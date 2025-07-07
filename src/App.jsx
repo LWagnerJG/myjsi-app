@@ -12,15 +12,6 @@ import {
     Share2, Film, Filter, Play
 } from 'lucide-react';
 
-import { Combobox as AutoCompleteCombobox, Listbox } from '@headlessui/react';
-
-import PageTitle from './PageTitle';
-import GlassCard from './GlassCard';
-import FormInput from './FormInput';
-import OrderModal from './OrderModal';
-import CommissionRatesScreen from './CommissionRatesScreen';
-
-
 const logoLight = 'https://i.imgur.com/qskYhB0.png';
 
 const lightTheme = {
@@ -3454,8 +3445,8 @@ const ProductsScreen = ({ onNavigate, theme }) => {
                                             src={img}
                                             alt={`${category.name} example ${index + 1}`}
                                             className={`rounded-md object-cover transition-opacity ${category.images.length === 1 && category.name !== 'Swivels'
-                                                    ? 'w-2/3 h-32'
-                                                    : 'w-16 h-16'
+                                                ? 'w-2/3 h-32'
+                                                : 'w-16 h-16'
                                                 }`}
                                             loading="lazy"
                                             onError={(e) => {
@@ -3542,8 +3533,8 @@ const ProductComparisonScreen = ({ categoryId, onNavigate, theme }) => {
                             <button
                                 onClick={() => setIndex(i)}
                                 className={`relative w-24 h-24 rounded-xl overflow-hidden transition-all duration-200 ${i === index
-                                        ? 'ring-2 ring-offset-2 ring-blue-500 scale-105'
-                                        : 'opacity-70 hover:opacity-100'
+                                    ? 'ring-2 ring-offset-2 ring-blue-500 scale-105'
+                                    : 'opacity-70 hover:opacity-100'
                                     }`}
                             >
                                 <img
@@ -4125,8 +4116,8 @@ const FabricSearchForm = () => {
                                                 type="button"
                                                 onClick={() => updateMulti('grade', g)}
                                                 className={`px-3 py-1 rounded-full ${form.grade.includes(g)
-                                                        ? 'bg-primary text-white'
-                                                        : 'bg-gray-200 text-gray-700'
+                                                    ? 'bg-primary text-white'
+                                                    : 'bg-gray-200 text-gray-700'
                                                     }`}
                                             >{g}</button>
                                         ))}
@@ -4159,8 +4150,8 @@ const FabricSearchForm = () => {
                                             type="button"
                                             onClick={() => updateMulti('fabricType', t)}
                                             className={`px-3 py-1 rounded-full ${form.fabricType.includes(t)
-                                                    ? 'bg-primary text-white'
-                                                    : 'bg-gray-200 text-gray-700'
+                                                ? 'bg-primary text-white'
+                                                : 'bg-gray-200 text-gray-700'
                                                 }`}
                                         >{t}</button>
                                     ))}
@@ -4193,8 +4184,8 @@ const FabricSearchForm = () => {
                                             type="button"
                                             onClick={() => updateMulti('tackable', t.toLowerCase())}
                                             className={`px-3 py-1 rounded-full ${form.tackable.includes(t.toLowerCase())
-                                                    ? 'bg-primary text-white'
-                                                    : 'bg-gray-200 text-gray-700'
+                                                ? 'bg-primary text-white'
+                                                : 'bg-gray-200 text-gray-700'
                                                 }`}
                                         >{t}</button>
                                     ))}
