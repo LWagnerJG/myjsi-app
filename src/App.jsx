@@ -2907,7 +2907,7 @@ const ResourceDetailScreen = ({ category, theme, onNavigate, setSuccessMessage, 
     if (category === 'loaner pool') {
         return <LoanerPoolScreen theme={theme} onNavigate={onNavigate} setSuccessMessage={setSuccessMessage} userSettings={userSettings} />;
     }
-    if (category === 'commission_rates') {
+    if (category === 'commission rates') {
         return <CommissionRatesScreen theme={theme} onNavigate={onNavigate} />;
     }
     if (category === 'contracts') {
