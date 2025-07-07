@@ -12,6 +12,15 @@ import {
     Share2, Film, Filter, Play
 } from 'lucide-react';
 
+import { Combobox as AutoCompleteCombobox, Listbox } from '@headlessui/react';
+
+import PageTitle from './PageTitle';
+import GlassCard from './GlassCard';
+import FormInput from './FormInput';
+import OrderModal from './OrderModal';
+import CommissionRatesScreen from './CommissionRatesScreen';
+
+
 const logoLight = 'https://i.imgur.com/qskYhB0.png';
 
 const lightTheme = {
@@ -397,66 +406,6 @@ const RESOURCES_DATA = [
         ].sort((a, b) => a.label.localeCompare(b.label))
     }
 ];
-
-const FormInput = React.memo(({ label, type = 'text', value, onChange, placeholder, options, className = "", theme, readOnly = false, required = false, isMulti, onMultiChange }) => {
-    const inputClass = `w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-offset-0 text-base outline-none`;
-    const styles = { backgroundColor: theme.colors.subtle, borderColor: 'transparent', color: theme.colors.textPrimary, ringColor: theme.colors.accent, '--placeholder-color': theme.colors.textSecondary };
-
-    const formatCurrency = (val) => {
-        if (!val) return '';
-        const numericValue = String(val).replace(/[^0-9]/g, '');
-        if (!numericValue) return '$';
-        return '$' + new Intl.NumberFormat().format(numericValue);
-    };
-
-    const handleCurrencyChange = (e) => {
-        let numericValue = e.target.value.replace(/[^0-9]/g, '');
-        onChange({ target: { value: numericValue } });
-    }
-
-    return (
-        <div className={`space-y-1 ${className}`}>
-            {label && <label className="text-xs font-semibold px-1" style={{ color: theme.colors.textSecondary }}>
-                {label} {required && <span className="text-red-500">*</span>}
-            </label>}
-            {type === 'select' ? (
-                isMulti ? (
-                    <div className={`${inputClass} flex flex-wrap gap-2`} style={{ ...styles, padding: '0.5rem' }}>
-                        {options.map(opt => (
-                            <button
-                                key={opt.value}
-                                type="button"
-                                onClick={() => onMultiChange(opt.value)}
-                                className={`px-2 py-1 text-xs rounded-md transition-colors ${value.includes(opt.value) ? 'text-white' : ''}`}
-                                style={{
-                                    backgroundColor: value.includes(opt.value) ? theme.colors.accent : theme.colors.background,
-                                    color: value.includes(opt.value) ? 'white' : theme.colors.textSecondary
-                                }}
-                            >
-                                {opt.label}
-                            </button>
-                        ))}
-                    </div>
-                ) : (
-                    <select value={value || ""} onChange={onChange} className={inputClass} style={{ ...styles, color: value ? theme.colors.textPrimary : theme.colors.textSecondary }} required={required}>
-                        <option value="" disabled>{placeholder}</option>
-                        {options.map(opt => typeof opt === 'string' ? <option key={opt} value={opt}>{opt}</option> : <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-                    </select>
-                )
-            ) : type === 'textarea' ? (
-                <textarea value={value} onChange={onChange} className={inputClass} style={styles} rows="4" placeholder={placeholder} readOnly={readOnly} />
-            ) : type === 'currency' ? (
-                <div className="relative">
-                    <input type="text" value={formatCurrency(value)} onChange={handleCurrencyChange} className={inputClass} style={styles} placeholder={placeholder} readOnly={readOnly} required={required} />
-                </div>
-            ) : (
-                <div className="relative">
-                    <input type={type} value={value} onChange={onChange} className={inputClass} style={styles} placeholder={placeholder} readOnly={readOnly} required={required} />
-                </div>
-            )}
-        </div>
-    );
-});
 
 const RequestFieldVisitScreen = ({ theme, setSuccessMessage, onNavigate }) => {
     const [currentDate, setCurrentDate] = useState(new Date('2025-07-04T12:00:00Z'));
@@ -1220,6 +1169,66 @@ const PageTitle = React.memo(({ title, theme, onBack, children }) => (
         {children}
     </div>
 ));
+
+const FormInput = React.memo(({ label, type = 'text', value, onChange, placeholder, options, className = "", theme, readOnly = false, required = false, isMulti, onMultiChange }) => {
+    const inputClass = `w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-offset-0 text-base outline-none`;
+    const styles = { backgroundColor: theme.colors.subtle, borderColor: 'transparent', color: theme.colors.textPrimary, ringColor: theme.colors.accent, '--placeholder-color': theme.colors.textSecondary };
+
+    const formatCurrency = (val) => {
+        if (!val) return '';
+        const numericValue = String(val).replace(/[^0-9]/g, '');
+        if (!numericValue) return '$';
+        return '$' + new Intl.NumberFormat().format(numericValue);
+    };
+
+    const handleCurrencyChange = (e) => {
+        let numericValue = e.target.value.replace(/[^0-9]/g, '');
+        onChange({ target: { value: numericValue } });
+    }
+
+    return (
+        <div className={`space-y-1 ${className}`}>
+            {label && <label className="text-xs font-semibold px-1" style={{ color: theme.colors.textSecondary }}>
+                {label} {required && <span className="text-red-500">*</span>}
+            </label>}
+            {type === 'select' ? (
+                isMulti ? (
+                    <div className={`${inputClass} flex flex-wrap gap-2`} style={{ ...styles, padding: '0.5rem' }}>
+                        {options.map(opt => (
+                            <button
+                                key={opt.value}
+                                type="button"
+                                onClick={() => onMultiChange(opt.value)}
+                                className={`px-2 py-1 text-xs rounded-md transition-colors ${value.includes(opt.value) ? 'text-white' : ''}`}
+                                style={{
+                                    backgroundColor: value.includes(opt.value) ? theme.colors.accent : theme.colors.background,
+                                    color: value.includes(opt.value) ? 'white' : theme.colors.textSecondary
+                                }}
+                            >
+                                {opt.label}
+                            </button>
+                        ))}
+                    </div>
+                ) : (
+                    <select value={value || ""} onChange={onChange} className={inputClass} style={{ ...styles, color: value ? theme.colors.textPrimary : theme.colors.textSecondary }} required={required}>
+                        <option value="" disabled>{placeholder}</option>
+                        {options.map(opt => typeof opt === 'string' ? <option key={opt} value={opt}>{opt}</option> : <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                    </select>
+                )
+            ) : type === 'textarea' ? (
+                <textarea value={value} onChange={onChange} className={inputClass} style={styles} rows="4" placeholder={placeholder} readOnly={readOnly} />
+            ) : type === 'currency' ? (
+                <div className="relative">
+                    <input type="text" value={formatCurrency(value)} onChange={handleCurrencyChange} className={inputClass} style={styles} placeholder={placeholder} readOnly={readOnly} required={required} />
+                </div>
+            ) : (
+                <div className="relative">
+                    <input type={type} value={value} onChange={onChange} className={inputClass} style={styles} placeholder={placeholder} readOnly={readOnly} required={required} />
+                </div>
+            )}
+        </div>
+    );
+});
 
 const SearchInput = React.memo(({ onSubmit, value, onChange, placeholder, theme, className, onVoiceClick }) => (
     <form onSubmit={onSubmit} className={`relative flex items-center ${className || ''}`} >
@@ -5617,185 +5626,198 @@ function App() {
     const [navigationHistory, setNavigationHistory] = useState(['home']);
     const currentScreen = navigationHistory[navigationHistory.length - 1];
 
-    const [currentUserId] = useState(1);
+    // Centralized state
+    const [currentUserId] = useState(1); // Designate user with ID 1 as the current user
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [cart, setCart] = useState({});
     const [isDarkMode, setIsDarkMode] = useState(false);
-    const currentTheme = useMemo(
-        () => (isDarkMode ? darkTheme : lightTheme),
-        [isDarkMode]
-    );
-
     const [members, setMembers] = useState(INITIAL_MEMBERS);
     const [opportunities, setOpportunities] = useState(INITIAL_OPPORTUNITIES);
     const [successMessage, setSuccessMessage] = useState('');
     const [alertInfo, setAlertInfo] = useState({ show: false, message: '' });
-
     const [userSettings, setUserSettings] = useState({
         id: 1,
         firstName: 'Luke',
         lastName: 'Miller',
         email: 'luke.miller@example.com',
-        homeAddress: '11406 Wolf Dancer Pass W #103\nFishers, IN 46037',
-        tShirtSize: 'L',
+        homeAddress: '11406 Wolf Dancer Pass W #103\nFishers, IN, 46037',
+        tShirtSize: 'L'
     });
+
 
     const [designFirms, setDesignFirms] = useState(INITIAL_DESIGN_FIRMS);
     const [dealers, setDealers] = useState(INITIAL_DEALERS);
 
+    // State for AI Chat
     const [searchTerm, setSearchTerm] = useState('');
     const [aiResponse, setAiResponse] = useState('');
     const [isAILoading, setIsAILoading] = useState(false);
     const [showAIDropdown, setShowAIDropdown] = useState(false);
+    const [filteredApps, setFilteredApps] = useState([]);
+
 
     const touchStartX = useRef(0);
 
     useEffect(() => {
-        setMembers(prev =>
-            prev.map(m =>
-                m.id === currentUserId
-                    ? { ...m, firstName: userSettings.firstName, lastName: userSettings.lastName, email: userSettings.email }
-                    : m
-            )
-        );
+        setMembers(prevMembers => prevMembers.map(member =>
+            member.id === currentUserId
+                ? { ...member, firstName: userSettings.firstName, lastName: userSettings.lastName, email: userSettings.email }
+                : member
+        ));
     }, [userSettings, currentUserId]);
 
-    const toggleTheme = useCallback(() => setIsDarkMode(p => !p), []);
-    const handleNavigate = useCallback(screen => {
-        setNavigationHistory(prev => [...prev, screen]);
-        setShowProfileMenu(false);
-    }, []);
-    const handleBack = useCallback(() => {
-        if (navigationHistory.length > 1) {
-            setNavigationHistory(prev => prev.slice(0, -1));
+    useEffect(() => {
+        if (searchTerm.trim() !== '') {
+            const lowerCaseQuery = searchTerm.toLowerCase();
+            const results = allApps.filter(app =>
+                app.name.toLowerCase().includes(lowerCaseQuery)
+            );
+            setFilteredApps(results);
+        } else {
+            setFilteredApps([]);
         }
-    }, [navigationHistory.length]);
-    const handleHome = useCallback(() => {
-        setNavigationHistory(['home']);
-        setShowProfileMenu(false);
+    }, [searchTerm]);
+
+    const toggleTheme = useCallback(() => setIsDarkMode(prev => !prev), []);
+    const currentTheme = useMemo(() => isDarkMode ? darkTheme : lightTheme, [isDarkMode]);
+
+    const handleNavigate = useCallback((screen) => { setNavigationHistory(prev => [...prev, screen]); setShowProfileMenu(false); }, []);
+    const handleBack = useCallback(() => { if (navigationHistory.length > 1) { setNavigationHistory(prev => prev.slice(0, -1)); } }, [navigationHistory.length]);
+    const handleHome = useCallback(() => { setNavigationHistory(['home']); setShowProfileMenu(false); }, []);
+
+    const handleTouchStart = (e) => { touchStartX.current = e.targetTouches[0].clientX; };
+    const handleTouchEnd = (e) => { const touchEndX = e.changedTouches[0].clientX; if (touchStartX.current < 50 && touchEndX - touchStartX.current > 75) { handleBack(); } touchStartX.current = 0; };
+
+    const handleSetSelectedOrder = useCallback((order) => {
+        setSelectedOrder(order);
     }, []);
 
-    const handleTouchStart = e => {
-        touchStartX.current = e.targetTouches[0].clientX;
-    };
-    const handleTouchEnd = e => {
-        const endX = e.changedTouches[0].clientX;
-        if (touchStartX.current < 50 && endX - touchStartX.current > 75) {
-            handleBack();
-        }
-        touchStartX.current = 0;
-    };
+    const handleShowAlert = useCallback((message) => {
+        setAlertInfo({ show: true, message });
+    }, []);
 
-    const handleShowAlert = useCallback(message => setAlertInfo({ show: true, message }), []);
+    const handleCreateLead = useCallback((newLeadData) => {
+        if (newLeadData.project && newLeadData.estimatedList && newLeadData.projectStatus && newLeadData.vertical && newLeadData.poTimeframe && newLeadData.urgency && (!newLeadData.competitionPresent || newLeadData.competitors.length > 0) && newLeadData.products.length > 0) {
+            const newOpportunity = {
+                id: opportunities.length + 2, // to avoid key collision with initial opportunities
+                name: newLeadData.project,
+                stage: newLeadData.projectStatus,
+                value: `$${parseInt(String(newLeadData.estimatedList).replace(/[^0-9]/g, '')).toLocaleString()}`,
+                company: newLeadData.dealer,
+                contact: newLeadData.designFirm,
+                poTimeframe: newLeadData.poTimeframe,
+                manufacturingNotes: newLeadData.products.map(p => `${p.series}${p.series === 'Vision' ? ` (${(p.materials || []).join(', ')}, Glass: ${p.glassDoors ? 'Y' : 'N'})` : ''}`).join('; ')
+            };
+            setOpportunities(prev => [...prev, newOpportunity]);
+
+            if (!designFirms.includes(newLeadData.designFirm)) {
+                setDesignFirms(prev => [...new Set([...prev, newLeadData.designFirm])]);
+            }
+            if (!dealers.includes(newLeadData.dealer)) {
+                setDealers(prev => [...new Set([...prev, newLeadData.dealer])]);
+            }
+
+            handleNavigate('projects'); // Navigate back to projects screen after creation
+            setSuccessMessage("Lead Created!");
+            setTimeout(() => setSuccessMessage(""), 2000);
+
+        } else {
+            handleShowAlert("Please fill out all required fields.");
+        }
+    }, [opportunities, designFirms, dealers, handleShowAlert, handleNavigate]);
+
     const handleUpdateCart = useCallback((item, change) => {
         setCart(prev => {
-            const next = { ...prev };
-            const qty = (next[item.id] ?? 0) + change;
-            if (qty > 0) next[item.id] = qty; else delete next[item.id];
-            return next;
+            const newCart = { ...prev };
+            const currentQty = newCart[item.id] || 0;
+            const newQty = currentQty + change;
+            if (newQty > 0) {
+                newCart[item.id] = newQty;
+            } else {
+                delete newCart[item.id];
+            }
+            return newCart;
         });
     }, []);
+
     const handleCloseAIDropdown = useCallback(() => {
         setShowAIDropdown(false);
         setSearchTerm('');
     }, []);
+
     const handleSaveSettings = useCallback(() => {
-        setSuccessMessage('Settings Saved!');
-        setTimeout(() => setSuccessMessage(''), 2000);
+        setSuccessMessage("Settings Saved!");
+        setTimeout(() => setSuccessMessage(""), 2000);
         handleBack();
     }, [handleBack]);
 
-    const handleCreateLead = useCallback(
-        data => {
-            const ok =
-                data.project &&
-                data.estimatedList &&
-                data.projectStatus &&
-                data.vertical &&
-                data.poTimeframe &&
-                data.urgency &&
-                (!data.competitionPresent || data.competitors.length > 0) &&
-                data.products.length > 0;
-            if (!ok) return handleShowAlert('Please fill out all required fields.');
-
-            const newOpp = {
-                id: opportunities.length + 2,
-                name: data.project,
-                stage: data.projectStatus,
-                value: `$${parseInt(String(data.estimatedList).replace(/[^0-9]/g, ''), 10).toLocaleString()}`,
-                company: data.dealer,
-                contact: data.designFirm,
-                poTimeframe: data.poTimeframe,
-                manufacturingNotes: data.products
-                    .map(
-                        p =>
-                            `${p.series}${p.series === 'Vision'
-                                ? ` (${(p.materials || []).join(', ')}, Glass: ${p.glassDoors ? 'Y' : 'N'})`
-                                : ''
-                            }`
-                    )
-                    .join('; '),
-            };
-
-            setOpportunities(prev => [...prev, newOpp]);
-            if (!designFirms.includes(data.designFirm)) setDesignFirms(d => [...d, data.designFirm]);
-            if (!dealers.includes(data.dealer)) setDealers(d => [...d, data.dealer]);
-
-            handleNavigate('projects');
-            setSuccessMessage('Lead Created!');
-            setTimeout(() => setSuccessMessage(''), 2000);
-        },
-        [opportunities, designFirms, dealers, handleShowAlert, handleNavigate]
-    );
-
-    const handleAskAI = useCallback(async prompt => {
+    const handleAskAI = useCallback(async (prompt) => {
         if (!prompt.trim()) return;
+
         setShowAIDropdown(true);
         setIsAILoading(true);
         setAiResponse('');
-        let websiteContext = 'No relevant website information was found for this query.';
+
+        let websiteContext = "No relevant website information was found for this query.";
+
         try {
-            if (prompt.toLowerCase().includes('how long has jsi been making furniture')) {
-                websiteContext =
-                    'JSI is a brand of the parent company Jasper Group, which was founded in 1929 and has a long heritage of quality woodworking.';
+            if (prompt.toLowerCase().includes("how long has jsi been making furniture")) {
+                websiteContext = `JSI is a brand of the parent company Jasper Group, which was founded in 1929 and has a long heritage of quality woodworking.`;
             }
-        } catch {
-            websiteContext = 'Could not perform website search at this time.';
+        } catch (searchError) {
+            console.error("Web search simulation failed:", searchError);
+            websiteContext = "Could not perform website search at this time.";
         }
+
+
         const context = `
-      You are an AI assistant for the furniture company JSI.
-      Your knowledge is strictly limited to the information provided below.
-      Prioritize information from the "WEBSITE CONTEXT" first, then "IN-APP DATA".
-      Answer concisely in two sentences or less based only on the provided data.
-      If you don't know the answer from the context, say so.
-      Current Date: ${new Date().toDateString()}
+        You are an AI assistant for the furniture company JSI.
+        Your knowledge is strictly limited to the information provided below.
+        Prioritize information from the "WEBSITE CONTEXT" first, then "IN-APP DATA".
+        Answer concisely in two sentences or less based only on the provided data.
+        If you don't know the answer from the context, say so.
+        Current Date: ${new Date().toDateString()}
 
-      WEBSITE CONTEXT:
-      ${websiteContext}
+        WEBSITE CONTEXT:
+        ${websiteContext}
 
-      IN-APP DATA:
-      LEAD TIMES: ${JSON.stringify(LEAD_TIMES_DATA)}
-      FABRIC OPTIONS: ${JSON.stringify(FABRICS_DATA)}
-      PRODUCT MODELS: ${JSON.stringify(JSI_MODELS)}
+        IN-APP DATA:
+        LEAD TIMES: ${JSON.stringify(LEAD_TIMES_DATA)}
+        FABRIC OPTIONS: ${JSON.stringify(FABRICS_DATA)}
+        PRODUCT MODELS: ${JSON.stringify(JSI_MODELS)}
     `;
+
         try {
-            const chatHistory = [{ role: 'user', parts: [{ text: `${context}\n\nQuestion: "${prompt}"` }] }];
+            const chatHistory = [{ role: "user", parts: [{ text: `${context}\n\nQuestion: "${prompt}"` }] }];
             const payload = { contents: chatHistory };
-            const apiKey = '';
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-            const res = await fetch(url, {
+            const apiKey = ""; // This will be handled by the environment
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+            const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload),
+                body: JSON.stringify(payload)
             });
-            if (!res.ok) throw new Error(res.status);
-            const data = await res.json();
-            const text = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "I couldn't find an answer.";
+
+            if (!response.ok) {
+                throw new Error(`API request failed with status ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            let text = "Sorry, I couldn't find an answer based on the available data. Please try a different question.";
+            if (result.candidates && result.candidates.length > 0 &&
+                result.candidates[0].content && result.candidates[0].content.parts &&
+                result.candidates[0].content.parts.length > 0) {
+                text = result.candidates[0].content.parts[0].text;
+            }
+
             setAiResponse(text);
-        } catch (err) {
-            console.error('AI error', err);
-            setAiResponse('Error connecting to AI assistant. Please try again.');
+
+        } catch (error) {
+            console.error("AI API call failed:", error);
+            setAiResponse("There was an error connecting to the AI assistant. Please check the console for details.");
         } finally {
             setIsAILoading(false);
         }
@@ -5806,7 +5828,7 @@ function App() {
             onNavigate: handleNavigate,
             onHomeClick: handleHome,
             theme: currentTheme,
-            onProfileClick: () => setShowProfileMenu(p => !p),
+            onProfileClick: () => setShowProfileMenu(prev => !prev),
             members,
             setMembers,
             opportunities,
@@ -5835,114 +5857,93 @@ function App() {
             setUserSettings,
             onSave: handleSaveSettings,
             currentUserId,
+            filteredApps,
         };
 
         if (currentScreen === 'logout') {
             return <PlaceholderScreen theme={currentTheme} category="Logged Out" />;
         }
 
-        const [type, p1, p2] = currentScreen.split('/');
+        const screenParts = currentScreen.split('/');
+        const screenType = screenParts[0];
 
-        if (type === 'resources' && p1 === 'commission_rates') {
-            return <CommissionRatesScreen {...commonProps} />;
-        }
+        let ContentComponent;
 
-        if (type === 'products' && p1 === 'category' && p2) {
-            return <ProductComparisonScreen {...commonProps} categoryId={p2} />;
+        if (screenType === 'products' && screenParts[1] === 'category' && screenParts[2]) {
+            return <ProductComparisonScreen {...commonProps} categoryId={screenParts[2]} />;
         }
-        if (type === 'products' && p1 === 'competitive-analysis') {
+        if (screenType === 'products' && screenParts[1] === 'competitive-analysis') {
             return <CompetitiveAnalysisScreen {...commonProps} />;
         }
-        if (type === 'resources' && p1) {
-            return (
-                <ResourceDetailScreen
-                    {...commonProps}
-                    category={p1.replace(/_/g, ' ')}
-                />
-            );
+        if (screenType === 'resources' && screenParts[1]) {
+            return <ResourceDetailScreen {...commonProps} category={screenParts[1].replace(/_/g, ' ')} />;
         }
-        if (type === 'fabrics' && p1) {
+        if (screenType === 'fabrics' && screenParts[1]) {
             return <FabricsScreen {...commonProps} />;
         }
         if (currentScreen === 'samples/cart') {
             return <CartScreen {...commonProps} />;
         }
 
-        const Dynamic = SCREEN_MAP[type];
-        return Dynamic ? (
-            <Dynamic {...commonProps} />
-        ) : (
-            <PlaceholderScreen theme={currentTheme} category="Page Not Found" />
-        );
+        ContentComponent = SCREEN_MAP[screenType];
+
+        if (ContentComponent) {
+            return <ContentComponent {...commonProps} />;
+        }
+
+        return <PlaceholderScreen theme={currentTheme} category="Page Not Found" />;
     };
 
-
     return (
-        <div className="flex justify-center items-center h-screen bg-gray-800">
-            <div className="w-[393px] h-[852px] bg-black rounded-[50px] shadow-2xl overflow-hidden border-[10px] border-black relative">
-                <div
-                    style={{ backgroundColor: currentTheme.colors.background }}
-                    className="h-full w-full font-sans overflow-hidden flex flex-col"
-                    onTouchStart={handleTouchStart}
-                    onTouchEnd={handleTouchEnd}
-                >
-                    <style>{scrollbarHideStyle}</style>
+        <div
+            style={{ backgroundColor: currentTheme.colors.background }}
+            className="h-screen w-screen font-sans overflow-hidden flex flex-col"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+        >
+            <style>{scrollbarHideStyle}</style>
+            <AppHeader
+                onHomeClick={handleHome}
+                theme={currentTheme}
+                onProfileClick={() => setShowProfileMenu(true)}
+                isHome={currentScreen === 'home'}
+                handleBack={handleBack}
+                showBack={navigationHistory.length > 1}
+                userName={userSettings.firstName}
+                isDarkMode={isDarkMode}
+            />
+            <div className="flex-1 overflow-y-auto scrollbar-hide">
+                {renderScreen()}
+            </div>
 
-                    <AppHeader
-                        onHomeClick={handleHome}
-                        isDarkMode={isDarkMode}
+            <div className="absolute inset-0 pointer-events-none">
+                {showProfileMenu && <ProfileMenu
+                    show={showProfileMenu}
+                    onClose={() => setShowProfileMenu(false)}
+                    onNavigate={handleNavigate}
+                    toggleTheme={toggleTheme}
+                    theme={currentTheme}
+                    isDarkMode={isDarkMode}
+                />}
+                {selectedOrder && (
+                    <OrderModal
+                        order={selectedOrder}
+                        onClose={() => setSelectedOrder(null)}
                         theme={currentTheme}
-                        onProfileClick={() => setShowProfileMenu(true)}
-                        isHome={currentScreen === 'home'}
-                        handleBack={handleBack}
-                        showBack={navigationHistory.length > 1}
-                        userName={userSettings.firstName}
                     />
-
-                    <div className="flex-1 overflow-y-auto scrollbar-hide">
-                        {renderScreen()}
+                )}
+                <Modal show={alertInfo.show} onClose={() => setAlertInfo({ show: false, message: '' })} title="Alert" theme={currentTheme}>
+                    <div className="flex items-center">
+                        <AlertCircle className="w-8 h-8 mr-4" style={{ color: currentTheme.colors.accent }} />
+                        <p style={{ color: currentTheme.colors.textPrimary }}>{alertInfo.message}</p>
                     </div>
-
-                    <div className="absolute inset-0 pointer-events-none">
-                        {showProfileMenu && (
-                            <ProfileMenu
-                                show={showProfileMenu}
-                                onClose={() => setShowProfileMenu(false)}
-                                onNavigate={handleNavigate}
-                                toggleTheme={toggleTheme}
-                                theme={currentTheme}
-                                isDarkMode={isDarkMode}
-                            />
-                        )}
-
-                        {selectedOrder && (
-                            <OrderModal
-                                order={selectedOrder}
-                                onClose={() => setSelectedOrder(null)}
-                                onShowDetails={() => handleNavigate(`orderDetails/${selectedOrder.orderNumber}`)}
-                                theme={currentTheme}
-                            />
-                        )}
-
-                        <Modal
-                            show={alertInfo.show}
-                            onClose={() => setAlertInfo({ show: false, message: '' })}
-                            title="Alert"
-                            theme={currentTheme}
-                        >
-                            <div className="flex items-center">
-                                <AlertCircle className="w-8 h-8 mr-4" style={{ color: currentTheme.colors.accent }} />
-                                <p style={{ color: currentTheme.colors.textPrimary }}>{alertInfo.message}</p>
-                            </div>
-                        </Modal>
-
-                        <SuccessToast message={successMessage} show={!!successMessage} theme={currentTheme} />
-                    </div>
-                </div>
+                </Modal>
+                <SuccessToast message={successMessage} show={!!successMessage} theme={currentTheme} />
             </div>
         </div>
     );
 }
+
 
 
 export default App;
