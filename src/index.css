@@ -1,22 +1,58 @@
+/* Import Tailwind's base, components, and utilities styles */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Your custom global styles go below */
+:root {
+    font-family: "Inter var", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    font-size: 15px;
+    --stone: #E6E4DC;
+}
+
 body {
+    background: #F3F2EF;
+    color: #111;
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
 }
 
-code {
-    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0;
 }
 
-html, body, #root {
-    height: 100%;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    overflow: hidden; /* Prevents accidental scrolling on the body */
+.hero-title {
+    font-size: 3rem;
+    line-height: 1;
+    font-weight: 800;
 }
+
+.section-band {
+    background: var(--stone);
+}
+
+.chip {
+    font-variant-numeric: tabular-nums;
+    font-size: .75rem;
+    padding: .125rem .5rem;
+    border-radius: .75rem;
+    display: inline-flex;
+    align-items: center;
+    font-weight: 500
+}
+
+    .chip.pos {
+        background: #16a34a20;
+        color: #16a34a;
+    }
+
+    .chip.neg {
+        background: #dc262620;
+        color: #dc2626;
+    }
+
+    .chip.neu {
+        background: #bfbfbf20;
+        color: #6b7280;
+    }
