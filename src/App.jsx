@@ -50,28 +50,6 @@ const darkTheme = {
     backdropFilter: 'blur(12px)',
 };
 
-if (!document.getElementById('jsi-global-css')) {
-    const s = document.createElement('style');
-    s.id = 'jsi-global-css';
-    s.innerHTML = `
-    :root{
-      font-family:"Inter var",system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-      font-size:15px;
-      --stone:#E6E4DC;
-    }
-    body{background:#F3F2EF;color:#111;margin:0;}
-    h1,h2,h3,h4,h5,h6{font-weight:600;letter-spacing:-0.01em;margin:0;}
-    .hero-title{font-size:3rem;line-height:1;font-weight:800;}
-    .section-band{background:var(--stone);}
-    .chip{font-variant-numeric:tabular-nums;font-size:.75rem;padding:.125rem .5rem;border-radius:.75rem;display:inline-flex;align-items:center;font-weight:500}
-    .chip.pos{background:#16a34a20;color:#16a34a;}
-    .chip.neg{background:#dc262620;color:#dc2626;}
-    .chip.neu{background:#bfbfbf20;color:#6b7280;}
-  `;
-    document.head.appendChild(s);
-}
-
-
 
 const MY_PROJECTS_DATA = [
     { id: 'proj1', name: 'Acme Corp HQ', location: 'Indianapolis, IN', image: 'https://placehold.co/400x300/D9CDBA/2A2A2A?text=Install+1' },
