@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
   "name": "myjsi-app",
   "version": "0.1.0",
   "private": true,
@@ -37,7 +36,6 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-=======
   "name": "myjsi-react-app",
   "private": true,
   "version": "0.0.0",
@@ -68,6 +66,5 @@
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.11",
     "vite": "^7.0.0"
->>>>>>> 9ffe99a4183a45a68f71531dc2a156e5b14f78d6
   }
 }
