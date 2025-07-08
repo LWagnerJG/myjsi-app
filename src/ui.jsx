@@ -60,24 +60,53 @@ import {
     Play
 } from 'lucide-react';
 
+// ui.jsx
 import * as Data from './data.js';
 
-
-
 const {
+    // New–Lead form
     EMPTY_LEAD,
-    INITIAL_DESIGN_FIRMS,
-    INITIAL_DEALERS,
+    VERTICALS,
+    URGENCY_LEVELS,
+    PO_TIMEFRAMES,
     COMPETITORS,
     DISCOUNT_OPTIONS,
+    JSI_PRODUCT_SERIES,
     VISION_MATERIALS,
-    VERTICALS,
-    PO_TIMEFRAMES,
-    STAGES
-} = Data;
+    WIN_PROBABILITY_OPTIONS,
+    INITIAL_DESIGN_FIRMS,
+    INITIAL_DEALERS,
 
-const { SAMPLE_CATEGORIES, SAMPLE_PRODUCTS } = Data;
-const { STAGE_COLORS, MY_PROJECTS_DATA } = Data;
+    // Projects screen
+    INITIAL_OPPORTUNITIES,
+    STAGES,
+    STAGE_COLORS,
+
+    // Samples + Cart
+    SAMPLE_CATEGORIES,
+    SAMPLE_PRODUCTS,
+
+    // Home menu + Orders
+    MENU_ITEMS,
+    ORDER_DATA,
+
+    // Sales screen
+    YTD_SALES_DATA,
+    MONTHLY_SALES_DATA,
+    SALES_VERTICALS_DATA,
+
+    // Community feed
+    INITIAL_POSTS,    // if you renamed it from MyJSI 1.0.txt’s POSTS  
+    INITIAL_WINS,     // …and WINS  
+    INITIAL_POLLS,    // …and POLLS  
+
+    // Members screen
+    INITIAL_MEMBERS,
+    PERMISSION_LABELS,
+    USER_TITLES,
+
+    // Any others you reference…
+} = Data;
 
 const Avatar = ({ src, alt, theme }) => {
     const [err, setErr] = useState(false);
@@ -412,13 +441,7 @@ const PostCard = ({ post, theme }) => {
     );
 };
 
-const INITIAL_MEMBERS = [
-    { id: 1, firstName: 'Luke', lastName: 'Miller', email: 'luke.miller@example.com', title: 'Admin', role: 'Admin', permissions: { salesData: true, commissions: true, projects: true, customerRanking: true, dealerRewards: true, submittingReplacements: true } },
-    { id: 2, firstName: 'Sarah', lastName: 'Chen', email: 'sarah.chen@example.com', title: 'Admin', role: 'Admin', permissions: { salesData: true, commissions: true, projects: true, customerRanking: true, dealerRewards: true, submittingReplacements: true } },
-    { id: 3, firstName: 'Michael', lastName: 'Jones', email: 'michael.jones@example.com', title: 'Sales', role: 'User', permissions: { salesData: true, commissions: true, projects: false, customerRanking: true, dealerRewards: false, submittingReplacements: false } },
-    { id: 4, firstName: 'Jessica', lastName: 'Williams', email: 'jessica.williams@example.com', title: 'Designer', role: 'User', permissions: { salesData: false, commissions: false, projects: true, customerRanking: false, dealerRewards: false, submittingReplacements: true } },
-    { id: 5, firstName: 'David', lastName: 'Brown', email: 'david.brown@example.com', title: 'Sales', role: 'User', permissions: { salesData: true, commissions: true, projects: false, customerRanking: true, dealerRewards: false, submittingReplacements: false } },
-];
+
 
 const WinsCard = ({ win, theme }) => {
     const { user, timeAgo, title, images } = win;
@@ -568,9 +591,6 @@ const EMPTY_USER = {
         submittingReplacements: false
     }
 };
-
-const USER_TITLES = ["Sales", "Designer", "Sales/Designer", "Administration"];
-
 
 const FormSection = ({ title, theme, children }) => (
     <GlassCard
@@ -2034,86 +2054,167 @@ const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSettings }) 
     }, [selectedCategory, setQuantity, onUpdateCart]);
 
     const handleOrderFullSet = useCallback(() => {
-        const fullSetItem = {
-            id: 'full-jsi-set',
-            name: 'Full JSI Sample Set'
-        };
-        onUpdateCart(fullSetItem, 1);
+        onUpdateCart({ id: 'full-jsi-set', name: 'Full JSI Sample Set' }, 1);
     }, [onUpdateCart]);
 
-    const totalCartItems = useMemo(() => Object.values(cart).reduce((sum, qty) => sum + qty, 0), [cart]);
-    const filteredProducts = useMemo(() => SAMPLE_PRODUCTS.filter(p => p.category === selectedCategory), [selectedCategory]);
+    const totalCartItems = useMemo(
+        () => Object.values(cart).reduce((sum, qty) => sum + qty, 0),
+        [cart]
+    );
+    const filteredProducts = useMemo(
+        () => SAMPLE_PRODUCTS.filter(p => p.category === selectedCategory),
+        [selectedCategory]
+    );
 
     return (
         <>
             <PageTitle title="Samples" theme={theme}>
-                <div className="flex items-center space-x-2">
-                    <button onClick={handleOrderFullSet} className="text-xs font-semibold px-3 py-1.5 rounded-lg" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }}>
+                <div className="flex items-center space-x-3">
+                    <button
+                        onClick={handleOrderFullSet}
+                        className="px-4 py-1.5 rounded-full transition"
+                        style={{
+                            backgroundColor: theme.colors.subtle,
+                            color: theme.colors.textPrimary
+                        }}
+                    >
                         Order Full JSI Set
                     </button>
                     <div className="relative">
-                        <button onClick={() => onNavigate('samples/cart')} className="p-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10">
-                            <ShoppingCart className="w-7 h-7" style={{ color: theme.colors.textPrimary }} />
+                        <button
+                            onClick={() => onNavigate('samples/cart')}
+                            className="p-2 rounded-full hover:bg-black/10 transition"
+                        >
+                            <ShoppingCart
+                                className="w-7 h-7"
+                                style={{ color: theme.colors.textPrimary }}
+                            />
                         </button>
-                        {totalCartItems > 0 && <div className="absolute -top-1 -right-2 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: theme.colors.accent }}>{totalCartItems}</div>}
+                        {totalCartItems > 0 && (
+                            <div
+                                className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
+                                style={{ backgroundColor: theme.colors.accent }}
+                            >
+                                {totalCartItems}
+                            </div>
+                        )}
                     </div>
                 </div>
             </PageTitle>
 
-            <div className="px-4 space-y-4 pb-4">
-                <div className="overflow-hidden rounded-xl" style={{ backgroundColor: theme.colors.surface }}>
-                    <div className="flex space-x-2 p-1 overflow-x-auto scrollbar-hide">
-                        {SAMPLE_CATEGORIES.map(cat => (
-                            <button key={cat.id} onClick={() => setSelectedCategory(cat.id)} className={`flex-shrink-0 px-3 py-2 text-sm font-semibold rounded-lg transition-colors w-28`}>
-                                <span className="p-2 rounded-md" style={{
-                                    backgroundColor: selectedCategory === cat.id ? theme.colors.subtle : 'transparent',
-                                    color: selectedCategory === cat.id ? theme.colors.accent : theme.colors.textSecondary
-                                }}>
-                                    {cat.name}
-                                </span>
-                            </button>
-                        ))}
-                    </div>
+            <div
+                className="px-4 py-2 mb-4 overflow-x-auto scrollbar-hide"
+                style={{ backgroundColor: theme.colors.surface, borderRadius: '1.5rem' }}
+            >
+                <div className="flex space-x-2">
+                    {SAMPLE_CATEGORIES.map(cat => (
+                        <button
+                            key={cat.id}
+                            onClick={() => setSelectedCategory(cat.id)}
+                            className={`px-4 py-2 transition ${selectedCategory === cat.id
+                                    ? 'bg-white shadow rounded-full'
+                                    : 'bg-transparent'
+                                }`}
+                        >
+                            <span
+                                className="text-sm font-semibold"
+                                style={{
+                                    color:
+                                        selectedCategory === cat.id
+                                            ? theme.colors.accent
+                                            : theme.colors.textSecondary
+                                }}
+                            >
+                                {cat.name}
+                            </span>
+                        </button>
+                    ))}
                 </div>
-
-                <GlassCard theme={theme} className="p-3 flex items-center justify-between">
-                    <span className="font-bold" style={{ color: theme.colors.textPrimary }}>
-                        {`Complete ${SAMPLE_CATEGORIES.find(c => c.id === selectedCategory)?.name || ''} Set`}
-                    </span>
-                    <div className="flex items-center space-x-2">
-                        <button onClick={() => setSetQuantity(q => Math.max(1, q - 1))} className="w-7 h-7 flex items-center justify-center rounded-md" style={{ backgroundColor: theme.colors.subtle }}><Minus className="w-4 h-4" style={{ color: theme.colors.textSecondary }} /></button>
-                        <span className="font-bold text-lg w-8 text-center" style={{ color: theme.colors.textPrimary }}>{setQuantity}</span>
-                        <button onClick={() => setSetQuantity(q => q + 1)} className="w-7 h-7 flex items-center justify-center rounded-md" style={{ backgroundColor: theme.colors.subtle }}><Plus className="w-4 h-4" style={{ color: theme.colors.textSecondary }} /></button>
-                        <button onClick={handleAddSetToCart} className="font-bold py-1.5 px-4 rounded-md text-white" style={{ backgroundColor: theme.colors.accent }}>Add</button>
-                    </div>
-                </GlassCard>
             </div>
+
+            <GlassCard theme={theme} className="mx-4 mb-4 p-4 flex items-center justify-between">
+                <span
+                    className="font-bold text-base"
+                    style={{ color: theme.colors.textPrimary }}
+                >
+                    Complete {SAMPLE_CATEGORIES.find(c => c.id === selectedCategory)?.name} Set
+                </span>
+                <div className="flex items-center space-x-3">
+                    <button
+                        onClick={() => setSetQuantity(q => Math.max(1, q - 1))}
+                        className="w-8 h-8 rounded-full flex items-center justify-center transition"
+                        style={{ backgroundColor: theme.colors.subtle }}
+                    >
+                        <Minus className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
+                    </button>
+                    <span
+                        className="w-8 text-center font-bold text-lg"
+                        style={{ color: theme.colors.textPrimary }}
+                    >
+                        {setQuantity}
+                    </span>
+                    <button
+                        onClick={() => setSetQuantity(q => q + 1)}
+                        className="w-8 h-8 rounded-full flex items-center justify-center transition"
+                        style={{ backgroundColor: theme.colors.subtle }}
+                    >
+                        <Plus className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
+                    </button>
+                    <button
+                        onClick={handleAddSetToCart}
+                        className="px-6 py-2 rounded-full font-semibold text-white transition"
+                        style={{ backgroundColor: theme.colors.accent }}
+                    >
+                        Add
+                    </button>
+                </div>
+            </GlassCard>
 
             <div className="px-4 grid grid-cols-2 gap-4 pb-4">
                 {filteredProducts.map(product => {
                     const quantity = cart[product.id] || 0;
-                    return (<div key={product.id} className="text-center">
-                        <GlassCard theme={theme} className="relative aspect-square w-full rounded-2xl p-1" style={{ borderColor: quantity > 0 ? theme.colors.accent : 'transparent', borderWidth: '2px' }}>
-                            <div className="w-full h-full rounded-xl" style={{ backgroundColor: product.color }}></div>
-                            {quantity === 0 ? (
-                                <button onClick={() => onUpdateCart(product, 1)} className="absolute inset-0"></button>
-                            ) : (
-                                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-24">
+                    return (
+                        <button
+                            key={product.id}
+                            onClick={() => onUpdateCart(product, 1)}
+                            className="relative w-full aspect-square rounded-2xl overflow-hidden transition"
+                            style={{
+                                border: `2px solid ${quantity > 0 ? theme.colors.accent : theme.colors.border}`,
+                                backgroundColor: product.color
+                            }}
+                        >
+                            {quantity > 0 && (
+                                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-28">
                                     <GlassCard theme={theme} className="p-1 flex justify-between items-center">
-                                        <button onClick={() => onUpdateCart(product, -1)} className="w-7 h-7 flex items-center justify-center rounded-md" style={{ backgroundColor: theme.colors.subtle }}><Minus className="w-4 h-4" style={{ color: theme.colors.textSecondary }} /></button>
-                                        <span className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>{quantity}</span>
-                                        <button onClick={() => onUpdateCart(product, 1)} className="w-7 h-7 flex items-center justify-center rounded-md" style={{ backgroundColor: theme.colors.subtle }}><Plus className="w-4 h-4" style={{ color: theme.colors.textSecondary }} /></button>
+                                        <button
+                                            onClick={e => { e.stopPropagation(); onUpdateCart(product, -1); }}
+                                            className="w-7 h-7 rounded-full flex items-center justify-center transition"
+                                            style={{ backgroundColor: theme.colors.subtle }}
+                                        >
+                                            <Minus className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
+                                        </button>
+                                        <span className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>
+                                            {quantity}
+                                        </span>
+                                        <button
+                                            onClick={e => { e.stopPropagation(); onUpdateCart(product, 1); }}
+                                            className="w-7 h-7 rounded-full flex items-center justify-center transition"
+                                            style={{ backgroundColor: theme.colors.subtle }}
+                                        >
+                                            <Plus className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
+                                        </button>
                                     </GlassCard>
                                 </div>
                             )}
-                        </GlassCard>
-                        <p className="mt-2 font-semibold text-sm" style={{ color: theme.colors.textPrimary }}>{product.name}</p>
-                    </div>)
+                        </button>
+                    );
                 })}
             </div>
         </>
     );
 };
+
+
 
 const ReplacementsScreen = ({ theme, setSuccessMessage, onNavigate, showAlert }) => {
     const [formData, setFormData] = useState(null);
