@@ -3,8 +3,7 @@
 // Import themes and data from the data file
 import { lightTheme, darkTheme } from './data.js';
 
-// Import ALL components and the SCREEN_MAP from your new ui.jsx file
-import { AppHeader, HomeScreen, SCREEN_MAP } from './ui.jsx';
+import { AppHeader, HomeScreen, SCREEN_MAP } from './ui';
 
 import { User } from 'lucide-react'; // Import icon needed for the header
 
