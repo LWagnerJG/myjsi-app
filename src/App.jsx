@@ -20,12 +20,9 @@ function App() {
     const [showProfileMenu, setShowProfileMenu] = useState(false);
 
     const currentScreen = navigationHistory[navigationHistory.length - 1];
-    const currentTheme = useMemo(
-        () => (isDarkMode ? darkTheme : lightTheme),
-        [isDarkMode]
-    );
+    const currentTheme = useMemo(() => (isDarkMode ? darkTheme : lightTheme), [isDarkMode]);
 
-    // Lock body scroll on home, restore elsewhere
+    // lock body scroll on home, restore elsewhere
     useEffect(() => {
         document.body.style.overflow = currentScreen === 'home' ? 'hidden' : 'auto';
     }, [currentScreen]);
@@ -46,7 +43,6 @@ function App() {
     }, []);
 
     const handleNavigate = useCallback(screen => {
-        console.log('🔀 navigating to:', screen);
         setNavigationHistory(prev => [...prev, screen]);
         setShowProfileMenu(false);
     }, []);

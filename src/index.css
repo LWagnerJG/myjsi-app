@@ -14,3 +14,7 @@ body {
     -ms-overflow-style: none;
     scrollbar-width: none;
 }
+
+.home-no-scroll .overflow-y-auto {
+    overflow: hidden !important;
+}
