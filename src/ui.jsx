@@ -1,100 +1,837 @@
-import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react';
+﻿import React, {
+    useState,
+    useRef,
+    useMemo,
+    useCallback,
+    useEffect
+} from 'react';
+
 import {
-    User, MousePointer, PieChart, RotateCw, Palette, DollarSign,
-    Database, MessageSquare, Heart, MoreVertical, Image, Video,
-    ArrowRight, Search, Briefcase, Package, X, ChevronDown,
-    ChevronRight, ChevronLeft, Sun, Moon, Camera, LogOut,
-    HelpCircle, ShoppingCart, CheckCircle, Plus, Minus,
-    ArrowLeft, BarChart2, List, Home, Hourglass, Armchair,
-    Server, UserPlus, UserX, Trophy, ChevronUp, Mic,
-    AlertCircle, Settings, Paperclip, Copy, Save, Send,
-    Share2, Film, Filter, Play
+    User,
+    MousePointer,
+    PieChart,
+    RotateCw,
+    Palette,
+    DollarSign,
+    Database,
+    MessageSquare,
+    Heart,
+    MoreVertical,
+    Image,
+    Video,
+    ArrowRight,
+    Search,
+    Briefcase,
+    Package,
+    X,
+    ChevronDown,
+    ChevronRight,
+    ChevronLeft,
+    Sun,
+    Moon,
+    Camera,
+    LogOut,
+    HelpCircle,
+    ShoppingCart,
+    CheckCircle,
+    Plus,
+    Minus,
+    ArrowLeft,
+    BarChart2,
+    List,
+    Home,
+    Hourglass,
+    Armchair,
+    Server,
+    UserPlus,
+    UserX,
+    Trophy,
+    ChevronUp,
+    Mic,
+    AlertCircle,
+    Settings,
+    Paperclip,
+    Copy,
+    Save,
+    Send,
+    Share2,
+    Film,
+    Filter,
+    Play
 } from 'lucide-react';
+
 import * as Data from './data.js';
 
-const GlassCard = React.memo(React.forwardRef(({ children, className = '', theme, ...props }, ref) => (
-    <div
-        ref={ref}
-        className={`rounded-[1.75rem] border shadow-lg transition-all duration-300 ${className}`}
-        style={{
-            backgroundColor: theme.colors.surface,
-            borderColor: theme.colors.border,
-            boxShadow: `0 4px 30px ${theme.colors.shadow}`,
-            backdropFilter: theme.backdropFilter,
-            WebkitBackdropFilter: theme.backdropFilter,
-        }}
-        {...props}
+
+
+const {
+    EMPTY_LEAD,
+    INITIAL_DESIGN_FIRMS,
+    INITIAL_DEALERS,
+    COMPETITORS,
+    DISCOUNT_OPTIONS,
+    VISION_MATERIALS,
+    VERTICALS,
+    PO_TIMEFRAMES,
+    STAGES
+} = Data;
+
+const { SAMPLE_CATEGORIES, SAMPLE_PRODUCTS } = Data;
+const { STAGE_COLORS, MY_PROJECTS_DATA } = Data;
+
+const Avatar = ({ src, alt, theme }) => {
+    const [err, setErr] = useState(false);
+
+    // fallback to initials/icon if the image fails
+    if (err || !src) {
+        return (
+            <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                <User
+                    className="w-5 h-5"
+                    style={{ color: theme.colors.textSecondary }}
+                />
+            </div>
+        );
+    }
+
+    return (
+        <img
+            src={src}
+            alt={alt}
+            className="w-10 h-10 rounded-full object-cover"
+            onError={() => setErr(true)}
+        />
+    );
+};
+
+const CartScreen = ({ theme, onNavigate, handleBack, cart, setCart, onUpdateCart, userSettings }) => {
+    const [address, setAddress] = useState('');
+    const [predictions, setPredictions] = useState([]);
+    const [isSubmitted, setIsSubmitted] = useState(false);
+    const autocompleteService = useRef(null);
+    const inputRef = useRef(null);
+
+    useEffect(() => {
+        const Maps_API_KEY = 'AIzaSyBnNqlHE8XC92q10IUCQgXx-aiOKpCS7Ac';
+
+        if (window.google && window.google.maps) {
+            autocompleteService.current = new window.google.maps.places.AutocompleteService();
+            return;
+        }
+
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${Maps_API_KEY}&libraries=places`;
+        script.async = true;
+        script.defer = true;
+        document.head.appendChild(script);
+
+        script.onload = () => {
+            if (window.google && window.google.maps) {
+                autocompleteService.current = new window.google.maps.places.AutocompleteService();
+            }
+        };
+
+        return () => {
+            const existingScript = document.head.querySelector(`script[src*="maps.googleapis.com"]`);
+            if (existingScript) {
+            }
+        };
+    }, []);
+
+    const handleAddressChange = (e) => {
+        const value = e.target.value;
+        setAddress(value);
+        if (autocompleteService.current && value) {
+            autocompleteService.current.getPlacePredictions({ input: value }, (predictions, status) => {
+                if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions) {
+                    setPredictions(predictions);
+                } else {
+                    setPredictions([]);
+                }
+            });
+        } else {
+            setPredictions([]);
+        }
+    };
+
+    const handleSelectPrediction = (prediction) => {
+        setAddress(prediction.description);
+        setPredictions([]);
+    };
+
+    const cartItems = useMemo(() => {
+        return Object.entries(cart).map(([id, quantity]) => {
+            if (id === 'full-jsi-set') {
+                return { id, name: 'Full JSI Sample Set', quantity };
+            }
+            if (id.startsWith('set-')) {
+                const categoryId = id.replace('set-', '');
+                const categoryName = SAMPLE_CATEGORIES.find(c => c.id === categoryId)?.name || 'Unknown';
+                return { id, name: `Complete ${categoryName} Set`, quantity };
+            }
+            const product = SAMPLE_PRODUCTS.find(p => String(p.id) === id);
+            return product ? { ...product, quantity } : null;
+        }).filter(Boolean);
+    }, [cart]);
+
+    const handleSubmit = useCallback(() => {
+        setIsSubmitted(true);
+        setTimeout(() => {
+            setCart({});
+            onNavigate('home');
+        }, 1000);
+    }, [setCart, onNavigate])
+
+    if (isSubmitted) {
+        return (
+            <div className="flex flex-col items-center justify-center h-full">
+                <GlassCard theme={theme} className="p-8 flex flex-col items-center justify-center">
+                    <CheckCircle className="w-16 h-16 mb-4" style={{ color: theme.colors.accent }} />
+                    <h2 className="text-2xl font-bold" style={{ color: theme.colors.textPrimary }}>Ordered!</h2>
+                </GlassCard>
+            </div>
+        )
+    }
+
+    return (
+        <>
+            <PageTitle title="Cart" theme={theme} />
+            <div className="px-4 space-y-4 pb-4">
+                <GlassCard theme={theme} className="p-4 space-y-2">
+                    <h3 className="font-bold" style={{ color: theme.colors.textPrimary }}>Selected Samples</h3>
+                    {cartItems.length > 0 ? cartItems.map((item) => (
+                        <div key={item.id} className="flex justify-between items-center text-sm py-1">
+                            <span style={{ color: theme.colors.textPrimary }}>{item.name}</span>
+                            <div className="flex items-center space-x-3">
+                                <button onClick={() => onUpdateCart(item, -1)} className="w-6 h-6 flex items-center justify-center rounded-md" style={{ backgroundColor: theme.colors.subtle }}><Minus className="w-4 h-4" style={{ color: theme.colors.textSecondary }} /></button>
+                                <span className="font-bold w-4 text-center">{item.quantity}</span>
+                                <button onClick={() => onUpdateCart(item, 1)} className="w-6 h-6 flex items-center justify-center rounded-md" style={{ backgroundColor: theme.colors.subtle }}><Plus className="w-4 h-4" style={{ color: theme.colors.textSecondary }} /></button>
+                            </div>
+                        </div>
+                    )) : <p className="text-sm" style={{ color: theme.colors.textSecondary }}>Your cart is empty.</p>}
+                </GlassCard>
+                <GlassCard theme={theme} className="p-4 space-y-2">
+                    <h3 className="font-bold" style={{ color: theme.colors.textPrimary }}>Ship To</h3>
+                    <div className="relative">
+                        <input
+                            ref={inputRef}
+                            type="text"
+                            value={address}
+                            onChange={handleAddressChange}
+                            placeholder="Start typing your address..."
+                            className="w-full p-2 pr-10 border rounded-lg" style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border, color: theme.colors.textPrimary }}
+                        />
+                        <button onClick={() => setAddress(userSettings.homeAddress)} className="absolute top-2 right-2 p-1 rounded-full" style={{ backgroundColor: theme.colors.surface }}><Home className="w-5 h-5" style={{ color: theme.colors.secondary }} /></button>
+                        {predictions.length > 0 && (
+                            <GlassCard theme={theme} className="absolute w-full mt-1 z-10 p-1">
+                                {predictions.map(prediction => (
+                                    <button
+                                        key={prediction.place_id}
+                                        onClick={() => handleSelectPrediction(prediction)}
+                                        className="block w-full text-left p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5"
+                                        style={{ color: theme.colors.textSecondary }}
+                                    >
+                                        {prediction.description}
+                                    </button>
+                                ))}
+                            </GlassCard>
+                        )}
+                    </div>
+                </GlassCard>
+                <button onClick={handleSubmit} disabled={Object.keys(cart).length === 0 || !address.trim()} className="w-full font-bold py-3 px-6 rounded-lg transition-colors disabled:opacity-50" style={{ backgroundColor: theme.colors.accent, color: '#FFFFFF' }}>Submit</button>
+            </div>
+        </>
+    );
+};
+
+const Combobox = ({ label, value, onChange, placeholder, options, onAddNew, theme, required, zIndex }) => {
+    const [inputValue, setInputValue] = useState(value);
+    const [showOptions, setShowOptions] = useState(false);
+    const wrapperRef = useRef(null);
+
+    useEffect(() => {
+        setInputValue(value);
+    }, [value]);
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+                setShowOptions(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [wrapperRef]);
+    const filteredOptions = options.filter(option => option.toLowerCase().includes(inputValue.toLowerCase()));
+
+    const handleSelect = (option) => {
+        onChange(option);
+        setInputValue(option);
+        setShowOptions(false);
+    };
+
+    const handleAddNew = () => {
+        if (inputValue && !options.includes(inputValue)) {
+            onAddNew(inputValue);
+        }
+        onChange(inputValue);
+        setShowOptions(false);
+    }
+
+    return (
+        <div className={`relative ${zIndex}`} ref={wrapperRef}>
+            <input
+                required={required}
+                type="text"
+                value={inputValue}
+                onChange={e => setInputValue(e.target.value)}
+                onFocus={() => setShowOptions(true)}
+                placeholder={placeholder}
+                className="w-full px-4 py-3 border rounded-full focus:ring-2 text-base outline-none"
+                style={{ backgroundColor: theme.colors.subtle, borderColor: 'transparent', color: theme.colors.textPrimary, ringColor: theme.colors.accent }}
+            />
+            {showOptions && (
+                <GlassCard theme={theme} className="absolute w-full mt-1 z-10 p-2 max-h-48 overflow-y-auto">
+                    {filteredOptions.map(option => (
+                        <button type="button" key={option} onClick={() => handleSelect(option)} className="block w-full text-left p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5" style={{ color: theme.colors.textPrimary }}>
+                            {option}
+                        </button>
+                    ))}
+                    {inputValue && !options.includes(inputValue) && (
+                        <button type="button" onClick={handleAddNew} className="block w-full text-left p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5 font-semibold" style={{ color: theme.colors.accent }}>
+                            Add "{inputValue}"
+                        </button>
+                    )}
+                </GlassCard>
+            )}
+        </div>
+    )
+};
+
+const ProfileMenu = ({ show, onClose, onNavigate, toggleTheme, theme, isDarkMode }) => {
+    if (!show) return null;
+    const menuItems = [
+        { label: isDarkMode ? 'Light Mode' : 'Dark Mode', action: () => { toggleTheme(); onClose(); }, icon: isDarkMode ? Sun : Moon },
+        { label: 'Settings', action: () => onNavigate('settings'), icon: Settings },
+        { label: 'Members', action: () => onNavigate('members'), icon: User },
+        { label: 'Help', action: () => onNavigate('help'), icon: HelpCircle },
+        { label: 'Log Out', action: () => onNavigate('logout'), icon: LogOut },
+    ];
+    return (
+        <div className="absolute inset-0 z-30 pointer-events-auto" onClick={onClose}>
+            <GlassCard theme={theme} className="absolute top-24 right-4 w-48 p-2 space-y-1" onClick={(e) => e.stopPropagation()}>
+                {menuItems.map(item => (
+                    <button key={item.label} onClick={item.action} className="w-full text-left flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-black/10 dark:hover:bg-white/10" style={{ color: theme.colors.textPrimary }}>
+                        <item.icon className="w-4 h-4 mr-3" style={{ color: theme.colors.secondary }} />{item.label}
+                    </button>
+                ))}
+            </GlassCard>
+        </div>
+    );
+};
+
+const PostCard = ({ post, theme }) => {
+    const { user, timeAgo, text, image, likes = 0, comments = [] } = post;
+
+    const [liked, setLiked] = useState(false);
+    const [count, setCount] = useState(likes);
+    const [open, setOpen] = useState(false);
+    const [input, setInput] = useState('');
+    const [list, setList] = useState(comments);
+    const [menu, setMenu] = useState(false);
+
+    const toggleLike = () => { setLiked(!liked); setCount((c) => c + (liked ? -1 : 1)); };
+    const addCmt = () => { if (!input.trim()) return; setList([...list, { id: Date.now(), name: 'You', text: input }]); setInput(''); };
+
+    const sharePost = async () => {
+        setMenu(false);
+        const msg = `${text}\n${window.location.href}`;
+        if (navigator.share && window.isSecureContext) {
+            try { await navigator.share({ title: 'JSI Community Post', text, url: window.location.href }); return; } catch { }
+        }
+        try { await navigator.clipboard.writeText(msg); alert('Link copied!'); return; } catch { }
+        const t = document.createElement('textarea'); t.value = msg; t.style.position = 'fixed'; t.style.opacity = '0';
+        document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t);
+        alert('Link copied!');
+    };
+
+    return (
+        <GlassCard theme={theme} className="p-5 space-y-4 rounded-2xl shadow-lg">
+            <div className="flex items-start justify-between">
+                <div className="flex items-center space-x-3">
+                    <Avatar src={user.avatar} alt={user.name} theme={theme} />
+                    <div>
+                        <p className="text-sm font-medium" style={{ color: theme.colors.textPrimary }}>{user.name}</p>
+                        <p className="text-xs" style={{ color: theme.colors.textSecondary }}>{timeAgo}</p>
+                    </div>
+                </div>
+                <div className="relative">
+                    <button onClick={() => setMenu(!menu)}>
+                        <MoreVertical className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
+                    </button>
+                    {menu && (
+                        <div className="absolute right-0 mt-1 w-28 rounded-lg shadow-lg z-20" style={{ backgroundColor: theme.colors.background }}>
+                            <button onClick={sharePost} className="flex items-center w-full px-4 py-2 text-sm hover:bg-[rgba(0,0,0,0.03)]">
+                                <Share2 className="w-4 h-4 mr-2" /> Share
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            <p className="text-sm" style={{ color: theme.colors.textPrimary }}>{text}</p>
+            {image && <img src={image} alt="" className="w-full rounded-xl object-cover max-h-72" style={{ border: `1px solid ${theme.colors.subtle}` }} />}
+
+            <div className="flex items-center space-x-6">
+                <button onClick={toggleLike} className="flex items-center space-x-1">
+                    <Heart className={`w-5 h-5 transition-colors ${liked ? 'fill-current' : 'stroke-2'}`}
+                        style={{ color: liked ? theme.colors.accent : theme.colors.textSecondary, fill: liked ? theme.colors.accent : 'none' }} />
+                    <span className="text-sm" style={{ color: theme.colors.textSecondary }}>{count}</span>
+                </button>
+                <button onClick={() => setOpen(!open)} className="flex items-center space-x-1">
+                    <MessageSquare className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
+                    <span className="text-sm" style={{ color: theme.colors.textSecondary }}>{list.length}</span>
+                </button>
+            </div>
+
+            {open && (
+                <div className="space-y-3">
+                    {list.map((c) => (
+                        <p key={c.id} className="text-sm" style={{ color: theme.colors.textPrimary }}>
+                            <span className="font-medium">{c.name}: </span>{c.text}
+                        </p>
+                    ))}
+                    <div className="flex items-center space-x-2">
+                        <input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Add a comment…"
+                            className="flex-1 px-3 py-2 text-sm rounded-lg"
+                            style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }} />
+                        <button onClick={addCmt}><Send className="w-5 h-5" style={{ color: theme.colors.accent }} /></button>
+                    </div>
+                </div>
+            )}
+        </GlassCard>
+    );
+};
+
+const INITIAL_MEMBERS = [
+    { id: 1, firstName: 'Luke', lastName: 'Miller', email: 'luke.miller@example.com', title: 'Admin', role: 'Admin', permissions: { salesData: true, commissions: true, projects: true, customerRanking: true, dealerRewards: true, submittingReplacements: true } },
+    { id: 2, firstName: 'Sarah', lastName: 'Chen', email: 'sarah.chen@example.com', title: 'Admin', role: 'Admin', permissions: { salesData: true, commissions: true, projects: true, customerRanking: true, dealerRewards: true, submittingReplacements: true } },
+    { id: 3, firstName: 'Michael', lastName: 'Jones', email: 'michael.jones@example.com', title: 'Sales', role: 'User', permissions: { salesData: true, commissions: true, projects: false, customerRanking: true, dealerRewards: false, submittingReplacements: false } },
+    { id: 4, firstName: 'Jessica', lastName: 'Williams', email: 'jessica.williams@example.com', title: 'Designer', role: 'User', permissions: { salesData: false, commissions: false, projects: true, customerRanking: false, dealerRewards: false, submittingReplacements: true } },
+    { id: 5, firstName: 'David', lastName: 'Brown', email: 'david.brown@example.com', title: 'Sales', role: 'User', permissions: { salesData: true, commissions: true, projects: false, customerRanking: true, dealerRewards: false, submittingReplacements: false } },
+];
+
+const WinsCard = ({ win, theme }) => {
+    const { user, timeAgo, title, images } = win;
+    const [idx, setIdx] = useState(0);
+    const [menu, setMenu] = useState(false);
+
+    const shareWin = async () => {
+        setMenu(false);
+        const msg = `${title}\n${window.location.href}`;
+        if (navigator.share && window.isSecureContext) {
+            try { await navigator.share({ title: 'JSI Win', text: title, url: window.location.href }); return; } catch { }
+        }
+        try { await navigator.clipboard.writeText(msg); alert('Link copied!'); return; } catch { }
+        alert('Copy failed.');
+    };
+
+    const prev = () => setIdx((idx - 1 + images.length) % images.length);
+    const next = () => setIdx((idx + 1) % images.length);
+
+    return (
+        <GlassCard theme={theme} className="p-5 space-y-4 rounded-2xl shadow-lg">
+            <div className="flex items-start justify-between">
+                <div className="flex items-center space-x-3">
+                    <Avatar src={user.avatar} alt={user.name} theme={theme} />
+                    <div>
+                        <p className="text-sm font-medium" style={{ color: theme.colors.textPrimary }}>{user.name}</p>
+                        <p className="text-xs" style={{ color: theme.colors.textSecondary }}>{timeAgo}</p>
+                    </div>
+                </div>
+
+                <div className="relative">
+                    <button onClick={() => setMenu(!menu)}>
+                        <MoreVertical className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
+                    </button>
+                    {menu && (
+                        <div className="absolute right-0 mt-1 w-28 rounded-lg shadow-lg z-20"
+                            style={{ backgroundColor: theme.colors.background }}>
+                            <button onClick={shareWin}
+                                className="flex items-center w-full px-4 py-2 text-sm hover:bg-[rgba(0,0,0,0.03)]">
+                                <Share2 className="w-4 h-4 mr-2" /> Share
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            <p className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>{title}</p>
+
+            <div className="relative">
+                <img
+                    src={images[idx]}
+                    alt=""
+                    className="w-full rounded-xl object-cover max-h-72"
+                    style={{ border: `1px solid ${theme.colors.subtle}` }}
+                />
+
+                {images.length > 1 && (
+                    <>
+                        <button onClick={prev}
+                            className="absolute left-2 top-1/2 -translate-y-1/2 bg-[rgba(0,0,0,0.45)] hover:bg-[rgba(0,0,0,0.6)] p-2 rounded-full">
+                            <ChevronLeft className="w-4 h-4 text-white" />
+                        </button>
+                        <button onClick={next}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 bg-[rgba(0,0,0,0.45)] hover:bg-[rgba(0,0,0,0.6)] p-2 rounded-full">
+                            <ChevronRight className="w-4 h-4 text-white" />
+                        </button>
+                    </>
+                )}
+            </div>
+        </GlassCard>
+    );
+};
+
+const PollCard = ({ poll, theme }) => {
+    const { user, timeAgo, question, options } = poll;
+    const [choice, setChoice] = useState(null);
+    const total = options.reduce((s, o) => s + o.votes, 0);
+    const [menu, setMenu] = useState(false);
+
+    const sharePoll = async () => {
+        setMenu(false);
+        const msg = `${question}\n${window.location.href}`;
+        if (navigator.share && window.isSecureContext) {
+            try { await navigator.share({ title: 'JSI Poll', text: question, url: window.location.href }); return; } catch { }
+        }
+        try { await navigator.clipboard.writeText(msg); alert('Link copied!'); return; } catch { }
+        alert('Copy failed.');
+    };
+
+    return (
+        <GlassCard theme={theme} className="p-5 space-y-4 rounded-2xl shadow-lg">
+            <div className="flex items-start justify-between">
+                <div className="flex items-center space-x-3">
+                    <Avatar src={user.avatar} alt={user.name} theme={theme} />
+                    <div>
+                        <p className="text-sm font-medium" style={{ color: theme.colors.textPrimary }}>{user.name}</p>
+                        <p className="text-xs" style={{ color: theme.colors.textSecondary }}>{timeAgo}</p>
+                    </div>
+                </div>
+                <div className="relative">
+                    <button onClick={() => setMenu(!menu)}>
+                        <MoreVertical className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
+                    </button>
+                    {menu && (
+                        <div className="absolute right-0 mt-1 w-28 rounded-lg shadow-lg z-20" style={{ backgroundColor: theme.colors.background }}>
+                            <button onClick={sharePoll} className="flex items-center w-full px-4 py-2 text-sm hover:bg-[rgba(0,0,0,0.03)]">
+                                <Share2 className="w-4 h-4 mr-2" /> Share
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            <p className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>{question}</p>
+
+            <div className="space-y-2">
+                {options.map((o) => {
+                    const pct = Math.round((o.votes / total) * 100);
+                    const chosen = choice === o.id;
+                    const showPct = choice !== null;
+                    return (
+                        <button key={o.id} onClick={() => setChoice(o.id)}
+                            className={`w-full flex justify-between items-center px-4 py-2 rounded-lg transition-colors ${chosen ? 'ring-2 ring-offset-2' : ''}`}
+                            style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary, borderColor: theme.colors.accent }}>
+                            <span>{o.text}</span>
+                            {showPct && <span className="font-medium">{pct}%</span>}
+                        </button>
+                    );
+                })}
+            </div>
+        </GlassCard>
+    );
+};
+
+const EMPTY_USER = {
+    firstName: '',
+    lastName: '',
+    email: '',
+    role: 'User',
+    title: '',
+    permissions: {
+        salesData: false,
+        commissions: false,
+        projects: false,
+        customerRanking: false,
+        dealerRewards: false,
+        submittingReplacements: false
+    }
+};
+
+const USER_TITLES = ["Sales", "Designer", "Sales/Designer", "Administration"];
+
+
+const FormSection = ({ title, theme, children }) => (
+    <GlassCard
+        theme={theme}
+        className="p-4 space-y-4 mb-6"
+        style={{ backgroundColor: theme.colors.surface }}
     >
+        <h2
+            className="font-bold text-lg"
+            style={{ color: theme.colors.textPrimary }}
+        >
+            {title}
+        </h2>
         {children}
-    </div>
-)));
+    </GlassCard>
+);
+
+const CreateContentModal = ({ close, pickType, typeChosen, onAdd, theme }) => {
+    const type = typeChosen;
+    const [text, setText] = useState('');
+    const [file, setFile] = useState(null);
+    const [question, setQ] = useState('');
+    const [optA, setA] = useState('');
+    const [optB, setB] = useState('');
+
+    const submit = () => {
+        const now = 'just now';
+        if (type === 'post') {
+            onAdd('post', {
+                id: Date.now(),
+                user: { name: 'You', avatar: '' },
+                timeAgo: now,
+                text,
+                image: file ? URL.createObjectURL(file) : null,
+                likes: 0,
+                comments: [],
+            });
+        }
+        if (type === 'win') {
+            onAdd('win', {
+                id: Date.now(),
+                user: { name: 'You', avatar: '' },
+                timeAgo: now,
+                title: text || 'Win!',
+                images: [file ? URL.createObjectURL(file) : 'https://picsum.photos/seed/win/800/500'],
+            });
+        }
+        if (type === 'poll') {
+            onAdd('poll', {
+                id: Date.now(),
+                user: { name: 'You', avatar: '' },
+                timeAgo: now,
+                question,
+                options: [
+                    { id: 'a', text: optA || 'Option A', votes: 0 },
+                    { id: 'b', text: optB || 'Option B', votes: 0 },
+                ],
+            });
+        }
+        close();
+    };
+
+    return (
+        <div className="fixed inset-0 z-30 flex items-center justify-center"
+            style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+            <div className="w-full max-w-md bg-white rounded-2xl p-6 space-y-6 relative"
+                style={{ color: theme.colors.textPrimary, maxHeight: '90vh', overflowY: 'auto' }}>
+                <button onClick={close} className="absolute right-4 top-4">
+                    <X className="w-5 h-5" />
+                </button>
+
+                {!type && (
+                    <>
+                        <h3 className="text-lg font-semibold mb-3">Create…</h3>
+                        <div className="space-y-3">
+                            <button onClick={() => pickType('post')} className="w-full py-3 rounded-lg font-medium"
+                                style={{ backgroundColor: theme.colors.subtle }}>Feed Post</button>
+                            <button onClick={() => pickType('win')} className="w-full py-3 rounded-lg font-medium"
+                                style={{ backgroundColor: theme.colors.subtle }}>Win</button>
+                            <button onClick={() => pickType('poll')} className="w-full py-3 rounded-lg font-medium"
+                                style={{ backgroundColor: theme.colors.subtle }}>Poll</button>
+                        </div>
+                    </>
+                )}
+
+                {type === 'post' && (
+                    <>
+                        <h3 className="text-lg font-semibold">New Feed Post</h3>
+                        <textarea value={text} onChange={(e) => setText(e.target.value)}
+                            rows={4} className="w-full p-3 rounded-lg"
+                            style={{ backgroundColor: theme.colors.subtle }} />
+                        <label className="block">
+                            <input type="file" accept="image/*,video/*" hidden
+                                onChange={(e) => setFile(e.target.files[0])} />
+                            <span className="mt-3 inline-flex items-center space-x-2 px-4 py-2 rounded-lg cursor-pointer"
+                                style={{ backgroundColor: theme.colors.subtle }}>
+                                {file ? <span>{file.name}</span> : <><Image className="w-4 h-4" /><span>Add attachment</span></>}
+                            </span>
+                        </label>
+                        <button onClick={submit} className="w-full py-3 rounded-lg font-medium text-white"
+                            style={{ backgroundColor: theme.colors.accent }}>Post</button>
+                    </>
+                )}
+
+                {type === 'win' && (
+                    <>
+                        <h3 className="text-lg font-semibold">Share a Win</h3>
+                        <textarea value={text} onChange={(e) => setText(e.target.value)}
+                            rows={3} className="w-full p-3 rounded-lg"
+                            style={{ backgroundColor: theme.colors.subtle }} placeholder="Describe your win…" />
+                        <label className="block">
+                            <input type="file" accept="image/*,video/*" hidden
+                                onChange={(e) => setFile(e.target.files[0])} />
+                            <span className="mt-3 inline-flex items-center space-x-2 px-4 py-2 rounded-lg cursor-pointer"
+                                style={{ backgroundColor: theme.colors.subtle }}>
+                                {file ? <span>{file.name}</span> : <><Image className="w-4 h-4" /><span>Add photo/video</span></>}
+                            </span>
+                        </label>
+                        <button onClick={submit} className="w-full py-3 rounded-lg font-medium text-white"
+                            style={{ backgroundColor: theme.colors.accent }}>Post Win</button>
+                    </>
+                )}
+
+                {type === 'poll' && (
+                    <>
+                        <h3 className="text-lg font-semibold">Create Poll</h3>
+                        <input value={question} onChange={(e) => setQ(e.target.value)}
+                            className="w-full p-3 rounded-lg"
+                            style={{ backgroundColor: theme.colors.subtle }} placeholder="Question" />
+                        <input value={optA} onChange={(e) => setA(e.target.value)}
+                            className="w-full p-3 rounded-lg mt-3"
+                            style={{ backgroundColor: theme.colors.subtle }} placeholder="Option A" />
+                        <input value={optB} onChange={(e) => setB(e.target.value)}
+                            className="w-full p-3 rounded-lg mt-3"
+                            style={{ backgroundColor: theme.colors.subtle }} placeholder="Option B" />
+                        <button onClick={submit} className="w-full py-3 rounded-lg font-medium text-white mt-4"
+                            style={{ backgroundColor: theme.colors.accent }}>Post Poll</button>
+                    </>
+                )}
+            </div>
+        </div>
+    );
+};
+
+
+const GlassCard = React.memo(
+    React.forwardRef(({ children, className = '', theme, ...props }, ref) => (
+        <div
+            ref={ref}
+            className={`rounded-[1.75rem] border shadow-lg transition-all duration-300 ${className}`}
+            style={{
+                backgroundColor: theme.colors.surface,
+                borderColor: theme.colors.border,
+                boxShadow: `0 4px 30px ${theme.colors.shadow}`,
+                backdropFilter: theme.backdropFilter,
+                WebkitBackdropFilter: theme.backdropFilter
+            }}
+            {...props}
+        >
+            {children}
+        </div>
+    ))
+);
 
 const PageTitle = React.memo(({ title, theme, onBack, children }) => (
     <div className="px-4 pt-6 pb-4 flex justify-between items-center">
         <div className="flex-1 flex items-center space-x-2">
             {onBack && (
-                <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10">
-                    <ArrowLeft className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
+                <button
+                    onClick={onBack}
+                    className="p-2 ml-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10"
+                >
+                    <ArrowLeft
+                        className="w-5 h-5"
+                        style={{ color: theme.colors.textSecondary }}
+                    />
                 </button>
             )}
-            <h1 className="text-3xl font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>{title}</h1>
+            <h1
+                className="text-3xl font-bold tracking-tight"
+                style={{ color: theme.colors.textPrimary }}
+            >
+                {title}
+            </h1>
         </div>
         {children}
     </div>
 ));
 
-const FormInput = React.memo(({ label, type = 'text', value, onChange, placeholder, options, className = "", theme, readOnly = false, required = false, isMulti, onMultiChange }) => {
-    const inputClass = `w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-offset-0 text-base outline-none`;
-    const styles = { backgroundColor: theme.colors.subtle, borderColor: 'transparent', color: theme.colors.textPrimary, ringColor: theme.colors.accent, '--placeholder-color': theme.colors.textSecondary };
-    const formatCurrency = (val) => {
-        if (!val) return '';
-        const numericValue = String(val).replace(/[^0-9]/g, '');
-        if (!numericValue) return '$';
-        return '$' + new Intl.NumberFormat().format(numericValue);
+const FormInput = React.memo(({
+    label,
+    type = 'text',
+    value,
+    onChange,
+    placeholder,
+    options,
+    className = '',
+    theme,
+    readOnly = false,
+    required = false
+}) => {
+    const inputClass = `w-full px-4 py-3 border rounded-lg focus:ring-2 text-base outline-none ${className}`;
+    const styles = {
+        backgroundColor: theme.colors.background,  // light beige
+        borderColor: theme.colors.border,      // visible border
+        color: theme.colors.textPrimary,
+        ringColor: theme.colors.accent,
+        '--placeholder-color': theme.colors.textSecondary
     };
-    const handleCurrencyChange = (e) => {
-        let numericValue = e.target.value.replace(/[^0-9]/g, '');
-        onChange({ target: { value: numericValue } });
-    }
+
     return (
-        <div className={`space-y-1 ${className}`}>
-            {label && <label className="text-xs font-semibold px-1" style={{ color: theme.colors.textSecondary }}>
-                {label} {required && <span className="text-red-500">*</span>}
-            </label>}
+        <div className="space-y-1">
+            {label && (
+                <label
+                    className="text-xs font-semibold px-1"
+                    style={{ color: theme.colors.textSecondary }}
+                >
+                    {label}{required && <> <span className="text-red-500">*</span></>}
+                </label>
+            )}
+
             {type === 'select' ? (
-                isMulti ? (
-                    <div className={`${inputClass} flex flex-wrap gap-2`} style={{ ...styles, padding: '0.5rem' }}>
-                        {options.map(opt => (
-                            <button
-                                key={opt.value}
-                                type="button"
-                                onClick={() => onMultiChange(opt.value)}
-                                className={`px-2 py-1 text-xs rounded-md transition-colors ${value.includes(opt.value) ? 'text-white' : ''}`}
-                                style={{
-                                    backgroundColor: value.includes(opt.value) ? theme.colors.accent : theme.colors.background,
-                                    color: value.includes(opt.value) ? 'white' : theme.colors.textSecondary
-                                }}
-                            >
-                                {opt.label}
-                            </button>
-                        ))}
-                    </div>
-                ) : (
-                    <select value={value || ""} onChange={onChange} className={inputClass} style={{ ...styles, color: value ? theme.colors.textPrimary : theme.colors.textSecondary }} required={required}>
-                        <option value="" disabled>{placeholder}</option>
-                        {options.map(opt => typeof opt === 'string' ? <option key={opt} value={opt}>{opt}</option> : <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-                    </select>
-                )
+                <select
+                    required={required}
+                    value={value || ''}
+                    onChange={onChange}
+                    className={inputClass}
+                    style={styles}
+                >
+                    <option value="" disabled hidden>
+                        {placeholder}
+                    </option>
+                    {options.map(o =>
+                        typeof o === 'string' ? (
+                            <option key={o} value={o}>{o}</option>
+                        ) : (
+                            <option key={o.value} value={o.value}>{o.label}</option>
+                        )
+                    )}
+                </select>
             ) : type === 'textarea' ? (
-                <textarea value={value} onChange={onChange} className={inputClass} style={styles} rows="4" placeholder={placeholder} readOnly={readOnly} />
-            ) : type === 'currency' ? (
-                <div className="relative">
-                    <input type="text" value={formatCurrency(value)} onChange={handleCurrencyChange} className={inputClass} style={styles} placeholder={placeholder} readOnly={readOnly} required={required} />
-                </div>
+                <textarea
+                    value={value}
+                    onChange={onChange}
+                    className={inputClass}
+                    style={styles}
+                    rows="4"
+                    placeholder={placeholder}
+                    readOnly={readOnly}
+                />
             ) : (
-                <div className="relative">
-                    <input type={type} value={value} onChange={onChange} className={inputClass} style={styles} placeholder={placeholder} readOnly={readOnly} required={required} />
-                </div>
+                <input
+                    type={type}
+                    value={value}
+                    onChange={onChange}
+                    className={inputClass}
+                    style={styles}
+                    placeholder={placeholder}
+                    readOnly={readOnly}
+                    required={required}
+                />
             )}
         </div>
     );
@@ -120,6 +857,33 @@ const SearchInput = React.memo(({ onSubmit, value, onChange, placeholder, theme,
         )}
     </form>
 ));
+
+const Modal = ({ show, onClose, title, children, theme }) => {
+    if (!show) return null;
+    return (
+        <div
+            className="absolute inset-0 bg-black bg-opacity-70 flex items-end justify-center z-50 transition-opacity duration-300 pointer-events-auto pt-16"
+            style={{ opacity: show ? 1 : 0 }}
+            onClick={onClose}
+        >
+            <div
+                style={{ backgroundColor: theme.colors.surface, backdropFilter: theme.backdropFilter, WebkitBackdropFilter: theme.backdropFilter, borderColor: theme.colors.border, boxShadow: `0 4px 30px ${theme.colors.shadow}` }}
+                className="rounded-t-2xl w-full max-w-md max-h-full flex flex-col transition-transform duration-300 transform"
+                onClick={(e) => e.stopPropagation()}
+            >
+                {title !== "" && (
+                    <div className="flex justify-between items-center p-4 border-b" style={{ borderColor: theme.colors.border }}>
+                        <h2 className="text-xl font-bold" style={{ color: theme.colors.textPrimary }}>{title}</h2>
+                        <button onClick={onClose} className="p-1 rounded-full transition-colors" style={{ backgroundColor: theme.colors.subtle }}>
+                            <X className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
+                        </button>
+                    </div>
+                )}
+                <div className={`${title !== "" ? "p-6" : "pt-8 px-6 pb-6"} overflow-y-auto space-y-4 scrollbar-hide`}>{children}</div>
+            </div>
+        </div>
+    );
+};
 
 const SuccessToast = ({ message, show, theme }) => {
     if (!show) return null;
@@ -207,33 +971,1598 @@ const HomeScreen = ({ onNavigate, theme, onAskAI, searchTerm, onSearchTermChange
         </div>
     );
 };
+const PermissionToggle = React.memo(({ label, isEnabled, onToggle, theme, disabled }) => {
+    const titleText = disabled ? "Requires Sales Data access" : "";
+    return (
+        <div title={titleText} className={`flex items-center justify-between text-sm ${disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`} onClick={disabled ? undefined : onToggle}>
+            <span style={{ color: theme.colors.textSecondary }}>{label}</span>
+            <div className={`relative inline-flex items-center h-5 rounded-full w-9 transition-colors ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`} style={{ backgroundColor: isEnabled ? theme.colors.accent : theme.colors.subtle }}>
+                <span className={`inline-block w-3.5 h-3.5 transform bg-white rounded-full transition-transform ${isEnabled ? 'translate-x-5' : 'translate-x-1'}`} />
+            </div>
+        </div>
+    );
+});
 
+const MonthlyBarChart = ({ data, theme }) => {
+    const maxValue = Math.max(...data.map(d => Math.max(d.bookings, d.sales)));
+
+    return (
+        <div className="space-y-3">
+            {data.map((item, index) => (
+                <div key={index} className="space-y-1">
+                    <div className="flex justify-between text-sm">
+                        <span style={{ color: theme.colors.textSecondary }}>{item.month}</span>
+                        <span style={{ color: theme.colors.textPrimary }}>
+                            ${item.bookings?.toLocaleString() || 0}
+                        </span>
+                    </div>
+                    <div className="relative h-6 rounded-full" style={{ backgroundColor: theme.colors.subtle }}>
+                        <div
+                            className="h-full rounded-full transition-all duration-300"
+                            style={{
+                                width: `${((item.bookings || 0) / maxValue) * 100}%`,
+                                backgroundColor: theme.colors.accent
+                            }}
+                        />
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+};
+
+const MonthlyTable = ({ data, theme, totalBookings, totalSales }) => (
+    <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+            <thead>
+                <tr className="border-b" style={{ borderColor: theme.colors.border }}>
+                    <th className="text-left py-2 px-1 font-semibold" style={{ color: theme.colors.textSecondary }}>
+                        Month
+                    </th>
+                    <th className="text-right py-2 px-1 font-semibold" style={{ color: theme.colors.textSecondary }}>
+                        Bookings
+                    </th>
+                    <th className="text-right py-2 px-1 font-semibold" style={{ color: theme.colors.textSecondary }}>
+                        Sales
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {data.map((item, index) => (
+                    <tr key={index} className="border-b" style={{ borderColor: theme.colors.border }}>
+                        <td className="py-2 px-1" style={{ color: theme.colors.textPrimary }}>
+                            {item.month}
+                        </td>
+                        <td className="text-right py-2 px-1" style={{ color: theme.colors.textPrimary }}>
+                            ${(item.bookings || 0).toLocaleString()}
+                        </td>
+                        <td className="text-right py-2 px-1" style={{ color: theme.colors.textPrimary }}>
+                            ${(item.sales || 0).toLocaleString()}
+                        </td>
+                    </tr>
+                ))}
+                <tr className="border-t-2 font-bold" style={{ borderColor: theme.colors.accent }}>
+                    <td className="py-2 px-1" style={{ color: theme.colors.textPrimary }}>
+                        Total
+                    </td>
+                    <td className="text-right py-2 px-1" style={{ color: theme.colors.accent }}>
+                        ${totalBookings.toLocaleString()}
+                    </td>
+                    <td className="text-right py-2 px-1" style={{ color: theme.colors.accent }}>
+                        ${totalSales.toLocaleString()}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+);
+
+const RecentPOsCard = ({ orders, theme, onOrderClick }) => (
+    <GlassCard theme={theme} className="p-4 hover:border-white/20 transition-all duration-300">
+        <h3 className="font-bold text-lg mb-4" style={{ color: theme.colors.textPrimary }}>
+            Recent Purchase Orders
+        </h3>
+        <div className="space-y-3">
+            {orders.map((order, index) => (
+                <div
+                    key={index}
+                    className="flex justify-between items-center p-3 rounded-lg cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                    onClick={() => onOrderClick(order)}
+                    style={{ backgroundColor: theme.colors.subtle }}
+                >
+                    <div>
+                        <div className="font-semibold" style={{ color: theme.colors.textPrimary }}>
+                            {order.company}
+                        </div>
+                        <div className="text-sm" style={{ color: theme.colors.textSecondary }}>
+                            PO #{order.po}
+                        </div>
+                    </div>
+                    <div className="text-right">
+                        <div className="font-bold" style={{ color: theme.colors.accent }}>
+                            {order.amount}
+                        </div>
+                        <div className="text-sm" style={{ color: theme.colors.textSecondary }}>
+                            {new Date(order.date).toLocaleDateString()}
+                        </div>
+                    </div>
+                </div>
+            ))}
+        </div>
+    </GlassCard>
+);
+
+const DonutChart = ({ data, theme }) => {
+    const total = data.reduce((sum, item) => sum + item.value, 0);
+
+    return (
+        <div className="space-y-3">
+            {data.map((item, index) => (
+                <div key={index} className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                        <div
+                            className="w-4 h-4 rounded-full"
+                            style={{ backgroundColor: item.color || theme.colors.accent }}
+                        />
+                        <span style={{ color: theme.colors.textPrimary }}>{item.label}</span>
+                    </div>
+                    <div className="text-right">
+                        <div className="font-semibold" style={{ color: theme.colors.textPrimary }}>
+                            {item.value}%
+                        </div>
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+};
+
+const OrderModal = ({ order, onClose, onShowDetails, theme }) => (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <GlassCard theme={theme} className="w-full max-w-md">
+            <div className="p-6">
+                <div className="flex justify-between items-start mb-4">
+                    <h3 className="text-xl font-bold" style={{ color: theme.colors.textPrimary }}>
+                        Order Details
+                    </h3>
+                    <button
+                        onClick={onClose}
+                        className="p-1 rounded-full hover:bg-black/10 dark:hover:bg-white/10"
+                    >
+                        <X className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
+                    </button>
+                </div>
+
+                <div className="space-y-3">
+                    <div>
+                        <span className="text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>
+                            Company:
+                        </span>
+                        <div style={{ color: theme.colors.textPrimary }}>{order.company}</div>
+                    </div>
+
+                    <div>
+                        <span className="text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>
+                            PO Number:
+                        </span>
+                        <div style={{ color: theme.colors.textPrimary }}>{order.po}</div>
+                    </div>
+
+                    <div>
+                        <span className="text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>
+                            Amount:
+                        </span>
+                        <div className="text-xl font-bold" style={{ color: theme.colors.accent }}>
+                            {order.amount}
+                        </div>
+                    </div>
+
+                    <div>
+                        <span className="text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>
+                            Date:
+                        </span>
+                        <div style={{ color: theme.colors.textPrimary }}>
+                            {new Date(order.date).toLocaleDateString()}
+                        </div>
+                    </div>
+
+                    {order.shipDate && (
+                        <div>
+                            <span className="text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>
+                                Ship Date:
+                            </span>
+                            <div style={{ color: theme.colors.textPrimary }}>{order.shipDate}</div>
+                        </div>
+                    )}
+                </div>
+
+                <div className="flex space-x-3 mt-6">
+                    <button
+                        onClick={onShowDetails}
+                        className="flex-1 py-2 px-4 rounded-lg font-semibold text-white"
+                        style={{ backgroundColor: theme.colors.accent }}
+                    >
+                        View All Orders
+                    </button>
+                    <button
+                        onClick={onClose}
+                        className="flex-1 py-2 px-4 rounded-lg font-semibold border"
+                        style={{
+                            color: theme.colors.textPrimary,
+                            borderColor: theme.colors.border,
+                            backgroundColor: theme.colors.subtle
+                        }}
+                    >
+                        Close
+                    </button>
+                </div>
+            </div>
+        </GlassCard>
+    </div>
+);
 const SalesScreen = ({ theme, onNavigate }) => {
-    return <PageTitle title="Sales" theme={theme} onBack={() => onNavigate('home')} />;
+  const { MONTHLY_SALES_DATA, ORDER_DATA, SALES_VERTICALS_DATA } = Data;
+  const [monthlyView, setMonthlyView] = useState('table');
+  const [selectedOrder, setSelectedOrder] = useState(null);
+
+  const { totalBookings, totalSales } = useMemo(() => {
+    const bookings = Data.MONTHLY_SALES_DATA.reduce((acc, m) => acc + m.bookings, 0);
+    const sales    = Data.MONTHLY_SALES_DATA.reduce((acc, m) => acc + m.sales,   0);
+    return { totalBookings: bookings, totalSales: sales };
+  }, []);
+
+  const recentOrders = useMemo(() => {
+    return Data.ORDER_DATA
+      .filter(o => o.date && o.net)
+      .sort((a, b) => new Date(b.date) - new Date(a.date))
+      .slice(0, 9);
+  }, []);
+
+  const goal           = 7000000;
+  const percentToGoal  = useMemo(() => (totalBookings / goal) * 100, [totalBookings]);
+
+  const handleToggleView       = useCallback(() => setMonthlyView(v => v === 'chart' ? 'table' : 'chart'), []);
+  const handleShowOrderDetails = useCallback(order => setSelectedOrder(order), []);
+  const handleCloseModal       = useCallback(() => setSelectedOrder(null), []);
+  const handleCustomerRankNav  = useCallback(() => onNavigate('customer-rank'), [onNavigate]);
+  const handleCommissionsNav   = useCallback(() => onNavigate('commissions'),  [onNavigate]);
+  const handleRewardsNav       = useCallback(() => onNavigate('incentive-rewards'), [onNavigate]);
+
+  return (
+    <>
+      <PageTitle title="Sales Dashboard" theme={theme}>
+        <button
+          onClick={() => onNavigate('new-lead')}
+          className="p-2 rounded-full -mr-2 transition-transform hover:scale-110 active:scale-95"
+          style={{ backgroundColor: theme.colors.accent }}
+        >
+          <Plus className="w-5 h-5 text-white" />
+        </button>
+      </PageTitle>
+
+      <div className="px-4 space-y-4 pb-4">
+        <GlassCard theme={theme} className="p-4 hover:border-white/20 transition-all duration-300">
+          <p className="text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>
+            Progress to Goal
+          </p>
+          <p className="text-4xl font-bold my-2" style={{ color: theme.colors.accent }}>
+            {percentToGoal.toFixed(1)}%
+          </p>
+          <div className="relative w-full h-2.5 rounded-full" style={{ backgroundColor: theme.colors.subtle }}>
+            <div
+              className="h-2.5 rounded-full"
+              style={{ width: `${percentToGoal}%`, backgroundColor: theme.colors.accent }}
+            />
+          </div>
+        </GlassCard>
+
+        <GlassCard theme={theme} className="p-4 hover:border-white/20 transition-all duration-300">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>
+              Monthly Performance
+            </h3>
+            <button
+              onClick={handleToggleView}
+              className="p-1.5 rounded-md"
+              style={{ backgroundColor: theme.colors.subtle }}
+            >
+              {monthlyView === 'chart'
+                ? <List className="w-4 h-4" style={{ color: theme.colors.secondary }} />
+                : <BarChart2 className="w-4 h-4" style={{ color: theme.colors.secondary }} />}
+            </button>
+          </div>
+          {monthlyView === 'chart'
+            ? <MonthlyBarChart data={Data.MONTHLY_SALES_DATA} theme={theme} />
+            : <MonthlyTable
+                data={Data.MONTHLY_SALES_DATA}
+                theme={theme}
+                totalBookings={totalBookings}
+                totalSales={totalSales}
+              />}
+        </GlassCard>
+
+        <RecentPOsCard
+          orders={recentOrders}
+          theme={theme}
+          onOrderClick={handleShowOrderDetails}
+        />
+
+        <GlassCard theme={theme} className="p-4 hover:border-white/20 transition-all duration-300">
+          <h3 className="font-bold text-lg mb-4" style={{ color: theme.colors.textPrimary }}>
+            Verticals Breakdown
+          </h3>
+          <DonutChart data={Data.SALES_VERTICALS_DATA} theme={theme} />
+        </GlassCard>
+
+        <GlassCard theme={theme} className="p-1">
+          <button
+            onClick={handleCustomerRankNav}
+            className="w-full p-3 rounded-xl flex items-center justify-between"
+          >
+            <span className="text-md font-semibold" style={{ color: theme.colors.textPrimary }}>
+              View Customer Rank
+            </span>
+            <ArrowRight className="w-5 h-5" style={{ color: theme.colors.secondary }} />
+          </button>
+        </GlassCard>
+
+        <GlassCard theme={theme} className="p-1">
+          <button
+            onClick={handleCommissionsNav}
+            className="w-full p-3 rounded-xl flex items-center justify-between"
+          >
+            <span className="text-md font-semibold" style={{ color: theme.colors.textPrimary }}>
+              View Commissions
+            </span>
+            <ArrowRight className="w-5 h-5" style={{ color: theme.colors.secondary }} />
+          </button>
+        </GlassCard>
+
+        <GlassCard theme={theme} className="p-1">
+          <button
+            onClick={handleRewardsNav}
+            className="w-full p-3 rounded-xl flex items-center justify-between"
+          >
+            <span className="text-md font-semibold" style={{ color: theme.colors.textPrimary }}>
+              View Incentive Rewards
+            </span>
+            <ArrowRight className="w-5 h-5" style={{ color: theme.colors.secondary }} />
+          </button>
+        </GlassCard>
+      </div>
+
+      {selectedOrder && (
+        <OrderModal
+          order={selectedOrder}
+          onClose={handleCloseModal}
+          onShowDetails={() => {
+            handleCloseModal();
+            onNavigate('orders');
+          }}
+          theme={theme}
+        />
+      )}
+    </>
+  );
 };
-const OrdersScreen = ({ theme, onNavigate }) => {
-    return <PageTitle title="Orders" theme={theme} onBack={() => onNavigate('home')} />;
-};
+
+
+const OrdersScreen = ({ theme, onNavigate }) => (
+    <>
+        <PageTitle
+            title="Orders"
+            theme={theme}
+            onBack={() => onNavigate('home')}
+        />
+        <div className="p-4 space-y-4 overflow-y-auto">
+            {Data.ORDER_DATA.map(order => (
+                <GlassCard
+                    key={order.orderNumber}
+                    theme={theme}
+                    className="p-4"
+                >
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <div
+                                className="font-semibold text-lg"
+                                style={{ color: theme.colors.textPrimary }}
+                            >
+                                {order.company}
+                            </div>
+                            <div
+                                className="text-sm"
+                                style={{ color: theme.colors.textSecondary }}
+                            >
+                                PO #{order.po} • {new Date(order.date).toLocaleDateString()}
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <div
+                                className="font-bold"
+                                style={{ color: theme.colors.accent }}
+                            >
+                                {order.amount}
+                            </div>
+                            <div
+                                className="text-sm"
+                                style={{ color: theme.colors.textSecondary }}
+                            >
+                                Ship {order.shipDate || '—'}
+                            </div>
+                        </div>
+                    </div>
+                </GlassCard>
+            ))}
+        </div>
+    </>
+);
+
+
+
 const ProductsScreen = ({ theme, onNavigate }) => {
-    return <PageTitle title="Products" theme={theme} onBack={() => onNavigate('home')} />;
+    const [searchTerm, setSearchTerm] = useState('');
+    const [viewMode, setViewMode] = useState('grid');
+
+    const filteredCategories = useMemo(() => {
+        if (!searchTerm.trim()) return Data.PRODUCTS_CATEGORIES_DATA;
+
+        const lowerSearch = searchTerm.toLowerCase();
+        return Data.PRODUCTS_CATEGORIES_DATA.filter(category =>
+            category.name.toLowerCase().includes(lowerSearch)
+        );
+    }, [searchTerm]);
+
+    const handleCategoryClick = useCallback((category) => {
+        onNavigate(category.nav);
+    }, [onNavigate]);
+
+    const toggleViewMode = useCallback(() => {
+        setViewMode(prev => prev === 'grid' ? 'list' : 'grid');
+    }, []);
+
+    return (
+        <>
+            <PageTitle title="Products" theme={theme}>
+                <button
+                    onClick={toggleViewMode}
+                    className="p-2 rounded-lg transition-colors hover:bg-black/10 dark:hover:bg-white/10"
+                    style={{ backgroundColor: theme.colors.subtle }}
+                >
+                    {viewMode === 'grid' ?
+                        <List className="w-5 h-5" style={{ color: theme.colors.textSecondary }} /> :
+                        <BarChart2 className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
+                    }
+                </button>
+            </PageTitle>
+
+            <div className="px-4 pb-4">
+                <SearchInput
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Search products..."
+                    theme={theme}
+                    className="mb-4"
+                />
+
+                {filteredCategories.length === 0 ? (
+                    <GlassCard theme={theme} className="p-8 text-center">
+                        <p style={{ color: theme.colors.textSecondary }}>
+                            No products found matching "{searchTerm}"
+                        </p>
+                    </GlassCard>
+                ) : viewMode === 'grid' ? (
+                    <div className="space-y-4">
+                        {filteredCategories.map(category => (
+                            <GlassCard
+                                key={category.name}
+                                theme={theme}
+                                className="p-4 overflow-hidden cursor-pointer transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                                onClick={() => handleCategoryClick(category)}
+                            >
+                                <h2 className="text-2xl font-bold mb-2" style={{ color: theme.colors.textPrimary }}>
+                                    {category.name}
+                                </h2>
+                                <div className="flex space-x-2 -mb-2">
+                                    {category.images.map((img, index) => (
+                                        <img
+                                            key={index}
+                                            src={img}
+                                            alt={`${category.name} example ${index + 1}`}
+                                            className={`rounded-md object-cover transition-opacity ${category.images.length === 1 && category.name !== 'Swivels'
+                                                ? 'w-2/3 h-32'
+                                                : 'w-16 h-16'
+                                                }`}
+                                            loading="lazy"
+                                            onError={(e) => {
+                                                e.target.onerror = null;
+                                                e.target.src = 'https://placehold.co/100x100/EEE/333?text=Image+Error';
+                                            }}
+                                        />
+                                    ))}
+                                </div>
+                            </GlassCard>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="space-y-2">
+                        {filteredCategories.map(category => (
+                            <GlassCard
+                                key={category.name}
+                                theme={theme}
+                                className="p-3 cursor-pointer transform transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
+                                onClick={() => handleCategoryClick(category)}
+                            >
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center space-x-3">
+                                        <img
+                                            src={category.images[0]}
+                                            alt={category.name}
+                                            className="w-12 h-12 rounded-md object-cover"
+                                            loading="lazy"
+                                            onError={(e) => {
+                                                e.target.onerror = null;
+                                                e.target.src = 'https://placehold.co/100x100/EEE/333?text=Error';
+                                            }}
+                                        />
+                                        <h3 className="font-semibold text-lg" style={{ color: theme.colors.textPrimary }}>
+                                            {category.name}
+                                        </h3>
+                                    </div>
+                                    <ArrowRight className="w-5 h-5" style={{ color: theme.colors.secondary }} />
+                                </div>
+                            </GlassCard>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </>
+    );
 };
+
+const NewLeadScreen = ({
+    theme,
+    onSuccess,
+    designFirms,
+    setDesignFirms,
+    dealers,
+    setDealers,
+}) => {
+    const [newLead, setNewLead] = useState({
+        ...EMPTY_LEAD,
+        winProbability: 50,
+        jsiSpecServicesType: 'New Quote',
+        jsiRevisionQuoteNumber: '',
+        jsiPastProjectInfo: '',
+    });
+
+    const updateField = useCallback((field, value) => {
+        setNewLead(prev => ({ ...prev, [field]: value }));
+    }, []);
+
+    // --- PRODUCT HANDLERS ---
+    const addSeries = useCallback(series => {
+        setNewLead(prev => ({
+            ...prev,
+            products: [
+                ...prev.products,
+                { series, materials: [], glassDoors: false }
+            ]
+        }));
+    }, []);
+
+    const removeSeries = useCallback(idx => {
+        setNewLead(prev => ({
+            ...prev,
+            products: prev.products.filter((_, i) => i !== idx)
+        }));
+    }, []);
+
+    const toggleMaterial = useCallback((idx, mat) => {
+        setNewLead(prev => {
+            const prods = [...prev.products];
+            const mats = prods[idx].materials.includes(mat)
+                ? prods[idx].materials.filter(m => m !== mat)
+                : [...prods[idx].materials, mat];
+            prods[idx] = { ...prods[idx], materials: mats };
+            return { ...prev, products: prods };
+        });
+    }, []);
+
+    const toggleGlass = useCallback(idx => {
+        setNewLead(prev => {
+            const prods = [...prev.products];
+            prods[idx] = { ...prods[idx], glassDoors: !prods[idx].glassDoors };
+            return { ...prev, products: prods };
+        });
+    }, []);
+
+    // --- OTHER DERIVED DATA ---
+    const availableSeries = useMemo(
+        () => JSI_PRODUCT_SERIES.filter(s => !newLead.products.some(p => p.series === s)),
+        [newLead.products]
+    );
+
+    const DISCOUNT_LIST = useMemo(
+        () => ['Undecided Discount', ...DISCOUNT_OPTIONS.filter(d => d !== 'Undecided')],
+        []
+    );
+
+    const handleSubmit = e => {
+        e.preventDefault();
+        onSuccess(newLead);
+    };
+
+    return (
+        <form onSubmit={handleSubmit} className="flex flex-col h-full">
+            <PageTitle title="Create New Lead" theme={theme} />
+
+            <div className="flex-1 overflow-y-auto px-4 pb-4 pt-4 space-y-6 scrollbar-hide">
+                {/* Project Details */}
+                <FormSection title="Project Details" theme={theme}>
+                    <input
+                        required
+                        type="text"
+                        placeholder="Enter Project Name"
+                        value={newLead.project}
+                        onChange={e => updateField('project', e.target.value)}
+                        className="w-full px-4 py-3 border rounded-full focus:ring-2 text-base outline-none"
+                        style={{
+                            backgroundColor: theme.colors.subtle,
+                            borderColor: 'transparent',
+                            color: theme.colors.textPrimary,
+                            ringColor: theme.colors.accent,
+                        }}
+                    />
+                    <FancySelect
+                        required
+                        placeholder="Select Design Firm"
+                        options={designFirms}
+                        value={newLead.designFirm}
+                        onChange={e => updateField('designFirm', e.target.value)}
+                        theme={theme}
+                    />
+                    <FancySelect
+                        required
+                        placeholder="Select Dealer"
+                        options={dealers}
+                        value={newLead.dealer}
+                        onChange={e => updateField('dealer', e.target.value)}
+                        theme={theme}
+                    />
+                </FormSection>
+
+                {/* Summary */}
+                <FormSection title="Summary" theme={theme}>
+                    {/* your ProbabilitySlider here, unchanged */}
+                </FormSection>
+
+                {/* Status / Vertical / List / Timeframe */}
+                <FormSection title="Project Status" theme={theme}>
+                    <FancySelect
+                        required
+                        placeholder="Select Stage"
+                        options={STAGES}
+                        value={newLead.projectStatus}
+                        onChange={e => updateField('projectStatus', e.target.value)}
+                        theme={theme}
+                    />
+                </FormSection>
+                <FormSection title="Vertical" theme={theme}>
+                    <FancySelect
+                        required
+                        placeholder="Select Vertical"
+                        options={VERTICALS}
+                        value={newLead.vertical}
+                        onChange={e => updateField('vertical', e.target.value)}
+                        theme={theme}
+                    />
+                </FormSection>
+                <FormSection title="Estimated List" theme={theme}>
+                    <input
+                        required
+                        type="text"
+                        placeholder="Enter Estimated List"
+                        value={newLead.estimatedList}
+                        onChange={e => updateField('estimatedList', e.target.value)}
+                        className="w-full px-4 py-3 border rounded-full focus:ring-2 text-base outline-none"
+                        style={{
+                            backgroundColor: theme.colors.subtle,
+                            borderColor: 'transparent',
+                            color: theme.colors.textPrimary,
+                            ringColor: theme.colors.accent,
+                        }}
+                    />
+                </FormSection>
+                <FormSection title="PO Timeframe" theme={theme}>
+                    <FancySelect
+                        required
+                        placeholder="Select PO Timeframe"
+                        options={PO_TIMEFRAMES}
+                        value={newLead.poTimeframe}
+                        onChange={e => updateField('poTimeframe', e.target.value)}
+                        theme={theme}
+                    />
+                </FormSection>
+
+                {/* Competition Present */}
+                <FormSection title="Competition?" theme={theme}>
+                    <FancySelect
+                        options={['Yes', 'No']}
+                        placeholder="Competition Present?"
+                        value={newLead.competitionPresent ? 'Yes' : 'No'}
+                        onChange={e => {
+                            const present = e.target.value === 'Yes';
+                            updateField('competitionPresent', present);
+                            if (!present) updateField('competitors', []);
+                        }}
+                        theme={theme}
+                    />
+                </FormSection>
+
+                {/* Products Section */}
+                <FormSection title="Competition & Products" theme={theme}>
+                    <div className="space-y-4">
+                        {newLead.products.map((p, idx) => (
+                            <div
+                                key={idx}
+                                className="bg-white rounded-lg p-4 border border-gray-200 space-y-2"
+                                style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.border }}
+                            >
+                                <div className="flex justify-between items-center">
+                                    <span className="font-semibold">{p.series}</span>
+                                    <button
+                                        type="button"
+                                        onClick={() => removeSeries(idx)}
+                                        className="p-1 rounded-full hover:bg-red-100"
+                                    >
+                                        <X className="w-4 h-4" style={{ color: theme.colors.error || '#E53E3E' }} />
+                                    </button>
+                                </div>
+
+                                <div className="flex flex-wrap gap-2">
+                                    {VISION_MATERIALS.map(mat => (
+                                        <button
+                                            key={mat}
+                                            type="button"
+                                            onClick={() => toggleMaterial(idx, mat)}
+                                            className={`px-3 py-1 text-xs rounded-full ${p.materials.includes(mat)
+                                                    ? 'bg-blue-600 text-white'
+                                                    : 'bg-gray-200 text-gray-700'
+                                                }`}
+                                        >
+                                            {mat}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <label className="flex items-center space-x-2 text-sm">
+                                    <input
+                                        type="checkbox"
+                                        checked={p.glassDoors}
+                                        onChange={() => toggleGlass(idx)}
+                                        className="form-checkbox"
+                                    />
+                                    <span>Glass Doors?</span>
+                                </label>
+                            </div>
+                        ))}
+
+                        {/* Add New Series */}
+                        {availableSeries.length > 0 && (
+                            <FancySelect
+                                placeholder="Add a Product Series..."
+                                options={availableSeries}
+                                value={''}
+                                onChange={e => addSeries(e.target.value)}
+                                theme={theme}
+                            />
+                        )}
+                    </div>
+                </FormSection>
+
+                {/* Discount */}
+                <FormSection title="Discount" theme={theme}>
+                    <FancySelect
+                        required
+                        placeholder="Select Discount"
+                        options={DISCOUNT_LIST}
+                        value={newLead.discount}
+                        onChange={e => updateField('discount', e.target.value)}
+                        theme={theme}
+                    />
+                </FormSection>
+
+                {/* Notes */}
+                <FormSection title="Additional Notes" theme={theme}>
+                    <textarea
+                        rows={3}
+                        placeholder="Enter details…"
+                        value={newLead.notes}
+                        onChange={e => updateField('notes', e.target.value)}
+                        className="w-full p-3 rounded-lg outline-none"
+                        style={{
+                            backgroundColor: theme.colors.subtle,
+                            color: theme.colors.textPrimary
+                        }}
+                    />
+                </FormSection>
+            </div>
+
+            <button
+                type="submit"
+                className="w-full py-3 text-white font-semibold rounded-b-lg"
+                style={{ backgroundColor: theme.colors.accent }}
+            >
+                Submit Lead
+            </button>
+        </form>
+    );
+};
+
+
+
+
 const ResourcesScreen = ({ theme, onNavigate }) => {
-    return <PageTitle title="Resources" theme={theme} onBack={() => onNavigate('home')} />;
+    return (
+        <>
+            <PageTitle title="Resources" theme={theme} />
+            <div className="px-4 space-y-6 pb-4">
+                {Data.RESOURCES_DATA.map(category => (
+                    <div key={category.category}>
+                        <h2 className="text-xl font-bold mb-2 px-1" style={{ color: theme.colors.textPrimary }}>{category.category}</h2>
+                        <div className="space-y-3">
+                            {category.items.map(item => (
+                                <GlassCard key={item.label} theme={theme} className="p-1">
+                                    <button onClick={() => onNavigate(item.nav)} className="w-full p-3 rounded-xl flex items-center justify-between">
+                                        <span className="text-md font-semibold tracking-tight" style={{ color: theme.colors.textPrimary }}>{item.label}</span>
+                                        <ArrowRight className="w-5 h-5" style={{ color: theme.colors.secondary }} />
+                                    </button>
+                                </GlassCard>
+                            ))}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </>
+    );
 };
-const ProjectsScreen = ({ theme, onNavigate }) => {
-    return <PageTitle title="Projects" theme={theme} onBack={() => onNavigate('home')} />;
+
+const ProjectsScreen = ({ onNavigate, theme, opportunities }) => {
+    const [projectsTab, setProjectsTab] = useState('pipeline');
+    const [selectedPipelineStage, setSelectedPipelineStage] = useState('Discovery');
+
+    const filteredOpportunities = useMemo(() => opportunities.filter(opp => opp.stage === selectedPipelineStage), [selectedPipelineStage, opportunities]);
+
+    return (
+        <>
+            <PageTitle title="Projects" theme={theme}>
+                <button onClick={() => onNavigate('new-lead')} className="p-2 rounded-full -mr-2" style={{ backgroundColor: theme.colors.accent }}>
+                    <Plus className="w-5 h-5 text-white" />
+                </button>
+            </PageTitle>
+
+            {/* --- UPDATED TOGGLE BUTTON --- */}
+            <div className="px-4">
+                <GlassCard theme={theme} className="p-1 flex relative">
+                    {/* Sliding Highlight Element */}
+                    <div
+                        className="absolute top-1 bottom-1 w-[calc(50%-0.25rem)] h-auto rounded-full transition-all duration-300 ease-in-out"
+                        style={{
+                            backgroundColor: theme.colors.primary,
+                            transform: projectsTab === 'pipeline' ? 'translateX(0.25rem)' : 'translateX(calc(100% + 0.25rem))'
+                        }}
+                    />
+
+                    {/* Buttons are now transparent and sit on top of the highlight */}
+                    <button
+                        onClick={() => setProjectsTab('pipeline')}
+                        className="flex-1 py-2 text-sm font-semibold rounded-full transition-colors duration-300 relative z-10"
+                        style={{ color: projectsTab === 'pipeline' ? theme.colors.surface : theme.colors.textPrimary }}
+                    >
+                        Pipeline
+                    </button>
+                    <button
+                        onClick={() => setProjectsTab('my-projects')}
+                        className="flex-1 py-2 text-sm font-semibold rounded-full transition-colors duration-300 relative z-10"
+                        style={{ color: projectsTab === 'my-projects' ? theme.colors.surface : theme.colors.textPrimary }}
+                    >
+                        My Projects
+                    </button>
+                </GlassCard>
+            </div>
+
+            {projectsTab === 'pipeline' ? (
+                <>
+                    <div className="flex space-x-2 overflow-x-auto p-4 scrollbar-hide">
+                        {STAGES.map(stage => (
+                            <button
+                                key={stage}
+                                onClick={() => setSelectedPipelineStage(stage)}
+                                className="px-4 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition-colors"
+                                style={{
+                                    backgroundColor: selectedPipelineStage === stage ? theme.colors.primary : 'transparent',
+                                    color: selectedPipelineStage === stage ? theme.colors.surface : theme.colors.textSecondary
+                                }}
+                            >
+                                {stage}
+                            </button>
+                        ))}
+                    </div>
+                    <div className="px-4 space-y-4 pb-4">
+                        {filteredOpportunities.map(opp => (
+                            <GlassCard key={opp.id} theme={theme} className="overflow-hidden">
+                                <div className="p-4">
+                                    <div className="flex justify-between items-start">
+                                        <h3 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>{opp.name}</h3>
+                                        <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${STAGE_COLORS[opp.stage]}`}>{opp.stage}</span>
+                                    </div>
+                                    <p className="text-sm" style={{ color: theme.colors.textSecondary }}>{opp.company}</p>
+                                    <p className="font-semibold text-2xl my-2" style={{ color: theme.colors.textPrimary }}>{opp.value}</p>
+                                </div>
+                            </GlassCard>
+                        ))}
+                    </div>
+                </>
+            ) : (
+                <div className="px-4 pt-4 pb-4 grid grid-cols-2 gap-4">
+                    {Data.MY_PROJECTS_DATA.map(project => (
+                        <GlassCard key={project.id} theme={theme} className="p-2 space-y-2 cursor-pointer">
+                            <img src={project.image} alt={project.name} className="w-full h-24 object-cover rounded-lg" onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/400x300/EEE/333?text=Error'; }} />
+                            <div>
+                                <p className="font-bold text-sm" style={{ color: theme.colors.textPrimary }}>{project.name}</p>
+                                <p className="text-xs" style={{ color: theme.colors.textSecondary }}>{project.location}</p>
+                            </div>
+                        </GlassCard>
+                    ))}
+                </div>
+            )}
+        </>
+    );
 };
+
 const CommunityScreen = ({ theme, onNavigate }) => {
-    return <PageTitle title="Community" theme={theme} onBack={() => onNavigate('home')} />;
+    const [tab, setTab] = useState('feed');
+    const [modalOpen, setModal] = useState(false);
+    const [modalType, setType] = useState(null);
+
+    const [posts, setPosts] = useState([
+        {
+            id: 1,
+            user: { name: 'Natalie Parker', avatar: '/avatars/natalie.png' },
+            timeAgo: 'just now',
+            text: 'Great install in Chicago!',
+            image: 'https://picsum.photos/seed/chicago/800/500',
+            likes: 3,
+            comments: [],
+        },
+    ]);
+
+    const [wins, setWins] = useState([
+        {
+            id: 1,
+            user: { name: 'Laura Chen', avatar: '/avatars/laura.png' },
+            timeAgo: 'yesterday',
+            title: 'Boston HQ install – success! 🎉',
+            images: [
+                'https://picsum.photos/seed/boston1/800/500',
+                'https://picsum.photos/seed/boston2/800/500',
+                'https://picsum.photos/seed/boston3/800/500',
+            ],
+        },
+    ]);
+
+    const [polls, setPolls] = useState([
+        {
+            id: 1,
+            user: { name: 'Doug Shapiro', avatar: '/avatars/doug.png' },
+            timeAgo: '1 d',
+            question: 'Which Vision base finish do you spec the most?',
+            options: [
+                { id: 'carbon', text: 'Carbon', votes: 8 },
+                { id: 'oak', text: 'Natural Oak', votes: 5 },
+                { id: 'white', text: 'Designer White', votes: 12 },
+            ],
+        },
+    ]);
+
+    const addItem = (type, obj) => {
+        if (type === 'post') setPosts((arr) => [obj, ...arr]);
+        if (type === 'win') setWins((arr) => [obj, ...arr]);
+        if (type === 'poll') setPolls((arr) => [obj, ...arr]);
+    };
+
+    return (
+        <div className="h-full flex flex-col" style={{ backgroundColor: theme.colors.background }}>
+            <div className="flex items-center justify-between px-4">
+                <PageTitle title="Community" theme={theme} />
+                <button
+                    onClick={() => { setType(null); setModal(true); }}
+                    className="p-2 rounded-full"
+                    style={{ backgroundColor: theme.colors.accent, color: '#fff' }}
+                >
+                    <Plus className="w-5 h-5" />
+                </button>
+            </div>
+
+            <div className="grid grid-cols-3 border-b border-[rgba(0,0,0,0.06)] mx-4 mt-2">
+                {['feed', 'wins', 'polls'].map((t) => (
+                    <button
+                        key={t}
+                        onClick={() => setTab(t)}
+                        className={`py-2 w-full text-center text-sm font-medium ${tab === t ? 'border-b-2' : ''}`}
+                        style={{
+                            color: tab === t ? theme.colors.accent : theme.colors.textSecondary,
+                            borderColor: tab === t ? theme.colors.accent : 'transparent',
+                        }}
+                    >
+                        {t[0].toUpperCase() + t.slice(1)}
+                    </button>
+                ))}
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-4 pb-6 pt-6 space-y-6 max-w-md mx-auto">
+                {tab === 'feed' && posts.map((p) => <PostCard key={p.id} post={p} theme={theme} />)}
+                {tab === 'wins' && wins.map((w) => <WinsCard key={w.id} win={w} theme={theme} />)}
+                {tab === 'polls' && polls.map((p) => <PollCard key={p.id} poll={p} theme={theme} />)}
+            </div>
+
+            {modalOpen && (
+                <CreateContentModal
+                    close={() => setModal(false)}
+                    pickType={(t) => setType(t)}
+                    typeChosen={modalType}
+                    onAdd={addItem}
+                    theme={theme}
+                />
+            )}
+        </div>
+    );
 };
-const SamplesScreen = ({ theme, onNavigate }) => {
-    return <PageTitle title="Samples" theme={theme} onBack={() => onNavigate('home')} />;
+
+const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSettings }) => {
+    const [selectedCategory, setSelectedCategory] = useState('tfl');
+    const [setQuantity, setSetQuantity] = useState(1);
+
+    const handleAddSetToCart = useCallback(() => {
+        const categoryName = SAMPLE_CATEGORIES.find(c => c.id === selectedCategory)?.name || 'Unknown';
+        const setItem = {
+            id: `set-${selectedCategory}`,
+            name: `Complete ${categoryName} Set`,
+        };
+        onUpdateCart(setItem, setQuantity);
+        setSetQuantity(1);
+    }, [selectedCategory, setQuantity, onUpdateCart]);
+
+    const handleOrderFullSet = useCallback(() => {
+        const fullSetItem = {
+            id: 'full-jsi-set',
+            name: 'Full JSI Sample Set'
+        };
+        onUpdateCart(fullSetItem, 1);
+    }, [onUpdateCart]);
+
+    const totalCartItems = useMemo(() => Object.values(cart).reduce((sum, qty) => sum + qty, 0), [cart]);
+    const filteredProducts = useMemo(() => SAMPLE_PRODUCTS.filter(p => p.category === selectedCategory), [selectedCategory]);
+
+    return (
+        <>
+            <PageTitle title="Samples" theme={theme}>
+                <div className="flex items-center space-x-2">
+                    <button onClick={handleOrderFullSet} className="text-xs font-semibold px-3 py-1.5 rounded-lg" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }}>
+                        Order Full JSI Set
+                    </button>
+                    <div className="relative">
+                        <button onClick={() => onNavigate('samples/cart')} className="p-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10">
+                            <ShoppingCart className="w-7 h-7" style={{ color: theme.colors.textPrimary }} />
+                        </button>
+                        {totalCartItems > 0 && <div className="absolute -top-1 -right-2 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: theme.colors.accent }}>{totalCartItems}</div>}
+                    </div>
+                </div>
+            </PageTitle>
+
+            <div className="px-4 space-y-4 pb-4">
+                <div className="overflow-hidden rounded-xl" style={{ backgroundColor: theme.colors.surface }}>
+                    <div className="flex space-x-2 p-1 overflow-x-auto scrollbar-hide">
+                        {SAMPLE_CATEGORIES.map(cat => (
+                            <button key={cat.id} onClick={() => setSelectedCategory(cat.id)} className={`flex-shrink-0 px-3 py-2 text-sm font-semibold rounded-lg transition-colors w-28`}>
+                                <span className="p-2 rounded-md" style={{
+                                    backgroundColor: selectedCategory === cat.id ? theme.colors.subtle : 'transparent',
+                                    color: selectedCategory === cat.id ? theme.colors.accent : theme.colors.textSecondary
+                                }}>
+                                    {cat.name}
+                                </span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                <GlassCard theme={theme} className="p-3 flex items-center justify-between">
+                    <span className="font-bold" style={{ color: theme.colors.textPrimary }}>
+                        {`Complete ${SAMPLE_CATEGORIES.find(c => c.id === selectedCategory)?.name || ''} Set`}
+                    </span>
+                    <div className="flex items-center space-x-2">
+                        <button onClick={() => setSetQuantity(q => Math.max(1, q - 1))} className="w-7 h-7 flex items-center justify-center rounded-md" style={{ backgroundColor: theme.colors.subtle }}><Minus className="w-4 h-4" style={{ color: theme.colors.textSecondary }} /></button>
+                        <span className="font-bold text-lg w-8 text-center" style={{ color: theme.colors.textPrimary }}>{setQuantity}</span>
+                        <button onClick={() => setSetQuantity(q => q + 1)} className="w-7 h-7 flex items-center justify-center rounded-md" style={{ backgroundColor: theme.colors.subtle }}><Plus className="w-4 h-4" style={{ color: theme.colors.textSecondary }} /></button>
+                        <button onClick={handleAddSetToCart} className="font-bold py-1.5 px-4 rounded-md text-white" style={{ backgroundColor: theme.colors.accent }}>Add</button>
+                    </div>
+                </GlassCard>
+            </div>
+
+            <div className="px-4 grid grid-cols-2 gap-4 pb-4">
+                {filteredProducts.map(product => {
+                    const quantity = cart[product.id] || 0;
+                    return (<div key={product.id} className="text-center">
+                        <GlassCard theme={theme} className="relative aspect-square w-full rounded-2xl p-1" style={{ borderColor: quantity > 0 ? theme.colors.accent : 'transparent', borderWidth: '2px' }}>
+                            <div className="w-full h-full rounded-xl" style={{ backgroundColor: product.color }}></div>
+                            {quantity === 0 ? (
+                                <button onClick={() => onUpdateCart(product, 1)} className="absolute inset-0"></button>
+                            ) : (
+                                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-24">
+                                    <GlassCard theme={theme} className="p-1 flex justify-between items-center">
+                                        <button onClick={() => onUpdateCart(product, -1)} className="w-7 h-7 flex items-center justify-center rounded-md" style={{ backgroundColor: theme.colors.subtle }}><Minus className="w-4 h-4" style={{ color: theme.colors.textSecondary }} /></button>
+                                        <span className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>{quantity}</span>
+                                        <button onClick={() => onUpdateCart(product, 1)} className="w-7 h-7 flex items-center justify-center rounded-md" style={{ backgroundColor: theme.colors.subtle }}><Plus className="w-4 h-4" style={{ color: theme.colors.textSecondary }} /></button>
+                                    </GlassCard>
+                                </div>
+                            )}
+                        </GlassCard>
+                        <p className="mt-2 font-semibold text-sm" style={{ color: theme.colors.textPrimary }}>{product.name}</p>
+                    </div>)
+                })}
+            </div>
+        </>
+    );
 };
-const ReplacementsScreen = ({ theme, onNavigate }) => {
-    return <PageTitle title="Replacements" theme={theme} onBack={() => onNavigate('home')} />;
+
+const ReplacementsScreen = ({ theme, setSuccessMessage, onNavigate, showAlert }) => {
+    const [formData, setFormData] = useState(null);
+    const [attachments, setAttachments] = useState([]);
+    const [isScanning, setIsScanning] = useState(false);
+    const fileInputRef = useRef(null);
+
+    const isDarkMode = theme.colors.background === '#1E1E1E';
+
+    const inputBg = isDarkMode ? theme.colors.surface : theme.colors.subtle;
+    const inputBorder = theme.colors.border;
+    const btnBg = isDarkMode ? theme.colors.textPrimary : theme.colors.accent;
+    const btnColor = isDarkMode ? theme.colors.background : '#FFF';
+
+    const handleScan = () => {
+        setIsScanning(true);
+        setTimeout(() => {
+            setFormData({ so: 'SO-450080', lineItem: '001', notes: '' });
+            setIsScanning(false);
+        }, 1500);
+    };
+
+    const handleEnterManually = () => setFormData({ so: '', lineItem: '', notes: '' });
+    const handleFormChange = e => setFormData(p => ({ ...p, [e.target.name]: e.target.value }));
+    const handleFileChange = e => e.target.files && setAttachments(p => [...p, ...Array.from(e.target.files)]);
+    const removeAttachment = name => setAttachments(p => p.filter(f => f.name !== name));
+    const handleSubmit = () => {
+        setSuccessMessage("Replacement Request Submitted!");
+        setTimeout(() => {
+            setSuccessMessage("");
+            onNavigate('home');
+        }, 1200);
+    };
+
+    return (
+        <>
+            <PageTitle title="Request Replacement" theme={theme} />
+            <div className="px-4 pb-4">
+                <GlassCard
+                    theme={theme}
+                    className="p-4"
+                    style={{ backgroundColor: theme.colors.card }}
+                >
+                    {!formData ? (
+                        <div className="text-center space-y-4">
+                            <button
+                                onClick={handleScan}
+                                disabled={isScanning}
+                                className="w-full flex flex-col items-center justify-center p-8 rounded-lg border-2 border-dashed hover:bg-white/5 transition-colors"
+                                style={{ borderColor: theme.colors.accent, color: theme.colors.accent }}
+                            >
+                                <Camera className={`w-12 h-12 mb-2 ${isScanning ? 'animate-pulse' : ''}`} />
+                                <span className="font-semibold">
+                                    {isScanning ? 'Scanning...' : 'Scan QR Code'}
+                                </span>
+                            </button>
+                            <div className="flex items-center my-4">
+                                <div className="flex-grow border-t" style={{ borderColor: theme.colors.subtle }} />
+                                <span className="mx-4 text-xs uppercase" style={{ color: theme.colors.textSecondary }}>
+                                    Or
+                                </span>
+                                <div className="flex-grow border-t" style={{ borderColor: theme.colors.subtle }} />
+                            </div>
+                            <button
+                                onClick={handleEnterManually}
+                                className="font-semibold py-2 px-4 hover:underline transition-colors"
+                                style={{ color: theme.colors.accent }}
+                            >
+                                Enter Details Manually
+                            </button>
+                        </div>
+                    ) : (
+                        <>
+                            <FormInput
+                                label="Sales Order"
+                                name="so"
+                                value={formData.so}
+                                onChange={handleFormChange}
+                                theme={theme}
+                                style={{ backgroundColor: inputBg, borderColor: inputBorder, color: theme.colors.textPrimary }}
+                            />
+                            <FormInput
+                                label="Line Item"
+                                name="lineItem"
+                                value={formData.lineItem}
+                                onChange={handleFormChange}
+                                theme={theme}
+                                style={{ backgroundColor: inputBg, borderColor: inputBorder, color: theme.colors.textPrimary }}
+                            />
+                            <FormInput
+                                type="textarea"
+                                label="Notes"
+                                name="notes"
+                                value={formData.notes}
+                                onChange={handleFormChange}
+                                theme={theme}
+                                style={{ backgroundColor: inputBg, borderColor: inputBorder, color: theme.colors.textPrimary }}
+                            />
+
+                            {attachments.map(file => (
+                                <div key={file.name} className="flex items-center space-x-2 mt-3">
+                                    <span className="text-sm" style={{ color: theme.colors.textPrimary }}>
+                                        {file.name}
+                                    </span>
+                                    <button onClick={() => removeAttachment(file.name)}>
+                                        <X className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
+                                    </button>
+                                </div>
+                            ))}
+
+                            <label className="block mt-6">
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    multiple
+                                    hidden
+                                    onChange={handleFileChange}
+                                />
+                                <span
+                                    className="inline-flex items-center space-x-2 px-4 py-2 rounded-lg cursor-pointer"
+                                    style={{ backgroundColor: theme.colors.subtle }}
+                                >
+                                    <Image className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
+                                    <span>Add Attachment</span>
+                                </span>
+                            </label>
+
+                            <button
+                                onClick={handleSubmit}
+                                className="mt-8 w-full py-3 rounded-full font-medium transition-colors"
+                                style={{ backgroundColor: btnBg, color: btnColor }}
+                            >
+                                Submit Request
+                            </button>
+                        </>
+                    )}
+                </GlassCard>
+            </div>
+        </>
+    );
 };
-const FeedbackScreen = ({ theme, onNavigate }) => {
-    return <PageTitle title="Feedback" theme={theme} onBack={() => onNavigate('home')} />;
+
+const SettingsScreen = ({ theme, onSave, userSettings, setUserSettings }) => {
+    const [localSettings, setLocalSettings] = useState(userSettings);
+
+    const handleChange = (field, value) => {
+        setLocalSettings(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        setUserSettings(localSettings);
+        onSave();
+    };
+
+    return (
+        <form onSubmit={handleSubmit}>
+            <PageTitle title="Settings" theme={theme} />
+            <div className="px-4 pb-4 space-y-6">
+                <FormSection title="Personal Information" theme={theme}>
+                    <FormInput label="First Name" value={localSettings.firstName} onChange={(e) => handleChange('firstName', e.target.value)} theme={theme} />
+                    <FormInput label="Last Name" value={localSettings.lastName} onChange={(e) => handleChange('lastName', e.target.value)} theme={theme} />
+                    <FormInput type="email" label="Email" value={localSettings.email} onChange={(e) => handleChange('email', e.target.value)} theme={theme} />
+                </FormSection>
+                <FormSection title="Preferences" theme={theme}>
+                    <FormInput type="textarea" label="Home Address" value={localSettings.homeAddress} onChange={(e) => handleChange('homeAddress', e.target.value)} theme={theme} />
+                    <FormInput type="select" label="T-Shirt Size" value={localSettings.tShirtSize} onChange={(e) => handleChange('tShirtSize', e.target.value)} options={['S', 'M', 'L', 'XL', 'XXL']} theme={theme} />
+                </FormSection>
+                <div className="pt-4 pb-4">
+                    <button type="submit" className="w-full text-white font-bold py-3 px-6 rounded-lg transition-colors" style={{ backgroundColor: theme.colors.accent }}>Save Changes</button>
+                </div>
+            </div>
+        </form>
+    )
+}
+
+const MembersScreen = ({ theme, members, setMembers, currentUserId }) => {
+    const [expandedUserId, setExpandedUserId] = useState(null);
+    const [showAddUserModal, setShowAddUserModal] = useState(false);
+    const [newUser, setNewUser] = useState(EMPTY_USER);
+    const [userToRemove, setUserToRemove] = useState(null);
+
+    const admins = useMemo(() => members.filter(m => m.role === 'Admin'), [members]);
+    const users = useMemo(() => members.filter(m => m.role === 'User'), [members]);
+
+    const orderedPermissionLabels = useMemo(() => ({
+        salesData: "Sales Data",
+        customerRanking: "Customer Ranking",
+        projects: "Projects",
+        commissions: "Commissions",
+        dealerRewards: "Dealer Rewards",
+        submittingReplacements: "Submitting Replacements"
+    }), []);
+
+    const handleToggleExpand = useCallback((userId) => {
+        setExpandedUserId(prev => (prev === userId ? null : userId));
+    }, []);
+
+    const handleUpdateUser = useCallback((userId, field, value) => {
+        setMembers(prev => prev.map(m => m.id === userId ? { ...m, [field]: value } : m));
+    }, [setMembers]);
+
+    const handleUpdateRole = useCallback((userId, newRole) => {
+        setMembers(prev => prev.map(m => (m.id === userId ? { ...m, role: newRole } : m)));
+        setExpandedUserId(null);
+    }, [setMembers]);
+
+    const handleConfirmRemove = useCallback((user) => {
+        setUserToRemove(user);
+    }, []);
+
+    const executeRemoveUser = useCallback(() => {
+        if (userToRemove) {
+            setMembers(prev => prev.filter(m => m.id !== userToRemove.id));
+            setUserToRemove(null);
+            setExpandedUserId(null);
+        }
+    }, [userToRemove, setMembers]);
+
+    const handleTogglePermission = useCallback((e, userId, permissionKey) => {
+        e.stopPropagation();
+        setMembers(prevMembers =>
+            prevMembers.map(member => {
+                if (member.id === userId) {
+                    const newPermissions = { ...member.permissions, [permissionKey]: !member.permissions[permissionKey] };
+                    if (permissionKey === 'salesData' && !newPermissions.salesData) {
+                        newPermissions.commissions = false;
+                        newPermissions.dealerRewards = false;
+                        newPermissions.customerRanking = false;
+                    }
+                    return { ...member, permissions: newPermissions };
+                }
+                return member;
+            })
+        );
+    }, [setMembers]);
+
+    const handleAddUser = useCallback((e) => {
+        e.preventDefault();
+        if (newUser.firstName && newUser.lastName && newUser.email) {
+            const newId = members.length > 0 ? Math.max(...members.map(m => m.id)) + 1 : 1;
+            setMembers(prev => [...prev, { ...newUser, id: newId }]);
+            setShowAddUserModal(false);
+            setNewUser(EMPTY_USER);
+        } else {
+            console.error("Please fill out all fields.");
+        }
+    }, [newUser, members, setMembers]);
+
+    const handleNewUserChange = useCallback((field, value) => {
+        let newPermissions = { ...newUser.permissions };
+        if (field === 'title') {
+            if (value === 'Sales') {
+                newPermissions = { salesData: true, commissions: false, projects: true, customerRanking: true, dealerRewards: true, submittingReplacements: true };
+            } else if (value === 'Designer') {
+                newPermissions = { salesData: false, commissions: false, projects: true, customerRanking: false, dealerRewards: false, submittingReplacements: true };
+            }
+        }
+        setNewUser(prev => ({ ...prev, [field]: value, permissions: newPermissions }));
+    }, [newUser]);
+
+    const MemberCard = React.memo(({ user, theme, expanded, onToggleExpand, onUpdateUser, onUpdateRole, onConfirmRemove, onTogglePermission, orderedPermissionLabels, USER_TITLES, isCurrentUser }) => (
+        <GlassCard theme={theme} className="p-0 overflow-hidden transition-all">
+            <div className="p-4 cursor-pointer" onClick={() => onToggleExpand(user.id)}>
+                <div className="flex justify-between items-center">
+                    <div className="flex items-center space-x-2">
+                        <p className="font-bold" style={{ color: theme.colors.textPrimary }}>{user.firstName} {user.lastName}</p>
+                        {isCurrentUser && <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: theme.colors.accent, color: 'white' }}>You</span>}
+                    </div>
+                    <ChevronDown className={`w-5 h-5 transition-transform ${expanded ? 'rotate-180' : ''}`} style={{ color: theme.colors.secondary }} />
+                </div>
+                {user.role !== 'Admin' && <p className="text-sm mt-1" style={{ color: theme.colors.textSecondary }}>{user.title}</p>}
+            </div>
+            {expanded && (
+                <div className="bg-black/5 dark:bg-white/5">
+                    {user.role === 'User' && (
+                        <div className="p-4 border-t space-y-4" style={{ borderColor: theme.colors.subtle }}>
+                            <FormInput
+                                type="select"
+                                value={user.title}
+                                onChange={(e) => onUpdateUser(user.id, 'title', e.target.value)}
+                                options={USER_TITLES.map(t => ({ value: t, label: t }))}
+                                theme={theme}
+                                placeholder="User Title"
+                            />
+                            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                                {Object.entries(orderedPermissionLabels).map(([key, label]) => {
+                                    const isDisabled = !user.permissions.salesData && ['commissions', 'dealerRewards', 'customerRanking'].includes(key);
+                                    return (
+                                        <PermissionToggle
+                                            key={key}
+                                            label={label}
+                                            isEnabled={user.permissions[key]}
+                                            disabled={isDisabled}
+                                            onToggle={(e) => onTogglePermission(e, user.id, key)}
+                                            theme={theme}
+                                        />
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+                    <div className="p-4 border-t space-y-3" style={{ borderColor: theme.colors.subtle }}>
+                        <button onClick={() => onUpdateRole(user.id, user.role === 'Admin' ? 'User' : 'Admin')} className="w-full text-center p-2.5 rounded-lg font-semibold" style={{ backgroundColor: theme.colors.accent, color: 'white' }}>
+                            {user.role === 'Admin' ? 'Make User' : 'Make Admin'}
+                        </button>
+                        <button onClick={() => onConfirmRemove(user)} className="w-full text-center p-2.5 rounded-lg font-semibold bg-red-500/10 text-red-500">
+                            Remove User
+                        </button>
+                    </div>
+                </div>
+            )}
+        </GlassCard>
+    ));
+
+    return (
+        <>
+            <PageTitle title="Members" theme={theme}>
+                <button onClick={() => setShowAddUserModal(true)} className="p-2 rounded-full" style={{ backgroundColor: theme.colors.accent }}>
+                    <Plus className="w-5 h-5 text-white" />
+                </button>
+            </PageTitle>
+            <div className="px-4 space-y-6 pb-4">
+                <div>
+                    <h3 className="font-bold text-xl mb-3 px-1" style={{ color: theme.colors.textPrimary }}>Administrators</h3>
+                    <div className="space-y-3">
+                        {admins.map(member => (
+                            <MemberCard key={member.id} user={member} theme={theme} expanded={expandedUserId === member.id} onToggleExpand={handleToggleExpand} onUpdateUser={handleUpdateUser} onUpdateRole={handleUpdateRole} onConfirmRemove={handleConfirmRemove} onTogglePermission={handleTogglePermission} orderedPermissionLabels={orderedPermissionLabels} USER_TITLES={USER_TITLES} isCurrentUser={member.id === currentUserId} />
+                        ))}
+                    </div>
+                </div>
+                <div>
+                    <h3 className="font-bold text-xl mb-3 px-1" style={{ color: theme.colors.textPrimary }}>Users</h3>
+                    <div className="space-y-3">
+                        {users.map(member => (
+                            <MemberCard key={member.id} user={member} theme={theme} expanded={expandedUserId === member.id} onToggleExpand={handleToggleExpand} onUpdateUser={handleUpdateUser} onUpdateRole={handleUpdateRole} onConfirmRemove={handleConfirmRemove} onTogglePermission={handleTogglePermission} orderedPermissionLabels={orderedPermissionLabels} USER_TITLES={USER_TITLES} isCurrentUser={member.id === currentUserId} />
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            <Modal show={showAddUserModal} onClose={() => setShowAddUserModal(false)} title="Add New User" theme={theme}>
+                <form onSubmit={handleAddUser} className="space-y-4">
+                    <FormInput label="First Name" value={newUser.firstName} onChange={e => handleNewUserChange('firstName', e.target.value)} placeholder="First Name" theme={theme} />
+                    <FormInput label="Last Name" value={newUser.lastName} onChange={e => handleNewUserChange('lastName', e.target.value)} placeholder="Last Name" theme={theme} />
+                    <FormInput type="email" label="Email" value={newUser.email} onChange={e => handleNewUserChange('email', e.target.value)} placeholder="Email" theme={theme} />
+                    <FormInput type="select" label="Title" options={USER_TITLES.map(t => ({ value: t, label: t }))} value={newUser.title} onChange={e => handleNewUserChange('title', e.target.value)} theme={theme} placeholder="Select a Title" />
+                    <div className="pt-2">
+                        <button type="submit" className="w-full text-white font-bold py-3 px-6 rounded-lg transition-colors" style={{ backgroundColor: theme.colors.accent }}>Create User</button>
+                    </div>
+                </form>
+            </Modal>
+            <Modal show={!!userToRemove} onClose={() => setUserToRemove(null)} title="Remove User" theme={theme}>
+                <p style={{ color: theme.colors.textPrimary }}>Are you sure you want to remove <span className="font-bold">{userToRemove?.firstName} {userToRemove?.lastName}</span>?</p>
+                <p className="text-sm" style={{ color: theme.colors.textSecondary }}>This action is permanent and will delete the user from the MyJSI app.</p>
+                <div className="flex justify-end space-x-3 pt-4">
+                    <button onClick={() => setUserToRemove(null)} className="font-bold py-2 px-5 rounded-lg" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }}>Cancel</button>
+                    <button onClick={executeRemoveUser} className="font-bold py-2 px-5 rounded-lg bg-red-600 text-white">Remove User</button>
+                </div>
+            </Modal>
+        </>
+    );
+};
+
+const HelpScreen = ({ theme }) => (
+    <>
+        <PageTitle title="Help & Support" theme={theme} />
+        <div className="px-4 pb-4 space-y-6">
+            <GlassCard theme={theme} className="p-4 space-y-2">
+                <h3 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>Frequently Asked Questions</h3>
+                <div className="text-sm space-y-3">
+                    <div>
+                        <p className="font-semibold" style={{ color: theme.colors.textPrimary }}>How do I track an order?</p>
+                        <p style={{ color: theme.colors.textSecondary }}>Navigate to the 'Orders' section from the home screen. You can search by order number, company, or project details.</p>
+                    </div>
+                    <div>
+                        <p className="font-semibold" style={{ color: theme.colors.textPrimary }}>Where can I find lead times?</p>
+                        <p style={{ color: theme.colors.textSecondary }}>The 'Lead Times' section provides up-to-date estimates for all our product categories.</p>
+                    </div>
+                    <div>
+                        <p className="font-semibold" style={{ color: theme.colors.textPrimary }}>How do I request a replacement part?</p>
+                        <p style={{ color: theme.colors.textSecondary }}>Go to the 'Replacements' section and scan the QR code on the product label to begin your request.</p>
+                    </div>
+                </div>
+            </GlassCard>
+            <GlassCard theme={theme} className="p-4 space-y-2">
+                <h3 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>Contact Support</h3>
+                <p className="text-sm" style={{ color: theme.colors.textSecondary }}>
+                    For technical issues or questions not answered here, please email our support team. We're happy to help!
+                </p>
+                <a href="mailto:myjsiapp@jaspergroup.us.com" className="font-semibold text-center block p-2 rounded-lg" style={{ color: theme.colors.accent, backgroundColor: theme.colors.subtle }}>
+                    myjsiapp@jaspergroup.us.com
+                </a>
+            </GlassCard>
+        </div>
+    </>
+);
+
+const LogoutScreen = ({ theme, onNavigate }) => {
+    React.useEffect(() => {
+        onNavigate('home');
+    }, []);
+    return (
+        <PageTitle
+            title="Logged Out"
+            theme={theme}
+            onBack={() => onNavigate('home')}
+        />
+    );
+};
+
+const FeedbackScreen = ({ theme, setSuccessMessage, onNavigate }) => {
+    const [subject, setSubject] = useState('');
+    const [message, setMessage] = useState('');
+    const [attachment, setAttachment] = useState(null);
+
+    const handleFileChange = (e) => {
+        if (e.target.files && e.target.files[0]) {
+            setAttachment(e.target.files[0]);
+        }
+    };
+
+    const handleSubmit = () => {
+        console.log({ subject, message, attachment });
+        setSuccessMessage("Feedback Submitted!");
+        setTimeout(() => {
+            setSuccessMessage("");
+            onNavigate('home');
+        }, 1200);
+    };
+
+    return (
+        <>
+            <PageTitle title="Feedback" theme={theme} />
+            <div className="px-4 pb-4 space-y-4">
+                <FormInput label="Subject" value={subject} onChange={e => setSubject(e.target.value)} placeholder="e.g. Feature Request" theme={theme} />
+                <FormInput label="Message" type="textarea" value={message} onChange={e => setMessage(e.target.value)} placeholder="Your detailed feedback..." theme={theme} />
+                <div>
+                    <label htmlFor="file-upload" className="w-full font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center cursor-pointer" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }}>
+                        <Paperclip className="w-4 h-4 mr-2" />
+                        Add Attachment
+                    </label>
+                    <input id="file-upload" type="file" className="hidden" onChange={handleFileChange} />
+                    {attachment && <p className="text-xs text-center mt-2" style={{ color: theme.colors.textSecondary }}>Selected: {attachment.name}</p>}
+                </div>
+                <button className="w-full font-bold py-3 px-6 rounded-lg transition-colors" style={{ backgroundColor: theme.colors.accent, color: '#FFFFFF' }} onClick={handleSubmit}>Submit Feedback</button>
+            </div>
+        </>
+    );
 };
 
 const SCREEN_MAP = {
@@ -245,17 +2574,33 @@ const SCREEN_MAP = {
     projects: ProjectsScreen,
     community: CommunityScreen,
     samples: SamplesScreen,
+    'samples/cart': CartScreen,
+    'new-lead': NewLeadScreen,
     replacements: ReplacementsScreen,
+    settings: SettingsScreen,
+    members: MembersScreen,
+    help: HelpScreen,
+    logout: LogoutScreen,
     feedback: FeedbackScreen,
 };
 
 export {
+    Avatar,
+    PostCard,
+    WinsCard,
+    CreateContentModal,
     GlassCard,
     PageTitle,
     FormInput,
     SearchInput,
     SuccessToast,
     AppHeader,
+    MonthlyBarChart,
+    MonthlyTable,
+    RecentPOsCard,
+    DonutChart,
+    OrderModal,
+    PollCard,
 
     HomeScreen,
     SalesScreen,
@@ -268,5 +2613,6 @@ export {
     ReplacementsScreen,
     FeedbackScreen,
 
+    ProfileMenu,
     SCREEN_MAP
 };

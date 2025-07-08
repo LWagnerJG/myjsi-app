@@ -1,51 +1,110 @@
 ﻿import React, { useState, useMemo, useCallback } from 'react';
-
-// Import themes and data from the data file
-import { lightTheme, darkTheme } from './data.js';
-
-import { AppHeader, HomeScreen, SCREEN_MAP } from './ui.jsx';
-
-import { User } from 'lucide-react'; // Import icon needed for the header
+import { lightTheme, darkTheme, INITIAL_OPPORTUNITIES, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS } from './data.js';
+import { AppHeader, ProfileMenu, SCREEN_MAP } from './ui.jsx';
 
 function App() {
-    // All your state and logic goes here
     const [navigationHistory, setNavigationHistory] = useState(['home']);
     const [isDarkMode, setIsDarkMode] = useState(false);
-    const [userSettings] = useState({ firstName: 'Luke' });
+    const [cart, setCart] = useState({});
+    const [designFirms, setDesignFirms] = useState(INITIAL_DESIGN_FIRMS);
+    const [dealers, setDealers] = useState(INITIAL_DEALERS);
+    const handleNewLeadSuccess = useCallback(newLead => {
+        setOpportunities(prev => [...prev, newLead]);
+        setNavigationHistory(prev => [...prev, 'projects']);
+    }, []);
+
+    const [showProfileMenu, setShowProfileMenu] = useState(false);
+    const [opportunities, setOpportunities] = useState(INITIAL_OPPORTUNITIES);
+    const [userSettings, setUserSettings] = useState({
+        id: 1,
+        firstName: 'Luke',
+        lastName: 'Wagner',
+        email: 'luke.wagner@example.com',
+        homeAddress: '…',
+        tShirtSize: 'L'
+    });
 
     const currentScreen = navigationHistory[navigationHistory.length - 1];
-    const currentTheme = useMemo(() => isDarkMode ? darkTheme : lightTheme, [isDarkMode]);
+    const currentTheme = useMemo(
+        () => (isDarkMode ? darkTheme : lightTheme),
+        [isDarkMode]
+    );
 
-    const handleNavigate = useCallback((screen) => {
+    const handleUpdateCart = useCallback((item, change) => {
+        setCart(prev => {
+            const next = { ...prev };
+            const qty = (next[item.id] || 0) + change;
+            if (qty > 0) next[item.id] = qty;
+            else delete next[item.id];
+            return next;
+        });
+    }, []);
+
+    const handleNavigate = useCallback(screen => {
+        console.log('🔀 navigating to:', screen);
         setNavigationHistory(prev => [...prev, screen]);
+        setShowProfileMenu(false);
     }, []);
 
     const handleHome = useCallback(() => {
         setNavigationHistory(['home']);
+        setShowProfileMenu(false);
     }, []);
 
-    // This function decides which screen component to show
-    const renderScreen = () => {
-        const ContentComponent = SCREEN_MAP[currentScreen];
-        if (ContentComponent) {
-            // Pass the necessary functions and state to the screen component
-            return <ContentComponent onNavigate={handleNavigate} theme={currentTheme} />;
-        }
-        return <div className="p-8 text-center font-semibold">Page Not Found</div>;
+    const handleBack = useCallback(() => {
+        setNavigationHistory(prev =>
+            prev.length > 1 ? prev.slice(0, -1) : prev
+        );
+    }, []);
+
+    const extraProps = {
+        samples: { cart, onUpdateCart: handleUpdateCart, userSettings },
+        'samples/cart': { cart, onUpdateCart: handleUpdateCart, userSettings },
+        projects: { opportunities },
+        settings: { userSettings, setUserSettings },
+        'new-lead': { onSuccess: handleNewLeadSuccess, designFirms, setDesignFirms, dealers, setDealers }
     };
+    const Screen = SCREEN_MAP[currentScreen];
 
     return (
-        <div style={{ backgroundColor: currentTheme.colors.background }} className="h-screen w-screen font-sans flex flex-col">
+        <div
+            className="h-screen w-screen font-sans flex flex-col"
+            style={{ backgroundColor: currentTheme.colors.background }}
+        >
             <AppHeader
-                onHomeClick={handleHome}
                 theme={currentTheme}
                 userName={userSettings.firstName}
+                isHome={currentScreen === 'home'}
+                showBack={navigationHistory.length > 1}
+                handleBack={handleBack}
                 isDarkMode={isDarkMode}
-            // Add other props like handleBack if needed later
+                onToggleDark={() => setIsDarkMode(d => !d)}
+                onHomeClick={handleHome}
+                onProfileClick={() => setShowProfileMenu(true)}
             />
             <main className="flex-1 overflow-y-auto scrollbar-hide">
-                {renderScreen()}
+                {Screen ? (
+                    <Screen
+                        theme={currentTheme}
+                        onNavigate={handleNavigate}
+                        {...(extraProps[currentScreen] || {})}
+                    />
+                ) : (
+                    <div className="p-8 text-center font-semibold">
+                        Page Not Found
+                    </div>
+                )}
             </main>
+            {showProfileMenu && (
+                <ProfileMenu
+                    show={showProfileMenu}
+                    onClose={() => setShowProfileMenu(false)}
+                    onNavigate={handleNavigate}
+                    toggleTheme={() => setIsDarkMode(d => !d)}
+                    theme={currentTheme}
+                    isDarkMode={isDarkMode}
+                />
+            )}
         </div>
     );
 }
