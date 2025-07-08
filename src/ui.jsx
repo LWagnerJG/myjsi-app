@@ -82,8 +82,6 @@ const {
     STAGES,
     STAGE_COLORS,
 
-    RESOURCES_DATA,
-
     // Samples + Cart
     SAMPLE_CATEGORIES,
     SAMPLE_PRODUCTS,
@@ -98,17 +96,30 @@ const {
     SALES_VERTICALS_DATA,
 
     // Community feed
-    INITIAL_POSTS,    // if you renamed it from MyJSI 1.0.txt’s POSTS  
-    INITIAL_WINS,     // …and WINS  
-    INITIAL_POLLS,    // …and POLLS  
+    INITIAL_POSTS,
+    INITIAL_WINS,
+    INITIAL_POLLS,
 
     // Members screen
     INITIAL_MEMBERS,
     PERMISSION_LABELS,
     USER_TITLES,
 
-    // Any others you reference…
+    // …any others you reference…
+
+    // Resources screens
+    RESOURCES_DATA,
+    COMMISSION_RATES_TABLE_DATA,
+    LOANER_POOL_PRODUCTS,
+    SAMPLE_DISCOUNTS_DATA,
+    DISCONTINUED_FINISHES,
+    SOCIAL_MEDIA_POSTS,
+    DEALER_DIRECTORY_DATA,
+    CONTRACTS_DATA,
+    LEAD_TIMES_DATA,
+    DAILY_DISCOUNT_OPTIONS
 } = Data;
+
 
 const Avatar = ({ src, alt, theme }) => {
     const [err, setErr] = useState(false);
