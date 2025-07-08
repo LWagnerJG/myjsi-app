@@ -212,7 +212,7 @@ const SalesScreen = ({ theme, onNavigate }) => {
     return <PageTitle title="Sales" theme={theme} onBack={() => onNavigate('home')} />;
 };
 const OrdersScreen = ({ theme, onNavigate }) => {
-    return <PageTitle title="Orders" theme={theme} onBack={() => onNavigate('home')} />;
+    return <PageTitle title="NoOrders" theme={theme} onBack={() => onNavigate('home')} />;
 };
 const ProductsScreen = ({ theme, onNavigate }) => {
     return <PageTitle title="Products" theme={theme} onBack={() => onNavigate('home')} />;
