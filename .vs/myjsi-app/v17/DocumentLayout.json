@@ -60,7 +60,7 @@
               "RelativeDocumentMoniker": "src\\ui.jsx",
               "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\ui.jsx",
               "RelativeToolTip": "src\\ui.jsx",
-              "ViewState": "AgIAAOEAAAAAAAAAAAAwwO0AAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAOMAAAAAAAAAAADwvw8BAAACAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
               "WhenOpened": "2025-07-08T12:39:11.271Z",
               "EditorCaption": ""
@@ -75,8 +75,7 @@
               "RelativeToolTip": "myjsi-react-app.esproj",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2025-07-08T12:32:17.589Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-08T12:32:17.589Z"
             },
             {
               "$type": "Document",
@@ -88,8 +87,7 @@
               "RelativeToolTip": "src\\data.js",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAABqAQAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2025-07-08T01:42:02.956Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-08T01:42:02.956Z"
             },
             {
               "$type": "Document",
@@ -99,10 +97,9 @@
               "RelativeDocumentMoniker": "src\\App.jsx",
               "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\App.jsx",
               "RelativeToolTip": "src\\App.jsx",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAA5AAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
-              "WhenOpened": "2025-07-07T21:47:36.308Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-07T21:47:36.308Z"
             },
             {
               "$type": "Document",
@@ -114,8 +111,7 @@
               "RelativeToolTip": "src\\index.css",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
-              "WhenOpened": "2025-07-07T22:43:47.419Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-07T22:43:47.419Z"
             },
             {
               "$type": "Document",
@@ -127,8 +123,7 @@
               "RelativeToolTip": "src\\main.jsx",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAACAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
-              "WhenOpened": "2025-07-07T22:44:02.195Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-07T22:44:02.195Z"
             },
             {
               "$type": "Document",
@@ -140,8 +135,7 @@
               "RelativeToolTip": "package.json",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAADMAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-07-07T22:39:07.918Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-07T22:39:07.918Z"
             },
             {
               "$type": "Document",
@@ -153,8 +147,7 @@
               "RelativeToolTip": "postcss.config.cjs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2025-07-08T01:30:47.433Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-08T01:30:47.433Z"
             },
             {
               "$type": "Document",
@@ -166,8 +159,7 @@
               "RelativeToolTip": "index.html",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
-              "WhenOpened": "2025-07-08T01:19:54.714Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-08T01:19:54.714Z"
             },
             {
               "$type": "Document",
@@ -179,8 +171,7 @@
               "RelativeToolTip": "tailwind.config.cjs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2025-07-07T23:14:57.522Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-07T23:14:57.522Z"
             }
           ]
         }

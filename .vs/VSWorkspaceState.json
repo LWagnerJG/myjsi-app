@@ -2,9 +2,8 @@
   "ExpandedNodes": [
     "",
     "\\src",
-    "\\src\\components",
     "\\src\\data.js"
   ],
-  "SelectedNode": "\\src\\index.css",
+  "SelectedNode": "\\src\\ui.jsx",
   "PreviewInSolutionExplorer": false
 }

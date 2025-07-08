@@ -250,7 +250,6 @@ const SCREEN_MAP = {
 };
 
 export {
-    // Reusable Components
     GlassCard,
     PageTitle,
     FormInput,
@@ -258,18 +257,16 @@ export {
     SuccessToast,
     AppHeader,
 
-    // Full Screen Components
     HomeScreen,
     SalesScreen,
     OrdersScreen,
     ProductsScreen,
     ResourcesScreen,
     ProjectsScreen,
-    CommunityScreen,  // Note: you have CommunityScreen, not CommunityHome
+    CommunityScreen,
     SamplesScreen,
     ReplacementsScreen,
     FeedbackScreen,
 
-    // The Screen Map
     SCREEN_MAP
 };
