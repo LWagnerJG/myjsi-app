@@ -76,7 +76,9 @@ function App() {
         'samples/cart': { cart, onUpdateCart: handleUpdateCart, userSettings },
         projects: { opportunities },
         settings: { userSettings, setUserSettings },
-        'new-lead': { onSuccess: handleNewLeadSuccess, designFirms, setDesignFirms, dealers, setDealers }
+        'new-lead': { onSuccess: handleNewLeadSuccess, designFirms, setDesignFirms, dealers, setDealers },
+        resources: {},
+        // no extraProps needed for deeper resource screens—they receive theme & onNavigate
     };
 
     const Screen = SCREEN_MAP[currentScreen];
@@ -103,8 +105,8 @@ function App() {
 
             <main
                 className={`flex-1 ${currentScreen === 'home'
-                        ? 'overflow-hidden'
-                        : 'overflow-y-auto scrollbar-hide'
+                    ? 'overflow-hidden'
+                    : 'overflow-y-auto scrollbar-hide'
                     }`}
             >
                 {Screen ? (

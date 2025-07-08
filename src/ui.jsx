@@ -2699,7 +2699,32 @@ const SCREEN_MAP = {
     sales: SalesScreen,
     orders: OrdersScreen,
     products: ProductsScreen,
+
+    // Top-level Resources menu
     resources: ResourcesScreen,
+
+    // Fabrics
+    'fabrics/search_form': SearchFormScreen,
+    'fabrics/com_request': COMRequestScreen,
+
+    // Rep Functions
+    'resources/commission_rates': CommissionRatesScreen,
+    'resources/loaner_pool': LoanerPoolScreen,
+    'resources/dealer_registration': DealerRegistrationScreen,
+    'resources/request_field_visit': RequestFieldVisitScreen,
+    'resources/sample_discounts': SampleDiscountsScreen,
+    'resources/dealer_directory': DealerDirectoryScreen,
+
+    // Misc.
+    'resources/contracts': ContractsScreen,
+    'resources/design_days': DesignDaysScreen,
+    'resources/discontinued_finishes': DiscontinuedFinishesScreen,
+    'resources/install_instructions': InstallInstructionsScreen,
+    'resources/lead-times': LeadTimesScreen,
+    'resources/presentations': PresentationsScreen,
+    'resources/social_media': SocialMediaScreen,
+
+    // Other app screens
     projects: ProjectsScreen,
     community: CommunityScreen,
     samples: SamplesScreen,
