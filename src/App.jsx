@@ -8,12 +8,6 @@ function App() {
     const [cart, setCart] = useState({});
     const [designFirms, setDesignFirms] = useState(INITIAL_DESIGN_FIRMS);
     const [dealers, setDealers] = useState(INITIAL_DEALERS);
-    const handleNewLeadSuccess = useCallback(newLead => {
-        setOpportunities(prev => [...prev, newLead]);
-        setNavigationHistory(prev => [...prev, 'projects']);
-    }, []);
-
-    const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [opportunities, setOpportunities] = useState(INITIAL_OPPORTUNITIES);
     const [userSettings, setUserSettings] = useState({
         id: 1,
@@ -23,6 +17,7 @@ function App() {
         homeAddress: '…',
         tShirtSize: 'L'
     });
+    const [showProfileMenu, setShowProfileMenu] = useState(false);
 
     const currentScreen = navigationHistory[navigationHistory.length - 1];
     const currentTheme = useMemo(
@@ -38,6 +33,11 @@ function App() {
             else delete next[item.id];
             return next;
         });
+    }, []);
+
+    const handleNewLeadSuccess = useCallback(newLead => {
+        setOpportunities(prev => [...prev, newLead]);
+        setNavigationHistory(prev => [...prev, 'projects']);
     }, []);
 
     const handleNavigate = useCallback(screen => {
@@ -64,12 +64,16 @@ function App() {
         settings: { userSettings, setUserSettings },
         'new-lead': { onSuccess: handleNewLeadSuccess, designFirms, setDesignFirms, dealers, setDealers }
     };
+
     const Screen = SCREEN_MAP[currentScreen];
 
     return (
         <div
             className="h-screen w-screen font-sans flex flex-col"
-            style={{ backgroundColor: currentTheme.colors.background }}
+            style={{
+                backgroundColor: currentTheme.colors.background,
+                transform: 'translateY(-8px)'
+            }}
         >
             <AppHeader
                 theme={currentTheme}
@@ -82,7 +86,13 @@ function App() {
                 onHomeClick={handleHome}
                 onProfileClick={() => setShowProfileMenu(true)}
             />
-            <main className="flex-1 overflow-y-auto scrollbar-hide">
+
+            <main
+                className={`flex-1 ${currentScreen === 'home'
+                        ? 'overflow-hidden'
+                        : 'overflow-y-auto scrollbar-hide'
+                    }`}
+            >
                 {Screen ? (
                     <Screen
                         theme={currentTheme}
@@ -95,6 +105,7 @@ function App() {
                     </div>
                 )}
             </main>
+
             {showProfileMenu && (
                 <ProfileMenu
                     show={showProfileMenu}
