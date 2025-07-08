@@ -22,9 +22,22 @@ function App() {
     const currentScreen = navigationHistory[navigationHistory.length - 1];
     const currentTheme = useMemo(() => (isDarkMode ? darkTheme : lightTheme), [isDarkMode]);
 
-    // lock body scroll on home, restore elsewhere
+    // Lock body-level scroll on home (desktop)
     useEffect(() => {
         document.body.style.overflow = currentScreen === 'home' ? 'hidden' : 'auto';
+    }, [currentScreen]);
+
+    // Prevent touch-based scrolling on home (mobile)
+    useEffect(() => {
+        const preventDefault = e => e.preventDefault();
+        if (currentScreen === 'home') {
+            document.addEventListener('touchmove', preventDefault, { passive: false });
+        } else {
+            document.removeEventListener('touchmove', preventDefault);
+        }
+        return () => {
+            document.removeEventListener('touchmove', preventDefault);
+        };
     }, [currentScreen]);
 
     const handleUpdateCart = useCallback((item, change) => {
