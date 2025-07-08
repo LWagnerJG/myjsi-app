@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo, useCallback } from 'react';
+﻿import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { lightTheme, darkTheme, INITIAL_OPPORTUNITIES, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS } from './data.js';
 import { AppHeader, ProfileMenu, SCREEN_MAP } from './ui.jsx';
 
@@ -14,7 +14,7 @@ function App() {
         firstName: 'Luke',
         lastName: 'Wagner',
         email: 'luke.wagner@example.com',
-        homeAddress: '…',
+        homeAddress: '5445 N Deerwood Lake Rd, Jasper, IN 47546',
         tShirtSize: 'L'
     });
     const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -24,6 +24,11 @@ function App() {
         () => (isDarkMode ? darkTheme : lightTheme),
         [isDarkMode]
     );
+
+    // Lock body scroll on home, restore elsewhere
+    useEffect(() => {
+        document.body.style.overflow = currentScreen === 'home' ? 'hidden' : 'auto';
+    }, [currentScreen]);
 
     const handleUpdateCart = useCallback((item, change) => {
         setCart(prev => {
