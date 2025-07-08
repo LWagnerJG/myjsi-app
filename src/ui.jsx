@@ -149,7 +149,7 @@ const AppHeader = React.memo(({ onHomeClick, isDarkMode, theme, onProfileClick, 
             </div>
             <div className="flex items-center space-x-4">
                 {isHome && (
-                    <div className="text-lg font-normal leading-tight" style={{ color: theme.colors.textPrimary }}>Hey, {userName}!</div>
+                    <div className="text-lg font-normal leading-tight" style={{ color: theme.colors.textPrimary }}>Hello, {userName}!</div>
                 )}
                 <button onClick={onProfileClick} className="w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: theme.colors.subtle }}>
                     <User className="w-5 h-5" style={{ color: theme.colors.secondary }} />
