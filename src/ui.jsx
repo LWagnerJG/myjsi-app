@@ -2704,7 +2704,7 @@ const SCREEN_MAP = {
     resources: ResourcesScreen,
 
     // Fabrics
-    'fabrics/search_form': SearchFormScreen,
+    'fabrics/search_form': FabricSearchForm,
     'fabrics/com_request': COMRequestScreen,
 
     // Rep Functions
