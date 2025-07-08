@@ -82,6 +82,8 @@ const {
     STAGES,
     STAGE_COLORS,
 
+    RESOURCES_DATA,
+
     // Samples + Cart
     SAMPLE_CATEGORIES,
     SAMPLE_PRODUCTS,
@@ -1814,22 +1816,42 @@ const NewLeadScreen = ({
 };
 
 
-
-
 const ResourcesScreen = ({ theme, onNavigate }) => {
     return (
         <>
             <PageTitle title="Resources" theme={theme} />
+
             <div className="px-4 space-y-6 pb-4">
                 {Data.RESOURCES_DATA.map(category => (
                     <div key={category.category}>
-                        <h2 className="text-xl font-bold mb-2 px-1" style={{ color: theme.colors.textPrimary }}>{category.category}</h2>
+                        <h2
+                            className="text-xl font-bold mb-2 px-1"
+                            style={{ color: theme.colors.textPrimary }}
+                        >
+                            {category.category}
+                        </h2>
+
                         <div className="space-y-3">
                             {category.items.map(item => (
-                                <GlassCard key={item.label} theme={theme} className="p-1">
-                                    <button onClick={() => onNavigate(item.nav)} className="w-full p-3 rounded-xl flex items-center justify-between">
-                                        <span className="text-md font-semibold tracking-tight" style={{ color: theme.colors.textPrimary }}>{item.label}</span>
-                                        <ArrowRight className="w-5 h-5" style={{ color: theme.colors.secondary }} />
+                                <GlassCard
+                                    key={item.label}
+                                    theme={theme}
+                                    className="p-1"
+                                >
+                                    <button
+                                        onClick={() => onNavigate(item.nav)}
+                                        className="w-full p-3 rounded-xl flex items-center justify-between"
+                                    >
+                                        <span
+                                            className="text-md font-semibold tracking-tight"
+                                            style={{ color: theme.colors.textPrimary }}
+                                        >
+                                            {item.label}
+                                        </span>
+                                        <ArrowRight
+                                            className="w-5 h-5"
+                                            style={{ color: theme.colors.secondary }}
+                                        />
                                     </button>
                                 </GlassCard>
                             ))}
@@ -1840,6 +1862,7 @@ const ResourcesScreen = ({ theme, onNavigate }) => {
         </>
     );
 };
+
 
 const ProjectsScreen = ({ onNavigate, theme, opportunities }) => {
     const [projectsTab, setProjectsTab] = useState('pipeline');
