@@ -1,44 +1,10 @@
-﻿import {
-    MousePointer, PieChart, Armchair, Database, Briefcase, MessageSquare, Package, RotateCw
-} from 'lucide-react';
+﻿import { MousePointer, PieChart, Armchair, Database, Briefcase, MessageSquare, Package, RotateCw } from 'lucide-react';
 
+export const lightTheme = { colors: { background: '#F3F2EF', surface: 'rgba(255,255,255,0.92)', primary: '#003366', accent: '#003366', secondary: '#7A7A7A', textPrimary: '#111111', textSecondary: '#555555', border: 'rgba(0,0,0,0.05)', shadow: 'rgba(0,0,0,0.10)' }, backdropFilter: 'blur(12px)' };
+export const darkTheme = { colors: { background: '#1E1E1E', surface: 'rgba(40,40,40,0.85)', primary: '#BBBBBB', accent: '#BBBBBB', secondary: '#999999', textPrimary: '#F5F5F5', textSecondary: '#CCCCCC', border: 'rgba(255,255,255,0.08)', shadow: 'rgba(0,0,0,0.25)' }, backdropFilter: 'blur(12px)' };
+export const MENU_ITEMS = [{ id: 'orders', icon: MousePointer, label: 'Orders' }, { id: 'sales', icon: PieChart, label: 'Sales' }, { id: 'products', icon: Armchair, label: 'Products' }, { id: 'resources', icon: Database, label: 'Resources' }, { id: 'projects', icon: Briefcase, label: 'Projects' }, { id: 'community', icon: MessageSquare, label: 'Community' }, { id: 'samples', icon: Package, label: 'Samples' }, { id: 'replacements', icon: RotateCw, label: 'Replacements' },];
 export const logoLight = 'https://i.imgur.com/qskYhB0.png';
 
-export const lightTheme = {
-    colors: {
-        background: '#F3F2EF',
-        surface: 'rgba(255,255,255,0.92)',
-        primary: '#003366',
-        accent: '#003366',
-        accentHover: '#002244',
-        secondary: '#7A7A7A',
-        subtle: '#E6E4DC',
-        textPrimary: '#111111',
-        textSecondary: '#555555',
-        border: 'rgba(0,0,0,0.05)',
-        shadow: 'rgba(0,0,0,0.10)',
-        card: 'rgba(255,255,255,0.92)',
-    },
-    backdropFilter: 'blur(12px)',
-};
-
-export const darkTheme = {
-    colors: {
-        background: '#1E1E1E',
-        surface: 'rgba(40,40,40,0.85)',
-        primary: '#BBBBBB',
-        accent: '#BBBBBB',
-        accentHover: '#EEEEEE',
-        secondary: '#999999',
-        subtle: '#2A2A2A',
-        textPrimary: '#F5F5F5',
-        textSecondary: '#CCCCCC',
-        border: 'rgba(255,255,255,0.08)',
-        shadow: 'rgba(0,0,0,0.25)',
-        card: 'rgba(60,60,60,0.85)',
-    },
-    backdropFilter: 'blur(12px)',
-};
 
 export const MY_PROJECTS_DATA = [
     { id: 'proj1', name: 'Acme Corp HQ', location: 'Indianapolis, IN', image: 'https://placehold.co/400x300/D9CDBA/2A2A2A?text=Install+1' },
@@ -47,16 +13,6 @@ export const MY_PROJECTS_DATA = [
     { id: 'proj4', name: 'Downtown Library', location: 'Indianapolis, IN', image: 'https://placehold.co/400x300/966642/FFFFFF?text=Install+4' },
 ];
 
-export const MENU_ITEMS = [
-    { id: 'orders', icon: MousePointer, label: 'Orders' },
-    { id: 'sales', icon: PieChart, label: 'Sales' },
-    { id: 'products', icon: Armchair, label: 'Products' },
-    { id: 'resources', icon: Database, label: 'Resources' },
-    { id: 'projects', icon: Briefcase, label: 'Projects' },
-    { id: 'community', icon: MessageSquare, label: 'Community' },
-    { id: 'samples', icon: Package, label: 'Samples' },
-    { id: 'replacements', icon: RotateCw, label: 'Replacements' },
-];
 
 export const ORDER_DATA = [
     { date: '2025-06-12T14:30:00Z', amount: '$43,034.00', company: 'BUSINESS FURNITURE LLC', details: 'MSD of Lawrence Township - LECC', orderNumber: '444353-00', po: 'S65473-7', net: 31250.00, reward: 'Jennifer Franklin (1%)', shipDate: '8/25/2025', status: 'In Production', shipTo: 'BUSINESS FURNITURE LLC\n4102 MEGHAN BEELER COURT\nSOUTH BEND, IN 46628', discount: '61.20%', packQty: 8, lineItems: [{ line: '001', name: 'CROSSOVER SWIVEL CONFERENCE', model: 'AW6007C', quantity: 8, net: 902.10, extNet: 7216.80, options: 'None', specs: [{ label: 'MIDBACK-SWIVELBASE', value: 'ARWYNSERIES-MODELAW6007C' }, { label: 'CONTROLMECHANISM', value: 'SWIVELTILT' }, { label: 'CASTERDETAILS', value: 'BLACKCASTER' }, { label: 'UPH.INFO', value: '(JSOMC)MAYERLUDLOWCHESTNUT-GRADEC' }, { label: 'TAG', value: '#410CONFERENCEROOM/COLORCODEBLACK' }] }, { line: '002', name: 'CUSTOM UNIT - LAMINATE', model: 'CUSTOM-CGL', quantity: 1, net: 734.00, extNet: 734.00, options: 'Special Size', specs: [] }, { line: '003', name: 'STRAIGHT ARM SWIVEL CHAIR', model: 'KN3000UUS', quantity: 2, net: 658.44, extNet: 1316.87, options: 'Custom Fabric', specs: [] },] },
