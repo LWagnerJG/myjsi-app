@@ -1372,7 +1372,6 @@ const OrdersScreen = ({ theme, onNavigate }) => (
         <PageTitle
             title="Orders"
             theme={theme}
-            onBack={() => onNavigate('home')}
         />
         <div className="p-4 space-y-4 overflow-y-auto">
             {Data.ORDER_DATA.map(order => (
@@ -1397,16 +1396,10 @@ const OrdersScreen = ({ theme, onNavigate }) => (
                             </div>
                         </div>
                         <div className="text-right">
-                            <div
-                                className="font-bold"
-                                style={{ color: theme.colors.accent }}
-                            >
+                            <div className="font-bold" style={{ color: theme.colors.accent }}>
                                 {order.amount}
                             </div>
-                            <div
-                                className="text-sm"
-                                style={{ color: theme.colors.textSecondary }}
-                            >
+                            <div className="text-sm" style={{ color: theme.colors.textSecondary }}>
                                 Ship {order.shipDate || '—'}
                             </div>
                         </div>
@@ -1416,6 +1409,7 @@ const OrdersScreen = ({ theme, onNavigate }) => (
         </div>
     </>
 );
+
 
 
 
