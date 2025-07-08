@@ -30,7 +30,7 @@ function App() {
     return (
         <div style={{ backgroundColor: currentTheme.colors.background }} className="h-screen w-screen font-sans flex flex-col">
             <header className="p-4 flex justify-between items-center bg-white/50 backdrop-blur-sm sticky top-4 mx-4 rounded-full shadow-md z-10">
-                <img src="https://i.imgur.com/qskYhB0.png" alt="Logo" className="h-10" onClick={handleHome} className="cursor-pointer" />
+                <img src="https://i.imgur.com/qskYhB0.png" alt="Logo" onClick={handleHome} className="h-10 cursor-pointer" />
                 <div className="flex items-center space-x-2">
                     <span style={{ color: currentTheme.colors.textPrimary }}>Hey, {userSettings.firstName}!</span>
                     <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
