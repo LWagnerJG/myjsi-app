@@ -1,7 +1,6 @@
 ﻿import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react';
 
 // Import data and themes from their new, separate files
-import { lightTheme, darkTheme, scrollbarHideStyle } from './data.js'; // Assuming you moved themes to data.js for simplicity
 import { INITIAL_MEMBERS, INITIAL_OPPORTUNITIES, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS, allApps } from './data.js';
 
 // Import your components from the components folder
@@ -80,7 +79,6 @@ function App() {
 
     return (
         <div style={{ backgroundColor: currentTheme.colors.background }} className="h-screen w-screen font-sans overflow-hidden flex flex-col">
-            <style>{scrollbarHideStyle}</style>
 
             <AppHeader
                 onHomeClick={handleHome}
@@ -88,7 +86,7 @@ function App() {
                 userName={userSettings.firstName}
             />
 
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto scrollbar-hide">
                 {renderScreen()}
             </div>
         </div>
