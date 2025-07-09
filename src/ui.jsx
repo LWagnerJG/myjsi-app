@@ -3056,7 +3056,6 @@ const SCREEN_MAP = {
     'fabrics/com_request': COMRequestScreen,
 
     // Rep Functions
-    'resources/commission_rates': CommissionRatesScreen,
     'resources/loaner_pool': LoanerPoolScreen,
     'resources/dealer_registration': DealerRegistrationScreen,
     'resources/request_field_visit': RequestFieldVisitScreen,
