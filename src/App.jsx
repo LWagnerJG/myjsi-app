@@ -1,14 +1,17 @@
 ﻿import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { lightTheme, darkTheme, INITIAL_OPPORTUNITIES, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS } from './data.js';
-import { AppHeader, ProfileMenu, SCREEN_MAP } from './ui.jsx';
+import { lightTheme, darkTheme } from './data.js';
+import { AppHeader, ProfileMenu, SCREEN_MAP, VoiceModal, Modal, SuccessToast, PageTitle } from './ui.jsx';
+import * as Data from './data.js';
 
 function App() {
+    // --- STATE ---
     const [navigationHistory, setNavigationHistory] = useState(['home']);
     const [isDarkMode, setIsDarkMode] = useState(false);
+    const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [cart, setCart] = useState({});
-    const [designFirms, setDesignFirms] = useState(INITIAL_DESIGN_FIRMS);
-    const [dealers, setDealers] = useState(INITIAL_DEALERS);
-    const [opportunities, setOpportunities] = useState(INITIAL_OPPORTUNITIES);
+    const [opportunities, setOpportunities] = useState(Data.INITIAL_OPPORTUNITIES);
+    const [designFirms, setDesignFirms] = useState(Data.INITIAL_DESIGN_FIRMS);
+    const [dealers, setDealers] = useState(Data.INITIAL_DEALERS);
     const [userSettings, setUserSettings] = useState({
         id: 1,
         firstName: 'Luke',
@@ -17,29 +20,21 @@ function App() {
         homeAddress: '5445 N Deerwood Lake Rd, Jasper, IN 47546',
         tShirtSize: 'L'
     });
-    const [showProfileMenu, setShowProfileMenu] = useState(false);
+    const [voiceMessage, setVoiceMessage] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
+    const [alertInfo, setAlertInfo] = useState({ show: false, message: '' });
 
+    // --- DERIVED STATE ---
     const currentScreen = navigationHistory[navigationHistory.length - 1];
     const currentTheme = useMemo(() => (isDarkMode ? darkTheme : lightTheme), [isDarkMode]);
 
-    // Lock body-level scroll on home (desktop)
-    useEffect(() => {
-        document.body.style.overflow = currentScreen === 'home' ? 'hidden' : 'auto';
-    }, [currentScreen]);
-
-    // Prevent touch-based scrolling on home (mobile)
-    useEffect(() => {
-        const preventDefault = e => e.preventDefault();
-        if (currentScreen === 'home') {
-            document.addEventListener('touchmove', preventDefault, { passive: false });
-        } else {
-            document.removeEventListener('touchmove', preventDefault);
-        }
-        return () => {
-            document.removeEventListener('touchmove', preventDefault);
-        };
-    }, [currentScreen]);
-
+    // --- HANDLERS ---
+    const handleNavigate = useCallback((screen) => { setNavigationHistory(prev => [...prev, screen]); setShowProfileMenu(false); }, []);
+    const handleHome = useCallback(() => { setNavigationHistory(['home']); setShowProfileMenu(false); }, []);
+    const handleBack = useCallback(() => { if (navigationHistory.length > 1) { setNavigationHistory(prev => prev.slice(0, -1)); } }, [navigationHistory]);
+    const handleShowAlert = useCallback((message) => { setAlertInfo({ show: true, message }); }, []);
+    const handleShowVoiceModal = useCallback((message) => { setVoiceMessage(message); setTimeout(() => setVoiceMessage(''), 1000); }, []);
+    const handleNewLeadSuccess = useCallback(newLead => { setOpportunities(prev => [...prev, newLead]); handleNavigate('projects'); }, [handleNavigate]);
     const handleUpdateCart = useCallback((item, change) => {
         setCart(prev => {
             const next = { ...prev };
@@ -50,46 +45,43 @@ function App() {
         });
     }, []);
 
-    const handleNewLeadSuccess = useCallback(newLead => {
-        setOpportunities(prev => [...prev, newLead]);
-        setNavigationHistory(prev => [...prev, 'projects']);
-    }, []);
+    // --- RENDER LOGIC ---
+    const renderScreen = () => {
+        const ScreenComponent = SCREEN_MAP[currentScreen.split('/')[0]];
 
-    const handleNavigate = useCallback(screen => {
-        setNavigationHistory(prev => [...prev, screen]);
-        setShowProfileMenu(false);
-    }, []);
+        if (!ScreenComponent) {
+            return <PageTitle title="Not Found" theme={currentTheme} />;
+        }
 
-    const handleHome = useCallback(() => {
-        setNavigationHistory(['home']);
-        setShowProfileMenu(false);
-    }, []);
+        // This new logic explicitly passes the correct props to each screen
+        const props = {
+            theme: currentTheme,
+            onNavigate: handleNavigate,
+            setSuccessMessage,
+            showAlert: handleShowAlert,
+        };
 
-    const handleBack = useCallback(() => {
-        setNavigationHistory(prev =>
-            prev.length > 1 ? prev.slice(0, -1) : prev
-        );
-    }, []);
-
-    const extraProps = {
-        samples: { cart, onUpdateCart: handleUpdateCart, userSettings },
-        'samples/cart': { cart, onUpdateCart: handleUpdateCart, userSettings },
-        projects: { opportunities },
-        settings: { userSettings, setUserSettings },
-        'new-lead': { onSuccess: handleNewLeadSuccess, designFirms, setDesignFirms, dealers, setDealers },
-        resources: {},
-        // no extraProps needed for deeper resource screens—they receive theme & onNavigate
+        switch (currentScreen) {
+            case 'projects':
+                return <ScreenComponent {...props} opportunities={opportunities} />;
+            case 'samples':
+            case 'samples/cart':
+                return <ScreenComponent {...props} cart={cart} onUpdateCart={handleUpdateCart} userSettings={userSettings} />;
+            case 'settings':
+                return <ScreenComponent {...props} userSettings={userSettings} setUserSettings={setUserSettings} onSave={() => { setSuccessMessage("Settings Saved!"); setTimeout(() => setSuccessMessage(''), 2000); handleBack(); }} />;
+            case 'new-lead':
+                return <ScreenComponent {...props} onSuccess={handleNewLeadSuccess} designFirms={designFirms} setDesignFirms={setDesignFirms} dealers={dealers} setDealers={setDealers} />;
+            case 'home':
+                return <ScreenComponent {...props} onVoiceActivate={handleShowVoiceModal} />;
+            default:
+                return <ScreenComponent {...props} />;
+        }
     };
-
-    const Screen = SCREEN_MAP[currentScreen];
 
     return (
         <div
             className="h-screen w-screen font-sans flex flex-col"
-            style={{
-                backgroundColor: currentTheme.colors.background,
-                transform: 'translateY(-8px)'
-            }}
+            style={{ backgroundColor: currentTheme.colors.background }}
         >
             <AppHeader
                 theme={currentTheme}
@@ -103,35 +95,27 @@ function App() {
                 onProfileClick={() => setShowProfileMenu(true)}
             />
 
-            <main
-                className={`flex-1 ${currentScreen === 'home'
-                    ? 'overflow-hidden'
-                    : 'overflow-y-auto scrollbar-hide'
-                    }`}
-            >
-                {Screen ? (
-                    <Screen
-                        theme={currentTheme}
-                        onNavigate={handleNavigate}
-                        {...(extraProps[currentScreen] || {})}
-                    />
-                ) : (
-                    <div className="p-8 text-center font-semibold">
-                        Page Not Found
-                    </div>
-                )}
+            <main className={`flex-1 overflow-y-auto scrollbar-hide`}>
+                {renderScreen()}
             </main>
 
-            {showProfileMenu && (
-                <ProfileMenu
-                    show={showProfileMenu}
-                    onClose={() => setShowProfileMenu(false)}
-                    onNavigate={handleNavigate}
-                    toggleTheme={() => setIsDarkMode(d => !d)}
-                    theme={currentTheme}
-                    isDarkMode={isDarkMode}
-                />
-            )}
+            <div className="absolute inset-0 pointer-events-none">
+                {showProfileMenu && (
+                    <ProfileMenu
+                        show={showProfileMenu}
+                        onClose={() => setShowProfileMenu(false)}
+                        onNavigate={handleNavigate}
+                        toggleTheme={() => setIsDarkMode(d => !d)}
+                        theme={currentTheme}
+                        isDarkMode={isDarkMode}
+                    />
+                )}
+                <Modal show={alertInfo.show} onClose={() => setAlertInfo({ show: false, message: '' })} title="Alert" theme={currentTheme}>
+                    <p>{alertInfo.message}</p>
+                </Modal>
+                <SuccessToast message={successMessage} show={!!successMessage} theme={currentTheme} />
+                <VoiceModal message={voiceMessage} show={!!voiceMessage} theme={currentTheme} />
+            </div>
         </div>
     );
 }

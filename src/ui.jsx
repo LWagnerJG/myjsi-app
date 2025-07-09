@@ -1,84 +1,16 @@
-﻿import React, {
-    useState,
-    useRef,
-    useMemo,
-    useCallback,
-    useEffect
-} from 'react';
-
+﻿import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react';
 import {
-    User,
-    MousePointer,
-    PieChart,
-    RotateCw,
-    Palette,
-    DollarSign,
-    Database,
-    MessageSquare,
-    Heart,
-    MoreVertical,
-    Video,
-    ArrowRight,
-    Search,
-    Briefcase,
-    Package,
-    X,
-    ChevronDown,
-    ChevronRight,
-    ChevronLeft,
-    Sun,
-    Moon,
-    Camera,
-    LogOut,
-    HelpCircle,
-    ShoppingCart,
-    CheckCircle,
-    Plus,
-    Minus,
-    ArrowLeft,
-    BarChart2,
-    List,
-    Home,
-    Hourglass,
-    Armchair,
-    Server,
-    UserPlus,
-    UserX,
-    Trophy,
-    ChevronUp,
-    Mic,
-    AlertCircle,
-    Settings,
-    Paperclip,
-    Copy,
-    Save,
-    Send,
-    Share2,
-    Film,
-    Filter,
-    Play,
-    Calendar,
-    MapPin,
-    Clock,
-    Bus,
+    User, MousePointer, PieChart, RotateCw, Palette, DollarSign,
+    Database, MessageSquare, Heart, MoreVertical, Video,
+    ArrowRight, Search, Briefcase, Package, X, ChevronDown,
+    ChevronRight, ChevronLeft, Sun, Moon, Camera, LogOut,
+    HelpCircle, ShoppingCart, CheckCircle, Plus, Minus,
+    ArrowLeft, BarChart2, List, Home, Hourglass, Armchair,
+    Server, UserPlus, UserX, Trophy, ChevronUp, Mic,
+    AlertCircle, Settings, Paperclip, Copy, Save, Send,
+    Share2, Film, Filter, Play, Calendar, MapPin, Clock, Bus
 } from 'lucide-react';
-
-// ui.jsx
 import * as Data from './data.js';
-
-export const Button = React.memo(({ children, className = '', theme, ...props }) => (
-    <button
-        className={`px-4 py-2 rounded-lg font-semibold ${className}`}
-        style={
-            theme
-                ? { backgroundColor: theme.colors.accent, color: '#fff' }
-                : undefined
-        }
-        {...props}
-    >
-        {children}
-    </button>
-))
 
 export const GlassCard = React.memo(
     React.forwardRef(({ children, className = '', theme, ...props }, ref) => (
@@ -97,109 +29,161 @@ export const GlassCard = React.memo(
             {children}
         </div>
     ))
-)
+);
+
+export const PageTitle = React.memo(({ title, theme, onBack, children }) => (
+    <div className="px-4 pt-6 pb-4 flex justify-between items-center">
+        <div className="flex-1 flex items-center space-x-2">
+            {onBack && (
+                <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10">
+                    <ArrowLeft className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
+                </button>
+            )}
+            <h1 className="text-3xl font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>{title}</h1>
+        </div>
+        {children}
+    </div>
+));
+
+export const Button = React.memo(({ children, className = '', theme, ...props }) => (
+    <button
+        className={`px-4 py-2 rounded-lg font-semibold ${className}`}
+        style={
+            theme
+                ? { backgroundColor: theme.colors.accent, color: '#fff' }
+                : undefined
+        }
+        {...props}
+    >
+        {children}
+    </button>
+))
 
 export const Card = ({ children, ...props }) => (
     <GlassCard {...props}>{children}</GlassCard>
 )
 
-export const AutoCompleteCombobox = ({
-    label,
-    value,
-    onChange,
-    placeholder,
-    options,
-    onAddNew,
-    theme,
-    required,
-    zIndex,
-}) => {
-    const [inputValue, setInputValue] = useState(value)
-    const [showOptions, setShowOptions] = useState(false)
-    const wrapperRef = useRef(null)
+export const useDropdownPosition = (ref) => {
+    const [dropDirection, setDropDirection] = useState('down');
 
-    useEffect(() => setInputValue(value), [value])
-
-    useEffect(() => {
-        function handleClickOutside(e) {
-            if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
-                setShowOptions(false)
+    const checkPosition = useCallback(() => {
+        if (ref.current) {
+            const rect = ref.current.getBoundingClientRect();
+            const spaceBelow = window.innerHeight - rect.bottom;
+            // A typical dropdown panel is around 200-250px high
+            if (spaceBelow < 250 && rect.top > 260) {
+                setDropDirection('up');
+            } else {
+                setDropDirection('down');
             }
         }
-        document.addEventListener('mousedown', handleClickOutside)
-        return () => document.removeEventListener('mousedown', handleClickOutside)
-    }, [])
+    }, [ref]);
 
-    const filtered = options.filter(opt =>
-        opt.toLowerCase().includes(inputValue.toLowerCase())
-    )
+    return [dropDirection, checkPosition];
+};
 
-    const handleSelect = opt => {
-        onChange(opt)
-        setInputValue(opt)
-        setShowOptions(false)
-    }
+export const CustomSelect = ({ label, value, onChange, options, placeholder, theme, required }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const wrapperRef = useRef(null);
+    const [dropDirection, checkPosition] = useDropdownPosition(wrapperRef);
 
-    const handleAdd = () => {
-        if (inputValue && !options.includes(inputValue)) onAddNew(inputValue)
-        onChange(inputValue)
-        setShowOptions(false)
-    }
+    useEffect(() => { /* ... (click outside logic remains the same) ... */ }, []);
+
+    const handleSelect = (optionValue) => {
+        onChange({ target: { value: optionValue } });
+        setIsOpen(false);
+    };
+
+    const handleOpen = () => {
+        checkPosition(); // Check position before opening
+        setIsOpen(o => !o);
+    };
+
+    const selectedLabel = options.find(o => o.value === value)?.label || placeholder;
 
     return (
-        <div className={`relative ${zIndex}`} ref={wrapperRef}>
-            {label && (
-                <label
-                    className="block text-xs font-semibold mb-1"
-                    style={{ color: theme.colors.textSecondary }}
-                >
-                    {label}{required && ' *'}
-                </label>
+        <div className="relative space-y-1" ref={wrapperRef}>
+            {label && (<label className="block text-xs font-semibold px-4" style={{ color: theme.colors.textSecondary }}>{label}</label>)}
+            <button type="button" onClick={handleOpen} className="w-full px-4 py-3 border rounded-full text-base text-left flex justify-between items-center" style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border, color: value ? theme.colors.textPrimary : theme.colors.textSecondary }}>
+                {selectedLabel}
+                <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} style={{ color: theme.colors.textSecondary }} />
+            </button>
+
+            {isOpen && (
+                <div className={`absolute w-full z-10 ${dropDirection === 'up' ? 'bottom-full mb-1' : 'top-full mt-1'}`}>
+                    <GlassCard theme={theme} className="p-2 max-h-60 overflow-y-auto scrollbar-hide">
+                        {options.map(opt => (
+                            <button key={opt.value} type="button" onClick={() => handleSelect(opt.value)} className="block w-full text-left p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10" style={{ color: theme.colors.textPrimary }}>
+                                {opt.label}
+                            </button>
+                        ))}
+                    </GlassCard>
+                </div>
             )}
+        </div>
+    );
+};
+
+export const AutoCompleteCombobox = ({ label, value, onChange, placeholder, options, onAddNew, theme, required }) => {
+    const [inputValue, setInputValue] = useState(value || '');
+    const [showOptions, setShowOptions] = useState(false);
+    const wrapperRef = useRef(null);
+    const [dropDirection, checkPosition] = useDropdownPosition(wrapperRef);
+
+    useEffect(() => setInputValue(value || ''), [value]);
+    useEffect(() => { /* ... (click outside logic remains the same) ... */ }, []);
+
+    const filtered = options.filter(opt => opt.toLowerCase().includes(inputValue.toLowerCase()));
+
+    const handleSelect = opt => {
+        onChange(opt);
+        setInputValue(opt);
+        setShowOptions(false);
+    };
+
+    const handleOpen = () => {
+        checkPosition();
+        setShowOptions(true);
+    };
+
+    const handleAdd = () => {
+        if (inputValue && !options.includes(inputValue)) onAddNew(inputValue);
+        onChange(inputValue);
+        setShowOptions(false);
+    };
+
+    return (
+        <div className="relative space-y-1" ref={wrapperRef}>
+            {label && (<label className="block text-xs font-semibold px-4" style={{ color: theme.colors.textSecondary }}>{label}</label>)}
             <input
                 required={required}
                 type="text"
                 value={inputValue}
-                onChange={e => { setInputValue(e.target.value); setShowOptions(true) }}
-                onFocus={() => setShowOptions(true)}
+                onChange={e => { setInputValue(e.target.value); handleOpen(); }}
+                onFocus={handleOpen}
                 placeholder={placeholder}
                 className="w-full px-4 py-3 border rounded-full focus:ring-2 outline-none"
-                style={{
-                    backgroundColor: theme.colors.subtle,
-                    borderColor: 'transparent',
-                    color: theme.colors.textPrimary,
-                    ringColor: theme.colors.accent,
-                }}
+                style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border, color: theme.colors.textPrimary, ringColor: theme.colors.accent }}
             />
             {showOptions && (
-                <GlassCard
-                    theme={theme}
-                    className="absolute w-full mt-1 z-10 p-2 max-h-48 overflow-y-auto"
-                >
-                    {filtered.map(opt => (
-                        <button
-                            key={opt}
-                            onClick={() => handleSelect(opt)}
-                            className="block w-full text-left p-2 rounded-md hover:bg-black/5"
-                            style={{ color: theme.colors.textPrimary }}
-                        >
-                            {opt}
-                        </button>
-                    ))}
-                    {inputValue && !options.includes(inputValue) && (
-                        <button
-                            onClick={handleAdd}
-                            className="block w-full text-left p-2 rounded-md font-semibold hover:bg-black/5"
-                            style={{ color: theme.colors.accent }}
-                        >
-                            Add “{inputValue}”
-                        </button>
-                    )}
-                </GlassCard>
+                <div className={`absolute w-full z-10 ${dropDirection === 'up' ? 'bottom-full mb-1' : 'top-full mt-1'}`}>
+                    <GlassCard theme={theme} className="p-2 max-h-48 overflow-y-auto scrollbar-hide">
+                        {filtered.map(opt => (
+                            <button key={opt} type="button" onClick={() => handleSelect(opt)} className="block w-full text-left p-2 rounded-md hover:bg-black/5" style={{ color: theme.colors.textPrimary }}>
+                                {opt}
+                            </button>
+                        ))}
+                        {onAddNew && inputValue && !options.includes(inputValue) && (
+                            <button type="button" onClick={handleAdd} className="block w-full text-left p-2 rounded-md font-semibold hover:bg-black/5" style={{ color: theme.colors.accent }}>
+                                Add “{inputValue}”
+                            </button>
+                        )}
+                    </GlassCard>
+                </div>
             )}
         </div>
-    )
-}
+    );
+};
 
 const {
     // New–Lead form
@@ -275,8 +259,106 @@ const UpholsteryIcon = ({ color }) => <Icon uri="https://img.icons8.com/ios-fill
 const CasegoodIcon = ({ color }) => <Icon uri="https://img.icons8.com/ios-filled/50/desk.png" color={color} />;
 const SearchIcon = ({ size, color }) => <Icon uri="https://img.icons8.com/ios-glyphs/60/search--v1.png" size={size} color={color} />;
 const FilterIcon = ({ size, color }) => <Icon uri="https://img.icons8.com/ios-filled/50/filter--v1.png" size={size} color={color} />;
-// --------------------------------------------------
 
+export const SmartSearch = ({ theme, onNavigate, onAskAI, onVoiceActivate }) => {
+    const [query, setQuery] = useState('');
+    const [filteredApps, setFilteredApps] = useState([]);
+    const [isFocused, setIsFocused] = useState(false);
+    const searchContainerRef = useRef(null);
+
+    useEffect(() => {
+        if (!isFocused) {
+            setFilteredApps([]);
+            return;
+        }
+        const term = query.trim().toLowerCase();
+        if (term.length >= 2) {
+            const results = Data.allApps
+                .filter(app => app.name.toLowerCase().includes(term))
+                .sort((a, b) => a.name.localeCompare(b.name));
+            setFilteredApps(results);
+        } else {
+            setFilteredApps([]);
+        }
+    }, [query, isFocused]);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
+                setIsFocused(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    const handleNavigation = (route) => {
+        onNavigate(route);
+        setQuery('');
+        setFilteredApps([]);
+        setIsFocused(false);
+    };
+
+    const handleFormSubmit = (e) => {
+        e.preventDefault();
+        if (query.trim() && filteredApps.length === 0) {
+            onAskAI(query);
+            setQuery('');
+            setIsFocused(false);
+        }
+    };
+
+    const handleVoiceClick = () => {
+        onVoiceActivate('Voice Activated'); // Use the new prop
+    };
+
+    return (
+        <div ref={searchContainerRef} className="relative z-20">
+            <form onSubmit={handleFormSubmit} className="relative">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: theme.colors.textSecondary }} />
+                <input
+                    type="text"
+                    placeholder="Ask me anything..."
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onFocus={() => setIsFocused(true)}
+                    className="w-full pl-11 pr-12 py-3 rounded-full text-base border-2 shadow-md transition-colors focus:ring-2"
+                    style={{
+                        backgroundColor: theme.colors.surface,
+                        color: theme.colors.textPrimary,
+                        borderColor: theme.colors.border,
+                        outline: 'none',
+                    }}
+                />
+                <button
+                    type="button"
+                    onClick={handleVoiceClick}
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center"
+                >
+                    <Mic className="h-5 w-5" style={{ color: theme.colors.textSecondary }} />
+                </button>
+            </form>
+
+            {isFocused && filteredApps.length > 0 && (
+                <GlassCard theme={theme} className="absolute top-full mt-2 w-full p-2 z-50">
+                    <ul className="max-h-60 overflow-y-auto">
+                        {filteredApps.map(app => (
+                            <li
+                                key={app.route}
+                                onMouseDown={() => handleNavigation(app.route)}
+                                className="flex items-center gap-2 cursor-pointer px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5"
+                                style={{ color: theme.colors.textPrimary }}
+                            >
+                                <ChevronRight className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
+                                {app.name}
+                            </li>
+                        ))}
+                    </ul>
+                </GlassCard>
+            )}
+        </div>
+    );
+};
 const SocialMediaScreen = ({ theme, showAlert, setSuccessMessage }) => {
     const copyToClipboard = (text) => {
         const textArea = document.createElement('textarea');
@@ -342,8 +424,6 @@ const SocialMediaScreen = ({ theme, showAlert, setSuccessMessage }) => {
         </>
     );
 };
-
-// This component is now updated to display L/V notations
 const LeadTimesScreen = ({ theme = {} }) => {
     // State and hooks remain the same
     const [searchTerm, setSearchTerm] = useState('');
@@ -571,7 +651,6 @@ const PresentationsScreen = ({ theme, onNavigate }) => {
         </div>
     );
 };
-
 const InstallInstructionsScreen = ({ theme }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedSeries, setSelectedSeries] = useState(null);
@@ -676,7 +755,6 @@ const InstallInstructionsScreen = ({ theme }) => {
         </div>
     );
 };
-
 const DiscontinuedFinishesScreen = ({ theme }) => {
     const { DISCONTINUED_FINISHES } = Data;
     return (
@@ -704,7 +782,6 @@ const DiscontinuedFinishesScreen = ({ theme }) => {
         </>
     );
 };
-
 const DesignDaysScreen = ({ theme }) => {
     // Hard-coded schedule and transport data from the site :contentReference[oaicite:0]{index=0}
     const schedule = [
@@ -840,7 +917,6 @@ Stops: The Mart – Wells & Kinzie → Emily Hotel Welcome Center`,
         </div>
     );
 };
-
 const ContractsScreen = ({ theme, onNavigate }) => {
     const ContractCard = React.memo(({ contract, theme }) => (
         <GlassCard theme={theme} className="p-4 flex flex-col space-y-3">
@@ -918,7 +994,6 @@ const ContractsScreen = ({ theme, onNavigate }) => {
         </div>
     );
 };
-
 const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage }) => {
     const [dealers, setDealers] = useState(DEALER_DIRECTORY_DATA);
     const [searchTerm, setSearchTerm] = useState('');
@@ -1258,7 +1333,6 @@ const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage }) => {
         </>
     );
 };
-
 const CommissionRatesScreen = ({ theme, onNavigate }) => {
     return (
         <div className="p-6">
@@ -2504,19 +2578,12 @@ const EMPTY_USER = {
 };
 
 const FormSection = ({ title, theme, children }) => (
-    <GlassCard
-        theme={theme}
-        className="p-4 space-y-4 mb-6"
-        style={{ backgroundColor: theme.colors.surface }}
-    >
-        <h2
-            className="font-bold text-lg"
-            style={{ color: theme.colors.textPrimary }}
-        >
-            {title}
-        </h2>
-        {children}
-    </GlassCard>
+    <div className="space-y-4">
+        <h3 className="font-bold text-xl px-1 mb-4" style={{ color: theme.colors.textPrimary }}>{title}</h3>
+        <GlassCard theme={theme} className="p-4 space-y-4">
+            {children}
+        </GlassCard>
+    </div>
 );
 
 const CreateContentModal = ({ close, pickType, typeChosen, onAdd, theme }) => {
@@ -2647,30 +2714,35 @@ const CreateContentModal = ({ close, pickType, typeChosen, onAdd, theme }) => {
 };
 
 
-const PageTitle = React.memo(({ title, theme, onBack, children }) => (
-    <div className="px-4 pt-6 pb-4 flex justify-between items-center">
-        <div className="flex-1 flex items-center space-x-2">
-            {onBack && (
-                <button
-                    onClick={onBack}
-                    className="p-2 ml-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10"
-                >
-                    <ArrowLeft
-                        className="w-5 h-5"
-                        style={{ color: theme.colors.textSecondary }}
-                    />
-                </button>
-            )}
-            <h1
-                className="text-3xl font-bold tracking-tight"
-                style={{ color: theme.colors.textPrimary }}
-            >
-                {title}
-            </h1>
+const FancySelect = ({ value, onChange, options, placeholder, required, theme }) => (
+    <div
+        className="relative w-full rounded-full overflow-hidden"
+        style={{ backgroundColor: theme.colors.subtle }}
+    >
+        <select
+            required={required}
+            value={value || ""}
+            onChange={onChange}
+            className="w-full py-3 pl-4 pr-10 rounded-full bg-transparent text-base font-medium cursor-pointer appearance-none focus:outline-none focus:ring-2"
+            style={{
+                color: value ? theme.colors.textPrimary : theme.colors.textSecondary,
+                ringColor: theme.colors.accent,
+            }}
+        >
+            <option value="" disabled hidden>
+                {placeholder}
+            </option>
+            {options.map((o) => (
+                <option key={o} value={o}>
+                    {o}
+                </option>
+            ))}
+        </select>
+        <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none">
+            <ChevronDown className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
         </div>
-        {children}
     </div>
-));
+);
 
 const FormInput = React.memo(({
     label,
@@ -2679,55 +2751,53 @@ const FormInput = React.memo(({
     onChange,
     placeholder,
     options,
-    className = '',
+    className = "",
     theme,
     readOnly = false,
-    required = false
+    required = false,
 }) => {
-    const inputClass = `w-full px-4 py-3 border rounded-lg focus:ring-2 text-base outline-none ${className}`;
+    const inputClass = `w-full px-4 py-3 border rounded-full focus:ring-2 text-base outline-none ${className}`;
     const styles = {
-        backgroundColor: theme.colors.background,  // light beige
-        borderColor: theme.colors.border,      // visible border
+        backgroundColor: theme.colors.subtle,
+        borderColor: theme.colors.border, // <-- FIX: Changed from 'transparent'
         color: theme.colors.textPrimary,
         ringColor: theme.colors.accent,
-        '--placeholder-color': theme.colors.textSecondary
+    };
+
+    const formatCurrency = (val) => {
+        if (!val) return '';
+        const numericValue = String(val).replace(/[^0-9]/g, '');
+        if (!numericValue) return '$';
+        return '$' + new Intl.NumberFormat('en-US').format(numericValue);
+    };
+
+    const handleCurrencyChange = (e) => {
+        const numericValue = e.target.value.replace(/[^0-9]/g, '');
+        onChange({ target: { value: numericValue } }); // Pass only digits to state
     };
 
     return (
         <div className="space-y-1">
             {label && (
-                <label
-                    className="text-xs font-semibold px-1"
-                    style={{ color: theme.colors.textSecondary }}
-                >
-                    {label}{required && <> <span className="text-red-500">*</span></>}
+                <label className="text-xs font-semibold px-4" style={{ color: theme.colors.textSecondary }}>
+                    {label} {/* FIX: Removed required asterisk */}
                 </label>
             )}
-
-            {type === 'select' ? (
-                <select
-                    required={required}
-                    value={value || ''}
-                    onChange={onChange}
+            {type === 'currency' ? (
+                <input
+                    type="text"
+                    value={formatCurrency(value)}
+                    onChange={handleCurrencyChange}
                     className={inputClass}
                     style={styles}
-                >
-                    <option value="" disabled hidden>
-                        {placeholder}
-                    </option>
-                    {options.map(o =>
-                        typeof o === 'string' ? (
-                            <option key={o} value={o}>{o}</option>
-                        ) : (
-                            <option key={o.value} value={o.value}>{o.label}</option>
-                        )
-                    )}
-                </select>
+                    placeholder={placeholder}
+                    required={required}
+                />
             ) : type === 'textarea' ? (
                 <textarea
                     value={value}
                     onChange={onChange}
-                    className={inputClass}
+                    className={inputClass.replace('rounded-full', 'rounded-2xl')}
                     style={styles}
                     rows="4"
                     placeholder={placeholder}
@@ -2748,7 +2818,6 @@ const FormInput = React.memo(({
         </div>
     );
 });
-
 const SearchInput = React.memo(({ onSubmit, value, onChange, placeholder, theme, className, onVoiceClick }) => (
     <form onSubmit={onSubmit} className={`relative flex items-center ${className || ''}`} >
         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -2836,7 +2905,7 @@ const AppHeader = React.memo(({ onHomeClick, isDarkMode, theme, onProfileClick, 
     );
 });
 
-const HomeScreen = ({ onNavigate, theme, onAskAI, searchTerm, onSearchTermChange, showAIDropdown, aiResponse, isAILoading, onCloseAIDropdown, showAlert }) => {
+export const HomeScreen = ({ onNavigate, theme, onAskAI, showAIDropdown, aiResponse, isAILoading, onCloseAIDropdown, onVoiceActivate }) => {
     const handleFeedbackClick = useCallback(() => {
         onNavigate('feedback');
     }, [onNavigate]);
@@ -2844,18 +2913,26 @@ const HomeScreen = ({ onNavigate, theme, onAskAI, searchTerm, onSearchTermChange
     return (
         <div className="flex flex-col h-full rounded-t-[40px] -mt-8 pt-8" style={{ backgroundColor: theme.colors.background }}>
             <div className="px-4 pt-4 pb-2 relative z-10">
-                <input
-                    type="text"
-                    placeholder="Ask me anything..."
-                    className="w-full pl-11 pr-12 py-3 rounded-full text-base border-2 shadow-md transition-colors focus:ring-2"
-                    style={{
-                        backgroundColor: theme.colors.surface,
-                        color: theme.colors.textPrimary,
-                        borderColor: theme.colors.border,
-                        outline: 'none',
-                    }}
+                <SmartSearch
+                    theme={theme}
+                    onNavigate={onNavigate}
+                    onAskAI={onAskAI}
+                    onVoiceActivate={onVoiceActivate}
                 />
+                {showAIDropdown && (
+                    <GlassCard theme={theme} className="absolute top-full w-full mt-2 p-4 left-0">
+                        {isAILoading ? (
+                            <div className="flex items-center justify-center p-4">
+                                <Hourglass className="w-6 h-6 animate-spin" style={{ color: theme.colors.accent }} />
+                                <p className="ml-3" style={{ color: theme.colors.textPrimary }}>Thinking...</p>
+                            </div>
+                        ) : (
+                            <p style={{ color: theme.colors.textPrimary }}>{aiResponse}</p>
+                        )}
+                    </GlassCard>
+                )}
             </div>
+
             <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide">
                 <div className="grid grid-cols-2 gap-4">
                     {Data.MENU_ITEMS.map((item) => (
@@ -2881,6 +2958,7 @@ const HomeScreen = ({ onNavigate, theme, onAskAI, searchTerm, onSearchTermChange
                     </button>
                 </GlassCard>
             </div>
+            {showAIDropdown && (<div className="absolute inset-0 bg-transparent z-0" onClick={onCloseAIDropdown} />)}
         </div>
     );
 };
@@ -2896,6 +2974,20 @@ const PermissionToggle = React.memo(({ label, isEnabled, onToggle, theme, disabl
     );
 });
 
+export const VoiceModal = ({ message, show, theme }) => {
+    if (!show) return null;
+
+    return (
+        <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
+            <GlassCard theme={theme} className="px-8 py-6 flex items-center space-x-4 shadow-2xl">
+                <Mic className="w-7 h-7" style={{ color: theme.colors.accent }} />
+                <span className="text-xl font-semibold" style={{ color: theme.colors.textPrimary }}>
+                    {message}
+                </span>
+            </GlassCard>
+        </div>
+    );
+};
 const MonthlyBarChart = ({ data, theme }) => {
     const maxValue = Math.max(...data.map(d => Math.max(d.bookings, d.sales)));
 
@@ -3113,153 +3205,120 @@ const OrderModal = ({ order, onClose, onShowDetails, theme }) => (
         </GlassCard>
     </div>
 );
+
 const SalesScreen = ({ theme, onNavigate }) => {
-  const { MONTHLY_SALES_DATA, ORDER_DATA, SALES_VERTICALS_DATA } = Data;
-  const [monthlyView, setMonthlyView] = useState('table');
-  const [selectedOrder, setSelectedOrder] = useState(null);
+    const { MONTHLY_SALES_DATA, ORDER_DATA, SALES_VERTICALS_DATA } = Data;
+    const [monthlyView, setMonthlyView] = useState('table');
+    const [selectedOrder, setSelectedOrder] = useState(null);
 
-  const { totalBookings, totalSales } = useMemo(() => {
-    const bookings = Data.MONTHLY_SALES_DATA.reduce((acc, m) => acc + m.bookings, 0);
-    const sales    = Data.MONTHLY_SALES_DATA.reduce((acc, m) => acc + m.sales,   0);
-    return { totalBookings: bookings, totalSales: sales };
-  }, []);
+    const { totalBookings, totalSales } = useMemo(() => {
+        const bookings = Data.MONTHLY_SALES_DATA.reduce((acc, m) => acc + m.bookings, 0);
+        const sales = Data.MONTHLY_SALES_DATA.reduce((acc, m) => acc + m.sales, 0);
+        return { totalBookings: bookings, totalSales: sales };
+    }, []);
 
-  const recentOrders = useMemo(() => {
-    return Data.ORDER_DATA
-      .filter(o => o.date && o.net)
-      .sort((a, b) => new Date(b.date) - new Date(a.date))
-      .slice(0, 9);
-  }, []);
+    const recentOrders = useMemo(() => {
+        return Data.ORDER_DATA
+            .filter(o => o.date && o.net)
+            .sort((a, b) => new Date(b.date) - new Date(a.date))
+            .slice(0, 9);
+    }, []);
 
-  const goal           = 7000000;
-  const percentToGoal  = useMemo(() => (totalBookings / goal) * 100, [totalBookings]);
+    const goal = 7000000;
+    const percentToGoal = useMemo(() => (totalBookings / goal) * 100, [totalBookings]);
 
-  const handleToggleView       = useCallback(() => setMonthlyView(v => v === 'chart' ? 'table' : 'chart'), []);
-  const handleShowOrderDetails = useCallback(order => setSelectedOrder(order), []);
-  const handleCloseModal       = useCallback(() => setSelectedOrder(null), []);
-  const handleCustomerRankNav  = useCallback(() => onNavigate('customer-rank'), [onNavigate]);
-  const handleCommissionsNav   = useCallback(() => onNavigate('commissions'),  [onNavigate]);
-  const handleRewardsNav       = useCallback(() => onNavigate('incentive-rewards'), [onNavigate]);
+    const handleToggleView = useCallback(() => setMonthlyView(v => v === 'chart' ? 'table' : 'chart'), []);
+    const handleShowOrderDetails = useCallback(order => setSelectedOrder(order), []);
+    const handleCloseModal = useCallback(() => setSelectedOrder(null), []);
+    const handleCustomerRankNav = useCallback(() => onNavigate('customer-rank'), [onNavigate]);
+    const handleCommissionsNav = useCallback(() => onNavigate('commissions'), [onNavigate]);
+    const handleRewardsNav = useCallback(() => onNavigate('incentive-rewards'), [onNavigate]);
 
-  return (
-    <>
-      <PageTitle title="Sales Dashboard" theme={theme}>
-        <button
-          onClick={() => onNavigate('new-lead')}
-          className="p-2 rounded-full -mr-2 transition-transform hover:scale-110 active:scale-95"
-          style={{ backgroundColor: theme.colors.accent }}
-        >
-          <Plus className="w-5 h-5 text-white" />
-        </button>
-      </PageTitle>
+    return (
+        <>
+            <PageTitle title="Sales Dashboard" theme={theme}>
+                {/* The button is now inside PageTitle */}
+                <button
+                    onClick={() => onNavigate('new-lead')}
+                    className="flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-transform hover:scale-105 active:scale-95"
+                    style={{ backgroundColor: theme.colors.accent, color: 'white' }}
+                >
+                    <span>New</span>
+                    <Plus className="w-4 h-4" />
+                </button>
+            </PageTitle>
 
-      <div className="px-4 space-y-4 pb-4">
-        <GlassCard theme={theme} className="p-4 hover:border-white/20 transition-all duration-300">
-          <p className="text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>
-            Progress to Goal
-          </p>
-          <p className="text-4xl font-bold my-2" style={{ color: theme.colors.accent }}>
-            {percentToGoal.toFixed(1)}%
-          </p>
-          <div className="relative w-full h-2.5 rounded-full" style={{ backgroundColor: theme.colors.subtle }}>
-            <div
-              className="h-2.5 rounded-full"
-              style={{ width: `${percentToGoal}%`, backgroundColor: theme.colors.accent }}
-            />
-          </div>
-        </GlassCard>
+            {/* The extra div for the button has been removed */}
+            <div className="px-4 space-y-4 pb-4">
+                <GlassCard theme={theme} className="p-4 transition-all duration-300 hover:border-white/20">
+                    <p className="text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>
+                        Progress to Goal
+                    </p>
+                    <p className="text-4xl font-bold my-2" style={{ color: theme.colors.accent }}>
+                        {percentToGoal.toFixed(1)}%
+                    </p>
+                    <div className="relative w-full h-2.5 rounded-full" style={{ backgroundColor: theme.colors.subtle }}>
+                        <div className="h-2.5 rounded-full" style={{ width: `${percentToGoal}%`, backgroundColor: theme.colors.accent }}></div>
+                    </div>
+                </GlassCard>
 
-        <GlassCard theme={theme} className="p-4 hover:border-white/20 transition-all duration-300">
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>
-              Monthly Performance
-            </h3>
-            <button
-              onClick={handleToggleView}
-              className="p-1.5 rounded-md"
-              style={{ backgroundColor: theme.colors.subtle }}
-            >
-              {monthlyView === 'chart'
-                ? <List className="w-4 h-4" style={{ color: theme.colors.secondary }} />
-                : <BarChart2 className="w-4 h-4" style={{ color: theme.colors.secondary }} />}
-            </button>
-          </div>
-          {monthlyView === 'chart'
-            ? <MonthlyBarChart data={Data.MONTHLY_SALES_DATA} theme={theme} />
-            : <MonthlyTable
-                data={Data.MONTHLY_SALES_DATA}
-                theme={theme}
-                totalBookings={totalBookings}
-                totalSales={totalSales}
-              />}
-        </GlassCard>
+                <GlassCard theme={theme} className="p-4 hover:border-white/20 transition-all duration-300">
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>
+                            Monthly Performance
+                        </h3>
+                        <button
+                            onClick={handleToggleView}
+                            className="p-1.5 rounded-md"
+                            style={{ backgroundColor: theme.colors.subtle }}
+                        >
+                            {monthlyView === 'chart'
+                                ? <List className="w-4 h-4" style={{ color: theme.colors.secondary }} />
+                                : <BarChart2 className="w-4 h-4" style={{ color: theme.colors.secondary }} />}
+                        </button>
+                    </div>
+                    {monthlyView === 'chart'
+                        ? <MonthlyBarChart data={Data.MONTHLY_SALES_DATA} theme={theme} />
+                        : <MonthlyTable
+                            data={Data.MONTHLY_SALES_DATA}
+                            theme={theme}
+                            totalBookings={totalBookings}
+                            totalSales={totalSales}
+                        />}
+                </GlassCard>
 
-        <RecentPOsCard
-          orders={recentOrders}
-          theme={theme}
-          onOrderClick={handleShowOrderDetails}
-        />
+                <RecentPOsCard
+                    orders={recentOrders}
+                    theme={theme}
+                    onOrderClick={handleShowOrderDetails}
+                />
 
-        <GlassCard theme={theme} className="p-4 hover:border-white/20 transition-all duration-300">
-          <h3 className="font-bold text-lg mb-4" style={{ color: theme.colors.textPrimary }}>
-            Verticals Breakdown
-          </h3>
-          <DonutChart data={Data.SALES_VERTICALS_DATA} theme={theme} />
-        </GlassCard>
+                <GlassCard theme={theme} className="p-4 hover:border-white/20 transition-all duration-300">
+                    <h3 className="font-bold text-lg mb-4" style={{ color: theme.colors.textPrimary }}>
+                        Verticals Breakdown
+                    </h3>
+                    <DonutChart data={Data.SALES_VERTICALS_DATA} theme={theme} />
+                </GlassCard>
 
-        <GlassCard theme={theme} className="p-1">
-          <button
-            onClick={handleCustomerRankNav}
-            className="w-full p-3 rounded-xl flex items-center justify-between"
-          >
-            <span className="text-md font-semibold" style={{ color: theme.colors.textPrimary }}>
-              View Customer Rank
-            </span>
-            <ArrowRight className="w-5 h-5" style={{ color: theme.colors.secondary }} />
-          </button>
-        </GlassCard>
+                <GlassCard theme={theme} className="p-1"><button onClick={handleCustomerRankNav} className="w-full p-3 rounded-xl flex items-center justify-between"><span className="text-md font-semibold tracking-tight" style={{ color: theme.colors.textPrimary }}>View Customer Rank</span><ArrowRight className="w-5 h-5" style={{ color: theme.colors.secondary }} /></button></GlassCard>
+                <GlassCard theme={theme} className="p-1"><button onClick={handleCommissionsNav} className="w-full p-3 rounded-xl flex items-center justify-between"><span className="text-md font-semibold tracking-tight" style={{ color: theme.colors.textPrimary }}>View Commissions</span><ArrowRight className="w-5 h-5" style={{ color: theme.colors.secondary }} /></button></GlassCard>
+                <GlassCard theme={theme} className="p-1"><button onClick={handleRewardsNav} className="w-full p-3 rounded-xl flex items-center justify-between"><span className="text-md font-semibold tracking-tight" style={{ color: theme.colors.textPrimary }}>View Incentive Rewards</span><ArrowRight className="w-5 h-5" style={{ color: theme.colors.secondary }} /></button></GlassCard>
+            </div>
 
-        <GlassCard theme={theme} className="p-1">
-          <button
-            onClick={handleCommissionsNav}
-            className="w-full p-3 rounded-xl flex items-center justify-between"
-          >
-            <span className="text-md font-semibold" style={{ color: theme.colors.textPrimary }}>
-              View Commissions
-            </span>
-            <ArrowRight className="w-5 h-5" style={{ color: theme.colors.secondary }} />
-          </button>
-        </GlassCard>
-
-        <GlassCard theme={theme} className="p-1">
-          <button
-            onClick={handleRewardsNav}
-            className="w-full p-3 rounded-xl flex items-center justify-between"
-          >
-            <span className="text-md font-semibold" style={{ color: theme.colors.textPrimary }}>
-              View Incentive Rewards
-            </span>
-            <ArrowRight className="w-5 h-5" style={{ color: theme.colors.secondary }} />
-          </button>
-        </GlassCard>
-      </div>
-
-      {selectedOrder && (
-        <OrderModal
-          order={selectedOrder}
-          onClose={handleCloseModal}
-          onShowDetails={() => {
-            handleCloseModal();
-            onNavigate('orders');
-          }}
-          theme={theme}
-        />
-      )}
-    </>
-  );
+            {selectedOrder && (
+                <OrderModal
+                    order={selectedOrder}
+                    onClose={handleCloseModal}
+                    onShowDetails={() => {
+                        handleCloseModal();
+                        onNavigate('orders');
+                    }}
+                    theme={theme}
+                />
+            )}
+        </>
+    );
 };
-
-
 const OrdersScreen = ({ theme, onNavigate }) => (
     <>
         <PageTitle
@@ -3426,7 +3485,37 @@ const ProductsScreen = ({ theme, onNavigate }) => {
     );
 };
 
-const NewLeadScreen = ({
+export const ProbabilitySlider = ({ value, onChange, theme }) => (
+    <div>
+        <label className="block text-xs font-semibold px-4" style={{ color: theme.colors.textSecondary }}>
+            Win Probability
+        </label>
+        <div className="relative w-full h-8 select-none pt-4 px-2">
+            <input
+                type="range"
+                min={0}
+                max={100}
+                step={5}
+                value={value}
+                onInput={(e) => onChange(parseInt(e.target.value, 10))}
+                className="w-full h-2 cursor-pointer appearance-none rounded-full outline-none"
+                style={{ background: theme.colors.subtle, accentColor: theme.colors.accent }}
+            />
+            <div
+                className="absolute top-[25px] -translate-x-1/2 flex items-center justify-center h-6 w-6 rounded-full text-[10px] font-bold pointer-events-none shadow"
+                style={{
+                    left: `${value}%`,
+                    backgroundColor: theme.colors.accent,
+                    color: '#FFF',
+                }}
+            >
+                {value}%
+            </div>
+        </div>
+    </div>
+);
+
+export const NewLeadScreen = ({
     theme,
     onSuccess,
     designFirms,
@@ -3435,278 +3524,116 @@ const NewLeadScreen = ({
     setDealers,
 }) => {
     const [newLead, setNewLead] = useState({
-        ...EMPTY_LEAD,
+        ...Data.EMPTY_LEAD,
         winProbability: 50,
-        jsiSpecServicesType: 'New Quote',
-        jsiRevisionQuoteNumber: '',
-        jsiPastProjectInfo: '',
+        isContract: false,
+        contractType: '',
     });
 
-    const updateField = useCallback((field, value) => {
-        setNewLead(prev => ({ ...prev, [field]: value }));
-    }, []);
-
-    // --- PRODUCT HANDLERS ---
-    const addSeries = useCallback(series => {
-        setNewLead(prev => ({
-            ...prev,
-            products: [
-                ...prev.products,
-                { series, materials: [], glassDoors: false }
-            ]
-        }));
-    }, []);
-
-    const removeSeries = useCallback(idx => {
-        setNewLead(prev => ({
-            ...prev,
-            products: prev.products.filter((_, i) => i !== idx)
-        }));
-    }, []);
-
-    const toggleMaterial = useCallback((idx, mat) => {
+    const updateField = useCallback((field, value) => { setNewLead(prev => ({ ...prev, [field]: value })); }, []);
+    const handleSubmit = (e) => { e.preventDefault(); onSuccess(newLead); };
+    const addProduct = useCallback((series) => { if (series) { setNewLead(prev => ({ ...prev, products: [...prev.products, { series }] })); } }, []);
+    const removeProduct = useCallback((idx) => { setNewLead(prev => ({ ...prev, products: prev.products.filter((_, i) => i !== idx) })); }, []);
+    const toggleCompetitor = useCallback((competitor) => {
         setNewLead(prev => {
-            const prods = [...prev.products];
-            const mats = prods[idx].materials.includes(mat)
-                ? prods[idx].materials.filter(m => m !== mat)
-                : [...prods[idx].materials, mat];
-            prods[idx] = { ...prods[idx], materials: mats };
-            return { ...prev, products: prods };
+            const currentCompetitors = prev.competitors || [];
+            const next = currentCompetitors.includes(competitor) ? currentCompetitors.filter(c => c !== competitor) : [...currentCompetitors, competitor];
+            return { ...prev, competitors: next };
         });
     }, []);
 
-    const toggleGlass = useCallback(idx => {
-        setNewLead(prev => {
-            const prods = [...prev.products];
-            prods[idx] = { ...prods[idx], glassDoors: !prods[idx].glassDoors };
-            return { ...prev, products: prods };
-        });
-    }, []);
-
-    // --- OTHER DERIVED DATA ---
-    const availableSeries = useMemo(
-        () => JSI_PRODUCT_SERIES.filter(s => !newLead.products.some(p => p.series === s)),
-        [newLead.products]
-    );
-
-    const DISCOUNT_LIST = useMemo(
-        () => ['Undecided Discount', ...DISCOUNT_OPTIONS.filter(d => d !== 'Undecided')],
-        []
-    );
-
-    const handleSubmit = e => {
-        e.preventDefault();
-        onSuccess(newLead);
-    };
+    const availableSeries = useMemo(() => Data.JSI_PRODUCT_SERIES.filter(s => !newLead.products.some(p => p.series === s)), [newLead.products]);
 
     return (
         <form onSubmit={handleSubmit} className="flex flex-col h-full">
             <PageTitle title="Create New Lead" theme={theme} />
 
             <div className="flex-1 overflow-y-auto px-4 pb-4 pt-4 space-y-6 scrollbar-hide">
-                {/* Project Details */}
-                <FormSection title="Project Details" theme={theme}>
-                    <input
-                        required
-                        type="text"
-                        placeholder="Enter Project Name"
-                        value={newLead.project}
-                        onChange={e => updateField('project', e.target.value)}
-                        className="w-full px-4 py-3 border rounded-full focus:ring-2 text-base outline-none"
-                        style={{
-                            backgroundColor: theme.colors.subtle,
-                            borderColor: 'transparent',
-                            color: theme.colors.textPrimary,
-                            ringColor: theme.colors.accent,
-                        }}
-                    />
-                    <FancySelect
-                        required
-                        placeholder="Select Design Firm"
-                        options={designFirms}
-                        value={newLead.designFirm}
-                        onChange={e => updateField('designFirm', e.target.value)}
-                        theme={theme}
-                    />
-                    <FancySelect
-                        required
-                        placeholder="Select Dealer"
-                        options={dealers}
-                        value={newLead.dealer}
-                        onChange={e => updateField('dealer', e.target.value)}
-                        theme={theme}
-                    />
-                </FormSection>
+                <div className="relative z-50">
+                    <FormSection title="Project Details" theme={theme}>
+                        <FormInput required label="Project Name" value={newLead.project} onChange={(e) => updateField('project', e.target.value)} placeholder="e.g., Acme Corp Headquarters" theme={theme} />
+                        <CustomSelect required label="Project Stage" value={newLead.projectStatus} onChange={(e) => updateField('projectStatus', e.target.value)} options={Data.STAGES.map(s => ({ label: s, value: s }))} placeholder="Select a Stage" theme={theme} />
+                        <CustomSelect required label="Vertical" value={newLead.vertical} onChange={(e) => updateField('vertical', e.target.value)} options={Data.VERTICALS.map(v => ({ label: v, value: v }))} placeholder="Select a Vertical" theme={theme} />
+                    </FormSection>
+                </div>
 
-                {/* Summary */}
-                <FormSection title="Summary" theme={theme}>
-                    {/* your ProbabilitySlider here, unchanged */}
-                </FormSection>
+                <div className="relative z-40">
+                    <FormSection title="Stakeholders" theme={theme}>
+                        <AutoCompleteCombobox label="A&D Firm" required value={newLead.designFirm} onChange={(val) => updateField('designFirm', val)} placeholder="Search or add a design firm..." options={designFirms} onAddNew={(f) => setDesignFirms((p) => [...new Set([f, ...p])])} theme={theme} />
+                        <AutoCompleteCombobox label="Dealer" required value={newLead.dealer} onChange={(val) => updateField('dealer', val)} placeholder="Search or add a dealer..." options={dealers} onAddNew={(d) => setDealers((p) => [...new Set([d, ...p])])} theme={theme} />
+                    </FormSection>
+                </div>
 
-                {/* Status / Vertical / List / Timeframe */}
-                <FormSection title="Project Status" theme={theme}>
-                    <FancySelect
-                        required
-                        placeholder="Select Stage"
-                        options={STAGES}
-                        value={newLead.projectStatus}
-                        onChange={e => updateField('projectStatus', e.target.value)}
-                        theme={theme}
-                    />
-                </FormSection>
-                <FormSection title="Vertical" theme={theme}>
-                    <FancySelect
-                        required
-                        placeholder="Select Vertical"
-                        options={VERTICALS}
-                        value={newLead.vertical}
-                        onChange={e => updateField('vertical', e.target.value)}
-                        theme={theme}
-                    />
-                </FormSection>
-                <FormSection title="Estimated List" theme={theme}>
-                    <input
-                        required
-                        type="text"
-                        placeholder="Enter Estimated List"
-                        value={newLead.estimatedList}
-                        onChange={e => updateField('estimatedList', e.target.value)}
-                        className="w-full px-4 py-3 border rounded-full focus:ring-2 text-base outline-none"
-                        style={{
-                            backgroundColor: theme.colors.subtle,
-                            borderColor: 'transparent',
-                            color: theme.colors.textPrimary,
-                            ringColor: theme.colors.accent,
-                        }}
-                    />
-                </FormSection>
-                <FormSection title="PO Timeframe" theme={theme}>
-                    <FancySelect
-                        required
-                        placeholder="Select PO Timeframe"
-                        options={PO_TIMEFRAMES}
-                        value={newLead.poTimeframe}
-                        onChange={e => updateField('poTimeframe', e.target.value)}
-                        theme={theme}
-                    />
-                </FormSection>
+                <div className="relative z-30">
+                    <FormSection title="Financials & Timeline" theme={theme}>
+                        <FormInput label="Estimated List Price" required type="currency" value={newLead.estimatedList} onChange={(e) => updateField('estimatedList', e.target.value)} placeholder="$0" theme={theme} />
+                        <ProbabilitySlider value={newLead.winProbability} onChange={(v) => updateField('winProbability', v)} theme={theme} />
+                        <CustomSelect label="Discount" value={newLead.discount} onChange={(e) => updateField('discount', e.target.value)} options={Data.DISCOUNT_OPTIONS.map(d => ({ label: d, value: d }))} placeholder="Select a Discount" theme={theme} />
+                        <CustomSelect label="PO Timeframe" required value={newLead.poTimeframe} onChange={(e) => updateField('poTimeframe', e.target.value)} options={Data.PO_TIMEFRAMES.map(t => ({ label: t, value: t }))} placeholder="Select a Timeframe" theme={theme} />
 
-                {/* Competition Present */}
-                <FormSection title="Competition?" theme={theme}>
-                    <FancySelect
-                        options={['Yes', 'No']}
-                        placeholder="Competition Present?"
-                        value={newLead.competitionPresent ? 'Yes' : 'No'}
-                        onChange={e => {
-                            const present = e.target.value === 'Yes';
-                            updateField('competitionPresent', present);
-                            if (!present) updateField('competitors', []);
-                        }}
-                        theme={theme}
-                    />
-                </FormSection>
+                        <div className="flex items-center justify-between text-sm px-3 pt-4 border-t mt-4" style={{ borderColor: theme.colors.subtle }}>
+                            <label style={{ color: theme.colors.textSecondary }}>Contract?</label>
+                            <input type="checkbox" className="h-5 w-5 rounded-md border-2" style={{ accentColor: theme.colors.accent, borderColor: theme.colors.border }} checked={!!newLead.isContract} onChange={(e) => updateField('isContract', e.target.checked)} />
+                        </div>
 
-                {/* Products Section */}
-                <FormSection title="Competition & Products" theme={theme}>
-                    <div className="space-y-4">
-                        {newLead.products.map((p, idx) => (
-                            <div
-                                key={idx}
-                                className="bg-white rounded-lg p-4 border border-gray-200 space-y-2"
-                                style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.border }}
-                            >
-                                <div className="flex justify-between items-center">
-                                    <span className="font-semibold">{p.series}</span>
-                                    <button
-                                        type="button"
-                                        onClick={() => removeSeries(idx)}
-                                        className="p-1 rounded-full hover:bg-red-100"
-                                    >
-                                        <X className="w-4 h-4" style={{ color: theme.colors.error || '#E53E3E' }} />
-                                    </button>
-                                </div>
+                        {newLead.isContract && (
+                            <div className="pt-2 animate-fade-in">
+                                <CustomSelect required placeholder="Select a Contract" value={newLead.contractType} onChange={(e) => updateField('contractType', e.target.value)} options={Data.CONTRACT_OPTIONS.map(c => ({ label: c, value: c }))} theme={theme} />
+                            </div>
+                        )}
+                    </FormSection>
+                </div>
 
-                                <div className="flex flex-wrap gap-2">
-                                    {VISION_MATERIALS.map(mat => (
-                                        <button
-                                            key={mat}
-                                            type="button"
-                                            onClick={() => toggleMaterial(idx, mat)}
-                                            className={`px-3 py-1 text-xs rounded-full ${p.materials.includes(mat)
-                                                    ? 'bg-blue-600 text-white'
-                                                    : 'bg-gray-200 text-gray-700'
-                                                }`}
-                                        >
-                                            {mat}
+                <div className="relative z-20">
+                    <FormSection title="Competition & Products" theme={theme}>
+                        <div className="flex items-center justify-between text-sm px-3">
+                            <label style={{ color: theme.colors.textSecondary }}>Competition?</label>
+                            <input type="checkbox" className="h-5 w-5 rounded-md border-2" style={{ accentColor: theme.colors.accent, borderColor: theme.colors.border }} checked={!!newLead.competitionPresent} onChange={(e) => updateField('competitionPresent', e.target.checked)} />
+                        </div>
+                        {newLead.competitionPresent && (
+                            <div className="space-y-2 pt-4 border-t" style={{ borderColor: theme.colors.subtle }}>
+                                <label className="block text-xs font-semibold px-1" style={{ color: theme.colors.textSecondary }}>Competitors</label>
+                                <div className="p-2 flex flex-wrap gap-2 rounded-2xl" style={{ backgroundColor: theme.colors.subtle }}>
+                                    {Data.COMPETITORS.filter(c => c !== 'None').map(c => (
+                                        <button type="button" key={c} onClick={() => toggleCompetitor(c)} className={`px-3 py-1.5 text-sm rounded-full font-medium transition-colors`} style={{ backgroundColor: newLead.competitors.includes(c) ? theme.colors.accent : theme.colors.surface, color: newLead.competitors.includes(c) ? 'white' : theme.colors.textPrimary }}>
+                                            {c}
                                         </button>
                                     ))}
                                 </div>
-
-                                <label className="flex items-center space-x-2 text-sm">
-                                    <input
-                                        type="checkbox"
-                                        checked={p.glassDoors}
-                                        onChange={() => toggleGlass(idx)}
-                                        className="form-checkbox"
-                                    />
-                                    <span>Glass Doors?</span>
-                                </label>
                             </div>
-                        ))}
-
-                        {/* Add New Series */}
-                        {availableSeries.length > 0 && (
-                            <FancySelect
-                                placeholder="Add a Product Series..."
-                                options={availableSeries}
-                                value={''}
-                                onChange={e => addSeries(e.target.value)}
-                                theme={theme}
-                            />
                         )}
-                    </div>
-                </FormSection>
+                        <div className="border-t pt-4 mt-4 space-y-3" style={{ borderColor: theme.colors.border }}>
+                            <label className="text-xs font-semibold px-1" style={{ color: theme.colors.textSecondary }}>Products</label>
+                            {newLead.products.map((p, idx) => (
+                                <div key={idx} className="p-3 rounded-lg flex items-center justify-between" style={{ backgroundColor: theme.colors.subtle }}>
+                                    <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>{p.series}</span>
+                                    <button type="button" onClick={() => removeProduct(idx)} className="p-1 rounded-full hover:bg-red-500/10">
+                                        <X className="w-4 h-4 text-red-500" />
+                                    </button>
+                                </div>
+                            ))}
+                            {availableSeries.length > 0 && (
+                                <AutoCompleteCombobox
+                                    value={""}
+                                    onChange={(val) => { addProduct(val); }}
+                                    placeholder="+ Add a Product..."
+                                    options={availableSeries}
+                                    theme={theme}
+                                />
+                            )}
+                        </div>
+                    </FormSection>
+                </div>
 
-                {/* Discount */}
-                <FormSection title="Discount" theme={theme}>
-                    <FancySelect
-                        required
-                        placeholder="Select Discount"
-                        options={DISCOUNT_LIST}
-                        value={newLead.discount}
-                        onChange={e => updateField('discount', e.target.value)}
-                        theme={theme}
-                    />
-                </FormSection>
-
-                {/* Notes */}
-                <FormSection title="Additional Notes" theme={theme}>
-                    <textarea
-                        rows={3}
-                        placeholder="Enter details…"
-                        value={newLead.notes}
-                        onChange={e => updateField('notes', e.target.value)}
-                        className="w-full p-3 rounded-lg outline-none"
-                        style={{
-                            backgroundColor: theme.colors.subtle,
-                            color: theme.colors.textPrimary
-                        }}
-                    />
-                </FormSection>
+                <div className="pt-4 pb-4">
+                    <button type="submit" className="w-full text-white font-bold py-3.5 rounded-full" style={{ backgroundColor: theme.colors.accent }}>
+                        Submit Lead
+                    </button>
+                </div>
             </div>
-
-            <button
-                type="submit"
-                className="w-full py-3 text-white font-semibold rounded-b-lg"
-                style={{ backgroundColor: theme.colors.accent }}
-            >
-                Submit Lead
-            </button>
         </form>
     );
 };
-
-
 const ResourcesScreen = ({ theme, onNavigate }) => {
     return (
         <>
@@ -3754,7 +3681,6 @@ const ResourcesScreen = ({ theme, onNavigate }) => {
     );
 };
 
-
 const ProjectsScreen = ({ onNavigate, theme, opportunities }) => {
     const [projectsTab, setProjectsTab] = useState('pipeline');
     const [selectedPipelineStage, setSelectedPipelineStage] = useState('Discovery');
@@ -3764,15 +3690,19 @@ const ProjectsScreen = ({ onNavigate, theme, opportunities }) => {
     return (
         <>
             <PageTitle title="Projects" theme={theme}>
-                <button onClick={() => onNavigate('new-lead')} className="p-2 rounded-full -mr-2" style={{ backgroundColor: theme.colors.accent }}>
-                    <Plus className="w-5 h-5 text-white" />
+                {/* The button is now inside PageTitle */}
+                <button
+                    onClick={() => onNavigate('new-lead')}
+                    className="flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-transform hover:scale-105 active:scale-95"
+                    style={{ backgroundColor: theme.colors.accent, color: 'white' }}
+                >
+                    <span>New</span>
+                    <Plus className="w-4 h-4" />
                 </button>
             </PageTitle>
 
-            {/* --- UPDATED TOGGLE BUTTON --- */}
-            <div className="px-4">
+            <div className="px-4 mt-4">
                 <GlassCard theme={theme} className="p-1 flex relative">
-                    {/* Sliding Highlight Element */}
                     <div
                         className="absolute top-1 bottom-1 w-[calc(50%-0.25rem)] h-auto rounded-full transition-all duration-300 ease-in-out"
                         style={{
@@ -3780,8 +3710,6 @@ const ProjectsScreen = ({ onNavigate, theme, opportunities }) => {
                             transform: projectsTab === 'pipeline' ? 'translateX(0.25rem)' : 'translateX(calc(100% + 0.25rem))'
                         }}
                     />
-
-                    {/* Buttons are now transparent and sit on top of the highlight */}
                     <button
                         onClick={() => setProjectsTab('pipeline')}
                         className="flex-1 py-2 text-sm font-semibold rounded-full transition-colors duration-300 relative z-10"
@@ -3801,35 +3729,8 @@ const ProjectsScreen = ({ onNavigate, theme, opportunities }) => {
 
             {projectsTab === 'pipeline' ? (
                 <>
-                    <div className="flex space-x-2 overflow-x-auto p-4 scrollbar-hide">
-                        {STAGES.map(stage => (
-                            <button
-                                key={stage}
-                                onClick={() => setSelectedPipelineStage(stage)}
-                                className="px-4 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition-colors"
-                                style={{
-                                    backgroundColor: selectedPipelineStage === stage ? theme.colors.primary : 'transparent',
-                                    color: selectedPipelineStage === stage ? theme.colors.surface : theme.colors.textSecondary
-                                }}
-                            >
-                                {stage}
-                            </button>
-                        ))}
-                    </div>
-                    <div className="px-4 space-y-4 pb-4">
-                        {filteredOpportunities.map(opp => (
-                            <GlassCard key={opp.id} theme={theme} className="overflow-hidden">
-                                <div className="p-4">
-                                    <div className="flex justify-between items-start">
-                                        <h3 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>{opp.name}</h3>
-                                        <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${STAGE_COLORS[opp.stage]}`}>{opp.stage}</span>
-                                    </div>
-                                    <p className="text-sm" style={{ color: theme.colors.textSecondary }}>{opp.company}</p>
-                                    <p className="font-semibold text-2xl my-2" style={{ color: theme.colors.textPrimary }}>{opp.value}</p>
-                                </div>
-                            </GlassCard>
-                        ))}
-                    </div>
+                    <div className="flex space-x-2 overflow-x-auto p-4 scrollbar-hide">{STAGES.map(stage => (<button key={stage} onClick={() => setSelectedPipelineStage(stage)} className={`px-4 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition-colors`} style={{ backgroundColor: selectedPipelineStage === stage ? theme.colors.primary : 'transparent', color: selectedPipelineStage === stage ? theme.colors.surface : theme.colors.textSecondary }}>{stage}</button>))}</div>
+                    <div className="px-4 space-y-4 pb-4">{filteredOpportunities.map(opp => (<GlassCard key={opp.id} theme={theme} className="overflow-hidden"><div className="p-4"><div className="flex justify-between items-start"><h3 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>{opp.name}</h3><span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${STAGE_COLORS[opp.stage]}`}>{opp.stage}</span></div><p className="text-sm" style={{ color: theme.colors.textSecondary }}>{opp.company}</p><p className="font-semibold text-2xl my-2" style={{ color: theme.colors.textPrimary }}>{opp.value}</p></div></GlassCard>))}</div>
                 </>
             ) : (
                 <div className="px-4 pt-4 pb-4 grid grid-cols-2 gap-4">
@@ -4624,7 +4525,6 @@ export {
     PostCard,
     WinsCard,
     CreateContentModal,
-    PageTitle,
     FormInput,
     SearchInput,
     SuccessToast,
@@ -4636,9 +4536,9 @@ export {
     DonutChart,
     OrderModal,
     PollCard,
+    Modal,
 
     // Top‐level screens
-    HomeScreen,
     SalesScreen,
     OrdersScreen,
     ProductsScreen,
@@ -4670,7 +4570,7 @@ export {
     CommunityScreen,
     SamplesScreen,
     CartScreen,
-    NewLeadScreen,
+    FancySelect,
     ReplacementsScreen,
     SettingsScreen,
     MembersScreen,

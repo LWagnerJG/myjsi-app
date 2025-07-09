@@ -123,7 +123,28 @@ export const LEAD_TIMES_DATA = [
 export const FABRICS_DATA = [{ name: 'Luxe Weave', manufacturer: 'Momentum' }, { name: 'Origin', manufacturer: 'Momentum' }, { name: 'Origin', manufacturer: 'Maharam' }, { name: 'Origin', manufacturer: 'Architex' }, { name: 'Climb', manufacturer: 'Maharam' }, { name: 'Rigid', manufacturer: 'Maharam' }, { name: 'Heritage Tweed', manufacturer: 'Traditions' }];
 
 export const allApps = [
-    { name: 'Samples', route: 'samples' }, { name: 'Request Replacement', route: 'replacements' }, { name: 'Community', route: 'community' }, { name: 'Lead Times', route: 'lead-times' }, { name: 'Products', route: 'products' }, { name: 'Orders', route: 'orders' }, { name: 'Sales', route: 'sales' }, { name: 'Projects', route: 'projects' }, { name: 'Resources', route: 'resources' }, { name: 'Dealer Directory', route: 'resources/dealer_directory' }, { name: 'Commission Rates', route: 'resources/commission_rates' }, { name: 'Contracts', route: 'resources/contracts' }, { name: 'Loaner Pool', route: 'resources/loaner_pool' }, { name: 'Discontinued Finishes', route: 'resources/discontinued_finishes' }, { name: 'Sample Discounts', route: 'resources/sample_discounts' }, { name: 'Social Media', route: 'resources/social_media' }, { name: 'Customer Ranking', route: 'customer-rank' }, { name: 'Commissions', route: 'commissions' }, { name: 'Members', route: 'members' }, { name: 'Settings', route: 'settings' }, { name: 'Help', route: 'help' }, { name: 'Feedback', route: 'feedback' },
+    { name: 'Samples', route: 'samples' },
+    { name: 'Request Replacement', route: 'replacements' },
+    { name: 'Community', route: 'community' },
+    { name: 'Lead Times', route: 'resources/lead-times' },
+    { name: 'Products', route: 'products' },
+    { name: 'Orders', route: 'orders' },
+    { name: 'Sales', route: 'sales' },
+    { name: 'Projects', route: 'projects' },
+    { name: 'Resources', route: 'resources' },
+    { name: 'Dealer Directory', route: 'resources/dealer_directory' },
+    { name: 'Commission Rates', route: 'resources/commission_rates' },
+    { name: 'Contracts', route: 'resources/contracts' },
+    { name: 'Loaner Pool', route: 'resources/loaner_pool' },
+    { name: 'Discontinued Finishes', route: 'resources/discontinued_finishes' },
+    { name: 'Sample Discounts', route: 'resources/sample_discounts' },
+    { name: 'Social Media', route: 'resources/social_media' },
+    { name: 'Customer Ranking', route: 'customer-rank' },
+    { name: 'Commissions', route: 'commissions' },
+    { name: 'Members', route: 'members' },
+    { name: 'Settings', route: 'settings' },
+    { name: 'Help', route: 'help' },
+    { name: 'Feedback', route: 'feedback' },
 ];
 
 export const RESOURCES_DATA = [
@@ -235,6 +256,15 @@ export const COMMISSIONS_CHECKS_DATA = generateCommissionData();
 export const COMMISSION_RATES_TABLE_DATA = { standard: [{ discount: '5/10', rep: '12%', spiff: '3%' }, { discount: '50/10/5', rep: '11%', spiff: '3%' }, { discount: '50/20', rep: '10%', spiff: '3%' }, { discount: '50/20/1', rep: '9%', spiff: '3%' }, { discount: '50/20/2', rep: '9%', spiff: '3%' }, { discount: '50/20/3', rep: '8%', spiff: '3%' }, { discount: '50/20/4', rep: '8%', spiff: '3%' }, { discount: '50/20/5', rep: '7%', spiff: '3%' }, { discount: '50/20/6', rep: '7%', spiff: '3%' }, { discount: '50/20/7', rep: '6%', spiff: '3%' }, { discount: '50/20/8', rep: '6%', spiff: '3%' }, { discount: '50/20/9', rep: '6%', spiff: '3%' }, { discount: '50/20/10', rep: '5%', spiff: { value: '3%', note: '*if > $100k net' } },], contract: [{ discount: 'GSA', rep: '5%', spiff: '3%' }, { discount: 'Omnia', rep: '3.8-3.9%', spiff: '2.5%' }, { discount: 'Premier', rep: '4.1-4.3%', spiff: '2%' }, { discount: 'TIPS', rep: '3.6-3.8%', spiff: 'N/A' },], split: [{ territory: 'Specifying', percentage: 70 }, { territory: 'Ordering', percentage: 30 },] };
 
 export const CONTRACTS_DATA = { omnia: { name: "Omnia", tiers: [{ off: "54% off (Dock Delivery)", dealer: "15% dealer commission", rep: "3.91% rep commission" }, { off: "53% off (Dock Delivery)", dealer: "17% dealer commission", rep: "3.83% rep commission" }, { off: "52% off (Dock Delivery)", dealer: "18% dealer commission", rep: "3.75% rep commission" },], margin: ["54/15 = 60.90%", "53/17 = 60.99%", "52/18 = 60.64%"], url: "https://webresources.jsifurniture.com/production/uploads/j_contracts_tcpn.pdf" }, tips: { name: "TIPS", tiers: [{ off: "51% off (Delivery and Installed)", dealer: "24% dealer commission", rep: "3.67% rep commission" }, { off: "53% off (Dock Delivery)", dealer: "20% dealer commission", rep: "3.83% rep commission" },], note: "Spiff is not allowed.", url: "https://webresources.jsifurniture.com/production/uploads/jsi_contracts_tips_taps.pdf" }, premier: { name: "Premier", tiers: [{ off: "56% off (up to $500k)", dealer: "14% dealer commission", rep: "4.09% rep commission" }, { off: "57% off ($500k-750k)", dealer: "13% dealer commission", rep: "4.19% rep commission" }, { off: "58% off ($750k+)", dealer: "12% dealer commission", rep: "4.29% rep commission" },], url: "https://webresources.jsifurniture.com/production/uploads/jsi_contracts_premier.pdf" } };
+
+export const CONTRACT_OPTIONS = [
+    "GSA",
+    "GSA (MJP)",
+    "Omnia Partners",
+    "Premier Healthcare Alliance L.P.",
+    "TIPS",
+    "GSA TEAM"
+];
 
 export const DAILY_DISCOUNT_OPTIONS = ["50 (50)", "50/5 (52.5)", "50/8 (54)", "50/10 (55)", "50/10/5 (57.25)"];
 
