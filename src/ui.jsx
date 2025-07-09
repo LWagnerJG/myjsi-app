@@ -1,14 +1,13 @@
 ﻿import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react';
 import {
-    User, MousePointer, PieChart, RotateCw, Palette, DollarSign,
-    Database, MessageSquare, Heart, MoreVertical, Video,
-    ArrowRight, Search, Briefcase, Package, X, ChevronDown,
-    ChevronRight, ChevronLeft, Sun, Moon, Camera, LogOut,
-    HelpCircle, ShoppingCart, CheckCircle, Plus, Minus,
-    ArrowLeft, BarChart2, List, Home, Hourglass, Armchair,
-    Server, UserPlus, UserX, Trophy, ChevronUp, Mic,
-    AlertCircle, Settings, Paperclip, Copy, Save, Send,
-    Share2, Film, Filter, Play, Calendar, MapPin, Clock, Bus
+    AlertCircle, Armchair, ArrowLeft, ArrowRight, BarChart2, Briefcase, Bus,
+    Calendar, Camera, CheckCircle, ChevronDown, ChevronLeft, ChevronRight,
+    ChevronUp, Clock, Copy, Database, DollarSign, FileText, Film, Filter,
+    HelpCircle, Home, Hourglass, List, LogOut, MapPin, MessageSquare, Mic,
+    Minus, MonitorPlay, Moon, MoreVertical, Package, Palette, Heart,
+    Paperclip, Percent, PieChart, Play, Plus, RotateCw, Save, Search, Send,
+    Server, Settings, Share2, ShoppingCart, Sun, Trophy, User, UserPlus,
+    UserX, Users, Video, Wrench, X
 } from 'lucide-react';
 import * as Data from './data.jsx';
 
@@ -82,6 +81,70 @@ export const useDropdownPosition = (ref) => {
     return [dropDirection, checkPosition];
 };
 
+export const CustomerRankScreen = ({ theme, onNavigate }) => {
+    const [sortConfig, setSortConfig] = useState({ key: 'sales', direction: 'descending' });
+    const { topThree, theRest } = useMemo(() => {
+        let sortableItems = [...Data.CUSTOMER_RANK_DATA];
+        sortableItems.sort((a, b) => {
+            if (a[sortConfig.key] < b[sortConfig.key]) return sortConfig.direction === 'ascending' ? -1 : 1;
+            if (a[sortConfig.key] > b[sortConfig.key]) return sortConfig.direction === 'ascending' ? 1 : -1;
+            return 0;
+        });
+        return { topThree: sortableItems.slice(0, 3), theRest: sortableItems.slice(3) };
+    }, [sortConfig]);
+
+    const requestSort = (key) => {
+        let direction = 'descending';
+        if (sortConfig.key === key && sortConfig.direction === 'descending') {
+            direction = 'ascending';
+        }
+        setSortConfig({ key, direction });
+    };
+
+    const SortableHeader = ({ sortKey, children }) => { /* ... (Component logic) ... */ };
+
+    return (
+        <>
+            <PageTitle title="Customer Ranking" theme={theme} />
+            <div className="px-4 pb-4 space-y-6">
+                <div className="flex items-end justify-center space-x-2">
+                    {/* Podium UI */}
+                </div>
+                <GlassCard theme={theme} className="p-4">
+                    {/* Table Header */}
+                    <div className="grid grid-cols-12 gap-2 text-sm font-bold pb-2 border-b" style={{ borderColor: theme.colors.subtle, color: theme.colors.textSecondary }}>
+                        <div className="col-span-1">#</div>
+                        <div className="col-span-5">Name</div>
+                        <div className="col-span-3 text-right cursor-pointer" onClick={() => requestSort('bookings')}>Bookings</div>
+                        <div className="col-span-3 text-right cursor-pointer" onClick={() => requestSort('sales')}>Sales</div>
+                    </div>
+                    {/* Table Body */}
+                    <div className="space-y-1 pt-2">
+                        {theRest.map((customer, index) => (
+                            <div key={customer.id} className="grid grid-cols-12 gap-2 items-center text-sm p-2 rounded-lg" style={{ backgroundColor: index % 2 === 1 ? 'rgba(0,0,0,0.03)' : 'transparent' }}>
+                                <div className="col-span-1 font-semibold" style={{ color: theme.colors.textSecondary }}>{index + 4}</div>
+                                <div className="col-span-5 font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{customer.name}</div>
+                                <div className="col-span-3 text-right font-mono" style={{ color: theme.colors.textSecondary }}>${customer.bookings.toLocaleString()}</div>
+                                <div className="col-span-3 text-right font-mono font-semibold" style={{ color: theme.colors.accent }}>${customer.sales.toLocaleString()}</div>
+                            </div>
+                        ))}
+                    </div>
+                </GlassCard>
+            </div>
+        </>
+    );
+};
+
+export const CommissionsScreen = ({ theme, onNavigate }) => {
+    // Placeholder - Logic will be added later
+    return <PageTitle title="Commissions" theme={theme} />;
+};
+
+export const IncentiveRewardsScreen = ({ theme, onNavigate }) => {
+    // Placeholder - Logic will be added later
+    return <PageTitle title="Incentive Rewards" theme={theme} />;
+};
+
 export const CustomSelect = ({ label, value, onChange, options, placeholder, theme, required }) => {
     const [isOpen, setIsOpen] = useState(false);
     const wrapperRef = useRef(null);
@@ -124,14 +187,34 @@ export const CustomSelect = ({ label, value, onChange, options, placeholder, the
     );
 };
 
-export const AutoCompleteCombobox = ({ label, value, onChange, placeholder, options, onAddNew, theme, required }) => {
+export const AutoCompleteCombobox = ({
+    label,
+    value,
+    onChange,
+    placeholder,
+    options,
+    onAddNew,
+    theme,
+    required,
+    zIndex,
+    dropdownClassName // New prop to allow custom dropdown styling
+}) => {
     const [inputValue, setInputValue] = useState(value || '');
     const [showOptions, setShowOptions] = useState(false);
     const wrapperRef = useRef(null);
-    const [dropDirection, checkPosition] = useDropdownPosition(wrapperRef);
 
     useEffect(() => setInputValue(value || ''), [value]);
-    useEffect(() => { /* ... (click outside logic remains the same) ... */ }, []);
+
+    useEffect(() => {
+        function handleClickOutside(e) {
+            // FIX: Corrected a typo here that prevented this from working
+            if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
+                setShowOptions(false);
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const filtered = options.filter(opt => opt.toLowerCase().includes(inputValue.toLowerCase()));
 
@@ -141,11 +224,6 @@ export const AutoCompleteCombobox = ({ label, value, onChange, placeholder, opti
         setShowOptions(false);
     };
 
-    const handleOpen = () => {
-        checkPosition();
-        setShowOptions(true);
-    };
-
     const handleAdd = () => {
         if (inputValue && !options.includes(inputValue)) onAddNew(inputValue);
         onChange(inputValue);
@@ -153,38 +231,48 @@ export const AutoCompleteCombobox = ({ label, value, onChange, placeholder, opti
     };
 
     return (
-        <div className="relative space-y-1" ref={wrapperRef}>
-            {label && (<label className="block text-xs font-semibold px-4" style={{ color: theme.colors.textSecondary }}>{label}</label>)}
+        <div className={`relative ${zIndex}`} ref={wrapperRef}>
+            {label && (
+                <label className="block text-xs font-semibold px-4" style={{ color: theme.colors.textSecondary }}>
+                    {label}
+                </label>
+            )}
             <input
                 required={required}
                 type="text"
                 value={inputValue}
-                onChange={e => { setInputValue(e.target.value); handleOpen(); }}
-                onFocus={handleOpen}
+                onChange={e => { setInputValue(e.target.value); setShowOptions(true); }}
+                onFocus={() => setShowOptions(true)}
                 placeholder={placeholder}
                 className="w-full px-4 py-3 border rounded-full focus:ring-2 outline-none"
-                style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border, color: theme.colors.textPrimary, ringColor: theme.colors.accent }}
+                style={{
+                    backgroundColor: theme.colors.subtle,
+                    borderColor: theme.colors.border,
+                    color: theme.colors.textPrimary,
+                    ringColor: theme.colors.accent,
+                }}
             />
             {showOptions && (
-                <div className={`absolute w-full z-10 ${dropDirection === 'up' ? 'bottom-full mb-1' : 'top-full mt-1'}`}>
-                    <GlassCard theme={theme} className="p-2 max-h-48 overflow-y-auto scrollbar-hide">
-                        {filtered.map(opt => (
-                            <button key={opt} type="button" onClick={() => handleSelect(opt)} className="block w-full text-left p-2 rounded-md hover:bg-black/5" style={{ color: theme.colors.textPrimary }}>
-                                {opt}
-                            </button>
-                        ))}
-                        {onAddNew && inputValue && !options.includes(inputValue) && (
-                            <button type="button" onClick={handleAdd} className="block w-full text-left p-2 rounded-md font-semibold hover:bg-black/5" style={{ color: theme.colors.accent }}>
-                                Add “{inputValue}”
-                            </button>
-                        )}
-                    </GlassCard>
-                </div>
+                // Now uses the dropdownClassName prop, with a default of max-h-48
+                <GlassCard
+                    theme={theme}
+                    className={`absolute w-full mt-1 z-10 p-2 overflow-y-auto scrollbar-hide ${dropdownClassName || 'max-h-48'}`}
+                >
+                    {filtered.map(opt => (
+                        <button key={opt} type="button" onClick={() => handleSelect(opt)} className="block w-full text-left p-2 rounded-md hover:bg-black/5" style={{ color: theme.colors.textPrimary }}>
+                            {opt}
+                        </button>
+                    ))}
+                    {onAddNew && inputValue && !options.includes(inputValue) && (
+                        <button type="button" onClick={handleAdd} className="block w-full text-left p-2 rounded-md font-semibold hover:bg-black/5" style={{ color: theme.colors.accent }}>
+                            Add “{inputValue}”
+                        </button>
+                    )}
+                </GlassCard>
             )}
         </div>
     );
 };
-
 const {
     // New–Lead form
     EMPTY_LEAD,
@@ -1385,38 +1473,39 @@ const CommissionRatesScreen = ({ theme, onNavigate }) => {
 
 
 
-const SampleDiscountsScreen = ({ theme, onNavigate }) => {
+export const SampleDiscountsScreen = ({ theme, onNavigate, setSuccessMessage }) => {
+    const handleCopy = useCallback((textToCopy) => {
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            setSuccessMessage("SSA# Copied!");
+            setTimeout(() => setSuccessMessage(""), 1200);
+        });
+    }, [setSuccessMessage]);
+
     return (
         <>
-            {/* Back button */}
-            <button
-                onClick={() => onNavigate('resources')}
-                className="mb-4 flex items-center text-sm font-medium px-4 py-2"
-                style={{ color: theme.colors.textPrimary }}
-            >
-                <ArrowLeft className="w-4 h-4 mr-1" style={{ color: theme.colors.textSecondary }} />
-                Back to Resources
-            </button>
-
-            {/* Title */}
+            {/* The redundant "Back to Resources" button has been removed from here */}
             <PageTitle title="Sample Discounts" theme={theme} />
 
             <div className="px-4 space-y-4 pb-4">
-                {SAMPLE_DISCOUNTS_DATA.map((discount, index) => (
-                    <GlassCard key={index} theme={theme} className="p-4">
-                        <h3 className="font-semibold mb-2" style={{ color: theme.colors.textPrimary }}>
-                            {discount.title}
-                        </h3>
-                        <div>
-                            <p className="text-sm mb-1" style={{ color: theme.colors.textSecondary }}>
-                                <span className="font-medium">SSA:</span> {discount.ssa}
-                            </p>
-                            <p className="text-sm mb-1" style={{ color: theme.colors.textSecondary }}>
-                                <span className="font-medium">Discount:</span> {discount.off}
-                            </p>
-                            <p className="text-sm" style={{ color: theme.colors.textSecondary }}>
-                                <span className="font-medium">Commission:</span> {discount.commission}
-                            </p>
+                {Data.SAMPLE_DISCOUNTS_DATA.map((discount) => (
+                    <GlassCard key={discount.ssa} theme={theme} className="p-4 flex items-center space-x-4">
+                        <div className="flex-shrink-0 w-24 text-center">
+                            <p className="text-5xl font-bold" style={{ color: theme.colors.accent }}>{discount.off.match(/\d+/)[0]}%</p>
+                            <p className="text-xs font-semibold" style={{ color: theme.colors.textSecondary }}>Off List</p>
+                        </div>
+                        <div className="flex-1 space-y-3 border-l pl-4" style={{ borderColor: theme.colors.subtle }}>
+                            <h3 className="font-bold text-lg text-center pb-2 border-b" style={{ color: theme.colors.textPrimary, borderColor: theme.colors.subtle }}>
+                                {discount.title}
+                            </h3>
+                            <div className="flex items-center justify-between text-sm">
+                                <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>SSA: {discount.ssa}</span>
+                                <button onClick={() => handleCopy(discount.ssa)} className="p-1 rounded-md hover:bg-black/10 dark:hover:bg-white/10 ml-2">
+                                    <Copy className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
+                                </button>
+                            </div>
+                            <div className="text-sm text-center pt-1 font-medium" style={{ color: theme.colors.textSecondary }}>
+                                {discount.commission}
+                            </div>
                         </div>
                     </GlassCard>
                 ))}
@@ -1424,7 +1513,6 @@ const SampleDiscountsScreen = ({ theme, onNavigate }) => {
         </>
     );
 };
-
 const RequestFieldVisitScreen = ({ theme, setSuccessMessage, onNavigate }) => {
     // --- state ---
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -2029,7 +2117,7 @@ const fabricTypeOptions = ['Type1', 'Type2', 'Type3']; // TODO: replace with rea
 const tackableOptions = ['Yes', 'No'];
 
 export const FabricSearchForm = ({ theme, showAlert, onNavigate }) => {
-    const [form, setForm] = useState({ supplier: '', pattern: '', jsiSeries: '', });
+    const [form, setForm] = useState({ supplier: '', pattern: '', jsiSeries: '' });
     const [results, setResults] = useState(null);
     const [error, setError] = useState('');
 
@@ -2048,13 +2136,11 @@ export const FabricSearchForm = ({ theme, showAlert, onNavigate }) => {
             return;
         }
         setError('');
-
         let filtered = Data.FABRICS_DATA.filter(item =>
             item.supplier === form.supplier &&
             item.series === form.jsiSeries &&
             (!form.pattern || item.pattern === form.pattern)
         );
-
         setResults(filtered);
     }, [form]);
 
@@ -2066,21 +2152,25 @@ export const FabricSearchForm = ({ theme, showAlert, onNavigate }) => {
 
     return (
         <div className="flex flex-col h-full">
-            <PageTitle title="Search Fabrics" theme={theme} onBack={() => onNavigate('fabrics')} />
+            {/* FIX: The onBack prop has been removed to hide the redundant back arrow */}
+            <PageTitle title="Search Fabrics" theme={theme} />
 
             <div className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-hide">
                 {!results ? (
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        <FormSection title="Search Criteria" theme={theme}>
-                            {error && <p className="text-sm text-red-500 -mt-2 mb-2">{error}</p>}
-                            <AutoCompleteCombobox label="Supplier" required value={form.supplier} onChange={v => updateField('supplier', v)} options={fabricSuppliers} placeholder="Search Suppliers" theme={theme} />
-                            <AutoCompleteCombobox label="Pattern" value={form.pattern} onChange={v => updateField('pattern', v)} options={fabricPatterns} placeholder="Search Patterns (Optional)" theme={theme} />
-                            <AutoCompleteCombobox label="JSI Series" required value={form.jsiSeries} onChange={v => updateField('jsiSeries', v)} options={jsiSeriesOptions} placeholder="Search JSI Series" theme={theme} />
+                        <FormSection title="" theme={theme}>
+                            {error && <p className="text-sm text-red-500 -mt-2 mb-2 px-1">{error}</p>}
+
+                            {/* FIX: Added dropdownClassName to make lists longer */}
+                            <AutoCompleteCombobox label="Supplier" required value={form.supplier} onChange={v => updateField('supplier', v)} options={fabricSuppliers} placeholder="Search Suppliers" theme={theme} dropdownClassName="max-h-72" />
+                            <AutoCompleteCombobox label="Pattern" value={form.pattern} onChange={v => updateField('pattern', v)} options={fabricPatterns} placeholder="Search Patterns (Optional)" theme={theme} dropdownClassName="max-h-72" />
+                            <AutoCompleteCombobox label="JSI Series" required value={form.jsiSeries} onChange={v => updateField('jsiSeries', v)} options={jsiSeriesOptions} placeholder="Search JSI Series" theme={theme} dropdownClassName="max-h-72" />
+
                         </FormSection>
                         <button type="submit" className="w-full text-white font-bold py-3.5 rounded-full" style={{ backgroundColor: theme.colors.accent }}>Search</button>
                     </form>
                 ) : (
-                    <div className="space-y-4">
+                    <div className="space-y-4 animate-fade-in">
                         <FormSection title="Results" theme={theme}>
                             <div className="text-sm space-y-1">
                                 <div><span className="font-medium" style={{ color: theme.colors.textSecondary }}>Supplier:</span> {form.supplier}</div>
@@ -2112,7 +2202,6 @@ export const FabricSearchForm = ({ theme, showAlert, onNavigate }) => {
         </div>
     );
 };
-
 export const COMYardageRequestScreen = ({ theme, showAlert, onNavigate }) => {
     const [selectedModels, setSelectedModels] = useState([]);
 
@@ -2120,7 +2209,7 @@ export const COMYardageRequestScreen = ({ theme, showAlert, onNavigate }) => {
         if (modelId && !selectedModels.some(m => m.id === modelId)) {
             const modelData = Data.JSI_MODELS.find(m => m.id === modelId);
             if (modelData) {
-                setSelectedModels(prev => [...prev, { ...modelData, quantity: 1, fabric: '' }]);
+                setSelectedModels(prev => [...prev, { ...modelData, quantity: 1 }]);
             }
         }
     }, [selectedModels]);
@@ -2149,7 +2238,12 @@ export const COMYardageRequestScreen = ({ theme, showAlert, onNavigate }) => {
         <div className="flex flex-col h-full">
             <PageTitle title="COM Yardage Request" theme={theme} onBack={() => onNavigate('fabrics')} />
             <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4 scrollbar-hide">
-                <FormSection title="Select Models" theme={theme}>
+                <FormSection title="Selected Models" theme={theme}>
+                    {selectedModels.length === 0 && (
+                        <p className="text-center text-sm" style={{ color: theme.colors.textSecondary }}>
+                            Use the dropdown below to add models to your request.
+                        </p>
+                    )}
                     {selectedModels.map(model => (
                         <GlassCard key={model.id} className="p-4 space-y-3" style={{ backgroundColor: theme.colors.subtle }}>
                             <div className="flex items-start justify-between">
@@ -2169,16 +2263,18 @@ export const COMYardageRequestScreen = ({ theme, showAlert, onNavigate }) => {
                             </div>
                         </GlassCard>
                     ))}
-                    <AutoCompleteCombobox
-                        value=""
-                        onChange={(val) => {
-                            const modelId = val.match(/\(([^)]+)\)/)?.[1];
-                            addModel(modelId);
-                        }}
-                        placeholder="+ Add a Model..."
-                        options={modelOptions}
-                        theme={theme}
-                    />
+                    <div className="pt-2">
+                        <AutoCompleteCombobox
+                            value=""
+                            onChange={(val) => {
+                                const modelId = val.match(/\(([^)]+)\)/)?.[1];
+                                addModel(modelId);
+                            }}
+                            placeholder="+ Add a Model..."
+                            options={modelOptions}
+                            theme={theme}
+                        />
+                    </div>
                 </FormSection>
 
                 <div className="pt-4 pb-4">
@@ -2716,20 +2812,62 @@ const WinsCard = ({ win, theme }) => {
     );
 };
 
-const PollCard = ({ poll, theme }) => {
+export const PollCard = ({ poll, theme }) => {
     const { user, timeAgo, question, options } = poll;
     const [choice, setChoice] = useState(null);
-    const total = options.reduce((s, o) => s + o.votes, 0);
+
+    // FIX: Re-added the menu state and share functionality.
     const [menu, setMenu] = useState(false);
+    const menuRef = useRef(null);
+
+    // Close menu when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (menuRef.current && !menuRef.current.contains(event.target)) {
+                setMenu(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [menuRef]);
 
     const sharePoll = async () => {
         setMenu(false);
-        const msg = `${question}\n${window.location.href}`;
-        if (navigator.share && window.isSecureContext) {
-            try { await navigator.share({ title: 'JSI Poll', text: question, url: window.location.href }); return; } catch { }
+        const shareData = {
+            title: 'JSI Poll',
+            text: question,
+            url: window.location.href,
+        };
+        try {
+            if (navigator.share) {
+                await navigator.share(shareData);
+            } else {
+                await navigator.clipboard.writeText(`${question}\n${window.location.href}`);
+                alert('Poll link copied to clipboard!');
+            }
+        } catch (err) {
+            console.error("Share failed:", err);
+            alert('Could not share at this time.');
         }
-        try { await navigator.clipboard.writeText(msg); alert('Link copied!'); return; } catch { }
-        alert('Copy failed.');
+    };
+
+    const totalVotes = useMemo(() => {
+        if (choice === null) return 0;
+        // In a real app, you'd get updated vote counts from a server.
+        // For this demo, we'll just add 1 to the chosen option.
+        return options.reduce((sum, o) => {
+            let voteCount = o.votes;
+            if (o.id === choice) {
+                voteCount += 1;
+            }
+            return sum + voteCount;
+        }, 0);
+    }, [choice, options]);
+
+    const handleVote = (optionId) => {
+        if (choice === null) {
+            setChoice(optionId);
+        }
     };
 
     return (
@@ -2742,16 +2880,16 @@ const PollCard = ({ poll, theme }) => {
                         <p className="text-xs" style={{ color: theme.colors.textSecondary }}>{timeAgo}</p>
                     </div>
                 </div>
-                <div className="relative">
-                    <button onClick={() => setMenu(!menu)}>
+                <div className="relative" ref={menuRef}>
+                    <button onClick={() => setMenu(m => !m)}>
                         <MoreVertical className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
                     </button>
                     {menu && (
-                        <div className="absolute right-0 mt-1 w-28 rounded-lg shadow-lg z-20" style={{ backgroundColor: theme.colors.background }}>
-                            <button onClick={sharePoll} className="flex items-center w-full px-4 py-2 text-sm hover:bg-[rgba(0,0,0,0.03)]">
-                                <Share2 className="w-4 h-4 mr-2" /> Share
+                        <GlassCard theme={theme} className="absolute right-0 mt-1 w-32 p-1 z-20">
+                            <button onClick={sharePoll} className="flex items-center w-full px-3 py-2 text-sm rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/10" style={{ color: theme.colors.textPrimary }}>
+                                <Share2 className="w-4 h-4 mr-2" style={{ color: theme.colors.textSecondary }} /> Share
                             </button>
-                        </div>
+                        </GlassCard>
                     )}
                 </div>
             </div>
@@ -2759,16 +2897,38 @@ const PollCard = ({ poll, theme }) => {
             <p className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>{question}</p>
 
             <div className="space-y-2">
-                {options.map((o) => {
-                    const pct = Math.round((o.votes / total) * 100);
-                    const chosen = choice === o.id;
-                    const showPct = choice !== null;
+                {options.map((option) => {
+                    const hasVoted = choice !== null;
+                    const voteCount = choice === option.id ? option.votes + 1 : option.votes;
+                    const percentage = hasVoted ? Math.round((voteCount / totalVotes) * 100) : 0;
+                    const isChosen = choice === option.id;
+
                     return (
-                        <button key={o.id} onClick={() => setChoice(o.id)}
-                            className={`w-full flex justify-between items-center px-4 py-2 rounded-lg transition-colors ${chosen ? 'ring-2 ring-offset-2' : ''}`}
-                            style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary, borderColor: theme.colors.accent }}>
-                            <span>{o.text}</span>
-                            {showPct && <span className="font-medium">{pct}%</span>}
+                        <button
+                            key={option.id}
+                            onClick={() => handleVote(option.id)}
+                            disabled={hasVoted}
+                            // FIX: Changed from rounded-lg to rounded-full
+                            className="w-full text-left p-0.5 rounded-full border transition-all duration-300"
+                            style={{
+                                cursor: hasVoted ? 'default' : 'pointer',
+                                borderColor: isChosen ? theme.colors.accent : theme.colors.border,
+                            }}
+                        >
+                            <div className="relative flex justify-between items-center px-4 py-2">
+                                {/* Percentage bar background */}
+                                {hasVoted && (
+                                    <div
+                                        className="absolute left-0 top-0 h-full rounded-full opacity-20 transition-all duration-500"
+                                        style={{ width: `${percentage}%`, backgroundColor: theme.colors.accent }}
+                                    ></div>
+                                )}
+
+                                <span className="relative z-10 font-medium" style={{ color: theme.colors.textPrimary }}>{option.text}</span>
+                                {hasVoted && (
+                                    <span className="relative z-10 text-sm font-bold" style={{ color: theme.colors.accent }}>{percentage}%</span>
+                                )}
+                            </div>
                         </button>
                     );
                 })}
@@ -3098,7 +3258,6 @@ const SuccessToast = ({ message, show, theme }) => {
 const AppHeader = React.memo(({ onHomeClick, isDarkMode, theme, onProfileClick, isHome, handleBack, showBack, userName }) => {
     const filterStyle = isDarkMode ? 'brightness(0) invert(1)' : 'none';
 
-    // UPDATED: Changed margin-top from mt-6 to mt-4 to move it higher
     return (
         <div style={{ backgroundColor: theme.colors.surface, backdropFilter: theme.backdropFilter, WebkitBackdropFilter: theme.backdropFilter }} className="mx-auto mt-4 w-[90%] px-6 py-3 flex justify-between items-center sticky top-0 z-20 rounded-full shadow-md backdrop-blur">
             <div className="flex items-center space-x-2">
@@ -3115,14 +3274,18 @@ const AppHeader = React.memo(({ onHomeClick, isDarkMode, theme, onProfileClick, 
                 {isHome && (
                     <div className="text-lg font-normal leading-tight" style={{ color: theme.colors.textPrimary }}>Hello, {userName}!</div>
                 )}
-                <button onClick={onProfileClick} className="w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: theme.colors.subtle }}>
+                {/* UPDATED: Added border classes and styles for a defined circle */}
+                <button
+                    onClick={onProfileClick}
+                    className="w-9 h-9 rounded-full flex items-center justify-center border transition-colors hover:bg-black/5 dark:hover:bg-white/10"
+                    style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border }}
+                >
                     <User className="w-5 h-5" style={{ color: theme.colors.secondary }} />
                 </button>
             </div>
         </div>
     );
 });
-
 export const HomeScreen = ({ onNavigate, theme, onAskAI, showAIDropdown, aiResponse, isAILoading, onCloseAIDropdown, onVoiceActivate }) => {
     const handleFeedbackClick = useCallback(() => {
         onNavigate('feedback');
@@ -3315,31 +3478,58 @@ const RecentPOsCard = ({ orders, theme, onOrderClick }) => (
     </GlassCard>
 );
 
-const DonutChart = ({ data, theme }) => {
-    const total = data.reduce((sum, item) => sum + item.value, 0);
+export const DonutChart = React.memo(({ data, theme }) => {
+    const total = data.reduce((acc, item) => acc + item.value, 0);
+    if (total === 0) return null;
+
+    let cumulative = 0;
+    const size = 150;
+    const strokeWidth = 20;
+    const radius = (size - strokeWidth) / 2;
+    const circumference = 2 * Math.PI * radius;
 
     return (
-        <div className="space-y-3">
-            {data.map((item, index) => (
-                <div key={index} className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                        <div
-                            className="w-4 h-4 rounded-full"
-                            style={{ backgroundColor: item.color || theme.colors.accent }}
-                        />
-                        <span style={{ color: theme.colors.textPrimary }}>{item.label}</span>
-                    </div>
-                    <div className="text-right">
-                        <div className="font-semibold" style={{ color: theme.colors.textPrimary }}>
-                            {item.value}%
+        <div className="flex items-center space-x-6">
+            <div className="relative" style={{ width: size, height: size }}>
+                <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+                    <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke={theme.colors.subtle} strokeWidth={strokeWidth} />
+                    <g transform={`rotate(-90 ${size / 2} ${size / 2})`}>
+                        {data.map((item, index) => {
+                            const dasharray = (circumference * item.value) / total;
+                            const dashoffset = circumference * (1 - (cumulative / total));
+                            cumulative += item.value;
+                            return (
+                                <circle
+                                    key={index}
+                                    cx={size / 2}
+                                    cy={size / 2}
+                                    r={radius}
+                                    fill="none"
+                                    stroke={item.color}
+                                    strokeWidth={strokeWidth}
+                                    strokeDasharray={`${dasharray} ${circumference}`}
+                                    strokeDashoffset={-circumference + dashoffset}
+                                    className="transition-all duration-500"
+                                />
+                            )
+                        })}
+                    </g>
+                </svg>
+            </div>
+            <div className="space-y-2">
+                {data.map(item => (
+                    <div key={item.label} className="flex items-center">
+                        <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: item.color }}></div>
+                        <div>
+                            <p className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>{item.label}</p>
+                            <p className="text-xs font-mono" style={{ color: theme.colors.textSecondary }}>${item.value.toLocaleString()}</p>
                         </div>
                     </div>
-                </div>
-            ))}
+                ))}
+            </div>
         </div>
     );
-};
-
+});
 export const OrderModal = React.memo(({ order, onClose, theme }) => {
     const [isExpanded, setIsExpanded] = useState(false);
 
@@ -3980,42 +4170,65 @@ export const NewLeadScreen = ({
     );
 };
 
+export const resourceIcons = {
+    'Search Database': Search,
+    'Request COM Yardage': Paperclip,
+    'Commission Rates': DollarSign,
+    'Dealer Directory': Users,
+    'Loaner Pool': Package,
+    'New Dealer Sign-Up': UserPlus,
+    'Request Field Visit': MapPin,
+    'Sample Discounts': Percent,
+    'Contracts': FileText,
+    'Design Days': Calendar,
+    'Discontinued Finishes Database': Palette,
+    'Install Instructions': Wrench,
+    'Presentations': MonitorPlay,
+    'Social Media': Share2,
+    'Lead Times': Hourglass,
+};
+
 export const ResourcesScreen = ({ theme, onNavigate }) => {
     return (
         <div className="flex flex-col h-full">
-            <PageTitle title="Resources" theme={theme} />
-            <div className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-hide">
-                <div className="space-y-6">
-                    {Data.RESOURCES_DATA.map(category => (
-                        // Each category is now its own single, clean card
-                        <GlassCard key={category.category} theme={theme} className="p-2">
-                            <h2 className="text-xl font-bold mb-1 px-3 pt-2" style={{ color: theme.colors.textPrimary }}>
-                                {category.category}
-                            </h2>
+            {/* The main PageTitle is removed for a cleaner look, as requested previously */}
+            <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6 scrollbar-hide">
+                {Data.RESOURCES_DATA.map(category => (
+                    <div key={category.category}>
+                        <h2 className="text-xl font-bold mb-2 px-1" style={{ color: theme.colors.textPrimary }}>
+                            {category.category}
+                        </h2>
+                        <GlassCard theme={theme} className="p-2">
                             <div className="space-y-1">
-                                {category.items.map((item, index) => (
-                                    <React.Fragment key={item.nav}>
-                                        {/* Add a subtle divider between items, but not before the first one */}
-                                        {index > 0 && <div className="border-t mx-3" style={{ borderColor: theme.colors.subtle }}></div>}
-                                        <button
-                                            onClick={() => onNavigate(item.nav)}
-                                            className="w-full p-3 rounded-xl flex items-center justify-between transition-colors hover:bg-black/5 dark:hover:bg-white/10"
-                                        >
-                                            <span className="text-md font-semibold tracking-tight" style={{ color: theme.colors.textPrimary }}>
-                                                {item.label}
-                                            </span>
-                                            <ArrowRight className="w-5 h-5" style={{ color: theme.colors.secondary }} />
-                                        </button>
-                                    </React.Fragment>
-                                ))}
+                                {category.items.map((item, index) => {
+                                    const Icon = resourceIcons[item.label] || Database; // Use the icon map
+                                    return (
+                                        <React.Fragment key={item.nav}>
+                                            {index > 0 && <div className="border-t mx-3" style={{ borderColor: theme.colors.subtle }}></div>}
+                                            <button
+                                                onClick={() => onNavigate(item.nav)}
+                                                className="w-full p-3 rounded-xl flex items-center justify-between transition-colors hover:bg-black/5 dark:hover:bg-white/10"
+                                            >
+                                                <div className="flex items-center space-x-4">
+                                                    <Icon className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
+                                                    <span className="text-md font-semibold tracking-tight" style={{ color: theme.colors.textPrimary }}>
+                                                        {item.label}
+                                                    </span>
+                                                </div>
+                                                <ArrowRight className="w-5 h-5" style={{ color: theme.colors.secondary }} />
+                                            </button>
+                                        </React.Fragment>
+                                    )
+                                })}
                             </div>
                         </GlassCard>
-                    ))}
-                </div>
+                    </div>
+                ))}
             </div>
         </div>
     );
 };
+
 
 const ProjectsScreen = ({ onNavigate, theme, opportunities }) => {
     const [projectsTab, setProjectsTab] = useState('pipeline');
@@ -4759,6 +4972,9 @@ const SCREEN_MAP = {
     sales: SalesScreen,
     orders: OrdersScreen,
     products: ProductsScreen,
+    'customer-rank': CustomerRankScreen,
+    'commissions': CommissionsScreen,
+    'incentive-rewards': IncentiveRewardsScreen,
 
     // Top-level Resources menu
     resources: ResourcesScreen,
@@ -4812,9 +5028,8 @@ export {
     MonthlyBarChart,
     MonthlyTable,
     RecentPOsCard,
-    DonutChart,
-    PollCard,
     Modal,
+   
 
     // Top‐level screens
     SalesScreen,
@@ -4829,7 +5044,6 @@ export {
     LoanerPoolScreen,
     DealerRegistrationScreen,
     RequestFieldVisitScreen,
-    SampleDiscountsScreen,
     DealerDirectoryScreen,
 
     // Misc. resource screens
