@@ -258,7 +258,8 @@ const {
     CONTRACTS_DATA,
     LEAD_TIMES_DATA,
     DAILY_DISCOUNT_OPTIONS,
-    INSTALL_INSTRUCTIONS_DATA
+    INSTALL_INSTRUCTIONS_DATA,
+    FABRICS_DATA
 } = Data;
 
 
@@ -1702,7 +1703,7 @@ const gradeOptions = ['A', 'B', 'C', 'COL', 'COM', 'D', 'E', 'F', 'G', 'H', 'I',
 const fabricTypeOptions = ['Type1', 'Type2', 'Type3']; // TODO: replace with real fabric types
 const tackableOptions = ['Yes', 'No'];
 
-const SearchFormScreen = () => {
+const SearchFormScreen = ({ theme }) => {
     const fabricSuppliers = [
         'Arc-Com', 'Camira', 'Carnegie', 'CF Stinson', 'Designtex',
         'Guilford of Maine', 'Knoll', 'Kravet', 'Maharam', 'Momentum'
@@ -1740,9 +1741,7 @@ const SearchFormScreen = () => {
     const updateMulti = useCallback((field, value) => {
         setForm(f => {
             const has = f[field].includes(value);
-            const arr = has
-                ? f[field].filter(x => x !== value)
-                : [...f[field], value];
+            const arr = has ? f[field].filter(x => x !== value) : [...f[field], value];
             return { ...f, [field]: arr };
         });
         if (field === 'grade') setShowGradeOptions(true);
@@ -1765,7 +1764,7 @@ const SearchFormScreen = () => {
             (form.fabricType.length === 0 || form.fabricType.includes(item.textile)) &&
             (form.tackable.length === 0 || form.tackable.includes(item.tackable))
         );
-        // fallback demo case
+        // demo fallback
         if (
             filtered.length === 0 &&
             form.supplier === 'Arc-Com' &&
@@ -1794,95 +1793,103 @@ const SearchFormScreen = () => {
     return (
         <div className="px-4 py-6">
             {!results ? (
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    {error && <p className="text-sm text-destructive">{error}</p>}
+                <Card theme={theme} className="p-6 space-y-6">
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        {error && <p className="text-sm text-destructive">{error}</p>}
 
-                    <AutoCompleteCombobox
-                        label="Supplier *"
-                        placeholder="Search Supplier"
-                        value={form.supplier}
-                        onChange={v => updateField('supplier', v)}
-                        options={fabricSuppliers}
-                    />
+                        <AutoCompleteCombobox
+                            theme={theme}
+                            label="Supplier *"
+                            placeholder="Search Supplier"
+                            value={form.supplier}
+                            onChange={v => updateField('supplier', v)}
+                            options={fabricSuppliers}
+                        />
 
-                    <AutoCompleteCombobox
-                        label="Pattern"
-                        placeholder="Search Pattern"
-                        value={form.pattern}
-                        onChange={v => updateField('pattern', v)}
-                        options={fabricPatterns}
-                    />
+                        <AutoCompleteCombobox
+                            theme={theme}
+                            label="Pattern"
+                            placeholder="Search Pattern"
+                            value={form.pattern}
+                            onChange={v => updateField('pattern', v)}
+                            options={fabricPatterns}
+                        />
 
-                    <AutoCompleteCombobox
-                        label="JSI Series *"
-                        placeholder="Search JSI Series"
-                        value={form.jsiSeries}
-                        onChange={v => updateField('jsiSeries', v)}
-                        options={jsiSeriesOptions}
-                    />
+                        <AutoCompleteCombobox
+                            theme={theme}
+                            label="JSI Series *"
+                            placeholder="Search JSI Series"
+                            value={form.jsiSeries}
+                            onChange={v => updateField('jsiSeries', v)}
+                            options={jsiSeriesOptions}
+                        />
 
-                    <div>
-                        <p className="mb-2 font-medium">Grade</p>
-                        <div className="flex flex-wrap gap-2">
-                            {!showGradeOptions
-                                ? <Button variant="filled" onClick={() => setShowGradeOptions(true)}>Any</Button>
-                                : <>
-                                    <Button variant="outline" onClick={() => { updateField('grade', []); setShowGradeOptions(false); }}>Any</Button>
-                                    {['A', 'B', 'C', 'COL', 'COM', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'L1', 'L2'].map(g => (
-                                        <Button
-                                            key={g}
-                                            variant={form.grade.includes(g) ? 'filled' : 'outline'}
-                                            onClick={() => updateMulti('grade', g)}
-                                        >{g}</Button>
-                                    ))}
-                                </>
-                            }
+                        <div>
+                            <p className="mb-2 font-medium">Grade</p>
+                            <div className="flex flex-wrap gap-2">
+                                {!showGradeOptions
+                                    ? <Button theme={theme} onClick={() => setShowGradeOptions(true)}>Any</Button>
+                                    : <>
+                                        <Button theme={theme} onClick={() => { updateField('grade', []); setShowGradeOptions(false); }}>Any</Button>
+                                        {['A', 'B', 'C', 'COL', 'COM', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'L1', 'L2'].map(g => (
+                                            <Button
+                                                key={g}
+                                                theme={theme}
+                                                onClick={() => updateMulti('grade', g)}
+                                                className={form.grade.includes(g) ? 'bg-accent text-white' : ''}
+                                            >{g}</Button>
+                                        ))}
+                                    </>
+                                }
+                            </div>
                         </div>
-                    </div>
 
-                    <div>
-                        <p className="mb-2 font-medium">Fabric Type</p>
-                        <div className="flex flex-wrap gap-2">
-                            {!showFabricOptions
-                                ? <Button variant="filled" onClick={() => setShowFabricOptions(true)}>Any</Button>
-                                : <>
-                                    <Button variant="outline" onClick={() => { updateField('fabricType', []); setShowFabricOptions(false); }}>Any</Button>
-                                    {['Coated', 'Fabric', 'Leather', 'Panel'].map(t => (
-                                        <Button
-                                            key={t}
-                                            variant={form.fabricType.includes(t) ? 'filled' : 'outline'}
-                                            onClick={() => updateMulti('fabricType', t)}
-                                        >{t}</Button>
-                                    ))}
-                                </>
-                            }
+                        <div>
+                            <p className="mb-2 font-medium">Fabric Type</p>
+                            <div className="flex flex-wrap gap-2">
+                                {!showFabricOptions
+                                    ? <Button theme={theme} onClick={() => setShowFabricOptions(true)}>Any</Button>
+                                    : <>
+                                        <Button theme={theme} onClick={() => { updateField('fabricType', []); setShowFabricOptions(false); }}>Any</Button>
+                                        {['Coated', 'Fabric', 'Leather', 'Panel'].map(t => (
+                                            <Button
+                                                key={t}
+                                                theme={theme}
+                                                onClick={() => updateMulti('fabricType', t)}
+                                                className={form.fabricType.includes(t) ? 'bg-accent text-white' : ''}
+                                            >{t}</Button>
+                                        ))}
+                                    </>
+                                }
+                            </div>
                         </div>
-                    </div>
 
-                    <div>
-                        <p className="mb-2 font-medium">Tackable</p>
-                        <div className="flex flex-wrap gap-2">
-                            {!showTackableOptions
-                                ? <Button variant="filled" onClick={() => setShowTackableOptions(true)}>Any</Button>
-                                : <>
-                                    <Button variant="outline" onClick={() => { updateField('tackable', []); setShowTackableOptions(false); }}>Any</Button>
-                                    {['Yes', 'No'].map(t => (
-                                        <Button
-                                            key={t}
-                                            variant={form.tackable.includes(t.toLowerCase()) ? 'filled' : 'outline'}
-                                            onClick={() => updateMulti('tackable', t.toLowerCase())}
-                                        >{t}</Button>
-                                    ))}
-                                </>
-                            }
+                        <div>
+                            <p className="mb-2 font-medium">Tackable</p>
+                            <div className="flex flex-wrap gap-2">
+                                {!showTackableOptions
+                                    ? <Button theme={theme} onClick={() => setShowTackableOptions(true)}>Any</Button>
+                                    : <>
+                                        <Button theme={theme} onClick={() => { updateField('tackable', []); setShowTackableOptions(false); }}>Any</Button>
+                                        {['Yes', 'No'].map(t => (
+                                            <Button
+                                                key={t}
+                                                theme={theme}
+                                                onClick={() => updateMulti('tackable', t.toLowerCase())}
+                                                className={form.tackable.includes(t.toLowerCase()) ? 'bg-accent text-white' : ''}
+                                            >{t}</Button>
+                                        ))}
+                                    </>
+                                }
+                            </div>
                         </div>
-                    </div>
 
-                    <Button type="submit" className="w-full">Search</Button>
-                </form>
+                        <Button theme={theme} type="submit" className="w-full">Search</Button>
+                    </form>
+                </Card>
             ) : (
                 <div className="space-y-6">
-                    <Card className="p-4">
+                    <Card theme={theme} className="p-4">
                         <p className="font-semibold text-lg">Results: {results.length}</p>
                         <div className="mt-2 space-y-1 text-sm">
                             <div><span className="font-medium">Supplier:</span> {form.supplier}</div>
@@ -1892,7 +1899,7 @@ const SearchFormScreen = () => {
                     </Card>
                     <div className="space-y-4">
                         {results.map((r, i) => (
-                            <Card key={i} className="p-4">
+                            <Card key={i} theme={theme} className="p-4">
                                 <p className="text-primary font-semibold mb-2">Approved</p>
                                 <div className="space-y-1 text-sm">
                                     <div><span className="font-medium">Supplier:</span> {r.supplier}</div>
@@ -1904,14 +1911,12 @@ const SearchFormScreen = () => {
                             </Card>
                         ))}
                     </div>
-                    <Button onClick={resetSearch} className="w-full">New Search</Button>
+                    <Button theme={theme} onClick={resetSearch} className="w-full">New Search</Button>
                 </div>
             )}
         </div>
     );
-};
-
-
+}; 
 
 const Avatar = ({ src, alt, theme }) => {
     const [err, setErr] = useState(false);
