@@ -1828,6 +1828,56 @@ const LoanerPoolScreen = ({
     );
 };
 
+export const ResourceDetailScreen = ({ theme, onNavigate, setSuccessMessage, userSettings, showAlert, currentScreen }) => {
+    // Extract the specific resource type from the URL-like path
+    const category = currentScreen.split('/')[1]?.replace(/_/g, ' ');
+
+    switch (category) {
+        case 'presentations':
+            const pathParts = currentScreen.split('/');
+            const subScreen = pathParts[2];
+            const seriesId = pathParts[3];
+
+            if (subScreen === 'view' && seriesId) {
+                return <PresentationViewerScreen theme={theme} seriesId={seriesId} onBack={() => onNavigate('resources/presentations/by_series_list')} />;
+            }
+            if (subScreen === 'by_series_list') {
+                return <PresentationSeriesListScreen theme={theme} onNavigate={onNavigate} />;
+            }
+            return <PresentationsScreen theme={theme} onNavigate={onNavigate} />;
+
+        case 'dealer directory':
+            return <DealerDirectoryScreen theme={theme} showAlert={showAlert} setSuccessMessage={setSuccessMessage} />;
+        case 'loaner pool':
+            return <LoanerPoolScreen theme={theme} onNavigate={onNavigate} setSuccessMessage={setSuccessMessage} userSettings={userSettings} />;
+        case 'commission rates':
+            return <CommissionRatesScreen theme={theme} onNavigate={onNavigate} />;
+        case 'contracts':
+            return <ContractsScreen theme={theme} onNavigate={onNavigate} />;
+        case 'dealer registration':
+            return <DealerRegistrationScreen theme={theme} onNavigate={onNavigate} setSuccessMessage={setSuccessMessage} />;
+        case 'discontinued finishes':
+            return <DiscontinuedFinishesScreen theme={theme} onNavigate={onNavigate} />;
+        case 'sample discounts':
+            return <SampleDiscountsScreen theme={theme} onNavigate={onNavigate} />;
+        case 'social media':
+            return <SocialMediaScreen theme={theme} showAlert={showAlert} setSuccessMessage={setSuccessMessage} />;
+        case 'request field visit':
+            return <RequestFieldVisitScreen theme={theme} onNavigate={onNavigate} setSuccessMessage={setSuccessMessage} />;
+        case 'install instructions':
+            return <InstallInstructionsScreen theme={theme} />;
+        case 'lead times':
+            return <LeadTimesScreen theme={theme} />;
+        default:
+            return (
+                <div className="px-4 pt-4 pb-4">
+                    <PageTitle title={category?.replace(/(^\w{1})|(\s+\w{1})/g, letter => letter.toUpperCase()) || "Resource"} theme={theme} />
+                    <GlassCard theme={theme} className="p-8 text-center"><p style={{ color: theme.colors.textPrimary }}>Content for this section will be available soon.</p></GlassCard>
+                </div>
+            );
+    }
+};
+
 
 const COMRequestScreen = ({ theme, onNavigate, showAlert }) => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -1977,6 +2027,204 @@ const COMRequestScreen = ({ theme, onNavigate, showAlert }) => {
 const gradeOptions = ['A', 'B', 'C', 'COL', 'COM', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'L1', 'L2'];
 const fabricTypeOptions = ['Type1', 'Type2', 'Type3']; // TODO: replace with real fabric types
 const tackableOptions = ['Yes', 'No'];
+
+export const FabricSearchForm = ({ theme, showAlert, onNavigate }) => {
+    const [form, setForm] = useState({ supplier: '', pattern: '', jsiSeries: '', });
+    const [results, setResults] = useState(null);
+    const [error, setError] = useState('');
+
+    const fabricSuppliers = useMemo(() => ['Arc-Com', 'Camira', 'Carnegie', 'CF Stinson', 'Designtex', 'Guilford of Maine', 'Knoll', 'Kravet', 'Maharam', 'Momentum'], []);
+    const fabricPatterns = useMemo(() => ['Astor', 'Caldera', 'Crossgrain', 'Dapper', 'Eco Wool', 'Heritage Tweed', 'Luxe Weave', 'Melange', 'Pixel', 'Prospect'], []);
+    const jsiSeriesOptions = useMemo(() => ['Alden', 'Allied', 'Anthology', 'Aria', 'Cincture', 'Convert', 'Midwest', 'Momentum', 'Proton', 'Reveal', 'Symmetry', 'Vision', 'Wink'], []);
+
+    const updateField = useCallback((field, value) => {
+        setForm(f => ({ ...f, [field]: value }));
+    }, []);
+
+    const handleSubmit = useCallback(e => {
+        e.preventDefault();
+        if (!form.supplier || !form.jsiSeries) {
+            setError('Supplier and JSI Series are required fields.');
+            return;
+        }
+        setError('');
+
+        let filtered = Data.FABRICS_DATA.filter(item =>
+            item.supplier === form.supplier &&
+            item.series === form.jsiSeries &&
+            (!form.pattern || item.pattern === form.pattern)
+        );
+
+        setResults(filtered);
+    }, [form]);
+
+    const resetSearch = useCallback(() => {
+        setForm({ supplier: '', pattern: '', jsiSeries: '' });
+        setResults(null);
+        setError('');
+    }, []);
+
+    return (
+        <div className="flex flex-col h-full">
+            <PageTitle title="Search Fabrics" theme={theme} onBack={() => onNavigate('fabrics')} />
+
+            <div className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-hide">
+                {!results ? (
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        <FormSection title="Search Criteria" theme={theme}>
+                            {error && <p className="text-sm text-red-500 -mt-2 mb-2">{error}</p>}
+                            <AutoCompleteCombobox label="Supplier" required value={form.supplier} onChange={v => updateField('supplier', v)} options={fabricSuppliers} placeholder="Search Suppliers" theme={theme} />
+                            <AutoCompleteCombobox label="Pattern" value={form.pattern} onChange={v => updateField('pattern', v)} options={fabricPatterns} placeholder="Search Patterns (Optional)" theme={theme} />
+                            <AutoCompleteCombobox label="JSI Series" required value={form.jsiSeries} onChange={v => updateField('jsiSeries', v)} options={jsiSeriesOptions} placeholder="Search JSI Series" theme={theme} />
+                        </FormSection>
+                        <button type="submit" className="w-full text-white font-bold py-3.5 rounded-full" style={{ backgroundColor: theme.colors.accent }}>Search</button>
+                    </form>
+                ) : (
+                    <div className="space-y-4">
+                        <FormSection title="Results" theme={theme}>
+                            <div className="text-sm space-y-1">
+                                <div><span className="font-medium" style={{ color: theme.colors.textSecondary }}>Supplier:</span> {form.supplier}</div>
+                                {form.pattern && <div><span className="font-medium" style={{ color: theme.colors.textSecondary }}>Pattern:</span> {form.pattern}</div>}
+                                <div><span className="font-medium" style={{ color: theme.colors.textSecondary }}>Series:</span> {form.jsiSeries}</div>
+                            </div>
+                        </FormSection>
+
+                        {results.length > 0 ? results.map((r, i) => (
+                            <GlassCard key={i} theme={theme} className="p-4">
+                                <p className="text-green-600 font-semibold mb-2">Approved</p>
+                                <div className="space-y-1 text-sm">
+                                    <div><span className="font-medium" style={{ color: theme.colors.textSecondary }}>Pattern:</span> {r.pattern}</div>
+                                    <div><span className="font-medium" style={{ color: theme.colors.textSecondary }}>Grade:</span> {r.grade}</div>
+                                    <div><span className="font-medium" style={{ color: theme.colors.textSecondary }}>Tackable:</span> {r.tackable}</div>
+                                </div>
+                            </GlassCard>
+                        )) : (
+                            <GlassCard theme={theme} className="p-8 text-center">
+                                <p className="font-semibold" style={{ color: theme.colors.textPrimary }}>No Results Found</p>
+                                <p className="text-sm" style={{ color: theme.colors.textSecondary }}>There are no approved fabrics matching your criteria.</p>
+                            </GlassCard>
+                        )}
+
+                        <button onClick={resetSearch} className="w-full text-white font-bold py-3.5 rounded-full" style={{ backgroundColor: theme.colors.accent }}>New Search</button>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+export const COMYardageRequestScreen = ({ theme, showAlert, onNavigate }) => {
+    const [selectedModels, setSelectedModels] = useState([]);
+
+    const addModel = useCallback((modelId) => {
+        if (modelId && !selectedModels.some(m => m.id === modelId)) {
+            const modelData = Data.JSI_MODELS.find(m => m.id === modelId);
+            if (modelData) {
+                setSelectedModels(prev => [...prev, { ...modelData, quantity: 1, fabric: '' }]);
+            }
+        }
+    }, [selectedModels]);
+
+    const updateModel = useCallback((modelId, updates) => {
+        setSelectedModels(prev => prev.map(m => (m.id === modelId ? { ...m, ...updates } : m)));
+    }, []);
+
+    const removeModel = useCallback((modelId) => {
+        setSelectedModels(prev => prev.filter(m => m.id !== modelId));
+    }, []);
+
+    const handleSubmit = () => {
+        showAlert('COM Yardage Request Submitted (Demo)');
+        onNavigate('resources');
+    };
+
+    const modelOptions = useMemo(() =>
+        Data.JSI_MODELS
+            .filter(m => m.isUpholstered && !selectedModels.some(sm => sm.id === m.id))
+            .map(m => `${m.name} (${m.id})`),
+        [selectedModels]
+    );
+
+    return (
+        <div className="flex flex-col h-full">
+            <PageTitle title="COM Yardage Request" theme={theme} onBack={() => onNavigate('fabrics')} />
+            <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4 scrollbar-hide">
+                <FormSection title="Select Models" theme={theme}>
+                    {selectedModels.map(model => (
+                        <GlassCard key={model.id} className="p-4 space-y-3" style={{ backgroundColor: theme.colors.subtle }}>
+                            <div className="flex items-start justify-between">
+                                <div>
+                                    <p className="font-semibold" style={{ color: theme.colors.textPrimary }}>{model.name}</p>
+                                    <p className="text-sm font-mono" style={{ color: theme.colors.textSecondary }}>{model.id}</p>
+                                </div>
+                                <button onClick={() => removeModel(model.id)} className="p-1 rounded-full hover:bg-red-500/10"><X className="w-5 h-5 text-red-500" /></button>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <label className="text-sm font-medium" style={{ color: theme.colors.textSecondary }}>Quantity</label>
+                                <div className="flex items-center space-x-2">
+                                    <button type="button" onClick={() => updateModel(model.id, { quantity: Math.max(1, model.quantity - 1) })} className="p-1 rounded-full" style={{ backgroundColor: theme.colors.surface }}><Minus className="w-4 h-4" style={{ color: theme.colors.secondary }} /></button>
+                                    <span className="font-bold w-8 text-center" style={{ color: theme.colors.textPrimary }}>{model.quantity}</span>
+                                    <button type="button" onClick={() => updateModel(model.id, { quantity: model.quantity + 1 })} className="p-1 rounded-full" style={{ backgroundColor: theme.colors.surface }}><Plus className="w-4 h-4" style={{ color: theme.colors.secondary }} /></button>
+                                </div>
+                            </div>
+                        </GlassCard>
+                    ))}
+                    <AutoCompleteCombobox
+                        value=""
+                        onChange={(val) => {
+                            const modelId = val.match(/\(([^)]+)\)/)?.[1];
+                            addModel(modelId);
+                        }}
+                        placeholder="+ Add a Model..."
+                        options={modelOptions}
+                        theme={theme}
+                    />
+                </FormSection>
+
+                <div className="pt-4 pb-4">
+                    <button onClick={handleSubmit} disabled={selectedModels.length === 0} className="w-full font-bold py-3.5 px-6 rounded-full transition-colors disabled:opacity-50" style={{ backgroundColor: theme.colors.accent, color: '#FFFFFF' }}>
+                        Submit Request
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export const FabricsScreen = ({ onNavigate, theme, currentScreen, showAlert }) => {
+    const subScreen = currentScreen.split('/')[1];
+
+    if (subScreen === 'search_form') {
+        // FIX: Ensure the theme prop is passed here
+        return <FabricSearchForm theme={theme} showAlert={showAlert} onNavigate={onNavigate} />;
+    }
+
+    if (subScreen === 'com_request') {
+        // FIX: Ensure the theme prop is passed here
+        return <COMYardageRequestScreen theme={theme} showAlert={showAlert} onNavigate={onNavigate} />;
+    }
+
+    // This is the main menu for the Fabrics section
+    return (
+        <>
+            <PageTitle title="Fabrics" theme={theme} />
+            <div className="px-4 space-y-3 pb-4">
+                <GlassCard theme={theme} className="p-1">
+                    <button onClick={() => onNavigate('fabrics/search_form')} className="w-full p-4 rounded-xl flex items-center justify-between">
+                        <span className="text-md font-semibold tracking-tight" style={{ color: theme.colors.textPrimary }}>Search Database</span>
+                        <ArrowRight className="w-5 h-5" style={{ color: theme.colors.secondary }} />
+                    </button>
+                </GlassCard>
+                <GlassCard theme={theme} className="p-1">
+                    <button onClick={() => onNavigate('fabrics/com_request')} className="w-full p-4 rounded-xl flex items-center justify-between">
+                        <span className="text-md font-semibold tracking-tight" style={{ color: theme.colors.textPrimary }}>Request COM Yardage</span>
+                        <ArrowRight className="w-5 h-5" style={{ color: theme.colors.secondary }} />
+                    </button>
+                </GlassCard>
+            </div>
+        </>
+    );
+};
 
 const SearchFormScreen = ({ theme }) => {
     const fabricSuppliers = [
@@ -2218,60 +2466,9 @@ const Avatar = ({ src, alt, theme }) => {
     );
 };
 
-const CartScreen = ({ theme, onNavigate, handleBack, cart, setCart, onUpdateCart, userSettings }) => {
+export const CartScreen = ({ theme, onNavigate, handleBack, cart, setCart, onUpdateCart, userSettings }) => {
     const [address, setAddress] = useState('');
-    const [predictions, setPredictions] = useState([]);
     const [isSubmitted, setIsSubmitted] = useState(false);
-    const autocompleteService = useRef(null);
-    const inputRef = useRef(null);
-
-    useEffect(() => {
-        const Maps_API_KEY = 'AIzaSyBnNqlHE8XC92q10IUCQgXx-aiOKpCS7Ac';
-
-        if (window.google && window.google.maps) {
-            autocompleteService.current = new window.google.maps.places.AutocompleteService();
-            return;
-        }
-
-        const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${Maps_API_KEY}&libraries=places`;
-        script.async = true;
-        script.defer = true;
-        document.head.appendChild(script);
-
-        script.onload = () => {
-            if (window.google && window.google.maps) {
-                autocompleteService.current = new window.google.maps.places.AutocompleteService();
-            }
-        };
-
-        return () => {
-            const existingScript = document.head.querySelector(`script[src*="maps.googleapis.com"]`);
-            if (existingScript) {
-            }
-        };
-    }, []);
-
-    const handleAddressChange = (e) => {
-        const value = e.target.value;
-        setAddress(value);
-        if (autocompleteService.current && value) {
-            autocompleteService.current.getPlacePredictions({ input: value }, (predictions, status) => {
-                if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions) {
-                    setPredictions(predictions);
-                } else {
-                    setPredictions([]);
-                }
-            });
-        } else {
-            setPredictions([]);
-        }
-    };
-
-    const handleSelectPrediction = (prediction) => {
-        setAddress(prediction.description);
-        setPredictions([]);
-    };
 
     const cartItems = useMemo(() => {
         return Object.entries(cart).map(([id, quantity]) => {
@@ -2280,10 +2477,10 @@ const CartScreen = ({ theme, onNavigate, handleBack, cart, setCart, onUpdateCart
             }
             if (id.startsWith('set-')) {
                 const categoryId = id.replace('set-', '');
-                const categoryName = SAMPLE_CATEGORIES.find(c => c.id === categoryId)?.name || 'Unknown';
+                const categoryName = Data.SAMPLE_CATEGORIES.find(c => c.id === categoryId)?.name || 'Unknown';
                 return { id, name: `Complete ${categoryName} Set`, quantity };
             }
-            const product = SAMPLE_PRODUCTS.find(p => String(p.id) === id);
+            const product = Data.SAMPLE_PRODUCTS.find(p => String(p.id) === id);
             return product ? { ...product, quantity } : null;
         }).filter(Boolean);
     }, [cart]);
@@ -2293,8 +2490,8 @@ const CartScreen = ({ theme, onNavigate, handleBack, cart, setCart, onUpdateCart
         setTimeout(() => {
             setCart({});
             onNavigate('home');
-        }, 1000);
-    }, [setCart, onNavigate])
+        }, 1200);
+    }, [setCart, onNavigate]);
 
     if (isSubmitted) {
         return (
@@ -2304,12 +2501,12 @@ const CartScreen = ({ theme, onNavigate, handleBack, cart, setCart, onUpdateCart
                     <h2 className="text-2xl font-bold" style={{ color: theme.colors.textPrimary }}>Ordered!</h2>
                 </GlassCard>
             </div>
-        )
+        );
     }
 
     return (
         <>
-            <PageTitle title="Cart" theme={theme} />
+            <PageTitle title="Cart" theme={theme} onBack={handleBack} />
             <div className="px-4 space-y-4 pb-4">
                 <GlassCard theme={theme} className="p-4 space-y-2">
                     <h3 className="font-bold" style={{ color: theme.colors.textPrimary }}>Selected Samples</h3>
@@ -2327,29 +2524,8 @@ const CartScreen = ({ theme, onNavigate, handleBack, cart, setCart, onUpdateCart
                 <GlassCard theme={theme} className="p-4 space-y-2">
                     <h3 className="font-bold" style={{ color: theme.colors.textPrimary }}>Ship To</h3>
                     <div className="relative">
-                        <input
-                            ref={inputRef}
-                            type="text"
-                            value={address}
-                            onChange={handleAddressChange}
-                            placeholder="Start typing your address..."
-                            className="w-full p-2 pr-10 border rounded-lg" style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border, color: theme.colors.textPrimary }}
-                        />
+                        <textarea value={address} onChange={(e) => setAddress(e.target.value)} rows="3" placeholder="Enter shipping address..." className="w-full p-2 pr-10 border rounded-lg" style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border, color: theme.colors.textPrimary }}></textarea>
                         <button onClick={() => setAddress(userSettings.homeAddress)} className="absolute top-2 right-2 p-1 rounded-full" style={{ backgroundColor: theme.colors.surface }}><Home className="w-5 h-5" style={{ color: theme.colors.secondary }} /></button>
-                        {predictions.length > 0 && (
-                            <GlassCard theme={theme} className="absolute w-full mt-1 z-10 p-1">
-                                {predictions.map(prediction => (
-                                    <button
-                                        key={prediction.place_id}
-                                        onClick={() => handleSelectPrediction(prediction)}
-                                        className="block w-full text-left p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5"
-                                        style={{ color: theme.colors.textSecondary }}
-                                    >
-                                        {prediction.description}
-                                    </button>
-                                ))}
-                            </GlassCard>
-                        )}
                     </div>
                 </GlassCard>
                 <button onClick={handleSubmit} disabled={Object.keys(cart).length === 0 || !address.trim()} className="w-full font-bold py-3 px-6 rounded-lg transition-colors disabled:opacity-50" style={{ backgroundColor: theme.colors.accent, color: '#FFFFFF' }}>Submit</button>
@@ -2357,7 +2533,6 @@ const CartScreen = ({ theme, onNavigate, handleBack, cart, setCart, onUpdateCart
         </>
     );
 };
-
 
 export const ProfileMenu = ({ show, onClose, onNavigate, toggleTheme, theme, isDarkMode }) => {
     if (!show) return null;
@@ -4596,6 +4771,7 @@ const SCREEN_MAP = {
 
     // Top-level Resources menu
     resources: ResourcesScreen,
+    fabrics: FabricsScreen,
 
     // Fabrics
     'fabrics/search_form': SearchFormScreen,
@@ -4679,7 +4855,6 @@ export {
     ProjectsScreen,
     CommunityScreen,
     SamplesScreen,
-    CartScreen,
     FancySelect,
     ReplacementsScreen,
     SettingsScreen,

@@ -1,75 +1,124 @@
 ﻿import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
-import { lightTheme, darkTheme, INITIAL_MEMBERS } from './data.jsx';
-import { AppHeader, ProfileMenu, SCREEN_MAP, OrderModal, Modal, SuccessToast, PageTitle } from './ui.jsx';
+import { lightTheme, darkTheme, INITIAL_MEMBERS, INITIAL_OPPORTUNITIES, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS } from './data.jsx';
+import { AppHeader, ProfileMenu, SCREEN_MAP, OrderModal, Modal, SuccessToast, PageTitle, ResourceDetailScreen, CartScreen, VoiceModal } from './ui.jsx';
 import * as Data from './data.jsx';
 
 function App() {
-    // --- STATE ---
+    // --- CORE APP STATE ---
     const [navigationHistory, setNavigationHistory] = useState(['home']);
-    const [members, setMembers] = useState(INITIAL_MEMBERS);
-    const [currentUserId, setCurrentUserId] = useState(1);
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
-    const [selectedOrder, setSelectedOrder] = useState(null);
-    const [userSettings, setUserSettings] = useState({ id: 1, firstName: 'Luke', lastName: 'Wagner' });
+    const [alertInfo, setAlertInfo] = useState({ show: false, message: '' });
+    const [voiceMessage, setVoiceMessage] = useState('');
 
+    // --- SCREEN-SPECIFIC STATE ---
+    const [members, setMembers] = useState(INITIAL_MEMBERS);
+    const [currentUserId, setCurrentUserId] = useState(1);
+    const [selectedOrder, setSelectedOrder] = useState(null);
+    const [opportunities, setOpportunities] = useState(INITIAL_OPPORTUNITIES);
+    const [designFirms, setDesignFirms] = useState(INITIAL_DESIGN_FIRMS);
+    const [dealers, setDealers] = useState(INITIAL_DEALERS);
+    const [userSettings, setUserSettings] = useState({
+        id: 1,
+        firstName: 'Luke',
+        lastName: 'Miller',
+        email: 'luke.wagner@example.com',
+        homeAddress: '5445 N Deerwood Lake Rd, Jasper, IN 47546',
+        tShirtSize: 'L',
+        permissions: { salesData: true, commissions: true, projects: true, customerRanking: true, dealerRewards: true, submittingReplacements: true }
+    });
+    const [cart, setCart] = useState({});
+
+    // --- GESTURE & AI STATE ---
     const touchStartX = useRef(0);
+    const [aiResponse, setAiResponse] = useState('');
+    const [isAILoading, setIsAILoading] = useState(false);
+    const [showAIDropdown, setShowAIDropdown] = useState(false);
 
     // --- DERIVED STATE ---
     const currentScreen = navigationHistory[navigationHistory.length - 1];
     const currentTheme = useMemo(() => (isDarkMode ? darkTheme : lightTheme), [isDarkMode]);
 
-    // --- EFFECT TO PREVENT SCROLLING ON MOBILE ---
+    // --- SIDE EFFECTS ---
     useEffect(() => {
         const preventDefault = (e) => e.preventDefault();
-
-        // If on the home screen, disable touch scrolling on the document body
+        // Lock scrolling on home screen for mobile
         if (currentScreen === 'home') {
             document.body.addEventListener('touchmove', preventDefault, { passive: false });
         } else {
-            // Re-enable scrolling on all other screens
             document.body.removeEventListener('touchmove', preventDefault);
         }
-
-        // Cleanup the event listener when the component unmounts or the screen changes
-        return () => {
-            document.body.removeEventListener('touchmove', preventDefault);
-        };
-    }, [currentScreen]); // This effect runs every time the screen changes
+        return () => document.body.removeEventListener('touchmove', preventDefault);
+    }, [currentScreen]);
 
     // --- HANDLERS ---
-    const handleNavigate = useCallback((screen) => { setNavigationHistory(prev => [...prev, screen]); }, []);
-    const handleHome = useCallback(() => { setNavigationHistory(['home']); }, []);
+    const handleNavigate = useCallback((screen) => { setNavigationHistory(prev => [...prev, screen]); setShowProfileMenu(false); }, []);
+    const handleHome = useCallback(() => { setNavigationHistory(['home']); setShowProfileMenu(false); }, []);
     const handleBack = useCallback(() => { if (navigationHistory.length > 1) { setNavigationHistory(prev => prev.slice(0, -1)); } }, [navigationHistory.length]);
     const handleSaveSettings = useCallback(() => { setSuccessMessage("Settings Saved!"); setTimeout(() => setSuccessMessage(""), 2000); handleBack(); }, [handleBack]);
+    const handleNewLeadSuccess = useCallback((newLead) => { setOpportunities(prev => [...prev, newLead]); handleNavigate('projects'); }, [handleNavigate]);
+    const handleShowAlert = useCallback((message) => { setAlertInfo({ show: true, message }); }, []);
+    const handleShowVoiceModal = useCallback((message) => { setVoiceMessage(message); setTimeout(() => setVoiceMessage(''), 1200); }, []);
+    const handleUpdateCart = useCallback((item, change) => {
+        setCart(prev => {
+            const newCart = { ...prev };
+            const currentQty = newCart[item.id] || 0;
+            const newQty = currentQty + change;
+            if (newQty > 0) newCart[item.id] = newQty;
+            else delete newCart[item.id];
+            return newCart;
+        });
+    }, []);
+    const handleAskAI = useCallback(async (prompt) => {
+        if (!prompt) return;
+        setShowAIDropdown(true);
+        setIsAILoading(true);
+        setTimeout(() => {
+            setAiResponse(`This is a simulated AI response for: "${prompt}"`);
+            setIsAILoading(false);
+        }, 1500);
+    }, []);
+    const handleCloseAIDropdown = useCallback(() => { setShowAIDropdown(false); }, []);
+    const handleTouchStart = (e) => { if (e.targetTouches[0].clientX < 50) { touchStartX.current = e.targetTouches[0].clientX; } else { touchStartX.current = 0; } };
+    const handleTouchEnd = (e) => { const touchEndX = e.changedTouches[0].clientX; if (touchStartX.current > 0 && touchEndX - touchStartX.current > 75) { handleBack(); } touchStartX.current = 0; };
 
-    const handleTouchStart = (e) => {
-        if (e.targetTouches[0].clientX < 50) {
-            touchStartX.current = e.targetTouches[0].clientX;
-        } else {
-            touchStartX.current = 0;
-        }
-    };
-    const handleTouchEnd = (e) => {
-        const touchEndX = e.changedTouches[0].clientX;
-        if (touchStartX.current > 0 && touchEndX - touchStartX.current > 75) {
-            handleBack();
-        }
-        touchStartX.current = 0;
-    };
-
+    // --- RENDER LOGIC ---
     const renderScreen = () => {
-        const screenKey = currentScreen.split('/')[0];
+        const screenParts = currentScreen.split('/');
+        const screenKey = screenParts[0];
         const ScreenComponent = SCREEN_MAP[screenKey];
+
         if (!ScreenComponent) return <PageTitle title="Not Found" theme={currentTheme} />;
-        const props = { theme: currentTheme, onNavigate: handleNavigate, setSuccessMessage };
+
+        const props = { theme: currentTheme, onNavigate: handleNavigate, setSuccessMessage, showAlert: handleShowAlert, handleBack };
+
+        if (currentScreen === 'samples/cart') {
+            return <CartScreen {...props} cart={cart} setCart={setCart} onUpdateCart={handleUpdateCart} userSettings={userSettings} />;
+        }
+        if (screenKey === 'resources' && screenParts.length > 1) {
+            return <ResourceDetailScreen {...props} currentScreen={currentScreen} userSettings={userSettings} />;
+        }
 
         switch (screenKey) {
-            case 'orders': return <ScreenComponent {...props} setSelectedOrder={setSelectedOrder} />;
-            case 'settings': return <ScreenComponent {...props} userSettings={userSettings} setUserSettings={setUserSettings} onSave={handleSaveSettings} />;
-            case 'members': return <ScreenComponent {...props} members={members} setMembers={setMembers} currentUserId={currentUserId} />;
-            default: return <ScreenComponent {...props} />;
+            case 'home':
+                return <ScreenComponent {...props} onAskAI={handleAskAI} showAIDropdown={showAIDropdown} aiResponse={aiResponse} isAILoading={isAILoading} onCloseAIDropdown={handleCloseAIDropdown} onVoiceActivate={handleShowVoiceModal} />;
+            case 'fabrics':
+                return <ScreenComponent {...props} currentScreen={currentScreen} />;
+            case 'orders':
+                return <ScreenComponent {...props} setSelectedOrder={setSelectedOrder} />;
+            case 'samples':
+                return <ScreenComponent {...props} cart={cart} onUpdateCart={handleUpdateCart} userSettings={userSettings} />;
+            case 'settings':
+                return <ScreenComponent {...props} userSettings={userSettings} setUserSettings={setUserSettings} onSave={handleSaveSettings} />;
+            case 'members':
+                return <ScreenComponent {...props} members={members} setMembers={setMembers} currentUserId={currentUserId} />;
+            case 'projects':
+                return <ScreenComponent {...props} opportunities={opportunities} />;
+            case 'new-lead':
+                return <ScreenComponent {...props} onSuccess={handleNewLeadSuccess} designFirms={designFirms} setDesignFirms={setDesignFirms} dealers={dealers} setDealers={setDealers} />;
+            default:
+                return <ScreenComponent {...props} />;
         }
     };
 
@@ -99,7 +148,9 @@ function App() {
             <div className="absolute inset-0 pointer-events-none">
                 {showProfileMenu && <ProfileMenu show={showProfileMenu} onClose={() => setShowProfileMenu(false)} onNavigate={handleNavigate} toggleTheme={() => setIsDarkMode(d => !d)} theme={currentTheme} isDarkMode={isDarkMode} />}
                 {selectedOrder && <OrderModal order={selectedOrder} onClose={() => setSelectedOrder(null)} theme={currentTheme} />}
+                <Modal show={alertInfo.show} onClose={() => setAlertInfo({ show: false, message: '' })} title="Alert" theme={currentTheme}><p>{alertInfo.message}</p></Modal>
                 <SuccessToast message={successMessage} show={!!successMessage} theme={currentTheme} />
+                <VoiceModal message={voiceMessage} show={!!voiceMessage} theme={currentTheme} />
             </div>
         </div>
     );
