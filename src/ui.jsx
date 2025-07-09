@@ -3979,50 +3979,41 @@ export const NewLeadScreen = ({
         </form>
     );
 };
-const ResourcesScreen = ({ theme, onNavigate }) => {
+
+export const ResourcesScreen = ({ theme, onNavigate }) => {
     return (
-        <>
+        <div className="flex flex-col h-full">
             <PageTitle title="Resources" theme={theme} />
-
-            <div className="px-4 space-y-6 pb-4">
-                {Data.RESOURCES_DATA.map(category => (
-                    <div key={category.category}>
-                        <h2
-                            className="text-xl font-bold mb-2 px-1"
-                            style={{ color: theme.colors.textPrimary }}
-                        >
-                            {category.category}
-                        </h2>
-
-                        <div className="space-y-3">
-                            {category.items.map(item => (
-                                <GlassCard
-                                    key={item.label}
-                                    theme={theme}
-                                    className="p-1"
-                                >
-                                    <button
-                                        onClick={() => onNavigate(item.nav)}
-                                        className="w-full p-3 rounded-xl flex items-center justify-between"
-                                    >
-                                        <span
-                                            className="text-md font-semibold tracking-tight"
-                                            style={{ color: theme.colors.textPrimary }}
+            <div className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-hide">
+                <div className="space-y-6">
+                    {Data.RESOURCES_DATA.map(category => (
+                        // Each category is now its own single, clean card
+                        <GlassCard key={category.category} theme={theme} className="p-2">
+                            <h2 className="text-xl font-bold mb-1 px-3 pt-2" style={{ color: theme.colors.textPrimary }}>
+                                {category.category}
+                            </h2>
+                            <div className="space-y-1">
+                                {category.items.map((item, index) => (
+                                    <React.Fragment key={item.nav}>
+                                        {/* Add a subtle divider between items, but not before the first one */}
+                                        {index > 0 && <div className="border-t mx-3" style={{ borderColor: theme.colors.subtle }}></div>}
+                                        <button
+                                            onClick={() => onNavigate(item.nav)}
+                                            className="w-full p-3 rounded-xl flex items-center justify-between transition-colors hover:bg-black/5 dark:hover:bg-white/10"
                                         >
-                                            {item.label}
-                                        </span>
-                                        <ArrowRight
-                                            className="w-5 h-5"
-                                            style={{ color: theme.colors.secondary }}
-                                        />
-                                    </button>
-                                </GlassCard>
-                            ))}
-                        </div>
-                    </div>
-                ))}
+                                            <span className="text-md font-semibold tracking-tight" style={{ color: theme.colors.textPrimary }}>
+                                                {item.label}
+                                            </span>
+                                            <ArrowRight className="w-5 h-5" style={{ color: theme.colors.secondary }} />
+                                        </button>
+                                    </React.Fragment>
+                                ))}
+                            </div>
+                        </GlassCard>
+                    ))}
+                </div>
             </div>
-        </>
+        </div>
     );
 };
 
@@ -4828,7 +4819,6 @@ export {
     // Top‐level screens
     SalesScreen,
     ProductsScreen,
-    ResourcesScreen,
 
     // Fabrics screens
     SearchFormScreen,
