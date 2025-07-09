@@ -124,13 +124,18 @@ const {
 
 
 const CommissionRatesScreen = ({ theme, onNavigate }) => {
-    const { standard, contract, split } = Data.COMMISSION_RATES_TABLE_DATA;
     return (
-        <>
-            {/* … your JSX … */}
-        </>
+        <div className="p-6">
+            <PageTitle title="Commission Rates" theme={theme} />
+            <div className="mt-4">
+                {/* Your commission rates content here */}
+                <p>Commission rates content goes here...</p>
+            </div>
+        </div>
     );
 };
+
+
 const COMRequestScreen = ({ theme, onNavigate, showAlert }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedModels, setSelectedModels] = useState([]);

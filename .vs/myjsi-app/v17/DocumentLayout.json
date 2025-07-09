@@ -21,7 +21,7 @@
       "VerticalTabListWidth": 256,
       "DocumentGroups": [
         {
-          "DockedHeight": 354,
+          "DockedHeight": 250,
           "SelectedChildIndex": 2,
           "Children": [
             {
@@ -58,7 +58,7 @@
               "RelativeDocumentMoniker": "src\\ui.jsx",
               "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\ui.jsx",
               "RelativeToolTip": "src\\ui.jsx",
-              "ViewState": "AgIAAF0AAAAAAAAAAAAAAIMAAAAGAAAAAAAAAA==",
+              "ViewState": "AgIAAGsAAAAAAAAAAAAnwIIAAAA6AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
               "WhenOpened": "2025-07-08T12:39:11.271Z",
               "EditorCaption": ""
@@ -66,7 +66,7 @@
           ]
         },
         {
-          "DockedHeight": 46,
+          "DockedHeight": 150,
           "SelectedChildIndex": -1,
           "Children": [
             {
