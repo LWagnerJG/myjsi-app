@@ -121,107 +121,16 @@ const {
     DAILY_DISCOUNT_OPTIONS
 } = Data;
 
-import COMRequestScreen from './COMRequestScreen';
+
 
 const CommissionRatesScreen = ({ theme, onNavigate }) => {
     const { standard, contract, split } = Data.COMMISSION_RATES_TABLE_DATA;
-
     return (
         <>
-            {/* Back button */}
-            <button
-                onClick={() => onNavigate('resources')}
-                className="mb-4 flex items-center text-sm font-medium px-4 py-2"
-                style={{ color: theme.colors.textPrimary }}
-            >
-                <ArrowLeft className="w-4 h-4 mr-1" style={{ color: theme.colors.textSecondary }} />
-                Back to Resources
-            </button>
-
-            {/* Title */}
-            <PageTitle title="Commission Rates" theme={theme} />
-
-            <div className="px-4 space-y-6 pb-4">
-                {/* Standard Rates */}
-                <GlassCard theme={theme} className="p-4">
-                    <h3 className="font-semibold mb-2" style={{ color: theme.colors.textPrimary }}>
-                        Standard
-                    </h3>
-                    <table className="w-full text-left">
-                        <thead>
-                            <tr>
-                                <th className="pb-2">Discount</th>
-                                <th className="pb-2">Rep %</th>
-                                <th className="pb-2">Spiff %</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {standard.map((row, i) => (
-                                <tr key={i} className="border-t">
-                                    <td className="py-2">{row.discount}</td>
-                                    <td className="py-2">{row.rep}</td>
-                                    <td className="py-2">
-                                        {typeof row.spiff === 'object' ? row.spiff.value : row.spiff}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </GlassCard>
-
-                {/* Contract Rates */}
-                <GlassCard theme={theme} className="p-4">
-                    <h3 className="font-semibold mb-2" style={{ color: theme.colors.textPrimary }}>
-                        Contract
-                    </h3>
-                    <table className="w-full text-left">
-                        <thead>
-                            <tr>
-                                <th className="pb-2">Discount</th>
-                                <th className="pb-2">Rep %</th>
-                                <th className="pb-2">Spiff %</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {contract.map((row, i) => (
-                                <tr key={i} className="border-t">
-                                    <td className="py-2">{row.discount}</td>
-                                    <td className="py-2">{row.rep}</td>
-                                    <td className="py-2">{row.spiff}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </GlassCard>
-
-                {/* Split */}
-                <GlassCard theme={theme} className="p-4">
-                    <h3 className="font-semibold mb-2" style={{ color: theme.colors.textPrimary }}>
-                        Split
-                    </h3>
-                    <table className="w-full text-left">
-                        <thead>
-                            <tr>
-                                <th className="pb-2">Territory</th>
-                                <th className="pb-2">% Split</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {split.map((row, i) => (
-                                <tr key={i} className="border-t">
-                                    <td className="py-2">{row.territory}</td>
-                                    <td className="py-2">{row.percentage}%</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </GlassCard>
-            </div>
+            {/* … your JSX … */}
         </>
     );
 };
-
-
 const COMRequestScreen = ({ theme, onNavigate, showAlert }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedModels, setSelectedModels] = useState([]);
