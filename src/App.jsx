@@ -28,12 +28,11 @@ function App() {
         tShirtSize: 'L',
         permissions: { salesData: true, commissions: true, projects: true, customerRanking: true, dealerRewards: true, submittingReplacements: true }
     });
-
-    // RESTORED: State for AI Search functionality
     const [aiResponse, setAiResponse] = useState('');
     const [isAILoading, setIsAILoading] = useState(false);
     const [showAIDropdown, setShowAIDropdown] = useState(false);
 
+    // Ref for swipe-to-go-back gesture
     const touchStartX = useRef(0);
 
     // --- DERIVED STATE ---
@@ -44,13 +43,11 @@ function App() {
     const handleNavigate = useCallback((screen) => { setNavigationHistory(prev => [...prev, screen]); }, []);
     const handleHome = useCallback(() => { setNavigationHistory(['home']); }, []);
     const handleBack = useCallback(() => { if (navigationHistory.length > 1) { setNavigationHistory(prev => prev.slice(0, -1)); } }, [navigationHistory.length]);
-    const handleShowAlert = useCallback((message) => { setAlertInfo({ show: true, message }); }, []);
     const handleSaveSettings = useCallback(() => { setSuccessMessage("Settings Saved!"); setTimeout(() => setSuccessMessage(""), 2000); handleBack(); }, [handleBack]);
     const handleNewLeadSuccess = useCallback((newLead) => { setOpportunities(prev => [...prev, newLead]); handleNavigate('projects'); }, [handleNavigate]);
-
-    // RESTORED: Handlers for AI search and voice activation
+    const handleShowAlert = useCallback((message) => { setAlertInfo({ show: true, message }); }, []);
+    const handleShowVoiceModal = useCallback((message) => { setVoiceMessage(message); setTimeout(() => setVoiceMessage(''), 1000); }, []);
     const handleAskAI = useCallback(async (prompt) => {
-        // This is a placeholder for your actual AI logic
         if (!prompt) return;
         setShowAIDropdown(true);
         setIsAILoading(true);
@@ -59,47 +56,58 @@ function App() {
             setIsAILoading(false);
         }, 1500);
     }, []);
-
     const handleCloseAIDropdown = useCallback(() => { setShowAIDropdown(false); }, []);
-    const handleShowVoiceModal = useCallback((message) => { setVoiceMessage(message); setTimeout(() => setVoiceMessage(''), 1000); }, []);
 
-    // --- RENDER LOGIC ---
+    // RESTORED: Handlers for the swipe-to-go-back gesture
+    const handleTouchStart = (e) => {
+        if (e.targetTouches[0].clientX < 50) {
+            touchStartX.current = e.targetTouches[0].clientX;
+        } else {
+            touchStartX.current = 0;
+        }
+    };
+    const handleTouchEnd = (e) => {
+        const touchEndX = e.changedTouches[0].clientX;
+        if (touchStartX.current > 0 && touchEndX - touchStartX.current > 75) {
+            handleBack();
+        }
+        touchStartX.current = 0;
+    };
+
     const renderScreen = () => {
         const screenKey = currentScreen.split('/')[0];
         const ScreenComponent = SCREEN_MAP[screenKey];
 
-        if (!ScreenComponent) {
-            return <PageTitle title="Not Found" theme={currentTheme} />;
-        }
+        if (!ScreenComponent) return <PageTitle title="Not Found" theme={currentTheme} />;
 
-        const commonProps = {
-            theme: currentTheme,
-            onNavigate: handleNavigate,
-            setSuccessMessage,
-            showAlert: handleShowAlert,
-        };
+        const props = { theme: currentTheme, onNavigate: handleNavigate, setSuccessMessage, showAlert: handleShowAlert };
 
-        // UPDATED: This switch ensures every screen gets the specific props it needs
         switch (screenKey) {
             case 'home':
-                return <ScreenComponent {...commonProps} onAskAI={handleAskAI} showAIDropdown={showAIDropdown} aiResponse={aiResponse} isAILoading={isAILoading} onCloseAIDropdown={handleCloseAIDropdown} onVoiceActivate={handleShowVoiceModal} />;
+                return <ScreenComponent {...props} onAskAI={handleAskAI} showAIDropdown={showAIDropdown} aiResponse={aiResponse} isAILoading={isAILoading} onCloseAIDropdown={handleCloseAIDropdown} onVoiceActivate={handleShowVoiceModal} />;
             case 'orders':
-                return <ScreenComponent {...commonProps} setSelectedOrder={setSelectedOrder} />;
+                return <ScreenComponent {...props} setSelectedOrder={setSelectedOrder} />;
             case 'settings':
-                return <ScreenComponent {...commonProps} userSettings={userSettings} setUserSettings={setUserSettings} onSave={handleSaveSettings} />;
+                return <ScreenComponent {...props} userSettings={userSettings} setUserSettings={setUserSettings} onSave={handleSaveSettings} />;
             case 'members':
                 return <ScreenComponent {...props} members={members} setMembers={setMembers} currentUserId={currentUserId} />;
             case 'projects':
                 return <ScreenComponent {...props} opportunities={opportunities} />;
             case 'new-lead':
-                return <ScreenComponent {...commonProps} onSuccess={handleNewLeadSuccess} designFirms={designFirms} setDesignFirms={setDesignFirms} dealers={dealers} setDealers={setDealers} />;
+                return <ScreenComponent {...props} onSuccess={handleNewLeadSuccess} designFirms={designFirms} setDesignFirms={setDesignFirms} dealers={dealers} setDealers={setDealers} />;
             default:
-                return <ScreenComponent {...commonProps} />;
+                return <ScreenComponent {...props} />;
         }
     };
 
     return (
-        <div className="h-screen w-screen font-sans flex flex-col" style={{ backgroundColor: currentTheme.colors.background }}>
+        <div
+            className="h-screen w-screen font-sans flex flex-col"
+            style={{ backgroundColor: currentTheme.colors.background }}
+            // RESTORED: Touch handlers for swipe gesture
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+        >
             <AppHeader
                 theme={currentTheme}
                 userName={userSettings.firstName}
@@ -112,6 +120,7 @@ function App() {
                 onProfileClick={() => setShowProfileMenu(p => !p)}
             />
 
+            {/* FIXED: This main element now correctly disables scrolling ONLY on the home screen */}
             <main className={`flex-1 ${currentScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto'} scrollbar-hide`}>
                 {renderScreen()}
             </main>
