@@ -3193,7 +3193,7 @@ export {
     OrderModal,
     PollCard,
 
-    // Top-level screens
+    // Top‐level screens
     HomeScreen,
     SalesScreen,
     OrdersScreen,
@@ -3204,7 +3204,7 @@ export {
     SearchFormScreen,
     COMRequestScreen,
 
-    // Rep Function screens
+    // “Rep Functions” screens
     CommissionRatesScreen,
     LoanerPoolScreen,
     DealerRegistrationScreen,
@@ -3212,13 +3212,14 @@ export {
     SampleDiscountsScreen,
     DealerDirectoryScreen,
 
-    // Misc. Resource screens
+    // Misc. resource screens
     ContractsScreen,
     DesignDaysScreen,
     DiscontinuedFinishesScreen,
     InstallInstructionsScreen,
     PresentationsScreen,
     LeadTimesScreen,
+    SocialMediaScreen,
 
     // Other app screens
     ProjectsScreen,
@@ -3233,6 +3234,6 @@ export {
     LogoutScreen,
     FeedbackScreen,
 
-    // Navigation map
+    // The navigation map
     SCREEN_MAP,
 };
