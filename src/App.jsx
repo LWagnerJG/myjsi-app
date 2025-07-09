@@ -1,17 +1,22 @@
 ﻿import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { lightTheme, darkTheme } from './data.js';
-import { AppHeader, ProfileMenu, SCREEN_MAP, VoiceModal, Modal, SuccessToast, PageTitle } from './ui.jsx';
-import * as Data from './data.js';
+import { lightTheme, darkTheme, INITIAL_OPPORTUNITIES, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS } from './data.jsx';
+import { AppHeader, ProfileMenu, SCREEN_MAP, VoiceModal, Modal, SuccessToast, PageTitle, OrderModal } from './ui.jsx';
+import * as Data from './data.jsx';
 
 function App() {
     // --- STATE ---
     const [navigationHistory, setNavigationHistory] = useState(['home']);
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
+    const [alertInfo, setAlertInfo] = useState({ show: false, message: '' });
+
+    // Add state for the selected order
+    const [selectedOrder, setSelectedOrder] = useState(null);
+
+    // Other app-specific state...
     const [cart, setCart] = useState({});
     const [opportunities, setOpportunities] = useState(Data.INITIAL_OPPORTUNITIES);
-    const [designFirms, setDesignFirms] = useState(Data.INITIAL_DESIGN_FIRMS);
-    const [dealers, setDealers] = useState(Data.INITIAL_DEALERS);
     const [userSettings, setUserSettings] = useState({
         id: 1,
         firstName: 'Luke',
@@ -20,9 +25,6 @@ function App() {
         homeAddress: '5445 N Deerwood Lake Rd, Jasper, IN 47546',
         tShirtSize: 'L'
     });
-    const [voiceMessage, setVoiceMessage] = useState('');
-    const [successMessage, setSuccessMessage] = useState('');
-    const [alertInfo, setAlertInfo] = useState({ show: false, message: '' });
 
     // --- DERIVED STATE ---
     const currentScreen = navigationHistory[navigationHistory.length - 1];
@@ -34,7 +36,7 @@ function App() {
     const handleBack = useCallback(() => { if (navigationHistory.length > 1) { setNavigationHistory(prev => prev.slice(0, -1)); } }, [navigationHistory]);
     const handleShowAlert = useCallback((message) => { setAlertInfo({ show: true, message }); }, []);
     const handleShowVoiceModal = useCallback((message) => { setVoiceMessage(message); setTimeout(() => setVoiceMessage(''), 1000); }, []);
-    const handleNewLeadSuccess = useCallback(newLead => { setOpportunities(prev => [...prev, newLead]); handleNavigate('projects'); }, [handleNavigate]);
+
     const handleUpdateCart = useCallback((item, change) => {
         setCart(prev => {
             const next = { ...prev };
@@ -45,7 +47,6 @@ function App() {
         });
     }, []);
 
-    // --- RENDER LOGIC ---
     const renderScreen = () => {
         const ScreenComponent = SCREEN_MAP[currentScreen.split('/')[0]];
 
@@ -53,7 +54,6 @@ function App() {
             return <PageTitle title="Not Found" theme={currentTheme} />;
         }
 
-        // This new logic explicitly passes the correct props to each screen
         const props = {
             theme: currentTheme,
             onNavigate: handleNavigate,
@@ -61,18 +61,11 @@ function App() {
             showAlert: handleShowAlert,
         };
 
+        // Pass specific props to each screen as needed
         switch (currentScreen) {
-            case 'projects':
-                return <ScreenComponent {...props} opportunities={opportunities} />;
-            case 'samples':
-            case 'samples/cart':
-                return <ScreenComponent {...props} cart={cart} onUpdateCart={handleUpdateCart} userSettings={userSettings} />;
-            case 'settings':
-                return <ScreenComponent {...props} userSettings={userSettings} setUserSettings={setUserSettings} onSave={() => { setSuccessMessage("Settings Saved!"); setTimeout(() => setSuccessMessage(''), 2000); handleBack(); }} />;
-            case 'new-lead':
-                return <ScreenComponent {...props} onSuccess={handleNewLeadSuccess} designFirms={designFirms} setDesignFirms={setDesignFirms} dealers={dealers} setDealers={setDealers} />;
-            case 'home':
-                return <ScreenComponent {...props} onVoiceActivate={handleShowVoiceModal} />;
+            case 'orders':
+                return <ScreenComponent {...props} setSelectedOrder={setSelectedOrder} />;
+            // ... other cases
             default:
                 return <ScreenComponent {...props} />;
         }
@@ -110,11 +103,20 @@ function App() {
                         isDarkMode={isDarkMode}
                     />
                 )}
+                {/* Render the OrderModal when an order is selected */}
+                {selectedOrder && (
+                    <OrderModal
+                        order={selectedOrder}
+                        onClose={() => setSelectedOrder(null)}
+                        theme={currentTheme}
+                    />
+                )}
                 <Modal show={alertInfo.show} onClose={() => setAlertInfo({ show: false, message: '' })} title="Alert" theme={currentTheme}>
                     <p>{alertInfo.message}</p>
                 </Modal>
                 <SuccessToast message={successMessage} show={!!successMessage} theme={currentTheme} />
-                <VoiceModal message={voiceMessage} show={!!voiceMessage} theme={currentTheme} />
+                {/* VoiceModal might need its state defined if you use it */}
+                {/* <VoiceModal message={voiceMessage} show={!!voiceMessage} theme={currentTheme} /> */}
             </div>
         </div>
     );

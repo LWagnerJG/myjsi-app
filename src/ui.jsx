@@ -10,7 +10,7 @@ import {
     AlertCircle, Settings, Paperclip, Copy, Save, Send,
     Share2, Film, Filter, Play, Calendar, MapPin, Clock, Bus
 } from 'lucide-react';
-import * as Data from './data.js';
+import * as Data from './data.jsx';
 
 export const GlassCard = React.memo(
     React.forwardRef(({ children, className = '', theme, ...props }, ref) => (
@@ -424,6 +424,48 @@ const SocialMediaScreen = ({ theme, showAlert, setSuccessMessage }) => {
         </>
     );
 };
+
+export const LineItemCard = React.memo(({ lineItem, theme }) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+
+    return (
+        <GlassCard theme={theme} className="p-3 cursor-pointer" onClick={() => setIsExpanded(!isExpanded)} style={{ backgroundColor: theme.colors.subtle }}>
+            <div className="flex justify-between items-center">
+                <p className="font-semibold" style={{ color: theme.colors.textPrimary }}>{lineItem.name}</p>
+                <ChevronDown className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} style={{ color: theme.colors.textSecondary }} />
+            </div>
+            {isExpanded && (
+                <div className="border-t mt-3 pt-3 space-y-2 text-sm" style={{ borderColor: theme.colors.border }}>
+                    <div className="grid grid-cols-3 gap-x-4">
+                        <div>
+                            <p className="text-xs font-semibold" style={{ color: theme.colors.textSecondary }}>MODEL</p>
+                            <p style={{ color: theme.colors.textPrimary }}>{lineItem.model}</p>
+                        </div>
+                        <div>
+                            <p className="text-xs font-semibold" style={{ color: theme.colors.textSecondary }}>QTY</p>
+                            <p style={{ color: theme.colors.textPrimary }}>{lineItem.quantity}</p>
+                        </div>
+                        <div>
+                            <p className="text-xs font-semibold" style={{ color: theme.colors.textSecondary }}>NET</p>
+                            <p style={{ color: theme.colors.textPrimary }}>${lineItem.extNet.toLocaleString()}</p>
+                        </div>
+                    </div>
+                    {lineItem.specs && lineItem.specs.length > 0 && (
+                        <div className="border-t mt-3 pt-3 space-y-2" style={{ borderColor: theme.colors.border }}>
+                            <p className="font-bold text-xs" style={{ color: theme.colors.textSecondary }}>OPTIONS:</p>
+                            {lineItem.specs.map(spec => (
+                                <div key={spec.label}>
+                                    <p className="font-semibold" style={{ color: theme.colors.textSecondary }}>{spec.label}</p>
+                                    <p className="font-mono text-xs" style={{ color: theme.colors.textPrimary }}>{spec.value}</p>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
+        </GlassCard>
+    );
+});
 const LeadTimesScreen = ({ theme = {} }) => {
     // State and hooks remain the same
     const [searchTerm, setSearchTerm] = useState('');
@@ -3122,90 +3164,80 @@ const DonutChart = ({ data, theme }) => {
     );
 };
 
-const OrderModal = ({ order, onClose, onShowDetails, theme }) => (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-        <GlassCard theme={theme} className="w-full max-w-md">
-            <div className="p-6">
-                <div className="flex justify-between items-start mb-4">
-                    <h3 className="text-xl font-bold" style={{ color: theme.colors.textPrimary }}>
-                        Order Details
-                    </h3>
-                    <button
-                        onClick={onClose}
-                        className="p-1 rounded-full hover:bg-black/10 dark:hover:bg-white/10"
-                    >
-                        <X className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
-                    </button>
-                </div>
+const OrderModal = React.memo(({ order, onClose, theme }) => {
+    const [isExpanded, setIsExpanded] = useState(false);
 
-                <div className="space-y-3">
-                    <div>
-                        <span className="text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>
-                            Company:
-                        </span>
-                        <div style={{ color: theme.colors.textPrimary }}>{order.company}</div>
+    if (!order) return null;
+
+    const statusColor = Data.STATUS_COLORS[order.status] || theme.colors.primary;
+    const statusText = (order.status || 'N/A').toUpperCase();
+
+    return (
+        <Modal show={!!order} onClose={onClose} title="" theme={theme}>
+            <div className="space-y-4">
+                <div className="flex justify-between items-start">
+                    <div className="pr-4">
+                        <h2 className="text-xl font-bold" style={{ color: theme.colors.textPrimary }}>{order.company}</h2>
+                        {order.details && <p className="-mt-1 text-sm" style={{ color: theme.colors.textSecondary }}>{order.details}</p>}
                     </div>
-
-                    <div>
-                        <span className="text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>
-                            PO Number:
-                        </span>
-                        <div style={{ color: theme.colors.textPrimary }}>{order.po}</div>
-                    </div>
-
-                    <div>
-                        <span className="text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>
-                            Amount:
-                        </span>
-                        <div className="text-xl font-bold" style={{ color: theme.colors.accent }}>
-                            {order.amount}
-                        </div>
-                    </div>
-
-                    <div>
-                        <span className="text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>
-                            Date:
-                        </span>
-                        <div style={{ color: theme.colors.textPrimary }}>
-                            {new Date(order.date).toLocaleDateString()}
-                        </div>
-                    </div>
-
-                    {order.shipDate && (
-                        <div>
-                            <span className="text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>
-                                Ship Date:
-                            </span>
-                            <div style={{ color: theme.colors.textPrimary }}>{order.shipDate}</div>
-                        </div>
-                    )}
-                </div>
-
-                <div className="flex space-x-3 mt-6">
-                    <button
-                        onClick={onShowDetails}
-                        className="flex-1 py-2 px-4 rounded-lg font-semibold text-white"
-                        style={{ backgroundColor: theme.colors.accent }}
-                    >
-                        View All Orders
-                    </button>
-                    <button
-                        onClick={onClose}
-                        className="flex-1 py-2 px-4 rounded-lg font-semibold border"
-                        style={{
-                            color: theme.colors.textPrimary,
-                            borderColor: theme.colors.border,
-                            backgroundColor: theme.colors.subtle
-                        }}
-                    >
+                    <button onClick={onClose} className="text-sm font-medium p-2 -mr-2 flex-shrink-0" style={{ color: theme.colors.textSecondary }}>
                         Close
                     </button>
                 </div>
-            </div>
-        </GlassCard>
-    </div>
-);
 
+                <div className="text-center py-2 rounded-lg font-semibold text-white" style={{ backgroundColor: statusColor }}>
+                    {statusText}
+                </div>
+
+                <dl className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm border-t border-b py-4" style={{ borderColor: theme.colors.subtle }}>
+                    <dt className="font-medium" style={{ color: theme.colors.textSecondary }}>SO:</dt>
+                    <dd className="font-mono text-right" style={{ color: theme.colors.textPrimary }}>{order.orderNumber}</dd>
+                    {order.po && <>
+                        <dt className="font-medium" style={{ color: theme.colors.textSecondary }}>PO:</dt>
+                        <dd className="font-mono text-right" style={{ color: theme.colors.textPrimary }}>{order.po}</dd>
+                    </>}
+                    {order.net && <>
+                        <dt className="font-medium" style={{ color: theme.colors.textSecondary }}>NET:</dt>
+                        <dd className="font-mono text-right font-semibold" style={{ color: theme.colors.textPrimary }}>${order.net.toLocaleString()}</dd>
+                    </>}
+                    {order.reward && <>
+                        <dt className="font-medium" style={{ color: theme.colors.textSecondary }}>REWARDS:</dt>
+                        <dd className="text-right" style={{ color: theme.colors.textPrimary }}>{order.reward}</dd>
+                    </>}
+                    {order.shipDate && <>
+                        <dt className="font-medium" style={{ color: theme.colors.textSecondary }}>SHIP DATE:</dt>
+                        <dd className="text-right font-semibold" style={{ color: theme.colors.textPrimary }}>{order.shipDate}</dd>
+                    </>}
+                </dl>
+
+                <div className="space-y-3">
+                    {order.shipTo && <div>
+                        <p className="font-semibold text-xs" style={{ color: theme.colors.textSecondary }}>SHIP TO:</p>
+                        <p className="whitespace-pre-line leading-tight text-sm" style={{ color: theme.colors.textPrimary }}>{order.shipTo}</p>
+                    </div>}
+                    {order.discount && <div className="flex justify-between items-center text-sm pt-3 border-t" style={{ borderColor: theme.colors.subtle }}>
+                        <span className="font-medium" style={{ color: theme.colors.textSecondary }}>DISCOUNT:</span>
+                        <span className="font-semibold text-base" style={{ color: theme.colors.textPrimary }}>{order.discount}</span>
+                    </div>}
+                </div>
+
+                <button onClick={() => setIsExpanded(p => !p)} className="w-full py-3 rounded-full font-medium text-white transition" style={{ backgroundColor: theme.colors.accent }} disabled={!order.lineItems || order.lineItems.length === 0}>
+                    {isExpanded ? 'Hide Order Details' : 'Show Order Details'}
+                </button>
+
+                <div className={`transition-all duration-500 ease-in-out grid ${isExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
+                    <div className="overflow-hidden">
+                        <div className="space-y-3 pt-4 border-t" style={{ borderColor: theme.colors.subtle }}>
+                            {(order.lineItems && order.lineItems.length > 0) ? (
+                                order.lineItems.map(item => <LineItemCard key={item.line} lineItem={item} theme={theme} />)
+                            ) : null}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Modal>
+    );
+});
 const SalesScreen = ({ theme, onNavigate }) => {
     const { MONTHLY_SALES_DATA, ORDER_DATA, SALES_VERTICALS_DATA } = Data;
     const [monthlyView, setMonthlyView] = useState('table');
@@ -3319,51 +3351,177 @@ const SalesScreen = ({ theme, onNavigate }) => {
         </>
     );
 };
-const OrdersScreen = ({ theme, onNavigate }) => (
-    <>
-        <PageTitle
-            title="Orders"
-            theme={theme}
-        />
-        <div className="p-4 space-y-4 overflow-y-auto">
-            {Data.ORDER_DATA.map(order => (
-                <GlassCard
-                    key={order.orderNumber}
-                    theme={theme}
-                    className="p-4"
-                >
-                    <div className="flex justify-between items-start">
-                        <div>
-                            <div
-                                className="font-semibold text-lg"
-                                style={{ color: theme.colors.textPrimary }}
-                            >
-                                {order.company}
-                            </div>
-                            <div
-                                className="text-sm"
-                                style={{ color: theme.colors.textSecondary }}
-                            >
-                                PO #{order.po} • {new Date(order.date).toLocaleDateString()}
-                            </div>
+
+export const OrderCalendarView = ({ orders, onDateClick, theme, dateType }) => {
+    const [currentDate, setCurrentDate] = useState(new Date('2025-07-09T12:00:00Z'));
+
+    const ordersByDate = useMemo(() => {
+        const map = new Map();
+        orders.forEach(order => {
+            const dateStr = order[dateType];
+            if (dateStr) {
+                const date = new Date(dateStr);
+                const key = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+                map.set(key, true);
+            }
+        });
+        return map;
+    }, [orders, dateType]);
+
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const blanks = Array(firstDay).fill(null);
+    const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+
+    return (
+        <GlassCard theme={theme} className="p-4">
+            <div className="flex justify-between items-center mb-4">
+                <button onClick={() => setCurrentDate(new Date(year, month - 1, 1))} className="p-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10"><ChevronLeft style={{ color: theme.colors.textSecondary }} /></button>
+                <h3 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>{currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}</h3>
+                <button onClick={() => setCurrentDate(new Date(year, month + 1, 1))} className="p-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10"><ChevronRight style={{ color: theme.colors.textSecondary }} /></button>
+            </div>
+            <div className="grid grid-cols-7 gap-1 text-center text-xs font-semibold" style={{ color: theme.colors.textSecondary }}>
+                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => <div key={d}>{d}</div>)}
+            </div>
+            <div className="grid grid-cols-7 gap-1 mt-2">
+                {blanks.map((_, i) => <div key={`b-${i}`} />)}
+                {days.map(day => {
+                    const date = new Date(year, month, day);
+                    const today = new Date('2025-07-09T12:00:00Z');
+                    const isToday = date.toDateString() === today.toDateString();
+                    const key = `${year}-${month}-${day}`;
+                    const hasOrder = ordersByDate.has(key);
+
+                    return (
+                        <div key={day} className="relative h-10 flex items-center justify-center">
+                            <span className={`w-8 h-8 flex items-center justify-center rounded-full ${isToday ? 'bg-blue-600 text-white' : ''}`}>
+                                {day}
+                            </span>
+                            {hasOrder && <div className="absolute bottom-1 h-1.5 w-1.5 bg-blue-500 rounded-full"></div>}
                         </div>
-                        <div className="text-right">
-                            <div className="font-bold" style={{ color: theme.colors.accent }}>
-                                {order.amount}
+                    );
+                })}
+            </div>
+        </GlassCard>
+    );
+};
+
+export const OrdersScreen = ({ theme, setSelectedOrder }) => {
+    const [searchTerm, setSearchTerm] = useState('');
+    const [dateType, setDateType] = useState('shipDate'); // 'shipDate' or 'date' (for PO Date)
+    const [viewMode, setViewMode] = useState('list'); // 'list' or 'calendar'
+    const [showDateFilter, setShowDateFilter] = useState(false);
+    const filterMenuRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (filterMenuRef.current && !filterMenuRef.current.contains(e.target)) {
+                setShowDateFilter(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const filteredOrders = useMemo(() =>
+        Data.ORDER_DATA.filter(order =>
+            (order.company?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+            (order.details?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+            (order.orderNumber?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+            (order.po?.toLowerCase() || '').includes(searchTerm.toLowerCase()) // Search by PO#
+        ),
+        [searchTerm]
+    );
+
+    const groupedOrders = useMemo(() => {
+        return filteredOrders.reduce((acc, order) => {
+            const dateStr = order[dateType];
+            if (!dateStr) return acc;
+            const date = new Date(dateStr);
+            const groupKey = date.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' }).toUpperCase();
+            if (!acc[groupKey]) {
+                acc[groupKey] = { orders: [], total: 0 };
+            }
+            acc[groupKey].orders.push(order);
+            acc[groupKey].total += order.net || 0;
+            return acc;
+        }, {});
+    }, [filteredOrders, dateType]);
+
+    const sortedGroupKeys = useMemo(() => Object.keys(groupedOrders).sort((a, b) => new Date(b) - new Date(a)), [groupedOrders]);
+
+    return (
+        <div className="flex flex-col h-full">
+            <PageTitle title="Orders" theme={theme} />
+            <div className="px-4 pt-2 pb-4 flex items-center space-x-2 sticky top-0 z-10" style={{ backgroundColor: theme.colors.background, backdropFilter: 'blur(12px)' }}>
+                <SearchInput value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Search Orders..." theme={theme} className="flex-grow" />
+                <div className="relative">
+                    <button onClick={() => setShowDateFilter(f => !f)} className="p-3.5 rounded-full" style={{ backgroundColor: theme.colors.subtle }}>
+                        <Filter className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />
+                    </button>
+                    {showDateFilter && (
+                        <GlassCard ref={filterMenuRef} theme={theme} className="absolute top-14 right-0 z-10 w-40 p-2">
+                            <button onClick={() => { setDateType('shipDate'); setShowDateFilter(false); }} className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${dateType === 'shipDate' ? 'font-bold' : ''}`} style={{ color: theme.colors.textPrimary, backgroundColor: dateType === 'shipDate' ? theme.colors.subtle : 'transparent' }}>Ship Date</button>
+                            <button onClick={() => { setDateType('date'); setShowDateFilter(false); }} className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${dateType === 'date' ? 'font-bold' : ''}`} style={{ color: theme.colors.textPrimary, backgroundColor: dateType === 'date' ? theme.colors.subtle : 'transparent' }}>PO Date</button>
+                        </GlassCard>
+                    )}
+                </div>
+                <button onClick={() => setViewMode(v => v === 'list' ? 'calendar' : 'list')} className="p-3.5 rounded-full" style={{ backgroundColor: theme.colors.subtle }}>
+                    <Calendar className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />
+                </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-hide">
+                {viewMode === 'list' ? (
+                    <div className="space-y-6">
+                        {sortedGroupKeys.map(dateKey => (
+                            <div key={dateKey}>
+                                <div className="flex justify-between items-baseline mb-2 px-1 pb-2 border-b" style={{ borderColor: theme.colors.border }}>
+                                    <h2 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>{dateKey}</h2>
+                                    <p className="font-bold text-xl" style={{ color: theme.colors.accent }}>
+                                        ${groupedOrders[dateKey].total.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                                    </p>
+                                </div>
+                                <div className="space-y-3">
+                                    {groupedOrders[dateKey].orders.map((order) => {
+                                        const statusColor = Data.STATUS_COLORS[order.status] || theme.colors.secondary;
+                                        return (
+                                            <GlassCard key={order.orderNumber} theme={theme} className="p-4 cursor-pointer hover:border-gray-400/50 flex items-center space-x-4" onClick={() => setSelectedOrder(order)}>
+                                                <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: statusColor }}></div>
+                                                <div className="flex-1 flex justify-between items-center min-w-0">
+                                                    <div className="truncate pr-4">
+                                                        <p className="font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{order.details || 'N/A'}</p>
+                                                        <p className="text-sm" style={{ color: theme.colors.textSecondary }}>{order.company}</p>
+                                                    </div>
+                                                    <div className="text-right flex-shrink-0 space-y-1">
+                                                        {order.net != null && (
+                                                            <p className="font-semibold text-lg whitespace-nowrap" style={{ color: theme.colors.textPrimary }}>
+                                                                ${order.net.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                                                            </p>
+                                                        )}
+                                                        <div className="flex justify-end">
+                                                            <span className="text-xs font-mono px-2 py-0.5 rounded-md" style={{ color: theme.colors.textSecondary, backgroundColor: theme.colors.subtle }}>
+                                                                {order.orderNumber}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </GlassCard>
+                                        )
+                                    })}
+                                </div>
                             </div>
-                            <div className="text-sm" style={{ color: theme.colors.textSecondary }}>
-                                Ship {order.shipDate || '—'}
-                            </div>
-                        </div>
+                        ))}
                     </div>
-                </GlassCard>
-            ))}
+                ) : (
+                    <OrderCalendarView orders={filteredOrders} theme={theme} dateType={dateType} />
+                )}
+            </div>
         </div>
-    </>
-);
-
-
-
+    );
+};
 
 const ProductsScreen = ({ theme, onNavigate }) => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -4540,7 +4698,6 @@ export {
 
     // Top‐level screens
     SalesScreen,
-    OrdersScreen,
     ProductsScreen,
     ResourcesScreen,
 
