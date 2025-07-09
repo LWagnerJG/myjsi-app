@@ -67,6 +67,141 @@ import {
 // ui.jsx
 import * as Data from './data.js';
 
+export const Button = React.memo(({ children, className = '', theme, ...props }) => (
+    <button
+        className={`px-4 py-2 rounded-lg font-semibold ${className}`}
+        style={
+            theme
+                ? { backgroundColor: theme.colors.accent, color: '#fff' }
+                : undefined
+        }
+        {...props}
+    >
+        {children}
+    </button>
+))
+
+export const GlassCard = React.memo(
+    React.forwardRef(({ children, className = '', theme, ...props }, ref) => (
+        <div
+            ref={ref}
+            className={`rounded-[1.75rem] border shadow-lg transition-all duration-300 ${className}`}
+            style={{
+                backgroundColor: theme.colors.surface,
+                borderColor: theme.colors.border,
+                boxShadow: `0 4px 30px ${theme.colors.shadow}`,
+                backdropFilter: theme.backdropFilter,
+                WebkitBackdropFilter: theme.backdropFilter,
+            }}
+            {...props}
+        >
+            {children}
+        </div>
+    ))
+)
+
+export const Card = ({ children, ...props }) => (
+    <GlassCard {...props}>{children}</GlassCard>
+)
+
+export const AutoCompleteCombobox = ({
+    label,
+    value,
+    onChange,
+    placeholder,
+    options,
+    onAddNew,
+    theme,
+    required,
+    zIndex,
+}) => {
+    const [inputValue, setInputValue] = useState(value)
+    const [showOptions, setShowOptions] = useState(false)
+    const wrapperRef = useRef(null)
+
+    useEffect(() => setInputValue(value), [value])
+
+    useEffect(() => {
+        function handleClickOutside(e) {
+            if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
+                setShowOptions(false)
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => document.removeEventListener('mousedown', handleClickOutside)
+    }, [])
+
+    const filtered = options.filter(opt =>
+        opt.toLowerCase().includes(inputValue.toLowerCase())
+    )
+
+    const handleSelect = opt => {
+        onChange(opt)
+        setInputValue(opt)
+        setShowOptions(false)
+    }
+
+    const handleAdd = () => {
+        if (inputValue && !options.includes(inputValue)) onAddNew(inputValue)
+        onChange(inputValue)
+        setShowOptions(false)
+    }
+
+    return (
+        <div className={`relative ${zIndex}`} ref={wrapperRef}>
+            {label && (
+                <label
+                    className="block text-xs font-semibold mb-1"
+                    style={{ color: theme.colors.textSecondary }}
+                >
+                    {label}{required && ' *'}
+                </label>
+            )}
+            <input
+                required={required}
+                type="text"
+                value={inputValue}
+                onChange={e => { setInputValue(e.target.value); setShowOptions(true) }}
+                onFocus={() => setShowOptions(true)}
+                placeholder={placeholder}
+                className="w-full px-4 py-3 border rounded-full focus:ring-2 outline-none"
+                style={{
+                    backgroundColor: theme.colors.subtle,
+                    borderColor: 'transparent',
+                    color: theme.colors.textPrimary,
+                    ringColor: theme.colors.accent,
+                }}
+            />
+            {showOptions && (
+                <GlassCard
+                    theme={theme}
+                    className="absolute w-full mt-1 z-10 p-2 max-h-48 overflow-y-auto"
+                >
+                    {filtered.map(opt => (
+                        <button
+                            key={opt}
+                            onClick={() => handleSelect(opt)}
+                            className="block w-full text-left p-2 rounded-md hover:bg-black/5"
+                            style={{ color: theme.colors.textPrimary }}
+                        >
+                            {opt}
+                        </button>
+                    ))}
+                    {inputValue && !options.includes(inputValue) && (
+                        <button
+                            onClick={handleAdd}
+                            className="block w-full text-left p-2 rounded-md font-semibold hover:bg-black/5"
+                            style={{ color: theme.colors.accent }}
+                        >
+                            Add “{inputValue}”
+                        </button>
+                    )}
+                </GlassCard>
+            )}
+        </div>
+    )
+}
+
 const {
     // New–Lead form
     EMPTY_LEAD,
@@ -125,6 +260,7 @@ const {
     DAILY_DISCOUNT_OPTIONS,
     INSTALL_INSTRUCTIONS_DATA
 } = Data;
+
 
 const SocialMediaScreen = ({ theme, showAlert, setSuccessMessage }) => {
     const copyToClipboard = (text) => {
@@ -1284,40 +1420,24 @@ const DealerRegistrationScreen = ({ navigation }) => {
     );
 };
 
-const styles = StyleSheet.create({
+const styles = {
     container: {
-        flexGrow: 1,
-        padding: 20,
+        padding: '20px',
         backgroundColor: '#fff',
+        display: 'flex',
         justifyContent: 'center',
     },
     title: {
-        fontSize: 24,
-        marginBottom: 20,
-        textAlign: 'center',
-        fontWeight: 'bold',
+        fontSize: '24px',
+        marginBottom: '20px',
     },
-    input: {
-        height: 50,
-        borderColor: '#ccc',
-        borderWidth: 1,
-        borderRadius: 8,
-        paddingHorizontal: 12,
-        marginBottom: 15,
-    },
-    button: {
-        backgroundColor: '#007AFF',
-        paddingVertical: 15,
-        borderRadius: 8,
-        alignItems: 'center',
-        marginTop: 10,
-    },
-    buttonText: {
-        color: '#fff',
-        fontSize: 18,
-        fontWeight: '600',
-    },
-});
+};
+
+// then in your JSX:
+<div style={styles.container}>
+    <h1 style={styles.title}>Hello</h1>
+    …
+</div>
 
 const LoanerPoolScreen = ({
     theme,
@@ -1583,158 +1703,183 @@ const fabricTypeOptions = ['Type1', 'Type2', 'Type3']; // TODO: replace with rea
 const tackableOptions = ['Yes', 'No'];
 
 const SearchFormScreen = () => {
-    const [form, setForm] = useState({
+    const fabricSuppliers = [
+        'Arc-Com', 'Camira', 'Carnegie', 'CF Stinson', 'Designtex',
+        'Guilford of Maine', 'Knoll', 'Kravet', 'Maharam', 'Momentum'
+    ];
+    const fabricPatterns = [
+        'Astor', 'Caldera', 'Crossgrain', 'Dapper', 'Eco Wool',
+        'Heritage Tweed', 'Luxe Weave', 'Melange', 'Pixel', 'Prospect'
+    ];
+    const jsiSeriesOptions = [
+        'Alden', 'Allied', 'Anthology', 'Aria', 'Cincture',
+        'Convert', 'Midwest', 'Momentum', 'Proton', 'Reveal',
+        'Symmetry', 'Vision', 'Wink'
+    ];
+
+    const initialForm = {
         supplier: '',
         pattern: '',
         jsiSeries: '',
         grade: [],
         fabricType: [],
         tackable: []
-    });
-    const [results, setResults] = useState(null);
-    const [error, setError] = useState('');
+    };
+
+    const [form, setForm] = useState(initialForm);
     const [showGradeOptions, setShowGradeOptions] = useState(false);
     const [showFabricOptions, setShowFabricOptions] = useState(false);
     const [showTackableOptions, setShowTackableOptions] = useState(false);
+    const [results, setResults] = useState(null);
+    const [error, setError] = useState('');
 
-    const [fabricSuppliers, setFabricSuppliers] = useState([]);
-    const [fabricPatterns, setFabricPatterns] = useState([]);
-    const [jsiSeriesOptions, setJsiSeriesOptions] = useState([]);
-
-    useEffect(() => {
-        // TODO: fetch lists for suppliers, patterns, and series
-        // e.g. API.getSuppliers().then(setFabricSuppliers);
+    const updateField = useCallback((field, value) => {
+        setForm(f => ({ ...f, [field]: value }));
     }, []);
 
-    const updateField = (field, value) => {
-        setForm(f => ({ ...f, [field]: value }));
-    };
-
-    const updateMulti = (field, value) => {
+    const updateMulti = useCallback((field, value) => {
         setForm(f => {
-            const list = f[field];
-            const updated = list.includes(value)
-                ? list.filter(x => x !== value)
-                : [...list, value];
-            return { ...f, [field]: updated };
+            const has = f[field].includes(value);
+            const arr = has
+                ? f[field].filter(x => x !== value)
+                : [...f[field], value];
+            return { ...f, [field]: arr };
         });
-    };
+        if (field === 'grade') setShowGradeOptions(true);
+        if (field === 'fabricType') setShowFabricOptions(true);
+        if (field === 'tackable') setShowTackableOptions(true);
+    }, []);
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = useCallback(e => {
         e.preventDefault();
         if (!form.supplier || !form.jsiSeries) {
-            setError('Please fill in required fields');
+            setError('Supplier and Series are required.');
             return;
         }
         setError('');
-        // TODO: call search API
-        // const data = await API.searchJSI(form);
-        // setResults(data);
-    };
+        let filtered = FABRICS_DATA.filter(item =>
+            item.supplier === form.supplier &&
+            item.series === form.jsiSeries &&
+            (!form.pattern || item.pattern === form.pattern) &&
+            (form.grade.length === 0 || form.grade.includes(item.grade)) &&
+            (form.fabricType.length === 0 || form.fabricType.includes(item.textile)) &&
+            (form.tackable.length === 0 || form.tackable.includes(item.tackable))
+        );
+        // fallback demo case
+        if (
+            filtered.length === 0 &&
+            form.supplier === 'Arc-Com' &&
+            form.jsiSeries === 'Alden'
+        ) {
+            filtered = [{
+                supplier: 'Arc-Com',
+                pattern: 'Demo',
+                grade: 'A',
+                tackable: 'yes',
+                textile: 'Fabric'
+            }];
+        }
+        setResults(filtered);
+    }, [form]);
 
-    const resetSearch = () => {
+    const resetSearch = useCallback(() => {
+        setForm(initialForm);
         setResults(null);
-        setForm({ supplier: '', pattern: '', jsiSeries: '', grade: [], fabricType: [], tackable: [] });
         setShowGradeOptions(false);
         setShowFabricOptions(false);
         setShowTackableOptions(false);
         setError('');
-    };
+    }, []);
 
     return (
         <div className="px-4 py-6">
             {!results ? (
-                <Card className="p-6 space-y-6">
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        {error && <p className="text-sm text-destructive">{error}</p>}
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    {error && <p className="text-sm text-destructive">{error}</p>}
 
-                        <AutoCompleteCombobox
-                            label="Supplier *"
-                            placeholder="Search Supplier"
-                            value={form.supplier}
-                            onChange={v => updateField('supplier', v)}
-                            options={fabricSuppliers}
-                        />
+                    <AutoCompleteCombobox
+                        label="Supplier *"
+                        placeholder="Search Supplier"
+                        value={form.supplier}
+                        onChange={v => updateField('supplier', v)}
+                        options={fabricSuppliers}
+                    />
 
-                        <AutoCompleteCombobox
-                            label="Pattern"
-                            placeholder="Search Pattern"
-                            value={form.pattern}
-                            onChange={v => updateField('pattern', v)}
-                            options={fabricPatterns}
-                        />
+                    <AutoCompleteCombobox
+                        label="Pattern"
+                        placeholder="Search Pattern"
+                        value={form.pattern}
+                        onChange={v => updateField('pattern', v)}
+                        options={fabricPatterns}
+                    />
 
-                        <AutoCompleteCombobox
-                            label="JSI Series *"
-                            placeholder="Search JSI Series"
-                            value={form.jsiSeries}
-                            onChange={v => updateField('jsiSeries', v)}
-                            options={jsiSeriesOptions}
-                        />
+                    <AutoCompleteCombobox
+                        label="JSI Series *"
+                        placeholder="Search JSI Series"
+                        value={form.jsiSeries}
+                        onChange={v => updateField('jsiSeries', v)}
+                        options={jsiSeriesOptions}
+                    />
 
-                        <div>
-                            <p className="mb-2 font-medium">Grade</p>
-                            <div className="flex flex-wrap gap-2">
-                                {!showGradeOptions ? (
-                                    <Button variant="filled" onClick={() => setShowGradeOptions(true)}>Any</Button>
-                                ) : (
-                                    <>
-                                        <Button variant="outline" onClick={() => { updateField('grade', []); setShowGradeOptions(false); }}>Any</Button>
-                                        {gradeOptions.map(g => (
-                                            <Button
-                                                key={g}
-                                                variant={form.grade.includes(g) ? 'filled' : 'outline'}
-                                                onClick={() => updateMulti('grade', g)}
-                                            >{g}</Button>
-                                        ))}
-                                    </>
-                                )}
-                            </div>
+                    <div>
+                        <p className="mb-2 font-medium">Grade</p>
+                        <div className="flex flex-wrap gap-2">
+                            {!showGradeOptions
+                                ? <Button variant="filled" onClick={() => setShowGradeOptions(true)}>Any</Button>
+                                : <>
+                                    <Button variant="outline" onClick={() => { updateField('grade', []); setShowGradeOptions(false); }}>Any</Button>
+                                    {['A', 'B', 'C', 'COL', 'COM', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'L1', 'L2'].map(g => (
+                                        <Button
+                                            key={g}
+                                            variant={form.grade.includes(g) ? 'filled' : 'outline'}
+                                            onClick={() => updateMulti('grade', g)}
+                                        >{g}</Button>
+                                    ))}
+                                </>
+                            }
                         </div>
+                    </div>
 
-                        <div>
-                            <p className="mb-2 font-medium">Fabric Type</p>
-                            <div className="flex flex-wrap gap-2">
-                                {!showFabricOptions ? (
-                                    <Button variant="filled" onClick={() => setShowFabricOptions(true)}>Any</Button>
-                                ) : (
-                                    <>
-                                        <Button variant="outline" onClick={() => { updateField('fabricType', []); setShowFabricOptions(false); }}>Any</Button>
-                                        {fabricTypeOptions.map(type => (
-                                            <Button
-                                                key={type}
-                                                variant={form.fabricType.includes(type) ? 'filled' : 'outline'}
-                                                onClick={() => updateMulti('fabricType', type)}
-                                            >{type}</Button>
-                                        ))}
-                                    </>
-                                )}
-                            </div>
+                    <div>
+                        <p className="mb-2 font-medium">Fabric Type</p>
+                        <div className="flex flex-wrap gap-2">
+                            {!showFabricOptions
+                                ? <Button variant="filled" onClick={() => setShowFabricOptions(true)}>Any</Button>
+                                : <>
+                                    <Button variant="outline" onClick={() => { updateField('fabricType', []); setShowFabricOptions(false); }}>Any</Button>
+                                    {['Coated', 'Fabric', 'Leather', 'Panel'].map(t => (
+                                        <Button
+                                            key={t}
+                                            variant={form.fabricType.includes(t) ? 'filled' : 'outline'}
+                                            onClick={() => updateMulti('fabricType', t)}
+                                        >{t}</Button>
+                                    ))}
+                                </>
+                            }
                         </div>
+                    </div>
 
-                        <div>
-                            <p className="mb-2 font-medium">Tackable</p>
-                            <div className="flex flex-wrap gap-2">
-                                {!showTackableOptions ? (
-                                    <Button variant="filled" onClick={() => setShowTackableOptions(true)}>Any</Button>
-                                ) : (
-                                    <>
-                                        <Button variant="outline" onClick={() => { updateField('tackable', []); setShowTackableOptions(false); }}>Any</Button>
-                                        {tackableOptions.map(t => (
-                                            <Button
-                                                key={t}
-                                                variant={form.tackable.includes(t) ? 'filled' : 'outline'}
-                                                onClick={() => updateMulti('tackable', t)}
-                                            >{t}</Button>
-                                        ))}
-                                    </>
-                                )}
-                            </div>
+                    <div>
+                        <p className="mb-2 font-medium">Tackable</p>
+                        <div className="flex flex-wrap gap-2">
+                            {!showTackableOptions
+                                ? <Button variant="filled" onClick={() => setShowTackableOptions(true)}>Any</Button>
+                                : <>
+                                    <Button variant="outline" onClick={() => { updateField('tackable', []); setShowTackableOptions(false); }}>Any</Button>
+                                    {['Yes', 'No'].map(t => (
+                                        <Button
+                                            key={t}
+                                            variant={form.tackable.includes(t.toLowerCase()) ? 'filled' : 'outline'}
+                                            onClick={() => updateMulti('tackable', t.toLowerCase())}
+                                        >{t}</Button>
+                                    ))}
+                                </>
+                            }
                         </div>
+                    </div>
 
-                        <Button type="submit" className="w-full">Search</Button>
-                    </form>
-                </Card>
+                    <Button type="submit" className="w-full">Search</Button>
+                </form>
             ) : (
                 <div className="space-y-6">
                     <Card className="p-4">
@@ -1765,6 +1910,8 @@ const SearchFormScreen = () => {
         </div>
     );
 };
+
+
 
 const Avatar = ({ src, alt, theme }) => {
     const [err, setErr] = useState(false);
@@ -1931,68 +2078,6 @@ const CartScreen = ({ theme, onNavigate, handleBack, cart, setCart, onUpdateCart
     );
 };
 
-const Combobox = ({ label, value, onChange, placeholder, options, onAddNew, theme, required, zIndex }) => {
-    const [inputValue, setInputValue] = useState(value);
-    const [showOptions, setShowOptions] = useState(false);
-    const wrapperRef = useRef(null);
-
-    useEffect(() => {
-        setInputValue(value);
-    }, [value]);
-    useEffect(() => {
-        function handleClickOutside(event) {
-            if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
-                setShowOptions(false);
-            }
-        }
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, [wrapperRef]);
-    const filteredOptions = options.filter(option => option.toLowerCase().includes(inputValue.toLowerCase()));
-
-    const handleSelect = (option) => {
-        onChange(option);
-        setInputValue(option);
-        setShowOptions(false);
-    };
-
-    const handleAddNew = () => {
-        if (inputValue && !options.includes(inputValue)) {
-            onAddNew(inputValue);
-        }
-        onChange(inputValue);
-        setShowOptions(false);
-    }
-
-    return (
-        <div className={`relative ${zIndex}`} ref={wrapperRef}>
-            <input
-                required={required}
-                type="text"
-                value={inputValue}
-                onChange={e => setInputValue(e.target.value)}
-                onFocus={() => setShowOptions(true)}
-                placeholder={placeholder}
-                className="w-full px-4 py-3 border rounded-full focus:ring-2 text-base outline-none"
-                style={{ backgroundColor: theme.colors.subtle, borderColor: 'transparent', color: theme.colors.textPrimary, ringColor: theme.colors.accent }}
-            />
-            {showOptions && (
-                <GlassCard theme={theme} className="absolute w-full mt-1 z-10 p-2 max-h-48 overflow-y-auto">
-                    {filteredOptions.map(option => (
-                        <button type="button" key={option} onClick={() => handleSelect(option)} className="block w-full text-left p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5" style={{ color: theme.colors.textPrimary }}>
-                            {option}
-                        </button>
-                    ))}
-                    {inputValue && !options.includes(inputValue) && (
-                        <button type="button" onClick={handleAddNew} className="block w-full text-left p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5 font-semibold" style={{ color: theme.colors.accent }}>
-                            Add "{inputValue}"
-                        </button>
-                    )}
-                </GlassCard>
-            )}
-        </div>
-    )
-};
 
 const ProfileMenu = ({ show, onClose, onNavigate, toggleTheme, theme, isDarkMode }) => {
     if (!show) return null;
@@ -2393,25 +2478,6 @@ const CreateContentModal = ({ close, pickType, typeChosen, onAdd, theme }) => {
     );
 };
 
-
-const GlassCard = React.memo(
-    React.forwardRef(({ children, className = '', theme, ...props }, ref) => (
-        <div
-            ref={ref}
-            className={`rounded-[1.75rem] border shadow-lg transition-all duration-300 ${className}`}
-            style={{
-                backgroundColor: theme.colors.surface,
-                borderColor: theme.colors.border,
-                boxShadow: `0 4px 30px ${theme.colors.shadow}`,
-                backdropFilter: theme.backdropFilter,
-                WebkitBackdropFilter: theme.backdropFilter
-            }}
-            {...props}
-        >
-            {children}
-        </div>
-    ))
-);
 
 const PageTitle = React.memo(({ title, theme, onBack, children }) => (
     <div className="px-4 pt-6 pb-4 flex justify-between items-center">
@@ -4383,14 +4449,12 @@ const SCREEN_MAP = {
     feedback: FeedbackScreen,
 };
 
-
 export {
     // Reusable UI bits
     Avatar,
     PostCard,
     WinsCard,
     CreateContentModal,
-    GlassCard,
     PageTitle,
     FormInput,
     SearchInput,

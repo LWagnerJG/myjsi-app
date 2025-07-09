@@ -18,3 +18,15 @@ body {
 .home-no-scroll .overflow-y-auto {
     overflow: hidden !important;
 }
+
+.container {
+    padding: 20px;
+    background: #fff;
+    display: flex;
+    justify-content: center;
+}
+
+.title {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
