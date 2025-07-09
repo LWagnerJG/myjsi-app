@@ -72,6 +72,7 @@ const {
     COMPETITORS,
     DISCOUNT_OPTIONS,
     JSI_PRODUCT_SERIES,
+    JSI_MODELS,
     VISION_MATERIALS,
     WIN_PROBABILITY_OPTIONS,
     INITIAL_DESIGN_FIRMS,
@@ -120,6 +121,151 @@ const {
     DAILY_DISCOUNT_OPTIONS
 } = Data;
 
+
+const COMRequestScreen = ({ theme, onNavigate, showAlert }) => {
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedModels, setSelectedModels] = useState([]);
+
+    const searchResults = useMemo(() => {
+        if (!searchTerm) return [];
+        return JSI_MODELS.filter(
+            m =>
+                m.isUpholstered &&
+                (m.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    m.id.toLowerCase().includes(searchTerm.toLowerCase()))
+        );
+    }, [searchTerm]);
+
+    const addModel = model => {
+        if (!selectedModels.find(m => m.id === model.id)) {
+            setSelectedModels(prev => [
+                ...prev,
+                { ...model, quantity: 1, fabric: '', fabricSearch: '', showFabricSearch: false }
+            ]);
+        }
+        setSearchTerm('');
+    };
+
+    const updateModel = (modelId, updates) => {
+        setSelectedModels(prev =>
+            prev.map(m => (m.id === modelId ? { ...m, ...updates } : m))
+        );
+    };
+
+    const handleSearchSubmit = e => {
+        e.preventDefault();
+        if (searchResults.length) addModel(searchResults[0]);
+    };
+
+    const handleSubmit = () => {
+        showAlert('COM Yardage Request Submitted (Demo)');
+        onNavigate('resources');
+    };
+
+    return (
+        <div className="flex flex-col h-full p-4">
+            <button
+                onClick={() => onNavigate('resources')}
+                className="mb-4 text-sm font-medium flex items-center"
+                style={{ color: theme.colors.textPrimary }}
+            >
+                ← Back to Resources
+            </button>
+
+            <Card className="mb-4 p-4">
+                <form onSubmit={handleSearchSubmit} className="relative">
+                    <SearchInput
+                        value={searchTerm}
+                        onChange={e => setSearchTerm(e.target.value)}
+                        placeholder="Search model(s)…"
+                        theme={theme}
+                    />
+                    {searchResults.length > 0 && searchTerm && (
+                        <GlassCard
+                            className="absolute w-full mt-1 z-10 p-2 space-y-1"
+                            theme={theme}
+                        >
+                            {searchResults.map(model => (
+                                <button
+                                    key={model.id}
+                                    onClick={() => addModel(model)}
+                                    className="w-full text-left p-2 rounded-md hover:bg-black/5"
+                                    style={{ color: theme.colors.textPrimary }}
+                                >
+                                    {model.name} ({model.id})
+                                </button>
+                            ))}
+                        </GlassCard>
+                    )}
+                </form>
+            </Card>
+
+            <div className="flex-grow space-y-3 overflow-y-auto scrollbar-hide">
+                {selectedModels.map(model => (
+                    <GlassCard key={model.id} className="p-4 space-y-3" theme={theme}>
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="font-semibold" style={{ color: theme.colors.textPrimary }}>
+                                    {model.id}
+                                </p>
+                                <p className="text-sm" style={{ color: theme.colors.textSecondary }}>
+                                    {model.series}
+                                </p>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <button
+                                    onClick={() => updateModel(model.id, { quantity: Math.max(1, model.quantity - 1) })}
+                                    className="p-1 rounded-full"
+                                    style={{ backgroundColor: theme.colors.subtle }}
+                                >
+                                    −
+                                </button>
+                                <span className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>
+                                    {model.quantity}
+                                </span>
+                                <button
+                                    onClick={() => updateModel(model.id, { quantity: model.quantity + 1 })}
+                                    className="p-1 rounded-full"
+                                    style={{ backgroundColor: theme.colors.subtle }}
+                                >
+                                    +
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <p className="mb-1 font-medium">Fabric</p>
+                            <button
+                                onClick={() => updateModel(model.id, { showFabricSearch: !model.showFabricSearch })}
+                                className="w-full p-2 rounded-md flex items-center justify-between"
+                                style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }}
+                            >
+                                <span>{model.fabric || 'Search Fabric'}</span>
+                                <ArrowRight className="w-4 h-4" style={{ color: theme.colors.secondary }} />
+                            </button>
+                            {model.showFabricSearch && (
+                                <div className="mt-2">
+                                    <SearchInput
+                                        value={model.fabricSearch}
+                                        onChange={e => updateModel(model.id, { fabricSearch: e.target.value })}
+                                        placeholder="Type to search fabric…"
+                                        theme={theme}
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    </GlassCard>
+                ))}
+            </div>
+
+            <div className="pt-4">
+                <Button onClick={handleSubmit} disabled={!selectedModels.length} className="w-full">
+                    Submit
+                </Button>
+            </div>
+        </div>
+    );
+};
 
 const gradeOptions = ['A', 'B', 'C', 'COL', 'COM', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'L1', 'L2'];
 const fabricTypeOptions = ['Type1', 'Type2', 'Type3']; // TODO: replace with real fabric types
