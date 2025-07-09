@@ -3174,6 +3174,7 @@ const SCREEN_MAP = {
 
 
 export {
+    // Reusable UI bits
     Avatar,
     PostCard,
     WinsCard,
@@ -3184,6 +3185,7 @@ export {
     SearchInput,
     SuccessToast,
     AppHeader,
+    ProfileMenu,
     MonthlyBarChart,
     MonthlyTable,
     RecentPOsCard,
@@ -3191,17 +3193,46 @@ export {
     OrderModal,
     PollCard,
 
+    // Top-level screens
     HomeScreen,
     SalesScreen,
     OrdersScreen,
     ProductsScreen,
     ResourcesScreen,
+
+    // Fabrics screens
+    SearchFormScreen,
+    COMRequestScreen,
+
+    // Rep Function screens
+    CommissionRatesScreen,
+    LoanerPoolScreen,
+    DealerRegistrationScreen,
+    RequestFieldVisitScreen,
+    SampleDiscountsScreen,
+    DealerDirectoryScreen,
+
+    // Misc. Resource screens
+    ContractsScreen,
+    DesignDaysScreen,
+    DiscontinuedFinishesScreen,
+    InstallInstructionsScreen,
+    PresentationsScreen,
+    LeadTimesScreen,
+
+    // Other app screens
     ProjectsScreen,
     CommunityScreen,
     SamplesScreen,
+    CartScreen,
+    NewLeadScreen,
     ReplacementsScreen,
+    SettingsScreen,
+    MembersScreen,
+    HelpScreen,
+    LogoutScreen,
     FeedbackScreen,
 
-    ProfileMenu,
-    SCREEN_MAP
+    // Navigation map
+    SCREEN_MAP,
 };
