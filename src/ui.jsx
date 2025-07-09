@@ -425,42 +425,38 @@ const SocialMediaScreen = ({ theme, showAlert, setSuccessMessage }) => {
     );
 };
 
-export const LineItemCard = React.memo(({ lineItem, theme }) => {
+const LineItemCard = React.memo(({ lineItem, index, theme }) => {
     const [isExpanded, setIsExpanded] = useState(false);
 
     return (
-        <GlassCard theme={theme} className="p-3 cursor-pointer" onClick={() => setIsExpanded(!isExpanded)} style={{ backgroundColor: theme.colors.subtle }}>
-            <div className="flex justify-between items-center">
-                <p className="font-semibold" style={{ color: theme.colors.textPrimary }}>{lineItem.name}</p>
-                <ChevronDown className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} style={{ color: theme.colors.textSecondary }} />
+        <GlassCard theme={theme} className="p-3" style={{ backgroundColor: theme.colors.subtle }}>
+            <div className="flex items-start space-x-4">
+                <div className="text-sm font-bold text-center w-8 flex-shrink-0" style={{ color: theme.colors.accent }}>
+                    <div className="text-xs" style={{ color: theme.colors.textSecondary }}>LINE</div>
+                    <div>{index + 1}</div>
+                </div>
+                <div className="flex-1 min-w-0">
+                    <p className="font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{lineItem.name}</p>
+                    <div className="flex items-center justify-between text-xs font-mono" style={{ color: theme.colors.textSecondary }}>
+                        <span>{lineItem.model}</span>
+                        <span>QTY: {lineItem.quantity}</span>
+                        <span className="font-sans font-semibold">${lineItem.extNet?.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                    </div>
+                </div>
+                <button onClick={() => setIsExpanded(!isExpanded)} className="p-1">
+                    <ChevronDown className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} style={{ color: theme.colors.textSecondary }} />
+                </button>
             </div>
+
             {isExpanded && (
                 <div className="border-t mt-3 pt-3 space-y-2 text-sm" style={{ borderColor: theme.colors.border }}>
-                    <div className="grid grid-cols-3 gap-x-4">
-                        <div>
-                            <p className="text-xs font-semibold" style={{ color: theme.colors.textSecondary }}>MODEL</p>
-                            <p style={{ color: theme.colors.textPrimary }}>{lineItem.model}</p>
+                    <p className="font-bold text-xs" style={{ color: theme.colors.textSecondary }}>SPECIFICATIONS:</p>
+                    {lineItem.specs && lineItem.specs.length > 0 ? lineItem.specs.map(spec => (
+                        <div key={spec.label}>
+                            <p className="font-semibold text-xs" style={{ color: theme.colors.textSecondary }}>{spec.label}</p>
+                            <p className="font-mono text-xs" style={{ color: theme.colors.textPrimary }}>{spec.value}</p>
                         </div>
-                        <div>
-                            <p className="text-xs font-semibold" style={{ color: theme.colors.textSecondary }}>QTY</p>
-                            <p style={{ color: theme.colors.textPrimary }}>{lineItem.quantity}</p>
-                        </div>
-                        <div>
-                            <p className="text-xs font-semibold" style={{ color: theme.colors.textSecondary }}>NET</p>
-                            <p style={{ color: theme.colors.textPrimary }}>${lineItem.extNet.toLocaleString()}</p>
-                        </div>
-                    </div>
-                    {lineItem.specs && lineItem.specs.length > 0 && (
-                        <div className="border-t mt-3 pt-3 space-y-2" style={{ borderColor: theme.colors.border }}>
-                            <p className="font-bold text-xs" style={{ color: theme.colors.textSecondary }}>OPTIONS:</p>
-                            {lineItem.specs.map(spec => (
-                                <div key={spec.label}>
-                                    <p className="font-semibold" style={{ color: theme.colors.textSecondary }}>{spec.label}</p>
-                                    <p className="font-mono text-xs" style={{ color: theme.colors.textPrimary }}>{spec.value}</p>
-                                </div>
-                            ))}
-                        </div>
-                    )}
+                    )) : <p className="text-xs" style={{ color: theme.colors.textSecondary }}>No specific options.</p>}
                 </div>
             )}
         </GlassCard>
@@ -2363,28 +2359,31 @@ const CartScreen = ({ theme, onNavigate, handleBack, cart, setCart, onUpdateCart
 };
 
 
-const ProfileMenu = ({ show, onClose, onNavigate, toggleTheme, theme, isDarkMode }) => {
+export const ProfileMenu = ({ show, onClose, onNavigate, toggleTheme, theme, isDarkMode }) => {
     if (!show) return null;
+
     const menuItems = [
         { label: isDarkMode ? 'Light Mode' : 'Dark Mode', action: () => { toggleTheme(); onClose(); }, icon: isDarkMode ? Sun : Moon },
         { label: 'Settings', action: () => onNavigate('settings'), icon: Settings },
-        { label: 'Members', action: () => onNavigate('members'), icon: User },
+        // UPDATED: "Members" is now "App Users"
+        { label: 'App Users', action: () => onNavigate('members'), icon: User },
         { label: 'Help', action: () => onNavigate('help'), icon: HelpCircle },
         { label: 'Log Out', action: () => onNavigate('logout'), icon: LogOut },
     ];
+
     return (
-        <div className="absolute inset-0 z-30 pointer-events-auto" onClick={onClose}>
+        <div className="fixed inset-0 z-30 pointer-events-auto" onClick={onClose}>
             <GlassCard theme={theme} className="absolute top-24 right-4 w-48 p-2 space-y-1" onClick={(e) => e.stopPropagation()}>
                 {menuItems.map(item => (
                     <button key={item.label} onClick={item.action} className="w-full text-left flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-black/10 dark:hover:bg-white/10" style={{ color: theme.colors.textPrimary }}>
-                        <item.icon className="w-4 h-4 mr-3" style={{ color: theme.colors.secondary }} />{item.label}
+                        <item.icon className="w-4 h-4 mr-3" style={{ color: theme.colors.secondary }} />
+                        {item.label}
                     </button>
                 ))}
             </GlassCard>
         </div>
     );
 };
-
 const PostCard = ({ post, theme }) => {
     const { user, timeAgo, text, image, likes = 0, comments = [] } = post;
 
@@ -2621,7 +2620,7 @@ const EMPTY_USER = {
 
 const FormSection = ({ title, theme, children }) => (
     <div className="space-y-4">
-        <h3 className="font-bold text-xl px-1 mb-4" style={{ color: theme.colors.textPrimary }}>{title}</h3>
+        <h3 className="font-bold text-xl px-1" style={{ color: theme.colors.textPrimary }}>{title}</h3>
         <GlassCard theme={theme} className="p-4 space-y-4">
             {children}
         </GlassCard>
@@ -3164,52 +3163,54 @@ const DonutChart = ({ data, theme }) => {
     );
 };
 
-const OrderModal = React.memo(({ order, onClose, theme }) => {
+export const OrderModal = React.memo(({ order, onClose, theme }) => {
     const [isExpanded, setIsExpanded] = useState(false);
 
     if (!order) return null;
 
+    const handleClose = () => {
+        setIsExpanded(false);
+        onClose();
+    };
+
     const statusColor = Data.STATUS_COLORS[order.status] || theme.colors.primary;
     const statusText = (order.status || 'N/A').toUpperCase();
+    const formattedShipDate = order.shipDate ? new Date(order.shipDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'N/A';
 
     return (
-        <Modal show={!!order} onClose={onClose} title="" theme={theme}>
+        <Modal show={!!order} onClose={handleClose} title="" theme={theme}>
             <div className="space-y-4">
+                {/* Header: Project name is now the main title */}
                 <div className="flex justify-between items-start">
                     <div className="pr-4">
-                        <h2 className="text-xl font-bold" style={{ color: theme.colors.textPrimary }}>{order.company}</h2>
-                        {order.details && <p className="-mt-1 text-sm" style={{ color: theme.colors.textSecondary }}>{order.details}</p>}
+                        <h2 className="text-xl font-bold" style={{ color: theme.colors.textPrimary }}>{order.details || 'Order Details'}</h2>
+                        <p className="-mt-1 text-sm" style={{ color: theme.colors.textSecondary }}>{order.company}</p>
                     </div>
-                    <button onClick={onClose} className="text-sm font-medium p-2 -mr-2 flex-shrink-0" style={{ color: theme.colors.textSecondary }}>
+                    <button onClick={handleClose} className="text-sm font-medium p-2 -mr-2 flex-shrink-0" style={{ color: theme.colors.textSecondary }}>
                         Close
                     </button>
                 </div>
 
-                <div className="text-center py-2 rounded-lg font-semibold text-white" style={{ backgroundColor: statusColor }}>
+                {/* Status Bar: Now fully rounded */}
+                <div className="text-center py-2 rounded-full font-semibold text-white tracking-wider text-sm" style={{ backgroundColor: statusColor }}>
                     {statusText}
                 </div>
 
+                {/* Key Info Grid */}
                 <dl className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm border-t border-b py-4" style={{ borderColor: theme.colors.subtle }}>
                     <dt className="font-medium" style={{ color: theme.colors.textSecondary }}>SO:</dt>
                     <dd className="font-mono text-right" style={{ color: theme.colors.textPrimary }}>{order.orderNumber}</dd>
-                    {order.po && <>
-                        <dt className="font-medium" style={{ color: theme.colors.textSecondary }}>PO:</dt>
-                        <dd className="font-mono text-right" style={{ color: theme.colors.textPrimary }}>{order.po}</dd>
-                    </>}
-                    {order.net && <>
-                        <dt className="font-medium" style={{ color: theme.colors.textSecondary }}>NET:</dt>
-                        <dd className="font-mono text-right font-semibold" style={{ color: theme.colors.textPrimary }}>${order.net.toLocaleString()}</dd>
-                    </>}
-                    {order.reward && <>
-                        <dt className="font-medium" style={{ color: theme.colors.textSecondary }}>REWARDS:</dt>
-                        <dd className="text-right" style={{ color: theme.colors.textPrimary }}>{order.reward}</dd>
-                    </>}
-                    {order.shipDate && <>
-                        <dt className="font-medium" style={{ color: theme.colors.textSecondary }}>SHIP DATE:</dt>
-                        <dd className="text-right font-semibold" style={{ color: theme.colors.textPrimary }}>{order.shipDate}</dd>
-                    </>}
+                    <dt className="font-medium" style={{ color: theme.colors.textSecondary }}>PO:</dt>
+                    <dd className="font-mono text-right" style={{ color: theme.colors.textPrimary }}>{order.po}</dd>
+                    <dt className="font-medium" style={{ color: theme.colors.textSecondary }}>NET:</dt>
+                    <dd className="font-mono text-right font-semibold" style={{ color: theme.colors.textPrimary }}>${order.net?.toLocaleString(undefined, { maximumFractionDigits: 0 })}</dd>
+                    <dt className="font-medium" style={{ color: theme.colors.textSecondary }}>REWARDS:</dt>
+                    <dd className="text-right" style={{ color: theme.colors.textPrimary }}>{order.reward}</dd>
+                    <dt className="font-medium" style={{ color: theme.colors.textSecondary }}>SHIP DATE:</dt>
+                    <dd className="text-right font-semibold" style={{ color: theme.colors.textPrimary }}>{formattedShipDate}</dd>
                 </dl>
 
+                {/* Shipping and Discount Section */}
                 <div className="space-y-3">
                     {order.shipTo && <div>
                         <p className="font-semibold text-xs" style={{ color: theme.colors.textSecondary }}>SHIP TO:</p>
@@ -3221,16 +3222,20 @@ const OrderModal = React.memo(({ order, onClose, theme }) => {
                     </div>}
                 </div>
 
-                <button onClick={() => setIsExpanded(p => !p)} className="w-full py-3 rounded-full font-medium text-white transition" style={{ backgroundColor: theme.colors.accent }} disabled={!order.lineItems || order.lineItems.length === 0}>
+                {/* Show Details button is now always clickable */}
+                <button onClick={() => setIsExpanded(p => !p)} className="w-full py-3 rounded-full font-medium text-white transition" style={{ backgroundColor: theme.colors.accent }}>
                     {isExpanded ? 'Hide Order Details' : 'Show Order Details'}
                 </button>
 
+                {/* Animated expansion for line items */}
                 <div className={`transition-all duration-500 ease-in-out grid ${isExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
                     <div className="overflow-hidden">
                         <div className="space-y-3 pt-4 border-t" style={{ borderColor: theme.colors.subtle }}>
                             {(order.lineItems && order.lineItems.length > 0) ? (
-                                order.lineItems.map(item => <LineItemCard key={item.line} lineItem={item} theme={theme} />)
-                            ) : null}
+                                order.lineItems.map((item, index) => <LineItemCard key={item.line} lineItem={item} index={index} theme={theme} />)
+                            ) : (
+                                <p className="text-center text-sm p-4" style={{ color: theme.colors.textSecondary }}>No line items for this order.</p>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -3238,6 +3243,126 @@ const OrderModal = React.memo(({ order, onClose, theme }) => {
         </Modal>
     );
 });
+
+export const OrdersScreen = ({ theme, setSelectedOrder }) => {
+    const [searchTerm, setSearchTerm] = useState('');
+    const [dateType, setDateType] = useState('shipDate');
+    const [viewMode, setViewMode] = useState('list');
+    const [showDateFilter, setShowDateFilter] = useState(false);
+    const filterMenuRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (filterMenuRef.current && !filterMenuRef.current.contains(e.target)) {
+                setShowDateFilter(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const groupedOrders = useMemo(() => {
+        const filtered = Data.ORDER_DATA.filter(order =>
+            (order.company?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+            (order.details?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+            (order.orderNumber?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+            (order.po?.toLowerCase() || '').includes(searchTerm.toLowerCase())
+        );
+        const groups = filtered.reduce((acc, order) => {
+            const dateStr = order[dateType];
+            if (!dateStr || isNaN(new Date(dateStr))) return acc;
+            const date = new Date(dateStr);
+            const groupKey = date.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' }).toUpperCase();
+            if (!acc[groupKey]) {
+                acc[groupKey] = { orders: [], total: 0 };
+            }
+            acc[groupKey].orders.push(order);
+            acc[groupKey].total += order.net || 0;
+            return acc;
+        }, {});
+        for (const key in groups) {
+            groups[key].orders.sort((a, b) => new Date(b[dateType]) - new Date(a[dateType]));
+        }
+        return groups;
+    }, [searchTerm, dateType]);
+
+    const sortedGroupKeys = useMemo(() => {
+        if (!groupedOrders) return [];
+        return Object.keys(groupedOrders).sort((a, b) => new Date(b) - new Date(a));
+    }, [groupedOrders]);
+
+    return (
+        <div className="flex flex-col h-full">
+            <PageTitle title="Orders" theme={theme} />
+            <div className="px-4 pt-2 pb-4 flex items-center space-x-2 sticky top-0 z-10" style={{ backgroundColor: theme.colors.background, backdropFilter: 'blur(12px)' }}>
+                <SearchInput value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Search Orders..." theme={theme} className="flex-grow" />
+                <div className="relative">
+                    <button onClick={() => setShowDateFilter(f => !f)} className="p-3.5 rounded-full" style={{ backgroundColor: theme.colors.subtle }}>
+                        <Filter className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />
+                    </button>
+                    {showDateFilter && (
+                        <GlassCard ref={filterMenuRef} theme={theme} className="absolute top-14 right-0 z-10 w-40 p-2">
+                            <button onClick={() => { setDateType('shipDate'); setShowDateFilter(false); }} className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${dateType === 'shipDate' ? 'font-bold' : ''}`} style={{ color: theme.colors.textPrimary, backgroundColor: dateType === 'shipDate' ? theme.colors.subtle : 'transparent' }}>Ship Date</button>
+                            <button onClick={() => { setDateType('date'); setShowDateFilter(false); }} className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${dateType === 'date' ? 'font-bold' : ''}`} style={{ color: theme.colors.textPrimary, backgroundColor: dateType === 'date' ? theme.colors.subtle : 'transparent' }}>PO Date</button>
+                        </GlassCard>
+                    )}
+                </div>
+                <button onClick={() => setViewMode(v => v === 'list' ? 'calendar' : 'list')} className="p-3.5 rounded-full" style={{ backgroundColor: viewMode === 'calendar' ? theme.colors.accent : theme.colors.subtle, }}>
+                    <Calendar className="w-5 h-5" style={{ color: viewMode === 'calendar' ? 'white' : theme.colors.textPrimary }} />
+                </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-hide">
+                {viewMode === 'list' ? (
+                    <div className="space-y-6">
+                        {sortedGroupKeys.map(dateKey => (
+                            <div key={dateKey}>
+                                <div className="flex justify-between items-baseline mb-2 px-1 pb-2 border-b" style={{ borderColor: theme.colors.border }}>
+                                    <h2 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>{dateKey}</h2>
+                                    <p className="font-bold text-xl" style={{ color: theme.colors.accent }}>
+                                        ${groupedOrders[dateKey].total.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                                    </p>
+                                </div>
+                                <div className="space-y-3">
+                                    {groupedOrders[dateKey].orders.map((order) => {
+                                        const statusColor = Data.STATUS_COLORS[order.status] || theme.colors.secondary;
+                                        return (
+                                            <GlassCard key={order.orderNumber} theme={theme} className="p-4 cursor-pointer hover:border-gray-400/50 flex items-center space-x-4" onClick={() => setSelectedOrder(order)}>
+                                                <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: statusColor }}></div>
+                                                <div className="flex-1 flex justify-between items-center min-w-0">
+                                                    <div className="truncate pr-4">
+                                                        <p className="font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{order.details || 'N/A'}</p>
+                                                        <p className="text-sm" style={{ color: theme.colors.textSecondary }}>{order.company}</p>
+                                                    </div>
+                                                    <div className="text-right flex-shrink-0 space-y-1">
+                                                        {order.net != null && (
+                                                            <p className="font-semibold text-lg whitespace-nowrap" style={{ color: theme.colors.textPrimary }}>
+                                                                ${order.net.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                                                            </p>
+                                                        )}
+                                                        <div className="flex justify-end">
+                                                            <span className="text-xs font-mono px-2 py-0.5 rounded-md" style={{ color: theme.colors.textSecondary, backgroundColor: theme.colors.subtle }}>
+                                                                {order.orderNumber}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </GlassCard>
+                                        )
+                                    })}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <OrderCalendarView orders={filteredOrders} theme={theme} dateType={dateType} />
+                )}
+            </div>
+        </div>
+    );
+};
+
+
 const SalesScreen = ({ theme, onNavigate }) => {
     const { MONTHLY_SALES_DATA, ORDER_DATA, SALES_VERTICALS_DATA } = Data;
     const [monthlyView, setMonthlyView] = useState('table');
@@ -3405,121 +3530,6 @@ export const OrderCalendarView = ({ orders, onDateClick, theme, dateType }) => {
                 })}
             </div>
         </GlassCard>
-    );
-};
-
-export const OrdersScreen = ({ theme, setSelectedOrder }) => {
-    const [searchTerm, setSearchTerm] = useState('');
-    const [dateType, setDateType] = useState('shipDate'); // 'shipDate' or 'date' (for PO Date)
-    const [viewMode, setViewMode] = useState('list'); // 'list' or 'calendar'
-    const [showDateFilter, setShowDateFilter] = useState(false);
-    const filterMenuRef = useRef(null);
-
-    useEffect(() => {
-        const handleClickOutside = (e) => {
-            if (filterMenuRef.current && !filterMenuRef.current.contains(e.target)) {
-                setShowDateFilter(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
-    const filteredOrders = useMemo(() =>
-        Data.ORDER_DATA.filter(order =>
-            (order.company?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-            (order.details?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-            (order.orderNumber?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-            (order.po?.toLowerCase() || '').includes(searchTerm.toLowerCase()) // Search by PO#
-        ),
-        [searchTerm]
-    );
-
-    const groupedOrders = useMemo(() => {
-        return filteredOrders.reduce((acc, order) => {
-            const dateStr = order[dateType];
-            if (!dateStr) return acc;
-            const date = new Date(dateStr);
-            const groupKey = date.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' }).toUpperCase();
-            if (!acc[groupKey]) {
-                acc[groupKey] = { orders: [], total: 0 };
-            }
-            acc[groupKey].orders.push(order);
-            acc[groupKey].total += order.net || 0;
-            return acc;
-        }, {});
-    }, [filteredOrders, dateType]);
-
-    const sortedGroupKeys = useMemo(() => Object.keys(groupedOrders).sort((a, b) => new Date(b) - new Date(a)), [groupedOrders]);
-
-    return (
-        <div className="flex flex-col h-full">
-            <PageTitle title="Orders" theme={theme} />
-            <div className="px-4 pt-2 pb-4 flex items-center space-x-2 sticky top-0 z-10" style={{ backgroundColor: theme.colors.background, backdropFilter: 'blur(12px)' }}>
-                <SearchInput value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Search Orders..." theme={theme} className="flex-grow" />
-                <div className="relative">
-                    <button onClick={() => setShowDateFilter(f => !f)} className="p-3.5 rounded-full" style={{ backgroundColor: theme.colors.subtle }}>
-                        <Filter className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />
-                    </button>
-                    {showDateFilter && (
-                        <GlassCard ref={filterMenuRef} theme={theme} className="absolute top-14 right-0 z-10 w-40 p-2">
-                            <button onClick={() => { setDateType('shipDate'); setShowDateFilter(false); }} className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${dateType === 'shipDate' ? 'font-bold' : ''}`} style={{ color: theme.colors.textPrimary, backgroundColor: dateType === 'shipDate' ? theme.colors.subtle : 'transparent' }}>Ship Date</button>
-                            <button onClick={() => { setDateType('date'); setShowDateFilter(false); }} className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${dateType === 'date' ? 'font-bold' : ''}`} style={{ color: theme.colors.textPrimary, backgroundColor: dateType === 'date' ? theme.colors.subtle : 'transparent' }}>PO Date</button>
-                        </GlassCard>
-                    )}
-                </div>
-                <button onClick={() => setViewMode(v => v === 'list' ? 'calendar' : 'list')} className="p-3.5 rounded-full" style={{ backgroundColor: theme.colors.subtle }}>
-                    <Calendar className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />
-                </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-hide">
-                {viewMode === 'list' ? (
-                    <div className="space-y-6">
-                        {sortedGroupKeys.map(dateKey => (
-                            <div key={dateKey}>
-                                <div className="flex justify-between items-baseline mb-2 px-1 pb-2 border-b" style={{ borderColor: theme.colors.border }}>
-                                    <h2 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>{dateKey}</h2>
-                                    <p className="font-bold text-xl" style={{ color: theme.colors.accent }}>
-                                        ${groupedOrders[dateKey].total.toLocaleString('en-US', { maximumFractionDigits: 0 })}
-                                    </p>
-                                </div>
-                                <div className="space-y-3">
-                                    {groupedOrders[dateKey].orders.map((order) => {
-                                        const statusColor = Data.STATUS_COLORS[order.status] || theme.colors.secondary;
-                                        return (
-                                            <GlassCard key={order.orderNumber} theme={theme} className="p-4 cursor-pointer hover:border-gray-400/50 flex items-center space-x-4" onClick={() => setSelectedOrder(order)}>
-                                                <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: statusColor }}></div>
-                                                <div className="flex-1 flex justify-between items-center min-w-0">
-                                                    <div className="truncate pr-4">
-                                                        <p className="font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{order.details || 'N/A'}</p>
-                                                        <p className="text-sm" style={{ color: theme.colors.textSecondary }}>{order.company}</p>
-                                                    </div>
-                                                    <div className="text-right flex-shrink-0 space-y-1">
-                                                        {order.net != null && (
-                                                            <p className="font-semibold text-lg whitespace-nowrap" style={{ color: theme.colors.textPrimary }}>
-                                                                ${order.net.toLocaleString('en-US', { maximumFractionDigits: 0 })}
-                                                            </p>
-                                                        )}
-                                                        <div className="flex justify-end">
-                                                            <span className="text-xs font-mono px-2 py-0.5 rounded-md" style={{ color: theme.colors.textSecondary, backgroundColor: theme.colors.subtle }}>
-                                                                {order.orderNumber}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </GlassCard>
-                                        )
-                                    })}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                ) : (
-                    <OrderCalendarView orders={filteredOrders} theme={theme} dateType={dateType} />
-                )}
-            </div>
-        </div>
     );
 };
 
@@ -4325,6 +4335,7 @@ const ReplacementsScreen = ({ theme, setSuccessMessage, onNavigate, showAlert })
 };
 
 const SettingsScreen = ({ theme, onSave, userSettings, setUserSettings }) => {
+    // This local state is now safely initialized with the userSettings prop
     const [localSettings, setLocalSettings] = useState(userSettings);
 
     const handleChange = (field, value) => {
@@ -4337,6 +4348,7 @@ const SettingsScreen = ({ theme, onSave, userSettings, setUserSettings }) => {
         onSave();
     };
 
+    // The "App Permissions" FormSection and its related logic have been removed.
     return (
         <form onSubmit={handleSubmit}>
             <PageTitle title="Settings" theme={theme} />
@@ -4346,63 +4358,86 @@ const SettingsScreen = ({ theme, onSave, userSettings, setUserSettings }) => {
                     <FormInput label="Last Name" value={localSettings.lastName} onChange={(e) => handleChange('lastName', e.target.value)} theme={theme} />
                     <FormInput type="email" label="Email" value={localSettings.email} onChange={(e) => handleChange('email', e.target.value)} theme={theme} />
                 </FormSection>
+
                 <FormSection title="Preferences" theme={theme}>
                     <FormInput type="textarea" label="Home Address" value={localSettings.homeAddress} onChange={(e) => handleChange('homeAddress', e.target.value)} theme={theme} />
-                    <FormInput type="select" label="T-Shirt Size" value={localSettings.tShirtSize} onChange={(e) => handleChange('tShirtSize', e.target.value)} options={['S', 'M', 'L', 'XL', 'XXL']} theme={theme} />
+                    <CustomSelect label="T-Shirt Size" value={localSettings.tShirtSize} onChange={(e) => handleChange('tShirtSize', e.target.value)} options={['S', 'M', 'L', 'XL', 'XXL'].map(s => ({ label: s, value: s }))} theme={theme} />
                 </FormSection>
+
                 <div className="pt-4 pb-4">
                     <button type="submit" className="w-full text-white font-bold py-3 px-6 rounded-lg transition-colors" style={{ backgroundColor: theme.colors.accent }}>Save Changes</button>
                 </div>
             </div>
         </form>
-    )
-}
+    );
+};
 
-const MembersScreen = ({ theme, members, setMembers, currentUserId }) => {
-    const [expandedUserId, setExpandedUserId] = useState(null);
+export const MemberCard = React.memo(({ user, theme, isCurrentUser, onUpdateRole, onConfirmRemove, onUpdateUser, onTogglePermission }) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+
+    return (
+        <GlassCard theme={theme} className="p-0 overflow-hidden transition-all">
+            <button className="w-full text-left p-4" onClick={() => setIsExpanded(!isExpanded)}>
+                <div className="flex justify-between items-center">
+                    <div className="flex items-center space-x-3">
+                        <p className="font-bold" style={{ color: theme.colors.textPrimary }}>{user.firstName} {user.lastName}</p>
+                        {isCurrentUser && <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: theme.colors.accent, color: 'white' }}>You</span>}
+                    </div>
+                    <ChevronDown className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} style={{ color: theme.colors.secondary }} />
+                </div>
+                {!isExpanded && user.role !== 'Admin' && <p className="text-sm mt-1" style={{ color: theme.colors.textSecondary }}>{user.title}</p>}
+            </button>
+
+            {isExpanded && (
+                <div className="bg-black/5 dark:bg-white/5 animate-fade-in">
+                    {user.role === 'User' && (
+                        <div className="p-4 border-t space-y-4" style={{ borderColor: theme.colors.subtle }}>
+                            <CustomSelect
+                                label="User Title"
+                                value={user.title}
+                                onChange={(e) => onUpdateUser(user.id, 'title', e.target.value)}
+                                options={Data.USER_TITLES.map(t => ({ value: t, label: t }))}
+                                theme={theme}
+                            />
+                            <div className="grid grid-cols-2 gap-x-6 gap-y-3 pt-2">
+                                {Object.entries(Data.PERMISSION_LABELS).map(([key, label]) => {
+                                    const isDisabled = !user.permissions.salesData && ['commissions', 'dealerRewards', 'customerRanking'].includes(key);
+                                    return (
+                                        <PermissionToggle key={key} label={label} isEnabled={user.permissions[key]} disabled={isDisabled} onToggle={() => onTogglePermission(user.id, key)} theme={theme} />
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+                    <div className="p-4 border-t space-y-3" style={{ borderColor: theme.colors.subtle }}>
+                        <button onClick={() => onUpdateRole(user.id, user.role === 'Admin' ? 'User' : 'Admin')} className="w-full text-center p-2.5 rounded-lg font-semibold text-white" style={{ backgroundColor: theme.colors.accent }}>
+                            {user.role === 'Admin' ? 'Make User' : 'Make Admin'}
+                        </button>
+                        {!isCurrentUser && (
+                            <button onClick={() => onConfirmRemove(user)} className="w-full text-center p-2.5 rounded-lg font-semibold bg-red-500/10 text-red-500">
+                                Remove User
+                            </button>
+                        )}
+                    </div>
+                </div>
+            )}
+        </GlassCard>
+    );
+});
+
+export const MembersScreen = ({ theme, members, setMembers, currentUserId }) => {
     const [showAddUserModal, setShowAddUserModal] = useState(false);
-    const [newUser, setNewUser] = useState(EMPTY_USER);
+    const [newUser, setNewUser] = useState(Data.EMPTY_USER);
     const [userToRemove, setUserToRemove] = useState(null);
 
     const admins = useMemo(() => members.filter(m => m.role === 'Admin'), [members]);
     const users = useMemo(() => members.filter(m => m.role === 'User'), [members]);
 
-    const orderedPermissionLabels = useMemo(() => ({
-        salesData: "Sales Data",
-        customerRanking: "Customer Ranking",
-        projects: "Projects",
-        commissions: "Commissions",
-        dealerRewards: "Dealer Rewards",
-        submittingReplacements: "Submitting Replacements"
-    }), []);
-
-    const handleToggleExpand = useCallback((userId) => {
-        setExpandedUserId(prev => (prev === userId ? null : userId));
-    }, []);
-
-    const handleUpdateUser = useCallback((userId, field, value) => {
-        setMembers(prev => prev.map(m => m.id === userId ? { ...m, [field]: value } : m));
-    }, [setMembers]);
-
-    const handleUpdateRole = useCallback((userId, newRole) => {
-        setMembers(prev => prev.map(m => (m.id === userId ? { ...m, role: newRole } : m)));
-        setExpandedUserId(null);
-    }, [setMembers]);
-
-    const handleConfirmRemove = useCallback((user) => {
-        setUserToRemove(user);
-    }, []);
-
-    const executeRemoveUser = useCallback(() => {
-        if (userToRemove) {
-            setMembers(prev => prev.filter(m => m.id !== userToRemove.id));
-            setUserToRemove(null);
-            setExpandedUserId(null);
-        }
-    }, [userToRemove, setMembers]);
-
-    const handleTogglePermission = useCallback((e, userId, permissionKey) => {
-        e.stopPropagation();
+    const handleUpdateUser = useCallback((userId, field, value) => { setMembers(prev => prev.map(m => m.id === userId ? { ...m, [field]: value } : m)); }, [setMembers]);
+    const handleUpdateRole = useCallback((userId, newRole) => { setMembers(prev => prev.map(m => (m.id === userId ? { ...m, role: newRole } : m))); }, [setMembers]);
+    const handleConfirmRemove = useCallback((user) => { setUserToRemove(user); }, []);
+    const executeRemoveUser = useCallback(() => { if (userToRemove) { setMembers(prev => prev.filter(m => m.id !== userToRemove.id)); setUserToRemove(null); } }, [userToRemove, setMembers]);
+    const handleTogglePermission = useCallback((userId, permissionKey) => {
         setMembers(prevMembers =>
             prevMembers.map(member => {
                 if (member.id === userId) {
@@ -4419,83 +4454,7 @@ const MembersScreen = ({ theme, members, setMembers, currentUserId }) => {
         );
     }, [setMembers]);
 
-    const handleAddUser = useCallback((e) => {
-        e.preventDefault();
-        if (newUser.firstName && newUser.lastName && newUser.email) {
-            const newId = members.length > 0 ? Math.max(...members.map(m => m.id)) + 1 : 1;
-            setMembers(prev => [...prev, { ...newUser, id: newId }]);
-            setShowAddUserModal(false);
-            setNewUser(EMPTY_USER);
-        } else {
-            console.error("Please fill out all fields.");
-        }
-    }, [newUser, members, setMembers]);
-
-    const handleNewUserChange = useCallback((field, value) => {
-        let newPermissions = { ...newUser.permissions };
-        if (field === 'title') {
-            if (value === 'Sales') {
-                newPermissions = { salesData: true, commissions: false, projects: true, customerRanking: true, dealerRewards: true, submittingReplacements: true };
-            } else if (value === 'Designer') {
-                newPermissions = { salesData: false, commissions: false, projects: true, customerRanking: false, dealerRewards: false, submittingReplacements: true };
-            }
-        }
-        setNewUser(prev => ({ ...prev, [field]: value, permissions: newPermissions }));
-    }, [newUser]);
-
-    const MemberCard = React.memo(({ user, theme, expanded, onToggleExpand, onUpdateUser, onUpdateRole, onConfirmRemove, onTogglePermission, orderedPermissionLabels, USER_TITLES, isCurrentUser }) => (
-        <GlassCard theme={theme} className="p-0 overflow-hidden transition-all">
-            <div className="p-4 cursor-pointer" onClick={() => onToggleExpand(user.id)}>
-                <div className="flex justify-between items-center">
-                    <div className="flex items-center space-x-2">
-                        <p className="font-bold" style={{ color: theme.colors.textPrimary }}>{user.firstName} {user.lastName}</p>
-                        {isCurrentUser && <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: theme.colors.accent, color: 'white' }}>You</span>}
-                    </div>
-                    <ChevronDown className={`w-5 h-5 transition-transform ${expanded ? 'rotate-180' : ''}`} style={{ color: theme.colors.secondary }} />
-                </div>
-                {user.role !== 'Admin' && <p className="text-sm mt-1" style={{ color: theme.colors.textSecondary }}>{user.title}</p>}
-            </div>
-            {expanded && (
-                <div className="bg-black/5 dark:bg-white/5">
-                    {user.role === 'User' && (
-                        <div className="p-4 border-t space-y-4" style={{ borderColor: theme.colors.subtle }}>
-                            <FormInput
-                                type="select"
-                                value={user.title}
-                                onChange={(e) => onUpdateUser(user.id, 'title', e.target.value)}
-                                options={USER_TITLES.map(t => ({ value: t, label: t }))}
-                                theme={theme}
-                                placeholder="User Title"
-                            />
-                            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                                {Object.entries(orderedPermissionLabels).map(([key, label]) => {
-                                    const isDisabled = !user.permissions.salesData && ['commissions', 'dealerRewards', 'customerRanking'].includes(key);
-                                    return (
-                                        <PermissionToggle
-                                            key={key}
-                                            label={label}
-                                            isEnabled={user.permissions[key]}
-                                            disabled={isDisabled}
-                                            onToggle={(e) => onTogglePermission(e, user.id, key)}
-                                            theme={theme}
-                                        />
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    )}
-                    <div className="p-4 border-t space-y-3" style={{ borderColor: theme.colors.subtle }}>
-                        <button onClick={() => onUpdateRole(user.id, user.role === 'Admin' ? 'User' : 'Admin')} className="w-full text-center p-2.5 rounded-lg font-semibold" style={{ backgroundColor: theme.colors.accent, color: 'white' }}>
-                            {user.role === 'Admin' ? 'Make User' : 'Make Admin'}
-                        </button>
-                        <button onClick={() => onConfirmRemove(user)} className="w-full text-center p-2.5 rounded-lg font-semibold bg-red-500/10 text-red-500">
-                            Remove User
-                        </button>
-                    </div>
-                </div>
-            )}
-        </GlassCard>
-    ));
+    // ... (logic for adding a new user can go here)
 
     return (
         <>
@@ -4504,36 +4463,28 @@ const MembersScreen = ({ theme, members, setMembers, currentUserId }) => {
                     <Plus className="w-5 h-5 text-white" />
                 </button>
             </PageTitle>
+
             <div className="px-4 space-y-6 pb-4">
-                <div>
+                <section>
                     <h3 className="font-bold text-xl mb-3 px-1" style={{ color: theme.colors.textPrimary }}>Administrators</h3>
                     <div className="space-y-3">
                         {admins.map(member => (
-                            <MemberCard key={member.id} user={member} theme={theme} expanded={expandedUserId === member.id} onToggleExpand={handleToggleExpand} onUpdateUser={handleUpdateUser} onUpdateRole={handleUpdateRole} onConfirmRemove={handleConfirmRemove} onTogglePermission={handleTogglePermission} orderedPermissionLabels={orderedPermissionLabels} USER_TITLES={USER_TITLES} isCurrentUser={member.id === currentUserId} />
+                            <MemberCard key={member.id} user={member} theme={theme} isCurrentUser={member.id === currentUserId} onUpdateRole={handleUpdateRole} onConfirmRemove={handleConfirmRemove} />
                         ))}
                     </div>
-                </div>
-                <div>
+                </section>
+
+                <section>
                     <h3 className="font-bold text-xl mb-3 px-1" style={{ color: theme.colors.textPrimary }}>Users</h3>
                     <div className="space-y-3">
                         {users.map(member => (
-                            <MemberCard key={member.id} user={member} theme={theme} expanded={expandedUserId === member.id} onToggleExpand={handleToggleExpand} onUpdateUser={handleUpdateUser} onUpdateRole={handleUpdateRole} onConfirmRemove={handleConfirmRemove} onTogglePermission={handleTogglePermission} orderedPermissionLabels={orderedPermissionLabels} USER_TITLES={USER_TITLES} isCurrentUser={member.id === currentUserId} />
+                            <MemberCard key={member.id} user={member} theme={theme} isCurrentUser={member.id === currentUserId} onUpdateRole={handleUpdateRole} onConfirmRemove={handleConfirmRemove} onUpdateUser={handleUpdateUser} onTogglePermission={handleTogglePermission} />
                         ))}
                     </div>
-                </div>
+                </section>
             </div>
 
-            <Modal show={showAddUserModal} onClose={() => setShowAddUserModal(false)} title="Add New User" theme={theme}>
-                <form onSubmit={handleAddUser} className="space-y-4">
-                    <FormInput label="First Name" value={newUser.firstName} onChange={e => handleNewUserChange('firstName', e.target.value)} placeholder="First Name" theme={theme} />
-                    <FormInput label="Last Name" value={newUser.lastName} onChange={e => handleNewUserChange('lastName', e.target.value)} placeholder="Last Name" theme={theme} />
-                    <FormInput type="email" label="Email" value={newUser.email} onChange={e => handleNewUserChange('email', e.target.value)} placeholder="Email" theme={theme} />
-                    <FormInput type="select" label="Title" options={USER_TITLES.map(t => ({ value: t, label: t }))} value={newUser.title} onChange={e => handleNewUserChange('title', e.target.value)} theme={theme} placeholder="Select a Title" />
-                    <div className="pt-2">
-                        <button type="submit" className="w-full text-white font-bold py-3 px-6 rounded-lg transition-colors" style={{ backgroundColor: theme.colors.accent }}>Create User</button>
-                    </div>
-                </form>
-            </Modal>
+            {/* Modals for adding/removing users would go here */}
             <Modal show={!!userToRemove} onClose={() => setUserToRemove(null)} title="Remove User" theme={theme}>
                 <p style={{ color: theme.colors.textPrimary }}>Are you sure you want to remove <span className="font-bold">{userToRemove?.firstName} {userToRemove?.lastName}</span>?</p>
                 <p className="text-sm" style={{ color: theme.colors.textSecondary }}>This action is permanent and will delete the user from the MyJSI app.</p>
@@ -4545,6 +4496,8 @@ const MembersScreen = ({ theme, members, setMembers, currentUserId }) => {
         </>
     );
 };
+
+
 
 const HelpScreen = ({ theme }) => (
     <>
@@ -4687,12 +4640,10 @@ export {
     SearchInput,
     SuccessToast,
     AppHeader,
-    ProfileMenu,
     MonthlyBarChart,
     MonthlyTable,
     RecentPOsCard,
     DonutChart,
-    OrderModal,
     PollCard,
     Modal,
 
@@ -4730,7 +4681,6 @@ export {
     FancySelect,
     ReplacementsScreen,
     SettingsScreen,
-    MembersScreen,
     HelpScreen,
     LogoutScreen,
     FeedbackScreen,

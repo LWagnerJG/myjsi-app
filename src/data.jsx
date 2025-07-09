@@ -206,7 +206,14 @@ export const MONTHLY_SALES_DATA = [{ month: 'Jan', bookings: 1259493, sales: 506
 
 export const SALES_VERTICALS_DATA = [{ label: 'Healthcare', value: 2900104, color: '#B99962' }, { label: 'Higher Ed', value: 1045589, color: '#7A7A7A' }, { label: 'K12', value: 1045589, color: '#A0A0A0' }, { label: 'Corporate', value: 1045589, color: '#2A2A2A' }, { label: 'Government', value: 1045589, color: '#CCCCCC' },];
 
-export const PERMISSION_LABELS = { salesData: "Sales Data", customerRanking: "Customer Ranking", projects: "Projects", commissions: "Commissions", dealerRewards: "Dealer Rewards", submittingReplacements: "Submitting Replacements" };
+export const PERMISSION_LABELS = {
+    salesData: "Sales Data",
+    customerRanking: "Customer Ranking",
+    projects: "Projects",
+    commissions: "Commissions",
+    dealerRewards: "Dealer Rewards",
+    submittingReplacements: "Submitting Replacements"
+};
 
 export const USER_TITLES = ["Sales", "Designer", "Sales/Designer", "Administration"];
 
@@ -253,14 +260,13 @@ const generateCommissionData = () => {
 export const COMMISSIONS_CHECKS_DATA = generateCommissionData();
 
 export const STATUS_COLORS = {
-    'Entered': '#7A7A7A',
-    'Order Entry': '#60A5FA',
-    'Acknowledged': '#818CF8',
-    'In Production': '#FBBF24',
-    'Shipping': '#34D399',
-    'Delivered': '#10B981',
+    'Entered': '#A0AEC0',        // Slate Gray
+    'Order Entry': '#4A90E2',    // Strong Blue
+    'Acknowledged': '#7B68EE',   // Medium Slate Blue
+    'In Production': '#F5A623',  // Gold/Orange
+    'Shipping': '#50E3C2',       // Teal
+    'Delivered': '#4CAF50',      // Success Green
 };
-
 export const COMMISSION_RATES_TABLE_DATA = { standard: [{ discount: '5/10', rep: '12%', spiff: '3%' }, { discount: '50/10/5', rep: '11%', spiff: '3%' }, { discount: '50/20', rep: '10%', spiff: '3%' }, { discount: '50/20/1', rep: '9%', spiff: '3%' }, { discount: '50/20/2', rep: '9%', spiff: '3%' }, { discount: '50/20/3', rep: '8%', spiff: '3%' }, { discount: '50/20/4', rep: '8%', spiff: '3%' }, { discount: '50/20/5', rep: '7%', spiff: '3%' }, { discount: '50/20/6', rep: '7%', spiff: '3%' }, { discount: '50/20/7', rep: '6%', spiff: '3%' }, { discount: '50/20/8', rep: '6%', spiff: '3%' }, { discount: '50/20/9', rep: '6%', spiff: '3%' }, { discount: '50/20/10', rep: '5%', spiff: { value: '3%', note: '*if > $100k net' } },], contract: [{ discount: 'GSA', rep: '5%', spiff: '3%' }, { discount: 'Omnia', rep: '3.8-3.9%', spiff: '2.5%' }, { discount: 'Premier', rep: '4.1-4.3%', spiff: '2%' }, { discount: 'TIPS', rep: '3.6-3.8%', spiff: 'N/A' },], split: [{ territory: 'Specifying', percentage: 70 }, { territory: 'Ordering', percentage: 30 },] };
 
 export const CONTRACTS_DATA = { omnia: { name: "Omnia", tiers: [{ off: "54% off (Dock Delivery)", dealer: "15% dealer commission", rep: "3.91% rep commission" }, { off: "53% off (Dock Delivery)", dealer: "17% dealer commission", rep: "3.83% rep commission" }, { off: "52% off (Dock Delivery)", dealer: "18% dealer commission", rep: "3.75% rep commission" },], margin: ["54/15 = 60.90%", "53/17 = 60.99%", "52/18 = 60.64%"], url: "https://webresources.jsifurniture.com/production/uploads/j_contracts_tcpn.pdf" }, tips: { name: "TIPS", tiers: [{ off: "51% off (Delivery and Installed)", dealer: "24% dealer commission", rep: "3.67% rep commission" }, { off: "53% off (Dock Delivery)", dealer: "20% dealer commission", rep: "3.83% rep commission" },], note: "Spiff is not allowed.", url: "https://webresources.jsifurniture.com/production/uploads/jsi_contracts_tips_taps.pdf" }, premier: { name: "Premier", tiers: [{ off: "56% off (up to $500k)", dealer: "14% dealer commission", rep: "4.09% rep commission" }, { off: "57% off ($500k-750k)", dealer: "13% dealer commission", rep: "4.19% rep commission" }, { off: "58% off ($750k+)", dealer: "12% dealer commission", rep: "4.29% rep commission" },], url: "https://webresources.jsifurniture.com/production/uploads/jsi_contracts_premier.pdf" } };
