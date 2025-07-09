@@ -122,8 +122,288 @@ const {
     DEALER_DIRECTORY_DATA,
     CONTRACTS_DATA,
     LEAD_TIMES_DATA,
-    DAILY_DISCOUNT_OPTIONS
+    DAILY_DISCOUNT_OPTIONS,
+    INSTALL_INSTRUCTIONS_DATA
 } = Data;
+
+const SocialMediaScreen = ({ theme, showAlert, setSuccessMessage }) => {
+    const copyToClipboard = (text) => {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            setSuccessMessage('Caption Copied!');
+            setTimeout(() => setSuccessMessage(''), 2000);
+        } catch (err) {
+            showAlert('Failed to copy text.');
+        }
+        document.body.removeChild(textArea);
+    };
+
+    const saveMedia = (post) => {
+        showAlert(`Media for "${post.caption.substring(0, 20)}..." saved to device.`);
+    };
+
+    return (
+        <>
+            <PageTitle title="Social Media" theme={theme} />
+            <div className="px-4 pb-4 grid grid-cols-2 gap-4">
+                {SOCIAL_MEDIA_POSTS.map(post => (
+                    <GlassCard key={post.id} theme={theme} className="p-2 flex flex-col space-y-2">
+                        <div className="aspect-w-4 aspect-h-5 w-full rounded-lg overflow-hidden">
+                            {post.type === 'image' ? (
+                                <img src={post.url} alt={`Social media post ${post.id}`} className="w-full h-full object-cover" />
+                            ) : (
+                                <div
+                                    className="w-full h-full flex items-center justify-center"
+                                    style={{ backgroundColor: theme.colors.subtle }}
+                                >
+                                    <Film className="w-12 h-12" style={{ color: theme.colors.secondary }} />
+                                </div>
+                            )}
+                        </div>
+                        <p className="text-xs px-1" style={{ color: theme.colors.textSecondary }}>
+                            {post.caption}
+                        </p>
+                        <div className="grid grid-cols-2 gap-1 pt-1">
+                            <button
+                                onClick={() => copyToClipboard(post.caption)}
+                                className="flex items-center justify-center text-xs font-semibold p-2 rounded-md"
+                                style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }}
+                            >
+                                <Copy className="w-3 h-3 mr-1.5" />
+                                Copy
+                            </button>
+                            <button
+                                onClick={() => saveMedia(post)}
+                                className="flex items-center justify-center text-xs font-semibold p-2 rounded-md"
+                                style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }}
+                            >
+                                <Save className="w-3 h-3 mr-1.5" />
+                                Save
+                            </button>
+                        </div>
+                    </GlassCard>
+                ))}
+            </div>
+        </>
+    );
+};
+
+const LeadTimesScreen = ({ theme, onNavigate }) => {
+    return (
+        <>
+            <PageTitle title="Lead Times" theme={theme} onBack={() => onNavigate('resources')}>
+                {/* Optionally a back button provided by PageTitle */}
+            </PageTitle>
+
+            <div className="px-4 space-y-6 pb-4">
+                {LEAD_TIMES_DATA.map((item, idx) => (
+                    <GlassCard key={idx} theme={theme} className="p-4">
+                        <h3 className="font-semibold text-lg" style={{ color: theme.colors.textPrimary }}>
+                            {item.series}
+                        </h3>
+                        <div className="mt-2 space-y-1">
+                            {item.products.map((p, j) => (
+                                <div key={j} className="flex justify-between text-sm">
+                                    <span style={{ color: theme.colors.textSecondary }}>{p.type}</span>
+                                    <span style={{ color: theme.colors.textPrimary }}>{p.weeks} weeks</span>
+                                </div>
+                            ))}
+                        </div>
+                    </GlassCard>
+                ))}
+            </div>
+        </>
+    );
+};
+
+const PresentationsScreen = ({ theme, onNavigate }) => {
+    // Navigate to the series list or a future “by type” screen
+    const handleNavigateByType = () =>
+        onNavigate('resources/presentations/by_type');
+    const handleNavigateBySeries = () =>
+        onNavigate('resources/presentations/by_series_list');
+
+    const PresentationButton = ({ title, imageUrl, onClick }) => (
+        <div onClick={onClick} className="cursor-pointer group">
+            <GlassCard
+                theme={theme}
+                className="p-2 overflow-hidden transition-all duration-300
+                   group-hover:border-gray-400/50
+                   group-hover:scale-[1.02]
+                   active:scale-[0.98]"
+            >
+                <div className="relative aspect-video w-full rounded-xl bg-gray-200 overflow-hidden">
+                    <img
+                        src={imageUrl}
+                        alt={`${title} presentation preview`}
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent" />
+                    <h3
+                        className="absolute bottom-3 left-4 text-2xl font-bold text-white tracking-tight"
+                    >
+                        {title}
+                    </h3>
+                </div>
+            </GlassCard>
+        </div>
+    );
+
+    return (
+        <div className="h-full flex flex-col">
+            <PageTitle title="Presentations" theme={theme} />
+            <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4">
+                <PresentationButton
+                    title="By Type"
+                    imageUrl="https://placehold.co/800x450/A9886C/FFFFFF?text=Lounge%0APresentation"
+                    onClick={handleNavigateByType}
+                />
+                <PresentationButton
+                    title="By Series"
+                    imageUrl="https://placehold.co/800x450/7A7A7A/FFFFFF?text=Vision%0APresentation"
+                    onClick={handleNavigateBySeries}
+                />
+            </div>
+        </div>
+    );
+};
+
+const InstallInstructionsScreen = ({ theme }) => {
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedSeries, setSelectedSeries] = useState(null);
+
+    const groupedInstructions = useMemo(() => {
+        const filter = searchTerm.toLowerCase().trim();
+        const filtered = INSTALL_INSTRUCTIONS_DATA.filter(item =>
+            item.name.toLowerCase().includes(filter)
+        );
+        return filtered.reduce((acc, item) => {
+            (acc[item.type] = acc[item.type] || []).push(item);
+            return acc;
+        }, {});
+    }, [searchTerm]);
+
+    if (selectedSeries) {
+        return (
+            <div className="flex flex-col h-full">
+                <PageTitle title={selectedSeries.name} theme={theme} />
+                <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4 scrollbar-hide">
+                    <div className="relative aspect-video w-full rounded-2xl bg-black overflow-hidden flex items-center justify-center">
+                        <img
+                            src={selectedSeries.videoUrl}
+                            alt={`${selectedSeries.name} video`}
+                            className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/20" />
+                        <div className="absolute w-16 h-16 rounded-full bg-white/30 backdrop-blur-sm flex items-center justify-center cursor-pointer">
+                            <Play className="w-8 h-8 text-white" />
+                        </div>
+                    </div>
+                    <a
+                        href={selectedSeries.pdfUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block"
+                    >
+                        <GlassCard theme={theme} className="p-4 flex items-center justify-between hover:border-gray-400/50">
+                            <div className="flex items-center space-x-3">
+                                <Paperclip className="w-6 h-6" style={{ color: theme.colors.accent }} />
+                                <span className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>
+                                    Download PDF Instructions
+                                </span>
+                            </div>
+                            <ArrowRight className="w-5 h-5" style={{ color: theme.colors.secondary }} />
+                        </GlassCard>
+                    </a>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="h-full flex flex-col">
+            <PageTitle title="Installation Instructions" theme={theme} />
+            <div
+                className="px-4 pt-2 pb-4 sticky top-0 z-10 bg-opacity-80 backdrop-blur-md"
+                style={{ backgroundColor: theme.colors.background.substring(0, 7) + 'd0' }}
+            >
+                <SearchInput
+                    value={searchTerm}
+                    onChange={e => setSearchTerm(e.target.value)}
+                    placeholder="Search by series name…"
+                    theme={theme}
+                />
+            </div>
+            <div className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-hide">
+                {Object.entries(groupedInstructions).map(([type, items]) => (
+                    <section key={type} className="mb-8">
+                        <h2
+                            className="text-2xl font-bold capitalize mb-4 px-1"
+                            style={{ color: theme.colors.textPrimary }}
+                        >
+                            {type}
+                        </h2>
+                        <div className="grid grid-cols-2 gap-4">
+                            {items.map(item => (
+                                <div
+                                    key={item.id}
+                                    onClick={() => setSelectedSeries(item)}
+                                    className="cursor-pointer space-y-2"
+                                >
+                                    <GlassCard theme={theme} className="aspect-square p-2 overflow-hidden hover:border-gray-400/50">
+                                        <img
+                                            src={item.thumbnail}
+                                            alt={item.name}
+                                            className="w-full h-full object-cover rounded-xl"
+                                        />
+                                    </GlassCard>
+                                    <p
+                                        className="font-semibold text-center text-sm"
+                                        style={{ color: theme.colors.textPrimary }}
+                                    >
+                                        {item.name}
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+const DiscontinuedFinishesScreen = ({ theme }) => {
+    const { DISCONTINUED_FINISHES } = Data;
+    return (
+        <>
+            <PageTitle title="Discontinued Finishes" theme={theme} />
+            <div className="px-4 pb-4 space-y-4">
+                {DISCONTINUED_FINISHES.map((finish, idx) => (
+                    <GlassCard key={idx} theme={theme} className="p-4">
+                        <p className="font-semibold text-lg" style={{ color: theme.colors.textPrimary }}>
+                            {finish.category}
+                        </p>
+                        <div className="flex items-center mt-2 space-x-6">
+                            <div className="flex items-center space-x-2">
+                                <span className="w-6 h-6 rounded" style={{ backgroundColor: finish.oldColor }} />
+                                <span style={{ color: theme.colors.textSecondary }}>{finish.oldName}</span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <span className="w-6 h-6 rounded" style={{ backgroundColor: finish.newColor }} />
+                                <span style={{ color: theme.colors.textSecondary }}>{finish.newName}</span>
+                            </div>
+                        </div>
+                    </GlassCard>
+                ))}
+            </div>
+        </>
+    );
+};
 
 const DesignDaysScreen = ({ theme }) => {
     // Hard-coded schedule and transport data from the site :contentReference[oaicite:0]{index=0}

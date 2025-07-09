@@ -29,13 +29,111 @@ export const ORDER_DATA = [
 ];
 
 export const LEAD_TIMES_DATA = [
-    { series: "Standard Seating", products: [{ type: "All Series", weeks: "6-8" }], category: "wood seating" },
-    { series: "Standard Casegoods & Tables", products: [{ type: "Veneer", weeks: "8-10" }, { type: "Laminate", weeks: "6-8" }], category: "casegoods" },
-    { series: "Arwyn", products: [{ type: "Seating", weeks: "6-8" }], category: "upholstered" },
-    { series: "Satisse", products: [{ type: "Seating", weeks: "8-10" }, { type: "Carts", weeks: "8-10" }], category: "upholstered" },
-    { series: "Forge", products: [{ type: "Laminate", weeks: "6-8" }], category: "casegoods" },
-    { series: "Kindera", products: [{ type: "Seating", weeks: "8-10" }], category: "upholstered" },
-    { series: "Somna", products: [{ type: "Seating", weeks: "8-10" }], category: "upholstered" },
+    {
+        series: "Seating",
+        products: [
+            { type: "Addison – Wood", weeks: "4 weeks" },
+            { type: "Addison – Uph", weeks: "7 weeks" },
+            { type: "Americana – Wood", weeks: "4 weeks" },
+            { type: "Americana – Uph", weeks: "7 weeks" },
+            { type: "Ansen", weeks: "7 weeks" },
+            { type: "Arwyn Seating", weeks: "8 weeks" },
+            { type: "Avini", weeks: "7 weeks" },
+            { type: "BeSPACE Seating", weeks: "8 weeks" },
+            { type: "Boston – Wood", weeks: "7 weeks" },
+            { type: "Boston – Uph", weeks: "7 weeks" },
+            { type: "Bourne Seating", weeks: "7 weeks" },
+            { type: "Bryn", weeks: "5 weeks" },
+            { type: "Bryn – Uph", weeks: "5 weeks" },
+            { type: "Cāav Seating", weeks: "8 weeks" },
+            { type: "Class Act – Wood", weeks: "4 weeks" },
+            { type: "Class Act – Uph", weeks: "7 weeks" },
+            { type: "Connect", weeks: "8 weeks" },
+            { type: "Cosgrove", weeks: "5 weeks" },
+            { type: "Encore", weeks: "5 weeks" },
+            { type: "Finn", weeks: "7 weeks" },
+            { type: "Finn Nu", weeks: "7 weeks" },
+            { type: "Garvey R5*", weeks: "5 weeks" },
+            { type: "Gatsby", weeks: "7 weeks" },
+            { type: "Harbor", weeks: "7 weeks" },
+            { type: "Henley", weeks: "5 weeks" },
+            { type: "Henley – Uph", weeks: "7 weeks" },
+            { type: "Hoopz", weeks: "5 weeks" },
+            { type: "Hoopz – Uph", weeks: "7 weeks" },
+            { type: "Indie Seating", weeks: "4 weeks" },
+            { type: "Jude", weeks: "8 weeks" },
+            { type: "Jude – Uph", weeks: "5 weeks" },
+            { type: "Kindera", weeks: "7 weeks" },
+            { type: "Knox*", weeks: "7 weeks" },
+            { type: "Knox – Uph*", weeks: "5 weeks" },
+            { type: "Kyla", weeks: "7 weeks" },
+            { type: "Kyla – Uph", weeks: "7 weeks" },
+            { type: "Mackey", weeks: "5 weeks" },
+            { type: "Mackey – Uph", weeks: "8 weeks" },
+            { type: "Madison", weeks: "6 weeks" },
+            { type: "Millie", weeks: "8 weeks" },
+            { type: "Moto Seating", weeks: "5 weeks" },
+            { type: "Native Benches", weeks: "7 weeks" },
+            { type: "Newton", weeks: "7 weeks" },
+            { type: "Oxley", weeks: "7 weeks" },
+            { type: "Pillows", weeks: "5 weeks" },
+            { type: "Poet Seating", weeks: "8 weeks" },
+            { type: "Protocol", weeks: "6 weeks" },
+            { type: "Proxy", weeks: "8 weeks" },
+            { type: "Ramona", weeks: "5 weeks" },
+            { type: "Ria", weeks: "7 weeks" },
+            { type: "Satisse", weeks: "7 weeks" },
+            { type: "Somna", weeks: "7 weeks" },
+            { type: "Sosa", weeks: "5 weeks" },
+            { type: "Teekan", weeks: "8 weeks" },
+            { type: "Totem", weeks: "8 weeks" },
+            { type: "Trinity", weeks: "8 weeks" },
+            { type: "Wink*", weeks: "8 weeks" },
+            { type: "Wink* – Uph", weeks: "8 weeks" },
+            { type: "Ziva Seating", weeks: "5 weeks" }
+        ]
+    },
+    {
+        series: "Casegoods + Tables",
+        products: [
+            { type: "Addison – Wood", weeks: "8 weeks" },
+            { type: "Addison – Uph", weeks: "4 weeks" },
+            { type: "Americana – Wood", weeks: "4 weeks" },
+            { type: "Americana – Uph", weeks: "8 weeks" },
+            { type: "Ansen", weeks: "8 weeks" },
+            { type: "Arwyn Tables*", weeks: "8 weeks" },
+            { type: "BeSPACE Tables", weeks: "8 weeks" },
+            { type: "Bourne Tables*", weeks: "8 weeks" },
+            { type: "Brogan*", weeks: "10 weeks" },
+            { type: "Cāav Tables*", weeks: "10 weeks" },
+            { type: "Copilot*", weeks: "8 weeks" },
+            { type: "Finale*", weeks: "4 weeks" },
+            { type: "Flux Laminate*", weeks: "4 weeks" },
+            { type: "Flux Veneer*", weeks: "8 weeks" },
+            { type: "Forge*", weeks: "8 weeks" },
+            { type: "Indie Tables*", weeks: "8 weeks" },
+            { type: "Lincoln*", weeks: "8 weeks" },
+            { type: "Lok*", weeks: "8 weeks" },
+            { type: "Moto Laminate*", weeks: "8 weeks" },
+            { type: "Moto Veneer", weeks: "4 weeks" },
+            { type: "Native Laminate*", weeks: "4 weeks" },
+            { type: "Native Veneer*", weeks: "8 weeks" },
+            { type: "Nosh*", weeks: "8 weeks" },
+            { type: "Poet Tables*", weeks: "8 weeks" },
+            { type: "Privacy, LG Style", weeks: "8 weeks" },
+            { type: "Privacy, VS Style", weeks: "7 weeks" },
+            { type: "Prost*", weeks: "8 weeks" },
+            { type: "Reef Laminate*", weeks: "8 weeks" },
+            { type: "Reef Veneer", weeks: "8 weeks" },
+            { type: "Romy*", weeks: "4 weeks" },
+            { type: "Trail*", weeks: "4 weeks" },
+            { type: "Vision Laminate*", weeks: "8 weeks" },
+            { type: "Vision Veneer*", weeks: "8 weeks" },
+            { type: "Walden*", weeks: "8 weeks" },
+            { type: "Wellington*", weeks: "8 weeks" },
+            { type: "Ziva Tables*", weeks: "8 weeks" }
+        ]
+    }
 ];
 
 export const FABRICS_DATA = [{ name: 'Luxe Weave', manufacturer: 'Momentum' }, { name: 'Origin', manufacturer: 'Momentum' }, { name: 'Origin', manufacturer: 'Maharam' }, { name: 'Origin', manufacturer: 'Architex' }, { name: 'Climb', manufacturer: 'Maharam' }, { name: 'Rigid', manufacturer: 'Maharam' }, { name: 'Heritage Tweed', manufacturer: 'Traditions' }];
@@ -195,3 +293,62 @@ export const INITIAL_MEMBERS = [
 ];
 
 export const REWARDS_DATA = { '2025-Q2': { sales: [{ name: "Alan Bird", amount: 1034.21 }, { name: "Deb Butler", amount: 520.32 }, { name: "Jason Beehler", amount: 44.21 }, { name: "Andrea Kirkland", amount: 20.00 },], designers: [{ name: "Jen Franklin", amount: 12.10 }] }, '2025-Q1': { sales: [{ name: "Deb Butler", amount: 845.12 }, { name: "Alan Bird", amount: 730.50 }, { name: "Andrea Kirkland", amount: 55.00 }, { name: "Jason Beehler", amount: 32.80 },], designers: [{ name: "Jen Franklin", amount: 25.50 }] }, '2024-Q4': { sales: [{ name: "Alan Bird", amount: 1200.00 }, { name: "Deb Butler", amount: 950.00 }, { name: "Jason Beehler", amount: 75.00 }, { name: "Andrea Kirkland", amount: 30.00 },], designers: [{ name: "Jen Franklin", amount: 40.00 }] }, '2024-Q3': { sales: [], designers: [] }, '2024-Q2': { sales: [{ name: "Deb Butler", amount: 1100.30 }, { name: "Alan Bird", amount: 1050.11 }, { name: "Andrea Kirkland", amount: 60.00 }, { name: "Jason Beehler", amount: 50.15 },], designers: [{ name: "Jen Franklin", amount: 75.00 }] }, '2024-Q1': { sales: [{ name: "Alan Bird", amount: 962.21 }, { name: "Deb Butler", amount: 720.60 }, { name: "Jason Beehler", amount: 65.80 }, { name: "Andrea Kirkland", amount: 30.00 },], designers: [{ name: "Jen Franklin", amount: 35.00 }] }, '2023-Q4': { sales: [], designers: [] }, '2023-Q3': { sales: [], designers: [] }, '2023-Q2': { sales: [], designers: [] }, '2023-Q1': { sales: [], designers: [] }, };
+
+export const INSTALL_INSTRUCTIONS_DATA = [
+    {
+        id: 'arwyn',
+        name: 'Arwyn',
+        type: 'Seating',
+        videoUrl: 'https://placehold.co/1600x900/2A2A2A/FFF?text=Video',
+        pdfUrl: 'https://www.jsifurniture.com/resources/documents/type/11',
+        thumbnail: 'https://webresources.jsifurniture.com/production/uploads/jsi_arwyn_comp_0001.jpg'
+    },
+    {
+        id: 'bryn',
+        name: 'Bryn',
+        type: 'Seating',
+        videoUrl: 'https://placehold.co/1600x900/2A2A2A/FFF?text=Video',
+        pdfUrl: 'https://www.jsifurniture.com/resources/documents/type/11',
+        thumbnail: 'https://webresources.jsifurniture.com/production/uploads/jsi_bryn_comp_0004.jpg'
+    },
+    {
+        id: 'caav',
+        name: 'Caav',
+        type: 'Lounge',
+        videoUrl: 'https://placehold.co/1600x900/2A2A2A/FFF?text=Video',
+        pdfUrl: 'https://www.jsifurniture.com/resources/documents/type/11',
+        thumbnail: 'https://webresources.jsifurniture.com/production/uploads/jsi_caav_comp_0005.jpg'
+    },
+    {
+        id: 'vision',
+        name: 'Vision',
+        type: 'Casegoods',
+        videoUrl: 'https://placehold.co/1600x900/2A2A2A/FFF?text=Video',
+        pdfUrl: 'https://www.jsifurniture.com/resources/documents/type/11',
+        thumbnail: 'https://webresources.jsifurniture.com/production/uploads/jsi_vision_config_000002.jpg'
+    },
+    {
+        id: 'forge',
+        name: 'Forge',
+        type: 'Tables',
+        videoUrl: 'https://placehold.co/1600x900/2A2A2A/FFF?text=Video',
+        pdfUrl: 'https://www.jsifurniture.com/resources/documents/type/11',
+        thumbnail: 'https://webresources.jsifurniture.com/production/uploads/jsi_forge_config_0001.jpg'
+    },
+    {
+        id: 'flux',
+        name: 'Flux',
+        type: 'Casegoods',
+        videoUrl: 'https://placehold.co/1600x900/2A2A2A/FFF?text=Video',
+        pdfUrl: 'https://www.jsifurniture.com/resources/documents/type/11',
+        thumbnail: 'https://webresources.jsifurniture.com/production/uploads/jsi_flux_config_00008.jpg'
+    },
+    {
+        id: 'tablet',
+        name: 'Tablet',
+        type: 'Tables',
+        videoUrl: 'https://placehold.co/1600x900/2A2A2A/FFF?text=Video',
+        pdfUrl: 'https://www.jsifurniture.com/resources/documents/type/11',
+        thumbnail: 'https://webresources.jsifurniture.com/production/uploads/jsi_tablet_config_0001.jpg'
+    },
+];
