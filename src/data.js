@@ -44,7 +44,39 @@ export const allApps = [
     { name: 'Samples', route: 'samples' }, { name: 'Request Replacement', route: 'replacements' }, { name: 'Community', route: 'community' }, { name: 'Lead Times', route: 'lead-times' }, { name: 'Products', route: 'products' }, { name: 'Orders', route: 'orders' }, { name: 'Sales', route: 'sales' }, { name: 'Projects', route: 'projects' }, { name: 'Resources', route: 'resources' }, { name: 'Dealer Directory', route: 'resources/dealer_directory' }, { name: 'Commission Rates', route: 'resources/commission_rates' }, { name: 'Contracts', route: 'resources/contracts' }, { name: 'Loaner Pool', route: 'resources/loaner_pool' }, { name: 'Discontinued Finishes', route: 'resources/discontinued_finishes' }, { name: 'Sample Discounts', route: 'resources/sample_discounts' }, { name: 'Social Media', route: 'resources/social_media' }, { name: 'Customer Ranking', route: 'customer-rank' }, { name: 'Commissions', route: 'commissions' }, { name: 'Members', route: 'members' }, { name: 'Settings', route: 'settings' }, { name: 'Help', route: 'help' }, { name: 'Feedback', route: 'feedback' },
 ];
 
-export const RESOURCES_DATA = [{ category: "Fabrics", items: [{ label: "Search Database", nav: "fabrics/search_form" }, { label: "Request COM Yardage", nav: "fabrics/com_request" }] }, { category: "Rep Functions", items: [{ label: "Commission Rates", nav: "resources/commission_rates" }, { label: "Loaner Pool", nav: "resources/loaner_pool" }, { label: "New Dealer Sign-Up", nav: "resources/dealer_registration" }, { label: "Request Field Visit", nav: "resources/request_field_visit" }, { label: "Sample Discounts", nav: "resources/sample_discounts" }, { label: "Dealer Directory", nav: "resources/dealer_directory" }].sort((a, b) => a.label.localeCompare(b.label)) }, { category: "Misc.", items: [{ label: "Contracts", nav: "resources/contracts" }, { label: "Design Days", nav: "resources/design_days" }, { label: "Discontinued Finishes Database", nav: "resources/discontinued_finishes" }, { label: "Install Instructions", nav: "resources/install_instructions" }, { label: "Presentations", nav: "resources/presentations" }, { label: "Social Media", nav: "resources/social_media" }, { label: "Lead Times", nav: "lead-times" },].sort((a, b) => a.label.localeCompare(b.label)) }];
+export const RESOURCES_DATA = [
+    {
+        category: "Fabrics",
+        items: [
+            { label: "Search Database", nav: "fabrics/search_form" },
+            { label: "Request COM Yardage", nav: "fabrics/com_request" }
+        ]
+    },
+    {
+        category: "Rep Functions",
+        items: [
+            { label: "Commission Rates", nav: "resources/commission_rates" },
+            { label: "Loaner Pool", nav: "resources/loaner_pool" },
+            { label: "New Dealer Sign-Up", nav: "resources/dealer_registration" },
+            { label: "Request Field Visit", nav: "resources/request_field_visit" },
+            { label: "Sample Discounts", nav: "resources/sample_discounts" },
+            { label: "Dealer Directory", nav: "resources/dealer_directory" }
+        ].sort((a, b) => a.label.localeCompare(b.label))
+    },
+    {
+        category: "Misc.",
+        items: [
+            { label: "Contracts", nav: "resources/contracts" },
+            { label: "Design Days", nav: "resources/design_days" },
+            { label: "Discontinued Finishes Database", nav: "resources/discontinued_finishes" },
+            { label: "Install Instructions", nav: "resources/install_instructions" },
+            { label: "Presentations", nav: "resources/presentations" },
+            { label: "Social Media", nav: "resources/social_media" },
+            // <-- fixed here:
+            { label: "Lead Times", nav: "resources/lead-times" }
+        ].sort((a, b) => a.label.localeCompare(b.label))
+    }
+];
 
 export const SOCIAL_MEDIA_POSTS = [{ id: 1, type: 'image', url: 'https://placehold.co/400x500/E3DBC8/2A2A2A?text=JSI+Seating', caption: 'Comfort meets design. ✨ Discover the new Arwyn series, perfect for any modern workspace. #JSIFurniture #OfficeDesign #ModernWorkplace' }, { id: 2, type: 'image', url: 'https://placehold.co/400x500/D9CDBA/2A2A2A?text=Vision+Casegoods', caption: 'Functionality at its finest. The Vision casegoods line offers endless configuration possibilities. #Casegoods #OfficeInspo #JSI' }, { id: 3, type: 'video', url: 'https://placehold.co/400x500/A9886C/FFFFFF?text=Lounge+Tour+(Video)', caption: 'Take a closer look at the luxurious details of our Caav lounge collection. #LoungeSeating #ContractFurniture #HospitalityDesign' }, { id: 4, type: 'image', url: 'https://placehold.co/400x500/966642/FFFFFF?text=Forge+Tables', caption: 'Gather around. The Forge table series brings a rustic yet refined look to collaborative spaces. #MeetingTable #Collaboration #JSI' },];
 
