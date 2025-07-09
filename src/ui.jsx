@@ -121,6 +121,194 @@ const {
 } = Data;
 
 
+const gradeOptions = ['A', 'B', 'C', 'COL', 'COM', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'L1', 'L2'];
+const fabricTypeOptions = ['Type1', 'Type2', 'Type3']; // TODO: replace with real fabric types
+const tackableOptions = ['Yes', 'No'];
+
+const SearchFormScreen = () => {
+    const [form, setForm] = useState({
+        supplier: '',
+        pattern: '',
+        jsiSeries: '',
+        grade: [],
+        fabricType: [],
+        tackable: []
+    });
+    const [results, setResults] = useState(null);
+    const [error, setError] = useState('');
+    const [showGradeOptions, setShowGradeOptions] = useState(false);
+    const [showFabricOptions, setShowFabricOptions] = useState(false);
+    const [showTackableOptions, setShowTackableOptions] = useState(false);
+
+    const [fabricSuppliers, setFabricSuppliers] = useState([]);
+    const [fabricPatterns, setFabricPatterns] = useState([]);
+    const [jsiSeriesOptions, setJsiSeriesOptions] = useState([]);
+
+    useEffect(() => {
+        // TODO: fetch lists for suppliers, patterns, and series
+        // e.g. API.getSuppliers().then(setFabricSuppliers);
+    }, []);
+
+    const updateField = (field, value) => {
+        setForm(f => ({ ...f, [field]: value }));
+    };
+
+    const updateMulti = (field, value) => {
+        setForm(f => {
+            const list = f[field];
+            const updated = list.includes(value)
+                ? list.filter(x => x !== value)
+                : [...list, value];
+            return { ...f, [field]: updated };
+        });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!form.supplier || !form.jsiSeries) {
+            setError('Please fill in required fields');
+            return;
+        }
+        setError('');
+        // TODO: call search API
+        // const data = await API.searchJSI(form);
+        // setResults(data);
+    };
+
+    const resetSearch = () => {
+        setResults(null);
+        setForm({ supplier: '', pattern: '', jsiSeries: '', grade: [], fabricType: [], tackable: [] });
+        setShowGradeOptions(false);
+        setShowFabricOptions(false);
+        setShowTackableOptions(false);
+        setError('');
+    };
+
+    return (
+        <div className="px-4 py-6">
+            {!results ? (
+                <Card className="p-6 space-y-6">
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        {error && <p className="text-sm text-destructive">{error}</p>}
+
+                        <AutoCompleteCombobox
+                            label="Supplier *"
+                            placeholder="Search Supplier"
+                            value={form.supplier}
+                            onChange={v => updateField('supplier', v)}
+                            options={fabricSuppliers}
+                        />
+
+                        <AutoCompleteCombobox
+                            label="Pattern"
+                            placeholder="Search Pattern"
+                            value={form.pattern}
+                            onChange={v => updateField('pattern', v)}
+                            options={fabricPatterns}
+                        />
+
+                        <AutoCompleteCombobox
+                            label="JSI Series *"
+                            placeholder="Search JSI Series"
+                            value={form.jsiSeries}
+                            onChange={v => updateField('jsiSeries', v)}
+                            options={jsiSeriesOptions}
+                        />
+
+                        <div>
+                            <p className="mb-2 font-medium">Grade</p>
+                            <div className="flex flex-wrap gap-2">
+                                {!showGradeOptions ? (
+                                    <Button variant="filled" onClick={() => setShowGradeOptions(true)}>Any</Button>
+                                ) : (
+                                    <>
+                                        <Button variant="outline" onClick={() => { updateField('grade', []); setShowGradeOptions(false); }}>Any</Button>
+                                        {gradeOptions.map(g => (
+                                            <Button
+                                                key={g}
+                                                variant={form.grade.includes(g) ? 'filled' : 'outline'}
+                                                onClick={() => updateMulti('grade', g)}
+                                            >{g}</Button>
+                                        ))}
+                                    </>
+                                )}
+                            </div>
+                        </div>
+
+                        <div>
+                            <p className="mb-2 font-medium">Fabric Type</p>
+                            <div className="flex flex-wrap gap-2">
+                                {!showFabricOptions ? (
+                                    <Button variant="filled" onClick={() => setShowFabricOptions(true)}>Any</Button>
+                                ) : (
+                                    <>
+                                        <Button variant="outline" onClick={() => { updateField('fabricType', []); setShowFabricOptions(false); }}>Any</Button>
+                                        {fabricTypeOptions.map(type => (
+                                            <Button
+                                                key={type}
+                                                variant={form.fabricType.includes(type) ? 'filled' : 'outline'}
+                                                onClick={() => updateMulti('fabricType', type)}
+                                            >{type}</Button>
+                                        ))}
+                                    </>
+                                )}
+                            </div>
+                        </div>
+
+                        <div>
+                            <p className="mb-2 font-medium">Tackable</p>
+                            <div className="flex flex-wrap gap-2">
+                                {!showTackableOptions ? (
+                                    <Button variant="filled" onClick={() => setShowTackableOptions(true)}>Any</Button>
+                                ) : (
+                                    <>
+                                        <Button variant="outline" onClick={() => { updateField('tackable', []); setShowTackableOptions(false); }}>Any</Button>
+                                        {tackableOptions.map(t => (
+                                            <Button
+                                                key={t}
+                                                variant={form.tackable.includes(t) ? 'filled' : 'outline'}
+                                                onClick={() => updateMulti('tackable', t)}
+                                            >{t}</Button>
+                                        ))}
+                                    </>
+                                )}
+                            </div>
+                        </div>
+
+                        <Button type="submit" className="w-full">Search</Button>
+                    </form>
+                </Card>
+            ) : (
+                <div className="space-y-6">
+                    <Card className="p-4">
+                        <p className="font-semibold text-lg">Results: {results.length}</p>
+                        <div className="mt-2 space-y-1 text-sm">
+                            <div><span className="font-medium">Supplier:</span> {form.supplier}</div>
+                            {form.pattern && <div><span className="font-medium">Pattern:</span> {form.pattern}</div>}
+                            <div><span className="font-medium">Series:</span> {form.jsiSeries}</div>
+                        </div>
+                    </Card>
+                    <div className="space-y-4">
+                        {results.map((r, i) => (
+                            <Card key={i} className="p-4">
+                                <p className="text-primary font-semibold mb-2">Approved</p>
+                                <div className="space-y-1 text-sm">
+                                    <div><span className="font-medium">Supplier:</span> {r.supplier}</div>
+                                    <div><span className="font-medium">Pattern:</span> {r.pattern}</div>
+                                    <div><span className="font-medium">Grade:</span> {r.grade}</div>
+                                    <div><span className="font-medium">Tackable:</span> {r.tackable}</div>
+                                    <div><span className="font-medium">Textile:</span> {r.textile || 'Not Specified'}</div>
+                                </div>
+                            </Card>
+                        ))}
+                    </div>
+                    <Button onClick={resetSearch} className="w-full">New Search</Button>
+                </div>
+            )}
+        </div>
+    );
+};
+
 const Avatar = ({ src, alt, theme }) => {
     const [err, setErr] = useState(false);
 
@@ -2704,7 +2892,7 @@ const SCREEN_MAP = {
     resources: ResourcesScreen,
 
     // Fabrics
-    'fabrics/search_form': FabricSearchForm,
+    'fabrics/search_form': SearchFormScreen,
     'fabrics/com_request': COMRequestScreen,
 
     // Rep Functions
@@ -2737,6 +2925,7 @@ const SCREEN_MAP = {
     logout: LogoutScreen,
     feedback: FeedbackScreen,
 };
+
 
 export {
     Avatar,
