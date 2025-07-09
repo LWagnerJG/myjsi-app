@@ -17,7 +17,6 @@ import {
     MessageSquare,
     Heart,
     MoreVertical,
-    Image,
     Video,
     ArrowRight,
     Search,
@@ -262,6 +261,21 @@ const {
     FABRICS_DATA
 } = Data;
 
+const Icon = ({ uri, size = 24, className = "" }) => (
+    <img
+        src={uri}
+        alt="icon" // Alt text is good practice for web accessibility
+        className={className}
+        style={{ width: size, height: size }}
+    />
+);
+
+const WoodIcon = ({ color }) => <Icon uri="https://img.icons8.com/ios-glyphs/60/chair.png" color={color} />;
+const UpholsteryIcon = ({ color }) => <Icon uri="https://img.icons8.com/ios-filled/50/armchair.png" color={color} />;
+const CasegoodIcon = ({ color }) => <Icon uri="https://img.icons8.com/ios-filled/50/desk.png" color={color} />;
+const SearchIcon = ({ size, color }) => <Icon uri="https://img.icons8.com/ios-glyphs/60/search--v1.png" size={size} color={color} />;
+const FilterIcon = ({ size, color }) => <Icon uri="https://img.icons8.com/ios-filled/50/filter--v1.png" size={size} color={color} />;
+// --------------------------------------------------
 
 const SocialMediaScreen = ({ theme, showAlert, setSuccessMessage }) => {
     const copyToClipboard = (text) => {
@@ -329,34 +343,183 @@ const SocialMediaScreen = ({ theme, showAlert, setSuccessMessage }) => {
     );
 };
 
-const LeadTimesScreen = ({ theme, onNavigate }) => {
-    return (
-        <>
-            <PageTitle title="Lead Times" theme={theme} onBack={() => onNavigate('resources')}>
-                {/* Optionally a back button provided by PageTitle */}
-            </PageTitle>
+// This component is now updated to display L/V notations
+const LeadTimesScreen = ({ theme = {} }) => {
+    // State and hooks remain the same
+    const [searchTerm, setSearchTerm] = useState('');
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [sortFastest, setSortFastest] = useState(false);
+    const [filterCategory, setFilterCategory] = useState('all');
+    const filterMenuRef = useRef(null);
 
-            <div className="px-4 space-y-6 pb-4">
-                {LEAD_TIMES_DATA.map((item, idx) => (
-                    <GlassCard key={idx} theme={theme} className="p-4">
-                        <h3 className="font-semibold text-lg" style={{ color: theme.colors.textPrimary }}>
-                            {item.series}
-                        </h3>
-                        <div className="mt-2 space-y-1">
-                            {item.products.map((p, j) => (
-                                <div key={j} className="flex justify-between text-sm">
-                                    <span style={{ color: theme.colors.textSecondary }}>{p.type}</span>
-                                    <span style={{ color: theme.colors.textPrimary }}>{p.weeks} weeks</span>
-                                </div>
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (filterMenuRef.current && !filterMenuRef.current.contains(e.target)) {
+                setDropdownOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    // The useMemo hook now correctly filters for all Casegood-related types
+    const rows = useMemo(() => {
+        const map = {};
+        LEAD_TIMES_DATA.forEach(({ series, type, weeks }) => {
+            if (!map[series]) map[series] = {};
+            map[series][type] = weeks;
+        });
+        let list = Object.entries(map).map(([series, types]) => ({ series, types }));
+
+        // Category filter
+        if (filterCategory === 'upholstered') {
+            list = list.filter(r => r.types.Upholstery != null);
+        } else if (filterCategory === 'wood') {
+            list = list.filter(r => r.types['Wood Seating'] != null);
+        } else if (filterCategory === 'casegoods') {
+            list = list.filter(r =>
+                r.types.Casegoods != null ||
+                r.types.Laminate != null ||
+                r.types.Veneer != null ||
+                r.types.Tables != null
+            );
+        }
+
+        // Search filter
+        if (searchTerm) {
+            const q = searchTerm.toLowerCase();
+            list = list.filter(r => r.series.toLowerCase().includes(q));
+        }
+
+        // Sort by fastest
+        if (sortFastest) {
+            list.sort((a, b) => {
+                const aMin = Math.min(...Object.values(a.types));
+                const bMin = Math.min(...Object.values(b.types));
+                return aMin - bMin;
+            });
+        }
+
+        return list;
+    }, [searchTerm, filterCategory, sortFastest]);
+
+    // A small component to render the L/V notations
+    const LVLabel = ({ label }) => (
+        <span className="text-xs font-bold -mb-1" style={{ color: theme.colors.textSecondary }}>
+            {label}
+        </span>
+    );
+
+    return (
+        <div className="flex flex-col h-full">
+            <PageTitle title="Lead Times" theme={theme} />
+
+            <div className="px-4 pb-4 flex items-center space-x-2">
+                <SearchInput
+                    className="flex-grow"
+                    value={searchTerm}
+                    onChange={e => setSearchTerm(e.target.value)}
+                    placeholder="Search by series name…"
+                    theme={theme}
+                />
+                <div className="relative">
+                    <button
+                        onClick={() => setDropdownOpen(o => !o)}
+                        className="p-3.5 rounded-lg"
+                        style={{ backgroundColor: theme.colors.subtle }}
+                    >
+                        <Filter className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />
+                    </button>
+                    {dropdownOpen && (
+                        <GlassCard ref={filterMenuRef} theme={theme} className="absolute top-14 right-0 z-10 w-48 p-2">
+                            <label className="flex items-center w-full px-2 py-1.5 text-sm rounded-md cursor-pointer" style={{ color: theme.colors.textPrimary }}>
+                                <input
+                                    type="checkbox"
+                                    checked={sortFastest}
+                                    onChange={() => setSortFastest(f => !f)}
+                                    className="form-checkbox h-4 w-4 mr-3"
+                                    style={{ color: theme.colors.accent }}
+                                />
+                                Sort by fastest
+                            </label>
+                            <div className="border-t my-1" style={{ borderColor: theme.colors.subtle }} />
+                            {[{ key: 'all', label: 'All' }, { key: 'upholstered', label: 'Upholstered' }, { key: 'wood', label: 'Wood Seating' }, { key: 'casegoods', label: 'Casegoods' }].map(opt => (
+                                <button
+                                    key={opt.key}
+                                    onClick={() => { setFilterCategory(opt.key); setDropdownOpen(false); }}
+                                    className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${filterCategory === opt.key ? 'font-bold' : ''}`}
+                                    style={{
+                                        color: theme.colors.textPrimary,
+                                        backgroundColor: filterCategory === opt.key ? theme.colors.subtle : 'transparent'
+                                    }}
+                                >
+                                    {opt.label}
+                                </button>
                             ))}
+                        </GlassCard>
+                    )}
+                </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-3 scrollbar-hide">
+                {rows.map(({ series, types }) => (
+                    <GlassCard key={series} theme={theme} className="p-4 flex items-center justify-between">
+                        <div className="flex items-center space-x-6">
+                            {/* --- RENDER LOGIC UPDATED FOR NEW TYPES --- */}
+                            {types['Upholstery'] != null && (
+                                <div className="flex flex-col items-center w-10 text-center">
+                                    <UpholsteryIcon color={theme.colors.accent} />
+                                    <span className="mt-1.5 text-sm font-bold">{types.Upholstery}</span>
+                                </div>
+                            )}
+                            {types['Seating'] != null && (
+                                <div className="flex flex-col items-center w-10 text-center">
+                                    <UpholsteryIcon color={theme.colors.accent} />
+                                    <span className="mt-1.5 text-sm font-bold">{types.Seating}</span>
+                                </div>
+                            )}
+                            {types['Wood Seating'] != null && (
+                                <div className="flex flex-col items-center w-10 text-center">
+                                    <WoodIcon color={theme.colors.accent} />
+                                    <span className="mt-1.5 text-sm font-bold">{types['Wood Seating']}</span>
+                                </div>
+                            )}
+                            {types['Casegoods'] != null && (
+                                <div className="flex flex-col items-center w-10 text-center">
+                                    <CasegoodIcon color={theme.colors.accent} />
+                                    <span className="mt-1.5 text-sm font-bold">{types.Casegoods}</span>
+                                </div>
+                            )}
+                            {types['Tables'] != null && (
+                                <div className="flex flex-col items-center w-10 text-center">
+                                    <CasegoodIcon color={theme.colors.accent} />
+                                    <span className="mt-1.5 text-sm font-bold">{types.Tables}</span>
+                                </div>
+                            )}
+                            {types['Laminate'] != null && (
+                                <div className="flex flex-col items-center w-10 text-center">
+                                    <LVLabel label="L" />
+                                    <CasegoodIcon color={theme.colors.accent} />
+                                    <span className="mt-1.5 text-sm font-bold">{types.Laminate}</span>
+                                </div>
+                            )}
+                            {types['Veneer'] != null && (
+                                <div className="flex flex-col items-center w-10 text-center">
+                                    <LVLabel label="V" />
+                                    <CasegoodIcon color={theme.colors.accent} />
+                                    <span className="mt-1.5 text-sm font-bold">{types.Veneer}</span>
+                                </div>
+                            )}
                         </div>
+                        <span className="font-bold text-lg text-right" style={{ color: theme.colors.textPrimary }}>
+                            {series}
+                        </span>
                     </GlassCard>
                 ))}
             </div>
-        </>
+        </div>
     );
 };
-
 const PresentationsScreen = ({ theme, onNavigate }) => {
     // Navigate to the series list or a future “by type” screen
     const handleNavigateByType = () =>
@@ -2596,7 +2759,8 @@ const SearchInput = React.memo(({ onSubmit, value, onChange, placeholder, theme,
             placeholder={placeholder}
             value={value}
             onChange={onChange}
-            className="w-full pl-12 pr-12 py-3 border rounded-lg focus:ring-2 text-base outline-none"
+            // Changed rounded-lg to rounded-full for consistent styling
+            className="w-full pl-12 pr-12 py-3 border rounded-full focus:ring-2 text-base outline-none"
             style={{ backgroundColor: theme.colors.subtle, borderColor: 'transparent', color: theme.colors.textPrimary, ringColor: theme.colors.accent, }}
         />
         {onVoiceClick && (
