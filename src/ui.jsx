@@ -122,7 +122,6 @@ const {
 } = Data;
 
 
-
 const CommissionRatesScreen = ({ theme, onNavigate }) => {
     return (
         <div className="p-6">
@@ -134,7 +133,6 @@ const CommissionRatesScreen = ({ theme, onNavigate }) => {
         </div>
     );
 };
-
 
 const COMRequestScreen = ({ theme, onNavigate, showAlert }) => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -3056,6 +3054,7 @@ const SCREEN_MAP = {
     'fabrics/com_request': COMRequestScreen,
 
     // Rep Functions
+    'resources/commission_rates': CommissionRatesScreen,
     'resources/loaner_pool': LoanerPoolScreen,
     'resources/dealer_registration': DealerRegistrationScreen,
     'resources/request_field_visit': RequestFieldVisitScreen,
