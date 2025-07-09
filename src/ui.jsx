@@ -81,60 +81,6 @@ export const useDropdownPosition = (ref) => {
     return [dropDirection, checkPosition];
 };
 
-export const CustomerRankScreen = ({ theme, onNavigate }) => {
-    const [sortConfig, setSortConfig] = useState({ key: 'sales', direction: 'descending' });
-    const { topThree, theRest } = useMemo(() => {
-        let sortableItems = [...Data.CUSTOMER_RANK_DATA];
-        sortableItems.sort((a, b) => {
-            if (a[sortConfig.key] < b[sortConfig.key]) return sortConfig.direction === 'ascending' ? -1 : 1;
-            if (a[sortConfig.key] > b[sortConfig.key]) return sortConfig.direction === 'ascending' ? 1 : -1;
-            return 0;
-        });
-        return { topThree: sortableItems.slice(0, 3), theRest: sortableItems.slice(3) };
-    }, [sortConfig]);
-
-    const requestSort = (key) => {
-        let direction = 'descending';
-        if (sortConfig.key === key && sortConfig.direction === 'descending') {
-            direction = 'ascending';
-        }
-        setSortConfig({ key, direction });
-    };
-
-    const SortableHeader = ({ sortKey, children }) => { /* ... (Component logic) ... */ };
-
-    return (
-        <>
-            <PageTitle title="Customer Ranking" theme={theme} />
-            <div className="px-4 pb-4 space-y-6">
-                <div className="flex items-end justify-center space-x-2">
-                    {/* Podium UI */}
-                </div>
-                <GlassCard theme={theme} className="p-4">
-                    {/* Table Header */}
-                    <div className="grid grid-cols-12 gap-2 text-sm font-bold pb-2 border-b" style={{ borderColor: theme.colors.subtle, color: theme.colors.textSecondary }}>
-                        <div className="col-span-1">#</div>
-                        <div className="col-span-5">Name</div>
-                        <div className="col-span-3 text-right cursor-pointer" onClick={() => requestSort('bookings')}>Bookings</div>
-                        <div className="col-span-3 text-right cursor-pointer" onClick={() => requestSort('sales')}>Sales</div>
-                    </div>
-                    {/* Table Body */}
-                    <div className="space-y-1 pt-2">
-                        {theRest.map((customer, index) => (
-                            <div key={customer.id} className="grid grid-cols-12 gap-2 items-center text-sm p-2 rounded-lg" style={{ backgroundColor: index % 2 === 1 ? 'rgba(0,0,0,0.03)' : 'transparent' }}>
-                                <div className="col-span-1 font-semibold" style={{ color: theme.colors.textSecondary }}>{index + 4}</div>
-                                <div className="col-span-5 font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{customer.name}</div>
-                                <div className="col-span-3 text-right font-mono" style={{ color: theme.colors.textSecondary }}>${customer.bookings.toLocaleString()}</div>
-                                <div className="col-span-3 text-right font-mono font-semibold" style={{ color: theme.colors.accent }}>${customer.sales.toLocaleString()}</div>
-                            </div>
-                        ))}
-                    </div>
-                </GlassCard>
-            </div>
-        </>
-    );
-};
-
 export const CommissionsScreen = ({ theme, onNavigate }) => {
     // Placeholder - Logic will be added later
     return <PageTitle title="Commissions" theme={theme} />;
@@ -273,6 +219,30 @@ export const AutoCompleteCombobox = ({
         </div>
     );
 };
+
+export const ToggleButtonGroup = ({ value, onChange, options, theme }) => (
+    <div
+        className="w-full flex p-1 rounded-full"
+        style={{ backgroundColor: theme.colors.subtle }}
+    >
+        {options.map((opt) => (
+            <button
+                key={opt.value}
+                type="button"
+                onClick={() => onChange(opt.value)}
+                className="flex-1 rounded-full py-2 px-1 text-center text-sm font-bold transition-all duration-300"
+                style={{
+                    backgroundColor: opt.value === value ? theme.colors.surface : 'transparent',
+                    color: opt.value === value ? theme.colors.accent : theme.colors.textSecondary,
+                    boxShadow: opt.value === value ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                }}
+            >
+                {opt.label}
+            </button>
+        ))}
+    </div>
+);
+
 const {
     // New–Lead form
     EMPTY_LEAD,
@@ -3530,6 +3500,99 @@ export const DonutChart = React.memo(({ data, theme }) => {
         </div>
     );
 });
+
+export const CustomerRankScreen = ({ theme, onNavigate }) => {
+    const [sortKey, setSortKey] = useState('sales');
+    const [modalData, setModalData] = useState(null);
+
+    const sortedCustomers = useMemo(() => {
+        return [...Data.CUSTOMER_RANK_DATA].sort((a, b) => (b[sortKey] || 0) - (a[sortKey] || 0));
+    }, [sortKey]);
+
+    const { topThree, theRest } = useMemo(() => ({
+        topThree: sortedCustomers.slice(0, 3),
+        theRest: sortedCustomers.slice(3)
+    }), [sortedCustomers]);
+
+    const handleOpenModal = useCallback((customer) => {
+        if (customer.orders && customer.orders.length > 0) {
+            setModalData(customer);
+        }
+    }, []);
+    const handleCloseModal = useCallback(() => setModalData(null), []);
+
+    const PodiumCard = ({ customer, rank, theme }) => {
+        const podiumStyles = {
+            1: { iconColor: '#FFD700', textColor: theme.colors.accent, order: 'order-2', size: 'w-1/3' },
+            2: { iconColor: '#C0C0C0', textColor: theme.colors.textPrimary, order: 'order-1', size: 'w-1/4' },
+            3: { iconColor: '#CD7F32', textColor: theme.colors.textPrimary, order: 'order-3', size: 'w-1/4' },
+        };
+        const style = podiumStyles[rank];
+
+        return (
+            <div className={`text-center ${style.order} ${style.size}`}>
+                <Trophy className="mx-auto w-10 h-10" fill={style.iconColor} color="rgba(0,0,0,0.3)" />
+                <p className="font-bold text-md truncate mt-1" style={{ color: style.textColor }}>{customer.name}</p>
+                <p className="text-sm font-semibold" style={{ color: style.textColor }}>${customer[sortKey].toLocaleString()}</p>
+            </div>
+        );
+    };
+
+    return (
+        <>
+            <PageTitle title="Customer Ranking" theme={theme} />
+            <div className="px-4 pb-4 space-y-6">
+
+                {/* Podium for Top 3 */}
+                <div className="flex items-end justify-center space-x-2 pt-4">
+                    {topThree[1] && <PodiumCard customer={topThree[1]} rank={2} theme={theme} />}
+                    {topThree[0] && <PodiumCard customer={topThree[0]} rank={1} theme={theme} />}
+                    {topThree[2] && <PodiumCard customer={topThree[2]} rank={3} theme={theme} />}
+                </div>
+
+                {/* Sort Controls */}
+                <ToggleButtonGroup
+                    value={sortKey}
+                    onChange={setSortKey}
+                    options={[{ label: 'By Sales', value: 'sales' }, { label: 'By Bookings', value: 'bookings' }]}
+                    theme={theme}
+                />
+
+                {/* Rest of the Ranking List */}
+                <div className="space-y-3">
+                    {theRest.map((customer, index) => (
+                        <GlassCard key={customer.id} theme={theme} className="p-4 cursor-pointer hover:border-gray-400/50" onClick={() => handleOpenModal(customer)}>
+                            <div className="flex items-center space-x-4">
+                                <div className="font-bold text-lg" style={{ color: theme.colors.textSecondary }}>{index + 4}</div>
+                                <div className="flex-1">
+                                    <p className="font-bold truncate" style={{ color: theme.colors.textPrimary }}>{customer.name}</p>
+                                </div>
+                                <div className="text-right">
+                                    <p className="font-semibold text-lg" style={{ color: theme.colors.accent }}>${customer.sales.toLocaleString()}</p>
+                                    <p className="text-xs font-mono" style={{ color: theme.colors.textSecondary }}>Bookings: ${customer.bookings.toLocaleString()}</p>
+                                </div>
+                            </div>
+                        </GlassCard>
+                    ))}
+                </div>
+            </div>
+
+            <Modal show={!!modalData} onClose={handleCloseModal} title={`${modalData?.name} - Recent Orders`} theme={theme}>
+                <div className="space-y-3">
+                    {modalData?.orders.length > 0 ? modalData.orders.map((order, index) => (
+                        <div key={index} className="flex justify-between items-center text-sm border-b pb-2" style={{ borderColor: theme.colors.subtle }}>
+                            <span style={{ color: theme.colors.textPrimary }}>{order.projectName}</span>
+                            <span className="font-semibold" style={{ color: theme.colors.accent }}>${order.amount.toLocaleString()}</span>
+                        </div>
+                    )) : (
+                        <p style={{ color: theme.colors.textSecondary }}>No specific orders to display for this total.</p>
+                    )}
+                </div>
+            </Modal>
+        </>
+    );
+};
+
 export const OrderModal = React.memo(({ order, onClose, theme }) => {
     const [isExpanded, setIsExpanded] = useState(false);
 
