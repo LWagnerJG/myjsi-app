@@ -122,9 +122,6 @@ const {
 } = Data;
 
 import COMRequestScreen from './COMRequestScreen';
-import { CommissionRatesScreen } from './CommissionRatesScreen';
-
-
 
 const CommissionRatesScreen = ({ theme, onNavigate }) => {
     const { standard, contract, split } = Data.COMMISSION_RATES_TABLE_DATA;
