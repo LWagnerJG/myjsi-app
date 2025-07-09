@@ -2923,9 +2923,9 @@ const SuccessToast = ({ message, show, theme }) => {
 const AppHeader = React.memo(({ onHomeClick, isDarkMode, theme, onProfileClick, isHome, handleBack, showBack, userName }) => {
     const filterStyle = isDarkMode ? 'brightness(0) invert(1)' : 'none';
 
-    // FIX: Changed margin-top from mt-8 to mt-6 to move the header up
+    // UPDATED: Changed margin-top from mt-6 to mt-4 to move it higher
     return (
-        <div style={{ backgroundColor: theme.colors.surface, backdropFilter: theme.backdropFilter, WebkitBackdropFilter: theme.backdropFilter }} className="mx-auto mt-6 w-[90%] px-6 py-3 flex justify-between items-center sticky top-0 z-20 rounded-full shadow-md backdrop-blur">
+        <div style={{ backgroundColor: theme.colors.surface, backdropFilter: theme.backdropFilter, WebkitBackdropFilter: theme.backdropFilter }} className="mx-auto mt-4 w-[90%] px-6 py-3 flex justify-between items-center sticky top-0 z-20 rounded-full shadow-md backdrop-blur">
             <div className="flex items-center space-x-2">
                 {showBack && (
                     <button onClick={handleBack} className="p-2 -ml-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10" >
@@ -2947,6 +2947,7 @@ const AppHeader = React.memo(({ onHomeClick, isDarkMode, theme, onProfileClick, 
         </div>
     );
 });
+
 export const HomeScreen = ({ onNavigate, theme, onAskAI, showAIDropdown, aiResponse, isAILoading, onCloseAIDropdown, onVoiceActivate }) => {
     const handleFeedbackClick = useCallback(() => {
         onNavigate('feedback');
