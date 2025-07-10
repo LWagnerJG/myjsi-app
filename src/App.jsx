@@ -38,8 +38,8 @@ function App() {
 
     // --- GESTURE & AI STATE ---
     const touchStartX = useRef(0);
-    const touchStartY = useRef(0); // New: Store initial Y position
-    const isSwipingHorizontal = useRef(false); // New: Flag to confirm horizontal swipe intent
+    const touchStartY = useRef(0); // Store initial Y position
+    const isSwipingHorizontal = useRef(false); // Flag to confirm horizontal swipe intent
 
     const [aiResponse, setAiResponse] = useState('');
     const [isAILoading, setIsAILoading] = useState(false);
@@ -47,7 +47,7 @@ function App() {
 
     // --- DERIVED STATE ---
     const currentScreen = navigationHistory[navigationHistory.length - 1];
-    const previousScreen = navigationHistory.length > 1 ? navigationHistory[navigationHistory.length - 2] : null; // Only get if there's a previous screen
+    const previousScreen = navigationHistory.length > 1 ? navigationHistory[navigationHistory.length - 2] : null;
     const currentTheme = useMemo(() => (isDarkMode ? darkTheme : lightTheme), [isDarkMode]);
 
     // --- SIDE EFFECTS ---
@@ -88,13 +88,13 @@ function App() {
 
     const handleBack = useCallback(() => {
         if (navigationHistory.length > 1 && !isTransitioning) {
-            setIsTransitioning(true); // Enable CSS transition for smooth snap
-            setSwipeTranslateX(window.innerWidth); // Animate current screen off to the right
+            setIsTransitioning(true);
+            setSwipeTranslateX(window.innerWidth);
             setTimeout(() => {
                 setNavigationHistory(prev => prev.slice(0, -1));
-                setSwipeTranslateX(0); // Reset for next screen (previous one is now current)
-                setIsTransitioning(false); // Disable transition after state update
-            }, 300); // Match CSS transition duration
+                setSwipeTranslateX(0);
+                setIsTransitioning(false);
+            }, 300);
         }
     }, [navigationHistory.length, isTransitioning]);
 
@@ -139,13 +139,15 @@ function App() {
     const handleTouchStart = (e) => {
         if (isTransitioning || navigationHistory.length <= 1) return;
 
-        // Check if touch starts from the far left edge (e.g., first 30 pixels)
         const touchX = e.targetTouches[0].clientX;
         if (touchX < 30) { // Define a trigger zone (e.g., 30 pixels from left)
             touchStartX.current = touchX;
-            touchStartY.current = e.targetTouches[0].clientY; // Store initial Y
+            touchStartY.current = e.targetTouches[0].clientY;
             isSwipingHorizontal.current = false; // Reset horizontal swipe flag
             setIsTransitioning(false); // Disable transition during active drag
+            // Immediately prevent default if touch starts in swipe zone
+            // This prevents initial vertical scrolling if user is already scrolling
+            e.preventDefault(); //
         } else {
             touchStartX.current = 0; // Not a left-edge swipe
         }
@@ -161,16 +163,19 @@ function App() {
 
         // Determine if it's primarily a horizontal swipe
         // If horizontal movement is significantly greater than vertical movement
-        if (diffX > 5 && diffX > diffY * 1.5) { // Thresholds: at least 5px horizontal, and 1.5x horizontal vs vertical
+        if (!isSwipingHorizontal.current && diffX > 5 && diffX > diffY * 1.5) { //
             isSwipingHorizontal.current = true;
-            e.preventDefault(); // Prevent vertical scrolling
+            // e.preventDefault() is already called in onTouchStart for the swipe zone
+            // so we don't need it here unless the touch didn't start in the zone
         }
 
         if (isSwipingHorizontal.current) {
             let newTranslateX = diffX;
-            if (newTranslateX < 0) newTranslateX = 0; // Ensure it doesn't go left past start
+            if (newTranslateX < 0) newTranslateX = 0;
 
             setSwipeTranslateX(newTranslateX);
+            // Even if already prevented in start, ensure it stays prevented during horizontal drag
+            e.preventDefault(); //
         }
     };
 
@@ -180,26 +185,23 @@ function App() {
         const touchEndX = e.changedTouches[0].clientX;
         const swipeDistance = touchEndX - touchStartX.current;
 
-        // Threshold for a successful "back" swipe (e.g., 25% of screen width)
         const swipeThreshold = window.innerWidth * 0.25;
 
         if (isSwipingHorizontal.current && swipeDistance > swipeThreshold && navigationHistory.length > 1) {
-            handleBack(); // Trigger the animated back navigation
+            handleBack();
         } else {
-            // If swipe not long enough or not horizontal, snap back to original position
-            setIsTransitioning(true); // Enable transition for snapping back
+            setIsTransitioning(true);
             setSwipeTranslateX(0);
             setTimeout(() => {
-                setIsTransitioning(false); // Disable transition after snap back
-            }, 300); // Match CSS transition duration
+                setIsTransitioning(false);
+            }, 300);
         }
-        touchStartX.current = 0; // Reset
-        touchStartY.current = 0; // Reset Y
-        isSwipingHorizontal.current = false; // Reset horizontal swipe flag
+        touchStartX.current = 0;
+        touchStartY.current = 0;
+        isSwipingHorizontal.current = false;
     };
 
     // --- RENDER LOGIC ---
-    // renderScreen now takes an optional 'screenKey' prop
     const renderScreen = (screenKey) => {
         if (!screenKey) return null;
 
