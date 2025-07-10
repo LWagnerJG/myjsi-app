@@ -84,7 +84,7 @@ export const useDropdownPosition = (ref) => {
 export const CommissionsScreen = ({ theme }) => {
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
     const [expandedMonth, setExpandedMonth] = useState(null);
-    const [expandedRow, setExpandedRow] = useState(null); // State for individual row expansion
+    const [expandedRow, setExpandedRow] = useState(null); // New state for individual row expansion
 
     const years = Object.keys(Data.COMMISSIONS_DATA).sort((a, b) => b - a);
     const monthlyData = Data.COMMISSIONS_DATA[selectedYear] || [];
@@ -138,14 +138,14 @@ export const CommissionsScreen = ({ theme }) => {
                                         if (detail.invoices) {
                                             return (
                                                 <div key={dIndex} className="space-y-4">
-                                                    <div className="rounded-lg overflow-hidden" style={{ border: `1px solid ${theme.colors.border}` }}>
+                                                    <div className="rounded-lg overflow-hidden" style={{ border: `1px solid ${theme.colors.border}` }}> {/* Maintain outer border */}
                                                         <table className="w-full text-sm">
                                                             <thead>
                                                                 <tr className="text-left font-semibold" style={{ color: theme.colors.textSecondary, backgroundColor: theme.colors.subtle }}>
-                                                                    <th className="py-2 px-2 w-2/5">SO # / Project</th>
-                                                                    <th className="py-2 px-2 text-right w-1/5">Net</th>
-                                                                    <th className="py-2 px-2 text-right w-1/5">Comm.</th>
-                                                                    <th className="py-2 px-2 text-right w-1/5">Rate</th>
+                                                                    <th className="py-2 px-3">SO # / Project</th>
+                                                                    <th className="py-2 px-3 text-right">Net</th>
+                                                                    <th className="py-2 px-3 text-right">Comm.</th>
+                                                                    <th className="py-2 px-3 text-right">Rate</th>
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
@@ -156,17 +156,17 @@ export const CommissionsScreen = ({ theme }) => {
                                                                         <tr
                                                                             key={iIndex}
                                                                             onClick={() => toggleRow(iIndex)}
-                                                                            className={`cursor-pointer transition-colors ${iIndex % 2 === 0 ? '' : 'bg-black/5 dark:bg-white/5'} hover:bg-black/10 dark:hover:bg-white/10`} // Added hover effect and zebra striping
+                                                                            className={`cursor-pointer transition-colors ${iIndex % 2 === 0 ? '' : 'bg-black/5 dark:bg-white/5'}`} // Zebra striping
                                                                         >
-                                                                            <td className="py-2 px-2">
+                                                                            <td className="py-2 px-3">
                                                                                 <div className="font-mono text-xs break-words" style={{ color: theme.colors.textPrimary }}>{inv.so || inv.invoice}</div>
                                                                                 {isRowExpanded && inv.project && (
                                                                                     <div className="text-xs mt-1 break-words" style={{ color: theme.colors.textSecondary }}>{inv.project}</div>
                                                                                 )}
                                                                             </td>
-                                                                            <td className="py-2 px-2 text-right font-mono" style={{ color: theme.colors.textPrimary }}>${inv.netAmount.toLocaleString()}</td>
-                                                                            <td className="py-2 px-2 text-right font-bold" style={{ color: theme.colors.accent }}>${inv.commission.toLocaleString()}</td>
-                                                                            <td className="py-2 px-2 text-right text-xs" style={{ color: theme.colors.textPrimary }}>{commissionRate}%</td>
+                                                                            <td className="py-2 px-3 text-right font-mono" style={{ color: theme.colors.textPrimary }}>${inv.netAmount.toLocaleString()}</td>
+                                                                            <td className="py-2 px-3 text-right font-bold" style={{ color: theme.colors.accent }}>${inv.commission.toLocaleString()}</td>
+                                                                            <td className="py-2 px-3 text-right text-xs" style={{ color: theme.colors.textPrimary }}>{commissionRate}%</td>
                                                                         </tr>
                                                                     );
                                                                 })}
@@ -189,7 +189,7 @@ export const CommissionsScreen = ({ theme }) => {
                                                         <DollarSign className="w-5 h-5 mr-2" style={{ color: theme.colors.accent }} />
                                                         {detail.brandTotal} Totals
                                                     </h4>
-                                                    <div className="space-y-1 text-sm">
+                                                    <div className="space-y-1 text-sm"> {/* Reduced space for cleaner summary */}
                                                         <div className="flex justify-between items-center">
                                                             <span className="font-medium" style={{ color: theme.colors.textSecondary }}>Invoiced Total:</span>
                                                             <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>${detail.listTotal.toLocaleString()}</span>
