@@ -540,26 +540,19 @@ export const COMMISSIONS_DATA = {
                         { invoice: '00006069750', po: 'A290036-2', so: '450224', project: '', listValue: 2276.62, netAmount: 2223.49, commission: 96.65 },
                         { invoice: '0000600883', po: 'A290066-3', so: '450338', project: '', listValue: 1143.60, netAmount: 1128.11, commission: 1128.11 },
                         { invoice: '0000610026', po: 'A289674-4', so: '486362', project: '', listValue: 40.40, netAmount: 40.40, commission: 40.40 },
-                        // Add more invoices as needed from PDF
                     ]
                 },
-                // Totals from PDF
-                { customer: '025708 OTIS R BOWEN CENTER FOR HUMAN', total: 0 }, // Placeholder, extract from PDF if more data
+                { customer: '025708 OTIS R BOWEN CENTER FOR HUMAN', total: 0 },
                 { customer: '025728 INNOVATE LLC', total: 0 },
                 { customer: '044145 - DESKS INC OF UTAH', total: 0 },
                 { customer: '044145 DESKS INC OF UTAH', total: 0 },
                 { brandTotal: 'JSI', listTotal: 537933.27, netTotal: 507450.82, commissionTotal: 37094.23 },
             ]
         },
-        // Add previous months/years as needed, e.g.
         { month: 'May', amount: 45000.00, issuedDate: '2025-06-22', details: [] },
         { month: 'April', amount: 32000.50, issuedDate: '2025-05-22', details: [] },
-        // ... more months
     ],
     '2024': [
-        // Similar structure for previous year
         { month: 'December', amount: 28000.00, issuedDate: '2025-01-22', details: [] },
-        // ... etc.
     ],
-    // Add more years if needed
 };

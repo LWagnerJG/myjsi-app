@@ -94,23 +94,24 @@ export const CommissionsScreen = ({ theme }) => {
 
     return (
         <div className="h-full flex flex-col">
-            <PageTitle title="Commissions" theme={theme} />
-
-            <div className="px-4 pb-2">
-                <CustomSelect
-                    label="Year"
-                    value={selectedYear}
-                    onChange={(e) => setSelectedYear(e.target.value)}
-                    options={years.map(y => ({ value: y, label: y }))}
-                    theme={theme}
-                />
+            <div className="px-4 pt-6 pb-4 flex justify-between items-center">
+                <h1 className="text-3xl font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>Commissions</h1>
+                <div className="flex items-center">
+                    <CustomSelect
+                        label="Year"
+                        value={selectedYear}
+                        onChange={(e) => setSelectedYear(e.target.value)}
+                        options={years.map(y => ({ value: y, label: y }))}
+                        theme={theme}
+                    />
+                </div>
             </div>
 
             <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-3 scrollbar-hide">
                 <table className="w-full border-collapse">
                     <thead>
                         <tr className="text-left text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>
-                            <th className="pb-2">Month</th>
+                            <th className="pb-2"></th>
                             <th className="pb-2 text-right">Amount</th>
                             <th className="pb-2 text-right">Issued</th>
                         </tr>
@@ -120,7 +121,7 @@ export const CommissionsScreen = ({ theme }) => {
                             <React.Fragment key={check.month}>
                                 <tr
                                     onClick={() => toggleMonth(check.month)}
-                                    className="cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition"
+                                    className="cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                                 >
                                     <td className="py-3" style={{ color: theme.colors.textPrimary }}>{check.month}</td>
                                     <td className="py-3 text-right font-bold" style={{ color: theme.colors.accent }}>${check.amount.toLocaleString()}</td>
@@ -129,51 +130,87 @@ export const CommissionsScreen = ({ theme }) => {
                                 {expandedMonth === check.month && check.details && (
                                     <tr>
                                         <td colSpan="3" className="p-0">
-                                            <div className="bg-black/5 dark:bg-white/5 p-4 space-y-4 animate-fade-in">
+                                            <div className="p-4 space-y-6 animate-fade-in" style={{ backgroundColor: theme.colors.surface, backdropFilter: 'blur(8px)' }}>
                                                 {check.details.map((detail, dIndex) => {
                                                     if (detail.invoices) {
                                                         return (
-                                                            <div key={dIndex}>
-                                                                <h4 className="font-semibold mb-2" style={{ color: theme.colors.textPrimary }}>{detail.salesperson}</h4>
-                                                                <table className="w-full text-sm">
-                                                                    <thead>
-                                                                        <tr style={{ color: theme.colors.textSecondary }}>
-                                                                            <th className="text-left">Invoice</th>
-                                                                            <th className="text-right">List</th>
-                                                                            <th className="text-right">Net</th>
-                                                                            <th className="text-right">Comm.</th>
-                                                                        </tr>
-                                                                    </thead>
-                                                                    <tbody>
-                                                                        {detail.invoices.map((inv, iIndex) => (
-                                                                            <tr key={iIndex}>
-                                                                                <td>{inv.invoice} ({inv.project || 'N/A'})</td>
-                                                                                <td className="text-right">${inv.listValue.toLocaleString()}</td>
-                                                                                <td className="text-right">${inv.netAmount.toLocaleString()}</td>
-                                                                                <td className="text-right font-bold" style={{ color: theme.colors.accent }}>${inv.commission.toLocaleString()}</td>
+                                                            <div key={dIndex} className="space-y-4">
+                                                                <h4 className="font-semibold text-base flex items-center" style={{ color: theme.colors.textPrimary }}>
+                                                                    <User className="w-5 h-5 mr-2" style={{ color: theme.colors.accent }} />
+                                                                    Salesperson
+                                                                </h4>
+                                                                <div className="text-sm mb-3" style={{ color: theme.colors.textSecondary }}>
+                                                                    {detail.salesperson.split(';').map(email => (
+                                                                        <span key={email.trim()} className="inline-block px-3 py-1 rounded-full mr-2 mb-2 text-sm" style={{ backgroundColor: theme.colors.subtle }}>
+                                                                            {email.trim()}
+                                                                        </span>
+                                                                    ))}
+                                                                </div>
+                                                                <div className="overflow-x-auto rounded-lg border" style={{ borderColor: theme.colors.border }}>
+                                                                    <table className="w-full text-sm min-w-max">
+                                                                        <thead>
+                                                                            <tr className="text-left font-semibold" style={{ color: theme.colors.textSecondary, backgroundColor: theme.colors.subtle }}>
+                                                                                <th className="py-2 px-4">Invoice/Project</th>
+                                                                                <th className="py-2 px-4 text-right">List</th>
+                                                                                <th className="py-2 px-4 text-right">Net</th>
+                                                                                <th className="py-2 px-4 text-right">Comm.</th>
                                                                             </tr>
-                                                                        ))}
-                                                                    </tbody>
-                                                                </table>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            {detail.invoices.map((inv, iIndex) => (
+                                                                                <tr key={iIndex} className="border-t" style={{ borderColor: theme.colors.border }}>
+                                                                                    <td className="py-2 px-4">
+                                                                                        <div className="font-mono text-sm">{inv.invoice}</div>
+                                                                                        {inv.project && <div className="text-xs mt-1 truncate max-w-[200px]" title={inv.project} style={{ color: theme.colors.textSecondary }}>{inv.project}</div>}
+                                                                                    </td>
+                                                                                    <td className="py-2 px-4 text-right font-mono">${inv.listValue.toLocaleString()}</td>
+                                                                                    <td className="py-2 px-4 text-right font-mono">${inv.netAmount.toLocaleString()}</td>
+                                                                                    <td className="py-2 px-4 text-right font-bold" style={{ color: theme.colors.accent }}>${inv.commission.toLocaleString()}</td>
+                                                                                </tr>
+                                                                            ))}
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
                                                             </div>
                                                         );
-                                                    } else if (detail.customer) {
+                                                    } else if (detail.customer && detail.total > 0) {
                                                         return (
-                                                            <div key={dIndex} className="flex justify-between text-sm">
-                                                                <span>{detail.customer}</span>
-                                                                <span>${detail.total.toLocaleString()}</span>
+                                                            <div key={dIndex} className="flex justify-between items-center text-sm p-3 rounded-lg" style={{ backgroundColor: theme.colors.subtle }}>
+                                                                <span className="font-medium" style={{ color: theme.colors.textPrimary }}>{detail.customer}</span>
+                                                                <span style={{ color: theme.colors.accent }}>${detail.total.toLocaleString()}</span>
                                                             </div>
                                                         );
                                                     } else if (detail.brandTotal) {
                                                         return (
-                                                            <div key={dIndex} className="flex justify-between font-bold">
-                                                                <span>{detail.brandTotal}</span>
-                                                                <span>List: ${detail.listTotal.toLocaleString()} | Net: ${detail.netTotal.toLocaleString()} | Comm: ${detail.commissionTotal.toLocaleString()}</span>
+                                                            <div key={dIndex} className="p-4 rounded-lg" style={{ backgroundColor: theme.colors.subtle }}>
+                                                                <h4 className="font-bold text-base mb-3 flex items-center" style={{ color: theme.colors.textPrimary }}>
+                                                                    <DollarSign className="w-5 h-5 mr-2" style={{ color: theme.colors.accent }} />
+                                                                    {detail.brandTotal} Totals
+                                                                </h4>
+                                                                <div className="space-y-2 text-sm">
+                                                                    <div className="flex justify-between">
+                                                                        <span style={{ color: theme.colors.textSecondary }}>List:</span>
+                                                                        <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>${detail.listTotal.toLocaleString()}</span>
+                                                                    </div>
+                                                                    <div className="flex justify-between">
+                                                                        <span style={{ color: theme.colors.textSecondary }}>Net:</span>
+                                                                        <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>${detail.netTotal.toLocaleString()}</span>
+                                                                    </div>
+                                                                    <div className="flex justify-between pt-2 border-t" style={{ borderColor: theme.colors.border }}>
+                                                                        <span className="font-bold" style={{ color: theme.colors.textSecondary }}>Commission:</span>
+                                                                        <span className="font-bold text-lg" style={{ color: theme.colors.accent }}>${detail.commissionTotal.toLocaleString()}</span>
+                                                                    </div>
+                                                                </div>
                                                             </div>
                                                         );
                                                     }
                                                     return null;
                                                 })}
+                                                {check.details.filter(d => d.customer && d.total > 0).length === 0 && (
+                                                    <div className="text-center text-sm p-4 rounded-lg" style={{ color: theme.colors.textSecondary, backgroundColor: theme.colors.subtle }}>
+                                                        No additional commissions from other customers.
+                                                    </div>
+                                                )}
                                             </div>
                                         </td>
                                     </tr>
