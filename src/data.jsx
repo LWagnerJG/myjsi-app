@@ -170,7 +170,53 @@ export const RESOURCES_DATA = [
 
 export const SOCIAL_MEDIA_POSTS = [{ id: 1, type: 'image', url: 'https://placehold.co/400x500/E3DBC8/2A2A2A?text=JSI+Seating', caption: 'Comfort meets design. ✨ Discover the new Arwyn series, perfect for any modern workspace. #JSIFurniture #OfficeDesign #ModernWorkplace' }, { id: 2, type: 'image', url: 'https://placehold.co/400x500/D9CDBA/2A2A2A?text=Vision+Casegoods', caption: 'Functionality at its finest. The Vision casegoods line offers endless configuration possibilities. #Casegoods #OfficeInspo #JSI' }, { id: 3, type: 'video', url: 'https://placehold.co/400x500/A9886C/FFFFFF?text=Lounge+Tour+(Video)', caption: 'Take a closer look at the luxurious details of our Caav lounge collection. #LoungeSeating #ContractFurniture #HospitalityDesign' }, { id: 4, type: 'image', url: 'https://placehold.co/400x500/966642/FFFFFF?text=Forge+Tables', caption: 'Gather around. The Forge table series brings a rustic yet refined look to collaborative spaces. #MeetingTable #Collaboration #JSI' },];
 
-export const LOANER_POOL_PRODUCTS = [{ id: 'br2301', name: 'Bryn', model: 'BR2301', img: 'https://placehold.co/100x100/E3DBC8/7A7A7A?text=Chair' }, { id: 'cv4501', name: 'Caav', model: 'CV4501', img: 'https://placehold.co/100x100/D9CDBA/7A7A7A?text=Sofa' }, { id: 'kn2301', name: 'Knox', model: 'KN2301', img: 'https://placehold.co/100x100/A9886C/7A7A7A?text=Stool' }, { id: 'wk4501', name: 'Wink', model: 'WK4501', img: 'https://placehold.co/100x100/966642/7A7A7A?text=Chair' },];
+
+export const LOANER_POOL_PRODUCTS = [
+    {
+        id: 'br2301',
+        name: 'Bryn',
+        model: 'BR2301',
+        img: 'https://webresources.jsifurniture.com/production/uploads/jsi_bryn_feat_00018_kI9ljLG.jpg',
+        specs: {
+            'Upholstery': 'Maharam, Mode, Glacier',
+            'Wood': 'Light Maple',
+            'Other': 'Polished Aluminum Base'
+        }
+    },
+    {
+        id: 'cv4501',
+        name: 'Caav',
+        model: 'CV4501',
+        img: 'https://webresources.jsifurniture.com/production/uploads/jsi_caav_feat_00027_vBm3FBY.jpg',
+        specs: {
+            'Upholstery': 'Momentum, Origin, Lagoon',
+            'Wood': 'Mocha',
+            'Other': 'Tablet Arm, Bag Hook'
+        }
+    },
+    {
+        id: 'kn2301',
+        name: 'Knox',
+        model: 'KN2301',
+        img: 'https://webresources.jsifurniture.com/production/uploads/jsi_knox_comp_00001.jpg',
+        specs: {
+            'Upholstery': 'CF Stinson, Beeline, Honeycomb',
+            'Wood': 'Natural Oak',
+            'Other': 'Counter-Height, Foot Ring'
+        }
+    },
+    {
+        id: 'wk4501',
+        name: 'Wink',
+        model: 'WK4501',
+        img: 'https://webresources.jsifurniture.com/production/uploads/jsi_wink_enviro_00033.jpg',
+        specs: {
+            'Upholstery': 'Kvadrat, Remix 3, 0662',
+            'Shell': 'Designer White Plastic',
+            'Other': '4-Star Swivel Base'
+        }
+    },
+];
 
 export const INITIAL_OPPORTUNITIES = [{ id: 1, name: 'New Office Furnishings', stage: 'Discovery', discount: '5%', value: '$50,000', company: 'ABC Corporation', contact: 'John Smith', poTimeframe: '30-60 days' }, { id: 2, name: 'Lobby Refresh', stage: 'Specifying', value: '$75,000', company: 'XYZ Industries', contact: 'Jane Doe', poTimeframe: '60-90 days' },];
 

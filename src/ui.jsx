@@ -4,7 +4,7 @@ import {
     Calendar, Camera, CheckCircle, ChevronDown, ChevronLeft, ChevronRight,
     ChevronUp, Clock, Copy, Database, DollarSign, FileText, Film, Filter,
     HelpCircle, Home, Hourglass, List, LogOut, MapPin, MessageSquare, Mic,
-    Minus, MonitorPlay, Moon, MoreVertical, Package, Palette, Heart,
+    Minus, MonitorPlay, Moon, MoreVertical, Package, Palette,
     Paperclip, Percent, PieChart, Play, Plus, RotateCw, Save, Search, Send,
     Server, Settings, Share2, ShoppingCart, Sun, Trophy, User, UserPlus,
     UserX, Users, Video, Wrench, X
@@ -91,20 +91,30 @@ export const IncentiveRewardsScreen = ({ theme, onNavigate }) => {
     return <PageTitle title="Incentive Rewards" theme={theme} />;
 };
 
-export const CustomSelect = ({ label, value, onChange, options, placeholder, theme, required }) => {
+export const CustomSelect = ({ label, value, onChange, options, placeholder, theme, required, onOpen }) => {
     const [isOpen, setIsOpen] = useState(false);
     const wrapperRef = useRef(null);
     const [dropDirection, checkPosition] = useDropdownPosition(wrapperRef);
 
-    useEffect(() => { /* ... (click outside logic remains the same) ... */ }, []);
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const handleSelect = (optionValue) => {
         onChange({ target: { value: optionValue } });
         setIsOpen(false);
     };
 
+    // This now also calls the new onOpen function if it exists
     const handleOpen = () => {
-        checkPosition(); // Check position before opening
+        checkPosition();
+        onOpen?.(); // Trigger the parent's expand function
         setIsOpen(o => !o);
     };
 
@@ -112,10 +122,23 @@ export const CustomSelect = ({ label, value, onChange, options, placeholder, the
 
     return (
         <div className="relative space-y-1" ref={wrapperRef}>
-            {label && (<label className="block text-xs font-semibold px-4" style={{ color: theme.colors.textSecondary }}>{label}</label>)}
-            <button type="button" onClick={handleOpen} className="w-full px-4 py-3 border rounded-full text-base text-left flex justify-between items-center" style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border, color: value ? theme.colors.textPrimary : theme.colors.textSecondary }}>
+            {label && (
+                <label className="block text-xs font-semibold px-4" style={{ color: theme.colors.textSecondary }}>
+                    {label}
+                </label>
+            )}
+            <button
+                type="button"
+                onClick={handleOpen}
+                className="w-full px-4 py-2 border rounded-full text-sm text-left flex justify-between items-center"
+                style={{
+                    backgroundColor: theme.colors.surface,
+                    borderColor: theme.colors.border,
+                    color: value ? theme.colors.textPrimary : theme.colors.textSecondary,
+                }}
+            >
                 {selectedLabel}
-                <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} style={{ color: theme.colors.textSecondary }} />
+                <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} style={{ color: theme.colors.textSecondary }} />
             </button>
 
             {isOpen && (
@@ -132,7 +155,6 @@ export const CustomSelect = ({ label, value, onChange, options, placeholder, the
         </div>
     );
 };
-
 export const AutoCompleteCombobox = ({
     label,
     value,
@@ -1773,28 +1795,57 @@ const styles = {
     …
 </div>
 
-const LoanerPoolScreen = ({
-    theme,
-    onNavigate,
-    setSuccessMessage,
-    userSettings
-}) => {
-    const [loanerSearch, setLoanerSearch] = useState('');
+export const LoanerPoolScreen = ({ theme, onNavigate, setSuccessMessage, userSettings }) => {
+    const [searchTerm, setSearchTerm] = useState('');
     const [selectedLoaners, setSelectedLoaners] = useState([]);
     const [address, setAddress] = useState('');
+    const [predictions, setPredictions] = useState([]);
+    const autocompleteService = useRef(null);
+    const inputRef = useRef(null);
 
-    const handleToggleLoaner = (id) => {
-        setSelectedLoaners(prev =>
-            prev.includes(id)
-                ? prev.filter(i => i !== id)
-                : [...prev, id]
-        );
+    useEffect(() => {
+        const Maps_API_KEY = 'YOUR_Maps_API_KEY_HERE';
+        if (window.google && window.google.maps && window.google.maps.places) {
+            autocompleteService.current = new window.google.maps.places.AutocompleteService();
+            return;
+        }
+        const scriptId = 'google-maps-script';
+        if (document.getElementById(scriptId)) return;
+
+        const script = document.createElement('script');
+        script.id = scriptId;
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${Maps_API_KEY}&libraries=places`;
+        script.async = true;
+        document.head.appendChild(script);
+        script.onload = () => {
+            if (window.google?.maps?.places) {
+                autocompleteService.current = new window.google.maps.places.AutocompleteService();
+            }
+        };
+    }, []);
+
+    const handleAddressChange = (e) => {
+        const value = e.target.value;
+        setAddress(value);
+        if (autocompleteService.current && value) {
+            autocompleteService.current.getPlacePredictions({ input: value }, (preds) => { setPredictions(preds || []); });
+        } else {
+            setPredictions([]);
+        }
     };
 
-    const filteredLoaners = LOANER_POOL_PRODUCTS.filter(
-        p =>
-            p.name.toLowerCase().includes(loanerSearch.toLowerCase()) ||
-            p.model.toLowerCase().includes(loanerSearch.toLowerCase())
+    const handleSelectPrediction = (prediction) => {
+        setAddress(prediction.description);
+        setPredictions([]);
+    };
+
+    const handleToggleLoaner = (id) => {
+        setSelectedLoaners(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+    };
+
+    const filteredLoaners = Data.LOANER_POOL_PRODUCTS.filter(p =>
+        p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.model.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const handleSubmit = () => {
@@ -1805,87 +1856,112 @@ const LoanerPoolScreen = ({
         }, 1200);
     };
 
+    // New logic to get the names of selected items
+    const selectedItemNames = useMemo(() =>
+        Data.LOANER_POOL_PRODUCTS
+            .filter(p => selectedLoaners.includes(p.id))
+            .map(p => p.name)
+            .join(', '),
+        [selectedLoaners]
+    );
+
     return (
-        <>
+        <div className="h-full flex flex-col">
             <PageTitle title="Loaner Pool" theme={theme} />
-
-            <div className="px-4 pt-4 pb-4">
-                <SearchInput
-                    value={loanerSearch}
-                    onChange={e => setLoanerSearch(e.target.value)}
-                    placeholder="Search Loaner…"
-                    theme={theme}
-                />
+            <div className="px-4 pt-2 pb-4">
+                <SearchInput value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder="Search by name or model..." theme={theme} />
             </div>
 
-            <div className="px-4 space-y-3 pb-4">
-                {filteredLoaners.map(item => {
-                    const isSelected = selectedLoaners.includes(item.id);
-                    return (
-                        <GlassCard
-                            key={item.id}
-                            theme={theme}
-                            className="p-3 flex items-center justify-between cursor-pointer border-2 transition-all"
-                            style={{ borderColor: isSelected ? theme.colors.accent : 'transparent' }}
-                            onClick={() => handleToggleLoaner(item.id)}
-                        >
-                            <div>
-                                <p className="font-bold" style={{ color: theme.colors.textPrimary }}>
-                                    {item.name}
-                                </p>
-                                <p className="text-xs" style={{ color: theme.colors.textSecondary }}>
-                                    {item.model}
-                                </p>
-                            </div>
-                            <img
-                                src={item.img}
-                                alt={item.name}
-                                className="w-16 h-16 rounded-lg"
-                            />
-                        </GlassCard>
-                    );
-                })}
+            <div className="flex-1 overflow-y-auto px-4 grid grid-cols-2 gap-4 pb-4 scrollbar-hide">
+                {filteredLoaners.map(item => (
+                    <LoanerItemCard
+                        key={item.id}
+                        item={item}
+                        isSelected={selectedLoaners.includes(item.id)}
+                        onSelect={handleToggleLoaner}
+                        theme={theme}
+                    />
+                ))}
             </div>
 
-            <div className="px-4 space-y-4 pb-4 sticky bottom-0 bg-white">
+            <div className="px-4 space-y-3 pt-3 pb-4 sticky bottom-0 border-t" style={{ backgroundColor: theme.colors.background, borderColor: theme.colors.border }}>
+                <div className="flex justify-between items-center px-1">
+                    <h3 className="font-bold" style={{ color: theme.colors.textPrimary }}>Requested:</h3>
+                    {/* FIX: Show names of requested items instead of a count */}
+                    <p className="text-sm font-semibold truncate" style={{ color: theme.colors.textSecondary }}>
+                        {selectedLoaners.length > 0 ? selectedItemNames : "No items selected"}
+                    </p>
+                </div>
                 <GlassCard theme={theme} className="p-4 space-y-2">
-                    <h3 className="font-bold" style={{ color: theme.colors.textPrimary }}>
-                        Ship To
-                    </h3>
+                    <h3 className="font-bold px-1" style={{ color: theme.colors.textPrimary }}>Ship To</h3>
                     <div className="relative">
-                        <textarea
-                            value={address}
-                            onChange={e => setAddress(e.target.value)}
-                            className="w-full p-2 border rounded-lg"
-                            style={{
-                                backgroundColor: theme.colors.subtle,
-                                borderColor: theme.colors.border,
-                                color: theme.colors.textPrimary
-                            }}
-                        />
-                        <button
-                            onClick={() => setAddress(userSettings.homeAddress)}
-                            className="absolute top-2 right-2 p-1 rounded-full"
-                            style={{ backgroundColor: theme.colors.surface }}
-                        >
-                            <Home className="w-5 h-5" style={{ color: theme.colors.secondary }} />
-                        </button>
+                        <textarea ref={inputRef} value={address} onChange={handleAddressChange} rows="2" placeholder="Start typing shipping address..." className="w-full p-3 pr-12 border rounded-2xl" style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border, color: theme.colors.textPrimary, resize: 'none' }} />
+                        <button onClick={() => setAddress(userSettings.homeAddress)} className="absolute top-3 right-3 p-1 rounded-full" style={{ backgroundColor: theme.colors.surface }}><Home className="w-5 h-5" style={{ color: theme.colors.secondary }} /></button>
+                        {predictions.length > 0 && (
+                            <GlassCard theme={theme} className="absolute w-full mt-1 z-10 p-1 bottom-full mb-2">
+                                {predictions.map(p => (<button key={p.place_id} onClick={() => handleSelectPrediction(p)} className="block w-full text-left p-2 rounded-md hover:bg-black/5" style={{ color: theme.colors.textSecondary }}>{p.description}</button>))}
+                            </GlassCard>
+                        )}
                     </div>
                 </GlassCard>
-
                 <button
                     onClick={handleSubmit}
                     disabled={selectedLoaners.length === 0 || !address.trim()}
-                    className="w-full font-bold py-3 px-6 rounded-lg transition-colors disabled:opacity-50"
+                    className="w-full font-bold py-3.5 px-6 rounded-full transition-colors disabled:opacity-50"
                     style={{ backgroundColor: theme.colors.accent, color: '#FFF' }}
                 >
-                    Request
+                    Submit Request
                 </button>
             </div>
-        </>
+        </div>
     );
 };
+export const LoanerItemCard = ({ item, isSelected, onSelect, theme }) => {
+    return (
+        <div
+            onClick={() => onSelect(item.id)}
+            className={`transition-all duration-300 ease-in-out cursor-pointer ${isSelected ? 'scale-100 opacity-100' : 'scale-95 opacity-80 hover:opacity-100'}`}
+        >
+            <GlassCard
+                theme={theme}
+                className="p-0 overflow-hidden"
+                // FIX: The border is now thicker and uses the theme's accent color for a more obvious selection
+                style={{
+                    borderWidth: isSelected ? '3px' : '1px',
+                    borderColor: isSelected ? theme.colors.accent : theme.colors.border
+                }}
+            >
+                {/* Main Visual Area */}
+                <div className="relative aspect-square w-full group">
+                    <img src={item.img} alt={item.name} className="absolute w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                    <div className="absolute bottom-0 left-0 p-3 text-white">
+                        <h3 className="font-bold text-lg">{item.name}</h3>
+                        <p className="font-mono text-xs opacity-80">{item.model}</p>
+                    </div>
+                </div>
 
+                {/* Animated Expansion for Specs */}
+                <div className={`transition-all duration-500 ease-in-out grid ${isSelected ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
+                    <div className="overflow-hidden">
+                        <div className="p-4 space-y-3 border-t" style={{ borderColor: theme.colors.subtle }}>
+                            <h4 className="text-sm font-bold" style={{ color: theme.colors.textPrimary }}>Specifications</h4>
+                            {/* FIX: Improved UI for formatting specifications */}
+                            <div className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-1 text-sm">
+                                {Object.entries(item.specs).map(([key, value]) => (
+                                    <React.Fragment key={key}>
+                                        <div className="font-medium" style={{ color: theme.colors.textSecondary }}>{key}:</div>
+                                        <div className="font-semibold text-right" style={{ color: theme.colors.textPrimary }}>{value}</div>
+                                    </React.Fragment>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </GlassCard>
+        </div>
+    );
+};
 export const ResourceDetailScreen = ({ theme, onNavigate, setSuccessMessage, userSettings, showAlert, currentScreen }) => {
     // Extract the specific resource type from the URL-like path
     const category = currentScreen.split('/')[1]?.replace(/_/g, ' ');
@@ -3164,7 +3240,8 @@ const FormInput = React.memo(({
         </div>
     );
 });
-const SearchInput = React.memo(({ onSubmit, value, onChange, placeholder, theme, className, onVoiceClick }) => (
+
+export const SearchInput = React.memo(({ onSubmit, value, onChange, placeholder, theme, className, onVoiceClick }) => (
     <form onSubmit={onSubmit} className={`relative flex items-center ${className || ''}`} >
         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
             <Search className="h-5 w-5" style={{ color: theme.colors.textSecondary }} />
@@ -3174,7 +3251,6 @@ const SearchInput = React.memo(({ onSubmit, value, onChange, placeholder, theme,
             placeholder={placeholder}
             value={value}
             onChange={onChange}
-            // Changed rounded-lg to rounded-full for consistent styling
             className="w-full pl-12 pr-12 py-3 border rounded-full focus:ring-2 text-base outline-none"
             style={{ backgroundColor: theme.colors.subtle, borderColor: 'transparent', color: theme.colors.textPrimary, ringColor: theme.colors.accent, }}
         />
@@ -3313,18 +3389,27 @@ export const HomeScreen = ({ onNavigate, theme, onAskAI, showAIDropdown, aiRespo
         </div>
     );
 };
-const PermissionToggle = React.memo(({ label, isEnabled, onToggle, theme, disabled }) => {
+export const PermissionToggle = React.memo(({ label, isEnabled, onToggle, theme, disabled }) => {
     const titleText = disabled ? "Requires Sales Data access" : "";
     return (
-        <div title={titleText} className={`flex items-center justify-between text-sm ${disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`} onClick={disabled ? undefined : onToggle}>
+        <div title={titleText} className={`flex items-center justify-between text-sm ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`} onClick={disabled ? undefined : onToggle}>
             <span style={{ color: theme.colors.textSecondary }}>{label}</span>
-            <div className={`relative inline-flex items-center h-5 rounded-full w-9 transition-colors ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`} style={{ backgroundColor: isEnabled ? theme.colors.accent : theme.colors.subtle }}>
-                <span className={`inline-block w-3.5 h-3.5 transform bg-white rounded-full transition-transform ${isEnabled ? 'translate-x-5' : 'translate-x-1'}`} />
-            </div>
+            <button
+                type="button"
+                role="switch"
+                aria-checked={isEnabled}
+                className="relative inline-flex items-center h-6 rounded-full w-11 transition-colors border"
+                // FIX: "Off" state now has a visible border and background
+                style={{ 
+                    backgroundColor: isEnabled ? theme.colors.accent : theme.colors.subtle,
+                    borderColor: theme.colors.border
+                }}
+            >
+                <span className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${isEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+            </button>
         </div>
     );
 });
-
 export const VoiceModal = ({ message, show, theme }) => {
     if (!show) return null;
 
@@ -4233,7 +4318,7 @@ export const NewLeadScreen = ({
     );
 };
 
-export const resourceIcons = {
+const resourceIcons = {
     'Search Database': Search,
     'Request COM Yardage': Paperclip,
     'Commission Rates': DollarSign,
@@ -4816,34 +4901,60 @@ const SettingsScreen = ({ theme, onSave, userSettings, setUserSettings }) => {
     );
 };
 
-export const MemberCard = React.memo(({ user, theme, isCurrentUser, onUpdateRole, onConfirmRemove, onUpdateUser, onTogglePermission }) => {
-    const [isExpanded, setIsExpanded] = useState(false);
+export const MemberCard = React.memo(({ user, theme, isCurrentUser, onConfirmPromotion, onConfirmRemove, onUpdateUser, onTogglePermission, isExpanded, onToggleExpand, isLast }) => {
+
+    const handleRoleChange = (e) => {
+        onUpdateUser(user.id, 'title', e.target.value);
+    };
+
+    const cardContent = (
+        <div className="p-4 flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+                <p className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>
+                    {user.firstName} {user.lastName}
+                </p>
+                {/* Pending invitation icon */}
+                {user.status === 'pending' && <Hourglass className="w-4 h-4 text-amber-500" />}
+                {isCurrentUser && (
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: theme.colors.accent, color: 'white' }}>
+                        You
+                    </span>
+                )}
+            </div>
+            <div className="flex items-center space-x-2">
+                {user.role === 'User' ? (
+                    <div className="w-40">
+                        <CustomSelect
+                            value={user.title}
+                            onChange={handleRoleChange}
+                            options={Data.USER_TITLES.map(t => ({ value: t, label: t }))}
+                            theme={theme}
+                            onOpen={onToggleExpand} // The dropdown itself now toggles the permissions view
+                        />
+                    </div>
+                ) : (
+                    // Admins still use a simple chevron since they have no title to edit
+                    <button onClick={onToggleExpand} className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10">
+                        <ChevronDown className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} style={{ color: theme.colors.secondary }} />
+                    </button>
+                )}
+            </div>
+        </div>
+    );
 
     return (
-        <GlassCard theme={theme} className="p-0 overflow-hidden transition-all">
-            <button className="w-full text-left p-4" onClick={() => setIsExpanded(!isExpanded)}>
-                <div className="flex justify-between items-center">
-                    <div className="flex items-center space-x-3">
-                        <p className="font-bold" style={{ color: theme.colors.textPrimary }}>{user.firstName} {user.lastName}</p>
-                        {isCurrentUser && <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: theme.colors.accent, color: 'white' }}>You</span>}
-                    </div>
-                    <ChevronDown className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} style={{ color: theme.colors.secondary }} />
-                </div>
-                {!isExpanded && user.role !== 'Admin' && <p className="text-sm mt-1" style={{ color: theme.colors.textSecondary }}>{user.title}</p>}
-            </button>
+        <div className={`transition-all duration-300 ${!isExpanded && !isLast ? 'border-b' : ''}`} style={{ borderColor: theme.colors.subtle }}>
+            {/* The main clickable area */}
+            <div className={`${(user.role === 'Admin' && !isCurrentUser) ? 'cursor-pointer' : 'cursor-default'}`} onClick={user.role === 'Admin' && !isCurrentUser ? onToggleExpand : undefined}>
+                {cardContent}
+            </div>
 
             {isExpanded && (
-                <div className="bg-black/5 dark:bg-white/5 animate-fade-in">
-                    {user.role === 'User' && (
-                        <div className="p-4 border-t space-y-4" style={{ borderColor: theme.colors.subtle }}>
-                            <CustomSelect
-                                label="User Title"
-                                value={user.title}
-                                onChange={(e) => onUpdateUser(user.id, 'title', e.target.value)}
-                                options={Data.USER_TITLES.map(t => ({ value: t, label: t }))}
-                                theme={theme}
-                            />
-                            <div className="grid grid-cols-2 gap-x-6 gap-y-3 pt-2">
+                <div className="bg-black/5 dark:bg-white/5 px-4 pb-4 animate-fade-in">
+                    <div className="pt-4 border-t" style={{ borderColor: theme.colors.subtle }}>
+                        {user.role === 'User' && (
+                            <div className="space-y-3 mb-4">
+                                <h4 className="font-bold text-sm" style={{ color: theme.colors.textPrimary }}>Permissions</h4>
                                 {Object.entries(Data.PERMISSION_LABELS).map(([key, label]) => {
                                     const isDisabled = !user.permissions.salesData && ['commissions', 'dealerRewards', 'customerRanking'].includes(key);
                                     return (
@@ -4851,97 +4962,184 @@ export const MemberCard = React.memo(({ user, theme, isCurrentUser, onUpdateRole
                                     );
                                 })}
                             </div>
-                        </div>
-                    )}
-                    <div className="p-4 border-t space-y-3" style={{ borderColor: theme.colors.subtle }}>
-                        <button onClick={() => onUpdateRole(user.id, user.role === 'Admin' ? 'User' : 'Admin')} className="w-full text-center p-2.5 rounded-lg font-semibold text-white" style={{ backgroundColor: theme.colors.accent }}>
-                            {user.role === 'Admin' ? 'Make User' : 'Make Admin'}
-                        </button>
-                        {!isCurrentUser && (
-                            <button onClick={() => onConfirmRemove(user)} className="w-full text-center p-2.5 rounded-lg font-semibold bg-red-500/10 text-red-500">
-                                Remove User
-                            </button>
                         )}
+                        <div className="space-y-3 pt-4 border-t" style={{ borderColor: theme.colors.subtle }}>
+                            <button onClick={() => onConfirmPromotion(user)} className="w-full text-center p-2.5 rounded-full font-semibold text-white" style={{ backgroundColor: theme.colors.accent }}>
+                                {user.role === 'Admin' ? 'Move to User' : 'Make Admin'}
+                            </button>
+                            {!isCurrentUser && (
+                                <button onClick={() => onConfirmRemove(user)} className="w-full text-center p-2.5 rounded-full font-semibold bg-red-500/10 text-red-500">
+                                    Delete User
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}
-        </GlassCard>
+        </div>
     );
 });
-
-export const MembersScreen = ({ theme, members, setMembers, currentUserId }) => {
-    const [showAddUserModal, setShowAddUserModal] = useState(false);
+export const AddUserModal = ({ show, onClose, onAddUser, theme, roleToAdd }) => {
+    // Note: The EMPTY_USER should be defined in your data.jsx file
     const [newUser, setNewUser] = useState(Data.EMPTY_USER);
+
+    // Reset form when the modal is opened
+    useEffect(() => {
+        if (show) {
+            setNewUser(Data.EMPTY_USER);
+        }
+    }, [show]);
+
+    const handleNewUserChange = useCallback((field, value) => {
+        setNewUser(prev => ({ ...prev, [field]: value }));
+    }, []);
+
+    const handleAddUser = (e) => {
+        e.preventDefault();
+        if (newUser.firstName && newUser.lastName && newUser.email) {
+            // The parent component now handles adding the role
+            onAddUser(newUser);
+        } else {
+            alert("Please fill out all required fields.");
+        }
+    };
+
+    return (
+        <Modal show={show} onClose={onClose} title={`Add New ${roleToAdd}`} theme={theme}>
+            <form onSubmit={handleAddUser} className="space-y-4">
+                <FormInput required label="First Name" value={newUser.firstName} onChange={e => handleNewUserChange('firstName', e.target.value)} placeholder="First Name" theme={theme} />
+                <FormInput required label="Last Name" value={newUser.lastName} onChange={e => handleNewUserChange('lastName', e.target.value)} placeholder="Last Name" theme={theme} />
+                <FormInput required type="email" label="Email" value={newUser.email} onChange={e => handleNewUserChange('email', e.target.value)} placeholder="Email" theme={theme} />
+
+                {/* Only show the User Title dropdown if adding a 'User', not an 'Admin' */}
+                {roleToAdd === 'User' && (
+                    <CustomSelect required label="User Title" options={Data.USER_TITLES.map(t => ({ value: t, label: t }))} value={newUser.title} onChange={e => handleNewUserChange('title', e.target.value)} theme={theme} placeholder="Select a Title" />
+                )}
+
+                <div className="pt-2 text-center">
+                    <p className="text-xs mb-3" style={{ color: theme.colors.textSecondary }}>
+                        This will send an invitation to the user to join the MyJSI app.
+                    </p>
+                    <button
+                        type="submit"
+                        className="w-full font-bold py-3 px-6 rounded-full text-white"
+                        style={{ backgroundColor: theme.colors.accent }}
+                    >
+                        Send Invite
+                    </button>
+                </div>
+            </form>
+        </Modal>
+    );
+};
+
+// ui.jsx
+
+export const MembersScreen = ({ theme, members, setMembers, currentUserId, onNavigate }) => {
+    const [showAddUserModal, setShowAddUserModal] = useState(false);
     const [userToRemove, setUserToRemove] = useState(null);
+    const [userToPromote, setUserToPromote] = useState(null);
+    const [roleToAdd, setRoleToAdd] = useState(null);
+    const [expandedUserId, setExpandedUserId] = useState(null); // State now lives here
 
     const admins = useMemo(() => members.filter(m => m.role === 'Admin'), [members]);
     const users = useMemo(() => members.filter(m => m.role === 'User'), [members]);
 
     const handleUpdateUser = useCallback((userId, field, value) => { setMembers(prev => prev.map(m => m.id === userId ? { ...m, [field]: value } : m)); }, [setMembers]);
-    const handleUpdateRole = useCallback((userId, newRole) => { setMembers(prev => prev.map(m => (m.id === userId ? { ...m, role: newRole } : m))); }, [setMembers]);
     const handleConfirmRemove = useCallback((user) => { setUserToRemove(user); }, []);
     const executeRemoveUser = useCallback(() => { if (userToRemove) { setMembers(prev => prev.filter(m => m.id !== userToRemove.id)); setUserToRemove(null); } }, [userToRemove, setMembers]);
     const handleTogglePermission = useCallback((userId, permissionKey) => {
-        setMembers(prevMembers =>
-            prevMembers.map(member => {
-                if (member.id === userId) {
-                    const newPermissions = { ...member.permissions, [permissionKey]: !member.permissions[permissionKey] };
-                    if (permissionKey === 'salesData' && !newPermissions.salesData) {
-                        newPermissions.commissions = false;
-                        newPermissions.dealerRewards = false;
-                        newPermissions.customerRanking = false;
-                    }
-                    return { ...member, permissions: newPermissions };
+        setMembers(prevMembers => prevMembers.map(member => {
+            if (member.id === userId) {
+                const newPermissions = { ...member.permissions, [permissionKey]: !member.permissions[permissionKey] };
+                if (permissionKey === 'salesData' && !newPermissions.salesData) {
+                    newPermissions.commissions = false;
+                    newPermissions.dealerRewards = false;
+                    newPermissions.customerRanking = false;
                 }
-                return member;
-            })
-        );
+                return { ...member, permissions: newPermissions };
+            }
+            return member;
+        }));
     }, [setMembers]);
 
-    // ... (logic for adding a new user can go here)
+    const handleConfirmPromotion = useCallback((user) => { setUserToPromote(user); }, []);
+    const executePromotion = useCallback(() => {
+        if (userToPromote) {
+            const newRole = userToPromote.role === 'Admin' ? 'User' : 'Admin';
+            setMembers(prev => prev.map(m => (m.id === userToPromote.id ? { ...m, role: newRole } : m)));
+            setUserToPromote(null);
+        }
+    }, [userToPromote, setMembers]);
+
+    const handleAddUser = (newUser) => {
+        const newId = members.length > 0 ? Math.max(...members.map(m => m.id)) + 1 : 1;
+        setMembers(prev => [...prev, { ...newUser, id: newId, role: roleToAdd, status: 'pending' }]);
+        setShowAddUserModal(false);
+    };
+
+    const handleToggleExpand = (userId) => {
+        setExpandedUserId(prevId => (prevId === userId ? null : userId));
+    };
 
     return (
         <>
-            <PageTitle title="Members" theme={theme}>
-                <button onClick={() => setShowAddUserModal(true)} className="p-2 rounded-full" style={{ backgroundColor: theme.colors.accent }}>
-                    <Plus className="w-5 h-5 text-white" />
-                </button>
-            </PageTitle>
-
-            <div className="px-4 space-y-6 pb-4">
-                <section>
-                    <h3 className="font-bold text-xl mb-3 px-1" style={{ color: theme.colors.textPrimary }}>Administrators</h3>
-                    <div className="space-y-3">
-                        {admins.map(member => (
-                            <MemberCard key={member.id} user={member} theme={theme} isCurrentUser={member.id === currentUserId} onUpdateRole={handleUpdateRole} onConfirmRemove={handleConfirmRemove} />
-                        ))}
-                    </div>
-                </section>
-
-                <section>
-                    <h3 className="font-bold text-xl mb-3 px-1" style={{ color: theme.colors.textPrimary }}>Users</h3>
-                    <div className="space-y-3">
-                        {users.map(member => (
-                            <MemberCard key={member.id} user={member} theme={theme} isCurrentUser={member.id === currentUserId} onUpdateRole={handleUpdateRole} onConfirmRemove={handleConfirmRemove} onUpdateUser={handleUpdateUser} onTogglePermission={handleTogglePermission} />
-                        ))}
-                    </div>
-                </section>
+            <div className="px-4 pt-6 pb-4">
+                {/* The main "App Users" title has been removed */}
             </div>
 
-            {/* Modals for adding/removing users would go here */}
-            <Modal show={!!userToRemove} onClose={() => setUserToRemove(null)} title="Remove User" theme={theme}>
-                <p style={{ color: theme.colors.textPrimary }}>Are you sure you want to remove <span className="font-bold">{userToRemove?.firstName} {userToRemove?.lastName}</span>?</p>
-                <p className="text-sm" style={{ color: theme.colors.textSecondary }}>This action is permanent and will delete the user from the MyJSI app.</p>
+            <div className="px-4 space-y-6 pb-4">
+                <GlassCard theme={theme} className="p-0">
+                    <h2 className="font-bold text-2xl p-4" style={{ color: theme.colors.textPrimary }}>Administrators</h2>
+                    <div>
+                        {admins.map((member, index) => (
+                            <MemberCard key={member.id} user={member} theme={theme} isCurrentUser={member.id === currentUserId} onConfirmPromotion={handleConfirmPromotion} onConfirmRemove={handleConfirmRemove} isExpanded={expandedUserId === member.id} onToggleExpand={() => handleToggleExpand(member.id)} isLast={index === admins.length - 1} />
+                        ))}
+                    </div>
+                    <div className="p-4 border-t" style={{ borderColor: theme.colors.subtle }}>
+                        <button onClick={() => { setRoleToAdd('Admin'); setShowAddUserModal(true); }} className="w-full flex items-center justify-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-colors hover:bg-black/5 dark:hover:bg-white/10" style={{ color: theme.colors.accent }}>
+                            <Plus className="w-4 h-4" />
+                            <span>Add Administrator</span>
+                        </button>
+                    </div>
+                </GlassCard>
+
+                <GlassCard theme={theme} className="p-0">
+                    <h2 className="font-bold text-2xl p-4" style={{ color: theme.colors.textPrimary }}>Users</h2>
+                    <div>
+                        {users.map((member, index) => (
+                            <MemberCard key={member.id} user={member} theme={theme} isCurrentUser={member.id === currentUserId} onConfirmPromotion={handleConfirmPromotion} onConfirmRemove={handleConfirmRemove} onUpdateUser={handleUpdateUser} onTogglePermission={handleTogglePermission} isExpanded={expandedUserId === member.id} onToggleExpand={() => handleToggleExpand(member.id)} isLast={index === users.length - 1} />
+                        ))}
+                    </div>
+                    <div className="p-4 border-t" style={{ borderColor: theme.colors.subtle }}>
+                        <button onClick={() => { setRoleToAdd('User'); setShowAddUserModal(true); }} className="w-full flex items-center justify-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-colors hover:bg-black/5 dark:hover:bg-white/10" style={{ color: theme.colors.accent }}>
+                            <Plus className="w-4 h-4" />
+                            <span>Add User</span>
+                        </button>
+                    </div>
+                </GlassCard>
+            </div>
+
+            <AddUserModal show={!!roleToAdd} onClose={() => setRoleToAdd(null)} onAddUser={handleAddUser} theme={theme} roleToAdd={roleToAdd} />
+            <Modal show={!!userToRemove} onClose={() => setUserToRemove(null)} title="Delete User" theme={theme}>
+                <p style={{ color: theme.colors.textPrimary }}>Are you sure you want to delete <span className="font-bold">{userToRemove?.firstName} {userToRemove?.lastName}</span>?</p>
+                <p className="text-sm" style={{ color: theme.colors.textSecondary }}>This action is permanent.</p>
                 <div className="flex justify-end space-x-3 pt-4">
                     <button onClick={() => setUserToRemove(null)} className="font-bold py-2 px-5 rounded-lg" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }}>Cancel</button>
-                    <button onClick={executeRemoveUser} className="font-bold py-2 px-5 rounded-lg bg-red-600 text-white">Remove User</button>
+                    <button onClick={executeRemoveUser} className="font-bold py-2 px-5 rounded-lg bg-red-600 text-white">Delete</button>
+                </div>
+            </Modal>
+            <Modal show={!!userToPromote} onClose={() => setUserToPromote(null)} title="Confirm Role Change" theme={theme}>
+                <p style={{ color: theme.colors.textPrimary }}>Are you sure you want to make <span className="font-bold">{userToPromote?.firstName} {userToPromote?.lastName}</span> an Admin?</p>
+                <p className="text-sm mt-2" style={{ color: theme.colors.textSecondary }}>This action gives the user full permissions.</p>
+                <div className="flex justify-end space-x-3 pt-4 mt-4 border-t" style={{ borderColor: theme.colors.border }}>
+                    <button onClick={() => setUserToPromote(null)} className="font-bold py-2 px-5 rounded-lg" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }}>Cancel</button>
+                    <button onClick={executePromotion} className="font-bold py-2 px-5 rounded-lg text-white" style={{ backgroundColor: '#10B981' }}>Make Admin</button>
                 </div>
             </Modal>
         </>
     );
 };
-
-
 
 const HelpScreen = ({ theme }) => (
     <>
@@ -5085,7 +5283,6 @@ export {
     WinsCard,
     CreateContentModal,
     FormInput,
-    SearchInput,
     SuccessToast,
     AppHeader,
     MonthlyBarChart,
@@ -5104,7 +5301,6 @@ export {
 
     // “Rep Functions” screens
     CommissionRatesScreen,
-    LoanerPoolScreen,
     DealerRegistrationScreen,
     RequestFieldVisitScreen,
     DealerDirectoryScreen,
