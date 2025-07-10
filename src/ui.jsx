@@ -4901,12 +4901,21 @@ const SettingsScreen = ({ theme, onSave, userSettings, setUserSettings }) => {
     );
 };
 
-export const MemberCard = React.memo(({ user, theme, isCurrentUser, onConfirmPromotion, onConfirmRemove, onUpdateUser, onTogglePermission, isLast }) => {
-    const [isExpanded, setIsExpanded] = useState(false);
+export const MemberCard = React.memo(({ user, theme, isCurrentUser, onConfirmPromotion, onConfirmRemove, onUpdateUser, onTogglePermission, onUpdateRole, isExpanded, onToggleExpand, isLast }) => {
 
     const handleRoleChange = (e) => {
         onUpdateUser(user.id, 'title', e.target.value);
-        setIsExpanded(true);
+    };
+
+    // This handler now performs the correct action based on the user's role
+    const handleActionClick = () => {
+        // FIX: If the user is already an Admin, demote them instantly without a modal.
+        if (user.role === 'Admin') {
+            onUpdateRole(user.id, 'User');
+        } else {
+            // Otherwise, show the confirmation modal before making them an Admin.
+            onConfirmPromotion(user);
+        }
     };
 
     const cardContent = (
@@ -4930,10 +4939,9 @@ export const MemberCard = React.memo(({ user, theme, isCurrentUser, onConfirmPro
                             onChange={handleRoleChange}
                             options={Data.USER_TITLES.map(t => ({ value: t, label: t }))}
                             theme={theme}
-                            onOpen={() => setIsExpanded(true)}
+                            onOpen={onToggleExpand}
                         />
                     </div>
-                    // FIX: The dropdown arrow is now hidden for the current user's tile.
                 ) : !isCurrentUser && (
                     <ChevronDown className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} style={{ color: theme.colors.secondary }} />
                 )}
@@ -4943,11 +4951,11 @@ export const MemberCard = React.memo(({ user, theme, isCurrentUser, onConfirmPro
 
     return (
         <div className={`transition-all duration-300 ${!isExpanded && !isLast ? 'border-b' : ''}`} style={{ borderColor: theme.colors.subtle }}>
-            <button className="w-full text-left disabled:opacity-70 disabled:cursor-not-allowed" onClick={() => setIsExpanded(!isExpanded)} disabled={isCurrentUser}>
+            <button className="w-full text-left disabled:opacity-70 disabled:cursor-not-allowed" onClick={onToggleExpand} disabled={isCurrentUser}>
                 {cardContent}
             </button>
 
-            {isExpanded && (
+            {isExpanded && !isCurrentUser && (
                 <div className="bg-black/5 dark:bg-white/5 px-4 pb-4 animate-fade-in">
                     <div className="pt-4 border-t" style={{ borderColor: theme.colors.subtle }}>
                         {user.role === 'User' && (
@@ -4961,16 +4969,13 @@ export const MemberCard = React.memo(({ user, theme, isCurrentUser, onConfirmPro
                                 })}
                             </div>
                         )}
-                        {/* FIX: Removed the extra top border from this div to prevent the "double bar" */}
                         <div className={`space-y-3 ${user.role === 'User' ? 'pt-4 border-t' : ''}`} style={{ borderColor: theme.colors.subtle }}>
-                            <button onClick={() => onConfirmPromotion(user)} className="w-full text-center p-2.5 rounded-full font-semibold text-white" style={{ backgroundColor: theme.colors.accent }}>
+                            <button onClick={handleActionClick} className="w-full text-center p-2.5 rounded-full font-semibold text-white" style={{ backgroundColor: theme.colors.accent }}>
                                 {user.role === 'Admin' ? 'Move to User' : 'Make Admin'}
                             </button>
-                            {!isCurrentUser && (
-                                <button onClick={() => onConfirmRemove(user)} className="w-full text-center p-2.5 rounded-full font-semibold bg-red-500/10 text-red-500">
-                                    Delete User
-                                </button>
-                            )}
+                            <button onClick={() => onConfirmRemove(user)} className="w-full text-center p-2.5 rounded-full font-semibold bg-red-500/10 text-red-500">
+                                Delete User
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -4978,17 +4983,15 @@ export const MemberCard = React.memo(({ user, theme, isCurrentUser, onConfirmPro
         </div>
     );
 });
-
 export const AddUserModal = ({ show, onClose, onAddUser, theme, roleToAdd }) => {
-    // Note: The EMPTY_USER should be defined in your data.jsx file
     const [newUser, setNewUser] = useState(Data.EMPTY_USER);
 
-    // Reset form when the modal is opened
     useEffect(() => {
         if (show) {
-            setNewUser(Data.EMPTY_USER);
+            // Reset form when the modal is opened for a new user
+            setNewUser({ ...Data.EMPTY_USER, role: roleToAdd });
         }
-    }, [show]);
+    }, [show, roleToAdd]);
 
     const handleNewUserChange = useCallback((field, value) => {
         setNewUser(prev => ({ ...prev, [field]: value }));
@@ -4997,8 +5000,9 @@ export const AddUserModal = ({ show, onClose, onAddUser, theme, roleToAdd }) => 
     const handleAddUser = (e) => {
         e.preventDefault();
         if (newUser.firstName && newUser.lastName && newUser.email) {
-            // The parent component now handles adding the role
             onAddUser(newUser);
+            // FIX: This now automatically closes the modal upon successful submission
+            onClose();
         } else {
             alert("Please fill out all required fields.");
         }
@@ -5011,7 +5015,6 @@ export const AddUserModal = ({ show, onClose, onAddUser, theme, roleToAdd }) => 
                 <FormInput required label="Last Name" value={newUser.lastName} onChange={e => handleNewUserChange('lastName', e.target.value)} placeholder="Last Name" theme={theme} />
                 <FormInput required type="email" label="Email" value={newUser.email} onChange={e => handleNewUserChange('email', e.target.value)} placeholder="Email" theme={theme} />
 
-                {/* Only show the User Title dropdown if adding a 'User', not an 'Admin' */}
                 {roleToAdd === 'User' && (
                     <CustomSelect required label="User Title" options={Data.USER_TITLES.map(t => ({ value: t, label: t }))} value={newUser.title} onChange={e => handleNewUserChange('title', e.target.value)} theme={theme} placeholder="Select a Title" />
                 )}
@@ -5033,44 +5036,42 @@ export const AddUserModal = ({ show, onClose, onAddUser, theme, roleToAdd }) => 
     );
 };
 
-// ui.jsx
-
 export const MembersScreen = ({ theme, members, setMembers, currentUserId, onNavigate }) => {
     const [showAddUserModal, setShowAddUserModal] = useState(false);
     const [userToRemove, setUserToRemove] = useState(null);
     const [userToPromote, setUserToPromote] = useState(null);
     const [roleToAdd, setRoleToAdd] = useState(null);
-    const [expandedUserId, setExpandedUserId] = useState(null); // State now lives here
+    const [expandedUserId, setExpandedUserId] = useState(null);
 
     const admins = useMemo(() => members.filter(m => m.role === 'Admin'), [members]);
     const users = useMemo(() => members.filter(m => m.role === 'User'), [members]);
 
     const handleUpdateUser = useCallback((userId, field, value) => { setMembers(prev => prev.map(m => m.id === userId ? { ...m, [field]: value } : m)); }, [setMembers]);
+    const handleUpdateRole = useCallback((userId, newRole) => { setMembers(prev => prev.map(m => (m.id === userId ? { ...m, role: newRole } : m))); }, [setMembers]);
     const handleConfirmRemove = useCallback((user) => { setUserToRemove(user); }, []);
     const executeRemoveUser = useCallback(() => { if (userToRemove) { setMembers(prev => prev.filter(m => m.id !== userToRemove.id)); setUserToRemove(null); } }, [userToRemove, setMembers]);
     const handleTogglePermission = useCallback((userId, permissionKey) => {
-        setMembers(prevMembers => prevMembers.map(member => {
-            if (member.id === userId) {
-                const newPermissions = { ...member.permissions, [permissionKey]: !member.permissions[permissionKey] };
-                if (permissionKey === 'salesData' && !newPermissions.salesData) {
-                    newPermissions.commissions = false;
-                    newPermissions.dealerRewards = false;
-                    newPermissions.customerRanking = false;
+        setMembers(prevMembers =>
+            prevMembers.map(member => {
+                if (member.id === userId) {
+                    const newPermissions = { ...member.permissions, [permissionKey]: !member.permissions[permissionKey] };
+                    if (permissionKey === 'salesData' && !newPermissions.salesData) {
+                        newPermissions.commissions = false; newPermissions.dealerRewards = false; newPermissions.customerRanking = false;
+                    }
+                    return { ...member, permissions: newPermissions };
                 }
-                return { ...member, permissions: newPermissions };
-            }
-            return member;
-        }));
+                return member;
+            })
+        );
     }, [setMembers]);
 
     const handleConfirmPromotion = useCallback((user) => { setUserToPromote(user); }, []);
     const executePromotion = useCallback(() => {
         if (userToPromote) {
-            const newRole = userToPromote.role === 'Admin' ? 'User' : 'Admin';
-            setMembers(prev => prev.map(m => (m.id === userToPromote.id ? { ...m, role: newRole } : m)));
+            handleUpdateRole(userToPromote.id, 'Admin');
             setUserToPromote(null);
         }
-    }, [userToPromote, setMembers]);
+    }, [userToPromote, handleUpdateRole]);
 
     const handleAddUser = (newUser) => {
         const newId = members.length > 0 ? Math.max(...members.map(m => m.id)) + 1 : 1;
@@ -5085,7 +5086,8 @@ export const MembersScreen = ({ theme, members, setMembers, currentUserId, onNav
     return (
         <>
             <div className="px-4 pt-6 pb-4">
-                {/* The main "App Users" title has been removed */}
+                {/* Header is now minimal */}
+                <h1 className="text-3xl font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>App Users</h1>
             </div>
 
             <div className="px-4 space-y-6 pb-4">
@@ -5093,7 +5095,7 @@ export const MembersScreen = ({ theme, members, setMembers, currentUserId, onNav
                     <h2 className="font-bold text-2xl p-4" style={{ color: theme.colors.textPrimary }}>Administrators</h2>
                     <div>
                         {admins.map((member, index) => (
-                            <MemberCard key={member.id} user={member} theme={theme} isCurrentUser={member.id === currentUserId} onConfirmPromotion={handleConfirmPromotion} onConfirmRemove={handleConfirmRemove} isExpanded={expandedUserId === member.id} onToggleExpand={() => handleToggleExpand(member.id)} isLast={index === admins.length - 1} />
+                            <MemberCard key={member.id} user={member} theme={theme} isCurrentUser={member.id === currentUserId} onConfirmPromotion={handleConfirmPromotion} onConfirmRemove={handleConfirmRemove} onUpdateRole={handleUpdateRole} isExpanded={expandedUserId === member.id} onToggleExpand={() => handleToggleExpand(member.id)} isLast={index === admins.length - 1} />
                         ))}
                     </div>
                     <div className="p-4 border-t" style={{ borderColor: theme.colors.subtle }}>
@@ -5108,7 +5110,7 @@ export const MembersScreen = ({ theme, members, setMembers, currentUserId, onNav
                     <h2 className="font-bold text-2xl p-4" style={{ color: theme.colors.textPrimary }}>Users</h2>
                     <div>
                         {users.map((member, index) => (
-                            <MemberCard key={member.id} user={member} theme={theme} isCurrentUser={member.id === currentUserId} onConfirmPromotion={handleConfirmPromotion} onConfirmRemove={handleConfirmRemove} onUpdateUser={handleUpdateUser} onTogglePermission={handleTogglePermission} isExpanded={expandedUserId === member.id} onToggleExpand={() => handleToggleExpand(member.id)} isLast={index === users.length - 1} />
+                            <MemberCard key={member.id} user={member} theme={theme} isCurrentUser={member.id === currentUserId} onConfirmPromotion={handleConfirmPromotion} onConfirmRemove={handleConfirmRemove} onUpdateUser={handleUpdateUser} onTogglePermission={handleTogglePermission} onUpdateRole={handleUpdateRole} isExpanded={expandedUserId === member.id} onToggleExpand={() => handleToggleExpand(member.id)} isLast={index === users.length - 1} />
                         ))}
                     </div>
                     <div className="p-4 border-t" style={{ borderColor: theme.colors.subtle }}>
@@ -5120,6 +5122,7 @@ export const MembersScreen = ({ theme, members, setMembers, currentUserId, onNav
                 </GlassCard>
             </div>
 
+            {/* All Modals */}
             <AddUserModal show={!!roleToAdd} onClose={() => setRoleToAdd(null)} onAddUser={handleAddUser} theme={theme} roleToAdd={roleToAdd} />
             <Modal show={!!userToRemove} onClose={() => setUserToRemove(null)} title="Delete User" theme={theme}>
                 <p style={{ color: theme.colors.textPrimary }}>Are you sure you want to delete <span className="font-bold">{userToRemove?.firstName} {userToRemove?.lastName}</span>?</p>
@@ -5140,7 +5143,6 @@ export const MembersScreen = ({ theme, members, setMembers, currentUserId, onNav
         </>
     );
 };
-
 const HelpScreen = ({ theme }) => (
     <>
         <PageTitle title="Help & Support" theme={theme} />

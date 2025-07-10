@@ -260,9 +260,7 @@ export const PERMISSION_LABELS = {
     dealerRewards: "Dealer Rewards",
     submittingReplacements: "Submitting Replacements"
 };
-
-export const USER_TITLES = ["Sales", "Designer", "Sales/Designer", "Administration"];
-
+export const USER_TITLES = ["Sales", "Designer", "Sales/Designer", "Admin Support"];
 export const EMPTY_USER = { firstName: '', lastName: '', email: '', title: 'Sales', role: 'User', permissions: { salesData: true, commissions: false, projects: true, customerRanking: true, dealerRewards: true, submittingReplacements: true } };
 
 export const CUSTOMER_RANK_DATA = [{ id: 1, name: 'Business Furniture LLC', bookings: 450000, sales: 435000, orders: [{ projectName: 'Lawrence Township LECC', amount: 43034 }, { projectName: 'Monreau Seminary', amount: 137262 }] }, { id: 2, name: 'Corporate Design Inc', bookings: 380000, sales: 395000, orders: [{ projectName: 'OneMain Financial HQ', amount: 1250 }, { projectName: 'OneMain Financial Branch', amount: 643 }] }, { id: 3, name: 'OfficeWorks', bookings: 510000, sales: 490000, orders: [{ projectName: 'Main Office Remodel', amount: 510000 }] }, { id: 4, name: 'LOTH Inc.', bookings: 320000, sales: 310000, orders: [] }, { id: 5, name: 'One Eleven Design', bookings: 280000, sales: 275000, orders: [{ projectName: 'Centlivre, LLC', amount: 3415 }] }, { id: 6, name: 'RJE Business Interiors', bookings: 470000, sales: 465000, orders: [] }, { id: 7, name: 'Sharp School Services', bookings: 190000, sales: 185000, orders: [] }, { id: 8, name: 'Braden Business Systems', bookings: 210000, sales: 205000, orders: [] }, { id: 9, 'name': 'Schroeder\'s', address: '888 Office Park, Fort Wayne, IN 46805', bookings: 150000, sales: 140000, salespeople: [{ name: 'Andrea Kirkland', status: 'active' }], designers: [], administration: [], installers: [], dailyDiscount: '50/20 (60.00%)' }, { id: 10, 'name': 'CVC', address: '999 Corporate Dr, Evansville, IN 47715', bookings: 230000, sales: 220000, salespeople: [{ name: 'Michael Jones', status: 'active' }], designers: [], administration: [{ name: 'Luke Miller', status: 'active' }], installers: [], dailyDiscount: '50/20 (60.00%)' },];
