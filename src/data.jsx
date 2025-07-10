@@ -1,4 +1,9 @@
-﻿import { MousePointer, BarChart2, Users, Package2, RefreshCw, PieChart, Armchair, Database, Briefcase, MessageSquare, Package, RotateCw } from 'lucide-react';
+﻿import {
+    MousePointer, BarChart2, Users, Package2, RefreshCw, PieChart, Armchair,
+    Database, Briefcase, MessageSquare, Package, RotateCw, Search, Paperclip,
+    DollarSign, UserPlus, MapPin, Percent, FileText, Calendar, Palette,
+    Wrench, MonitorPlay, Share2, Hourglass, Settings, HelpCircle, Send
+} from 'lucide-react';
 
 export const lightTheme = { colors: { background: '#F3F2EF', surface: 'rgba(255,255,255,0.92)', primary: '#003366', accent: '#003366', secondary: '#7A7A7A', textPrimary: '#111111', textSecondary: '#555555', border: 'rgba(0,0,0,0.05)', shadow: 'rgba(0,0,0,0.10)' }, backdropFilter: 'blur(12px)' };
 export const darkTheme = { colors: { background: '#1E1E1E', surface: 'rgba(40,40,40,0.85)', primary: '#BBBBBB', accent: '#BBBBBB', secondary: '#999999', textPrimary: '#F5F5F5', textSecondary: '#CCCCCC', border: 'rgba(255,255,255,0.08)', shadow: 'rgba(0,0,0,0.25)' }, backdropFilter: 'blur(12px)' };
@@ -32,11 +37,6 @@ export const MY_PROJECTS_DATA = [
         image: 'https://webresources.jsifurniture.com/production/uploads/jsi_coldjet_install_00001.jpg'
     },
 ];
-
-
-
-
-// Data updated to differentiate Laminate/Veneer types
 export const LEAD_TIMES_DATA = [
     { series: 'Addison', type: 'Wood Seating', weeks: 4 },
     { series: 'Addison', type: 'Upholstery', weeks: 7 },
@@ -126,34 +126,31 @@ export const LEAD_TIMES_DATA = [
     { series: 'Wink', type: 'Seating', weeks: 3 },
     { series: 'Ziva', type: 'Tables', weeks: 4 },
 ].sort((a, b) => a.series.localeCompare(b.series));
-
 export const FABRICS_DATA = [{ name: 'Luxe Weave', manufacturer: 'Momentum' }, { name: 'Origin', manufacturer: 'Momentum' }, { name: 'Origin', manufacturer: 'Maharam' }, { name: 'Origin', manufacturer: 'Architex' }, { name: 'Climb', manufacturer: 'Maharam' }, { name: 'Rigid', manufacturer: 'Maharam' }, { name: 'Heritage Tweed', manufacturer: 'Traditions' }];
-
 export const allApps = [
-    { name: 'Samples', route: 'samples' },
-    { name: 'Request Replacement', route: 'replacements' },
-    { name: 'Community', route: 'community' },
-    { name: 'Lead Times', route: 'resources/lead-times' },
-    { name: 'Products', route: 'products' },
-    { name: 'Orders', route: 'orders' },
-    { name: 'Sales', route: 'sales' },
-    { name: 'Projects', route: 'projects' },
-    { name: 'Resources', route: 'resources' },
-    { name: 'Dealer Directory', route: 'resources/dealer_directory' },
-    { name: 'Commission Rates', route: 'resources/commission_rates' },
-    { name: 'Contracts', route: 'resources/contracts' },
-    { name: 'Loaner Pool', route: 'resources/loaner_pool' },
-    { name: 'Discontinued Finishes', route: 'resources/discontinued_finishes' },
-    { name: 'Sample Discounts', route: 'resources/sample_discounts' },
-    { name: 'Social Media', route: 'resources/social_media' },
-    { name: 'Customer Ranking', route: 'customer-rank' },
-    { name: 'Commissions', route: 'commissions' },
-    { name: 'Members', route: 'members' },
-    { name: 'Settings', route: 'settings' },
-    { name: 'Help', route: 'help' },
-    { name: 'Feedback', route: 'feedback' },
+    { name: 'Samples', route: 'samples', icon: Package },
+    { name: 'Request Replacement', route: 'replacements', icon: RotateCw },
+    { name: 'Community', route: 'community', icon: MessageSquare },
+    { name: 'Lead Times', route: 'resources/lead-times', icon: Hourglass },
+    { name: 'Products', route: 'products', icon: Armchair },
+    { name: 'Orders', route: 'orders', icon: MousePointer },
+    { name: 'Sales', route: 'sales', icon: PieChart },
+    { name: 'Projects', route: 'projects', icon: Briefcase },
+    { name: 'Resources', route: 'resources', icon: Database },
+    { name: 'Dealer Directory', route: 'resources/dealer_directory', icon: Users },
+    { name: 'Commission Rates', route: 'resources/commission_rates', icon: DollarSign },
+    { name: 'Contracts', route: 'resources/contracts', icon: FileText },
+    { name: 'Loaner Pool', route: 'resources/loaner_pool', icon: Package },
+    { name: 'Discontinued Finishes', route: 'resources/discontinued_finishes', icon: Palette },
+    { name: 'Sample Discounts', route: 'resources/sample_discounts', icon: Percent },
+    { name: 'Social Media', route: 'resources/social_media', icon: Share2 },
+    { name: 'Customer Ranking', route: 'customer-rank', icon: BarChart2 },
+    { name: 'Commissions', route: 'commissions', icon: DollarSign },
+    { name: 'Members', route: 'members', icon: Users },
+    { name: 'Settings', route: 'settings', icon: Settings },
+    { name: 'Help', route: 'help', icon: HelpCircle },
+    { name: 'Feedback', route: 'feedback', icon: Send },
 ];
-
 export const RESOURCES_DATA = [
     {
         category: "Fabrics",
@@ -187,10 +184,7 @@ export const RESOURCES_DATA = [
         ].sort((a, b) => a.label.localeCompare(b.label))
     }
 ];
-
 export const SOCIAL_MEDIA_POSTS = [{ id: 1, type: 'image', url: 'https://placehold.co/400x500/E3DBC8/2A2A2A?text=JSI+Seating', caption: 'Comfort meets design. ✨ Discover the new Arwyn series, perfect for any modern workspace. #JSIFurniture #OfficeDesign #ModernWorkplace' }, { id: 2, type: 'image', url: 'https://placehold.co/400x500/D9CDBA/2A2A2A?text=Vision+Casegoods', caption: 'Functionality at its finest. The Vision casegoods line offers endless configuration possibilities. #Casegoods #OfficeInspo #JSI' }, { id: 3, type: 'video', url: 'https://placehold.co/400x500/A9886C/FFFFFF?text=Lounge+Tour+(Video)', caption: 'Take a closer look at the luxurious details of our Caav lounge collection. #LoungeSeating #ContractFurniture #HospitalityDesign' }, { id: 4, type: 'image', url: 'https://placehold.co/400x500/966642/FFFFFF?text=Forge+Tables', caption: 'Gather around. The Forge table series brings a rustic yet refined look to collaborative spaces. #MeetingTable #Collaboration #JSI' },];
-
-
 export const LOANER_POOL_PRODUCTS = [
     {
         id: 'br2301',
@@ -237,7 +231,6 @@ export const LOANER_POOL_PRODUCTS = [
         }
     },
 ];
-
 export const INITIAL_OPPORTUNITIES = [{ id: 1, name: 'New Office Furnishings', stage: 'Discovery', discount: '5%', value: '$50,000', company: 'ABC Corporation', contact: 'John Smith', poTimeframe: '30-60 days' }, { id: 2, name: 'Lobby Refresh', stage: 'Specifying', value: '$75,000', company: 'XYZ Industries', contact: 'Jane Doe', poTimeframe: '60-90 days' },];
 
 export const STAGES = ['Discovery', 'Specifying', 'Decision/Bidding', 'PO Expected', 'Won', 'Lost'];
@@ -282,7 +275,6 @@ export const PERMISSION_LABELS = {
 };
 export const USER_TITLES = ["Sales", "Designer", "Sales/Designer", "Admin Support"];
 export const EMPTY_USER = { firstName: '', lastName: '', email: '', title: 'Sales', role: 'User', permissions: { salesData: true, commissions: false, projects: true, customerRanking: true, dealerRewards: true, submittingReplacements: true } };
-
 export const CUSTOMER_RANK_DATA = [{ id: 1, name: 'Business Furniture LLC', bookings: 450000, sales: 435000, orders: [{ projectName: 'Lawrence Township LECC', amount: 43034 }, { projectName: 'Monreau Seminary', amount: 137262 }] }, { id: 2, name: 'Corporate Design Inc', bookings: 380000, sales: 395000, orders: [{ projectName: 'OneMain Financial HQ', amount: 1250 }, { projectName: 'OneMain Financial Branch', amount: 643 }] }, { id: 3, name: 'OfficeWorks', bookings: 510000, sales: 490000, orders: [{ projectName: 'Main Office Remodel', amount: 510000 }] }, { id: 4, name: 'LOTH Inc.', bookings: 320000, sales: 310000, orders: [] }, { id: 5, name: 'One Eleven Design', bookings: 280000, sales: 275000, orders: [{ projectName: 'Centlivre, LLC', amount: 3415 }] }, { id: 6, name: 'RJE Business Interiors', bookings: 470000, sales: 465000, orders: [] }, { id: 7, name: 'Sharp School Services', bookings: 190000, sales: 185000, orders: [] }, { id: 8, name: 'Braden Business Systems', bookings: 210000, sales: 205000, orders: [] }, { id: 9, 'name': 'Schroeder\'s', address: '888 Office Park, Fort Wayne, IN 46805', bookings: 150000, sales: 140000, salespeople: [{ name: 'Andrea Kirkland', status: 'active' }], designers: [], administration: [], installers: [], dailyDiscount: '50/20 (60.00%)' }, { id: 10, 'name': 'CVC', address: '999 Corporate Dr, Evansville, IN 47715', bookings: 230000, sales: 220000, salespeople: [{ name: 'Michael Jones', status: 'active' }], designers: [], administration: [{ name: 'Luke Miller', status: 'active' }], installers: [], dailyDiscount: '50/20 (60.00%)' },];
 
 export const ORDER_DATA = [
@@ -350,7 +342,97 @@ export const DEALER_DIRECTORY_DATA = [{ id: 1, name: 'Business Furniture LLC', a
 
 export const DISCONTINUED_FINISHES = [{ category: "Maple", oldName: "ALE MEDIUM", veneer: "#3610", solid: "#3610", oldColor: "#d3b48c", newName: "PILSNER", newColor: "#e6d3b1" }, { category: "Maple", oldName: "BUTTERSCOTCH", veneer: "#3381", solid: "#3381", oldColor: "#a96e41", newName: "OUTBACK", newColor: "#966642" }, { category: "Maple", oldName: "VENETIAN", veneer: "#3593", solid: "#3593", oldColor: "#5e3a2f", newName: "BRICKDUST", newColor: "#744334" }, { category: "Cherry", oldName: "BOURBON MEDIUM", veneer: "#3581", solid: "#3683", oldColor: "#744334", newName: "OUTBACK", newColor: "#966642" }, { category: "Cherry", oldName: "BRIGHTON MEDIUM", veneer: "#3611", solid: "#3684", oldColor: "#5e3a2f", newName: "BRICKDUST", newColor: "#744334" }, { category: "Oak", oldName: "GOLDEN OAK", veneer: "#3321", solid: "#3321", oldColor: "#c68e41", newName: "DUNE", newColor: "#d1b38b" }, { category: "Oak", oldName: "TRADITIONAL OAK", veneer: "#3351", solid: "#3351", oldColor: "#a46e3a", newName: "FAWN", newColor: "#c8a57a" }, { category: "Walnut", oldName: "NATURAL WALNUT", veneer: "#3401", solid: "#3401", oldColor: "#6b4a39", newName: "NATURAL", newColor: "#6f4f3a" }, { category: "Laminate", oldName: "KENSINGTON MAPLE", veneer: "N/A", solid: "N/A", oldColor: "#d8b48b", newName: "HARD ROCK MAPLE", newColor: "#dcb992" }, { category: "Laminate", oldName: "WINDSOR CHERRY", veneer: "N/A", solid: "N/A", oldColor: "#8b4b3b", newName: "WILD CHERRY", newColor: "#8f5245" },];
 
-export const PRODUCT_DATA = { 'bar-stools': { title: 'Bar Stools', data: [{ id: 'poet-bar', name: 'Poet', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_poet_stool_0001.jpg', basePrice: { list: 780 } }, { id: 'knox-bar', name: 'Knox', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_knox_comp_00002.jpg', basePrice: { list: 850 } }, { id: 'indie-bar', name: 'Indie', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_indie_comp_00003.jpg', basePrice: { list: 920 } }, { id: 'jude-bar', name: 'Jude', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_jude_comp_0002.jpg', basePrice: { list: 1050 } }, { id: 'chicago-bar', name: 'Chicago', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_chicago_comp_0002.jpg', basePrice: { list: 890 } },], }, 'counter-stools': { title: 'Counter Stools', data: [{ id: 'poet-counter', name: 'Poet', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_poet_stool_0002.jpg', basePrice: { list: 750 } }, { id: 'knox-counter', name: 'Knox', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_knox_comp_00001.jpg', basePrice: { list: 820 } }, { id: 'indie-counter', name: 'Indie', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_indie_comp_00002.jpg', basePrice: { list: 890 } }, { id: 'jude-counter', name: 'Jude', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_jude_comp_0001.jpg', basePrice: { list: 1020 } }, { id: 'chicago-counter', name: 'Chicago', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_chicago_comp_0001.jpg', basePrice: { list: 860 } },], }, swivels: { title: 'Swivel Chairs', data: [{ id: 'cosgrove', name: 'Cosgrove', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_cosgrove_comp_0008.jpg', basePrice: { list: 1187 } }, { id: 'arwyn', name: 'Arwyn', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_arwyn_comp_0001.jpg', basePrice: { list: 1395 } }, { id: 'newton', name: 'Newton', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_newton_comp_00001.jpg', basePrice: { list: 1520 } }, { id: 'proxy', name: 'Proxy', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_proxy_comp_0001_Y7gA7sE.jpg', basePrice: { list: 1675 } }, { id: 'derby', name: 'Derby', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_derby_comp_0002.jpg', basePrice: { list: 1450 } },], }, 'guest-chairs': { title: 'Guest Chairs', data: [{ id: 'indie-guest', name: 'Indie', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_indie_comp_00001.jpg', basePrice: { list: 850 } }, { id: 'jude-guest', name: 'Jude', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_jude_comp_0003.jpg', basePrice: { list: 980 } }, { id: 'arwyn-guest', name: 'Arwyn', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_arwyn_comp_0003.jpg', basePrice: { list: 1100 } }, { id: 'wink-guest', name: 'Wink', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_wink_comp_0001.jpg', basePrice: { list: 1200 } }, { id: 'bryn-guest', name: 'Bryn', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_bryn_comp_0004.jpg', basePrice: { list: 1350 } }, { id: 'hoopz-guest', name: 'Hoopz', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_hoopz_comp_0001.jpg', basePrice: { list: 1150 } },], }, lounge: { title: 'Lounge', data: [{ id: 'caav', name: 'Caav', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_caav_comp_0005.jpg', basePrice: { list: 2100 } }, { id: 'kindera', name: 'Kindera', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_kindera_comp_00001.jpg', basePrice: { list: 2400 } }, { id: 'symmetry', name: 'Symmetry', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_symmetry_comp_0001.jpg', basePrice: { list: 2650 } }, { id: 'welli', name: 'Welli', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_welli_comp_0003.jpg', basePrice: { list: 2800 } }, { id: 'satisse', name: 'Satisse', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_satisse_comp_0002.jpg', basePrice: { list: 3200 } }, { id: 'somna', name: 'Somna', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_somna_comp_0001.jpg', basePrice: { list: 2900 } },], }, 'coffee-tables': { title: 'Coffee Tables', data: [{ id: 'poet-coffee', name: 'Poet', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_poet_config_002.jpg', basePrice: { list: 950 } }, { id: 'zephyr-coffee', name: 'Zephyr', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_zephyr_config_003.jpg', basePrice: { list: 1100 } }, { id: 'denver-coffee', name: 'Denver', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_denver_config_001.jpg', basePrice: { list: 1250 } }, { id: 'teekan-coffee', name: 'Teekan', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_teekan_config_0001.jpg', basePrice: { list: 1400 } }, { id: 'connect-coffee', name: 'Connect', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_connect_config_0001.jpg', basePrice: { list: 1550 } },], }, 'end-tables': { title: 'End Tables', data: [{ id: 'poet-end', name: 'Poet', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_poet_config_001.jpg', basePrice: { list: 750 } }, { id: 'zephyr-end', name: 'Zephyr', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_zephyr_config_004.jpg', basePrice: { list: 850 } }, { id: 'denver-end', name: 'Denver', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_denver_config_002.jpg', basePrice: { list: 950 } }, { id: 'teekan-end', name: 'Teekan', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_teekan_config_0002.jpg', basePrice: { list: 1100 } }, { id: 'connect-end', name: 'Connect', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_connect_config_0002.jpg', basePrice: { list: 1250 } },], }, conference: { title: 'Conference Tables', data: [{ id: 'moto-conf', name: 'Moto', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_moto_config_0003.jpg', basePrice: { list: 4800 } }, { id: 'tablet-conf', name: 'Tablet', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_tablet_config_0001.jpg', basePrice: { list: 5500 } }, { id: 'forge-conf', name: 'Forge', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_forge_config_0001.jpg', basePrice: { list: 6000 } }, { id: 'alden-conf', name: 'Alden', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_alden_config_0001.jpg', basePrice: { list: 6500 } }, { id: 'vision-conf', name: 'Vision', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_vision_config_000006.jpg', basePrice: { list: 7200 } },], }, casegoods: { title: 'Casegoods', data: [{ id: 'moto-1', name: 'Moto', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_moto_config_0002.jpg', basePrice: { list: 4200 } }, { id: 'flux-1', name: 'Flux', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_flux_config_00008.jpg', basePrice: { list: 5800 } }, { id: 'alden-1', name: 'Alden', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_alden_config_0002.jpg', basePrice: { list: 6500 } }, { id: 'vision-1', name: 'Vision', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_vision_config_000002.jpg', basePrice: { list: 7200 } }, { id: 'vision-2', name: 'Vision', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_vision_config_000007.jpg', basePrice: { list: 7200 } },], }, };
+export const PRODUCT_DATA = {
+    'bar-stools': {
+        title: 'Bar Stools',
+        data: [
+            { id: 'poet-bar', name: 'Poet', image: 'https://via.placeholder.com/300?text=Poet', basePrice: { list: 780 } },
+            { id: 'knox-bar', name: 'Knox', image: 'https://via.placeholder.com/300?text=Knox', basePrice: { list: 850 } },
+            { id: 'indie-bar', name: 'Indie', image: 'https://via.placeholder.com/300?text=Indie', basePrice: { list: 920 } },
+            { id: 'jude-bar', name: 'Jude', image: 'https://via.placeholder.com/300?text=Jude', basePrice: { list: 1050 } },
+        ],
+    },
+
+    'counter-stools': {
+        title: 'Counter Stools',
+        data: [
+            { id: 'poet-counter', name: 'Poet', image: 'https://via.placeholder.com/300?text=Poet', basePrice: { list: 750 } },
+            { id: 'knox-counter', name: 'Knox', image: 'https://via.placeholder.com/300?text=Knox', basePrice: { list: 820 } },
+            { id: 'indie-counter', name: 'Indie', image: 'https://via.placeholder.com/300?text=Indie', basePrice: { list: 890 } },
+            { id: 'jude-counter', name: 'Jude', image: 'https://via.placeholder.com/300?text=Jude', basePrice: { list: 1020 } },
+        ],
+    },
+
+    swivels: {
+        title: 'Swivel Chairs',
+        data: [
+            { id: 'cosgrove', name: 'Cosgrove', image: 'https://via.placeholder.com/300?text=Cosgrove', basePrice: { list: 1187 } },
+            { id: 'arwyn', name: 'Arwyn', image: 'https://via.placeholder.com/300?text=Arwyn', basePrice: { list: 1395 } },
+            { id: 'newton', name: 'Newton', image: 'https://via.placeholder.com/300?text=Newton', basePrice: { list: 1520 } },
+            { id: 'proxy', name: 'Proxy', image: 'https://via.placeholder.com/300?text=Proxy', basePrice: { list: 1675 } },
+        ],
+    },
+
+    'guest-chairs': {
+        title: 'Guest Chairs',
+        data: [
+            { id: 'indie-guest', name: 'Indie', image: 'https://via.placeholder.com/300?text=Indie', basePrice: { list: 850 } },
+            { id: 'jude-guest', name: 'Jude', image: 'https://via.placeholder.com/300?text=Jude', basePrice: { list: 980 } },
+            { id: 'arwyn-guest', name: 'Arwyn', image: 'https://via.placeholder.com/300?text=Arwyn', basePrice: { list: 1100 } },
+            { id: 'wink-guest', name: 'Wink', image: 'https://via.placeholder.com/300?text=Wink', basePrice: { list: 1200 } },
+        ],
+    },
+
+    lounge: {
+        title: 'Lounge',
+        data: [
+            { id: 'caav', name: 'Caav', image: 'https://via.placeholder.com/300?text=Caav', basePrice: { list: 2100 } },
+            { id: 'kindera', name: 'Kindera', image: 'https://via.placeholder.com/300?text=Kindera', basePrice: { list: 2400 } },
+            { id: 'somna', name: 'Somna', image: 'https://via.placeholder.com/300?text=Somna', basePrice: { list: 2900 } },
+            { id: 'satisse', name: 'Satisse', image: 'https://via.placeholder.com/300?text=Satisse', basePrice: { list: 3200 } },
+        ],
+    },
+
+    'coffee-tables': {
+        title: 'Coffee Tables',
+        data: [
+            { id: 'poet-coffee', name: 'Poet', image: 'https://via.placeholder.com/300?text=Poet', basePrice: { list: 950 } },
+            { id: 'teekan-coffee', name: 'Teekan', image: 'https://via.placeholder.com/300?text=Teekan', basePrice: { list: 1400 } },
+            { id: 'connect-coffee', name: 'Connect', image: 'https://via.placeholder.com/300?text=Connect', basePrice: { list: 1550 } },
+            { id: 'ziva-coffee', name: 'Ziva', image: 'https://via.placeholder.com/300?text=Ziva', basePrice: { list: 1250 } },
+        ],
+    },
+
+    'end-tables': {
+        title: 'End Tables',
+        data: [
+            { id: 'poet-end', name: 'Poet', image: 'https://via.placeholder.com/300?text=Poet', basePrice: { list: 750 } },
+            { id: 'teekan-end', name: 'Teekan', image: 'https://via.placeholder.com/300?text=Teekan', basePrice: { list: 1100 } },
+            { id: 'ziva-end', name: 'Ziva', image: 'https://via.placeholder.com/300?text=Ziva', basePrice: { list: 950 } },
+            { id: 'connect-end', name: 'Connect', image: 'https://via.placeholder.com/300?text=Connect', basePrice: { list: 1250 } },
+        ],
+    },
+
+    conference: {
+        title: 'Conference Tables',
+        data: [
+            { id: 'moto-conf', name: 'Moto', image: 'https://via.placeholder.com/300?text=Moto', basePrice: { list: 4800 } },
+            { id: 'vision-conf', name: 'Vision', image: 'https://via.placeholder.com/300?text=Vision', basePrice: { list: 7200 } },
+            { id: 'forge-conf', name: 'Forge', image: 'https://via.placeholder.com/300?text=Forge', basePrice: { list: 6000 } },
+            { id: 'brogan-conf', name: 'Brogan', image: 'https://via.placeholder.com/300?text=Brogan', basePrice: { list: 6500 } },
+        ],
+    },
+
+    casegoods: {
+        title: 'Casegoods',
+        data: [
+            { id: 'vision-1', name: 'Vision', image: 'https://via.placeholder.com/300?text=Vision', basePrice: { list: 7200 } },
+            { id: 'flux-1', name: 'Flux', image: 'https://via.placeholder.com/300?text=Flux', basePrice: { list: 5800 } },
+            { id: 'brogan-1', name: 'Brogan', image: 'https://via.placeholder.com/300?text=Brogan', basePrice: { list: 6500 } },
+            { id: 'moto-1', name: 'Moto', image: 'https://via.placeholder.com/300?text=Moto', basePrice: { list: 4200 } },
+        ],
+    },
+};
 
 export const PRODUCTS_CATEGORIES_DATA = Object.entries(PRODUCT_DATA).map(([key, value]) => ({ name: value.title, nav: `products/category/${key}`, images: value.data.length > 0 ? value.data.slice(0, 2).map(p => p.image) : ['https://placehold.co/100x100/EEE/777?text=JSI'] })).sort((a, b) => a.name.localeCompare(b.name));
 
@@ -444,3 +526,40 @@ export const INSTALL_INSTRUCTIONS_DATA = [
         thumbnail: 'https://webresources.jsifurniture.com/production/uploads/jsi_tablet_config_0001.jpg'
     },
 ];
+
+export const COMMISSIONS_DATA = {
+    '2025': [
+        {
+            month: 'June', amount: 37094.23, issuedDate: '2025-07-22', details: [
+                {
+                    salesperson: 'DAN@BGREPS.COM; OTCOLEINDY@GMAIL.COM', invoices: [
+                        { invoice: '0000608805', po: 'A289743-4', so: '486242', project: '9100 KEYSTONE AMENITY: FURNITURE ELL LILY', listValue: 1070.40, netAmount: 1536.77, commission: 153.68 },
+                        { invoice: '0000608806', po: 'A2900020-1', so: '495025', project: '', listValue: 1035.90, netAmount: 995.03, commission: 114.36 },
+                        { invoice: '0000600608', po: 'A2901050-1', so: '450581', project: '', listValue: 190.40, netAmount: 743.73, commission: 74.37 },
+                        { invoice: '00006069725', po: 'A290006-3', so: '450338', project: '', listValue: 103.20, netAmount: 178.54, commission: 17.85 },
+                        { invoice: '00006069750', po: 'A290036-2', so: '450224', project: '', listValue: 2276.62, netAmount: 2223.49, commission: 96.65 },
+                        { invoice: '0000600883', po: 'A290066-3', so: '450338', project: '', listValue: 1143.60, netAmount: 1128.11, commission: 1128.11 },
+                        { invoice: '0000610026', po: 'A289674-4', so: '486362', project: '', listValue: 40.40, netAmount: 40.40, commission: 40.40 },
+                        // Add more invoices as needed from PDF
+                    ]
+                },
+                // Totals from PDF
+                { customer: '025708 OTIS R BOWEN CENTER FOR HUMAN', total: 0 }, // Placeholder, extract from PDF if more data
+                { customer: '025728 INNOVATE LLC', total: 0 },
+                { customer: '044145 - DESKS INC OF UTAH', total: 0 },
+                { customer: '044145 DESKS INC OF UTAH', total: 0 },
+                { brandTotal: 'JSI', listTotal: 537933.27, netTotal: 507450.82, commissionTotal: 37094.23 },
+            ]
+        },
+        // Add previous months/years as needed, e.g.
+        { month: 'May', amount: 45000.00, issuedDate: '2025-06-22', details: [] },
+        { month: 'April', amount: 32000.50, issuedDate: '2025-05-22', details: [] },
+        // ... more months
+    ],
+    '2024': [
+        // Similar structure for previous year
+        { month: 'December', amount: 28000.00, issuedDate: '2025-01-22', details: [] },
+        // ... etc.
+    ],
+    // Add more years if needed
+};

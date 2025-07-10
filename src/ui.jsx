@@ -81,11 +81,111 @@ export const useDropdownPosition = (ref) => {
     return [dropDirection, checkPosition];
 };
 
-export const CommissionsScreen = ({ theme, onNavigate }) => {
-    // Placeholder - Logic will be added later
-    return <PageTitle title="Commissions" theme={theme} />;
-};
+export const CommissionsScreen = ({ theme }) => {
+    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
+    const [expandedMonth, setExpandedMonth] = useState(null);
 
+    const years = Object.keys(Data.COMMISSIONS_DATA).sort((a, b) => b - a);
+    const monthlyData = Data.COMMISSIONS_DATA[selectedYear] || [];
+
+    const toggleMonth = (month) => {
+        setExpandedMonth(prev => prev === month ? null : month);
+    };
+
+    return (
+        <div className="h-full flex flex-col">
+            <PageTitle title="Commissions" theme={theme} />
+
+            <div className="px-4 pb-2">
+                <CustomSelect
+                    label="Year"
+                    value={selectedYear}
+                    onChange={(e) => setSelectedYear(e.target.value)}
+                    options={years.map(y => ({ value: y, label: y }))}
+                    theme={theme}
+                />
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-3 scrollbar-hide">
+                <table className="w-full border-collapse">
+                    <thead>
+                        <tr className="text-left text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>
+                            <th className="pb-2">Month</th>
+                            <th className="pb-2 text-right">Amount</th>
+                            <th className="pb-2 text-right">Issued</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {monthlyData.map((check, index) => (
+                            <React.Fragment key={check.month}>
+                                <tr
+                                    onClick={() => toggleMonth(check.month)}
+                                    className="cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition"
+                                >
+                                    <td className="py-3" style={{ color: theme.colors.textPrimary }}>{check.month}</td>
+                                    <td className="py-3 text-right font-bold" style={{ color: theme.colors.accent }}>${check.amount.toLocaleString()}</td>
+                                    <td className="py-3 text-right text-sm" style={{ color: theme.colors.textSecondary }}>{new Date(check.issuedDate).toLocaleDateString()}</td>
+                                </tr>
+                                {expandedMonth === check.month && check.details && (
+                                    <tr>
+                                        <td colSpan="3" className="p-0">
+                                            <div className="bg-black/5 dark:bg-white/5 p-4 space-y-4 animate-fade-in">
+                                                {check.details.map((detail, dIndex) => {
+                                                    if (detail.invoices) {
+                                                        return (
+                                                            <div key={dIndex}>
+                                                                <h4 className="font-semibold mb-2" style={{ color: theme.colors.textPrimary }}>{detail.salesperson}</h4>
+                                                                <table className="w-full text-sm">
+                                                                    <thead>
+                                                                        <tr style={{ color: theme.colors.textSecondary }}>
+                                                                            <th className="text-left">Invoice</th>
+                                                                            <th className="text-right">List</th>
+                                                                            <th className="text-right">Net</th>
+                                                                            <th className="text-right">Comm.</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        {detail.invoices.map((inv, iIndex) => (
+                                                                            <tr key={iIndex}>
+                                                                                <td>{inv.invoice} ({inv.project || 'N/A'})</td>
+                                                                                <td className="text-right">${inv.listValue.toLocaleString()}</td>
+                                                                                <td className="text-right">${inv.netAmount.toLocaleString()}</td>
+                                                                                <td className="text-right font-bold" style={{ color: theme.colors.accent }}>${inv.commission.toLocaleString()}</td>
+                                                                            </tr>
+                                                                        ))}
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        );
+                                                    } else if (detail.customer) {
+                                                        return (
+                                                            <div key={dIndex} className="flex justify-between text-sm">
+                                                                <span>{detail.customer}</span>
+                                                                <span>${detail.total.toLocaleString()}</span>
+                                                            </div>
+                                                        );
+                                                    } else if (detail.brandTotal) {
+                                                        return (
+                                                            <div key={dIndex} className="flex justify-between font-bold">
+                                                                <span>{detail.brandTotal}</span>
+                                                                <span>List: ${detail.listTotal.toLocaleString()} | Net: ${detail.netTotal.toLocaleString()} | Comm: ${detail.commissionTotal.toLocaleString()}</span>
+                                                            </div>
+                                                        );
+                                                    }
+                                                    return null;
+                                                })}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )}
+                            </React.Fragment>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+};
 export const IncentiveRewardsScreen = ({ theme, onNavigate }) => {
     // Placeholder - Logic will be added later
     return <PageTitle title="Incentive Rewards" theme={theme} />;
@@ -426,10 +526,10 @@ export const SmartSearch = ({ theme, onNavigate, onAskAI, onVoiceActivate }) => 
                             <li
                                 key={app.route}
                                 onMouseDown={() => handleNavigation(app.route)}
-                                className="flex items-center gap-2 cursor-pointer px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5"
+                                className="flex items-center gap-3 cursor-pointer px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5"
                                 style={{ color: theme.colors.textPrimary }}
                             >
-                                <ChevronRight className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
+                                <app.icon className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
                                 {app.name}
                             </li>
                         ))}
@@ -1788,8 +1888,6 @@ const styles = {
         marginBottom: '20px',
     },
 };
-
-// then in your JSX:
 <div style={styles.container}>
     <h1 style={styles.title}>Hello</h1>
     …
@@ -2607,6 +2705,7 @@ const Avatar = ({ src, alt, theme }) => {
         />
     );
 };
+
 
 export const CartScreen = ({ theme, onNavigate, handleBack, cart, setCart, onUpdateCart, userSettings }) => {
     const [address, setAddress] = useState('');
@@ -4382,6 +4481,28 @@ export const ResourcesScreen = ({ theme, onNavigate }) => {
     );
 };
 
+export const PRODUCTS_CATEGORIES_DATA = Object
+    .entries(Data.PRODUCT_DATA)
+    .map(([key, value]) => {
+        const images = [];
+
+        for (let i = 0; i < 4; i++) {
+            if (value.data[i]) {
+                const label = encodeURIComponent(value.data[i].name);
+                images.push(`https://placehold.co/150x150?text=${label}`);
+            } else {
+                images.push('https://placehold.co/150x150/EEE/888?text=No+Image');
+            }
+        }
+
+        return {
+            id: key,
+            name: value.title,
+            nav: `products/category/${key}`,
+            images
+        };
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
 
 export const ProjectsScreen = ({ onNavigate, theme, opportunities }) => {
     const [projectsTab, setProjectsTab] = useState('pipeline');
@@ -4489,6 +4610,244 @@ export const ProjectsScreen = ({ onNavigate, theme, opportunities }) => {
         </div>
     );
 };
+
+export const ProductComparisonScreen = ({ categoryId, onNavigate, theme }) => {
+    const category = Data.PRODUCT_DATA?.[categoryId];
+    if (!category || !category.data?.length) {
+        return (
+            <PlaceholderScreen
+                theme={theme}
+                category={category?.title || 'Products'}
+            />
+        );
+    }
+
+    const dataSorted = React.useMemo(
+        () =>
+            [...category.data].sort(
+                (a, b) => (a.basePrice?.list || 0) - (b.basePrice?.list || 0)
+            ),
+        [category.data]
+    );
+    const [index, setIndex] = useState(0);
+    const selected = dataSorted[index];
+
+    const money = (n) => (typeof n === 'number' ? `$${n.toLocaleString()}` : '—');
+
+    return (
+        <div className="px-4 pt-4 pb-10 space-y-4">
+            <PageTitle title={category.title} theme={theme} />
+
+            <div className="bg-white/50 dark:bg-black/20 rounded-2xl p-4 backdrop-blur-sm">
+                <div className="flex space-x-3 overflow-x-auto scrollbar-hide pb-2">
+                    {dataSorted.map((p, i) => (
+                        <div
+                            key={p.id}
+                            className="flex flex-col items-center space-y-2 flex-shrink-0"
+                        >
+                            <button
+                                onClick={() => setIndex(i)}
+                                className={`relative w-24 h-24 rounded-xl overflow-hidden transition-all duration-200 ${i === index
+                                    ? 'ring-2 ring-offset-2 ring-blue-500 scale-105'
+                                    : 'opacity-70 hover:opacity-100'
+                                    }`}
+                            >
+                                <img
+                                    src={p.image}
+                                    alt={p.name}
+                                    className="w-full h-full object-cover"
+                                />
+                            </button>
+                            <div className="text-center">
+                                <p className="text-xs font-semibold" style={{ color: theme.colors.textPrimary }}>
+                                    {p.name}
+                                </p>
+                                <p className="text-xs font-bold" style={{ color: theme.colors.accent }}>
+                                    {money(p.basePrice?.list)}
+                                </p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-lg">
+                <img
+                    src={selected.image}
+                    alt={selected.name}
+                    className="absolute w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+                <div className="absolute bottom-4 left-4 right-4">
+                    <h2 className="text-2xl font-bold text-white mb-1">{selected.name}</h2>
+                    <p className="text-3xl font-bold text-white">{money(selected.basePrice?.list)}</p>
+                </div>
+            </div>
+
+            <GlassCard theme={theme} className="p-4 space-y-4">
+                <div className="space-y-3">
+                    <div className="flex justify-between items-center pb-3 border-b" style={{ borderColor: theme.colors.subtle }}>
+                        <span className="font-semibold" style={{ color: theme.colors.textSecondary }}>Series</span>
+                        <span className="font-semibold text-right" style={{ color: theme.colors.textSecondary }}>List $</span>
+                    </div>
+
+                    <div className="flex justify-between items-center py-2">
+                        <span className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>{selected.name}</span>
+                        <span className="font-bold text-lg" style={{ color: theme.colors.accent }}>{money(selected.basePrice?.list)}</span>
+                    </div>
+
+                    {dataSorted.filter((_, i) => i !== index).slice(0, 3).map(item => (
+                        <div key={item.id} className="flex justify-between items-center py-2 opacity-60">
+                            <span style={{ color: theme.colors.textPrimary }}>{item.name}</span>
+                            <span style={{ color: theme.colors.textPrimary }}>{money(item.basePrice?.list)}</span>
+                        </div>
+                    ))}
+                </div>
+            </GlassCard>
+
+            <GlassCard theme={theme} className="p-1">
+                <button
+                    onClick={() => onNavigate(`products/competitive-analysis/${categoryId}`)}
+                    className="w-full p-4 rounded-xl flex items-center justify-between hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                >
+                    <span className="text-lg font-semibold" style={{ color: theme.colors.textPrimary }}>
+                        Competitive Analysis
+                    </span>
+                    <ArrowRight className="w-5 h-5" style={{ color: theme.colors.secondary }} />
+                </button>
+            </GlassCard>
+        </div>
+    );
+};
+
+export const CompetitiveAnalysisScreen = ({ theme, currentScreen }) => {
+    const categoryId = currentScreen?.split('/')?.[2] || 'casegoods';
+    const data = Data.COMPETITIVE_DATA?.[categoryId];
+    if (!data?.typicals?.length) {
+        return <PlaceholderScreen theme={theme} category="Competitive Analysis" />;
+    }
+
+    const [selected, setSelected] = React.useState(data.typicals[0]);
+    const [sortKey, setSortKey] = React.useState('adv');
+    const [expanded, setExpanded] = React.useState(false);
+
+    const money = (n) => {
+        if (typeof n !== 'number' || isNaN(n)) return '—';
+        return `$${n.toLocaleString()}`;
+    };
+
+    const getPrice = (item, type) => {
+        if (!item?.basePrice) return 0;
+        if (typeof item.basePrice.list === 'number') return item.basePrice.list;
+        if (typeof item.basePrice.laminate === 'number' && type === 'lam') return item.basePrice.laminate;
+        if (typeof item.basePrice.veneer === 'number' && type === 'ven') return item.basePrice.veneer;
+        if (typeof item.basePrice.laminate === 'number') return item.basePrice.laminate;
+        return 0;
+    };
+
+    const pctAdv = (our, comp) => {
+        if (!comp || comp === 0) return 0;
+        return Math.round(((comp - our) / comp) * 100);
+    };
+
+    const chip = (p) => <span className={`chip ${p > 0 ? 'pos' : p < 0 ? 'neg' : 'neu'}`}>{p > 0 ? `+${p}%` : `${p}%`}</span>;
+
+    const sortRows = React.useMemo(() => {
+        const ourLam = getPrice(selected, 'lam');
+        const ourVen = getPrice(selected, 'ven') || ourLam;
+
+        return data.competitors
+            .map(c => ({
+                name: c.name,
+                lam: Math.round(ourLam * c.factor),
+                ven: Math.round(ourVen * c.factor),
+                adv: pctAdv(ourLam, Math.round(ourLam * c.factor)),
+            }))
+            .sort((a, b) => sortKey === 'adv' ? b.adv - a.adv : a[sortKey] - b[sortKey]);
+    }, [selected, sortKey, data.competitors]);
+
+    const heading =
+        (Data.PRODUCT_DATA?.[categoryId]?.title ?? categoryId)
+            .replace(/-/g, ' ')
+            .replace(/\b\w/g, c => c.toUpperCase()) + ' Competitive Analysis';
+
+    return (
+        <div className="px-6 pt-4 pb-10 space-y-4">
+            <h1 className="text-subhead font-semibold">{heading}</h1>
+
+            <div className="flex space-x-2 overflow-x-auto pb-1 scrollbar-hide">
+                {data.typicals.map(t => (
+                    <button key={t.id} onClick={() => setSelected(t)}
+                        className={`flex-shrink-0 w-20 h-20 rounded-lg border-2 transition-all duration-150
+              ${selected.id === t.id ? 'border-blue-500' : 'border-transparent opacity-70'} hover:scale-105 hover:opacity-100`}>
+                        <img src={t.image} alt={t.name} className="w-full h-full object-cover rounded-lg" />
+                    </button>
+                ))}
+            </div>
+
+            <a href={selected.url} target="_blank" rel="noopener noreferrer">
+                <div className="relative w-full h-48 rounded-2xl overflow-hidden shadow-md group">
+                    <img src={selected.image} alt={selected.name} loading="lazy"
+                        className="absolute w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/15 to-transparent" />
+                </div>
+            </a>
+
+            <div className="h-6 section-band" />
+
+            <GlassCard theme={theme} className="p-0 shadow-sm overflow-hidden">
+                <div className="grid grid-cols-4 text-sm font-semibold sticky top-0 backdrop-blur bg-white/85 border-b"
+                    style={{ borderColor: theme.colors.subtle }}>
+                    <button className="text-left py-2 pl-4" onClick={() => setSortKey('name')}>Series</button>
+                    <button className="text-left py-2" onClick={() => setSortKey('lam')}>Laminate</button>
+                    <button className="text-left py-2" onClick={() => setSortKey('ven')}>Veneer</button>
+                    <button className="text-right py-2 pr-4" onClick={() => setSortKey('adv')}>Adv.</button>
+                </div>
+
+                <div className="grid grid-cols-4 px-4 py-2 hover:bg-black/5"
+                    style={{ fontVariantNumeric: 'tabular-nums' }}>
+                    <span>{selected.name}</span>
+                    <span>{money(getPrice(selected, 'lam'))}</span>
+                    <span>{money(getPrice(selected, 'ven'))}</span>
+                    <span />
+                </div>
+
+                {(expanded ? sortRows : sortRows.slice(0, 3)).map(r => (
+                    <div key={r.name}
+                        className="grid grid-cols-4 px-4 py-2 border-t hover:bg-black/5"
+                        style={{ borderColor: theme.colors.subtle, fontVariantNumeric: 'tabular-nums' }}>
+                        <span>{r.name}</span>
+                        <span>{money(r.lam)}</span>
+                        <span>{money(r.ven)}</span>
+                        <span className="text-right">{chip(r.adv)}</span>
+                    </div>
+                ))}
+
+                {sortRows.length > 3 && (
+                    <button onClick={() => setExpanded(!expanded)}
+                        className="w-full text-sm py-2 font-medium border-t"
+                        style={{ borderColor: theme.colors.subtle, color: theme.colors.secondary }}>
+                        {expanded ? 'Show top 3' : `Show all (${sortRows.length})`}
+                    </button>
+                )}
+            </GlassCard>
+        </div>
+    );
+};
+
+export const PlaceholderScreen = ({ theme, category }) => {
+    return (
+        <div className="px-4 pt-4 pb-4">
+            <PageTitle title={category || "Coming Soon"} theme={theme} />
+            <GlassCard theme={theme} className="p-8 text-center">
+                <p style={{ color: theme.colors.textPrimary }}>
+                    This section is under construction.
+                </p>
+            </GlassCard>
+        </div>
+    );
+};
+
 const CommunityScreen = ({ theme, onNavigate }) => {
     const [tab, setTab] = useState('feed');
     const [modalOpen, setModal] = useState(false);
@@ -5281,6 +5640,7 @@ const SCREEN_MAP = {
     'customer-rank': CustomerRankScreen,
     'commissions': CommissionsScreen,
     'incentive-rewards': IncentiveRewardsScreen,
+    'commissions': CommissionsScreen,
 
     // Top-level Resources menu
     resources: ResourcesScreen,
@@ -5322,7 +5682,6 @@ const SCREEN_MAP = {
 };
 
 export {
-    // Reusable UI bits
     Avatar,
     PostCard,
     WinsCard,

@@ -1,6 +1,10 @@
 ﻿import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { lightTheme, darkTheme, INITIAL_MEMBERS, INITIAL_OPPORTUNITIES, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS } from './data.jsx';
-import { AppHeader, ProfileMenu, SCREEN_MAP, OrderModal, Modal, SuccessToast, PageTitle, ResourceDetailScreen, CartScreen, VoiceModal } from './ui.jsx';
+import {
+    AppHeader, ProfileMenu, SCREEN_MAP, OrderModal, Modal, SuccessToast, PageTitle,
+    ResourceDetailScreen, CartScreen, VoiceModal, ProductComparisonScreen,
+    CompetitiveAnalysisScreen, PlaceholderScreen, FabricsScreen
+} from './ui.jsx';
 import * as Data from './data.jsx';
 
 function App() {
@@ -52,12 +56,33 @@ function App() {
         return () => document.body.removeEventListener('touchmove', preventDefault);
     }, [currentScreen]);
 
+    useEffect(() => {
+        setMembers(prevMembers => prevMembers.map(member =>
+            member.id === currentUserId
+                ? { ...member, firstName: userSettings.firstName, lastName: userSettings.lastName, email: userSettings.email }
+                : member
+        ));
+    }, [userSettings, currentUserId]);
+
+
     // --- HANDLERS ---
     const handleNavigate = useCallback((screen) => { setNavigationHistory(prev => [...prev, screen]); setShowProfileMenu(false); }, []);
     const handleHome = useCallback(() => { setNavigationHistory(['home']); setShowProfileMenu(false); }, []);
     const handleBack = useCallback(() => { if (navigationHistory.length > 1) { setNavigationHistory(prev => prev.slice(0, -1)); } }, [navigationHistory.length]);
     const handleSaveSettings = useCallback(() => { setSuccessMessage("Settings Saved!"); setTimeout(() => setSuccessMessage(""), 2000); handleBack(); }, [handleBack]);
-    const handleNewLeadSuccess = useCallback((newLead) => { setOpportunities(prev => [...prev, newLead]); handleNavigate('projects'); }, [handleNavigate]);
+    const handleNewLeadSuccess = useCallback((newLead) => {
+        const newOpportunity = {
+            id: opportunities.length + 1,
+            name: newLead.project,
+            stage: newLead.projectStatus,
+            value: `$${parseInt(String(newLead.estimatedList).replace(/[^0-9]/g, '')).toLocaleString()}`,
+            company: newLead.dealer,
+        };
+        setOpportunities(prev => [...prev, newOpportunity]);
+        handleNavigate('projects');
+        setSuccessMessage("Lead Created!");
+        setTimeout(() => setSuccessMessage(""), 2000);
+    }, [opportunities, handleNavigate]);
     const handleShowAlert = useCallback((message) => { setAlertInfo({ show: true, message }); }, []);
     const handleShowVoiceModal = useCallback((message) => { setVoiceMessage(message); setTimeout(() => setVoiceMessage(''), 1200); }, []);
     const handleUpdateCart = useCallback((item, change) => {
@@ -87,38 +112,52 @@ function App() {
     const renderScreen = () => {
         const screenParts = currentScreen.split('/');
         const screenKey = screenParts[0];
-        const ScreenComponent = SCREEN_MAP[screenKey];
 
-        if (!ScreenComponent) return <PageTitle title="Not Found" theme={currentTheme} />;
+        const commonProps = {
+            theme: currentTheme,
+            onNavigate: handleNavigate,
+            setSuccessMessage,
+            showAlert: handleShowAlert,
+            handleBack,
+            userSettings,
+            currentScreen,
+        };
 
-        const props = { theme: currentTheme, onNavigate: handleNavigate, setSuccessMessage, showAlert: handleShowAlert, handleBack };
-
-        if (currentScreen === 'samples/cart') {
-            return <CartScreen {...props} cart={cart} setCart={setCart} onUpdateCart={handleUpdateCart} userSettings={userSettings} />;
+        if (screenKey === 'products' && screenParts[1] === 'category' && screenParts[2]) {
+            return <ProductComparisonScreen {...commonProps} categoryId={screenParts[2]} />;
+        }
+        if (screenKey === 'products' && screenParts[1] === 'competitive-analysis' && screenParts[2]) {
+            return <CompetitiveAnalysisScreen {...commonProps} categoryId={screenParts[2]} />;
         }
         if (screenKey === 'resources' && screenParts.length > 1) {
-            return <ResourceDetailScreen {...props} currentScreen={currentScreen} userSettings={userSettings} />;
+            return <ResourceDetailScreen {...commonProps} />;
         }
+        if (currentScreen === 'samples/cart') {
+            return <CartScreen {...commonProps} cart={cart} setCart={setCart} onUpdateCart={handleUpdateCart} />;
+        }
+
+        const ScreenComponent = SCREEN_MAP[screenKey];
+        if (!ScreenComponent) return <PlaceholderScreen {...commonProps} category="Page Not Found" />;
 
         switch (screenKey) {
             case 'home':
-                return <ScreenComponent {...props} onAskAI={handleAskAI} showAIDropdown={showAIDropdown} aiResponse={aiResponse} isAILoading={isAILoading} onCloseAIDropdown={handleCloseAIDropdown} onVoiceActivate={handleShowVoiceModal} />;
+                return <ScreenComponent {...commonProps} onAskAI={handleAskAI} showAIDropdown={showAIDropdown} aiResponse={aiResponse} isAILoading={isAILoading} onCloseAIDropdown={handleCloseAIDropdown} onVoiceActivate={handleShowVoiceModal} />;
             case 'fabrics':
-                return <ScreenComponent {...props} currentScreen={currentScreen} />;
+                return <ScreenComponent {...commonProps} />;
             case 'orders':
-                return <ScreenComponent {...props} setSelectedOrder={setSelectedOrder} />;
+                return <ScreenComponent {...commonProps} setSelectedOrder={setSelectedOrder} />;
             case 'samples':
-                return <ScreenComponent {...props} cart={cart} onUpdateCart={handleUpdateCart} userSettings={userSettings} />;
+                return <ScreenComponent {...commonProps} cart={cart} onUpdateCart={handleUpdateCart} />;
             case 'settings':
-                return <ScreenComponent {...props} userSettings={userSettings} setUserSettings={setUserSettings} onSave={handleSaveSettings} />;
+                return <ScreenComponent {...commonProps} setUserSettings={setUserSettings} onSave={handleSaveSettings} />;
             case 'members':
-                return <ScreenComponent {...props} members={members} setMembers={setMembers} currentUserId={currentUserId} />;
+                return <ScreenComponent {...commonProps} members={members} setMembers={setMembers} currentUserId={currentUserId} />;
             case 'projects':
-                return <ScreenComponent {...props} opportunities={opportunities} />;
+                return <ScreenComponent {...commonProps} opportunities={opportunities} />;
             case 'new-lead':
-                return <ScreenComponent {...props} onSuccess={handleNewLeadSuccess} designFirms={designFirms} setDesignFirms={setDesignFirms} dealers={dealers} setDealers={setDealers} />;
+                return <ScreenComponent {...commonProps} onSuccess={handleNewLeadSuccess} designFirms={designFirms} setDesignFirms={setDesignFirms} dealers={dealers} setDealers={setDealers} />;
             default:
-                return <ScreenComponent {...props} />;
+                return <ScreenComponent {...commonProps} />;
         }
     };
 
