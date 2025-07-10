@@ -16,7 +16,7 @@ function App() {
     const [alertInfo, setAlertInfo] = useState({ show: false, message: '' });
     const [voiceMessage, setVoiceMessage] = useState('');
     const [swipeTranslateX, setSwipeTranslateX] = useState(0); // New state for swipe animation
-    const [isAnimatingBack, setIsAnimatingBack] = useState(false); // New state to control animation timing
+    const [isTransitioning, setIsTransitioning] = useState(false); // New state to control CSS transition
 
     // --- SCREEN-SPECIFIC STATE ---
     const [members, setMembers] = useState(INITIAL_MEMBERS);
@@ -44,7 +44,9 @@ function App() {
 
     // --- DERIVED STATE ---
     const currentScreen = navigationHistory[navigationHistory.length - 1];
-    const previousScreen = navigationHistory[navigationHistory.length - 2]; // Get the previous screen for potential animation
+    // To ensure a smoother transition, we pre-render the previous screen.
+    // We get the second to last element, or null if it's the home screen.
+    const previousScreen = navigationHistory.length > 1 ? navigationHistory[navigationHistory.length - 2] : null;
     const currentTheme = useMemo(() => (isDarkMode ? darkTheme : lightTheme), [isDarkMode]);
 
     // --- SIDE EFFECTS ---
@@ -73,27 +75,27 @@ function App() {
         setNavigationHistory(prev => [...prev, screen]);
         setShowProfileMenu(false);
         setSwipeTranslateX(0); // Reset animation state on new navigation
-        setIsAnimatingBack(false);
+        setIsTransitioning(false); // Ensure no transition active
     }, []);
 
     const handleHome = useCallback(() => {
         setNavigationHistory(['home']);
         setShowProfileMenu(false);
         setSwipeTranslateX(0); // Reset animation state on home navigation
-        setIsAnimatingBack(false);
+        setIsTransitioning(false); // Ensure no transition active
     }, []);
 
     const handleBack = useCallback(() => {
-        if (navigationHistory.length > 1) {
-            setIsAnimatingBack(true); // Start animation
+        if (navigationHistory.length > 1 && !isTransitioning) {
+            setIsTransitioning(true); // Start transition
             setSwipeTranslateX(window.innerWidth); // Animate current screen off to the right
             setTimeout(() => {
                 setNavigationHistory(prev => prev.slice(0, -1));
-                setSwipeTranslateX(0); // Reset for next screen
-                setIsAnimatingBack(false); // End animation state
+                setSwipeTranslateX(0); // Reset for next screen (previous one is now current)
+                setIsTransitioning(false); // End transition state
             }, 300); // Match CSS transition duration
         }
-    }, [navigationHistory.length]);
+    }, [navigationHistory.length, isTransitioning]);
 
     const handleSaveSettings = useCallback(() => { setSuccessMessage("Settings Saved!"); setTimeout(() => setSuccessMessage(""), 2000); handleBack(); }, [handleBack]);
     const handleNewLeadSuccess = useCallback((newLead) => {
@@ -134,48 +136,57 @@ function App() {
 
     // Gesture handler for swiping back
     const handleTouchStart = (e) => {
+        if (isTransitioning) return; // Prevent new swipes during an ongoing transition
+
         // Only consider touches from the far left edge of the screen
         if (e.targetTouches[0].clientX < 50) {
             touchStartX.current = e.targetTouches[0].clientX;
-            // Optionally, prevent default to avoid scrolling while swiping
-            // e.preventDefault();
+            // No setIsTransitioning(false) here, as it conflicts with immediate render
+            // The transition class will be conditionally applied in JSX
         } else {
             touchStartX.current = 0; // Reset if not a left-edge swipe
         }
     };
 
     const handleTouchMove = (e) => {
-        if (touchStartX.current === 0 || isAnimatingBack) return; // Only track valid swipes and not during animation
-        const currentTouchX = e.targetTouches[0].clientX;
-        const diffX = currentTouchX - touchStartX.current;
+        if (touchStartX.current === 0 || isTransitioning) return; // Only track valid swipes and not during transition
 
-        // Only allow positive movement (swiping right)
-        if (diffX > 0) {
-            setSwipeTranslateX(diffX);
-            // Optionally, prevent default to avoid scrolling while swiping
-            // e.preventDefault();
-        }
+        const currentTouchX = e.targetTouches[0].clientX;
+        let diffX = currentTouchX - touchStartX.current;
+
+        // Ensure movement is only to the right and doesn't go below 0
+        if (diffX < 0) diffX = 0;
+
+        setSwipeTranslateX(diffX);
     };
 
     const handleTouchEnd = (e) => {
-        if (touchStartX.current === 0 || isAnimatingBack) return; // Only process valid swipes and not during animation
+        if (touchStartX.current === 0 || isTransitioning) return; // Only process valid swipes and not during transition
 
         const touchEndX = e.changedTouches[0].clientX;
         const swipeDistance = touchEndX - touchStartX.current;
 
-        // Threshold for a successful "back" swipe
-        if (swipeDistance > 75 && navigationHistory.length > 1) {
+        // Threshold for a successful "back" swipe (e.g., 25% of screen width)
+        const swipeThreshold = window.innerWidth * 0.25;
+
+        if (swipeDistance > swipeThreshold && navigationHistory.length > 1) {
             handleBack(); // Trigger the animated back navigation
         } else {
             // If swipe not long enough, snap back to original position
+            setIsTransitioning(true); // Enable transition for snapping back
             setSwipeTranslateX(0);
+            setTimeout(() => {
+                setIsTransitioning(false); // Disable transition after snap back
+            }, 300); // Match CSS transition duration
         }
         touchStartX.current = 0; // Reset
     };
 
     // --- RENDER LOGIC ---
     // renderScreen now takes an optional 'isCurrent' prop to differentiate the rendering context
-    const renderScreen = (screenKey, isCurrent = true) => {
+    const renderScreen = (screenKey) => {
+        if (!screenKey) return null; // Handle case where previousScreen might be null
+
         const screenParts = screenKey.split('/');
         const baseScreenKey = screenParts[0];
 
@@ -229,10 +240,10 @@ function App() {
 
     return (
         <div
-            className="h-screen w-screen font-sans flex flex-col relative overflow-hidden" // Added relative and overflow-hidden
+            className="h-screen w-screen font-sans flex flex-col relative overflow-hidden"
             style={{ backgroundColor: currentTheme.colors.background }}
             onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove} // Add touch move handler
+            onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
         >
             <AppHeader
@@ -247,30 +258,31 @@ function App() {
                 onProfileClick={() => setShowProfileMenu(p => !p)}
             />
 
+            {/* Container for the previous screen (rendered behind current) */}
+            {previousScreen && (
+                <div
+                    className={`absolute inset-0 pt-[72px] ${isTransitioning ? 'transition-transform duration-300' : ''} ${previousScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto'} scrollbar-hide`}
+                    style={{
+                        backgroundColor: currentTheme.colors.background,
+                        // This positions the previous screen to the left, and moves it with the swipe
+                        transform: `translateX(${swipeTranslateX - window.innerWidth}px)`
+                    }}
+                >
+                    {renderScreen(previousScreen)}
+                </div>
+            )}
+
             {/* Container for the current screen, animated on swipe */}
             {/* The pt-[72px] is based on AppHeader height. Adjust if AppHeader height changes. */}
             <div
-                className={`absolute inset-0 pt-[72px] transition-transform duration-300 ${currentScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto'} scrollbar-hide`}
+                className={`absolute inset-0 pt-[72px] ${isTransitioning ? 'transition-transform duration-300' : ''} ${currentScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto'} scrollbar-hide`}
                 style={{
                     backgroundColor: currentTheme.colors.background, // Ensure background covers the screen
                     transform: `translateX(${swipeTranslateX}px)`
                 }}
             >
-                {renderScreen(currentScreen, true)}
+                {renderScreen(currentScreen)}
             </div>
-
-            {/* Render the previous screen slightly off-screen for the reveal effect */}
-            {navigationHistory.length > 1 && (
-                <div
-                    className={`absolute inset-0 pt-[72px] transition-transform duration-300 ${previousScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto'} scrollbar-hide`}
-                    style={{
-                        backgroundColor: currentTheme.colors.background,
-                        transform: `translateX(${swipeTranslateX - window.innerWidth}px)` // Position to the left, ready to be revealed
-                    }}
-                >
-                    {renderScreen(previousScreen, false)}
-                </div>
-            )}
 
 
             <div className="absolute inset-0 pointer-events-none">
