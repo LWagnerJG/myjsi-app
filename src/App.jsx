@@ -15,6 +15,8 @@ function App() {
     const [successMessage, setSuccessMessage] = useState('');
     const [alertInfo, setAlertInfo] = useState({ show: false, message: '' });
     const [voiceMessage, setVoiceMessage] = useState('');
+    const [swipeTranslateX, setSwipeTranslateX] = useState(0); // New state for swipe animation
+    const [isAnimatingBack, setIsAnimatingBack] = useState(false); // New state to control animation timing
 
     // --- SCREEN-SPECIFIC STATE ---
     const [members, setMembers] = useState(INITIAL_MEMBERS);
@@ -42,6 +44,7 @@ function App() {
 
     // --- DERIVED STATE ---
     const currentScreen = navigationHistory[navigationHistory.length - 1];
+    const previousScreen = navigationHistory[navigationHistory.length - 2]; // Get the previous screen for potential animation
     const currentTheme = useMemo(() => (isDarkMode ? darkTheme : lightTheme), [isDarkMode]);
 
     // --- SIDE EFFECTS ---
@@ -66,9 +69,32 @@ function App() {
 
 
     // --- HANDLERS ---
-    const handleNavigate = useCallback((screen) => { setNavigationHistory(prev => [...prev, screen]); setShowProfileMenu(false); }, []);
-    const handleHome = useCallback(() => { setNavigationHistory(['home']); setShowProfileMenu(false); }, []);
-    const handleBack = useCallback(() => { if (navigationHistory.length > 1) { setNavigationHistory(prev => prev.slice(0, -1)); } }, [navigationHistory.length]);
+    const handleNavigate = useCallback((screen) => {
+        setNavigationHistory(prev => [...prev, screen]);
+        setShowProfileMenu(false);
+        setSwipeTranslateX(0); // Reset animation state on new navigation
+        setIsAnimatingBack(false);
+    }, []);
+
+    const handleHome = useCallback(() => {
+        setNavigationHistory(['home']);
+        setShowProfileMenu(false);
+        setSwipeTranslateX(0); // Reset animation state on home navigation
+        setIsAnimatingBack(false);
+    }, []);
+
+    const handleBack = useCallback(() => {
+        if (navigationHistory.length > 1) {
+            setIsAnimatingBack(true); // Start animation
+            setSwipeTranslateX(window.innerWidth); // Animate current screen off to the right
+            setTimeout(() => {
+                setNavigationHistory(prev => prev.slice(0, -1));
+                setSwipeTranslateX(0); // Reset for next screen
+                setIsAnimatingBack(false); // End animation state
+            }, 300); // Match CSS transition duration
+        }
+    }, [navigationHistory.length]);
+
     const handleSaveSettings = useCallback(() => { setSuccessMessage("Settings Saved!"); setTimeout(() => setSuccessMessage(""), 2000); handleBack(); }, [handleBack]);
     const handleNewLeadSuccess = useCallback((newLead) => {
         const newOpportunity = {
@@ -105,41 +131,81 @@ function App() {
         }, 1500);
     }, []);
     const handleCloseAIDropdown = useCallback(() => { setShowAIDropdown(false); }, []);
-    const handleTouchStart = (e) => { if (e.targetTouches[0].clientX < 50) { touchStartX.current = e.targetTouches[0].clientX; } else { touchStartX.current = 0; } };
-    const handleTouchEnd = (e) => { const touchEndX = e.changedTouches[0].clientX; if (touchStartX.current > 0 && touchEndX - touchStartX.current > 75) { handleBack(); } touchStartX.current = 0; };
+
+    // Gesture handler for swiping back
+    const handleTouchStart = (e) => {
+        // Only consider touches from the far left edge of the screen
+        if (e.targetTouches[0].clientX < 50) {
+            touchStartX.current = e.targetTouches[0].clientX;
+            // Optionally, prevent default to avoid scrolling while swiping
+            // e.preventDefault();
+        } else {
+            touchStartX.current = 0; // Reset if not a left-edge swipe
+        }
+    };
+
+    const handleTouchMove = (e) => {
+        if (touchStartX.current === 0 || isAnimatingBack) return; // Only track valid swipes and not during animation
+        const currentTouchX = e.targetTouches[0].clientX;
+        const diffX = currentTouchX - touchStartX.current;
+
+        // Only allow positive movement (swiping right)
+        if (diffX > 0) {
+            setSwipeTranslateX(diffX);
+            // Optionally, prevent default to avoid scrolling while swiping
+            // e.preventDefault();
+        }
+    };
+
+    const handleTouchEnd = (e) => {
+        if (touchStartX.current === 0 || isAnimatingBack) return; // Only process valid swipes and not during animation
+
+        const touchEndX = e.changedTouches[0].clientX;
+        const swipeDistance = touchEndX - touchStartX.current;
+
+        // Threshold for a successful "back" swipe
+        if (swipeDistance > 75 && navigationHistory.length > 1) {
+            handleBack(); // Trigger the animated back navigation
+        } else {
+            // If swipe not long enough, snap back to original position
+            setSwipeTranslateX(0);
+        }
+        touchStartX.current = 0; // Reset
+    };
 
     // --- RENDER LOGIC ---
-    const renderScreen = () => {
-        const screenParts = currentScreen.split('/');
-        const screenKey = screenParts[0];
+    // renderScreen now takes an optional 'isCurrent' prop to differentiate the rendering context
+    const renderScreen = (screenKey, isCurrent = true) => {
+        const screenParts = screenKey.split('/');
+        const baseScreenKey = screenParts[0];
 
         const commonProps = {
             theme: currentTheme,
             onNavigate: handleNavigate,
             setSuccessMessage,
             showAlert: handleShowAlert,
-            handleBack,
+            handleBack, // This handleBack now includes animation
             userSettings,
-            currentScreen,
+            currentScreen: screenKey, // Pass the full screen key
         };
 
-        if (screenKey === 'products' && screenParts[1] === 'category' && screenParts[2]) {
+        if (baseScreenKey === 'products' && screenParts[1] === 'category' && screenParts[2]) {
             return <ProductComparisonScreen {...commonProps} categoryId={screenParts[2]} />;
         }
-        if (screenKey === 'products' && screenParts[1] === 'competitive-analysis' && screenParts[2]) {
+        if (baseScreenKey === 'products' && screenParts[1] === 'competitive-analysis' && screenParts[2]) {
             return <CompetitiveAnalysisScreen {...commonProps} categoryId={screenParts[2]} />;
         }
-        if (screenKey === 'resources' && screenParts.length > 1) {
+        if (baseScreenKey === 'resources' && screenParts.length > 1) {
             return <ResourceDetailScreen {...commonProps} />;
         }
-        if (currentScreen === 'samples/cart') {
+        if (screenKey === 'samples/cart') {
             return <CartScreen {...commonProps} cart={cart} setCart={setCart} onUpdateCart={handleUpdateCart} />;
         }
 
-        const ScreenComponent = SCREEN_MAP[screenKey];
+        const ScreenComponent = SCREEN_MAP[baseScreenKey];
         if (!ScreenComponent) return <PlaceholderScreen {...commonProps} category="Page Not Found" />;
 
-        switch (screenKey) {
+        switch (baseScreenKey) {
             case 'home':
                 return <ScreenComponent {...commonProps} onAskAI={handleAskAI} showAIDropdown={showAIDropdown} aiResponse={aiResponse} isAILoading={isAILoading} onCloseAIDropdown={handleCloseAIDropdown} onVoiceActivate={handleShowVoiceModal} />;
             case 'fabrics':
@@ -163,9 +229,10 @@ function App() {
 
     return (
         <div
-            className="h-screen w-screen font-sans flex flex-col"
+            className="h-screen w-screen font-sans flex flex-col relative overflow-hidden" // Added relative and overflow-hidden
             style={{ backgroundColor: currentTheme.colors.background }}
             onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove} // Add touch move handler
             onTouchEnd={handleTouchEnd}
         >
             <AppHeader
@@ -180,9 +247,31 @@ function App() {
                 onProfileClick={() => setShowProfileMenu(p => !p)}
             />
 
-            <main className={`flex-1 ${currentScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto'} scrollbar-hide`}>
-                {renderScreen()}
-            </main>
+            {/* Container for the current screen, animated on swipe */}
+            {/* The pt-[72px] is based on AppHeader height. Adjust if AppHeader height changes. */}
+            <div
+                className={`absolute inset-0 pt-[72px] transition-transform duration-300 ${currentScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto'} scrollbar-hide`}
+                style={{
+                    backgroundColor: currentTheme.colors.background, // Ensure background covers the screen
+                    transform: `translateX(${swipeTranslateX}px)`
+                }}
+            >
+                {renderScreen(currentScreen, true)}
+            </div>
+
+            {/* Render the previous screen slightly off-screen for the reveal effect */}
+            {navigationHistory.length > 1 && (
+                <div
+                    className={`absolute inset-0 pt-[72px] transition-transform duration-300 ${previousScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto'} scrollbar-hide`}
+                    style={{
+                        backgroundColor: currentTheme.colors.background,
+                        transform: `translateX(${swipeTranslateX - window.innerWidth}px)` // Position to the left, ready to be revealed
+                    }}
+                >
+                    {renderScreen(previousScreen, false)}
+                </div>
+            )}
+
 
             <div className="absolute inset-0 pointer-events-none">
                 {showProfileMenu && <ProfileMenu show={showProfileMenu} onClose={() => setShowProfileMenu(false)} onNavigate={handleNavigate} toggleTheme={() => setIsDarkMode(d => !d)} theme={currentTheme} isDarkMode={isDarkMode} />}
