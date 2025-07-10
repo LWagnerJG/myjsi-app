@@ -133,58 +133,56 @@ export const CommissionsScreen = ({ theme }) => {
 
                         {expandedMonth === check.month && check.details && (
                             <div className="p-0 animate-fade-in">
-                                <GlassCard theme={theme} className="p-4 space-y-6 max-w-md mx-auto my-4">
+                                <GlassCard theme={theme} className="p-4 max-w-md mx-auto my-4">
                                     {check.details.map((detail, dIndex) => {
                                         if (detail.invoices) {
                                             return (
                                                 <div key={dIndex} className="space-y-4">
-                                                    <div className="rounded-lg overflow-hidden" style={{ border: `1px solid ${theme.colors.border}` }}>
-                                                        <table className="w-full text-sm">
-                                                            <thead>
-                                                                <tr className="text-left font-semibold" style={{ color: theme.colors.textSecondary, backgroundColor: theme.colors.subtle }}>
-                                                                    <th className="py-2 px-2 w-2/5">SO # / Project</th>
-                                                                    <th className="py-2 px-2 text-right w-1/5">Net</th>
-                                                                    <th className="py-2 px-2 text-right w-1/5">Comm.</th>
-                                                                    <th className="py-2 px-2 text-right w-1/5">Rate</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                {detail.invoices.map((inv, iIndex) => {
-                                                                    const commissionRate = inv.netAmount ? ((inv.commission / inv.netAmount) * 100).toFixed(1) : '0.0';
-                                                                    const isRowExpanded = expandedRow === iIndex;
-                                                                    return (
-                                                                        <tr
-                                                                            key={iIndex}
-                                                                            onClick={() => toggleRow(iIndex)}
-                                                                            className={`cursor-pointer transition-colors ${iIndex % 2 === 0 ? '' : 'bg-black/5 dark:bg-white/5'} hover:bg-black/10 dark:hover:bg-white/10`} // Added hover effect and zebra striping
-                                                                        >
-                                                                            <td className="py-2 px-2">
-                                                                                <div className="font-mono text-xs break-words" style={{ color: theme.colors.textPrimary }}>{inv.so || inv.invoice}</div>
-                                                                                {isRowExpanded && inv.project && (
-                                                                                    <div className="text-xs mt-1 break-words" style={{ color: theme.colors.textSecondary }}>{inv.project}</div>
-                                                                                )}
-                                                                            </td>
-                                                                            <td className="py-2 px-2 text-right font-mono" style={{ color: theme.colors.textPrimary }}>${inv.netAmount.toLocaleString()}</td>
-                                                                            <td className="py-2 px-2 text-right font-bold" style={{ color: theme.colors.accent }}>${inv.commission.toLocaleString()}</td>
-                                                                            <td className="py-2 px-2 text-right text-xs" style={{ color: theme.colors.textPrimary }}>{commissionRate}%</td>
-                                                                        </tr>
-                                                                    );
-                                                                })}
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
+                                                    <table className="w-full text-sm">
+                                                        <thead>
+                                                            <tr className="text-left font-semibold" style={{ color: theme.colors.textSecondary, backgroundColor: theme.colors.subtle }}>
+                                                                <th className="py-2 px-2 w-2/5">SO # / Project</th>
+                                                                <th className="py-2 px-2 text-right w-1/5">Net</th>
+                                                                <th className="py-2 px-2 text-right w-1/5">Comm.</th>
+                                                                <th className="py-2 px-2 text-right w-1/5">Rate</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {detail.invoices.map((inv, iIndex) => {
+                                                                const commissionRate = inv.netAmount ? ((inv.commission / inv.netAmount) * 100).toFixed(1) : '0.0';
+                                                                const isRowExpanded = expandedRow === iIndex;
+                                                                return (
+                                                                    <tr
+                                                                        key={iIndex}
+                                                                        onClick={() => toggleRow(iIndex)}
+                                                                        className={`cursor-pointer transition-colors ${iIndex % 2 === 0 ? 'bg-black/5 dark:bg-white/5' : ''} hover:bg-black/10 dark:hover:bg-white/10`} // Adjusted for discrete zebra striping on even rows
+                                                                    >
+                                                                        <td className="py-2 px-2">
+                                                                            <div className="font-mono text-xs break-words" style={{ color: theme.colors.textPrimary }}>{inv.so || inv.invoice}</div>
+                                                                            {isRowExpanded && inv.project && (
+                                                                                <div className="text-xs mt-1 break-words" style={{ color: theme.colors.textSecondary }}>{inv.project}</div>
+                                                                            )}
+                                                                        </td>
+                                                                        <td className="py-2 px-2 text-right font-mono" style={{ color: theme.colors.textPrimary }}>${inv.netAmount.toLocaleString()}</td>
+                                                                        <td className="py-2 px-2 text-right font-bold" style={{ color: theme.colors.accent }}>${inv.commission.toLocaleString()}</td>
+                                                                        <td className="py-2 px-2 text-right text-xs" style={{ color: theme.colors.textPrimary }}>{commissionRate}%</td>
+                                                                    </tr>
+                                                                );
+                                                            })}
+                                                        </tbody>
+                                                    </table>
                                                 </div>
                                             );
                                         } else if (detail.customer && detail.total > 0) {
                                             return (
-                                                <div key={dIndex} className="flex justify-between items-center text-sm p-3 rounded-lg" style={{ backgroundColor: theme.colors.subtle }}>
+                                                <div key={dIndex} className="flex justify-between items-center text-sm p-3">
                                                     <span className="font-medium" style={{ color: theme.colors.textPrimary }}>{detail.customer}</span>
                                                     <span style={{ color: theme.colors.accent }}>${detail.total.toLocaleString()}</span>
                                                 </div>
                                             );
                                         } else if (detail.brandTotal) {
                                             return (
-                                                <div key={dIndex} className="p-4 rounded-lg space-y-2" style={{ backgroundColor: theme.colors.subtle }}>
+                                                <div key={dIndex} className="p-4 space-y-2">
                                                     <h4 className="font-bold text-base flex items-center" style={{ color: theme.colors.textPrimary }}>
                                                         <DollarSign className="w-5 h-5 mr-2" style={{ color: theme.colors.accent }} />
                                                         {detail.brandTotal} Totals
@@ -217,7 +215,6 @@ export const CommissionsScreen = ({ theme }) => {
         </div>
     );
 };
-
 export const IncentiveRewardsScreen = ({ theme, onNavigate }) => {
     // Placeholder - Logic will be added later
     return <PageTitle title="Incentive Rewards" theme={theme} />;
