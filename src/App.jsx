@@ -15,8 +15,8 @@ function App() {
     const [successMessage, setSuccessMessage] = useState('');
     const [alertInfo, setAlertInfo] = useState({ show: false, message: '' });
     const [voiceMessage, setVoiceMessage] = useState('');
-    const [swipeTranslateX, setSwipeTranslateX] = useState(0); // New state for swipe animation
-    const [isTransitioning, setIsTransitioning] = useState(false); // New state to control CSS transition
+    const [swipeTranslateX, setSwipeTranslateX] = useState(0);
+    const [isTransitioning, setIsTransitioning] = useState(false);
 
     // --- SCREEN-SPECIFIC STATE ---
     const [members, setMembers] = useState(INITIAL_MEMBERS);
@@ -38,9 +38,9 @@ function App() {
 
     // --- GESTURE & AI STATE ---
     const touchStartX = useRef(0);
-    const touchStartY = useRef(0); // Store initial Y position
-    const isSwipingHorizontal = useRef(false); // Flag to confirm horizontal swipe intent
-    const hasSwipeStarted = useRef(false); // Flag to ensure we only analyze direction once per gesture
+    const touchStartY = useRef(0);
+    const hasSwipeStarted = useRef(false); // Tracks if a gesture started in the left zone
+    const isHorizontalSwipe = useRef(false); // Confirmed horizontal swipe for the current gesture
 
     const [aiResponse, setAiResponse] = useState('');
     const [isAILoading, setIsAILoading] = useState(false);
@@ -53,16 +53,24 @@ function App() {
 
     // --- SIDE EFFECTS ---
     useEffect(() => {
-        const preventDefault = (e) => e.preventDefault();
-        // Lock scrolling on home screen for mobile
-        // Note: Global preventDefault might interfere with nested scrollable elements.
-        // The touch event handlers in the component will manage prevention more granularly.
-        if (currentScreen === 'home') {
-            document.body.addEventListener('touchmove', preventDefault, { passive: false });
-        } else {
-            document.body.removeEventListener('touchmove', preventDefault);
-        }
-        return () => document.body.removeEventListener('touchmove', preventDefault);
+        // Global touchmove listener to prevent overscroll bounce on iOS, etc.
+        // This is separate from gesture-specific prevention.
+        const preventDefaultGlobal = (e) => {
+            // Prevent default body scrolling ONLY if we are on the home screen
+            // or if a horizontal swipe is currently active.
+            // This is complex to manage globally vs. element-specific.
+            // For now, let's keep it simple as it was.
+            if (currentScreen === 'home') {
+                e.preventDefault();
+            }
+        };
+
+        // We use passive: false to allow e.preventDefault() in touchmove
+        document.body.addEventListener('touchmove', preventDefaultGlobal, { passive: false });
+
+        return () => {
+            document.body.removeEventListener('touchmove', preventDefaultGlobal);
+        };
     }, [currentScreen]);
 
     useEffect(() => {
@@ -143,12 +151,16 @@ function App() {
         if (isTransitioning || navigationHistory.length <= 1) return;
 
         const touchX = e.targetTouches[0].clientX;
-        if (touchX < 30) { // Define a trigger zone (e.g., 30 pixels from left)
+        if (touchX < 30) { // Touch starts within the left-edge swipe zone
             touchStartX.current = touchX;
             touchStartY.current = e.targetTouches[0].clientY;
-            hasSwipeStarted.current = true; // Mark that a swipe potential has begun
-            isSwipingHorizontal.current = false; // Reset horizontal swipe flag for new gesture
+            hasSwipeStarted.current = true; // Flag that a potential swipe is in progress
+            isHorizontalSwipe.current = false; // Reset for new gesture
             setIsTransitioning(false); // Disable transition during active drag
+            // IMMEDIATELY PREVENT DEFAULT. This is the key.
+            // We assume horizontal swipe intent from this zone, and block all default scroll.
+            e.preventDefault();
+            e.stopPropagation(); // Also stop propagation to prevent parent elements from scrolling
         } else {
             touchStartX.current = 0; // Not a left-edge swipe
             hasSwipeStarted.current = false;
@@ -164,29 +176,31 @@ function App() {
         const diffX = currentTouchX - touchStartX.current;
         const diffY = Math.abs(currentTouchY - touchStartY.current);
 
-        // If we haven't determined the primary direction yet
-        if (!isSwipingHorizontal.current) {
-            // Define a small tolerance before committing to a direction
-            const directionTolerance = 10; // pixels
+        // Continue preventing default throughout the gesture if it started in the zone
+        // This ensures no vertical scrolling happens once we've claimed the touch.
+        e.preventDefault();
+        e.stopPropagation();
+
+        // If we haven't confirmed direction yet, or if it's an ongoing horizontal swipe
+        if (!isHorizontalSwipe.current) {
+            const directionTolerance = 10; // pixels to distinguish initial direction
 
             if (diffX > directionTolerance && diffX > diffY) { // Primarily horizontal and moving right
-                isSwipingHorizontal.current = true;
-                e.preventDefault(); // LOCK SCROLL: Prevent default browser behavior (like vertical scroll)
+                isHorizontalSwipe.current = true;
             } else if (diffY > directionTolerance) { // Primarily vertical
-                // If it's a vertical scroll, stop tracking this as a horizontal swipe
-                touchStartX.current = 0; // Invalidate the swipe gesture
+                // If it turns out to be a vertical gesture, invalidate the horizontal swipe
+                // Screen won't scroll due to preventDefault, but horizontal swipe won't continue.
+                touchStartX.current = 0; // Invalidate the swipe
                 hasSwipeStarted.current = false;
-                return; // Let native scrolling continue
+                return; // Stop processing this as a horizontal swipe
             }
         }
 
         // If it's confirmed a horizontal swipe (or it's an ongoing horizontal swipe)
-        if (isSwipingHorizontal.current) {
+        if (isHorizontalSwipe.current) {
             let newTranslateX = diffX;
             if (newTranslateX < 0) newTranslateX = 0; // Ensure it doesn't go left past start
-
             setSwipeTranslateX(newTranslateX);
-            e.preventDefault(); // Continue preventing default during horizontal drag
         }
     };
 
@@ -198,7 +212,7 @@ function App() {
 
         const swipeThreshold = window.innerWidth * 0.25;
 
-        if (isSwipingHorizontal.current && swipeDistance > swipeThreshold && navigationHistory.length > 1) {
+        if (isHorizontalSwipe.current && swipeDistance > swipeThreshold && navigationHistory.length > 1) {
             handleBack();
         } else {
             setIsTransitioning(true);
@@ -207,10 +221,11 @@ function App() {
                 setIsTransitioning(false);
             }, 300);
         }
+        // Reset all gesture state flags
         touchStartX.current = 0;
         touchStartY.current = 0;
-        isSwipingHorizontal.current = false;
-        hasSwipeStarted.current = false; // Reset for next touch
+        hasSwipeStarted.current = false;
+        isHorizontalSwipe.current = false;
     };
 
     // --- RENDER LOGIC ---
