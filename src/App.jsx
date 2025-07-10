@@ -44,9 +44,7 @@ function App() {
 
     // --- DERIVED STATE ---
     const currentScreen = navigationHistory[navigationHistory.length - 1];
-    // To ensure a smoother transition, we pre-render the previous screen.
-    // We get the second to last element, or null if it's the home screen.
-    const previousScreen = navigationHistory.length > 1 ? navigationHistory[navigationHistory.length - 2] : null;
+    const previousScreen = navigationHistory.length > 1 ? navigationHistory[navigationHistory.length - 2] : null; // Only get if there's a previous screen
     const currentTheme = useMemo(() => (isDarkMode ? darkTheme : lightTheme), [isDarkMode]);
 
     // --- SIDE EFFECTS ---
@@ -74,25 +72,25 @@ function App() {
     const handleNavigate = useCallback((screen) => {
         setNavigationHistory(prev => [...prev, screen]);
         setShowProfileMenu(false);
-        setSwipeTranslateX(0); // Reset animation state on new navigation
-        setIsTransitioning(false); // Ensure no transition active
+        setSwipeTranslateX(0);
+        setIsTransitioning(false);
     }, []);
 
     const handleHome = useCallback(() => {
         setNavigationHistory(['home']);
         setShowProfileMenu(false);
-        setSwipeTranslateX(0); // Reset animation state on home navigation
-        setIsTransitioning(false); // Ensure no transition active
+        setSwipeTranslateX(0);
+        setIsTransitioning(false);
     }, []);
 
     const handleBack = useCallback(() => {
         if (navigationHistory.length > 1 && !isTransitioning) {
-            setIsTransitioning(true); // Start transition
+            setIsTransitioning(true); // Enable CSS transition for smooth snap
             setSwipeTranslateX(window.innerWidth); // Animate current screen off to the right
             setTimeout(() => {
                 setNavigationHistory(prev => prev.slice(0, -1));
                 setSwipeTranslateX(0); // Reset for next screen (previous one is now current)
-                setIsTransitioning(false); // End transition state
+                setIsTransitioning(false); // Disable transition after state update
             }, 300); // Match CSS transition duration
         }
     }, [navigationHistory.length, isTransitioning]);
@@ -136,13 +134,12 @@ function App() {
 
     // Gesture handler for swiping back
     const handleTouchStart = (e) => {
-        if (isTransitioning) return; // Prevent new swipes during an ongoing transition
+        if (isTransitioning || navigationHistory.length <= 1) return; // Prevent new swipes during transition or on home screen
 
         // Only consider touches from the far left edge of the screen
         if (e.targetTouches[0].clientX < 50) {
             touchStartX.current = e.targetTouches[0].clientX;
-            // No setIsTransitioning(false) here, as it conflicts with immediate render
-            // The transition class will be conditionally applied in JSX
+            setIsTransitioning(false); // Disable transition during active drag
         } else {
             touchStartX.current = 0; // Reset if not a left-edge swipe
         }
@@ -183,7 +180,7 @@ function App() {
     };
 
     // --- RENDER LOGIC ---
-    // renderScreen now takes an optional 'isCurrent' prop to differentiate the rendering context
+    // renderScreen now takes an optional 'screenKey' prop
     const renderScreen = (screenKey) => {
         if (!screenKey) return null; // Handle case where previousScreen might be null
 
@@ -195,9 +192,9 @@ function App() {
             onNavigate: handleNavigate,
             setSuccessMessage,
             showAlert: handleShowAlert,
-            handleBack, // This handleBack now includes animation
+            handleBack,
             userSettings,
-            currentScreen: screenKey, // Pass the full screen key
+            currentScreen: screenKey,
         };
 
         if (baseScreenKey === 'products' && screenParts[1] === 'category' && screenParts[2]) {
