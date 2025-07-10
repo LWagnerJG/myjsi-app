@@ -4,7 +4,7 @@ import {
     Calendar, Camera, CheckCircle, ChevronDown, ChevronLeft, ChevronRight,
     ChevronUp, Clock, Copy, Database, DollarSign, FileText, Film, Filter,
     HelpCircle, Home, Hourglass, List, LogOut, MapPin, MessageSquare, Mic,
-    Minus, MonitorPlay, Moon, MoreVertical, Package, Palette,
+    Minus, MonitorPlay, Moon, MoreVertical, Package, Palette, Heart,
     Paperclip, Percent, PieChart, Play, Plus, RotateCw, Save, Search, Send,
     Server, Settings, Share2, ShoppingCart, Sun, Trophy, User, UserPlus,
     UserX, Users, Video, Wrench, X
