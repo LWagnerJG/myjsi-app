@@ -7,10 +7,30 @@ export const logoLight = 'https://i.imgur.com/qskYhB0.png';
 export const MENU_ITEMS = [{ id: 'orders', icon: MousePointer, label: 'Orders' }, { id: 'sales', icon: PieChart, label: 'Sales' }, { id: 'products', icon: Armchair, label: 'Products' }, { id: 'resources', icon: Database, label: 'Resources' }, { id: 'projects', icon: Briefcase, label: 'Projects' }, { id: 'community', icon: MessageSquare, label: 'Community' }, { id: 'samples', icon: Package, label: 'Samples' }, { id: 'replacements', icon: RotateCw, label: 'Replacements' },];
 
 export const MY_PROJECTS_DATA = [
-    { id: 'proj1', name: 'Acme Corp HQ', location: 'Indianapolis, IN', image: 'https://placehold.co/400x300/D9CDBA/2A2A2A?text=Install+1' },
-    { id: 'proj2', name: 'Tech Park Offices', location: 'Fishers, IN', image: 'https://placehold.co/400x300/E3DBC8/2A2A2A?text=Install+2' },
-    { id: 'proj3', name: 'Community Hospital', location: 'Carmel, IN', image: 'https://placehold.co/400x300/A9886C/FFFFFF?text=Install+3' },
-    { id: 'proj4', name: 'Downtown Library', location: 'Indianapolis, IN', image: 'https://placehold.co/400x300/966642/FFFFFF?text=Install+4' },
+    {
+        id: 'proj1',
+        name: 'Acme Corp HQ',
+        location: 'Indianapolis, IN',
+        image: 'https://webresources.jsifurniture.com/production/uploads/jsi_vision_install_0000010.jpg'
+    },
+    {
+        id: 'proj2',
+        name: 'Tech Park Offices',
+        location: 'Fishers, IN',
+        image: 'https://webresources.jsifurniture.com/production/uploads/jsi_caav_install_00024_pldPbiW.jpg'
+    },
+    {
+        id: 'proj3',
+        name: 'Community Hospital',
+        location: 'Carmel, IN',
+        image: 'https://webresources.jsifurniture.com/production/uploads/original_images/jsi_finn_enviro_00004_aOu5872.jpg'
+    },
+    {
+        id: 'proj4',
+        name: 'Downtown Library',
+        location: 'Indianapolis, IN',
+        image: 'https://webresources.jsifurniture.com/production/uploads/jsi_coldjet_install_00001.jpg'
+    },
 ];
 
 

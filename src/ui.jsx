@@ -328,17 +328,17 @@ const {
 const Icon = ({ uri, size = 24, className = "" }) => (
     <img
         src={uri}
-        alt="icon" // Alt text is good practice for web accessibility
+        alt="icon"
         className={className}
         style={{ width: size, height: size }}
     />
 );
 
-const WoodIcon = ({ color }) => <Icon uri="https://img.icons8.com/ios-glyphs/60/chair.png" color={color} />;
-const UpholsteryIcon = ({ color }) => <Icon uri="https://img.icons8.com/ios-filled/50/armchair.png" color={color} />;
-const CasegoodIcon = ({ color }) => <Icon uri="https://img.icons8.com/ios-filled/50/desk.png" color={color} />;
-const SearchIcon = ({ size, color }) => <Icon uri="https://img.icons8.com/ios-glyphs/60/search--v1.png" size={size} color={color} />;
-const FilterIcon = ({ size, color }) => <Icon uri="https://img.icons8.com/ios-filled/50/filter--v1.png" size={size} color={color} />;
+const WoodIcon = ({ color }) => <Icon uri="https://img.icons8.com/ios-glyphs/60/chair.png" />;
+const UpholsteryIcon = ({ color }) => <Icon uri="https://img.icons8.com/ios-filled/50/armchair.png" />;
+const CasegoodIcon = ({ color }) => <Icon uri="https://img.icons8.com/ios-filled/50/desk.png" />;
+const SearchIcon = ({ size, color }) => <Icon uri="https://img.icons8.com/ios-glyphs/60/search--v1.png" size={size} />;
+const FilterIcon = ({ size, color }) => <Icon uri="https://img.icons8.com/ios-filled/50/filter--v1.png" size={size} />;
 
 export const SmartSearch = ({ theme, onNavigate, onAskAI, onVoiceActivate }) => {
     const [query, setQuery] = useState('');
@@ -3391,6 +3391,13 @@ export const HomeScreen = ({ onNavigate, theme, onAskAI, showAIDropdown, aiRespo
 };
 export const PermissionToggle = React.memo(({ label, isEnabled, onToggle, theme, disabled }) => {
     const titleText = disabled ? "Requires Sales Data access" : "";
+
+    // This style object now has a more visible border color for the 'off' state
+    const toggleStyle = {
+        backgroundColor: isEnabled ? theme.colors.accent : 'transparent',
+        borderColor: isEnabled ? theme.colors.accent : 'rgba(0, 0, 0, 0.2)',
+    };
+
     return (
         <div title={titleText} className={`flex items-center justify-between text-sm ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`} onClick={disabled ? undefined : onToggle}>
             <span style={{ color: theme.colors.textSecondary }}>{label}</span>
@@ -3398,14 +3405,12 @@ export const PermissionToggle = React.memo(({ label, isEnabled, onToggle, theme,
                 type="button"
                 role="switch"
                 aria-checked={isEnabled}
-                className="relative inline-flex items-center h-6 rounded-full w-11 transition-colors border"
-                // FIX: "Off" state now has a visible border and background
-                style={{ 
-                    backgroundColor: isEnabled ? theme.colors.accent : theme.colors.subtle,
-                    borderColor: theme.colors.border
-                }}
+                className="relative inline-flex items-center h-6 w-11 transition-colors duration-200 ease-in-out rounded-full border-2"
+                style={toggleStyle}
             >
-                <span className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${isEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                <span
+                    className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform duration-200 ease-in-out ${isEnabled ? 'translate-x-5' : 'translate-x-0.5'}`}
+                />
             </button>
         </div>
     );
@@ -4378,27 +4383,32 @@ export const ResourcesScreen = ({ theme, onNavigate }) => {
 };
 
 
-const ProjectsScreen = ({ onNavigate, theme, opportunities }) => {
+export const ProjectsScreen = ({ onNavigate, theme, opportunities }) => {
     const [projectsTab, setProjectsTab] = useState('pipeline');
     const [selectedPipelineStage, setSelectedPipelineStage] = useState('Discovery');
 
-    const filteredOpportunities = useMemo(() => opportunities.filter(opp => opp.stage === selectedPipelineStage), [selectedPipelineStage, opportunities]);
+    const filteredOpportunities = useMemo(() => {
+        if (!opportunities) return []; // Safety check
+        return opportunities.filter(opp => opp.stage === selectedPipelineStage);
+    }, [selectedPipelineStage, opportunities]);
+
+    // This determines the text for the button based on the selected tab
+    const newButtonText = projectsTab === 'pipeline' ? 'New Lead' : 'Add New Install';
 
     return (
-        <>
+        <div className="h-full flex flex-col">
             <PageTitle title="Projects" theme={theme}>
-                {/* The button is now inside PageTitle */}
                 <button
                     onClick={() => onNavigate('new-lead')}
                     className="flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-transform hover:scale-105 active:scale-95"
                     style={{ backgroundColor: theme.colors.accent, color: 'white' }}
                 >
-                    <span>New</span>
+                    <span>{newButtonText}</span>
                     <Plus className="w-4 h-4" />
                 </button>
             </PageTitle>
 
-            <div className="px-4 mt-4">
+            <div className="px-4">
                 <GlassCard theme={theme} className="p-1 flex relative">
                     <div
                         className="absolute top-1 bottom-1 w-[calc(50%-0.25rem)] h-auto rounded-full transition-all duration-300 ease-in-out"
@@ -4425,27 +4435,60 @@ const ProjectsScreen = ({ onNavigate, theme, opportunities }) => {
             </div>
 
             {projectsTab === 'pipeline' ? (
-                <>
-                    <div className="flex space-x-2 overflow-x-auto p-4 scrollbar-hide">{STAGES.map(stage => (<button key={stage} onClick={() => setSelectedPipelineStage(stage)} className={`px-4 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition-colors`} style={{ backgroundColor: selectedPipelineStage === stage ? theme.colors.primary : 'transparent', color: selectedPipelineStage === stage ? theme.colors.surface : theme.colors.textSecondary }}>{stage}</button>))}</div>
-                    <div className="px-4 space-y-4 pb-4">{filteredOpportunities.map(opp => (<GlassCard key={opp.id} theme={theme} className="overflow-hidden"><div className="p-4"><div className="flex justify-between items-start"><h3 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>{opp.name}</h3><span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${STAGE_COLORS[opp.stage]}`}>{opp.stage}</span></div><p className="text-sm" style={{ color: theme.colors.textSecondary }}>{opp.company}</p><p className="font-semibold text-2xl my-2" style={{ color: theme.colors.textPrimary }}>{opp.value}</p></div></GlassCard>))}</div>
-                </>
+                <div className="flex-1 flex flex-col overflow-hidden">
+                    <div className="flex space-x-2 overflow-x-auto p-4 scrollbar-hide">
+                        {Data.STAGES.map(stage => (
+                            <button
+                                key={stage}
+                                onClick={() => setSelectedPipelineStage(stage)}
+                                className="px-4 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition-colors"
+                                style={{
+                                    backgroundColor: selectedPipelineStage === stage ? theme.colors.primary : 'transparent',
+                                    color: selectedPipelineStage === stage ? theme.colors.surface : theme.colors.textSecondary
+                                }}
+                            >
+                                {stage}
+                            </button>
+                        ))}
+                    </div>
+                    <div className="flex-1 overflow-y-auto px-4 space-y-4 pb-4 scrollbar-hide">
+                        {filteredOpportunities.length > 0 ? filteredOpportunities.map(opp => (
+                            <GlassCard key={opp.id} theme={theme} className="overflow-hidden p-4">
+                                <div className="flex justify-between items-start">
+                                    <h3 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>{opp.name}</h3>
+                                    <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${Data.STAGE_COLORS[opp.stage]}`}>{opp.stage}</span>
+                                </div>
+                                <p className="text-sm" style={{ color: theme.colors.textSecondary }}>{opp.company}</p>
+                                <p className="font-semibold text-2xl my-2" style={{ color: theme.colors.textPrimary }}>{opp.value}</p>
+                            </GlassCard>
+                        )) : (
+                            <p className="text-center text-sm p-8" style={{ color: theme.colors.textSecondary }}>No projects in this stage.</p>
+                        )}
+                    </div>
+                </div>
             ) : (
-                <div className="px-4 pt-4 pb-4 grid grid-cols-2 gap-4">
+                <div className="flex-1 overflow-y-auto px-4 pt-4 pb-4 space-y-6 scrollbar-hide">
                     {Data.MY_PROJECTS_DATA.map(project => (
-                        <GlassCard key={project.id} theme={theme} className="p-2 space-y-2 cursor-pointer">
-                            <img src={project.image} alt={project.name} className="w-full h-24 object-cover rounded-lg" onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/400x300/EEE/333?text=Error'; }} />
-                            <div>
-                                <p className="font-bold text-sm" style={{ color: theme.colors.textPrimary }}>{project.name}</p>
-                                <p className="text-xs" style={{ color: theme.colors.textSecondary }}>{project.location}</p>
+                        <GlassCard key={project.id} theme={theme} className="p-0 overflow-hidden cursor-pointer group">
+                            <div className="relative aspect-video w-full">
+                                <img
+                                    src={project.image}
+                                    alt={project.name}
+                                    className="absolute h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                                <div className="absolute bottom-0 left-0 p-4">
+                                    <h3 className="text-2xl font-bold text-white tracking-tight">{project.name}</h3>
+                                    <p className="text-white/80 font-medium">{project.location}</p>
+                                </div>
                             </div>
                         </GlassCard>
                     ))}
                 </div>
             )}
-        </>
+        </div>
     );
 };
-
 const CommunityScreen = ({ theme, onNavigate }) => {
     const [tab, setTab] = useState('feed');
     const [modalOpen, setModal] = useState(false);
@@ -5317,7 +5360,6 @@ export {
     SocialMediaScreen,
 
     // Other app screens
-    ProjectsScreen,
     CommunityScreen,
     SamplesScreen,
     FancySelect,
