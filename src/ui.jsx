@@ -3308,19 +3308,21 @@ const FancySelect = ({ value, onChange, options, placeholder, required, theme })
     </div>
 );
 
+// in ui.jsx
+
 export const FormInput = React.memo(({
     label,
     type = 'text',
-    value, // This is the prop that might be undefined/null
+    value,
     onChange,
+    name, // Ensure name is passed for the handler
     placeholder,
-    options,
     className = "",
     theme,
     readOnly = false,
     required = false,
 }) => {
-    // Ensure value is always a controlled string
+    // This ensures the input is always controlled, preventing errors with null/undefined values.
     const controlledValue = value === undefined || value === null ? '' : value;
 
     const inputClass = `w-full px-4 py-3 border rounded-full focus:ring-2 text-base outline-none ${className}`;
@@ -3340,7 +3342,7 @@ export const FormInput = React.memo(({
 
     const handleCurrencyChange = (e) => {
         const numericValue = e.target.value.replace(/[^0-9]/g, '');
-        onChange({ target: { value: numericValue } }); // Pass only digits to state
+        onChange({ target: { name, value: numericValue } });
     };
 
     return (
@@ -3351,18 +3353,11 @@ export const FormInput = React.memo(({
                 </label>
             )}
             {type === 'currency' ? (
-                <input
-                    type="text"
-                    value={formatCurrency(controlledValue)} // Use controlledValue
-                    onChange={handleCurrencyChange}
-                    className={inputClass}
-                    style={styles}
-                    placeholder={placeholder}
-                    required={required}
-                />
+                <input type="text" name={name} value={formatCurrency(controlledValue)} onChange={handleCurrencyChange} className={inputClass} style={styles} placeholder={placeholder} required={required} />
             ) : type === 'textarea' ? (
                 <textarea
-                    value={controlledValue} // Use controlledValue
+                    name={name}
+                    value={controlledValue}
                     onChange={onChange}
                     className={inputClass.replace('rounded-full', 'rounded-2xl')}
                     style={styles}
@@ -3373,7 +3368,8 @@ export const FormInput = React.memo(({
             ) : (
                 <input
                     type={type}
-                    value={controlledValue} // Use controlledValue
+                    name={name}
+                    value={controlledValue}
                     onChange={onChange}
                     className={inputClass}
                     style={styles}
@@ -3385,6 +3381,8 @@ export const FormInput = React.memo(({
         </div>
     );
 });
+
+
 export const SearchInput = React.memo(({ onSubmit, value, onChange, placeholder, theme, className, onVoiceClick }) => (
     <form onSubmit={onSubmit} className={`relative flex items-center ${className || ''}`} >
         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -3476,6 +3474,7 @@ const AppHeader = React.memo(({ onHomeClick, isDarkMode, theme, onProfileClick, 
         </div>
     );
 });
+
 export const HomeScreen = ({ onNavigate, theme, onAskAI, showAIDropdown, aiResponse, isAILoading, onCloseAIDropdown, onVoiceActivate }) => {
     const handleFeedbackClick = useCallback(() => {
         onNavigate('feedback');
@@ -3483,7 +3482,8 @@ export const HomeScreen = ({ onNavigate, theme, onAskAI, showAIDropdown, aiRespo
 
     return (
         <div className="flex flex-col h-screen overflow-hidden" style={{ backgroundColor: theme.colors.background }}>
-            <div className="px-4 pt-4 pb-2 relative z-10">
+            {/* UPDATED: Changed padding from pt-4 pb-2 to py-4 for symmetrical spacing */}
+            <div className="px-4 py-4 relative z-10">
                 <SmartSearch
                     theme={theme}
                     onNavigate={onNavigate}
@@ -3533,6 +3533,7 @@ export const HomeScreen = ({ onNavigate, theme, onAskAI, showAIDropdown, aiRespo
         </div>
     );
 };
+
 export const PermissionToggle = React.memo(({ label, isEnabled, onToggle, theme, disabled }) => {
     const titleText = disabled ? "Requires Sales Data access" : "";
 
@@ -3844,7 +3845,6 @@ export const OrderModal = React.memo(({ order, onClose, theme }) => {
     return (
         <Modal show={!!order} onClose={handleClose} title="" theme={theme}>
             <div className="space-y-4">
-                {/* Header: Project name is now the main title */}
                 <div className="flex justify-between items-start">
                     <div className="pr-4">
                         <h2 className="text-xl font-bold" style={{ color: theme.colors.textPrimary }}>{order.details || 'Order Details'}</h2>
@@ -3855,26 +3855,31 @@ export const OrderModal = React.memo(({ order, onClose, theme }) => {
                     </button>
                 </div>
 
-                {/* Status Bar: Now fully rounded */}
                 <div className="text-center py-2 rounded-full font-semibold text-white tracking-wider text-sm" style={{ backgroundColor: statusColor }}>
                     {statusText}
                 </div>
 
-                {/* Key Info Grid */}
                 <dl className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm border-t border-b py-4" style={{ borderColor: theme.colors.subtle }}>
                     <dt className="font-medium" style={{ color: theme.colors.textSecondary }}>SO:</dt>
                     <dd className="font-mono text-right" style={{ color: theme.colors.textPrimary }}>{order.orderNumber}</dd>
-                    <dt className="font-medium" style={{ color: theme.colors.textSecondary }}>PO:</dt>
-                    <dd className="font-mono text-right" style={{ color: theme.colors.textPrimary }}>{order.po}</dd>
-                    <dt className="font-medium" style={{ color: theme.colors.textSecondary }}>NET:</dt>
-                    <dd className="font-mono text-right font-semibold" style={{ color: theme.colors.textPrimary }}>${order.net?.toLocaleString(undefined, { maximumFractionDigits: 0 })}</dd>
-                    <dt className="font-medium" style={{ color: theme.colors.textSecondary }}>REWARDS:</dt>
-                    <dd className="text-right" style={{ color: theme.colors.textPrimary }}>{order.reward}</dd>
-                    <dt className="font-medium" style={{ color: theme.colors.textSecondary }}>SHIP DATE:</dt>
-                    <dd className="text-right font-semibold" style={{ color: theme.colors.textPrimary }}>{formattedShipDate}</dd>
+                    {order.po && <>
+                        <dt className="font-medium" style={{ color: theme.colors.textSecondary }}>PO:</dt>
+                        <dd className="font-mono text-right" style={{ color: theme.colors.textPrimary }}>{order.po}</dd>
+                    </>}
+                    {order.net && <>
+                        <dt className="font-medium" style={{ color: theme.colors.textSecondary }}>NET:</dt>
+                        <dd className="font-mono text-right font-semibold" style={{ color: theme.colors.textPrimary }}>${order.net.toLocaleString(undefined, { maximumFractionDigits: 0 })}</dd>
+                    </>}
+                    {order.reward && <>
+                        <dt className="font-medium" style={{ color: theme.colors.textSecondary }}>REWARDS:</dt>
+                        <dd className="text-right" style={{ color: theme.colors.textPrimary }}>{order.reward}</dd>
+                    </>}
+                    {order.shipDate && <>
+                        <dt className="font-medium" style={{ color: theme.colors.textSecondary }}>SHIP DATE:</dt>
+                        <dd className="text-right font-semibold" style={{ color: theme.colors.textPrimary }}>{formattedShipDate}</dd>
+                    </>}
                 </dl>
 
-                {/* Shipping and Discount Section */}
                 <div className="space-y-3">
                     {order.shipTo && <div>
                         <p className="font-semibold text-xs" style={{ color: theme.colors.textSecondary }}>SHIP TO:</p>
@@ -3886,12 +3891,10 @@ export const OrderModal = React.memo(({ order, onClose, theme }) => {
                     </div>}
                 </div>
 
-                {/* Show Details button is now always clickable */}
-                <button onClick={() => setIsExpanded(p => !p)} className="w-full py-3 rounded-full font-medium text-white transition" style={{ backgroundColor: theme.colors.accent }}>
+                <button onClick={() => setIsExpanded(p => !p)} className="w-full py-3 rounded-full font-medium text-white transition" style={{ backgroundColor: theme.colors.accent }} disabled={!order.lineItems || order.lineItems.length === 0}>
                     {isExpanded ? 'Hide Order Details' : 'Show Order Details'}
                 </button>
 
-                {/* Animated expansion for line items */}
                 <div className={`transition-all duration-500 ease-in-out grid ${isExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
                     <div className="overflow-hidden">
                         <div className="space-y-3 pt-4 border-t" style={{ borderColor: theme.colors.subtle }}>
@@ -3907,7 +3910,6 @@ export const OrderModal = React.memo(({ order, onClose, theme }) => {
         </Modal>
     );
 });
-
 export const OrdersScreen = ({ theme, setSelectedOrder }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [dateType, setDateType] = useState('shipDate');
@@ -5164,32 +5166,34 @@ const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSettings }) 
 };
 
 
-export const ReplacementsScreen = ({ theme, setSuccessMessage, onNavigate, showAlert }) => {
-    // Initialize formData to null, but ensure handleEnterManually sets it up properly.
-    // Let's ensure formData has a structured initial state for inputs.
-    // A common pattern is to initialize it to a default object rather than null, if it's always expected to be an object.
-    const [formData, setFormData] = useState(null); // Keep as null initially for the "scan/manual" choice
+// in ui.jsx
 
+export const ReplacementsScreen = ({ theme, setSuccessMessage, onNavigate }) => {
+    const [formData, setFormData] = useState(null);
     const [attachments, setAttachments] = useState([]);
     const [isScanning, setIsScanning] = useState(false);
     const fileInputRef = useRef(null);
 
+    const handleEnterManually = () => {
+        setFormData({ so: '', lineItem: '', notes: '' });
+    };
+
     const handleScan = () => {
         setIsScanning(true);
         setTimeout(() => {
-            // Ensure all expected fields are present with default values
             setFormData({ so: 'SO-450080', lineItem: '001', notes: '' });
             setIsScanning(false);
         }, 1500);
     };
 
-    const handleEnterManually = () => {
-        // Ensure all expected fields are present with default values when entering manually
-        setFormData({ so: '', lineItem: '', notes: '' });
-    };
-    const handleFormChange = e => setFormData(p => ({ ...p, [e.target.name]: e.target.value }));
+    const handleFormChange = useCallback((e) => {
+        const { name, value } = e.target;
+        setFormData(p => ({ ...p, [name]: value }));
+    }, []);
+
     const handleFileChange = e => e.target.files && setAttachments(p => [...p, ...Array.from(e.target.files)]);
     const removeAttachment = name => setAttachments(p => p.filter(f => f.name !== name));
+
     const handleSubmit = () => {
         setSuccessMessage("Replacement Request Submitted!");
         setTimeout(() => {
@@ -5202,109 +5206,57 @@ export const ReplacementsScreen = ({ theme, setSuccessMessage, onNavigate, showA
         <>
             <PageTitle title="Request Replacement" theme={theme} />
             <div className="px-4 pb-4">
-                <GlassCard
-                    theme={theme}
-                    className="p-4"
-                >
-                    {!formData ? ( // Show initial choice if formData is null
+                <GlassCard theme={theme} className="p-4">
+                    {!formData ? (
                         <div className="text-center space-y-4">
-                            <button
-                                onClick={handleScan}
-                                disabled={isScanning}
-                                className="w-full flex flex-col items-center justify-center p-8 rounded-lg border-2 border-dashed hover:bg-white/5 transition-colors"
-                                style={{ borderColor: theme.colors.accent, color: theme.colors.accent }}
-                            >
+                            <button onClick={handleScan} disabled={isScanning} className="w-full flex flex-col items-center justify-center p-8 rounded-lg border-2 border-dashed hover:bg-white/5 transition-colors" style={{ borderColor: theme.colors.accent, color: theme.colors.accent }}>
                                 <Camera className={`w-12 h-12 mb-2 ${isScanning ? 'animate-pulse' : ''}`} />
-                                <span className="font-semibold">
-                                    {isScanning ? 'Scanning...' : 'Scan QR Code'}
-                                </span>
+                                <span className="font-semibold">{isScanning ? 'Scanning...' : 'Scan QR Code'}</span>
                             </button>
                             <div className="flex items-center my-4">
                                 <div className="flex-grow border-t" style={{ borderColor: theme.colors.subtle }} />
-                                <span className="mx-4 text-xs uppercase" style={{ color: theme.colors.textSecondary }}>
-                                    Or
-                                </span>
+                                <span className="mx-4 text-xs uppercase" style={{ color: theme.colors.textSecondary }}>Or</span>
                                 <div className="flex-grow border-t" style={{ borderColor: theme.colors.subtle }} />
                             </div>
-                            <button
-                                onClick={handleEnterManually}
-                                className="font-semibold py-2 px-4 hover:underline transition-colors"
-                                style={{ color: theme.colors.accent }}
-                            >
+                            <button onClick={handleEnterManually} className="font-semibold py-2 px-4 hover:underline transition-colors" style={{ color: theme.colors.accent }}>
                                 Enter Details Manually
                             </button>
                         </div>
-                    ) : ( // Show form if formData is an object
-                        <>
-                            <FormInput
-                                label="Sales Order"
-                                name="so"
-                                value={formData.so} // Ensure value is a string, even if empty
-                                onChange={handleFormChange}
-                                theme={theme}
-                                readOnly={false} // Explicitly ensure it's not read-only
-                            />
-                            <FormInput
-                                label="Line Item"
-                                name="lineItem"
-                                value={formData.lineItem} // Ensure value is a string, even if empty
-                                onChange={handleFormChange}
-                                theme={theme}
-                                readOnly={false} // Explicitly ensure it's not read-only
-                            />
-                            <FormInput
-                                type="textarea"
-                                label="Notes"
-                                name="notes"
-                                value={formData.notes} // Ensure value is a string, even if empty
-                                onChange={handleFormChange}
-                                theme={theme}
-                                readOnly={false} // Explicitly ensure it's not read-only
-                            />
+                    ) : (
+                        <div className="space-y-4">
+                            <FormInput label="Sales Order" name="so" value={formData.so} onChange={handleFormChange} theme={theme} />
+                            <FormInput label="Line Item" name="lineItem" value={formData.lineItem} onChange={handleFormChange} theme={theme} />
+                            <FormInput type="textarea" label="Notes" name="notes" value={formData.notes} onChange={handleFormChange} placeholder="Describe the issue or parts needed..." theme={theme} />
 
-                            {attachments.map(file => (
-                                <div key={file.name} className="flex items-center space-x-2 mt-3">
-                                    <span className="text-sm" style={{ color: theme.colors.textPrimary }}>
-                                        {file.name}
-                                    </span>
-                                    <button onClick={() => removeAttachment(file.name)}>
-                                        <X className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
+                            <div>
+                                <label className="text-xs font-semibold px-1" style={{ color: theme.colors.textSecondary }}>Photos</label>
+                                <div className="mt-1 grid grid-cols-3 gap-2">
+                                    {attachments.map((file, idx) => (
+                                        <div key={idx} className="relative aspect-square">
+                                            <img src={URL.createObjectURL(file)} alt={`preview-${idx}`} className="w-full h-full object-cover rounded-lg" />
+                                            <button onClick={() => removeAttachment(file.name)} className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-0.5">
+                                                <X className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                    <button onClick={() => fileInputRef.current.click()} className="flex flex-col items-center justify-center aspect-square border-2 border-dashed rounded-lg" style={{ borderColor: theme.colors.subtle, color: theme.colors.textSecondary }}>
+                                        <ImageIcon className="w-6 h-6 mb-1" />
+                                        <span className="text-xs font-semibold">Add Photo</span>
                                     </button>
                                 </div>
-                            ))}
+                                <input type="file" ref={fileInputRef} multiple accept="image/*" className="hidden" onChange={handleFileChange} />
+                            </div>
 
-                            <label className="block mt-6">
-                                <input
-                                    ref={fileInputRef}
-                                    type="file"
-                                    multiple
-                                    hidden
-                                    onChange={handleFileChange}
-                                />
-                                <span
-                                    className="inline-flex items-center space-x-2 px-4 py-2 rounded-lg cursor-pointer"
-                                    style={{ backgroundColor: theme.colors.subtle }}
-                                >
-                                    <ImageIcon className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
-                                    <span>Add Attachment</span>
-                                </span>
-                            </label>
-
-                            <button
-                                onClick={handleSubmit}
-                                className="mt-8 w-full py-3 rounded-full font-medium transition-colors"
-                                style={{ backgroundColor: theme.colors.accent, color: '#FFF' }}
-                            >
+                            <button onClick={handleSubmit} className="mt-8 w-full py-3 rounded-full font-medium transition-colors text-white" style={{ backgroundColor: theme.colors.accent }}>
                                 Submit Request
                             </button>
-                        </>
+                        </div>
                     )}
                 </GlassCard>
             </div>
         </>
     );
 };
-
 
 const SettingsScreen = ({ theme, onSave, userSettings, setUserSettings }) => {
     // This local state is now safely initialized with the userSettings prop
