@@ -38,6 +38,9 @@ function App() {
 
     // --- GESTURE & AI STATE ---
     const touchStartX = useRef(0);
+    const touchStartY = useRef(0); // New: Store initial Y position
+    const isSwipingHorizontal = useRef(false); // New: Flag to confirm horizontal swipe intent
+
     const [aiResponse, setAiResponse] = useState('');
     const [isAILoading, setIsAILoading] = useState(false);
     const [showAIDropdown, setShowAIDropdown] = useState(false);
@@ -134,31 +137,45 @@ function App() {
 
     // Gesture handler for swiping back
     const handleTouchStart = (e) => {
-        if (isTransitioning || navigationHistory.length <= 1) return; // Prevent new swipes during transition or on home screen
+        if (isTransitioning || navigationHistory.length <= 1) return;
 
-        // Only consider touches from the far left edge of the screen
-        if (e.targetTouches[0].clientX < 50) {
-            touchStartX.current = e.targetTouches[0].clientX;
+        // Check if touch starts from the far left edge (e.g., first 30 pixels)
+        const touchX = e.targetTouches[0].clientX;
+        if (touchX < 30) { // Define a trigger zone (e.g., 30 pixels from left)
+            touchStartX.current = touchX;
+            touchStartY.current = e.targetTouches[0].clientY; // Store initial Y
+            isSwipingHorizontal.current = false; // Reset horizontal swipe flag
             setIsTransitioning(false); // Disable transition during active drag
         } else {
-            touchStartX.current = 0; // Reset if not a left-edge swipe
+            touchStartX.current = 0; // Not a left-edge swipe
         }
     };
 
     const handleTouchMove = (e) => {
-        if (touchStartX.current === 0 || isTransitioning) return; // Only track valid swipes and not during transition
+        if (touchStartX.current === 0 || isTransitioning) return;
 
         const currentTouchX = e.targetTouches[0].clientX;
-        let diffX = currentTouchX - touchStartX.current;
+        const currentTouchY = e.targetTouches[0].clientY;
+        const diffX = currentTouchX - touchStartX.current;
+        const diffY = Math.abs(currentTouchY - touchStartY.current);
 
-        // Ensure movement is only to the right and doesn't go below 0
-        if (diffX < 0) diffX = 0;
+        // Determine if it's primarily a horizontal swipe
+        // If horizontal movement is significantly greater than vertical movement
+        if (diffX > 5 && diffX > diffY * 1.5) { // Thresholds: at least 5px horizontal, and 1.5x horizontal vs vertical
+            isSwipingHorizontal.current = true;
+            e.preventDefault(); // Prevent vertical scrolling
+        }
 
-        setSwipeTranslateX(diffX);
+        if (isSwipingHorizontal.current) {
+            let newTranslateX = diffX;
+            if (newTranslateX < 0) newTranslateX = 0; // Ensure it doesn't go left past start
+
+            setSwipeTranslateX(newTranslateX);
+        }
     };
 
     const handleTouchEnd = (e) => {
-        if (touchStartX.current === 0 || isTransitioning) return; // Only process valid swipes and not during transition
+        if (touchStartX.current === 0 || isTransitioning) return;
 
         const touchEndX = e.changedTouches[0].clientX;
         const swipeDistance = touchEndX - touchStartX.current;
@@ -166,10 +183,10 @@ function App() {
         // Threshold for a successful "back" swipe (e.g., 25% of screen width)
         const swipeThreshold = window.innerWidth * 0.25;
 
-        if (swipeDistance > swipeThreshold && navigationHistory.length > 1) {
+        if (isSwipingHorizontal.current && swipeDistance > swipeThreshold && navigationHistory.length > 1) {
             handleBack(); // Trigger the animated back navigation
         } else {
-            // If swipe not long enough, snap back to original position
+            // If swipe not long enough or not horizontal, snap back to original position
             setIsTransitioning(true); // Enable transition for snapping back
             setSwipeTranslateX(0);
             setTimeout(() => {
@@ -177,12 +194,14 @@ function App() {
             }, 300); // Match CSS transition duration
         }
         touchStartX.current = 0; // Reset
+        touchStartY.current = 0; // Reset Y
+        isSwipingHorizontal.current = false; // Reset horizontal swipe flag
     };
 
     // --- RENDER LOGIC ---
     // renderScreen now takes an optional 'screenKey' prop
     const renderScreen = (screenKey) => {
-        if (!screenKey) return null; // Handle case where previousScreen might be null
+        if (!screenKey) return null;
 
         const screenParts = screenKey.split('/');
         const baseScreenKey = screenParts[0];
@@ -261,7 +280,6 @@ function App() {
                     className={`absolute inset-0 pt-[72px] ${isTransitioning ? 'transition-transform duration-300' : ''} ${previousScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto'} scrollbar-hide`}
                     style={{
                         backgroundColor: currentTheme.colors.background,
-                        // This positions the previous screen to the left, and moves it with the swipe
                         transform: `translateX(${swipeTranslateX - window.innerWidth}px)`
                     }}
                 >
@@ -270,11 +288,10 @@ function App() {
             )}
 
             {/* Container for the current screen, animated on swipe */}
-            {/* The pt-[72px] is based on AppHeader height. Adjust if AppHeader height changes. */}
             <div
                 className={`absolute inset-0 pt-[72px] ${isTransitioning ? 'transition-transform duration-300' : ''} ${currentScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto'} scrollbar-hide`}
                 style={{
-                    backgroundColor: currentTheme.colors.background, // Ensure background covers the screen
+                    backgroundColor: currentTheme.colors.background,
                     transform: `translateX(${swipeTranslateX}px)`
                 }}
             >
