@@ -4,10 +4,10 @@ import {
     Calendar, Camera, CheckCircle, ChevronDown, ChevronLeft, ChevronRight,
     ChevronUp, Clock, Copy, Database, DollarSign, FileText, Film, Filter,
     HelpCircle, Home, Hourglass, List, LogOut, MapPin, MessageSquare, Mic,
-    Minus, MonitorPlay, Moon, MoreVertical, Package, Palette, Heart,
+    Minus, MonitorPlay, Moon, MoreVertical, Package, Palette, Heart, Image,
     Paperclip, Percent, PieChart, Play, Plus, RotateCw, Save, Search, Send,
     Server, Settings, Share2, ShoppingCart, Sun, Trophy, User, UserPlus,
-    UserX, Users, Video, Wrench, X
+    UserX, Users, Video, Wrench, X, ImageIcon
 } from 'lucide-react';
 import * as Data from './data.jsx';
 
@@ -3308,10 +3308,10 @@ const FancySelect = ({ value, onChange, options, placeholder, required, theme })
     </div>
 );
 
-const FormInput = React.memo(({
+export const FormInput = React.memo(({
     label,
     type = 'text',
-    value,
+    value, // This is the prop that might be undefined/null
     onChange,
     placeholder,
     options,
@@ -3320,10 +3320,13 @@ const FormInput = React.memo(({
     readOnly = false,
     required = false,
 }) => {
+    // Ensure value is always a controlled string
+    const controlledValue = value === undefined || value === null ? '' : value;
+
     const inputClass = `w-full px-4 py-3 border rounded-full focus:ring-2 text-base outline-none ${className}`;
     const styles = {
         backgroundColor: theme.colors.subtle,
-        borderColor: theme.colors.border, // <-- FIX: Changed from 'transparent'
+        borderColor: theme.colors.border,
         color: theme.colors.textPrimary,
         ringColor: theme.colors.accent,
     };
@@ -3344,13 +3347,13 @@ const FormInput = React.memo(({
         <div className="space-y-1">
             {label && (
                 <label className="text-xs font-semibold px-4" style={{ color: theme.colors.textSecondary }}>
-                    {label} {/* FIX: Removed required asterisk */}
+                    {label}
                 </label>
             )}
             {type === 'currency' ? (
                 <input
                     type="text"
-                    value={formatCurrency(value)}
+                    value={formatCurrency(controlledValue)} // Use controlledValue
                     onChange={handleCurrencyChange}
                     className={inputClass}
                     style={styles}
@@ -3359,7 +3362,7 @@ const FormInput = React.memo(({
                 />
             ) : type === 'textarea' ? (
                 <textarea
-                    value={value}
+                    value={controlledValue} // Use controlledValue
                     onChange={onChange}
                     className={inputClass.replace('rounded-full', 'rounded-2xl')}
                     style={styles}
@@ -3370,7 +3373,7 @@ const FormInput = React.memo(({
             ) : (
                 <input
                     type={type}
-                    value={value}
+                    value={controlledValue} // Use controlledValue
                     onChange={onChange}
                     className={inputClass}
                     style={styles}
@@ -3382,7 +3385,6 @@ const FormInput = React.memo(({
         </div>
     );
 });
-
 export const SearchInput = React.memo(({ onSubmit, value, onChange, placeholder, theme, className, onVoiceClick }) => (
     <form onSubmit={onSubmit} className={`relative flex items-center ${className || ''}`} >
         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -5162,25 +5164,29 @@ const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSettings }) 
 };
 
 
-
 export const ReplacementsScreen = ({ theme, setSuccessMessage, onNavigate, showAlert }) => {
-    const [formData, setFormData] = useState(null);
+    // Initialize formData to null, but ensure handleEnterManually sets it up properly.
+    // Let's ensure formData has a structured initial state for inputs.
+    // A common pattern is to initialize it to a default object rather than null, if it's always expected to be an object.
+    const [formData, setFormData] = useState(null); // Keep as null initially for the "scan/manual" choice
+
     const [attachments, setAttachments] = useState([]);
     const [isScanning, setIsScanning] = useState(false);
     const fileInputRef = useRef(null);
 
-    // isDarkMode and related inputBg, inputBorder, btnBg, btnColor variables are now unnecessary
-    // because FormInput will handle its own styling based on the 'theme' prop it receives.
-
     const handleScan = () => {
         setIsScanning(true);
         setTimeout(() => {
+            // Ensure all expected fields are present with default values
             setFormData({ so: 'SO-450080', lineItem: '001', notes: '' });
             setIsScanning(false);
         }, 1500);
     };
 
-    const handleEnterManually = () => setFormData({ so: '', lineItem: '', notes: '' });
+    const handleEnterManually = () => {
+        // Ensure all expected fields are present with default values when entering manually
+        setFormData({ so: '', lineItem: '', notes: '' });
+    };
     const handleFormChange = e => setFormData(p => ({ ...p, [e.target.name]: e.target.value }));
     const handleFileChange = e => e.target.files && setAttachments(p => [...p, ...Array.from(e.target.files)]);
     const removeAttachment = name => setAttachments(p => p.filter(f => f.name !== name));
@@ -5199,9 +5205,8 @@ export const ReplacementsScreen = ({ theme, setSuccessMessage, onNavigate, showA
                 <GlassCard
                     theme={theme}
                     className="p-4"
-                // Removed style={{ backgroundColor: theme.colors.card }} as GlassCard handles its own background
                 >
-                    {!formData ? (
+                    {!formData ? ( // Show initial choice if formData is null
                         <div className="text-center space-y-4">
                             <button
                                 onClick={handleScan}
@@ -5229,32 +5234,32 @@ export const ReplacementsScreen = ({ theme, setSuccessMessage, onNavigate, showA
                                 Enter Details Manually
                             </button>
                         </div>
-                    ) : (
+                    ) : ( // Show form if formData is an object
                         <>
                             <FormInput
                                 label="Sales Order"
                                 name="so"
-                                value={formData.so}
+                                value={formData.so} // Ensure value is a string, even if empty
                                 onChange={handleFormChange}
                                 theme={theme}
-                            // Removed redundant style prop: style={{ backgroundColor: inputBg, borderColor: inputBorder, color: theme.colors.textPrimary }}
+                                readOnly={false} // Explicitly ensure it's not read-only
                             />
                             <FormInput
                                 label="Line Item"
                                 name="lineItem"
-                                value={formData.lineItem}
+                                value={formData.lineItem} // Ensure value is a string, even if empty
                                 onChange={handleFormChange}
                                 theme={theme}
-                            // Removed redundant style prop
+                                readOnly={false} // Explicitly ensure it's not read-only
                             />
                             <FormInput
                                 type="textarea"
                                 label="Notes"
                                 name="notes"
-                                value={formData.notes}
+                                value={formData.notes} // Ensure value is a string, even if empty
                                 onChange={handleFormChange}
                                 theme={theme}
-                            // Removed redundant style prop
+                                readOnly={false} // Explicitly ensure it's not read-only
                             />
 
                             {attachments.map(file => (
@@ -5280,7 +5285,7 @@ export const ReplacementsScreen = ({ theme, setSuccessMessage, onNavigate, showA
                                     className="inline-flex items-center space-x-2 px-4 py-2 rounded-lg cursor-pointer"
                                     style={{ backgroundColor: theme.colors.subtle }}
                                 >
-                                    <Image className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
+                                    <ImageIcon className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
                                     <span>Add Attachment</span>
                                 </span>
                             </label>
@@ -5288,7 +5293,7 @@ export const ReplacementsScreen = ({ theme, setSuccessMessage, onNavigate, showA
                             <button
                                 onClick={handleSubmit}
                                 className="mt-8 w-full py-3 rounded-full font-medium transition-colors"
-                                style={{ backgroundColor: theme.colors.accent, color: '#FFF' }} // Used accent from theme directly
+                                style={{ backgroundColor: theme.colors.accent, color: '#FFF' }}
                             >
                                 Submit Request
                             </button>
@@ -5299,6 +5304,8 @@ export const ReplacementsScreen = ({ theme, setSuccessMessage, onNavigate, showA
         </>
     );
 };
+
+
 const SettingsScreen = ({ theme, onSave, userSettings, setUserSettings }) => {
     // This local state is now safely initialized with the userSettings prop
     const [localSettings, setLocalSettings] = useState(userSettings);
@@ -5718,7 +5725,6 @@ export {
     PostCard,
     WinsCard,
     CreateContentModal,
-    FormInput,
     SuccessToast,
     AppHeader,
     MonthlyBarChart,
