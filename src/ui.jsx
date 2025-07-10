@@ -5163,18 +5163,14 @@ const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSettings }) 
 
 
 
-const ReplacementsScreen = ({ theme, setSuccessMessage, onNavigate, showAlert }) => {
+export const ReplacementsScreen = ({ theme, setSuccessMessage, onNavigate, showAlert }) => {
     const [formData, setFormData] = useState(null);
     const [attachments, setAttachments] = useState([]);
     const [isScanning, setIsScanning] = useState(false);
     const fileInputRef = useRef(null);
 
-    const isDarkMode = theme.colors.background === '#1E1E1E';
-
-    const inputBg = isDarkMode ? theme.colors.surface : theme.colors.subtle;
-    const inputBorder = theme.colors.border;
-    const btnBg = isDarkMode ? theme.colors.textPrimary : theme.colors.accent;
-    const btnColor = isDarkMode ? theme.colors.background : '#FFF';
+    // isDarkMode and related inputBg, inputBorder, btnBg, btnColor variables are now unnecessary
+    // because FormInput will handle its own styling based on the 'theme' prop it receives.
 
     const handleScan = () => {
         setIsScanning(true);
@@ -5203,7 +5199,7 @@ const ReplacementsScreen = ({ theme, setSuccessMessage, onNavigate, showAlert })
                 <GlassCard
                     theme={theme}
                     className="p-4"
-                    style={{ backgroundColor: theme.colors.card }}
+                // Removed style={{ backgroundColor: theme.colors.card }} as GlassCard handles its own background
                 >
                     {!formData ? (
                         <div className="text-center space-y-4">
@@ -5241,7 +5237,7 @@ const ReplacementsScreen = ({ theme, setSuccessMessage, onNavigate, showAlert })
                                 value={formData.so}
                                 onChange={handleFormChange}
                                 theme={theme}
-                                style={{ backgroundColor: inputBg, borderColor: inputBorder, color: theme.colors.textPrimary }}
+                            // Removed redundant style prop: style={{ backgroundColor: inputBg, borderColor: inputBorder, color: theme.colors.textPrimary }}
                             />
                             <FormInput
                                 label="Line Item"
@@ -5249,7 +5245,7 @@ const ReplacementsScreen = ({ theme, setSuccessMessage, onNavigate, showAlert })
                                 value={formData.lineItem}
                                 onChange={handleFormChange}
                                 theme={theme}
-                                style={{ backgroundColor: inputBg, borderColor: inputBorder, color: theme.colors.textPrimary }}
+                            // Removed redundant style prop
                             />
                             <FormInput
                                 type="textarea"
@@ -5258,7 +5254,7 @@ const ReplacementsScreen = ({ theme, setSuccessMessage, onNavigate, showAlert })
                                 value={formData.notes}
                                 onChange={handleFormChange}
                                 theme={theme}
-                                style={{ backgroundColor: inputBg, borderColor: inputBorder, color: theme.colors.textPrimary }}
+                            // Removed redundant style prop
                             />
 
                             {attachments.map(file => (
@@ -5292,7 +5288,7 @@ const ReplacementsScreen = ({ theme, setSuccessMessage, onNavigate, showAlert })
                             <button
                                 onClick={handleSubmit}
                                 className="mt-8 w-full py-3 rounded-full font-medium transition-colors"
-                                style={{ backgroundColor: btnBg, color: btnColor }}
+                                style={{ backgroundColor: theme.colors.accent, color: '#FFF' }} // Used accent from theme directly
                             >
                                 Submit Request
                             </button>
@@ -5303,7 +5299,6 @@ const ReplacementsScreen = ({ theme, setSuccessMessage, onNavigate, showAlert })
         </>
     );
 };
-
 const SettingsScreen = ({ theme, onSave, userSettings, setUserSettings }) => {
     // This local state is now safely initialized with the userSettings prop
     const [localSettings, setLocalSettings] = useState(userSettings);
