@@ -3338,7 +3338,7 @@ export const HomeScreen = ({ onNavigate, theme, onAskAI, showAIDropdown, aiRespo
     }, [onNavigate]);
 
     return (
-        <div className="flex flex-col h-full rounded-t-[40px] -mt-8 pt-8" style={{ backgroundColor: theme.colors.background }}>
+        <div className="flex flex-col h-screen overflow-hidden" style={{ backgroundColor: theme.colors.background }}>
             <div className="px-4 pt-4 pb-2 relative z-10">
                 <SmartSearch
                     theme={theme}
