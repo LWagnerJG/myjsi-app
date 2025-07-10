@@ -4901,10 +4901,12 @@ const SettingsScreen = ({ theme, onSave, userSettings, setUserSettings }) => {
     );
 };
 
-export const MemberCard = React.memo(({ user, theme, isCurrentUser, onConfirmPromotion, onConfirmRemove, onUpdateUser, onTogglePermission, isExpanded, onToggleExpand, isLast }) => {
+export const MemberCard = React.memo(({ user, theme, isCurrentUser, onConfirmPromotion, onConfirmRemove, onUpdateUser, onTogglePermission, isLast }) => {
+    const [isExpanded, setIsExpanded] = useState(false);
 
     const handleRoleChange = (e) => {
         onUpdateUser(user.id, 'title', e.target.value);
+        setIsExpanded(true);
     };
 
     const cardContent = (
@@ -4913,7 +4915,6 @@ export const MemberCard = React.memo(({ user, theme, isCurrentUser, onConfirmPro
                 <p className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>
                     {user.firstName} {user.lastName}
                 </p>
-                {/* Pending invitation icon */}
                 {user.status === 'pending' && <Hourglass className="w-4 h-4 text-amber-500" />}
                 {isCurrentUser && (
                     <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: theme.colors.accent, color: 'white' }}>
@@ -4929,14 +4930,12 @@ export const MemberCard = React.memo(({ user, theme, isCurrentUser, onConfirmPro
                             onChange={handleRoleChange}
                             options={Data.USER_TITLES.map(t => ({ value: t, label: t }))}
                             theme={theme}
-                            onOpen={onToggleExpand} // The dropdown itself now toggles the permissions view
+                            onOpen={() => setIsExpanded(true)}
                         />
                     </div>
-                ) : (
-                    // Admins still use a simple chevron since they have no title to edit
-                    <button onClick={onToggleExpand} className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10">
-                        <ChevronDown className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} style={{ color: theme.colors.secondary }} />
-                    </button>
+                    // FIX: The dropdown arrow is now hidden for the current user's tile.
+                ) : !isCurrentUser && (
+                    <ChevronDown className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} style={{ color: theme.colors.secondary }} />
                 )}
             </div>
         </div>
@@ -4944,10 +4943,9 @@ export const MemberCard = React.memo(({ user, theme, isCurrentUser, onConfirmPro
 
     return (
         <div className={`transition-all duration-300 ${!isExpanded && !isLast ? 'border-b' : ''}`} style={{ borderColor: theme.colors.subtle }}>
-            {/* The main clickable area */}
-            <div className={`${(user.role === 'Admin' && !isCurrentUser) ? 'cursor-pointer' : 'cursor-default'}`} onClick={user.role === 'Admin' && !isCurrentUser ? onToggleExpand : undefined}>
+            <button className="w-full text-left disabled:opacity-70 disabled:cursor-not-allowed" onClick={() => setIsExpanded(!isExpanded)} disabled={isCurrentUser}>
                 {cardContent}
-            </div>
+            </button>
 
             {isExpanded && (
                 <div className="bg-black/5 dark:bg-white/5 px-4 pb-4 animate-fade-in">
@@ -4963,7 +4961,8 @@ export const MemberCard = React.memo(({ user, theme, isCurrentUser, onConfirmPro
                                 })}
                             </div>
                         )}
-                        <div className="space-y-3 pt-4 border-t" style={{ borderColor: theme.colors.subtle }}>
+                        {/* FIX: Removed the extra top border from this div to prevent the "double bar" */}
+                        <div className={`space-y-3 ${user.role === 'User' ? 'pt-4 border-t' : ''}`} style={{ borderColor: theme.colors.subtle }}>
                             <button onClick={() => onConfirmPromotion(user)} className="w-full text-center p-2.5 rounded-full font-semibold text-white" style={{ backgroundColor: theme.colors.accent }}>
                                 {user.role === 'Admin' ? 'Move to User' : 'Make Admin'}
                             </button>
@@ -4979,6 +4978,7 @@ export const MemberCard = React.memo(({ user, theme, isCurrentUser, onConfirmPro
         </div>
     );
 });
+
 export const AddUserModal = ({ show, onClose, onAddUser, theme, roleToAdd }) => {
     // Note: The EMPTY_USER should be defined in your data.jsx file
     const [newUser, setNewUser] = useState(Data.EMPTY_USER);
