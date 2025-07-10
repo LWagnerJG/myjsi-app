@@ -44,6 +44,7 @@ export const PageTitle = React.memo(({ title, theme, onBack, children }) => (
     </div>
 ));
 
+
 export const Button = React.memo(({ children, className = '', theme, ...props }) => (
     <button
         className={`px-4 py-2 rounded-lg font-semibold ${className}`}
@@ -61,7 +62,6 @@ export const Button = React.memo(({ children, className = '', theme, ...props })
 export const Card = ({ children, ...props }) => (
     <GlassCard {...props}>{children}</GlassCard>
 )
-
 export const useDropdownPosition = (ref) => {
     const [dropDirection, setDropDirection] = useState('down');
 
@@ -81,140 +81,6 @@ export const useDropdownPosition = (ref) => {
     return [dropDirection, checkPosition];
 };
 
-export const CommissionsScreen = ({ theme }) => {
-    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
-    const [expandedMonth, setExpandedMonth] = useState(null);
-    const [expandedRow, setExpandedRow] = useState(null); // State for individual row expansion
-
-    const years = Object.keys(Data.COMMISSIONS_DATA).sort((a, b) => b - a);
-    const monthlyData = Data.COMMISSIONS_DATA[selectedYear] || [];
-
-    const toggleMonth = (month) => {
-        setExpandedMonth(prev => prev === month ? null : month);
-        setExpandedRow(null); // Collapse any open row when month changes
-    };
-
-    const toggleRow = (rowIndex) => {
-        setExpandedRow(prev => prev === rowIndex ? null : rowIndex);
-    };
-
-    return (
-        <div className="h-full flex flex-col">
-            <div className="px-4 pt-6 pb-4 flex justify-between items-center">
-                <h1 className="text-3xl font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>Commissions</h1>
-                <div className="flex items-center">
-                    <CustomSelect
-                        label="Year"
-                        value={selectedYear}
-                        onChange={(e) => setSelectedYear(e.target.value)}
-                        options={years.map(y => ({ value: y, label: y }))}
-                        theme={theme}
-                    />
-                </div>
-            </div>
-
-            <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-3 scrollbar-hide">
-                {monthlyData.map((check, index) => (
-                    <React.Fragment key={check.month}>
-                        <GlassCard
-                            theme={theme}
-                            onClick={() => toggleMonth(check.month)}
-                            className="p-4 cursor-pointer hover:border-gray-400/50 flex justify-between items-center"
-                        >
-                            <div className="flex-1">
-                                <div className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>{check.month}</div>
-                                <div className="text-sm" style={{ color: theme.colors.textSecondary }}>{new Date(check.issuedDate).toLocaleDateString()}</div>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <span className="font-bold text-lg" style={{ color: theme.colors.accent }}>${check.amount.toLocaleString()}</span>
-                                <ChevronDown className={`w-5 h-5 transition-transform ${expandedMonth === check.month ? 'rotate-180' : ''}`} style={{ color: theme.colors.textSecondary }} />
-                            </div>
-                        </GlassCard>
-
-                        {expandedMonth === check.month && check.details && (
-                            <div className="p-0 animate-fade-in">
-                                <GlassCard theme={theme} className="p-4 max-w-md mx-auto my-4">
-                                    {check.details.map((detail, dIndex) => {
-                                        if (detail.invoices) {
-                                            return (
-                                                <div key={dIndex} className="space-y-4">
-                                                    <table className="w-full text-sm">
-                                                        <thead>
-                                                            <tr className="text-left font-semibold" style={{ color: theme.colors.textSecondary, backgroundColor: theme.colors.subtle }}>
-                                                                <th className="py-2 px-2 w-2/5">SO # / Project</th>
-                                                                <th className="py-2 px-2 text-right w-1/5">Net</th>
-                                                                <th className="py-2 px-2 text-right w-1/5">Comm.</th>
-                                                                <th className="py-2 px-2 text-right w-1/5">Rate</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            {detail.invoices.map((inv, iIndex) => {
-                                                                const commissionRate = inv.netAmount ? ((inv.commission / inv.netAmount) * 100).toFixed(1) : '0.0';
-                                                                const isRowExpanded = expandedRow === iIndex;
-                                                                return (
-                                                                    <tr
-                                                                        key={iIndex}
-                                                                        onClick={() => toggleRow(iIndex)}
-                                                                        className={`cursor-pointer transition-colors ${iIndex % 2 === 0 ? 'bg-black/5 dark:bg-white/5' : ''} hover:bg-black/10 dark:hover:bg-white/10`} // Adjusted for discrete zebra striping on even rows
-                                                                    >
-                                                                        <td className="py-2 px-2">
-                                                                            <div className="font-mono text-xs break-words" style={{ color: theme.colors.textPrimary }}>{inv.so || inv.invoice}</div>
-                                                                            {isRowExpanded && inv.project && (
-                                                                                <div className="text-xs mt-1 break-words" style={{ color: theme.colors.textSecondary }}>{inv.project}</div>
-                                                                            )}
-                                                                        </td>
-                                                                        <td className="py-2 px-2 text-right font-mono" style={{ color: theme.colors.textPrimary }}>${inv.netAmount.toLocaleString()}</td>
-                                                                        <td className="py-2 px-2 text-right font-bold" style={{ color: theme.colors.accent }}>${inv.commission.toLocaleString()}</td>
-                                                                        <td className="py-2 px-2 text-right text-xs" style={{ color: theme.colors.textPrimary }}>{commissionRate}%</td>
-                                                                    </tr>
-                                                                );
-                                                            })}
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            );
-                                        } else if (detail.customer && detail.total > 0) {
-                                            return (
-                                                <div key={dIndex} className="flex justify-between items-center text-sm p-3">
-                                                    <span className="font-medium" style={{ color: theme.colors.textPrimary }}>{detail.customer}</span>
-                                                    <span style={{ color: theme.colors.accent }}>${detail.total.toLocaleString()}</span>
-                                                </div>
-                                            );
-                                        } else if (detail.brandTotal) {
-                                            return (
-                                                <div key={dIndex} className="p-4 space-y-2">
-                                                    <h4 className="font-bold text-base flex items-center" style={{ color: theme.colors.textPrimary }}>
-                                                        <DollarSign className="w-5 h-5 mr-2" style={{ color: theme.colors.accent }} />
-                                                        {detail.brandTotal} Totals
-                                                    </h4>
-                                                    <div className="space-y-1 text-sm">
-                                                        <div className="flex justify-between items-center">
-                                                            <span className="font-medium" style={{ color: theme.colors.textSecondary }}>Invoiced Total:</span>
-                                                            <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>${detail.listTotal.toLocaleString()}</span>
-                                                        </div>
-                                                        <div className="flex justify-between items-center">
-                                                            <span className="font-medium" style={{ color: theme.colors.textSecondary }}>Commissioned Value:</span>
-                                                            <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>${detail.netTotal.toLocaleString()}</span>
-                                                        </div>
-                                                        <div className="flex justify-between items-center pt-2 border-t" style={{ borderColor: theme.colors.border }}>
-                                                            <span className="font-bold" style={{ color: theme.colors.textSecondary }}>Commission Amount:</span>
-                                                            <span className="font-bold text-lg" style={{ color: theme.colors.accent }}>${detail.commissionTotal.toLocaleString()}</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            );
-                                        }
-                                        return null;
-                                    })}
-                                </GlassCard>
-                            </div>
-                        )}
-                    </React.Fragment>
-                ))}
-            </div>
-        </div>
-    );
-};
 export const IncentiveRewardsScreen = ({ theme, onNavigate }) => {
     // Placeholder - Logic will be added later
     return <PageTitle title="Incentive Rewards" theme={theme} />;
@@ -240,10 +106,9 @@ export const CustomSelect = ({ label, value, onChange, options, placeholder, the
         setIsOpen(false);
     };
 
-    // This now also calls the new onOpen function if it exists
     const handleOpen = () => {
         checkPosition();
-        onOpen?.(); // Trigger the parent's expand function
+        onOpen?.();
         setIsOpen(o => !o);
     };
 
@@ -266,8 +131,10 @@ export const CustomSelect = ({ label, value, onChange, options, placeholder, the
                     color: value ? theme.colors.textPrimary : theme.colors.textSecondary,
                 }}
             >
-                {selectedLabel}
-                <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} style={{ color: theme.colors.textSecondary }} />
+                {/* Adjusted padding on the right to make space for the icon */}
+                <span className="pr-6">{selectedLabel}</span>
+                {/* Icon is now absolutely positioned to avoid overlapping text */}
+                <ChevronDown className={`absolute right-4 w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} style={{ color: theme.colors.textSecondary }} />
             </button>
 
             {isOpen && (
@@ -284,6 +151,7 @@ export const CustomSelect = ({ label, value, onChange, options, placeholder, the
         </div>
     );
 };
+
 export const AutoCompleteCombobox = ({
     label,
     value,
@@ -1592,7 +1460,153 @@ const CommissionRatesScreen = ({ theme, onNavigate }) => {
     );
 };
 
+export const CommissionsScreen = ({ theme }) => {
+    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
+    const [expandedMonth, setExpandedMonth] = useState(null);
+    const [expandedRow, setExpandedRow] = useState(null); // State for individual row expansion
 
+    const years = Object.keys(Data.COMMISSIONS_DATA).sort((a, b) => b - a);
+    const monthlyData = Data.COMMISSIONS_DATA[selectedYear] || [];
+
+    const toggleMonth = (month) => {
+        setExpandedMonth(prev => prev === month ? null : month);
+        setExpandedRow(null); // Collapse any open row when month changes
+    };
+
+    const toggleRow = (rowIndex) => {
+        setExpandedRow(prev => prev === rowIndex ? null : rowIndex);
+    };
+
+    return (
+        <div className="h-full flex flex-col">
+            <div className="px-4 pt-6 pb-4 flex justify-between items-center">
+                <h1 className="text-3xl font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>Commissions</h1>
+                <div className="flex items-center">
+                    <CustomSelect
+                        value={selectedYear}
+                        onChange={(e) => setSelectedYear(e.target.value)}
+                        options={years.map(y => ({ value: y, label: y }))}
+                        theme={theme}
+                    />
+                </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-3 scrollbar-hide">
+                {monthlyData.map((check, index) => (
+                    <GlassCard
+                        key={check.month}
+                        theme={theme}
+                        className="p-4 cursor-pointer hover:border-gray-400/50" // Apply card styling to the whole month section
+                    >
+                        <div
+                            onClick={() => toggleMonth(check.month)}
+                            className="flex justify-between items-center"
+                        >
+                            <div className="flex-1">
+                                <div className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>{check.month}</div>
+                                <div className="text-sm" style={{ color: theme.colors.textSecondary }}>Paid: {new Date(check.issuedDate).toLocaleDateString()}</div>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <span className="font-bold text-lg" style={{ color: theme.colors.accent }}>${check.amount.toLocaleString()}</span>
+                                <ChevronDown className={`w-5 h-5 transition-transform ${expandedMonth === check.month ? 'rotate-180' : ''}`} style={{ color: theme.colors.textSecondary }} />
+                            </div>
+                        </div>
+
+                        {expandedMonth === check.month && check.details && (
+                            <div className="mt-4 pt-4 border-t animate-fade-in" style={{ borderColor: theme.colors.border }}> {/* Add top border for separation */}
+                                {check.details.map((detail, dIndex) => {
+                                    if (detail.invoices) {
+                                        const totalCommission = detail.invoices.reduce((sum, inv) => sum + inv.commission, 0);
+                                        const totalNetAmount = detail.invoices.reduce((sum, inv) => sum + inv.netAmount, 0);
+                                        const avgRate = totalNetAmount > 0 ? ((totalCommission / totalNetAmount) * 100).toFixed(1) : '0.0';
+
+                                        return (
+                                            <div key={dIndex} className="space-y-2"> {/* Reduced space-y for tighter rows */}
+                                                <div className="text-left font-semibold py-2 px-3" style={{ color: theme.colors.textSecondary, backgroundColor: theme.colors.subtle }}>
+                                                    <div className="grid grid-cols-[2.5fr,1fr,1fr,0.8fr] gap-x-2"> {/* Adjusted grid for headers */}
+                                                        <div>SO # / Project</div>
+                                                        <div className="text-right">Net</div>
+                                                        <div className="text-right">Comm.</div>
+                                                        <div className="text-right">Rate</div>
+                                                    </div>
+                                                </div>
+                                                {detail.invoices.map((inv, iIndex) => {
+                                                    const commissionRate = inv.netAmount ? ((inv.commission / inv.netAmount) * 100).toFixed(1) : '0.0';
+                                                    return (
+                                                        <div
+                                                            key={iIndex}
+                                                            // Removed onClick handler as project name is now static
+                                                            className={`transition-all duration-200 group relative p-3 rounded-xl`} // Changed to rounded-xl
+                                                            style={{
+                                                                marginTop: '0.25rem', // Small margin to separate rounded rows
+                                                                marginBottom: '0.25rem',
+                                                                backgroundColor: iIndex % 2 === 0 ? 'transparent' : 'rgba(0,0,0,0.03)' // Very light zebra striping
+                                                            }}
+                                                        >
+                                                            <div className="grid grid-cols-[2.5fr,1fr,1fr,0.8fr] gap-x-2 items-center text-sm"> {/* Adjusted grid and font size */}
+                                                                <div className="relative">
+                                                                    <div className="font-medium break-words" style={{ color: theme.colors.textPrimary }}>{inv.so || inv.invoice}</div> {/* Changed to font-medium */}
+                                                                    {/* Project name is now a static subtitle */}
+                                                                    {inv.project && (
+                                                                        <div className="text-xs mt-1 break-words" style={{ color: theme.colors.textSecondary }}>{inv.project}</div>
+                                                                    )}
+                                                                    {/* Removed ChevronDown icon */}
+                                                                </div>
+                                                                <div className="text-right font-medium" style={{ color: theme.colors.textPrimary }}>${inv.netAmount.toLocaleString()}</div> {/* Changed to font-medium */}
+                                                                <div className="text-right font-bold" style={{ color: theme.colors.accent }}>${inv.commission.toLocaleString()}</div>
+                                                                <div className="text-right font-medium" style={{ color: theme.colors.textPrimary }}>{commissionRate}%</div> {/* Changed to font-medium */}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                                {/* Average Rate Row */}
+                                                <div className="font-semibold border-t pt-4 mt-4 text-right pr-2" style={{ borderColor: theme.colors.border }}> {/* Adjusted padding and font-semibold */}
+                                                    <span style={{ color: theme.colors.textPrimary }}>Avg. Rate:</span>{' '}
+                                                    <span className="font-bold" style={{ color: theme.colors.accent }}>{avgRate}%</span> {/* Bolded percentage */}
+                                                </div>
+                                            </div>
+                                        );
+                                    } else if (detail.customer && detail.total > 0) {
+                                        return (
+                                            <div key={dIndex} className="flex justify-between items-center text-sm p-3 rounded-lg" style={{ backgroundColor: theme.colors.subtle }}>
+                                                <span className="font-medium" style={{ color: theme.colors.textPrimary }}>{detail.customer}</span>
+                                                <span style={{ color: theme.colors.accent }}>${detail.total.toLocaleString()}</span>
+                                            </div>
+                                        );
+                                    } else if (detail.brandTotal) {
+                                        return (
+                                            <div key={dIndex} className="pt-4 mt-4 border-t" style={{ borderColor: theme.colors.border }}>
+                                                <h4 className="font-bold text-lg mb-3 flex items-center" style={{ color: theme.colors.textPrimary }}>
+                                                    <DollarSign className="w-5 h-5 mr-2" style={{ color: theme.colors.accent }} />
+                                                    Totals
+                                                </h4>
+                                                <div className="space-y-2 text-base">
+                                                    <div className="flex justify-between items-center">
+                                                        <span style={{ color: theme.colors.textSecondary }}>Invoiced Total:</span>
+                                                        <span className="font-medium" style={{ color: theme.colors.textPrimary }}>${detail.listTotal.toLocaleString()}</span> {/* Changed to font-medium */}
+                                                    </div>
+                                                    <div className="flex justify-between items-center">
+                                                        <span style={{ color: theme.colors.textSecondary }}>Commissioned Value:</span>
+                                                        <span className="font-medium" style={{ color: theme.colors.textPrimary }}>${detail.netTotal.toLocaleString()}</span> {/* Changed to font-medium */}
+                                                    </div>
+                                                    <div className="flex justify-between items-center pt-2 font-semibold" style={{ color: theme.colors.textPrimary }}>
+                                                        <span>Commission Amount:</span>
+                                                        <span className="text-lg font-bold" style={{ color: theme.colors.accent }}>${detail.commissionTotal.toLocaleString()}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    }
+                                    return null;
+                                })}
+                            </div>
+                        )}
+                    </GlassCard>
+                ))}
+            </div>
+        </div>
+    );
+};
 
 export const SampleDiscountsScreen = ({ theme, onNavigate, setSuccessMessage }) => {
     const handleCopy = useCallback((textToCopy) => {

@@ -534,12 +534,12 @@ export const COMMISSIONS_DATA = {
                 {
                     salesperson: 'DAN@BGREPS.COM; OTCOLEINDY@GMAIL.COM', invoices: [
                         { invoice: '0000608805', po: 'A289743-4', so: '486242', project: '9100 KEYSTONE AMENITY: FURNITURE ELL LILY', listValue: 1070.40, netAmount: 1536.77, commission: 153.68 },
-                        { invoice: '0000608806', po: 'A2900020-1', so: '495025', project: '', listValue: 1035.90, netAmount: 995.03, commission: 114.36 },
-                        { invoice: '0000600608', po: 'A2901050-1', so: '450581', project: '', listValue: 190.40, netAmount: 743.73, commission: 74.37 },
-                        { invoice: '00006069725', po: 'A290006-3', so: '450338', project: '', listValue: 103.20, netAmount: 178.54, commission: 17.85 },
-                        { invoice: '00006069750', po: 'A290036-2', so: '450224', project: '', listValue: 2276.62, netAmount: 2223.49, commission: 96.65 },
-                        { invoice: '0000600883', po: 'A290066-3', so: '450338', project: '', listValue: 1143.60, netAmount: 1128.11, commission: 1128.11 },
-                        { invoice: '0000610026', po: 'A289674-4', so: '486362', project: '', listValue: 40.40, netAmount: 40.40, commission: 40.40 },
+                        { invoice: '0000608806', po: 'A2900020-1', so: '495025', project: 'ELI LILLY AND COMPANY', listValue: 1035.90, netAmount: 995.03, commission: 114.36 },
+                        { invoice: '0000600608', po: 'A2901050-1', so: '450581', project: 'ELI LILLY & COMPANY', listValue: 190.40, netAmount: 743.73, commission: 74.37 },
+                        { invoice: '00006069725', po: 'A290006-3', so: '450338', project: 'MARSHALL COMMUNITY BUILDING', listValue: 103.20, netAmount: 178.54, commission: 17.85 },
+                        { invoice: '00006069750', po: 'A290036-2', so: '450224', project: 'BELZER MIDDLE SCHOOL MSD OF LAWRENCE TOWNSHIP', listValue: 2276.62, netAmount: 2223.49, commission: 96.65 },
+                        { invoice: '0000600883', po: 'A290066-3', so: '450338', project: 'MSD OF LAWRENCE TOWNSHIP', listValue: 1143.60, netAmount: 1128.11, commission: 1128.11 },
+                        { invoice: '0000610026', po: 'A289674-4', so: '486362', project: 'GREENFIELD BANKING CO FISHERS OFFICE', listValue: 40.40, netAmount: 40.40, commission: 40.40 },
                     ]
                 },
                 { customer: '025708 OTIS R BOWEN CENTER FOR HUMAN', total: 0 },
