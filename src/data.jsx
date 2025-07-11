@@ -5,8 +5,7 @@
     Wrench, MonitorPlay, Share2, Hourglass, Settings, HelpCircle, Send
 } from 'lucide-react';
 
-export const lightTheme = { colors: { background: '#F3F2EF', surface: 'rgba(255,255,255,0.92)', primary: '#003366', accent: '#003366', secondary: '#7A7A7A', textPrimary: '#111111', textSecondary: '#555555', border: 'rgba(0,0,0,0.05)', shadow: 'rgba(0,0,0,0.10)' }, backdropFilter: 'blur(12px)' };
-export const darkTheme = { colors: { background: '#1E1E1E', surface: 'rgba(40,40,40,0.85)', primary: '#BBBBBB', accent: '#BBBBBB', secondary: '#999999', textPrimary: '#F5F5F5', textSecondary: '#CCCCCC', border: 'rgba(255,255,255,0.08)', shadow: 'rgba(0,0,0,0.25)' }, backdropFilter: 'blur(12px)' };
+export const lightTheme = { colors: { background: '#E9E9E7', surface: 'rgba(255,255,255,0.92)', primary: '#003366', accent: '#003366', secondary: '#7A7A7A', textPrimary: '#111111', textSecondary: '#555555', border: 'rgba(0,0,0,0.05)', shadow: 'rgba(0,0,0,0.10)' }, backdropFilter: 'blur(12px)' }; export const darkTheme = { colors: { background: '#1E1E1E', surface: 'rgba(40,40,40,0.85)', primary: '#BBBBBB', accent: '#BBBBBB', secondary: '#999999', textPrimary: '#F5F5F5', textSecondary: '#CCCCCC', border: 'rgba(255,255,255,0.08)', shadow: 'rgba(0,0,0,0.25)' }, backdropFilter: 'blur(12px)' };
 export const logoLight = 'https://i.imgur.com/qskYhB0.png';
 
 export const MENU_ITEMS = [{ id: 'orders', icon: MousePointer, label: 'Orders' }, { id: 'sales', icon: PieChart, label: 'Sales' }, { id: 'products', icon: Armchair, label: 'Products' }, { id: 'resources', icon: Database, label: 'Resources' }, { id: 'projects', icon: Briefcase, label: 'Projects' }, { id: 'community', icon: MessageSquare, label: 'Community' }, { id: 'samples', icon: Package, label: 'Samples' }, { id: 'replacements', icon: RotateCw, label: 'Replacements' },];
