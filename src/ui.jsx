@@ -163,34 +163,22 @@ export const AutoCompleteCombobox = ({
     required,
     zIndex,
     dropdownClassName,
-    resetOnSelect // New prop to control clearing the input on select
+    resetOnSelect
 }) => {
     const [inputValue, setInputValue] = useState(value || '');
     const [showOptions, setShowOptions] = useState(false);
-    const wrapperRef = useRef(null);
+    const wrapperRef = useRef(null); // Ref for the input field to position the portal
 
     useEffect(() => {
-        // Only update the internal input value if it's not meant to be reset.
         if (!resetOnSelect) {
             setInputValue(value || '');
         }
     }, [value, resetOnSelect]);
 
-    useEffect(() => {
-        function handleClickOutside(e) {
-            if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
-                setShowOptions(false);
-            }
-        }
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
     const filtered = options.filter(opt => opt.toLowerCase().includes(inputValue.toLowerCase()));
 
     const handleSelect = opt => {
         onChange(opt);
-        // If resetOnSelect is true, clear the input. Otherwise, fill it with the selection.
         if (resetOnSelect) {
             setInputValue('');
         } else {
@@ -203,6 +191,44 @@ export const AutoCompleteCombobox = ({
         if (inputValue && !options.includes(inputValue)) onAddNew(inputValue);
         onChange(inputValue);
         setShowOptions(false);
+    };
+
+    const AutocompleteDropdownPortal = () => {
+        const dropdownRef = useRef(null);
+
+        // This effect handles closing the dropdown when clicking outside
+        useEffect(() => {
+            const handleClickOutside = (event) => {
+                if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                    setShowOptions(false);
+                }
+            };
+            const timerId = setTimeout(() => document.addEventListener("mousedown", handleClickOutside), 0);
+            return () => { clearTimeout(timerId); document.removeEventListener("mousedown", handleClickOutside); };
+        }, []);
+
+        const parentRect = wrapperRef.current?.getBoundingClientRect();
+        const dropdownWidth = 288;
+        const top = parentRect ? parentRect.bottom + 4 : 0;
+        const left = parentRect ? parentRect.right - dropdownWidth : 0;
+
+        return ReactDOM.createPortal(
+            <div ref={dropdownRef} className="absolute z-[9999]" style={{ top: `${top}px`, left: `${left}px`, width: `${dropdownWidth}px` }}>
+                <GlassCard theme={theme} className={`p-2 overflow-y-auto scrollbar-hide ${dropdownClassName || 'max-h-80'}`}>
+                    {filtered.map(opt => (
+                        <button key={opt} type="button" onClick={() => handleSelect(opt)} className="block w-full text-left p-2 rounded-md hover:bg-black/5" style={{ color: theme.colors.textPrimary }}>
+                            {opt}
+                        </button>
+                    ))}
+                    {onAddNew && inputValue && !options.includes(inputValue) && (
+                        <button type="button" onClick={handleAdd} className="block w-full text-left p-2 rounded-md font-semibold hover:bg-black/5" style={{ color: theme.colors.accent }}>
+                            Add “{inputValue}”
+                        </button>
+                    )}
+                </GlassCard>
+            </div>,
+            document.body
+        );
     };
 
     return (
@@ -227,49 +253,41 @@ export const AutoCompleteCombobox = ({
                     ringColor: theme.colors.accent,
                 }}
             />
-            {showOptions && (
-                <GlassCard
-                    theme={theme}
-                    className={`absolute w-full mt-1 z-10 p-2 overflow-y-auto scrollbar-hide ${dropdownClassName || 'max-h-48'}`}
-                >
-                    {filtered.map(opt => (
-                        <button key={opt} type="button" onClick={() => handleSelect(opt)} className="block w-full text-left p-2 rounded-md hover:bg-black/5" style={{ color: theme.colors.textPrimary }}>
-                            {opt}
-                        </button>
-                    ))}
-                    {onAddNew && inputValue && !options.includes(inputValue) && (
-                        <button type="button" onClick={handleAdd} className="block w-full text-left p-2 rounded-md font-semibold hover:bg-black/5" style={{ color: theme.colors.accent }}>
-                            Add “{inputValue}”
-                        </button>
-                    )}
-                </GlassCard>
-            )}
+            {showOptions && <AutocompleteDropdownPortal />}
         </div>
     );
 };
-export const ToggleButtonGroup = ({ value, onChange, options, theme }) => (
-    <div
-        className="w-full flex p-1 rounded-full"
-        style={{ backgroundColor: theme.colors.subtle }}
-    >
-        {options.map((opt) => (
-            <button
-                key={opt.value}
-                type="button"
-                onClick={() => onChange(opt.value)}
-                className="flex-1 rounded-full py-2 px-1 text-center text-sm font-bold transition-all duration-300"
-                style={{
-                    backgroundColor: opt.value === value ? theme.colors.surface : 'transparent',
-                    color: opt.value === value ? theme.colors.accent : theme.colors.textSecondary,
-                    boxShadow: opt.value === value ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                }}
-            >
-                {opt.label}
-            </button>
-        ))}
-    </div>
-);
 
+export const ToggleButtonGroup = ({ value, onChange, options, theme }) => {
+    const selectedIndex = options.findIndex(opt => opt.value === value);
+
+    return (
+        <div className="w-full flex p-1 rounded-full relative" style={{ backgroundColor: theme.colors.subtle }}>
+            {/* Sliding Pill Background */}
+            <div
+                className="absolute top-1 bottom-1 h-auto rounded-full shadow-sm transition-all duration-300 ease-in-out"
+                style={{
+                    width: `calc(${100 / options.length}% - 0.125rem * 2 / ${options.length})`,
+                    backgroundColor: theme.colors.surface,
+                    transform: `translateX(calc(${selectedIndex * 100}% + ${selectedIndex * 0.125}rem))`
+                }}
+            />
+            {options.map((opt) => (
+                <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => onChange(opt.value)}
+                    className="flex-1 rounded-full py-2 px-1 text-center text-sm font-semibold transition-colors duration-300 relative z-10"
+                    style={{
+                        color: opt.value === value ? theme.colors.accent : theme.colors.textSecondary
+                    }}
+                >
+                    {opt.label}
+                </button>
+            ))}
+        </div>
+    );
+};
 const {
     // New–Lead form
     EMPTY_LEAD,
@@ -3162,14 +3180,15 @@ const EMPTY_USER = {
 
 const FormSection = ({ title, theme, children }) => (
     <GlassCard theme={theme} className="p-4">
-        <h3 className="font-bold text-xl mb-4 pb-3 border-b" style={{ color: theme.colors.textPrimary, borderColor: theme.colors.subtle }}>
-            {title}
-        </h3>
+        {/* The title is now inside the card, creating the grouped effect */}
+        <h3 className="font-bold text-xl mb-4">{title}</h3>
         <div className="space-y-4">
             {children}
         </div>
     </GlassCard>
 );
+
+
 const CreateContentModal = ({ close, pickType, typeChosen, onAdd, theme }) => {
     const type = typeChosen;
     const [text, setText] = useState('');
@@ -3335,21 +3354,21 @@ export const FormInput = React.memo(({
     type = 'text',
     value,
     onChange,
-    name, // Ensure name is passed for the handler
+    name,
     placeholder,
     className = "",
     theme,
     readOnly = false,
     required = false,
+    icon = null, // New prop for the icon
 }) => {
-    // This ensures the input is always controlled, preventing errors with null/undefined values.
     const controlledValue = value === undefined || value === null ? '' : value;
 
-    const inputClass = `w-full px-4 py-3 border rounded-full focus:ring-2 text-base outline-none ${className}`;
+    const inputClass = `w-full px-4 py-3 border rounded-full focus:ring-2 text-base outline-none ${icon ? 'pr-10' : ''} ${className}`;
     const styles = {
         backgroundColor: theme.colors.subtle,
         borderColor: theme.colors.border,
-        color: theme.colors.textPrimary,
+        color: readOnly && !controlledValue ? theme.colors.textSecondary : theme.colors.textPrimary,
         ringColor: theme.colors.accent,
     };
 
@@ -3372,36 +3391,43 @@ export const FormInput = React.memo(({
                     {label}
                 </label>
             )}
-            {type === 'currency' ? (
-                <input type="text" name={name} value={formatCurrency(controlledValue)} onChange={handleCurrencyChange} className={inputClass} style={styles} placeholder={placeholder} required={required} />
-            ) : type === 'textarea' ? (
-                <textarea
-                    name={name}
-                    value={controlledValue}
-                    onChange={onChange}
-                    className={inputClass.replace('rounded-full', 'rounded-2xl')}
-                    style={styles}
-                    rows="4"
-                    placeholder={placeholder}
-                    readOnly={readOnly}
-                />
-            ) : (
-                <input
-                    type={type}
-                    name={name}
-                    value={controlledValue}
-                    onChange={onChange}
-                    className={inputClass}
-                    style={styles}
-                    placeholder={placeholder}
-                    readOnly={readOnly}
-                    required={required}
-                />
-            )}
+            <div className="relative">
+                {type === 'currency' ? (
+                    <input type="text" name={name} value={formatCurrency(controlledValue)} onChange={handleCurrencyChange} className={inputClass} style={styles} placeholder={placeholder} required={required} />
+                ) : type === 'textarea' ? (
+                    <textarea
+                        name={name}
+                        value={controlledValue}
+                        onChange={onChange}
+                        className={inputClass.replace('rounded-full', 'rounded-2xl')}
+                        style={styles}
+                        rows="4"
+                        placeholder={placeholder}
+                        readOnly={readOnly}
+                    />
+                ) : (
+                    <input
+                        type={type}
+                        name={name}
+                        value={controlledValue}
+                        onChange={onChange}
+                        className={inputClass}
+                        style={styles}
+                        placeholder={placeholder}
+                        readOnly={readOnly}
+                        required={required}
+                    />
+                )}
+                {/* Icon is rendered here if provided */}
+                {icon && (
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+                        {icon}
+                    </div>
+                )}
+            </div>
         </div>
     );
 });
-
 
 export const SearchInput = React.memo(({ onSubmit, value, onChange, placeholder, theme, className, onVoiceClick }) => (
     <form onSubmit={onSubmit} className={`relative flex items-center ${className || ''}`} >
@@ -4396,15 +4422,21 @@ export const ProbabilitySlider = ({ value, onChange, theme }) => (
 const DropdownPortal = ({ children, onClose, parentRef, theme }) => {
     const dropdownRef = useRef(null);
 
-    // This simplified effect now correctly handles closing the dropdown
     useEffect(() => {
-        const handleClickOutside = (event) => {
+        // This function handles the click event
+        function handleClickOutside(event) {
+            // If the click is outside the dropdown's content, call the onClose function
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
                 onClose();
             }
-        };
-        document.addEventListener("mousedown", handleClickOutside);
+        }
+        // Use a timeout to ensure the listener is added after the current click event is processed
+        const timerId = setTimeout(() => {
+            document.addEventListener("mousedown", handleClickOutside);
+        }, 0);
+
         return () => {
+            clearTimeout(timerId);
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, [onClose]);
@@ -4428,6 +4460,7 @@ const DropdownPortal = ({ children, onClose, parentRef, theme }) => {
     );
 };
 
+
 export const NewLeadScreen = ({
     theme,
     onSuccess,
@@ -4443,12 +4476,26 @@ export const NewLeadScreen = ({
         contractType: '',
     });
 
+    const [activeDropdown, setActiveDropdown] = useState(null);
+
     const updateField = useCallback((field, value) => {
         setNewLead(prev => ({ ...prev, [field]: value }));
+        setActiveDropdown(null);
     }, []);
 
-    const handleSubmit = (e) => { e.preventDefault(); onSuccess(newLead); };
-    const addProduct = useCallback((series) => { if (series) { setNewLead(prev => ({ ...prev, products: [...prev.products, { series }] })); } }, []);
+    const handleOpenDropdown = (type, ref) => {
+        setActiveDropdown({ type, ref });
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (!newLead.projectStatus) {
+            alert('Please select a Project Stage before submitting.');
+            return;
+        }
+        onSuccess(newLead);
+    };
+    const addProduct = useCallback((series) => { if (series) { setNewLead(prev => ({ ...prev, products: [...prev.products, { series, hasGlassDoors: false, material: '' }] })); } }, []);
     const removeProduct = useCallback((idx) => { setNewLead(prev => ({ ...prev, products: prev.products.filter((_, i) => i !== idx) })); }, []);
     const toggleCompetitor = useCallback((competitor) => {
         setNewLead(prev => {
@@ -4458,120 +4505,221 @@ export const NewLeadScreen = ({
         });
     }, []);
 
+    const updateProductOption = (productIndex, key, value) => {
+        setNewLead(prev => {
+            const updatedProducts = prev.products.map((product, index) => {
+                if (index === productIndex) {
+                    return { ...product, [key]: value };
+                }
+                return product;
+            });
+            return { ...prev, products: updatedProducts };
+        });
+    };
+
     const availableSeries = useMemo(() => Data.JSI_PRODUCT_SERIES.filter(s => !newLead.products.some(p => p.series === s)), [newLead.products]);
 
-    // A simple divider component for visual separation
-    const SectionDivider = () => <div className="border-t" style={{ borderColor: theme.colors.border }}></div>;
+    const dropdownData = {
+        stage: { field: 'projectStatus', options: Data.STAGES.map(s => ({ label: s, value: s })) },
+        vertical: { field: 'vertical', options: Data.VERTICALS.map(v => ({ label: v, value: v })) },
+        discount: { field: 'discount', options: Data.DISCOUNT_OPTIONS.map(d => ({ label: d, value: d })) },
+        poTimeframe: { field: 'poTimeframe', options: Data.PO_TIMEFRAMES.map(t => ({ label: t, value: t })) },
+        contractType: { field: 'contractType', options: Data.CONTRACT_OPTIONS.map(c => ({ label: c, value: c })) },
+    };
+
+    const stageRef = useRef(null);
+    const verticalRef = useRef(null);
+    const discountRef = useRef(null);
+    const poTimeframeRef = useRef(null);
+    const contractTypeRef = useRef(null);
 
     return (
         <form onSubmit={handleSubmit} className="flex flex-col h-full">
-            <div className="flex-1 overflow-y-auto px-4 pb-4 pt-6 scrollbar-hide">
-                {/* The entire form is now inside a single GlassCard */}
-                <GlassCard theme={theme} className="p-4 space-y-6">
+            {/* The layout is now just a list of sections with space between them */}
+            <div onClick={() => setActiveDropdown(null)} className="flex-1 overflow-y-auto px-4 pb-4 pt-6 space-y-6 scrollbar-hide">
 
-                    {/* --- Project Details Section --- */}
-                    <div>
-                        <h3 className="font-bold text-xl mb-4">Project Details</h3>
-                        <div className="space-y-4">
-                            <FormInput required label="Project Name" value={newLead.project} onChange={(e) => updateField('project', e.target.value)} placeholder="e.g., Acme Corp Headquarters" theme={theme} />
-                            <CustomSelect required label="Project Stage" value={newLead.projectStatus} onChange={(e) => updateField('projectStatus', e.target.value)} options={Data.STAGES.map(s => ({ label: s, value: s }))} placeholder="Select stage" theme={theme} />
-                            <CustomSelect required label="Vertical" value={newLead.vertical} onChange={(e) => updateField('vertical', e.target.value)} options={Data.VERTICALS.map(v => ({ label: v, value: v }))} placeholder="Select vertical" theme={theme} />
-                            {newLead.vertical === 'Other (Please specify)' && (
-                                <div className="pl-4 animate-fade-in">
-                                    <FormInput
-                                        label="Please Specify Vertical"
-                                        value={newLead.otherVertical}
-                                        onChange={(e) => updateField('otherVertical', e.target.value)}
-                                        placeholder="Specify the vertical..."
-                                        theme={theme}
-                                        required
-                                    />
-                                </div>
-                            )}
-                        </div>
+                <FormSection title="Project Details" theme={theme}>
+                    <FormInput required label="Project Name" value={newLead.project} onChange={(e) => updateField('project', e.target.value)} placeholder="e.g., Acme Corp Headquarters" theme={theme} />
+
+                    <div ref={stageRef} onClick={(e) => { e.stopPropagation(); handleOpenDropdown('stage', stageRef); }} className="cursor-pointer">
+                        <FormInput readOnly required label="Project Stage" value={newLead.projectStatus} placeholder="Select stage" theme={theme} icon={<ChevronDown className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />} />
                     </div>
 
-                    <SectionDivider />
-
-                    {/* --- Stakeholders Section --- */}
-                    <div>
-                        <h3 className="font-bold text-xl mb-4">Stakeholders</h3>
-                        <div className="space-y-4">
-                            <AutoCompleteCombobox label="A&D Firm" required value={newLead.designFirm} onChange={(val) => updateField('designFirm', val)} placeholder="Search or add a design firm..." options={designFirms} onAddNew={(f) => setDesignFirms((p) => [...new Set([f, ...p])])} theme={theme} />
-                            <AutoCompleteCombobox label="Dealer" required value={newLead.dealer} onChange={(val) => updateField('dealer', val)} placeholder="Search or add a dealer..." options={dealers} onAddNew={(d) => setDealers((p) => [...new Set([d, ...p])])} theme={theme} />
-                        </div>
+                    <div ref={verticalRef} onClick={(e) => { e.stopPropagation(); handleOpenDropdown('vertical', verticalRef); }} className="cursor-pointer">
+                        <FormInput readOnly required label="Vertical" value={newLead.vertical} placeholder="Select vertical" theme={theme} icon={<ChevronDown className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />} />
                     </div>
 
-                    <SectionDivider />
+                    {newLead.vertical === 'Other (Please specify)' && (
+                        <div className="pl-4 animate-fade-in">
+                            <FormInput
+                                label="Please Specify Vertical"
+                                value={newLead.otherVertical}
+                                onChange={(e) => updateField('otherVertical', e.target.value)}
+                                placeholder="Specify the vertical..."
+                                theme={theme}
+                                required
+                            />
+                        </div>
+                    )}
+                </FormSection>
 
-                    {/* --- Competition & Products Section --- */}
-                    <div>
-                        <h3 className="font-bold text-xl mb-4">Competition & Products</h3>
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between text-sm px-3">
-                                <label style={{ color: theme.colors.textSecondary }}>Competition?</label>
-                                <input type="checkbox" className="h-5 w-5 rounded-md border-2" style={{ accentColor: theme.colors.accent, borderColor: theme.colors.border }} checked={!!newLead.competitionPresent} onChange={(e) => updateField('competitionPresent', e.target.checked)} />
-                            </div>
-                            {newLead.competitionPresent && (
-                                <div className="space-y-2">
-                                    <label className="block text-xs font-semibold px-1" style={{ color: theme.colors.textSecondary }}>Competitors</label>
-                                    <div className="p-2 flex flex-wrap gap-2 rounded-2xl" style={{ backgroundColor: theme.colors.subtle }}>
-                                        {Data.COMPETITORS.filter(c => c !== 'None').map(c => (
-                                            <button type="button" key={c} onClick={() => toggleCompetitor(c)} className={`px-3 py-1.5 text-sm rounded-full font-medium transition-colors`} style={{ backgroundColor: newLead.competitors.includes(c) ? theme.colors.accent : theme.colors.surface, color: newLead.competitors.includes(c) ? 'white' : theme.colors.textPrimary }}>
-                                                {c}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                            <div className="space-y-3">
-                                <label className="text-xs font-semibold px-1" style={{ color: theme.colors.textSecondary }}>Products</label>
-                                {newLead.products.map((p, idx) => (
-                                    <div key={idx} className="p-3 rounded-lg flex items-center justify-between" style={{ backgroundColor: theme.colors.subtle }}>
-                                        <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>{p.series}</span>
-                                        <button type="button" onClick={() => removeProduct(idx)} className="p-1 rounded-full hover:bg-red-500/10">
-                                            <X className="w-4 h-4 text-red-500" />
-                                        </button>
-                                    </div>
+                <FormSection title="Stakeholders" theme={theme}>
+                    <AutoCompleteCombobox label="A&D Firm" required value={newLead.designFirm} onChange={(val) => updateField('designFirm', val)} placeholder="Search or add a design firm..." options={designFirms} onAddNew={(f) => setDesignFirms((p) => [...new Set([f, ...p])])} theme={theme} />
+                    <AutoCompleteCombobox label="Dealer" required value={newLead.dealer} onChange={(val) => updateField('dealer', val)} placeholder="Search or add a dealer..." options={dealers} onAddNew={(d) => setDealers((p) => [...new Set([d, ...p])])} theme={theme} />
+                </FormSection>
+
+                <FormSection title="Competition & Products" theme={theme}>
+                    <div className="flex items-center justify-between text-sm px-3">
+                        <label style={{ color: theme.colors.textSecondary }}>Bid?</label>
+                        <input type="checkbox" className="h-5 w-5 rounded-md border-2" style={{ accentColor: theme.colors.accent, borderColor: theme.colors.border }} checked={!!newLead.isBid} onChange={(e) => updateField('isBid', e.target.checked)} />
+                    </div>
+                    <div className="flex items-center justify-between text-sm px-3 mt-2">
+                        <label style={{ color: theme.colors.textSecondary }}>Competition?</label>
+                        <input type="checkbox" className="h-5 w-5 rounded-md border-2" style={{ accentColor: theme.colors.accent, borderColor: theme.colors.border }} checked={!!newLead.competitionPresent} onChange={(e) => updateField('competitionPresent', e.target.checked)} />
+                    </div>
+
+                    {newLead.competitionPresent && (
+                        <div className="space-y-2 pt-4 border-t mt-4" style={{ borderColor: theme.colors.subtle }}>
+                            <div className="p-2 flex flex-wrap gap-2 rounded-2xl" style={{ backgroundColor: theme.colors.subtle }}>
+                                {Data.COMPETITORS.filter(c => c !== 'None').map(c => (
+                                    <button
+                                        type="button"
+                                        key={c}
+                                        onClick={() => toggleCompetitor(c)}
+                                        className={`px-3 py-1.5 text-sm rounded-full font-medium transition-colors border`}
+                                        style={{
+                                            backgroundColor: newLead.competitors.includes(c) ? theme.colors.accent : theme.colors.surface,
+                                            color: newLead.competitors.includes(c) ? 'white' : theme.colors.textPrimary,
+                                            borderColor: newLead.competitors.includes(c) ? theme.colors.accent : theme.colors.border,
+                                        }}
+                                    >
+                                        {c}
+                                    </button>
                                 ))}
-                                {availableSeries.length > 0 && (
-                                    <AutoCompleteCombobox
-                                        value={""}
-                                        onChange={(val) => { addProduct(val); }}
-                                        placeholder="+ Add a Product..."
-                                        options={availableSeries}
+                            </div>
+                        </div>
+                    )}
+                    <div className="border-t pt-4 mt-4 space-y-3" style={{ borderColor: theme.colors.border }}>
+                        <label className="text-xs font-semibold px-1" style={{ color: theme.colors.textSecondary }}>Products</label>
+                        {newLead.products.map((p, idx) => (
+                            <div key={idx} className="p-3 rounded-lg" style={{ backgroundColor: theme.colors.subtle }}>
+                                <div className="flex items-center justify-between">
+                                    <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>{p.series}</span>
+                                    <button type="button" onClick={() => removeProduct(idx)} className="p-1 rounded-full hover:bg-red-500/10">
+                                        <X className="w-4 h-4 text-red-500" />
+                                    </button>
+                                </div>
+                                {p.series === 'Vision' && (
+                                    <VisionOptions
                                         theme={theme}
-                                        resetOnSelect={true}
-                                        dropdownClassName="w-72 right-0 max-h-80"
+                                        product={p}
+                                        productIndex={idx}
+                                        onUpdate={updateProductOption}
                                     />
                                 )}
                             </div>
-                        </div>
+                        ))}
+                        {availableSeries.length > 0 && (
+                            <AutoCompleteCombobox
+                                value={""}
+                                onChange={(val) => { addProduct(val); }}
+                                placeholder="+ Add a Product..."
+                                options={availableSeries}
+                                theme={theme}
+                                resetOnSelect={true}
+                                dropdownClassName="w-72 right-0 max-h-80"
+                            />
+                        )}
+                    </div>
+                </FormSection>
+
+                <FormSection title="Financials & Timeline" theme={theme}>
+                    <FormInput label="Estimated List Price" required type="currency" value={newLead.estimatedList} onChange={(e) => updateField('estimatedList', e.target.value)} placeholder="$0" theme={theme} />
+                    <ProbabilitySlider value={newLead.winProbability} onChange={(v) => updateField('winProbability', v)} theme={theme} />
+
+                    <div ref={discountRef} onClick={(e) => { e.stopPropagation(); handleOpenDropdown('discount', discountRef); }} className="cursor-pointer">
+                        <FormInput readOnly label="Discount" value={newLead.discount} placeholder="Select a Discount" theme={theme} icon={<ChevronDown className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />} />
                     </div>
 
-                    <SectionDivider />
+                    <div ref={poTimeframeRef} onClick={(e) => { e.stopPropagation(); handleOpenDropdown('poTimeframe', poTimeframeRef); }} className="cursor-pointer">
+                        <FormInput readOnly required label="PO Timeframe" value={newLead.poTimeframe} placeholder="Select a Timeframe" theme={theme} icon={<ChevronDown className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />} />
+                    </div>
 
-                    {/* --- Financials & Timeline Section --- */}
-                    <div>
-                        <h3 className="font-bold text-xl mb-4">Financials & Timeline</h3>
-                        <div className="space-y-4">
-                            <FormInput label="Estimated List Price" required type="currency" value={newLead.estimatedList} onChange={(e) => updateField('estimatedList', e.target.value)} placeholder="$0" theme={theme} />
-                            <ProbabilitySlider value={newLead.winProbability} onChange={(v) => updateField('winProbability', v)} theme={theme} />
-                            <CustomSelect label="Discount" value={newLead.discount} onChange={(e) => updateField('discount', e.target.value)} options={Data.DISCOUNT_OPTIONS.map(d => ({ label: d, value: d }))} placeholder="Select a Discount" theme={theme} />
-                            <CustomSelect label="PO Timeframe" required value={newLead.poTimeframe} onChange={(e) => updateField('poTimeframe', e.target.value)} options={Data.PO_TIMEFRAMES.map(t => ({ label: t, value: t }))} placeholder="Select a Timeframe" theme={theme} />
-                            <div className="flex items-center justify-between text-sm px-3 pt-2">
-                                <label style={{ color: theme.colors.textSecondary }}>Contract?</label>
-                                <input type="checkbox" className="h-5 w-5 rounded-md border-2" style={{ accentColor: theme.colors.accent, borderColor: theme.colors.border }} checked={!!newLead.isContract} onChange={(e) => updateField('isContract', e.target.checked)} />
-                            </div>
-                            {newLead.isContract && (
-                                <div className="animate-fade-in">
-                                    <CustomSelect required placeholder="Select a Contract" value={newLead.contractType} onChange={(e) => updateField('contractType', e.target.value)} options={Data.CONTRACT_OPTIONS.map(c => ({ label: c, value: c }))} theme={theme} />
+                    <div className="flex items-center justify-between text-sm px-3 pt-2">
+                        <label style={{ color: theme.colors.textSecondary }}>Contract?</label>
+                        <input type="checkbox" className="h-5 w-5 rounded-md border-2" style={{ accentColor: theme.colors.accent, borderColor: theme.colors.border }} checked={!!newLead.isContract} onChange={(e) => updateField('isContract', e.target.checked)} />
+                    </div>
+
+                    {newLead.isContract && (
+                        <div className="animate-fade-in" ref={contractTypeRef} onClick={(e) => { e.stopPropagation(); handleOpenDropdown('contractType', contractTypeRef); }}>
+                            <FormInput readOnly required placeholder="Select a Contract" value={newLead.contractType} theme={theme} icon={<ChevronDown className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />} />
+                        </div>
+                    )}
+                </FormSection>
+
+                <FormSection title="Services & Notes" theme={theme}>
+                    <div className="flex items-center justify-between text-sm">
+                        <label className="font-medium" style={{ color: theme.colors.textSecondary }}>JSI Spec Services Required?</label>
+                        <input
+                            type="checkbox"
+                            className="h-5 w-5 rounded-md border-2"
+                            style={{ accentColor: theme.colors.accent, borderColor: theme.colors.border }}
+                            checked={!!newLead.jsiSpecServices}
+                            onChange={(e) => updateField('jsiSpecServices', e.target.checked)}
+                        />
+                    </div>
+
+                    {newLead.jsiSpecServices && (
+                        <div className="animate-fade-in pt-4 space-y-4">
+                            <ToggleButtonGroup
+                                value={newLead.quoteType}
+                                onChange={(value) => updateField('quoteType', value)}
+                                options={[
+                                    { label: 'New Quote', value: 'New Quote' },
+                                    { label: 'Revision', value: 'Revision' },
+                                    { label: 'Past Project', value: 'Past Project' }
+                                ]}
+                                theme={theme}
+                            />
+                            {newLead.quoteType === 'Revision' && (
+                                <div className="relative flex items-center pt-2">
+                                    <FormInput
+                                        label="Quote"
+                                        value={newLead.jsiQuoteNumber}
+                                        onChange={(e) => updateField('jsiQuoteNumber', e.target.value)}
+                                        placeholder="JG 25-2342"
+                                        theme={theme}
+                                    />
+                                    <button type="button" className="absolute right-2 bottom-2 px-3 py-1 text-xs font-semibold rounded-full" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textSecondary }}>
+                                        Unknown
+                                    </button>
+                                </div>
+                            )}
+                            {newLead.quoteType === 'Past Project' && (
+                                <div className="animate-fade-in pt-2">
+                                    <FormInput
+                                        label="Past Project Reference"
+                                        value={newLead.pastProjectRef}
+                                        onChange={(e) => updateField('pastProjectRef', e.target.value)}
+                                        placeholder="Enter past project name or quote #"
+                                        theme={theme}
+                                    />
                                 </div>
                             )}
                         </div>
-                    </div>
+                    )}
 
-                </GlassCard>
+                    <div className="pt-2">
+                        <FormInput
+                            label="Other Notes"
+                            type="textarea"
+                            value={newLead.notes}
+                            onChange={(e) => updateField('notes', e.target.value)}
+                            placeholder="Enter details..."
+                            theme={theme}
+                        />
+                    </div>
+                </FormSection>
 
                 <div className="pt-4 pb-4">
                     <button type="submit" className="w-full text-white font-bold py-3.5 rounded-full" style={{ backgroundColor: theme.colors.accent }}>
@@ -4579,7 +4727,125 @@ export const NewLeadScreen = ({
                     </button>
                 </div>
             </div>
+
+            {activeDropdown && (
+                <SelectPortal
+                    onClose={() => setActiveDropdown(null)}
+                    parentRef={activeDropdown.ref}
+                    theme={theme}
+                >
+                    {dropdownData[activeDropdown.type].options.map(opt => (
+                        <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => updateField(dropdownData[activeDropdown.type].field, opt.value)}
+                            className="block w-full text-left p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10"
+                        >
+                            {opt.label}
+                        </button>
+                    ))}
+                </SelectPortal>
+            )}
         </form>
+    );
+};
+
+const SelectPortal = ({ children, onClose, parentRef, theme }) => {
+    const dropdownRef = useRef(null);
+
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                onClose();
+            }
+        }
+        const timerId = setTimeout(() => {
+            document.addEventListener("mousedown", handleClickOutside);
+        }, 0);
+
+        return () => {
+            clearTimeout(timerId);
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [onClose]);
+
+    const parentRect = parentRef.current?.getBoundingClientRect();
+    const dropdownWidth = 288;
+    const top = parentRect ? parentRect.bottom + 4 : 0;
+    const left = parentRect ? parentRect.right - dropdownWidth : 0;
+
+    return ReactDOM.createPortal(
+        <div
+            ref={dropdownRef}
+            className="absolute z-[9999]"
+            style={{ top: `${top}px`, left: `${left}px`, width: `${dropdownWidth}px` }}
+        >
+            <GlassCard theme={theme} className="p-2 max-h-80 overflow-y-auto scrollbar-hide">
+                {/* It now renders whatever children are passed to it */}
+                {children}
+            </GlassCard>
+        </div>,
+        document.body
+    );
+};
+const VisionOptions = ({ theme, product, productIndex, onUpdate }) => {
+    const [isMaterialDropdownOpen, setIsMaterialDropdownOpen] = useState(false);
+    const materialRef = useRef(null);
+
+    const handleSelectMaterial = (material) => {
+        onUpdate(productIndex, 'material', material);
+        setIsMaterialDropdownOpen(false);
+    };
+
+    const DropdownHeader = ({ text }) => (
+        <div className="px-3 pt-2 pb-1 text-xs font-bold uppercase" style={{ color: theme.colors.textSecondary }}>
+            {text}
+        </div>
+    );
+
+    return (
+        <>
+            <div className="space-y-3 mt-3 pt-3 border-t" style={{ borderColor: theme.colors.border }}>
+                <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium" style={{ color: theme.colors.textSecondary }}>Glass doors?</label>
+                    <input
+                        type="checkbox"
+                        className="h-5 w-5 rounded-md border-2"
+                        style={{ accentColor: theme.colors.accent, borderColor: theme.colors.border }}
+                        checked={!!product.hasGlassDoors}
+                        onChange={(e) => onUpdate(productIndex, 'hasGlassDoors', e.target.checked)}
+                    />
+                </div>
+
+                <div ref={materialRef} onClick={() => setIsMaterialDropdownOpen(true)}>
+                    <FormInput
+                        readOnly
+                        label="Material?"
+                        value={product.material}
+                        placeholder="Select a material"
+                        theme={theme}
+                    />
+                </div>
+            </div>
+
+            {isMaterialDropdownOpen && (
+                <SelectPortal
+                    parentRef={materialRef}
+                    onClose={() => setIsMaterialDropdownOpen(false)}
+                    theme={theme}
+                >
+                    <DropdownHeader text="Laminate" />
+                    {Data.JSI_LAMINATES.map(opt => (
+                        <button key={opt} type="button" onClick={() => handleSelectMaterial(opt)} className="block w-full text-left p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10">{opt}</button>
+                    ))}
+                    <div className="border-t mx-2 my-2" style={{ borderColor: theme.colors.subtle }}></div>
+                    <DropdownHeader text="Veneer" />
+                    {Data.JSI_VENEERS.map(opt => (
+                        <button key={opt} type="button" onClick={() => handleSelectMaterial(opt)} className="block w-full text-left p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10">{opt}</button>
+                    ))}
+                </SelectPortal>
+            )}
+        </>
     );
 };
 
