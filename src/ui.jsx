@@ -4432,6 +4432,24 @@ export const NewLeadScreen = ({
     });
 
     const [activeDropdown, setActiveDropdown] = useState(null);
+    const scrollContainerRef = useRef(null);
+
+    useEffect(() => {
+        const container = scrollContainerRef.current;
+        const handleScroll = () => {
+            setActiveDropdown(null);
+        };
+
+        if (activeDropdown && container) {
+            container.addEventListener('scroll', handleScroll);
+        }
+
+        return () => {
+            if (container) {
+                container.removeEventListener('scroll', handleScroll);
+            }
+        };
+    }, [activeDropdown]);
 
     const updateField = useCallback((field, value) => {
         setNewLead(prev => ({ ...prev, [field]: value }));
@@ -4490,9 +4508,7 @@ export const NewLeadScreen = ({
 
     return (
         <form onSubmit={handleSubmit} className="flex flex-col h-full">
-            {/* The layout is now just a list of sections with space between them */}
-            <div onClick={() => setActiveDropdown(null)} className="flex-1 overflow-y-auto px-4 pb-4 pt-6 space-y-6 scrollbar-hide">
-
+            <div ref={scrollContainerRef} className="flex-1 overflow-y-auto px-4 pb-4 pt-6 space-y-6 scrollbar-hide">
                 <FormSection title="Project Details" theme={theme}>
                     <FormInput required label="Project Name" value={newLead.project} onChange={(e) => updateField('project', e.target.value)} placeholder="e.g., Acme Corp Headquarters" theme={theme} />
 
@@ -4507,7 +4523,6 @@ export const NewLeadScreen = ({
                     {newLead.vertical === 'Other (Please specify)' && (
                         <div className="pl-4 animate-fade-in">
                             <FormInput
-                                label="Please Specify Vertical"
                                 value={newLead.otherVertical}
                                 onChange={(e) => updateField('otherVertical', e.target.value)}
                                 placeholder="Specify the vertical..."
@@ -4519,8 +4534,9 @@ export const NewLeadScreen = ({
                 </FormSection>
 
                 <FormSection title="Stakeholders" theme={theme}>
-                    <AutoCompleteCombobox label="A&D Firm" required value={newLead.designFirm} onChange={(val) => updateField('designFirm', val)} placeholder="Search or add a design firm..." options={designFirms} onAddNew={(f) => setDesignFirms((p) => [...new Set([f, ...p])])} theme={theme} />
-                    <AutoCompleteCombobox label="Dealer" required value={newLead.dealer} onChange={(val) => updateField('dealer', val)} placeholder="Search or add a dealer..." options={dealers} onAddNew={(d) => setDealers((p) => [...new Set([d, ...p])])} theme={theme} />
+                    {/* The scroll container ref is now passed to these components */}
+                    <AutoCompleteCombobox scrollContainerRef={scrollContainerRef} label="A&D Firm" required value={newLead.designFirm} onChange={(val) => updateField('designFirm', val)} placeholder="Search or add a design firm..." options={designFirms} onAddNew={(f) => setDesignFirms((p) => [...new Set([f, ...p])])} theme={theme} />
+                    <AutoCompleteCombobox scrollContainerRef={scrollContainerRef} label="Dealer" required value={newLead.dealer} onChange={(val) => updateField('dealer', val)} placeholder="Search or add a dealer..." options={dealers} onAddNew={(d) => setDealers((p) => [...new Set([d, ...p])])} theme={theme} />
                 </FormSection>
 
                 <FormSection title="Competition & Products" theme={theme}>
@@ -4576,6 +4592,7 @@ export const NewLeadScreen = ({
                         ))}
                         {availableSeries.length > 0 && (
                             <AutoCompleteCombobox
+                                scrollContainerRef={scrollContainerRef} // Also passed here
                                 value={""}
                                 onChange={(val) => { addProduct(val); }}
                                 placeholder="+ Add a Product..."
@@ -4704,7 +4721,6 @@ export const NewLeadScreen = ({
         </form>
     );
 };
-
 const SelectPortal = ({ children, onClose, parentRef, theme }) => {
     const dropdownRef = useRef(null);
 
