@@ -399,7 +399,7 @@ export const SmartSearch = ({ theme, onNavigate, onAskAI, onVoiceActivate }) => 
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     onFocus={() => setIsFocused(true)}
-                    className="w-full pl-11 pr-12 py-3 rounded-full text-base border-2 shadow-md transition-colors focus:ring-2"
+                    className="w-full pl-11 pr-12 py-4 rounded-full text-base border-2 shadow-md transition-colors focus:ring-2"
                     style={{
                         backgroundColor: theme.colors.surface,
                         color: theme.colors.textPrimary,
@@ -3481,29 +3481,32 @@ export const HomeScreen = ({ onNavigate, theme, onAskAI, showAIDropdown, aiRespo
     }, [onNavigate]);
 
     return (
-        <div className="flex flex-col h-screen overflow-hidden" style={{ backgroundColor: theme.colors.background }}>
-            {/* UPDATED: Changed padding from pt-4 pb-2 to py-4 for symmetrical spacing */}
-            <div className="px-4 py-4 relative z-10">
-                <SmartSearch
-                    theme={theme}
-                    onNavigate={onNavigate}
-                    onAskAI={onAskAI}
-                    onVoiceActivate={onVoiceActivate}
-                />
-                {showAIDropdown && (
-                    <GlassCard theme={theme} className="absolute top-full w-full mt-2 p-4 left-0">
-                        {isAILoading ? (
-                            <div className="flex items-center justify-center p-4">
-                                <Hourglass className="w-6 h-6 animate-spin" style={{ color: theme.colors.accent }} />
-                                <p className="ml-3" style={{ color: theme.colors.textPrimary }}>Thinking...</p>
-                            </div>
-                        ) : (
-                            <p style={{ color: theme.colors.textPrimary }}>{aiResponse}</p>
-                        )}
-                    </GlassCard>
-                )}
+        <div className="flex flex-col h-full overflow-hidden" style={{ backgroundColor: theme.colors.background }}>
+            {/* Header section with equal margins above and below search bar */}
+            <div className="px-4 flex-shrink-0 flex items-center justify-center py-4" style={{ height: '90px' }}>
+                <div className="relative z-10 w-full max-w-full">
+                    <SmartSearch
+                        theme={theme}
+                        onNavigate={onNavigate}
+                        onAskAI={onAskAI}
+                        onVoiceActivate={onVoiceActivate}
+                    />
+                    {showAIDropdown && (
+                        <GlassCard theme={theme} className="absolute top-full w-full mt-2 p-4 left-0">
+                            {isAILoading ? (
+                                <div className="flex items-center justify-center p-4">
+                                    <Hourglass className="w-6 h-6 animate-spin" style={{ color: theme.colors.accent }} />
+                                    <p className="ml-3" style={{ color: theme.colors.textPrimary }}>Thinking...</p>
+                                </div>
+                            ) : (
+                                <p style={{ color: theme.colors.textPrimary }}>{aiResponse}</p>
+                            )}
+                        </GlassCard>
+                    )}
+                </div>
             </div>
 
+            {/* Main content area */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide">
                 <div className="grid grid-cols-2 gap-4">
                     {Data.MENU_ITEMS.map((item) => (
@@ -3529,11 +3532,11 @@ export const HomeScreen = ({ onNavigate, theme, onAskAI, showAIDropdown, aiRespo
                     </button>
                 </GlassCard>
             </div>
+
             {showAIDropdown && (<div className="absolute inset-0 bg-transparent z-0" onClick={onCloseAIDropdown} />)}
         </div>
     );
 };
-
 export const PermissionToggle = React.memo(({ label, isEnabled, onToggle, theme, disabled }) => {
     const titleText = disabled ? "Requires Sales Data access" : "";
 
