@@ -263,7 +263,7 @@ export const ToggleButtonGroup = ({ value, onChange, options, theme }) => {
 
     return (
         <div className="w-full flex p-1 rounded-full relative" style={{ backgroundColor: theme.colors.subtle }}>
-            {/* Sliding Pill Background */}
+            {/* This is the sliding pill background */}
             <div
                 className="absolute top-1 bottom-1 h-auto rounded-full shadow-sm transition-all duration-300 ease-in-out"
                 style={{
@@ -3238,9 +3238,9 @@ export const FormInput = React.memo(({
                         name={name}
                         value={controlledValue}
                         onChange={onChange}
-                        // Changed to rounded-3xl for a softer, more modern look
-                        className={inputClass.replace('rounded-full', 'rounded-3xl')}
-                        style={styles}
+                        // Updated to be more rounded and to disable resizing
+                        className="w-full px-4 py-3 border rounded-3xl focus:ring-2 text-base outline-none"
+                        style={{ ...styles, resize: 'none' }}
                         rows="4"
                         placeholder={placeholder}
                         readOnly={readOnly}
@@ -3267,6 +3267,7 @@ export const FormInput = React.memo(({
         </div>
     );
 });
+
 export const SearchInput = React.memo(({ onSubmit, value, onChange, placeholder, theme, className, onVoiceClick }) => (
     <form onSubmit={onSubmit} className={`relative flex items-center ${className || ''}`} >
         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
