@@ -11,12 +11,12 @@
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\App.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\index.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\index.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\data.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\data.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\index.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\index.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\package.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
@@ -44,7 +44,7 @@
               "RelativeDocumentMoniker": "src\\App.jsx",
               "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\App.jsx",
               "RelativeToolTip": "src\\App.jsx",
-              "ViewState": "AgIAAD4BAAAAAAAAAAAswEgBAAASAAAAAAAAAA==",
+              "ViewState": "AgIAAEEBAAAAAAAAAAAswEwBAABLAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
               "WhenOpened": "2025-07-08T13:51:08.282Z",
               "EditorCaption": ""
@@ -77,7 +77,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "index.css",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\index.css",
               "RelativeDocumentMoniker": "src\\index.css",
@@ -90,13 +90,13 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 2,
               "Title": "data.jsx",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\data.jsx",
               "RelativeDocumentMoniker": "src\\data.jsx",
               "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\data.jsx",
               "RelativeToolTip": "src\\data.jsx",
-              "ViewState": "AgIAACABAAAAAAAAAAAswEABAAACAAAAAAAAAA==",
+              "ViewState": "AgIAADYBAAAAAAAAAAAmwE8BAAACAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
               "WhenOpened": "2025-07-08T13:51:14.598Z",
               "EditorCaption": ""
@@ -109,7 +109,7 @@
               "RelativeDocumentMoniker": "src\\ui.jsx",
               "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\ui.jsx",
               "RelativeToolTip": "src\\ui.jsx",
-              "ViewState": "AgIAAPIVAAAAAAAAAAAqwAsWAAACAAAAAAAAAA==",
+              "ViewState": "AgIAAKAXAAAAAAAAAAAswKwXAAAYAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
               "WhenOpened": "2025-07-08T12:39:11.271Z",
               "EditorCaption": ""

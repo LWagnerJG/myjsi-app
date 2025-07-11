@@ -1,10 +1,10 @@
 ﻿import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
-import { lightTheme, darkTheme, INITIAL_MEMBERS, INITIAL_OPPORTUNITIES, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS } from './data.jsx';
+import { lightTheme, darkTheme, INITIAL_MEMBERS, INITIAL_OPPORTUNITIES, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS, INITIAL_POSTS, INITIAL_WINS, INITIAL_POLLS } from './data.jsx';
 import {
     AppHeader, ProfileMenu, SCREEN_MAP, OrderModal, Modal, SuccessToast, PageTitle,
     ResourceDetailScreen, CartScreen, VoiceModal, ProductComparisonScreen,
-    CompetitiveAnalysisScreen, PlaceholderScreen, FabricsScreen, ProjectDetailModal
+    CompetitiveAnalysisScreen, PlaceholderScreen, FabricsScreen, ProjectDetailModal, CreateContentModal
 } from './ui.jsx';
 import * as Data from './data.jsx';
 
@@ -38,17 +38,22 @@ function App() {
     });
     const [cart, setCart] = useState({});
 
-    // --- ENHANCED GESTURE & AI STATE ---
+    // --- COMMUNITY & AI STATE ---
+    const [posts, setPosts] = useState(INITIAL_POSTS);
+    const [wins, setWins] = useState(INITIAL_WINS);
+    const [polls, setPolls] = useState(INITIAL_POLLS);
+    const [showCreateContentModal, setShowCreateContentModal] = useState(false);
+    const [aiResponse, setAiResponse] = useState('');
+    const [isAILoading, setIsAILoading] = useState(false);
+    const [showAIDropdown, setShowAIDropdown] = useState(false);
+
+    // --- GESTURE STATE ---
     const touchStartX = useRef(0);
     const touchStartY = useRef(0);
     const hasSwipeStarted = useRef(false);
     const isHorizontalSwipe = useRef(false);
     const swipeStartTime = useRef(0);
     const lastTouchX = useRef(0);
-
-    const [aiResponse, setAiResponse] = useState('');
-    const [isAILoading, setIsAILoading] = useState(false);
-    const [showAIDropdown, setShowAIDropdown] = useState(false);
 
     // --- DERIVED STATE ---
     const currentScreen = navigationHistory[navigationHistory.length - 1];
@@ -80,7 +85,6 @@ function App() {
 
     // --- HANDLERS ---
     const handleNavigate = useCallback((screen) => {
-        // Quicker slide-in animation for forward navigation
         setIsTransitioning(true);
         setSwipeTranslateX(-window.innerWidth);
 
@@ -128,6 +132,12 @@ function App() {
         setTimeout(() => setSuccessMessage(""), 2000);
     }, [opportunities, handleNavigate]);
 
+    const handleAddItem = (type, obj) => {
+        if (type === 'post') setPosts(prev => [obj, ...prev]);
+        if (type === 'win') setWins(prev => [obj, ...prev]);
+        if (type === 'poll') setPolls(prev => [obj, ...prev]);
+    };
+
     const handleShowAlert = useCallback((message) => { setAlertInfo({ show: true, message }); }, []);
     const handleShowVoiceModal = useCallback((message) => { setVoiceMessage(message); setTimeout(() => setVoiceMessage(''), 1200); }, []);
     const handleUpdateCart = useCallback((item, change) => {
@@ -154,10 +164,8 @@ function App() {
     // --- ENHANCED TOUCH HANDLERS ---
     const handleTouchStart = (e) => {
         if (isTransitioning || navigationHistory.length <= 1) return;
-
         const touchX = e.touches[0].clientX;
         const touchY = e.touches[0].clientY;
-
         if (touchX < 50) {
             touchStartX.current = touchX;
             touchStartY.current = touchY;
@@ -170,7 +178,6 @@ function App() {
 
     const handleTouchMove = (e) => {
         if (!hasSwipeStarted.current || isTransitioning) return;
-
         const currentX = e.touches[0].clientX;
         const currentY = e.touches[0].clientY;
         const diffX = currentX - touchStartX.current;
@@ -190,7 +197,6 @@ function App() {
             const maxSwipe = window.innerWidth * 0.8;
             const resistance = Math.max(0, Math.min(maxSwipe, diffX));
             const easedTransform = resistance * (1 - resistance / (maxSwipe * 2));
-
             setSwipeTranslateX(Math.max(0, easedTransform));
             lastTouchX.current = currentX;
         }
@@ -198,15 +204,11 @@ function App() {
 
     const handleTouchEnd = () => {
         if (!hasSwipeStarted.current || isTransitioning) return;
-
         if (isHorizontalSwipe.current) {
             const swipeDistance = lastTouchX.current - touchStartX.current;
             const swipeTime = Date.now() - swipeStartTime.current;
             const swipeVelocity = swipeDistance / swipeTime;
-
-            const shouldGoBack = swipeDistance > window.innerWidth * 0.25 ||
-                (swipeDistance > window.innerWidth * 0.15 && swipeVelocity > 0.3);
-
+            const shouldGoBack = swipeDistance > window.innerWidth * 0.25 || (swipeDistance > window.innerWidth * 0.15 && swipeVelocity > 0.3);
             if (shouldGoBack) {
                 handleBack();
             } else {
@@ -215,8 +217,6 @@ function App() {
                 setTimeout(() => setIsTransitioning(false), 150);
             }
         }
-
-        // Reset all touch state
         hasSwipeStarted.current = false;
         isHorizontalSwipe.current = false;
         touchStartX.current = 0;
@@ -228,10 +228,8 @@ function App() {
     // --- RENDER LOGIC ---
     const renderScreen = (screenKey) => {
         if (!screenKey) return null;
-
         const screenParts = screenKey.split('/');
         const baseScreenKey = screenParts[0];
-
         const commonProps = {
             theme: currentTheme,
             onNavigate: handleNavigate,
@@ -241,7 +239,6 @@ function App() {
             userSettings,
             currentScreen: screenKey,
         };
-
         if (baseScreenKey === 'products' && screenParts[1] === 'category' && screenParts[2]) {
             return <ProductComparisonScreen {...commonProps} categoryId={screenParts[2]} />;
         }
@@ -254,7 +251,6 @@ function App() {
         if (screenKey === 'samples/cart') {
             return <CartScreen {...commonProps} cart={cart} setCart={setCart} onUpdateCart={handleUpdateCart} />;
         }
-
         const ScreenComponent = SCREEN_MAP[baseScreenKey];
         if (!ScreenComponent) return <PlaceholderScreen {...commonProps} category="Page Not Found" />;
 
@@ -273,6 +269,8 @@ function App() {
                 return <ScreenComponent {...commonProps} members={members} setMembers={setMembers} currentUserId={currentUserId} />;
             case 'projects':
                 return <ScreenComponent {...commonProps} opportunities={opportunities} setSelectedOpportunity={setSelectedOpportunity} />;
+            case 'community':
+                return <ScreenComponent {...commonProps} openCreateContentModal={() => setShowCreateContentModal(true)} posts={posts} wins={wins} polls={polls} />;
             case 'new-lead':
                 return <ScreenComponent {...commonProps} onSuccess={handleNewLeadSuccess} designFirms={designFirms} setDesignFirms={setDesignFirms} dealers={dealers} setDealers={setDealers} />;
             default:
@@ -300,7 +298,6 @@ function App() {
                 onProfileClick={() => setShowProfileMenu(p => !p)}
             />
 
-            {/* Previous screen container - enhanced with quicker transitions and no vertical scroll during swipe */}
             {previousScreen && (
                 <div
                     className={`absolute inset-0 ${isTransitioning ? 'transition-transform duration-200 ease-out' : ''} ${swipeTranslateX > 0 ? 'overflow-hidden' : (previousScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto')} scrollbar-hide`}
@@ -315,7 +312,6 @@ function App() {
                 </div>
             )}
 
-            {/* Current screen container - enhanced with quicker transitions */}
             <div
                 className={`absolute inset-0 ${isTransitioning ? 'transition-transform duration-200 ease-out' : ''} ${currentScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto'} scrollbar-hide`}
                 style={{
@@ -328,13 +324,13 @@ function App() {
                 {renderScreen(currentScreen)}
             </div>
 
-            {/* Modals and overlays */}
             <div className="absolute inset-0 z-[100] pointer-events-none">
-                {(showProfileMenu || selectedOrder || alertInfo.show || !!voiceMessage || selectedOpportunity) && (
+                {(showProfileMenu || selectedOrder || alertInfo.show || !!voiceMessage || selectedOpportunity || showCreateContentModal) && (
                     <div className="pointer-events-auto">
                         {showProfileMenu && <ProfileMenu show={showProfileMenu} onClose={() => setShowProfileMenu(false)} onNavigate={handleNavigate} toggleTheme={() => setIsDarkMode(d => !d)} theme={currentTheme} isDarkMode={isDarkMode} />}
                         {selectedOrder && <OrderModal order={selectedOrder} onClose={() => setSelectedOrder(null)} theme={currentTheme} />}
                         {selectedOpportunity && <ProjectDetailModal opportunity={selectedOpportunity} onClose={() => setSelectedOpportunity(null)} theme={currentTheme} onNavigate={handleNavigate} />}
+                        {showCreateContentModal && <CreateContentModal close={() => setShowCreateContentModal(false)} theme={currentTheme} onAdd={handleAddItem} />}
                         <Modal show={alertInfo.show} onClose={() => setAlertInfo({ show: false, message: '' })} title="Alert" theme={currentTheme}><p>{alertInfo.message}</p></Modal>
                         <SuccessToast message={successMessage} show={!!successMessage} theme={currentTheme} />
                         <VoiceModal message={voiceMessage} show={!!voiceMessage} theme={currentTheme} />

@@ -294,6 +294,47 @@ export const YTD_SALES_DATA = [{ label: 'Total Sales', current: 3666132, previou
 
 export const MONTHLY_SALES_DATA = [{ month: 'Jan', bookings: 1259493, sales: 506304 }, { month: 'Feb', bookings: 497537, sales: 553922 }, { month: 'Mar', bookings: 397684, sales: 365601 }, { month: 'Apr', bookings: 554318, sales: 696628 }, { month: 'May', bookings: 840255, sales: 1340018 }, { month: 'Jun', bookings: 116846, sales: 36823 },];
 
+export const INITIAL_POSTS = [
+    {
+        id: 1,
+        type: 'post', // Added type property
+        user: { name: 'Natalie Parker', avatar: 'https://i.pravatar.cc/150?u=natalie' },
+        timeAgo: '2h',
+        text: 'Great install in Chicago! The Vision series looks amazing in the new corporate headquarters.',
+        image: 'https://webresources.jsifurniture.com/production/uploads/jsi_vision_install_0000010.jpg',
+        likes: 12,
+        comments: [{ id: 1, name: 'John Doe', text: 'Looks fantastic!' }],
+    },
+];
+
+export const INITIAL_WINS = [
+    {
+        id: 2, // Changed id to be unique
+        type: 'win', // Added type property
+        user: { name: 'Laura Chen', avatar: 'https://i.pravatar.cc/150?u=laura' },
+        timeAgo: 'yesterday',
+        title: 'Boston HQ install – success! 🎉',
+        images: [
+            'https://webresources.jsifurniture.com/production/uploads/jsi_caav_install_00024_pldPbiW.jpg',
+            'https://webresources.jsifurniture.com/production/uploads/original_images/jsi_finn_enviro_00004_aOu5872.jpg',
+        ],
+    },
+];
+
+export const INITIAL_POLLS = [
+    {
+        id: 1,
+        user: { name: 'Doug Shapiro', avatar: null }, // Avatar removed to show generic icon
+        timeAgo: '1d',
+        question: 'Which Vision base finish do you spec the most?',
+        options: [
+            { id: 'carbon', text: 'Carbon', votes: 8 },
+            { id: 'oak', text: 'Natural Oak', votes: 5 },
+            { id: 'white', text: 'Designer White', votes: 12 },
+        ],
+    },
+];
+
 export const SALES_VERTICALS_DATA = [{ label: 'Healthcare', value: 2900104, color: '#B99962' }, { label: 'Higher Ed', value: 1045589, color: '#7A7A7A' }, { label: 'K12', value: 1045589, color: '#A0A0A0' }, { label: 'Corporate', value: 1045589, color: '#2A2A2A' }, { label: 'Government', value: 1045589, color: '#CCCCCC' },];
 
 export const PERMISSION_LABELS = {

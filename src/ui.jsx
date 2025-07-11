@@ -2782,12 +2782,14 @@ export const ProfileMenu = ({ show, onClose, onNavigate, toggleTheme, theme, isD
         </div>
     );
 };
+
+
 const PostCard = ({ post, theme }) => {
     const { user, timeAgo, text, image, likes = 0, comments = [] } = post;
 
     const [liked, setLiked] = useState(false);
     const [count, setCount] = useState(likes);
-    const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState(comments && comments.length > 0);
     const [input, setInput] = useState('');
     const [list, setList] = useState(comments);
     const [menu, setMenu] = useState(false);
@@ -2864,7 +2866,6 @@ const PostCard = ({ post, theme }) => {
         </GlassCard>
     );
 };
-
 
 
 const WinsCard = ({ win, theme }) => {
@@ -3091,8 +3092,8 @@ const FormSection = ({ title, theme, children }) => (
 );
 
 
-const CreateContentModal = ({ close, pickType, typeChosen, onAdd, theme }) => {
-    const type = typeChosen;
+const CreateContentModal = ({ close, theme, onAdd }) => {
+    const [type, setType] = useState(null);
     const [text, setText] = useState('');
     const [file, setFile] = useState(null);
     const [question, setQ] = useState('');
@@ -3100,124 +3101,60 @@ const CreateContentModal = ({ close, pickType, typeChosen, onAdd, theme }) => {
     const [optB, setB] = useState('');
 
     const submit = () => {
-        const now = 'just now';
-        if (type === 'post') {
-            onAdd('post', {
-                id: Date.now(),
-                user: { name: 'You', avatar: '' },
-                timeAgo: now,
-                text,
-                image: file ? URL.createObjectURL(file) : null,
-                likes: 0,
-                comments: [],
-            });
-        }
-        if (type === 'win') {
-            onAdd('win', {
-                id: Date.now(),
-                user: { name: 'You', avatar: '' },
-                timeAgo: now,
-                title: text || 'Win!',
-                images: [file ? URL.createObjectURL(file) : 'https://picsum.photos/seed/win/800/500'],
-            });
-        }
-        if (type === 'poll') {
-            onAdd('poll', {
-                id: Date.now(),
-                user: { name: 'You', avatar: '' },
-                timeAgo: now,
-                question,
-                options: [
-                    { id: 'a', text: optA || 'Option A', votes: 0 },
-                    { id: 'b', text: optB || 'Option B', votes: 0 },
-                ],
-            });
-        }
+        // This is demonstration logic, would be replaced with actual API calls
+        if (type === 'post') onAdd('post', { id: Date.now(), user: { name: 'You', avatar: '' }, timeAgo: 'just now', text, image: file ? URL.createObjectURL(file) : null, likes: 0, comments: [], });
+        if (type === 'win') onAdd('win', { id: Date.now(), user: { name: 'You', avatar: '' }, timeAgo: 'just now', title: text || 'Win!', images: [file ? URL.createObjectURL(file) : 'https://placehold.co/800x500/A9886C/FFFFFF?text=JSI+Win'], });
+        if (type === 'poll') onAdd('poll', { id: Date.now(), user: { name: 'You', avatar: '' }, timeAgo: 'now', question, options: [{ id: 'a', text: optA || 'Option A', votes: 0 }, { id: 'b', text: optB || 'Option B', votes: 0 }], });
         close();
     };
 
-    return (
-        <div className="fixed inset-0 z-30 flex items-center justify-center"
-            style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-            <div className="w-full max-w-md bg-white rounded-2xl p-6 space-y-6 relative"
-                style={{ color: theme.colors.textPrimary, maxHeight: '90vh', overflowY: 'auto' }}>
-                <button onClick={close} className="absolute right-4 top-4">
-                    <X className="w-5 h-5" />
-                </button>
-
-                {!type && (
-                    <>
-                        <h3 className="text-lg font-semibold mb-3">Create…</h3>
-                        <div className="space-y-3">
-                            <button onClick={() => pickType('post')} className="w-full py-3 rounded-lg font-medium"
-                                style={{ backgroundColor: theme.colors.subtle }}>Feed Post</button>
-                            <button onClick={() => pickType('win')} className="w-full py-3 rounded-lg font-medium"
-                                style={{ backgroundColor: theme.colors.subtle }}>Win</button>
-                            <button onClick={() => pickType('poll')} className="w-full py-3 rounded-lg font-medium"
-                                style={{ backgroundColor: theme.colors.subtle }}>Poll</button>
-                        </div>
-                    </>
-                )}
-
-                {type === 'post' && (
-                    <>
-                        <h3 className="text-lg font-semibold">New Feed Post</h3>
-                        <textarea value={text} onChange={(e) => setText(e.target.value)}
-                            rows={4} className="w-full p-3 rounded-lg"
-                            style={{ backgroundColor: theme.colors.subtle }} />
-                        <label className="block">
-                            <input type="file" accept="image/*,video/*" hidden
-                                onChange={(e) => setFile(e.target.files[0])} />
-                            <span className="mt-3 inline-flex items-center space-x-2 px-4 py-2 rounded-lg cursor-pointer"
-                                style={{ backgroundColor: theme.colors.subtle }}>
-                                {file ? <span>{file.name}</span> : <><Image className="w-4 h-4" /><span>Add attachment</span></>}
-                            </span>
-                        </label>
-                        <button onClick={submit} className="w-full py-3 rounded-lg font-medium text-white"
-                            style={{ backgroundColor: theme.colors.accent }}>Post</button>
-                    </>
-                )}
-
-                {type === 'win' && (
-                    <>
-                        <h3 className="text-lg font-semibold">Share a Win</h3>
-                        <textarea value={text} onChange={(e) => setText(e.target.value)}
-                            rows={3} className="w-full p-3 rounded-lg"
-                            style={{ backgroundColor: theme.colors.subtle }} placeholder="Describe your win…" />
-                        <label className="block">
-                            <input type="file" accept="image/*,video/*" hidden
-                                onChange={(e) => setFile(e.target.files[0])} />
-                            <span className="mt-3 inline-flex items-center space-x-2 px-4 py-2 rounded-lg cursor-pointer"
-                                style={{ backgroundColor: theme.colors.subtle }}>
-                                {file ? <span>{file.name}</span> : <><Image className="w-4 h-4" /><span>Add photo/video</span></>}
-                            </span>
-                        </label>
-                        <button onClick={submit} className="w-full py-3 rounded-lg font-medium text-white"
-                            style={{ backgroundColor: theme.colors.accent }}>Post Win</button>
-                    </>
-                )}
-
-                {type === 'poll' && (
-                    <>
-                        <h3 className="text-lg font-semibold">Create Poll</h3>
-                        <input value={question} onChange={(e) => setQ(e.target.value)}
-                            className="w-full p-3 rounded-lg"
-                            style={{ backgroundColor: theme.colors.subtle }} placeholder="Question" />
-                        <input value={optA} onChange={(e) => setA(e.target.value)}
-                            className="w-full p-3 rounded-lg mt-3"
-                            style={{ backgroundColor: theme.colors.subtle }} placeholder="Option A" />
-                        <input value={optB} onChange={(e) => setB(e.target.value)}
-                            className="w-full p-3 rounded-lg mt-3"
-                            style={{ backgroundColor: theme.colors.subtle }} placeholder="Option B" />
-                        <button onClick={submit} className="w-full py-3 rounded-lg font-medium text-white mt-4"
-                            style={{ backgroundColor: theme.colors.accent }}>Post Poll</button>
-                    </>
-                )}
+    const OptionButton = ({ icon: Icon, title, description, onClick }) => (
+        <button onClick={onClick} className="w-full text-left p-4 rounded-2xl flex items-center space-x-4 transition-colors hover:bg-black/5 dark:hover:bg-white/5" style={{ backgroundColor: theme.colors.subtle }}>
+            <div className="p-3 rounded-full" style={{ backgroundColor: theme.colors.surface }}>
+                <Icon className="w-6 h-6" style={{ color: theme.colors.accent }} />
             </div>
-        </div>
+            <div>
+                <p className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>{title}</p>
+                <p className="text-sm" style={{ color: theme.colors.textSecondary }}>{description}</p>
+            </div>
+        </button>
     );
-};
 
+    const renderForm = () => {
+        switch (type) {
+            case 'post':
+                return <div className="space-y-4">
+                    <h3 className="text-xl font-bold">New Post</h3>
+                    <FormInput type="textarea" value={text} onChange={(e) => setText(e.target.value)} placeholder="Share an update..." theme={theme} />
+                    <label className="block"><input type="file" accept="image/*,video/*" hidden onChange={(e) => setFile(e.target.files[0])} /><span className="inline-flex items-center space-x-2 px-4 py-2 rounded-lg cursor-pointer" style={{ backgroundColor: theme.colors.subtle }}>{file ? <span>{file.name}</span> : <><Image className="w-4 h-4" /><span>Add Media</span></>}</span></label>
+                    <button onClick={submit} className="w-full font-bold py-3 px-6 rounded-full text-white" style={{ backgroundColor: theme.colors.accent }}>Post</button>
+                </div>;
+            case 'win':
+                return <div className="space-y-4">
+                    <h3 className="text-xl font-bold">Share a Win</h3>
+                    <FormInput type="textarea" value={text} onChange={(e) => setText(e.target.value)} placeholder="Describe the win..." theme={theme} />
+                    <label className="block"><input type="file" accept="image/*" hidden onChange={(e) => setFile(e.target.files[0])} /><span className="inline-flex items-center space-x-2 px-4 py-2 rounded-lg cursor-pointer" style={{ backgroundColor: theme.colors.subtle }}>{file ? <span>{file.name}</span> : <><ImageIcon className="w-4 h-4" /><span>Add Photo</span></>}</span></label>
+                    <button onClick={submit} className="w-full font-bold py-3 px-6 rounded-full text-white" style={{ backgroundColor: theme.colors.accent }}>Post Win</button>
+                </div>;
+            case 'poll':
+                return <div className="space-y-4">
+                    <h3 className="text-xl font-bold">Create Poll</h3>
+                    <FormInput value={question} onChange={(e) => setQ(e.target.value)} placeholder="What's your question?" theme={theme} />
+                    <FormInput value={optA} onChange={(e) => setA(e.target.value)} placeholder="Option A" theme={theme} />
+                    <FormInput value={optB} onChange={(e) => setB(e.target.value)} placeholder="Option B" theme={theme} />
+                    <button onClick={submit} className="w-full font-bold py-3 px-6 rounded-full text-white" style={{ backgroundColor: theme.colors.accent }}>Post Poll</button>
+                </div>;
+            default:
+                return <div className="space-y-3">
+                    <OptionButton icon={MessageSquare} title="Feed Post" description="Share an update or photo" onClick={() => setType('post')} />
+                    <OptionButton icon={Trophy} title="Win" description="Celebrate a successful project" onClick={() => setType('win')} />
+                    <OptionButton icon={PieChart} title="Poll" description="Ask a question to the community" onClick={() => setType('poll')} />
+                </div>;
+        }
+    };
+
+    return <Modal show={true} onClose={close} title={type ? "" : "Create..."} theme={theme}>{renderForm()}</Modal>;
+};
 
 const FancySelect = ({ value, onChange, options, placeholder, required, theme }) => (
     <div
@@ -5351,101 +5288,51 @@ export const PlaceholderScreen = ({ theme, category }) => {
     );
 };
 
-const CommunityScreen = ({ theme, onNavigate }) => {
+const CommunityScreen = ({ theme, onNavigate, openCreateContentModal, posts, wins, polls }) => {
     const [tab, setTab] = useState('feed');
-    const [modalOpen, setModal] = useState(false);
-    const [modalType, setType] = useState(null);
 
-    const [posts, setPosts] = useState([
-        {
-            id: 1,
-            user: { name: 'Natalie Parker', avatar: '/avatars/natalie.png' },
-            timeAgo: 'just now',
-            text: 'Great install in Chicago!',
-            image: 'https://picsum.photos/seed/chicago/800/500',
-            likes: 3,
-            comments: [],
-        },
-    ]);
-
-    const [wins, setWins] = useState([
-        {
-            id: 1,
-            user: { name: 'Laura Chen', avatar: '/avatars/laura.png' },
-            timeAgo: 'yesterday',
-            title: 'Boston HQ install – success! 🎉',
-            images: [
-                'https://picsum.photos/seed/boston1/800/500',
-                'https://picsum.photos/seed/boston2/800/500',
-                'https://picsum.photos/seed/boston3/800/500',
-            ],
-        },
-    ]);
-
-    const [polls, setPolls] = useState([
-        {
-            id: 1,
-            user: { name: 'Doug Shapiro', avatar: '/avatars/doug.png' },
-            timeAgo: '1 d',
-            question: 'Which Vision base finish do you spec the most?',
-            options: [
-                { id: 'carbon', text: 'Carbon', votes: 8 },
-                { id: 'oak', text: 'Natural Oak', votes: 5 },
-                { id: 'white', text: 'Designer White', votes: 12 },
-            ],
-        },
-    ]);
-
-    const addItem = (type, obj) => {
-        if (type === 'post') setPosts((arr) => [obj, ...arr]);
-        if (type === 'win') setWins((arr) => [obj, ...arr]);
-        if (type === 'poll') setPolls((arr) => [obj, ...arr]);
-    };
+    const combinedFeed = useMemo(() => {
+        return [...posts, ...wins].sort((a, b) => b.id - a.id);
+    }, [posts, wins]);
 
     return (
         <div className="h-full flex flex-col" style={{ backgroundColor: theme.colors.background }}>
             <div className="flex items-center justify-between px-4">
                 <PageTitle title="Community" theme={theme} />
                 <button
-                    onClick={() => { setType(null); setModal(true); }}
-                    className="p-2 rounded-full"
-                    style={{ backgroundColor: theme.colors.accent, color: '#fff' }}
+                    onClick={openCreateContentModal}
+                    className="flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-transform hover:scale-105 active:scale-95"
+                    style={{ backgroundColor: theme.colors.accent, color: 'white' }}
                 >
-                    <Plus className="w-5 h-5" />
+                    <span>Create Post</span>
+                    <Plus className="w-4 h-4" />
                 </button>
             </div>
 
-            <div className="grid grid-cols-3 border-b border-[rgba(0,0,0,0.06)] mx-4 mt-2">
-                {['feed', 'wins', 'polls'].map((t) => (
+            <div className="grid grid-cols-2 border-b border-[rgba(0,0,0,0.06)] mx-4 mt-2">
+                {['feed', 'polls'].map((t) => (
                     <button
                         key={t}
                         onClick={() => setTab(t)}
-                        className={`py-2 w-full text-center text-sm font-medium ${tab === t ? 'border-b-2' : ''}`}
+                        className={`py-2 w-full text-center text-sm font-medium capitalize ${tab === t ? 'border-b-2' : ''}`}
                         style={{
                             color: tab === t ? theme.colors.accent : theme.colors.textSecondary,
                             borderColor: tab === t ? theme.colors.accent : 'transparent',
                         }}
                     >
-                        {t[0].toUpperCase() + t.slice(1)}
+                        {t}
                     </button>
                 ))}
             </div>
 
-            <div className="flex-1 overflow-y-auto px-4 pb-6 pt-6 space-y-6 max-w-md mx-auto">
-                {tab === 'feed' && posts.map((p) => <PostCard key={p.id} post={p} theme={theme} />)}
-                {tab === 'wins' && wins.map((w) => <WinsCard key={w.id} win={w} theme={theme} />)}
-                {tab === 'polls' && polls.map((p) => <PollCard key={p.id} poll={p} theme={theme} />)}
+            <div className="flex-1 overflow-y-auto px-4 pb-6 pt-6 space-y-6 max-w-md mx-auto scrollbar-hide">
+                {tab === 'feed' && combinedFeed.map((item) => (
+                    item.type === 'post'
+                        ? <PostCard key={`post-${item.id}`} post={item} theme={theme} />
+                        : <WinsCard key={`win-${item.id}`} win={item} theme={theme} />
+                ))}
+                {tab === 'polls' && polls.map((p) => <PollCard key={`poll-${p.id}`} poll={p} theme={theme} />)}
             </div>
-
-            {modalOpen && (
-                <CreateContentModal
-                    close={() => setModal(false)}
-                    pickType={(t) => setType(t)}
-                    typeChosen={modalType}
-                    onAdd={addItem}
-                    theme={theme}
-                />
-            )}
         </div>
     );
 };
@@ -6147,7 +6034,6 @@ const SCREEN_MAP = {
 
 export {
     Avatar,
-    PostCard,
     WinsCard,
     CreateContentModal,
     SuccessToast,
@@ -6173,7 +6059,6 @@ export {
     SocialMediaScreen,
 
     // Other app screens
-    CommunityScreen,
     FancySelect,
     SettingsScreen,
     HelpScreen,
