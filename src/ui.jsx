@@ -3534,9 +3534,8 @@ export const HomeScreen = ({ onNavigate, theme, onAskAI, showAIDropdown, aiRespo
 
     return (
         <div className="flex flex-col h-full overflow-hidden" style={{ backgroundColor: theme.colors.background }}>
-            {/* Search bar container - keeping original width but moving upward */}
-            <div className="px-4 pt-2 pb-4">
-                <div className="relative z-10 w-full max-w-full">
+            <div className="pt-2 pb-4">
+                <div className="relative z-10 w-[90%] mx-auto">
                     <SmartSearch
                         theme={theme}
                         onNavigate={onNavigate}
