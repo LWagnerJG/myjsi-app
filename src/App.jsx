@@ -303,8 +303,9 @@ function App() {
             {/* Previous screen container - enhanced with quicker transitions and no vertical scroll during swipe */}
             {previousScreen && (
                 <div
-                    className={`absolute inset-0 pt-24 ${isTransitioning ? 'transition-transform duration-200 ease-out' : ''} ${swipeTranslateX > 0 ? 'overflow-hidden' : (previousScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto')} scrollbar-hide`}
+                    className={`absolute inset-0 ${isTransitioning ? 'transition-transform duration-200 ease-out' : ''} ${swipeTranslateX > 0 ? 'overflow-hidden' : (previousScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto')} scrollbar-hide`}
                     style={{
+                        paddingTop: '85px',
                         backgroundColor: currentTheme.colors.background,
                         transform: `translateX(${swipeTranslateX - window.innerWidth}px)`,
                         willChange: 'transform'
@@ -316,8 +317,9 @@ function App() {
 
             {/* Current screen container - enhanced with quicker transitions */}
             <div
-                className={`absolute inset-0 pt-24 ${isTransitioning ? 'transition-transform duration-200 ease-out' : ''} ${currentScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto'} scrollbar-hide`}
+                className={`absolute inset-0 ${isTransitioning ? 'transition-transform duration-200 ease-out' : ''} ${currentScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto'} scrollbar-hide`}
                 style={{
+                    paddingTop: '85px',
                     backgroundColor: currentTheme.colors.background,
                     transform: `translateX(${swipeTranslateX}px)`,
                     willChange: 'transform'

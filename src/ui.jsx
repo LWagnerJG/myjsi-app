@@ -425,7 +425,7 @@ export const SmartSearch = ({ theme, onNavigate, onAskAI, onVoiceActivate }) => 
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     onFocus={() => setIsFocused(true)}
-                    className="w-full pl-11 pr-12 py-4 rounded-full text-base border-2 shadow-md transition-colors focus:ring-2"
+                    className="w-full pl-11 pr-12 py-5 rounded-full text-base border-2 shadow-md transition-colors focus:ring-2"
                     style={{
                         backgroundColor: theme.colors.surface,
                         color: theme.colors.textPrimary,
@@ -3534,7 +3534,8 @@ export const HomeScreen = ({ onNavigate, theme, onAskAI, showAIDropdown, aiRespo
 
     return (
         <div className="flex flex-col h-full overflow-hidden" style={{ backgroundColor: theme.colors.background }}>
-            <div className="px-4 pt-8 pb-6">
+            {/* Search bar container - keeping original width but moving upward */}
+            <div className="px-4 pt-2 pb-4">
                 <div className="relative z-10 w-full max-w-full">
                     <SmartSearch
                         theme={theme}
@@ -3557,6 +3558,7 @@ export const HomeScreen = ({ onNavigate, theme, onAskAI, showAIDropdown, aiRespo
                 </div>
             </div>
 
+            {/* Main content area - keeping original app width */}
             <div className="flex-1 overflow-y-auto px-4 space-y-4 scrollbar-hide">
                 <div className="grid grid-cols-2 gap-4">
                     {Data.MENU_ITEMS.map((item) => (
@@ -3587,7 +3589,6 @@ export const HomeScreen = ({ onNavigate, theme, onAskAI, showAIDropdown, aiRespo
         </div>
     );
 };
-
 
 export const PermissionToggle = React.memo(({ label, isEnabled, onToggle, theme, disabled }) => {
     const titleText = disabled ? "Requires Sales Data access" : "";
