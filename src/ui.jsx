@@ -3262,7 +3262,7 @@ export const FormInput = React.memo(({
     theme,
     readOnly = false,
     required = false,
-    icon = null, // New prop for the icon
+    icon = null,
 }) => {
     const controlledValue = value === undefined || value === null ? '' : value;
 
@@ -3301,7 +3301,8 @@ export const FormInput = React.memo(({
                         name={name}
                         value={controlledValue}
                         onChange={onChange}
-                        className={inputClass.replace('rounded-full', 'rounded-2xl')}
+                        // Changed to rounded-3xl for a softer, more modern look
+                        className={inputClass.replace('rounded-full', 'rounded-3xl')}
                         style={styles}
                         rows="4"
                         placeholder={placeholder}
@@ -3320,7 +3321,6 @@ export const FormInput = React.memo(({
                         required={required}
                     />
                 )}
-                {/* Icon is rendered here if provided */}
                 {icon && (
                     <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
                         {icon}
@@ -3330,7 +3330,6 @@ export const FormInput = React.memo(({
         </div>
     );
 });
-
 export const SearchInput = React.memo(({ onSubmit, value, onChange, placeholder, theme, className, onVoiceClick }) => (
     <form onSubmit={onSubmit} className={`relative flex items-center ${className || ''}`} >
         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -3556,7 +3555,7 @@ export const HomeScreen = ({ onNavigate, theme, onAskAI, showAIDropdown, aiRespo
     }, [onNavigate]);
 
     return (
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
             <div className="pt-2 pb-4">
                 <div className="relative z-10 w-[90%] mx-auto">
                     <SmartSearch
@@ -3567,26 +3566,34 @@ export const HomeScreen = ({ onNavigate, theme, onAskAI, showAIDropdown, aiRespo
                     />
                     {showAIDropdown && (
                         <GlassCard theme={theme} className="absolute top-full w-full mt-2 p-4 left-0">
-                            {/* ... AI dropdown content ... */}
+                            {isAILoading ? (
+                                <div className="flex items-center justify-center p-4">
+                                    <Hourglass className="w-6 h-6 animate-spin" style={{ color: theme.colors.accent }} />
+                                    <p className="ml-3" style={{ color: theme.colors.textPrimary }}>Thinking...</p>
+                                </div>
+                            ) : (
+                                <p style={{ color: theme.colors.textPrimary }}>{aiResponse}</p>
+                            )}
                         </GlassCard>
                     )}
                 </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-4 space-y-4 scrollbar-hide">
+            <div className="flex-1 overflow-y-auto px-4 space-y-4 pb-4 scrollbar-hide">
                 <div className="grid grid-cols-2 gap-4">
                     {Data.MENU_ITEMS.map((item) => (
                         <div
                             key={item.id}
-                            className="group relative p-4 h-32 flex flex-col justify-between cursor-pointer transition-all duration-300 rounded-[1.75rem] border shadow-lg"
+                            // Padding changed from p-4 to p-6 to move content inward
+                            className="group relative p-6 h-32 flex flex-col justify-between cursor-pointer transition-all duration-300 rounded-[2.25rem] border shadow-lg hover:shadow-xl hover:-translate-y-1"
                             style={{
-                                backgroundColor: theme.colors.surface, // Use the new white surface color
+                                backgroundColor: theme.colors.surface,
                                 borderColor: theme.colors.border
                             }}
                             onClick={() => onNavigate(item.id)}
                         >
                             <div className="relative">
-                                <item.icon className="w-7 h-7" style={{ color: theme.colors.textSecondary }} strokeWidth={1.5} />
+                                <item.icon className="w-7 h-7" style={{ color: theme.colors.accent }} strokeWidth={1.5} />
                             </div>
                             <div className="relative">
                                 <span className="text-xl font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>{item.label}</span>
@@ -3594,9 +3601,12 @@ export const HomeScreen = ({ onNavigate, theme, onAskAI, showAIDropdown, aiRespo
                         </div>
                     ))}
                 </div>
-                <div className="p-1 rounded-[1.75rem] border shadow-lg" style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.border }}>
-                    <button onClick={handleFeedbackClick} className="w-full h-20 p-3 rounded-2xl flex items-center justify-center space-x-4">
-                        <MessageSquare className="w-7 h-7" style={{ color: theme.colors.textSecondary }} strokeWidth={1.5} />
+                <div
+                    className="p-1 rounded-full border shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
+                    style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.border }}
+                >
+                    <button onClick={handleFeedbackClick} className="w-full py-5 px-3 rounded-full flex items-center justify-center space-x-4">
+                        <MessageSquare className="w-7 h-7" style={{ color: theme.colors.accent }} strokeWidth={1.5} />
                         <span className="text-xl font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>Give Feedback</span>
                     </button>
                 </div>
@@ -3606,6 +3616,7 @@ export const HomeScreen = ({ onNavigate, theme, onAskAI, showAIDropdown, aiRespo
         </div>
     );
 };
+
 
 export const PermissionToggle = React.memo(({ label, isEnabled, onToggle, theme, disabled }) => {
     const titleText = disabled ? "Requires Sales Data access" : "";
@@ -5641,7 +5652,7 @@ export const ReplacementsScreen = ({ theme, setSuccessMessage, onNavigate }) => 
     }, []);
 
     const handleFileChange = e => e.target.files && setAttachments(p => [...p, ...Array.from(e.target.files)]);
-    const removeAttachment = name => setAttachments(p => p.filter(f => f.name !== name));
+    const removeAttachment = photoIndex => setAttachments(p => p.filter((_, idx) => idx !== photoIndex));
 
     const handleSubmit = () => {
         setSuccessMessage("Replacement Request Submitted!");
@@ -5658,7 +5669,7 @@ export const ReplacementsScreen = ({ theme, setSuccessMessage, onNavigate }) => 
                 <GlassCard theme={theme} className="p-4">
                     {!formData ? (
                         <div className="text-center space-y-4">
-                            <button onClick={handleScan} disabled={isScanning} className="w-full flex flex-col items-center justify-center p-8 rounded-lg border-2 border-dashed hover:bg-white/5 transition-colors" style={{ borderColor: theme.colors.accent, color: theme.colors.accent }}>
+                            <button onClick={handleScan} disabled={isScanning} className="w-full flex flex-col items-center justify-center p-8 rounded-2xl border-2 border-dashed hover:bg-white/5 transition-colors" style={{ borderColor: theme.colors.accent, color: theme.colors.accent }}>
                                 <Camera className={`w-12 h-12 mb-2 ${isScanning ? 'animate-pulse' : ''}`} />
                                 <span className="font-semibold">{isScanning ? 'Scanning...' : 'Scan QR Code'}</span>
                             </button>
@@ -5677,18 +5688,17 @@ export const ReplacementsScreen = ({ theme, setSuccessMessage, onNavigate }) => 
                             <FormInput label="Line Item" name="lineItem" value={formData.lineItem} onChange={handleFormChange} theme={theme} />
                             <FormInput type="textarea" label="Notes" name="notes" value={formData.notes} onChange={handleFormChange} placeholder="Describe the issue or parts needed..." theme={theme} />
 
+                            {/* Redesigned Photo Upload Section */}
                             <div>
                                 <label className="text-xs font-semibold px-1" style={{ color: theme.colors.textSecondary }}>Photos</label>
-                                <div className="mt-1 grid grid-cols-3 gap-2">
+                                <div className="mt-1 p-4 rounded-3xl min-h-[120px] flex flex-wrap gap-3" style={{ backgroundColor: theme.colors.subtle }}>
                                     {attachments.map((file, idx) => (
-                                        <div key={idx} className="relative aspect-square">
-                                            <img src={URL.createObjectURL(file)} alt={`preview-${idx}`} className="w-full h-full object-cover rounded-lg" />
-                                            <button onClick={() => removeAttachment(file.name)} className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-0.5">
-                                                <X className="w-4 h-4" />
-                                            </button>
+                                        <div key={idx} className="relative w-20 h-20">
+                                            <img src={URL.createObjectURL(file)} alt={`preview-${idx}`} className="w-full h-full object-cover rounded-lg shadow-md" />
+                                            <button onClick={() => removeAttachment(idx)} className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5"><X className="w-4 h-4" /></button>
                                         </div>
                                     ))}
-                                    <button onClick={() => fileInputRef.current.click()} className="flex flex-col items-center justify-center aspect-square border-2 border-dashed rounded-lg" style={{ borderColor: theme.colors.subtle, color: theme.colors.textSecondary }}>
+                                    <button onClick={() => fileInputRef.current.click()} className="w-20 h-20 flex flex-col items-center justify-center rounded-lg border-2 border-dashed" style={{ borderColor: theme.colors.border, color: theme.colors.textSecondary }}>
                                         <ImageIcon className="w-6 h-6 mb-1" />
                                         <span className="text-xs font-semibold">Add Photo</span>
                                     </button>
@@ -5696,7 +5706,7 @@ export const ReplacementsScreen = ({ theme, setSuccessMessage, onNavigate }) => 
                                 <input type="file" ref={fileInputRef} multiple accept="image/*" className="hidden" onChange={handleFileChange} />
                             </div>
 
-                            <button onClick={handleSubmit} className="mt-8 w-full py-3 rounded-full font-medium transition-colors text-white" style={{ backgroundColor: theme.colors.accent }}>
+                            <button onClick={handleSubmit} className="mt-8 w-full py-3.5 rounded-full font-bold transition-colors text-white" style={{ backgroundColor: theme.colors.accent }}>
                                 Submit Request
                             </button>
                         </div>
@@ -5706,7 +5716,6 @@ export const ReplacementsScreen = ({ theme, setSuccessMessage, onNavigate }) => 
         </>
     );
 };
-
 const SettingsScreen = ({ theme, onSave, userSettings, setUserSettings }) => {
     // This local state is now safely initialized with the userSettings prop
     const [localSettings, setLocalSettings] = useState(userSettings);
