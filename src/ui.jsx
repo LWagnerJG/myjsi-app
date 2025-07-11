@@ -10,6 +10,7 @@ import {
     UserX, Users, Video, Wrench, X, ImageIcon
 } from 'lucide-react';
 import * as Data from './data.jsx';
+import ReactDOM from 'react-dom';
 
 export const GlassCard = React.memo(
     React.forwardRef(({ children, className = '', theme, ...props }, ref) => (
@@ -131,15 +132,13 @@ export const CustomSelect = ({ label, value, onChange, options, placeholder, the
                     color: value ? theme.colors.textPrimary : theme.colors.textSecondary,
                 }}
             >
-                {/* Adjusted padding on the right to make space for the icon */}
                 <span className="pr-6">{selectedLabel}</span>
-                {/* Icon is now absolutely positioned to avoid overlapping text */}
                 <ChevronDown className={`absolute right-4 w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} style={{ color: theme.colors.textSecondary }} />
             </button>
 
             {isOpen && (
-                <div className={`absolute w-full z-10 ${dropDirection === 'up' ? 'bottom-full mb-1' : 'top-full mt-1'}`}>
-                    <GlassCard theme={theme} className="p-2 max-h-60 overflow-y-auto scrollbar-hide">
+                <div className={`absolute right-0 w-72 z-10 ${dropDirection === 'up' ? 'bottom-full mb-1' : 'top-full mt-1'}`}>
+                    <GlassCard theme={theme} className="p-2 max-h-80 overflow-y-auto scrollbar-hide">
                         {options.map(opt => (
                             <button key={opt.value} type="button" onClick={() => handleSelect(opt.value)} className="block w-full text-left p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10" style={{ color: theme.colors.textPrimary }}>
                                 {opt.label}
@@ -151,7 +150,6 @@ export const CustomSelect = ({ label, value, onChange, options, placeholder, the
         </div>
     );
 };
-
 export const AutoCompleteCombobox = ({
     label,
     value,
@@ -162,17 +160,22 @@ export const AutoCompleteCombobox = ({
     theme,
     required,
     zIndex,
-    dropdownClassName // New prop to allow custom dropdown styling
+    dropdownClassName,
+    resetOnSelect // New prop to control clearing the input on select
 }) => {
     const [inputValue, setInputValue] = useState(value || '');
     const [showOptions, setShowOptions] = useState(false);
     const wrapperRef = useRef(null);
 
-    useEffect(() => setInputValue(value || ''), [value]);
+    useEffect(() => {
+        // Only update the internal input value if it's not meant to be reset.
+        if (!resetOnSelect) {
+            setInputValue(value || '');
+        }
+    }, [value, resetOnSelect]);
 
     useEffect(() => {
         function handleClickOutside(e) {
-            // FIX: Corrected a typo here that prevented this from working
             if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
                 setShowOptions(false);
             }
@@ -185,7 +188,12 @@ export const AutoCompleteCombobox = ({
 
     const handleSelect = opt => {
         onChange(opt);
-        setInputValue(opt);
+        // If resetOnSelect is true, clear the input. Otherwise, fill it with the selection.
+        if (resetOnSelect) {
+            setInputValue('');
+        } else {
+            setInputValue(opt);
+        }
         setShowOptions(false);
     };
 
@@ -218,7 +226,6 @@ export const AutoCompleteCombobox = ({
                 }}
             />
             {showOptions && (
-                // Now uses the dropdownClassName prop, with a default of max-h-48
                 <GlassCard
                     theme={theme}
                     className={`absolute w-full mt-1 z-10 p-2 overflow-y-auto scrollbar-hide ${dropdownClassName || 'max-h-48'}`}
@@ -238,7 +245,6 @@ export const AutoCompleteCombobox = ({
         </div>
     );
 };
-
 export const ToggleButtonGroup = ({ value, onChange, options, theme }) => (
     <div
         className="w-full flex p-1 rounded-full"
@@ -1849,76 +1855,87 @@ const RequestFieldVisitScreen = ({ theme, setSuccessMessage, onNavigate }) => {
     );
 };
 
-const DealerRegistrationScreen = ({ navigation }) => {
+export const DealerRegistrationScreen = ({ theme, onNavigate, setSuccessMessage }) => {
     const [dealerName, setDealerName] = useState('');
     const [address, setAddress] = useState('');
     const [contactNumber, setContactNumber] = useState('');
     const [email, setEmail] = useState('');
     const [licenseNumber, setLicenseNumber] = useState('');
 
-    const handleSubmit = () => {
-        // TODO: Add validation and API integration
-        const registrationData = {
-            dealerName,
-            address,
-            contactNumber,
-            email,
-            licenseNumber,
-        };
-        console.log('Registering dealer:', registrationData);
-        // Navigate to confirmation or dashboard
-        navigation.navigate('Home');
+    const handleSubmit = (e) => {
+        e.preventDefault(); // Prevent the page from reloading on submit
+        // Logic to handle the form data would go here
+        console.log({ dealerName, address, contactNumber, email, licenseNumber });
+
+        // Use the existing success message and navigation system
+        setSuccessMessage("Dealer Registration Submitted!");
+        setTimeout(() => {
+            setSuccessMessage("");
+            onNavigate('resources');
+        }, 1500);
     };
 
     return (
-        <ScrollView contentContainerStyle={styles.container}>
-            <Text style={styles.title}>Dealer Registration</Text>
-
-            <TextInput
-                style={styles.input}
-                placeholder="Dealer Name"
-                value={dealerName}
-                onChangeText={setDealerName}
-            />
-
-            <TextInput
-                style={styles.input}
-                placeholder="Address"
-                value={address}
-                onChangeText={setAddress}
-            />
-
-            <TextInput
-                style={styles.input}
-                placeholder="Contact Number"
-                keyboardType="phone-pad"
-                value={contactNumber}
-                onChangeText={setContactNumber}
-            />
-
-            <TextInput
-                style={styles.input}
-                placeholder="Email"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                value={email}
-                onChangeText={setEmail}
-            />
-
-            <TextInput
-                style={styles.input}
-                placeholder="Business License Number"
-                value={licenseNumber}
-                onChangeText={setLicenseNumber}
-            />
-
-            <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-                <Text style={styles.buttonText}>Submit</Text>
-            </TouchableOpacity>
-        </ScrollView>
+        <div className="flex flex-col h-full">
+            <PageTitle title="New Dealer Sign-Up" theme={theme} />
+            <div className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-hide">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <GlassCard theme={theme} className="p-4 space-y-4">
+                        <FormInput
+                            label="Dealer Name"
+                            value={dealerName}
+                            onChange={(e) => setDealerName(e.target.value)}
+                            placeholder="Enter the official dealer name"
+                            theme={theme}
+                            required
+                        />
+                        <FormInput
+                            label="Address"
+                            type="textarea"
+                            value={address}
+                            onChange={(e) => setAddress(e.target.value)}
+                            placeholder="Enter the full business address"
+                            theme={theme}
+                            required
+                        />
+                        <FormInput
+                            label="Contact Number"
+                            type="tel"
+                            value={contactNumber}
+                            onChange={(e) => setContactNumber(e.target.value)}
+                            placeholder="(555) 555-5555"
+                            theme={theme}
+                            required
+                        />
+                        <FormInput
+                            label="Email"
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="Enter contact email address"
+                            theme={theme}
+                            required
+                        />
+                        <FormInput
+                            label="Business License Number"
+                            value={licenseNumber}
+                            onChange={(e) => setLicenseNumber(e.target.value)}
+                            placeholder="Enter license number (optional)"
+                            theme={theme}
+                        />
+                    </GlassCard>
+                    <button
+                        type="submit"
+                        className="w-full font-bold py-3.5 px-6 rounded-full text-white"
+                        style={{ backgroundColor: theme.colors.accent }}
+                    >
+                        Submit Registration
+                    </button>
+                </form>
+            </div>
+        </div>
     );
 };
-
 const styles = {
     container: {
         padding: '20px',
@@ -3142,14 +3159,15 @@ const EMPTY_USER = {
 };
 
 const FormSection = ({ title, theme, children }) => (
-    <div className="space-y-4">
-        <h3 className="font-bold text-xl px-1" style={{ color: theme.colors.textPrimary }}>{title}</h3>
-        <GlassCard theme={theme} className="p-4 space-y-4">
+    <GlassCard theme={theme} className="p-4">
+        <h3 className="font-bold text-xl mb-4 pb-3 border-b" style={{ color: theme.colors.textPrimary, borderColor: theme.colors.subtle }}>
+            {title}
+        </h3>
+        <div className="space-y-4">
             {children}
-        </GlassCard>
-    </div>
+        </div>
+    </GlassCard>
 );
-
 const CreateContentModal = ({ close, pickType, typeChosen, onAdd, theme }) => {
     const type = typeChosen;
     const [text, setText] = useState('');
@@ -4033,7 +4051,7 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
 };
 
 
-const SalesScreen = ({ theme, onNavigate }) => {
+export const SalesScreen = ({ theme, onNavigate }) => {
     const { MONTHLY_SALES_DATA, ORDER_DATA, SALES_VERTICALS_DATA } = Data;
     const [monthlyView, setMonthlyView] = useState('table');
     const [selectedOrder, setSelectedOrder] = useState(null);
@@ -4052,7 +4070,7 @@ const SalesScreen = ({ theme, onNavigate }) => {
     }, []);
 
     const goal = 7000000;
-    const percentToGoal = useMemo(() => (totalBookings / goal) * 100, [totalBookings]);
+    const percentToGoal = useMemo(() => (totalBookings / goal) * 100, [totalBookings, goal]);
 
     const handleToggleView = useCallback(() => setMonthlyView(v => v === 'chart' ? 'table' : 'chart'), []);
     const handleShowOrderDetails = useCallback(order => setSelectedOrder(order), []);
@@ -4062,74 +4080,82 @@ const SalesScreen = ({ theme, onNavigate }) => {
     const handleRewardsNav = useCallback(() => onNavigate('incentive-rewards'), [onNavigate]);
 
     return (
-        <>
-            <PageTitle title="Sales Dashboard" theme={theme}>
-                {/* The button is now inside PageTitle */}
-                <button
-                    onClick={() => onNavigate('new-lead')}
-                    className="flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-transform hover:scale-105 active:scale-95"
-                    style={{ backgroundColor: theme.colors.accent, color: 'white' }}
-                >
-                    <span>New</span>
-                    <Plus className="w-4 h-4" />
-                </button>
-            </PageTitle>
+        // The main component now uses flex-col to manage layout
+        <div className="flex flex-col h-full">
+            {/* This new div wraps the title, making it sticky */}
+            <div
+                className="sticky top-0 z-10 backdrop-blur-md"
+                style={{ backgroundColor: `${theme.colors.background}e0` }}
+            >
+                <PageTitle title="Sales Dashboard" theme={theme}>
+                    <button
+                        onClick={() => onNavigate('new-lead')}
+                        className="flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-transform hover:scale-105 active:scale-95"
+                        style={{ backgroundColor: theme.colors.accent, color: 'white' }}
+                    >
+                        <span>New</span>
+                        <Plus className="w-4 h-4" />
+                    </button>
+                </PageTitle>
+            </div>
 
-            {/* The extra div for the button has been removed */}
-            <div className="px-4 space-y-4 pb-4">
-                <GlassCard theme={theme} className="p-4 transition-all duration-300 hover:border-white/20">
-                    <p className="text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>
-                        Progress to Goal
-                    </p>
-                    <p className="text-4xl font-bold my-2" style={{ color: theme.colors.accent }}>
-                        {percentToGoal.toFixed(1)}%
-                    </p>
-                    <div className="relative w-full h-2.5 rounded-full" style={{ backgroundColor: theme.colors.subtle }}>
-                        <div className="h-2.5 rounded-full" style={{ width: `${percentToGoal}%`, backgroundColor: theme.colors.accent }}></div>
-                    </div>
-                </GlassCard>
+            {/* This div now contains only the scrollable content */}
+            <div className="flex-1 overflow-y-auto scrollbar-hide">
+                <div className="px-4 space-y-4 py-4">
+                    <GlassCard theme={theme} className="p-4 transition-all duration-300 hover:border-white/20">
+                        <p className="text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>
+                            Progress to Goal
+                        </p>
+                        <p className="text-4xl font-bold my-2" style={{ color: theme.colors.accent }}>
+                            {percentToGoal.toFixed(1)}%
+                        </p>
+                        <div className="relative w-full h-2.5 rounded-full" style={{ backgroundColor: theme.colors.subtle }}>
+                            <div className="h-2.5 rounded-full" style={{ width: `${percentToGoal}%`, backgroundColor: theme.colors.accent }}></div>
+                        </div>
+                    </GlassCard>
 
-                <GlassCard theme={theme} className="p-4 hover:border-white/20 transition-all duration-300">
-                    <div className="flex justify-between items-center mb-4">
-                        <h3 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>
-                            Monthly Performance
+                    <GlassCard theme={theme} className="p-4 hover:border-white/20 transition-all duration-300">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>
+                                Monthly Performance
+                            </h3>
+                            <button
+                                onClick={handleToggleView}
+                                className="p-1.5 rounded-md"
+                                style={{ backgroundColor: theme.colors.subtle }}
+                            >
+                                {monthlyView === 'chart'
+                                    ? <List className="w-4 h-4" style={{ color: theme.colors.secondary }} />
+                                    : <BarChart2 className="w-4 h-4" style={{ color: theme.colors.secondary }} />}
+                            </button>
+                        </div>
+                        {monthlyView === 'chart'
+                            ? <MonthlyBarChart data={Data.MONTHLY_SALES_DATA} theme={theme} />
+                            : <MonthlyTable
+                                data={Data.MONTHLY_SALES_DATA}
+                                theme={theme}
+                                totalBookings={totalBookings}
+                                totalSales={totalSales}
+                            />}
+                    </GlassCard>
+
+                    <RecentPOsCard
+                        orders={recentOrders}
+                        theme={theme}
+                        onOrderClick={handleShowOrderDetails}
+                    />
+
+                    <GlassCard theme={theme} className="p-4 hover:border-white/20 transition-all duration-300">
+                        <h3 className="font-bold text-lg mb-4" style={{ color: theme.colors.textPrimary }}>
+                            Verticals Breakdown
                         </h3>
-                        <button
-                            onClick={handleToggleView}
-                            className="p-1.5 rounded-md"
-                            style={{ backgroundColor: theme.colors.subtle }}
-                        >
-                            {monthlyView === 'chart'
-                                ? <List className="w-4 h-4" style={{ color: theme.colors.secondary }} />
-                                : <BarChart2 className="w-4 h-4" style={{ color: theme.colors.secondary }} />}
-                        </button>
-                    </div>
-                    {monthlyView === 'chart'
-                        ? <MonthlyBarChart data={Data.MONTHLY_SALES_DATA} theme={theme} />
-                        : <MonthlyTable
-                            data={Data.MONTHLY_SALES_DATA}
-                            theme={theme}
-                            totalBookings={totalBookings}
-                            totalSales={totalSales}
-                        />}
-                </GlassCard>
+                        <DonutChart data={Data.SALES_VERTICALS_DATA} theme={theme} />
+                    </GlassCard>
 
-                <RecentPOsCard
-                    orders={recentOrders}
-                    theme={theme}
-                    onOrderClick={handleShowOrderDetails}
-                />
-
-                <GlassCard theme={theme} className="p-4 hover:border-white/20 transition-all duration-300">
-                    <h3 className="font-bold text-lg mb-4" style={{ color: theme.colors.textPrimary }}>
-                        Verticals Breakdown
-                    </h3>
-                    <DonutChart data={Data.SALES_VERTICALS_DATA} theme={theme} />
-                </GlassCard>
-
-                <GlassCard theme={theme} className="p-1"><button onClick={handleCustomerRankNav} className="w-full p-3 rounded-xl flex items-center justify-between"><span className="text-md font-semibold tracking-tight" style={{ color: theme.colors.textPrimary }}>View Customer Rank</span><ArrowRight className="w-5 h-5" style={{ color: theme.colors.secondary }} /></button></GlassCard>
-                <GlassCard theme={theme} className="p-1"><button onClick={handleCommissionsNav} className="w-full p-3 rounded-xl flex items-center justify-between"><span className="text-md font-semibold tracking-tight" style={{ color: theme.colors.textPrimary }}>View Commissions</span><ArrowRight className="w-5 h-5" style={{ color: theme.colors.secondary }} /></button></GlassCard>
-                <GlassCard theme={theme} className="p-1"><button onClick={handleRewardsNav} className="w-full p-3 rounded-xl flex items-center justify-between"><span className="text-md font-semibold tracking-tight" style={{ color: theme.colors.textPrimary }}>View Incentive Rewards</span><ArrowRight className="w-5 h-5" style={{ color: theme.colors.secondary }} /></button></GlassCard>
+                    <GlassCard theme={theme} className="p-1"><button onClick={handleCustomerRankNav} className="w-full p-3 rounded-xl flex items-center justify-between"><span className="text-md font-semibold tracking-tight" style={{ color: theme.colors.textPrimary }}>View Customer Rank</span><ArrowRight className="w-5 h-5" style={{ color: theme.colors.secondary }} /></button></GlassCard>
+                    <GlassCard theme={theme} className="p-1"><button onClick={handleCommissionsNav} className="w-full p-3 rounded-xl flex items-center justify-between"><span className="text-md font-semibold tracking-tight" style={{ color: theme.colors.textPrimary }}>View Commissions</span><ArrowRight className="w-5 h-5" style={{ color: theme.colors.secondary }} /></button></GlassCard>
+                    <GlassCard theme={theme} className="p-1"><button onClick={handleRewardsNav} className="w-full p-3 rounded-xl flex items-center justify-between"><span className="text-md font-semibold tracking-tight" style={{ color: theme.colors.textPrimary }}>View Incentive Rewards</span><ArrowRight className="w-5 h-5" style={{ color: theme.colors.secondary }} /></button></GlassCard>
+                </div>
             </div>
 
             {selectedOrder && (
@@ -4143,7 +4169,7 @@ const SalesScreen = ({ theme, onNavigate }) => {
                     theme={theme}
                 />
             )}
-        </>
+        </div>
     );
 };
 
@@ -4203,7 +4229,7 @@ export const OrderCalendarView = ({ orders, onDateClick, theme, dateType }) => {
     );
 };
 
-const ProductsScreen = ({ theme, onNavigate }) => {
+export const ProductsScreen = ({ theme, onNavigate }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [viewMode, setViewMode] = useState('grid');
 
@@ -4225,29 +4251,37 @@ const ProductsScreen = ({ theme, onNavigate }) => {
     }, []);
 
     return (
-        <>
-            <PageTitle title="Products" theme={theme}>
-                <button
-                    onClick={toggleViewMode}
-                    className="p-2 rounded-lg transition-colors hover:bg-black/10 dark:hover:bg-white/10"
-                    style={{ backgroundColor: theme.colors.subtle }}
-                >
-                    {viewMode === 'grid' ?
-                        <List className="w-5 h-5" style={{ color: theme.colors.textSecondary }} /> :
-                        <BarChart2 className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
-                    }
-                </button>
-            </PageTitle>
+        // The component now uses flex-col to manage the sticky header and scrollable content
+        <div className="flex flex-col h-full">
+            {/* This new div wraps the title and search, making them sticky */}
+            <div
+                className="sticky top-0 z-10 backdrop-blur-md"
+                style={{ backgroundColor: `${theme.colors.background}e0` }}
+            >
+                <PageTitle title="Products" theme={theme}>
+                    <button
+                        onClick={toggleViewMode}
+                        className="p-2 rounded-lg transition-colors hover:bg-black/10 dark:hover:bg-white/10"
+                        style={{ backgroundColor: theme.colors.subtle }}
+                    >
+                        {viewMode === 'grid' ?
+                            <List className="w-5 h-5" style={{ color: theme.colors.textSecondary }} /> :
+                            <BarChart2 className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
+                        }
+                    </button>
+                </PageTitle>
+                <div className="px-4 pb-4">
+                    <SearchInput
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        placeholder="Search products..."
+                        theme={theme}
+                    />
+                </div>
+            </div>
 
-            <div className="px-4 pb-4">
-                <SearchInput
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Search products..."
-                    theme={theme}
-                    className="mb-4"
-                />
-
+            {/* This div now only contains the scrollable content */}
+            <div className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-hide">
                 {filteredCategories.length === 0 ? (
                     <GlassCard theme={theme} className="p-8 text-center">
                         <p style={{ color: theme.colors.textSecondary }}>
@@ -4319,16 +4353,18 @@ const ProductsScreen = ({ theme, onNavigate }) => {
                     </div>
                 )}
             </div>
-        </>
+        </div>
     );
 };
-
 export const ProbabilitySlider = ({ value, onChange, theme }) => (
     <div>
         <label className="block text-xs font-semibold px-4" style={{ color: theme.colors.textSecondary }}>
             Win Probability
         </label>
-        <div className="relative w-full h-8 select-none pt-4 px-2">
+        <div className="relative w-full h-8 flex items-center select-none pt-4 px-2">
+            {/* This div acts as the visible gray track */}
+            <div className="absolute w-full h-1.5 rounded-full" style={{ backgroundColor: theme.colors.subtle }}></div>
+
             <input
                 type="range"
                 min={0}
@@ -4336,15 +4372,17 @@ export const ProbabilitySlider = ({ value, onChange, theme }) => (
                 step={5}
                 value={value}
                 onInput={(e) => onChange(parseInt(e.target.value, 10))}
-                className="w-full h-2 cursor-pointer appearance-none rounded-full outline-none"
-                style={{ background: theme.colors.subtle, accentColor: theme.colors.accent }}
+                className="relative w-full h-2 bg-transparent cursor-pointer appearance-none rounded-full outline-none"
+                style={{ accentColor: theme.colors.accent }}
             />
             <div
-                className="absolute top-[25px] -translate-x-1/2 flex items-center justify-center h-6 w-6 rounded-full text-[10px] font-bold pointer-events-none shadow"
+                className="absolute top-1/2 -translate-y-1/2 flex items-center justify-center h-6 w-6 rounded-full text-[10px] font-bold pointer-events-none shadow"
                 style={{
                     left: `${value}%`,
                     backgroundColor: theme.colors.accent,
                     color: '#FFF',
+                    // This math adjusts the bubble's position to stay centered on the slider's thumb
+                    transform: `translateX(-${value / 100 * 24}px) translateY(-50%)`
                 }}
             >
                 {value}%
@@ -4353,6 +4391,49 @@ export const ProbabilitySlider = ({ value, onChange, theme }) => (
     </div>
 );
 
+const DropdownPortal = ({ children, onClose, parentRef, theme }) => {
+    const dropdownRef = useRef(null);
+
+    // This effect handles closing the dropdown when clicking outside
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                onClose();
+            }
+        }
+        const timerId = setTimeout(() => {
+            document.addEventListener("mousedown", handleClickOutside);
+        }, 10);
+
+        return () => {
+            clearTimeout(timerId);
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [onClose]);
+
+    const parentRect = parentRef.current?.getBoundingClientRect();
+
+    // Set a fixed width for the dropdown
+    const dropdownWidth = 288; // Equivalent to w-72 in Tailwind
+
+    // Position the dropdown
+    const top = parentRect ? parentRect.bottom + 4 : 0;
+    // Align the right edge of the dropdown with the right edge of the parent field
+    const left = parentRect ? parentRect.right - dropdownWidth : 0;
+
+    return ReactDOM.createPortal(
+        <div
+            ref={dropdownRef}
+            className="absolute z-[9999]"
+            style={{ top: `${top}px`, left: `${left}px`, width: `${dropdownWidth}px` }}
+        >
+            <GlassCard theme={theme} className="p-2 max-h-80 overflow-y-auto scrollbar-hide">
+                {children}
+            </GlassCard>
+        </div>,
+        document.body
+    );
+};
 export const NewLeadScreen = ({
     theme,
     onSuccess,
@@ -4368,7 +4449,19 @@ export const NewLeadScreen = ({
         contractType: '',
     });
 
-    const updateField = useCallback((field, value) => { setNewLead(prev => ({ ...prev, [field]: value })); }, []);
+    // This state now just tracks which dropdown to show, and which input field it belongs to
+    const [activeDropdown, setActiveDropdown] = useState({ type: null, ref: null });
+
+    const updateField = useCallback((field, value) => {
+        setNewLead(prev => ({ ...prev, [field]: value }));
+        setActiveDropdown({ type: null, ref: null }); // Close dropdown on selection
+    }, []);
+
+    // Refs for each clickable input field to position the dropdown
+    const stageRef = useRef(null);
+    const verticalRef = useRef(null);
+    const discountRef = useRef(null);
+
     const handleSubmit = (e) => { e.preventDefault(); onSuccess(newLead); };
     const addProduct = useCallback((series) => { if (series) { setNewLead(prev => ({ ...prev, products: [...prev.products, { series }] })); } }, []);
     const removeProduct = useCallback((idx) => { setNewLead(prev => ({ ...prev, products: prev.products.filter((_, i) => i !== idx) })); }, []);
@@ -4384,84 +4477,85 @@ export const NewLeadScreen = ({
 
     return (
         <form onSubmit={handleSubmit} className="flex flex-col h-full">
-            <PageTitle title="Create New Lead" theme={theme} />
+            <div className="flex-1 overflow-y-auto px-4 pb-4 pt-6 space-y-6 scrollbar-hide">
+                <FormSection title="Project Details" theme={theme}>
+                    <FormInput required label="Project Name" value={newLead.project} onChange={(e) => updateField('project', e.target.value)} placeholder="e.g., Acme Corp Headquarters" theme={theme} />
 
-            <div className="flex-1 overflow-y-auto px-4 pb-4 pt-4 space-y-6 scrollbar-hide">
-                <div className="relative z-50">
-                    <FormSection title="Project Details" theme={theme}>
-                        <FormInput required label="Project Name" value={newLead.project} onChange={(e) => updateField('project', e.target.value)} placeholder="e.g., Acme Corp Headquarters" theme={theme} />
-                        <CustomSelect required label="Project Stage" value={newLead.projectStatus} onChange={(e) => updateField('projectStatus', e.target.value)} options={Data.STAGES.map(s => ({ label: s, value: s }))} placeholder="Select a Stage" theme={theme} />
-                        <CustomSelect required label="Vertical" value={newLead.vertical} onChange={(e) => updateField('vertical', e.target.value)} options={Data.VERTICALS.map(v => ({ label: v, value: v }))} placeholder="Select a Vertical" theme={theme} />
-                    </FormSection>
-                </div>
+                    <div ref={stageRef} onClick={() => setActiveDropdown({ type: 'stage', ref: stageRef })}>
+                        <FormInput readOnly required label="Project Stage" value={newLead.projectStatus} placeholder="Select stage" theme={theme} />
+                    </div>
 
-                <div className="relative z-40">
-                    <FormSection title="Stakeholders" theme={theme}>
-                        <AutoCompleteCombobox label="A&D Firm" required value={newLead.designFirm} onChange={(val) => updateField('designFirm', val)} placeholder="Search or add a design firm..." options={designFirms} onAddNew={(f) => setDesignFirms((p) => [...new Set([f, ...p])])} theme={theme} />
-                        <AutoCompleteCombobox label="Dealer" required value={newLead.dealer} onChange={(val) => updateField('dealer', val)} placeholder="Search or add a dealer..." options={dealers} onAddNew={(d) => setDealers((p) => [...new Set([d, ...p])])} theme={theme} />
-                    </FormSection>
-                </div>
+                    <div ref={verticalRef} onClick={() => setActiveDropdown({ type: 'vertical', ref: verticalRef })}>
+                        <FormInput readOnly required label="Vertical" value={newLead.vertical} placeholder="Select vertical" theme={theme} />
+                    </div>
+                </FormSection>
 
-                <div className="relative z-30">
-                    <FormSection title="Financials & Timeline" theme={theme}>
-                        <FormInput label="Estimated List Price" required type="currency" value={newLead.estimatedList} onChange={(e) => updateField('estimatedList', e.target.value)} placeholder="$0" theme={theme} />
-                        <ProbabilitySlider value={newLead.winProbability} onChange={(v) => updateField('winProbability', v)} theme={theme} />
-                        <CustomSelect label="Discount" value={newLead.discount} onChange={(e) => updateField('discount', e.target.value)} options={Data.DISCOUNT_OPTIONS.map(d => ({ label: d, value: d }))} placeholder="Select a Discount" theme={theme} />
-                        <CustomSelect label="PO Timeframe" required value={newLead.poTimeframe} onChange={(e) => updateField('poTimeframe', e.target.value)} options={Data.PO_TIMEFRAMES.map(t => ({ label: t, value: t }))} placeholder="Select a Timeframe" theme={theme} />
+                <FormSection title="Stakeholders" theme={theme}>
+                    <AutoCompleteCombobox label="A&D Firm" required value={newLead.designFirm} onChange={(val) => updateField('designFirm', val)} placeholder="Search or add a design firm..." options={designFirms} onAddNew={(f) => setDesignFirms((p) => [...new Set([f, ...p])])} theme={theme} />
+                    <AutoCompleteCombobox label="Dealer" required value={newLead.dealer} onChange={(val) => updateField('dealer', val)} placeholder="Search or add a dealer..." options={dealers} onAddNew={(d) => setDealers((p) => [...new Set([d, ...p])])} theme={theme} />
+                </FormSection>
 
-                        <div className="flex items-center justify-between text-sm px-3 pt-4 border-t mt-4" style={{ borderColor: theme.colors.subtle }}>
-                            <label style={{ color: theme.colors.textSecondary }}>Contract?</label>
-                            <input type="checkbox" className="h-5 w-5 rounded-md border-2" style={{ accentColor: theme.colors.accent, borderColor: theme.colors.border }} checked={!!newLead.isContract} onChange={(e) => updateField('isContract', e.target.checked)} />
+                <FormSection title="Financials & Timeline" theme={theme}>
+                    <FormInput label="Estimated List Price" required type="currency" value={newLead.estimatedList} onChange={(e) => updateField('estimatedList', e.target.value)} placeholder="$0" theme={theme} />
+                    <ProbabilitySlider value={newLead.winProbability} onChange={(v) => updateField('winProbability', v)} theme={theme} />
+
+                    <div ref={discountRef} onClick={() => setActiveDropdown({ type: 'discount', ref: discountRef })}>
+                        <FormInput readOnly label="Discount" value={newLead.discount} placeholder="Select a Discount" theme={theme} />
+                    </div>
+
+                    <CustomSelect label="PO Timeframe" required value={newLead.poTimeframe} onChange={(e) => updateField('poTimeframe', e.target.value)} options={Data.PO_TIMEFRAMES.map(t => ({ label: t, value: t }))} placeholder="Select a Timeframe" theme={theme} />
+
+                    <div className="flex items-center justify-between text-sm px-3 pt-4 border-t mt-4" style={{ borderColor: theme.colors.subtle }}>
+                        <label style={{ color: theme.colors.textSecondary }}>Contract?</label>
+                        <input type="checkbox" className="h-5 w-5 rounded-md border-2" style={{ accentColor: theme.colors.accent, borderColor: theme.colors.border }} checked={!!newLead.isContract} onChange={(e) => updateField('isContract', e.target.checked)} />
+                    </div>
+
+                    {newLead.isContract && (
+                        <div className="pt-2 animate-fade-in">
+                            <CustomSelect required placeholder="Select a Contract" value={newLead.contractType} onChange={(e) => updateField('contractType', e.target.value)} options={Data.CONTRACT_OPTIONS.map(c => ({ label: c, value: c }))} theme={theme} />
                         </div>
+                    )}
+                </FormSection>
 
-                        {newLead.isContract && (
-                            <div className="pt-2 animate-fade-in">
-                                <CustomSelect required placeholder="Select a Contract" value={newLead.contractType} onChange={(e) => updateField('contractType', e.target.value)} options={Data.CONTRACT_OPTIONS.map(c => ({ label: c, value: c }))} theme={theme} />
-                            </div>
-                        )}
-                    </FormSection>
-                </div>
-
-                <div className="relative z-20">
-                    <FormSection title="Competition & Products" theme={theme}>
-                        <div className="flex items-center justify-between text-sm px-3">
-                            <label style={{ color: theme.colors.textSecondary }}>Competition?</label>
-                            <input type="checkbox" className="h-5 w-5 rounded-md border-2" style={{ accentColor: theme.colors.accent, borderColor: theme.colors.border }} checked={!!newLead.competitionPresent} onChange={(e) => updateField('competitionPresent', e.target.checked)} />
-                        </div>
-                        {newLead.competitionPresent && (
-                            <div className="space-y-2 pt-4 border-t" style={{ borderColor: theme.colors.subtle }}>
-                                <label className="block text-xs font-semibold px-1" style={{ color: theme.colors.textSecondary }}>Competitors</label>
-                                <div className="p-2 flex flex-wrap gap-2 rounded-2xl" style={{ backgroundColor: theme.colors.subtle }}>
-                                    {Data.COMPETITORS.filter(c => c !== 'None').map(c => (
-                                        <button type="button" key={c} onClick={() => toggleCompetitor(c)} className={`px-3 py-1.5 text-sm rounded-full font-medium transition-colors`} style={{ backgroundColor: newLead.competitors.includes(c) ? theme.colors.accent : theme.colors.surface, color: newLead.competitors.includes(c) ? 'white' : theme.colors.textPrimary }}>
-                                            {c}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                        <div className="border-t pt-4 mt-4 space-y-3" style={{ borderColor: theme.colors.border }}>
-                            <label className="text-xs font-semibold px-1" style={{ color: theme.colors.textSecondary }}>Products</label>
-                            {newLead.products.map((p, idx) => (
-                                <div key={idx} className="p-3 rounded-lg flex items-center justify-between" style={{ backgroundColor: theme.colors.subtle }}>
-                                    <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>{p.series}</span>
-                                    <button type="button" onClick={() => removeProduct(idx)} className="p-1 rounded-full hover:bg-red-500/10">
-                                        <X className="w-4 h-4 text-red-500" />
+                <FormSection title="Competition & Products" theme={theme}>
+                    <div className="flex items-center justify-between text-sm px-3">
+                        <label style={{ color: theme.colors.textSecondary }}>Competition?</label>
+                        <input type="checkbox" className="h-5 w-5 rounded-md border-2" style={{ accentColor: theme.colors.accent, borderColor: theme.colors.border }} checked={!!newLead.competitionPresent} onChange={(e) => updateField('competitionPresent', e.target.checked)} />
+                    </div>
+                    {newLead.competitionPresent && (
+                        <div className="space-y-2 pt-4 border-t" style={{ borderColor: theme.colors.subtle }}>
+                            <label className="block text-xs font-semibold px-1" style={{ color: theme.colors.textSecondary }}>Competitors</label>
+                            <div className="p-2 flex flex-wrap gap-2 rounded-2xl" style={{ backgroundColor: theme.colors.subtle }}>
+                                {Data.COMPETITORS.filter(c => c !== 'None').map(c => (
+                                    <button type="button" key={c} onClick={() => toggleCompetitor(c)} className={`px-3 py-1.5 text-sm rounded-full font-medium transition-colors`} style={{ backgroundColor: newLead.competitors.includes(c) ? theme.colors.accent : theme.colors.surface, color: newLead.competitors.includes(c) ? 'white' : theme.colors.textPrimary }}>
+                                        {c}
                                     </button>
-                                </div>
-                            ))}
-                            {availableSeries.length > 0 && (
-                                <AutoCompleteCombobox
-                                    value={""}
-                                    onChange={(val) => { addProduct(val); }}
-                                    placeholder="+ Add a Product..."
-                                    options={availableSeries}
-                                    theme={theme}
-                                />
-                            )}
+                                ))}
+                            </div>
                         </div>
-                    </FormSection>
-                </div>
+                    )}
+                    <div className="border-t pt-4 mt-4 space-y-3" style={{ borderColor: theme.colors.border }}>
+                        <label className="text-xs font-semibold px-1" style={{ color: theme.colors.textSecondary }}>Products</label>
+                        {newLead.products.map((p, idx) => (
+                            <div key={idx} className="p-3 rounded-lg flex items-center justify-between" style={{ backgroundColor: theme.colors.subtle }}>
+                                <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>{p.series}</span>
+                                <button type="button" onClick={() => removeProduct(idx)} className="p-1 rounded-full hover:bg-red-500/10">
+                                    <X className="w-4 h-4 text-red-500" />
+                                </button>
+                            </div>
+                        ))}
+                        {availableSeries.length > 0 && (
+                            <AutoCompleteCombobox
+                                value={""}
+                                onChange={(val) => { addProduct(val); }}
+                                placeholder="+ Add a Product..."
+                                options={availableSeries}
+                                theme={theme}
+                                resetOnSelect={true}
+                            />
+                        )}
+                    </div>
+                </FormSection>
 
                 <div className="pt-4 pb-4">
                     <button type="submit" className="w-full text-white font-bold py-3.5 rounded-full" style={{ backgroundColor: theme.colors.accent }}>
@@ -4469,6 +4563,23 @@ export const NewLeadScreen = ({
                     </button>
                 </div>
             </div>
+
+            {/* Render the correct dropdown options in the portal when active */}
+            {activeDropdown.type === 'stage' && (
+                <DropdownPortal onClose={() => setActiveDropdown({ type: null, ref: null })} parentRef={activeDropdown.ref} theme={theme}>
+                    {Data.STAGES.map(opt => <button key={opt} type="button" onClick={() => updateField('projectStatus', opt)} className="block w-full text-left p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10">{opt}</button>)}
+                </DropdownPortal>
+            )}
+            {activeDropdown.type === 'vertical' && (
+                <DropdownPortal onClose={() => setActiveDropdown({ type: null, ref: null })} parentRef={activeDropdown.ref} theme={theme}>
+                    {Data.VERTICALS.map(opt => <button key={opt} type="button" onClick={() => updateField('vertical', opt)} className="block w-full text-left p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10">{opt}</button>)}
+                </DropdownPortal>
+            )}
+            {activeDropdown.type === 'discount' && (
+                <DropdownPortal onClose={() => setActiveDropdown({ type: null, ref: null })} parentRef={activeDropdown.ref} theme={theme}>
+                    {Data.DISCOUNT_OPTIONS.map(opt => <button key={opt} type="button" onClick={() => updateField('discount', opt)} className="block w-full text-left p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10">{opt}</button>)}
+                </DropdownPortal>
+            )}
         </form>
     );
 };
@@ -4491,35 +4602,37 @@ const resourceIcons = {
     'Lead Times': Hourglass,
 };
 
+
 export const ResourcesScreen = ({ theme, onNavigate }) => {
     return (
         <div className="flex flex-col h-full">
-            <PageTitle title="Resources" theme={theme} />
-
-            <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4 scrollbar-hide">
+            {/* The main PageTitle has been removed */}
+            <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4 scrollbar-hide">
                 {Data.RESOURCES_DATA.map(category => (
                     <GlassCard key={category.category} theme={theme} className="p-4">
-                        {/* The category header is now inside the card with a border below it */}
-                        <h2 className="text-xl font-bold mb-2 pb-3 border-b" style={{ color: theme.colors.textPrimary, borderColor: theme.colors.subtle }}>
+                        {/* The header font size is now larger (text-2xl) */}
+                        <h2 className="text-2xl font-bold mb-2 pb-3 border-b" style={{ color: theme.colors.textPrimary, borderColor: theme.colors.subtle }}>
                             {category.category}
                         </h2>
                         <div className="space-y-1">
-                            {category.items.map((item) => {
+                            {category.items.map((item, index) => {
                                 const Icon = resourceIcons[item.label] || Database;
                                 return (
-                                    <button
-                                        key={item.nav}
-                                        onClick={() => onNavigate(item.nav)}
-                                        className="w-full p-3 rounded-xl flex items-center justify-between transition-colors hover:bg-black/5 dark:hover:bg-white/10"
-                                    >
-                                        <div className="flex items-center space-x-4">
-                                            <Icon className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
-                                            <span className="text-md font-semibold tracking-tight" style={{ color: theme.colors.textPrimary }}>
-                                                {item.label}
-                                            </span>
-                                        </div>
-                                        <ArrowRight className="w-5 h-5" style={{ color: theme.colors.secondary }} />
-                                    </button>
+                                    <React.Fragment key={item.nav}>
+                                        {index > 0 && <div className="border-t mx-3" style={{ borderColor: theme.colors.subtle }} />}
+                                        <button
+                                            onClick={() => onNavigate(item.nav)}
+                                            className="w-full p-3 rounded-xl flex items-center justify-between transition-colors hover:bg-black/5 dark:hover:bg-white/10"
+                                        >
+                                            <div className="flex items-center space-x-4">
+                                                <Icon className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
+                                                <span className="text-md font-semibold tracking-tight" style={{ color: theme.colors.textPrimary }}>
+                                                    {item.label}
+                                                </span>
+                                            </div>
+                                            <ArrowRight className="w-5 h-5" style={{ color: theme.colors.secondary }} />
+                                        </button>
+                                    </React.Fragment>
                                 )
                             })}
                         </div>
@@ -4528,8 +4641,7 @@ export const ResourcesScreen = ({ theme, onNavigate }) => {
             </div>
         </div>
     );
-};
-export const PRODUCTS_CATEGORIES_DATA = Object.entries(Data.PRODUCT_DATA).map(([key, value]) => {
+}; export const PRODUCTS_CATEGORIES_DATA = Object.entries(Data.PRODUCT_DATA).map(([key, value]) => {
     const images = [];
     // Ensure we always get two images or placeholders
     for (let i = 0; i < 2; i++) {
@@ -5683,19 +5795,11 @@ export {
     MonthlyTable,
     RecentPOsCard,
     Modal,
-   
-
-    // Top‐level screens
-    SalesScreen,
-    ProductsScreen,
-
-    // Fabrics screens
     SearchFormScreen,
     COMRequestScreen,
 
     // “Rep Functions” screens
     CommissionRatesScreen,
-    DealerRegistrationScreen,
     RequestFieldVisitScreen,
     DealerDirectoryScreen,
 
