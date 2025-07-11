@@ -4,7 +4,7 @@ import { lightTheme, darkTheme, INITIAL_MEMBERS, INITIAL_OPPORTUNITIES, INITIAL_
 import {
     AppHeader, ProfileMenu, SCREEN_MAP, OrderModal, Modal, SuccessToast, PageTitle,
     ResourceDetailScreen, CartScreen, VoiceModal, ProductComparisonScreen,
-    CompetitiveAnalysisScreen, PlaceholderScreen, FabricsScreen, ProjectDetailModal // The new modal is imported
+    CompetitiveAnalysisScreen, PlaceholderScreen, FabricsScreen, ProjectDetailModal
 } from './ui.jsx';
 import * as Data from './data.jsx';
 
@@ -26,7 +26,6 @@ function App() {
     const [opportunities, setOpportunities] = useState(INITIAL_OPPORTUNITIES);
     const [designFirms, setDesignFirms] = useState(INITIAL_DESIGN_FIRMS);
     const [dealers, setDealers] = useState(INITIAL_DEALERS);
-    // New state to manage which project detail modal is open
     const [selectedOpportunity, setSelectedOpportunity] = useState(null);
     const [userSettings, setUserSettings] = useState({
         id: 1,
@@ -39,11 +38,13 @@ function App() {
     });
     const [cart, setCart] = useState({});
 
-    // --- GESTURE & AI STATE ---
+    // --- ENHANCED GESTURE & AI STATE ---
     const touchStartX = useRef(0);
     const touchStartY = useRef(0);
     const hasSwipeStarted = useRef(false);
     const isHorizontalSwipe = useRef(false);
+    const swipeStartTime = useRef(0); // New: Track swipe timing
+    const lastTouchX = useRef(0); // New: Track last touch position
 
     const [aiResponse, setAiResponse] = useState('');
     const [isAILoading, setIsAILoading] = useState(false);
@@ -77,13 +78,18 @@ function App() {
         ));
     }, [userSettings, currentUserId]);
 
-
     // --- HANDLERS ---
     const handleNavigate = useCallback((screen) => {
-        setNavigationHistory(prev => [...prev, screen]);
-        setShowProfileMenu(false);
-        setSwipeTranslateX(0);
-        setIsTransitioning(false);
+        // Add slide-in animation for forward navigation
+        setIsTransitioning(true);
+        setSwipeTranslateX(-window.innerWidth);
+
+        setTimeout(() => {
+            setNavigationHistory(prev => [...prev, screen]);
+            setShowProfileMenu(false);
+            setSwipeTranslateX(0);
+            setIsTransitioning(false);
+        }, 150);
     }, []);
 
     const handleHome = useCallback(() => {
@@ -107,7 +113,6 @@ function App() {
 
     const handleSaveSettings = useCallback(() => { setSuccessMessage("Settings Saved!"); setTimeout(() => setSuccessMessage(""), 2000); handleBack(); }, [handleBack]);
 
-    // This function is updated to save ALL data from the form
     const handleNewLeadSuccess = useCallback((newLead) => {
         const newOpportunity = {
             id: opportunities.length + 1,
@@ -115,7 +120,7 @@ function App() {
             stage: newLead.projectStatus,
             value: `$${parseInt(String(newLead.estimatedList).replace(/[^0-9]/g, '')).toLocaleString()}`,
             company: newLead.dealer,
-            ...newLead // Include all other fields from the form
+            ...newLead
         };
         setOpportunities(prev => [...prev, newOpportunity]);
         handleNavigate('projects');
@@ -146,7 +151,84 @@ function App() {
     }, []);
     const handleCloseAIDropdown = useCallback(() => { setShowAIDropdown(false); }, []);
 
-    // ... (Gesture handlers remain the same) ...
+    // --- ENHANCED TOUCH HANDLERS ---
+    const handleTouchStart = (e) => {
+        if (isTransitioning || navigationHistory.length <= 1) return;
+
+        const touchX = e.touches[0].clientX;
+        const touchY = e.touches[0].clientY;
+
+        // Enhanced: More generous swipe area (50px instead of 30px)
+        if (touchX < 50) {
+            touchStartX.current = touchX;
+            touchStartY.current = touchY;
+            lastTouchX.current = touchX;
+            hasSwipeStarted.current = true;
+            isHorizontalSwipe.current = false;
+            swipeStartTime.current = Date.now();
+        }
+    };
+
+    const handleTouchMove = (e) => {
+        if (!hasSwipeStarted.current || isTransitioning) return;
+
+        const currentX = e.touches[0].clientX;
+        const currentY = e.touches[0].clientY;
+        const diffX = currentX - touchStartX.current;
+        const diffY = Math.abs(currentY - touchStartY.current);
+
+        if (!isHorizontalSwipe.current) {
+            // Enhanced: Better swipe detection
+            if (diffX > 15 && diffX > diffY * 1.5) {
+                isHorizontalSwipe.current = true;
+            } else if (diffY > 15) {
+                hasSwipeStarted.current = false;
+                return;
+            }
+        }
+
+        if (isHorizontalSwipe.current) {
+            e.preventDefault();
+            // Enhanced: Smoother resistance calculation
+            const maxSwipe = window.innerWidth * 0.8;
+            const resistance = Math.max(0, Math.min(maxSwipe, diffX));
+            const easedTransform = resistance * (1 - resistance / (maxSwipe * 2));
+
+            setSwipeTranslateX(Math.max(0, easedTransform));
+            lastTouchX.current = currentX;
+        }
+    };
+
+    const handleTouchEnd = () => {
+        if (!hasSwipeStarted.current || isTransitioning) return;
+
+        if (isHorizontalSwipe.current) {
+            const swipeDistance = lastTouchX.current - touchStartX.current;
+            const swipeTime = Date.now() - swipeStartTime.current;
+            const swipeVelocity = swipeDistance / swipeTime;
+
+            // Enhanced: Consider both distance and velocity
+            const shouldGoBack = swipeDistance > window.innerWidth * 0.25 ||
+                (swipeDistance > window.innerWidth * 0.15 && swipeVelocity > 0.3);
+
+            if (shouldGoBack) {
+                handleBack();
+            } else {
+                // Enhanced: Smoother snap back animation
+                setIsTransitioning(true);
+                setSwipeTranslateX(0);
+                setTimeout(() => setIsTransitioning(false), 250);
+            }
+        }
+
+        // Reset all touch state
+        hasSwipeStarted.current = false;
+        isHorizontalSwipe.current = false;
+        touchStartX.current = 0;
+        touchStartY.current = 0;
+        lastTouchX.current = 0;
+        swipeStartTime.current = 0;
+    };
 
     // --- RENDER LOGIC ---
     const renderScreen = (screenKey) => {
@@ -195,7 +277,6 @@ function App() {
             case 'members':
                 return <ScreenComponent {...commonProps} members={members} setMembers={setMembers} currentUserId={currentUserId} />;
             case 'projects':
-                // The ProjectsScreen now receives the opportunities list and the function to open the modal
                 return <ScreenComponent {...commonProps} opportunities={opportunities} setSelectedOpportunity={setSelectedOpportunity} />;
             case 'new-lead':
                 return <ScreenComponent {...commonProps} onSuccess={handleNewLeadSuccess} designFirms={designFirms} setDesignFirms={setDesignFirms} dealers={dealers} setDealers={setDealers} />;
@@ -208,6 +289,9 @@ function App() {
         <div
             className="h-screen w-screen font-sans flex flex-col relative overflow-hidden"
             style={{ backgroundColor: currentTheme.colors.background }}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
         >
             <AppHeader
                 theme={currentTheme}
@@ -221,20 +305,48 @@ function App() {
                 onProfileClick={() => setShowProfileMenu(p => !p)}
             />
 
-            {/* The main screen containers */}
+            {/* Enhanced: Swipe progress indicator */}
+            {swipeTranslateX > 0 && (
+                <div
+                    className="absolute top-1/2 left-4 transform -translate-y-1/2 z-40 bg-black bg-opacity-20 rounded-full w-8 h-8 flex items-center justify-center transition-opacity duration-200"
+                    style={{ opacity: Math.min(1, swipeTranslateX / (window.innerWidth * 0.3)) }}
+                >
+                    <span className="text-white text-lg">←</span>
+                </div>
+            )}
+
+            {/* Previous screen container - enhanced transition */}
+            {previousScreen && (
+                <div
+                    className={`absolute inset-0 pt-24 ${isTransitioning ? 'transition-transform duration-300 ease-out' : ''} ${previousScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto'} scrollbar-hide`}
+                    style={{
+                        backgroundColor: currentTheme.colors.background,
+                        transform: `translateX(${swipeTranslateX - window.innerWidth}px)`,
+                        willChange: 'transform'
+                    }}
+                >
+                    {renderScreen(previousScreen)}
+                </div>
+            )}
+
+            {/* Current screen container - enhanced transition */}
             <div
-                className={`absolute inset-0 pt-24 ${isTransitioning ? 'transition-transform duration-300' : ''} ${currentScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto'} scrollbar-hide`}
+                className={`absolute inset-0 pt-24 ${isTransitioning ? 'transition-transform duration-300 ease-out' : ''} ${currentScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto'} scrollbar-hide`}
+                style={{
+                    backgroundColor: currentTheme.colors.background,
+                    transform: `translateX(${swipeTranslateX}px)`,
+                    willChange: 'transform'
+                }}
             >
                 {renderScreen(currentScreen)}
             </div>
 
-            {/* Global modal container ensures modals render on top */}
+            {/* Modals and overlays */}
             <div className="absolute inset-0 z-50 pointer-events-none">
                 {(showProfileMenu || selectedOrder || alertInfo.show || !!voiceMessage || selectedOpportunity) && (
                     <div className="pointer-events-auto">
                         {showProfileMenu && <ProfileMenu show={showProfileMenu} onClose={() => setShowProfileMenu(false)} onNavigate={handleNavigate} toggleTheme={() => setIsDarkMode(d => !d)} theme={currentTheme} isDarkMode={isDarkMode} />}
                         {selectedOrder && <OrderModal order={selectedOrder} onClose={() => setSelectedOrder(null)} theme={currentTheme} />}
-                        {/* The new Project Detail Modal is now rendered here */}
                         {selectedOpportunity && <ProjectDetailModal opportunity={selectedOpportunity} onClose={() => setSelectedOpportunity(null)} theme={currentTheme} onNavigate={handleNavigate} />}
                         <Modal show={alertInfo.show} onClose={() => setAlertInfo({ show: false, message: '' })} title="Alert" theme={currentTheme}><p>{alertInfo.message}</p></Modal>
                         <SuccessToast message={successMessage} show={!!successMessage} theme={currentTheme} />
