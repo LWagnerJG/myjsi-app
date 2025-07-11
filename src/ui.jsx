@@ -87,6 +87,7 @@ export const IncentiveRewardsScreen = ({ theme, onNavigate }) => {
     return <PageTitle title="Incentive Rewards" theme={theme} />;
 };
 
+
 export const CustomSelect = ({ label, value, onChange, options, placeholder, theme, required, onOpen }) => {
     const [isOpen, setIsOpen] = useState(false);
     const wrapperRef = useRef(null);
@@ -125,9 +126,9 @@ export const CustomSelect = ({ label, value, onChange, options, placeholder, the
             <button
                 type="button"
                 onClick={handleOpen}
-                className="w-full px-4 py-2 border rounded-full text-sm text-left flex justify-between items-center"
+                className="w-full px-4 py-3 border rounded-full text-base text-left flex justify-between items-center"
                 style={{
-                    backgroundColor: theme.colors.surface,
+                    backgroundColor: theme.colors.subtle,
                     borderColor: theme.colors.border,
                     color: value ? theme.colors.textPrimary : theme.colors.textSecondary,
                 }}
@@ -137,7 +138,7 @@ export const CustomSelect = ({ label, value, onChange, options, placeholder, the
             </button>
 
             {isOpen && (
-                <div className={`absolute right-0 w-72 z-10 ${dropDirection === 'up' ? 'bottom-full mb-1' : 'top-full mt-1'}`}>
+                <div className={`absolute right-0 w-72 z-50 ${dropDirection === 'up' ? 'bottom-full mb-1' : 'top-full mt-1'}`}>
                     <GlassCard theme={theme} className="p-2 max-h-80 overflow-y-auto scrollbar-hide">
                         {options.map(opt => (
                             <button key={opt.value} type="button" onClick={() => handleSelect(opt.value)} className="block w-full text-left p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10" style={{ color: theme.colors.textPrimary }}>
@@ -150,6 +151,7 @@ export const CustomSelect = ({ label, value, onChange, options, placeholder, the
         </div>
     );
 };
+
 export const AutoCompleteCombobox = ({
     label,
     value,
@@ -4394,31 +4396,22 @@ export const ProbabilitySlider = ({ value, onChange, theme }) => (
 const DropdownPortal = ({ children, onClose, parentRef, theme }) => {
     const dropdownRef = useRef(null);
 
-    // This effect handles closing the dropdown when clicking outside
+    // This simplified effect now correctly handles closing the dropdown
     useEffect(() => {
-        function handleClickOutside(event) {
+        const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
                 onClose();
             }
-        }
-        const timerId = setTimeout(() => {
-            document.addEventListener("mousedown", handleClickOutside);
-        }, 10);
-
+        };
+        document.addEventListener("mousedown", handleClickOutside);
         return () => {
-            clearTimeout(timerId);
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, [onClose]);
 
     const parentRect = parentRef.current?.getBoundingClientRect();
-
-    // Set a fixed width for the dropdown
-    const dropdownWidth = 288; // Equivalent to w-72 in Tailwind
-
-    // Position the dropdown
+    const dropdownWidth = 288;
     const top = parentRect ? parentRect.bottom + 4 : 0;
-    // Align the right edge of the dropdown with the right edge of the parent field
     const left = parentRect ? parentRect.right - dropdownWidth : 0;
 
     return ReactDOM.createPortal(
@@ -4450,25 +4443,10 @@ export const NewLeadScreen = ({
         contractType: '',
     });
 
-    const [activeDropdown, setActiveDropdown] = useState(null);
-    const formRef = useRef(null);
-
-    useEffect(() => {
-        function handleClickOutside(event) {
-            if (formRef.current && !formRef.current.contains(event.target)) {
-                setActiveDropdown(null);
-            }
-        }
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, []);
-
     const updateField = useCallback((field, value) => {
         setNewLead(prev => ({ ...prev, [field]: value }));
-        setActiveDropdown(null);
     }, []);
+
     const handleSubmit = (e) => { e.preventDefault(); onSuccess(newLead); };
     const addProduct = useCallback((series) => { if (series) { setNewLead(prev => ({ ...prev, products: [...prev.products, { series }] })); } }, []);
     const removeProduct = useCallback((idx) => { setNewLead(prev => ({ ...prev, products: prev.products.filter((_, i) => i !== idx) })); }, []);
@@ -4482,155 +4460,118 @@ export const NewLeadScreen = ({
 
     const availableSeries = useMemo(() => Data.JSI_PRODUCT_SERIES.filter(s => !newLead.products.some(p => p.series === s)), [newLead.products]);
 
-    const DropdownOptions = ({ options, onSelect, field }) => (
-        <div className="absolute right-0 w-72 mt-1 z-50">
-            <GlassCard theme={theme} className="p-2 max-h-80 overflow-y-auto scrollbar-hide">
-                {options.map(opt => (
-                    <button key={opt.value} type="button" onClick={() => onSelect(field, opt.value)} className="block w-full text-left p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10" style={{ color: theme.colors.textPrimary }}>
-                        {opt.label}
-                    </button>
-                ))}
-            </GlassCard>
-        </div>
-    );
-
-    const stageRef = useRef(null);
-    const verticalRef = useRef(null);
-    const discountRef = useRef(null);
-    const poTimeframeRef = useRef(null);
-    const contractTypeRef = useRef(null);
+    // A simple divider component for visual separation
+    const SectionDivider = () => <div className="border-t" style={{ borderColor: theme.colors.border }}></div>;
 
     return (
         <form onSubmit={handleSubmit} className="flex flex-col h-full">
-            <div ref={formRef} className="flex-1 overflow-y-auto px-4 pb-4 pt-6 space-y-6 scrollbar-hide">
-                <div className="relative z-50">
-                    <FormSection title="Project Details" theme={theme}>
-                        <FormInput required label="Project Name" value={newLead.project} onChange={(e) => updateField('project', e.target.value)} placeholder="e.g., Acme Corp Headquarters" theme={theme} />
+            <div className="flex-1 overflow-y-auto px-4 pb-4 pt-6 scrollbar-hide">
+                {/* The entire form is now inside a single GlassCard */}
+                <GlassCard theme={theme} className="p-4 space-y-6">
 
-                        <div className="relative">
-                            <div ref={stageRef} onClick={() => setActiveDropdown(activeDropdown === 'stage' ? null : 'stage')}>
-                                <FormInput readOnly required label="Project Stage" value={newLead.projectStatus} placeholder="Select stage" theme={theme} />
-                            </div>
-                            {activeDropdown === 'stage' && <DropdownPortal onClose={() => setActiveDropdown(null)} parentRef={stageRef} theme={theme}>
-                                {Data.STAGES.map(opt => <button key={opt} type="button" onClick={() => updateField('projectStatus', opt)} className="block w-full text-left p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10">{opt}</button>)}
-                            </DropdownPortal>}
-                        </div>
-
-                        <div className="relative">
-                            <div ref={verticalRef} onClick={() => setActiveDropdown(activeDropdown === 'vertical' ? null : 'vertical')}>
-                                <FormInput readOnly required label="Vertical" value={newLead.vertical} placeholder="Select vertical" theme={theme} />
-                            </div>
-                            {activeDropdown === 'vertical' && <DropdownPortal onClose={() => setActiveDropdown(null)} parentRef={verticalRef} theme={theme}>
-                                {Data.VERTICALS.map(opt => <button key={opt} type="button" onClick={() => updateField('vertical', opt)} className="block w-full text-left p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10">{opt}</button>)}
-                            </DropdownPortal>}
-                        </div>
-
-                        {/* This new block conditionally renders the text field for "Other" vertical */}
-                        {newLead.vertical === 'Other (Please specify)' && (
-                            <div className="pl-4 animate-fade-in">
-                                <FormInput
-                                    label="Please Specify Vertical"
-                                    value={newLead.otherVertical}
-                                    onChange={(e) => updateField('otherVertical', e.target.value)}
-                                    placeholder="Specify the vertical..."
-                                    theme={theme}
-                                    required
-                                />
-                            </div>
-                        )}
-                    </FormSection>
-                </div>
-
-                <div className="relative z-40">
-                    <FormSection title="Stakeholders" theme={theme}>
-                        <AutoCompleteCombobox label="A&D Firm" required value={newLead.designFirm} onChange={(val) => updateField('designFirm', val)} placeholder="Search or add a design firm..." options={designFirms} onAddNew={(f) => setDesignFirms((p) => [...new Set([f, ...p])])} theme={theme} />
-                        <AutoCompleteCombobox label="Dealer" required value={newLead.dealer} onChange={(val) => updateField('dealer', val)} placeholder="Search or add a dealer..." options={dealers} onAddNew={(d) => setDealers((p) => [...new Set([d, ...p])])} theme={theme} />
-                    </FormSection>
-                </div>
-
-                <div className="relative z-30">
-                    <FormSection title="Competition & Products" theme={theme}>
-                        <div className="flex items-center justify-between text-sm px-3">
-                            <label style={{ color: theme.colors.textSecondary }}>Competition?</label>
-                            <input type="checkbox" className="h-5 w-5 rounded-md border-2" style={{ accentColor: theme.colors.accent, borderColor: theme.colors.border }} checked={!!newLead.competitionPresent} onChange={(e) => updateField('competitionPresent', e.target.checked)} />
-                        </div>
-                        {newLead.competitionPresent && (
-                            <div className="space-y-2 pt-4 border-t" style={{ borderColor: theme.colors.subtle }}>
-                                <label className="block text-xs font-semibold px-1" style={{ color: theme.colors.textSecondary }}>Competitors</label>
-                                <div className="p-2 flex flex-wrap gap-2 rounded-2xl" style={{ backgroundColor: theme.colors.subtle }}>
-                                    {Data.COMPETITORS.filter(c => c !== 'None').map(c => (
-                                        <button type="button" key={c} onClick={() => toggleCompetitor(c)} className={`px-3 py-1.5 text-sm rounded-full font-medium transition-colors`} style={{ backgroundColor: newLead.competitors.includes(c) ? theme.colors.accent : theme.colors.surface, color: newLead.competitors.includes(c) ? 'white' : theme.colors.textPrimary }}>
-                                            {c}
-                                        </button>
-                                    ))}
+                    {/* --- Project Details Section --- */}
+                    <div>
+                        <h3 className="font-bold text-xl mb-4">Project Details</h3>
+                        <div className="space-y-4">
+                            <FormInput required label="Project Name" value={newLead.project} onChange={(e) => updateField('project', e.target.value)} placeholder="e.g., Acme Corp Headquarters" theme={theme} />
+                            <CustomSelect required label="Project Stage" value={newLead.projectStatus} onChange={(e) => updateField('projectStatus', e.target.value)} options={Data.STAGES.map(s => ({ label: s, value: s }))} placeholder="Select stage" theme={theme} />
+                            <CustomSelect required label="Vertical" value={newLead.vertical} onChange={(e) => updateField('vertical', e.target.value)} options={Data.VERTICALS.map(v => ({ label: v, value: v }))} placeholder="Select vertical" theme={theme} />
+                            {newLead.vertical === 'Other (Please specify)' && (
+                                <div className="pl-4 animate-fade-in">
+                                    <FormInput
+                                        label="Please Specify Vertical"
+                                        value={newLead.otherVertical}
+                                        onChange={(e) => updateField('otherVertical', e.target.value)}
+                                        placeholder="Specify the vertical..."
+                                        theme={theme}
+                                        required
+                                    />
                                 </div>
-                            </div>
-                        )}
-                        <div className="border-t pt-4 mt-4 space-y-3" style={{ borderColor: theme.colors.border }}>
-                            <label className="text-xs font-semibold px-1" style={{ color: theme.colors.textSecondary }}>Products</label>
-                            {newLead.products.map((p, idx) => (
-                                <div key={idx} className="p-3 rounded-lg flex items-center justify-between" style={{ backgroundColor: theme.colors.subtle }}>
-                                    <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>{p.series}</span>
-                                    <button type="button" onClick={() => removeProduct(idx)} className="p-1 rounded-full hover:bg-red-500/10">
-                                        <X className="w-4 h-4 text-red-500" />
-                                    </button>
-                                </div>
-                            ))}
-                            {availableSeries.length > 0 && (
-                                <AutoCompleteCombobox
-                                    value={""}
-                                    onChange={(val) => { addProduct(val); }}
-                                    placeholder="+ Add a Product..."
-                                    options={availableSeries}
-                                    theme={theme}
-                                    resetOnSelect={true}
-                                    dropdownClassName="w-72 right-0 max-h-80"
-                                />
                             )}
                         </div>
-                    </FormSection>
-                </div>
+                    </div>
 
-                <div className="relative z-20">
-                    <FormSection title="Financials & Timeline" theme={theme}>
-                        <FormInput label="Estimated List Price" required type="currency" value={newLead.estimatedList} onChange={(e) => updateField('estimatedList', e.target.value)} placeholder="$0" theme={theme} />
-                        <ProbabilitySlider value={newLead.winProbability} onChange={(v) => updateField('winProbability', v)} theme={theme} />
+                    <SectionDivider />
 
-                        <div className="relative">
-                            <div ref={discountRef} onClick={() => setActiveDropdown(activeDropdown === 'discount' ? null : 'discount')}>
-                                <FormInput readOnly label="Discount" value={newLead.discount} placeholder="Select a Discount" theme={theme} />
+                    {/* --- Stakeholders Section --- */}
+                    <div>
+                        <h3 className="font-bold text-xl mb-4">Stakeholders</h3>
+                        <div className="space-y-4">
+                            <AutoCompleteCombobox label="A&D Firm" required value={newLead.designFirm} onChange={(val) => updateField('designFirm', val)} placeholder="Search or add a design firm..." options={designFirms} onAddNew={(f) => setDesignFirms((p) => [...new Set([f, ...p])])} theme={theme} />
+                            <AutoCompleteCombobox label="Dealer" required value={newLead.dealer} onChange={(val) => updateField('dealer', val)} placeholder="Search or add a dealer..." options={dealers} onAddNew={(d) => setDealers((p) => [...new Set([d, ...p])])} theme={theme} />
+                        </div>
+                    </div>
+
+                    <SectionDivider />
+
+                    {/* --- Competition & Products Section --- */}
+                    <div>
+                        <h3 className="font-bold text-xl mb-4">Competition & Products</h3>
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between text-sm px-3">
+                                <label style={{ color: theme.colors.textSecondary }}>Competition?</label>
+                                <input type="checkbox" className="h-5 w-5 rounded-md border-2" style={{ accentColor: theme.colors.accent, borderColor: theme.colors.border }} checked={!!newLead.competitionPresent} onChange={(e) => updateField('competitionPresent', e.target.checked)} />
                             </div>
-                            {activeDropdown === 'discount' && <DropdownPortal onClose={() => setActiveDropdown(null)} parentRef={discountRef} theme={theme}>
-                                {Data.DISCOUNT_OPTIONS.map(opt => <button key={opt} type="button" onClick={() => updateField('discount', opt)} className="block w-full text-left p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10">{opt}</button>)}
-                            </DropdownPortal>}
-                        </div>
-
-                        <div className="relative">
-                            <div ref={poTimeframeRef} onClick={() => setActiveDropdown(activeDropdown === 'poTimeframe' ? null : 'poTimeframe')}>
-                                <FormInput readOnly required label="PO Timeframe" value={newLead.poTimeframe} placeholder="Select a Timeframe" theme={theme} />
-                            </div>
-                            {activeDropdown === 'poTimeframe' && <DropdownPortal onClose={() => setActiveDropdown(null)} parentRef={poTimeframeRef} theme={theme}>
-                                {Data.PO_TIMEFRAMES.map(opt => <button key={opt} type="button" onClick={() => updateField('poTimeframe', opt)} className="block w-full text-left p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10">{opt}</button>)}
-                            </DropdownPortal>}
-                        </div>
-
-                        <div className="flex items-center justify-between text-sm px-3 pt-4 border-t mt-4" style={{ borderColor: theme.colors.subtle }}>
-                            <label style={{ color: theme.colors.textSecondary }}>Contract?</label>
-                            <input type="checkbox" className="h-5 w-5 rounded-md border-2" style={{ accentColor: theme.colors.accent, borderColor: theme.colors.border }} checked={!!newLead.isContract} onChange={(e) => updateField('isContract', e.target.checked)} />
-                        </div>
-
-                        {newLead.isContract && (
-                            <div className="pt-2 animate-fade-in relative">
-                                <div ref={contractTypeRef} onClick={() => setActiveDropdown(activeDropdown === 'contractType' ? null : 'contractType')}>
-                                    <FormInput readOnly required placeholder="Select a Contract" value={newLead.contractType} theme={theme} />
+                            {newLead.competitionPresent && (
+                                <div className="space-y-2">
+                                    <label className="block text-xs font-semibold px-1" style={{ color: theme.colors.textSecondary }}>Competitors</label>
+                                    <div className="p-2 flex flex-wrap gap-2 rounded-2xl" style={{ backgroundColor: theme.colors.subtle }}>
+                                        {Data.COMPETITORS.filter(c => c !== 'None').map(c => (
+                                            <button type="button" key={c} onClick={() => toggleCompetitor(c)} className={`px-3 py-1.5 text-sm rounded-full font-medium transition-colors`} style={{ backgroundColor: newLead.competitors.includes(c) ? theme.colors.accent : theme.colors.surface, color: newLead.competitors.includes(c) ? 'white' : theme.colors.textPrimary }}>
+                                                {c}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
-                                {activeDropdown === 'contractType' && <DropdownPortal onClose={() => setActiveDropdown(null)} parentRef={contractTypeRef} theme={theme}>
-                                    {Data.CONTRACT_OPTIONS.map(opt => <button key={opt} type="button" onClick={() => updateField('contractType', opt)} className="block w-full text-left p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10">{opt}</button>)}
-                                </DropdownPortal>}
+                            )}
+                            <div className="space-y-3">
+                                <label className="text-xs font-semibold px-1" style={{ color: theme.colors.textSecondary }}>Products</label>
+                                {newLead.products.map((p, idx) => (
+                                    <div key={idx} className="p-3 rounded-lg flex items-center justify-between" style={{ backgroundColor: theme.colors.subtle }}>
+                                        <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>{p.series}</span>
+                                        <button type="button" onClick={() => removeProduct(idx)} className="p-1 rounded-full hover:bg-red-500/10">
+                                            <X className="w-4 h-4 text-red-500" />
+                                        </button>
+                                    </div>
+                                ))}
+                                {availableSeries.length > 0 && (
+                                    <AutoCompleteCombobox
+                                        value={""}
+                                        onChange={(val) => { addProduct(val); }}
+                                        placeholder="+ Add a Product..."
+                                        options={availableSeries}
+                                        theme={theme}
+                                        resetOnSelect={true}
+                                        dropdownClassName="w-72 right-0 max-h-80"
+                                    />
+                                )}
                             </div>
-                        )}
-                    </FormSection>
-                </div>
+                        </div>
+                    </div>
+
+                    <SectionDivider />
+
+                    {/* --- Financials & Timeline Section --- */}
+                    <div>
+                        <h3 className="font-bold text-xl mb-4">Financials & Timeline</h3>
+                        <div className="space-y-4">
+                            <FormInput label="Estimated List Price" required type="currency" value={newLead.estimatedList} onChange={(e) => updateField('estimatedList', e.target.value)} placeholder="$0" theme={theme} />
+                            <ProbabilitySlider value={newLead.winProbability} onChange={(v) => updateField('winProbability', v)} theme={theme} />
+                            <CustomSelect label="Discount" value={newLead.discount} onChange={(e) => updateField('discount', e.target.value)} options={Data.DISCOUNT_OPTIONS.map(d => ({ label: d, value: d }))} placeholder="Select a Discount" theme={theme} />
+                            <CustomSelect label="PO Timeframe" required value={newLead.poTimeframe} onChange={(e) => updateField('poTimeframe', e.target.value)} options={Data.PO_TIMEFRAMES.map(t => ({ label: t, value: t }))} placeholder="Select a Timeframe" theme={theme} />
+                            <div className="flex items-center justify-between text-sm px-3 pt-2">
+                                <label style={{ color: theme.colors.textSecondary }}>Contract?</label>
+                                <input type="checkbox" className="h-5 w-5 rounded-md border-2" style={{ accentColor: theme.colors.accent, borderColor: theme.colors.border }} checked={!!newLead.isContract} onChange={(e) => updateField('isContract', e.target.checked)} />
+                            </div>
+                            {newLead.isContract && (
+                                <div className="animate-fade-in">
+                                    <CustomSelect required placeholder="Select a Contract" value={newLead.contractType} onChange={(e) => updateField('contractType', e.target.value)} options={Data.CONTRACT_OPTIONS.map(c => ({ label: c, value: c }))} theme={theme} />
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                </GlassCard>
 
                 <div className="pt-4 pb-4">
                     <button type="submit" className="w-full text-white font-bold py-3.5 rounded-full" style={{ backgroundColor: theme.colors.accent }}>
