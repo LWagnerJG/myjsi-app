@@ -4113,9 +4113,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
     const handleRewardsNav = useCallback(() => onNavigate('incentive-rewards'), [onNavigate]);
 
     return (
-        // The main component now uses flex-col to manage layout
         <div className="flex flex-col h-full">
-            {/* This new div wraps the title, making it sticky */}
             <div
                 className="sticky top-0 z-10 backdrop-blur-md"
                 style={{ backgroundColor: `${theme.colors.background}e0` }}
@@ -4126,13 +4124,13 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                         className="flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-transform hover:scale-105 active:scale-95"
                         style={{ backgroundColor: theme.colors.accent, color: 'white' }}
                     >
-                        <span>New</span>
+                        {/* The button text has been updated here */}
+                        <span>New Lead</span>
                         <Plus className="w-4 h-4" />
                     </button>
                 </PageTitle>
             </div>
 
-            {/* This div now contains only the scrollable content */}
             <div className="flex-1 overflow-y-auto scrollbar-hide">
                 <div className="px-4 space-y-4 py-4">
                     <GlassCard theme={theme} className="p-4 transition-all duration-300 hover:border-white/20">
@@ -4142,7 +4140,8 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                         <p className="text-4xl font-bold my-2" style={{ color: theme.colors.accent }}>
                             {percentToGoal.toFixed(1)}%
                         </p>
-                        <div className="relative w-full h-2.5 rounded-full" style={{ backgroundColor: theme.colors.subtle }}>
+                        {/* This div is the gray background bar, now with a more visible color */}
+                        <div className="relative w-full h-2.5 rounded-full" style={{ backgroundColor: 'rgba(0, 0, 0, 0.08)' }}>
                             <div className="h-2.5 rounded-full" style={{ width: `${percentToGoal}%`, backgroundColor: theme.colors.accent }}></div>
                         </div>
                     </GlassCard>
@@ -4205,7 +4204,6 @@ export const SalesScreen = ({ theme, onNavigate }) => {
         </div>
     );
 };
-
 export const OrderCalendarView = ({ orders, onDateClick, theme, dateType }) => {
     const [currentDate, setCurrentDate] = useState(new Date('2025-07-09T12:00:00Z'));
 
