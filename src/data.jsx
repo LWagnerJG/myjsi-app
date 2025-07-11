@@ -5,7 +5,38 @@
     Wrench, MonitorPlay, Share2, Hourglass, Settings, HelpCircle, Send
 } from 'lucide-react';
 
-export const lightTheme = { colors: { background: '#E9E9E7', surface: 'rgba(255,255,255,0.92)', primary: '#003366', accent: '#003366', secondary: '#7A7A7A', textPrimary: '#111111', textSecondary: '#555555', border: 'rgba(0,0,0,0.05)', shadow: 'rgba(0,0,0,0.10)' }, backdropFilter: 'blur(12px)' }; export const darkTheme = { colors: { background: '#1E1E1E', surface: 'rgba(40,40,40,0.85)', primary: '#BBBBBB', accent: '#BBBBBB', secondary: '#999999', textPrimary: '#F5F5F5', textSecondary: '#CCCCCC', border: 'rgba(255,255,255,0.08)', shadow: 'rgba(0,0,0,0.25)' }, backdropFilter: 'blur(12px)' };
+export const lightTheme = {
+    colors: {
+        background: '#f8f8f8',
+        surface: '#FFFFFF',
+        primary: '#003366',
+        accent: '#AD8A77', // Changed to the new color
+        secondary: '#414141',
+        textPrimary: '#111111',
+        textSecondary: '#555555',
+        border: 'rgba(0,0,0,0.08)',
+        shadow: 'rgba(0,0,0,0.10)'
+    },
+    backdropFilter: 'blur(12px)'
+};
+
+export const darkTheme = { 
+    colors: { 
+        background: '#1E1E1E', 
+        surface: 'rgba(40,40,40,0.85)', 
+        primary: '#BBBBBB', 
+        accent: '#BBBBBB', 
+        secondary: '#999999', 
+        textPrimary: '#F5F5F5', 
+        textSecondary: '#CCCCCC', 
+        border: 'rgba(255,255,255,0.08)', 
+        shadow: 'rgba(0,0,0,0.25)' 
+    }, 
+    backdropFilter: 'blur(12px)' 
+};
+
+// ... (the rest of your data.jsx file remains the same)
+
 export const logoLight = 'https://i.imgur.com/qskYhB0.png';
 
 export const MENU_ITEMS = [{ id: 'orders', icon: MousePointer, label: 'Orders' }, { id: 'sales', icon: PieChart, label: 'Sales' }, { id: 'products', icon: Armchair, label: 'Products' }, { id: 'resources', icon: Database, label: 'Resources' }, { id: 'projects', icon: Briefcase, label: 'Projects' }, { id: 'community', icon: MessageSquare, label: 'Community' }, { id: 'samples', icon: Package, label: 'Samples' }, { id: 'replacements', icon: RotateCw, label: 'Replacements' },];
@@ -275,7 +306,19 @@ export const PERMISSION_LABELS = {
 };
 export const USER_TITLES = ["Sales", "Designer", "Sales/Designer", "Admin Support"];
 export const EMPTY_USER = { firstName: '', lastName: '', email: '', title: 'Sales', role: 'User', permissions: { salesData: true, commissions: false, projects: true, customerRanking: true, dealerRewards: true, submittingReplacements: true } };
-export const CUSTOMER_RANK_DATA = [{ id: 1, name: 'Business Furniture LLC', bookings: 450000, sales: 435000, orders: [{ projectName: 'Lawrence Township LECC', amount: 43034 }, { projectName: 'Monreau Seminary', amount: 137262 }] }, { id: 2, name: 'Corporate Design Inc', bookings: 380000, sales: 395000, orders: [{ projectName: 'OneMain Financial HQ', amount: 1250 }, { projectName: 'OneMain Financial Branch', amount: 643 }] }, { id: 3, name: 'OfficeWorks', bookings: 510000, sales: 490000, orders: [{ projectName: 'Main Office Remodel', amount: 510000 }] }, { id: 4, name: 'LOTH Inc.', bookings: 320000, sales: 310000, orders: [] }, { id: 5, name: 'One Eleven Design', bookings: 280000, sales: 275000, orders: [{ projectName: 'Centlivre, LLC', amount: 3415 }] }, { id: 6, name: 'RJE Business Interiors', bookings: 470000, sales: 465000, orders: [] }, { id: 7, name: 'Sharp School Services', bookings: 190000, sales: 185000, orders: [] }, { id: 8, name: 'Braden Business Systems', bookings: 210000, sales: 205000, orders: [] }, { id: 9, 'name': 'Schroeder\'s', address: '888 Office Park, Fort Wayne, IN 46805', bookings: 150000, sales: 140000, salespeople: [{ name: 'Andrea Kirkland', status: 'active' }], designers: [], administration: [], installers: [], dailyDiscount: '50/20 (60.00%)' }, { id: 10, 'name': 'CVC', address: '999 Corporate Dr, Evansville, IN 47715', bookings: 230000, sales: 220000, salespeople: [{ name: 'Michael Jones', status: 'active' }], designers: [], administration: [{ name: 'Luke Miller', status: 'active' }], installers: [], dailyDiscount: '50/20 (60.00%)' },];
+
+export const CUSTOMER_RANK_DATA = [
+    { id: 1, name: 'Business Furniture LLC', bookings: 450000, sales: 435000, orders: [{ projectName: 'Lawrence Township LECC', amount: 43034 }, { projectName: 'Monreau Seminary', amount: 137262 }] },
+    { id: 2, name: 'Corporate Design Inc', bookings: 380000, sales: 395000, orders: [{ projectName: 'OneMain Financial HQ', amount: 1250 }, { projectName: 'OneMain Financial Branch', amount: 643 }] },
+    { id: 3, name: 'OfficeWorks', bookings: 490000, sales: 510000, orders: [{ projectName: 'Main Office Remodel', amount: 510000 }] },
+    { id: 4, name: 'LOTH Inc.', bookings: 310000, sales: 320000, orders: [] },
+    { id: 5, name: 'One Eleven Design', bookings: 280000, sales: 275000, orders: [{ projectName: 'Centlivre, LLC', amount: 3415 }] },
+    { id: 6, name: 'RJE Business Interiors', bookings: 650000, sales: 470000, orders: [] },
+    { id: 7, name: 'Sharp School Services', bookings: 185000, sales: 190000, orders: [] },
+    { id: 8, name: 'Braden Business Systems', bookings: 205000, sales: 210000, orders: [] },
+    { id: 9, 'name': 'Schroeder\'s', bookings: 150000, sales: 140000, orders: [] },
+    { id: 10, 'name': 'CVC', bookings: 230000, sales: 220000, orders: [] }
+];
 
 export const ORDER_DATA = [
     { date: '2025-07-04T14:30:00Z', amount: '$169,946.99', company: 'OFFICEWORKS INC.', details: 'University of Notre Dame', orderNumber: '454108-01', po: 'S65557-3', net: 169946.99, reward: 'DEBRA BUTLER (1%)', shipDate: '2025-07-04T12:00:00Z', status: 'Delivered', shipTo: 'BUSINESS FURNISHINGS LLC\n4102 MEGHAN BEELER COURT\nSOUTH BEND, IN 46628', discount: '61.20%', packQty: 0, lineItems: [] },
@@ -317,11 +360,11 @@ export const COMMISSIONS_CHECKS_DATA = generateCommissionData();
 
 export const STATUS_COLORS = {
     'Entered': '#A0AEC0',        // Slate Gray
-    'Order Entry': '#4A90E2',    // Strong Blue
-    'Acknowledged': '#7B68EE',   // Medium Slate Blue
-    'In Production': '#F5A623',  // Gold/Orange
-    'Shipping': '#50E3C2',       // Teal
-    'Delivered': '#4CAF50',      // Success Green
+    'Order Entry': '#716A66',    // Strong Blue
+    'Acknowledged': '#B6B5AA',   // Medium Slate Blue
+    'In Production': '#C7AD8E',  // Gold/Orange
+    'Shipping': '#878F95',       // Teal
+    'Delivered': '#689a5e',      // Success Green
 };
 export const COMMISSION_RATES_TABLE_DATA = { standard: [{ discount: '5/10', rep: '12%', spiff: '3%' }, { discount: '50/10/5', rep: '11%', spiff: '3%' }, { discount: '50/20', rep: '10%', spiff: '3%' }, { discount: '50/20/1', rep: '9%', spiff: '3%' }, { discount: '50/20/2', rep: '9%', spiff: '3%' }, { discount: '50/20/3', rep: '8%', spiff: '3%' }, { discount: '50/20/4', rep: '8%', spiff: '3%' }, { discount: '50/20/5', rep: '7%', spiff: '3%' }, { discount: '50/20/6', rep: '7%', spiff: '3%' }, { discount: '50/20/7', rep: '6%', spiff: '3%' }, { discount: '50/20/8', rep: '6%', spiff: '3%' }, { discount: '50/20/9', rep: '6%', spiff: '3%' }, { discount: '50/20/10', rep: '5%', spiff: { value: '3%', note: '*if > $100k net' } },], contract: [{ discount: 'GSA', rep: '5%', spiff: '3%' }, { discount: 'Omnia', rep: '3.8-3.9%', spiff: '2.5%' }, { discount: 'Premier', rep: '4.1-4.3%', spiff: '2%' }, { discount: 'TIPS', rep: '3.6-3.8%', spiff: 'N/A' },], split: [{ territory: 'Specifying', percentage: 70 }, { territory: 'Ordering', percentage: 30 },] };
 

@@ -12,13 +12,14 @@ import {
 import * as Data from './data.jsx';
 import ReactDOM from 'react-dom';
 
+
 export const GlassCard = React.memo(
     React.forwardRef(({ children, className = '', theme, ...props }, ref) => (
         <div
             ref={ref}
             className={`rounded-[1.75rem] border shadow-lg transition-all duration-300 ${className}`}
             style={{
-                backgroundColor: theme.colors.surface,
+                backgroundColor: theme.colors.surface, // This line makes the card's background white
                 borderColor: theme.colors.border,
                 boxShadow: `0 4px 30px ${theme.colors.shadow}`,
                 backdropFilter: theme.backdropFilter,
@@ -30,7 +31,6 @@ export const GlassCard = React.memo(
         </div>
     ))
 );
-
 export const PageTitle = React.memo(({ title, theme, onBack, children }) => (
     <div className="px-4 pt-6 pb-4 flex justify-between items-center">
         <div className="flex-1 flex items-center space-x-2">
@@ -363,105 +363,7 @@ const CasegoodIcon = ({ color }) => <Icon uri="https://img.icons8.com/ios-filled
 const SearchIcon = ({ size, color }) => <Icon uri="https://img.icons8.com/ios-glyphs/60/search--v1.png" size={size} />;
 const FilterIcon = ({ size, color }) => <Icon uri="https://img.icons8.com/ios-filled/50/filter--v1.png" size={size} />;
 
-export const SmartSearch = ({ theme, onNavigate, onAskAI, onVoiceActivate }) => {
-    const [query, setQuery] = useState('');
-    const [filteredApps, setFilteredApps] = useState([]);
-    const [isFocused, setIsFocused] = useState(false);
-    const searchContainerRef = useRef(null);
 
-    useEffect(() => {
-        if (!isFocused) {
-            setFilteredApps([]);
-            return;
-        }
-        const term = query.trim().toLowerCase();
-        if (term.length >= 2) {
-            const results = Data.allApps
-                .filter(app => app.name.toLowerCase().includes(term))
-                .sort((a, b) => a.name.localeCompare(b.name));
-            setFilteredApps(results);
-        } else {
-            setFilteredApps([]);
-        }
-    }, [query, isFocused]);
-
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
-                setIsFocused(false);
-            }
-        };
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
-
-    const handleNavigation = (route) => {
-        onNavigate(route);
-        setQuery('');
-        setFilteredApps([]);
-        setIsFocused(false);
-    };
-
-    const handleFormSubmit = (e) => {
-        e.preventDefault();
-        if (query.trim() && filteredApps.length === 0) {
-            onAskAI(query);
-            setQuery('');
-            setIsFocused(false);
-        }
-    };
-
-    const handleVoiceClick = () => {
-        onVoiceActivate('Voice Activated'); // Use the new prop
-    };
-
-    return (
-        <div ref={searchContainerRef} className="relative z-20">
-            <form onSubmit={handleFormSubmit} className="relative">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: theme.colors.textSecondary }} />
-                <input
-                    type="text"
-                    placeholder="Ask me anything..."
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    onFocus={() => setIsFocused(true)}
-                    className="w-full pl-11 pr-12 py-5 rounded-full text-base border-2 shadow-md transition-colors focus:ring-2"
-                    style={{
-                        backgroundColor: theme.colors.surface,
-                        color: theme.colors.textPrimary,
-                        borderColor: theme.colors.border,
-                        outline: 'none',
-                    }}
-                />
-                <button
-                    type="button"
-                    onClick={handleVoiceClick}
-                    className="absolute inset-y-0 right-0 pr-4 flex items-center"
-                >
-                    <Mic className="h-5 w-5" style={{ color: theme.colors.textSecondary }} />
-                </button>
-            </form>
-
-            {isFocused && filteredApps.length > 0 && (
-                <GlassCard theme={theme} className="absolute top-full mt-2 w-full p-2 z-50">
-                    <ul className="max-h-60 overflow-y-auto">
-                        {filteredApps.map(app => (
-                            <li
-                                key={app.route}
-                                onMouseDown={() => handleNavigation(app.route)}
-                                className="flex items-center gap-3 cursor-pointer px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5"
-                                style={{ color: theme.colors.textPrimary }}
-                            >
-                                <app.icon className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
-                                {app.name}
-                            </li>
-                        ))}
-                    </ul>
-                </GlassCard>
-            )}
-        </div>
-    );
-};
 const SocialMediaScreen = ({ theme, showAlert, setSuccessMessage }) => {
     const copyToClipboard = (text) => {
         const textArea = document.createElement('textarea');
@@ -3454,7 +3356,7 @@ const Modal = ({ show, onClose, title, children, theme }) => {
     if (!show) return null;
     return (
         <div
-            className="fixed inset-0 bg-black bg-opacity-70 flex items-end justify-center z-50 transition-opacity duration-300 pointer-events-auto"
+            className="fixed inset-0 bg-black bg-opacity-70 flex items-end justify-center z-[100] transition-opacity duration-300 pointer-events-auto"
             style={{ opacity: show ? 1 : 0 }}
             onClick={onClose}
         >
@@ -3494,11 +3396,33 @@ const SuccessToast = ({ message, show, theme }) => {
     )
 }
 
+export const lightTheme = {
+    colors: {
+        background: '#EEEEEC', // The slightly darker page background
+        surface: '#FFFFFF',    // Pure white for all component surfaces
+        primary: '#003366',
+        accent: '#003366',
+        secondary: '#7A7A7A',
+        textPrimary: '#111111',
+        textSecondary: '#555555',
+        border: 'rgba(0,0,0,0.08)',
+        shadow: 'rgba(0,0,0,0.10)'
+    },
+    backdropFilter: 'blur(12px)'
+};
 export const AppHeader = React.memo(({ onHomeClick, isDarkMode, theme, onProfileClick, isHome, handleBack, showBack, userName }) => {
     const filterStyle = isDarkMode ? 'brightness(0) invert(1)' : 'none';
 
     return (
-        <div className="app-header" style={{ backgroundColor: theme.colors.surface, backdropFilter: theme.backdropFilter, WebkitBackdropFilter: theme.backdropFilter }} className="mx-auto mt-4 w-[90%] px-6 py-3 flex justify-between items-center sticky top-0 z-20 rounded-full shadow-md backdrop-blur">
+        <div
+            style={{
+                backgroundColor: theme.colors.surface, // Use the new white surface color
+                backdropFilter: theme.backdropFilter,
+                WebkitBackdropFilter: theme.backdropFilter
+            }}
+            className="mx-auto mt-4 w-[90%] px-6 py-3 flex justify-between items-center sticky top-0 z-20 rounded-full shadow-lg backdrop-blur"
+        >
+            {/* ... rest of AppHeader content ... */}
             <div className="flex items-center space-x-2">
                 {showBack && (
                     <button onClick={handleBack} className="p-2 -ml-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10" >
@@ -3513,7 +3437,6 @@ export const AppHeader = React.memo(({ onHomeClick, isDarkMode, theme, onProfile
                 {isHome && (
                     <div className="text-lg font-normal leading-tight" style={{ color: theme.colors.textPrimary }}>Hello, {userName}!</div>
                 )}
-                {/* UPDATED: Added border classes and styles for a defined circle */}
                 <button
                     onClick={onProfileClick}
                     className="w-9 h-9 rounded-full flex items-center justify-center border transition-colors hover:bg-black/5 dark:hover:bg-white/5"
@@ -3526,6 +3449,106 @@ export const AppHeader = React.memo(({ onHomeClick, isDarkMode, theme, onProfile
     );
 });
 
+export const SmartSearch = ({ theme, onNavigate, onAskAI, onVoiceActivate }) => {
+    const [query, setQuery] = useState('');
+    const [filteredApps, setFilteredApps] = useState([]);
+    const [isFocused, setIsFocused] = useState(false);
+    const searchContainerRef = useRef(null);
+
+    useEffect(() => {
+        if (!isFocused) {
+            setFilteredApps([]);
+            return;
+        }
+        const term = query.trim().toLowerCase();
+        if (term.length >= 2) {
+            const results = Data.allApps
+                .filter(app => app.name.toLowerCase().includes(term))
+                .sort((a, b) => a.name.localeCompare(b.name));
+            setFilteredApps(results);
+        } else {
+            setFilteredApps([]);
+        }
+    }, [query, isFocused]);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
+                setIsFocused(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    const handleNavigation = (route) => {
+        onNavigate(route);
+        setQuery('');
+        setFilteredApps([]);
+        setIsFocused(false);
+    };
+
+    const handleFormSubmit = (e) => {
+        e.preventDefault();
+        if (query.trim() && filteredApps.length === 0) {
+            onAskAI(query);
+            setQuery('');
+            setIsFocused(false);
+        }
+    };
+
+    const handleVoiceClick = () => {
+        onVoiceActivate('Voice Activated');
+    };
+
+    return (
+        <div ref={searchContainerRef} className="relative z-20">
+            <form onSubmit={handleFormSubmit} className="relative">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: theme.colors.textSecondary }} />
+                <input
+                    type="text"
+                    placeholder="Ask me anything..."
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onFocus={() => setIsFocused(true)}
+                    // Padding is changed from py-4 to py-5 to increase height
+                    className="w-full pl-11 pr-12 py-5 rounded-full text-base border-2 shadow-lg transition-colors focus:ring-2"
+                    style={{
+                        backgroundColor: theme.colors.surface,
+                        color: theme.colors.textPrimary,
+                        borderColor: theme.colors.border,
+                        outline: 'none',
+                    }}
+                />
+                <button
+                    type="button"
+                    onClick={handleVoiceClick}
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center"
+                >
+                    <Mic className="h-5 w-5" style={{ color: theme.colors.textSecondary }} />
+                </button>
+            </form>
+
+            {isFocused && filteredApps.length > 0 && (
+                <GlassCard theme={theme} className="absolute top-full mt-2 w-full p-2 z-50">
+                    <ul className="max-h-60 overflow-y-auto">
+                        {filteredApps.map(app => (
+                            <li
+                                key={app.route}
+                                onMouseDown={() => handleNavigation(app.route)}
+                                className="flex items-center gap-3 cursor-pointer px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5"
+                                style={{ color: theme.colors.textPrimary }}
+                            >
+                                <app.icon className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
+                                {app.name}
+                            </li>
+                        ))}
+                    </ul>
+                </GlassCard>
+            )}
+        </div>
+    );
+};
 
 export const HomeScreen = ({ onNavigate, theme, onAskAI, showAIDropdown, aiResponse, isAILoading, onCloseAIDropdown, onVoiceActivate }) => {
     const handleFeedbackClick = useCallback(() => {
@@ -3533,7 +3556,7 @@ export const HomeScreen = ({ onNavigate, theme, onAskAI, showAIDropdown, aiRespo
     }, [onNavigate]);
 
     return (
-        <div className="flex flex-col h-full overflow-hidden" style={{ backgroundColor: theme.colors.background }}>
+        <div className="flex flex-col h-full">
             <div className="pt-2 pb-4">
                 <div className="relative z-10 w-[90%] mx-auto">
                     <SmartSearch
@@ -3544,27 +3567,22 @@ export const HomeScreen = ({ onNavigate, theme, onAskAI, showAIDropdown, aiRespo
                     />
                     {showAIDropdown && (
                         <GlassCard theme={theme} className="absolute top-full w-full mt-2 p-4 left-0">
-                            {isAILoading ? (
-                                <div className="flex items-center justify-center p-4">
-                                    <Hourglass className="w-6 h-6 animate-spin" style={{ color: theme.colors.accent }} />
-                                    <p className="ml-3" style={{ color: theme.colors.textPrimary }}>Thinking...</p>
-                                </div>
-                            ) : (
-                                <p style={{ color: theme.colors.textPrimary }}>{aiResponse}</p>
-                            )}
+                            {/* ... AI dropdown content ... */}
                         </GlassCard>
                     )}
                 </div>
             </div>
 
-            {/* Main content area - keeping original app width */}
             <div className="flex-1 overflow-y-auto px-4 space-y-4 scrollbar-hide">
                 <div className="grid grid-cols-2 gap-4">
                     {Data.MENU_ITEMS.map((item) => (
-                        <GlassCard
+                        <div
                             key={item.id}
-                            theme={theme}
-                            className="group relative p-4 h-32 flex flex-col justify-between cursor-pointer transition-all duration-300 hover:border-white/20"
+                            className="group relative p-4 h-32 flex flex-col justify-between cursor-pointer transition-all duration-300 rounded-[1.75rem] border shadow-lg"
+                            style={{
+                                backgroundColor: theme.colors.surface, // Use the new white surface color
+                                borderColor: theme.colors.border
+                            }}
                             onClick={() => onNavigate(item.id)}
                         >
                             <div className="relative">
@@ -3573,15 +3591,15 @@ export const HomeScreen = ({ onNavigate, theme, onAskAI, showAIDropdown, aiRespo
                             <div className="relative">
                                 <span className="text-xl font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>{item.label}</span>
                             </div>
-                        </GlassCard>
+                        </div>
                     ))}
                 </div>
-                <GlassCard theme={theme} className="p-1">
-                    <button onClick={handleFeedbackClick} className="w-full h-20 p-3 rounded-xl flex items-center justify-center space-x-4">
+                <div className="p-1 rounded-[1.75rem] border shadow-lg" style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.border }}>
+                    <button onClick={handleFeedbackClick} className="w-full h-20 p-3 rounded-2xl flex items-center justify-center space-x-4">
                         <MessageSquare className="w-7 h-7" style={{ color: theme.colors.textSecondary }} strokeWidth={1.5} />
                         <span className="text-xl font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>Give Feedback</span>
                     </button>
-                </GlassCard>
+                </div>
             </div>
 
             {showAIDropdown && (<div className="absolute inset-0 bg-transparent z-0" onClick={onCloseAIDropdown} />)}
@@ -3791,18 +3809,14 @@ export const DonutChart = React.memo(({ data, theme }) => {
     );
 });
 
-export const CustomerRankScreen = ({ theme, onNavigate }) => {
+export const CustomerRankingScreen = ({ theme, onNavigate }) => {
     const [sortKey, setSortKey] = useState('sales');
     const [modalData, setModalData] = useState(null);
 
     const sortedCustomers = useMemo(() => {
+        // This logic remains the same, sorting the entire list.
         return [...Data.CUSTOMER_RANK_DATA].sort((a, b) => (b[sortKey] || 0) - (a[sortKey] || 0));
     }, [sortKey]);
-
-    const { topThree, theRest } = useMemo(() => ({
-        topThree: sortedCustomers.slice(0, 3),
-        theRest: sortedCustomers.slice(3)
-    }), [sortedCustomers]);
 
     const handleOpenModal = useCallback((customer) => {
         if (customer.orders && customer.orders.length > 0) {
@@ -3811,65 +3825,56 @@ export const CustomerRankScreen = ({ theme, onNavigate }) => {
     }, []);
     const handleCloseModal = useCallback(() => setModalData(null), []);
 
-    const PodiumCard = ({ customer, rank, theme }) => {
-        const podiumStyles = {
-            1: { iconColor: '#FFD700', textColor: theme.colors.accent, order: 'order-2', size: 'w-1/3' },
-            2: { iconColor: '#C0C0C0', textColor: theme.colors.textPrimary, order: 'order-1', size: 'w-1/4' },
-            3: { iconColor: '#CD7F32', textColor: theme.colors.textPrimary, order: 'order-3', size: 'w-1/4' },
-        };
-        const style = podiumStyles[rank];
-
-        return (
-            <div className={`text-center ${style.order} ${style.size}`}>
-                <Trophy className="mx-auto w-10 h-10" fill={style.iconColor} color="rgba(0,0,0,0.3)" />
-                <p className="font-bold text-md truncate mt-1" style={{ color: style.textColor }}>{customer.name}</p>
-                <p className="text-sm font-semibold" style={{ color: style.textColor }}>${customer[sortKey].toLocaleString()}</p>
+    // A single, clean list item component for all ranks.
+    const RankListItem = ({ customer, rank, onClick }) => (
+        <button onClick={onClick} className="w-full p-4 flex items-center space-x-4 transition-colors hover:bg-black/5 dark:hover:bg-white/10 rounded-xl">
+            <div className="flex items-center justify-center w-10 h-10 rounded-xl flex-shrink-0" style={{ backgroundColor: theme.colors.subtle }}>
+                <span className="text-xl font-bold" style={{ color: theme.colors.textSecondary }}>{rank}</span>
             </div>
-        );
-    };
+            <div className="flex-1 min-w-0">
+                <p className="font-bold text-lg truncate" style={{ color: theme.colors.textPrimary }}>{customer.name}</p>
+            </div>
+            <div className="text-right">
+                <p className="font-semibold text-lg" style={{ color: theme.colors.accent }}>${customer[sortKey].toLocaleString()}</p>
+            </div>
+        </button>
+    );
 
     return (
-        <>
-            <PageTitle title="Customer Ranking" theme={theme} />
-            <div className="px-4 pb-4 space-y-6">
-
-                {/* Podium for Top 3 */}
-                <div className="flex items-end justify-center space-x-2 pt-4">
-                    {topThree[1] && <PodiumCard customer={topThree[1]} rank={2} theme={theme} />}
-                    {topThree[0] && <PodiumCard customer={topThree[0]} rank={1} theme={theme} />}
-                    {topThree[2] && <PodiumCard customer={topThree[2]} rank={3} theme={theme} />}
+        <div className="h-full flex flex-col">
+            <div className="px-4">
+                <PageTitle title="Customer Ranking" theme={theme} />
+                <div className="pb-4">
+                    <GlassCard theme={theme} className="p-1">
+                        <ToggleButtonGroup
+                            value={sortKey}
+                            onChange={setSortKey}
+                            options={[{ label: 'By Sales', value: 'sales' }, { label: 'By Bookings', value: 'bookings' }]}
+                            theme={theme}
+                        />
+                    </GlassCard>
                 </div>
+            </div>
 
-                {/* Sort Controls */}
-                <ToggleButtonGroup
-                    value={sortKey}
-                    onChange={setSortKey}
-                    options={[{ label: 'By Sales', value: 'sales' }, { label: 'By Bookings', value: 'bookings' }]}
-                    theme={theme}
-                />
-
-                {/* Rest of the Ranking List */}
-                <div className="space-y-3">
-                    {theRest.map((customer, index) => (
-                        <GlassCard key={customer.id} theme={theme} className="p-4 cursor-pointer hover:border-gray-400/50" onClick={() => handleOpenModal(customer)}>
-                            <div className="flex items-center space-x-4">
-                                <div className="font-bold text-lg" style={{ color: theme.colors.textSecondary }}>{index + 4}</div>
-                                <div className="flex-1">
-                                    <p className="font-bold truncate" style={{ color: theme.colors.textPrimary }}>{customer.name}</p>
-                                </div>
-                                <div className="text-right">
-                                    <p className="font-semibold text-lg" style={{ color: theme.colors.accent }}>${customer.sales.toLocaleString()}</p>
-                                    <p className="text-xs font-mono" style={{ color: theme.colors.textSecondary }}>Bookings: ${customer.bookings.toLocaleString()}</p>
-                                </div>
-                            </div>
-                        </GlassCard>
+            {/* The main scrolling container now holds a single list */}
+            <div className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-hide">
+                <GlassCard theme={theme} className="p-2">
+                    {sortedCustomers.map((customer, index) => (
+                        <React.Fragment key={customer.id}>
+                            {index > 0 && <div className="border-t mx-4" style={{ borderColor: theme.colors.subtle }}></div>}
+                            <RankListItem
+                                customer={customer}
+                                rank={index + 1}
+                                onClick={() => handleOpenModal(customer)}
+                            />
+                        </React.Fragment>
                     ))}
-                </div>
+                </GlassCard>
             </div>
 
             <Modal show={!!modalData} onClose={handleCloseModal} title={`${modalData?.name} - Recent Orders`} theme={theme}>
                 <div className="space-y-3">
-                    {modalData?.orders.length > 0 ? modalData.orders.map((order, index) => (
+                    {modalData?.orders?.length > 0 ? modalData.orders.map((order, index) => (
                         <div key={index} className="flex justify-between items-center text-sm border-b pb-2" style={{ borderColor: theme.colors.subtle }}>
                             <span style={{ color: theme.colors.textPrimary }}>{order.projectName}</span>
                             <span className="font-semibold" style={{ color: theme.colors.accent }}>${order.amount.toLocaleString()}</span>
@@ -3879,10 +3884,9 @@ export const CustomerRankScreen = ({ theme, onNavigate }) => {
                     )}
                 </div>
             </Modal>
-        </>
+        </div>
     );
 };
-
 export const OrderModal = React.memo(({ order, onClose, theme }) => {
     const [isExpanded, setIsExpanded] = useState(false);
 
@@ -6075,7 +6079,7 @@ const SCREEN_MAP = {
     sales: SalesScreen,
     orders: OrdersScreen,
     products: ProductsScreen,
-    'customer-rank': CustomerRankScreen,
+    'customer-rank': CustomerRankingScreen,
     'commissions': CommissionsScreen,
     'incentive-rewards': IncentiveRewardsScreen,
     // Top-level Resources menu

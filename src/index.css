@@ -16,7 +16,6 @@ body {
 }
 
 .app-header {
-    isolation: isolate;
 }
 
 .home-no-scroll .overflow-y-auto {

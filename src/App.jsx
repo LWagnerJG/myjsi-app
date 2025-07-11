@@ -329,7 +329,7 @@ function App() {
             </div>
 
             {/* Modals and overlays */}
-            <div className="absolute inset-0 z-50 pointer-events-none">
+            <div className="absolute inset-0 z-[100] pointer-events-none">
                 {(showProfileMenu || selectedOrder || alertInfo.show || !!voiceMessage || selectedOpportunity) && (
                     <div className="pointer-events-auto">
                         {showProfileMenu && <ProfileMenu show={showProfileMenu} onClose={() => setShowProfileMenu(false)} onNavigate={handleNavigate} toggleTheme={() => setIsDarkMode(d => !d)} theme={currentTheme} isDarkMode={isDarkMode} />}
