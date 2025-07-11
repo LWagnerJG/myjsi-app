@@ -5450,12 +5450,29 @@ const CommunityScreen = ({ theme, onNavigate }) => {
     );
 };
 
-const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSettings }) => {
+export const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSettings }) => {
     const [selectedCategory, setSelectedCategory] = useState('tfl');
     const [setQuantity, setSetQuantity] = useState(1);
 
+    // New state and refs to manage the sliding pill animation
+    const [pillStyle, setPillStyle] = useState({ left: 0, width: 0, opacity: 0 });
+    const buttonRefs = useRef([]);
+    const containerRef = useRef(null);
+
+    useEffect(() => {
+        const selectedIndex = Data.SAMPLE_CATEGORIES.findIndex(c => c.id === selectedCategory);
+        const selectedButton = buttonRefs.current[selectedIndex];
+        if (selectedButton) {
+            setPillStyle({
+                left: selectedButton.offsetLeft,
+                width: selectedButton.offsetWidth,
+                opacity: 1
+            });
+        }
+    }, [selectedCategory]);
+
     const handleAddSetToCart = useCallback(() => {
-        const categoryName = SAMPLE_CATEGORIES.find(c => c.id === selectedCategory)?.name || 'Unknown';
+        const categoryName = Data.SAMPLE_CATEGORIES.find(c => c.id === selectedCategory)?.name || 'Unknown';
         const setItem = {
             id: `set-${selectedCategory}`,
             name: `Complete ${categoryName} Set`,
@@ -5473,7 +5490,7 @@ const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSettings }) 
         [cart]
     );
     const filteredProducts = useMemo(
-        () => SAMPLE_PRODUCTS.filter(p => p.category === selectedCategory),
+        () => Data.SAMPLE_PRODUCTS.filter(p => p.category === selectedCategory),
         [selectedCategory]
     );
 
@@ -5483,10 +5500,10 @@ const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSettings }) 
                 <div className="flex items-center space-x-3">
                     <button
                         onClick={handleOrderFullSet}
-                        className="px-4 py-1.5 rounded-full transition"
+                        className="px-4 py-2 rounded-full text-sm font-semibold transition-transform hover:scale-105 active:scale-95"
                         style={{
-                            backgroundColor: theme.colors.subtle,
-                            color: theme.colors.textPrimary
+                            backgroundColor: theme.colors.accent,
+                            color: 'white'
                         }}
                     >
                         Order Full JSI Set
@@ -5513,42 +5530,43 @@ const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSettings }) 
                 </div>
             </PageTitle>
 
-            <div
-                className="px-4 py-2 mb-4 overflow-x-auto scrollbar-hide"
-                style={{ backgroundColor: theme.colors.surface, borderRadius: '1.5rem' }}
-            >
-                <div className="flex space-x-2">
-                    {SAMPLE_CATEGORIES.map(cat => (
-                        <button
-                            key={cat.id}
-                            onClick={() => setSelectedCategory(cat.id)}
-                            className={`px-4 py-2 transition ${selectedCategory === cat.id
-                                    ? 'bg-white shadow rounded-full'
-                                    : 'bg-transparent'
-                                }`}
-                        >
-                            <span
-                                className="text-sm font-semibold"
+            {/* Redesigned category filter with sliding pill */}
+            <div className="px-4 mb-4">
+                <GlassCard theme={theme} className="p-1">
+                    <div ref={containerRef} className="relative flex space-x-2 overflow-x-auto scrollbar-hide whitespace-nowrap">
+                        <div
+                            className="absolute top-1 bottom-1 h-auto rounded-full transition-all duration-300 ease-in-out"
+                            style={{
+                                backgroundColor: theme.colors.primary,
+                                left: pillStyle.left,
+                                width: pillStyle.width,
+                                opacity: pillStyle.opacity
+                            }}
+                        />
+                        {Data.SAMPLE_CATEGORIES.map((cat, index) => (
+                            <button
+                                key={cat.id}
+                                ref={el => buttonRefs.current[index] = el}
+                                onClick={() => setSelectedCategory(cat.id)}
+                                className="relative z-10 px-4 py-2 rounded-full font-semibold text-sm transition-colors duration-300"
                                 style={{
-                                    color:
-                                        selectedCategory === cat.id
-                                            ? theme.colors.accent
-                                            : theme.colors.textSecondary
+                                    color: selectedCategory === cat.id ? theme.colors.surface : theme.colors.textPrimary,
                                 }}
                             >
                                 {cat.name}
-                            </span>
-                        </button>
-                    ))}
-                </div>
+                            </button>
+                        ))}
+                    </div>
+                </GlassCard>
             </div>
+
 
             <GlassCard theme={theme} className="mx-4 mb-4 p-4 flex items-center justify-between">
                 <span
                     className="font-bold text-base"
                     style={{ color: theme.colors.textPrimary }}
                 >
-                    Complete {SAMPLE_CATEGORIES.find(c => c.id === selectedCategory)?.name} Set
+                    Complete {Data.SAMPLE_CATEGORIES.find(c => c.id === selectedCategory)?.name} Set
                 </span>
                 <div className="flex items-center space-x-3">
                     <button
@@ -5624,9 +5642,6 @@ const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSettings }) 
         </>
     );
 };
-
-
-// in ui.jsx
 
 export const ReplacementsScreen = ({ theme, setSuccessMessage, onNavigate }) => {
     const [formData, setFormData] = useState(null);
@@ -6159,7 +6174,6 @@ export {
 
     // Other app screens
     CommunityScreen,
-    SamplesScreen,
     FancySelect,
     SettingsScreen,
     HelpScreen,
