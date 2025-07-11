@@ -18,7 +18,7 @@ export const GlassCard = React.memo(
             ref={ref}
             className={`rounded-[1.75rem] border shadow-lg transition-all duration-300 ${className}`}
             style={{
-                backgroundColor: theme.colors.surface,
+                // The background color has been removed to create a clearer blur effect
                 borderColor: theme.colors.border,
                 boxShadow: `0 4px 30px ${theme.colors.shadow}`,
                 backdropFilter: theme.backdropFilter,
@@ -30,7 +30,6 @@ export const GlassCard = React.memo(
         </div>
     ))
 );
-
 export const PageTitle = React.memo(({ title, theme, onBack, children }) => (
     <div className="px-4 pt-6 pb-4 flex justify-between items-center">
         <div className="flex-1 flex items-center space-x-2">
@@ -3557,7 +3556,6 @@ export const HomeScreen = ({ onNavigate, theme, onAskAI, showAIDropdown, aiRespo
                 </div>
             </div>
 
-            {/* Main content area - keeping original app width */}
             <div className="flex-1 overflow-y-auto px-4 space-y-4 scrollbar-hide">
                 <div className="grid grid-cols-2 gap-4">
                     {Data.MENU_ITEMS.map((item) => (
@@ -3588,7 +3586,6 @@ export const HomeScreen = ({ onNavigate, theme, onAskAI, showAIDropdown, aiRespo
         </div>
     );
 };
-
 export const PermissionToggle = React.memo(({ label, isEnabled, onToggle, theme, disabled }) => {
     const titleText = disabled ? "Requires Sales Data access" : "";
 
