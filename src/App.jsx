@@ -43,8 +43,8 @@ function App() {
     const touchStartY = useRef(0);
     const hasSwipeStarted = useRef(false);
     const isHorizontalSwipe = useRef(false);
-    const swipeStartTime = useRef(0); // New: Track swipe timing
-    const lastTouchX = useRef(0); // New: Track last touch position
+    const swipeStartTime = useRef(0);
+    const lastTouchX = useRef(0);
 
     const [aiResponse, setAiResponse] = useState('');
     const [isAILoading, setIsAILoading] = useState(false);
@@ -80,7 +80,7 @@ function App() {
 
     // --- HANDLERS ---
     const handleNavigate = useCallback((screen) => {
-        // Add slide-in animation for forward navigation
+        // Quicker slide-in animation for forward navigation
         setIsTransitioning(true);
         setSwipeTranslateX(-window.innerWidth);
 
@@ -89,7 +89,7 @@ function App() {
             setShowProfileMenu(false);
             setSwipeTranslateX(0);
             setIsTransitioning(false);
-        }, 150);
+        }, 100);
     }, []);
 
     const handleHome = useCallback(() => {
@@ -107,7 +107,7 @@ function App() {
                 setNavigationHistory(prev => prev.slice(0, -1));
                 setSwipeTranslateX(0);
                 setIsTransitioning(false);
-            }, 300);
+            }, 200);
         }
     }, [navigationHistory.length, isTransitioning]);
 
@@ -158,7 +158,6 @@ function App() {
         const touchX = e.touches[0].clientX;
         const touchY = e.touches[0].clientY;
 
-        // Enhanced: More generous swipe area (50px instead of 30px)
         if (touchX < 50) {
             touchStartX.current = touchX;
             touchStartY.current = touchY;
@@ -178,7 +177,6 @@ function App() {
         const diffY = Math.abs(currentY - touchStartY.current);
 
         if (!isHorizontalSwipe.current) {
-            // Enhanced: Better swipe detection
             if (diffX > 15 && diffX > diffY * 1.5) {
                 isHorizontalSwipe.current = true;
             } else if (diffY > 15) {
@@ -189,7 +187,6 @@ function App() {
 
         if (isHorizontalSwipe.current) {
             e.preventDefault();
-            // Enhanced: Smoother resistance calculation
             const maxSwipe = window.innerWidth * 0.8;
             const resistance = Math.max(0, Math.min(maxSwipe, diffX));
             const easedTransform = resistance * (1 - resistance / (maxSwipe * 2));
@@ -207,17 +204,15 @@ function App() {
             const swipeTime = Date.now() - swipeStartTime.current;
             const swipeVelocity = swipeDistance / swipeTime;
 
-            // Enhanced: Consider both distance and velocity
             const shouldGoBack = swipeDistance > window.innerWidth * 0.25 ||
                 (swipeDistance > window.innerWidth * 0.15 && swipeVelocity > 0.3);
 
             if (shouldGoBack) {
                 handleBack();
             } else {
-                // Enhanced: Smoother snap back animation
                 setIsTransitioning(true);
                 setSwipeTranslateX(0);
-                setTimeout(() => setIsTransitioning(false), 250);
+                setTimeout(() => setIsTransitioning(false), 150);
             }
         }
 
@@ -305,20 +300,10 @@ function App() {
                 onProfileClick={() => setShowProfileMenu(p => !p)}
             />
 
-            {/* Enhanced: Swipe progress indicator */}
-            {swipeTranslateX > 0 && (
-                <div
-                    className="absolute top-1/2 left-4 transform -translate-y-1/2 z-40 bg-black bg-opacity-20 rounded-full w-8 h-8 flex items-center justify-center transition-opacity duration-200"
-                    style={{ opacity: Math.min(1, swipeTranslateX / (window.innerWidth * 0.3)) }}
-                >
-                    <span className="text-white text-lg">←</span>
-                </div>
-            )}
-
-            {/* Previous screen container - enhanced transition */}
+            {/* Previous screen container - enhanced with quicker transitions and no vertical scroll during swipe */}
             {previousScreen && (
                 <div
-                    className={`absolute inset-0 pt-24 ${isTransitioning ? 'transition-transform duration-300 ease-out' : ''} ${previousScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto'} scrollbar-hide`}
+                    className={`absolute inset-0 pt-24 ${isTransitioning ? 'transition-transform duration-200 ease-out' : ''} ${swipeTranslateX > 0 ? 'overflow-hidden' : (previousScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto')} scrollbar-hide`}
                     style={{
                         backgroundColor: currentTheme.colors.background,
                         transform: `translateX(${swipeTranslateX - window.innerWidth}px)`,
@@ -329,9 +314,9 @@ function App() {
                 </div>
             )}
 
-            {/* Current screen container - enhanced transition */}
+            {/* Current screen container - enhanced with quicker transitions */}
             <div
-                className={`absolute inset-0 pt-24 ${isTransitioning ? 'transition-transform duration-300 ease-out' : ''} ${currentScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto'} scrollbar-hide`}
+                className={`absolute inset-0 pt-24 ${isTransitioning ? 'transition-transform duration-200 ease-out' : ''} ${currentScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto'} scrollbar-hide`}
                 style={{
                     backgroundColor: currentTheme.colors.background,
                     transform: `translateX(${swipeTranslateX}px)`,
