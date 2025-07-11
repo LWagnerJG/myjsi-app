@@ -7,7 +7,7 @@ import {
     Minus, MonitorPlay, Moon, MoreVertical, Package, Palette, Heart, Image,
     Paperclip, Percent, PieChart, Play, Plus, RotateCw, Save, Search, Send,
     Server, Settings, Share2, ShoppingCart, Sun, Trophy, User, UserPlus,
-    UserX, Users, Video, Wrench, X, ImageIcon
+    UserX, Users, Video, Wrench, X, ImageIcon, Pencil
 } from 'lucide-react';
 import * as Data from './data.jsx';
 import ReactDOM from 'react-dom';
@@ -3454,17 +3454,23 @@ const Modal = ({ show, onClose, title, children, theme }) => {
     if (!show) return null;
     return (
         <div
-            className="absolute inset-0 bg-black bg-opacity-70 flex items-end justify-center z-50 transition-opacity duration-300 pointer-events-auto pt-16"
+            className="fixed inset-0 bg-black bg-opacity-70 flex items-end justify-center z-50 transition-opacity duration-300 pointer-events-auto"
             style={{ opacity: show ? 1 : 0 }}
             onClick={onClose}
         >
             <div
-                style={{ backgroundColor: theme.colors.surface, backdropFilter: theme.backdropFilter, WebkitBackdropFilter: theme.backdropFilter, borderColor: theme.colors.border, boxShadow: `0 4px 30px ${theme.colors.shadow}` }}
-                className="rounded-t-2xl w-full max-w-md max-h-full flex flex-col transition-transform duration-300 transform"
+                style={{
+                    backgroundColor: theme.colors.surface,
+                    backdropFilter: theme.backdropFilter,
+                    WebkitBackdropFilter: theme.backdropFilter,
+                    borderColor: theme.colors.border,
+                    boxShadow: `0 -4px 30px ${theme.colors.shadow}`
+                }}
+                className="w-full h-[85vh] rounded-t-2xl flex flex-col transition-transform duration-300 transform"
                 onClick={(e) => e.stopPropagation()}
             >
                 {title !== "" && (
-                    <div className="flex justify-between items-center p-4 border-b" style={{ borderColor: theme.colors.border }}>
+                    <div className="flex justify-between items-center p-4 border-b flex-shrink-0" style={{ borderColor: theme.colors.border }}>
                         <h2 className="text-xl font-bold" style={{ color: theme.colors.textPrimary }}>{title}</h2>
                         <button onClick={onClose} className="p-1 rounded-full transition-colors" style={{ backgroundColor: theme.colors.subtle }}>
                             <X className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
@@ -3476,7 +3482,6 @@ const Modal = ({ show, onClose, title, children, theme }) => {
         </div>
     );
 };
-
 const SuccessToast = ({ message, show, theme }) => {
     if (!show) return null;
     return (
@@ -4925,16 +4930,80 @@ export const ResourcesScreen = ({ theme, onNavigate }) => {
     };
 }).sort((a, b) => a.name.localeCompare(b.name));
 
-export const ProjectsScreen = ({ onNavigate, theme, opportunities }) => {
+export const ProjectDetailModal = ({ opportunity, onClose, theme, onNavigate }) => {
+    // Helper component for displaying each piece of data
+    const DetailItem = ({ label, value }) => {
+        if (!value && typeof value !== 'boolean' && !Array.isArray(value)) return null;
+
+        let displayValue = value;
+        if (typeof value === 'boolean') {
+            displayValue = value ? 'Yes' : 'No';
+        } else if (Array.isArray(value) && value.length > 0) {
+            displayValue = value.join(', ');
+        } else if (Array.isArray(value)) {
+            return null; // Don't render empty arrays
+        }
+
+        return (
+            <div>
+                <p className="text-xs font-bold uppercase tracking-wider" style={{ color: theme.colors.textSecondary }}>{label}</p>
+                <p className="text-base" style={{ color: theme.colors.textPrimary }}>{displayValue}</p>
+            </div>
+        );
+    };
+
+    return (
+        <Modal
+            show={!!opportunity}
+            onClose={onClose}
+            title={opportunity?.name || "Project Details"}
+            theme={theme}
+        >
+            {opportunity && (
+                <>
+                    <button
+                        onClick={() => { onClose(); onNavigate('new-lead'); }}
+                        className="absolute top-4 right-14 p-2 rounded-full transition-colors hover:bg-black/10 dark:hover:bg-white/10"
+                    >
+                        <Pencil className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
+                    </button>
+                    <div className="space-y-4">
+                        <DetailItem label="Stage" value={opportunity.stage} />
+                        <DetailItem label="Company" value={opportunity.company} />
+                        <DetailItem label="Value" value={opportunity.value} />
+                        <DetailItem label="Vertical" value={opportunity.vertical} />
+                        {opportunity.otherVertical && <DetailItem label="Specified Vertical" value={opportunity.otherVertical} />}
+                        <DetailItem label="A&D Firm" value={opportunity.designFirm} />
+                        <DetailItem label="Dealer" value={opportunity.dealer} />
+                        <DetailItem label="PO Timeframe" value={opportunity.poTimeframe} />
+                        <DetailItem label="Discount" value={opportunity.discount} />
+                        <DetailItem label="Win Probability" value={`${opportunity.winProbability}%`} />
+                        <DetailItem label="Bid?" value={opportunity.isBid} />
+                        <DetailItem label="Competition?" value={opportunity.competitionPresent} />
+                        <DetailItem label="Competitors" value={opportunity.competitors} />
+                        <DetailItem label="Products" value={opportunity.products?.map(p => p.series).join(', ')} />
+                        <DetailItem label="JSI Spec Services" value={opportunity.jsiSpecServices} />
+                        {opportunity.jsiSpecServices && <DetailItem label="Quote Type" value={opportunity.quoteType} />}
+                        {opportunity.jsiQuoteNumber && <DetailItem label="Revision Quote #" value={opportunity.jsiQuoteNumber} />}
+                        {opportunity.pastProjectRef && <DetailItem label="Past Project Ref" value={opportunity.pastProjectRef} />}
+                        <DetailItem label="Notes" value={opportunity.notes} />
+                    </div>
+                </>
+            )}
+        </Modal>
+    );
+};
+
+
+export const ProjectsScreen = ({ onNavigate, theme, opportunities, setSelectedOpportunity }) => {
     const [projectsTab, setProjectsTab] = useState('pipeline');
     const [selectedPipelineStage, setSelectedPipelineStage] = useState('Discovery');
 
     const filteredOpportunities = useMemo(() => {
-        if (!opportunities) return []; // Safety check
+        if (!opportunities) return [];
         return opportunities.filter(opp => opp.stage === selectedPipelineStage);
     }, [selectedPipelineStage, opportunities]);
 
-    // This determines the text for the button based on the selected tab
     const newButtonText = projectsTab === 'pipeline' ? 'New Lead' : 'Add New Install';
 
     return (
@@ -4995,7 +5064,7 @@ export const ProjectsScreen = ({ onNavigate, theme, opportunities }) => {
                     </div>
                     <div className="flex-1 overflow-y-auto px-4 space-y-4 pb-4 scrollbar-hide">
                         {filteredOpportunities.length > 0 ? filteredOpportunities.map(opp => (
-                            <GlassCard key={opp.id} theme={theme} className="overflow-hidden p-4">
+                            <GlassCard key={opp.id} theme={theme} className="overflow-hidden p-4 cursor-pointer hover:border-gray-400/50" onClick={() => setSelectedOpportunity(opp)}>
                                 <div className="flex justify-between items-start">
                                     <h3 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>{opp.name}</h3>
                                     <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${Data.STAGE_COLORS[opp.stage]}`}>{opp.stage}</span>
