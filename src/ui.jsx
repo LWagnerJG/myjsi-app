@@ -3443,11 +3443,11 @@ const SuccessToast = ({ message, show, theme }) => {
     )
 }
 
-const AppHeader = React.memo(({ onHomeClick, isDarkMode, theme, onProfileClick, isHome, handleBack, showBack, userName }) => {
+export const AppHeader = React.memo(({ onHomeClick, isDarkMode, theme, onProfileClick, isHome, handleBack, showBack, userName }) => {
     const filterStyle = isDarkMode ? 'brightness(0) invert(1)' : 'none';
 
     return (
-        <div style={{ backgroundColor: theme.colors.surface, backdropFilter: theme.backdropFilter, WebkitBackdropFilter: theme.backdropFilter }} className="mx-auto mt-4 w-[90%] px-6 py-3 flex justify-between items-center sticky top-0 z-20 rounded-full shadow-md backdrop-blur">
+        <div className="app-header" style={{ backgroundColor: theme.colors.surface, backdropFilter: theme.backdropFilter, WebkitBackdropFilter: theme.backdropFilter }} className="mx-auto mt-4 w-[90%] px-6 py-3 flex justify-between items-center sticky top-0 z-20 rounded-full shadow-md backdrop-blur">
             <div className="flex items-center space-x-2">
                 {showBack && (
                     <button onClick={handleBack} className="p-2 -ml-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10" >
@@ -3465,7 +3465,7 @@ const AppHeader = React.memo(({ onHomeClick, isDarkMode, theme, onProfileClick, 
                 {/* UPDATED: Added border classes and styles for a defined circle */}
                 <button
                     onClick={onProfileClick}
-                    className="w-9 h-9 rounded-full flex items-center justify-center border transition-colors hover:bg-black/5 dark:hover:bg-white/10"
+                    className="w-9 h-9 rounded-full flex items-center justify-center border transition-colors hover:bg-black/5 dark:hover:bg-white/5"
                     style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border }}
                 >
                     <User className="w-5 h-5" style={{ color: theme.colors.secondary }} />
@@ -3475,6 +3475,7 @@ const AppHeader = React.memo(({ onHomeClick, isDarkMode, theme, onProfileClick, 
     );
 });
 
+
 export const HomeScreen = ({ onNavigate, theme, onAskAI, showAIDropdown, aiResponse, isAILoading, onCloseAIDropdown, onVoiceActivate }) => {
     const handleFeedbackClick = useCallback(() => {
         onNavigate('feedback');
@@ -3482,8 +3483,7 @@ export const HomeScreen = ({ onNavigate, theme, onAskAI, showAIDropdown, aiRespo
 
     return (
         <div className="flex flex-col h-full overflow-hidden" style={{ backgroundColor: theme.colors.background }}>
-            {/* Header section with equal margins above and below search bar */}
-            <div className="px-4 flex-shrink-0 flex items-center justify-center py-4" style={{ height: '90px' }}>
+            <div className="px-4 pt-8 pb-6">
                 <div className="relative z-10 w-full max-w-full">
                     <SmartSearch
                         theme={theme}
@@ -3506,8 +3506,7 @@ export const HomeScreen = ({ onNavigate, theme, onAskAI, showAIDropdown, aiRespo
                 </div>
             </div>
 
-            {/* Main content area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide">
+            <div className="flex-1 overflow-y-auto px-4 space-y-4 scrollbar-hide">
                 <div className="grid grid-cols-2 gap-4">
                     {Data.MENU_ITEMS.map((item) => (
                         <GlassCard
@@ -3537,6 +3536,8 @@ export const HomeScreen = ({ onNavigate, theme, onAskAI, showAIDropdown, aiRespo
         </div>
     );
 };
+
+
 export const PermissionToggle = React.memo(({ label, isEnabled, onToggle, theme, disabled }) => {
     const titleText = disabled ? "Requires Sales Data access" : "";
 
@@ -4493,44 +4494,41 @@ const resourceIcons = {
 export const ResourcesScreen = ({ theme, onNavigate }) => {
     return (
         <div className="flex flex-col h-full">
-            {/* The main PageTitle is removed for a cleaner look, as requested previously */}
-            <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6 scrollbar-hide">
+            <PageTitle title="Resources" theme={theme} />
+
+            <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4 scrollbar-hide">
                 {Data.RESOURCES_DATA.map(category => (
-                    <div key={category.category}>
-                        <h2 className="text-xl font-bold mb-2 px-1" style={{ color: theme.colors.textPrimary }}>
+                    <GlassCard key={category.category} theme={theme} className="p-4">
+                        {/* The category header is now inside the card with a border below it */}
+                        <h2 className="text-xl font-bold mb-2 pb-3 border-b" style={{ color: theme.colors.textPrimary, borderColor: theme.colors.subtle }}>
                             {category.category}
                         </h2>
-                        <GlassCard theme={theme} className="p-2">
-                            <div className="space-y-1">
-                                {category.items.map((item, index) => {
-                                    const Icon = resourceIcons[item.label] || Database; // Use the icon map
-                                    return (
-                                        <React.Fragment key={item.nav}>
-                                            {index > 0 && <div className="border-t mx-3" style={{ borderColor: theme.colors.subtle }}></div>}
-                                            <button
-                                                onClick={() => onNavigate(item.nav)}
-                                                className="w-full p-3 rounded-xl flex items-center justify-between transition-colors hover:bg-black/5 dark:hover:bg-white/10"
-                                            >
-                                                <div className="flex items-center space-x-4">
-                                                    <Icon className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
-                                                    <span className="text-md font-semibold tracking-tight" style={{ color: theme.colors.textPrimary }}>
-                                                        {item.label}
-                                                    </span>
-                                                </div>
-                                                <ArrowRight className="w-5 h-5" style={{ color: theme.colors.secondary }} />
-                                            </button>
-                                        </React.Fragment>
-                                    )
-                                })}
-                            </div>
-                        </GlassCard>
-                    </div>
+                        <div className="space-y-1">
+                            {category.items.map((item) => {
+                                const Icon = resourceIcons[item.label] || Database;
+                                return (
+                                    <button
+                                        key={item.nav}
+                                        onClick={() => onNavigate(item.nav)}
+                                        className="w-full p-3 rounded-xl flex items-center justify-between transition-colors hover:bg-black/5 dark:hover:bg-white/10"
+                                    >
+                                        <div className="flex items-center space-x-4">
+                                            <Icon className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
+                                            <span className="text-md font-semibold tracking-tight" style={{ color: theme.colors.textPrimary }}>
+                                                {item.label}
+                                            </span>
+                                        </div>
+                                        <ArrowRight className="w-5 h-5" style={{ color: theme.colors.secondary }} />
+                                    </button>
+                                )
+                            })}
+                        </div>
+                    </GlassCard>
                 ))}
             </div>
         </div>
     );
 };
-
 export const PRODUCTS_CATEGORIES_DATA = Object.entries(Data.PRODUCT_DATA).map(([key, value]) => {
     const images = [];
     // Ensure we always get two images or placeholders
@@ -5681,7 +5679,6 @@ export {
     WinsCard,
     CreateContentModal,
     SuccessToast,
-    AppHeader,
     MonthlyBarChart,
     MonthlyTable,
     RecentPOsCard,

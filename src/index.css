@@ -15,6 +15,10 @@ body {
     scrollbar-width: none;
 }
 
+.app-header {
+    isolation: isolate;
+}
+
 .home-no-scroll .overflow-y-auto {
     overflow: hidden !important;
 }

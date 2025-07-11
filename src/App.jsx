@@ -289,7 +289,7 @@ function App() {
             {/* Container for the previous screen (rendered behind current) */}
             {previousScreen && (
                 <div
-                    className={`absolute inset-0 pt-[72px] ${isTransitioning ? 'transition-transform duration-300' : ''} ${previousScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto'} scrollbar-hide`}
+                    className={`absolute inset-0 pt-[70px] ${isTransitioning ? 'transition-transform duration-300' : ''} ${previousScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto'} scrollbar-hide`}
                     style={{
                         backgroundColor: currentTheme.colors.background,
                         transform: `translateX(${swipeTranslateX - window.innerWidth}px)`
@@ -301,7 +301,7 @@ function App() {
 
             {/* Container for the current screen, animated on swipe */}
             <div
-                className={`absolute inset-0 pt-[72px] ${isTransitioning ? 'transition-transform duration-300' : ''} ${currentScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto'} scrollbar-hide`}
+                className={`absolute inset-0 pt-[70px] ${isTransitioning ? 'transition-transform duration-300' : ''} ${currentScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto'} scrollbar-hide`}
                 style={{
                     backgroundColor: currentTheme.colors.background,
                     transform: `translateX(${swipeTranslateX}px)`
