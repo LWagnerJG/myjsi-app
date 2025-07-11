@@ -4415,7 +4415,6 @@ const DropdownPortal = ({ children, onClose, parentRef, theme }) => {
     );
 };
 
-
 export const NewLeadScreen = ({
     theme,
     onSuccess,
@@ -4432,8 +4431,9 @@ export const NewLeadScreen = ({
     });
 
     const [activeDropdown, setActiveDropdown] = useState(null);
-    const scrollContainerRef = useRef(null);
+    const scrollContainerRef = useRef(null); // This ref identifies the scrolling area
 
+    // This effect listens for scroll events on the container and closes the dropdowns
     useEffect(() => {
         const container = scrollContainerRef.current;
         const handleScroll = () => {
@@ -4441,7 +4441,7 @@ export const NewLeadScreen = ({
         };
 
         if (activeDropdown && container) {
-            container.addEventListener('scroll', handleScroll);
+            container.addEventListener('scroll', handleScroll, { once: true });
         }
 
         return () => {
@@ -4506,9 +4506,17 @@ export const NewLeadScreen = ({
     const poTimeframeRef = useRef(null);
     const contractTypeRef = useRef(null);
 
+    const CheckboxRow = ({ label, checked, onChange }) => (
+        <div className="flex items-center justify-between text-sm px-3 py-2 rounded-full" style={{ backgroundColor: theme.colors.subtle }}>
+            <label style={{ color: theme.colors.textSecondary }} className="font-semibold">{label}</label>
+            <input type="checkbox" className="h-5 w-5 rounded-md border-2" style={{ accentColor: theme.colors.accent, borderColor: theme.colors.border }} checked={checked} onChange={onChange} />
+        </div>
+    );
+
     return (
         <form onSubmit={handleSubmit} className="flex flex-col h-full">
-            <div ref={scrollContainerRef} className="flex-1 overflow-y-auto px-4 pb-4 pt-6 space-y-6 scrollbar-hide">
+            {/* The ref is now correctly attached to the scrolling container */}
+            <div ref={scrollContainerRef} className="flex-1 overflow-y-auto px-4 pb-4 pt-6 space-y-4 scrollbar-hide">
                 <FormSection title="Project Details" theme={theme}>
                     <FormInput required label="Project Name" value={newLead.project} onChange={(e) => updateField('project', e.target.value)} placeholder="e.g., Acme Corp Headquarters" theme={theme} />
 
@@ -4534,19 +4542,14 @@ export const NewLeadScreen = ({
                 </FormSection>
 
                 <FormSection title="Stakeholders" theme={theme}>
-                    {/* The scroll container ref is now passed to these components */}
                     <AutoCompleteCombobox scrollContainerRef={scrollContainerRef} label="A&D Firm" required value={newLead.designFirm} onChange={(val) => updateField('designFirm', val)} placeholder="Search or add a design firm..." options={designFirms} onAddNew={(f) => setDesignFirms((p) => [...new Set([f, ...p])])} theme={theme} />
                     <AutoCompleteCombobox scrollContainerRef={scrollContainerRef} label="Dealer" required value={newLead.dealer} onChange={(val) => updateField('dealer', val)} placeholder="Search or add a dealer..." options={dealers} onAddNew={(d) => setDealers((p) => [...new Set([d, ...p])])} theme={theme} />
                 </FormSection>
 
                 <FormSection title="Competition & Products" theme={theme}>
-                    <div className="flex items-center justify-between text-sm px-3">
-                        <label style={{ color: theme.colors.textSecondary }}>Bid?</label>
-                        <input type="checkbox" className="h-5 w-5 rounded-md border-2" style={{ accentColor: theme.colors.accent, borderColor: theme.colors.border }} checked={!!newLead.isBid} onChange={(e) => updateField('isBid', e.target.checked)} />
-                    </div>
-                    <div className="flex items-center justify-between text-sm px-3 mt-2">
-                        <label style={{ color: theme.colors.textSecondary }}>Competition?</label>
-                        <input type="checkbox" className="h-5 w-5 rounded-md border-2" style={{ accentColor: theme.colors.accent, borderColor: theme.colors.border }} checked={!!newLead.competitionPresent} onChange={(e) => updateField('competitionPresent', e.target.checked)} />
+                    <div className="space-y-2">
+                        <CheckboxRow label="Bid?" checked={!!newLead.isBid} onChange={(e) => updateField('isBid', e.target.checked)} />
+                        <CheckboxRow label="Competition?" checked={!!newLead.competitionPresent} onChange={(e) => updateField('competitionPresent', e.target.checked)} />
                     </div>
 
                     {newLead.competitionPresent && (
@@ -4573,11 +4576,15 @@ export const NewLeadScreen = ({
                     <div className="border-t pt-4 mt-4 space-y-3" style={{ borderColor: theme.colors.border }}>
                         <label className="text-xs font-semibold px-1" style={{ color: theme.colors.textSecondary }}>Products</label>
                         {newLead.products.map((p, idx) => (
-                            <div key={idx} className="p-3 rounded-lg" style={{ backgroundColor: theme.colors.subtle }}>
+                            <div key={idx} className="p-4 rounded-2xl border space-y-3" style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border }}>
                                 <div className="flex items-center justify-between">
-                                    <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>{p.series}</span>
-                                    <button type="button" onClick={() => removeProduct(idx)} className="p-1 rounded-full hover:bg-red-500/10">
-                                        <X className="w-4 h-4 text-red-500" />
+                                    <span className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>{p.series}</span>
+                                    <button
+                                        type="button"
+                                        onClick={() => removeProduct(idx)}
+                                        className="w-7 h-7 flex items-center justify-center rounded-full transition-colors hover:bg-red-500/10"
+                                    >
+                                        <X className="w-5 h-5 text-red-500" />
                                     </button>
                                 </div>
                                 {p.series === 'Vision' && (
@@ -4592,7 +4599,7 @@ export const NewLeadScreen = ({
                         ))}
                         {availableSeries.length > 0 && (
                             <AutoCompleteCombobox
-                                scrollContainerRef={scrollContainerRef} // Also passed here
+                                scrollContainerRef={scrollContainerRef}
                                 value={""}
                                 onChange={(val) => { addProduct(val); }}
                                 placeholder="+ Add a Product..."
@@ -4617,10 +4624,7 @@ export const NewLeadScreen = ({
                         <FormInput readOnly required label="PO Timeframe" value={newLead.poTimeframe} placeholder="Select a Timeframe" theme={theme} icon={<ChevronDown className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />} />
                     </div>
 
-                    <div className="flex items-center justify-between text-sm px-3 pt-2">
-                        <label style={{ color: theme.colors.textSecondary }}>Contract?</label>
-                        <input type="checkbox" className="h-5 w-5 rounded-md border-2" style={{ accentColor: theme.colors.accent, borderColor: theme.colors.border }} checked={!!newLead.isContract} onChange={(e) => updateField('isContract', e.target.checked)} />
-                    </div>
+                    <CheckboxRow label="Contract?" checked={!!newLead.isContract} onChange={(e) => updateField('isContract', e.target.checked)} />
 
                     {newLead.isContract && (
                         <div className="animate-fade-in" ref={contractTypeRef} onClick={(e) => { e.stopPropagation(); handleOpenDropdown('contractType', contractTypeRef); }}>
@@ -4630,16 +4634,7 @@ export const NewLeadScreen = ({
                 </FormSection>
 
                 <FormSection title="Services & Notes" theme={theme}>
-                    <div className="flex items-center justify-between text-sm">
-                        <label className="font-medium" style={{ color: theme.colors.textSecondary }}>JSI Spec Services Required?</label>
-                        <input
-                            type="checkbox"
-                            className="h-5 w-5 rounded-md border-2"
-                            style={{ accentColor: theme.colors.accent, borderColor: theme.colors.border }}
-                            checked={!!newLead.jsiSpecServices}
-                            onChange={(e) => updateField('jsiSpecServices', e.target.checked)}
-                        />
-                    </div>
+                    <CheckboxRow label="JSI Spec Services Required?" checked={!!newLead.jsiSpecServices} onChange={(e) => updateField('jsiSpecServices', e.target.checked)} />
 
                     {newLead.jsiSpecServices && (
                         <div className="animate-fade-in pt-4 space-y-4">
@@ -4759,7 +4754,7 @@ const SelectPortal = ({ children, onClose, parentRef, theme }) => {
         document.body
     );
 };
-const VisionOptions = ({ theme, product, productIndex, onUpdate }) => {
+export const VisionOptions = ({ theme, product, productIndex, onUpdate }) => {
     const [isMaterialDropdownOpen, setIsMaterialDropdownOpen] = useState(false);
     const materialRef = useRef(null);
 
@@ -4769,7 +4764,7 @@ const VisionOptions = ({ theme, product, productIndex, onUpdate }) => {
     };
 
     const DropdownHeader = ({ text }) => (
-        <div className="px-3 pt-2 pb-1 text-xs font-bold uppercase" style={{ color: theme.colors.textSecondary }}>
+        <div className="px-3 pt-2 pb-1 text-xs font-bold uppercase tracking-wider" style={{ color: theme.colors.textSecondary }}>
             {text}
         </div>
     );
@@ -4795,6 +4790,7 @@ const VisionOptions = ({ theme, product, productIndex, onUpdate }) => {
                         value={product.material}
                         placeholder="Select a material"
                         theme={theme}
+                        icon={<ChevronDown className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />}
                     />
                 </div>
             </div>
@@ -4805,21 +4801,28 @@ const VisionOptions = ({ theme, product, productIndex, onUpdate }) => {
                     onClose={() => setIsMaterialDropdownOpen(false)}
                     theme={theme}
                 >
+                    {/* New "Unknown" option */}
+                    <button type="button" onClick={() => handleSelectMaterial('Unknown')} className="block w-full text-left p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 text-sm">
+                        Unknown
+                    </button>
+                    <div className="border-t mx-2 my-2" style={{ borderColor: theme.colors.subtle }}></div>
+
                     <DropdownHeader text="Laminate" />
                     {Data.JSI_LAMINATES.map(opt => (
-                        <button key={opt} type="button" onClick={() => handleSelectMaterial(opt)} className="block w-full text-left p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10">{opt}</button>
+                        <button key={opt} type="button" onClick={() => handleSelectMaterial(opt)} className="block w-full text-left p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 text-sm">{opt}</button>
                     ))}
+
                     <div className="border-t mx-2 my-2" style={{ borderColor: theme.colors.subtle }}></div>
+
                     <DropdownHeader text="Veneer" />
                     {Data.JSI_VENEERS.map(opt => (
-                        <button key={opt} type="button" onClick={() => handleSelectMaterial(opt)} className="block w-full text-left p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10">{opt}</button>
+                        <button key={opt} type="button" onClick={() => handleSelectMaterial(opt)} className="block w-full text-left p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 text-sm">{opt}</button>
                     ))}
                 </SelectPortal>
             )}
         </>
     );
 };
-
 const resourceIcons = {
     'Search Database': Search,
     'Request COM Yardage': Paperclip,
