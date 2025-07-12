@@ -168,69 +168,108 @@ export const AutoCompleteCombobox = ({
     required,
     zIndex,
     dropdownClassName,
-    resetOnSelect
+    resetOnSelect,
 }) => {
     const [inputValue, setInputValue] = useState(value || '');
     const [showOptions, setShowOptions] = useState(false);
-    const wrapperRef = useRef(null); // Ref for the input field to position the portal
+    const wrapperRef = useRef(null);           // trigger field
+    const dropdownRef = useRef(null);          // dropdown itself
 
+    /* 1️⃣  keep text in sync with controlled prop  */
     useEffect(() => {
-        if (!resetOnSelect) {
-            setInputValue(value || '');
-        }
+        if (!resetOnSelect) setInputValue(value || '');
     }, [value, resetOnSelect]);
 
-    const filtered = options.filter(opt => opt.toLowerCase().includes(inputValue.toLowerCase()));
+    /* 2️⃣  filter options  */
+    const filtered = options.filter((opt) =>
+        opt.toLowerCase().includes(inputValue.toLowerCase())
+    );
 
-    const handleSelect = opt => {
+    /* 3️⃣  select an option  */
+    const handleSelect = (opt) => {
         onChange(opt);
-        if (resetOnSelect) {
-            setInputValue('');
-        } else {
-            setInputValue(opt);
-        }
+        if (resetOnSelect) setInputValue('');
+        else setInputValue(opt);
         setShowOptions(false);
     };
 
+    /* 4️⃣  add custom option  */
     const handleAdd = () => {
         if (inputValue && !options.includes(inputValue)) onAddNew(inputValue);
         onChange(inputValue);
         setShowOptions(false);
     };
 
-    const AutocompleteDropdownPortal = () => {
-        const dropdownRef = useRef(null);
+    /* 5️⃣  close on outside click  */
+    useEffect(() => {
+        const clickOutside = (e) => {
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(e.target) &&
+                wrapperRef.current &&
+                !wrapperRef.current.contains(e.target)
+            ) {
+                setShowOptions(false);
+            }
+        };
+        document.addEventListener('mousedown', clickOutside);
+        return () => document.removeEventListener('mousedown', clickOutside);
+    }, []);
 
-        // This effect handles closing the dropdown when clicking outside
-        useEffect(() => {
-            const handleClickOutside = (event) => {
-                if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-                    setShowOptions(false);
-                }
-            };
-            const timerId = setTimeout(() => document.addEventListener("mousedown", handleClickOutside), 0);
-            return () => { clearTimeout(timerId); document.removeEventListener("mousedown", handleClickOutside); };
-        }, []);
+    /* 6️⃣  close on scroll  */
+    useEffect(() => {
+        if (!showOptions) return;
+        const scrollHandler = () => setShowOptions(false);
+        window.addEventListener('scroll', scrollHandler, { passive: true });
+        return () => window.removeEventListener('scroll', scrollHandler);
+    }, [showOptions]);
 
-        const parentRect = wrapperRef.current?.getBoundingClientRect();
-        const dropdownWidth = 288;
-        const top = parentRect ? parentRect.bottom + 4 : 0;
-        const left = parentRect ? parentRect.right - dropdownWidth : 0;
-
+    /* 7️⃣  portal dropdown (anchored to trigger)  */
+    const DropdownPortal = () => {
+        if (!wrapperRef.current) return null;
+        const rect = wrapperRef.current.getBoundingClientRect();
+        const width = 288;
         return ReactDOM.createPortal(
-            <div ref={dropdownRef} className="absolute z-[9999]" style={{ top: `${top}px`, left: `${left}px`, width: `${dropdownWidth}px` }}>
-                <GlassCard theme={theme} className={`p-2 overflow-y-auto scrollbar-hide ${dropdownClassName || 'max-h-80'}`}>
-                    {filtered.map(opt => (
-                        <button key={opt} type="button" onClick={() => handleSelect(opt)} className="block w-full text-left p-2 rounded-md hover:bg-black/5" style={{ color: theme.colors.textPrimary }}>
+            <div
+                ref={dropdownRef}
+                className="absolute z-[9999]"
+                style={{
+                    top: `${rect.bottom + window.scrollY + 4}px`,
+                    left: `${rect.left + window.scrollX}px`,
+                    width: `${width}px`,
+                }}
+            >
+                <div
+                    className={`p-2 max-h-80 overflow-y-auto scrollbar-hide rounded-2xl shadow-lg ${dropdownClassName || ''}`}
+                    style={{
+                        backgroundColor: theme.colors.surface,
+                        border: `1px solid ${theme.colors.border}`,
+                        backdropFilter: theme.backdropFilter,
+                        WebkitBackdropFilter: theme.backdropFilter,
+                    }}
+                >
+                    {filtered.map((opt) => (
+                        <button
+                            key={opt}
+                            type="button"
+                            onClick={() => handleSelect(opt)}
+                            className="block w-full text-left p-2 rounded-md hover:bg-black/5"
+                            style={{ color: theme.colors.textPrimary }}
+                        >
                             {opt}
                         </button>
                     ))}
                     {onAddNew && inputValue && !options.includes(inputValue) && (
-                        <button type="button" onClick={handleAdd} className="block w-full text-left p-2 rounded-md font-semibold hover:bg-black/5" style={{ color: theme.colors.accent }}>
+                        <button
+                            type="button"
+                            onClick={handleAdd}
+                            className="block w-full text-left p-2 rounded-md font-semibold hover:bg-black/5"
+                            style={{ color: theme.colors.accent }}
+                        >
                             Add “{inputValue}”
                         </button>
                     )}
-                </GlassCard>
+                </div>
             </div>,
             document.body
         );
@@ -247,7 +286,10 @@ export const AutoCompleteCombobox = ({
                 required={required}
                 type="text"
                 value={inputValue}
-                onChange={e => { setInputValue(e.target.value); setShowOptions(true); }}
+                onChange={(e) => {
+                    setInputValue(e.target.value);
+                    setShowOptions(true);
+                }}
                 onFocus={() => setShowOptions(true)}
                 placeholder={placeholder}
                 className="w-full px-4 py-3 border rounded-full focus:ring-2 outline-none"
@@ -258,11 +300,10 @@ export const AutoCompleteCombobox = ({
                     ringColor: theme.colors.accent,
                 }}
             />
-            {showOptions && <AutocompleteDropdownPortal />}
+            {showOptions && <DropdownPortal />}
         </div>
     );
 };
-
 export const ToggleButtonGroup = ({ value, onChange, options, theme }) => {
     const selectedIndex = options.findIndex(opt => opt.value === value);
 
@@ -4464,7 +4505,6 @@ export const NativeSelect = ({ label, value, onChange, options, placeholder, the
     };
 
     const selectedLabel = useMemo(() => {
-        // Ensure options is an array before trying to find
         if (!Array.isArray(options)) {
             console.warn("NativeSelect: 'options' prop is not an array. Please provide an array of { label, value } objects.");
             return placeholder;
@@ -4483,7 +4523,6 @@ export const NativeSelect = ({ label, value, onChange, options, placeholder, the
             <button
                 type="button"
                 onClick={handleOpen}
-                // Styling for the dropdown trigger (the rounded field)
                 className="w-full px-4 py-3 border rounded-full text-base text-left flex justify-between items-center"
                 style={{
                     backgroundColor: theme.colors.subtle,
@@ -4499,24 +4538,19 @@ export const NativeSelect = ({ label, value, onChange, options, placeholder, the
                 <div className={`absolute left-0 w-full z-50 ${dropDirection === 'up' ? 'bottom-full mb-1' : 'top-full mt-1'}`}>
                     <GlassCard
                         theme={theme}
-                        // Styling for the dropdown menu container itself
-                        className="p-0 max-h-80 overflow-y-auto scrollbar-hide rounded-lg shadow-lg"
+                        className="p-1.5 max-h-60 overflow-y-auto scrollbar-hide rounded-2xl shadow-lg"
                     >
-                        {/* Ensure options is an array before mapping */}
                         {Array.isArray(options) && options.map(opt => (
                             <button
                                 key={opt.value}
                                 type="button"
                                 onClick={() => handleSelect(opt.value)}
-                                // Styling for individual dropdown items and selected state
-                                className={`block w-full text-left py-2 px-4 text-sm ${opt.value === value
-                                        ? 'bg-gray-200 text-gray-900 font-semibold' // Light gray background, dark text for selected
-                                        : 'text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800' // Default and hover styles
-                                    }`}
-                                // Explicitly set text color to ensure it's theme.colors.textPrimary for non-selected,
-                                // and potentially still theme.colors.textPrimary or a specific dark color for selected.
-                                // If theme.colors.textPrimary is light, you'll need a different color for selected text here.
-                                style={{ color: opt.value === value ? (theme.colors.textPrimary === 'white' ? 'black' : theme.colors.textPrimary) : theme.colors.textPrimary }}
+                                className={`block w-full text-left py-2.5 px-3.5 text-sm rounded-lg transition-colors`}
+                                style={{
+                                    backgroundColor: opt.value === value ? theme.colors.primary : 'transparent',
+                                    color: opt.value === value ? theme.colors.surface : theme.colors.textPrimary,
+                                    fontWeight: opt.value === value ? '600' : '400'
+                                }}
                             >
                                 {opt.label}
                             </button>
@@ -4527,6 +4561,7 @@ export const NativeSelect = ({ label, value, onChange, options, placeholder, the
         </div>
     );
 };
+
 export const NewLeadScreen = ({
     theme,
     onSuccess,
@@ -4867,72 +4902,92 @@ export const ResourcesScreen = ({ theme, onNavigate }) => {
     };
 }).sort((a, b) => a.name.localeCompare(b.name));
 
-export const ProjectDetailModal = ({ opportunity, onClose, theme, onNavigate }) => {
-    // Helper component for displaying each piece of data
-    const DetailItem = ({ label, value }) => {
-        if (!value && typeof value !== 'boolean' && !Array.isArray(value)) return null;
+export const ProjectDetailModal = ({ opportunity, onClose, theme, onUpdate }) => {
+    const [editedOpp, setEditedOpp] = useState(null);
 
-        let displayValue = value;
-        if (typeof value === 'boolean') {
-            displayValue = value ? 'Yes' : 'No';
-        } else if (Array.isArray(value) && value.length > 0) {
-            displayValue = value.join(', ');
-        } else if (Array.isArray(value)) {
-            return null; // Don't render empty arrays
+    useEffect(() => {
+        // When a new opportunity is selected, populate the form state
+        if (opportunity) {
+            setEditedOpp({
+                ...opportunity,
+                // Ensure value is a plain number for the currency input
+                value: parseInt(String(opportunity.value).replace(/[^0-9]/g, ''))
+            });
         }
+    }, [opportunity]);
 
-        return (
-            <div>
-                <p className="text-xs font-bold uppercase tracking-wider" style={{ color: theme.colors.textSecondary }}>{label}</p>
-                <p className="text-base" style={{ color: theme.colors.textPrimary }}>{displayValue}</p>
-            </div>
-        );
+    if (!editedOpp) return null;
+
+    const handleChange = (field, value) => {
+        setEditedOpp(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleSave = () => {
+        onUpdate(editedOpp);
+        onClose();
     };
 
     return (
-        <Modal
-            show={!!opportunity}
-            onClose={onClose}
-            title={opportunity?.name || "Project Details"}
-            theme={theme}
-        >
-            {opportunity && (
-                <>
-                    <button
-                        onClick={() => { onClose(); onNavigate('new-lead'); }}
-                        className="absolute top-4 right-14 p-2 rounded-full transition-colors hover:bg-black/10 dark:hover:bg-white/10"
-                    >
-                        <Pencil className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
-                    </button>
-                    <div className="space-y-4">
-                        <DetailItem label="Stage" value={opportunity.stage} />
-                        <DetailItem label="Company" value={opportunity.company} />
-                        <DetailItem label="Value" value={opportunity.value} />
-                        <DetailItem label="Vertical" value={opportunity.vertical} />
-                        {opportunity.otherVertical && <DetailItem label="Specified Vertical" value={opportunity.otherVertical} />}
-                        <DetailItem label="A&D Firm" value={opportunity.designFirm} />
-                        <DetailItem label="Dealer" value={opportunity.dealer} />
-                        <DetailItem label="PO Timeframe" value={opportunity.poTimeframe} />
-                        <DetailItem label="Discount" value={opportunity.discount} />
-                        <DetailItem label="Win Probability" value={`${opportunity.winProbability}%`} />
-                        <DetailItem label="Bid?" value={opportunity.isBid} />
-                        <DetailItem label="Competition?" value={opportunity.competitionPresent} />
-                        <DetailItem label="Competitors" value={opportunity.competitors} />
-                        <DetailItem label="Products" value={opportunity.products?.map(p => p.series).join(', ')} />
-                        <DetailItem label="JSI Spec Services" value={opportunity.jsiSpecServices} />
-                        {opportunity.jsiSpecServices && <DetailItem label="Quote Type" value={opportunity.quoteType} />}
-                        {opportunity.jsiQuoteNumber && <DetailItem label="Revision Quote #" value={opportunity.jsiQuoteNumber} />}
-                        {opportunity.pastProjectRef && <DetailItem label="Past Project Ref" value={opportunity.pastProjectRef} />}
-                        <DetailItem label="Notes" value={opportunity.notes} />
-                    </div>
-                </>
-            )}
+        <Modal show={!!opportunity} onClose={onClose} title="Edit Project Details" theme={theme}>
+            <div className="space-y-4">
+                <FormInput
+                    label="Project Name"
+                    value={editedOpp.name}
+                    onChange={(e) => handleChange('name', e.target.value)}
+                    theme={theme}
+                />
+                {/* Replaced CustomSelect with NativeSelect for rounded style */}
+                <NativeSelect
+                    label="Stage"
+                    value={editedOpp.stage}
+                    onChange={(e) => handleChange('stage', e.target.value)}
+                    options={Data.STAGES.map(s => ({ value: s, label: s }))}
+                    placeholder="Select Stage"
+                    theme={theme}
+                />
+                <FormInput
+                    label="Company"
+                    value={editedOpp.company}
+                    onChange={(e) => handleChange('company', e.target.value)}
+                    theme={theme}
+                />
+                <FormInput
+                    label="Value"
+                    type="currency"
+                    value={editedOpp.value}
+                    onChange={(e) => handleChange('value', e.target.value)}
+                    theme={theme}
+                />
+                {/* Replaced CustomSelect with NativeSelect for rounded style */}
+                <NativeSelect
+                    label="PO Timeframe"
+                    value={editedOpp.poTimeframe}
+                    onChange={(e) => handleChange('poTimeframe', e.target.value)}
+                    options={Data.PO_TIMEFRAMES.map(t => ({ value: t, label: t }))}
+                    placeholder="Select Timeframe"
+                    theme={theme}
+                />
+                <FormInput
+                    label="Discount"
+                    value={editedOpp.discount}
+                    onChange={(e) => handleChange('discount', e.target.value)}
+                    theme={theme}
+                />
+                <ProbabilitySlider
+                    value={editedOpp.winProbability}
+                    onChange={(val) => handleChange('winProbability', val)}
+                    theme={theme}
+                />
+                <div className="flex justify-end space-x-3 pt-4 border-t" style={{ borderColor: theme.colors.subtle }}>
+                    <button onClick={onClose} className="px-4 py-2 rounded-lg font-semibold" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }}>Cancel</button>
+                    <button onClick={handleSave} className="px-6 py-2 rounded-lg font-semibold text-white" style={{ backgroundColor: theme.colors.accent }}>Save</button>
+                </div>
+            </div>
         </Modal>
     );
 };
 
-
-export const ProjectsScreen = ({ onNavigate, theme, opportunities, setSelectedOpportunity, myProjects }) => {
+export const ProjectsScreen = ({ onNavigate, theme, opportunities, setSelectedOpportunity, myProjects, setSelectedProject }) => {
     const [projectsTab, setProjectsTab] = useState('pipeline');
     const [selectedPipelineStage, setSelectedPipelineStage] = useState('Discovery');
 
@@ -5023,7 +5078,7 @@ export const ProjectsScreen = ({ onNavigate, theme, opportunities, setSelectedOp
             ) : (
                 <div className="flex-1 overflow-y-auto px-4 pt-4 pb-4 space-y-6 scrollbar-hide">
                     {myProjects.map(project => (
-                        <GlassCard key={project.id} theme={theme} className="p-0 overflow-hidden cursor-pointer group">
+                        <GlassCard key={project.id} theme={theme} className="p-0 overflow-hidden cursor-pointer group" onClick={() => setSelectedProject(project)}>
                             <div className="relative aspect-video w-full">
                                 <img
                                     src={project.image}
@@ -5043,6 +5098,8 @@ export const ProjectsScreen = ({ onNavigate, theme, opportunities, setSelectedOp
         </div>
     );
 };
+
+
 export const ProductComparisonScreen = ({ categoryId, onNavigate, theme }) => {
     const category = Data.PRODUCT_DATA?.[categoryId];
     if (!category || !category.data?.length) {
@@ -5889,12 +5946,74 @@ export const MembersScreen = ({ theme, members, setMembers, currentUserId, onNav
     );
 };
 
+export const MyProjectDetailModal = ({ project, onClose, theme }) => {
+    if (!project) return null;
+
+    return (
+        <Modal show={!!project} onClose={onClose} title="" theme={theme}>
+            <div className="space-y-4">
+                <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-lg">
+                    <img
+                        src={project.image}
+                        alt={project.name}
+                        className="absolute w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                    <div className="absolute bottom-4 left-4 right-4">
+                        <h2 className="text-3xl font-bold text-white drop-shadow-md">{project.name}</h2>
+                        <p className="text-lg font-medium text-white/90 drop-shadow-md">{project.location}</p>
+                    </div>
+                </div>
+                <button
+                    onClick={onClose}
+                    className="w-full font-bold py-3 px-6 rounded-full text-white"
+                    style={{ backgroundColor: theme.colors.accent }}
+                >
+                    Close
+                </button>
+            </div>
+        </Modal>
+    );
+};
+
+
 export const AddNewInstallScreen = ({ theme, setSuccessMessage, onAddInstall, onBack }) => {
     const [projectName, setProjectName] = useState('');
-    const [locationCity, setLocationCity] = useState('');
-    const [locationState, setLocationState] = useState('');
+    const [location, setLocation] = useState('');
     const [photos, setPhotos] = useState([]);
     const fileInputRef = useRef(null);
+    const [predictions, setPredictions] = useState([]);
+    const [showPredictions, setShowPredictions] = useState(false);
+    const autocompleteService = useRef(null);
+
+    useEffect(() => {
+        if (window.google && window.google.maps && window.google.maps.places) {
+            autocompleteService.current = new window.google.maps.places.AutocompleteService();
+        }
+    }, []);
+
+    const handleLocationChange = (e) => {
+        const value = e.target.value;
+        setLocation(value);
+        if (autocompleteService.current && value) {
+            autocompleteService.current.getPlacePredictions({
+                input: value,
+                types: ['(cities)']
+            }, (preds) => {
+                setPredictions(preds || []);
+                setShowPredictions(true);
+            });
+        } else {
+            setPredictions([]);
+            setShowPredictions(false);
+        }
+    };
+
+    const handleSelectPrediction = (prediction) => {
+        setLocation(prediction.description);
+        setPredictions([]);
+        setShowPredictions(false);
+    };
 
     const handleFileChange = (e) => {
         if (e.target.files) {
@@ -5908,15 +6027,13 @@ export const AddNewInstallScreen = ({ theme, setSuccessMessage, onAddInstall, on
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (projectName && locationCity && locationState && photos.length > 0) {
+        if (projectName && location && photos.length > 0) {
             const newInstall = {
                 name: projectName,
-                location: `${locationCity}, ${locationState}`,
-                // In a real app, you'd upload photos and store URLs
+                location: location,
                 image: URL.createObjectURL(photos[0])
             };
             onAddInstall(newInstall);
-            setSuccessMessage("New Install Added!");
         } else {
             alert('Please fill out all fields and add at least one photo.');
         }
@@ -5924,7 +6041,7 @@ export const AddNewInstallScreen = ({ theme, setSuccessMessage, onAddInstall, on
 
     return (
         <form onSubmit={handleSubmit} className="h-full flex flex-col">
-            <PageTitle title="Add New Install" theme={theme} onBack={onBack} />
+            <PageTitle title="Add New Install" theme={theme} />
             <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4 scrollbar-hide">
                 <GlassCard theme={theme} className="p-4 space-y-4">
                     <FormInput
@@ -5935,36 +6052,45 @@ export const AddNewInstallScreen = ({ theme, setSuccessMessage, onAddInstall, on
                         theme={theme}
                         required
                     />
-                    <FormInput
-                        label="Location City"
-                        value={locationCity}
-                        onChange={(e) => setLocationCity(e.target.value)}
-                        placeholder="e.g., Indianapolis"
-                        theme={theme}
-                        required
-                    />
-                    <FormInput
-                        label="Location State"
-                        value={locationState}
-                        onChange={(e) => setLocationState(e.target.value)}
-                        placeholder="e.g., IN"
-                        theme={theme}
-                        required
-                    />
-                    <div>
-                        <label className="text-xs font-semibold px-1" style={{ color: theme.colors.textSecondary }}>Photos</label>
-                        <div className="mt-1 p-4 rounded-3xl min-h-[120px] flex flex-wrap gap-3" style={{ backgroundColor: theme.colors.subtle }}>
+                    <div className="relative">
+                        <FormInput
+                            label="Location"
+                            value={location}
+                            onChange={handleLocationChange}
+                            placeholder="e.g., Jasper, IN" // Updated placeholder
+                            theme={theme}
+                            required
+                        />
+                        {showPredictions && predictions.length > 0 && (
+                            <GlassCard theme={theme} className="absolute w-full mt-1 z-10 p-1">
+                                {predictions.map(p => (
+                                    <button
+                                        key={p.place_id}
+                                        type="button"
+                                        onClick={() => handleSelectPrediction(p)}
+                                        className="block w-full text-left p-2 rounded-md hover:bg-black/5"
+                                        style={{ color: theme.colors.textPrimary }}
+                                    >
+                                        {p.description}
+                                    </button>
+                                ))}
+                            </GlassCard>
+                        )}
+                    </div>
+                    {/* Redesigned Photo Upload Section */}
+                    <div className="space-y-3">
+                        <div className="grid grid-cols-3 gap-3">
                             {photos.map((file, idx) => (
-                                <div key={idx} className="relative w-20 h-20">
-                                    <img src={URL.createObjectURL(file)} alt={`preview-${idx}`} className="w-full h-full object-cover rounded-lg shadow-md" />
+                                <div key={idx} className="relative aspect-square">
+                                    <img src={URL.createObjectURL(file)} alt={`preview-${idx}`} className="w-full h-full object-cover rounded-xl shadow-md" />
                                     <button type="button" onClick={() => removePhoto(idx)} className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5"><X className="w-4 h-4" /></button>
                                 </div>
                             ))}
-                            <button type="button" onClick={() => fileInputRef.current.click()} className="w-20 h-20 flex flex-col items-center justify-center rounded-lg border-2 border-dashed" style={{ borderColor: theme.colors.border, color: theme.colors.textSecondary }}>
-                                <ImageIcon className="w-6 h-6 mb-1" />
-                                <span className="text-xs font-semibold">Add Photo</span>
-                            </button>
                         </div>
+                        <button type="button" onClick={() => fileInputRef.current.click()} className="w-full flex items-center justify-center space-x-2 py-3 rounded-full" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }}>
+                            <ImageIcon className="w-5 h-5" />
+                            <span className="font-semibold">Add Photo</span>
+                        </button>
                         <input type="file" ref={fileInputRef} multiple accept="image/*" className="hidden" onChange={handleFileChange} />
                     </div>
                 </GlassCard>
@@ -5977,6 +6103,7 @@ export const AddNewInstallScreen = ({ theme, setSuccessMessage, onAddInstall, on
         </form>
     );
 };
+
 
 const HelpScreen = ({ theme }) => (
     <>
@@ -6091,6 +6218,7 @@ const SCREEN_MAP = {
     'resources/presentations': PresentationsScreen,
     'resources/social_media': SocialMediaScreen,
     projects: ProjectsScreen,
+    AddNewInstallScreen: AddNewInstallScreen,
     community: CommunityScreen,
     samples: SamplesScreen,
     'samples/cart': CartScreen,
