@@ -4344,52 +4344,59 @@ export const ProbabilitySlider = ({ value, onChange, theme }) => {
     const [isDragging, setIsDragging] = useState(false);
     const sliderRef = useRef(null);
 
-    const handleMouseDown = (e) => {
-        setIsDragging(true);
-        handleMouseMove(e);
-    };
-
-    const handleMouseMove = (e) => {
+    /* ---- shared helper ---- */
+    const updateFromClientX = (clientX) => {
         if (!sliderRef.current) return;
-
         const rect = sliderRef.current.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
-        const snappedValue = Math.round(percentage / 5) * 5;
-
-        onChange(snappedValue);
+        const x = clientX - rect.left;
+        const pct = Math.max(0, Math.min(100, (x / rect.width) * 100));
+        const snapped = Math.round(pct / 5) * 5;
+        onChange(snapped);
     };
 
-    const handleMouseUp = () => {
-        setIsDragging(false);
-    };
+    /* ---- mouse handlers ---- */
+    const onMouseDown = (e) => { setIsDragging(true); updateFromClientX(e.clientX); };
+    const onMouseMove = (e) => { if (isDragging) updateFromClientX(e.clientX); };
+    const onMouseUp = () => setIsDragging(false);
 
+    /* ---- touch handlers ---- */
+    const onTouchStart = (e) => { setIsDragging(true); updateFromClientX(e.touches[0].clientX); };
+    const onTouchMove = (e) => { if (isDragging) updateFromClientX(e.touches[0].clientX); };
+    const onTouchEnd = () => setIsDragging(false);
+
+    /* ---- global listeners (passive = true) ---- */
     useEffect(() => {
-        if (isDragging) {
-            document.addEventListener('mousemove', handleMouseMove);
-            document.addEventListener('mouseup', handleMouseUp);
-            return () => {
-                document.removeEventListener('mousemove', handleMouseMove);
-                document.removeEventListener('mouseup', handleMouseUp);
-            };
-        }
+        if (!isDragging) return;
+        window.addEventListener('mousemove', onMouseMove, { passive: true });
+        window.addEventListener('mouseup', onMouseUp, { passive: true });
+        window.addEventListener('touchmove', onTouchMove, { passive: true });
+        window.addEventListener('touchend', onTouchEnd, { passive: true });
+
+        return () => {
+            window.removeEventListener('mousemove', onMouseMove);
+            window.removeEventListener('mouseup', onMouseUp);
+            window.removeEventListener('touchmove', onTouchMove);
+            window.removeEventListener('touchend', onTouchEnd);
+        };
     }, [isDragging]);
 
     return (
         <div className="space-y-3">
-            <label className="block text-sm font-medium tracking-wide" style={{ color: theme.colors.textSecondary }}>
+            <label
+                className="block text-sm font-medium tracking-wide"
+                style={{ color: theme.colors.textSecondary }}
+            >
                 Win Probability
             </label>
 
             <div className="relative px-4 py-4">
-                {/* Visible track/rail */}
+                {/* Track */}
                 <div
                     ref={sliderRef}
                     className="relative h-2 rounded-full cursor-pointer"
-                    style={{
-                        backgroundColor: theme.colors.border || '#d1d5db',
-                    }}
-                    onMouseDown={handleMouseDown}
+                    style={{ backgroundColor: theme.colors.border || '#d1d5db' }}
+                    onMouseDown={onMouseDown}
+                    onTouchStart={onTouchStart}
                 >
                     {/* Progress fill */}
                     <div
@@ -4400,21 +4407,23 @@ export const ProbabilitySlider = ({ value, onChange, theme }) => {
                         }}
                     />
 
-                    {/* Draggable percentage node - ON the track */}
+                    {/* Draggable knob */}
                     <div
-                        className={`absolute top-1/2 transform -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all duration-200 ${isDragging ? 'scale-110' : 'hover:scale-105'}`}
+                        className={`absolute top-1/2 transform -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all duration-200 ${isDragging ? 'scale-110' : 'hover:scale-105'
+                            }`}
                         style={{
                             left: `${value}%`,
                         }}
-                        onMouseDown={handleMouseDown}
                     >
                         <div
                             className="px-2 py-1 text-xs font-bold rounded-full whitespace-nowrap shadow-lg border"
                             style={{
                                 color: theme.colors.textPrimary || '#374151',
-                                backgroundColor: 'white',
+                                backgroundColor: '#ffffff',
                                 borderColor: theme.colors.border || '#d1d5db',
-                                boxShadow: isDragging ? '0 4px 12px rgba(0,0,0,0.3)' : '0 2px 8px rgba(0,0,0,0.2)'
+                                boxShadow: isDragging
+                                    ? '0 4px 12px rgba(0,0,0,0.3)'
+                                    : '0 2px 8px rgba(0,0,0,0.2)',
                             }}
                         >
                             {value}%
@@ -4437,7 +4446,6 @@ export const ProbabilitySlider = ({ value, onChange, theme }) => {
         </div>
     );
 };
-
 const DropdownPortal = ({ children, onClose, parentRef, theme }) => {
     const dropdownRef = useRef(null);
 
