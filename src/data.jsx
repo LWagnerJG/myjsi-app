@@ -9,7 +9,7 @@ export const lightTheme = {
     colors: {
         background: '#f8f8f8',
         surface: '#FFFFFF',
-        primary: '#003366',
+        primary: '#b3b3af',
         accent: '#AD8A77', // Changed to the new color
         secondary: '#414141',
         textPrimary: '#111111',

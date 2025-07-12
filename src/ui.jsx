@@ -4932,7 +4932,7 @@ export const ProjectDetailModal = ({ opportunity, onClose, theme, onNavigate }) 
 };
 
 
-export const ProjectsScreen = ({ onNavigate, theme, opportunities, setSelectedOpportunity }) => {
+export const ProjectsScreen = ({ onNavigate, theme, opportunities, setSelectedOpportunity, myProjects }) => {
     const [projectsTab, setProjectsTab] = useState('pipeline');
     const [selectedPipelineStage, setSelectedPipelineStage] = useState('Discovery');
 
@@ -4941,17 +4941,23 @@ export const ProjectsScreen = ({ onNavigate, theme, opportunities, setSelectedOp
         return opportunities.filter(opp => opp.stage === selectedPipelineStage);
     }, [selectedPipelineStage, opportunities]);
 
-    const newButtonText = projectsTab === 'pipeline' ? 'New Lead' : 'Add New Install';
+    const handleAddClick = () => {
+        if (projectsTab === 'pipeline') {
+            onNavigate('new-lead');
+        } else {
+            onNavigate('add-new-install');
+        }
+    };
 
     return (
         <div className="h-full flex flex-col">
             <PageTitle title="Projects" theme={theme}>
                 <button
-                    onClick={() => onNavigate('new-lead')}
+                    onClick={handleAddClick}
                     className="flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-transform hover:scale-105 active:scale-95"
                     style={{ backgroundColor: theme.colors.accent, color: 'white' }}
                 >
-                    <span>{newButtonText}</span>
+                    <span>{projectsTab === 'pipeline' ? 'New Lead' : 'Add New Install'}</span>
                     <Plus className="w-4 h-4" />
                 </button>
             </PageTitle>
@@ -5016,7 +5022,7 @@ export const ProjectsScreen = ({ onNavigate, theme, opportunities, setSelectedOp
                 </div>
             ) : (
                 <div className="flex-1 overflow-y-auto px-4 pt-4 pb-4 space-y-6 scrollbar-hide">
-                    {Data.MY_PROJECTS_DATA.map(project => (
+                    {myProjects.map(project => (
                         <GlassCard key={project.id} theme={theme} className="p-0 overflow-hidden cursor-pointer group">
                             <div className="relative aspect-video w-full">
                                 <img
@@ -5037,7 +5043,6 @@ export const ProjectsScreen = ({ onNavigate, theme, opportunities, setSelectedOp
         </div>
     );
 };
-
 export const ProductComparisonScreen = ({ categoryId, onNavigate, theme }) => {
     const category = Data.PRODUCT_DATA?.[categoryId];
     if (!category || !category.data?.length) {
@@ -5883,6 +5888,96 @@ export const MembersScreen = ({ theme, members, setMembers, currentUserId, onNav
         </>
     );
 };
+
+export const AddNewInstallScreen = ({ theme, setSuccessMessage, onAddInstall, onBack }) => {
+    const [projectName, setProjectName] = useState('');
+    const [locationCity, setLocationCity] = useState('');
+    const [locationState, setLocationState] = useState('');
+    const [photos, setPhotos] = useState([]);
+    const fileInputRef = useRef(null);
+
+    const handleFileChange = (e) => {
+        if (e.target.files) {
+            setPhotos(p => [...p, ...Array.from(e.target.files)]);
+        }
+    };
+
+    const removePhoto = (photoIndex) => {
+        setPhotos(p => p.filter((_, idx) => idx !== photoIndex));
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (projectName && locationCity && locationState && photos.length > 0) {
+            const newInstall = {
+                name: projectName,
+                location: `${locationCity}, ${locationState}`,
+                // In a real app, you'd upload photos and store URLs
+                image: URL.createObjectURL(photos[0])
+            };
+            onAddInstall(newInstall);
+            setSuccessMessage("New Install Added!");
+        } else {
+            alert('Please fill out all fields and add at least one photo.');
+        }
+    };
+
+    return (
+        <form onSubmit={handleSubmit} className="h-full flex flex-col">
+            <PageTitle title="Add New Install" theme={theme} onBack={onBack} />
+            <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4 scrollbar-hide">
+                <GlassCard theme={theme} className="p-4 space-y-4">
+                    <FormInput
+                        label="Project Name"
+                        value={projectName}
+                        onChange={(e) => setProjectName(e.target.value)}
+                        placeholder="e.g., Acme Corp HQ"
+                        theme={theme}
+                        required
+                    />
+                    <FormInput
+                        label="Location City"
+                        value={locationCity}
+                        onChange={(e) => setLocationCity(e.target.value)}
+                        placeholder="e.g., Indianapolis"
+                        theme={theme}
+                        required
+                    />
+                    <FormInput
+                        label="Location State"
+                        value={locationState}
+                        onChange={(e) => setLocationState(e.target.value)}
+                        placeholder="e.g., IN"
+                        theme={theme}
+                        required
+                    />
+                    <div>
+                        <label className="text-xs font-semibold px-1" style={{ color: theme.colors.textSecondary }}>Photos</label>
+                        <div className="mt-1 p-4 rounded-3xl min-h-[120px] flex flex-wrap gap-3" style={{ backgroundColor: theme.colors.subtle }}>
+                            {photos.map((file, idx) => (
+                                <div key={idx} className="relative w-20 h-20">
+                                    <img src={URL.createObjectURL(file)} alt={`preview-${idx}`} className="w-full h-full object-cover rounded-lg shadow-md" />
+                                    <button type="button" onClick={() => removePhoto(idx)} className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5"><X className="w-4 h-4" /></button>
+                                </div>
+                            ))}
+                            <button type="button" onClick={() => fileInputRef.current.click()} className="w-20 h-20 flex flex-col items-center justify-center rounded-lg border-2 border-dashed" style={{ borderColor: theme.colors.border, color: theme.colors.textSecondary }}>
+                                <ImageIcon className="w-6 h-6 mb-1" />
+                                <span className="text-xs font-semibold">Add Photo</span>
+                            </button>
+                        </div>
+                        <input type="file" ref={fileInputRef} multiple accept="image/*" className="hidden" onChange={handleFileChange} />
+                    </div>
+                </GlassCard>
+                <div className="pt-2">
+                    <button type="submit" className="w-full font-bold py-3.5 px-6 rounded-full text-white" style={{ backgroundColor: theme.colors.accent }}>
+                        Submit Install
+                    </button>
+                </div>
+            </div>
+        </form>
+    );
+};
+
 const HelpScreen = ({ theme }) => (
     <>
         <PageTitle title="Help & Support" theme={theme} />

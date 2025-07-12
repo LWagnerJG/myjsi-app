@@ -1,10 +1,11 @@
 ﻿import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
-import { lightTheme, darkTheme, INITIAL_MEMBERS, INITIAL_OPPORTUNITIES, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS, INITIAL_POSTS, INITIAL_POLLS } from './data.jsx';
+import { lightTheme, darkTheme, INITIAL_MEMBERS, INITIAL_OPPORTUNITIES, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS, INITIAL_POSTS, INITIAL_POLLS, MY_PROJECTS_DATA } from './data.jsx';
 import {
     AppHeader, ProfileMenu, SCREEN_MAP, OrderModal, Modal, SuccessToast, PageTitle,
     ResourceDetailScreen, CartScreen, VoiceModal, ProductComparisonScreen,
-    CompetitiveAnalysisScreen, PlaceholderScreen, FabricsScreen, ProjectDetailModal, CreateContentModal
+    CompetitiveAnalysisScreen, PlaceholderScreen, FabricsScreen, ProjectDetailModal, CreateContentModal,
+    AddNewInstallScreen // Make sure this is exported from ui.jsx
 } from './ui.jsx';
 import * as Data from './data.jsx';
 
@@ -27,6 +28,7 @@ function App() {
     const [designFirms, setDesignFirms] = useState(INITIAL_DESIGN_FIRMS);
     const [dealers, setDealers] = useState(INITIAL_DEALERS);
     const [selectedOpportunity, setSelectedOpportunity] = useState(null);
+    const [myProjects, setMyProjects] = useState(MY_PROJECTS_DATA); // State for My Projects
     const [userSettings, setUserSettings] = useState({
         id: 1,
         firstName: 'Luke',
@@ -143,6 +145,15 @@ function App() {
         if (type === 'post') setPosts(prev => [obj, ...prev]);
         if (type === 'poll') setPolls(prev => [obj, ...prev]);
     }, []);
+
+    const handleAddNewInstall = useCallback((newInstall) => {
+        setMyProjects(prev => [{
+            id: `proj${prev.length + 1}_${Date.now()}`, // Create a unique ID
+            ...newInstall,
+        }, ...prev]);
+        handleBack(); // Navigate back to the projects screen
+    }, [handleBack]);
+
 
     const handleShowAlert = useCallback((message) => { setAlertInfo({ show: true, message }); }, []);
     const handleShowVoiceModal = useCallback((message) => { setVoiceMessage(message); setTimeout(() => setVoiceMessage(''), 1200); }, []);
@@ -274,11 +285,13 @@ function App() {
             case 'members':
                 return <ScreenComponent {...commonProps} members={members} setMembers={setMembers} currentUserId={currentUserId} />;
             case 'projects':
-                return <ScreenComponent {...commonProps} opportunities={opportunities} setSelectedOpportunity={setSelectedOpportunity} />;
+                return <ScreenComponent {...commonProps} opportunities={opportunities} setSelectedOpportunity={setSelectedOpportunity} myProjects={myProjects} />;
             case 'community':
                 return <ScreenComponent {...commonProps} openCreateContentModal={() => setShowCreateContentModal(true)} posts={posts} polls={polls} />;
             case 'new-lead':
                 return <ScreenComponent {...commonProps} onSuccess={handleNewLeadSuccess} designFirms={designFirms} setDesignFirms={setDesignFirms} dealers={dealers} setDealers={setDealers} />;
+            case 'add-new-install':
+                return <AddNewInstallScreen {...commonProps} onAddInstall={handleAddNewInstall} onBack={handleBack} />;
             default:
                 return <ScreenComponent {...commonProps} />;
         }
