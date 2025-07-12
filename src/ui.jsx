@@ -2877,78 +2877,6 @@ const PostCard = ({ post, theme }) => {
 };
 
 
-const WinsCard = ({ win, theme }) => {
-    const { user, timeAgo, title, images } = win;
-    const [idx, setIdx] = useState(0);
-    const [menu, setMenu] = useState(false);
-
-    const shareWin = async () => {
-        setMenu(false);
-        const msg = `${title}\n${window.location.href}`;
-        if (navigator.share && window.isSecureContext) {
-            try { await navigator.share({ title: 'JSI Win', text: title, url: window.location.href }); return; } catch { }
-        }
-        try { await navigator.clipboard.writeText(msg); alert('Link copied!'); return; } catch { }
-        alert('Copy failed.');
-    };
-
-    const prev = () => setIdx((idx - 1 + images.length) % images.length);
-    const next = () => setIdx((idx + 1) % images.length);
-
-    return (
-        <GlassCard theme={theme} className="p-5 space-y-4 rounded-2xl shadow-lg">
-            <div className="flex items-start justify-between">
-                <div className="flex items-center space-x-3">
-                    <Avatar src={user.avatar} alt={user.name} theme={theme} />
-                    <div>
-                        <p className="text-sm font-medium" style={{ color: theme.colors.textPrimary }}>{user.name}</p>
-                        <p className="text-xs" style={{ color: theme.colors.textSecondary }}>{timeAgo}</p>
-                    </div>
-                </div>
-
-                <div className="relative">
-                    <button onClick={() => setMenu(!menu)}>
-                        <MoreVertical className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
-                    </button>
-                    {menu && (
-                        <div className="absolute right-0 mt-1 w-28 rounded-lg shadow-lg z-20"
-                            style={{ backgroundColor: theme.colors.background }}>
-                            <button onClick={shareWin}
-                                className="flex items-center w-full px-4 py-2 text-sm hover:bg-[rgba(0,0,0,0.03)]">
-                                <Share2 className="w-4 h-4 mr-2" /> Share
-                            </button>
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            <p className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>{title}</p>
-
-            <div className="relative">
-                <img
-                    src={images[idx]}
-                    alt=""
-                    className="w-full rounded-xl object-cover max-h-72"
-                    style={{ border: `1px solid ${theme.colors.subtle}` }}
-                />
-
-                {images.length > 1 && (
-                    <>
-                        <button onClick={prev}
-                            className="absolute left-2 top-1/2 -translate-y-1/2 bg-[rgba(0,0,0,0.45)] hover:bg-[rgba(0,0,0,0.6)] p-2 rounded-full">
-                            <ChevronLeft className="w-4 h-4 text-white" />
-                        </button>
-                        <button onClick={next}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 bg-[rgba(0,0,0,0.45)] hover:bg-[rgba(0,0,0,0.6)] p-2 rounded-full">
-                            <ChevronRight className="w-4 h-4 text-white" />
-                        </button>
-                    </>
-                )}
-            </div>
-        </GlassCard>
-    );
-};
-
 export const PollCard = ({ poll, theme }) => {
     const { user, timeAgo, question, options } = poll;
     const [choice, setChoice] = useState(null);
@@ -3101,6 +3029,35 @@ const FormSection = ({ title, theme, children }) => (
 );
 
 
+export const CreatePost = () => {
+    const [postType, setPostType] = useState('Post');
+
+    return (
+        <div className="create-post-container">
+            <h2>Create a new post</h2>
+            <div className="post-type-selector">
+                <button
+                    className={postType === 'Post' ? 'active' : ''}
+                    onClick={() => setPostType('Post')}
+                >
+                    Post
+                </button>
+                <button
+                    className={postType === 'Poll' ? 'active' : ''}
+                    onClick={() => setPostType('Poll')}
+                >
+                    Poll
+                </button>
+            </div>
+
+            <div className="editor-container">
+                {postType === 'Post' && <PostEditor />}
+                {postType === 'Poll' && <PollEditor />}
+            </div>
+        </div>
+    );
+};
+
 const CreateContentModal = ({ close, theme, onAdd }) => {
     const [type, setType] = useState(null);
     const [text, setText] = useState('');
@@ -3112,7 +3069,6 @@ const CreateContentModal = ({ close, theme, onAdd }) => {
     const submit = () => {
         // This is demonstration logic, would be replaced with actual API calls
         if (type === 'post') onAdd('post', { id: Date.now(), user: { name: 'You', avatar: '' }, timeAgo: 'just now', text, image: file ? URL.createObjectURL(file) : null, likes: 0, comments: [], });
-        if (type === 'win') onAdd('win', { id: Date.now(), user: { name: 'You', avatar: '' }, timeAgo: 'just now', title: text || 'Win!', images: [file ? URL.createObjectURL(file) : 'https://placehold.co/800x500/A9886C/FFFFFF?text=JSI+Win'], });
         if (type === 'poll') onAdd('poll', { id: Date.now(), user: { name: 'You', avatar: '' }, timeAgo: 'now', question, options: [{ id: 'a', text: optA || 'Option A', votes: 0 }, { id: 'b', text: optB || 'Option B', votes: 0 }], });
         close();
     };
@@ -3138,13 +3094,6 @@ const CreateContentModal = ({ close, theme, onAdd }) => {
                     <label className="block"><input type="file" accept="image/*,video/*" hidden onChange={(e) => setFile(e.target.files[0])} /><span className="inline-flex items-center space-x-2 px-4 py-2 rounded-lg cursor-pointer" style={{ backgroundColor: theme.colors.subtle }}>{file ? <span>{file.name}</span> : <><Image className="w-4 h-4" /><span>Add Media</span></>}</span></label>
                     <button onClick={submit} className="w-full font-bold py-3 px-6 rounded-full text-white" style={{ backgroundColor: theme.colors.accent }}>Post</button>
                 </div>;
-            case 'win':
-                return <div className="space-y-4">
-                    <h3 className="text-xl font-bold">Share a Win</h3>
-                    <FormInput type="textarea" value={text} onChange={(e) => setText(e.target.value)} placeholder="Describe the win..." theme={theme} />
-                    <label className="block"><input type="file" accept="image/*" hidden onChange={(e) => setFile(e.target.files[0])} /><span className="inline-flex items-center space-x-2 px-4 py-2 rounded-lg cursor-pointer" style={{ backgroundColor: theme.colors.subtle }}>{file ? <span>{file.name}</span> : <><ImageIcon className="w-4 h-4" /><span>Add Photo</span></>}</span></label>
-                    <button onClick={submit} className="w-full font-bold py-3 px-6 rounded-full text-white" style={{ backgroundColor: theme.colors.accent }}>Post Win</button>
-                </div>;
             case 'poll':
                 return <div className="space-y-4">
                     <h3 className="text-xl font-bold">Create Poll</h3>
@@ -3156,7 +3105,6 @@ const CreateContentModal = ({ close, theme, onAdd }) => {
             default:
                 return <div className="space-y-3">
                     <OptionButton icon={MessageSquare} title="Feed Post" description="Share an update or photo" onClick={() => setType('post')} />
-                    <OptionButton icon={Trophy} title="Win" description="Celebrate a successful project" onClick={() => setType('win')} />
                     <OptionButton icon={PieChart} title="Poll" description="Ask a question to the community" onClick={() => setType('poll')} />
                 </div>;
         }
@@ -3164,6 +3112,7 @@ const CreateContentModal = ({ close, theme, onAdd }) => {
 
     return <Modal show={true} onClose={close} title={type ? "" : "Create..."} theme={theme}>{renderForm()}</Modal>;
 };
+
 
 const FancySelect = ({ value, onChange, options, placeholder, required, theme }) => (
     <div
@@ -3195,7 +3144,6 @@ const FancySelect = ({ value, onChange, options, placeholder, required, theme })
     </div>
 );
 
-// in ui.jsx
 
 export const FormInput = React.memo(({
     label,
@@ -5327,12 +5275,13 @@ export const PlaceholderScreen = ({ theme, category }) => {
     );
 };
 
-const CommunityScreen = ({ theme, onNavigate, openCreateContentModal, posts, wins, polls }) => {
+export const CommunityScreen = ({ theme, onNavigate, openCreateContentModal, posts, polls }) => {
     const [tab, setTab] = useState('feed');
 
     const combinedFeed = useMemo(() => {
-        return [...posts, ...wins].sort((a, b) => b.id - a.id);
-    }, [posts, wins]);
+        // The feed now only combines posts and sorts them.
+        return [...posts].sort((a, b) => b.id - a.id);
+    }, [posts]);
 
     return (
         <div className="h-full flex flex-col" style={{ backgroundColor: theme.colors.background }}>
@@ -5366,16 +5315,13 @@ const CommunityScreen = ({ theme, onNavigate, openCreateContentModal, posts, win
 
             <div className="flex-1 overflow-y-auto px-4 pb-6 pt-6 space-y-6 max-w-md mx-auto scrollbar-hide">
                 {tab === 'feed' && combinedFeed.map((item) => (
-                    item.type === 'post'
-                        ? <PostCard key={`post-${item.id}`} post={item} theme={theme} />
-                        : <WinsCard key={`win-${item.id}`} win={item} theme={theme} />
+                    <PostCard key={`post-${item.id}`} post={item} theme={theme} />
                 ))}
                 {tab === 'polls' && polls.map((p) => <PollCard key={`poll-${p.id}`} poll={p} theme={theme} />)}
             </div>
         </div>
     );
 };
-
 export const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSettings }) => {
     const [selectedCategory, setSelectedCategory] = useState('tfl');
     const [setQuantity, setSetQuantity] = useState(1);
@@ -6073,7 +6019,6 @@ const SCREEN_MAP = {
 
 export {
     Avatar,
-    WinsCard,
     CreateContentModal,
     SuccessToast,
     MonthlyBarChart,

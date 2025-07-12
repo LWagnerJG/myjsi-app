@@ -1,6 +1,6 @@
 ﻿import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
-import { lightTheme, darkTheme, INITIAL_MEMBERS, INITIAL_OPPORTUNITIES, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS, INITIAL_POSTS, INITIAL_WINS, INITIAL_POLLS } from './data.jsx';
+import { lightTheme, darkTheme, INITIAL_MEMBERS, INITIAL_OPPORTUNITIES, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS, INITIAL_POSTS, INITIAL_POLLS } from './data.jsx';
 import {
     AppHeader, ProfileMenu, SCREEN_MAP, OrderModal, Modal, SuccessToast, PageTitle,
     ResourceDetailScreen, CartScreen, VoiceModal, ProductComparisonScreen,
@@ -40,7 +40,6 @@ function App() {
 
     // --- COMMUNITY & AI STATE ---
     const [posts, setPosts] = useState(INITIAL_POSTS);
-    const [wins, setWins] = useState(INITIAL_WINS);
     const [polls, setPolls] = useState(INITIAL_POLLS);
     const [showCreateContentModal, setShowCreateContentModal] = useState(false);
     const [aiResponse, setAiResponse] = useState('');
@@ -62,18 +61,26 @@ function App() {
 
     // --- SIDE EFFECTS ---
     useEffect(() => {
+        // Set the status bar theme color
+        const themeColor = isDarkMode ? darkTheme.colors.background : lightTheme.colors.background;
+        const metaThemeColor = document.querySelector("meta[name=theme-color]");
+        if (metaThemeColor) {
+            metaThemeColor.setAttribute("content", themeColor);
+        }
+
+        // Prevent scrolling on the home screen
         const preventDefaultGlobal = (e) => {
             if (currentScreen === 'home') {
                 e.preventDefault();
             }
         };
-
         document.body.addEventListener('touchmove', preventDefaultGlobal, { passive: false });
 
+        // Cleanup listeners
         return () => {
             document.body.removeEventListener('touchmove', preventDefaultGlobal);
         };
-    }, [currentScreen]);
+    }, [currentScreen, isDarkMode, currentTheme]);
 
     useEffect(() => {
         setMembers(prevMembers => prevMembers.map(member =>
@@ -132,11 +139,10 @@ function App() {
         setTimeout(() => setSuccessMessage(""), 2000);
     }, [opportunities, handleNavigate]);
 
-    const handleAddItem = (type, obj) => {
+    const handleAddItem = useCallback((type, obj) => {
         if (type === 'post') setPosts(prev => [obj, ...prev]);
-        if (type === 'win') setWins(prev => [obj, ...prev]);
         if (type === 'poll') setPolls(prev => [obj, ...prev]);
-    };
+    }, []);
 
     const handleShowAlert = useCallback((message) => { setAlertInfo({ show: true, message }); }, []);
     const handleShowVoiceModal = useCallback((message) => { setVoiceMessage(message); setTimeout(() => setVoiceMessage(''), 1200); }, []);
@@ -270,7 +276,7 @@ function App() {
             case 'projects':
                 return <ScreenComponent {...commonProps} opportunities={opportunities} setSelectedOpportunity={setSelectedOpportunity} />;
             case 'community':
-                return <ScreenComponent {...commonProps} openCreateContentModal={() => setShowCreateContentModal(true)} posts={posts} wins={wins} polls={polls} />;
+                return <ScreenComponent {...commonProps} openCreateContentModal={() => setShowCreateContentModal(true)} posts={posts} polls={polls} />;
             case 'new-lead':
                 return <ScreenComponent {...commonProps} onSuccess={handleNewLeadSuccess} designFirms={designFirms} setDesignFirms={setDesignFirms} dealers={dealers} setDealers={setDealers} />;
             default:
