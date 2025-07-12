@@ -214,6 +214,17 @@ export const RESOURCES_DATA = [
         ].sort((a, b) => a.label.localeCompare(b.label))
     }
 ];
+
+export const VERTICALS = [
+    'Corporate',
+    'Education',
+    'Government',
+    'Healthcare',
+    'Hospitality',
+    'Other (Please specify)'
+];
+
+
 export const SOCIAL_MEDIA_POSTS = [{ id: 1, type: 'image', url: 'https://placehold.co/400x500/E3DBC8/2A2A2A?text=JSI+Seating', caption: 'Comfort meets design. ✨ Discover the new Arwyn series, perfect for any modern workspace. #JSIFurniture #OfficeDesign #ModernWorkplace' }, { id: 2, type: 'image', url: 'https://placehold.co/400x500/D9CDBA/2A2A2A?text=Vision+Casegoods', caption: 'Functionality at its finest. The Vision casegoods line offers endless configuration possibilities. #Casegoods #OfficeInspo #JSI' }, { id: 3, type: 'video', url: 'https://placehold.co/400x500/A9886C/FFFFFF?text=Lounge+Tour+(Video)', caption: 'Take a closer look at the luxurious details of our Caav lounge collection. #LoungeSeating #ContractFurniture #HospitalityDesign' }, { id: 4, type: 'image', url: 'https://placehold.co/400x500/966642/FFFFFF?text=Forge+Tables', caption: 'Gather around. The Forge table series brings a rustic yet refined look to collaborative spaces. #MeetingTable #Collaboration #JSI' },];
 export const LOANER_POOL_PRODUCTS = [
     {
@@ -267,7 +278,7 @@ export const STAGES = ['Discovery', 'Specifying', 'Decision/Bidding', 'PO Expect
 
 export const STAGE_COLORS = { 'Discovery': `bg-blue-200 text-blue-900`, 'Specifying': `bg-green-200 text-green-900`, 'Decision/Bidding': `bg-orange-200 text-orange-900`, 'PO Expected': `bg-purple-200 text-purple-900`, 'Won': `bg-emerald-200 text-emerald-900`, 'Lost': `bg-red-200 text-red-900`, };
 
-export const EMPTY_LEAD = { project: '', designFirm: '', dealer: '', winProbability: '', projectStatus: '', vertical: '', otherVertical: '', estimatedList: '', poTimeframe: '', competitors: [], competitionPresent: false, isBid: false, jsiSpecServices: false, quoteType: 'New Quote', pastProjectRef: '', discount: 'Undecided', products: [], notes: '', jsiQuoteNumber: '', isContract: false, contractType: '' }; export const VERTICALS = ['Corporate', 'Education', 'Government', 'Healthcare', 'Hospitality', 'Other (Please specify)'];
+export const EMPTY_LEAD = { project: '', designFirm: '', dealer: '', winProbability: '', projectStatus: '', vertical: '', otherVertical: '', estimatedList: '', poTimeframe: '', competitors: [], competitionPresent: false, isBid: false, jsiSpecServices: false, quoteType: 'New Quote', pastProjectRef: '', discount: 'Undecided', products: [], notes: '', jsiQuoteNumber: '', isContract: false, contractType: '' };
 
 export const URGENCY_LEVELS = ['Low', 'Medium', 'High'];
 
@@ -277,7 +288,6 @@ export const COMPETITORS = ['None', 'Kimball', 'OFS', 'Indiana Furniture', 'Nati
 
 export const DISCOUNT_OPTIONS = ['Undecided', '50/20 (60.00%)', '50/20/1 (60.4%)', '50/20/2 (60.80%)', '50/20/4 (61.60%)', '50/20/2/3 (61.98%)', '50/20/5 (62.00%)', '50/20/3 (61.20%)', '50/20/6 (62.40%)', '50/25 (62.50%)', '50/20/5/2 (62.76%)', '50/20/7 (62.80%)', '50/20/8 (63.20%)', '50/10/10/10 (63.55%)', '50/20/9 (63.6%)', '50/20/10 (64.00%)', '50/20/8/3 (64.30%)', '50/20/10/3 (65.08%)', '50/20/10/5 (65.80%)', '50/20/15 (66.00%)'];
 
-export const JSI_PRODUCT_SERIES = ['Arwyn', 'Bryn', 'Caav', 'Connect', 'Hoopz', 'Indie', 'Jude', 'Kindera', 'Lok', 'Poet', 'Teekan', 'Vision', 'Wink', 'Ziva'].sort();
 
 export const VISION_MATERIALS = ['TFL', 'HPL', 'Veneer'];
 
@@ -372,6 +382,11 @@ export const ORDER_DATA = [
     { date: '2025-06-10T11:20:00Z', amount: '$137,262.94', company: 'BUSINESS FURNISHINGS', details: 'MONREAU SEMINARY', orderNumber: '450080-00', po: 'S65474-2', net: 112000.00, reward: 'Jennifer Franklin (1%)', shipDate: '2025-09-15T12:00:00Z', status: 'In Production', packQty: 25, shipTo: 'BUSINESS FURNISHINGS LLC\n4102 MEGHAN BEELER COURT\nSOUTH BEND, IN 46628', discount: '18.40%', lineItems: [] },
     { date: '', amount: '', company: 'SHARP SCHOOL SERVICES INC', details: 'MARSHALL COMMUNITY BUILDING', orderNumber: '442137', po: 'S65479-1', status: 'Entered', shipDate: '2025-07-20T12:00:00Z' },
 ];
+
+export const JSI_PRODUCT_SERIES = ['Arwyn', 'Bryn', 'Caav', 'Connect', 'Hoopz', 'Indie', 'Jude', 'Kindera', 'Lok', 'Poet', 'Teekan', 'Vision', 'Wink', 'Ziva'].sort();
+
+export const JSI_POLY_COLORS = ['Unknown', 'Toile Red', 'Thunderous Green', 'Kiwi Green', 'Refuge Blue', 'Navy Blue', 'Tricorn Black', 'Stop Red', 'Extra White'];
+
 
 export const SAMPLE_CATEGORIES = [{ id: 'tfl', name: 'TFL' }, { id: 'hpl', name: 'HPL' }, { id: 'veneer', name: 'Veneer' }, { id: 'solid-wood', name: 'Solid Wood' }, { id: 'paint', name: 'Paint' }, { id: 'metal', name: 'Metal' }, { id: 'solid-surface', name: 'Solid Surface' }, { id: 'glass', name: 'Glass' }, { id: 'plastic', name: 'Plastic' }, { id: 'poly', name: 'Poly' }, { id: 'specialty', name: 'Specialty' },];
 
