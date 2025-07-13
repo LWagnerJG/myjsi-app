@@ -2426,91 +2426,101 @@ export const FabricSearchForm = ({ theme, showAlert, onNavigate }) => {
         </div>
     );
 };
+
 export const COMYardageRequestScreen = ({ theme, showAlert, onNavigate }) => {
     const [selectedModels, setSelectedModels] = useState([]);
+    const [showConfirm, setShowConfirm] = useState(false);
+    const [summary, setSummary] = useState('');
 
-    const addModel = useCallback((modelId) => {
-        if (modelId && !selectedModels.some(m => m.id === modelId)) {
-            const modelData = Data.JSI_MODELS.find(m => m.id === modelId);
-            if (modelData) {
-                setSelectedModels(prev => [...prev, { ...modelData, quantity: 1 }]);
-            }
-        }
-    }, [selectedModels]);
-
-    const updateModel = useCallback((modelId, updates) => {
-        setSelectedModels(prev => prev.map(m => (m.id === modelId ? { ...m, ...updates } : m)));
-    }, []);
-
-    const removeModel = useCallback((modelId) => {
-        setSelectedModels(prev => prev.filter(m => m.id !== modelId));
-    }, []);
-
-    const handleSubmit = () => {
-        showAlert('COM Yardage Request Submitted (Demo)');
-        onNavigate('resources');
-    };
+    const fabricStrings = useMemo(() =>
+        Data.FABRICS_DATA.map(f => `${f.manufacturer}, **${f.name}**`), []);
 
     const modelOptions = useMemo(() =>
-        Data.JSI_MODELS
-            .filter(m => m.isUpholstered && !selectedModels.some(sm => sm.id === m.id))
-            .map(m => `${m.name} (${m.id})`),
-        [selectedModels]
-    );
+        Data.JSI_MODELS.filter(m => m.isUpholstered)
+            .map(m => `${m.name} (${m.id})`), []);
+
+    const addModel = rawVal => {
+        if (!rawVal) return;
+        const match = rawVal.match(/\(([^)]+)\)/);
+        const modelId = match ? match[1] : rawVal.trim();
+        const model = Data.JSI_MODELS.find(m => m.id === modelId);
+        if (!model) return;
+        const key = `${modelId}_${Date.now()}`;
+        setSelectedModels(prev => [...prev, { ...model, quantity: 1, fabric: '', key }]);
+    };
+
+    const updateModel = (key, updates) =>
+        setSelectedModels(prev =>
+            prev.map(m => (m.key === key ? { ...m, ...updates } : m)));
+
+    const removeModel = key =>
+        setSelectedModels(prev => prev.filter(m => m.key !== key));
+
+    const handleSubmit = () => {
+        const incomplete = selectedModels.some(m => !m.fabric.trim());
+        if (incomplete) return showAlert('Finish all fabrics.');
+        const list = selectedModels
+            .map(m => `${m.name} (${m.quantity}×) – ${m.fabric}`)
+            .join('\n');
+        setSummary(list);
+        setShowConfirm(true);
+    };
 
     return (
         <div className="flex flex-col h-full">
-            <PageTitle title="COM Yardage Request" theme={theme} onBack={() => onNavigate('fabrics')} />
-            <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4 scrollbar-hide">
-                <FormSection title="Selected Models" theme={theme}>
-                    {selectedModels.length === 0 && (
-                        <p className="text-center text-sm" style={{ color: theme.colors.textSecondary }}>
-                            Use the dropdown below to add models to your request.
-                        </p>
-                    )}
-                    {selectedModels.map(model => (
-                        <GlassCard key={model.id} className="p-4 space-y-3" style={{ backgroundColor: theme.colors.subtle }}>
+            <PageTitle title="COM Yardage Request" theme={theme} />
+
+            <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4">
+                <GlassCard theme={theme} className="p-4">
+                    <h3 className="font-bold mb-3" style={{ color: theme.colors.textPrimary }}>Select Model(s)</h3>
+
+                    {selectedModels.map(m => (
+                        <GlassCard key={m.key} theme={theme} className="p-4 mb-3 space-y-3">
                             <div className="flex items-start justify-between">
                                 <div>
-                                    <p className="font-semibold" style={{ color: theme.colors.textPrimary }}>{model.name}</p>
-                                    <p className="text-sm font-mono" style={{ color: theme.colors.textSecondary }}>{model.id}</p>
+                                    <p className="font-semibold">{m.name}</p>
+                                    <p className="text-sm font-mono">{m.id}</p>
                                 </div>
-                                <button onClick={() => removeModel(model.id)} className="p-1 rounded-full hover:bg-red-500/10"><X className="w-5 h-5 text-red-500" /></button>
+                                <button onClick={() => removeModel(m.key)} className="p-1 rounded-full hover:bg-red-500/10">
+                                    <X className="w-5 h-5 text-red-500" />
+                                </button>
                             </div>
-                            <div className="flex items-center justify-between">
-                                <label className="text-sm font-medium" style={{ color: theme.colors.textSecondary }}>Quantity</label>
-                                <div className="flex items-center space-x-2">
-                                    <button type="button" onClick={() => updateModel(model.id, { quantity: Math.max(1, model.quantity - 1) })} className="p-1 rounded-full" style={{ backgroundColor: theme.colors.surface }}><Minus className="w-4 h-4" style={{ color: theme.colors.secondary }} /></button>
-                                    <span className="font-bold w-8 text-center" style={{ color: theme.colors.textPrimary }}>{model.quantity}</span>
-                                    <button type="button" onClick={() => updateModel(model.id, { quantity: model.quantity + 1 })} className="p-1 rounded-full" style={{ backgroundColor: theme.colors.surface }}><Plus className="w-4 h-4" style={{ color: theme.colors.secondary }} /></button>
-                                </div>
+
+                            <div className="flex items-center space-x-3">
+                                <label className="text-sm font-medium">Qty</label>
+                                <button onClick={() => updateModel(m.key, { quantity: Math.max(1, m.quantity - 1) })}
+                                    className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: theme.colors.subtle }}><Minus className="w-4 h-4" /></button>
+                                <span className="font-bold">{m.quantity}</span>
+                                <button onClick={() => updateModel(m.key, { quantity: m.quantity + 1 })}
+                                    className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: theme.colors.subtle }}><Plus className="w-4 h-4" /></button>
                             </div>
+
+                            <AutoCompleteCombobox value={m.fabric} onChange={v => updateModel(m.key, { fabric: v })}
+                                placeholder="Fabric pattern…" options={fabricStrings} theme={theme} />
                         </GlassCard>
                     ))}
-                    <div className="pt-2">
-                        <AutoCompleteCombobox
-                            value=""
-                            onChange={(val) => {
-                                const modelId = val.match(/\(([^)]+)\)/)?.[1];
-                                addModel(modelId);
-                            }}
-                            placeholder="+ Add a Model..."
-                            options={modelOptions}
-                            theme={theme}
-                        />
-                    </div>
-                </FormSection>
 
-                <div className="pt-4 pb-4">
-                    <button onClick={handleSubmit} disabled={selectedModels.length === 0} className="w-full font-bold py-3.5 px-6 rounded-full transition-colors disabled:opacity-50" style={{ backgroundColor: theme.colors.accent, color: '#FFFFFF' }}>
-                        Submit Request
-                    </button>
-                </div>
+                    <AutoCompleteCombobox value="" onChange={addModel} placeholder="+ Add model"
+                        options={modelOptions} theme={theme} resetOnSelect />
+                </GlassCard>
+
+                <button onClick={handleSubmit} disabled={!selectedModels.length}
+                    className="w-full font-bold py-3 rounded-full text-white disabled:opacity-50" style={{ backgroundColor: theme.colors.accent }}>Submit Request</button>
             </div>
+
+            {showConfirm && ReactDOM.createPortal(
+                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+                    <GlassCard theme={theme} className="p-6 max-w-sm mx-4">
+                        <h2 className="text-xl font-bold mb-2">Request Received</h2>
+                        <pre className="text-sm whitespace-pre-wrap mb-4">{summary}</pre>
+                        <p className="text-sm mb-4">JSI will email you the requested yardages shortly.</p>
+                        <button onClick={() => { setShowConfirm(false); onNavigate('resources'); }}
+                            className="w-full py-2 rounded-full text-white" style={{ backgroundColor: theme.colors.accent }}>Done</button>
+                    </GlassCard>
+                </div>, document.body)}
         </div>
     );
 };
-
 export const FabricsScreen = ({ onNavigate, theme, currentScreen, showAlert }) => {
     const subScreen = currentScreen.split('/')[1];
 
