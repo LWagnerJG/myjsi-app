@@ -5080,20 +5080,29 @@ export const ProjectDetailModal = ({ opportunity, onClose, theme, onUpdate }) =>
     );
 };
 
-export const ProjectsScreen = ({ onNavigate, theme, opportunities, setSelectedOpportunity, myProjects, setSelectedProject }) => {
+export const ProjectsScreen = ({
+    onNavigate,
+    theme,
+    opportunities,
+    setSelectedOpportunity,
+    myProjects,
+    setSelectedProject
+}) => {
     const [projectsTab, setProjectsTab] = useState('pipeline');
     const [selectedPipelineStage, setSelectedPipelineStage] = useState('Discovery');
 
     const filteredOpportunities = useMemo(() => {
         if (!opportunities) return [];
-        return opportunities.filter(opp => opp.stage === selectedPipelineStage);
+        return opportunities.filter(
+            opp => opp.stage === selectedPipelineStage
+        );
     }, [selectedPipelineStage, opportunities]);
 
     const handleAddClick = () => {
         if (projectsTab === 'pipeline') {
             onNavigate('new-lead');
         } else {
-            onNavigate('add-new-install'); // Assuming 'add-new-install' is a valid route
+            onNavigate('add-new-install');
         }
     };
 
@@ -5103,38 +5112,56 @@ export const ProjectsScreen = ({ onNavigate, theme, opportunities, setSelectedOp
                 <button
                     onClick={handleAddClick}
                     className="flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-transform hover:scale-105 active:scale-95"
-                    style={{ backgroundColor: theme.colors.accent, color: 'white' }}
+                    style={{
+                        backgroundColor: theme.colors.accent,
+                        color: 'white'
+                    }}
                 >
-                    <span>{projectsTab === 'pipeline' ? 'New Lead' : 'Add New Install'}</span>
+                    <span>
+                        {projectsTab === 'pipeline' ? 'New Lead' : 'Add New Install'}
+                    </span>
                     <Plus className="w-4 h-4" />
                 </button>
             </PageTitle>
 
             <div className="px-4">
-                <GlassCard theme={theme} className="p-1 flex relative">
-                    {/* Top Toggle Bar Slider (Pipeline/My Projects) */}
-                    {/* The key is to make the slider span exactly half the inner width,
-                        and translate by 100% of its own width. */}
+                <GlassCard
+                    theme={theme}
+                    className="relative flex p-1 rounded-full overflow-hidden"
+                >
+                    {/* Slider “pill” anchored to selected side */}
                     <div
-                        className="absolute top-1 bottom-1 w-1/2 h-auto rounded-full transition-all duration-300 ease-in-out"
+                        className="absolute top-1 bottom-1 rounded-full transition-all duration-300 ease-in-out"
                         style={{
                             backgroundColor: theme.colors.accent,
-                            // When 'pipeline', it's at translateX(0).
-                            // When 'my-projects', it shifts by 100% of its own width (which is 1/2 of parent's width).
-                            transform: projectsTab === 'pipeline' ? 'translateX(0)' : 'translateX(100%)'
+                            width: 'calc(50% - 8px)',
+                            left: projectsTab === 'pipeline' ? '4px' : undefined,
+                            right: projectsTab === 'my-projects' ? '4px' : undefined
                         }}
                     />
+
                     <button
                         onClick={() => setProjectsTab('pipeline')}
                         className="flex-1 py-2 text-sm font-semibold rounded-full transition-colors duration-300 relative z-10"
-                        style={{ color: projectsTab === 'pipeline' ? theme.colors.surface : theme.colors.textPrimary }}
+                        style={{
+                            color:
+                                projectsTab === 'pipeline'
+                                    ? theme.colors.surface
+                                    : theme.colors.textPrimary
+                        }}
                     >
                         Pipeline
                     </button>
+
                     <button
                         onClick={() => setProjectsTab('my-projects')}
                         className="flex-1 py-2 text-sm font-semibold rounded-full transition-colors duration-300 relative z-10"
-                        style={{ color: projectsTab === 'my-projects' ? theme.colors.surface : theme.colors.textPrimary }}
+                        style={{
+                            color:
+                                projectsTab === 'my-projects'
+                                    ? theme.colors.surface
+                                    : theme.colors.textPrimary
+                        }}
                     >
                         My Projects
                     </button>
@@ -5144,15 +5171,22 @@ export const ProjectsScreen = ({ onNavigate, theme, opportunities, setSelectedOp
             {projectsTab === 'pipeline' ? (
                 <div className="flex-1 flex flex-col overflow-hidden">
                     <GlassCard theme={theme} className="p-1 mx-4 mt-4 mb-4">
-                        <div className="flex space-x-2 overflow-x-auto scrollbar-hide">
+                        {/* Overlapping stage pills to show peek of next */}
+                        <div className="flex space-x-[-2px] overflow-x-auto scrollbar-hide">
                             {Data.STAGES.map(stage => (
                                 <button
                                     key={stage}
                                     onClick={() => setSelectedPipelineStage(stage)}
                                     className="px-4 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition-colors flex-shrink-0"
                                     style={{
-                                        backgroundColor: selectedPipelineStage === stage ? theme.colors.accent : 'transparent',
-                                        color: selectedPipelineStage === stage ? theme.colors.surface : theme.colors.textSecondary
+                                        backgroundColor:
+                                            selectedPipelineStage === stage
+                                                ? theme.colors.accent
+                                                : 'transparent',
+                                        color:
+                                            selectedPipelineStage === stage
+                                                ? theme.colors.surface
+                                                : theme.colors.textSecondary
                                     }}
                                 >
                                     {stage}
@@ -5160,47 +5194,94 @@ export const ProjectsScreen = ({ onNavigate, theme, opportunities, setSelectedOp
                             ))}
                         </div>
                     </GlassCard>
+
                     <div className="flex-1 overflow-y-auto px-4 space-y-4 pb-4 scrollbar-hide">
-                        {filteredOpportunities.length > 0 ? filteredOpportunities.map(opp => (
-                            <GlassCard key={opp.id} theme={theme} className="overflow-hidden p-4 cursor-pointer hover:border-gray-400/50" onClick={() => setSelectedOpportunity(opp)}>
-                                <div className="flex justify-between items-start">
-                                    <h3 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>{opp.name}</h3>
-                                    <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${Data.STAGE_COLORS[opp.stage]}`}>{opp.stage}</span>
-                                </div>
-                                <p className="text-sm" style={{ color: theme.colors.textSecondary }}>{opp.company}</p>
-                                <p className="font-semibold text-2xl my-2" style={{ color: theme.colors.textPrimary }}>{opp.value}</p>
-                            </GlassCard>
-                        )) : (
-                            <p className="text-center text-sm p-8" style={{ color: theme.colors.textSecondary }}>No projects in this stage.</p>
+                        {filteredOpportunities.length > 0 ? (
+                            filteredOpportunities.map(opp => (
+                                <GlassCard
+                                    key={opp.id}
+                                    theme={theme}
+                                    className="overflow-hidden p-4 cursor-pointer hover:border-gray-400/50"
+                                    onClick={() => setSelectedOpportunity(opp)}
+                                >
+                                    <div className="flex justify-between items-start">
+                                        <h3
+                                            className="font-bold text-lg"
+                                            style={{ color: theme.colors.textPrimary }}
+                                        >
+                                            {opp.name}
+                                        </h3>
+                                        <span
+                                            className={`px-2.5 py-1 text-xs font-semibold rounded-full ${Data.STAGE_COLORS[opp.stage]}`}
+                                        >
+                                            {opp.stage}
+                                        </span>
+                                    </div>
+                                    <p
+                                        className="text-sm"
+                                        style={{ color: theme.colors.textSecondary }}
+                                    >
+                                        {opp.company}
+                                    </p>
+                                    <p
+                                        className="font-semibold text-2xl my-2"
+                                        style={{ color: theme.colors.textPrimary }}
+                                    >
+                                        {opp.value}
+                                    </p>
+                                </GlassCard>
+                            ))
+                        ) : (
+                            <p
+                                className="text-center text-sm p-8"
+                                style={{ color: theme.colors.textSecondary }}
+                            >
+                                No projects in this stage.
+                            </p>
                         )}
                     </div>
                 </div>
             ) : (
                 <div className="flex-1 overflow-y-auto px-4 pt-4 pb-4 space-y-6 scrollbar-hide">
-                    {myProjects && myProjects.length > 0 ? myProjects.map(project => (
-                        <GlassCard key={project.id} theme={theme} className="p-0 overflow-hidden cursor-pointer group" onClick={() => setSelectedProject(project)}>
-                            <div className="relative aspect-video w-full">
-                                <img
-                                    src={project.image}
-                                    alt={project.name}
-                                    className="absolute h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                                <div className="absolute bottom-0 left-0 p-4">
-                                    <h3 className="text-2xl font-bold text-white tracking-tight">{project.name}</h3>
-                                    <p className="text-white/80 font-medium">{project.location}</p>
+                    {myProjects && myProjects.length > 0 ? (
+                        myProjects.map(project => (
+                            <GlassCard
+                                key={project.id}
+                                theme={theme}
+                                className="p-0 overflow-hidden cursor-pointer group"
+                                onClick={() => setSelectedProject(project)}
+                            >
+                                <div className="relative aspect-video w-full">
+                                    <img
+                                        src={project.image}
+                                        alt={project.name}
+                                        className="absolute h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                                    <div className="absolute bottom-0 left-0 p-4">
+                                        <h3 className="text-2xl font-bold text-white tracking-tight">
+                                            {project.name}
+                                        </h3>
+                                        <p className="text-white/80 font-medium">
+                                            {project.location}
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
-                        </GlassCard>
-                    )) : (
-                        <p className="text-center text-sm p-8" style={{ color: theme.colors.textSecondary }}>No projects added yet.</p>
+                            </GlassCard>
+                        ))
+                    ) : (
+                        <p
+                            className="text-center text-sm p-8"
+                            style={{ color: theme.colors.textSecondary }}
+                        >
+                            No projects added yet.
+                        </p>
                     )}
                 </div>
             )}
         </div>
     );
 };
-
 
 export const ProductComparisonScreen = ({ categoryId, onNavigate, theme }) => {
     const category = Data.PRODUCT_DATA?.[categoryId];
