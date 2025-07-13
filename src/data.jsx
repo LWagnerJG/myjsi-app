@@ -390,7 +390,27 @@ export const JSI_POLY_COLORS = ['Unknown', 'Toile Red', 'Thunderous Green', 'Kiw
 
 export const SAMPLE_CATEGORIES = [{ id: 'tfl', name: 'TFL' }, { id: 'hpl', name: 'HPL' }, { id: 'veneer', name: 'Veneer' }, { id: 'solid-wood', name: 'Solid Wood' }, { id: 'paint', name: 'Paint' }, { id: 'metal', name: 'Metal' }, { id: 'solid-surface', name: 'Solid Surface' }, { id: 'glass', name: 'Glass' }, { id: 'plastic', name: 'Plastic' }, { id: 'poly', name: 'Poly' }, { id: 'specialty', name: 'Specialty' },];
 
-export const SAMPLE_PRODUCTS = [{ id: 1, name: 'Belair', category: 'veneer', color: '#E3DBC8' }, { id: 2, name: 'Egret', category: 'veneer', color: '#D9CDBA' }, { id: 3, name: 'Clay', category: 'veneer', color: '#A9886C' }, { id: 4, name: 'Outback', category: 'veneer', color: '#966642' }, { id: 5, name: 'Forged', category: 'metal', color: '#5A5A5A' }, { id: 6, name: 'Carbon', category: 'metal', color: '#3E3E3E' }, { id: 7, name: 'Cotton', category: 'fabric', color: '#F0F0F0' }, { id: 8, name: 'Linen', category: 'fabric', color: '#EAE0D3' },];
+export const SAMPLE_PRODUCTS = [
+    // TFL finish tiles
+    { id: 'tfl-1', category: 'tfl', name: 'Classic Linen', color: '#E0D7C6' },
+    { id: 'tfl-2', category: 'tfl', name: 'Morning Mist', color: '#F1EBE0' },
+    { id: 'tfl-3', category: 'tfl', name: 'Sandstone', color: '#D8CBB8' },
+
+    // HPL samples
+    { id: 'hpl-white', category: 'hpl', name: 'White HPL', color: '#fafafa' },
+    { id: 'hpl-gray', category: 'hpl', name: 'Gray HPL', color: '#cccccc' },
+    // ... more HPL entries
+
+    // Veneer samples
+    { id: 'veneer-light', category: 'veneer', name: 'Light Veneer', color: '#e5d3b3' },
+    { id: 'veneer-medium', category: 'veneer', name: 'Medium Veneer', color: '#b38c60' },
+    { id: 'veneer-dark', category: 'veneer', name: 'Dark Veneer', color: '#8b6d4b' },
+
+    // Solid wood samples
+    { id: 'wood-oak', category: 'solidwood', name: 'Oak Wood', color: '#c49e73' },
+    { id: 'wood-maple', category: 'solidwood', name: 'Maple Wood', color: '#deb887' }
+];
+
 
 export const JSI_MODELS = [{ id: 'VST2430SC', name: 'Storage Cabinet', series: 'Vision', isUpholstered: false }, { id: 'BRY2001', name: 'Desk Chair', series: 'Bryn', isUpholstered: true }, { id: 'TBCONF8', name: 'Conference Table', series: 'Tablet', isUpholstered: false }, { id: 'SIDETBL-SM', name: 'Side Table', series: 'Americana', isUpholstered: false }, { id: 'LNGCHR-OTT', name: 'Lounge Chair', series: 'Caav', isUpholstered: true },];
 

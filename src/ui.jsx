@@ -159,152 +159,152 @@ export const CustomSelect = ({ label, value, onChange, options, placeholder, the
 
 export const AutoCompleteCombobox = ({
     label,
+    options = [],
     value,
     onChange,
-    placeholder,
-    options,
     onAddNew,
-    theme,
-    required,
-    zIndex,
-    dropdownClassName,
-    resetOnSelect,
+    placeholder = '',
+    resetOnSelect = false,
+    theme
 }) => {
-    const [inputValue, setInputValue] = useState(value || '');
-    const [showOptions, setShowOptions] = useState(false);
-    const wrapperRef = useRef(null);           // trigger field
-    const dropdownRef = useRef(null);          // dropdown itself
+    const [query, setQuery] = useState('');
+    const [isOpen, setIsOpen] = useState(false);
+    const wrapperRef = useRef(null);
+    const [dropDirection, checkPosition] = useDropdownPosition(wrapperRef);
 
-    /* 1️⃣  keep text in sync with controlled prop  */
     useEffect(() => {
-        if (!resetOnSelect) setInputValue(value || '');
-    }, [value, resetOnSelect]);
-
-    /* 2️⃣  filter options  */
-    const filtered = options.filter((opt) =>
-        opt.toLowerCase().includes(inputValue.toLowerCase())
-    );
-
-    /* 3️⃣  select an option  */
-    const handleSelect = (opt) => {
-        onChange(opt);
-        if (resetOnSelect) setInputValue('');
-        else setInputValue(opt);
-        setShowOptions(false);
-    };
-
-    /* 4️⃣  add custom option  */
-    const handleAdd = () => {
-        if (inputValue && !options.includes(inputValue)) onAddNew(inputValue);
-        onChange(inputValue);
-        setShowOptions(false);
-    };
-
-    /* 5️⃣  close on outside click  */
-    useEffect(() => {
-        const clickOutside = (e) => {
-            if (
-                dropdownRef.current &&
-                !dropdownRef.current.contains(e.target) &&
-                wrapperRef.current &&
-                !wrapperRef.current.contains(e.target)
-            ) {
-                setShowOptions(false);
+        const handleOutside = e => {
+            if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
+                setIsOpen(false);
             }
         };
-        document.addEventListener('mousedown', clickOutside);
-        return () => document.removeEventListener('mousedown', clickOutside);
+        document.addEventListener('mousedown', handleOutside);
+        return () => document.removeEventListener('mousedown', handleOutside);
     }, []);
 
-    /* 6️⃣  close on scroll  */
-    useEffect(() => {
-        if (!showOptions) return;
-        const scrollHandler = () => setShowOptions(false);
-        window.addEventListener('scroll', scrollHandler, { passive: true });
-        return () => window.removeEventListener('scroll', scrollHandler);
-    }, [showOptions]);
+    const filtered = useMemo(() => {
+        const q = query.trim().toLowerCase();
+        if (!q) return options;
+        return options.filter(opt => {
+            // opt can be string or { label, value }
+            const text = typeof opt === 'string' ? opt : opt.label;
+            return text.toLowerCase().includes(q);
+        });
+    }, [options, query]);
 
-    /* 7️⃣  portal dropdown (anchored to trigger)  */
-    const DropdownPortal = () => {
-        if (!wrapperRef.current) return null;
-        const rect = wrapperRef.current.getBoundingClientRect();
-        const width = 288;
-        return ReactDOM.createPortal(
-            <div
-                ref={dropdownRef}
-                className="absolute z-[9999]"
-                style={{
-                    top: `${rect.bottom + window.scrollY + 4}px`,
-                    left: `${rect.left + window.scrollX}px`,
-                    width: `${width}px`,
-                }}
-            >
-                <div
-                    className={`p-2 max-h-80 overflow-y-auto scrollbar-hide rounded-2xl shadow-lg ${dropdownClassName || ''}`}
-                    style={{
-                        backgroundColor: theme.colors.surface,
-                        border: `1px solid ${theme.colors.border}`,
-                        backdropFilter: theme.backdropFilter,
-                        WebkitBackdropFilter: theme.backdropFilter,
-                    }}
-                >
-                    {filtered.map((opt) => (
-                        <button
-                            key={opt}
-                            type="button"
-                            onClick={() => handleSelect(opt)}
-                            className="block w-full text-left p-2 rounded-md hover:bg-black/5"
-                            style={{ color: theme.colors.textPrimary }}
-                        >
-                            {opt}
-                        </button>
-                    ))}
-                    {onAddNew && inputValue && !options.includes(inputValue) && (
-                        <button
-                            type="button"
-                            onClick={handleAdd}
-                            className="block w-full text-left p-2 rounded-md font-semibold hover:bg-black/5"
-                            style={{ color: theme.colors.accent }}
-                        >
-                            Add “{inputValue}”
-                        </button>
-                    )}
-                </div>
-            </div>,
-            document.body
+    // Display the chosen value
+    const displayValue = useMemo(() => {
+        if (value == null) return '';
+        const found = options.find(opt =>
+            typeof opt === 'string' ? opt === value : opt.value === value
         );
+        return typeof found === 'string'
+            ? found
+            : found?.label || '';
+    }, [options, value]);
+
+    const handleSelect = opt => {
+        const newVal = typeof opt === 'string' ? opt : opt.value;
+        onChange(newVal);
+        if (resetOnSelect) setQuery('');
+        setIsOpen(false);
     };
 
     return (
-        <div className={`relative ${zIndex}`} ref={wrapperRef}>
+        <div ref={wrapperRef} className="relative space-y-1 overflow-visible">
             {label && (
-                <label className="block text-xs font-semibold px-4" style={{ color: theme.colors.textSecondary }}>
+                <label
+                    className="block text-xs font-semibold px-4"
+                    style={{ color: theme.colors.textSecondary }}
+                >
                     {label}
                 </label>
             )}
-            <input
-                required={required}
-                type="text"
-                value={inputValue}
-                onChange={(e) => {
-                    setInputValue(e.target.value);
-                    setShowOptions(true);
-                }}
-                onFocus={() => setShowOptions(true)}
-                placeholder={placeholder}
-                className="w-full px-4 py-3 border rounded-full focus:ring-2 outline-none"
-                style={{
-                    backgroundColor: theme.colors.subtle,
-                    borderColor: theme.colors.border,
-                    color: theme.colors.textPrimary,
-                    ringColor: theme.colors.accent,
-                }}
-            />
-            {showOptions && <DropdownPortal />}
+
+            <div className="relative">
+                <input
+                    type="text"
+                    className="w-full pl-10 pr-4 py-3 rounded-full text-base border transition-colors"
+                    placeholder={displayValue || placeholder}
+                    value={query}
+                    onChange={e => {
+                        setQuery(e.target.value);
+                        setIsOpen(true);
+                    }}
+                    onFocus={() => {
+                        checkPosition();
+                        setIsOpen(true);
+                    }}
+                    style={{
+                        backgroundColor: theme.colors.subtle,
+                        borderColor: theme.colors.border,
+                        color: theme.colors.textPrimary
+                    }}
+                />
+                <Search
+                    className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5"
+                    style={{ color: theme.colors.textSecondary }}
+                />
+            </div>
+
+            {isOpen && (
+                <div
+                    className={`absolute left-0 w-full z-50 ${dropDirection === 'up' ? 'bottom-full mb-1' : 'top-full mt-1'
+                        }`}
+                >
+                    <GlassCard
+                        theme={theme}
+                        className="p-1.5 max-h-60 overflow-y-auto scrollbar-hide rounded-2xl shadow-lg"
+                    >
+                        {filtered.map(opt => {
+                            const text = typeof opt === 'string' ? opt : opt.label;
+                            const val = typeof opt === 'string' ? opt : opt.value;
+                            return (
+                                <button
+                                    key={val}
+                                    type="button"
+                                    className="block w-full text-left py-2.5 px-3.5 text-sm rounded-lg transition-colors"
+                                    onClick={() => handleSelect(opt)}
+                                    style={{
+                                        backgroundColor:
+                                            val === value ? theme.colors.primary : 'transparent',
+                                        color:
+                                            val === value
+                                                ? theme.colors.surface
+                                                : theme.colors.textPrimary,
+                                        fontWeight: val === value ? 600 : 400
+                                    }}
+                                >
+                                    {text}
+                                </button>
+                            );
+                        })}
+
+                        {onAddNew &&
+                            query &&
+                            !options.some(opt => {
+                                const text = typeof opt === 'string' ? opt : opt.label;
+                                return text.toLowerCase() === query.trim().toLowerCase();
+                            }) && (
+                                <button
+                                    type="button"
+                                    className="block w-full text-center italic py-2.5 px-3.5 text-sm rounded-lg hover:bg-black/5"
+                                    onClick={() => {
+                                        onAddNew(query.trim());
+                                        setIsOpen(false);
+                                        resetOnSelect && setQuery('');
+                                    }}
+                                    style={{ color: theme.colors.accent }}
+                                >
+                                    + Add “{query.trim()}”
+                                </button>
+                            )}
+                    </GlassCard>
+                </div>
+            )}
         </div>
     );
 };
-
 
 export const ToggleButtonGroup = ({ value, onChange, options, theme }) => {
     const selectedIndex = options.findIndex((opt) => opt.value === value);
@@ -4624,13 +4624,22 @@ const DropdownPortal = ({ children, onClose, parentRef, theme }) => {
     );
 };
 
-export const NativeSelect = ({ label, value, onChange, options, placeholder, theme, required }) => {
+export const NativeSelect = ({
+    label,
+    value,
+    onChange,
+    options,
+    placeholder,
+    theme,
+    required
+}) => {
     const [isOpen, setIsOpen] = useState(false);
     const wrapperRef = useRef(null);
     const [dropDirection, checkPosition] = useDropdownPosition(wrapperRef);
 
+    // Close when clicking outside
     useEffect(() => {
-        const handleClickOutside = (e) => {
+        const handleClickOutside = e => {
             if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
                 setIsOpen(false);
             }
@@ -4639,7 +4648,16 @@ export const NativeSelect = ({ label, value, onChange, options, placeholder, the
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const handleSelect = (optionValue) => {
+    // Compute label
+    const selectedLabel = useMemo(() => {
+        if (!Array.isArray(options)) {
+            console.warn("NativeSelect: 'options' should be an array");
+            return placeholder;
+        }
+        return options.find(o => o.value === value)?.label || placeholder;
+    }, [options, value, placeholder]);
+
+    const handleSelect = optionValue => {
         onChange({ target: { value: optionValue } });
         setIsOpen(false);
     };
@@ -4649,19 +4667,13 @@ export const NativeSelect = ({ label, value, onChange, options, placeholder, the
         setIsOpen(o => !o);
     };
 
-    const selectedLabel = useMemo(() => {
-        if (!Array.isArray(options)) {
-            console.warn("NativeSelect: 'options' prop is not an array. Please provide an array of { label, value } objects.");
-            return placeholder;
-        }
-        return options.find(o => o.value === value)?.label || placeholder;
-    }, [options, value, placeholder]);
-
-
     return (
-        <div className="relative space-y-1" ref={wrapperRef}>
+        <div ref={wrapperRef} className="relative space-y-1 overflow-visible">
             {label && (
-                <label className="block text-xs font-semibold px-4" style={{ color: theme.colors.textSecondary }}>
+                <label
+                    className="block text-xs font-semibold px-4"
+                    style={{ color: theme.colors.textSecondary }}
+                >
                     {label}
                 </label>
             )}
@@ -4672,29 +4684,40 @@ export const NativeSelect = ({ label, value, onChange, options, placeholder, the
                 style={{
                     backgroundColor: theme.colors.subtle,
                     borderColor: theme.colors.border,
-                    color: value ? theme.colors.textPrimary : theme.colors.textSecondary,
+                    color: value ? theme.colors.textPrimary : theme.colors.textSecondary
                 }}
             >
                 <span className="pr-6">{selectedLabel}</span>
-                <ChevronDown className={`absolute right-4 w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} style={{ color: theme.colors.textSecondary }} />
+                <ChevronDown
+                    className={`absolute right-4 w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''
+                        }`}
+                    style={{ color: theme.colors.textSecondary }}
+                />
             </button>
 
             {isOpen && (
-                <div className={`absolute left-0 w-full z-50 ${dropDirection === 'up' ? 'bottom-full mb-1' : 'top-full mt-1'}`}>
+                <div
+                    className={`absolute left-0 w-full z-50 ${dropDirection === 'up' ? 'bottom-full mb-1' : 'top-full mt-1'
+                        }`}
+                >
                     <GlassCard
                         theme={theme}
                         className="p-1.5 max-h-60 overflow-y-auto scrollbar-hide rounded-2xl shadow-lg"
                     >
-                        {Array.isArray(options) && options.map(opt => (
+                        {options.map(opt => (
                             <button
                                 key={opt.value}
                                 type="button"
                                 onClick={() => handleSelect(opt.value)}
-                                className={`block w-full text-left py-2.5 px-3.5 text-sm rounded-lg transition-colors`}
+                                className="block w-full text-left py-2.5 px-3.5 text-sm rounded-lg transition-colors"
                                 style={{
-                                    backgroundColor: opt.value === value ? theme.colors.primary : 'transparent',
-                                    color: opt.value === value ? theme.colors.surface : theme.colors.textPrimary,
-                                    fontWeight: opt.value === value ? '600' : '400'
+                                    backgroundColor:
+                                        opt.value === value ? theme.colors.primary : 'transparent',
+                                    color:
+                                        opt.value === value
+                                            ? theme.colors.surface
+                                            : theme.colors.textPrimary,
+                                    fontWeight: opt.value === value ? 600 : 400
                                 }}
                             >
                                 {opt.label}
@@ -4706,6 +4729,7 @@ export const NativeSelect = ({ label, value, onChange, options, placeholder, the
         </div>
     );
 };
+
 
 export const NewLeadScreen = ({
     theme,
@@ -4886,45 +4910,6 @@ export const KnoxOptions = ({ theme, product, productIndex, onUpdate }) => {
 
 
 
-const SelectPortal = ({ children, onClose, parentRef, theme }) => {
-    const dropdownRef = useRef(null);
-
-    useEffect(() => {
-        function handleClickOutside(event) {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-                onClose();
-            }
-        }
-        const timerId = setTimeout(() => {
-            document.addEventListener("mousedown", handleClickOutside);
-        }, 0);
-
-        return () => {
-            clearTimeout(timerId);
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, [onClose]);
-
-    const parentRect = parentRef.current?.getBoundingClientRect();
-    const dropdownWidth = 288;
-    const top = parentRect ? parentRect.bottom + 4 : 0;
-    const left = parentRect ? parentRect.right - dropdownWidth : 0;
-
-    return ReactDOM.createPortal(
-        <div
-            ref={dropdownRef}
-            className="absolute z-[9999]"
-            style={{ top: `${top}px`, left: `${left}px`, width: `${dropdownWidth}px` }}
-        >
-            <GlassCard theme={theme} className="p-2 max-h-80 overflow-y-auto scrollbar-hide">
-                {/* It now renders whatever children are passed to it */}
-                {children}
-            </GlassCard>
-        </div>,
-        document.body
-    );
-};
-
 export const VisionOptions = ({ theme, product, productIndex, onUpdate }) => {
     return (
         <div className="space-y-3 mt-3 pt-3 border-t" style={{ borderColor: theme.colors.border }}>
@@ -4955,7 +4940,6 @@ export const VisionOptions = ({ theme, product, productIndex, onUpdate }) => {
     );
 };
 
-// Replace your existing WinkHoopzOptions in ui.jsx
 export const WinkHoopzOptions = ({ theme, product, productIndex, onUpdate }) => {
     return (
         <div className="mt-3 pt-3 border-t" style={{ borderColor: theme.colors.border }}>
@@ -5619,45 +5603,43 @@ export const CommunityScreen = ({ theme, onNavigate, openCreateContentModal, pos
         </div>
     );
 };
+
+
 export const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSettings }) => {
     const [selectedCategory, setSelectedCategory] = useState('tfl');
     const [setQuantity, setSetQuantity] = useState(1);
 
-    // New state and refs to manage the sliding pill animation
+    // Manage category slider pill
     const [pillStyle, setPillStyle] = useState({ left: 0, width: 0, opacity: 0 });
     const buttonRefs = useRef([]);
     const containerRef = useRef(null);
 
     useEffect(() => {
-        const selectedIndex = Data.SAMPLE_CATEGORIES.findIndex(c => c.id === selectedCategory);
-        const selectedButton = buttonRefs.current[selectedIndex];
-        if (selectedButton) {
-            setPillStyle({
-                left: selectedButton.offsetLeft,
-                width: selectedButton.offsetWidth,
-                opacity: 1
-            });
-        }
+        const idx = Data.SAMPLE_CATEGORIES.findIndex(c => c.id === selectedCategory);
+        const btn = buttonRefs.current[idx];
+        if (btn) setPillStyle({ left: btn.offsetLeft, width: btn.offsetWidth, opacity: 1 });
     }, [selectedCategory]);
 
+    // Handlers
     const handleAddSetToCart = useCallback(() => {
         const categoryName = Data.SAMPLE_CATEGORIES.find(c => c.id === selectedCategory)?.name || 'Unknown';
-        const setItem = {
-            id: `set-${selectedCategory}`,
-            name: `Complete ${categoryName} Set`,
-        };
-        onUpdateCart(setItem, setQuantity);
+        onUpdateCart(
+            { id: `set-${selectedCategory}`, name: `Complete ${categoryName} Set` },
+            setQuantity
+        );
         setSetQuantity(1);
     }, [selectedCategory, setQuantity, onUpdateCart]);
 
-    const handleOrderFullSet = useCallback(() => {
-        onUpdateCart({ id: 'full-jsi-set', name: 'Full JSI Sample Set' }, 1);
-    }, [onUpdateCart]);
+    const handleOrderFullSet = useCallback(
+        () => onUpdateCart({ id: 'full-jsi-set', name: 'Full JSI Sample Set' }, 1),
+        [onUpdateCart]
+    );
 
     const totalCartItems = useMemo(
         () => Object.values(cart).reduce((sum, qty) => sum + qty, 0),
         [cart]
     );
+
     const filteredProducts = useMemo(
         () => Data.SAMPLE_PRODUCTS.filter(p => p.category === selectedCategory),
         [selectedCategory]
@@ -5665,15 +5647,13 @@ export const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSetti
 
     return (
         <>
+            {/* Header with full set and cart */}
             <PageTitle title="Samples" theme={theme}>
                 <div className="flex items-center space-x-3">
                     <button
                         onClick={handleOrderFullSet}
                         className="px-4 py-2 rounded-full text-sm font-semibold transition-transform hover:scale-105 active:scale-95"
-                        style={{
-                            backgroundColor: theme.colors.accent,
-                            color: 'white'
-                        }}
+                        style={{ backgroundColor: theme.colors.accent, color: 'white' }}
                     >
                         Order Full JSI Set
                     </button>
@@ -5699,14 +5679,17 @@ export const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSetti
                 </div>
             </PageTitle>
 
-            {/* Redesigned category filter with sliding pill */}
+            {/* Category filter with brown accent pill */}
             <div className="px-4 mb-4">
                 <GlassCard theme={theme} className="p-1">
-                    <div ref={containerRef} className="relative flex space-x-2 overflow-x-auto scrollbar-hide whitespace-nowrap">
+                    <div
+                        ref={containerRef}
+                        className="relative flex space-x-2 overflow-x-auto scrollbar-hide whitespace-nowrap"
+                    >
                         <div
-                            className="absolute top-1 bottom-1 h-auto rounded-full transition-all duration-300 ease-in-out"
+                            className="absolute top-1 bottom-1 rounded-full transition-all duration-300 ease-in-out"
                             style={{
-                                backgroundColor: theme.colors.primary,
+                                backgroundColor: theme.colors.accent,
                                 left: pillStyle.left,
                                 width: pillStyle.width,
                                 opacity: pillStyle.opacity
@@ -5715,11 +5698,14 @@ export const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSetti
                         {Data.SAMPLE_CATEGORIES.map((cat, index) => (
                             <button
                                 key={cat.id}
-                                ref={el => buttonRefs.current[index] = el}
+                                ref={el => (buttonRefs.current[index] = el)}
                                 onClick={() => setSelectedCategory(cat.id)}
                                 className="relative z-10 px-4 py-2 rounded-full font-semibold text-sm transition-colors duration-300"
                                 style={{
-                                    color: selectedCategory === cat.id ? theme.colors.surface : theme.colors.textPrimary,
+                                    color:
+                                        selectedCategory === cat.id
+                                            ? theme.colors.surface
+                                            : theme.colors.textPrimary
                                 }}
                             >
                                 {cat.name}
@@ -5729,45 +5715,40 @@ export const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSetti
                 </GlassCard>
             </div>
 
-
+            {/* Complete set controls */}
             <GlassCard theme={theme} className="mx-4 mb-4 p-4 flex items-center justify-between">
-                <span
-                    className="font-bold text-base"
-                    style={{ color: theme.colors.textPrimary }}
-                >
+                <span className="font-bold text-base" style={{ color: theme.colors.textPrimary }}>
                     Complete {Data.SAMPLE_CATEGORIES.find(c => c.id === selectedCategory)?.name} Set
                 </span>
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-2">
                     <button
                         onClick={() => setSetQuantity(q => Math.max(1, q - 1))}
-                        className="w-8 h-8 rounded-full flex items-center justify-center transition"
+                        className="w-8 h-8 flex items-center justify-center rounded-full transition"
                         style={{ backgroundColor: theme.colors.subtle }}
                     >
-                        <Minus className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
+                        <Minus className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
                     </button>
-                    <span
-                        className="w-8 text-center font-bold text-lg"
-                        style={{ color: theme.colors.textPrimary }}
-                    >
+                    <span className="font-semibold text-lg" style={{ color: theme.colors.textPrimary }}>
                         {setQuantity}
                     </span>
                     <button
                         onClick={() => setSetQuantity(q => q + 1)}
-                        className="w-8 h-8 rounded-full flex items-center justify-center transition"
+                        className="w-8 h-8 flex items-center justify-center rounded-full transition"
                         style={{ backgroundColor: theme.colors.subtle }}
                     >
-                        <Plus className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
+                        <Plus className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
                     </button>
                     <button
                         onClick={handleAddSetToCart}
-                        className="px-6 py-2 rounded-full font-semibold text-white transition"
-                        style={{ backgroundColor: theme.colors.accent }}
+                        className="px-4 py-2 rounded-full font-semibold text-sm transition-transform hover:scale-105 active:scale-95"
+                        style={{ backgroundColor: theme.colors.accent, color: 'white' }}
                     >
                         Add
                     </button>
                 </div>
             </GlassCard>
 
+            {/* Product grid showing squares with names and add/remove */}
             <div className="px-4 grid grid-cols-2 gap-4 pb-4">
                 {filteredProducts.map(product => {
                     const quantity = cart[product.id] || 0;
@@ -5775,12 +5756,20 @@ export const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSetti
                         <button
                             key={product.id}
                             onClick={() => onUpdateCart(product, 1)}
-                            className="relative w-full aspect-square rounded-2xl overflow-hidden transition"
+                            className="relative w-full aspect-square rounded-2xl overflow-hidden transition-colors"
                             style={{
-                                border: `2px solid ${quantity > 0 ? theme.colors.accent : theme.colors.border}`,
+                                border: `2px solid ${quantity > 0 ? theme.colors.accent : theme.colors.border
+                                    }`,
                                 backgroundColor: product.color
                             }}
                         >
+                            {/* Name overlay */}
+                            <div
+                                className="absolute top-2 left-2 bg-white bg-opacity-75 px-2 py-1 rounded text-xs font-semibold"
+                                style={{ color: theme.colors.textPrimary }}
+                            >
+                                {product.name}
+                            </div>
                             {quantity > 0 && (
                                 <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-28">
                                     <GlassCard theme={theme} className="p-1 flex justify-between items-center">
@@ -5811,6 +5800,7 @@ export const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSetti
         </>
     );
 };
+
 
 export const ReplacementsScreen = ({ theme, setSuccessMessage, onNavigate }) => {
     const [formData, setFormData] = useState(null);
