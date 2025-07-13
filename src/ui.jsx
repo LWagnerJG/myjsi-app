@@ -3549,7 +3549,7 @@ export const SmartSearch = ({
             text-base
             bg-white
             border-0
-            shadow-none
+            shadow-lg
             focus:ring-0
             outline-none
           "
@@ -3595,6 +3595,7 @@ export const SmartSearch = ({
         </div>
     );
 };
+
 export const HomeScreen = ({ onNavigate, theme, onAskAI, showAIDropdown, aiResponse, isAILoading, onCloseAIDropdown, onVoiceActivate }) => {
     const handleFeedbackClick = useCallback(() => {
         onNavigate('feedback');
