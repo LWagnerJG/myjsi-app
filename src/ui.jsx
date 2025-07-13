@@ -63,21 +63,31 @@ export const Button = React.memo(({ children, className = '', theme, ...props })
 export const Card = ({ children, ...props }) => (
     <GlassCard {...props}>{children}</GlassCard>
 )
-export const useDropdownPosition = (ref) => {
+
+export const useDropdownPosition = (elementRef) => {
     const [dropDirection, setDropDirection] = useState('down');
 
-    const checkPosition = useCallback(() => {
-        if (ref.current) {
-            const rect = ref.current.getBoundingClientRect();
-            const spaceBelow = window.innerHeight - rect.bottom;
-            // A typical dropdown panel is around 200-250px high
-            if (spaceBelow < 250 && rect.top > 260) {
-                setDropDirection('up');
-            } else {
-                setDropDirection('down');
-            }
+    const checkPosition = () => {
+        if (!elementRef.current) return;
+        const rect = elementRef.current.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const spaceAbove = rect.top;
+
+        // Must match the dropdown’s max-height (Tailwind max-h-80 = 20rem = 320px)
+        const estimatedDropdownHeight = 320;
+
+        if (spaceBelow < estimatedDropdownHeight && spaceAbove > estimatedDropdownHeight) {
+            setDropDirection('up');
+        } else {
+            setDropDirection('down');
         }
-    }, [ref]);
+    };
+
+    // Re-check on window resize (so it flips if user resizes)
+    useEffect(() => {
+        window.addEventListener('resize', checkPosition);
+        return () => window.removeEventListener('resize', checkPosition);
+    }, []);
 
     return [dropDirection, checkPosition];
 };
@@ -93,59 +103,27 @@ export const CustomSelect = ({ label, value, onChange, options, placeholder, the
     const wrapperRef = useRef(null);
     const [dropDirection, checkPosition] = useDropdownPosition(wrapperRef);
 
-    useEffect(() => {
-        const handleClickOutside = (e) => {
-            if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
-                setIsOpen(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
-    const handleSelect = (optionValue) => {
-        onChange({ target: { value: optionValue } });
-        setIsOpen(false);
-    };
-
     const handleOpen = () => {
-        checkPosition();
+        checkPosition();        // calculate up/down based on available space
         onOpen?.();
         setIsOpen(o => !o);
     };
 
-    const selectedLabel = options.find(o => o.value === value)?.label || placeholder;
-
+    // ... rest of your component …
     return (
-        <div className="relative space-y-1" ref={wrapperRef}>
-            {label && (
-                <label className="block text-xs font-semibold px-4" style={{ color: theme.colors.textSecondary }}>
-                    {label}
-                </label>
-            )}
-            <button
-                type="button"
-                onClick={handleOpen}
-                className="w-full px-4 py-3 border rounded-lg text-sm text-left flex justify-between items-center shadow-sm hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                style={{
-                    backgroundColor: theme.colors.subtle,
-                    borderColor: theme.colors.border,
-                    color: value ? theme.colors.textPrimary : theme.colors.textSecondary,
-                }}
-            >
-                <span className="pr-6">{selectedLabel}</span>
-                <ChevronDown className={`absolute right-4 w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} style={{ color: theme.colors.textSecondary }} />
-            </button>
+        <div ref={wrapperRef} className="relative space-y-1 overflow-visible">
+            {/** ...label, button, etc. */}
             {isOpen && (
-                <div className={`absolute left-0 w-full z-50 ${dropDirection === 'up' ? 'bottom-full mb-1' : 'top-full mt-1'}`}>
-                    <GlassCard theme={theme} className="p-2 max-h-80 overflow-y-auto scrollbar-hide">
+                <div
+                    className={`absolute left-0 w-full z-50 ${dropDirection === 'up' ? 'bottom-full mb-1' : 'top-full mt-1'
+                        }`}
+                >
+                    <GlassCard className="p-2 max-h-80 overflow-y-auto scrollbar-hide">
                         {options.map(opt => (
                             <button
                                 key={opt.value}
-                                type="button"
-                                onClick={() => handleSelect(opt.value)}
-                                className={`block w-full text-left p-2 rounded-lg ${opt.value === value ? 'bg-black/5 dark:bg-white/5 font-bold' : 'hover:bg-black/5 dark:hover:bg-white/5'}`}
-                                style={{ color: theme.colors.textPrimary }}
+                                onClick={() => { onChange(opt.value); setIsOpen(false); }}
+                                className="block w-full text-left px-3 py-2 hover:bg-gray-100"
                             >
                                 {opt.label}
                             </button>
@@ -156,7 +134,6 @@ export const CustomSelect = ({ label, value, onChange, options, placeholder, the
         </div>
     );
 };
-
 export const AutoCompleteCombobox = ({
     label,
     options = [],
@@ -3145,7 +3122,7 @@ const EMPTY_USER = {
 };
 
 const FormSection = ({ title, theme, children }) => (
-    <GlassCard theme={theme} className="p-4">
+    <GlassCard theme={theme} className="p-4 overflow-visible">
         {/* The title is now inside the card, creating the grouped effect */}
         <h3 className="font-bold text-xl mb-4">{title}</h3>
         <div className="space-y-4">
@@ -4583,40 +4560,383 @@ export const ProbabilitySlider = ({ value, onChange, theme }) => {
         </div>
     );
 };
-const DropdownPortal = ({ children, onClose, parentRef, theme }) => {
+
+export const PortalNativeSelect = ({
+    label,
+    value,
+    onChange,
+    options,
+    placeholder,
+    theme,
+    required
+}) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [position, setPosition] = useState({ top: 0, left: 0, width: 0 });
+    const wrapperRef = useRef(null);
     const dropdownRef = useRef(null);
 
+    // Calculate position for portal
+    const calculatePosition = () => {
+        if (!wrapperRef.current) return;
+
+        const rect = wrapperRef.current.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        const dropdownHeight = 240; // estimated max height
+
+        let top = rect.bottom + 4; // 4px margin
+
+        // If dropdown would go below viewport, position it above
+        if (top + dropdownHeight > viewportHeight) {
+            top = rect.top - dropdownHeight - 4;
+        }
+
+        setPosition({
+            top: top,
+            left: rect.left,
+            width: rect.width
+        });
+    };
+
+    // Close when clicking outside
     useEffect(() => {
-        // This function handles the click event
+        const handleClickOutside = e => {
+            if (wrapperRef.current && !wrapperRef.current.contains(e.target) &&
+                dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    // Handle scroll and resize
+    useEffect(() => {
+        const handleScrollResize = () => {
+            if (isOpen) {
+                calculatePosition();
+            }
+        };
+
+        window.addEventListener('scroll', handleScrollResize, true);
+        window.addEventListener('resize', handleScrollResize);
+
+        return () => {
+            window.removeEventListener('scroll', handleScrollResize, true);
+            window.removeEventListener('resize', handleScrollResize);
+        };
+    }, [isOpen]);
+
+    const selectedLabel = useMemo(() => {
+        if (!Array.isArray(options)) {
+            console.warn("NativeSelect: 'options' should be an array");
+            return placeholder;
+        }
+        return options.find(o => o.value === value)?.label || placeholder;
+    }, [options, value, placeholder]);
+
+    const handleSelect = optionValue => {
+        onChange({ target: { value: optionValue } });
+        setIsOpen(false);
+    };
+
+    const handleOpen = () => {
+        calculatePosition();
+        setIsOpen(o => !o);
+    };
+
+    return (
+        <>
+            <div ref={wrapperRef} className="relative space-y-1">
+                {label && (
+                    <label
+                        className="block text-xs font-semibold px-4"
+                        style={{ color: theme.colors.textSecondary }}
+                    >
+                        {label}
+                    </label>
+                )}
+                <button
+                    type="button"
+                    onClick={handleOpen}
+                    className="w-full px-4 py-3 border rounded-full text-base text-left flex justify-between items-center"
+                    style={{
+                        backgroundColor: theme.colors.subtle,
+                        borderColor: theme.colors.border,
+                        color: value ? theme.colors.textPrimary : theme.colors.textSecondary
+                    }}
+                >
+                    <span className="pr-6">{selectedLabel}</span>
+                    <ChevronDown
+                        className={`absolute right-4 w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''
+                            }`}
+                        style={{ color: theme.colors.textSecondary }}
+                    />
+                </button>
+            </div>
+
+            {/* Portal dropdown */}
+            {isOpen && (
+                <div
+                    ref={dropdownRef}
+                    className="fixed z-50"
+                    style={{
+                        top: position.top,
+                        left: position.left,
+                        width: position.width
+                    }}
+                >
+                    <GlassCard
+                        theme={theme}
+                        className="p-1.5 max-h-60 overflow-y-auto scrollbar-hide rounded-2xl shadow-lg"
+                    >
+                        {options.map(opt => (
+                            <button
+                                key={opt.value}
+                                type="button"
+                                onClick={() => handleSelect(opt.value)}
+                                className="block w-full text-left py-2.5 px-3.5 text-sm rounded-lg transition-colors"
+                                style={{
+                                    backgroundColor:
+                                        opt.value === value ? theme.colors.primary : 'transparent',
+                                    color:
+                                        opt.value === value
+                                            ? theme.colors.surface
+                                            : theme.colors.textPrimary,
+                                    fontWeight: opt.value === value ? 600 : 400
+                                }}
+                            >
+                                {opt.label}
+                            </button>
+                        ))}
+                    </GlassCard>
+                </div>
+            )}
+        </>
+    );
+};
+
+const DropdownPortal = ({ children, onClose, parentRef, theme }) => {
+    const dropdownRef = useRef(null);
+    const [position, setPosition] = useState({ top: 0, left: 0, width: 0 });
+    const [isPositioned, setIsPositioned] = useState(false);
+
+    // Calculate optimal position
+    const calculatePosition = () => {
+        if (!parentRef.current) return;
+
+        const parentRect = parentRef.current.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        const viewportWidth = window.innerWidth;
+        const dropdownHeight = 320; // max-h-80 = 320px
+        const dropdownWidth = parentRect.width; // Match parent width instead of fixed 288px
+
+        let top = parentRect.bottom + 4; // 4px margin below
+        let left = parentRect.left;
+
+        // Check if dropdown would go below viewport
+        if (top + dropdownHeight > viewportHeight) {
+            // Position above if there's more space above
+            const spaceAbove = parentRect.top;
+            const spaceBelow = viewportHeight - parentRect.bottom;
+
+            if (spaceAbove > spaceBelow) {
+                top = parentRect.top - dropdownHeight - 4; // 4px margin above
+            } else {
+                // Keep below but adjust height to fit
+                top = parentRect.bottom + 4;
+            }
+        }
+
+        // Check if dropdown would go outside viewport horizontally
+        if (left + dropdownWidth > viewportWidth) {
+            left = viewportWidth - dropdownWidth - 8; // 8px margin from edge
+        }
+
+        // Ensure left position is not negative
+        if (left < 8) {
+            left = 8;
+        }
+
+        setPosition({
+            top,
+            left,
+            width: dropdownWidth
+        });
+        setIsPositioned(true);
+    };
+
+    // Calculate position on mount and when parent changes
+    useEffect(() => {
+        calculatePosition();
+    }, [parentRef.current]);
+
+    // Recalculate position on scroll/resize
+    useEffect(() => {
+        const handleScrollResize = () => {
+            calculatePosition();
+        };
+
+        window.addEventListener('scroll', handleScrollResize, true);
+        window.addEventListener('resize', handleScrollResize);
+
+        return () => {
+            window.removeEventListener('scroll', handleScrollResize, true);
+            window.removeEventListener('resize', handleScrollResize);
+        };
+    }, []);
+
+    // Handle click outside
+    useEffect(() => {
         function handleClickOutside(event) {
-            // If the click is outside the dropdown's content, call the onClose function
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+            // Check if click is outside both dropdown and parent
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target) &&
+                parentRef.current && !parentRef.current.contains(event.target)) {
                 onClose();
             }
         }
-        // Use a timeout to ensure the listener is added after the current click event is processed
-        const timerId = setTimeout(() => {
-            document.addEventListener("mousedown", handleClickOutside);
-        }, 0);
+
+        // Add listener immediately, no timeout needed
+        document.addEventListener("mousedown", handleClickOutside);
 
         return () => {
-            clearTimeout(timerId);
             document.removeEventListener("mousedown", handleClickOutside);
         };
-    }, [onClose]);
+    }, [onClose, parentRef]);
 
-    const parentRect = parentRef.current?.getBoundingClientRect();
-    const dropdownWidth = 288;
-    const top = parentRect ? parentRect.bottom + 4 : 0;
-    const left = parentRect ? parentRect.right - dropdownWidth : 0;
+    // Don't render until position is calculated
+    if (!isPositioned) return null;
 
     return ReactDOM.createPortal(
         <div
             ref={dropdownRef}
-            className="absolute z-[9999]"
-            style={{ top: `${top}px`, left: `${left}px`, width: `${dropdownWidth}px` }}
+            className="fixed z-[9999]" // Use fixed instead of absolute
+            style={{
+                top: `${position.top}px`,
+                left: `${position.left}px`,
+                width: `${position.width}px`
+            }}
         >
-            <GlassCard theme={theme} className="p-2 max-h-80 overflow-y-auto scrollbar-hide">
+            <GlassCard
+                theme={theme}
+                className="p-2 overflow-y-auto scrollbar-hide rounded-2xl shadow-lg"
+                style={{
+                    maxHeight: `${Math.min(320, window.innerHeight - position.top - 20)}px`
+                }}
+            >
+                {children}
+            </GlassCard>
+        </div>,
+        document.body
+    );
+};
+
+const EnhancedDropdownPortal = ({ children, onClose, parentRef, theme, align = 'left' }) => {
+    const dropdownRef = useRef(null);
+    const [position, setPosition] = useState({ top: 0, left: 0, width: 0, direction: 'down' });
+    const [isPositioned, setIsPositioned] = useState(false);
+
+    const calculatePosition = () => {
+        if (!parentRef.current) return;
+
+        const parentRect = parentRef.current.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        const viewportWidth = window.innerWidth;
+        const dropdownHeight = 320;
+        const dropdownWidth = Math.max(parentRect.width, 200); // Minimum width of 200px
+
+        // Determine vertical position
+        const spaceBelow = viewportHeight - parentRect.bottom;
+        const spaceAbove = parentRect.top;
+        const shouldFlip = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
+
+        let top = shouldFlip
+            ? parentRect.top - dropdownHeight - 4
+            : parentRect.bottom + 4;
+
+        // Determine horizontal position based on align prop
+        let left;
+        switch (align) {
+            case 'right':
+                left = parentRect.right - dropdownWidth;
+                break;
+            case 'center':
+                left = parentRect.left + (parentRect.width - dropdownWidth) / 2;
+                break;
+            case 'left':
+            default:
+                left = parentRect.left;
+                break;
+        }
+
+        // Ensure dropdown stays within viewport horizontally
+        if (left + dropdownWidth > viewportWidth - 8) {
+            left = viewportWidth - dropdownWidth - 8;
+        }
+        if (left < 8) {
+            left = 8;
+        }
+
+        setPosition({
+            top,
+            left,
+            width: dropdownWidth,
+            direction: shouldFlip ? 'up' : 'down'
+        });
+        setIsPositioned(true);
+    };
+
+    useEffect(() => {
+        calculatePosition();
+    }, [parentRef.current, align]);
+
+    useEffect(() => {
+        const handleScrollResize = () => {
+            calculatePosition();
+        };
+
+        window.addEventListener('scroll', handleScrollResize, true);
+        window.addEventListener('resize', handleScrollResize);
+
+        return () => {
+            window.removeEventListener('scroll', handleScrollResize, true);
+            window.removeEventListener('resize', handleScrollResize);
+        };
+    }, []);
+
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target) &&
+                parentRef.current && !parentRef.current.contains(event.target)) {
+                onClose();
+            }
+        }
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [onClose, parentRef]);
+
+    if (!isPositioned) return null;
+
+    return ReactDOM.createPortal(
+        <div
+            ref={dropdownRef}
+            className="fixed z-[9999]"
+            style={{
+                top: `${position.top}px`,
+                left: `${position.left}px`,
+                width: `${position.width}px`
+            }}
+        >
+            <GlassCard
+                theme={theme}
+                className={`p-2 overflow-y-auto scrollbar-hide rounded-2xl shadow-lg ${position.direction === 'up' ? 'animate-slide-up' : 'animate-slide-down'
+                    }`}
+                style={{
+                    maxHeight: position.direction === 'up'
+                        ? `${Math.min(320, position.top - 20)}px`
+                        : `${Math.min(320, window.innerHeight - position.top - 20)}px`
+                }}
+            >
                 {children}
             </GlassCard>
         </div>,
@@ -4635,6 +4955,7 @@ export const NativeSelect = ({
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const wrapperRef = useRef(null);
+    const dropdownRef = useRef(null);
     const [dropDirection, checkPosition] = useDropdownPosition(wrapperRef);
 
     // Close when clicking outside
@@ -4647,6 +4968,23 @@ export const NativeSelect = ({
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
+
+    // Handle scroll and resize to reposition dropdown
+    useEffect(() => {
+        const handleScrollResize = () => {
+            if (isOpen) {
+                checkPosition();
+            }
+        };
+
+        window.addEventListener('scroll', handleScrollResize, true);
+        window.addEventListener('resize', handleScrollResize);
+
+        return () => {
+            window.removeEventListener('scroll', handleScrollResize, true);
+            window.removeEventListener('resize', handleScrollResize);
+        };
+    }, [isOpen, checkPosition]);
 
     // Compute label
     const selectedLabel = useMemo(() => {
@@ -4668,7 +5006,7 @@ export const NativeSelect = ({
     };
 
     return (
-        <div ref={wrapperRef} className="relative space-y-1 overflow-visible">
+        <div ref={wrapperRef} className="relative space-y-1">
             {label && (
                 <label
                     className="block text-xs font-semibold px-4"
@@ -4697,12 +5035,30 @@ export const NativeSelect = ({
 
             {isOpen && (
                 <div
+                    ref={dropdownRef}
                     className={`absolute left-0 w-full z-50 ${dropDirection === 'up' ? 'bottom-full mb-1' : 'top-full mt-1'
                         }`}
+                    style={{
+                        // Additional positioning fixes
+                        ...(dropDirection === 'up' && {
+                            bottom: '100%',
+                            marginBottom: '4px'
+                        }),
+                        ...(dropDirection === 'down' && {
+                            top: '100%',
+                            marginTop: '4px'
+                        })
+                    }}
                 >
                     <GlassCard
                         theme={theme}
                         className="p-1.5 max-h-60 overflow-y-auto scrollbar-hide rounded-2xl shadow-lg"
+                        style={{
+                            // Ensure dropdown doesn't exceed viewport bounds
+                            maxHeight: dropDirection === 'up'
+                                ? `${Math.min(240, wrapperRef.current?.getBoundingClientRect().top - 20)}px`
+                                : `${Math.min(240, window.innerHeight - wrapperRef.current?.getBoundingClientRect().bottom - 20)}px`
+                        }}
                     >
                         {options.map(opt => (
                             <button
@@ -4729,6 +5085,8 @@ export const NativeSelect = ({
         </div>
     );
 };
+
+
 
 
 export const NewLeadScreen = ({
@@ -4792,7 +5150,7 @@ export const NewLeadScreen = ({
     return (
         <form onSubmit={handleSubmit} className="flex flex-col h-full">
             <PageTitle title="Create New Lead" theme={theme} />
-            <div className="flex-1 overflow-y-auto px-4 pb-4 pt-4 space-y-4 scrollbar-hide">
+            <div className="flex-1 overflow-y-auto overflow-visible px-4 pb-4 pt-4 space-y-4 scrollbar-hide">
                 <FormSection title="Project Details" theme={theme}>
                     <FormInput required label="Project Name" value={newLead.project} onChange={(e) => updateField('project', e.target.value)} placeholder="e.g., Acme Corp Headquarters" theme={theme} />
                     <NativeSelect required label="Project Stage" value={newLead.projectStatus} onChange={(e) => updateField('projectStatus', e.target.value)} options={Data.STAGES.map(s => ({ label: s, value: s }))} placeholder="Select stage" theme={theme} />
