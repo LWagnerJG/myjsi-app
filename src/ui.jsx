@@ -3373,7 +3373,19 @@ export const SearchInput = React.memo(({ onSubmit, value, onChange, placeholder,
 ));
 
 const Modal = ({ show, onClose, title, children, theme }) => {
+    // Prevent background from scrolling whenever a modal is open
+    React.useEffect(() => {
+        if (show) {
+            const prev = document.body.style.overflow;
+            document.body.style.overflow = 'hidden';
+            return () => {
+                document.body.style.overflow = prev;
+            };
+        }
+    }, [show]);
+
     if (!show) return null;
+
     return (
         <div
             className="fixed inset-0 bg-black bg-opacity-70 flex items-end justify-center z-[100] transition-opacity duration-300 pointer-events-auto"
@@ -3381,6 +3393,8 @@ const Modal = ({ show, onClose, title, children, theme }) => {
             onClick={onClose}
         >
             <div
+                onClick={e => e.stopPropagation()}
+                className="w-full h-[85vh] rounded-t-2xl flex flex-col transition-transform duration-300 transform"
                 style={{
                     backgroundColor: theme.colors.surface,
                     backdropFilter: theme.backdropFilter,
@@ -3388,18 +3402,30 @@ const Modal = ({ show, onClose, title, children, theme }) => {
                     borderColor: theme.colors.border,
                     boxShadow: `0 -4px 30px ${theme.colors.shadow}`
                 }}
-                className="w-full h-[85vh] rounded-t-2xl flex flex-col transition-transform duration-300 transform"
-                onClick={(e) => e.stopPropagation()}
             >
                 {title !== "" && (
-                    <div className="flex justify-between items-center p-4 border-b flex-shrink-0" style={{ borderColor: theme.colors.border }}>
-                        <h2 className="text-xl font-bold" style={{ color: theme.colors.textPrimary }}>{title}</h2>
-                        <button onClick={onClose} className="p-1 rounded-full transition-colors" style={{ backgroundColor: theme.colors.subtle }}>
+                    <div
+                        className="flex justify-between items-center p-4 border-b flex-shrink-0"
+                        style={{ borderColor: theme.colors.border }}
+                    >
+                        <h2 className="text-xl font-bold" style={{ color: theme.colors.textPrimary }}>
+                            {title}
+                        </h2>
+                        <button
+                            onClick={onClose}
+                            className="p-1 rounded-full transition-colors"
+                            style={{ backgroundColor: theme.colors.subtle }}
+                        >
                             <X className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
                         </button>
                     </div>
                 )}
-                <div className={`${title !== "" ? "p-6" : "pt-8 px-6 pb-6"} overflow-y-auto space-y-4 scrollbar-hide`}>{children}</div>
+                <div
+                    className={`${title !== "" ? "p-6" : "pt-8 px-6 pb-6"
+                        } overflow-y-auto space-y-4 scrollbar-hide`}
+                >
+                    {children}
+                </div>
             </div>
         </div>
     );
