@@ -3469,7 +3469,12 @@ export const AppHeader = React.memo(({ onHomeClick, isDarkMode, theme, onProfile
     );
 });
 
-export const SmartSearch = ({ theme, onNavigate, onAskAI, onVoiceActivate }) => {
+export const SmartSearch = ({
+    theme,
+    onNavigate,
+    onAskAI,
+    onVoiceActivate
+}) => {
     const [query, setQuery] = useState('');
     const [filteredApps, setFilteredApps] = useState([]);
     const [isFocused, setIsFocused] = useState(false);
@@ -3492,23 +3497,26 @@ export const SmartSearch = ({ theme, onNavigate, onAskAI, onVoiceActivate }) => 
     }, [query, isFocused]);
 
     useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
+        const handleClickOutside = e => {
+            if (
+                searchContainerRef.current &&
+                !searchContainerRef.current.contains(e.target)
+            ) {
                 setIsFocused(false);
             }
         };
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const handleNavigation = (route) => {
+    const handleNavigation = route => {
         onNavigate(route);
         setQuery('');
         setFilteredApps([]);
         setIsFocused(false);
     };
 
-    const handleFormSubmit = (e) => {
+    const handleFormSubmit = e => {
         e.preventDefault();
         if (query.trim() && filteredApps.length === 0) {
             onAskAI(query);
@@ -3524,20 +3532,29 @@ export const SmartSearch = ({ theme, onNavigate, onAskAI, onVoiceActivate }) => 
     return (
         <div ref={searchContainerRef} className="relative z-20">
             <form onSubmit={handleFormSubmit} className="relative">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: theme.colors.textSecondary }} />
+                <Search
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5"
+                    style={{ color: theme.colors.textSecondary }}
+                />
                 <input
                     type="text"
                     placeholder="Ask me anything..."
                     value={query}
-                    onChange={(e) => setQuery(e.target.value)}
+                    onChange={e => setQuery(e.target.value)}
                     onFocus={() => setIsFocused(true)}
-                    // Padding is changed from py-4 to py-5 to increase height
-                    className="w-full pl-11 pr-12 py-5 rounded-full text-base border-2 shadow-lg transition-colors focus:ring-2"
+                    className="
+            w-full
+            pl-11 pr-12 py-5
+            rounded-full
+            text-base
+            bg-white
+            border-0
+            shadow-none
+            focus:ring-0
+            outline-none
+          "
                     style={{
-                        backgroundColor: theme.colors.surface,
-                        color: theme.colors.textPrimary,
-                        borderColor: theme.colors.border,
-                        outline: 'none',
+                        color: theme.colors.textPrimary
                     }}
                 />
                 <button
@@ -3545,7 +3562,10 @@ export const SmartSearch = ({ theme, onNavigate, onAskAI, onVoiceActivate }) => 
                     onClick={handleVoiceClick}
                     className="absolute inset-y-0 right-0 pr-4 flex items-center"
                 >
-                    <Mic className="h-5 w-5" style={{ color: theme.colors.textSecondary }} />
+                    <Mic
+                        className="h-5 w-5"
+                        style={{ color: theme.colors.textSecondary }}
+                    />
                 </button>
             </form>
 
@@ -3556,10 +3576,16 @@ export const SmartSearch = ({ theme, onNavigate, onAskAI, onVoiceActivate }) => 
                             <li
                                 key={app.route}
                                 onMouseDown={() => handleNavigation(app.route)}
-                                className="flex items-center gap-3 cursor-pointer px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5"
+                                className="
+                  flex items-center gap-3 cursor-pointer px-3 py-2 rounded-lg
+                  hover:bg-black/5
+                "
                                 style={{ color: theme.colors.textPrimary }}
                             >
-                                <app.icon className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
+                                <app.icon
+                                    className="w-4 h-4"
+                                    style={{ color: theme.colors.textSecondary }}
+                                />
                                 {app.name}
                             </li>
                         ))}
@@ -3569,7 +3595,6 @@ export const SmartSearch = ({ theme, onNavigate, onAskAI, onVoiceActivate }) => 
         </div>
     );
 };
-
 export const HomeScreen = ({ onNavigate, theme, onAskAI, showAIDropdown, aiResponse, isAILoading, onCloseAIDropdown, onVoiceActivate }) => {
     const handleFeedbackClick = useCallback(() => {
         onNavigate('feedback');
