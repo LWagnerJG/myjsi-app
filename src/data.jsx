@@ -10,7 +10,7 @@ export const lightTheme = {
         background: '#f8f8f8',
         surface: '#FFFFFF',
         primary: '#b3b3af',
-        accent: '#AD8A77', // Changed to the new color
+        accent: '#AD8A77', 
         secondary: '#414141',
         textPrimary: '#111111',
         textSecondary: '#555555',

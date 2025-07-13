@@ -7,7 +7,7 @@ import {
     Minus, MonitorPlay, Moon, MoreVertical, Package, Palette, Heart, Image,
     Paperclip, Percent, PieChart, Play, Plus, RotateCw, Save, Search, Send,
     Server, Settings, Share2, ShoppingCart, Sun, Trophy, User, UserPlus,
-    UserX, Users, Video, Wrench, X, ImageIcon, Pencil
+    UserX, Users, Video, Wrench, X, ImageIcon, Pencil, Trash2
 } from 'lucide-react';
 import * as Data from './data.jsx';
 import ReactDOM from 'react-dom';
@@ -2432,13 +2432,15 @@ export const COMYardageRequestScreen = ({ theme, showAlert, onNavigate }) => {
     const [showConfirm, setShowConfirm] = useState(false);
     const [summary, setSummary] = useState('');
 
+    /* ----- data ----- */
     const fabricStrings = useMemo(() =>
-        Data.FABRICS_DATA.map(f => `${f.manufacturer}, **${f.name}**`), []);
+        Data.FABRICS_DATA.map(f => `${f.manufacturer}, ${f.name}`), []);
 
     const modelOptions = useMemo(() =>
         Data.JSI_MODELS.filter(m => m.isUpholstered)
             .map(m => `${m.name} (${m.id})`), []);
 
+    /* ----- helpers ----- */
     const addModel = rawVal => {
         if (!rawVal) return;
         const match = rawVal.match(/\(([^)]+)\)/);
@@ -2472,55 +2474,80 @@ export const COMYardageRequestScreen = ({ theme, showAlert, onNavigate }) => {
 
             <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4">
                 <GlassCard theme={theme} className="p-4">
-                    <h3 className="font-bold mb-3" style={{ color: theme.colors.textPrimary }}>Select Model(s)</h3>
+                    <h3 className="font-bold mb-3 text-xl" style={{ color: theme.colors.textPrimary }}>
+                        Select Model(s)
+                    </h3>
 
                     {selectedModels.map(m => (
                         <GlassCard key={m.key} theme={theme} className="p-4 mb-3 space-y-3">
-                            <div className="flex items-start justify-between">
+                            <div className="flex items-center justify-between">
                                 <div>
                                     <p className="font-semibold">{m.name}</p>
                                     <p className="text-sm font-mono">{m.id}</p>
                                 </div>
-                                <button onClick={() => removeModel(m.key)} className="p-1 rounded-full hover:bg-red-500/10">
-                                    <X className="w-5 h-5 text-red-500" />
-                                </button>
+
+                                <div className="flex items-center space-x-2">
+                                    <button onClick={() => removeModel(m.key)}
+                                        className="p-1.5 rounded-full hover:bg-red-500/10 transition">
+                                        <Trash2 className="w-5 h-5 text-red-500" />
+                                    </button>
+                                    <span className="font-bold text-lg w-6 text-center">{m.quantity}</span>
+                                    <button onClick={() => updateModel(m.key, { quantity: m.quantity + 1 })}
+                                        className="p-1.5 rounded-full hover:bg-black/10 transition">
+                                        <Plus className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />
+                                    </button>
+                                </div>
                             </div>
 
-                            <div className="flex items-center space-x-3">
-                                <label className="text-sm font-medium">Qty</label>
-                                <button onClick={() => updateModel(m.key, { quantity: Math.max(1, m.quantity - 1) })}
-                                    className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: theme.colors.subtle }}><Minus className="w-4 h-4" /></button>
-                                <span className="font-bold">{m.quantity}</span>
-                                <button onClick={() => updateModel(m.key, { quantity: m.quantity + 1 })}
-                                    className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: theme.colors.subtle }}><Plus className="w-4 h-4" /></button>
-                            </div>
-
-                            <AutoCompleteCombobox value={m.fabric} onChange={v => updateModel(m.key, { fabric: v })}
-                                placeholder="Fabric pattern…" options={fabricStrings} theme={theme} />
+                            <AutoCompleteCombobox
+                                value={m.fabric}
+                                onChange={v => updateModel(m.key, { fabric: v })}
+                                placeholder="Fabric pattern…"
+                                options={fabricStrings}
+                                theme={theme}
+                            />
                         </GlassCard>
                     ))}
 
-                    <AutoCompleteCombobox value="" onChange={addModel} placeholder="+ Add model"
-                        options={modelOptions} theme={theme} resetOnSelect />
+                    <AutoCompleteCombobox
+                        value=""
+                        onChange={addModel}
+                        placeholder="+ Add model"
+                        options={modelOptions}
+                        theme={theme}
+                        resetOnSelect
+                    />
                 </GlassCard>
 
-                <button onClick={handleSubmit} disabled={!selectedModels.length}
-                    className="w-full font-bold py-3 rounded-full text-white disabled:opacity-50" style={{ backgroundColor: theme.colors.accent }}>Submit Request</button>
+                <button
+                    onClick={handleSubmit}
+                    disabled={!selectedModels.length}
+                    className="w-full font-bold py-3 rounded-full text-white disabled:opacity-50"
+                    style={{ backgroundColor: theme.colors.accent }}>
+                    Submit Request
+                </button>
             </div>
 
-            {showConfirm && ReactDOM.createPortal(
-                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-                    <GlassCard theme={theme} className="p-6 max-w-sm mx-4">
-                        <h2 className="text-xl font-bold mb-2">Request Received</h2>
-                        <pre className="text-sm whitespace-pre-wrap mb-4">{summary}</pre>
-                        <p className="text-sm mb-4">JSI will email you the requested yardages shortly.</p>
-                        <button onClick={() => { setShowConfirm(false); onNavigate('resources'); }}
-                            className="w-full py-2 rounded-full text-white" style={{ backgroundColor: theme.colors.accent }}>Done</button>
-                    </GlassCard>
-                </div>, document.body)}
+            {showConfirm &&
+                ReactDOM.createPortal(
+                    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+                        <GlassCard theme={theme} className="p-6 max-w-sm mx-4">
+                            <h2 className="text-xl font-bold mb-2">Request Received</h2>
+                            <pre className="text-sm whitespace-pre-wrap mb-4">{summary}</pre>
+                            <p className="text-sm mb-4">
+                                JSI will email you the requested yardages shortly.
+                            </p>
+                            <button onClick={() => { setShowConfirm(false); onNavigate('resources'); }}
+                                className="w-full py-2 rounded-full text-white"
+                                style={{ backgroundColor: theme.colors.accent }}>
+                                Done
+                            </button>
+                        </GlassCard>
+                    </div>, document.body)}
         </div>
     );
 };
+
 export const FabricsScreen = ({ onNavigate, theme, currentScreen, showAlert }) => {
     const subScreen = currentScreen.split('/')[1];
 
@@ -5066,7 +5093,7 @@ export const ProjectsScreen = ({ onNavigate, theme, opportunities, setSelectedOp
         if (projectsTab === 'pipeline') {
             onNavigate('new-lead');
         } else {
-            onNavigate('add-new-install');
+            onNavigate('add-new-install'); // Assuming 'add-new-install' is a valid route
         }
     };
 
@@ -5085,11 +5112,16 @@ export const ProjectsScreen = ({ onNavigate, theme, opportunities, setSelectedOp
 
             <div className="px-4">
                 <GlassCard theme={theme} className="p-1 flex relative">
+                    {/* Top Toggle Bar Slider (Pipeline/My Projects) */}
+                    {/* The key is to make the slider span exactly half the inner width,
+                        and translate by 100% of its own width. */}
                     <div
-                        className="absolute top-1 bottom-1 w-[calc(50%-0.25rem)] h-auto rounded-full transition-all duration-300 ease-in-out"
+                        className="absolute top-1 bottom-1 w-1/2 h-auto rounded-full transition-all duration-300 ease-in-out"
                         style={{
-                            backgroundColor: theme.colors.primary,
-                            transform: projectsTab === 'pipeline' ? 'translateX(0.25rem)' : 'translateX(calc(100% + 0.25rem))'
+                            backgroundColor: theme.colors.accent,
+                            // When 'pipeline', it's at translateX(0).
+                            // When 'my-projects', it shifts by 100% of its own width (which is 1/2 of parent's width).
+                            transform: projectsTab === 'pipeline' ? 'translateX(0)' : 'translateX(100%)'
                         }}
                     />
                     <button
@@ -5111,21 +5143,23 @@ export const ProjectsScreen = ({ onNavigate, theme, opportunities, setSelectedOp
 
             {projectsTab === 'pipeline' ? (
                 <div className="flex-1 flex flex-col overflow-hidden">
-                    <div className="flex space-x-2 overflow-x-auto p-4 scrollbar-hide">
-                        {Data.STAGES.map(stage => (
-                            <button
-                                key={stage}
-                                onClick={() => setSelectedPipelineStage(stage)}
-                                className="px-4 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition-colors"
-                                style={{
-                                    backgroundColor: selectedPipelineStage === stage ? theme.colors.primary : 'transparent',
-                                    color: selectedPipelineStage === stage ? theme.colors.surface : theme.colors.textSecondary
-                                }}
-                            >
-                                {stage}
-                            </button>
-                        ))}
-                    </div>
+                    <GlassCard theme={theme} className="p-1 mx-4 mt-4 mb-4">
+                        <div className="flex space-x-2 overflow-x-auto scrollbar-hide">
+                            {Data.STAGES.map(stage => (
+                                <button
+                                    key={stage}
+                                    onClick={() => setSelectedPipelineStage(stage)}
+                                    className="px-4 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition-colors flex-shrink-0"
+                                    style={{
+                                        backgroundColor: selectedPipelineStage === stage ? theme.colors.accent : 'transparent',
+                                        color: selectedPipelineStage === stage ? theme.colors.surface : theme.colors.textSecondary
+                                    }}
+                                >
+                                    {stage}
+                                </button>
+                            ))}
+                        </div>
+                    </GlassCard>
                     <div className="flex-1 overflow-y-auto px-4 space-y-4 pb-4 scrollbar-hide">
                         {filteredOpportunities.length > 0 ? filteredOpportunities.map(opp => (
                             <GlassCard key={opp.id} theme={theme} className="overflow-hidden p-4 cursor-pointer hover:border-gray-400/50" onClick={() => setSelectedOpportunity(opp)}>
@@ -5143,7 +5177,7 @@ export const ProjectsScreen = ({ onNavigate, theme, opportunities, setSelectedOp
                 </div>
             ) : (
                 <div className="flex-1 overflow-y-auto px-4 pt-4 pb-4 space-y-6 scrollbar-hide">
-                    {myProjects.map(project => (
+                    {myProjects && myProjects.length > 0 ? myProjects.map(project => (
                         <GlassCard key={project.id} theme={theme} className="p-0 overflow-hidden cursor-pointer group" onClick={() => setSelectedProject(project)}>
                             <div className="relative aspect-video w-full">
                                 <img
@@ -5158,7 +5192,9 @@ export const ProjectsScreen = ({ onNavigate, theme, opportunities, setSelectedOp
                                 </div>
                             </div>
                         </GlassCard>
-                    ))}
+                    )) : (
+                        <p className="text-center text-sm p-8" style={{ color: theme.colors.textSecondary }}>No projects added yet.</p>
+                    )}
                 </div>
             )}
         </div>
