@@ -332,67 +332,87 @@ export const AutoCompleteCombobox = ({
     theme,
 }) => {
     const [isOpen, setIsOpen] = useState(false);
+    const [pos, setPos] = useState({ top: 0, left: 0, width: 0 });
     const wrapRef = useRef(null);
-    const [dir, checkPosition] = useDropdownPosition(wrapRef);
+    const dropRef = useRef(null);
 
-    // Filtered list based on the current input value
+    // FIX: Moved this declaration before calcPos so it can be accessed.
     const filtered = useMemo(() => {
         const q = (value || '').toLowerCase();
-        if (!q) return options; // Show all options if input is empty
-        return options.filter(o =>
-            o.toLowerCase().includes(q)
-        );
+        if (!q) return options;
+        return options.filter(o => o.toLowerCase().includes(q));
     }, [value, options]);
 
-    // Handler for selecting an existing option
-    const handleSelect = (opt) => {
-        onChange(opt); // Update the parent state
-        setIsOpen(false);
-        if (resetOnSelect) {
-            onChange(''); // Clear the value in the parent state
-        }
-    };
+    // This function can now safely access the 'filtered' variable.
+    const calcPos = useCallback(() => {
+        if (!wrapRef.current) return;
+        const r = wrapRef.current.getBoundingClientRect();
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const h = Math.min(filtered.length * 44 + (onAddNew && value ? 44 : 0) + 20, vh * 0.4);
+        const w = Math.max(r.width, DROPDOWN_MIN_WIDTH);
 
-    // Handler for adding a new item
-    const handleAdd = () => {
-        if (!value) return;
-        onAddNew?.(value);
-        setIsOpen(false);
-        if (resetOnSelect) {
-            onChange(''); // Clear the value in the parent state
+        let top = r.bottom + DROPDOWN_GAP;
+        if (top + h > vh - 20) {
+            top = r.top - h - DROPDOWN_GAP;
         }
-    };
 
-    // Click-away handler
+        let left = r.left;
+        if (left + w > vw - DROPDOWN_SIDE_PADDING) left = vw - w - DROPDOWN_SIDE_PADDING;
+        if (left < DROPDOWN_SIDE_PADDING) left = DROPDOWN_SIDE_PADDING;
+
+        setPos({ top, left, width: w, height: h });
+    }, [filtered, onAddNew, value]);
+
+
     useEffect(() => {
-        const away = (e) =>
-            wrapRef.current &&
-            !wrapRef.current.contains(e.target) &&
-            setIsOpen(false);
+        if (!isOpen) return;
+        const handler = () => calcPos();
+        window.addEventListener('resize', handler);
+        window.addEventListener('scroll', handler, true);
+        return () => {
+            window.removeEventListener('resize', handler);
+            window.removeEventListener('scroll', handler, true);
+        };
+    }, [isOpen, calcPos]);
+
+    useEffect(() => {
+        const away = (e) => {
+            if (wrapRef.current && !wrapRef.current.contains(e.target) && dropRef.current && !dropRef.current.contains(e.target)) {
+                setIsOpen(false);
+            }
+        };
         document.addEventListener('mousedown', away);
         return () => document.removeEventListener('mousedown', away);
     }, []);
 
+    const handleSelect = (opt) => {
+        onChange(opt);
+        setIsOpen(false);
+        if (resetOnSelect) onChange('');
+    };
+
+    const handleAdd = () => {
+        if (!value) return;
+        onAddNew?.(value);
+        setIsOpen(false);
+        if (resetOnSelect) onChange('');
+    };
+
     return (
         <div ref={wrapRef} className="relative space-y-1">
             {label && (
-                <label
-                    className="block text-xs font-semibold px-4"
-                    style={{ color: theme.colors.textSecondary }}
-                >
+                <label className="block text-xs font-semibold px-4" style={{ color: theme.colors.textSecondary }}>
                     {label}
                 </label>
             )}
-
-            {/* Input is now fully controlled by the parent's `value` and `onChange` */}
             <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5"
-                    style={{ color: theme.colors.textSecondary }} />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: theme.colors.textSecondary }} />
                 <input
                     type="text"
                     value={value || ''}
-                    onFocus={() => { setIsOpen(true); checkPosition(); }}
-                    onChange={(e) => onChange(e.target.value)} // Typing directly updates parent state
+                    onFocus={() => { calcPos(); setIsOpen(true); }}
+                    onChange={(e) => onChange(e.target.value)}
                     placeholder={placeholder}
                     className="w-full pl-12 pr-4 py-3 border rounded-full text-base"
                     style={{
@@ -403,16 +423,22 @@ export const AutoCompleteCombobox = ({
                 />
             </div>
 
-            {/* Dropdown Menu */}
             {isOpen && (
                 <DropdownPortal parentRef={wrapRef} onClose={() => setIsOpen(false)}>
-                    <GlassCard
-                        theme={theme}
-                        className={`max-h-60 overflow-y-auto p-1.5 rounded-2xl shadow-lg ${dir === 'up' ? 'mb-2' : 'mt-2'
-                            }`}
+                    <div
+                        ref={dropRef}
+                        className="fixed z-[9999] pointer-events-auto"
+                        style={{ top: pos.top, left: pos.left, width: pos.width }}
                     >
-                        {filtered.length > 0 ? (
-                            filtered.map((opt) => (
+                        <GlassCard
+                            theme={theme}
+                            className="p-1.5 overflow-y-auto scrollbar-hide rounded-2xl shadow-lg"
+                            style={{
+                                maxHeight: pos.height,
+                                backgroundColor: '#FFFFFF'
+                            }}
+                        >
+                            {filtered.length > 0 && filtered.map((opt) => (
                                 <button
                                     key={opt}
                                     type="button"
@@ -422,23 +448,19 @@ export const AutoCompleteCombobox = ({
                                 >
                                     {opt}
                                 </button>
-                            ))
-                        ) : (
-                            !onAddNew && <p className="py-2.5 px-3.5 text-sm" style={{ color: theme.colors.textSecondary }}>No match</p>
-                        )}
-
-                        {/* "Add new" button */}
-                        {onAddNew && value && !options.some(o => o.toLowerCase() === value.toLowerCase()) && (
-                            <button
-                                type="button"
-                                onClick={handleAdd}
-                                className="block w-full text-left py-2.5 px-3.5 text-sm mt-1 rounded-lg font-semibold"
-                                style={{ color: theme.colors.accent }}
-                            >
-                                + Add "{value}"
-                            </button>
-                        )}
-                    </GlassCard>
+                            ))}
+                            {onAddNew && value && !options.some(o => o.toLowerCase() === value.toLowerCase()) && (
+                                <button
+                                    type="button"
+                                    onClick={handleAdd}
+                                    className="block w-full text-left py-2.5 px-3.5 text-sm mt-1 rounded-lg font-semibold"
+                                    style={{ color: theme.colors.accent }}
+                                >
+                                    + Add "{value}"
+                                </button>
+                            )}
+                        </GlassCard>
+                    </div>
                 </DropdownPortal>
             )}
         </div>
@@ -5446,7 +5468,6 @@ export const ResourcesScreen = ({ theme, onNavigate }) => {
     );
 };
 
-
 export const ProjectDetailModal = ({ opportunity, onClose, theme, onUpdate }) => {
     const [editedOpp, setEditedOpp] = useState(null);
 
@@ -5481,8 +5502,8 @@ export const ProjectDetailModal = ({ opportunity, onClose, theme, onUpdate }) =>
                     onChange={(e) => handleChange('name', e.target.value)}
                     theme={theme}
                 />
-                {/* Replaced CustomSelect with NativeSelect for rounded style */}
-                <NativeSelect
+                {/* FIX: Replaced NativeSelect with PortalNativeSelect */}
+                <PortalNativeSelect
                     label="Stage"
                     value={editedOpp.stage}
                     onChange={(e) => handleChange('stage', e.target.value)}
@@ -5503,8 +5524,8 @@ export const ProjectDetailModal = ({ opportunity, onClose, theme, onUpdate }) =>
                     onChange={(e) => handleChange('value', e.target.value)}
                     theme={theme}
                 />
-                {/* Replaced CustomSelect with NativeSelect for rounded style */}
-                <NativeSelect
+                {/* FIX: Replaced NativeSelect with PortalNativeSelect */}
+                <PortalNativeSelect
                     label="PO Timeframe"
                     value={editedOpp.poTimeframe}
                     onChange={(e) => handleChange('poTimeframe', e.target.value)}
@@ -5519,7 +5540,7 @@ export const ProjectDetailModal = ({ opportunity, onClose, theme, onUpdate }) =>
                     theme={theme}
                 />
                 <ProbabilitySlider
-                    value={editedOpp.winProbability}
+                    value={editedOpp.winProbability || 50}
                     onChange={(val) => handleChange('winProbability', val)}
                     theme={theme}
                 />
