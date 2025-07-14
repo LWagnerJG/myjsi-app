@@ -316,9 +316,92 @@ export const Card = ({ children, ...props }) => (
     <GlassCard {...props}>{children}</GlassCard>
 )
 
-export const IncentiveRewardsScreen = ({ theme, onNavigate }) => {
-    // Placeholder - Logic will be added later
-    return <PageTitle title="Incentive Rewards" theme={theme} />;
+export const IncentiveRewardsScreen = ({ theme }) => {
+    const generateTimePeriods = () => {
+        const periods = [];
+        const currentYear = new Date().getFullYear();
+        for (let year = currentYear; year >= currentYear - 2; year--) {
+            periods.push({ value: `${year}`, label: `${year}` });
+            for (let q = 4; q >= 1; q--) {
+                if (year === currentYear && q > Math.floor(new Date().getMonth() / 3) + 1) continue;
+                periods.push({ value: `${year}-Q${q}`, label: `Q${q} ${year}` });
+            }
+        }
+        return periods;
+    };
+
+    const timePeriods = useMemo(generateTimePeriods, []);
+    const [selectedPeriod, setSelectedPeriod] = useState(timePeriods[0].value);
+
+    const rewardsData = useMemo(() => {
+        const isAnnual = !selectedPeriod.includes('Q');
+        if (isAnnual) {
+            const year = selectedPeriod;
+            const cumulativeData = { sales: [], designers: [] };
+            const salesMap = new Map();
+            const designersMap = new Map();
+
+            for (let q = 1; q <= 4; q++) {
+                const periodKey = `${year}-Q${q}`;
+                if (REWARDS_DATA[periodKey]) {
+                    REWARDS_DATA[periodKey].sales.forEach(person => {
+                        salesMap.set(person.name, (salesMap.get(person.name) || 0) + person.amount);
+                    });
+                    REWARDS_DATA[periodKey].designers.forEach(person => {
+                        designersMap.set(person.name, (designersMap.get(person.name) || 0) + person.amount);
+                    });
+                }
+            }
+
+            salesMap.forEach((amount, name) => cumulativeData.sales.push({ name, amount }));
+            designersMap.forEach((amount, name) => cumulativeData.designers.push({ name, amount }));
+
+            return cumulativeData;
+        }
+        return REWARDS_DATA[selectedPeriod] || { sales: [], designers: [] };
+    }, [selectedPeriod]);
+
+    const sortedSales = [...(rewardsData.sales || [])].sort((a, b) => b.amount - a.amount);
+    const sortedDesigners = [...(rewardsData.designers || [])].sort((a, b) => b.amount - a.amount);
+
+    return (
+        <>
+            <PageTitle title="Rewards" theme={theme} />
+            <div className="px-4 space-y-4 pb-4">
+                <FormInput
+                    type="select"
+                    value={selectedPeriod}
+                    onChange={e => setSelectedPeriod(e.target.value)}
+                    options={timePeriods}
+                    theme={theme}
+                />
+
+                <GlassCard theme={theme} className="p-4">
+                    <h3 className="font-bold text-xl mb-2" style={{ color: theme.colors.textPrimary }}>Sales</h3>
+                    <div className="space-y-2">
+                        {sortedSales.length > 0 ? sortedSales.map(person => (
+                            <div key={person.name} className="flex justify-between items-center text-sm">
+                                <span style={{ color: theme.colors.textPrimary }}>{person.name}</span>
+                                <span className="font-semibold" style={{ color: theme.colors.accent }}>${person.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                            </div>
+                        )) : <p className="text-sm" style={{ color: theme.colors.textSecondary }}>No sales rewards for this period.</p>}
+                    </div>
+                </GlassCard>
+
+                <GlassCard theme={theme} className="p-4">
+                    <h3 className="font-bold text-xl mb-2" style={{ color: theme.colors.textPrimary }}>Designers</h3>
+                    <div className="space-y-2">
+                        {sortedDesigners.length > 0 ? sortedDesigners.map(person => (
+                            <div key={person.name} className="flex justify-between items-center text-sm">
+                                <span style={{ color: theme.colors.textPrimary }}>{person.name}</span>
+                                <span className="font-semibold" style={{ color: theme.colors.accent }}>${person.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                            </div>
+                        )) : <p className="text-sm" style={{ color: theme.colors.textSecondary }}>No designer rewards for this period.</p>}
+                    </div>
+                </GlassCard>
+            </div>
+        </>
+    );
 };
 
 export const AutoCompleteCombobox = ({
@@ -506,6 +589,7 @@ export const ToggleButtonGroup = ({ value, onChange, options, theme }) => {
         </div>
     );
 };
+
 const {
     // New–Lead form
     EMPTY_LEAD,
@@ -1294,8 +1378,9 @@ const ContractsScreen = ({ theme, onNavigate }) => {
         </div>
     );
 };
-const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage }) => {
-    const [dealers, setDealers] = useState(DEALER_DIRECTORY_DATA);
+
+export const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage }) => {
+    const [dealers, setDealers] = useState(Data.DEALER_DIRECTORY_DATA);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedDealer, setSelectedDealer] = useState(null);
     const [sortConfig, setSortConfig] = useState({ key: 'name' });
@@ -1358,13 +1443,13 @@ const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage }) => {
         setDealers(curr =>
             curr.map(d =>
                 d.id === selectedDealer.id
-                    ? { ...d, [role]: [...d[role], person] }
+                    ? { ...d, [role]: [...(d[role] || []), person] }
                     : d
             )
         );
         setSelectedDealer(d =>
             d.id === selectedDealer.id
-                ? { ...d, [newPerson.role]: [...d[newPerson.role], person] }
+                ? { ...d, [newPerson.role]: [...(d[newPerson.role] || []), person] }
                 : d
         );
         setShowAddPersonModal(false);
@@ -1380,7 +1465,7 @@ const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage }) => {
         <div>
             <h4 className="font-semibold" style={{ color: theme.colors.textPrimary }}>{title}</h4>
             <div className="text-sm space-y-1 mt-1">
-                {members.length
+                {members && members.length > 0
                     ? members.map(m => (
                         <div key={m.name} className="flex items-center" style={{ color: theme.colors.textSecondary }}>
                             {m.name}
@@ -1415,36 +1500,9 @@ const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage }) => {
                     </button>
                     {showFilterMenu && (
                         <GlassCard ref={filterMenuRef} theme={theme} className="absolute top-14 right-0 z-10 w-40 p-2">
-                            <button
-                                onClick={() => handleSort('name')}
-                                className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${sortConfig.key === 'name' ? 'font-bold' : ''}`}
-                                style={{
-                                    color: theme.colors.textPrimary,
-                                    backgroundColor: sortConfig.key === 'name' ? theme.colors.subtle : 'transparent'
-                                }}
-                            >
-                                A-Z
-                            </button>
-                            <button
-                                onClick={() => handleSort('sales')}
-                                className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${sortConfig.key === 'sales' ? 'font-bold' : ''}`}
-                                style={{
-                                    color: theme.colors.textPrimary,
-                                    backgroundColor: sortConfig.key === 'sales' ? theme.colors.subtle : 'transparent'
-                                }}
-                            >
-                                By Sales
-                            </button>
-                            <button
-                                onClick={() => handleSort('bookings')}
-                                className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${sortConfig.key === 'bookings' ? 'font-bold' : ''}`}
-                                style={{
-                                    color: theme.colors.textPrimary,
-                                    backgroundColor: sortConfig.key === 'bookings' ? theme.colors.subtle : 'transparent'
-                                }}
-                            >
-                                By Bookings
-                            </button>
+                            <button onClick={() => handleSort('name')} className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${sortConfig.key === 'name' ? 'font-bold' : ''}`} style={{ color: theme.colors.textPrimary, backgroundColor: sortConfig.key === 'name' ? theme.colors.subtle : 'transparent' }}> A-Z </button>
+                            <button onClick={() => handleSort('sales')} className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${sortConfig.key === 'sales' ? 'font-bold' : ''}`} style={{ color: theme.colors.textPrimary, backgroundColor: sortConfig.key === 'sales' ? theme.colors.subtle : 'transparent' }}> By Sales </button>
+                            <button onClick={() => handleSort('bookings')} className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${sortConfig.key === 'bookings' ? 'font-bold' : ''}`} style={{ color: theme.colors.textPrimary, backgroundColor: sortConfig.key === 'bookings' ? theme.colors.subtle : 'transparent' }}> By Bookings </button>
                         </GlassCard>
                     )}
                 </div>
@@ -1480,18 +1538,15 @@ const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage }) => {
                 ))}
             </div>
 
-            <Modal show={!!selectedDealer} onClose={() => setSelectedDealer(null)} title="" theme={theme}>
+            {/* FIX: The modal now gets the dealer name passed into its `title` prop */}
+            <Modal show={!!selectedDealer} onClose={() => setSelectedDealer(null)} title={selectedDealer?.name || ''} theme={theme}>
                 {selectedDealer && (
                     <div className="space-y-4">
+                        {/* The header is now handled by the Modal component itself */}
                         <div className="flex justify-between items-start">
-                            <div>
-                                <h2 className="text-2xl font-bold" style={{ color: theme.colors.textPrimary }}>
-                                    {selectedDealer.name}
-                                </h2>
-                                <p className="text-sm" style={{ color: theme.colors.textSecondary }}>
-                                    {selectedDealer.address}
-                                </p>
-                            </div>
+                            <p className="text-sm" style={{ color: theme.colors.textSecondary }}>
+                                {selectedDealer.address}
+                            </p>
                             <button
                                 onClick={() => setShowAddPersonModal(true)}
                                 className="p-2 -mr-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10"
@@ -1502,16 +1557,16 @@ const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage }) => {
 
                         <div className="border-t border-b py-4 space-y-4" style={{ borderColor: theme.colors.subtle }}>
                             <div>
-                                <ModalSectionHeader title="Daily Discount" />
-                                <FormInput
-                                    type="select"
+                                {/* FIX: Replaced FormInput with the correct PortalNativeSelect component */}
+                                <PortalNativeSelect
+                                    label="Daily Discount"
                                     theme={theme}
                                     value={selectedDealer.dailyDiscount}
                                     onChange={e => setPendingDiscountChange({
                                         dealerId: selectedDealer.id,
                                         newDiscount: e.target.value
                                     })}
-                                    options={DAILY_DISCOUNT_OPTIONS.map(opt => ({ label: opt, value: opt }))}
+                                    options={Data.DAILY_DISCOUNT_OPTIONS.map(opt => ({ label: opt, value: opt }))}
                                 />
                             </div>
                             <div>
@@ -1562,78 +1617,28 @@ const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage }) => {
                     <span className="font-bold">{pendingDiscountChange?.newDiscount}</span>?
                 </p>
                 <div className="flex justify-end space-x-3 pt-4">
-                    <button
-                        onClick={() => setPendingDiscountChange(null)}
-                        className="font-bold py-2 px-5 rounded-lg"
-                        style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }}
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        onClick={confirmDiscountChange}
-                        className="font-bold py-2 px-5 rounded-lg text-white"
-                        style={{ backgroundColor: theme.colors.accent }}
-                    >
-                        Save
-                    </button>
+                    <button onClick={() => setPendingDiscountChange(null)} className="font-bold py-2 px-5 rounded-lg" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }} > Cancel </button>
+                    <button onClick={confirmDiscountChange} className="font-bold py-2 px-5 rounded-lg text-white" style={{ backgroundColor: theme.colors.accent }} > Save </button>
                 </div>
             </Modal>
 
             <Modal show={showAddPersonModal} onClose={() => setShowAddPersonModal(false)} title="Add New Person" theme={theme}>
                 <form onSubmit={handleAddPerson} className="space-y-4">
-                    <FormInput
-                        label="First Name"
-                        value={newPerson.firstName}
-                        onChange={e => setNewPerson(p => ({ ...p, firstName: e.target.value }))}
-                        theme={theme}
-                        required
-                    />
-                    <FormInput
-                        label="Last Name"
-                        value={newPerson.lastName}
-                        onChange={e => setNewPerson(p => ({ ...p, lastName: e.target.value }))}
-                        theme={theme}
-                        required
-                    />
-                    <FormInput
-                        label="Email"
-                        type="email"
-                        value={newPerson.email}
-                        onChange={e => setNewPerson(p => ({ ...p, email: e.target.value }))}
-                        theme={theme}
-                        required
-                    />
-                    <FormInput
-                        label="Role"
-                        type="select"
-                        value={newPerson.role}
-                        onChange={e => setNewPerson(p => ({ ...p, role: e.target.value }))}
-                        theme={theme}
-                        options={[
-                            { label: 'Salesperson', value: 'salespeople' },
-                            { label: 'Designer', value: 'designers' },
-                            { label: 'Admin', value: 'administration' },
-                            { label: 'Installer', value: 'installers' }
-                        ]}
-                    />
+                    <FormInput label="First Name" value={newPerson.firstName} onChange={e => setNewPerson(p => ({ ...p, firstName: e.target.value }))} theme={theme} required />
+                    <FormInput label="Last Name" value={newPerson.lastName} onChange={e => setNewPerson(p => ({ ...p, lastName: e.target.value }))} theme={theme} required />
+                    <FormInput label="Email" type="email" value={newPerson.email} onChange={e => setNewPerson(p => ({ ...p, email: e.target.value }))} theme={theme} required />
+                    <FormInput label="Role" type="select" value={newPerson.role} onChange={e => setNewPerson(p => ({ ...p, role: e.target.value }))} theme={theme} options={[{ label: 'Salesperson', value: 'salespeople' }, { label: 'Designer', value: 'designers' }, { label: 'Admin', value: 'administration' }, { label: 'Installer', value: 'installers' }]} />
                     <div className="pt-2 text-center">
                         <p className="text-xs mb-2" style={{ color: theme.colors.textSecondary }}>
                             This will send an invitation to the user to join the MyJSI app.
                         </p>
-                        <button
-                            type="submit"
-                            className="w-full font-bold py-3 px-6 rounded-lg text-white"
-                            style={{ backgroundColor: theme.colors.accent }}
-                        >
-                            Send Invite
-                        </button>
+                        <button type="submit" className="w-full font-bold py-3 px-6 rounded-lg text-white" style={{ backgroundColor: theme.colors.accent }} > Send Invite </button>
                     </div>
                 </form>
             </Modal>
         </>
     );
 };
-
 
 const CommissionRatesScreen = ({ theme }) => {
     const rows = useMemo(() => {
@@ -3742,21 +3747,31 @@ export const AppHeader = React.memo(({ onHomeClick, isDarkMode, theme, onProfile
     return (
         <div
             style={{
-                backgroundColor: theme.colors.surface, // Use the new white surface color
+                backgroundColor: theme.colors.surface,
                 backdropFilter: theme.backdropFilter,
                 WebkitBackdropFilter: theme.backdropFilter
             }}
             className="mx-auto mt-4 w-[90%] px-6 py-3 flex justify-between items-center sticky top-0 z-20 rounded-full shadow-lg backdrop-blur"
         >
-            {/* ... rest of AppHeader content ... */}
-            <div className="flex items-center space-x-2">
-                {showBack && (
-                    <button onClick={handleBack} className="p-2 -ml-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10" >
-                        <ArrowLeft className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
-                    </button>
-                )}
-                <button onClick={onHomeClick} className="hover:opacity-80 transition-opacity">
-                    <img src={Data.logoLight} alt="MyJSI Logo" className="h-10 w-auto" style={{ filter: filterStyle, marginLeft: '0.5rem' }} />
+            <div className="flex items-center">
+                {/* FIX: The back button is no longer removed from the page. 
+                  Instead, its width and opacity are animated using CSS classes based on the `showBack` prop.
+                */}
+                <button
+                    aria-label="Go back"
+                    onClick={handleBack}
+                    className={`transition-all duration-300 ease-in-out overflow-hidden p-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10 ${showBack ? 'w-9 -ml-2 mr-2 opacity-100' : 'w-0 ml-0 mr-0 opacity-0'}`}
+                    disabled={!showBack} // Disable the button when not shown
+                >
+                    <ArrowLeft className="w-5 h-5 flex-shrink-0" style={{ color: theme.colors.textSecondary }} />
+                </button>
+
+                <button
+                    aria-label="Go to homepage"
+                    onClick={onHomeClick}
+                    className="hover:opacity-80 transition-opacity"
+                >
+                    <img src={Data.logoLight} alt="MyJSI Logo" className="h-10 w-auto" style={{ filter: filterStyle }} />
                 </button>
             </div>
             <div className="flex items-center space-x-4">
@@ -3764,6 +3779,7 @@ export const AppHeader = React.memo(({ onHomeClick, isDarkMode, theme, onProfile
                     <div className="text-lg font-normal leading-tight" style={{ color: theme.colors.textPrimary }}>Hello, {userName}!</div>
                 )}
                 <button
+                    aria-label="Open profile menu"
                     onClick={onProfileClick}
                     className="w-9 h-9 rounded-full flex items-center justify-center border transition-colors hover:bg-black/5 dark:hover:bg-white/5"
                     style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border }}
@@ -4976,7 +4992,6 @@ export const NewLeadScreen = ({
         winProbability: 50,
         isContract: false,
         contractType: '',
-        // FIX: Added state for the JSI Spec Services options
         jsiSpecServicesType: 'New Quote',
         jsiRevisionQuoteNumber: '',
         jsiPastProjectInfo: '',
@@ -5171,11 +5186,26 @@ export const NewLeadScreen = ({
                     )}
 
                     {/* Products list */}
-                    <div className="border-t pt-4 mt-4 space-y-3" style={{ borderColor: theme.colors.border }}>
-                        <label className="text-xs font-semibold px-1" style={{ color: theme.colors.textSecondary }}>
-                            Products
-                        </label>
+                    <div className="pt-4 mt-2 space-y-3">
+                        {/* HEADER ROW for Products */}
+                        <div className="flex items-center justify-between px-3">
+                            <label className="text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>
+                                Products
+                            </label>
+                            <div className="w-1/2">
+                                {availableSeries.length > 0 && (
+                                    <PortalNativeSelect
+                                        value=""
+                                        onChange={(e) => addProduct(e.target.value)}
+                                        placeholder="+ Add"
+                                        options={availableSeries.map(series => ({ label: series, value: series }))}
+                                        theme={theme}
+                                    />
+                                )}
+                            </div>
+                        </div>
 
+                        {/* List of added product cards */}
                         {newLead.products.map((p, idx) => (
                             <div
                                 key={idx}
@@ -5206,16 +5236,6 @@ export const NewLeadScreen = ({
                                 )}
                             </div>
                         ))}
-
-                        {availableSeries.length > 0 && (
-                            <PortalNativeSelect
-                                value=""
-                                onChange={(e) => addProduct(e.target.value)}
-                                placeholder="+ Add a Product..."
-                                options={availableSeries.map(series => ({ label: series, value: series }))}
-                                theme={theme}
-                            />
-                        )}
                     </div>
                 </FormSection>
 
@@ -5284,7 +5304,6 @@ export const NewLeadScreen = ({
                         onChange={e => updateField('jsiSpecServices', e.target.checked)}
                     />
 
-                    {/* FIX: This block now renders the conditional options */}
                     {newLead.jsiSpecServices && (
                         <div className="animate-fade-in pt-4 space-y-4 border-t" style={{ borderColor: theme.colors.subtle }}>
                             <ToggleButtonGroup
@@ -6933,7 +6952,6 @@ export {
 
     // “Rep Functions” screens
     RequestFieldVisitScreen,
-    DealerDirectoryScreen,
 
     // Misc. resource screens
     ContractsScreen,
