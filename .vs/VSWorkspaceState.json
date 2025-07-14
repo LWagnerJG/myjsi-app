@@ -2,8 +2,9 @@
   "ExpandedNodes": [
     "",
     "\\public",
-    "\\src"
+    "\\src",
+    "\\src\\constants"
   ],
-  "SelectedNode": "\\src\\data.jsx",
+  "SelectedNode": "\\src\\DropdownPortal.jsx",
   "PreviewInSolutionExplorer": false
 }

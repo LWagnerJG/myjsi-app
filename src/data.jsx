@@ -338,9 +338,9 @@ export const INITIAL_POLLS = [
         timeAgo: '1d',
         question: 'Which Vision base finish do you spec the most?',
         options: [
-            { id: 'carbon', text: 'Carbon', votes: 8 },
-            { id: 'oak', text: 'Natural Oak', votes: 5 },
-            { id: 'white', text: 'Designer White', votes: 12 },
+            { id: 'carbon', text: 'Truss', votes: 8 },
+            { id: 'oak', text: 'Torii', votes: 5 },
+            { id: 'white', text: 'De', votes: 12 },
         ],
     },
 ];
