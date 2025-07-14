@@ -4561,6 +4561,7 @@ export const ProbabilitySlider = ({ value, onChange, theme }) => {
     );
 };
 
+
 export const PortalNativeSelect = ({
     label,
     value,
@@ -4575,33 +4576,24 @@ export const PortalNativeSelect = ({
     const wrapperRef = useRef(null);
     const dropdownRef = useRef(null);
 
-    // Calculate position for portal
     const calculatePosition = () => {
         if (!wrapperRef.current) return;
-
         const rect = wrapperRef.current.getBoundingClientRect();
         const viewportHeight = window.innerHeight;
-        const dropdownHeight = 240; // estimated max height
-
-        let top = rect.bottom + 4; // 4px margin
-
-        // If dropdown would go below viewport, position it above
+        const dropdownHeight = 240;
+        let top = rect.bottom + 4;
         if (top + dropdownHeight > viewportHeight) {
             top = rect.top - dropdownHeight - 4;
         }
-
-        setPosition({
-            top: top,
-            left: rect.left,
-            width: rect.width
-        });
+        setPosition({ top, left: rect.left, width: rect.width });
     };
 
-    // Close when clicking outside
     useEffect(() => {
-        const handleClickOutside = e => {
-            if (wrapperRef.current && !wrapperRef.current.contains(e.target) &&
-                dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        const handleClickOutside = (e) => {
+            if (
+                wrapperRef.current && !wrapperRef.current.contains(e.target) &&
+                dropdownRef.current && !dropdownRef.current.contains(e.target)
+            ) {
                 setIsOpen(false);
             }
         };
@@ -4609,17 +4601,10 @@ export const PortalNativeSelect = ({
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // Handle scroll and resize
     useEffect(() => {
-        const handleScrollResize = () => {
-            if (isOpen) {
-                calculatePosition();
-            }
-        };
-
+        const handleScrollResize = () => isOpen && calculatePosition();
         window.addEventListener('scroll', handleScrollResize, true);
         window.addEventListener('resize', handleScrollResize);
-
         return () => {
             window.removeEventListener('scroll', handleScrollResize, true);
             window.removeEventListener('resize', handleScrollResize);
@@ -4627,21 +4612,18 @@ export const PortalNativeSelect = ({
     }, [isOpen]);
 
     const selectedLabel = useMemo(() => {
-        if (!Array.isArray(options)) {
-            console.warn("NativeSelect: 'options' should be an array");
-            return placeholder;
-        }
-        return options.find(o => o.value === value)?.label || placeholder;
+        if (!Array.isArray(options)) return placeholder;
+        return options.find((o) => o.value === value)?.label || placeholder;
     }, [options, value, placeholder]);
 
-    const handleSelect = optionValue => {
+    const handleSelect = (optionValue) => {
         onChange({ target: { value: optionValue } });
         setIsOpen(false);
     };
 
     const handleOpen = () => {
         calculatePosition();
-        setIsOpen(o => !o);
+        setIsOpen((o) => !o);
     };
 
     return (
@@ -4667,41 +4649,31 @@ export const PortalNativeSelect = ({
                 >
                     <span className="pr-6">{selectedLabel}</span>
                     <ChevronDown
-                        className={`absolute right-4 w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''
-                            }`}
+                        className={`absolute right-4 w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
                         style={{ color: theme.colors.textSecondary }}
                     />
                 </button>
             </div>
 
-            {/* Portal dropdown */}
             {isOpen && (
                 <div
                     ref={dropdownRef}
-                    className="fixed z-50"
-                    style={{
-                        top: position.top,
-                        left: position.left,
-                        width: position.width
-                    }}
+                    className="fixed z-[9999] pointer-events-auto"
+                    style={{ top: position.top, left: position.left, width: position.width }}
                 >
                     <GlassCard
                         theme={theme}
                         className="p-1.5 max-h-60 overflow-y-auto scrollbar-hide rounded-2xl shadow-lg"
                     >
-                        {options.map(opt => (
+                        {options.map((opt) => (
                             <button
                                 key={opt.value}
                                 type="button"
                                 onClick={() => handleSelect(opt.value)}
                                 className="block w-full text-left py-2.5 px-3.5 text-sm rounded-lg transition-colors"
                                 style={{
-                                    backgroundColor:
-                                        opt.value === value ? theme.colors.primary : 'transparent',
-                                    color:
-                                        opt.value === value
-                                            ? theme.colors.surface
-                                            : theme.colors.textPrimary,
+                                    backgroundColor: opt.value === value ? theme.colors.primary : 'transparent',
+                                    color: opt.value === value ? theme.colors.surface : theme.colors.textPrimary,
                                     fontWeight: opt.value === value ? 600 : 400
                                 }}
                             >
@@ -4715,101 +4687,66 @@ export const PortalNativeSelect = ({
     );
 };
 
-const DropdownPortal = ({ children, onClose, parentRef, theme }) => {
+export const DropdownPortal = ({ children, onClose, parentRef, theme }) => {
     const dropdownRef = useRef(null);
     const [position, setPosition] = useState({ top: 0, left: 0, width: 0 });
     const [isPositioned, setIsPositioned] = useState(false);
 
-    // Calculate optimal position
     const calculatePosition = () => {
         if (!parentRef.current) return;
-
         const parentRect = parentRef.current.getBoundingClientRect();
         const viewportHeight = window.innerHeight;
         const viewportWidth = window.innerWidth;
-        const dropdownHeight = 320; // max-h-80 = 320px
-        const dropdownWidth = parentRect.width; // Match parent width instead of fixed 288px
+        const dropdownHeight = 320;
+        const dropdownWidth = parentRect.width;
 
-        let top = parentRect.bottom + 4; // 4px margin below
-        let left = parentRect.left;
-
-        // Check if dropdown would go below viewport
+        let top = parentRect.bottom + 4;
         if (top + dropdownHeight > viewportHeight) {
-            // Position above if there's more space above
-            const spaceAbove = parentRect.top;
-            const spaceBelow = viewportHeight - parentRect.bottom;
-
-            if (spaceAbove > spaceBelow) {
-                top = parentRect.top - dropdownHeight - 4; // 4px margin above
-            } else {
-                // Keep below but adjust height to fit
-                top = parentRect.bottom + 4;
-            }
+            top = parentRect.top - dropdownHeight - 4;
         }
-
-        // Check if dropdown would go outside viewport horizontally
-        if (left + dropdownWidth > viewportWidth) {
-            left = viewportWidth - dropdownWidth - 8; // 8px margin from edge
+        let left = parentRect.left;
+        if (left + dropdownWidth > viewportWidth - 8) {
+            left = viewportWidth - dropdownWidth - 8;
         }
+        if (left < 8) left = 8;
 
-        // Ensure left position is not negative
-        if (left < 8) {
-            left = 8;
-        }
-
-        setPosition({
-            top,
-            left,
-            width: dropdownWidth
-        });
+        setPosition({ top, left, width: dropdownWidth });
         setIsPositioned(true);
     };
 
-    // Calculate position on mount and when parent changes
     useEffect(() => {
         calculatePosition();
     }, [parentRef.current]);
 
-    // Recalculate position on scroll/resize
     useEffect(() => {
-        const handleScrollResize = () => {
-            calculatePosition();
-        };
-
+        const handleScrollResize = () => calculatePosition();
         window.addEventListener('scroll', handleScrollResize, true);
         window.addEventListener('resize', handleScrollResize);
-
         return () => {
             window.removeEventListener('scroll', handleScrollResize, true);
             window.removeEventListener('resize', handleScrollResize);
         };
     }, []);
 
-    // Handle click outside
     useEffect(() => {
-        function handleClickOutside(event) {
-            // Check if click is outside both dropdown and parent
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target) &&
-                parentRef.current && !parentRef.current.contains(event.target)) {
+        const handleClickOutside = (e) => {
+            if (
+                dropdownRef.current && !dropdownRef.current.contains(e.target) &&
+                parentRef.current && !parentRef.current.contains(e.target)
+            ) {
                 onClose();
             }
-        }
-
-        // Add listener immediately, no timeout needed
-        document.addEventListener("mousedown", handleClickOutside);
-
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
         };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [onClose, parentRef]);
 
-    // Don't render until position is calculated
     if (!isPositioned) return null;
 
     return ReactDOM.createPortal(
         <div
             ref={dropdownRef}
-            className="fixed z-[9999]" // Use fixed instead of absolute
+            className="fixed z-[9999] pointer-events-auto"
             style={{
                 top: `${position.top}px`,
                 left: `${position.left}px`,
@@ -4830,21 +4767,30 @@ const DropdownPortal = ({ children, onClose, parentRef, theme }) => {
     );
 };
 
-const EnhancedDropdownPortal = ({ children, onClose, parentRef, theme, align = 'left' }) => {
+export const EnhancedDropdownPortal = ({
+    children,
+    onClose,
+    parentRef,
+    theme,
+    align = 'left'
+}) => {
     const dropdownRef = useRef(null);
-    const [position, setPosition] = useState({ top: 0, left: 0, width: 0, direction: 'down' });
+    const [position, setPosition] = useState({
+        top: 0,
+        left: 0,
+        width: 0,
+        direction: 'down'
+    });
     const [isPositioned, setIsPositioned] = useState(false);
 
     const calculatePosition = () => {
         if (!parentRef.current) return;
-
         const parentRect = parentRef.current.getBoundingClientRect();
         const viewportHeight = window.innerHeight;
         const viewportWidth = window.innerWidth;
         const dropdownHeight = 320;
-        const dropdownWidth = Math.max(parentRect.width, 200); // Minimum width of 200px
+        const dropdownWidth = Math.max(parentRect.width, 200);
 
-        // Determine vertical position
         const spaceBelow = viewportHeight - parentRect.bottom;
         const spaceAbove = parentRect.top;
         const shouldFlip = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
@@ -4853,7 +4799,6 @@ const EnhancedDropdownPortal = ({ children, onClose, parentRef, theme, align = '
             ? parentRect.top - dropdownHeight - 4
             : parentRect.bottom + 4;
 
-        // Determine horizontal position based on align prop
         let left;
         switch (align) {
             case 'right':
@@ -4862,26 +4807,16 @@ const EnhancedDropdownPortal = ({ children, onClose, parentRef, theme, align = '
             case 'center':
                 left = parentRect.left + (parentRect.width - dropdownWidth) / 2;
                 break;
-            case 'left':
             default:
                 left = parentRect.left;
-                break;
         }
 
-        // Ensure dropdown stays within viewport horizontally
         if (left + dropdownWidth > viewportWidth - 8) {
             left = viewportWidth - dropdownWidth - 8;
         }
-        if (left < 8) {
-            left = 8;
-        }
+        if (left < 8) left = 8;
 
-        setPosition({
-            top,
-            left,
-            width: dropdownWidth,
-            direction: shouldFlip ? 'up' : 'down'
-        });
+        setPosition({ top, left, width: dropdownWidth, direction: shouldFlip ? 'up' : 'down' });
         setIsPositioned(true);
     };
 
@@ -4890,13 +4825,9 @@ const EnhancedDropdownPortal = ({ children, onClose, parentRef, theme, align = '
     }, [parentRef.current, align]);
 
     useEffect(() => {
-        const handleScrollResize = () => {
-            calculatePosition();
-        };
-
+        const handleScrollResize = () => calculatePosition();
         window.addEventListener('scroll', handleScrollResize, true);
         window.addEventListener('resize', handleScrollResize);
-
         return () => {
             window.removeEventListener('scroll', handleScrollResize, true);
             window.removeEventListener('resize', handleScrollResize);
@@ -4904,15 +4835,16 @@ const EnhancedDropdownPortal = ({ children, onClose, parentRef, theme, align = '
     }, []);
 
     useEffect(() => {
-        function handleClickOutside(event) {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target) &&
-                parentRef.current && !parentRef.current.contains(event.target)) {
+        const handleClickOutside = (e) => {
+            if (
+                dropdownRef.current && !dropdownRef.current.contains(e.target) &&
+                parentRef.current && !parentRef.current.contains(e.target)
+            ) {
                 onClose();
             }
-        }
-
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [onClose, parentRef]);
 
     if (!isPositioned) return null;
@@ -4920,7 +4852,7 @@ const EnhancedDropdownPortal = ({ children, onClose, parentRef, theme, align = '
     return ReactDOM.createPortal(
         <div
             ref={dropdownRef}
-            className="fixed z-[9999]"
+            className="fixed z-[9999] pointer-events-auto"
             style={{
                 top: `${position.top}px`,
                 left: `${position.left}px`,
@@ -4932,9 +4864,12 @@ const EnhancedDropdownPortal = ({ children, onClose, parentRef, theme, align = '
                 className={`p-2 overflow-y-auto scrollbar-hide rounded-2xl shadow-lg ${position.direction === 'up' ? 'animate-slide-up' : 'animate-slide-down'
                     }`}
                 style={{
-                    maxHeight: position.direction === 'up'
-                        ? `${Math.min(320, position.top - 20)}px`
-                        : `${Math.min(320, window.innerHeight - position.top - 20)}px`
+                    maxHeight: `${Math.min(
+                        320,
+                        position.direction === 'up'
+                            ? position.top - 20
+                            : window.innerHeight - position.top - 20
+                    )}px`
                 }}
             >
                 {children}
@@ -4943,7 +4878,6 @@ const EnhancedDropdownPortal = ({ children, onClose, parentRef, theme, align = '
         document.body
     );
 };
-
 export const NativeSelect = ({
     label,
     value,
@@ -5087,8 +5021,6 @@ export const NativeSelect = ({
 };
 
 
-
-
 export const NewLeadScreen = ({
     theme,
     onSuccess,
@@ -5116,12 +5048,35 @@ export const NewLeadScreen = ({
         }
         onSuccess(newLead);
     };
-    const addProduct = useCallback((series) => { if (series) { setNewLead(prev => ({ ...prev, products: [...prev.products, { series, hasGlassDoors: false, material: '', hasWoodBack: false, polyColor: '' }] })); } }, []);
-    const removeProduct = useCallback((idx) => { setNewLead(prev => ({ ...prev, products: prev.products.filter((_, i) => i !== idx) })); }, []);
+
+    const addProduct = useCallback((series) => {
+        if (series) {
+            setNewLead(prev => ({
+                ...prev,
+                products: [...prev.products, {
+                    series,
+                    hasGlassDoors: false,
+                    material: '',
+                    hasWoodBack: false,
+                    polyColor: ''
+                }]
+            }));
+        }
+    }, []);
+
+    const removeProduct = useCallback((idx) => {
+        setNewLead(prev => ({
+            ...prev,
+            products: prev.products.filter((_, i) => i !== idx)
+        }));
+    }, []);
+
     const toggleCompetitor = useCallback((competitor) => {
         setNewLead(prev => {
             const currentCompetitors = prev.competitors || [];
-            const next = currentCompetitors.includes(competitor) ? currentCompetitors.filter(c => c !== competitor) : [...currentCompetitors, competitor];
+            const next = currentCompetitors.includes(competitor)
+                ? currentCompetitors.filter(c => c !== competitor)
+                : [...currentCompetitors, competitor];
             return { ...prev, competitors: next };
         });
     }, []);
@@ -5138,108 +5093,334 @@ export const NewLeadScreen = ({
         });
     };
 
-    const availableSeries = useMemo(() => Data.JSI_PRODUCT_SERIES.filter(s => !newLead.products.some(p => p.series === s)), [newLead.products]);
+    const availableSeries = useMemo(() =>
+        Data.JSI_PRODUCT_SERIES.filter(s =>
+            !newLead.products.some(p => p.series === s)
+        ), [newLead.products]);
 
     const CheckboxRow = ({ label, checked, onChange }) => (
-        <div className="flex items-center justify-between text-sm px-3 py-2 rounded-full" style={{ backgroundColor: theme.colors.subtle }}>
-            <label style={{ color: theme.colors.textSecondary }} className="font-semibold">{label}</label>
-            <input type="checkbox" className="h-5 w-5 rounded-md border-2" style={{ accentColor: theme.colors.accent, borderColor: theme.colors.border }} checked={checked} onChange={onChange} />
+        <div className="flex items-center justify-between text-sm px-3 py-2 rounded-full"
+            style={{ backgroundColor: theme.colors.subtle }}>
+            <label style={{ color: theme.colors.textSecondary }} className="font-semibold">
+                {label}
+            </label>
+            <input
+                type="checkbox"
+                className="h-5 w-5 rounded-md border-2"
+                style={{
+                    accentColor: theme.colors.accent,
+                    borderColor: theme.colors.border
+                }}
+                checked={checked}
+                onChange={onChange}
+            />
         </div>
     );
 
     return (
         <form onSubmit={handleSubmit} className="flex flex-col h-full">
             <PageTitle title="Create New Lead" theme={theme} />
-            <div className="flex-1 overflow-y-auto overflow-visible px-4 pb-4 pt-4 space-y-4 scrollbar-hide">
+
+            {/* CRITICAL FIX: Remove overflow-y-auto and scrollbar-hide */}
+            <div className="flex-1 px-4 pb-4 pt-4 space-y-4" style={{ overflow: 'visible' }}>
+
                 <FormSection title="Project Details" theme={theme}>
-                    <FormInput required label="Project Name" value={newLead.project} onChange={(e) => updateField('project', e.target.value)} placeholder="e.g., Acme Corp Headquarters" theme={theme} />
-                    <NativeSelect required label="Project Stage" value={newLead.projectStatus} onChange={(e) => updateField('projectStatus', e.target.value)} options={Data.STAGES.map(s => ({ label: s, value: s }))} placeholder="Select stage" theme={theme} />
-                    <NativeSelect required label="Vertical" value={newLead.vertical} onChange={(e) => updateField('vertical', e.target.value)} options={Data.VERTICALS.map(v => ({ label: v, value: v }))} placeholder="Select vertical" theme={theme} />
+                    <FormInput
+                        required
+                        label="Project Name"
+                        value={newLead.project}
+                        onChange={(e) => updateField('project', e.target.value)}
+                        placeholder="e.g., Acme Corp Headquarters"
+                        theme={theme}
+                    />
+
+                    {/* Use PortalNativeSelect instead of NativeSelect */}
+                    <PortalNativeSelect
+                        required
+                        label="Project Stage"
+                        value={newLead.projectStatus}
+                        onChange={(e) => updateField('projectStatus', e.target.value)}
+                        options={Data.STAGES.map(s => ({ label: s, value: s }))}
+                        placeholder="Select stage"
+                        theme={theme}
+                    />
+
+                    <PortalNativeSelect
+                        required
+                        label="Vertical"
+                        value={newLead.vertical}
+                        onChange={(e) => updateField('vertical', e.target.value)}
+                        options={Data.VERTICALS.map(v => ({ label: v, value: v }))}
+                        placeholder="Select vertical"
+                        theme={theme}
+                    />
+
                     {newLead.vertical === 'Other (Please specify)' && (
                         <div className="pl-4 animate-fade-in">
-                            <FormInput value={newLead.otherVertical} onChange={(e) => updateField('otherVertical', e.target.value)} placeholder="Specify the vertical..." theme={theme} required />
+                            <FormInput
+                                value={newLead.otherVertical}
+                                onChange={(e) => updateField('otherVertical', e.target.value)}
+                                placeholder="Specify the vertical..."
+                                theme={theme}
+                                required
+                            />
                         </div>
                     )}
                 </FormSection>
 
                 <FormSection title="Stakeholders" theme={theme}>
-                    <AutoCompleteCombobox label="A&D Firm" required value={newLead.designFirm} onChange={(val) => updateField('designFirm', val)} placeholder="Search or add a design firm..." options={designFirms} onAddNew={(f) => setDesignFirms((p) => [...new Set([f, ...p])])} theme={theme} />
-                    <AutoCompleteCombobox label="Dealer" required value={newLead.dealer} onChange={(val) => updateField('dealer', val)} placeholder="Search or add a dealer..." options={dealers} onAddNew={(d) => setDealers((p) => [...new Set([d, ...p])])} theme={theme} />
+                    <AutoCompleteCombobox
+                        label="A&D Firm"
+                        required
+                        value={newLead.designFirm}
+                        onChange={(val) => updateField('designFirm', val)}
+                        placeholder="Search or add a design firm..."
+                        options={designFirms}
+                        onAddNew={(f) => setDesignFirms((p) => [...new Set([f, ...p])])}
+                        theme={theme}
+                    />
+                    <AutoCompleteCombobox
+                        label="Dealer"
+                        required
+                        value={newLead.dealer}
+                        onChange={(val) => updateField('dealer', val)}
+                        placeholder="Search or add a dealer..."
+                        options={dealers}
+                        onAddNew={(d) => setDealers((p) => [...new Set([d, ...p])])}
+                        theme={theme}
+                    />
                 </FormSection>
 
                 <FormSection title="Competition & Products" theme={theme}>
                     <div className="space-y-2">
-                        <CheckboxRow label="Bid?" checked={!!newLead.isBid} onChange={(e) => updateField('isBid', e.target.checked)} />
-                        <CheckboxRow label="Competition?" checked={!!newLead.competitionPresent} onChange={(e) => updateField('competitionPresent', e.target.checked)} />
+                        <CheckboxRow
+                            label="Bid?"
+                            checked={!!newLead.isBid}
+                            onChange={(e) => updateField('isBid', e.target.checked)}
+                        />
+                        <CheckboxRow
+                            label="Competition?"
+                            checked={!!newLead.competitionPresent}
+                            onChange={(e) => updateField('competitionPresent', e.target.checked)}
+                        />
                     </div>
+
                     {newLead.competitionPresent && (
-                        <div className="space-y-2 pt-4 border-t mt-4" style={{ borderColor: theme.colors.subtle }}>
-                            <div className="p-2 flex flex-wrap gap-2 rounded-2xl" style={{ backgroundColor: theme.colors.subtle }}>
+                        <div className="space-y-2 pt-4 border-t mt-4"
+                            style={{ borderColor: theme.colors.subtle }}>
+                            <div className="p-2 flex flex-wrap gap-2 rounded-2xl"
+                                style={{ backgroundColor: theme.colors.subtle }}>
                                 {Data.COMPETITORS.filter(c => c !== 'None').map(c => (
-                                    <button type="button" key={c} onClick={() => toggleCompetitor(c)} className={`px-3 py-1.5 text-sm rounded-full font-medium transition-colors border`} style={{ backgroundColor: newLead.competitors.includes(c) ? theme.colors.accent : theme.colors.surface, color: newLead.competitors.includes(c) ? 'white' : theme.colors.textPrimary, borderColor: newLead.competitors.includes(c) ? theme.colors.accent : theme.colors.border }}>
+                                    <button
+                                        type="button"
+                                        key={c}
+                                        onClick={() => toggleCompetitor(c)}
+                                        className="px-3 py-1.5 text-sm rounded-full font-medium transition-colors border"
+                                        style={{
+                                            backgroundColor: newLead.competitors.includes(c)
+                                                ? theme.colors.accent
+                                                : theme.colors.surface,
+                                            color: newLead.competitors.includes(c)
+                                                ? 'white'
+                                                : theme.colors.textPrimary,
+                                            borderColor: newLead.competitors.includes(c)
+                                                ? theme.colors.accent
+                                                : theme.colors.border
+                                        }}
+                                    >
                                         {c}
                                     </button>
                                 ))}
                             </div>
                         </div>
                     )}
-                    <div className="border-t pt-4 mt-4 space-y-3" style={{ borderColor: theme.colors.border }}>
-                        <label className="text-xs font-semibold px-1" style={{ color: theme.colors.textSecondary }}>Products</label>
+
+                    <div className="border-t pt-4 mt-4 space-y-3"
+                        style={{ borderColor: theme.colors.border }}>
+                        <label className="text-xs font-semibold px-1"
+                            style={{ color: theme.colors.textSecondary }}>
+                            Products
+                        </label>
                         {newLead.products.map((p, idx) => (
-                            <div key={idx} className="p-4 rounded-2xl border space-y-3" style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border }}>
+                            <div key={idx}
+                                className="p-4 rounded-2xl border space-y-3"
+                                style={{
+                                    backgroundColor: theme.colors.subtle,
+                                    borderColor: theme.colors.border
+                                }}>
                                 <div className="flex items-center justify-between">
-                                    <span className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>{p.series}</span>
-                                    <button type="button" onClick={() => removeProduct(idx)} className="w-7 h-7 flex items-center justify-center rounded-full transition-colors hover:bg-red-500/10"><X className="w-5 h-5 text-red-500" /></button>
+                                    <span className="font-bold text-lg"
+                                        style={{ color: theme.colors.textPrimary }}>
+                                        {p.series}
+                                    </span>
+                                    <button
+                                        type="button"
+                                        onClick={() => removeProduct(idx)}
+                                        className="w-7 h-7 flex items-center justify-center rounded-full transition-colors hover:bg-red-500/10"
+                                    >
+                                        <X className="w-5 h-5 text-red-500" />
+                                    </button>
                                 </div>
-                                {p.series === 'Vision' && <VisionOptions theme={theme} product={p} productIndex={idx} onUpdate={updateProductOption} />}
-                                {p.series === 'Knox' && <KnoxOptions theme={theme} product={p} productIndex={idx} onUpdate={updateProductOption} />}
-                                {(p.series === 'Wink' || p.series === 'Hoopz') && <WinkHoopzOptions theme={theme} product={p} productIndex={idx} onUpdate={updateProductOption} />}
+                                {p.series === 'Vision' && (
+                                    <VisionOptions
+                                        theme={theme}
+                                        product={p}
+                                        productIndex={idx}
+                                        onUpdate={updateProductOption}
+                                    />
+                                )}
+                                {p.series === 'Knox' && (
+                                    <KnoxOptions
+                                        theme={theme}
+                                        product={p}
+                                        productIndex={idx}
+                                        onUpdate={updateProductOption}
+                                    />
+                                )}
+                                {(p.series === 'Wink' || p.series === 'Hoopz') && (
+                                    <WinkHoopzOptions
+                                        theme={theme}
+                                        product={p}
+                                        productIndex={idx}
+                                        onUpdate={updateProductOption}
+                                    />
+                                )}
                             </div>
                         ))}
                         {availableSeries.length > 0 && (
-                            <AutoCompleteCombobox value={""} onChange={(val) => { addProduct(val); }} placeholder="+ Add a Product..." options={availableSeries} theme={theme} resetOnSelect={true} />
+                            <AutoCompleteCombobox
+                                value=""
+                                onChange={(val) => { addProduct(val); }}
+                                placeholder="+ Add a Product..."
+                                options={availableSeries}
+                                theme={theme}
+                                resetOnSelect={true}
+                            />
                         )}
                     </div>
                 </FormSection>
 
                 <FormSection title="Financials & Timeline" theme={theme}>
-                    <FormInput label="Estimated List Price" required type="currency" value={newLead.estimatedList} onChange={(e) => updateField('estimatedList', e.target.value)} placeholder="$0" theme={theme} />
-                    <ProbabilitySlider value={newLead.winProbability} onChange={(v) => updateField('winProbability', v)} theme={theme} />
-                    <NativeSelect label="Discount" value={newLead.discount} onChange={(e) => updateField('discount', e.target.value)} options={Data.DISCOUNT_OPTIONS.map(d => ({ label: d, value: d }))} placeholder="Select a Discount" theme={theme} />
-                    <NativeSelect label="PO Timeframe" required value={newLead.poTimeframe} onChange={(e) => updateField('poTimeframe', e.target.value)} options={Data.PO_TIMEFRAMES.map(t => ({ label: t, value: t }))} placeholder="Select a Timeframe" theme={theme} />
-                    <CheckboxRow label="Contract?" checked={!!newLead.isContract} onChange={(e) => updateField('isContract', e.target.checked)} />
+                    <FormInput
+                        label="Estimated List Price"
+                        required
+                        type="currency"
+                        value={newLead.estimatedList}
+                        onChange={(e) => updateField('estimatedList', e.target.value)}
+                        placeholder="$0"
+                        theme={theme}
+                    />
+                    <ProbabilitySlider
+                        value={newLead.winProbability}
+                        onChange={(v) => updateField('winProbability', v)}
+                        theme={theme}
+                    />
+                    <PortalNativeSelect
+                        label="Discount"
+                        value={newLead.discount}
+                        onChange={(e) => updateField('discount', e.target.value)}
+                        options={Data.DISCOUNT_OPTIONS.map(d => ({ label: d, value: d }))}
+                        placeholder="Select a Discount"
+                        theme={theme}
+                    />
+                    <PortalNativeSelect
+                        label="PO Timeframe"
+                        required
+                        value={newLead.poTimeframe}
+                        onChange={(e) => updateField('poTimeframe', e.target.value)}
+                        options={Data.PO_TIMEFRAMES.map(t => ({ label: t, value: t }))}
+                        placeholder="Select a Timeframe"
+                        theme={theme}
+                    />
+                    <CheckboxRow
+                        label="Contract?"
+                        checked={!!newLead.isContract}
+                        onChange={(e) => updateField('isContract', e.target.checked)}
+                    />
                     {newLead.isContract && (
                         <div className="animate-fade-in">
-                            <NativeSelect required placeholder="Select a Contract" value={newLead.contractType} onChange={(e) => updateField('contractType', e.target.value)} options={Data.CONTRACT_OPTIONS.map(c => ({ label: c, value: c }))} theme={theme} />
+                            <PortalNativeSelect
+                                required
+                                placeholder="Select a Contract"
+                                value={newLead.contractType}
+                                onChange={(e) => updateField('contractType', e.target.value)}
+                                options={Data.CONTRACT_OPTIONS.map(c => ({ label: c, value: c }))}
+                                theme={theme}
+                            />
                         </div>
                     )}
                 </FormSection>
 
                 <FormSection title="Services & Notes" theme={theme}>
-                    <CheckboxRow label="JSI Spec Services Required?" checked={!!newLead.jsiSpecServices} onChange={(e) => updateField('jsiSpecServices', e.target.checked)} />
+                    <CheckboxRow
+                        label="JSI Spec Services Required?"
+                        checked={!!newLead.jsiSpecServices}
+                        onChange={(e) => updateField('jsiSpecServices', e.target.checked)}
+                    />
                     {newLead.jsiSpecServices && (
                         <div className="animate-fade-in pt-4 space-y-4">
-                            <ToggleButtonGroup value={newLead.quoteType} onChange={(value) => updateField('quoteType', value)} options={[{ label: 'New Quote', value: 'New Quote' }, { label: 'Revision', value: 'Revision' }, { label: 'Past Project', value: 'Past Project' }]} theme={theme} />
+                            <ToggleButtonGroup
+                                value={newLead.quoteType}
+                                onChange={(value) => updateField('quoteType', value)}
+                                options={[
+                                    { label: 'New Quote', value: 'New Quote' },
+                                    { label: 'Revision', value: 'Revision' },
+                                    { label: 'Past Project', value: 'Past Project' }
+                                ]}
+                                theme={theme}
+                            />
                             {newLead.quoteType === 'Revision' && (
                                 <div className="relative flex items-center pt-2">
-                                    <FormInput label="Quote" value={newLead.jsiQuoteNumber} onChange={(e) => updateField('jsiQuoteNumber', e.target.value)} placeholder="JG 25-2342" theme={theme} />
-                                    <button type="button" className="absolute right-2 bottom-2 px-3 py-1 text-xs font-semibold rounded-full" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textSecondary }}>Unknown</button>
+                                    <FormInput
+                                        label="Quote"
+                                        value={newLead.jsiQuoteNumber}
+                                        onChange={(e) => updateField('jsiQuoteNumber', e.target.value)}
+                                        placeholder="JG 25-2342"
+                                        theme={theme}
+                                    />
+                                    <button
+                                        type="button"
+                                        className="absolute right-2 bottom-2 px-3 py-1 text-xs font-semibold rounded-full"
+                                        style={{
+                                            backgroundColor: theme.colors.subtle,
+                                            color: theme.colors.textSecondary
+                                        }}
+                                    >
+                                        Unknown
+                                    </button>
                                 </div>
                             )}
                             {newLead.quoteType === 'Past Project' && (
                                 <div className="animate-fade-in pt-2">
-                                    <FormInput label="Past Project Reference" value={newLead.pastProjectRef} onChange={(e) => updateField('pastProjectRef', e.target.value)} placeholder="Enter past project name or quote #" theme={theme} />
+                                    <FormInput
+                                        label="Past Project Reference"
+                                        value={newLead.pastProjectRef}
+                                        onChange={(e) => updateField('pastProjectRef', e.target.value)}
+                                        placeholder="Enter past project name or quote #"
+                                        theme={theme}
+                                    />
                                 </div>
                             )}
                         </div>
                     )}
                     <div className="pt-2">
-                        <FormInput label="Other Notes" type="textarea" value={newLead.notes} onChange={(e) => updateField('notes', e.target.value)} placeholder="Enter details..." theme={theme} />
+                        <FormInput
+                            label="Other Notes"
+                            type="textarea"
+                            value={newLead.notes}
+                            onChange={(e) => updateField('notes', e.target.value)}
+                            placeholder="Enter details..."
+                            theme={theme}
+                        />
                     </div>
                 </FormSection>
 
                 <div className="pt-4 pb-4">
-                    <button type="submit" className="w-full text-white font-bold py-3.5 rounded-full" style={{ backgroundColor: theme.colors.accent }}>
+                    <button
+                        type="submit"
+                        className="w-full text-white font-bold py-3.5 rounded-full"
+                        style={{ backgroundColor: theme.colors.accent }}
+                    >
                         Submit Lead
                     </button>
                 </div>
@@ -5247,7 +5428,6 @@ export const NewLeadScreen = ({
         </form>
     );
 };
-
 
 export const KnoxOptions = ({ theme, product, productIndex, onUpdate }) => {
     return (
