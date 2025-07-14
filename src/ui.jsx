@@ -1,16 +1,96 @@
-﻿import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react';
+﻿import React, {
+    useState,
+    useRef,
+    useMemo,
+    useCallback,
+    useEffect,
+} from 'react';
+import ReactDOM from 'react-dom'; // for createPortal
+
 import {
-    AlertCircle, Armchair, ArrowLeft, ArrowRight, BarChart2, Briefcase, Bus,
-    Calendar, Camera, CheckCircle, ChevronDown, ChevronLeft, ChevronRight,
-    ChevronUp, Clock, Copy, Database, DollarSign, FileText, Film, Filter,
-    HelpCircle, Home, Hourglass, List, LogOut, MapPin, MessageSquare, Mic,
-    Minus, MonitorPlay, Moon, MoreVertical, Package, Palette, Heart, Image,
-    Paperclip, Percent, PieChart, Play, Plus, RotateCw, Save, Search, Send,
-    Server, Settings, Share2, ShoppingCart, Sun, Trophy, User, UserPlus,
-    UserX, Users, Video, Wrench, X, ImageIcon, Pencil, Trash2
-} from 'lucide-react';
+    DROPDOWN_MAX_HEIGHT,
+    DROPDOWN_PORTAL_HEIGHT,
+    DROPDOWN_MIN_WIDTH,
+    DROPDOWN_SIDE_PADDING,
+    DROPDOWN_GAP,
+} from './constants/dropdown.js';
+
+
+import { DropdownPortal } from './DropdownPortal.jsx';  // path / extension as in your project
+
+/* ──────────────────────────────────────────────────────────────────
+   Static data (mock DB / enums / etc.)
+   ────────────────────────────────────────────────────────────────── */
 import * as Data from './data.jsx';
-import ReactDOM from 'react-dom';
+
+/* ──────────────────────────────────────────────────────────────────
+   Iconography – lucide-react
+   (feel free to cull any icons you never use)
+   ────────────────────────────────────────────────────────────────── */
+import {
+    AlertCircle,
+    Armchair,
+    ArrowLeft,
+    ArrowRight,
+    BarChart2,
+    Briefcase,
+    Bus,
+    Calendar,
+    Camera,
+    CheckCircle,
+    ChevronDown,
+    ChevronLeft,
+    ChevronRight,
+    ChevronUp,
+    Clock,
+    Copy,
+    Database,
+    DollarSign,
+    FileText,
+    Film,
+    Filter,
+    Heart,
+    HelpCircle,
+    Home,
+    Hourglass,
+    Image,
+    List,
+    LogOut,
+    MapPin,
+    MessageSquare,
+    Mic,
+    Minus,
+    MonitorPlay,
+    Moon,
+    MoreVertical,
+    Package,
+    Paperclip,
+    Palette,
+    Percent,
+    PieChart,
+    Play,
+    Plus,
+    RotateCw,
+    Save,
+    Search,
+    Send,
+    Server,
+    Settings,
+    Share2,
+    ShoppingCart,
+    Sun,
+    Trophy,
+    User,
+    UserPlus,
+    UserX,
+    Users,
+    Video,
+    Wrench,
+    X,
+    ImageIcon,
+    Pencil,
+    Trash2,
+} from 'lucide-react';
 
 
 export const GlassCard = React.memo(
@@ -64,33 +144,7 @@ export const Card = ({ children, ...props }) => (
     <GlassCard {...props}>{children}</GlassCard>
 )
 
-export const useDropdownPosition = (elementRef) => {
-    const [dropDirection, setDropDirection] = useState('down');
 
-    const checkPosition = () => {
-        if (!elementRef.current) return;
-        const rect = elementRef.current.getBoundingClientRect();
-        const spaceBelow = window.innerHeight - rect.bottom;
-        const spaceAbove = rect.top;
-
-        // Must match the dropdown’s max-height (Tailwind max-h-80 = 20rem = 320px)
-        const estimatedDropdownHeight = 320;
-
-        if (spaceBelow < estimatedDropdownHeight && spaceAbove > estimatedDropdownHeight) {
-            setDropDirection('up');
-        } else {
-            setDropDirection('down');
-        }
-    };
-
-    // Re-check on window resize (so it flips if user resizes)
-    useEffect(() => {
-        window.addEventListener('resize', checkPosition);
-        return () => window.removeEventListener('resize', checkPosition);
-    }, []);
-
-    return [dropDirection, checkPosition];
-};
 
 export const IncentiveRewardsScreen = ({ theme, onNavigate }) => {
     // Placeholder - Logic will be added later
@@ -98,42 +152,6 @@ export const IncentiveRewardsScreen = ({ theme, onNavigate }) => {
 };
 
 
-export const CustomSelect = ({ label, value, onChange, options, placeholder, theme, required, onOpen }) => {
-    const [isOpen, setIsOpen] = useState(false);
-    const wrapperRef = useRef(null);
-    const [dropDirection, checkPosition] = useDropdownPosition(wrapperRef);
-
-    const handleOpen = () => {
-        checkPosition();        // calculate up/down based on available space
-        onOpen?.();
-        setIsOpen(o => !o);
-    };
-
-    // ... rest of your component …
-    return (
-        <div ref={wrapperRef} className="relative space-y-1 overflow-visible">
-            {/** ...label, button, etc. */}
-            {isOpen && (
-                <div
-                    className={`absolute left-0 w-full z-50 ${dropDirection === 'up' ? 'bottom-full mb-1' : 'top-full mt-1'
-                        }`}
-                >
-                    <GlassCard className="p-2 max-h-80 overflow-y-auto scrollbar-hide">
-                        {options.map(opt => (
-                            <button
-                                key={opt.value}
-                                onClick={() => { onChange(opt.value); setIsOpen(false); }}
-                                className="block w-full text-left px-3 py-2 hover:bg-gray-100"
-                            >
-                                {opt.label}
-                            </button>
-                        ))}
-                    </GlassCard>
-                </div>
-            )}
-        </div>
-    );
-};
 export const AutoCompleteCombobox = ({
     label,
     options = [],
@@ -1451,14 +1469,117 @@ const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage }) => {
         </>
     );
 };
-const CommissionRatesScreen = ({ theme, onNavigate }) => {
+
+
+const CommissionRatesScreen = ({ theme }) => {
+    const rows = useMemo(() => {
+        const tag = (d, isContract = false) => ({ ...d, isContract });
+        return [
+            ...COMMISSION_RATES_TABLE_DATA.standard.map(d => tag(d)),
+            ...COMMISSION_RATES_TABLE_DATA.contract.map(d => tag(d, true)),
+        ];
+    }, []);
+
+    const split = { specifying: 70, ordering: 30 };
+
+    const { subtle, surface, accent, secondary, textPrimary, textSecondary } =
+        theme.colors;
+    const zebra = i => (i % 2 ? surface : 'transparent');
+    const contractBg = `${accent}1A`;
+
     return (
-        <div className="p-6">
+        <div className="px-4 pb-8 space-y-4">
             <PageTitle title="Commission Rates" theme={theme} />
-            <div className="mt-4">
-                {/* Your commission rates content here */}
-                <p>Commission rates content goes here...</p>
-            </div>
+
+            <GlassCard
+                theme={theme}
+                className="p-0 overflow-hidden rounded-2xl shadow ring-1 ring-black/5"
+            >
+                <table className="w-full text-sm">
+                    <thead>
+                        <tr
+                            style={{ backgroundColor: subtle, color: textPrimary }}
+                            className="uppercase text-[11px] tracking-wide"
+                        >
+                            <th className="py-2.5 pl-4 text-left">Discounts</th>
+                            <th className="py-2.5 text-center">Rep&nbsp;Comm.</th>
+                            <th className="py-2.5 pr-4 text-right">Spiff</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {rows.map((r, i) => (
+                            <tr
+                                key={r.discount}
+                                style={{ backgroundColor: r.isContract ? contractBg : zebra(i) }}
+                            >
+                                <td
+                                    className="py-2.5 pl-4 font-medium break-all"
+                                    style={{ color: textPrimary }}
+                                >
+                                    {r.discount}
+                                </td>
+                                <td
+                                    className="py-2.5 text-center font-semibold"
+                                    style={{ color: accent }}
+                                >
+                                    {r.rep}
+                                </td>
+                                <td className="py-2.5 pr-4 text-right">
+                                    <span className="font-medium" style={{ color: textPrimary }}>
+                                        {typeof r.spiff === 'object' ? r.spiff.value : r.spiff}
+                                    </span>
+                                    {typeof r.spiff === 'object' && (
+                                        <div
+                                            className="text-[11px] italic"
+                                            style={{ color: textSecondary }}
+                                        >
+                                            {r.spiff.note}
+                                        </div>
+                                    )}
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </GlassCard>
+
+            <GlassCard
+                theme={theme}
+                className="p-6 rounded-2xl shadow ring-1 ring-black/5"
+            >
+                <h3
+                    className="mb-3 font-bold uppercase text-center tracking-wide text-[12px]"
+                    style={{ color: textSecondary }}
+                >
+                    Commission Split
+                </h3>
+
+                <div className="w-full h-6 flex rounded-full overflow-hidden ring-1 ring-black/5">
+                    <div
+                        className="flex items-center pl-2 text-[11px] font-semibold text-white"
+                        style={{
+                            width: `${split.specifying}%`,
+                            backgroundColor: accent,
+                        }}
+                    >
+                        {split.specifying}%
+                    </div>
+                    <div
+                        className="flex items-center justify-end pr-2 text-[11px] font-semibold text-white"
+                        style={{
+                            width: `${split.ordering}%`,
+                            backgroundColor: secondary,
+                        }}
+                    >
+                        {split.ordering}%
+                    </div>
+                </div>
+
+                <div className="mt-2 flex justify-between text-[12px] font-medium">
+                    <span style={{ color: textSecondary }}>Specifying</span>
+                    <span style={{ color: textSecondary }}>Ordering</span>
+                </div>
+            </GlassCard>
         </div>
     );
 };
@@ -3870,6 +3991,96 @@ export const DonutChart = React.memo(({ data, theme }) => {
     );
 });
 
+export function CustomSelect({
+    label,
+    value,
+    onChange,
+    options,
+    placeholder,
+    theme,
+    onOpen
+}) {
+    const [isOpen, setIsOpen] = useState(false)
+    const wrapperRef = useRef(null)
+    const [dropDirection, checkPosition] = useDropdownPosition(wrapperRef)
+
+    // close on outside click
+    useEffect(() => {
+        const handler = e => {
+            if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
+                setIsOpen(false)
+            }
+        }
+        document.addEventListener('mousedown', handler)
+        return () => document.removeEventListener('mousedown', handler)
+    }, [])
+
+    const handleOpen = () => {
+        checkPosition()
+        onOpen?.()
+        setIsOpen(o => !o)
+    }
+
+    const handleSelect = val => {
+        onChange({ target: { value: val } })
+        setIsOpen(false)
+    }
+
+    const selectedLabel =
+        options.find(o => o.value === value)?.label || placeholder
+
+    return (
+        <div ref={wrapperRef} className="relative overflow-visible space-y-1">
+            {label && (
+                <label
+                    className="block text-xs font-semibold px-4"
+                    style={{ color: theme.colors.textSecondary }}
+                >
+                    {label}
+                </label>
+            )}
+
+            <button
+                type="button"
+                onClick={handleOpen}
+                className="w-full px-4 py-3 border rounded-lg text-left flex justify-between items-center shadow-sm hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                style={{
+                    backgroundColor: theme.colors.subtle,
+                    borderColor: theme.colors.border,
+                    color: value
+                        ? theme.colors.textPrimary
+                        : theme.colors.textSecondary
+                }}
+            >
+                <span className="pr-6">{selectedLabel}</span>
+                <ChevronDown
+                    className={`absolute right-4 w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''
+                        }`}
+                    style={{ color: theme.colors.textSecondary }}
+                />
+            </button>
+
+            {isOpen && (
+                <DropdownPortal parentRef={wrapperRef} onClose={() => setIsOpen(false)}>
+                    <div className="p-2 max-h-80 overflow-y-auto scrollbar-hide rounded-2xl shadow-lg bg-white">
+                        {options.map(opt => (
+                            <button
+                                key={opt.value}
+                                type="button"
+                                onClick={() => handleSelect(opt.value)}
+                                className="block w-full text-left p-2 rounded-lg hover:bg-gray-100"
+                                style={{ color: theme.colors.textPrimary }}
+                            >
+                                {opt.label}
+                            </button>
+                        ))}
+                    </div>
+                </DropdownPortal>
+            )}
+        </div>
+    )
+}
+
 export const CustomerRankingScreen = ({ theme, onNavigate }) => {
     const [sortKey, setSortKey] = useState('sales');
     const [modalData, setModalData] = useState(null);
@@ -4561,7 +4772,6 @@ export const ProbabilitySlider = ({ value, onChange, theme }) => {
     );
 };
 
-
 export const PortalNativeSelect = ({
     label,
     value,
@@ -4569,66 +4779,78 @@ export const PortalNativeSelect = ({
     options,
     placeholder,
     theme,
-    required
+    required,
 }) => {
-    const [isOpen, setIsOpen] = useState(false);
-    const [position, setPosition] = useState({ top: 0, left: 0, width: 0 });
-    const wrapperRef = useRef(null);
-    const dropdownRef = useRef(null);
+    const [isOpen, setIsOpen] = React.useState(false);
+    const [pos, setPos] = React.useState({ top: 0, left: 0, width: 0 });
+    const wrapRef = React.useRef(null);
+    const dropRef = React.useRef(null);
 
-    const calculatePosition = () => {
-        if (!wrapperRef.current) return;
-        const rect = wrapperRef.current.getBoundingClientRect();
-        const viewportHeight = window.innerHeight;
-        const dropdownHeight = 240;
-        let top = rect.bottom + 4;
-        if (top + dropdownHeight > viewportHeight) {
-            top = rect.top - dropdownHeight - 4;
-        }
-        setPosition({ top, left: rect.left, width: rect.width });
-    };
+    /* -------- positioning -------------------------------------- */
+    const calcPos = React.useCallback(() => {
+        if (!wrapRef.current) return;
 
-    useEffect(() => {
-        const handleClickOutside = (e) => {
-            if (
-                wrapperRef.current && !wrapperRef.current.contains(e.target) &&
-                dropdownRef.current && !dropdownRef.current.contains(e.target)
-            ) {
-                setIsOpen(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
+        const r = wrapRef.current.getBoundingClientRect();
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const h = DROPDOWN_PORTAL_HEIGHT;
+        const w = Math.max(r.width, DROPDOWN_MIN_WIDTH);
+
+        let top = r.bottom + DROPDOWN_GAP;
+        if (top + h > vh) top = r.top - h - DROPDOWN_GAP;
+
+        let left = r.left;
+        if (left + w > vw - DROPDOWN_SIDE_PADDING)
+            left = vw - w - DROPDOWN_SIDE_PADDING;
+        if (left < DROPDOWN_SIDE_PADDING) left = DROPDOWN_SIDE_PADDING;
+
+        setPos({ top, left, width: w });
     }, []);
 
-    useEffect(() => {
-        const handleScrollResize = () => isOpen && calculatePosition();
-        window.addEventListener('scroll', handleScrollResize, true);
-        window.addEventListener('resize', handleScrollResize);
-        return () => {
-            window.removeEventListener('scroll', handleScrollResize, true);
-            window.removeEventListener('resize', handleScrollResize);
-        };
-    }, [isOpen]);
+    const toggleOpen = () => {
+        if (!isOpen) calcPos();
+        setIsOpen(o => !o);
+    };
 
-    const selectedLabel = useMemo(() => {
+    /* outside click / resize & scroll listeners */
+    React.useEffect(() => {
+        const clickAway = (e) =>
+            wrapRef.current &&
+            !wrapRef.current.contains(e.target) &&
+            dropRef.current &&
+            !dropRef.current.contains(e.target) &&
+            setIsOpen(false);
+
+        document.addEventListener('mousedown', clickAway);
+        return () => document.removeEventListener('mousedown', clickAway);
+    }, []);
+
+    React.useEffect(() => {
+        if (!isOpen) return;
+        const handler = () => calcPos();
+        window.addEventListener('resize', handler);
+        window.addEventListener('scroll', handler, true);
+        return () => {
+            window.removeEventListener('resize', handler);
+            window.removeEventListener('scroll', handler, true);
+        };
+    }, [isOpen, calcPos]);
+
+    /* helpers */
+    const selectedLabel = React.useMemo(() => {
         if (!Array.isArray(options)) return placeholder;
         return options.find((o) => o.value === value)?.label || placeholder;
     }, [options, value, placeholder]);
 
-    const handleSelect = (optionValue) => {
-        onChange({ target: { value: optionValue } });
+    const handleSelect = (v) => {
+        onChange({ target: { value: v } });
         setIsOpen(false);
     };
 
-    const handleOpen = () => {
-        calculatePosition();
-        setIsOpen((o) => !o);
-    };
-
+    /* -------- render ------------------------------------------- */
     return (
         <>
-            <div ref={wrapperRef} className="relative space-y-1">
+            <div ref={wrapRef} className="relative space-y-1">
                 {label && (
                     <label
                         className="block text-xs font-semibold px-4"
@@ -4637,19 +4859,23 @@ export const PortalNativeSelect = ({
                         {label}
                     </label>
                 )}
+
                 <button
                     type="button"
-                    onClick={handleOpen}
+                    onClick={toggleOpen}
+                    aria-expanded={isOpen}
+                    aria-required={required}
                     className="w-full px-4 py-3 border rounded-full text-base text-left flex justify-between items-center"
                     style={{
                         backgroundColor: theme.colors.subtle,
                         borderColor: theme.colors.border,
-                        color: value ? theme.colors.textPrimary : theme.colors.textSecondary
+                        color: value ? theme.colors.textPrimary : theme.colors.textSecondary,
                     }}
                 >
                     <span className="pr-6">{selectedLabel}</span>
                     <ChevronDown
-                        className={`absolute right-4 w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+                        className={`absolute right-4 w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''
+                            }`}
                         style={{ color: theme.colors.textSecondary }}
                     />
                 </button>
@@ -4657,9 +4883,9 @@ export const PortalNativeSelect = ({
 
             {isOpen && (
                 <div
-                    ref={dropdownRef}
+                    ref={dropRef}
                     className="fixed z-[9999] pointer-events-auto"
-                    style={{ top: position.top, left: position.left, width: position.width }}
+                    style={{ top: pos.top, left: pos.left, width: pos.width }}
                 >
                     <GlassCard
                         theme={theme}
@@ -4672,9 +4898,13 @@ export const PortalNativeSelect = ({
                                 onClick={() => handleSelect(opt.value)}
                                 className="block w-full text-left py-2.5 px-3.5 text-sm rounded-lg transition-colors"
                                 style={{
-                                    backgroundColor: opt.value === value ? theme.colors.primary : 'transparent',
-                                    color: opt.value === value ? theme.colors.surface : theme.colors.textPrimary,
-                                    fontWeight: opt.value === value ? 600 : 400
+                                    backgroundColor:
+                                        opt.value === value ? theme.colors.primary : 'transparent',
+                                    color:
+                                        opt.value === value
+                                            ? theme.colors.surface
+                                            : theme.colors.textPrimary,
+                                    fontWeight: opt.value === value ? 600 : 400,
                                 }}
                             >
                                 {opt.label}
@@ -4687,340 +4917,6 @@ export const PortalNativeSelect = ({
     );
 };
 
-export const DropdownPortal = ({ children, onClose, parentRef, theme }) => {
-    const dropdownRef = useRef(null);
-    const [position, setPosition] = useState({ top: 0, left: 0, width: 0 });
-    const [isPositioned, setIsPositioned] = useState(false);
-
-    const calculatePosition = () => {
-        if (!parentRef.current) return;
-        const parentRect = parentRef.current.getBoundingClientRect();
-        const viewportHeight = window.innerHeight;
-        const viewportWidth = window.innerWidth;
-        const dropdownHeight = 320;
-        const dropdownWidth = parentRect.width;
-
-        let top = parentRect.bottom + 4;
-        if (top + dropdownHeight > viewportHeight) {
-            top = parentRect.top - dropdownHeight - 4;
-        }
-        let left = parentRect.left;
-        if (left + dropdownWidth > viewportWidth - 8) {
-            left = viewportWidth - dropdownWidth - 8;
-        }
-        if (left < 8) left = 8;
-
-        setPosition({ top, left, width: dropdownWidth });
-        setIsPositioned(true);
-    };
-
-    useEffect(() => {
-        calculatePosition();
-    }, [parentRef.current]);
-
-    useEffect(() => {
-        const handleScrollResize = () => calculatePosition();
-        window.addEventListener('scroll', handleScrollResize, true);
-        window.addEventListener('resize', handleScrollResize);
-        return () => {
-            window.removeEventListener('scroll', handleScrollResize, true);
-            window.removeEventListener('resize', handleScrollResize);
-        };
-    }, []);
-
-    useEffect(() => {
-        const handleClickOutside = (e) => {
-            if (
-                dropdownRef.current && !dropdownRef.current.contains(e.target) &&
-                parentRef.current && !parentRef.current.contains(e.target)
-            ) {
-                onClose();
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [onClose, parentRef]);
-
-    if (!isPositioned) return null;
-
-    return ReactDOM.createPortal(
-        <div
-            ref={dropdownRef}
-            className="fixed z-[9999] pointer-events-auto"
-            style={{
-                top: `${position.top}px`,
-                left: `${position.left}px`,
-                width: `${position.width}px`
-            }}
-        >
-            <GlassCard
-                theme={theme}
-                className="p-2 overflow-y-auto scrollbar-hide rounded-2xl shadow-lg"
-                style={{
-                    maxHeight: `${Math.min(320, window.innerHeight - position.top - 20)}px`
-                }}
-            >
-                {children}
-            </GlassCard>
-        </div>,
-        document.body
-    );
-};
-
-export const EnhancedDropdownPortal = ({
-    children,
-    onClose,
-    parentRef,
-    theme,
-    align = 'left'
-}) => {
-    const dropdownRef = useRef(null);
-    const [position, setPosition] = useState({
-        top: 0,
-        left: 0,
-        width: 0,
-        direction: 'down'
-    });
-    const [isPositioned, setIsPositioned] = useState(false);
-
-    const calculatePosition = () => {
-        if (!parentRef.current) return;
-        const parentRect = parentRef.current.getBoundingClientRect();
-        const viewportHeight = window.innerHeight;
-        const viewportWidth = window.innerWidth;
-        const dropdownHeight = 320;
-        const dropdownWidth = Math.max(parentRect.width, 200);
-
-        const spaceBelow = viewportHeight - parentRect.bottom;
-        const spaceAbove = parentRect.top;
-        const shouldFlip = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
-
-        let top = shouldFlip
-            ? parentRect.top - dropdownHeight - 4
-            : parentRect.bottom + 4;
-
-        let left;
-        switch (align) {
-            case 'right':
-                left = parentRect.right - dropdownWidth;
-                break;
-            case 'center':
-                left = parentRect.left + (parentRect.width - dropdownWidth) / 2;
-                break;
-            default:
-                left = parentRect.left;
-        }
-
-        if (left + dropdownWidth > viewportWidth - 8) {
-            left = viewportWidth - dropdownWidth - 8;
-        }
-        if (left < 8) left = 8;
-
-        setPosition({ top, left, width: dropdownWidth, direction: shouldFlip ? 'up' : 'down' });
-        setIsPositioned(true);
-    };
-
-    useEffect(() => {
-        calculatePosition();
-    }, [parentRef.current, align]);
-
-    useEffect(() => {
-        const handleScrollResize = () => calculatePosition();
-        window.addEventListener('scroll', handleScrollResize, true);
-        window.addEventListener('resize', handleScrollResize);
-        return () => {
-            window.removeEventListener('scroll', handleScrollResize, true);
-            window.removeEventListener('resize', handleScrollResize);
-        };
-    }, []);
-
-    useEffect(() => {
-        const handleClickOutside = (e) => {
-            if (
-                dropdownRef.current && !dropdownRef.current.contains(e.target) &&
-                parentRef.current && !parentRef.current.contains(e.target)
-            ) {
-                onClose();
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [onClose, parentRef]);
-
-    if (!isPositioned) return null;
-
-    return ReactDOM.createPortal(
-        <div
-            ref={dropdownRef}
-            className="fixed z-[9999] pointer-events-auto"
-            style={{
-                top: `${position.top}px`,
-                left: `${position.left}px`,
-                width: `${position.width}px`
-            }}
-        >
-            <GlassCard
-                theme={theme}
-                className={`p-2 overflow-y-auto scrollbar-hide rounded-2xl shadow-lg ${position.direction === 'up' ? 'animate-slide-up' : 'animate-slide-down'
-                    }`}
-                style={{
-                    maxHeight: `${Math.min(
-                        320,
-                        position.direction === 'up'
-                            ? position.top - 20
-                            : window.innerHeight - position.top - 20
-                    )}px`
-                }}
-            >
-                {children}
-            </GlassCard>
-        </div>,
-        document.body
-    );
-};
-export const NativeSelect = ({
-    label,
-    value,
-    onChange,
-    options,
-    placeholder,
-    theme,
-    required
-}) => {
-    const [isOpen, setIsOpen] = useState(false);
-    const wrapperRef = useRef(null);
-    const dropdownRef = useRef(null);
-    const [dropDirection, checkPosition] = useDropdownPosition(wrapperRef);
-
-    // Close when clicking outside
-    useEffect(() => {
-        const handleClickOutside = e => {
-            if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
-                setIsOpen(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
-    // Handle scroll and resize to reposition dropdown
-    useEffect(() => {
-        const handleScrollResize = () => {
-            if (isOpen) {
-                checkPosition();
-            }
-        };
-
-        window.addEventListener('scroll', handleScrollResize, true);
-        window.addEventListener('resize', handleScrollResize);
-
-        return () => {
-            window.removeEventListener('scroll', handleScrollResize, true);
-            window.removeEventListener('resize', handleScrollResize);
-        };
-    }, [isOpen, checkPosition]);
-
-    // Compute label
-    const selectedLabel = useMemo(() => {
-        if (!Array.isArray(options)) {
-            console.warn("NativeSelect: 'options' should be an array");
-            return placeholder;
-        }
-        return options.find(o => o.value === value)?.label || placeholder;
-    }, [options, value, placeholder]);
-
-    const handleSelect = optionValue => {
-        onChange({ target: { value: optionValue } });
-        setIsOpen(false);
-    };
-
-    const handleOpen = () => {
-        checkPosition();
-        setIsOpen(o => !o);
-    };
-
-    return (
-        <div ref={wrapperRef} className="relative space-y-1">
-            {label && (
-                <label
-                    className="block text-xs font-semibold px-4"
-                    style={{ color: theme.colors.textSecondary }}
-                >
-                    {label}
-                </label>
-            )}
-            <button
-                type="button"
-                onClick={handleOpen}
-                className="w-full px-4 py-3 border rounded-full text-base text-left flex justify-between items-center"
-                style={{
-                    backgroundColor: theme.colors.subtle,
-                    borderColor: theme.colors.border,
-                    color: value ? theme.colors.textPrimary : theme.colors.textSecondary
-                }}
-            >
-                <span className="pr-6">{selectedLabel}</span>
-                <ChevronDown
-                    className={`absolute right-4 w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''
-                        }`}
-                    style={{ color: theme.colors.textSecondary }}
-                />
-            </button>
-
-            {isOpen && (
-                <div
-                    ref={dropdownRef}
-                    className={`absolute left-0 w-full z-50 ${dropDirection === 'up' ? 'bottom-full mb-1' : 'top-full mt-1'
-                        }`}
-                    style={{
-                        // Additional positioning fixes
-                        ...(dropDirection === 'up' && {
-                            bottom: '100%',
-                            marginBottom: '4px'
-                        }),
-                        ...(dropDirection === 'down' && {
-                            top: '100%',
-                            marginTop: '4px'
-                        })
-                    }}
-                >
-                    <GlassCard
-                        theme={theme}
-                        className="p-1.5 max-h-60 overflow-y-auto scrollbar-hide rounded-2xl shadow-lg"
-                        style={{
-                            // Ensure dropdown doesn't exceed viewport bounds
-                            maxHeight: dropDirection === 'up'
-                                ? `${Math.min(240, wrapperRef.current?.getBoundingClientRect().top - 20)}px`
-                                : `${Math.min(240, window.innerHeight - wrapperRef.current?.getBoundingClientRect().bottom - 20)}px`
-                        }}
-                    >
-                        {options.map(opt => (
-                            <button
-                                key={opt.value}
-                                type="button"
-                                onClick={() => handleSelect(opt.value)}
-                                className="block w-full text-left py-2.5 px-3.5 text-sm rounded-lg transition-colors"
-                                style={{
-                                    backgroundColor:
-                                        opt.value === value ? theme.colors.primary : 'transparent',
-                                    color:
-                                        opt.value === value
-                                            ? theme.colors.surface
-                                            : theme.colors.textPrimary,
-                                    fontWeight: opt.value === value ? 600 : 400
-                                }}
-                            >
-                                {opt.label}
-                            </button>
-                        ))}
-                    </GlassCard>
-                </div>
-            )}
-        </div>
-    );
-};
-
-
 export const NewLeadScreen = ({
     theme,
     onSuccess,
@@ -5029,6 +4925,7 @@ export const NewLeadScreen = ({
     dealers,
     setDealers,
 }) => {
+    /* -------- state -------- */
     const [newLead, setNewLead] = useState({
         ...Data.EMPTY_LEAD,
         winProbability: 50,
@@ -5036,9 +4933,9 @@ export const NewLeadScreen = ({
         contractType: '',
     });
 
-    const updateField = useCallback((field, value) => {
-        setNewLead(prev => ({ ...prev, [field]: value }));
-    }, []);
+    /* -------- helpers -------- */
+    const updateField = useCallback((field, value) =>
+        setNewLead(prev => ({ ...prev, [field]: value })), []);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -5049,59 +4946,55 @@ export const NewLeadScreen = ({
         onSuccess(newLead);
     };
 
+    /* products --------------------------------------------------- */
     const addProduct = useCallback((series) => {
-        if (series) {
-            setNewLead(prev => ({
-                ...prev,
-                products: [...prev.products, {
-                    series,
-                    hasGlassDoors: false,
-                    material: '',
-                    hasWoodBack: false,
-                    polyColor: ''
-                }]
-            }));
-        }
-    }, []);
-
-    const removeProduct = useCallback((idx) => {
+        if (!series) return;
         setNewLead(prev => ({
             ...prev,
-            products: prev.products.filter((_, i) => i !== idx)
+            products: [
+                ...prev.products,
+                { series, hasGlassDoors: false, material: '', hasWoodBack: false, polyColor: '' },
+            ],
         }));
     }, []);
 
-    const toggleCompetitor = useCallback((competitor) => {
+    const removeProduct = useCallback((idx) =>
+        setNewLead(prev => ({
+            ...prev,
+            products: prev.products.filter((_, i) => i !== idx),
+        })), []);
+
+    const updateProductOption = (pi, key, value) =>
+        setNewLead(prev => ({
+            ...prev,
+            products: prev.products.map((p, i) =>
+                i === pi ? { ...p, [key]: value } : p),
+        }));
+
+    const availableSeries = useMemo(
+        () => Data.JSI_PRODUCT_SERIES.filter(s =>
+            !newLead.products.some(p => p.series === s)),
+        [newLead.products],
+    );
+
+    /* competitors ------------------------------------------------ */
+    const toggleCompetitor = useCallback((c) =>
         setNewLead(prev => {
-            const currentCompetitors = prev.competitors || [];
-            const next = currentCompetitors.includes(competitor)
-                ? currentCompetitors.filter(c => c !== competitor)
-                : [...currentCompetitors, competitor];
+            const list = prev.competitors || [];
+            const next = list.includes(c) ? list.filter(x => x !== c) : [...list, c];
             return { ...prev, competitors: next };
-        });
-    }, []);
+        }), []);
 
-    const updateProductOption = (productIndex, key, value) => {
-        setNewLead(prev => {
-            const updatedProducts = prev.products.map((product, index) => {
-                if (index === productIndex) {
-                    return { ...product, [key]: value };
-                }
-                return product;
-            });
-            return { ...prev, products: updatedProducts };
-        });
-    };
-
-    const availableSeries = useMemo(() =>
-        Data.JSI_PRODUCT_SERIES.filter(s =>
-            !newLead.products.some(p => p.series === s)
-        ), [newLead.products]);
-
+    /* lightweight sub-component for the two checkboxes ------------- */
     const CheckboxRow = ({ label, checked, onChange }) => (
-        <div className="flex items-center justify-between text-sm px-3 py-2 rounded-full"
-            style={{ backgroundColor: theme.colors.subtle }}>
-            <label style={{ color: theme.colors.textSecondary }} className="font-semibold">
+        <div
+            className="flex items-center justify-between text-sm px-3 py-2 rounded-full"
+            style={{ backgroundColor: theme.colors.subtle }}
+        >
+            <label
+                className="font-semibold"
+                style={{ color: theme.colors.textSecondary }}
+            >
                 {label}
             </label>
             <input
@@ -5109,7 +5002,7 @@ export const NewLeadScreen = ({
                 className="h-5 w-5 rounded-md border-2"
                 style={{
                     accentColor: theme.colors.accent,
-                    borderColor: theme.colors.border
+                    borderColor: theme.colors.border,
                 }}
                 checked={checked}
                 onChange={onChange}
@@ -5117,29 +5010,28 @@ export const NewLeadScreen = ({
         </div>
     );
 
+    /* -------- render -------- */
     return (
         <form onSubmit={handleSubmit} className="flex flex-col h-full">
             <PageTitle title="Create New Lead" theme={theme} />
 
-            {/* CRITICAL FIX: Remove overflow-y-auto and scrollbar-hide */}
             <div className="flex-1 px-4 pb-4 pt-4 space-y-4" style={{ overflow: 'visible' }}>
-
+                {/* ─── Project Details ─── */}
                 <FormSection title="Project Details" theme={theme}>
                     <FormInput
                         required
                         label="Project Name"
                         value={newLead.project}
-                        onChange={(e) => updateField('project', e.target.value)}
+                        onChange={e => updateField('project', e.target.value)}
                         placeholder="e.g., Acme Corp Headquarters"
                         theme={theme}
                     />
 
-                    {/* Use PortalNativeSelect instead of NativeSelect */}
                     <PortalNativeSelect
                         required
                         label="Project Stage"
                         value={newLead.projectStatus}
-                        onChange={(e) => updateField('projectStatus', e.target.value)}
+                        onChange={e => updateField('projectStatus', e.target.value)}
                         options={Data.STAGES.map(s => ({ label: s, value: s }))}
                         placeholder="Select stage"
                         theme={theme}
@@ -5149,7 +5041,7 @@ export const NewLeadScreen = ({
                         required
                         label="Vertical"
                         value={newLead.vertical}
-                        onChange={(e) => updateField('vertical', e.target.value)}
+                        onChange={e => updateField('vertical', e.target.value)}
                         options={Data.VERTICALS.map(v => ({ label: v, value: v }))}
                         placeholder="Select vertical"
                         theme={theme}
@@ -5158,74 +5050,68 @@ export const NewLeadScreen = ({
                     {newLead.vertical === 'Other (Please specify)' && (
                         <div className="pl-4 animate-fade-in">
                             <FormInput
+                                required
                                 value={newLead.otherVertical}
-                                onChange={(e) => updateField('otherVertical', e.target.value)}
+                                onChange={e => updateField('otherVertical', e.target.value)}
                                 placeholder="Specify the vertical..."
                                 theme={theme}
-                                required
                             />
                         </div>
                     )}
                 </FormSection>
 
+                {/* ─── Stakeholders ─── */}
                 <FormSection title="Stakeholders" theme={theme}>
                     <AutoCompleteCombobox
                         label="A&D Firm"
                         required
                         value={newLead.designFirm}
-                        onChange={(val) => updateField('designFirm', val)}
+                        onChange={val => updateField('designFirm', val)}
                         placeholder="Search or add a design firm..."
                         options={designFirms}
-                        onAddNew={(f) => setDesignFirms((p) => [...new Set([f, ...p])])}
+                        onAddNew={(f) => setDesignFirms(p => [...new Set([f, ...p])])}
                         theme={theme}
                     />
                     <AutoCompleteCombobox
                         label="Dealer"
                         required
                         value={newLead.dealer}
-                        onChange={(val) => updateField('dealer', val)}
+                        onChange={val => updateField('dealer', val)}
                         placeholder="Search or add a dealer..."
                         options={dealers}
-                        onAddNew={(d) => setDealers((p) => [...new Set([d, ...p])])}
+                        onAddNew={(d) => setDealers(p => [...new Set([d, ...p])])}
                         theme={theme}
                     />
                 </FormSection>
 
+                {/* ─── Competition & Products ─── */}
                 <FormSection title="Competition & Products" theme={theme}>
                     <div className="space-y-2">
                         <CheckboxRow
                             label="Bid?"
                             checked={!!newLead.isBid}
-                            onChange={(e) => updateField('isBid', e.target.checked)}
+                            onChange={e => updateField('isBid', e.target.checked)}
                         />
                         <CheckboxRow
                             label="Competition?"
                             checked={!!newLead.competitionPresent}
-                            onChange={(e) => updateField('competitionPresent', e.target.checked)}
+                            onChange={e => updateField('competitionPresent', e.target.checked)}
                         />
                     </div>
 
                     {newLead.competitionPresent && (
-                        <div className="space-y-2 pt-4 border-t mt-4"
-                            style={{ borderColor: theme.colors.subtle }}>
-                            <div className="p-2 flex flex-wrap gap-2 rounded-2xl"
-                                style={{ backgroundColor: theme.colors.subtle }}>
+                        <div className="space-y-2 pt-4 border-t mt-4" style={{ borderColor: theme.colors.subtle }}>
+                            <div className="p-2 flex flex-wrap gap-2 rounded-2xl" style={{ backgroundColor: theme.colors.subtle }}>
                                 {Data.COMPETITORS.filter(c => c !== 'None').map(c => (
                                     <button
-                                        type="button"
                                         key={c}
+                                        type="button"
                                         onClick={() => toggleCompetitor(c)}
                                         className="px-3 py-1.5 text-sm rounded-full font-medium transition-colors border"
                                         style={{
-                                            backgroundColor: newLead.competitors.includes(c)
-                                                ? theme.colors.accent
-                                                : theme.colors.surface,
-                                            color: newLead.competitors.includes(c)
-                                                ? 'white'
-                                                : theme.colors.textPrimary,
-                                            borderColor: newLead.competitors.includes(c)
-                                                ? theme.colors.accent
-                                                : theme.colors.border
+                                            backgroundColor: newLead.competitors.includes(c) ? theme.colors.accent : theme.colors.surface,
+                                            color: newLead.competitors.includes(c) ? theme.colors.surface : theme.colors.textPrimary,
+                                            borderColor: newLead.competitors.includes(c) ? theme.colors.accent : theme.colors.border,
                                         }}
                                     >
                                         {c}
@@ -5235,22 +5121,20 @@ export const NewLeadScreen = ({
                         </div>
                     )}
 
-                    <div className="border-t pt-4 mt-4 space-y-3"
-                        style={{ borderColor: theme.colors.border }}>
-                        <label className="text-xs font-semibold px-1"
-                            style={{ color: theme.colors.textSecondary }}>
+                    {/* Products list */}
+                    <div className="border-t pt-4 mt-4 space-y-3" style={{ borderColor: theme.colors.border }}>
+                        <label className="text-xs font-semibold px-1" style={{ color: theme.colors.textSecondary }}>
                             Products
                         </label>
+
                         {newLead.products.map((p, idx) => (
-                            <div key={idx}
+                            <div
+                                key={idx}
                                 className="p-4 rounded-2xl border space-y-3"
-                                style={{
-                                    backgroundColor: theme.colors.subtle,
-                                    borderColor: theme.colors.border
-                                }}>
+                                style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border }}
+                            >
                                 <div className="flex items-center justify-between">
-                                    <span className="font-bold text-lg"
-                                        style={{ color: theme.colors.textPrimary }}>
+                                    <span className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>
                                         {p.series}
                                     </span>
                                     <button
@@ -5261,89 +5145,82 @@ export const NewLeadScreen = ({
                                         <X className="w-5 h-5 text-red-500" />
                                     </button>
                                 </div>
+
                                 {p.series === 'Vision' && (
-                                    <VisionOptions
-                                        theme={theme}
-                                        product={p}
-                                        productIndex={idx}
-                                        onUpdate={updateProductOption}
-                                    />
+                                    <Data.VisionOptions theme={theme} product={p} productIndex={idx} onUpdate={updateProductOption} />
                                 )}
                                 {p.series === 'Knox' && (
-                                    <KnoxOptions
-                                        theme={theme}
-                                        product={p}
-                                        productIndex={idx}
-                                        onUpdate={updateProductOption}
-                                    />
+                                    <Data.KnoxOptions theme={theme} product={p} productIndex={idx} onUpdate={updateProductOption} />
                                 )}
                                 {(p.series === 'Wink' || p.series === 'Hoopz') && (
-                                    <WinkHoopzOptions
-                                        theme={theme}
-                                        product={p}
-                                        productIndex={idx}
-                                        onUpdate={updateProductOption}
-                                    />
+                                    <Data.WinkHoopzOptions theme={theme} product={p} productIndex={idx} onUpdate={updateProductOption} />
                                 )}
                             </div>
                         ))}
+
                         {availableSeries.length > 0 && (
                             <AutoCompleteCombobox
                                 value=""
-                                onChange={(val) => { addProduct(val); }}
+                                onChange={val => addProduct(val)}
                                 placeholder="+ Add a Product..."
                                 options={availableSeries}
                                 theme={theme}
-                                resetOnSelect={true}
+                                resetOnSelect
                             />
                         )}
                     </div>
                 </FormSection>
 
+                {/* ─── Financials & Timeline ─── */}
                 <FormSection title="Financials & Timeline" theme={theme}>
                     <FormInput
                         label="Estimated List Price"
                         required
                         type="currency"
                         value={newLead.estimatedList}
-                        onChange={(e) => updateField('estimatedList', e.target.value)}
+                        onChange={e => updateField('estimatedList', e.target.value)}
                         placeholder="$0"
                         theme={theme}
                     />
+
                     <ProbabilitySlider
                         value={newLead.winProbability}
-                        onChange={(v) => updateField('winProbability', v)}
+                        onChange={v => updateField('winProbability', v)}
                         theme={theme}
                     />
+
                     <PortalNativeSelect
                         label="Discount"
                         value={newLead.discount}
-                        onChange={(e) => updateField('discount', e.target.value)}
+                        onChange={e => updateField('discount', e.target.value)}
                         options={Data.DISCOUNT_OPTIONS.map(d => ({ label: d, value: d }))}
                         placeholder="Select a Discount"
                         theme={theme}
                     />
+
                     <PortalNativeSelect
                         label="PO Timeframe"
                         required
                         value={newLead.poTimeframe}
-                        onChange={(e) => updateField('poTimeframe', e.target.value)}
+                        onChange={e => updateField('poTimeframe', e.target.value)}
                         options={Data.PO_TIMEFRAMES.map(t => ({ label: t, value: t }))}
                         placeholder="Select a Timeframe"
                         theme={theme}
                     />
+
                     <CheckboxRow
                         label="Contract?"
                         checked={!!newLead.isContract}
-                        onChange={(e) => updateField('isContract', e.target.checked)}
+                        onChange={e => updateField('isContract', e.target.checked)}
                     />
+
                     {newLead.isContract && (
                         <div className="animate-fade-in">
                             <PortalNativeSelect
                                 required
                                 placeholder="Select a Contract"
                                 value={newLead.contractType}
-                                onChange={(e) => updateField('contractType', e.target.value)}
+                                onChange={e => updateField('contractType', e.target.value)}
                                 options={Data.CONTRACT_OPTIONS.map(c => ({ label: c, value: c }))}
                                 theme={theme}
                             />
@@ -5351,70 +5228,33 @@ export const NewLeadScreen = ({
                     )}
                 </FormSection>
 
+                {/* ─── Services & Notes ─── */}
                 <FormSection title="Services & Notes" theme={theme}>
                     <CheckboxRow
                         label="JSI Spec Services Required?"
                         checked={!!newLead.jsiSpecServices}
-                        onChange={(e) => updateField('jsiSpecServices', e.target.checked)}
+                        onChange={e => updateField('jsiSpecServices', e.target.checked)}
                     />
+
                     {newLead.jsiSpecServices && (
                         <div className="animate-fade-in pt-4 space-y-4">
-                            <ToggleButtonGroup
-                                value={newLead.quoteType}
-                                onChange={(value) => updateField('quoteType', value)}
-                                options={[
-                                    { label: 'New Quote', value: 'New Quote' },
-                                    { label: 'Revision', value: 'Revision' },
-                                    { label: 'Past Project', value: 'Past Project' }
-                                ]}
-                                theme={theme}
-                            />
-                            {newLead.quoteType === 'Revision' && (
-                                <div className="relative flex items-center pt-2">
-                                    <FormInput
-                                        label="Quote"
-                                        value={newLead.jsiQuoteNumber}
-                                        onChange={(e) => updateField('jsiQuoteNumber', e.target.value)}
-                                        placeholder="JG 25-2342"
-                                        theme={theme}
-                                    />
-                                    <button
-                                        type="button"
-                                        className="absolute right-2 bottom-2 px-3 py-1 text-xs font-semibold rounded-full"
-                                        style={{
-                                            backgroundColor: theme.colors.subtle,
-                                            color: theme.colors.textSecondary
-                                        }}
-                                    >
-                                        Unknown
-                                    </button>
-                                </div>
-                            )}
-                            {newLead.quoteType === 'Past Project' && (
-                                <div className="animate-fade-in pt-2">
-                                    <FormInput
-                                        label="Past Project Reference"
-                                        value={newLead.pastProjectRef}
-                                        onChange={(e) => updateField('pastProjectRef', e.target.value)}
-                                        placeholder="Enter past project name or quote #"
-                                        theme={theme}
-                                    />
-                                </div>
-                            )}
+                            {/* additional fields could live here */}
                         </div>
                     )}
+
                     <div className="pt-2">
                         <FormInput
                             label="Other Notes"
                             type="textarea"
                             value={newLead.notes}
-                            onChange={(e) => updateField('notes', e.target.value)}
+                            onChange={e => updateField('notes', e.target.value)}
                             placeholder="Enter details..."
                             theme={theme}
                         />
                     </div>
                 </FormSection>
 
+                {/* ─── Submit ─── */}
                 <div className="pt-4 pb-4">
                     <button
                         type="submit"
@@ -5428,6 +5268,7 @@ export const NewLeadScreen = ({
         </form>
     );
 };
+
 
 export const KnoxOptions = ({ theme, product, productIndex, onUpdate }) => {
     return (
@@ -7007,7 +6848,6 @@ export {
     COMRequestScreen,
 
     // “Rep Functions” screens
-    CommissionRatesScreen,
     RequestFieldVisitScreen,
     DealerDirectoryScreen,
 
