@@ -16,11 +16,9 @@ import {
 } from './constants/dropdown.js';
 
 
-import { DropdownPortal } from './DropdownPortal.jsx';  // path / extension as in your project
+import { DropdownPortal } from './DropdownPortal.jsx';   //  ← this line
 
-/* ──────────────────────────────────────────────────────────────────
-   Static data (mock DB / enums / etc.)
-   ────────────────────────────────────────────────────────────────── */
+
 import * as Data from './data.jsx';
 
 /* ──────────────────────────────────────────────────────────────────
@@ -116,6 +114,7 @@ export const useDropdownPosition = (elementRef) => {
     return [direction, checkPosition];     // <-- BOTH values
 };
 
+
 export const PortalNativeSelect = ({
     label,
     value,
@@ -156,19 +155,20 @@ export const PortalNativeSelect = ({
         setIsOpen(o => !o);
     };
 
-    /* outside click / resize & scroll listeners */
+    /* outside-click handler */
     React.useEffect(() => {
-        const clickAway = (e) =>
+        const away = (e) =>
             wrapRef.current &&
             !wrapRef.current.contains(e.target) &&
             dropRef.current &&
             !dropRef.current.contains(e.target) &&
             setIsOpen(false);
 
-        document.addEventListener('mousedown', clickAway);
-        return () => document.removeEventListener('mousedown', clickAway);
+        document.addEventListener('mousedown', away);
+        return () => document.removeEventListener('mousedown', away);
     }, []);
 
+    /* recalc on resize / scroll when open */
     React.useEffect(() => {
         if (!isOpen) return;
         const handler = () => calcPos();
@@ -225,37 +225,40 @@ export const PortalNativeSelect = ({
                 </button>
             </div>
 
+            {/* menu rendered via portal so it never stretches the card */}
             {isOpen && (
-                <div
-                    ref={dropRef}
-                    className="fixed z-[9999] pointer-events-auto"
-                    style={{ top: pos.top, left: pos.left, width: pos.width }}
-                >
-                    <GlassCard
-                        theme={theme}
-                        className="p-1.5 max-h-60 overflow-y-auto scrollbar-hide rounded-2xl shadow-lg"
+                <DropdownPortal parentRef={wrapRef} onClose={() => setIsOpen(false)}>
+                    <div
+                        ref={dropRef}
+                        className="z-[9999] pointer-events-auto"
+                        style={{ top: pos.top, left: pos.left, width: pos.width }}
                     >
-                        {options.map((opt) => (
-                            <button
-                                key={opt.value}
-                                type="button"
-                                onClick={() => handleSelect(opt.value)}
-                                className="block w-full text-left py-2.5 px-3.5 text-sm rounded-lg transition-colors"
-                                style={{
-                                    backgroundColor:
-                                        opt.value === value ? theme.colors.primary : 'transparent',
-                                    color:
-                                        opt.value === value
-                                            ? theme.colors.surface
-                                            : theme.colors.textPrimary,
-                                    fontWeight: opt.value === value ? 600 : 400,
-                                }}
-                            >
-                                {opt.label}
-                            </button>
-                        ))}
-                    </GlassCard>
-                </div>
+                        <GlassCard
+                            theme={theme}
+                            className="p-1.5 max-h-60 overflow-y-auto scrollbar-hide rounded-2xl shadow-lg"
+                        >
+                            {options.map((opt) => (
+                                <button
+                                    key={opt.value}
+                                    type="button"
+                                    onClick={() => handleSelect(opt.value)}
+                                    className="block w-full text-left py-2.5 px-3.5 text-sm rounded-lg transition-colors"
+                                    style={{
+                                        backgroundColor:
+                                            opt.value === value ? theme.colors.primary : 'transparent',
+                                        color:
+                                            opt.value === value
+                                                ? theme.colors.surface
+                                                : theme.colors.textPrimary,
+                                        fontWeight: opt.value === value ? 600 : 400,
+                                    }}
+                                >
+                                    {opt.label}
+                                </button>
+                            ))}
+                        </GlassCard>
+                    </div>
+                </DropdownPortal>
             )}
         </>
     );
@@ -329,53 +332,53 @@ export const AutoCompleteCombobox = ({
     onAddNew,
     placeholder = '',
     resetOnSelect = false,
-    theme
+    theme,
 }) => {
     const [query, setQuery] = useState('');
     const [isOpen, setIsOpen] = useState(false);
-    const wrapperRef = useRef(null);
-    const [dropDirection, checkPosition] = useDropdownPosition(wrapperRef);
+    const wrapRef = useRef(null);
+    const [dir, checkPosition] = useDropdownPosition(wrapRef);
 
-    useEffect(() => {
-        const handleOutside = e => {
-            if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
-                setIsOpen(false);
-            }
-        };
-        document.addEventListener('mousedown', handleOutside);
-        return () => document.removeEventListener('mousedown', handleOutside);
-    }, []);
-
+    /* filter list */
     const filtered = useMemo(() => {
-        const q = query.trim().toLowerCase();
-        if (!q) return options;
-        return options.filter(opt => {
-            // opt can be string or { label, value }
-            const text = typeof opt === 'string' ? opt : opt.label;
-            return text.toLowerCase().includes(q);
-        });
-    }, [options, query]);
-
-    // Display the chosen value
-    const displayValue = useMemo(() => {
-        if (value == null) return '';
-        const found = options.find(opt =>
-            typeof opt === 'string' ? opt === value : opt.value === value
+        const q = query.toLowerCase();
+        return options.filter(o =>
+            o.toLowerCase().includes(q) && o.toLowerCase() !== value?.toLowerCase()
         );
-        return typeof found === 'string'
-            ? found
-            : found?.label || '';
-    }, [options, value]);
+    }, [query, options, value]);
 
-    const handleSelect = opt => {
-        const newVal = typeof opt === 'string' ? opt : opt.value;
-        onChange(newVal);
-        if (resetOnSelect) setQuery('');
+    /* selection */
+    const handleSelect = (opt) => {
+        onChange(opt); // Call onChange first to update parent state
+        if (resetOnSelect) {
+            setQuery(''); // Only reset query if resetOnSelect is true
+        } else {
+            setQuery(opt); // Set query to selected option
+        }
         setIsOpen(false);
     };
 
+    const handleAdd = () => {
+        if (!query) return;
+        onAddNew?.(query);
+        onChange(query);
+        setQuery(resetOnSelect ? '' : query); // Respect resetOnSelect for new additions too
+        setIsOpen(false);
+    };
+
+    /* click-away */
+    useEffect(() => {
+        const away = (e) =>
+            wrapRef.current &&
+            !wrapRef.current.contains(e.target) &&
+            setIsOpen(false);
+        document.addEventListener('mousedown', away);
+        return () => document.removeEventListener('mousedown', away);
+    }, []);
+
+    /* render */
     return (
-        <div ref={wrapperRef} className="relative space-y-1 overflow-visible">
+        <div ref={wrapRef} className="relative space-y-1">
             {label && (
                 <label
                     className="block text-xs font-semibold px-4"
@@ -385,91 +388,68 @@ export const AutoCompleteCombobox = ({
                 </label>
             )}
 
+            {/* input */}
             <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5"
+                    style={{ color: theme.colors.textSecondary }} />
                 <input
                     type="text"
-                    className="w-full pl-10 pr-4 py-3 rounded-full text-base border transition-colors"
-                    placeholder={displayValue || placeholder}
-                    value={query}
-                    onChange={e => {
-                        setQuery(e.target.value);
-                        setIsOpen(true);
-                    }}
-                    onFocus={() => {
-                        checkPosition();
-                        setIsOpen(true);
-                    }}
+                    value={isOpen ? query : value ?? ''}   // ← shows parent value when closed
+                    onFocus={() => { setIsOpen(true); checkPosition(); }}
+                    onChange={(e) => { setQuery(e.target.value); setIsOpen(true); }}
+                    placeholder={placeholder}
+                    className="w-full pl-12 pr-4 py-3 border rounded-full text-base"
                     style={{
                         backgroundColor: theme.colors.subtle,
                         borderColor: theme.colors.border,
-                        color: theme.colors.textPrimary
+                        color: theme.colors.textPrimary,
                     }}
-                />
-                <Search
-                    className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5"
-                    style={{ color: theme.colors.textSecondary }}
                 />
             </div>
 
+            {/* menu via portal */}
             {isOpen && (
-                <div
-                    className={`absolute left-0 w-full z-50 ${dropDirection === 'up' ? 'bottom-full mb-1' : 'top-full mt-1'
-                        }`}
-                >
+                <DropdownPortal parentRef={wrapRef} onClose={() => setIsOpen(false)}>
                     <GlassCard
                         theme={theme}
-                        className="p-1.5 max-h-60 overflow-y-auto scrollbar-hide rounded-2xl shadow-lg"
+                        className={`max-h-60 overflow-y-auto p-1.5 rounded-2xl shadow-lg ${dir === 'up' ? 'mb-2' : 'mt-2'
+                            }`}
                     >
-                        {filtered.map(opt => {
-                            const text = typeof opt === 'string' ? opt : opt.label;
-                            const val = typeof opt === 'string' ? opt : opt.value;
-                            return (
+                        {filtered.length > 0 ? (
+                            filtered.map((opt) => (
                                 <button
-                                    key={val}
+                                    key={opt}
                                     type="button"
-                                    className="block w-full text-left py-2.5 px-3.5 text-sm rounded-lg transition-colors"
                                     onClick={() => handleSelect(opt)}
-                                    style={{
-                                        backgroundColor:
-                                            val === value ? theme.colors.primary : 'transparent',
-                                        color:
-                                            val === value
-                                                ? theme.colors.surface
-                                                : theme.colors.textPrimary,
-                                        fontWeight: val === value ? 600 : 400
-                                    }}
+                                    className="block w-full text-left py-2.5 px-3.5 text-sm rounded-lg hover:bg-black/5 dark:hover:bg-white/10"
+                                    style={{ color: theme.colors.textPrimary }}
                                 >
-                                    {text}
+                                    {opt}
                                 </button>
-                            );
-                        })}
+                            ))
+                        ) : (
+                            <p className="py-2.5 px-3.5 text-sm"
+                                style={{ color: theme.colors.textSecondary }}>
+                                No match
+                            </p>
+                        )}
 
-                        {onAddNew &&
-                            query &&
-                            !options.some(opt => {
-                                const text = typeof opt === 'string' ? opt : opt.label;
-                                return text.toLowerCase() === query.trim().toLowerCase();
-                            }) && (
-                                <button
-                                    type="button"
-                                    className="block w-full text-center italic py-2.5 px-3.5 text-sm rounded-lg hover:bg-black/5"
-                                    onClick={() => {
-                                        onAddNew(query.trim());
-                                        setIsOpen(false);
-                                        resetOnSelect && setQuery('');
-                                    }}
-                                    style={{ color: theme.colors.accent }}
-                                >
-                                    + Add “{query.trim()}”
-                                </button>
-                            )}
+                        {onAddNew && query && !options.includes(query) && (
+                            <button
+                                type="button"
+                                onClick={handleAdd}
+                                className="block w-full text-left py-2.5 px-3.5 text-sm mt-1 rounded-lg font-semibold"
+                                style={{ color: theme.colors.accent }}
+                            >
+                                + Add "{query}"
+                            </button>
+                        )}
                     </GlassCard>
-                </div>
+                </DropdownPortal>
             )}
         </div>
     );
 };
-
 export const ToggleButtonGroup = ({ value, onChange, options, theme }) => {
     const selectedIndex = options.findIndex((opt) => opt.value === value);
 
@@ -3507,7 +3487,7 @@ const CreateContentModal = ({ close, theme, onAdd }) => {
 };
 
 
-const FancySelect = ({ value, onChange, options, placeholder, required, theme }) => (
+export const FancySelect = ({ value, onChange, options, placeholder, required, theme }) => (
     <div
         className="relative w-full rounded-full overflow-hidden"
         style={{ backgroundColor: theme.colors.subtle }}
@@ -6886,7 +6866,6 @@ export {
     SocialMediaScreen,
 
     // Other app screens
-    FancySelect,
     SettingsScreen,
     HelpScreen,
     LogoutScreen,
