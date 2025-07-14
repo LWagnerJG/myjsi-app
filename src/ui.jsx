@@ -2281,7 +2281,6 @@ export const LoanerPoolScreen = ({ theme, onNavigate, setSuccessMessage, userSet
         }, 1200);
     };
 
-    // New logic to get the names of selected items
     const selectedItemNames = useMemo(() =>
         Data.LOANER_POOL_PRODUCTS
             .filter(p => selectedLoaners.includes(p.id))
@@ -2297,22 +2296,53 @@ export const LoanerPoolScreen = ({ theme, onNavigate, setSuccessMessage, userSet
                 <SearchInput value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder="Search by name or model..." theme={theme} />
             </div>
 
-            <div className="flex-1 overflow-y-auto px-4 grid grid-cols-2 gap-4 pb-4 scrollbar-hide">
-                {filteredLoaners.map(item => (
-                    <LoanerItemCard
-                        key={item.id}
-                        item={item}
-                        isSelected={selectedLoaners.includes(item.id)}
-                        onSelect={handleToggleLoaner}
-                        theme={theme}
-                    />
-                ))}
+            <div className="flex-1 overflow-y-auto px-4 space-y-3 pb-4 scrollbar-hide">
+                {filteredLoaners.map(item => {
+                    const isSelected = selectedLoaners.includes(item.id);
+                    return (
+                        <GlassCard
+                            key={item.id}
+                            theme={theme}
+                            className="p-3 overflow-hidden cursor-pointer transition-all duration-300"
+                            onClick={() => handleToggleLoaner(item.id)}
+                            style={{
+                                borderWidth: '2px',
+                                borderColor: isSelected ? theme.colors.accent : 'transparent',
+                                backgroundColor: '#FFFFFF', // Ensures tile is solid white
+                            }}
+                        >
+                            <div className="flex space-x-4 items-start">
+                                <img
+                                    src={item.img}
+                                    alt={item.name}
+                                    className="w-24 h-24 object-cover rounded-xl flex-shrink-0" // More rounded border
+                                />
+                                <div className="flex-1 min-w-0">
+                                    <h4 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>{item.name}</h4>
+                                    <p className="text-sm font-mono" style={{ color: theme.colors.textSecondary }}>{item.model}</p>
+
+                                    {/* This section now correctly appears only when an item is selected */}
+                                    {isSelected && (
+                                        <div className="mt-3 pt-3 border-t space-y-1 animate-fade-in" style={{ borderColor: theme.colors.subtle }}>
+                                            <h4 className="text-sm font-bold pb-1" style={{ color: theme.colors.textPrimary }}>Specifications</h4>
+                                            {Object.entries(item.specs).map(([key, value]) => (
+                                                <div key={key} className="grid grid-cols-[auto,1fr] gap-x-3 text-sm">
+                                                    <div className="font-medium" style={{ color: theme.colors.textSecondary }}>{key}:</div>
+                                                    <div className="font-semibold text-right" style={{ color: theme.colors.textPrimary }}>{value}</div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </GlassCard>
+                    );
+                })}
             </div>
 
             <div className="px-4 space-y-3 pt-3 pb-4 sticky bottom-0 border-t" style={{ backgroundColor: theme.colors.background, borderColor: theme.colors.border }}>
                 <div className="flex justify-between items-center px-1">
                     <h3 className="font-bold" style={{ color: theme.colors.textPrimary }}>Requested:</h3>
-                    {/* FIX: Show names of requested items instead of a count */}
                     <p className="text-sm font-semibold truncate" style={{ color: theme.colors.textSecondary }}>
                         {selectedLoaners.length > 0 ? selectedItemNames : "No items selected"}
                     </p>
@@ -2343,50 +2373,42 @@ export const LoanerPoolScreen = ({ theme, onNavigate, setSuccessMessage, userSet
 };
 export const LoanerItemCard = ({ item, isSelected, onSelect, theme }) => {
     return (
-        <div
+        <GlassCard
+            theme={theme}
             onClick={() => onSelect(item.id)}
-            className={`transition-all duration-300 ease-in-out cursor-pointer ${isSelected ? 'scale-100 opacity-100' : 'scale-95 opacity-80 hover:opacity-100'}`}
+            className="p-2 overflow-hidden cursor-pointer transition-all duration-300"
+            style={{
+                borderWidth: '2px',
+                borderColor: isSelected ? theme.colors.accent : 'transparent'
+            }}
         >
-            <GlassCard
-                theme={theme}
-                className="p-0 overflow-hidden"
-                // FIX: The border is now thicker and uses the theme's accent color for a more obvious selection
-                style={{
-                    borderWidth: isSelected ? '3px' : '1px',
-                    borderColor: isSelected ? theme.colors.accent : theme.colors.border
-                }}
-            >
-                {/* Main Visual Area */}
-                <div className="relative aspect-square w-full group">
-                    <img src={item.img} alt={item.name} className="absolute w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                    <div className="absolute bottom-0 left-0 p-3 text-white">
-                        <h3 className="font-bold text-lg">{item.name}</h3>
-                        <p className="font-mono text-xs opacity-80">{item.model}</p>
-                    </div>
+            <div className="flex space-x-3 items-start">
+                {/* Image */}
+                <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+                    <img src={item.img} alt={item.name} className="absolute w-full h-full object-cover" />
                 </div>
 
-                {/* Animated Expansion for Specs */}
-                <div className={`transition-all duration-500 ease-in-out grid ${isSelected ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
-                    <div className="overflow-hidden">
-                        <div className="p-4 space-y-3 border-t" style={{ borderColor: theme.colors.subtle }}>
-                            <h4 className="text-sm font-bold" style={{ color: theme.colors.textPrimary }}>Specifications</h4>
-                            {/* FIX: Improved UI for formatting specifications */}
-                            <div className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-1 text-sm">
-                                {Object.entries(item.specs).map(([key, value]) => (
-                                    <React.Fragment key={key}>
-                                        <div className="font-medium" style={{ color: theme.colors.textSecondary }}>{key}:</div>
-                                        <div className="font-semibold text-right" style={{ color: theme.colors.textPrimary }}>{value}</div>
-                                    </React.Fragment>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
+                {/* Text Content */}
+                <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-base" style={{ color: theme.colors.textPrimary }}>{item.name}</h3>
+                    <p className="font-mono text-xs" style={{ color: theme.colors.textSecondary }}>{item.model}</p>
                 </div>
-            </GlassCard>
-        </div>
+
+                {/* Specs always visible */}
+                <div className="w-32 text-right space-y-0.5">
+                    <h4 className="text-xs font-bold" style={{ color: theme.colors.textPrimary }}>Specifications</h4>
+                    {Object.entries(item.specs).map(([key, value]) => (
+                        <div key={key} className="grid grid-cols-[auto,1fr] gap-x-1 text-xs">
+                            <div className="font-medium" style={{ color: theme.colors.textSecondary }}>{key}:</div>
+                            <div className="font-semibold" style={{ color: theme.colors.textPrimary }}>{value}</div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </GlassCard>
     );
 };
+
 export const ResourceDetailScreen = ({ theme, onNavigate, setSuccessMessage, userSettings, showAlert, currentScreen }) => {
     // Extract the specific resource type from the URL-like path
     const category = currentScreen.split('/')[1]?.replace(/_/g, ' ');
@@ -4390,6 +4412,11 @@ export const OrderModal = React.memo(({ order, onClose, theme }) => {
         </Modal>
     );
 });
+
+
+
+
+
 export const OrdersScreen = ({ theme, setSelectedOrder }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [dateType, setDateType] = useState('shipDate');
@@ -4407,14 +4434,20 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const groupedOrders = useMemo(() => {
-        const filtered = Data.ORDER_DATA.filter(order =>
+    // First, create a flat list of orders filtered by the search term.
+    // This will be used by both the list view and the calendar view.
+    const filteredOrders = useMemo(() => {
+        return Data.ORDER_DATA.filter(order =>
             (order.company?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
             (order.details?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
             (order.orderNumber?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
             (order.po?.toLowerCase() || '').includes(searchTerm.toLowerCase())
         );
-        const groups = filtered.reduce((acc, order) => {
+    }, [searchTerm]);
+
+    // For the list view, group the already-filtered orders by date.
+    const groupedOrders = useMemo(() => {
+        const groups = filteredOrders.reduce((acc, order) => {
             const dateStr = order[dateType];
             if (!dateStr || isNaN(new Date(dateStr))) return acc;
             const date = new Date(dateStr);
@@ -4430,7 +4463,7 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
             groups[key].orders.sort((a, b) => new Date(b[dateType]) - new Date(a[dateType]));
         }
         return groups;
-    }, [searchTerm, dateType]);
+    }, [filteredOrders, dateType]); // Depends on the flat filtered list now
 
     const sortedGroupKeys = useMemo(() => {
         if (!groupedOrders) return [];
@@ -4501,13 +4534,13 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
                         ))}
                     </div>
                 ) : (
+                    /* This now passes the correctly defined 'filteredOrders' variable, fixing the error. */
                     <OrderCalendarView orders={filteredOrders} theme={theme} dateType={dateType} />
                 )}
             </div>
         </div>
     );
 };
-
 
 export const SalesScreen = ({ theme, onNavigate }) => {
     const { MONTHLY_SALES_DATA, ORDER_DATA, SALES_VERTICALS_DATA } = Data;
@@ -5991,7 +6024,6 @@ export const CommunityScreen = ({ theme, onNavigate, openCreateContentModal, pos
 
 export const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSettings }) => {
     const [selectedCategory, setSelectedCategory] = useState('tfl');
-    const [setQuantity, setSetQuantity] = useState(1);
 
     // Manage category slider pill
     const [pillStyle, setPillStyle] = useState({ left: 0, width: 0, opacity: 0 });
@@ -6007,12 +6039,12 @@ export const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSetti
     // Handlers
     const handleAddSetToCart = useCallback(() => {
         const categoryName = Data.SAMPLE_CATEGORIES.find(c => c.id === selectedCategory)?.name || 'Unknown';
+        // Always adds a quantity of 1
         onUpdateCart(
             { id: `set-${selectedCategory}`, name: `Complete ${categoryName} Set` },
-            setQuantity
+            1
         );
-        setSetQuantity(1);
-    }, [selectedCategory, setQuantity, onUpdateCart]);
+    }, [selectedCategory, onUpdateCart]);
 
     const handleOrderFullSet = useCallback(
         () => onUpdateCart({ id: 'full-jsi-set', name: 'Full JSI Sample Set' }, 1),
@@ -6029,6 +6061,8 @@ export const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSetti
         [selectedCategory]
     );
 
+    const setInCartQuantity = cart[`set-${selectedCategory}`] || 0;
+
     return (
         <>
             {/* Header with full set and cart */}
@@ -6039,7 +6073,7 @@ export const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSetti
                         className="px-4 py-2 rounded-full text-sm font-semibold transition-transform hover:scale-105 active:scale-95"
                         style={{ backgroundColor: theme.colors.accent, color: 'white' }}
                     >
-                        Order Full JSI Set
+                        Order Full JSI Sample Set
                     </button>
                     <div className="relative">
                         <button
@@ -6099,38 +6133,33 @@ export const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSetti
                 </GlassCard>
             </div>
 
-            {/* Complete set controls */}
-            <GlassCard theme={theme} className="mx-4 mb-4 p-4 flex items-center justify-between">
-                <span className="font-bold text-base" style={{ color: theme.colors.textPrimary }}>
-                    Complete {Data.SAMPLE_CATEGORIES.find(c => c.id === selectedCategory)?.name} Set
-                </span>
-                <div className="flex items-center space-x-2">
-                    <button
-                        onClick={() => setSetQuantity(q => Math.max(1, q - 1))}
-                        className="w-8 h-8 flex items-center justify-center rounded-full transition"
-                        style={{ backgroundColor: theme.colors.subtle }}
-                    >
-                        <Minus className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
-                    </button>
-                    <span className="font-semibold text-lg" style={{ color: theme.colors.textPrimary }}>
-                        {setQuantity}
-                    </span>
-                    <button
-                        onClick={() => setSetQuantity(q => q + 1)}
-                        className="w-8 h-8 flex items-center justify-center rounded-full transition"
-                        style={{ backgroundColor: theme.colors.subtle }}
-                    >
-                        <Plus className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
-                    </button>
+            {/* Banner to add complete set */}
+            <div className="px-4 mb-4">
+                <div className="relative">
                     <button
                         onClick={handleAddSetToCart}
-                        className="px-4 py-2 rounded-full font-semibold text-sm transition-transform hover:scale-105 active:scale-95"
-                        style={{ backgroundColor: theme.colors.accent, color: 'white' }}
+                        className="w-full py-2.5 rounded-full text-sm font-semibold text-white shadow-md transition-transform hover:scale-105 active:scale-95"
+                        style={{
+                            backgroundColor: theme.colors.accent,
+                        }}
                     >
-                        Add
+                        Add Complete {Data.SAMPLE_CATEGORIES.find(c => c.id === selectedCategory)?.name} Set
                     </button>
+                    {setInCartQuantity > 0 && (
+                        <div
+                            className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shadow"
+                            style={{
+                                backgroundColor: theme.colors.surface,
+                                color: theme.colors.accent,
+                                border: `1px solid ${theme.colors.border}`
+                            }}
+                        >
+                            {setInCartQuantity}
+                        </div>
+                    )}
                 </div>
-            </GlassCard>
+            </div>
+
 
             {/* Product grid showing squares with names and add/remove */}
             <div className="px-4 grid grid-cols-2 gap-4 pb-4">
@@ -6142,8 +6171,7 @@ export const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSetti
                             onClick={() => onUpdateCart(product, 1)}
                             className="relative w-full aspect-square rounded-2xl overflow-hidden transition-colors"
                             style={{
-                                border: `2px solid ${quantity > 0 ? theme.colors.accent : theme.colors.border
-                                    }`,
+                                border: `2px solid ${quantity > 0 ? '#689a5e' : theme.colors.border}`,
                                 backgroundColor: product.color
                             }}
                         >
@@ -6184,7 +6212,6 @@ export const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSetti
         </>
     );
 };
-
 
 export const ReplacementsScreen = ({ theme, setSuccessMessage, onNavigate }) => {
     const [formData, setFormData] = useState(null);

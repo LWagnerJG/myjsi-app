@@ -226,12 +226,13 @@ export const VERTICALS = [
 
 
 export const SOCIAL_MEDIA_POSTS = [{ id: 1, type: 'image', url: 'https://placehold.co/400x500/E3DBC8/2A2A2A?text=JSI+Seating', caption: 'Comfort meets design. ✨ Discover the new Arwyn series, perfect for any modern workspace. #JSIFurniture #OfficeDesign #ModernWorkplace' }, { id: 2, type: 'image', url: 'https://placehold.co/400x500/D9CDBA/2A2A2A?text=Vision+Casegoods', caption: 'Functionality at its finest. The Vision casegoods line offers endless configuration possibilities. #Casegoods #OfficeInspo #JSI' }, { id: 3, type: 'video', url: 'https://placehold.co/400x500/A9886C/FFFFFF?text=Lounge+Tour+(Video)', caption: 'Take a closer look at the luxurious details of our Caav lounge collection. #LoungeSeating #ContractFurniture #HospitalityDesign' }, { id: 4, type: 'image', url: 'https://placehold.co/400x500/966642/FFFFFF?text=Forge+Tables', caption: 'Gather around. The Forge table series brings a rustic yet refined look to collaborative spaces. #MeetingTable #Collaboration #JSI' },];
+
 export const LOANER_POOL_PRODUCTS = [
     {
         id: 'br2301',
         name: 'Bryn',
         model: 'BR2301',
-        img: 'https://webresources.jsifurniture.com/production/uploads/jsi_bryn_feat_00018_kI9ljLG.jpg',
+        img: 'https://webresources.jsifurniture.com/production/uploads/jsi_bryn_comp_00022.jpg',
         specs: {
             'Upholstery': 'Maharam, Mode, Glacier',
             'Wood': 'Light Maple',
@@ -340,7 +341,7 @@ export const INITIAL_POLLS = [
         options: [
             { id: 'carbon', text: 'Truss', votes: 8 },
             { id: 'oak', text: 'Torii', votes: 5 },
-            { id: 'white', text: 'De', votes: 12 },
+            { id: 'white', text: 'Executive', votes: 12 },
         ],
     },
 ];
