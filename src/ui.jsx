@@ -3754,14 +3754,11 @@ export const AppHeader = React.memo(({ onHomeClick, isDarkMode, theme, onProfile
             className="mx-auto mt-4 w-[90%] px-6 py-3 flex justify-between items-center sticky top-0 z-20 rounded-full shadow-lg backdrop-blur"
         >
             <div className="flex items-center">
-                {/* FIX: The back button is no longer removed from the page. 
-                  Instead, its width and opacity are animated using CSS classes based on the `showBack` prop.
-                */}
                 <button
                     aria-label="Go back"
                     onClick={handleBack}
                     className={`transition-all duration-300 ease-in-out overflow-hidden p-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10 ${showBack ? 'w-9 -ml-2 mr-2 opacity-100' : 'w-0 ml-0 mr-0 opacity-0'}`}
-                    disabled={!showBack} // Disable the button when not shown
+                    disabled={!showBack}
                 >
                     <ArrowLeft className="w-5 h-5 flex-shrink-0" style={{ color: theme.colors.textSecondary }} />
                 </button>
@@ -3774,10 +3771,16 @@ export const AppHeader = React.memo(({ onHomeClick, isDarkMode, theme, onProfile
                     <img src={Data.logoLight} alt="MyJSI Logo" className="h-10 w-auto" style={{ filter: filterStyle }} />
                 </button>
             </div>
-            <div className="flex items-center space-x-4">
-                {isHome && (
-                    <div className="text-lg font-normal leading-tight" style={{ color: theme.colors.textPrimary }}>Hello, {userName}!</div>
-                )}
+            <div className="flex items-center space-x-2">
+                {/* FIX: The conditional rendering is replaced with dynamic classes for a fade/slide animation */}
+                <div
+                    className={`transition-all duration-300 ease-in-out text-lg font-normal leading-tight whitespace-nowrap overflow-hidden ${isHome ? 'max-w-[150px] opacity-100' : 'max-w-0 opacity-0'}`}
+                    style={{ color: theme.colors.textPrimary }}
+                    aria-hidden={!isHome}
+                >
+                    Hello, {userName}!
+                </div>
+
                 <button
                     aria-label="Open profile menu"
                     onClick={onProfileClick}
