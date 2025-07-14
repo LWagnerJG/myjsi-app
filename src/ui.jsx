@@ -468,6 +468,7 @@ export const AutoCompleteCombobox = ({
 };
 
 export const ToggleButtonGroup = ({ value, onChange, options, theme }) => {
+    // Find the index of the currently selected option
     const selectedIndex = options.findIndex((opt) => opt.value === value);
 
     return (
@@ -475,18 +476,20 @@ export const ToggleButtonGroup = ({ value, onChange, options, theme }) => {
             className="w-full flex p-1 rounded-full relative"
             style={{ backgroundColor: theme.colors.subtle }}
         >
-            {/* sliding pill */}
+            {/* This is the "sliding pill" that moves to the selected option */}
             <div
                 className="absolute top-1 bottom-1 rounded-full transition-transform duration-300 ease-in-out"
                 style={{
                     width: `calc(${100 / options.length}% - 4px)`,
                     backgroundColor: theme.colors.surface,
+                    // This transform calculates the correct position for the pill
                     transform: `translateX(calc(${selectedIndex * 100}% + ${selectedIndex * 4}px))`,
                     boxShadow: `0 1px 4px ${theme.colors.shadow}`,
                     border: `1px solid ${theme.colors.border}`,
                 }}
             />
 
+            {/* These are the transparent buttons that sit on top */}
             {options.map((opt) => (
                 <button
                     key={opt.value}
@@ -495,10 +498,6 @@ export const ToggleButtonGroup = ({ value, onChange, options, theme }) => {
                     className="flex-1 py-2 px-1 text-center text-sm font-semibold rounded-full transition-colors duration-300 relative z-10"
                     style={{
                         color: opt.value === value ? theme.colors.accent : theme.colors.textSecondary,
-                        border: `1px solid transparent`,
-                        ...(opt.value !== value && {
-                            borderColor: theme.colors.border,
-                        }),
                     }}
                 >
                     {opt.label}
@@ -507,7 +506,6 @@ export const ToggleButtonGroup = ({ value, onChange, options, theme }) => {
         </div>
     );
 };
-
 const {
     // New–Lead form
     EMPTY_LEAD,
