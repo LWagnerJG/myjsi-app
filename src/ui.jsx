@@ -4978,6 +4978,10 @@ export const NewLeadScreen = ({
         winProbability: 50,
         isContract: false,
         contractType: '',
+        // FIX: Added state for the JSI Spec Services options
+        jsiSpecServicesType: 'New Quote',
+        jsiRevisionQuoteNumber: '',
+        jsiPastProjectInfo: '',
     });
 
     /* -------- helpers -------- */
@@ -5205,7 +5209,6 @@ export const NewLeadScreen = ({
                             </div>
                         ))}
 
-                        {/* FIX: Replaced AutoCompleteCombobox with the simpler PortalNativeSelect */}
                         {availableSeries.length > 0 && (
                             <PortalNativeSelect
                                 value=""
@@ -5283,9 +5286,41 @@ export const NewLeadScreen = ({
                         onChange={e => updateField('jsiSpecServices', e.target.checked)}
                     />
 
+                    {/* FIX: This block now renders the conditional options */}
                     {newLead.jsiSpecServices && (
-                        <div className="animate-fade-in pt-4 space-y-4">
-                            {/* additional fields could live here */}
+                        <div className="animate-fade-in pt-4 space-y-4 border-t" style={{ borderColor: theme.colors.subtle }}>
+                            <ToggleButtonGroup
+                                value={newLead.jsiSpecServicesType}
+                                onChange={(val) => updateField('jsiSpecServicesType', val)}
+                                options={[
+                                    { label: 'New Quote', value: 'New Quote' },
+                                    { label: 'Revision', value: 'Revision' },
+                                    { label: 'Past Project', value: 'Past Project' }
+                                ]}
+                                theme={theme}
+                            />
+
+                            {newLead.jsiSpecServicesType === 'Revision' && (
+                                <FormInput
+                                    label="Revision Quote #"
+                                    value={newLead.jsiRevisionQuoteNumber}
+                                    onChange={(e) => updateField('jsiRevisionQuoteNumber', e.target.value)}
+                                    placeholder="Enter original quote #"
+                                    theme={theme}
+                                    required
+                                />
+                            )}
+
+                            {newLead.jsiSpecServicesType === 'Past Project' && (
+                                <FormInput
+                                    label="Past Project Info"
+                                    value={newLead.jsiPastProjectInfo}
+                                    onChange={(e) => updateField('jsiPastProjectInfo', e.target.value)}
+                                    placeholder="Enter past project name or #"
+                                    theme={theme}
+                                    required
+                                />
+                            )}
                         </div>
                     )}
 
