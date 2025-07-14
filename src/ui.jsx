@@ -316,13 +316,10 @@ export const Card = ({ children, ...props }) => (
     <GlassCard {...props}>{children}</GlassCard>
 )
 
-
-
 export const IncentiveRewardsScreen = ({ theme, onNavigate }) => {
     // Placeholder - Logic will be added later
     return <PageTitle title="Incentive Rewards" theme={theme} />;
 };
-
 
 export const AutoCompleteCombobox = ({
     label,
@@ -334,39 +331,39 @@ export const AutoCompleteCombobox = ({
     resetOnSelect = false,
     theme,
 }) => {
-    const [query, setQuery] = useState('');
     const [isOpen, setIsOpen] = useState(false);
     const wrapRef = useRef(null);
     const [dir, checkPosition] = useDropdownPosition(wrapRef);
 
-    /* filter list */
+    // Filtered list based on the current input value
     const filtered = useMemo(() => {
-        const q = query.toLowerCase();
+        const q = (value || '').toLowerCase();
+        if (!q) return options; // Show all options if input is empty
         return options.filter(o =>
-            o.toLowerCase().includes(q) && o.toLowerCase() !== value?.toLowerCase()
+            o.toLowerCase().includes(q)
         );
-    }, [query, options, value]);
+    }, [value, options]);
 
-    /* selection */
+    // Handler for selecting an existing option
     const handleSelect = (opt) => {
-        onChange(opt); // Call onChange first to update parent state
+        onChange(opt); // Update the parent state
+        setIsOpen(false);
         if (resetOnSelect) {
-            setQuery(''); // Only reset query if resetOnSelect is true
-        } else {
-            setQuery(opt); // Set query to selected option
+            onChange(''); // Clear the value in the parent state
         }
-        setIsOpen(false);
     };
 
+    // Handler for adding a new item
     const handleAdd = () => {
-        if (!query) return;
-        onAddNew?.(query);
-        onChange(query);
-        setQuery(resetOnSelect ? '' : query); // Respect resetOnSelect for new additions too
+        if (!value) return;
+        onAddNew?.(value);
         setIsOpen(false);
+        if (resetOnSelect) {
+            onChange(''); // Clear the value in the parent state
+        }
     };
 
-    /* click-away */
+    // Click-away handler
     useEffect(() => {
         const away = (e) =>
             wrapRef.current &&
@@ -376,7 +373,6 @@ export const AutoCompleteCombobox = ({
         return () => document.removeEventListener('mousedown', away);
     }, []);
 
-    /* render */
     return (
         <div ref={wrapRef} className="relative space-y-1">
             {label && (
@@ -388,15 +384,15 @@ export const AutoCompleteCombobox = ({
                 </label>
             )}
 
-            {/* input */}
+            {/* Input is now fully controlled by the parent's `value` and `onChange` */}
             <div className="relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5"
                     style={{ color: theme.colors.textSecondary }} />
                 <input
                     type="text"
-                    value={isOpen ? query : value ?? ''}   // ← shows parent value when closed
+                    value={value || ''}
                     onFocus={() => { setIsOpen(true); checkPosition(); }}
-                    onChange={(e) => { setQuery(e.target.value); setIsOpen(true); }}
+                    onChange={(e) => onChange(e.target.value)} // Typing directly updates parent state
                     placeholder={placeholder}
                     className="w-full pl-12 pr-4 py-3 border rounded-full text-base"
                     style={{
@@ -407,7 +403,7 @@ export const AutoCompleteCombobox = ({
                 />
             </div>
 
-            {/* menu via portal */}
+            {/* Dropdown Menu */}
             {isOpen && (
                 <DropdownPortal parentRef={wrapRef} onClose={() => setIsOpen(false)}>
                     <GlassCard
@@ -428,20 +424,18 @@ export const AutoCompleteCombobox = ({
                                 </button>
                             ))
                         ) : (
-                            <p className="py-2.5 px-3.5 text-sm"
-                                style={{ color: theme.colors.textSecondary }}>
-                                No match
-                            </p>
+                            !onAddNew && <p className="py-2.5 px-3.5 text-sm" style={{ color: theme.colors.textSecondary }}>No match</p>
                         )}
 
-                        {onAddNew && query && !options.includes(query) && (
+                        {/* "Add new" button */}
+                        {onAddNew && value && !options.some(o => o.toLowerCase() === value.toLowerCase()) && (
                             <button
                                 type="button"
                                 onClick={handleAdd}
                                 className="block w-full text-left py-2.5 px-3.5 text-sm mt-1 rounded-lg font-semibold"
                                 style={{ color: theme.colors.accent }}
                             >
-                                + Add "{query}"
+                                + Add "{value}"
                             </button>
                         )}
                     </GlassCard>
@@ -450,6 +444,7 @@ export const AutoCompleteCombobox = ({
         </div>
     );
 };
+
 export const ToggleButtonGroup = ({ value, onChange, options, theme }) => {
     const selectedIndex = options.findIndex((opt) => opt.value === value);
 
@@ -3092,7 +3087,6 @@ const Avatar = ({ src, alt, theme }) => {
     );
 };
 
-
 export const CartScreen = ({ theme, onNavigate, handleBack, cart, setCart, onUpdateCart, userSettings }) => {
     const [address, setAddress] = useState('');
     const [isSubmitted, setIsSubmitted] = useState(false);
@@ -3187,7 +3181,6 @@ export const ProfileMenu = ({ show, onClose, onNavigate, toggleTheme, theme, isD
     );
 };
 
-
 const PostCard = ({ post, theme }) => {
     const { user, timeAgo, text, image, likes = 0, comments = [] } = post;
 
@@ -3270,7 +3263,6 @@ const PostCard = ({ post, theme }) => {
         </GlassCard>
     );
 };
-
 
 export const PollCard = ({ poll, theme }) => {
     const { user, timeAgo, question, options } = poll;
@@ -3423,7 +3415,6 @@ const FormSection = ({ title, theme, children }) => (
     </GlassCard>
 );
 
-
 export const CreatePost = () => {
     const [postType, setPostType] = useState('Post');
 
@@ -3508,7 +3499,6 @@ const CreateContentModal = ({ close, theme, onAdd }) => {
     return <Modal show={true} onClose={close} title={type ? "" : "Create..."} theme={theme}>{renderForm()}</Modal>;
 };
 
-
 export const FancySelect = ({ value, onChange, options, placeholder, required, theme }) => (
     <div
         className="relative w-full rounded-full overflow-hidden"
@@ -3538,7 +3528,6 @@ export const FancySelect = ({ value, onChange, options, placeholder, required, t
         </div>
     </div>
 );
-
 
 export const FormInput = React.memo(({
     label,
@@ -3699,6 +3688,7 @@ const Modal = ({ show, onClose, title, children, theme }) => {
         </div>
     );
 };
+
 const SuccessToast = ({ message, show, theme }) => {
     if (!show) return null;
     return (
@@ -3725,6 +3715,7 @@ export const lightTheme = {
     },
     backdropFilter: 'blur(12px)'
 };
+
 export const AppHeader = React.memo(({ onHomeClick, isDarkMode, theme, onProfileClick, isHome, handleBack, showBack, userName }) => {
     const filterStyle = isDarkMode ? 'brightness(0) invert(1)' : 'none';
 
@@ -3959,7 +3950,6 @@ export const HomeScreen = ({ onNavigate, theme, onAskAI, showAIDropdown, aiRespo
     );
 };
 
-
 export const PermissionToggle = React.memo(({ label, isEnabled, onToggle, theme, disabled }) => {
     const titleText = disabled ? "Requires Sales Data access" : "";
 
@@ -3986,6 +3976,7 @@ export const PermissionToggle = React.memo(({ label, isEnabled, onToggle, theme,
         </div>
     );
 });
+
 export const VoiceModal = ({ message, show, theme }) => {
     if (!show) return null;
 
@@ -4000,6 +3991,7 @@ export const VoiceModal = ({ message, show, theme }) => {
         </div>
     );
 };
+
 const MonthlyBarChart = ({ data, theme }) => {
     const maxValue = Math.max(...data.map(d => Math.max(d.bookings, d.sales)));
 
@@ -4161,7 +4153,6 @@ export const DonutChart = React.memo(({ data, theme }) => {
         </div>
     );
 });
-
 export function CustomSelect({
     label,
     value,
@@ -4330,6 +4321,7 @@ export const CustomerRankingScreen = ({ theme, onNavigate }) => {
         </div>
     );
 };
+
 export const OrderModal = React.memo(({ order, onClose, theme }) => {
     const [isExpanded, setIsExpanded] = useState(false);
 
@@ -4412,10 +4404,6 @@ export const OrderModal = React.memo(({ order, onClose, theme }) => {
         </Modal>
     );
 });
-
-
-
-
 
 export const OrdersScreen = ({ theme, setSelectedOrder }) => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -4662,6 +4650,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
         </div>
     );
 };
+
 export const OrderCalendarView = ({ orders, onDateClick, theme, dateType }) => {
     const [currentDate, setCurrentDate] = useState(new Date('2025-07-09T12:00:00Z'));
 
@@ -4846,7 +4835,6 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
     );
 };
 
-
 export const ProbabilitySlider = ({ value, onChange, theme }) => {
     const [isDragging, setIsDragging] = useState(false);
     const sliderRef = useRef(null);
@@ -4953,7 +4941,6 @@ export const ProbabilitySlider = ({ value, onChange, theme }) => {
         </div>
     );
 };
-
 
 export const NewLeadScreen = ({
     theme,
@@ -5185,25 +5172,25 @@ export const NewLeadScreen = ({
                                 </div>
 
                                 {p.series === 'Vision' && (
-                                    <Data.VisionOptions theme={theme} product={p} productIndex={idx} onUpdate={updateProductOption} />
+                                    <VisionOptions theme={theme} product={p} productIndex={idx} onUpdate={updateProductOption} />
                                 )}
                                 {p.series === 'Knox' && (
-                                    <Data.KnoxOptions theme={theme} product={p} productIndex={idx} onUpdate={updateProductOption} />
+                                    <KnoxOptions theme={theme} product={p} productIndex={idx} onUpdate={updateProductOption} />
                                 )}
                                 {(p.series === 'Wink' || p.series === 'Hoopz') && (
-                                    <Data.WinkHoopzOptions theme={theme} product={p} productIndex={idx} onUpdate={updateProductOption} />
+                                    <WinkHoopzOptions theme={theme} product={p} productIndex={idx} onUpdate={updateProductOption} />
                                 )}
                             </div>
                         ))}
 
+                        {/* FIX: Replaced AutoCompleteCombobox with the simpler PortalNativeSelect */}
                         {availableSeries.length > 0 && (
-                            <AutoCompleteCombobox
+                            <PortalNativeSelect
                                 value=""
-                                onChange={val => addProduct(val)}
+                                onChange={(e) => addProduct(e.target.value)}
                                 placeholder="+ Add a Product..."
-                                options={availableSeries}
+                                options={availableSeries.map(series => ({ label: series, value: series }))}
                                 theme={theme}
-                                resetOnSelect
                             />
                         )}
                     </div>
@@ -5307,7 +5294,6 @@ export const NewLeadScreen = ({
     );
 };
 
-
 export const KnoxOptions = ({ theme, product, productIndex, onUpdate }) => {
     return (
         <div className="mt-3 pt-3 border-t" style={{ borderColor: theme.colors.border }}>
@@ -5325,13 +5311,49 @@ export const KnoxOptions = ({ theme, product, productIndex, onUpdate }) => {
     );
 };
 
-
-
 export const VisionOptions = ({ theme, product, productIndex, onUpdate }) => {
+    // This handler will now manage both Laminates and Veneers
+    const handleMaterialToggle = (material) => {
+        const currentMaterials = product.materials || [];
+        const nextMaterials = currentMaterials.includes(material)
+            ? currentMaterials.filter(m => m !== material)
+            : [...currentMaterials, material];
+        // The 'material' field is updated with the new array of selected materials.
+        onUpdate(productIndex, 'materials', nextMaterials);
+    };
+
+    // A small sub-component for rendering the toggle buttons
+    const MaterialButtonGroup = ({ label, options }) => (
+        <div>
+            <p className="text-sm font-semibold mb-2" style={{ color: theme.colors.textSecondary }}>{label}</p>
+            <div className="flex flex-wrap gap-2">
+                {options.map(opt => {
+                    const isSelected = product.materials?.includes(opt);
+                    return (
+                        <button
+                            key={opt}
+                            type="button"
+                            onClick={() => handleMaterialToggle(opt)}
+                            className="px-3 py-1.5 text-sm rounded-full font-medium transition-colors border"
+                            style={{
+                                backgroundColor: isSelected ? theme.colors.accent : theme.colors.surface,
+                                color: isSelected ? theme.colors.surface : theme.colors.textPrimary,
+                                borderColor: isSelected ? theme.colors.accent : theme.colors.border,
+                            }}
+                        >
+                            {opt}
+                        </button>
+                    )
+                })}
+            </div>
+        </div>
+    );
+
     return (
-        <div className="space-y-3 mt-3 pt-3 border-t" style={{ borderColor: theme.colors.border }}>
-            <div className="flex items-center justify-between">
-                <label className="text-sm font-medium" style={{ color: theme.colors.textSecondary }}>Glass doors?</label>
+        <div className="space-y-4 mt-3 pt-3 border-t" style={{ borderColor: theme.colors.border }}>
+            {/* Cleaner Checkbox Layout */}
+            <div className="flex items-center justify-between p-3 rounded-xl" style={{ backgroundColor: theme.colors.background }}>
+                <label className="font-semibold" style={{ color: theme.colors.textPrimary }}>Glass Doors?</label>
                 <input
                     type="checkbox"
                     className="h-5 w-5 rounded-md border-2"
@@ -5340,19 +5362,12 @@ export const VisionOptions = ({ theme, product, productIndex, onUpdate }) => {
                     onChange={(e) => onUpdate(productIndex, 'hasGlassDoors', e.target.checked)}
                 />
             </div>
-            {/* Now uses the reliable NativeSelect */}
-            <NativeSelect
-                label="Material?"
-                value={product.material}
-                onChange={(e) => onUpdate(productIndex, 'material', e.target.value)}
-                placeholder="Select a material"
-                theme={theme}
-                options={[
-                    { value: 'Unknown', label: 'Unknown' },
-                    ...Data.JSI_LAMINATES.map(l => ({ value: l, label: l })),
-                    ...Data.JSI_VENEERS.map(v => ({ value: v, label: v })),
-                ]}
-            />
+
+            {/* Grouped Toggle Buttons for Materials */}
+            <div className="space-y-4">
+                <MaterialButtonGroup label="Laminate" options={Data.JSI_LAMINATES} />
+                <MaterialButtonGroup label="Veneer" options={Data.JSI_VENEERS} />
+            </div>
         </div>
     );
 };
@@ -5360,7 +5375,8 @@ export const VisionOptions = ({ theme, product, productIndex, onUpdate }) => {
 export const WinkHoopzOptions = ({ theme, product, productIndex, onUpdate }) => {
     return (
         <div className="mt-3 pt-3 border-t" style={{ borderColor: theme.colors.border }}>
-            <NativeSelect
+            {/* Swapped NativeSelect for the working PortalNativeSelect */}
+            <PortalNativeSelect
                 label="Select poly"
                 value={product.polyColor}
                 onChange={(e) => onUpdate(productIndex, 'polyColor', e.target.value)}
@@ -5389,7 +5405,6 @@ const resourceIcons = {
     'Social Media': Share2,
     'Lead Times': Hourglass,
 };
-
 
 export const ResourcesScreen = ({ theme, onNavigate }) => {
     return (
@@ -5429,24 +5444,8 @@ export const ResourcesScreen = ({ theme, onNavigate }) => {
             </div>
         </div>
     );
-}; export const PRODUCTS_CATEGORIES_DATA = Object.entries(Data.PRODUCT_DATA).map(([key, value]) => {
-    const images = [];
-    // Ensure we always get two images or placeholders
-    for (let i = 0; i < 2; i++) {
-        if (value.data[i] && value.data[i].image) {
-            images.push(value.data[i].image);
-        } else {
-            // Fallback placeholder
-            images.push('https://placehold.co/100x100/EEE/777?text=JSI');
-        }
-    }
+};
 
-    return {
-        name: value.title,
-        nav: `products/category/${key}`,
-        images: images,
-    };
-}).sort((a, b) => a.name.localeCompare(b.name));
 
 export const ProjectDetailModal = ({ opportunity, onClose, theme, onUpdate }) => {
     const [editedOpp, setEditedOpp] = useState(null);
@@ -6021,7 +6020,6 @@ export const CommunityScreen = ({ theme, onNavigate, openCreateContentModal, pos
     );
 };
 
-
 export const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSettings }) => {
     const [selectedCategory, setSelectedCategory] = useState('tfl');
 
@@ -6301,6 +6299,7 @@ export const ReplacementsScreen = ({ theme, setSuccessMessage, onNavigate }) => 
         </>
     );
 };
+
 const SettingsScreen = ({ theme, onSave, userSettings, setUserSettings }) => {
     // This local state is now safely initialized with the userSettings prop
     const [localSettings, setLocalSettings] = useState(userSettings);
@@ -6421,6 +6420,7 @@ export const MemberCard = React.memo(({ user, theme, isCurrentUser, onConfirmPro
         </div>
     );
 });
+
 export const AddUserModal = ({ show, onClose, onAddUser, theme, roleToAdd }) => {
     const [newUser, setNewUser] = useState(Data.EMPTY_USER);
 
@@ -6612,7 +6612,6 @@ export const MyProjectDetailModal = ({ project, onClose, theme }) => {
     );
 };
 
-
 export const AddNewInstallScreen = ({ theme, setSuccessMessage, onAddInstall, onBack }) => {
     const [projectName, setProjectName] = useState('');
     const [location, setLocation] = useState('');
@@ -6739,7 +6738,6 @@ export const AddNewInstallScreen = ({ theme, setSuccessMessage, onAddInstall, on
         </form>
     );
 };
-
 
 const HelpScreen = ({ theme }) => (
     <>

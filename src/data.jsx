@@ -412,7 +412,6 @@ export const SAMPLE_PRODUCTS = [
     { id: 'wood-maple', category: 'solidwood', name: 'Maple Wood', color: '#deb887' }
 ];
 
-
 export const JSI_MODELS = [{ id: 'VST2430SC', name: 'Storage Cabinet', series: 'Vision', isUpholstered: false }, { id: 'BRY2001', name: 'Desk Chair', series: 'Bryn', isUpholstered: true }, { id: 'TBCONF8', name: 'Conference Table', series: 'Tablet', isUpholstered: false }, { id: 'SIDETBL-SM', name: 'Side Table', series: 'Americana', isUpholstered: false }, { id: 'LNGCHR-OTT', name: 'Lounge Chair', series: 'Caav', isUpholstered: true },];
 
 const generateCommissionData = () => {
@@ -443,6 +442,7 @@ export const STATUS_COLORS = {
     'Shipping': '#878F95',       // Teal
     'Delivered': '#689a5e',      // Success Green
 };
+
 export const COMMISSION_RATES_TABLE_DATA = { standard: [{ discount: '5/10', rep: '12%', spiff: '3%' }, { discount: '50/10/5', rep: '11%', spiff: '3%' }, { discount: '50/20', rep: '10%', spiff: '3%' }, { discount: '50/20/1', rep: '9%', spiff: '3%' }, { discount: '50/20/2', rep: '9%', spiff: '3%' }, { discount: '50/20/3', rep: '8%', spiff: '3%' }, { discount: '50/20/4', rep: '8%', spiff: '3%' }, { discount: '50/20/5', rep: '7%', spiff: '3%' }, { discount: '50/20/6', rep: '7%', spiff: '3%' }, { discount: '50/20/7', rep: '6%', spiff: '3%' }, { discount: '50/20/8', rep: '6%', spiff: '3%' }, { discount: '50/20/9', rep: '6%', spiff: '3%' }, { discount: '50/20/10', rep: '5%', spiff: { value: '3%', note: '*if > $100k net' } },], contract: [{ discount: 'GSA', rep: '5%', spiff: '3%' }, { discount: 'Omnia', rep: '3.8-3.9%', spiff: '2.5%' }, { discount: 'Premier', rep: '4.1-4.3%', spiff: '2%' }, { discount: 'TIPS', rep: '3.6-3.8%', spiff: 'N/A' },], split: [{ territory: 'Specifying', percentage: 70 }, { territory: 'Ordering', percentage: 30 },] };
 
 export const CONTRACTS_DATA = { omnia: { name: "Omnia", tiers: [{ off: "54% off (Dock Delivery)", dealer: "15% dealer commission", rep: "3.91% rep commission" }, { off: "53% off (Dock Delivery)", dealer: "17% dealer commission", rep: "3.83% rep commission" }, { off: "52% off (Dock Delivery)", dealer: "18% dealer commission", rep: "3.75% rep commission" },], margin: ["54/15 = 60.90%", "53/17 = 60.99%", "52/18 = 60.64%"], url: "https://webresources.jsifurniture.com/production/uploads/j_contracts_tcpn.pdf" }, tips: { name: "TIPS", tiers: [{ off: "51% off (Delivery and Installed)", dealer: "24% dealer commission", rep: "3.67% rep commission" }, { off: "53% off (Dock Delivery)", dealer: "20% dealer commission", rep: "3.83% rep commission" },], note: "Spiff is not allowed.", url: "https://webresources.jsifurniture.com/production/uploads/jsi_contracts_tips_taps.pdf" }, premier: { name: "Premier", tiers: [{ off: "56% off (up to $500k)", dealer: "14% dealer commission", rep: "4.09% rep commission" }, { off: "57% off ($500k-750k)", dealer: "13% dealer commission", rep: "4.19% rep commission" }, { off: "58% off ($750k+)", dealer: "12% dealer commission", rep: "4.29% rep commission" },], url: "https://webresources.jsifurniture.com/production/uploads/jsi_contracts_premier.pdf" } };
@@ -554,7 +554,24 @@ export const PRODUCT_DATA = {
     },
 };
 
-export const PRODUCTS_CATEGORIES_DATA = Object.entries(PRODUCT_DATA).map(([key, value]) => ({ name: value.title, nav: `products/category/${key}`, images: value.data.length > 0 ? value.data.slice(0, 2).map(p => p.image) : ['https://placehold.co/100x100/EEE/777?text=JSI'] })).sort((a, b) => a.name.localeCompare(b.name));
+export const PRODUCTS_CATEGORIES_DATA = Object.entries(PRODUCT_DATA).map(([key, value]) => {
+    const images = [];
+    // Ensure we always get two images or placeholders
+    for (let i = 0; i < 2; i++) {
+        if (value.data[i] && value.data[i].image) {
+            images.push(value.data[i].image);
+        } else {
+            // Fallback placeholder
+            images.push('https://placehold.co/100x100/EEE/777?text=JSI');
+        }
+    }
+
+    return {
+        name: value.title,
+        nav: `products/category/${key}`,
+        images: images,
+    };
+}).sort((a, b) => a.name.localeCompare(b.name));
 
 export const CASEGOODS_COMPETITIVE_DATA = { typicals: [{ id: 'vision-1', name: 'Vision', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_vision_config_000002.jpg', url: 'https://www.jsifurniture.com/product/vision', basePrice: { laminate: 7200, veneer: 8600 }, }, { id: 'vision-2', name: 'Vision', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_vision_config_000007.jpg', url: 'https://www.jsifurniture.com/product/vision', basePrice: { laminate: 7200, veneer: 8600 }, }, { id: 'vision-3', name: 'Vision', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_vision_config_000009.jpg', url: 'https://www.jsifurniture.com/product/vision', basePrice: { laminate: 7200, veneer: 8600 }, }, { id: 'vision-4', name: 'Vision', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_vision_config_00000012.jpg', url: 'https://www.jsifurniture.com/product/vision', basePrice: { laminate: 7200, veneer: 8600 }, }, { id: 'vision-5', name: 'Vision', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_vision_config_0023_6DHmfyb.jpg', url: 'https://www.jsifurniture.com/product/vision', basePrice: { laminate: 7200, veneer: 8600 }, }, { id: 'flux-1', name: 'Flux', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_flux_config_00008.jpg', url: 'https://www.jsifurniture.com/product/flux', basePrice: { laminate: 5800, veneer: 7200 }, },], competitors: [{ name: 'Kimball Priority', factor: 1.15 }, { name: 'OFS Pulse', factor: 1.10 }, { name: 'Indiana Canvas', factor: 0.95 },], };
 
