@@ -44,6 +44,8 @@ function App() {
     // --- COMMUNITY & AI STATE ---
     const [posts, setPosts] = useState(INITIAL_POSTS);
     const [polls, setPolls] = useState(INITIAL_POLLS);
+    const [likedPosts, setLikedPosts] = useState({}); // Stores { postId: true } for liked posts
+    const [pollChoices, setPollChoices] = useState({}); // Stores { pollId: chosenOptionId } for poll selections
     const [showCreateContentModal, setShowCreateContentModal] = useState(false);
     const [aiResponse, setAiResponse] = useState('');
     const [isAILoading, setIsAILoading] = useState(false);
@@ -186,6 +188,35 @@ function App() {
     }, []);
     const handleCloseAIDropdown = useCallback(() => { setShowAIDropdown(false); }, []);
 
+    // New handlers for managing likes and poll choices
+    const handleToggleLike = useCallback((postId) => {
+        setLikedPosts(prev => {
+            const newLikedPosts = { ...prev };
+            if (newLikedPosts[postId]) {
+                delete newLikedPosts[postId];
+            } else {
+                newLikedPosts[postId] = true;
+            }
+            return newLikedPosts;
+        });
+        // You might also want to update the 'likes' count on the post object itself for immediate UI reflection
+        setPosts(prevPosts =>
+            prevPosts.map(post =>
+                post.id === postId
+                    ? { ...post, likes: likedPosts[postId] ? post.likes - 1 : post.likes + 1 }
+                    : post
+            )
+        );
+    }, [likedPosts]); // Added likedPosts to dependency array
+
+    const handlePollVote = useCallback((pollId, optionId) => {
+        setPollChoices(prev => ({
+            ...prev,
+            [pollId]: optionId,
+        }));
+    }, []);
+
+
     const handleTouchStart = (e) => {
         if (isTransitioning || navigationHistory.length <= 1) return;
         const touchX = e.touches[0].clientX;
@@ -267,7 +298,7 @@ function App() {
             case 'settings': return <ScreenComponent {...commonProps} setUserSettings={setUserSettings} onSave={handleSaveSettings} />;
             case 'members': return <ScreenComponent {...commonProps} members={members} setMembers={setMembers} currentUserId={currentUserId} />;
             case 'projects': return <ScreenComponent {...commonProps} opportunities={opportunities} setSelectedOpportunity={setSelectedOpportunity} myProjects={myProjects} setSelectedProject={setSelectedProject} />;
-            case 'community': return <ScreenComponent {...commonProps} openCreateContentModal={() => setShowCreateContentModal(true)} posts={posts} polls={polls} />;
+            case 'community': return <ScreenComponent {...commonProps} openCreateContentModal={() => setShowCreateContentModal(true)} posts={posts} polls={polls} likedPosts={likedPosts} onToggleLike={handleToggleLike} pollChoices={pollChoices} onPollVote={handlePollVote} />;
             case 'new-lead': return <ScreenComponent {...commonProps} onSuccess={handleNewLeadSuccess} designFirms={designFirms} setDesignFirms={setDesignFirms} dealers={dealers} setDealers={setDealers} />;
             case 'add-new-install': return <AddNewInstallScreen {...commonProps} onAddInstall={handleAddNewInstall} />;
             default: return <ScreenComponent {...commonProps} />;

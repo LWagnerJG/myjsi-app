@@ -1313,6 +1313,59 @@ const ContractsScreen = ({ theme, onNavigate }) => {
     );
 };
 
+// New helper component for an editable person row
+const EditablePersonRow = ({ person, theme, onUpdateRole, onRemovePerson }) => {
+    const [isEditing, setIsEditing] = useState(false); // State to control editing mode
+
+    const roleOptions = useMemo(() => [
+        { label: 'Administrator', value: 'Administrator' },
+        { label: 'Admin/Sales Support', value: 'Admin/Sales Support' },
+        { label: 'Sales', value: 'Sales' },
+        { label: 'Designer', value: 'Designer' },
+        { label: 'Sales/Designer', value: 'Sales/Designer' },
+        { label: 'Installer', value: 'Installer' }
+    ], []);
+
+    const handleRoleChange = (e) => {
+        onUpdateRole(person.name, e.target.value);
+        setIsEditing(false); // Close editing mode after selection
+    };
+
+    return (
+        <button
+            onClick={() => setIsEditing(!isEditing)} // Make the whole row clickable to toggle editing
+            className="w-full flex flex-col items-start px-3 py-2 rounded-full transition-all duration-200"
+            style={{
+                backgroundColor: isEditing ? theme.colors.subtle : 'transparent', // Subtle background when editing, transparent when not
+            }}
+        >
+            <div className="flex items-center justify-between w-full">
+                <span className="font-semibold text-base" style={{ color: theme.colors.textPrimary }}>
+                    {person.name}
+                </span>
+                {person.status === 'pending' && <Hourglass className="w-3 h-3 text-amber-500 ml-2" />}
+            </div>
+
+            {isEditing && (
+                <div className="flex items-center space-x-2 animate-fade-in w-full mt-2">
+                    <PortalNativeSelect
+                        label="" // Keep label empty for subliminal style
+                        value={person.roleLabel}
+                        onChange={handleRoleChange}
+                        options={roleOptions}
+                        theme={theme}
+                        placeholder="Change Role"
+                    />
+                    <button onClick={(e) => { e.stopPropagation(); onRemovePerson(person.name); }} className="p-2 rounded-full hover:bg-red-500/10">
+                        <Trash2 className="w-4 h-4 text-red-500" />
+                    </button>
+                </div>
+            )}
+        </button>
+    );
+};
+
+
 export const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage }) => {
     const [dealers, setDealers] = useState(Data.DEALER_DIRECTORY_DATA);
     const [searchTerm, setSearchTerm] = useState('');
@@ -1322,7 +1375,7 @@ export const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage }) =
     const filterMenuRef = useRef(null);
     const [pendingDiscountChange, setPendingDiscountChange] = useState(null);
     const [showAddPersonModal, setShowAddPersonModal] = useState(false);
-    const [newPerson, setNewPerson] = useState({ firstName: '', lastName: '', email: '', role: 'salespeople' });
+    const [newPerson, setNewPerson] = useState({ firstName: '', lastName: '', email: '', role: 'Sales' }); // Default role label
 
     useEffect(() => {
         const handleClickOutside = (e) => {
@@ -1370,43 +1423,131 @@ export const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage }) =
     const handleAddPerson = (e) => {
         e.preventDefault();
         if (!selectedDealer) return;
-        const { firstName, lastName, email, role } = newPerson;
+        const { firstName, lastName, email, role } = newPerson; // role here is the label from the dropdown
         if (!firstName || !lastName || !email) return;
 
-        const person = { name: `${firstName} ${lastName}`, status: 'pending' };
+        // Map the selected role label back to the internal data structure key
+        const roleKeyMap = {
+            'Administrator': 'administration',
+            'Admin/Sales Support': 'administration', // Grouping under administration for simplicity based on provided data structure
+            'Sales': 'salespeople',
+            'Designer': 'designers',
+            'Sales/Designer': 'salespeople', // Grouping under salespeople for simplicity
+            'Installer': 'installers'
+        };
+        const targetRoleKey = roleKeyMap[role] || 'salespeople'; // Default to 'salespeople' if something goes wrong
+
+        const person = { name: `${firstName} ${lastName}`, status: 'pending', roleLabel: role, roleKey: targetRoleKey }; // Store both label and key if needed
         setDealers(curr =>
             curr.map(d =>
                 d.id === selectedDealer.id
-                    ? { ...d, [role]: [...(d[role] || []), person] }
+                    ? { ...d, [targetRoleKey]: [...(d[targetRoleKey] || []), person] }
                     : d
             )
         );
         setSelectedDealer(d =>
             d.id === selectedDealer.id
-                ? { ...d, [newPerson.role]: [...(d[newPerson.role] || []), person] }
+                ? { ...d, [targetRoleKey]: [...(d[targetRoleKey] || []), person] }
                 : d
         );
         setShowAddPersonModal(false);
-        setNewPerson({ firstName: '', lastName: '', email: '', role: 'salespeople' });
+        setNewPerson({ firstName: '', lastName: '', email: '', role: 'Sales' }); // Reset role to its default label
         setSuccessMessage(`Invitation sent to ${email}`);
         setTimeout(() => setSuccessMessage(""), 2000);
     };
 
-    const ModalSectionHeader = ({ title }) =>
-        <p className="font-bold text-sm" style={{ color: theme.colors.textSecondary }}>{title}</p>;
+    const handleUpdatePersonRole = useCallback((personName, newRoleLabel) => {
+        if (!selectedDealer) return;
 
-    const StaffSection = ({ title, members }) => (
-        <div>
-            <h4 className="font-semibold" style={{ color: theme.colors.textPrimary }}>{title}</h4>
-            <div className="text-sm space-y-1 mt-1">
+        // Find the person and update their role in the local selectedDealer state
+        const updatedSelectedDealer = { ...selectedDealer };
+        let found = false;
+
+        // Iterate through all role categories to find and update the person
+        ['salespeople', 'designers', 'administration', 'installers'].forEach(category => {
+            updatedSelectedDealer[category] = (updatedSelectedDealer[category] || []).map(p => {
+                if (p.name === personName) {
+                    found = true;
+                    // Map newRoleLabel back to roleKey for internal data structure
+                    const newRoleKey = {
+                        'Administrator': 'administration',
+                        'Admin/Sales Support': 'administration',
+                        'Sales': 'salespeople',
+                        'Designer': 'designers',
+                        'Sales/Designer': 'salespeople',
+                        'Installer': 'installers'
+                    }[newRoleLabel] || 'salespeople';
+
+                    // If the role category changes, this person needs to be moved.
+                    // For simplicity in this demo, we'll keep them in the original category but update their label.
+                    // A full implementation might involve removing from one array and adding to another.
+                    return { ...p, roleLabel: newRoleLabel, roleKey: newRoleKey };
+                }
+                return p;
+            });
+        });
+
+        if (found) {
+            // Update the main dealers list state and then setSelectedDealer to trigger re-render
+            setDealers(prevDealers => prevDealers.map(d =>
+                d.id === updatedSelectedDealer.id ? updatedSelectedDealer : d
+            ));
+            setSelectedDealer(updatedSelectedDealer); // Update selectedDealer to reflect changes
+            setSuccessMessage("Role Updated!");
+            setTimeout(() => setSuccessMessage(""), 1000);
+        }
+
+    }, [selectedDealer, setDealers, setSuccessMessage]);
+
+    const handleRemovePerson = useCallback((personName) => {
+        if (!selectedDealer) return;
+
+        const updatedSelectedDealer = { ...selectedDealer };
+        let removed = false;
+
+        // Remove the person from their category
+        ['salespeople', 'designers', 'administration', 'installers'].forEach(category => {
+            if (!removed && updatedSelectedDealer[category]) {
+                const initialLength = updatedSelectedDealer[category].length;
+                updatedSelectedDealer[category] = updatedSelectedDealer[category].filter(p => p.name !== personName);
+                if (updatedSelectedDealer[category].length < initialLength) {
+                    removed = true;
+                }
+            }
+        });
+
+        if (removed) {
+            setDealers(prevDealers => prevDealers.map(d =>
+                d.id === updatedSelectedDealer.id ? updatedSelectedDealer : d
+            ));
+            setSelectedDealer(updatedSelectedDealer);
+            setSuccessMessage("Person Removed!");
+            setTimeout(() => setSuccessMessage(""), 1000);
+        }
+    }, [selectedDealer, setDealers, setSuccessMessage]);
+
+
+    // Redefined ModalSectionHeader for uniform styling
+    const ModalSectionHeader = ({ title, theme }) =>
+        <p className="font-bold text-lg pt-4 pb-2" style={{ color: theme.colors.textPrimary }}>{title}</p>;
+
+
+    // StaffSection now renders EditablePersonRow for each member
+    const StaffSection = ({ title, members, onUpdateRole, onRemovePerson, theme }) => (
+        <div className="space-y-2">
+            <ModalSectionHeader title={title} theme={theme} />
+            <div className="text-sm space-y-1">
                 {members && members.length > 0
                     ? members.map(m => (
-                        <div key={m.name} className="flex items-center" style={{ color: theme.colors.textSecondary }}>
-                            {m.name}
-                            {m.status === 'pending' && <Hourglass className="w-3 h-3 ml-2 text-amber-500" />}
-                        </div>
+                        <EditablePersonRow
+                            key={m.name}
+                            person={m}
+                            theme={theme}
+                            onUpdateRole={onUpdateRole}
+                            onRemovePerson={onRemovePerson}
+                        />
                     ))
-                    : <p className="text-sm" style={{ color: theme.colors.textSecondary }}>None listed.</p>
+                    : <p className="text-sm px-3 py-2" style={{ color: theme.colors.textSecondary }}>None listed.</p>
                 }
             </div>
         </div>
@@ -1472,11 +1613,9 @@ export const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage }) =
                 ))}
             </div>
 
-            {/* FIX: The modal now gets the dealer name passed into its `title` prop */}
             <Modal show={!!selectedDealer} onClose={() => setSelectedDealer(null)} title={selectedDealer?.name || ''} theme={theme}>
                 {selectedDealer && (
                     <div className="space-y-4">
-                        {/* The header is now handled by the Modal component itself */}
                         <div className="flex justify-between items-start">
                             <p className="text-sm" style={{ color: theme.colors.textSecondary }}>
                                 {selectedDealer.address}
@@ -1489,57 +1628,59 @@ export const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage }) =
                             </button>
                         </div>
 
-                        <div className="border-t border-b py-4 space-y-4" style={{ borderColor: theme.colors.subtle }}>
-                            <div>
-                                {/* FIX: Replaced FormInput with the correct PortalNativeSelect component */}
-                                <PortalNativeSelect
-                                    label="Daily Discount"
-                                    theme={theme}
-                                    value={selectedDealer.dailyDiscount}
-                                    onChange={e => setPendingDiscountChange({
-                                        dealerId: selectedDealer.id,
-                                        newDiscount: e.target.value
-                                    })}
-                                    options={Data.DAILY_DISCOUNT_OPTIONS.map(opt => ({ label: opt, value: opt }))}
-                                />
-                            </div>
-                            <div>
-                                <ModalSectionHeader title="Recent Orders" />
-                                {selectedDealer.recentOrders.length > 0 ? (
-                                    <div className="space-y-2 mt-2">
-                                        {selectedDealer.recentOrders.map(order => (
-                                            <div
-                                                key={order.id}
-                                                className="flex justify-between items-center text-sm p-2 rounded-md"
-                                                style={{ backgroundColor: theme.colors.subtle }}
-                                            >
-                                                <div>
-                                                    <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>
-                                                        #{order.id}
-                                                    </span>
-                                                    <p className="text-xs" style={{ color: theme.colors.textSecondary }}>
-                                                        Shipped: {new Date(order.shippedDate).toLocaleDateString()}
-                                                    </p>
-                                                </div>
-                                                <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>
-                                                    ${order.amount.toLocaleString()}
-                                                </span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <p className="text-sm mt-1" style={{ color: theme.colors.textSecondary }}>
-                                        No recent orders.
-                                    </p>
-                                )}
-                            </div>
+                        {/* Daily Discount Section */}
+                        <div className="space-y-2">
+                            <ModalSectionHeader title="Daily Discount" theme={theme} /> {/* Use uniform header */}
+                            <PortalNativeSelect
+                                label="" // Keep label empty for subliminal style
+                                theme={theme}
+                                value={selectedDealer.dailyDiscount}
+                                onChange={e => setPendingDiscountChange({
+                                    dealerId: selectedDealer.id,
+                                    newDiscount: e.target.value
+                                })}
+                                options={Data.DAILY_DISCOUNT_OPTIONS.map(opt => ({ label: opt, value: opt }))}
+                            />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <StaffSection title="Salespeople" members={selectedDealer.salespeople} />
-                            <StaffSection title="Designers" members={selectedDealer.designers} />
-                            <StaffSection title="Administration" members={selectedDealer.administration} />
-                            <StaffSection title="Installers" members={selectedDealer.installers} />
+                        {/* Recent Orders Section */}
+                        <div className="space-y-2">
+                            <ModalSectionHeader title="Recent Orders" theme={theme} /> {/* Use uniform header */}
+                            {selectedDealer.recentOrders.length > 0 ? (
+                                <div className="space-y-2 mt-2">
+                                    {selectedDealer.recentOrders.map(order => (
+                                        <div
+                                            key={order.id}
+                                            className="flex justify-between items-center text-sm p-2 rounded-md"
+                                            style={{ backgroundColor: theme.colors.subtle }}
+                                        >
+                                            <div>
+                                                <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>
+                                                    #{order.id}
+                                                </span>
+                                                <p className="text-xs" style={{ color: theme.colors.textSecondary }}>
+                                                    Shipped: {new Date(order.shippedDate).toLocaleDateString()}
+                                                </p>
+                                            </div>
+                                            <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>
+                                                ${order.amount.toLocaleString()}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-sm mt-1" style={{ color: theme.colors.textSecondary }}>
+                                    No recent orders.
+                                </p>
+                            )}
+                        </div>
+
+                        {/* People Sections (Salespeople, Designers, Admin, Installers) */}
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-4">
+                            <StaffSection title="Salespeople" members={selectedDealer.salespeople} onUpdateRole={handleUpdatePersonRole} onRemovePerson={handleRemovePerson} theme={theme} />
+                            <StaffSection title="Designers" members={selectedDealer.designers} onUpdateRole={handleUpdatePersonRole} onRemovePerson={handleRemovePerson} theme={theme} />
+                            <StaffSection title="Administration" members={selectedDealer.administration} onUpdateRole={handleUpdatePersonRole} onRemovePerson={handleRemovePerson} theme={theme} />
+                            <StaffSection title="Installers" members={selectedDealer.installers} onUpdateRole={handleUpdatePersonRole} onRemovePerson={handleRemovePerson} theme={theme} />
                         </div>
                     </div>
                 )}
@@ -1551,8 +1692,8 @@ export const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage }) =
                     <span className="font-bold">{pendingDiscountChange?.newDiscount}</span>?
                 </p>
                 <div className="flex justify-end space-x-3 pt-4">
-                    <button onClick={() => setPendingDiscountChange(null)} className="font-bold py-2 px-5 rounded-lg" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }} > Cancel </button>
-                    <button onClick={confirmDiscountChange} className="font-bold py-2 px-5 rounded-lg text-white" style={{ backgroundColor: theme.colors.accent }} > Save </button>
+                    <button onClick={() => setPendingDiscountChange(null)} className="font-bold py-2 px-5 rounded-lg" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }}>Cancel</button>
+                    <button onClick={confirmDiscountChange} className="font-bold py-2 px-5 rounded-lg text-white" style={{ backgroundColor: theme.colors.accent }}>Save</button>
                 </div>
             </Modal>
 
@@ -1561,18 +1702,32 @@ export const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage }) =
                     <FormInput label="First Name" value={newPerson.firstName} onChange={e => setNewPerson(p => ({ ...p, firstName: e.target.value }))} theme={theme} required />
                     <FormInput label="Last Name" value={newPerson.lastName} onChange={e => setNewPerson(p => ({ ...p, lastName: e.target.value }))} theme={theme} required />
                     <FormInput label="Email" type="email" value={newPerson.email} onChange={e => setNewPerson(p => ({ ...p, email: e.target.value }))} theme={theme} required />
-                    <FormInput label="Role" type="select" value={newPerson.role} onChange={e => setNewPerson(p => ({ ...p, role: e.target.value }))} theme={theme} options={[{ label: 'Salesperson', value: 'salespeople' }, { label: 'Designer', value: 'designers' }, { label: 'Admin', value: 'administration' }, { label: 'Installer', value: 'installers' }]} />
+                    <PortalNativeSelect
+                        label="Role"
+                        value={newPerson.role}
+                        onChange={e => setNewPerson(p => ({ ...p, role: e.target.value }))}
+                        theme={theme}
+                        options={[
+                            { label: 'Administrator', value: 'Administrator' },
+                            { label: 'Admin/Sales Support', value: 'Admin/Sales Support' },
+                            { label: 'Sales', value: 'Sales' },
+                            { label: 'Designer', value: 'Designer' },
+                            { label: 'Sales/Designer', value: 'Sales/Designer' },
+                            { label: 'Installer', value: 'Installer' }
+                        ]}
+                    />
                     <div className="pt-2 text-center">
                         <p className="text-xs mb-2" style={{ color: theme.colors.textSecondary }}>
                             This will send an invitation to the user to join the MyJSI app.
                         </p>
-                        <button type="submit" className="w-full font-bold py-3 px-6 rounded-lg text-white" style={{ backgroundColor: theme.colors.accent }} > Send Invite </button>
+                        <button type="submit" className="w-full font-bold py-3 px-6 rounded-full text-white" style={{ backgroundColor: theme.colors.accent }} > Send Invite </button>
                     </div>
                 </form>
             </Modal>
         </>
     );
 };
+
 
 const CommissionRatesScreen = ({ theme }) => {
     const rows = useMemo(() => {
@@ -3245,17 +3400,19 @@ export const ProfileMenu = ({ show, onClose, onNavigate, toggleTheme, theme, isD
     );
 };
 
-const PostCard = ({ post, theme }) => {
+export const PostCard = ({ post, theme, isLiked, onToggleLike }) => {
     const { user, timeAgo, text, image, likes = 0, comments = [] } = post;
 
-    const [liked, setLiked] = useState(false);
-    const [count, setCount] = useState(likes);
+    // `liked` state is now a prop `isLiked`
+    // `count` state is now based on `likes` prop from `post` object, updated in App.jsx
     const [open, setOpen] = useState(comments && comments.length > 0);
     const [input, setInput] = useState('');
     const [list, setList] = useState(comments);
     const [menu, setMenu] = useState(false);
 
-    const toggleLike = () => { setLiked(!liked); setCount((c) => c + (liked ? -1 : 1)); };
+    const toggleLike = () => {
+        onToggleLike(post.id); // Call the prop function to update like status in parent
+    };
     const addCmt = () => { if (!input.trim()) return; setList([...list, { id: Date.now(), name: 'You', text: input }]); setInput(''); };
 
     const sharePost = async () => {
@@ -3299,9 +3456,9 @@ const PostCard = ({ post, theme }) => {
 
             <div className="flex items-center space-x-6">
                 <button onClick={toggleLike} className="flex items-center space-x-1">
-                    <Heart className={`w-5 h-5 transition-colors ${liked ? 'fill-current' : 'stroke-2'}`}
-                        style={{ color: liked ? theme.colors.accent : theme.colors.textSecondary, fill: liked ? theme.colors.accent : 'none' }} />
-                    <span className="text-sm" style={{ color: theme.colors.textSecondary }}>{count}</span>
+                    <Heart className={`w-5 h-5 transition-colors ${isLiked ? 'fill-current' : 'stroke-2'}`}
+                        style={{ color: isLiked ? theme.colors.accent : theme.colors.textSecondary, fill: isLiked ? theme.colors.accent : 'none' }} />
+                    <span className="text-sm" style={{ color: theme.colors.textSecondary }}>{likes}</span>
                 </button>
                 <button onClick={() => setOpen(!open)} className="flex items-center space-x-1">
                     <MessageSquare className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
@@ -3328,11 +3485,9 @@ const PostCard = ({ post, theme }) => {
     );
 };
 
-export const PollCard = ({ poll, theme }) => {
+export const PollCard = ({ poll, theme, userChoice, onVote }) => {
     const { user, timeAgo, question, options } = poll;
-    const [choice, setChoice] = useState(null);
-
-    // FIX: Re-added the menu state and share functionality.
+    // `choice` state is now a prop `userChoice`
     const [menu, setMenu] = useState(false);
     const menuRef = useRef(null);
 
@@ -3368,21 +3523,21 @@ export const PollCard = ({ poll, theme }) => {
     };
 
     const totalVotes = useMemo(() => {
-        if (choice === null) return 0;
+        if (userChoice === null || userChoice === undefined) return 0; // If no user choice, no votes counted for demo
         // In a real app, you'd get updated vote counts from a server.
-        // For this demo, we'll just add 1 to the chosen option.
+        // For this demo, we'll just add 1 to the chosen option if the user has chosen it.
         return options.reduce((sum, o) => {
             let voteCount = o.votes;
-            if (o.id === choice) {
+            if (o.id === userChoice) {
                 voteCount += 1;
             }
             return sum + voteCount;
         }, 0);
-    }, [choice, options]);
+    }, [userChoice, options]);
 
-    const handleVote = (optionId) => {
-        if (choice === null) {
-            setChoice(optionId);
+    const handleUserVote = (optionId) => {
+        if (userChoice === null || userChoice === undefined) { // Only allow voting if no choice has been made
+            onVote(poll.id, optionId); // Call the prop function to update choice in parent
         }
     };
 
@@ -3414,17 +3569,16 @@ export const PollCard = ({ poll, theme }) => {
 
             <div className="space-y-2">
                 {options.map((option) => {
-                    const hasVoted = choice !== null;
-                    const voteCount = choice === option.id ? option.votes + 1 : option.votes;
-                    const percentage = hasVoted ? Math.round((voteCount / totalVotes) * 100) : 0;
-                    const isChosen = choice === option.id;
+                    const hasVoted = userChoice !== null && userChoice !== undefined;
+                    const voteCount = (userChoice === option.id) ? option.votes + 1 : option.votes;
+                    const percentage = hasVoted && totalVotes > 0 ? Math.round((voteCount / totalVotes) * 100) : 0;
+                    const isChosen = userChoice === option.id;
 
                     return (
                         <button
                             key={option.id}
-                            onClick={() => handleVote(option.id)}
+                            onClick={() => handleUserVote(option.id)}
                             disabled={hasVoted}
-                            // FIX: Changed from rounded-lg to rounded-full
                             className="w-full text-left p-0.5 rounded-full border transition-all duration-300"
                             style={{
                                 cursor: hasVoted ? 'default' : 'pointer',
@@ -5695,7 +5849,7 @@ export const PlaceholderScreen = ({ theme, category }) => {
     );
 };
 
-export const CommunityScreen = ({ theme, onNavigate, openCreateContentModal, posts, polls }) => {
+export const CommunityScreen = ({ theme, onNavigate, openCreateContentModal, posts, polls, likedPosts, onToggleLike, pollChoices, onPollVote }) => {
     const [tab, setTab] = useState('feed');
 
     const combinedFeed = useMemo(() => {
@@ -5735,9 +5889,23 @@ export const CommunityScreen = ({ theme, onNavigate, openCreateContentModal, pos
 
             <div className="flex-1 overflow-y-auto px-4 pb-6 pt-6 space-y-6 max-w-md mx-auto scrollbar-hide">
                 {tab === 'feed' && combinedFeed.map((item) => (
-                    <PostCard key={`post-${item.id}`} post={item} theme={theme} />
+                    <PostCard
+                        key={`post-${item.id}`}
+                        post={item}
+                        theme={theme}
+                        isLiked={!!likedPosts[item.id]} // Pass whether this post is liked
+                        onToggleLike={onToggleLike} // Pass the like toggle handler
+                    />
                 ))}
-                {tab === 'polls' && polls.map((p) => <PollCard key={`poll-${p.id}`} poll={p} theme={theme} />)}
+                {tab === 'polls' && polls.map((p) => (
+                    <PollCard
+                        key={`poll-${p.id}`}
+                        poll={p}
+                        theme={theme}
+                        userChoice={pollChoices[p.id]} // Pass the user's choice for this poll
+                        onVote={onPollVote} // Pass the poll vote handler
+                    />
+                ))}
             </div>
         </div>
     );
