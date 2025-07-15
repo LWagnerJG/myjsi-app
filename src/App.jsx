@@ -253,7 +253,7 @@ function App() {
 
         if (baseScreenKey === 'products' && screenParts[1] === 'category' && screenParts[2]) return <ProductComparisonScreen {...commonProps} categoryId={screenParts[2]} />;
         if (baseScreenKey === 'products' && screenParts[1] === 'competitive-analysis' && screenParts[2]) return <CompetitiveAnalysisScreen {...commonProps} categoryId={screenParts[2]} />;
-        if (baseScreenKey === 'resources' && screenParts.length > 1) return <ResourceDetailScreen {...commonProps} />;
+        if (baseScreenKey === 'resources' && screenParts.length > 1) return <ResourceDetailScreen {...commonProps} onUpdateCart={handleUpdateCart} />;
         if (screenKey === 'samples/cart') return <CartScreen {...commonProps} cart={cart} setCart={setCart} onUpdateCart={handleUpdateCart} />;
 
         const ScreenComponent = SCREEN_MAP[baseScreenKey];
@@ -302,7 +302,5 @@ function App() {
         </div>
     );
 }
-
-
 
 export default App;

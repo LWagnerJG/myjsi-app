@@ -5,6 +5,7 @@
     useCallback,
     useEffect,
 } from 'react';
+
 import ReactDOM from 'react-dom'; // for createPortal
 
 import {
@@ -15,16 +16,10 @@ import {
     DROPDOWN_GAP,
 } from './constants/dropdown.js';
 
-
 import { DropdownPortal } from './DropdownPortal.jsx';   //  ← this line
-
 
 import * as Data from './data.jsx';
 
-/* ──────────────────────────────────────────────────────────────────
-   Iconography – lucide-react
-   (feel free to cull any icons you never use)
-   ────────────────────────────────────────────────────────────────── */
 import {
     AlertCircle,
     Armchair,
@@ -114,7 +109,6 @@ export const useDropdownPosition = (elementRef) => {
     return [direction, checkPosition];     // <-- BOTH values
 };
 
-
 export const PortalNativeSelect = ({
     label,
     value,
@@ -128,142 +122,26 @@ export const PortalNativeSelect = ({
     const [pos, setPos] = React.useState({ top: 0, left: 0, width: 0 });
     const wrapRef = React.useRef(null);
     const dropRef = React.useRef(null);
-
-    /* -------- positioning -------------------------------------- */
-    const calcPos = React.useCallback(() => {
-        if (!wrapRef.current) return;
-
-        const r = wrapRef.current.getBoundingClientRect();
-        const vw = window.innerWidth;
-        const vh = window.innerHeight;
-        const h = DROPDOWN_PORTAL_HEIGHT;
-        const w = Math.max(r.width, DROPDOWN_MIN_WIDTH);
-
-        let top = r.bottom + DROPDOWN_GAP;
-        if (top + h > vh) top = r.top - h - DROPDOWN_GAP;
-
-        let left = r.left;
-        if (left + w > vw - DROPDOWN_SIDE_PADDING)
-            left = vw - w - DROPDOWN_SIDE_PADDING;
-        if (left < DROPDOWN_SIDE_PADDING) left = DROPDOWN_SIDE_PADDING;
-
-        setPos({ top, left, width: w });
-    }, []);
-
-    const toggleOpen = () => {
-        if (!isOpen) calcPos();
-        setIsOpen(o => !o);
-    };
-
-    /* outside-click handler */
-    React.useEffect(() => {
-        const away = (e) =>
-            wrapRef.current &&
-            !wrapRef.current.contains(e.target) &&
-            dropRef.current &&
-            !dropRef.current.contains(e.target) &&
-            setIsOpen(false);
-
-        document.addEventListener('mousedown', away);
-        return () => document.removeEventListener('mousedown', away);
-    }, []);
-
-    /* recalc on resize / scroll when open */
-    React.useEffect(() => {
-        if (!isOpen) return;
-        const handler = () => calcPos();
-        window.addEventListener('resize', handler);
-        window.addEventListener('scroll', handler, true);
-        return () => {
-            window.removeEventListener('resize', handler);
-            window.removeEventListener('scroll', handler, true);
-        };
-    }, [isOpen, calcPos]);
-
-    /* helpers */
-    const selectedLabel = React.useMemo(() => {
-        if (!Array.isArray(options)) return placeholder;
-        return options.find((o) => o.value === value)?.label || placeholder;
-    }, [options, value, placeholder]);
-
-    const handleSelect = (v) => {
-        onChange({ target: { value: v } });
-        setIsOpen(false);
-    };
-
-    /* -------- render ------------------------------------------- */
+    const calcPos = React.useCallback(() => { if (!wrapRef.current) return; const r = wrapRef.current.getBoundingClientRect(); const vw = window.innerWidth; const vh = window.innerHeight; const h = DROPDOWN_PORTAL_HEIGHT; const w = Math.max(r.width, DROPDOWN_MIN_WIDTH); let top = r.bottom + DROPDOWN_GAP; if (top + h > vh) top = r.top - h - DROPDOWN_GAP; let left = r.left; if (left + w > vw - DROPDOWN_SIDE_PADDING) left = vw - w - DROPDOWN_SIDE_PADDING; if (left < DROPDOWN_SIDE_PADDING) left = DROPDOWN_SIDE_PADDING; setPos({ top, left, width: w }); }, []);
+    const toggleOpen = () => { if (!isOpen) calcPos(); setIsOpen(o => !o); };
+    React.useEffect(() => { const away = (e) => wrapRef.current && !wrapRef.current.contains(e.target) && dropRef.current && !dropRef.current.contains(e.target) && setIsOpen(false); document.addEventListener('mousedown', away); return () => document.removeEventListener('mousedown', away); }, []);
+    React.useEffect(() => { if (!isOpen) return; const handler = () => calcPos(); window.addEventListener('resize', handler); window.addEventListener('scroll', handler, true); return () => { window.removeEventListener('resize', handler); window.removeEventListener('scroll', handler, true); }; }, [isOpen, calcPos]);
+    const selectedLabel = React.useMemo(() => { if (!Array.isArray(options)) return placeholder; return options.find((o) => o.value === value)?.label || placeholder; }, [options, value, placeholder]);
+    const handleSelect = (v) => { onChange({ target: { value: v } }); setIsOpen(false); };
     return (
         <>
-            <div ref={wrapRef} className="relative space-y-1">
-                {label && (
-                    <label
-                        className="block text-xs font-semibold px-4"
-                        style={{ color: theme.colors.textSecondary }}
-                    >
-                        {label}
-                    </label>
-                )}
-
-                <button
-                    type="button"
-                    onClick={toggleOpen}
-                    aria-expanded={isOpen}
-                    aria-required={required}
-                    className="w-full px-4 py-3 border rounded-full text-base text-left flex justify-between items-center"
-                    style={{
-                        backgroundColor: theme.colors.subtle,
-                        borderColor: theme.colors.border,
-                        color: value ? theme.colors.textPrimary : theme.colors.textSecondary,
-                    }}
-                >
+            <div ref={wrapRef} className="relative space-y-2">
+                {/* FIX: Updated label style to text-sm and px-3 */}
+                {label && (<label className="block text-sm font-semibold px-3" style={{ color: theme.colors.textSecondary }}>{label}</label>)}
+                <button type="button" onClick={toggleOpen} aria-expanded={isOpen} aria-required={required} className="w-full px-4 py-3 border rounded-full text-base text-left flex justify-between items-center" style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border, color: value ? theme.colors.textPrimary : theme.colors.textSecondary, }}>
                     <span className="pr-6">{selectedLabel}</span>
-                    <ChevronDown
-                        className={`absolute right-4 w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''
-                            }`}
-                        style={{ color: theme.colors.textSecondary }}
-                    />
+                    <ChevronDown className={`absolute right-4 w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} style={{ color: theme.colors.textSecondary }} />
                 </button>
             </div>
-
-            {/* menu rendered via portal so it never stretches the card */}
-            {isOpen && (
-                <DropdownPortal parentRef={wrapRef} onClose={() => setIsOpen(false)}>
-                    <div
-                        ref={dropRef}
-                        className="z-[9999] pointer-events-auto"
-                        style={{ top: pos.top, left: pos.left, width: pos.width }}
-                    >
-                        <GlassCard
-                            theme={theme}
-                            className="p-1.5 max-h-60 overflow-y-auto scrollbar-hide rounded-2xl shadow-lg"
-                        >
-                            {options.map((opt) => (
-                                <button
-                                    key={opt.value}
-                                    type="button"
-                                    onClick={() => handleSelect(opt.value)}
-                                    className="block w-full text-left py-2.5 px-3.5 text-sm rounded-lg transition-colors"
-                                    style={{
-                                        backgroundColor:
-                                            opt.value === value ? theme.colors.primary : 'transparent',
-                                        color:
-                                            opt.value === value
-                                                ? theme.colors.surface
-                                                : theme.colors.textPrimary,
-                                        fontWeight: opt.value === value ? 600 : 400,
-                                    }}
-                                >
-                                    {opt.label}
-                                </button>
-                            ))}
-                        </GlassCard>
-                    </div>
-                </DropdownPortal>
-            )}
+            {isOpen && (<DropdownPortal parentRef={wrapRef} onClose={() => setIsOpen(false)}><div ref={dropRef} className="z-[9999] pointer-events-auto" style={{ top: pos.top, left: pos.left, width: pos.width }}><GlassCard theme={theme} className="p-1.5 max-h-60 overflow-y-auto scrollbar-hide rounded-2xl shadow-lg">{options.map((opt) => (<button key={opt.value} type="button" onClick={() => handleSelect(opt.value)} className="block w-full text-left py-2.5 px-3.5 text-sm rounded-lg transition-colors" style={{ backgroundColor: opt.value === value ? theme.colors.primary : 'transparent', color: opt.value === value ? theme.colors.surface : theme.colors.textPrimary, fontWeight: opt.value === value ? 600 : 400, }}>{opt.label}</button>))}</GlassCard></div></DropdownPortal>)}
         </>
     );
 };
-
 
 export const GlassCard = React.memo(
     React.forwardRef(({ children, className = '', theme, ...props }, ref) => (
@@ -283,6 +161,7 @@ export const GlassCard = React.memo(
         </div>
     ))
 );
+
 export const PageTitle = React.memo(({ title, theme, onBack, children }) => (
     <div className="px-4 pt-6 pb-4 flex justify-between items-center">
         <div className="flex-1 flex items-center space-x-2">
@@ -296,7 +175,6 @@ export const PageTitle = React.memo(({ title, theme, onBack, children }) => (
         {children}
     </div>
 ));
-
 
 export const Button = React.memo(({ children, className = '', theme, ...props }) => (
     <button
@@ -408,45 +286,41 @@ export const AutoCompleteCombobox = ({
     label,
     options = [],
     value,
-    onChange,
+    onChange, // handles raw input text changes
+    onSelect, // handles selection of an item from the filtered list
     onAddNew,
     placeholder = '',
-    resetOnSelect = false,
     theme,
+    dropdownClassName = '', // Added prop for custom dropdown styling
+    resetOnSelect = false, // New prop to clear input on selection
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [pos, setPos] = useState({ top: 0, left: 0, width: 0 });
     const wrapRef = useRef(null);
     const dropRef = useRef(null);
 
-    // FIX: Moved this declaration before calcPos so it can be accessed.
     const filtered = useMemo(() => {
         const q = (value || '').toLowerCase();
         if (!q) return options;
         return options.filter(o => o.toLowerCase().includes(q));
     }, [value, options]);
 
-    // This function can now safely access the 'filtered' variable.
     const calcPos = useCallback(() => {
         if (!wrapRef.current) return;
         const r = wrapRef.current.getBoundingClientRect();
         const vw = window.innerWidth;
         const vh = window.innerHeight;
-        const h = Math.min(filtered.length * 44 + (onAddNew && value ? 44 : 0) + 20, vh * 0.4);
+        // Adjusted height calculation to consider available space and dynamic content
+        const contentHeight = filtered.length * 44 + (onAddNew && value ? 44 : 0) + 20; // Estimate height based on items + 'add new' button + padding
+        const h = Math.min(contentHeight, vh * 0.4); // Cap height at 40% of viewport height
         const w = Math.max(r.width, DROPDOWN_MIN_WIDTH);
-
         let top = r.bottom + DROPDOWN_GAP;
-        if (top + h > vh - 20) {
-            top = r.top - h - DROPDOWN_GAP;
-        }
-
+        if (top + h > vh - DROPDOWN_SIDE_PADDING) top = r.top - h - DROPDOWN_GAP; // Flip upwards if not enough space below
         let left = r.left;
         if (left + w > vw - DROPDOWN_SIDE_PADDING) left = vw - w - DROPDOWN_SIDE_PADDING;
         if (left < DROPDOWN_SIDE_PADDING) left = DROPDOWN_SIDE_PADDING;
-
         setPos({ top, left, width: w, height: h });
     }, [filtered, onAddNew, value]);
-
 
     useEffect(() => {
         if (!isOpen) return;
@@ -469,23 +343,28 @@ export const AutoCompleteCombobox = ({
         return () => document.removeEventListener('mousedown', away);
     }, []);
 
-    const handleSelect = (opt) => {
-        onChange(opt);
+    const handleSelectOption = (opt) => {
+        onSelect?.(opt); // Use optional chaining for onSelect
         setIsOpen(false);
-        if (resetOnSelect) onChange('');
+        if (resetOnSelect) {
+            onChange(''); // Clear the input if resetOnSelect is true
+        } else {
+            onChange(opt); // Set the input value to the selected option if not resetting
+        }
     };
 
     const handleAdd = () => {
         if (!value) return;
         onAddNew?.(value);
         setIsOpen(false);
-        if (resetOnSelect) onChange('');
+        onChange(''); // Clear the input after adding new item
     };
 
     return (
-        <div ref={wrapRef} className="relative space-y-1">
+        <div ref={wrapRef} className="space-y-2">
+            {/* FIX: Updated label style to text-sm and px-3 */}
             {label && (
-                <label className="block text-xs font-semibold px-4" style={{ color: theme.colors.textSecondary }}>
+                <label className="block text-sm font-semibold px-3" style={{ color: theme.colors.textSecondary }}>
                     {label}
                 </label>
             )}
@@ -498,47 +377,21 @@ export const AutoCompleteCombobox = ({
                     onChange={(e) => onChange(e.target.value)}
                     placeholder={placeholder}
                     className="w-full pl-12 pr-4 py-3 border rounded-full text-base"
-                    style={{
-                        backgroundColor: theme.colors.subtle,
-                        borderColor: theme.colors.border,
-                        color: theme.colors.textPrimary,
-                    }}
+                    style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border, color: theme.colors.textPrimary }}
                 />
             </div>
 
             {isOpen && (
                 <DropdownPortal parentRef={wrapRef} onClose={() => setIsOpen(false)}>
-                    <div
-                        ref={dropRef}
-                        className="fixed z-[9999] pointer-events-auto"
-                        style={{ top: pos.top, left: pos.left, width: pos.width }}
-                    >
-                        <GlassCard
-                            theme={theme}
-                            className="p-1.5 overflow-y-auto scrollbar-hide rounded-2xl shadow-lg"
-                            style={{
-                                maxHeight: pos.height,
-                                backgroundColor: '#FFFFFF'
-                            }}
-                        >
+                    <div ref={dropRef} className={`fixed z-[9999] pointer-events-auto ${dropdownClassName}`} style={{ top: pos.top, left: pos.left, width: pos.width }}>
+                        <GlassCard theme={theme} className="p-1.5 overflow-y-auto scrollbar-hide rounded-2xl shadow-lg" style={{ maxHeight: pos.height, backgroundColor: '#FFFFFF' }}>
                             {filtered.length > 0 && filtered.map((opt) => (
-                                <button
-                                    key={opt}
-                                    type="button"
-                                    onClick={() => handleSelect(opt)}
-                                    className="block w-full text-left py-2.5 px-3.5 text-sm rounded-lg hover:bg-black/5 dark:hover:bg-white/10"
-                                    style={{ color: theme.colors.textPrimary }}
-                                >
+                                <button key={opt} type="button" onClick={() => handleSelectOption(opt)} className="block w-full text-left py-2.5 px-3.5 text-sm rounded-lg hover:bg-black/5" style={{ color: theme.colors.textPrimary }}>
                                     {opt}
                                 </button>
                             ))}
                             {onAddNew && value && !options.some(o => o.toLowerCase() === value.toLowerCase()) && (
-                                <button
-                                    type="button"
-                                    onClick={handleAdd}
-                                    className="block w-full text-left py-2.5 px-3.5 text-sm mt-1 rounded-lg font-semibold"
-                                    style={{ color: theme.colors.accent }}
-                                >
+                                <button type="button" onClick={handleAdd} className="block w-full text-left py-2.5 px-3.5 text-sm mt-1 rounded-lg font-semibold" style={{ color: theme.colors.accent }}>
                                     + Add "{value}"
                                 </button>
                             )}
@@ -591,7 +444,6 @@ export const ToggleButtonGroup = ({ value, onChange, options, theme }) => {
 };
 
 const {
-    // New–Lead form
     EMPTY_LEAD,
     VERTICALS,
     URGENCY_LEVELS,
@@ -604,38 +456,22 @@ const {
     WIN_PROBABILITY_OPTIONS,
     INITIAL_DESIGN_FIRMS,
     INITIAL_DEALERS,
-
-    // Projects screen
     INITIAL_OPPORTUNITIES,
     STAGES,
     STAGE_COLORS,
-
-    // Samples + Cart
     SAMPLE_CATEGORIES,
     SAMPLE_PRODUCTS,
-
-    // Home menu + Orders
     MENU_ITEMS,
     ORDER_DATA,
-
-    // Sales screen
     YTD_SALES_DATA,
     MONTHLY_SALES_DATA,
     SALES_VERTICALS_DATA,
-
-    // Community feed
     INITIAL_POSTS,
     INITIAL_WINS,
     INITIAL_POLLS,
-
-    // Members screen
     INITIAL_MEMBERS,
     PERMISSION_LABELS,
     USER_TITLES,
-
-    // …any others you reference…
-
-    // Resources screens
     RESOURCES_DATA,
     LOANER_POOL_PRODUCTS,
     SAMPLE_DISCOUNTS_DATA,
@@ -660,11 +496,14 @@ const Icon = ({ uri, size = 24, className = "" }) => (
 );
 
 const WoodIcon = ({ color }) => <Icon uri="https://img.icons8.com/ios-glyphs/60/chair.png" />;
-const UpholsteryIcon = ({ color }) => <Icon uri="https://img.icons8.com/ios-filled/50/armchair.png" />;
-const CasegoodIcon = ({ color }) => <Icon uri="https://img.icons8.com/ios-filled/50/desk.png" />;
-const SearchIcon = ({ size, color }) => <Icon uri="https://img.icons8.com/ios-glyphs/60/search--v1.png" size={size} />;
-const FilterIcon = ({ size, color }) => <Icon uri="https://img.icons8.com/ios-filled/50/filter--v1.png" size={size} />;
 
+const UpholsteryIcon = ({ color }) => <Icon uri="https://img.icons8.com/ios-filled/50/armchair.png" />;
+
+const CasegoodIcon = ({ color }) => <Icon uri="https://img.icons8.com/ios-filled/50/desk.png" />;
+
+const SearchIcon = ({ size, color }) => <Icon uri="https://img.icons8.com/ios-glyphs/60/search--v1.png" size={size} />;
+
+const FilterIcon = ({ size, color }) => <Icon uri="https://img.icons8.com/ios-filled/50/filter--v1.png" size={size} />;
 
 const SocialMediaScreen = ({ theme, showAlert, setSuccessMessage }) => {
     const copyToClipboard = (text) => {
@@ -769,6 +608,7 @@ const LineItemCard = React.memo(({ lineItem, index, theme }) => {
         </GlassCard>
     );
 });
+
 const LeadTimesScreen = ({ theme = {} }) => {
     // State and hooks remain the same
     const [searchTerm, setSearchTerm] = useState('');
@@ -945,6 +785,7 @@ const LeadTimesScreen = ({ theme = {} }) => {
         </div>
     );
 };
+
 const PresentationsScreen = ({ theme, onNavigate }) => {
     // Navigate to the series list or a future “by type” screen
     const handleNavigateByType = () =>
@@ -1139,35 +980,125 @@ const InstallInstructionsScreen = ({ theme }) => {
         </div>
     );
 };
-const DiscontinuedFinishesScreen = ({ theme }) => {
-    const { DISCONTINUED_FINISHES } = Data;
-    return (
-        <>
-            <PageTitle title="Discontinued Finishes" theme={theme} />
-            <div className="px-4 pb-4 space-y-4">
-                {DISCONTINUED_FINISHES.map((finish, idx) => (
-                    <GlassCard key={idx} theme={theme} className="p-4">
-                        <p className="font-semibold text-lg" style={{ color: theme.colors.textPrimary }}>
-                            {finish.category}
-                        </p>
-                        <div className="flex items-center mt-2 space-x-6">
-                            <div className="flex items-center space-x-2">
-                                <span className="w-6 h-6 rounded" style={{ backgroundColor: finish.oldColor }} />
-                                <span style={{ color: theme.colors.textSecondary }}>{finish.oldName}</span>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <span className="w-6 h-6 rounded" style={{ backgroundColor: finish.newColor }} />
-                                <span style={{ color: theme.colors.textSecondary }}>{finish.newName}</span>
-                            </div>
-                        </div>
-                    </GlassCard>
-                ))}
+
+export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) => {
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedFinish, setSelectedFinish] = useState(null);
+
+    const formatFinishName = (name) => {
+        if (!name) return '';
+        return name.split(' ').map((word, index) =>
+            index === 0 ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase() : word.toLowerCase()
+        ).join(' ');
+    };
+
+    const groupedFinishes = useMemo(() => {
+        const lowercasedFilter = searchTerm.toLowerCase().trim();
+        const filtered = Data.DISCONTINUED_FINISHES.filter(finish =>
+            finish.oldName.toLowerCase().includes(lowercasedFilter) ||
+            finish.newName.toLowerCase().includes(lowercasedFilter) ||
+            finish.category.toLowerCase().includes(lowercasedFilter)
+        );
+
+        return filtered.reduce((acc, finish) => {
+            const { category } = finish;
+            if (!acc[category]) acc[category] = [];
+            acc[category].push(finish);
+            return acc;
+        }, {});
+    }, [searchTerm]);
+
+    const handleOrderClick = () => {
+        if (!selectedFinish) return;
+        const newItem = {
+            id: `sample-${selectedFinish.newName.toLowerCase().replace(/\s/g, '-')}`,
+            name: formatFinishName(selectedFinish.newName),
+            category: selectedFinish.category,
+            color: selectedFinish.newColor,
+        };
+        onUpdateCart(newItem, 1);
+        setSelectedFinish(null);
+        onNavigate('samples');
+    };
+
+    // A new sub-component for rendering each row cleanly
+    const FinishRow = ({ finish, isLast }) => (
+        <button
+            onClick={() => setSelectedFinish(finish)}
+            className={`w-full text-left p-3 transition-colors hover:bg-black/5 rounded-2xl ${!isLast ? 'border-b' : ''}`}
+            style={{ borderColor: theme.colors.subtle }}
+        >
+            <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4 w-[45%]">
+                    <div className="w-10 h-10 rounded-full flex-shrink-0" style={{ backgroundColor: finish.oldColor, border: `1px solid ${theme.colors.border}` }} />
+                    <div className="min-w-0">
+                        <p className="font-semibold text-sm truncate" style={{ color: theme.colors.textPrimary }}>{formatFinishName(finish.oldName)}</p>
+                        <p className="font-mono text-xs" style={{ color: theme.colors.textSecondary }}>{finish.veneer}</p>
+                    </div>
+                </div>
+                <ArrowRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                <div className="flex items-center space-x-4 w-[45%]">
+                    <div className="w-10 h-10 rounded-full flex-shrink-0" style={{ backgroundColor: finish.newColor, border: `1px solid ${theme.colors.border}` }} />
+                    <div className="min-w-0">
+                        <p className="font-semibold text-sm truncate" style={{ color: theme.colors.textPrimary }}>{formatFinishName(finish.newName)}</p>
+                        <p className="font-mono text-xs" style={{ color: theme.colors.textSecondary }}>{finish.veneer}</p>
+                    </div>
+                </div>
             </div>
-        </>
+        </button>
+    );
+
+    return (
+        <div className="h-full flex flex-col">
+            <PageTitle title="Discontinued Finishes" theme={theme} />
+            <div className="px-4 pt-2 pb-4 sticky top-0 z-10" style={{ backgroundColor: `${theme.colors.background}e0`, backdropFilter: 'blur(10px)' }}>
+                <SearchInput
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Search by name or category..."
+                    theme={theme}
+                />
+            </div>
+            <div className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-hide">
+                {Object.keys(groupedFinishes).length > 0 ? (
+                    Object.entries(groupedFinishes).map(([category, finishes]) => (
+                        <section key={category} className="mb-6">
+                            <h2 className="text-2xl font-bold capitalize mb-3 px-1" style={{ color: theme.colors.textPrimary }}>
+                                {category}
+                            </h2>
+                            <GlassCard theme={theme} className="p-2 space-y-1">
+                                {finishes.map((finish, index) => (
+                                    <FinishRow
+                                        key={`${finish.oldName}-${index}`}
+                                        finish={finish}
+                                        isLast={index === finishes.length - 1}
+                                    />
+                                ))}
+                            </GlassCard>
+                        </section>
+                    ))
+                ) : (
+                    <GlassCard theme={theme} className="p-8 text-center mt-4">
+                        <p className="font-semibold" style={{ color: theme.colors.textPrimary }}>No Results Found</p>
+                        <p className="text-sm" style={{ color: theme.colors.textSecondary }}>Could not find any finishes matching "{searchTerm}".</p>
+                    </GlassCard>
+                )}
+            </div>
+            <Modal show={!!selectedFinish} onClose={() => setSelectedFinish(null)} title="Order Sample" theme={theme}>
+                <p style={{ color: theme.colors.textPrimary }}>
+                    Would you like to order a sample of the new replacement finish, <span className="font-bold">{formatFinishName(selectedFinish?.newName)}</span>?
+                </p>
+                <div className="flex justify-end space-x-3 pt-4 mt-4 border-t" style={{ borderColor: theme.colors.border }}>
+                    <button onClick={() => setSelectedFinish(null)} className="font-bold py-2 px-5 rounded-lg" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }}>Cancel</button>
+                    <button onClick={handleOrderClick} className="font-bold py-2 px-5 rounded-lg text-white" style={{ backgroundColor: theme.colors.accent }}>Order Sample</button>
+                </div>
+            </Modal>
+        </div>
     );
 };
-const DesignDaysScreen = ({ theme }) => {
-    // Hard-coded schedule and transport data from the site :contentReference[oaicite:0]{index=0}
+
+export const DesignDaysScreen = ({ theme }) => {
+    // Hard-coded schedule and transport data from the site
     const schedule = [
         {
             days: ['Monday, June 9', 'Tuesday, June 10'],
@@ -1214,7 +1145,7 @@ Stops: The Mart – Wells & Kinzie → Emily Hotel Welcome Center`,
                 </p>
                 <p style={{ color: theme.colors.textSecondary }}>
                     We’re back for our third year in the heart of Fulton Market—and we’re bringing the joy.
-                    Join us June 9–11, 2025 at 345 N Morgan, 6th Floor, for Design Days. Our showroom will be filled with new launches, design moments, and plenty of surprises to spark connection, creativity, and joy. :contentReference[oaicite:1]{index = 1}
+                    Join us June 9–11, 2025 at 345 N Morgan, 6th Floor, for Design Days. Our showroom will be filled with new launches, design moments, and plenty of surprises to spark connection, creativity, and joy.
                 </p>
                 <a
                     href="https://fultonmarketdesigndays.com"
@@ -1245,13 +1176,14 @@ Stops: The Mart – Wells & Kinzie → Emily Hotel Welcome Center`,
                     <Calendar className="inline w-5 h-5 mr-1" style={{ color: theme.colors.accent }} />
                     Show Schedule
                 </p>
-                {schedule.map((block, i) => (
-                    <GlassCard key={i} theme={theme} className="p-4 space-y-2">
+                {/* FIX: The `index` variable is now correctly defined for the key prop */}
+                {schedule.map((block, index) => (
+                    <GlassCard key={index} theme={theme} className="p-4 space-y-2">
                         <p className="font-medium" style={{ color: theme.colors.textSecondary }}>
                             {block.days.join(' and ')}
                         </p>
-                        {block.events.map((evt, j) => (
-                            <p key={j} style={{ color: theme.colors.textPrimary }}>{evt}</p>
+                        {block.events.map((evt, eventIndex) => (
+                            <p key={eventIndex} style={{ color: theme.colors.textPrimary }}>{evt}</p>
                         ))}
                     </GlassCard>
                 ))}
@@ -1269,8 +1201,9 @@ Stops: The Mart – Wells & Kinzie → Emily Hotel Welcome Center`,
             {/* Transport */}
             <div className="space-y-4">
                 <p className="font-semibold" style={{ color: theme.colors.textPrimary }}>Need a lift?</p>
-                {transport.map(({ icon: Icon, title, desc }, i) => (
-                    <GlassCard key={i} theme={theme} className="p-4 flex items-start space-x-3">
+                {/* FIX: The `index` variable is now correctly defined for the key prop */}
+                {transport.map(({ icon: Icon, title, desc }, index) => (
+                    <GlassCard key={index} theme={theme} className="p-4 flex items-start space-x-3">
                         <Icon className="w-6 h-6" style={{ color: theme.colors.secondary }} />
                         <div>
                             <p className="font-bold" style={{ color: theme.colors.textPrimary }}>{title}</p>
@@ -1286,7 +1219,7 @@ Stops: The Mart – Wells & Kinzie → Emily Hotel Welcome Center`,
                     Inspired and Unplugged.
                 </p>
                 <p style={{ color: theme.colors.textSecondary }}>
-                    Step into stillness. Win a 4-day, 3-night escape for two to Iceland—a boutique stay at Eyja Hotel, spa day at Blue Lagoon, plus a $1,000 flight voucher. Must be present to enter. Stop by our showroom for details. :contentReference[oaicite:2]{index = 2}
+                    Step into stillness. Win a 4-day, 3-night escape for two to Iceland—a boutique stay at Eyja Hotel, spa day at Blue Lagoon, plus a $1,000 flight voucher. Must be present to enter. Stop by our showroom for details.
                 </p>
                 <a
                     href="https://hoteleyja.is"
@@ -1301,6 +1234,7 @@ Stops: The Mart – Wells & Kinzie → Emily Hotel Welcome Center`,
         </div>
     );
 };
+
 const ContractsScreen = ({ theme, onNavigate }) => {
     const ContractCard = React.memo(({ contract, theme }) => (
         <GlassCard theme={theme} className="p-4 flex flex-col space-y-3">
@@ -1941,6 +1875,7 @@ export const SampleDiscountsScreen = ({ theme, onNavigate, setSuccessMessage }) 
         </>
     );
 };
+
 const RequestFieldVisitScreen = ({ theme, setSuccessMessage, onNavigate }) => {
     // --- state ---
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -2223,6 +2158,7 @@ export const DealerRegistrationScreen = ({ theme, onNavigate, setSuccessMessage 
         </div>
     );
 };
+
 const styles = {
     container: {
         padding: '20px',
@@ -2391,6 +2327,7 @@ export const LoanerPoolScreen = ({ theme, onNavigate, setSuccessMessage, userSet
         </div>
     );
 };
+
 export const LoanerItemCard = ({ item, isSelected, onSelect, theme }) => {
     return (
         <GlassCard
@@ -2429,11 +2366,38 @@ export const LoanerItemCard = ({ item, isSelected, onSelect, theme }) => {
     );
 };
 
-export const ResourceDetailScreen = ({ theme, onNavigate, setSuccessMessage, userSettings, showAlert, currentScreen }) => {
+export const ResourceDetailScreen = ({ theme, onNavigate, setSuccessMessage, userSettings, showAlert, currentScreen, onUpdateCart }) => {
     // Extract the specific resource type from the URL-like path
     const category = currentScreen.split('/')[1]?.replace(/_/g, ' ');
 
     switch (category) {
+        // --- Rep Functions ---
+        case 'commission rates':
+            return <CommissionRatesScreen theme={theme} />;
+        case 'loaner pool':
+            return <LoanerPoolScreen theme={theme} onNavigate={onNavigate} setSuccessMessage={setSuccessMessage} userSettings={userSettings} />;
+        case 'dealer registration':
+            return <DealerRegistrationScreen theme={theme} onNavigate={onNavigate} setSuccessMessage={setSuccessMessage} />;
+        case 'request field visit':
+            return <RequestFieldVisitScreen theme={theme} onNavigate={onNavigate} setSuccessMessage={setSuccessMessage} />;
+        case 'sample discounts':
+            return <SampleDiscountsScreen theme={theme} setSuccessMessage={setSuccessMessage} />;
+        case 'dealer directory':
+            return <DealerDirectoryScreen theme={theme} showAlert={showAlert} setSuccessMessage={setSuccessMessage} />;
+
+        // --- Misc. Resources ---
+        case 'contracts':
+            return <ContractsScreen theme={theme} />;
+        case 'design days':
+            return <DesignDaysScreen theme={theme} />;
+        case 'discontinued finishes':
+            return <DiscontinuedFinishesScreen theme={theme} onNavigate={onNavigate} onUpdateCart={onUpdateCart} />;
+        case 'install instructions':
+            return <InstallInstructionsScreen theme={theme} />;
+        case 'lead times':
+            return <LeadTimesScreen theme={theme} />;
+        case 'social media':
+            return <SocialMediaScreen theme={theme} showAlert={showAlert} setSuccessMessage={setSuccessMessage} />;
         case 'presentations':
             const pathParts = currentScreen.split('/');
             const subScreen = pathParts[2];
@@ -2447,28 +2411,7 @@ export const ResourceDetailScreen = ({ theme, onNavigate, setSuccessMessage, use
             }
             return <PresentationsScreen theme={theme} onNavigate={onNavigate} />;
 
-        case 'dealer directory':
-            return <DealerDirectoryScreen theme={theme} showAlert={showAlert} setSuccessMessage={setSuccessMessage} />;
-        case 'loaner pool':
-            return <LoanerPoolScreen theme={theme} onNavigate={onNavigate} setSuccessMessage={setSuccessMessage} userSettings={userSettings} />;
-        case 'commission rates':
-            return <CommissionRatesScreen theme={theme} onNavigate={onNavigate} />;
-        case 'contracts':
-            return <ContractsScreen theme={theme} onNavigate={onNavigate} />;
-        case 'dealer registration':
-            return <DealerRegistrationScreen theme={theme} onNavigate={onNavigate} setSuccessMessage={setSuccessMessage} />;
-        case 'discontinued finishes':
-            return <DiscontinuedFinishesScreen theme={theme} onNavigate={onNavigate} />;
-        case 'sample discounts':
-            return <SampleDiscountsScreen theme={theme} onNavigate={onNavigate} />;
-        case 'social media':
-            return <SocialMediaScreen theme={theme} showAlert={showAlert} setSuccessMessage={setSuccessMessage} />;
-        case 'request field visit':
-            return <RequestFieldVisitScreen theme={theme} onNavigate={onNavigate} setSuccessMessage={setSuccessMessage} />;
-        case 'install instructions':
-            return <InstallInstructionsScreen theme={theme} />;
-        case 'lead times':
-            return <LeadTimesScreen theme={theme} />;
+        // --- Fallback for any other resource ---
         default:
             return (
                 <div className="px-4 pt-4 pb-4">
@@ -2478,7 +2421,6 @@ export const ResourceDetailScreen = ({ theme, onNavigate, setSuccessMessage, use
             );
     }
 };
-
 
 const COMRequestScreen = ({ theme, onNavigate, showAlert }) => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -2626,7 +2568,7 @@ const COMRequestScreen = ({ theme, onNavigate, showAlert }) => {
 };
 
 const gradeOptions = ['A', 'B', 'C', 'COL', 'COM', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'L1', 'L2'];
-const fabricTypeOptions = ['Type1', 'Type2', 'Type3']; // TODO: replace with real fabric types
+const fabricTypeOptions = ['Type1', 'Type2', 'Type3'];
 const tackableOptions = ['Yes', 'No'];
 
 export const FabricSearchForm = ({ theme, showAlert, onNavigate }) => {
@@ -2737,7 +2679,7 @@ export const COMYardageRequestScreen = ({ theme, showAlert, onNavigate }) => {
         const model = Data.JSI_MODELS.find(m => m.id === modelId);
         if (!model) return;
         const key = `${modelId}_${Date.now()}`;
-        setSelectedModels(prev => [...prev, { ...model, quantity: 1, fabric: '', key }]);
+        setSelectedModels(prev => [...prev, { ...model, quantity: 1, fabric: '', fabricSearch: '', showFabricSearch: false, key }]);
     };
 
     const updateModel = (key, updates) =>
@@ -2748,8 +2690,8 @@ export const COMYardageRequestScreen = ({ theme, showAlert, onNavigate }) => {
         setSelectedModels(prev => prev.filter(m => m.key !== key));
 
     const handleSubmit = () => {
-        const incomplete = selectedModels.some(m => !m.fabric.trim());
-        if (incomplete) return showAlert('Finish all fabrics.');
+        const incomplete = selectedModels.some(m => !m.fabric.trim() || m.quantity < 1);
+        if (incomplete) return showAlert('Please ensure all models have a fabric and a quantity greater than 0.');
         const list = selectedModels
             .map(m => `${m.name} (${m.quantity}×) – ${m.fabric}`)
             .join('\n');
@@ -2780,17 +2722,30 @@ export const COMYardageRequestScreen = ({ theme, showAlert, onNavigate }) => {
                                         className="p-1.5 rounded-full hover:bg-red-500/10 transition">
                                         <Trash2 className="w-5 h-5 text-red-500" />
                                     </button>
-                                    <span className="font-bold text-lg w-6 text-center">{m.quantity}</span>
-                                    <button onClick={() => updateModel(m.key, { quantity: m.quantity + 1 })}
-                                        className="p-1.5 rounded-full hover:bg-black/10 transition">
-                                        <Plus className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />
-                                    </button>
+                                    {/* Quantity Input */}
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        value={m.quantity}
+                                        onChange={e => {
+                                            const newQuantity = parseInt(e.target.value, 10);
+                                            updateModel(m.key, { quantity: isNaN(newQuantity) ? '' : newQuantity });
+                                        }}
+                                        required
+                                        className="w-16 text-center py-1.5 px-2 border rounded-md"
+                                        style={{
+                                            backgroundColor: theme.colors.subtle,
+                                            borderColor: theme.colors.border,
+                                            color: theme.colors.textPrimary
+                                        }}
+                                    />
                                 </div>
                             </div>
 
                             <AutoCompleteCombobox
                                 value={m.fabric}
                                 onChange={v => updateModel(m.key, { fabric: v })}
+                                onSelect={v => updateModel(m.key, { fabric: v })}
                                 placeholder="Fabric pattern…"
                                 options={fabricStrings}
                                 theme={theme}
@@ -2800,17 +2755,18 @@ export const COMYardageRequestScreen = ({ theme, showAlert, onNavigate }) => {
 
                     <AutoCompleteCombobox
                         value=""
-                        onChange={addModel}
+                        onChange={() => { }}
+                        onSelect={addModel}
                         placeholder="+ Add model"
                         options={modelOptions}
                         theme={theme}
-                        resetOnSelect
+                        resetOnSelect={true}
                     />
                 </GlassCard>
 
                 <button
                     onClick={handleSubmit}
-                    disabled={!selectedModels.length}
+                    disabled={selectedModels.length === 0 || selectedModels.some(m => m.quantity < 1)}
                     className="w-full font-bold py-3 rounded-full text-white disabled:opacity-50"
                     style={{ backgroundColor: theme.colors.accent }}>
                     Submit Request
@@ -3568,7 +3524,6 @@ export const FormInput = React.memo(({
     icon = null,
 }) => {
     const controlledValue = value === undefined || value === null ? '' : value;
-
     const inputClass = `w-full px-4 py-3 border rounded-full focus:ring-2 text-base outline-none ${icon ? 'pr-10' : ''} ${className}`;
     const styles = {
         backgroundColor: theme.colors.subtle,
@@ -3576,59 +3531,29 @@ export const FormInput = React.memo(({
         color: readOnly && !controlledValue ? theme.colors.textSecondary : theme.colors.textPrimary,
         ringColor: theme.colors.accent,
     };
-
     const formatCurrency = (val) => {
         if (!val) return '';
         const numericValue = String(val).replace(/[^0-9]/g, '');
         if (!numericValue) return '$';
         return '$' + new Intl.NumberFormat('en-US').format(numericValue);
     };
-
     const handleCurrencyChange = (e) => {
         const numericValue = e.target.value.replace(/[^0-9]/g, '');
         onChange({ target: { name, value: numericValue } });
     };
-
     return (
-        <div className="space-y-1">
+        <div className="space-y-2">
+            {/* FIX: Label style updated to text-sm and px-3 */}
             {label && (
-                <label className="text-xs font-semibold px-4" style={{ color: theme.colors.textSecondary }}>
+                <label className="text-sm font-semibold px-3" style={{ color: theme.colors.textSecondary }}>
                     {label}
                 </label>
             )}
             <div className="relative">
-                {type === 'currency' ? (
-                    <input type="text" name={name} value={formatCurrency(controlledValue)} onChange={handleCurrencyChange} className={inputClass} style={styles} placeholder={placeholder} required={required} />
-                ) : type === 'textarea' ? (
-                    <textarea
-                        name={name}
-                        value={controlledValue}
-                        onChange={onChange}
-                        // Updated to be more rounded and to disable resizing
-                        className="w-full px-4 py-3 border rounded-3xl focus:ring-2 text-base outline-none"
-                        style={{ ...styles, resize: 'none' }}
-                        rows="4"
-                        placeholder={placeholder}
-                        readOnly={readOnly}
-                    />
-                ) : (
-                    <input
-                        type={type}
-                        name={name}
-                        value={controlledValue}
-                        onChange={onChange}
-                        className={inputClass}
-                        style={styles}
-                        placeholder={placeholder}
-                        readOnly={readOnly}
-                        required={required}
-                    />
-                )}
-                {icon && (
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
-                        {icon}
-                    </div>
-                )}
+                {type === 'currency' ? (<input type="text" name={name} value={formatCurrency(controlledValue)} onChange={handleCurrencyChange} className={inputClass} style={styles} placeholder={placeholder} required={required} />)
+                    : type === 'textarea' ? (<textarea name={name} value={controlledValue} onChange={onChange} className="w-full px-4 py-3 border rounded-3xl focus:ring-2 text-base outline-none" style={{ ...styles, resize: 'none' }} rows="4" placeholder={placeholder} readOnly={readOnly} />)
+                        : (<input type={type} name={name} value={controlledValue} onChange={onChange} className={inputClass} style={styles} placeholder={placeholder} readOnly={readOnly} required={required} />)}
+                {icon && (<div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">{icon}</div>)}
             </div>
         </div>
     );
@@ -3669,24 +3594,22 @@ const Modal = ({ show, onClose, title, children, theme }) => {
 
     if (!show) return null;
 
-    return (
+    // FIX: The entire modal is now rendered in a Portal at the top level of the page.
+    return ReactDOM.createPortal(
         <div
-            className="fixed inset-0 bg-black bg-opacity-70 flex items-end justify-center z-[100] transition-opacity duration-300 pointer-events-auto"
+            className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[999] transition-opacity duration-300 pointer-events-auto p-4"
             style={{ opacity: show ? 1 : 0 }}
             onClick={onClose}
         >
             <div
                 onClick={e => e.stopPropagation()}
-                className="w-full h-[85vh] rounded-t-2xl flex flex-col transition-transform duration-300 transform"
+                className="w-full max-w-md rounded-2xl flex flex-col transition-transform duration-300 transform shadow-2xl"
                 style={{
                     backgroundColor: theme.colors.surface,
-                    backdropFilter: theme.backdropFilter,
-                    WebkitBackdropFilter: theme.backdropFilter,
                     borderColor: theme.colors.border,
-                    boxShadow: `0 -4px 30px ${theme.colors.shadow}`
                 }}
             >
-                {title !== "" && (
+                {title && (
                     <div
                         className="flex justify-between items-center p-4 border-b flex-shrink-0"
                         style={{ borderColor: theme.colors.border }}
@@ -3696,7 +3619,7 @@ const Modal = ({ show, onClose, title, children, theme }) => {
                         </h2>
                         <button
                             onClick={onClose}
-                            className="p-1 rounded-full transition-colors"
+                            className="p-1 rounded-full transition-colors hover:bg-black/10 dark:hover:bg-white/10"
                             style={{ backgroundColor: theme.colors.subtle }}
                         >
                             <X className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
@@ -3704,13 +3627,14 @@ const Modal = ({ show, onClose, title, children, theme }) => {
                     </div>
                 )}
                 <div
-                    className={`${title !== "" ? "p-6" : "pt-8 px-6 pb-6"
+                    className={`${title ? "p-6" : "pt-8 px-6 pb-6"
                         } overflow-y-auto space-y-4 scrollbar-hide`}
                 >
                     {children}
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body // This tells React to render the modal at the end of the <body> tag
     );
 };
 
@@ -4461,8 +4385,6 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // First, create a flat list of orders filtered by the search term.
-    // This will be used by both the list view and the calendar view.
     const filteredOrders = useMemo(() => {
         return Data.ORDER_DATA.filter(order =>
             (order.company?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
@@ -4472,7 +4394,6 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
         );
     }, [searchTerm]);
 
-    // For the list view, group the already-filtered orders by date.
     const groupedOrders = useMemo(() => {
         const groups = filteredOrders.reduce((acc, order) => {
             const dateStr = order[dateType];
@@ -4490,7 +4411,7 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
             groups[key].orders.sort((a, b) => new Date(b[dateType]) - new Date(a[dateType]));
         }
         return groups;
-    }, [filteredOrders, dateType]); // Depends on the flat filtered list now
+    }, [filteredOrders, dateType]);
 
     const sortedGroupKeys = useMemo(() => {
         if (!groupedOrders) return [];
@@ -4561,8 +4482,12 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
                         ))}
                     </div>
                 ) : (
-                    /* This now passes the correctly defined 'filteredOrders' variable, fixing the error. */
-                    <OrderCalendarView orders={filteredOrders} theme={theme} dateType={dateType} />
+                    <OrderCalendarView
+                        orders={filteredOrders}
+                        theme={theme}
+                        dateType={dateType}
+                        onOrderClick={setSelectedOrder}
+                    />
                 )}
             </div>
         </div>
@@ -4690,8 +4615,9 @@ export const SalesScreen = ({ theme, onNavigate }) => {
     );
 };
 
-export const OrderCalendarView = ({ orders, onDateClick, theme, dateType }) => {
-    const [currentDate, setCurrentDate] = useState(new Date('2025-07-09T12:00:00Z'));
+export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => {
+    const [currentDate, setCurrentDate] = useState(new Date());
+    const [selectedDate, setSelectedDate] = useState(null);
 
     const ordersByDate = useMemo(() => {
         const map = new Map();
@@ -4700,11 +4626,25 @@ export const OrderCalendarView = ({ orders, onDateClick, theme, dateType }) => {
             if (dateStr) {
                 const date = new Date(dateStr);
                 const key = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
-                map.set(key, true);
+                if (!map.has(key)) {
+                    map.set(key, []);
+                }
+                map.get(key).push(order);
             }
         });
         return map;
     }, [orders, dateType]);
+
+    const ordersForSelectedDate = useMemo(() => {
+        if (!selectedDate) return [];
+        const key = `${selectedDate.getFullYear()}-${selectedDate.getMonth()}-${selectedDate.getDate()}`;
+        return ordersByDate.get(key) || [];
+    }, [selectedDate, ordersByDate]);
+
+    const handleDateClick = (day) => {
+        const newSelectedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+        setSelectedDate(newSelectedDate);
+    };
 
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
@@ -4714,35 +4654,60 @@ export const OrderCalendarView = ({ orders, onDateClick, theme, dateType }) => {
     const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
     return (
-        <GlassCard theme={theme} className="p-4">
-            <div className="flex justify-between items-center mb-4">
-                <button onClick={() => setCurrentDate(new Date(year, month - 1, 1))} className="p-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10"><ChevronLeft style={{ color: theme.colors.textSecondary }} /></button>
-                <h3 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>{currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}</h3>
-                <button onClick={() => setCurrentDate(new Date(year, month + 1, 1))} className="p-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10"><ChevronRight style={{ color: theme.colors.textSecondary }} /></button>
-            </div>
-            <div className="grid grid-cols-7 gap-1 text-center text-xs font-semibold" style={{ color: theme.colors.textSecondary }}>
-                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => <div key={d}>{d}</div>)}
-            </div>
-            <div className="grid grid-cols-7 gap-1 mt-2">
-                {blanks.map((_, i) => <div key={`b-${i}`} />)}
-                {days.map(day => {
-                    const date = new Date(year, month, day);
-                    const today = new Date('2025-07-09T12:00:00Z');
-                    const isToday = date.toDateString() === today.toDateString();
-                    const key = `${year}-${month}-${day}`;
-                    const hasOrder = ordersByDate.has(key);
+        <div className="space-y-4">
+            <GlassCard theme={theme} className="p-4">
+                <div className="flex justify-between items-center mb-4">
+                    <button onClick={() => setCurrentDate(new Date(year, month - 1, 1))} className="p-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10"><ChevronLeft style={{ color: theme.colors.textSecondary }} /></button>
+                    <h3 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>{currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}</h3>
+                    <button onClick={() => setCurrentDate(new Date(year, month + 1, 1))} className="p-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10"><ChevronRight style={{ color: theme.colors.textSecondary }} /></button>
+                </div>
+                <div className="grid grid-cols-7 gap-1 text-center text-xs font-semibold" style={{ color: theme.colors.textSecondary }}>
+                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => <div key={d}>{d}</div>)}
+                </div>
+                <div className="grid grid-cols-7 gap-1 mt-2">
+                    {blanks.map((_, i) => <div key={`b-${i}`} />)}
+                    {days.map(day => {
+                        const date = new Date(year, month, day);
+                        const isSelected = selectedDate?.toDateString() === date.toDateString();
+                        const key = `${year}-${month}-${day}`;
+                        const hasOrder = ordersByDate.has(key);
 
-                    return (
-                        <div key={day} className="relative h-10 flex items-center justify-center">
-                            <span className={`w-8 h-8 flex items-center justify-center rounded-full ${isToday ? 'bg-blue-600 text-white' : ''}`}>
-                                {day}
-                            </span>
-                            {hasOrder && <div className="absolute bottom-1 h-1.5 w-1.5 bg-blue-500 rounded-full"></div>}
-                        </div>
-                    );
-                })}
-            </div>
-        </GlassCard>
+                        return (
+                            <button
+                                key={day}
+                                onClick={() => handleDateClick(day)}
+                                className={`relative h-10 flex items-center justify-center rounded-full transition-colors duration-200 ${isSelected ? 'bg-blue-600 text-white font-bold' : 'hover:bg-black/5'}`}
+                            >
+                                <span>{day}</span>
+                                {hasOrder && <div className={`absolute bottom-1 h-1.5 w-1.5 rounded-full ${isSelected ? 'bg-white' : 'bg-blue-500'}`}></div>}
+                            </button>
+                        );
+                    })}
+                </div>
+            </GlassCard>
+
+            {selectedDate && ordersForSelectedDate.length > 0 && (
+                <div className="space-y-3 animate-fade-in">
+                    <h3 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>
+                        Orders for {selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    </h3>
+                    {ordersForSelectedDate.map(order => (
+                        <GlassCard key={order.orderNumber} theme={theme} className="p-4 cursor-pointer hover:border-gray-400/50 flex items-center space-x-4" onClick={() => onOrderClick(order)}>
+                            <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: Data.STATUS_COLORS[order.status] || theme.colors.secondary }}></div>
+                            <div className="flex-1 min-w-0">
+                                <p className="font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{order.details || 'N/A'}</p>
+                                <p className="text-sm" style={{ color: theme.colors.textSecondary }}>{order.company}</p>
+                            </div>
+                            <div className="text-right flex-shrink-0">
+                                <p className="font-semibold text-lg whitespace-nowrap" style={{ color: theme.colors.textPrimary }}>
+                                    ${(order.net || 0).toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                                </p>
+                            </div>
+                        </GlassCard>
+                    ))}
+                </div>
+            )}
+        </div>
     );
 };
 
@@ -4877,8 +4842,6 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
 export const ProbabilitySlider = ({ value, onChange, theme }) => {
     const [isDragging, setIsDragging] = useState(false);
     const sliderRef = useRef(null);
-
-    /* ---- shared helper ---- */
     const updateFromClientX = (clientX) => {
         if (!sliderRef.current) return;
         const rect = sliderRef.current.getBoundingClientRect();
@@ -4887,95 +4850,37 @@ export const ProbabilitySlider = ({ value, onChange, theme }) => {
         const snapped = Math.round(pct / 5) * 5;
         onChange(snapped);
     };
-
-    /* ---- mouse handlers ---- */
     const onMouseDown = (e) => { setIsDragging(true); updateFromClientX(e.clientX); };
     const onMouseMove = (e) => { if (isDragging) updateFromClientX(e.clientX); };
     const onMouseUp = () => setIsDragging(false);
-
-    /* ---- touch handlers ---- */
     const onTouchStart = (e) => { setIsDragging(true); updateFromClientX(e.touches[0].clientX); };
     const onTouchMove = (e) => { if (isDragging) updateFromClientX(e.touches[0].clientX); };
     const onTouchEnd = () => setIsDragging(false);
-
-    /* ---- global listeners (passive = true) ---- */
     useEffect(() => {
         if (!isDragging) return;
         window.addEventListener('mousemove', onMouseMove, { passive: true });
         window.addEventListener('mouseup', onMouseUp, { passive: true });
         window.addEventListener('touchmove', onTouchMove, { passive: true });
         window.addEventListener('touchend', onTouchEnd, { passive: true });
-
         return () => {
             window.removeEventListener('mousemove', onMouseMove);
             window.removeEventListener('mouseup', onMouseUp);
             window.removeEventListener('touchmove', onTouchMove);
             window.removeEventListener('touchend', onTouchEnd);
         };
-    }, [isDragging]);
-
+    }, [isDragging, onMouseMove, onMouseUp, onTouchMove, onTouchEnd]);
     return (
-        <div className="space-y-3">
-            <label
-                className="block text-sm font-medium tracking-wide"
-                style={{ color: theme.colors.textSecondary }}
-            >
+        <div className="space-y-2">
+            {/* FIX: Label style updated to text-sm and px-3 */}
+            <label className="text-sm font-semibold px-3" style={{ color: theme.colors.textSecondary }}>
                 Win Probability
             </label>
-
-            <div className="relative px-4 py-4">
-                {/* Track */}
-                <div
-                    ref={sliderRef}
-                    className="relative h-2 rounded-full cursor-pointer"
-                    style={{ backgroundColor: theme.colors.border || '#d1d5db' }}
-                    onMouseDown={onMouseDown}
-                    onTouchStart={onTouchStart}
-                >
-                    {/* Progress fill */}
-                    <div
-                        className="absolute top-0 left-0 h-full rounded-full transition-all duration-200"
-                        style={{
-                            backgroundColor: theme.colors.accent || '#3b82f6',
-                            width: `${value}%`,
-                        }}
-                    />
-
-                    {/* Draggable knob */}
-                    <div
-                        className={`absolute top-1/2 transform -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all duration-200 ${isDragging ? 'scale-110' : 'hover:scale-105'
-                            }`}
-                        style={{
-                            left: `${value}%`,
-                        }}
-                    >
-                        <div
-                            className="px-2 py-1 text-xs font-bold rounded-full whitespace-nowrap shadow-lg border"
-                            style={{
-                                color: theme.colors.textPrimary || '#374151',
-                                backgroundColor: '#ffffff',
-                                borderColor: theme.colors.border || '#d1d5db',
-                                boxShadow: isDragging
-                                    ? '0 4px 12px rgba(0,0,0,0.3)'
-                                    : '0 2px 8px rgba(0,0,0,0.2)',
-                            }}
-                        >
-                            {value}%
-                        </div>
-                    </div>
+            <div className="relative pt-4 pb-2 px-2">
+                <div ref={sliderRef} className="relative h-2 rounded-full cursor-pointer" style={{ backgroundColor: theme.colors.border || '#d1d5db' }} onMouseDown={onMouseDown} onTouchStart={onTouchStart}>
+                    <div className="absolute top-0 left-0 h-full rounded-full" style={{ backgroundColor: theme.colors.accent || '#3b82f6', width: `${value}%` }} />
+                    <div className="absolute top-1/2 transform -translate-x-1/2 -translate-y-1/2" style={{ left: `${value}%` }}><div className="px-2 py-1 text-xs font-bold rounded-full whitespace-nowrap shadow-lg border" style={{ color: theme.colors.textPrimary || '#374151', backgroundColor: '#ffffff', borderColor: theme.colors.border || '#d1d5db' }}>{value}%</div></div>
                 </div>
-
-                {/* Hidden input for accessibility */}
-                <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    step="5"
-                    value={value}
-                    onChange={(e) => onChange(Math.round(parseInt(e.target.value) / 5) * 5)}
-                    className="sr-only"
-                    aria-label="Win Probability Slider"
-                />
+                <input type="range" min="0" max="100" step="5" value={value} onChange={(e) => onChange(Math.round(parseInt(e.target.value) / 5) * 5)} className="sr-only" aria-label="Win Probability Slider" />
             </div>
         </div>
     );
@@ -5016,64 +4921,21 @@ export const NewLeadScreen = ({
     /* products --------------------------------------------------- */
     const addProduct = useCallback((series) => {
         if (!series) return;
-        setNewLead(prev => ({
-            ...prev,
-            products: [
-                ...prev.products,
-                { series, hasGlassDoors: false, material: '', hasWoodBack: false, polyColor: '' },
-            ],
-        }));
+        setNewLead(prev => ({ ...prev, products: [...prev.products, { series, hasGlassDoors: false, materials: [], hasWoodBack: false, polyColor: '' }] }));
     }, []);
 
-    const removeProduct = useCallback((idx) =>
-        setNewLead(prev => ({
-            ...prev,
-            products: prev.products.filter((_, i) => i !== idx),
-        })), []);
-
-    const updateProductOption = (pi, key, value) =>
-        setNewLead(prev => ({
-            ...prev,
-            products: prev.products.map((p, i) =>
-                i === pi ? { ...p, [key]: value } : p),
-        }));
-
-    const availableSeries = useMemo(
-        () => Data.JSI_PRODUCT_SERIES.filter(s =>
-            !newLead.products.some(p => p.series === s)),
-        [newLead.products],
-    );
+    const removeProduct = useCallback((idx) => setNewLead(prev => ({ ...prev, products: prev.products.filter((_, i) => i !== idx) })), []);
+    const updateProductOption = (pi, key, value) => setNewLead(prev => ({ ...prev, products: prev.products.map((p, i) => i === pi ? { ...p, [key]: value } : p) }));
+    const availableSeries = useMemo(() => Data.JSI_PRODUCT_SERIES.filter(s => !newLead.products.some(p => p.series === s)), [newLead.products]);
 
     /* competitors ------------------------------------------------ */
-    const toggleCompetitor = useCallback((c) =>
-        setNewLead(prev => {
-            const list = prev.competitors || [];
-            const next = list.includes(c) ? list.filter(x => x !== c) : [...list, c];
-            return { ...prev, competitors: next };
-        }), []);
+    const toggleCompetitor = useCallback((c) => setNewLead(prev => { const list = prev.competitors || []; const next = list.includes(c) ? list.filter(x => x !== c) : [...list, c]; return { ...prev, competitors: next }; }), []);
 
     /* lightweight sub-component for the two checkboxes ------------- */
     const CheckboxRow = ({ label, checked, onChange }) => (
-        <div
-            className="flex items-center justify-between text-sm px-3 py-2 rounded-full"
-            style={{ backgroundColor: theme.colors.subtle }}
-        >
-            <label
-                className="font-semibold"
-                style={{ color: theme.colors.textSecondary }}
-            >
-                {label}
-            </label>
-            <input
-                type="checkbox"
-                className="h-5 w-5 rounded-md border-2"
-                style={{
-                    accentColor: theme.colors.accent,
-                    borderColor: theme.colors.border,
-                }}
-                checked={checked}
-                onChange={onChange}
-            />
+        <div className="flex items-center justify-between text-sm px-3 py-2 rounded-full" style={{ backgroundColor: theme.colors.subtle }}>
+            <label className="font-semibold" style={{ color: theme.colors.textSecondary }}>{label}</label>
+            <input type="checkbox" className="h-5 w-5 rounded-md border-2" style={{ accentColor: theme.colors.accent, borderColor: theme.colors.border }} checked={checked} onChange={onChange} />
         </div>
     );
 
@@ -5081,291 +4943,50 @@ export const NewLeadScreen = ({
     return (
         <form onSubmit={handleSubmit} className="flex flex-col h-full">
             <PageTitle title="Create New Lead" theme={theme} />
-
             <div className="flex-1 px-4 pb-4 pt-4 space-y-4" style={{ overflow: 'visible' }}>
-                {/* ─── Project Details ─── */}
                 <FormSection title="Project Details" theme={theme}>
-                    <FormInput
-                        required
-                        label="Project Name"
-                        value={newLead.project}
-                        onChange={e => updateField('project', e.target.value)}
-                        placeholder="e.g., Acme Corp Headquarters"
-                        theme={theme}
-                    />
-
-                    <PortalNativeSelect
-                        required
-                        label="Project Stage"
-                        value={newLead.projectStatus}
-                        onChange={e => updateField('projectStatus', e.target.value)}
-                        options={Data.STAGES.map(s => ({ label: s, value: s }))}
-                        placeholder="Select stage"
-                        theme={theme}
-                    />
-
-                    <PortalNativeSelect
-                        required
-                        label="Vertical"
-                        value={newLead.vertical}
-                        onChange={e => updateField('vertical', e.target.value)}
-                        options={Data.VERTICALS.map(v => ({ label: v, value: v }))}
-                        placeholder="Select vertical"
-                        theme={theme}
-                    />
-
-                    {newLead.vertical === 'Other (Please specify)' && (
-                        <div className="pl-4 animate-fade-in">
-                            <FormInput
-                                required
-                                value={newLead.otherVertical}
-                                onChange={e => updateField('otherVertical', e.target.value)}
-                                placeholder="Specify the vertical..."
-                                theme={theme}
-                            />
-                        </div>
-                    )}
+                    <FormInput required label="Project Name" value={newLead.project} onChange={e => updateField('project', e.target.value)} placeholder="e.g., Acme Corp Headquarters" theme={theme} />
+                    <PortalNativeSelect required label="Project Stage" value={newLead.projectStatus} onChange={e => updateField('projectStatus', e.target.value)} options={Data.STAGES.map(s => ({ label: s, value: s }))} placeholder="Select stage" theme={theme} />
+                    <PortalNativeSelect required label="Vertical" value={newLead.vertical} onChange={e => updateField('vertical', e.target.value)} options={Data.VERTICALS.map(v => ({ label: v, value: v }))} placeholder="Select vertical" theme={theme} />
+                    {newLead.vertical === 'Other (Please specify)' && (<div className="pl-4 animate-fade-in"><FormInput required value={newLead.otherVertical} onChange={e => updateField('otherVertical', e.target.value)} placeholder="Specify the vertical..." theme={theme} /></div>)}
                 </FormSection>
 
-                {/* ─── Stakeholders ─── */}
                 <FormSection title="Stakeholders" theme={theme}>
-                    <AutoCompleteCombobox
-                        label="A&D Firm"
-                        required
-                        value={newLead.designFirm}
-                        onChange={val => updateField('designFirm', val)}
-                        placeholder="Search or add a design firm..."
-                        options={designFirms}
-                        onAddNew={(f) => setDesignFirms(p => [...new Set([f, ...p])])}
-                        theme={theme}
-                    />
-                    <AutoCompleteCombobox
-                        label="Dealer"
-                        required
-                        value={newLead.dealer}
-                        onChange={val => updateField('dealer', val)}
-                        placeholder="Search or add a dealer..."
-                        options={dealers}
-                        onAddNew={(d) => setDealers(p => [...new Set([d, ...p])])}
-                        theme={theme}
-                    />
+                    <AutoCompleteCombobox label="A&D Firm" required value={newLead.designFirm} onSelect={val => updateField('designFirm', val)} onChange={val => updateField('designFirm', val)} placeholder="Search or add a design firm..." options={designFirms} onAddNew={(f) => setDesignFirms(p => [...new Set([f, ...p])])} theme={theme} />
+                    <AutoCompleteCombobox label="Dealer" required value={newLead.dealer} onSelect={val => updateField('dealer', val)} onChange={val => updateField('dealer', val)} placeholder="Search or add a dealer..." options={dealers} onAddNew={(d) => setDealers(p => [...new Set([d, ...p])])} theme={theme} />
                 </FormSection>
 
-                {/* ─── Competition & Products ─── */}
                 <FormSection title="Competition & Products" theme={theme}>
-                    <div className="space-y-2">
-                        <CheckboxRow
-                            label="Bid?"
-                            checked={!!newLead.isBid}
-                            onChange={e => updateField('isBid', e.target.checked)}
-                        />
-                        <CheckboxRow
-                            label="Competition?"
-                            checked={!!newLead.competitionPresent}
-                            onChange={e => updateField('competitionPresent', e.target.checked)}
-                        />
+                    <div className="space-y-4">
+                        <CheckboxRow label="Bid?" checked={!!newLead.isBid} onChange={e => updateField('isBid', e.target.checked)} />
+                        <CheckboxRow label="Competition?" checked={!!newLead.competitionPresent} onChange={e => updateField('competitionPresent', e.target.checked)} />
                     </div>
-
-                    {newLead.competitionPresent && (
-                        <div className="space-y-2 pt-4 border-t mt-4" style={{ borderColor: theme.colors.subtle }}>
-                            <div className="p-2 flex flex-wrap gap-2 rounded-2xl" style={{ backgroundColor: theme.colors.subtle }}>
-                                {Data.COMPETITORS.filter(c => c !== 'None').map(c => (
-                                    <button
-                                        key={c}
-                                        type="button"
-                                        onClick={() => toggleCompetitor(c)}
-                                        className="px-3 py-1.5 text-sm rounded-full font-medium transition-colors border"
-                                        style={{
-                                            backgroundColor: newLead.competitors.includes(c) ? theme.colors.accent : theme.colors.surface,
-                                            color: newLead.competitors.includes(c) ? theme.colors.surface : theme.colors.textPrimary,
-                                            borderColor: newLead.competitors.includes(c) ? theme.colors.accent : theme.colors.border,
-                                        }}
-                                    >
-                                        {c}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Products list */}
+                    {newLead.competitionPresent && (<div className="space-y-2 pt-4 border-t mt-4" style={{ borderColor: theme.colors.subtle }}><div className="p-2 flex flex-wrap gap-2 rounded-2xl" style={{ backgroundColor: theme.colors.subtle }}>{Data.COMPETITORS.filter(c => c !== 'None').map(c => (<button key={c} type="button" onClick={() => toggleCompetitor(c)} className="px-3 py-1.5 text-sm rounded-full font-medium transition-colors border" style={{ backgroundColor: newLead.competitors.includes(c) ? theme.colors.accent : theme.colors.surface, color: newLead.competitors.includes(c) ? theme.colors.surface : theme.colors.textPrimary, borderColor: newLead.competitors.includes(c) ? theme.colors.accent : theme.colors.border }}>{c}</button>))}</div></div>)}
                     <div className="pt-4 mt-2 space-y-3">
-                        {/* HEADER ROW for Products */}
                         <div className="flex items-center justify-between px-3">
-                            <label className="text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>
-                                Products
-                            </label>
-                            <div className="w-1/2">
-                                {availableSeries.length > 0 && (
-                                    <PortalNativeSelect
-                                        value=""
-                                        onChange={(e) => addProduct(e.target.value)}
-                                        placeholder="+ Add"
-                                        options={availableSeries.map(series => ({ label: series, value: series }))}
-                                        theme={theme}
-                                    />
-                                )}
-                            </div>
+                            <label className="text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>Products</label>
+                            <div className="w-1/2">{availableSeries.length > 0 && (<PortalNativeSelect value="" onChange={(e) => addProduct(e.target.value)} placeholder="+ Add" options={availableSeries.map(series => ({ label: series, value: series }))} theme={theme} />)}</div>
                         </div>
-
-                        {/* List of added product cards */}
-                        {newLead.products.map((p, idx) => (
-                            <div
-                                key={idx}
-                                className="p-4 rounded-2xl border space-y-3"
-                                style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border }}
-                            >
-                                <div className="flex items-center justify-between">
-                                    <span className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>
-                                        {p.series}
-                                    </span>
-                                    <button
-                                        type="button"
-                                        onClick={() => removeProduct(idx)}
-                                        className="w-7 h-7 flex items-center justify-center rounded-full transition-colors hover:bg-red-500/10"
-                                    >
-                                        <X className="w-5 h-5 text-red-500" />
-                                    </button>
-                                </div>
-
-                                {p.series === 'Vision' && (
-                                    <VisionOptions theme={theme} product={p} productIndex={idx} onUpdate={updateProductOption} />
-                                )}
-                                {p.series === 'Knox' && (
-                                    <KnoxOptions theme={theme} product={p} productIndex={idx} onUpdate={updateProductOption} />
-                                )}
-                                {(p.series === 'Wink' || p.series === 'Hoopz') && (
-                                    <WinkHoopzOptions theme={theme} product={p} productIndex={idx} onUpdate={updateProductOption} />
-                                )}
-                            </div>
-                        ))}
+                        <div className="space-y-3">{newLead.products.map((p, idx) => (<div key={idx} className="space-y-2"><div className="flex items-center justify-between py-2 pl-4 pr-2 rounded-full" style={{ backgroundColor: theme.colors.subtle }}><span className="font-semibold" style={{ color: theme.colors.textPrimary }}>{p.series}</span><button type="button" onClick={() => removeProduct(idx)} className="w-7 h-7 flex items-center justify-center rounded-full transition-colors hover:bg-red-500/10"><X className="w-5 h-5 text-red-500" /></button></div>{(p.series === 'Vision' || p.series === 'Knox' || p.series === 'Wink' || p.series === 'Hoopz') && (<div className="pl-4 animate-fade-in">{p.series === 'Vision' && <VisionOptions theme={theme} product={p} productIndex={idx} onUpdate={updateProductOption} />}{p.series === 'Knox' && <KnoxOptions theme={theme} product={p} productIndex={idx} onUpdate={updateProductOption} />}{(p.series === 'Wink' || p.series === 'Hoopz') && <WinkHoopzOptions theme={theme} product={p} productIndex={idx} onUpdate={updateProductOption} />}</div>)}</div>))}</div>
                     </div>
                 </FormSection>
 
-                {/* ─── Financials & Timeline ─── */}
                 <FormSection title="Financials & Timeline" theme={theme}>
-                    <FormInput
-                        label="Estimated List Price"
-                        required
-                        type="currency"
-                        value={newLead.estimatedList}
-                        onChange={e => updateField('estimatedList', e.target.value)}
-                        placeholder="$0"
-                        theme={theme}
-                    />
-
-                    <ProbabilitySlider
-                        value={newLead.winProbability}
-                        onChange={v => updateField('winProbability', v)}
-                        theme={theme}
-                    />
-
-                    <PortalNativeSelect
-                        label="Discount"
-                        value={newLead.discount}
-                        onChange={e => updateField('discount', e.target.value)}
-                        options={Data.DISCOUNT_OPTIONS.map(d => ({ label: d, value: d }))}
-                        placeholder="Select a Discount"
-                        theme={theme}
-                    />
-
-                    <PortalNativeSelect
-                        label="PO Timeframe"
-                        required
-                        value={newLead.poTimeframe}
-                        onChange={e => updateField('poTimeframe', e.target.value)}
-                        options={Data.PO_TIMEFRAMES.map(t => ({ label: t, value: t }))}
-                        placeholder="Select a Timeframe"
-                        theme={theme}
-                    />
-
-                    <CheckboxRow
-                        label="Contract?"
-                        checked={!!newLead.isContract}
-                        onChange={e => updateField('isContract', e.target.checked)}
-                    />
-
-                    {newLead.isContract && (
-                        <div className="animate-fade-in">
-                            <PortalNativeSelect
-                                required
-                                placeholder="Select a Contract"
-                                value={newLead.contractType}
-                                onChange={e => updateField('contractType', e.target.value)}
-                                options={Data.CONTRACT_OPTIONS.map(c => ({ label: c, value: c }))}
-                                theme={theme}
-                            />
-                        </div>
-                    )}
+                    <FormInput label="Estimated List Price" required type="currency" value={newLead.estimatedList} onChange={e => updateField('estimatedList', e.target.value)} placeholder="$0" theme={theme} />
+                    <ProbabilitySlider value={newLead.winProbability} onChange={v => updateField('winProbability', v)} theme={theme} />
+                    <PortalNativeSelect label="Discount" value={newLead.discount} onChange={e => updateField('discount', e.target.value)} options={Data.DISCOUNT_OPTIONS.map(d => ({ label: d, value: d }))} placeholder="Select a Discount" theme={theme} />
+                    <PortalNativeSelect label="PO Timeframe" required value={newLead.poTimeframe} onChange={e => updateField('poTimeframe', e.target.value)} options={Data.PO_TIMEFRAMES.map(t => ({ label: t, value: t }))} placeholder="Select a Timeframe" theme={theme} />
+                    <CheckboxRow label="Contract?" checked={!!newLead.isContract} onChange={e => updateField('isContract', e.target.checked)} />
+                    {newLead.isContract && (<div className="animate-fade-in"><PortalNativeSelect required placeholder="Select a Contract" value={newLead.contractType} onChange={e => updateField('contractType', e.target.value)} options={Data.CONTRACT_OPTIONS.map(c => ({ label: c, value: c }))} theme={theme} /></div>)}
                 </FormSection>
 
-                {/* ─── Services & Notes ─── */}
                 <FormSection title="Services & Notes" theme={theme}>
-                    <CheckboxRow
-                        label="JSI Spec Services Required?"
-                        checked={!!newLead.jsiSpecServices}
-                        onChange={e => updateField('jsiSpecServices', e.target.checked)}
-                    />
-
-                    {newLead.jsiSpecServices && (
-                        <div className="animate-fade-in pt-4 space-y-4 border-t" style={{ borderColor: theme.colors.subtle }}>
-                            <ToggleButtonGroup
-                                value={newLead.jsiSpecServicesType}
-                                onChange={(val) => updateField('jsiSpecServicesType', val)}
-                                options={[
-                                    { label: 'New Quote', value: 'New Quote' },
-                                    { label: 'Revision', value: 'Revision' },
-                                    { label: 'Past Project', value: 'Past Project' }
-                                ]}
-                                theme={theme}
-                            />
-
-                            {newLead.jsiSpecServicesType === 'Revision' && (
-                                <FormInput
-                                    label="Revision Quote #"
-                                    value={newLead.jsiRevisionQuoteNumber}
-                                    onChange={(e) => updateField('jsiRevisionQuoteNumber', e.target.value)}
-                                    placeholder="Enter original quote #"
-                                    theme={theme}
-                                    required
-                                />
-                            )}
-
-                            {newLead.jsiSpecServicesType === 'Past Project' && (
-                                <FormInput
-                                    label="Past Project Info"
-                                    value={newLead.jsiPastProjectInfo}
-                                    onChange={(e) => updateField('jsiPastProjectInfo', e.target.value)}
-                                    placeholder="Enter past project name or #"
-                                    theme={theme}
-                                    required
-                                />
-                            )}
-                        </div>
-                    )}
-
-                    <div className="pt-2">
-                        <FormInput
-                            label="Other Notes"
-                            type="textarea"
-                            value={newLead.notes}
-                            onChange={e => updateField('notes', e.target.value)}
-                            placeholder="Enter details..."
-                            theme={theme}
-                        />
-                    </div>
+                    <CheckboxRow label="JSI Spec Services Required?" checked={!!newLead.jsiSpecServices} onChange={e => updateField('jsiSpecServices', e.target.checked)} />
+                    {newLead.jsiSpecServices && (<div className="animate-fade-in pt-4 space-y-4 border-t" style={{ borderColor: theme.colors.subtle }}><ToggleButtonGroup value={newLead.jsiSpecServicesType} onChange={(val) => updateField('jsiSpecServicesType', val)} options={[{ label: 'New Quote', value: 'New Quote' }, { label: 'Revision', value: 'Revision' }, { label: 'Past Project', value: 'Past Project' }]} theme={theme} />{newLead.jsiSpecServicesType === 'Revision' && (<FormInput label="Revision Quote #" value={newLead.jsiRevisionQuoteNumber} onChange={(e) => updateField('jsiRevisionQuoteNumber', e.target.value)} placeholder="Enter original quote #" theme={theme} required />)}{newLead.jsiSpecServicesType === 'Past Project' && (<FormInput label="Past Project Info" value={newLead.jsiPastProjectInfo} onChange={(e) => updateField('jsiPastProjectInfo', e.target.value)} placeholder="Enter past project name or #" theme={theme} required />)}</div>)}
+                    <div className="pt-2"><FormInput label="Other Notes" type="textarea" value={newLead.notes} onChange={e => updateField('notes', e.target.value)} placeholder="Enter details..." theme={theme} /></div>
                 </FormSection>
 
-                {/* ─── Submit ─── */}
-                <div className="pt-4 pb-4">
-                    <button
-                        type="submit"
-                        className="w-full text-white font-bold py-3.5 rounded-full"
-                        style={{ backgroundColor: theme.colors.accent }}
-                    >
-                        Submit Lead
-                    </button>
-                </div>
+                <div className="pt-4 pb-4"><button type="submit" className="w-full text-white font-bold py-3.5 rounded-full" style={{ backgroundColor: theme.colors.accent }}>Submit Lead</button></div>
             </div>
         </form>
     );
@@ -5618,13 +5239,22 @@ export const ProjectsScreen = ({
 }) => {
     const [projectsTab, setProjectsTab] = useState('pipeline');
     const [selectedPipelineStage, setSelectedPipelineStage] = useState('Discovery');
+    const [productSearch, setProductSearch] = useState(''); // State for the product search input
 
-    const filteredOpportunities = useMemo(() => {
-        if (!opportunities) return [];
-        return opportunities.filter(
-            opp => opp.stage === selectedPipelineStage
-        );
-    }, [selectedPipelineStage, opportunities]);
+    const [pillStyle, setPillStyle] = useState({ left: 0, width: 0, opacity: 0 });
+    const stageButtonRefs = useRef([]);
+
+    useEffect(() => {
+        const stageIndex = Data.STAGES.findIndex(s => s === selectedPipelineStage);
+        const buttonEl = stageButtonRefs.current[stageIndex];
+        if (buttonEl) {
+            setPillStyle({
+                left: buttonEl.offsetLeft,
+                width: buttonEl.offsetWidth,
+                opacity: 1,
+            });
+        }
+    }, [selectedPipelineStage]);
 
     const handleAddClick = () => {
         if (projectsTab === 'pipeline') {
@@ -5634,179 +5264,98 @@ export const ProjectsScreen = ({
         }
     };
 
+    const addProduct = useCallback((series) => {
+        if (!series) return;
+        setNewLead(prev => ({
+            ...prev,
+            products: [...prev.products, { series, hasGlassDoors: false, material: '' }],
+        }));
+    }, []);
+
+    const availableSeries = useMemo(
+        () => Data.JSI_PRODUCT_SERIES.filter(s =>
+            !opportunities.flatMap(o => o.products || []).some(p => p.series === s)
+        ),
+        [opportunities]
+    );
+
+    const filteredOpportunities = useMemo(() => {
+        if (!opportunities) return [];
+        return opportunities.filter(opp => opp.stage === selectedPipelineStage);
+    }, [selectedPipelineStage, opportunities]);
+
     return (
         <div className="h-full flex flex-col">
             <PageTitle title="Projects" theme={theme}>
                 <button
                     onClick={handleAddClick}
-                    className="flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-transform hover:scale-105 active:scale-95"
-                    style={{
-                        backgroundColor: theme.colors.accent,
-                        color: 'white'
-                    }}
+                    className="flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 hover:scale-105 active:scale-95"
+                    style={{ backgroundColor: theme.colors.accent, color: 'white' }}
                 >
-                    <span>
-                        {projectsTab === 'pipeline' ? 'New Lead' : 'Add New Install'}
-                    </span>
+                    <div className="relative h-5 w-[110px] flex items-center justify-center">
+                        <span className={`absolute transition-opacity duration-300 ${projectsTab === 'pipeline' ? 'opacity-100' : 'opacity-0'}`}>New Lead</span>
+                        <span className={`absolute transition-opacity duration-300 ${projectsTab === 'my-projects' ? 'opacity-100' : 'opacity-0'}`}>Add New Install</span>
+                    </div>
                     <Plus className="w-4 h-4" />
                 </button>
             </PageTitle>
 
-            <div className="px-4">
-                <GlassCard
-                    theme={theme}
-                    className="relative flex p-1 rounded-full overflow-hidden"
-                >
-                    {/* Slider “pill” anchored to selected side */}
-                    <div
-                        className="absolute top-1 bottom-1 rounded-full transition-all duration-300 ease-in-out"
-                        style={{
-                            backgroundColor: theme.colors.accent,
-                            width: 'calc(50% - 8px)',
-                            left: projectsTab === 'pipeline' ? '4px' : undefined,
-                            right: projectsTab === 'my-projects' ? '4px' : undefined
-                        }}
-                    />
-
-                    <button
-                        onClick={() => setProjectsTab('pipeline')}
-                        className="flex-1 py-2 text-sm font-semibold rounded-full transition-colors duration-300 relative z-10"
-                        style={{
-                            color:
-                                projectsTab === 'pipeline'
-                                    ? theme.colors.surface
-                                    : theme.colors.textPrimary
-                        }}
-                    >
-                        Pipeline
-                    </button>
-
-                    <button
-                        onClick={() => setProjectsTab('my-projects')}
-                        className="flex-1 py-2 text-sm font-semibold rounded-full transition-colors duration-300 relative z-10"
-                        style={{
-                            color:
-                                projectsTab === 'my-projects'
-                                    ? theme.colors.surface
-                                    : theme.colors.textPrimary
-                        }}
-                    >
-                        My Projects
-                    </button>
+            <div className="px-4 space-y-3">
+                <GlassCard theme={theme} className="relative flex p-1 rounded-full overflow-hidden">
+                    <div className="absolute top-1 bottom-1 rounded-full transition-transform duration-300 ease-in-out" style={{ backgroundColor: theme.colors.accent, width: 'calc(50% - 4px)', transform: projectsTab === 'pipeline' ? 'translateX(4px)' : 'translateX(calc(100% + 4px))' }} />
+                    <button onClick={() => setProjectsTab('pipeline')} className="flex-1 py-2 text-sm font-semibold rounded-full transition-colors duration-300 relative z-10" style={{ color: projectsTab === 'pipeline' ? theme.colors.surface : theme.colors.textPrimary }}>Pipeline</button>
+                    <button onClick={() => setProjectsTab('my-projects')} className="flex-1 py-2 text-sm font-semibold rounded-full transition-colors duration-300 relative z-10" style={{ color: projectsTab === 'my-projects' ? theme.colors.surface : theme.colors.textPrimary }}>My Projects</button>
                 </GlassCard>
-            </div>
 
-            {projectsTab === 'pipeline' ? (
-                <div className="flex-1 flex flex-col overflow-hidden">
-                    <GlassCard theme={theme} className="p-1 mx-4 mt-4 mb-4">
-                        {/* Overlapping stage pills to show peek of next */}
-                        <div className="flex space-x-[-2px] overflow-x-auto scrollbar-hide">
-                            {Data.STAGES.map(stage => (
-                                <button
-                                    key={stage}
-                                    onClick={() => setSelectedPipelineStage(stage)}
-                                    className="px-4 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition-colors flex-shrink-0"
-                                    style={{
-                                        backgroundColor:
-                                            selectedPipelineStage === stage
-                                                ? theme.colors.accent
-                                                : 'transparent',
-                                        color:
-                                            selectedPipelineStage === stage
-                                                ? theme.colors.surface
-                                                : theme.colors.textSecondary
-                                    }}
-                                >
+                {projectsTab === 'pipeline' && (
+                    <GlassCard theme={theme} className="p-1">
+                        <div className="relative flex space-x-2 overflow-x-auto scrollbar-hide">
+                            <div className="absolute top-1 bottom-1 rounded-full transition-all duration-300 ease-in-out" style={{ backgroundColor: theme.colors.accent, left: pillStyle.left, width: pillStyle.width, opacity: pillStyle.opacity }} />
+                            {Data.STAGES.map((stage, index) => (
+                                <button key={stage} ref={el => (stageButtonRefs.current[index] = el)} onClick={() => setSelectedPipelineStage(stage)} className="relative z-10 px-4 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition-colors flex-shrink-0" style={{ color: selectedPipelineStage === stage ? theme.colors.surface : theme.colors.textSecondary }}>
                                     {stage}
                                 </button>
                             ))}
                         </div>
                     </GlassCard>
+                )}
+            </div>
 
-                    <div className="flex-1 overflow-y-auto px-4 space-y-4 pb-4 scrollbar-hide">
-                        {filteredOpportunities.length > 0 ? (
-                            filteredOpportunities.map(opp => (
-                                <GlassCard
-                                    key={opp.id}
-                                    theme={theme}
-                                    className="overflow-hidden p-4 cursor-pointer hover:border-gray-400/50"
-                                    onClick={() => setSelectedOpportunity(opp)}
-                                >
-                                    <div className="flex justify-between items-start">
-                                        <h3
-                                            className="font-bold text-lg"
-                                            style={{ color: theme.colors.textPrimary }}
-                                        >
-                                            {opp.name}
-                                        </h3>
-                                        <span
-                                            className={`px-2.5 py-1 text-xs font-semibold rounded-full ${Data.STAGE_COLORS[opp.stage]}`}
-                                        >
-                                            {opp.stage}
-                                        </span>
-                                    </div>
-                                    <p
-                                        className="text-sm"
-                                        style={{ color: theme.colors.textSecondary }}
-                                    >
-                                        {opp.company}
-                                    </p>
-                                    <p
-                                        className="font-semibold text-2xl my-2"
-                                        style={{ color: theme.colors.textPrimary }}
-                                    >
-                                        {opp.value}
-                                    </p>
-                                </GlassCard>
-                            ))
-                        ) : (
-                            <p
-                                className="text-center text-sm p-8"
-                                style={{ color: theme.colors.textSecondary }}
-                            >
-                                No projects in this stage.
-                            </p>
-                        )}
-                    </div>
-                </div>
-            ) : (
-                <div className="flex-1 overflow-y-auto px-4 pt-4 pb-4 space-y-6 scrollbar-hide">
-                    {myProjects && myProjects.length > 0 ? (
+            <div className="flex-1 overflow-y-auto px-4 pt-4 pb-4 space-y-3 scrollbar-hide">
+                {projectsTab === 'pipeline' ? (
+                    filteredOpportunities.length > 0 ? (
+                        filteredOpportunities.map(opp => (
+                            <GlassCard key={opp.id} theme={theme} className="overflow-hidden p-4 cursor-pointer hover:border-gray-400/50" onClick={() => setSelectedOpportunity(opp)}>
+                                <div className="flex justify-between items-start">
+                                    <h3 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>{opp.name}</h3>
+                                    <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${Data.STAGE_COLORS[opp.stage]}`}>{opp.stage}</span>
+                                </div>
+                                <p className="text-sm" style={{ color: theme.colors.textSecondary }}>{opp.company}</p>
+                                <p className="font-semibold text-2xl my-2" style={{ color: theme.colors.textPrimary }}>{opp.value}</p>
+                            </GlassCard>
+                        ))
+                    ) : (
+                        <p className="text-center text-sm p-8" style={{ color: theme.colors.textSecondary }}>No projects in this stage.</p>
+                    )
+                ) : (
+                    myProjects && myProjects.length > 0 ? (
                         myProjects.map(project => (
-                            <GlassCard
-                                key={project.id}
-                                theme={theme}
-                                className="p-0 overflow-hidden cursor-pointer group"
-                                onClick={() => setSelectedProject(project)}
-                            >
+                            <GlassCard key={project.id} theme={theme} className="p-0 overflow-hidden cursor-pointer group" onClick={() => setSelectedProject(project)}>
                                 <div className="relative aspect-video w-full">
-                                    <img
-                                        src={project.image}
-                                        alt={project.name}
-                                        className="absolute h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                    />
+                                    <img src={project.image} alt={project.name} className="absolute h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                                     <div className="absolute bottom-0 left-0 p-4">
-                                        <h3 className="text-2xl font-bold text-white tracking-tight">
-                                            {project.name}
-                                        </h3>
-                                        <p className="text-white/80 font-medium">
-                                            {project.location}
-                                        </p>
+                                        <h3 className="text-2xl font-bold text-white tracking-tight">{project.name}</h3>
+                                        <p className="text-white/80 font-medium">{project.location}</p>
                                     </div>
                                 </div>
                             </GlassCard>
                         ))
                     ) : (
-                        <p
-                            className="text-center text-sm p-8"
-                            style={{ color: theme.colors.textSecondary }}
-                        >
-                            No projects added yet.
-                        </p>
-                    )}
-                </div>
-            )}
+                        <p className="text-center text-sm p-8" style={{ color: theme.colors.textSecondary }}>No projects added yet.</p>
+                    )
+                )}
+            </div>
         </div>
     );
 };
@@ -6958,8 +6507,6 @@ export {
 
     // Misc. resource screens
     ContractsScreen,
-    DesignDaysScreen,
-    DiscontinuedFinishesScreen,
     InstallInstructionsScreen,
     PresentationsScreen,
     LeadTimesScreen,

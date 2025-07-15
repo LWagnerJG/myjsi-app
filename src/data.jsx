@@ -35,8 +35,6 @@ export const darkTheme = {
     backdropFilter: 'blur(12px)' 
 };
 
-// ... (the rest of your data.jsx file remains the same)
-
 export const logoLight = 'https://i.imgur.com/qskYhB0.png';
 
 export const MENU_ITEMS = [{ id: 'orders', icon: MousePointer, label: 'Orders' }, { id: 'sales', icon: PieChart, label: 'Sales' }, { id: 'products', icon: Armchair, label: 'Products' }, { id: 'resources', icon: Database, label: 'Resources' }, { id: 'projects', icon: Briefcase, label: 'Projects' }, { id: 'community', icon: MessageSquare, label: 'Community' }, { id: 'samples', icon: Package, label: 'Samples' }, { id: 'replacements', icon: RotateCw, label: 'Replacements' },];
@@ -67,6 +65,7 @@ export const MY_PROJECTS_DATA = [
         image: 'https://webresources.jsifurniture.com/production/uploads/jsi_coldjet_install_00001.jpg'
     },
 ];
+
 export const LEAD_TIMES_DATA = [
     { series: 'Addison', type: 'Wood Seating', weeks: 4 },
     { series: 'Addison', type: 'Upholstery', weeks: 7 },
@@ -156,7 +155,9 @@ export const LEAD_TIMES_DATA = [
     { series: 'Wink', type: 'Seating', weeks: 3 },
     { series: 'Ziva', type: 'Tables', weeks: 4 },
 ].sort((a, b) => a.series.localeCompare(b.series));
+
 export const FABRICS_DATA = [{ name: 'Luxe Weave', manufacturer: 'Momentum' }, { name: 'Origin', manufacturer: 'Momentum' }, { name: 'Origin', manufacturer: 'Maharam' }, { name: 'Origin', manufacturer: 'Architex' }, { name: 'Climb', manufacturer: 'Maharam' }, { name: 'Rigid', manufacturer: 'Maharam' }, { name: 'Heritage Tweed', manufacturer: 'Traditions' }];
+
 export const allApps = [
     { name: 'Samples', route: 'samples', icon: Package },
     { name: 'Request Replacement', route: 'replacements', icon: RotateCw },
@@ -180,7 +181,9 @@ export const allApps = [
     { name: 'Settings', route: 'settings', icon: Settings },
     { name: 'Help', route: 'help', icon: HelpCircle },
     { name: 'Feedback', route: 'feedback', icon: Send },
+    { name: 'Design Days', route: 'resources/design_days', icon: Calendar },
 ];
+
 export const RESOURCES_DATA = [
     {
         category: "Fabrics",
@@ -223,7 +226,6 @@ export const VERTICALS = [
     'Hospitality',
     'Other (Please specify)'
 ];
-
 
 export const SOCIAL_MEDIA_POSTS = [{ id: 1, type: 'image', url: 'https://placehold.co/400x500/E3DBC8/2A2A2A?text=JSI+Seating', caption: 'Comfort meets design. ✨ Discover the new Arwyn series, perfect for any modern workspace. #JSIFurniture #OfficeDesign #ModernWorkplace' }, { id: 2, type: 'image', url: 'https://placehold.co/400x500/D9CDBA/2A2A2A?text=Vision+Casegoods', caption: 'Functionality at its finest. The Vision casegoods line offers endless configuration possibilities. #Casegoods #OfficeInspo #JSI' }, { id: 3, type: 'video', url: 'https://placehold.co/400x500/A9886C/FFFFFF?text=Lounge+Tour+(Video)', caption: 'Take a closer look at the luxurious details of our Caav lounge collection. #LoungeSeating #ContractFurniture #HospitalityDesign' }, { id: 4, type: 'image', url: 'https://placehold.co/400x500/966642/FFFFFF?text=Forge+Tables', caption: 'Gather around. The Forge table series brings a rustic yet refined look to collaborative spaces. #MeetingTable #Collaboration #JSI' },];
 
@@ -273,6 +275,7 @@ export const LOANER_POOL_PRODUCTS = [
         }
     },
 ];
+
 export const INITIAL_OPPORTUNITIES = [{ id: 1, name: 'New Office Furnishings', stage: 'Discovery', discount: '5%', value: '$50,000', company: 'ABC Corporation', contact: 'John Smith', poTimeframe: '30-60 days' }, { id: 2, name: 'Lobby Refresh', stage: 'Specifying', value: '$75,000', company: 'XYZ Industries', contact: 'Jane Doe', poTimeframe: '60-90 days' },];
 
 export const STAGES = ['Discovery', 'Specifying', 'Decision/Bidding', 'PO Expected', 'Won', 'Lost'];
@@ -289,7 +292,6 @@ export const COMPETITORS = ['None', 'Kimball', 'OFS', 'Indiana Furniture', 'Nati
 
 export const DISCOUNT_OPTIONS = ['Undecided', '50/20 (60.00%)', '50/20/1 (60.4%)', '50/20/2 (60.80%)', '50/20/4 (61.60%)', '50/20/2/3 (61.98%)', '50/20/5 (62.00%)', '50/20/3 (61.20%)', '50/20/6 (62.40%)', '50/25 (62.50%)', '50/20/5/2 (62.76%)', '50/20/7 (62.80%)', '50/20/8 (63.20%)', '50/10/10/10 (63.55%)', '50/20/9 (63.6%)', '50/20/10 (64.00%)', '50/20/8/3 (64.30%)', '50/20/10/3 (65.08%)', '50/20/10/5 (65.80%)', '50/20/15 (66.00%)'];
 
-
 export const VISION_MATERIALS = ['TFL', 'HPL', 'Veneer'];
 
 export const WIN_PROBABILITY_OPTIONS = ['20%', '40%', '60%', '80%', '100%'];
@@ -299,6 +301,7 @@ export const INITIAL_DESIGN_FIRMS = ['N/A', 'Undecided', 'McGee Designhouse', 'R
 export const INITIAL_DEALERS = ['Undecided', 'Business Furniture', 'COE', 'OfficeWorks', 'RJE'];
 
 export const JSI_LAMINATES = ['Nevada Slate', 'Urban Concrete', 'Smoked Hickory', 'Arctic Oak', 'Tuscan Marble', 'Brushed Steel', 'Midnight Linen', 'Riverstone Gray', 'Golden Teak', 'Sahara Sand'];
+
 export const JSI_VENEERS = ['Rift Cut Oak', 'Smoked Walnut', 'Figured Anigre', 'Reconstituted Ebony', 'Fumed Eucalyptus', 'Birdseye Maple', 'Cherry Burl', 'Sapele Pommele', 'Zebrawood', 'Koa'];
 
 export const YTD_SALES_DATA = [{ label: 'Total Sales', current: 3666132, previous: 2900104, goal: 7000000 }, { label: 'Education', current: 1250000, previous: 1045589, goal: 2500000 }, { label: 'Health', current: 980000, previous: 850000, goal: 2000000 },];
@@ -356,7 +359,9 @@ export const PERMISSION_LABELS = {
     dealerRewards: "Dealer Rewards",
     submittingReplacements: "Submitting Replacements"
 };
+
 export const USER_TITLES = ["Sales", "Designer", "Sales/Designer", "Admin Support"];
+
 export const EMPTY_USER = { firstName: '', lastName: '', email: '', title: 'Sales', role: 'User', permissions: { salesData: true, commissions: false, projects: true, customerRanking: true, dealerRewards: true, submittingReplacements: true } };
 
 export const CUSTOMER_RANK_DATA = [
@@ -387,7 +392,6 @@ export const ORDER_DATA = [
 export const JSI_PRODUCT_SERIES = ['Arwyn', 'Bryn', 'Caav', 'Connect', 'Hoopz', 'Indie', 'Jude', 'Kindera', 'Lok', 'Poet', 'Teekan', 'Vision', 'Wink', 'Ziva'].sort();
 
 export const JSI_POLY_COLORS = ['Unknown', 'Toile Red', 'Thunderous Green', 'Kiwi Green', 'Refuge Blue', 'Navy Blue', 'Tricorn Black', 'Stop Red', 'Extra White'];
-
 
 export const SAMPLE_CATEGORIES = [{ id: 'tfl', name: 'TFL' }, { id: 'hpl', name: 'HPL' }, { id: 'veneer', name: 'Veneer' }, { id: 'solid-wood', name: 'Solid Wood' }, { id: 'paint', name: 'Paint' }, { id: 'metal', name: 'Metal' }, { id: 'solid-surface', name: 'Solid Surface' }, { id: 'glass', name: 'Glass' }, { id: 'plastic', name: 'Plastic' }, { id: 'poly', name: 'Poly' }, { id: 'specialty', name: 'Specialty' },];
 
