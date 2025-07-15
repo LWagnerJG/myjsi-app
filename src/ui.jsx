@@ -2572,13 +2572,30 @@ const fabricTypeOptions = ['Type1', 'Type2', 'Type3'];
 const tackableOptions = ['Yes', 'No'];
 
 export const FabricSearchForm = ({ theme, showAlert, onNavigate }) => {
-    const [form, setForm] = useState({ supplier: '', pattern: '', jsiSeries: '' });
+    const [form, setForm] = useState({ supplier: '', pattern: '', jsiSeries: '', grade: 'Any' }); // Initialize grade to 'Any'
     const [results, setResults] = useState(null);
     const [error, setError] = useState('');
 
     const fabricSuppliers = useMemo(() => ['Arc-Com', 'Camira', 'Carnegie', 'CF Stinson', 'Designtex', 'Guilford of Maine', 'Knoll', 'Kravet', 'Maharam', 'Momentum'], []);
     const fabricPatterns = useMemo(() => ['Astor', 'Caldera', 'Crossgrain', 'Dapper', 'Eco Wool', 'Heritage Tweed', 'Luxe Weave', 'Melange', 'Pixel', 'Prospect'], []);
     const jsiSeriesOptions = useMemo(() => ['Alden', 'Allied', 'Anthology', 'Aria', 'Cincture', 'Convert', 'Midwest', 'Momentum', 'Proton', 'Reveal', 'Symmetry', 'Vision', 'Wink'], []);
+    const gradeOptions = useMemo(() => [ // Define grade options
+        { label: 'Any', value: 'Any' },
+        { label: 'A', value: 'A' },
+        { label: 'B', value: 'B' },
+        { label: 'C', value: 'C' },
+        { label: 'COL', value: 'COL' },
+        { label: 'COM', value: 'COM' },
+        { label: 'D', value: 'D' },
+        { label: 'E', value: 'E' },
+        { label: 'F', value: 'F' },
+        { label: 'G', value: 'G' },
+        { label: 'H', value: 'H' },
+        { label: 'I', value: 'I' },
+        { label: 'J', value: 'J' },
+        { label: 'L1', value: 'L1' },
+        { label: 'L2', value: 'L2' }
+    ], []);
 
     const updateField = useCallback((field, value) => {
         setForm(f => ({ ...f, [field]: value }));
@@ -2594,20 +2611,20 @@ export const FabricSearchForm = ({ theme, showAlert, onNavigate }) => {
         let filtered = Data.FABRICS_DATA.filter(item =>
             item.supplier === form.supplier &&
             item.series === form.jsiSeries &&
-            (!form.pattern || item.pattern === form.pattern)
+            (!form.pattern || item.pattern === form.pattern) &&
+            (form.grade === 'Any' || item.grade === form.grade) // Filter by grade
         );
         setResults(filtered);
     }, [form]);
 
     const resetSearch = useCallback(() => {
-        setForm({ supplier: '', pattern: '', jsiSeries: '' });
+        setForm({ supplier: '', pattern: '', jsiSeries: '', grade: 'Any' }); // Reset grade to 'Any'
         setResults(null);
         setError('');
     }, []);
 
     return (
         <div className="flex flex-col h-full">
-            {/* FIX: The onBack prop has been removed to hide the redundant back arrow */}
             <PageTitle title="Search Fabrics" theme={theme} />
 
             <div className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-hide">
@@ -2616,10 +2633,20 @@ export const FabricSearchForm = ({ theme, showAlert, onNavigate }) => {
                         <FormSection title="" theme={theme}>
                             {error && <p className="text-sm text-red-500 -mt-2 mb-2 px-1">{error}</p>}
 
-                            {/* FIX: Added dropdownClassName to make lists longer */}
                             <AutoCompleteCombobox label="Supplier" required value={form.supplier} onChange={v => updateField('supplier', v)} options={fabricSuppliers} placeholder="Search Suppliers" theme={theme} dropdownClassName="max-h-72" />
                             <AutoCompleteCombobox label="Pattern" value={form.pattern} onChange={v => updateField('pattern', v)} options={fabricPatterns} placeholder="Search Patterns (Optional)" theme={theme} dropdownClassName="max-h-72" />
                             <AutoCompleteCombobox label="JSI Series" required value={form.jsiSeries} onChange={v => updateField('jsiSeries', v)} options={jsiSeriesOptions} placeholder="Search JSI Series" theme={theme} dropdownClassName="max-h-72" />
+
+                            {/* New Grade Selection */}
+                            <div>
+                                <label className="block text-sm font-semibold px-3" style={{ color: theme.colors.textSecondary }}>Grade</label>
+                                <ToggleButtonGroup
+                                    value={form.grade}
+                                    onChange={value => updateField('grade', value)}
+                                    options={gradeOptions}
+                                    theme={theme}
+                                />
+                            </div>
 
                         </FormSection>
                         <button type="submit" className="w-full text-white font-bold py-3.5 rounded-full" style={{ backgroundColor: theme.colors.accent }}>Search</button>
@@ -2631,6 +2658,7 @@ export const FabricSearchForm = ({ theme, showAlert, onNavigate }) => {
                                 <div><span className="font-medium" style={{ color: theme.colors.textSecondary }}>Supplier:</span> {form.supplier}</div>
                                 {form.pattern && <div><span className="font-medium" style={{ color: theme.colors.textSecondary }}>Pattern:</span> {form.pattern}</div>}
                                 <div><span className="font-medium" style={{ color: theme.colors.textSecondary }}>Series:</span> {form.jsiSeries}</div>
+                                <div><span className="font-medium" style={{ color: theme.colors.textSecondary }}>Grade:</span> {form.grade}</div> {/* Display selected grade */}
                             </div>
                         </FormSection>
 
