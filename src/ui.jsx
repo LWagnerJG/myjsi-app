@@ -2572,33 +2572,28 @@ const fabricTypeOptions = ['Type1', 'Type2', 'Type3'];
 const tackableOptions = ['Yes', 'No'];
 
 export const FabricSearchForm = ({ theme, showAlert, onNavigate }) => {
-    const [form, setForm] = useState({ supplier: '', pattern: '', jsiSeries: '', grade: 'Any' }); // Initialize grade to 'Any'
+    const [form, setForm] = useState({ supplier: '', pattern: '', jsiSeries: '', grade: [] }); // grade is now an array for multi-selection
     const [results, setResults] = useState(null);
     const [error, setError] = useState('');
 
     const fabricSuppliers = useMemo(() => ['Arc-Com', 'Camira', 'Carnegie', 'CF Stinson', 'Designtex', 'Guilford of Maine', 'Knoll', 'Kravet', 'Maharam', 'Momentum'], []);
     const fabricPatterns = useMemo(() => ['Astor', 'Caldera', 'Crossgrain', 'Dapper', 'Eco Wool', 'Heritage Tweed', 'Luxe Weave', 'Melange', 'Pixel', 'Prospect'], []);
     const jsiSeriesOptions = useMemo(() => ['Alden', 'Allied', 'Anthology', 'Aria', 'Cincture', 'Convert', 'Midwest', 'Momentum', 'Proton', 'Reveal', 'Symmetry', 'Vision', 'Wink'], []);
-    const gradeOptions = useMemo(() => [ // Define grade options
-        { label: 'Any', value: 'Any' },
-        { label: 'A', value: 'A' },
-        { label: 'B', value: 'B' },
-        { label: 'C', value: 'C' },
-        { label: 'COL', value: 'COL' },
-        { label: 'COM', value: 'COM' },
-        { label: 'D', value: 'D' },
-        { label: 'E', value: 'E' },
-        { label: 'F', value: 'F' },
-        { label: 'G', value: 'G' },
-        { label: 'H', value: 'H' },
-        { label: 'I', value: 'I' },
-        { label: 'J', value: 'J' },
-        { label: 'L1', value: 'L1' },
-        { label: 'L2', value: 'L2' }
-    ], []);
+    const allGradeOptions = useMemo(() => ['A', 'B', 'C', 'COL', 'COM', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'L1', 'L2'], []); // All possible grades
 
     const updateField = useCallback((field, value) => {
         setForm(f => ({ ...f, [field]: value }));
+    }, []);
+
+    const toggleGrade = useCallback((grade) => {
+        setForm(prevForm => {
+            const currentGrades = prevForm.grade;
+            if (currentGrades.includes(grade)) {
+                return { ...prevForm, grade: currentGrades.filter(g => g !== grade) };
+            } else {
+                return { ...prevForm, grade: [...currentGrades, grade] };
+            }
+        });
     }, []);
 
     const handleSubmit = useCallback(e => {
@@ -2612,13 +2607,13 @@ export const FabricSearchForm = ({ theme, showAlert, onNavigate }) => {
             item.supplier === form.supplier &&
             item.series === form.jsiSeries &&
             (!form.pattern || item.pattern === form.pattern) &&
-            (form.grade === 'Any' || item.grade === form.grade) // Filter by grade
+            (form.grade.length === 0 || form.grade.includes(item.grade)) // Filter by selected grades (if any)
         );
         setResults(filtered);
     }, [form]);
 
     const resetSearch = useCallback(() => {
-        setForm({ supplier: '', pattern: '', jsiSeries: '', grade: 'Any' }); // Reset grade to 'Any'
+        setForm({ supplier: '', pattern: '', jsiSeries: '', grade: [] }); // Reset grade to empty array
         setResults(null);
         setError('');
     }, []);
@@ -2637,15 +2632,30 @@ export const FabricSearchForm = ({ theme, showAlert, onNavigate }) => {
                             <AutoCompleteCombobox label="Pattern" value={form.pattern} onChange={v => updateField('pattern', v)} options={fabricPatterns} placeholder="Search Patterns (Optional)" theme={theme} dropdownClassName="max-h-72" />
                             <AutoCompleteCombobox label="JSI Series" required value={form.jsiSeries} onChange={v => updateField('jsiSeries', v)} options={jsiSeriesOptions} placeholder="Search JSI Series" theme={theme} dropdownClassName="max-h-72" />
 
-                            {/* New Grade Selection */}
+                            {/* Grade Selection - All options displayed directly and wrapped */}
                             <div>
-                                <label className="block text-sm font-semibold px-3" style={{ color: theme.colors.textSecondary }}>Grade</label>
-                                <ToggleButtonGroup
-                                    value={form.grade}
-                                    onChange={value => updateField('grade', value)}
-                                    options={gradeOptions}
-                                    theme={theme}
-                                />
+                                <label className="block text-sm font-semibold px-3 mb-2" style={{ color: theme.colors.textSecondary }}>Grade</label>
+                                <div className="flex flex-wrap gap-2 p-1.5 rounded-full" style={{ backgroundColor: theme.colors.subtle }}>
+                                    <button
+                                        type="button"
+                                        onClick={() => setForm(prev => ({ ...prev, grade: [] }))} // Select "Any"
+                                        className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-colors duration-200 ${form.grade.length === 0 ? 'bg-white text-accent shadow-sm border' : 'bg-transparent text-textSecondary'}`}
+                                        style={{ borderColor: form.grade.length === 0 ? theme.colors.border : 'transparent' }}
+                                    >
+                                        Any
+                                    </button>
+                                    {allGradeOptions.map(grade => (
+                                        <button
+                                            key={grade}
+                                            type="button"
+                                            onClick={() => toggleGrade(grade)}
+                                            className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-colors duration-200 ${form.grade.includes(grade) ? 'bg-white text-accent shadow-sm border' : 'bg-transparent text-textSecondary'}`}
+                                            style={{ borderColor: form.grade.includes(grade) ? theme.colors.border : 'transparent' }}
+                                        >
+                                            {grade}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
 
                         </FormSection>
@@ -2658,7 +2668,7 @@ export const FabricSearchForm = ({ theme, showAlert, onNavigate }) => {
                                 <div><span className="font-medium" style={{ color: theme.colors.textSecondary }}>Supplier:</span> {form.supplier}</div>
                                 {form.pattern && <div><span className="font-medium" style={{ color: theme.colors.textSecondary }}>Pattern:</span> {form.pattern}</div>}
                                 <div><span className="font-medium" style={{ color: theme.colors.textSecondary }}>Series:</span> {form.jsiSeries}</div>
-                                <div><span className="font-medium" style={{ color: theme.colors.textSecondary }}>Grade:</span> {form.grade}</div> {/* Display selected grade */}
+                                <div><span className="font-medium" style={{ color: theme.colors.textSecondary }}>Grade:</span> {form.grade.length > 0 ? form.grade.join(', ') : 'Any'}</div> {/* Display selected grade(s) */}
                             </div>
                         </FormSection>
 
