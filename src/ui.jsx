@@ -3508,18 +3508,29 @@ export const CreatePost = () => {
     );
 };
 
-const CreateContentModal = ({ close, theme, onAdd }) => {
+export const CreateContentModal = ({ close, theme, onAdd }) => {
     const [type, setType] = useState(null);
     const [text, setText] = useState('');
     const [file, setFile] = useState(null);
     const [question, setQ] = useState('');
     const [optA, setA] = useState('');
     const [optB, setB] = useState('');
+    const [optC, setC] = useState(''); // Added Option C state
+    const [optD, setD] = useState(''); // Added Option D state
 
     const submit = () => {
         // This is demonstration logic, would be replaced with actual API calls
         if (type === 'post') onAdd('post', { id: Date.now(), user: { name: 'You', avatar: '' }, timeAgo: 'just now', text, image: file ? URL.createObjectURL(file) : null, likes: 0, comments: [], });
-        if (type === 'poll') onAdd('poll', { id: Date.now(), user: { name: 'You', avatar: '' }, timeAgo: 'now', question, options: [{ id: 'a', text: optA || 'Option A', votes: 0 }, { id: 'b', text: optB || 'Option B', votes: 0 }], });
+        if (type === 'poll') {
+            const options = [
+                { id: 'a', text: optA || 'Option A', votes: 0 },
+                { id: 'b', text: optB || 'Option B', votes: 0 },
+            ];
+            if (optC) options.push({ id: 'c', text: optC, votes: 0 }); // Add Option C if entered
+            if (optD) options.push({ id: 'd', text: optD, votes: 0 }); // Add Option D if entered
+
+            onAdd('poll', { id: Date.now(), user: { name: 'You', avatar: '' }, timeAgo: 'now', question, options });
+        }
         close();
     };
 
@@ -3550,13 +3561,17 @@ const CreateContentModal = ({ close, theme, onAdd }) => {
                     <FormInput value={question} onChange={(e) => setQ(e.target.value)} placeholder="What's your question?" theme={theme} />
                     <FormInput value={optA} onChange={(e) => setA(e.target.value)} placeholder="Option A" theme={theme} />
                     <FormInput value={optB} onChange={(e) => setB(e.target.value)} placeholder="Option B" theme={theme} />
+                    <FormInput value={optC} onChange={(e) => setC(e.target.value)} placeholder="Option C (Optional)" theme={theme} /> {/* Added Optional Option C */}
+                    <FormInput value={optD} onChange={(e) => setD(e.target.value)} placeholder="Option D (Optional)" theme={theme} /> {/* Added Optional Option D */}
                     <button onClick={submit} className="w-full font-bold py-3 px-6 rounded-full text-white" style={{ backgroundColor: theme.colors.accent }}>Post Poll</button>
                 </div>;
             default:
-                return <div className="space-y-3">
-                    <OptionButton icon={MessageSquare} title="Feed Post" description="Share an update or photo" onClick={() => setType('post')} />
-                    <OptionButton icon={PieChart} title="Poll" description="Ask a question to the community" onClick={() => setType('poll')} />
-                </div>;
+                return (
+                    <div className="space-y-3">
+                        <OptionButton icon={MessageSquare} title="Feed Post" description="Share an update or photo" onClick={() => setType('post')} />
+                        <OptionButton icon={PieChart} title="Poll" description="Ask a question to the community" onClick={() => setType('poll')} />
+                    </div>
+                );
         }
     };
 
@@ -6576,7 +6591,6 @@ const SCREEN_MAP = {
 
 export {
     Avatar,
-    CreateContentModal,
     SuccessToast,
     MonthlyBarChart,
     MonthlyTable,
