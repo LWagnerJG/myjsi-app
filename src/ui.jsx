@@ -2572,18 +2572,29 @@ const fabricTypeOptions = ['Type1', 'Type2', 'Type3'];
 const tackableOptions = ['Yes', 'No'];
 
 export const FabricSearchForm = ({ theme, showAlert, onNavigate }) => {
-    const [form, setForm] = useState({ supplier: '', pattern: '', jsiSeries: '', grade: [] }); // grade is now an array for multi-selection
+    const [form, setForm] = useState({ supplier: '', pattern: '', jsiSeries: '', grade: [], textile: 'Any', tackable: 'Any' }); // Added 'textile' and 'tackable' to form state, default to 'Any'
     const [results, setResults] = useState(null);
     const [error, setError] = useState('');
 
     const fabricSuppliers = useMemo(() => ['Arc-Com', 'Camira', 'Carnegie', 'CF Stinson', 'Designtex', 'Guilford of Maine', 'Knoll', 'Kravet', 'Maharam', 'Momentum'], []);
     const fabricPatterns = useMemo(() => ['Astor', 'Caldera', 'Crossgrain', 'Dapper', 'Eco Wool', 'Heritage Tweed', 'Luxe Weave', 'Melange', 'Pixel', 'Prospect'], []);
     const jsiSeriesOptions = useMemo(() => ['Alden', 'Allied', 'Anthology', 'Aria', 'Cincture', 'Convert', 'Midwest', 'Momentum', 'Proton', 'Reveal', 'Symmetry', 'Vision', 'Wink'], []);
-    const allGradeOptions = useMemo(() => ['A', 'B', 'C', 'COL', 'COM', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'L1', 'L2'], []); // All possible grades
+    const allGradeOptions = useMemo(() => ['A', 'B', 'C', 'COL', 'COM', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'L1', 'L2'], []);
+    const textileOptions = useMemo(() => [
+        { label: 'Any', value: 'Any' },
+        { label: 'Coated', value: 'Coated' },
+        { label: 'Fabric', value: 'Fabric' },
+        { label: 'Leather', value: 'Leather' },
+        { label: 'Panel', value: 'Panel' }
+    ], []);
+    const tackableOptions = useMemo(() => [
+        { label: 'Any', value: 'Any' },
+        { label: 'Yes', value: 'yes' },
+        { label: 'No', value: 'no' }
+    ], []);
 
-    const updateField = useCallback((field, value) => {
-        setForm(f => ({ ...f, [field]: value }));
-    }, []);
+    const updateField = useCallback((field, value) =>
+        setForm(f => ({ ...f, [field]: value })), []);
 
     const toggleGrade = useCallback((grade) => {
         setForm(prevForm => {
@@ -2607,13 +2618,15 @@ export const FabricSearchForm = ({ theme, showAlert, onNavigate }) => {
             item.supplier === form.supplier &&
             item.series === form.jsiSeries &&
             (!form.pattern || item.pattern === form.pattern) &&
-            (form.grade.length === 0 || form.grade.includes(item.grade)) // Filter by selected grades (if any)
+            (form.grade.length === 0 || form.grade.includes(item.grade)) &&
+            (form.textile === 'Any' || item.textile === form.textile) && // Filter by textile
+            (form.tackable === 'Any' || item.tackable === form.tackable) // Filter by tackable
         );
         setResults(filtered);
     }, [form]);
 
     const resetSearch = useCallback(() => {
-        setForm({ supplier: '', pattern: '', jsiSeries: '', grade: [] }); // Reset grade to empty array
+        setForm({ supplier: '', pattern: '', jsiSeries: '', grade: [], textile: 'Any', tackable: 'Any' }); // Reset all fields
         setResults(null);
         setError('');
     }, []);
@@ -2632,15 +2645,19 @@ export const FabricSearchForm = ({ theme, showAlert, onNavigate }) => {
                             <AutoCompleteCombobox label="Pattern" value={form.pattern} onChange={v => updateField('pattern', v)} options={fabricPatterns} placeholder="Search Patterns (Optional)" theme={theme} dropdownClassName="max-h-72" />
                             <AutoCompleteCombobox label="JSI Series" required value={form.jsiSeries} onChange={v => updateField('jsiSeries', v)} options={jsiSeriesOptions} placeholder="Search JSI Series" theme={theme} dropdownClassName="max-h-72" />
 
-                            {/* Grade Selection - All options displayed directly and wrapped */}
+                            {/* Grade Selection */}
                             <div>
                                 <label className="block text-sm font-semibold px-3 mb-2" style={{ color: theme.colors.textSecondary }}>Grade</label>
                                 <div className="flex flex-wrap gap-2 p-1.5 rounded-full" style={{ backgroundColor: theme.colors.subtle }}>
                                     <button
                                         type="button"
                                         onClick={() => setForm(prev => ({ ...prev, grade: [] }))} // Select "Any"
-                                        className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-colors duration-200 ${form.grade.length === 0 ? 'bg-white text-accent shadow-sm border' : 'bg-transparent text-textSecondary'}`}
-                                        style={{ borderColor: form.grade.length === 0 ? theme.colors.border : 'transparent' }}
+                                        className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-colors duration-200 border-2`}
+                                        style={{
+                                            backgroundColor: form.grade.length === 0 ? theme.colors.surface : 'transparent',
+                                            color: form.grade.length === 0 ? theme.colors.accent : theme.colors.textSecondary,
+                                            borderColor: form.grade.length === 0 ? theme.colors.accent : theme.colors.border,
+                                        }}
                                     >
                                         Any
                                     </button>
@@ -2649,13 +2666,39 @@ export const FabricSearchForm = ({ theme, showAlert, onNavigate }) => {
                                             key={grade}
                                             type="button"
                                             onClick={() => toggleGrade(grade)}
-                                            className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-colors duration-200 ${form.grade.includes(grade) ? 'bg-white text-accent shadow-sm border' : 'bg-transparent text-textSecondary'}`}
-                                            style={{ borderColor: form.grade.includes(grade) ? theme.colors.border : 'transparent' }}
+                                            className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-colors duration-200 border-2`}
+                                            style={{
+                                                backgroundColor: form.grade.includes(grade) ? theme.colors.surface : 'transparent',
+                                                color: form.grade.includes(grade) ? theme.colors.accent : theme.colors.textSecondary,
+                                                borderColor: form.grade.includes(grade) ? theme.colors.accent : theme.colors.border,
+                                            }}
                                         >
                                             {grade}
                                         </button>
                                     ))}
                                 </div>
+                            </div>
+
+                            {/* Textile Selection */}
+                            <div>
+                                <label className="block text-sm font-semibold px-3 mb-2" style={{ color: theme.colors.textSecondary }}>Textile</label>
+                                <ToggleButtonGroup
+                                    value={form.textile}
+                                    onChange={value => updateField('textile', value)}
+                                    options={textileOptions}
+                                    theme={theme}
+                                />
+                            </div>
+
+                            {/* Tackable Selection */}
+                            <div>
+                                <label className="block text-sm font-semibold px-3 mb-2" style={{ color: theme.colors.textSecondary }}>Tackable</label>
+                                <ToggleButtonGroup
+                                    value={form.tackable}
+                                    onChange={value => updateField('tackable', value)}
+                                    options={tackableOptions}
+                                    theme={theme}
+                                />
                             </div>
 
                         </FormSection>
@@ -2668,7 +2711,9 @@ export const FabricSearchForm = ({ theme, showAlert, onNavigate }) => {
                                 <div><span className="font-medium" style={{ color: theme.colors.textSecondary }}>Supplier:</span> {form.supplier}</div>
                                 {form.pattern && <div><span className="font-medium" style={{ color: theme.colors.textSecondary }}>Pattern:</span> {form.pattern}</div>}
                                 <div><span className="font-medium" style={{ color: theme.colors.textSecondary }}>Series:</span> {form.jsiSeries}</div>
-                                <div><span className="font-medium" style={{ color: theme.colors.textSecondary }}>Grade:</span> {form.grade.length > 0 ? form.grade.join(', ') : 'Any'}</div> {/* Display selected grade(s) */}
+                                <div><span className="font-medium" style={{ color: theme.colors.textSecondary }}>Grade:</span> {form.grade.length > 0 ? form.grade.join(', ') : 'Any'}</div>
+                                <div><span className="font-medium" style={{ color: theme.colors.textSecondary }}>Textile:</span> {form.textile}</div>
+                                <div><span className="font-medium" style={{ color: theme.colors.textSecondary }}>Tackable:</span> {form.tackable}</div>
                             </div>
                         </FormSection>
 
@@ -3919,10 +3964,10 @@ export const HomeScreen = ({ onNavigate, theme, onAskAI, showAIDropdown, aiRespo
                         <div
                             key={item.id}
                             // Padding changed from p-4 to p-6 to move content inward
-                            className="group relative p-6 h-32 flex flex-col justify-between cursor-pointer transition-all duration-300 rounded-[2.25rem] border shadow-lg hover:shadow-xl hover:-translate-y-1"
+                            className="group relative p-6 h-32 flex flex-col justify-between cursor-pointer transition-all duration-300 rounded-[2.25rem] shadow-lg hover:shadow-xl hover:-translate-y-1"
                             style={{
                                 backgroundColor: theme.colors.surface,
-                                borderColor: theme.colors.border
+                                // The borderColor property has been removed here to remove the thin grey border.
                             }}
                             onClick={() => onNavigate(item.id)}
                         >
@@ -3936,8 +3981,8 @@ export const HomeScreen = ({ onNavigate, theme, onAskAI, showAIDropdown, aiRespo
                     ))}
                 </div>
                 <div
-                    className="p-1 rounded-full border shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
-                    style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.border }}
+                    className="p-1 rounded-full shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
+                    style={{ backgroundColor: theme.colors.surface, /* The borderColor property has been removed here */ }}
                 >
                     <button onClick={handleFeedbackClick} className="w-full py-5 px-3 rounded-full flex items-center justify-center space-x-4">
                         <MessageSquare className="w-7 h-7" style={{ color: theme.colors.accent }} strokeWidth={1.5} />
