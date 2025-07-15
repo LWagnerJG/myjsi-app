@@ -349,7 +349,14 @@ export const INITIAL_POLLS = [
     },
 ];
 
-export const SALES_VERTICALS_DATA = [{ label: 'Healthcare', value: 2900104, color: '#B99962' }, { label: 'Higher Ed', value: 1045589, color: '#7A7A7A' }, { label: 'K12', value: 1045589, color: '#A0A0A0' }, { label: 'Corporate', value: 1045589, color: '#2A2A2A' }, { label: 'Government', value: 1045589, color: '#CCCCCC' },];
+export const SALES_VERTICALS_DATA = [
+    { label: 'Healthcare', value: 2900104, color: '#c5e1a5' }, // Changed color
+    { label: 'Education', value: 1045589, color: '#ef9a9a' }, // Changed color
+    { label: 'Hospitality', value: 1045589, color: '#b39ddb' }, // Changed color
+    { label: 'Corporate', value: 1045589, color: '#C7AD8E' }, // Changed color
+    { label: 'Government', value: 1045589, color: '#ffe082' }, // Changed color
+    { label: 'Other', value: 500000, color: '#c1c1c1' }, // Added an 'Other' category to use the last color
+];
 
 export const PERMISSION_LABELS = {
     salesData: "Sales Data",

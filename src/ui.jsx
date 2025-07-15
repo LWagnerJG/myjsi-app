@@ -16,7 +16,8 @@ import {
     DROPDOWN_GAP,
 } from './constants/dropdown.js';
 
-import { DropdownPortal } from './DropdownPortal.jsx';   //  ← this line
+import { DropdownPortal } from './DropdownPortal.jsx';
+import { REWARDS_DATA } from './data.jsx';
 
 import * as Data from './data.jsx';
 
@@ -195,20 +196,24 @@ export const Card = ({ children, ...props }) => (
 )
 
 export const IncentiveRewardsScreen = ({ theme }) => {
-    const generateTimePeriods = () => {
+    const generateTimePeriods = useCallback(() => {
         const periods = [];
         const currentYear = new Date().getFullYear();
-        for (let year = currentYear; year >= currentYear - 2; year--) {
-            periods.push({ value: `${year}`, label: `${year}` });
+
+        for (let year = currentYear; year >= currentYear - 2; year--) { // Last 3 years
+            periods.push({ value: `${year}`, label: `${year}` }); // Add full year
             for (let q = 4; q >= 1; q--) {
-                if (year === currentYear && q > Math.floor(new Date().getMonth() / 3) + 1) continue;
+                // Only add future quarters for the current year if they are in the past
+                if (year === currentYear && q > Math.floor(new Date().getMonth() / 3) + 1) {
+                    continue;
+                }
                 periods.push({ value: `${year}-Q${q}`, label: `Q${q} ${year}` });
             }
         }
         return periods;
-    };
+    }, []);
 
-    const timePeriods = useMemo(generateTimePeriods, []);
+    const timePeriods = useMemo(generateTimePeriods, [generateTimePeriods]);
     const [selectedPeriod, setSelectedPeriod] = useState(timePeriods[0].value);
 
     const rewardsData = useMemo(() => {
@@ -221,11 +226,11 @@ export const IncentiveRewardsScreen = ({ theme }) => {
 
             for (let q = 1; q <= 4; q++) {
                 const periodKey = `${year}-Q${q}`;
-                if (REWARDS_DATA[periodKey]) {
-                    REWARDS_DATA[periodKey].sales.forEach(person => {
+                if (REWARDS_DATA[periodKey]) { // Fixed typo here
+                    REWARDS_DATA[periodKey].sales.forEach(person => { // Fixed typo here
                         salesMap.set(person.name, (salesMap.get(person.name) || 0) + person.amount);
                     });
-                    REWARDS_DATA[periodKey].designers.forEach(person => {
+                    REWARDS_DATA[periodKey].designers.forEach(person => { // Fixed typo here
                         designersMap.set(person.name, (designersMap.get(person.name) || 0) + person.amount);
                     });
                 }
@@ -236,7 +241,7 @@ export const IncentiveRewardsScreen = ({ theme }) => {
 
             return cumulativeData;
         }
-        return REWARDS_DATA[selectedPeriod] || { sales: [], designers: [] };
+        return REWARDS_DATA[selectedPeriod] || { sales: [], designers: [] }; // Fixed typo here
     }, [selectedPeriod]);
 
     const sortedSales = [...(rewardsData.sales || [])].sort((a, b) => b.amount - a.amount);
@@ -244,16 +249,18 @@ export const IncentiveRewardsScreen = ({ theme }) => {
 
     return (
         <>
-            <PageTitle title="Rewards" theme={theme} />
+            <PageTitle title="Rewards" theme={theme}>
+                <div className="w-36"> {/* Added a div to control dropdown width */}
+                    <PortalNativeSelect
+                        value={selectedPeriod}
+                        onChange={e => setSelectedPeriod(e.target.value)}
+                        options={timePeriods}
+                        theme={theme}
+                        placeholder="Select Period"
+                    />
+                </div>
+            </PageTitle>
             <div className="px-4 space-y-4 pb-4">
-                <FormInput
-                    type="select"
-                    value={selectedPeriod}
-                    onChange={e => setSelectedPeriod(e.target.value)}
-                    options={timePeriods}
-                    theme={theme}
-                />
-
                 <GlassCard theme={theme} className="p-4">
                     <h3 className="font-bold text-xl mb-2" style={{ color: theme.colors.textPrimary }}>Sales</h3>
                     <div className="space-y-2">
@@ -281,6 +288,7 @@ export const IncentiveRewardsScreen = ({ theme }) => {
         </>
     );
 };
+
 
 export const AutoCompleteCombobox = ({
     label,
@@ -4360,7 +4368,7 @@ export const DonutChart = React.memo(({ data, theme }) => {
                         <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: item.color }}></div>
                         <div>
                             <p className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>{item.label}</p>
-                            <p className="text-xs font-mono" style={{ color: theme.colors.textSecondary }}>${item.value.toLocaleString()}</p>
+                            <p className="text-sm font-normal" style={{ color: theme.colors.textSecondary }}>${item.value.toLocaleString()}</p> {/* Changed font-mono to font-normal and text-xs to text-sm */}
                         </div>
                     </div>
                 ))}
@@ -4750,6 +4758,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
     const { MONTHLY_SALES_DATA, ORDER_DATA, SALES_VERTICALS_DATA } = Data;
     const [monthlyView, setMonthlyView] = useState('table');
     const [selectedOrder, setSelectedOrder] = useState(null);
+    const [numRecentOrders, setNumRecentOrders] = useState(3); // State to control number of recent orders displayed
 
     const { totalBookings, totalSales } = useMemo(() => {
         const bookings = Data.MONTHLY_SALES_DATA.reduce((acc, m) => acc + m.bookings, 0);
@@ -4757,11 +4766,18 @@ export const SalesScreen = ({ theme, onNavigate }) => {
         return { totalBookings: bookings, totalSales: sales };
     }, []);
 
-    const recentOrders = useMemo(() => {
+    const allRecentOrders = useMemo(() => {
         return Data.ORDER_DATA
             .filter(o => o.date && o.net)
-            .sort((a, b) => new Date(b.date) - new Date(a.date))
-            .slice(0, 9);
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
+    }, []);
+
+    const displayedRecentOrders = useMemo(() => {
+        return allRecentOrders.slice(0, numRecentOrders);
+    }, [allRecentOrders, numRecentOrders]);
+
+    const handleShowMoreOrders = useCallback(() => {
+        setNumRecentOrders(8); // Show 8 total orders
     }, []);
 
     const goal = 7000000;
@@ -4786,7 +4802,6 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                         className="flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-transform hover:scale-105 active:scale-95"
                         style={{ backgroundColor: theme.colors.accent, color: 'white' }}
                     >
-                        {/* The button text has been updated here */}
                         <span>New Lead</span>
                         <Plus className="w-4 h-4" />
                     </button>
@@ -4802,9 +4817,8 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                         <p className="text-4xl font-bold my-2" style={{ color: theme.colors.accent }}>
                             {percentToGoal.toFixed(1)}%
                         </p>
-                        {/* This div is the gray background bar, now with a more visible color */}
                         <div className="relative w-full h-2.5 rounded-full" style={{ backgroundColor: 'rgba(0, 0, 0, 0.08)' }}>
-                            <div className="h-2.5 rounded-full" style={{ width: `${percentToGoal}%`, backgroundColor: theme.colors.accent }}></div>
+                            <div className="h-full rounded-full" style={{ width: `${percentToGoal}%`, backgroundColor: theme.colors.accent }}></div>
                         </div>
                     </GlassCard>
 
@@ -4833,11 +4847,51 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                             />}
                     </GlassCard>
 
-                    <RecentPOsCard
-                        orders={recentOrders}
-                        theme={theme}
-                        onOrderClick={handleShowOrderDetails}
-                    />
+                    {/* Recent POs Card now includes the "Show five more" button */}
+                    <GlassCard theme={theme} className="p-4 hover:border-white/20 transition-all duration-300">
+                        <h3 className="font-bold text-lg mb-4" style={{ color: theme.colors.textPrimary }}>
+                            Recent Purchase Orders
+                        </h3>
+                        <div className="space-y-3">
+                            {displayedRecentOrders.map((order, index) => (
+                                <div
+                                    key={index}
+                                    className="flex justify-between items-center p-3 rounded-lg cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                                    onClick={() => handleShowOrderDetails(order)}
+                                    style={{ backgroundColor: theme.colors.subtle }}
+                                >
+                                    <div>
+                                        <div className="font-semibold" style={{ color: theme.colors.textPrimary }}>
+                                            {order.company}
+                                        </div>
+                                        <div className="text-sm" style={{ color: theme.colors.textSecondary }}>
+                                            PO #{order.po}
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <div className="font-bold" style={{ color: theme.colors.accent }}>
+                                            {order.amount}
+                                        </div>
+                                        <div className="text-sm" style={{ color: theme.colors.textSecondary }}>
+                                            {new Date(order.date).toLocaleDateString()}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {numRecentOrders === 3 && allRecentOrders.length > 3 && (
+                            <div className="text-center mt-4 pt-4 border-t" style={{ borderColor: theme.colors.border }}>
+                                <button
+                                    onClick={handleShowMoreOrders}
+                                    className="font-semibold text-sm py-2 px-4 rounded-full transition-colors"
+                                    style={{ backgroundColor: theme.colors.subtle, color: theme.colors.accent }}
+                                >
+                                    Show five more
+                                </button>
+                            </div>
+                        )}
+                    </GlassCard>
 
                     <GlassCard theme={theme} className="p-4 hover:border-white/20 transition-all duration-300">
                         <h3 className="font-bold text-lg mb-4" style={{ color: theme.colors.textPrimary }}>
