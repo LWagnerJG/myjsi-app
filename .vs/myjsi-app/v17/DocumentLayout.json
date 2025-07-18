@@ -25,8 +25,8 @@
       "VerticalTabListWidth": 256,
       "DocumentGroups": [
         {
-          "DockedHeight": 299,
-          "SelectedChildIndex": 3,
+          "DockedHeight": 211,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Document",
@@ -51,19 +51,7 @@
               "RelativeToolTip": "index.html",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABkAAAAHAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
-              "WhenOpened": "2025-07-14T16:39:19.571Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "data.jsx",
-              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\data.jsx",
-              "RelativeDocumentMoniker": "src\\data.jsx",
-              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\data.jsx",
-              "RelativeToolTip": "src\\data.jsx",
-              "ViewState": "AgIAAOwBAAAAAAAAAAAAwH4CAAAYAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
-              "WhenOpened": "2025-07-14T15:15:33.218Z",
+              "WhenOpened": "2025-07-14T16:39:19.571Z",
               "EditorCaption": ""
             },
             {
@@ -74,7 +62,7 @@
               "RelativeDocumentMoniker": "src\\ui.jsx",
               "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\ui.jsx",
               "RelativeToolTip": "src\\ui.jsx",
-              "ViewState": "AgIAAPsAAAAAAAAAAAAcwCMBAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAM4CAAAAAAAAAAAcwPkCAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
               "WhenOpened": "2025-07-14T14:57:10.088Z",
               "EditorCaption": ""
@@ -82,12 +70,25 @@
           ]
         },
         {
-          "DockedHeight": 101,
-          "SelectedChildIndex": -1,
+          "DockedHeight": 189,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Bookmark",
               "Name": "ST:1:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "data.jsx",
+              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\data.jsx",
+              "RelativeDocumentMoniker": "src\\data.jsx",
+              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\data.jsx",
+              "RelativeToolTip": "src\\data.jsx",
+              "ViewState": "AgIAADUAAAAAAAAAAADwv0EAAAAGAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
+              "WhenOpened": "2025-07-14T15:15:33.218Z",
+              "EditorCaption": ""
             }
           ]
         }

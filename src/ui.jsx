@@ -72,6 +72,7 @@ import {
     Settings,
     Share2,
     ShoppingCart,
+    Square, // Add this
     Sun,
     Trophy,
     User,
@@ -148,7 +149,7 @@ export const GlassCard = React.memo(
     React.forwardRef(({ children, className = '', theme, ...props }, ref) => (
         <div
             ref={ref}
-            className={`rounded-[1.75rem] border shadow-lg transition-all duration-300 ${className}`}
+            className={`rounded-[2.25rem] border shadow-lg transition-all duration-300 ${className}`}
             style={{
                 backgroundColor: theme.colors.surface, // This line makes the card's background white
                 borderColor: theme.colors.border,
@@ -617,8 +618,10 @@ const LineItemCard = React.memo(({ lineItem, index, theme }) => {
     );
 });
 
-const LeadTimesScreen = ({ theme = {} }) => {
-    // State and hooks remain the same
+// ui.jsx
+
+export const LeadTimesScreen = ({ theme = {} }) => {
+    // State and hooks
     const [searchTerm, setSearchTerm] = useState('');
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [sortFastest, setSortFastest] = useState(false);
@@ -627,7 +630,7 @@ const LeadTimesScreen = ({ theme = {} }) => {
 
     useEffect(() => {
         const handleClickOutside = (e) => {
-            if (filterMenuRef.current && !filterMenuRef.current.contains(e.target)) {
+            if (filterMenuRef.current && !filterMenu.current.contains(e.target)) {
                 setDropdownOpen(false);
             }
         };
@@ -635,52 +638,60 @@ const LeadTimesScreen = ({ theme = {} }) => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // The useMemo hook now correctly filters for all Casegood-related types
     const rows = useMemo(() => {
         const map = {};
-        LEAD_TIMES_DATA.forEach(({ series, type, weeks }) => {
-            if (!map[series]) map[series] = {};
-            map[series][type] = weeks;
+        // Process data to group types under each series
+        LEAD_TIMES_DATA.forEach(({ series, type, weeks, image }) => {
+            if (!map[series]) {
+                map[series] = { types: {} };
+            }
+            // Store the weeks and the specific image for each type
+            map[series].types[type] = { weeks, image };
         });
-        let list = Object.entries(map).map(([series, types]) => ({ series, types }));
 
-        // Category filter
+        let list = Object.entries(map).map(([series, data]) => ({
+            series,
+            types: data.types,
+        }));
+
+        // Filtering and sorting logic
         if (filterCategory === 'upholstered') {
             list = list.filter(r => r.types.Upholstery != null);
         } else if (filterCategory === 'wood') {
             list = list.filter(r => r.types['Wood Seating'] != null);
         } else if (filterCategory === 'casegoods') {
-            list = list.filter(r =>
-                r.types.Casegoods != null ||
-                r.types.Laminate != null ||
-                r.types.Veneer != null ||
-                r.types.Tables != null
-            );
+            list = list.filter(r => r.types.Casegoods != null || r.types.Laminate != null || r.types.Veneer != null || r.types.Tables != null);
         }
-
-        // Search filter
         if (searchTerm) {
             const q = searchTerm.toLowerCase();
             list = list.filter(r => r.series.toLowerCase().includes(q));
         }
-
-        // Sort by fastest
         if (sortFastest) {
             list.sort((a, b) => {
-                const aMin = Math.min(...Object.values(a.types));
-                const bMin = Math.min(...Object.values(b.types));
+                const aMin = Math.min(...Object.values(a.types).map(t => t.weeks));
+                const bMin = Math.min(...Object.values(b.types).map(t => t.weeks));
                 return aMin - bMin;
             });
         }
-
         return list;
     }, [searchTerm, filterCategory, sortFastest]);
 
-    // A small component to render the L/V notations
     const LVLabel = ({ label }) => (
-        <span className="text-xs font-bold -mb-1" style={{ color: theme.colors.textSecondary }}>
-            {label}
-        </span>
+        <span className="text-xs font-bold -mb-1" style={{ color: theme.colors.textSecondary }}>{label}</span>
+    );
+
+    // Helper component with larger image and no border
+    const LeadTimeInfo = ({ typeData }) => (
+        <div className="flex flex-col items-center w-20 text-center">
+            <img
+                src={typeData.image}
+                alt=""
+                className="w-16 h-16 object-contain" // Image size increased
+            />
+            <span className="text-lg font-bold" style={{ color: theme.colors.textPrimary }}>
+                {typeData.weeks}
+            </span>
+        </div>
     );
 
     return (
@@ -688,31 +699,15 @@ const LeadTimesScreen = ({ theme = {} }) => {
             <PageTitle title="Lead Times" theme={theme} />
 
             <div className="px-4 pb-4 flex items-center space-x-2">
-                <SearchInput
-                    className="flex-grow"
-                    value={searchTerm}
-                    onChange={e => setSearchTerm(e.target.value)}
-                    placeholder="Search by series name…"
-                    theme={theme}
-                />
+                <SearchInput className="flex-grow" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder="Search by series name…" theme={theme} />
                 <div className="relative">
-                    <button
-                        onClick={() => setDropdownOpen(o => !o)}
-                        className="p-3.5 rounded-lg"
-                        style={{ backgroundColor: theme.colors.subtle }}
-                    >
+                    <button onClick={() => setDropdownOpen(o => !o)} className="p-3.5 rounded-lg" style={{ backgroundColor: theme.colors.subtle }}>
                         <Filter className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />
                     </button>
                     {dropdownOpen && (
                         <GlassCard ref={filterMenuRef} theme={theme} className="absolute top-14 right-0 z-10 w-48 p-2">
                             <label className="flex items-center w-full px-2 py-1.5 text-sm rounded-md cursor-pointer" style={{ color: theme.colors.textPrimary }}>
-                                <input
-                                    type="checkbox"
-                                    checked={sortFastest}
-                                    onChange={() => setSortFastest(f => !f)}
-                                    className="form-checkbox h-4 w-4 mr-3"
-                                    style={{ color: theme.colors.accent }}
-                                />
+                                <input type="checkbox" checked={sortFastest} onChange={() => setSortFastest(f => !f)} className="form-checkbox h-4 w-4 mr-3" style={{ color: theme.colors.accent }} />
                                 Sort by fastest
                             </label>
                             <div className="border-t my-1" style={{ borderColor: theme.colors.subtle }} />
@@ -721,10 +716,7 @@ const LeadTimesScreen = ({ theme = {} }) => {
                                     key={opt.key}
                                     onClick={() => { setFilterCategory(opt.key); setDropdownOpen(false); }}
                                     className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${filterCategory === opt.key ? 'font-bold' : ''}`}
-                                    style={{
-                                        color: theme.colors.textPrimary,
-                                        backgroundColor: filterCategory === opt.key ? theme.colors.subtle : 'transparent'
-                                    }}
+                                    style={{ color: theme.colors.textPrimary, backgroundColor: filterCategory === opt.key ? theme.colors.subtle : 'transparent' }}
                                 >
                                     {opt.label}
                                 </button>
@@ -736,57 +728,31 @@ const LeadTimesScreen = ({ theme = {} }) => {
 
             <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-3 scrollbar-hide">
                 {rows.map(({ series, types }) => (
-                    <GlassCard key={series} theme={theme} className="p-4 flex items-center justify-between">
-                        <div className="flex items-center space-x-6">
-                            {/* --- RENDER LOGIC UPDATED FOR NEW TYPES --- */}
-                            {types['Upholstery'] != null && (
-                                <div className="flex flex-col items-center w-10 text-center">
-                                    <UpholsteryIcon color={theme.colors.accent} />
-                                    <span className="mt-1.5 text-sm font-bold">{types.Upholstery}</span>
-                                </div>
-                            )}
-                            {types['Seating'] != null && (
-                                <div className="flex flex-col items-center w-10 text-center">
-                                    <UpholsteryIcon color={theme.colors.accent} />
-                                    <span className="mt-1.5 text-sm font-bold">{types.Seating}</span>
-                                </div>
-                            )}
-                            {types['Wood Seating'] != null && (
-                                <div className="flex flex-col items-center w-10 text-center">
-                                    <WoodIcon color={theme.colors.accent} />
-                                    <span className="mt-1.5 text-sm font-bold">{types['Wood Seating']}</span>
-                                </div>
-                            )}
-                            {types['Casegoods'] != null && (
-                                <div className="flex flex-col items-center w-10 text-center">
-                                    <CasegoodIcon color={theme.colors.accent} />
-                                    <span className="mt-1.5 text-sm font-bold">{types.Casegoods}</span>
-                                </div>
-                            )}
-                            {types['Tables'] != null && (
-                                <div className="flex flex-col items-center w-10 text-center">
-                                    <CasegoodIcon color={theme.colors.accent} />
-                                    <span className="mt-1.5 text-sm font-bold">{types.Tables}</span>
-                                </div>
-                            )}
-                            {types['Laminate'] != null && (
-                                <div className="flex flex-col items-center w-10 text-center">
+                    <GlassCard key={series} theme={theme} className="p-2 flex items-center justify-between">
+                        <h3 className="text-xl font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>
+                            {series}
+                        </h3>
+                        <div className="flex items-center space-x-4">
+                            {types['Upholstery'] && <LeadTimeInfo typeData={types['Upholstery']} />}
+                            {types['Seating'] && <LeadTimeInfo typeData={types['Seating']} />}
+                            {types['Wood Seating'] && <LeadTimeInfo typeData={types['Wood Seating']} />}
+                            {types['Casegoods'] && <LeadTimeInfo typeData={types['Casegoods']} />}
+                            {types['Tables'] && <LeadTimeInfo typeData={types['Tables']} />}
+                            {types['Laminate'] && (
+                                <div className="flex flex-col items-center w-20 text-center">
                                     <LVLabel label="L" />
-                                    <CasegoodIcon color={theme.colors.accent} />
-                                    <span className="mt-1.5 text-sm font-bold">{types.Laminate}</span>
+                                    <img src={types['Laminate'].image} alt="Laminate" className="w-16 h-16 object-contain" />
+                                    <span className="text-lg font-bold">{types['Laminate'].weeks}</span>
                                 </div>
                             )}
-                            {types['Veneer'] != null && (
-                                <div className="flex flex-col items-center w-10 text-center">
+                            {types['Veneer'] && (
+                                <div className="flex flex-col items-center w-20 text-center">
                                     <LVLabel label="V" />
-                                    <CasegoodIcon color={theme.colors.accent} />
-                                    <span className="mt-1.5 text-sm font-bold">{types.Veneer}</span>
+                                    <img src={types['Veneer'].image} alt="Veneer" className="w-16 h-16 object-contain" />
+                                    <span className="text-lg font-bold">{types['Veneer'].weeks}</span>
                                 </div>
                             )}
                         </div>
-                        <span className="font-bold text-lg text-right" style={{ color: theme.colors.textPrimary }}>
-                            {series}
-                        </span>
                     </GlassCard>
                 ))}
             </div>
@@ -2531,7 +2497,7 @@ export const LoanerItemCard = ({ item, isSelected, onSelect, theme }) => {
 
 export const ResourceDetailScreen = ({ theme, onNavigate, setSuccessMessage, userSettings, showAlert, currentScreen, onUpdateCart }) => {
     // Extract the specific resource type from the URL-like path
-    const category = currentScreen.split('/')[1]?.replace(/_/g, ' ');
+    const category = currentScreen.split('/')[1]?.replace(/[_-]/g, ' ');
 
     switch (category) {
         // --- Rep Functions ---
@@ -3314,7 +3280,7 @@ const Avatar = ({ src, alt, theme }) => {
     );
 };
 
-export const CartScreen = ({ theme, onNavigate, handleBack, cart, setCart, onUpdateCart, userSettings }) => {
+export const CartScreen = ({ theme, onNavigate, cart, setCart, onUpdateCart, userSettings }) => {
     const [address, setAddress] = useState('');
     const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -3354,7 +3320,7 @@ export const CartScreen = ({ theme, onNavigate, handleBack, cart, setCart, onUpd
 
     return (
         <>
-            <PageTitle title="Cart" theme={theme} onBack={handleBack} />
+            <PageTitle title="Cart" theme={theme} />
             <div className="px-4 space-y-4 pb-4">
                 <GlassCard theme={theme} className="p-4 space-y-2">
                     <h3 className="font-bold" style={{ color: theme.colors.textPrimary }}>Selected Samples</h3>
@@ -3376,7 +3342,7 @@ export const CartScreen = ({ theme, onNavigate, handleBack, cart, setCart, onUpd
                         <button onClick={() => setAddress(userSettings.homeAddress)} className="absolute top-2 right-2 p-1 rounded-full" style={{ backgroundColor: theme.colors.surface }}><Home className="w-5 h-5" style={{ color: theme.colors.secondary }} /></button>
                     </div>
                 </GlassCard>
-                <button onClick={handleSubmit} disabled={Object.keys(cart).length === 0 || !address.trim()} className="w-full font-bold py-3 px-6 rounded-lg transition-colors disabled:opacity-50" style={{ backgroundColor: theme.colors.accent, color: '#FFFFFF' }}>Submit</button>
+                <button onClick={handleSubmit} disabled={Object.keys(cart).length === 0 || !address.trim()} className="w-full font-bold py-3 px-6 rounded-full transition-colors disabled:opacity-50" style={{ backgroundColor: theme.colors.accent, color: '#FFFFFF' }}>Submit</button>
             </div>
         </>
     );
@@ -6828,7 +6794,6 @@ export {
     ContractsScreen,
     InstallInstructionsScreen,
     PresentationsScreen,
-    LeadTimesScreen,
     SocialMediaScreen,
 
     // Other app screens
