@@ -502,90 +502,83 @@ export const PRODUCT_DATA = {
     'bar-stools': {
         title: 'Bar Stools',
         data: [
-            { id: 'poet-bar', name: 'Poet', image: 'https://via.placeholder.com/300?text=Poet', basePrice: { list: 780 } },
-            { id: 'knox-bar', name: 'Knox', image: 'https://via.placeholder.com/300?text=Knox', basePrice: { list: 850 } },
-            { id: 'indie-bar', name: 'Indie', image: 'https://via.placeholder.com/300?text=Indie', basePrice: { list: 920 } },
-            { id: 'jude-bar', name: 'Jude', image: 'https://via.placeholder.com/300?text=Jude', basePrice: { list: 1050 } },
+            { id: 'poet-bar', name: 'Poet', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_poet_comp_00001.jpg', basePrice: { list: 780 } },
+            { id: 'knox-bar', name: 'Knox', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_knox_comp_00001.jpg', basePrice: { list: 850 } },
+            { id: 'indie-bar', name: 'Indie', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_indie_comp_00001.jpg', basePrice: { list: 920 } },
+            { id: 'jude-bar', name: 'Jude', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_jude_comp_00001.jpg', basePrice: { list: 1050 } },
         ],
     },
-
     'counter-stools': {
         title: 'Counter Stools',
         data: [
-            { id: 'poet-counter', name: 'Poet', image: 'https://via.placeholder.com/300?text=Poet', basePrice: { list: 750 } },
-            { id: 'knox-counter', name: 'Knox', image: 'https://via.placeholder.com/300?text=Knox', basePrice: { list: 820 } },
-            { id: 'indie-counter', name: 'Indie', image: 'https://via.placeholder.com/300?text=Indie', basePrice: { list: 890 } },
-            { id: 'jude-counter', name: 'Jude', image: 'https://via.placeholder.com/300?text=Jude', basePrice: { list: 1020 } },
+            { id: 'poet-counter', name: 'Poet', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_poet_comp_00001.jpg', basePrice: { list: 750 } },
+            { id: 'knox-counter', name: 'Knox', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_knox_comp_00001.jpg', basePrice: { list: 820 } },
+            { id: 'indie-counter', name: 'Indie', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_indie_comp_00001.jpg', basePrice: { list: 890 } },
+            { id: 'jude-counter', name: 'Jude', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_jude_comp_00001.jpg', basePrice: { list: 1020 } },
         ],
     },
-
     swivels: {
         title: 'Swivel Chairs',
         data: [
-            { id: 'cosgrove', name: 'Cosgrove', image: 'https://via.placeholder.com/300?text=Cosgrove', basePrice: { list: 1187 } },
-            { id: 'arwyn', name: 'Arwyn', image: 'https://via.placeholder.com/300?text=Arwyn', basePrice: { list: 1395 } },
-            { id: 'newton', name: 'Newton', image: 'https://via.placeholder.com/300?text=Newton', basePrice: { list: 1520 } },
-            { id: 'proxy', name: 'Proxy', image: 'https://via.placeholder.com/300?text=Proxy', basePrice: { list: 1675 } },
+            { id: 'cosgrove', name: 'Cosgrove', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_cosgrove_comp_00001.jpg', basePrice: { list: 1187 } },
+            { id: 'arwyn', name: 'Arwyn', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_arwyn_comp_0001.jpg', basePrice: { list: 1395 } },
+            { id: 'newton', name: 'Newton', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_newton_comp_00001.jpg', basePrice: { list: 1520 } },
+            { id: 'proxy', name: 'Proxy', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_proxy_comp_00001.jpg', basePrice: { list: 1675 } },
         ],
     },
-
     'guest-chairs': {
         title: 'Guest Chairs',
         data: [
-            { id: 'indie-guest', name: 'Indie', image: 'https://via.placeholder.com/300?text=Indie', basePrice: { list: 850 } },
-            { id: 'jude-guest', name: 'Jude', image: 'https://via.placeholder.com/300?text=Jude', basePrice: { list: 980 } },
-            { id: 'arwyn-guest', name: 'Arwyn', image: 'https://via.placeholder.com/300?text=Arwyn', basePrice: { list: 1100 } },
-            { id: 'wink-guest', name: 'Wink', image: 'https://via.placeholder.com/300?text=Wink', basePrice: { list: 1200 } },
+            { id: 'indie-guest', name: 'Indie', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_indie_comp_00001.jpg', basePrice: { list: 850 } },
+            { id: 'jude-guest', name: 'Jude', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_jude_comp_00001.jpg', basePrice: { list: 980 } },
+            { id: 'arwyn-guest', name: 'Arwyn', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_arwyn_comp_0001.jpg', basePrice: { list: 1100 } },
+            { id: 'wink-guest', name: 'Wink', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_wink_enviro_00033.jpg', basePrice: { list: 1200 } },
         ],
     },
-
     lounge: {
         title: 'Lounge',
         data: [
-            { id: 'caav', name: 'Caav', image: 'https://via.placeholder.com/300?text=Caav', basePrice: { list: 2100 } },
-            { id: 'kindera', name: 'Kindera', image: 'https://via.placeholder.com/300?text=Kindera', basePrice: { list: 2400 } },
-            { id: 'somna', name: 'Somna', image: 'https://via.placeholder.com/300?text=Somna', basePrice: { list: 2900 } },
-            { id: 'satisse', name: 'Satisse', image: 'https://via.placeholder.com/300?text=Satisse', basePrice: { list: 3200 } },
+            { id: 'caav', name: 'Caav', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_caav_comp_0005.jpg', basePrice: { list: 2100 } },
+            { id: 'kindera', name: 'Kindera', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_kindera_comp_00001.jpg', basePrice: { list: 2400 } },
+            { id: 'somna', name: 'Somna', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_somna_comp_00001.jpg', basePrice: { list: 2900 } },
+            { id: 'satisse', name: 'Satisse', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_satisse_comp_00001.jpg', basePrice: { list: 3200 } },
         ],
     },
-
     'coffee-tables': {
         title: 'Coffee Tables',
         data: [
-            { id: 'poet-coffee', name: 'Poet', image: 'https://via.placeholder.com/300?text=Poet', basePrice: { list: 950 } },
-            { id: 'teekan-coffee', name: 'Teekan', image: 'https://via.placeholder.com/300?text=Teekan', basePrice: { list: 1400 } },
-            { id: 'connect-coffee', name: 'Connect', image: 'https://via.placeholder.com/300?text=Connect', basePrice: { list: 1550 } },
-            { id: 'ziva-coffee', name: 'Ziva', image: 'https://via.placeholder.com/300?text=Ziva', basePrice: { list: 1250 } },
+            { id: 'poet-coffee', name: 'Poet', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_poet_comp_00001.jpg', basePrice: { list: 950 } },
+            { id: 'teekan-coffee', name: 'Teekan', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_teekan_comp_00001.jpg', basePrice: { list: 1400 } },
+            { id: 'connect-coffee', name: 'Connect', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_connect_comp_00001.jpg', basePrice: { list: 1550 } },
+            { id: 'ziva-coffee', name: 'Ziva', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_ziva_comp_00001.jpg', basePrice: { list: 1250 } },
         ],
     },
-
     'end-tables': {
         title: 'End Tables',
         data: [
-            { id: 'poet-end', name: 'Poet', image: 'https://via.placeholder.com/300?text=Poet', basePrice: { list: 750 } },
-            { id: 'teekan-end', name: 'Teekan', image: 'https://via.placeholder.com/300?text=Teekan', basePrice: { list: 1100 } },
-            { id: 'ziva-end', name: 'Ziva', image: 'https://via.placeholder.com/300?text=Ziva', basePrice: { list: 950 } },
-            { id: 'connect-end', name: 'Connect', image: 'https://via.placeholder.com/300?text=Connect', basePrice: { list: 1250 } },
+            { id: 'poet-end', name: 'Poet', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_poet_comp_00001.jpg', basePrice: { list: 750 } },
+            { id: 'teekan-end', name: 'Teekan', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_teekan_comp_00001.jpg', basePrice: { list: 1100 } },
+            { id: 'ziva-end', name: 'Ziva', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_ziva_comp_00001.jpg', basePrice: { list: 950 } },
+            { id: 'connect-end', name: 'Connect', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_connect_comp_00001.jpg', basePrice: { list: 1250 } },
         ],
     },
-
     conference: {
         title: 'Conference Tables',
         data: [
-            { id: 'moto-conf', name: 'Moto', image: 'https://via.placeholder.com/300?text=Moto', basePrice: { list: 4800 } },
-            { id: 'vision-conf', name: 'Vision', image: 'https://via.placeholder.com/300?text=Vision', basePrice: { list: 7200 } },
-            { id: 'forge-conf', name: 'Forge', image: 'https://via.placeholder.com/300?text=Forge', basePrice: { list: 6000 } },
-            { id: 'brogan-conf', name: 'Brogan', image: 'https://via.placeholder.com/300?text=Brogan', basePrice: { list: 6500 } },
+            { id: 'moto-conf', name: 'Moto', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_moto_config_00001.jpg', basePrice: { list: 4800 } },
+            { id: 'vision-conf', name: 'Vision', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_vision_config_000002.jpg', basePrice: { list: 7200 } },
+            { id: 'forge-conf', name: 'Forge', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_forge_config_0001.jpg', basePrice: { list: 6000 } },
+            { id: 'brogan-conf', name: 'Brogan', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_brogan_config_00001.jpg', basePrice: { list: 6500 } },
         ],
     },
-
     casegoods: {
         title: 'Casegoods',
         data: [
-            { id: 'vision-1', name: 'Vision', image: 'https://via.placeholder.com/300?text=Vision', basePrice: { list: 7200 } },
-            { id: 'flux-1', name: 'Flux', image: 'https://via.placeholder.com/300?text=Flux', basePrice: { list: 5800 } },
-            { id: 'brogan-1', name: 'Brogan', image: 'https://via.placeholder.com/300?text=Brogan', basePrice: { list: 6500 } },
-            { id: 'moto-1', name: 'Moto', image: 'https://via.placeholder.com/300?text=Moto', basePrice: { list: 4200 } },
+            { id: 'vision-1', name: 'Vision', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_vision_config_000002.jpg', basePrice: { list: 5500 } },
+            { id: 'flux-1', name: 'Flux', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_flux_config_00008.jpg', basePrice: { list: 5800 } },
+            { id: 'brogan-1', name: 'Brogan', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_brogan_config_0015.jpg', basePrice: { list: 6500 } },
+            { id: 'walden-1', name: 'Walden', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_walden_config_00001.jpg', basePrice: { list: 6800 } },
+            { id: 'wellington-1', name: 'Wellington', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_wellington_config_00001.jpg', basePrice: { list: 7500 } },
         ],
     },
 };

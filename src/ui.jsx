@@ -4999,10 +4999,18 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
 export const ProductsScreen = ({ theme, onNavigate }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [viewMode, setViewMode] = useState('grid');
+    const [isScrolled, setIsScrolled] = useState(false);
+    const scrollContainerRef = useRef(null);
+
+    const handleScroll = () => {
+        if (scrollContainerRef.current) {
+            // Set state to true if user has scrolled more than 10px
+            setIsScrolled(scrollContainerRef.current.scrollTop > 10);
+        }
+    };
 
     const filteredCategories = useMemo(() => {
         if (!searchTerm.trim()) return Data.PRODUCTS_CATEGORIES_DATA;
-
         const lowerSearch = searchTerm.toLowerCase();
         return Data.PRODUCTS_CATEGORIES_DATA.filter(category =>
             category.name.toLowerCase().includes(lowerSearch)
@@ -5018,17 +5026,20 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
     }, []);
 
     return (
-        // The component now uses flex-col to manage the sticky header and scrollable content
         <div className="flex flex-col h-full">
-            {/* This new div wraps the title and search, making them sticky */}
+            {/* Sticky Header with conditional styling */}
             <div
-                className="sticky top-0 z-10 backdrop-blur-md"
-                style={{ backgroundColor: `${theme.colors.background}e0` }}
+                className={`sticky top-0 z-10 transition-all duration-300 ${isScrolled ? 'shadow-md' : 'shadow-none'}`}
+                style={{
+                    backgroundColor: isScrolled ? `${theme.colors.background}e0` : 'transparent',
+                    backdropFilter: isScrolled ? 'blur(12px)' : 'none',
+                    WebkitBackdropFilter: isScrolled ? 'blur(12px)' : 'none',
+                }}
             >
                 <PageTitle title="Products" theme={theme}>
                     <button
                         onClick={toggleViewMode}
-                        className="p-2 rounded-lg transition-colors hover:bg-black/10 dark:hover:bg-white/10"
+                        className="p-2 rounded-lg"
                         style={{ backgroundColor: theme.colors.subtle }}
                     >
                         {viewMode === 'grid' ?
@@ -5047,8 +5058,12 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
                 </div>
             </div>
 
-            {/* This div now only contains the scrollable content */}
-            <div className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-hide">
+            {/* Scrollable Content */}
+            <div
+                ref={scrollContainerRef}
+                onScroll={handleScroll}
+                className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-hide -mt-[7.5rem] pt-[7.5rem]"
+            >
                 {filteredCategories.length === 0 ? (
                     <GlassCard theme={theme} className="p-8 text-center">
                         <p style={{ color: theme.colors.textSecondary }}>
@@ -5078,10 +5093,6 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
                                                 : 'w-16 h-16'
                                                 }`}
                                             loading="lazy"
-                                            onError={(e) => {
-                                                e.target.onerror = null;
-                                                e.target.src = 'https://placehold.co/100x100/EEE/333?text=Image+Error';
-                                            }}
                                         />
                                     ))}
                                 </div>
@@ -5104,10 +5115,6 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
                                             alt={category.name}
                                             className="w-12 h-12 rounded-md object-cover"
                                             loading="lazy"
-                                            onError={(e) => {
-                                                e.target.onerror = null;
-                                                e.target.src = 'https://placehold.co/100x100/EEE/333?text=Error';
-                                            }}
                                         />
                                         <h3 className="font-semibold text-lg" style={{ color: theme.colors.textPrimary }}>
                                             {category.name}
@@ -5672,38 +5679,23 @@ export const ProductComparisonScreen = ({ categoryId, onNavigate, theme }) => {
         <div className="px-4 pt-4 pb-10 space-y-4">
             <PageTitle title={category.title} theme={theme} />
 
-            <div className="bg-white/50 dark:bg-black/20 rounded-2xl p-4 backdrop-blur-sm">
-                <div className="flex space-x-3 overflow-x-auto scrollbar-hide pb-2">
+            <GlassCard theme={theme} className="p-4">
+                <div className="flex space-x-3 overflow-x-auto scrollbar-hide">
                     {dataSorted.map((p, i) => (
-                        <div
+                        <button
                             key={p.id}
-                            className="flex flex-col items-center space-y-2 flex-shrink-0"
+                            onClick={() => setIndex(i)}
+                            className={`flex-shrink-0 w-24 h-24 rounded-2xl border-2 transition-all duration-150 bg-white overflow-hidden ${i === index ? 'border-blue-500' : 'border-transparent opacity-70'} hover:opacity-100`}
                         >
-                            <button
-                                onClick={() => setIndex(i)}
-                                className={`relative w-24 h-24 rounded-xl overflow-hidden transition-all duration-200 ${i === index
-                                    ? 'ring-2 ring-offset-2 ring-blue-500 scale-105'
-                                    : 'opacity-70 hover:opacity-100'
-                                    }`}
-                            >
-                                <img
-                                    src={p.image}
-                                    alt={p.name}
-                                    className="w-full h-full object-cover"
-                                />
-                            </button>
-                            <div className="text-center">
-                                <p className="text-xs font-semibold" style={{ color: theme.colors.textPrimary }}>
-                                    {p.name}
-                                </p>
-                                <p className="text-xs font-bold" style={{ color: theme.colors.accent }}>
-                                    {money(p.basePrice?.list)}
-                                </p>
-                            </div>
-                        </div>
+                            <img
+                                src={p.image}
+                                alt={p.name}
+                                className="w-full h-full object-cover scale-150"
+                            />
+                        </button>
                     ))}
                 </div>
-            </div>
+            </GlassCard>
 
             <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-lg">
                 <img
@@ -5711,59 +5703,69 @@ export const ProductComparisonScreen = ({ categoryId, onNavigate, theme }) => {
                     alt={selected.name}
                     className="absolute w-full h-full object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
-                <div className="absolute bottom-4 left-4 right-4">
-                    <h2 className="text-2xl font-bold text-white mb-1">{selected.name}</h2>
-                    <p className="text-3xl font-bold text-white">{money(selected.basePrice?.list)}</p>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+
+                <button
+                    onClick={() => onNavigate(`products/competitive-analysis/${categoryId}`)}
+                    className="absolute bottom-4 right-4 flex items-center space-x-2 px-4 py-2 rounded-full bg-white/40 backdrop-blur-md hover:bg-white/60 transition-colors border border-white/50"
+                >
+                    <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>Competition</span>
+                    <ArrowRight className="w-4 h-4" style={{ color: theme.colors.textPrimary }} />
+                </button>
+
+                <div className="absolute bottom-4 left-4">
+                    <h2 className="text-2xl font-bold text-white drop-shadow-md mb-1">{selected.name}</h2>
+                    <p className="text-3xl font-bold text-white drop-shadow-md">{money(selected.basePrice?.list)}</p>
                 </div>
             </div>
 
-            <GlassCard theme={theme} className="p-4 space-y-4">
-                <div className="space-y-3">
-                    <div className="flex justify-between items-center pb-3 border-b" style={{ borderColor: theme.colors.subtle }}>
-                        <span className="font-semibold" style={{ color: theme.colors.textSecondary }}>Series</span>
-                        <span className="font-semibold text-right" style={{ color: theme.colors.textSecondary }}>List $</span>
-                    </div>
-
-                    <div className="flex justify-between items-center py-2">
-                        <span className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>{selected.name}</span>
-                        <span className="font-bold text-lg" style={{ color: theme.colors.accent }}>{money(selected.basePrice?.list)}</span>
-                    </div>
-
-                    {dataSorted.filter((_, i) => i !== index).slice(0, 3).map(item => (
-                        <div key={item.id} className="flex justify-between items-center py-2 opacity-60">
-                            <span style={{ color: theme.colors.textPrimary }}>{item.name}</span>
-                            <span style={{ color: theme.colors.textPrimary }}>{money(item.basePrice?.list)}</span>
-                        </div>
-                    ))}
+            <GlassCard theme={theme} className="p-4 space-y-3">
+                <div className="flex justify-between items-center pb-3 border-b" style={{ borderColor: theme.colors.subtle }}>
+                    <span className="font-semibold" style={{ color: theme.colors.textSecondary }}>Series</span>
+                    <span className="font-semibold text-right" style={{ color: theme.colors.textSecondary }}>List $</span>
                 </div>
-            </GlassCard>
 
-            <GlassCard theme={theme} className="p-1">
-                <button
-                    onClick={() => onNavigate(`products/competitive-analysis/${categoryId}`)}
-                    className="w-full p-4 rounded-xl flex items-center justify-between hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-                >
-                    <span className="text-lg font-semibold" style={{ color: theme.colors.textPrimary }}>
-                        Competitive Analysis
-                    </span>
-                    <ArrowRight className="w-5 h-5" style={{ color: theme.colors.secondary }} />
-                </button>
+                {dataSorted.map(item => {
+                    const isSelected = item.id === selected.id;
+                    return (
+                        <div key={item.id} className="flex justify-between items-center py-1">
+                            <span
+                                className={isSelected ? 'font-bold text-lg' : 'text-base'}
+                                style={{ color: isSelected ? theme.colors.textPrimary : theme.colors.textSecondary }}
+                            >
+                                {item.name}
+                            </span>
+                            <span
+                                className={isSelected ? 'font-bold text-lg' : 'text-base'}
+                                style={{ color: isSelected ? theme.colors.accent : theme.colors.textSecondary }}
+                            >
+                                {money(item.basePrice?.list)}
+                            </span>
+                        </div>
+                    );
+                })}
             </GlassCard>
         </div>
     );
 };
 
-export const CompetitiveAnalysisScreen = ({ theme, currentScreen }) => {
+export const CompetitiveAnalysisScreen = ({ theme, currentScreen, setSuccessMessage }) => {
     const categoryId = currentScreen?.split('/')?.[2] || 'casegoods';
     const data = Data.COMPETITIVE_DATA?.[categoryId];
+
+    // State for the new modal and form
+    const [showRequestModal, setShowRequestModal] = useState(false);
+    const [newCompetitor, setNewCompetitor] = useState({ manufacturer: '', series: '', notes: '' });
+    const [attachment, setAttachment] = useState(null);
+
     if (!data?.typicals?.length) {
         return <PlaceholderScreen theme={theme} category="Competitive Analysis" />;
     }
 
     const [selected, setSelected] = React.useState(data.typicals[0]);
-    const [sortKey, setSortKey] = React.useState('adv');
-    const [expanded, setExpanded] = React.useState(false);
+
+    // Format categoryId for the title (e.g., "casegoods" -> "Casegoods Analysis")
+    const heading = (categoryId.charAt(0).toUpperCase() + categoryId.slice(1)) + ' Analysis';
 
     const money = (n) => {
         if (typeof n !== 'number' || isNaN(n)) return '—';
@@ -5784,91 +5786,155 @@ export const CompetitiveAnalysisScreen = ({ theme, currentScreen }) => {
         return Math.round(((comp - our) / comp) * 100);
     };
 
-    const chip = (p) => <span className={`chip ${p > 0 ? 'pos' : p < 0 ? 'neg' : 'neu'}`}>{p > 0 ? `+${p}%` : `${p}%`}</span>;
-
-    const sortRows = React.useMemo(() => {
-        const ourLam = getPrice(selected, 'lam');
-        const ourVen = getPrice(selected, 'ven') || ourLam;
-
+    const sortedCompetitors = React.useMemo(() => {
+        const ourPrice = getPrice(selected, 'lam'); // Using laminate as the baseline for sorting
         return data.competitors
             .map(c => ({
-                name: c.name,
-                lam: Math.round(ourLam * c.factor),
-                ven: Math.round(ourVen * c.factor),
-                adv: pctAdv(ourLam, Math.round(ourLam * c.factor)),
+                ...c,
+                price: Math.round(ourPrice * c.factor),
+                adv: pctAdv(ourPrice, Math.round(ourPrice * c.factor)),
             }))
-            .sort((a, b) => sortKey === 'adv' ? b.adv - a.adv : a[sortKey] - b[sortKey]);
-    }, [selected, sortKey, data.competitors]);
+            .sort((a, b) => b.adv - a.adv);
+    }, [selected, data.competitors]);
 
-    const heading =
-        (Data.PRODUCT_DATA?.[categoryId]?.title ?? categoryId)
-            .replace(/-/g, ' ')
-            .replace(/\b\w/g, c => c.toUpperCase()) + ' Competitive Analysis';
+    const handleFormChange = (e) => {
+        const { name, value } = e.target;
+        setNewCompetitor(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleFileChange = (e) => {
+        if (e.target.files && e.target.files[0]) {
+            setAttachment(e.target.files[0]);
+        }
+    };
+
+    const handleSubmitRequest = (e) => {
+        e.preventDefault();
+        console.log({ ...newCompetitor, attachment });
+
+        setSuccessMessage('Request sent to the sales team!');
+        setShowRequestModal(false);
+        setNewCompetitor({ manufacturer: '', series: '', notes: '' });
+        setAttachment(null);
+    };
+
+    const AdvantageChip = ({ value }) => (
+        <span className={`px-2.5 py-1 text-sm font-bold rounded-full ${value > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+            {value > 0 ? `+${value}%` : `${value}%`}
+        </span>
+    );
 
     return (
-        <div className="px-6 pt-4 pb-10 space-y-4">
-            <h1 className="text-subhead font-semibold">{heading}</h1>
+        <div className="flex flex-col h-full">
+            <PageTitle title={heading} theme={theme} />
 
-            <div className="flex space-x-2 overflow-x-auto pb-1 scrollbar-hide">
-                {data.typicals.map(t => (
-                    <button key={t.id} onClick={() => setSelected(t)}
-                        className={`flex-shrink-0 w-20 h-20 rounded-lg border-2 transition-all duration-150
-              ${selected.id === t.id ? 'border-blue-500' : 'border-transparent opacity-70'} hover:scale-105 hover:opacity-100`}>
-                        <img src={t.image} alt={t.name} className="w-full h-full object-cover rounded-lg" />
-                    </button>
-                ))}
-            </div>
+            <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4 scrollbar-hide">
+                <GlassCard theme={theme} className="p-4">
+                    <div className="flex space-x-3 overflow-x-auto scrollbar-hide">
+                        {data.typicals.map(t => (
+                            <button key={t.id} onClick={() => setSelected(t)}
+                                className={`flex-shrink-0 w-24 h-24 rounded-2xl border-2 transition-all duration-150 p-1 bg-white overflow-hidden
+                                    ${selected.id === t.id ? 'border-blue-500' : 'border-transparent opacity-70'} hover:opacity-100`}>
+                                <img src={t.image} alt={t.name} className="w-full h-full object-cover scale-150" />
+                            </button>
+                        ))}
+                    </div>
+                </GlassCard>
 
-            <a href={selected.url} target="_blank" rel="noopener noreferrer">
-                <div className="relative w-full h-48 rounded-2xl overflow-hidden shadow-md group">
+                <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-lg group">
                     <img src={selected.image} alt={selected.name} loading="lazy"
                         className="absolute w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/15 to-transparent" />
-                </div>
-            </a>
-
-            <div className="h-6 section-band" />
-
-            <GlassCard theme={theme} className="p-0 shadow-sm overflow-hidden">
-                <div className="grid grid-cols-4 text-sm font-semibold sticky top-0 backdrop-blur bg-white/85 border-b"
-                    style={{ borderColor: theme.colors.subtle }}>
-                    <button className="text-left py-2 pl-4" onClick={() => setSortKey('name')}>Series</button>
-                    <button className="text-left py-2" onClick={() => setSortKey('lam')}>Laminate</button>
-                    <button className="text-left py-2" onClick={() => setSortKey('ven')}>Veneer</button>
-                    <button className="text-right py-2 pr-4" onClick={() => setSortKey('adv')}>Adv.</button>
+                    <div className="absolute inset-0 bg-black/10" />
                 </div>
 
-                <div className="grid grid-cols-4 px-4 py-2 hover:bg-black/5"
-                    style={{ fontVariantNumeric: 'tabular-nums' }}>
-                    <span>{selected.name}</span>
-                    <span>{money(getPrice(selected, 'lam'))}</span>
-                    <span>{money(getPrice(selected, 'ven'))}</span>
-                    <span />
-                </div>
-
-                {(expanded ? sortRows : sortRows.slice(0, 3)).map(r => (
-                    <div key={r.name}
-                        className="grid grid-cols-4 px-4 py-2 border-t hover:bg-black/5"
-                        style={{ borderColor: theme.colors.subtle, fontVariantNumeric: 'tabular-nums' }}>
-                        <span>{r.name}</span>
-                        <span>{money(r.lam)}</span>
-                        <span>{money(r.ven)}</span>
-                        <span className="text-right">{chip(r.adv)}</span>
+                <GlassCard theme={theme} className="px-6 py-4 space-y-1">
+                    {/* Table Header */}
+                    <div className="grid grid-cols-3 gap-4 pb-2 text-sm font-semibold border-b" style={{ borderColor: theme.colors.border }}>
+                        <div style={{ color: theme.colors.textSecondary }}>Series</div>
+                        <div className="text-right" style={{ color: theme.colors.textSecondary }}>Laminate</div>
+                        <div className="text-right" style={{ color: theme.colors.textSecondary }}>Adv.</div>
                     </div>
-                ))}
 
-                {sortRows.length > 3 && (
-                    <button onClick={() => setExpanded(!expanded)}
-                        className="w-full text-sm py-2 font-medium border-t"
-                        style={{ borderColor: theme.colors.subtle, color: theme.colors.secondary }}>
-                        {expanded ? 'Show top 3' : `Show all (${sortRows.length})`}
+                    {/* JSI Row */}
+                    <div className="grid grid-cols-3 gap-4 py-3 rounded-lg" style={{ backgroundColor: theme.colors.subtle }}>
+                        <div className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>{selected.name}</div>
+                        <div className="font-bold text-lg text-right" style={{ color: theme.colors.textPrimary }}>{money(getPrice(selected, 'lam'))}</div>
+                        <div />
+                    </div>
+
+                    {/* Competitor Rows */}
+                    {sortedCompetitors.map(c => (
+                        <div key={c.name} className="grid grid-cols-3 gap-4 py-3 border-t" style={{ borderColor: theme.colors.border }}>
+                            <div className="font-medium" style={{ color: theme.colors.textSecondary }}>{c.name}</div>
+                            <div className="font-medium text-right" style={{ color: theme.colors.textSecondary }}>{money(c.price)}</div>
+                            <div className="text-right"><AdvantageChip value={c.adv} /></div>
+                        </div>
+                    ))}
+                </GlassCard>
+
+                <div className="pt-2">
+                    <button
+                        onClick={() => setShowRequestModal(true)}
+                        className="w-full font-bold py-3.5 px-6 rounded-full text-white"
+                        style={{ backgroundColor: theme.colors.accent }}
+                    >
+                        Request New Competitor
                     </button>
-                )}
-            </GlassCard>
+                </div>
+            </div>
+
+            <Modal show={showRequestModal} onClose={() => setShowRequestModal(false)} title="Request New Competitor" theme={theme}>
+                <form onSubmit={handleSubmitRequest} className="space-y-4">
+                    <FormInput
+                        label="Manufacturer"
+                        name="manufacturer"
+                        value={newCompetitor.manufacturer}
+                        onChange={handleFormChange}
+                        placeholder="Enter manufacturer..."
+                        theme={theme}
+                        required
+                    />
+                    <FormInput
+                        label="Series"
+                        name="series"
+                        value={newCompetitor.series}
+                        onChange={handleFormChange}
+                        placeholder="Enter series..."
+                        theme={theme}
+                        required
+                    />
+                    <FormInput
+                        label="Notes"
+                        name="notes"
+                        type="textarea"
+                        value={newCompetitor.notes}
+                        onChange={handleFormChange}
+                        placeholder="Any details are helpful. Links to the product page are especially valuable."
+                        theme={theme}
+                    />
+                    <div>
+                        <label
+                            htmlFor="file-upload"
+                            className="w-full flex items-center justify-center space-x-2 py-3 rounded-full cursor-pointer"
+                            style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }}
+                        >
+                            <Paperclip className="w-4 h-4" />
+                            <span className="font-semibold text-sm">
+                                {attachment ? attachment.name : 'Add Attachment'}
+                            </span>
+                        </label>
+                        <input id="file-upload" type="file" className="hidden" onChange={handleFileChange} />
+                    </div>
+                    <div className="pt-2">
+                        <button type="submit" className="w-full font-bold py-3 px-6 rounded-full text-white" style={{ backgroundColor: theme.colors.accent }}>
+                            Submit Request
+                        </button>
+                    </div>
+                </form>
+            </Modal>
         </div>
     );
 };
-
 export const PlaceholderScreen = ({ theme, category }) => {
     return (
         <div className="px-4 pt-4 pb-4">
