@@ -66,15 +66,13 @@ export const MY_PROJECTS_DATA = [
     },
 ];
 
-// data.jsx
-
 export const LEAD_TIMES_DATA = [
     { series: 'Addison', type: 'Wood Seating', weeks: 4, image: '/series-images/jsi_addison_comp_00015.jpg' },
     { series: 'Addison', type: 'Upholstery', weeks: 7, image: '/series-images/jsi_addison_comp_00014.jpg' },
     { series: 'Americana', type: 'Wood Seating', weeks: 4, image: '/series-images/jsi_americana_comp_00026.jpg' },
     { series: 'Americana', type: 'Upholstery', weeks: 7, image: '/series-images/jsi_americana_comp_00027.jpg' },
-    { series: 'Ansen', type: 'Seating', weeks: 7, image: '/series-images/jsi_ansen_comp_00001.jpg' },
-    { series: 'Anthology', type: 'Casegoods', weeks: 8, image: '/series-images/jsi_anthology_config_00001.jpg' },
+    { series: 'Ansen', type: 'Seating', weeks: 7, image: '/series-images/jsi_ansen_comp_00002.jpg' },
+    { series: 'Anthology', type: 'Casegoods', weeks: 8, image: '/series-images/jsi_anthology_comp_0008.jpg' },
     { series: 'Arwyn', type: 'Seating', weeks: 8, image: '/series-images/jsi_arwyn_comp_0001.jpg' },
     { series: 'Arwyn', type: 'Tables', weeks: 4, image: '/series-images/jsi_arwyn_comp_0001.jpg' },
     { series: 'Avini', type: 'Seating', weeks: 7, image: '/series-images/jsi_avini_comp_00001.jpg' },

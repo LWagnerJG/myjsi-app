@@ -618,8 +618,6 @@ const LineItemCard = React.memo(({ lineItem, index, theme }) => {
     );
 });
 
-// ui.jsx
-
 export const LeadTimesScreen = ({ theme = {} }) => {
     // State and hooks
     const [searchTerm, setSearchTerm] = useState('');
@@ -630,7 +628,7 @@ export const LeadTimesScreen = ({ theme = {} }) => {
 
     useEffect(() => {
         const handleClickOutside = (e) => {
-            if (filterMenuRef.current && !filterMenu.current.contains(e.target)) {
+            if (filterMenuRef.current && !filterMenuRef.current.contains(e.target)) {
                 setDropdownOpen(false);
             }
         };
@@ -677,20 +675,25 @@ export const LeadTimesScreen = ({ theme = {} }) => {
     }, [searchTerm, filterCategory, sortFastest]);
 
     const LVLabel = ({ label }) => (
-        <span className="text-xs font-bold -mb-1" style={{ color: theme.colors.textSecondary }}>{label}</span>
+        <span className="text-xs font-bold" style={{ color: theme.colors.textSecondary }}>{label}</span>
     );
 
-    // Helper component with larger image and no border
-    const LeadTimeInfo = ({ typeData }) => (
-        <div className="flex flex-col items-center w-20 text-center">
+    // Updated component with a light grey circle for the number
+    const LeadTimeInfo = ({ typeData, theme }) => (
+        <div className="relative w-28 h-28">
             <img
                 src={typeData.image}
                 alt=""
-                className="w-16 h-16 object-contain" // Image size increased
+                className="w-full h-full object-contain"
             />
-            <span className="text-lg font-bold" style={{ color: theme.colors.textPrimary }}>
-                {typeData.weeks}
-            </span>
+            <div
+                className="absolute bottom-1 right-1 h-9 w-9 flex items-center justify-center rounded-full shadow-md"
+                style={{ backgroundColor: theme.colors.subtle }}
+            >
+                <span className="text-lg font-bold" style={{ color: theme.colors.textSecondary }}>
+                    {typeData.weeks}
+                </span>
+            </div>
         </div>
     );
 
@@ -728,28 +731,37 @@ export const LeadTimesScreen = ({ theme = {} }) => {
 
             <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-3 scrollbar-hide">
                 {rows.map(({ series, types }) => (
-                    <GlassCard key={series} theme={theme} className="p-2 flex items-center justify-between">
-                        <h3 className="text-xl font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>
+                    <GlassCard key={series} theme={theme} className="px-6 py-2 flex items-center justify-between min-h-[9rem]">
+                        <h3 className="text-2xl font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>
                             {series}
                         </h3>
-                        <div className="flex items-center space-x-4">
-                            {types['Upholstery'] && <LeadTimeInfo typeData={types['Upholstery']} />}
-                            {types['Seating'] && <LeadTimeInfo typeData={types['Seating']} />}
-                            {types['Wood Seating'] && <LeadTimeInfo typeData={types['Wood Seating']} />}
-                            {types['Casegoods'] && <LeadTimeInfo typeData={types['Casegoods']} />}
-                            {types['Tables'] && <LeadTimeInfo typeData={types['Tables']} />}
+                        {/* This container now has a fixed width and justifies its content to the right */}
+                        <div className="flex items-center justify-end space-x-6 w-[17rem]">
+                            {types['Upholstery'] && <LeadTimeInfo typeData={types['Upholstery']} theme={theme} />}
+                            {types['Seating'] && <LeadTimeInfo typeData={types['Seating']} theme={theme} />}
+                            {types['Wood Seating'] && <LeadTimeInfo typeData={types['Wood Seating']} theme={theme} />}
+                            {types['Casegoods'] && <LeadTimeInfo typeData={types['Casegoods']} theme={theme} />}
+                            {types['Tables'] && <LeadTimeInfo typeData={types['Tables']} theme={theme} />}
                             {types['Laminate'] && (
-                                <div className="flex flex-col items-center w-20 text-center">
-                                    <LVLabel label="L" />
-                                    <img src={types['Laminate'].image} alt="Laminate" className="w-16 h-16 object-contain" />
-                                    <span className="text-lg font-bold">{types['Laminate'].weeks}</span>
+                                <div className="relative w-28 h-28 text-center">
+                                    <LVLabel label="Laminate" />
+                                    <img src={types['Laminate'].image} alt="Laminate" className="w-full h-full object-contain" />
+                                    <div className="absolute bottom-1 right-1 h-9 w-9 flex items-center justify-center rounded-full shadow-md" style={{ backgroundColor: theme.colors.subtle }}>
+                                        <span className="text-lg font-bold" style={{ color: theme.colors.textSecondary }}>
+                                            {types['Laminate'].weeks}
+                                        </span>
+                                    </div>
                                 </div>
                             )}
                             {types['Veneer'] && (
-                                <div className="flex flex-col items-center w-20 text-center">
-                                    <LVLabel label="V" />
-                                    <img src={types['Veneer'].image} alt="Veneer" className="w-16 h-16 object-contain" />
-                                    <span className="text-lg font-bold">{types['Veneer'].weeks}</span>
+                                <div className="relative w-28 h-28 text-center">
+                                    <LVLabel label="Veneer" />
+                                    <img src={types['Veneer'].image} alt="Veneer" className="w-full h-full object-contain" />
+                                    <div className="absolute bottom-1 right-1 h-9 w-9 flex items-center justify-center rounded-full shadow-md" style={{ backgroundColor: theme.colors.subtle }}>
+                                        <span className="text-lg font-bold" style={{ color: theme.colors.textSecondary }}>
+                                            {types['Veneer'].weeks}
+                                        </span>
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -759,6 +771,7 @@ export const LeadTimesScreen = ({ theme = {} }) => {
         </div>
     );
 };
+
 
 const PresentationsScreen = ({ theme, onNavigate }) => {
     // Navigate to the series list or a future “by type” screen
