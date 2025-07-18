@@ -529,10 +529,15 @@ export const PRODUCT_DATA = {
     'guest-chairs': {
         title: 'Guest Chairs',
         data: [
-            { id: 'indie-guest', name: 'Indie', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_indie_comp_00001.jpg', basePrice: { list: 850 } },
-            { id: 'jude-guest', name: 'Jude', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_jude_comp_00001.jpg', basePrice: { list: 980 } },
-            { id: 'arwyn-guest', name: 'Arwyn', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_arwyn_comp_0001.jpg', basePrice: { list: 1100 } },
-            { id: 'wink-guest', name: 'Wink', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_wink_enviro_00033.jpg', basePrice: { list: 1200 } },
+            { id: 'hoopz-guest', name: 'Hoopz', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_hoopz_comp_00001.jpg', basePrice: { list: 404 } },
+            { id: 'knox-guest', name: 'Knox', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_knox_comp_00001.jpg', basePrice: { list: 533 } },
+            { id: 'gatsby-guest', name: 'Gatsby', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_gatsby_comp_00001.jpg', basePrice: { list: 1055 } },
+            { id: 'ria-guest', name: 'Ria', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_ria_comp_00001.jpg', basePrice: { list: 1114 } },
+            { id: 'satisse-guest', name: 'Satisse', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_satisse_comp_00001.jpg', basePrice: { list: 1136 } },
+            { id: 'sosa-guest', name: 'Sosa', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_sosa_comp_00001.jpg', basePrice: { list: 1219 } },
+            { id: 'boston-guest', name: 'Boston', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_boston_comp_00001.jpg', basePrice: { list: 1263 } },
+            { id: 'bourne-guest', name: 'Bourne', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_bourne_comp_00001.jpg', basePrice: { list: 1589 } },
+            { id: 'arwyn-guest', name: 'Arwyn', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_arwyn_comp_0001.jpg', basePrice: { list: 1767 } },
         ],
     },
     lounge: {
