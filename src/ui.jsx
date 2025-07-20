@@ -26,6 +26,7 @@ import {
     Armchair,
     ArrowLeft,
     ArrowRight,
+    ArrowUp,
     BarChart2,
     Briefcase,
     Bus,
@@ -1353,8 +1354,8 @@ const EditablePersonRow = ({ person, theme, onUpdateRole, onRemovePerson }) => {
 };
 
 
-export const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage }) => {
-    const [dealers, setDealers] = useState(Data.DEALER_DIRECTORY_DATA);
+export const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage, dealers }) => {
+    const [localDealers, setLocalDealers] = useState(dealers);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedDealer, setSelectedDealer] = useState(null);
     const [sortConfig, setSortConfig] = useState({ key: 'name' });
@@ -1362,41 +1363,37 @@ export const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage }) =
     const filterMenuRef = useRef(null);
     const [pendingDiscountChange, setPendingDiscountChange] = useState(null);
     const [showAddPersonModal, setShowAddPersonModal] = useState(false);
-    const [newPerson, setNewPerson] = useState({ firstName: '', lastName: '', email: '', role: 'Sales' }); // Default role label
+    const [newPerson, setNewPerson] = useState({ firstName: '', lastName: '', email: '', role: 'Sales' });
+
+    // State for the new popover menu
+    const [menuState, setMenuState] = useState({ open: false, anchorEl: null, person: null });
+
+    useEffect(() => {
+        setLocalDealers(dealers);
+    }, [dealers]);
 
     useEffect(() => {
         const handleClickOutside = (e) => {
-            if (filterMenuRef.current && !filterMenuRef.current.contains(e.target)) {
-                setShowFilterMenu(false);
-            }
+            if (filterMenuRef.current && !filterMenuRef.current.contains(e.target)) setShowFilterMenu(false);
         };
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
     const sortedAndFilteredDealers = useMemo(() => {
-        return dealers
-            .filter(d =>
-                d.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                d.address.toLowerCase().includes(searchTerm.toLowerCase())
-            )
+        return localDealers
+            .filter(d => d.name.toLowerCase().includes(searchTerm.toLowerCase()) || (d.address && d.address.toLowerCase().includes(searchTerm.toLowerCase())))
             .sort((a, b) => {
-                if (sortConfig.key === 'name') {
-                    return a.name.localeCompare(b.name);
-                }
-                return b[sortConfig.key] - a[sortConfig.key];
+                if (sortConfig.key === 'name') return a.name.localeCompare(b.name);
+                return (b[sortConfig.key] || 0) - (a[sortConfig.key] || 0);
             });
-    }, [dealers, searchTerm, sortConfig]);
+    }, [localDealers, searchTerm, sortConfig]);
 
     const confirmDiscountChange = () => {
         if (!pendingDiscountChange) return;
         const { dealerId, newDiscount } = pendingDiscountChange;
-        setDealers(curr =>
-            curr.map(d => d.id === dealerId ? { ...d, dailyDiscount: newDiscount } : d)
-        );
-        setSelectedDealer(prev =>
-            prev && prev.id === dealerId ? { ...prev, dailyDiscount: newDiscount } : prev
-        );
+        setLocalDealers(curr => curr.map(d => d.id === dealerId ? { ...d, dailyDiscount: newDiscount } : d));
+        setSelectedDealer(prev => prev && prev.id === dealerId ? { ...prev, dailyDiscount: newDiscount } : prev);
         setPendingDiscountChange(null);
         setSuccessMessage("Saved!");
         setTimeout(() => setSuccessMessage(""), 1000);
@@ -1410,307 +1407,157 @@ export const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage }) =
     const handleAddPerson = (e) => {
         e.preventDefault();
         if (!selectedDealer) return;
-        const { firstName, lastName, email, role } = newPerson; // role here is the label from the dropdown
+        const { firstName, lastName, email, role } = newPerson;
         if (!firstName || !lastName || !email) return;
 
-        // Map the selected role label back to the internal data structure key
-        const roleKeyMap = {
-            'Administrator': 'administration',
-            'Admin/Sales Support': 'administration', // Grouping under administration for simplicity based on provided data structure
-            'Sales': 'salespeople',
-            'Designer': 'designers',
-            'Sales/Designer': 'salespeople', // Grouping under salespeople for simplicity
-            'Installer': 'installers'
-        };
-        const targetRoleKey = roleKeyMap[role] || 'salespeople'; // Default to 'salespeople' if something goes wrong
-
-        const person = { name: `${firstName} ${lastName}`, status: 'pending', roleLabel: role, roleKey: targetRoleKey }; // Store both label and key if needed
-        setDealers(curr =>
-            curr.map(d =>
-                d.id === selectedDealer.id
-                    ? { ...d, [targetRoleKey]: [...(d[targetRoleKey] || []), person] }
-                    : d
-            )
-        );
-        setSelectedDealer(d =>
-            d.id === selectedDealer.id
-                ? { ...d, [targetRoleKey]: [...(d[targetRoleKey] || []), person] }
-                : d
-        );
+        const roleKeyMap = { 'Administrator': 'administration', 'Admin/Sales Support': 'administration', 'Sales': 'salespeople', 'Designer': 'designers', 'Sales/Designer': 'salespeople', 'Installer': 'installers' };
+        const targetRoleKey = roleKeyMap[role] || 'salespeople';
+        const person = { name: `${firstName} ${lastName}`, email: email, status: 'pending', roleLabel: role };
+        const updatedDealer = { ...selectedDealer, [targetRoleKey]: [...(selectedDealer[targetRoleKey] || []), person] };
+        setLocalDealers(curr => curr.map(d => d.id === selectedDealer.id ? updatedDealer : d));
+        setSelectedDealer(updatedDealer);
         setShowAddPersonModal(false);
-        setNewPerson({ firstName: '', lastName: '', email: '', role: 'Sales' }); // Reset role to its default label
+        setNewPerson({ firstName: '', lastName: '', email: '', role: 'Sales' });
         setSuccessMessage(`Invitation sent to ${email}`);
         setTimeout(() => setSuccessMessage(""), 2000);
     };
 
-    const handleUpdatePersonRole = useCallback((personName, newRoleLabel) => {
+    const handleUpdatePersonRole = useCallback((personToUpdate, newRoleLabel) => {
         if (!selectedDealer) return;
+        const roleKeyMap = { 'Administrator': 'administration', 'Admin/Sales Support': 'administration', 'Sales': 'salespeople', 'Designer': 'designers', 'Sales/Designer': 'salespeople', 'Installer': 'installers' };
+        const newCategoryKey = roleKeyMap[newRoleLabel];
+        let personFound = false;
+        const tempDealer = JSON.parse(JSON.stringify(selectedDealer));
 
-        // Find the person and update their role in the local selectedDealer state
-        const updatedSelectedDealer = { ...selectedDealer };
-        let found = false;
-
-        // Iterate through all role categories to find and update the person
-        ['salespeople', 'designers', 'administration', 'installers'].forEach(category => {
-            updatedSelectedDealer[category] = (updatedSelectedDealer[category] || []).map(p => {
-                if (p.name === personName) {
-                    found = true;
-                    // Map newRoleLabel back to roleKey for internal data structure
-                    const newRoleKey = {
-                        'Administrator': 'administration',
-                        'Admin/Sales Support': 'administration',
-                        'Sales': 'salespeople',
-                        'Designer': 'designers',
-                        'Sales/Designer': 'salespeople',
-                        'Installer': 'installers'
-                    }[newRoleLabel] || 'salespeople';
-
-                    // If the role category changes, this person needs to be moved.
-                    // For simplicity in this demo, we'll keep them in the original category but update their label.
-                    // A full implementation might involve removing from one array and adding to another.
-                    return { ...p, roleLabel: newRoleLabel, roleKey: newRoleKey };
+        for (const category of ['salespeople', 'designers', 'administration', 'installers']) {
+            const personIndex = (tempDealer[category] || []).findIndex(p => p.name === personToUpdate.name);
+            if (personIndex > -1) {
+                const person = tempDealer[category][personIndex];
+                person.roleLabel = newRoleLabel;
+                if (category !== newCategoryKey) {
+                    tempDealer[category].splice(personIndex, 1);
+                    if (!tempDealer[newCategoryKey]) tempDealer[newCategoryKey] = [];
+                    tempDealer[newCategoryKey].push(person);
                 }
-                return p;
-            });
-        });
+                personFound = true;
+                break;
+            }
+        }
 
-        if (found) {
-            // Update the main dealers list state and then setSelectedDealer to trigger re-render
-            setDealers(prevDealers => prevDealers.map(d =>
-                d.id === updatedSelectedDealer.id ? updatedSelectedDealer : d
-            ));
-            setSelectedDealer(updatedSelectedDealer); // Update selectedDealer to reflect changes
+        if (personFound) {
+            setLocalDealers(prev => prev.map(d => d.id === tempDealer.id ? tempDealer : d));
+            setSelectedDealer(tempDealer);
             setSuccessMessage("Role Updated!");
             setTimeout(() => setSuccessMessage(""), 1000);
         }
-
-    }, [selectedDealer, setDealers, setSuccessMessage]);
+        setMenuState({ open: false, anchorEl: null, person: null }); // Close menu
+    }, [selectedDealer, setLocalDealers]);
 
     const handleRemovePerson = useCallback((personName) => {
         if (!selectedDealer) return;
-
-        const updatedSelectedDealer = { ...selectedDealer };
-        let removed = false;
-
-        // Remove the person from their category
+        const updatedDealer = { ...selectedDealer };
         ['salespeople', 'designers', 'administration', 'installers'].forEach(category => {
-            if (!removed && updatedSelectedDealer[category]) {
-                const initialLength = updatedSelectedDealer[category].length;
-                updatedSelectedDealer[category] = updatedSelectedDealer[category].filter(p => p.name !== personName);
-                if (updatedSelectedDealer[category].length < initialLength) {
-                    removed = true;
-                }
+            if (updatedDealer[category]) {
+                updatedDealer[category] = updatedDealer[category].filter(p => p.name !== personName);
             }
         });
+        setLocalDealers(prev => prev.map(d => d.id === updatedDealer.id ? updatedDealer : d));
+        setSelectedDealer(updatedDealer);
+        setSuccessMessage("Person Removed!");
+        setTimeout(() => setSuccessMessage(""), 1000);
+        setMenuState({ open: false, anchorEl: null, person: null }); // Close menu
+    }, [selectedDealer, setLocalDealers]);
 
-        if (removed) {
-            setDealers(prevDealers => prevDealers.map(d =>
-                d.id === updatedSelectedDealer.id ? updatedSelectedDealer : d
-            ));
-            setSelectedDealer(updatedSelectedDealer);
-            setSuccessMessage("Person Removed!");
-            setTimeout(() => setSuccessMessage(""), 1000);
-        }
-    }, [selectedDealer, setDealers, setSuccessMessage]);
+    const handleMenuOpen = (event, person) => {
+        setMenuState({ open: true, anchorEl: event.currentTarget, person });
+    };
 
+    const handleMenuClose = () => {
+        setMenuState({ open: false, anchorEl: null, person: null });
+    };
 
-    // Redefined ModalSectionHeader for uniform styling
-    const ModalSectionHeader = ({ title, theme }) =>
-        <p className="font-bold text-lg pt-4 pb-2" style={{ color: theme.colors.textPrimary }}>{title}</p>;
+    const ModalSectionHeader = ({ title }) => <p className="font-bold text-lg pt-4 pb-2" style={{ color: theme.colors.textPrimary }}>{title}</p>;
 
+    const roleOptions = useMemo(() => [
+        { label: 'Administrator', value: 'Administrator' }, { label: 'Admin/Sales Support', value: 'Admin/Sales Support' },
+        { label: 'Sales', value: 'Sales' }, { label: 'Designer', value: 'Designer' },
+        { label: 'Sales/Designer', value: 'Sales/Designer' }, { label: 'Installer', value: 'Installer' }
+    ], []);
 
-    // StaffSection now renders EditablePersonRow for each member
-    const StaffSection = ({ title, members, onUpdateRole, onRemovePerson, theme }) => (
-        <div className="space-y-2">
-            <ModalSectionHeader title={title} theme={theme} />
-            <div className="text-sm space-y-1">
-                {members && members.length > 0
-                    ? members.map(m => (
-                        <EditablePersonRow
-                            key={m.name}
-                            person={m}
-                            theme={theme}
-                            onUpdateRole={onUpdateRole}
-                            onRemovePerson={onRemovePerson}
-                        />
-                    ))
-                    : <p className="text-sm px-3 py-2" style={{ color: theme.colors.textSecondary }}>None listed.</p>
-                }
-            </div>
+    const StaffSection = ({ title, members }) => (
+        <div>
+            <ModalSectionHeader title={title} />
+            {members && members.length > 0 ? (
+                <div className="border-t" style={{ borderColor: theme.colors.subtle }}>
+                    {members.map(m => (
+                        <div key={m.name} className="flex justify-between items-center py-2 px-2 border-b" style={{ borderColor: theme.colors.subtle }}>
+                            <div>
+                                <p className="font-semibold" style={{ color: theme.colors.textPrimary }}>{m.name}</p>
+                                <p className="text-sm" style={{ color: theme.colors.textSecondary }}>
+                                    {m.status === 'pending' ? <span className="font-semibold text-amber-500">Pending Invitation</span> : m.email}
+                                </p>
+                            </div>
+                            <button onClick={(e) => handleMenuOpen(e, m)} className="p-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10">
+                                <MoreVertical className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            ) : <p className="text-sm px-2 py-1" style={{ color: theme.colors.textSecondary }}>None listed.</p>}
         </div>
     );
 
     return (
         <>
             <PageTitle title="Dealer Directory" theme={theme} />
-
             <div className="px-4 pb-4 flex items-center space-x-2">
-                <SearchInput
-                    className="flex-grow"
-                    value={searchTerm}
-                    onChange={e => setSearchTerm(e.target.value)}
-                    placeholder="Search by name or city..."
-                    theme={theme}
-                />
+                <SearchInput className="flex-grow" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder="Search by name or city..." theme={theme} />
                 <div className="relative">
-                    <button
-                        onClick={() => setShowFilterMenu(f => !f)}
-                        className="p-3.5 rounded-lg"
-                        style={{ backgroundColor: theme.colors.subtle }}
-                    >
-                        <Filter className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />
-                    </button>
-                    {showFilterMenu && (
-                        <GlassCard ref={filterMenuRef} theme={theme} className="absolute top-14 right-0 z-10 w-40 p-2">
-                            <button onClick={() => handleSort('name')} className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${sortConfig.key === 'name' ? 'font-bold' : ''}`} style={{ color: theme.colors.textPrimary, backgroundColor: sortConfig.key === 'name' ? theme.colors.subtle : 'transparent' }}> A-Z </button>
-                            <button onClick={() => handleSort('sales')} className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${sortConfig.key === 'sales' ? 'font-bold' : ''}`} style={{ color: theme.colors.textPrimary, backgroundColor: sortConfig.key === 'sales' ? theme.colors.subtle : 'transparent' }}> By Sales </button>
-                            <button onClick={() => handleSort('bookings')} className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${sortConfig.key === 'bookings' ? 'font-bold' : ''}`} style={{ color: theme.colors.textPrimary, backgroundColor: sortConfig.key === 'bookings' ? theme.colors.subtle : 'transparent' }}> By Bookings </button>
-                        </GlassCard>
-                    )}
+                    <button onClick={() => setShowFilterMenu(f => !f)} className="p-3.5 rounded-lg" style={{ backgroundColor: theme.colors.subtle }}><Filter className="w-5 h-5" style={{ color: theme.colors.textPrimary }} /></button>
+                    {showFilterMenu && (<GlassCard ref={filterMenuRef} theme={theme} className="absolute top-14 right-0 z-10 w-40 p-2"><button onClick={() => handleSort('name')} className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${sortConfig.key === 'name' ? 'font-bold' : ''}`} style={{ color: theme.colors.textPrimary, backgroundColor: sortConfig.key === 'name' ? theme.colors.subtle : 'transparent' }}> A-Z </button><button onClick={() => handleSort('sales')} className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${sortConfig.key === 'sales' ? 'font-bold' : ''}`} style={{ color: theme.colors.textPrimary, backgroundColor: sortConfig.key === 'sales' ? theme.colors.subtle : 'transparent' }}> By Sales </button><button onClick={() => handleSort('bookings')} className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${sortConfig.key === 'bookings' ? 'font-bold' : ''}`} style={{ color: theme.colors.textPrimary, backgroundColor: sortConfig.key === 'bookings' ? theme.colors.subtle : 'transparent' }}> By Bookings </button></GlassCard>)}
                 </div>
             </div>
-
             <div className="px-4 space-y-3 pb-4">
-                {sortedAndFilteredDealers.map(dealer => (
-                    <GlassCard
-                        key={dealer.id}
-                        theme={theme}
-                        className="p-4 cursor-pointer hover:border-gray-400/50"
-                        onClick={() => setSelectedDealer(dealer)}
-                    >
-                        <div className="flex justify-between items-start">
-                            <div>
-                                <h3 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>
-                                    {dealer.name}
-                                </h3>
-                                <p className="text-sm" style={{ color: theme.colors.textSecondary }}>
-                                    {dealer.address}
-                                </p>
-                            </div>
-                            <div className="text-right flex-shrink-0 ml-2">
-                                <p className="text-xs font-semibold capitalize" style={{ color: theme.colors.textSecondary }}>
-                                    {sortConfig.key}
-                                </p>
-                                <p className="font-bold" style={{ color: theme.colors.textPrimary }}>
-                                    ${dealer[sortConfig.key === 'name' ? 'bookings' : sortConfig.key].toLocaleString()}
-                                </p>
-                            </div>
-                        </div>
-                    </GlassCard>
-                ))}
+                {sortedAndFilteredDealers.map(dealer => (<GlassCard key={dealer.id} theme={theme} className="p-4 cursor-pointer hover:border-gray-400/50" onClick={() => { setSelectedDealer(dealer); }}><div className="flex justify-between items-start"><div><h3 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>{dealer.name}</h3><p className="text-sm" style={{ color: theme.colors.textSecondary }}>{dealer.address}</p></div><div className="text-right flex-shrink-0 ml-2"><p className="text-xs font-semibold capitalize" style={{ color: theme.colors.textSecondary }}>{sortConfig.key}</p><p className="font-bold" style={{ color: theme.colors.textPrimary }}>${(dealer[sortConfig.key === 'name' ? 'bookings' : sortConfig.key] || 0).toLocaleString()}</p></div></div></GlassCard>))}
             </div>
 
             <Modal show={!!selectedDealer} onClose={() => setSelectedDealer(null)} title={selectedDealer?.name || ''} theme={theme}>
                 {selectedDealer && (
-                    <div className="space-y-4">
-                        <div className="flex justify-between items-start">
-                            <p className="text-sm" style={{ color: theme.colors.textSecondary }}>
-                                {selectedDealer.address}
-                            </p>
-                            <button
-                                onClick={() => setShowAddPersonModal(true)}
-                                className="p-2 -mr-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10"
-                            >
-                                <UserPlus className="w-5 h-5" style={{ color: theme.colors.accent }} />
-                            </button>
+                    <div>
+                        <div className="flex justify-between items-start mb-4">
+                            <p className="text-sm" style={{ color: theme.colors.textSecondary }}>{selectedDealer.address}</p>
+                            <button onClick={() => setShowAddPersonModal(true)} className="p-2 -mr-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10"><UserPlus className="w-5 h-5" style={{ color: theme.colors.accent }} /></button>
                         </div>
-
-                        {/* Daily Discount Section */}
-                        <div className="space-y-2">
-                            <ModalSectionHeader title="Daily Discount" theme={theme} /> {/* Use uniform header */}
-                            <PortalNativeSelect
-                                label="" // Keep label empty for subliminal style
-                                theme={theme}
-                                value={selectedDealer.dailyDiscount}
-                                onChange={e => setPendingDiscountChange({
-                                    dealerId: selectedDealer.id,
-                                    newDiscount: e.target.value
-                                })}
-                                options={Data.DAILY_DISCOUNT_OPTIONS.map(opt => ({ label: opt, value: opt }))}
-                            />
-                        </div>
-
-                        {/* Recent Orders Section */}
-                        <div className="space-y-2">
-                            <ModalSectionHeader title="Recent Orders" theme={theme} /> {/* Use uniform header */}
-                            {selectedDealer.recentOrders.length > 0 ? (
-                                <div className="space-y-2 mt-2">
-                                    {selectedDealer.recentOrders.map(order => (
-                                        <div
-                                            key={order.id}
-                                            className="flex justify-between items-center text-sm p-2 rounded-md"
-                                            style={{ backgroundColor: theme.colors.subtle }}
-                                        >
-                                            <div>
-                                                <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>
-                                                    #{order.id}
-                                                </span>
-                                                <p className="text-xs" style={{ color: theme.colors.textSecondary }}>
-                                                    Shipped: {new Date(order.shippedDate).toLocaleDateString()}
-                                                </p>
-                                            </div>
-                                            <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>
-                                                ${order.amount.toLocaleString()}
-                                            </span>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <p className="text-sm mt-1" style={{ color: theme.colors.textSecondary }}>
-                                    No recent orders.
-                                </p>
-                            )}
-                        </div>
-
-                        {/* People Sections (Salespeople, Designers, Admin, Installers) */}
-                        <div className="grid grid-cols-2 gap-x-4 gap-y-4">
-                            <StaffSection title="Salespeople" members={selectedDealer.salespeople} onUpdateRole={handleUpdatePersonRole} onRemovePerson={handleRemovePerson} theme={theme} />
-                            <StaffSection title="Designers" members={selectedDealer.designers} onUpdateRole={handleUpdatePersonRole} onRemovePerson={handleRemovePerson} theme={theme} />
-                            <StaffSection title="Administration" members={selectedDealer.administration} onUpdateRole={handleUpdatePersonRole} onRemovePerson={handleRemovePerson} theme={theme} />
-                            <StaffSection title="Installers" members={selectedDealer.installers} onUpdateRole={handleUpdatePersonRole} onRemovePerson={handleRemovePerson} theme={theme} />
+                        <div className="grid grid-cols-2 gap-x-6">
+                            <StaffSection title="Salespeople" members={selectedDealer.salespeople} />
+                            <StaffSection title="Designers" members={selectedDealer.designers} />
+                            <StaffSection title="Administration" members={selectedDealer.administration} />
+                            <StaffSection title="Installers" members={selectedDealer.installers} />
                         </div>
                     </div>
                 )}
+                {menuState.open && (
+                    <DropdownPortal parentRef={{ current: menuState.anchorEl }} onClose={handleMenuClose}>
+                        <GlassCard theme={theme} className="p-1 w-56">
+                            <div className="px-2 py-1 text-xs font-bold" style={{ color: theme.colors.textSecondary }}>Change Role</div>
+                            {roleOptions.map(opt => (
+                                <button key={opt.value} onClick={() => handleUpdatePersonRole(menuState.person, opt.value)} className="w-full flex justify-between items-center text-left py-2 px-2 text-sm font-semibold rounded-lg hover:bg-black/5">
+                                    <span style={{ color: menuState.person.roleLabel === opt.value ? theme.colors.accent : theme.colors.textPrimary }}>{opt.label}</span>
+                                    {menuState.person.roleLabel === opt.value && <CheckCircle className="w-4 h-4" style={{ color: theme.colors.accent }} />}
+                                </button>
+                            ))}
+                            <div className="border-t my-1" style={{ borderColor: theme.colors.subtle }} />
+                            <button onClick={() => handleRemovePerson(menuState.person.name)} className="w-full flex items-center text-left py-2 px-2 text-sm font-semibold rounded-lg text-red-600 hover:bg-red-500/10">
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Remove Person
+                            </button>
+                        </GlassCard>
+                    </DropdownPortal>
+                )}
             </Modal>
 
-            <Modal show={!!pendingDiscountChange} onClose={() => setPendingDiscountChange(null)} title="Confirm Change" theme={theme}>
-                <p style={{ color: theme.colors.textPrimary }}>
-                    Are you sure you want to change the daily discount to{' '}
-                    <span className="font-bold">{pendingDiscountChange?.newDiscount}</span>?
-                </p>
-                <div className="flex justify-end space-x-3 pt-4">
-                    <button onClick={() => setPendingDiscountChange(null)} className="font-bold py-2 px-5 rounded-lg" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }}>Cancel</button>
-                    <button onClick={confirmDiscountChange} className="font-bold py-2 px-5 rounded-lg text-white" style={{ backgroundColor: theme.colors.accent }}>Save</button>
-                </div>
-            </Modal>
-
-            <Modal show={showAddPersonModal} onClose={() => setShowAddPersonModal(false)} title="Add New Person" theme={theme}>
-                <form onSubmit={handleAddPerson} className="space-y-4">
-                    <FormInput label="First Name" value={newPerson.firstName} onChange={e => setNewPerson(p => ({ ...p, firstName: e.target.value }))} theme={theme} required />
-                    <FormInput label="Last Name" value={newPerson.lastName} onChange={e => setNewPerson(p => ({ ...p, lastName: e.target.value }))} theme={theme} required />
-                    <FormInput label="Email" type="email" value={newPerson.email} onChange={e => setNewPerson(p => ({ ...p, email: e.target.value }))} theme={theme} required />
-                    <PortalNativeSelect
-                        label="Role"
-                        value={newPerson.role}
-                        onChange={e => setNewPerson(p => ({ ...p, role: e.target.value }))}
-                        theme={theme}
-                        options={[
-                            { label: 'Administrator', value: 'Administrator' },
-                            { label: 'Admin/Sales Support', value: 'Admin/Sales Support' },
-                            { label: 'Sales', value: 'Sales' },
-                            { label: 'Designer', value: 'Designer' },
-                            { label: 'Sales/Designer', value: 'Sales/Designer' },
-                            { label: 'Installer', value: 'Installer' }
-                        ]}
-                    />
-                    <div className="pt-2 text-center">
-                        <p className="text-xs mb-2" style={{ color: theme.colors.textSecondary }}>
-                            This will send an invitation to the user to join the MyJSI app.
-                        </p>
-                        <button type="submit" className="w-full font-bold py-3 px-6 rounded-full text-white" style={{ backgroundColor: theme.colors.accent }} > Send Invite </button>
-                    </div>
-                </form>
-            </Modal>
+            <Modal show={!!pendingDiscountChange} onClose={() => setPendingDiscountChange(null)} title="Confirm Change" theme={theme}><p style={{ color: theme.colors.textPrimary }}>Are you sure you want to change the daily discount to <span className="font-bold">{pendingDiscountChange?.newDiscount}</span>?</p><div className="flex justify-end space-x-3 pt-4"><button onClick={() => setPendingDiscountChange(null)} className="font-bold py-2 px-5 rounded-lg" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }}>Cancel</button><button onClick={confirmDiscountChange} className="font-bold py-2 px-5 rounded-lg text-white" style={{ backgroundColor: theme.colors.accent }}>Save</button></div></Modal>
+            <Modal show={showAddPersonModal} onClose={() => setShowAddPersonModal(false)} title="Add New Person" theme={theme}><form onSubmit={handleAddPerson} className="space-y-4"><FormInput label="First Name" value={newPerson.firstName} onChange={e => setNewPerson(p => ({ ...p, firstName: e.target.value }))} theme={theme} required /><FormInput label="Last Name" value={newPerson.lastName} onChange={e => setNewPerson(p => ({ ...p, lastName: e.target.value }))} theme={theme} required /><FormInput label="Email" type="email" value={newPerson.email} onChange={e => setNewPerson(p => ({ ...p, email: e.target.value }))} theme={theme} required /><PortalNativeSelect label="Role" value={newPerson.role} onChange={e => setNewPerson(p => ({ ...p, role: e.target.value }))} theme={theme} options={roleOptions} /><div className="pt-2 text-center"><p className="text-xs mb-2" style={{ color: theme.colors.textSecondary }}>This will send an invitation to the user to join the MyJSI app.</p><button type="submit" className="w-full font-bold py-3 px-6 rounded-full text-white" style={{ backgroundColor: theme.colors.accent }} > Send Invite </button></div></form></Modal>
         </>
     );
 };
@@ -2219,17 +2066,25 @@ const RequestFieldVisitScreen = ({ theme, setSuccessMessage, onNavigate }) => {
     );
 };
 
-export const DealerRegistrationScreen = ({ theme, onNavigate, setSuccessMessage }) => {
+export const DealerRegistrationScreen = ({ theme, onNavigate, setSuccessMessage, onAddDealer }) => {
     const [dealerName, setDealerName] = useState('');
-    const [address, setAddress] = useState('');
-    const [contactNumber, setContactNumber] = useState('');
     const [email, setEmail] = useState('');
-    const [licenseNumber, setLicenseNumber] = useState('');
+    const [dailyDiscount, setDailyDiscount] = useState('');
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-    const handleSubmit = (e) => {
-        e.preventDefault(); // Prevent the page from reloading on submit
-        // Logic to handle the form data would go here
-        console.log({ dealerName, address, contactNumber, email, licenseNumber });
+    // This is the initial submit handler for the main button
+    const handleInitialSubmit = (e) => {
+        e.preventDefault();
+        // It now just opens the confirmation modal
+        setShowConfirmModal(true);
+    };
+
+    // This function runs only after the user confirms in the modal
+    const handleFinalSubmit = () => {
+        // Call the new handler passed down from App.jsx
+        onAddDealer({ dealerName, email, dailyDiscount });
+
+        setShowConfirmModal(false); // Close the confirmation modal
 
         // Use the existing success message and navigation system
         setSuccessMessage("Dealer Registration Submitted!");
@@ -2243,36 +2098,18 @@ export const DealerRegistrationScreen = ({ theme, onNavigate, setSuccessMessage 
         <div className="flex flex-col h-full">
             <PageTitle title="New Dealer Sign-Up" theme={theme} />
             <div className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-hide">
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleInitialSubmit} className="space-y-4">
                     <GlassCard theme={theme} className="p-4 space-y-4">
                         <FormInput
                             label="Dealer Name"
                             value={dealerName}
                             onChange={(e) => setDealerName(e.target.value)}
-                            placeholder="Enter the official dealer name"
+                            placeholder="Enter dealer name"
                             theme={theme}
                             required
                         />
                         <FormInput
-                            label="Address"
-                            type="textarea"
-                            value={address}
-                            onChange={(e) => setAddress(e.target.value)}
-                            placeholder="Enter the full business address"
-                            theme={theme}
-                            required
-                        />
-                        <FormInput
-                            label="Contact Number"
-                            type="tel"
-                            value={contactNumber}
-                            onChange={(e) => setContactNumber(e.target.value)}
-                            placeholder="(555) 555-5555"
-                            theme={theme}
-                            required
-                        />
-                        <FormInput
-                            label="Email"
+                            label="Admin Email"
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
@@ -2280,12 +2117,14 @@ export const DealerRegistrationScreen = ({ theme, onNavigate, setSuccessMessage 
                             theme={theme}
                             required
                         />
-                        <FormInput
-                            label="Business License Number"
-                            value={licenseNumber}
-                            onChange={(e) => setLicenseNumber(e.target.value)}
-                            placeholder="Enter license number (optional)"
+                        <PortalNativeSelect
+                            label="Daily Discount"
+                            value={dailyDiscount}
+                            onChange={(e) => setDailyDiscount(e.target.value)}
+                            options={Data.DAILY_DISCOUNT_OPTIONS.map(opt => ({ label: opt, value: opt }))}
+                            placeholder="Select a discount"
                             theme={theme}
+                            required
                         />
                     </GlassCard>
                     <button
@@ -2297,6 +2136,33 @@ export const DealerRegistrationScreen = ({ theme, onNavigate, setSuccessMessage 
                     </button>
                 </form>
             </div>
+
+            {/* --- Confirmation Modal --- */}
+            <Modal show={showConfirmModal} onClose={() => setShowConfirmModal(false)} title="Confirm Registration" theme={theme}>
+                <p style={{ color: theme.colors.textPrimary }}>
+                    This will send the credit application and required documentation to the admin email provided:
+                    <strong className="block text-center my-3 text-lg">{email}</strong>
+                    Are you sure you want to proceed?
+                </p>
+                <div className="flex justify-end space-x-3 pt-4 mt-4 border-t" style={{ borderColor: theme.colors.border }}>
+                    <button
+                        type="button"
+                        onClick={() => setShowConfirmModal(false)}
+                        className="font-bold py-2 px-5 rounded-lg"
+                        style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }}
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleFinalSubmit}
+                        className="font-bold py-2 px-5 rounded-lg text-white"
+                        style={{ backgroundColor: theme.colors.accent }}
+                    >
+                        Submit
+                    </button>
+                </div>
+            </Modal>
         </div>
     );
 };
@@ -2508,7 +2374,8 @@ export const LoanerItemCard = ({ item, isSelected, onSelect, theme }) => {
     );
 };
 
-export const ResourceDetailScreen = ({ theme, onNavigate, setSuccessMessage, userSettings, showAlert, currentScreen, onUpdateCart }) => {
+
+export const ResourceDetailScreen = ({ theme, onNavigate, setSuccessMessage, userSettings, showAlert, currentScreen, onUpdateCart, dealerDirectory, handleAddDealer }) => {
     // Extract the specific resource type from the URL-like path
     const category = currentScreen.split('/')[1]?.replace(/[_-]/g, ' ');
 
@@ -2519,13 +2386,13 @@ export const ResourceDetailScreen = ({ theme, onNavigate, setSuccessMessage, use
         case 'loaner pool':
             return <LoanerPoolScreen theme={theme} onNavigate={onNavigate} setSuccessMessage={setSuccessMessage} userSettings={userSettings} />;
         case 'dealer registration':
-            return <DealerRegistrationScreen theme={theme} onNavigate={onNavigate} setSuccessMessage={setSuccessMessage} />;
+            return <DealerRegistrationScreen theme={theme} onNavigate={onNavigate} setSuccessMessage={setSuccessMessage} onAddDealer={handleAddDealer} />;
         case 'request field visit':
             return <RequestFieldVisitScreen theme={theme} onNavigate={onNavigate} setSuccessMessage={setSuccessMessage} />;
         case 'sample discounts':
             return <SampleDiscountsScreen theme={theme} setSuccessMessage={setSuccessMessage} />;
         case 'dealer directory':
-            return <DealerDirectoryScreen theme={theme} showAlert={showAlert} setSuccessMessage={setSuccessMessage} />;
+            return <DealerDirectoryScreen theme={theme} showAlert={showAlert} setSuccessMessage={setSuccessMessage} dealers={dealerDirectory} />;
 
         // --- Misc. Resources ---
         case 'contracts':
@@ -3957,6 +3824,7 @@ export const AppHeader = React.memo(({ onHomeClick, isDarkMode, theme, onProfile
     );
 });
 
+
 export const SmartSearch = ({
     theme,
     onNavigate,
@@ -3974,7 +3842,7 @@ export const SmartSearch = ({
             return;
         }
         const term = query.trim().toLowerCase();
-        if (term.length >= 2) {
+        if (term.length >= 1) {
             const results = Data.allApps
                 .filter(app => app.name.toLowerCase().includes(term))
                 .sort((a, b) => a.name.localeCompare(b.name));
@@ -4059,7 +3927,7 @@ export const SmartSearch = ({
 
             {isFocused && filteredApps.length > 0 && (
                 <GlassCard theme={theme} className="absolute top-full mt-2 w-full p-2 z-50">
-                    <ul className="max-h-60 overflow-y-auto">
+                    <ul className="max-h-60 overflow-y-auto scrollbar-hide">
                         {filteredApps.map(app => (
                             <li
                                 key={app.route}
@@ -4083,6 +3951,7 @@ export const SmartSearch = ({
         </div>
     );
 };
+
 
 export const HomeScreen = ({ onNavigate, theme, onAskAI, showAIDropdown, aiResponse, isAILoading, onCloseAIDropdown, onVoiceActivate }) => {
     const handleFeedbackClick = useCallback(() => {
@@ -4195,27 +4064,24 @@ export const VoiceModal = ({ message, show, theme }) => {
 };
 
 const MonthlyBarChart = ({ data, theme }) => {
-    const maxValue = Math.max(...data.map(d => Math.max(d.bookings, d.sales)));
-
+    const maxValue = Math.max(...data.map(d => d.bookings));
     return (
-        <div className="space-y-3">
+        <div className="space-y-4">
             {data.map((item, index) => (
-                <div key={index} className="space-y-1">
-                    <div className="flex justify-between text-sm">
-                        <span style={{ color: theme.colors.textSecondary }}>{item.month}</span>
-                        <span style={{ color: theme.colors.textPrimary }}>
-                            ${item.bookings?.toLocaleString() || 0}
-                        </span>
-                    </div>
-                    <div className="relative h-6 rounded-full" style={{ backgroundColor: theme.colors.subtle }}>
+                <div key={index} className="grid grid-cols-[3rem,1fr,auto] items-center gap-x-4 text-sm">
+                    <span className="font-semibold" style={{ color: theme.colors.textSecondary }}>{item.month}</span>
+                    <div className="h-2.5 rounded-full" style={{ backgroundColor: theme.colors.border }}>
                         <div
-                            className="h-full rounded-full transition-all duration-300"
+                            className="h-full rounded-full"
                             style={{
                                 width: `${((item.bookings || 0) / maxValue) * 100}%`,
                                 backgroundColor: theme.colors.accent
                             }}
                         />
                     </div>
+                    <span className="font-semibold text-right" style={{ color: theme.colors.textPrimary }}>
+                        ${(item.bookings || 0).toLocaleString()}
+                    </span>
                 </div>
             ))}
         </div>
@@ -4734,10 +4600,10 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
 };
 
 export const SalesScreen = ({ theme, onNavigate }) => {
-    const { MONTHLY_SALES_DATA, ORDER_DATA, SALES_VERTICALS_DATA } = Data;
-    const [monthlyView, setMonthlyView] = useState('table');
+    const { MONTHLY_SALES_DATA, ORDER_DATA, SALES_VERTICALS_DATA, STATUS_COLORS } = Data;
+    const [monthlyView, setMonthlyView] = useState('chart');
     const [selectedOrder, setSelectedOrder] = useState(null);
-    const [numRecentOrders, setNumRecentOrders] = useState(3); // State to control number of recent orders displayed
+    const [numRecentOrders, setNumRecentOrders] = useState(3);
 
     const { totalBookings, totalSales } = useMemo(() => {
         const bookings = Data.MONTHLY_SALES_DATA.reduce((acc, m) => acc + m.bookings, 0);
@@ -4756,18 +4622,40 @@ export const SalesScreen = ({ theme, onNavigate }) => {
     }, [allRecentOrders, numRecentOrders]);
 
     const handleShowMoreOrders = useCallback(() => {
-        setNumRecentOrders(8); // Show 8 total orders
+        setNumRecentOrders(8);
     }, []);
 
     const goal = 7000000;
     const percentToGoal = useMemo(() => (totalBookings / goal) * 100, [totalBookings, goal]);
 
-    const handleToggleView = useCallback(() => setMonthlyView(v => v === 'chart' ? 'table' : 'chart'), []);
     const handleShowOrderDetails = useCallback(order => setSelectedOrder(order), []);
     const handleCloseModal = useCallback(() => setSelectedOrder(null), []);
-    const handleCustomerRankNav = useCallback(() => onNavigate('customer-rank'), [onNavigate]);
-    const handleCommissionsNav = useCallback(() => onNavigate('commissions'), [onNavigate]);
-    const handleRewardsNav = useCallback(() => onNavigate('incentive-rewards'), [onNavigate]);
+
+    // Helper to format company names like "OFFICEWORKS INC." to "Officeworks Inc."
+    const formatCompanyName = (name) => {
+        if (!name) return '';
+        return name.toLowerCase().replace(/\b(\w)/g, s => s.toUpperCase());
+    };
+
+    // New helper to format large numbers into millions
+    const formatMillion = (n) => {
+        if (typeof n !== 'number') return '0.00M';
+        return `${(n / 1000000).toFixed(2)}M`;
+    };
+
+    const CardHeader = ({ title, children }) => (
+        <div className="flex justify-between items-center px-4 pt-4 pb-3 border-b" style={{ borderColor: theme.colors.border }}>
+            <h3 className="font-bold text-xl" style={{ color: theme.colors.textPrimary }}>{title}</h3>
+            {children}
+        </div>
+    );
+
+    const NavigationButton = ({ label, nav }) => (
+        <button onClick={() => onNavigate(nav)} className="w-full p-4 rounded-xl flex items-center justify-between transition-colors hover:bg-black/5 dark:hover:bg-white/10">
+            <span className="text-md font-semibold tracking-tight" style={{ color: theme.colors.textPrimary }}>{label}</span>
+            <ArrowRight className="w-5 h-5" style={{ color: theme.colors.secondary }} />
+        </button>
+    );
 
     return (
         <div className="flex flex-col h-full">
@@ -4789,78 +4677,82 @@ export const SalesScreen = ({ theme, onNavigate }) => {
 
             <div className="flex-1 overflow-y-auto scrollbar-hide">
                 <div className="px-4 space-y-4 py-4">
-                    <GlassCard theme={theme} className="p-4 transition-all duration-300 hover:border-white/20">
-                        <p className="text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>
-                            Progress to Goal
-                        </p>
-                        <p className="text-4xl font-bold my-2" style={{ color: theme.colors.accent }}>
-                            {percentToGoal.toFixed(1)}%
-                        </p>
-                        <div className="relative w-full h-2.5 rounded-full" style={{ backgroundColor: 'rgba(0, 0, 0, 0.08)' }}>
-                            <div className="h-full rounded-full" style={{ width: `${percentToGoal}%`, backgroundColor: theme.colors.accent }}></div>
+                    <GlassCard theme={theme} className="overflow-hidden">
+                        <CardHeader title="Progress to Goal">
+                            <div className="flex items-center space-x-1 px-2 py-0.5 rounded-full" style={{ backgroundColor: theme.colors.accent + '1A', color: theme.colors.accent }}>
+                                <ArrowUp className="w-3 h-3" />
+                                <span className="text-xs font-bold">+3.1%</span>
+                            </div>
+                        </CardHeader>
+                        <div className="p-4">
+                            <p className="text-5xl font-bold" style={{ color: theme.colors.accent }}>
+                                {percentToGoal.toFixed(1)}%
+                            </p>
+                            <p className="text-sm font-semibold mt-1 mb-3" style={{ color: theme.colors.textPrimary }}>
+                                ${formatMillion(totalBookings)} of ${formatMillion(goal)}
+                            </p>
+                            <div className="relative w-full h-4 rounded-full" style={{ backgroundColor: theme.colors.border }}>
+                                <div className="h-full rounded-full" style={{ width: `${percentToGoal}%`, backgroundColor: theme.colors.accent }}></div>
+                            </div>
                         </div>
                     </GlassCard>
 
-                    <GlassCard theme={theme} className="p-4 hover:border-white/20 transition-all duration-300">
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>
-                                Monthly Performance
-                            </h3>
-                            <button
-                                onClick={handleToggleView}
-                                className="p-1.5 rounded-md"
-                                style={{ backgroundColor: theme.colors.subtle }}
-                            >
-                                {monthlyView === 'chart'
-                                    ? <List className="w-4 h-4" style={{ color: theme.colors.secondary }} />
-                                    : <BarChart2 className="w-4 h-4" style={{ color: theme.colors.secondary }} />}
-                            </button>
-                        </div>
-                        {monthlyView === 'chart'
-                            ? <MonthlyBarChart data={Data.MONTHLY_SALES_DATA} theme={theme} />
-                            : <MonthlyTable
-                                data={Data.MONTHLY_SALES_DATA}
+                    <GlassCard theme={theme} className="overflow-hidden">
+                        <CardHeader title="Monthly Performance" />
+                        <div className="p-4">
+                            <ToggleButtonGroup
+                                value={monthlyView}
+                                onChange={setMonthlyView}
+                                options={[{ label: 'Chart', value: 'chart' }, { label: 'Table', value: 'table' }]}
                                 theme={theme}
-                                totalBookings={totalBookings}
-                                totalSales={totalSales}
-                            />}
+                            />
+                            <div className="mt-4">
+                                {monthlyView === 'chart'
+                                    ? <MonthlyBarChart data={Data.MONTHLY_SALES_DATA} theme={theme} />
+                                    : <MonthlyTable
+                                        data={Data.MONTHLY_SALES_DATA}
+                                        theme={theme}
+                                        totalBookings={totalBookings}
+                                        totalSales={totalSales}
+                                    />}
+                            </div>
+                        </div>
                     </GlassCard>
 
-                    {/* Recent POs Card now includes the "Show five more" button */}
-                    <GlassCard theme={theme} className="p-4 hover:border-white/20 transition-all duration-300">
-                        <h3 className="font-bold text-lg mb-4" style={{ color: theme.colors.textPrimary }}>
-                            Recent Purchase Orders
-                        </h3>
-                        <div className="space-y-3">
+                    <GlassCard theme={theme} className="overflow-hidden">
+                        <CardHeader title="Recent Purchase Orders" />
+                        <div className="px-1">
                             {displayedRecentOrders.map((order, index) => (
-                                <div
-                                    key={index}
-                                    className="flex justify-between items-center p-3 rounded-lg cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-                                    onClick={() => handleShowOrderDetails(order)}
-                                    style={{ backgroundColor: theme.colors.subtle }}
-                                >
-                                    <div>
-                                        <div className="font-semibold" style={{ color: theme.colors.textPrimary }}>
-                                            {order.company}
+                                <React.Fragment key={order.orderNumber}>
+                                    {index > 0 && <div className="border-t mx-3" style={{ borderColor: theme.colors.border }}></div>}
+                                    <button
+                                        className="w-full text-left p-3 transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                                        onClick={() => handleShowOrderDetails(order)}
+                                    >
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <p className="font-bold text-base" style={{ color: theme.colors.textPrimary }}>{formatCompanyName(order.company)}</p>
+                                                <p className="text-sm" style={{ color: theme.colors.textSecondary }}>PO #{order.po}</p>
+                                                <div className="mt-2">
+                                                    <span className="text-xs font-semibold px-2 py-1 rounded-full" style={{
+                                                        backgroundColor: (STATUS_COLORS[order.status] || theme.colors.secondary) + '20',
+                                                        color: STATUS_COLORS[order.status] || theme.colors.secondary
+                                                    }}>
+                                                        {order.status}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="font-bold text-xl" style={{ color: theme.colors.accent }}>{order.amount}</p>
+                                                <p className="text-sm" style={{ color: theme.colors.textSecondary }}>{new Date(order.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                                            </div>
                                         </div>
-                                        <div className="text-sm" style={{ color: theme.colors.textSecondary }}>
-                                            PO #{order.po}
-                                        </div>
-                                    </div>
-                                    <div className="text-right">
-                                        <div className="font-bold" style={{ color: theme.colors.accent }}>
-                                            {order.amount}
-                                        </div>
-                                        <div className="text-sm" style={{ color: theme.colors.textSecondary }}>
-                                            {new Date(order.date).toLocaleDateString()}
-                                        </div>
-                                    </div>
-                                </div>
+                                    </button>
+                                </React.Fragment>
                             ))}
                         </div>
-
                         {numRecentOrders === 3 && allRecentOrders.length > 3 && (
-                            <div className="text-center mt-4 pt-4 border-t" style={{ borderColor: theme.colors.border }}>
+                            <div className="text-center p-2 border-t" style={{ borderColor: theme.colors.border }}>
                                 <button
                                     onClick={handleShowMoreOrders}
                                     className="font-semibold text-sm py-2 px-4 rounded-full transition-colors"
@@ -4872,16 +4764,22 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                         )}
                     </GlassCard>
 
-                    <GlassCard theme={theme} className="p-4 hover:border-white/20 transition-all duration-300">
-                        <h3 className="font-bold text-lg mb-4" style={{ color: theme.colors.textPrimary }}>
-                            Verticals Breakdown
-                        </h3>
-                        <DonutChart data={Data.SALES_VERTICALS_DATA} theme={theme} />
+                    <GlassCard theme={theme} className="overflow-hidden">
+                        <CardHeader title="Verticals Breakdown" />
+                        <div className="p-4">
+                            <DonutChart data={Data.SALES_VERTICALS_DATA} theme={theme} />
+                        </div>
                     </GlassCard>
 
-                    <GlassCard theme={theme} className="p-1"><button onClick={handleCustomerRankNav} className="w-full p-3 rounded-xl flex items-center justify-between"><span className="text-md font-semibold tracking-tight" style={{ color: theme.colors.textPrimary }}>View Customer Rank</span><ArrowRight className="w-5 h-5" style={{ color: theme.colors.secondary }} /></button></GlassCard>
-                    <GlassCard theme={theme} className="p-1"><button onClick={handleCommissionsNav} className="w-full p-3 rounded-xl flex items-center justify-between"><span className="text-md font-semibold tracking-tight" style={{ color: theme.colors.textPrimary }}>View Commissions</span><ArrowRight className="w-5 h-5" style={{ color: theme.colors.secondary }} /></button></GlassCard>
-                    <GlassCard theme={theme} className="p-1"><button onClick={handleRewardsNav} className="w-full p-3 rounded-xl flex items-center justify-between"><span className="text-md font-semibold tracking-tight" style={{ color: theme.colors.textPrimary }}>View Incentive Rewards</span><ArrowRight className="w-5 h-5" style={{ color: theme.colors.secondary }} /></button></GlassCard>
+                    <GlassCard theme={theme} className="p-2">
+                        <div className="space-y-1">
+                            <NavigationButton label="View Customer Rank" nav="customer-rank" />
+                            <div className="border-t mx-3" style={{ borderColor: theme.colors.subtle }} />
+                            <NavigationButton label="View Commissions" nav="commissions" />
+                            <div className="border-t mx-3" style={{ borderColor: theme.colors.subtle }} />
+                            <NavigationButton label="View Incentive Rewards" nav="incentive-rewards" />
+                        </div>
+                    </GlassCard>
                 </div>
             </div>
 
@@ -4889,16 +4787,13 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                 <OrderModal
                     order={selectedOrder}
                     onClose={handleCloseModal}
-                    onShowDetails={() => {
-                        handleCloseModal();
-                        onNavigate('orders');
-                    }}
                     theme={theme}
                 />
             )}
         </div>
     );
 };
+
 
 export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => {
     const [currentDate, setCurrentDate] = useState(new Date());

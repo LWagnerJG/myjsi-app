@@ -40,12 +40,14 @@ function App() {
         permissions: { salesData: true, commissions: true, projects: true, customerRanking: true, dealerRewards: true, submittingReplacements: true }
     });
     const [cart, setCart] = useState({});
+    // --- ADDED STATE for Dealer Directory ---
+    const [dealerDirectory, setDealerDirectory] = useState(Data.DEALER_DIRECTORY_DATA);
 
     // --- COMMUNITY & AI STATE ---
     const [posts, setPosts] = useState(INITIAL_POSTS);
     const [polls, setPolls] = useState(INITIAL_POLLS);
-    const [likedPosts, setLikedPosts] = useState({}); // Stores { postId: true } for liked posts
-    const [pollChoices, setPollChoices] = useState({}); // Stores { pollId: chosenOptionId } for poll selections
+    const [likedPosts, setLikedPosts] = useState({});
+    const [pollChoices, setPollChoices] = useState({});
     const [showCreateContentModal, setShowCreateContentModal] = useState(false);
     const [aiResponse, setAiResponse] = useState('');
     const [isAILoading, setIsAILoading] = useState(false);
@@ -71,14 +73,12 @@ function App() {
         if (metaThemeColor) {
             metaThemeColor.setAttribute("content", themeColor);
         }
-
         const preventDefaultGlobal = (e) => {
             if (currentScreen === 'home') {
                 e.preventDefault();
             }
         };
         document.body.addEventListener('touchmove', preventDefaultGlobal, { passive: false });
-
         return () => {
             document.body.removeEventListener('touchmove', preventDefaultGlobal);
         };
@@ -122,6 +122,25 @@ function App() {
             }, 200);
         }
     }, [navigationHistory.length, isTransitioning]);
+
+    // --- ADDED HANDLER to add a dealer to the directory ---
+    const handleAddDealer = useCallback((newDealerData) => {
+        const newDealer = {
+            id: dealerDirectory.length + 1,
+            name: newDealerData.dealerName,
+            address: 'N/A',
+            bookings: 0,
+            sales: 0,
+            salespeople: [],
+            designers: [],
+            administration: [{ name: newDealerData.email, status: 'pending' }],
+            installers: [],
+            recentOrders: [],
+            dailyDiscount: newDealerData.dailyDiscount,
+        };
+        setDealerDirectory(prev => [newDealer, ...prev]);
+    }, [dealerDirectory]);
+
 
     const handleSaveSettings = useCallback(() => { setSuccessMessage("Settings Saved!"); setTimeout(() => setSuccessMessage(""), 2000); handleBack(); }, [handleBack]);
 
@@ -188,7 +207,6 @@ function App() {
     }, []);
     const handleCloseAIDropdown = useCallback(() => { setShowAIDropdown(false); }, []);
 
-    // New handlers for managing likes and poll choices
     const handleToggleLike = useCallback((postId) => {
         setLikedPosts(prev => {
             const newLikedPosts = { ...prev };
@@ -199,7 +217,6 @@ function App() {
             }
             return newLikedPosts;
         });
-        // You might also want to update the 'likes' count on the post object itself for immediate UI reflection
         setPosts(prevPosts =>
             prevPosts.map(post =>
                 post.id === postId
@@ -207,7 +224,7 @@ function App() {
                     : post
             )
         );
-    }, [likedPosts]); // Added likedPosts to dependency array
+    }, [likedPosts]);
 
     const handlePollVote = useCallback((pollId, optionId) => {
         setPollChoices(prev => ({
@@ -215,7 +232,6 @@ function App() {
             [pollId]: optionId,
         }));
     }, []);
-
 
     const handleTouchStart = (e) => {
         if (isTransitioning || navigationHistory.length <= 1) return;
@@ -280,7 +296,8 @@ function App() {
         if (!screenKey) return null;
         const screenParts = screenKey.split('/');
         const baseScreenKey = screenParts[0];
-        const commonProps = { theme: currentTheme, onNavigate: handleNavigate, setSuccessMessage, showAlert: handleShowAlert, handleBack, userSettings, currentScreen: screenKey };
+        // --- Pass new state and handler down ---
+        const commonProps = { theme: currentTheme, onNavigate: handleNavigate, setSuccessMessage, showAlert: handleShowAlert, handleBack, userSettings, currentScreen: screenKey, dealerDirectory, handleAddDealer };
 
         if (baseScreenKey === 'products' && screenParts[1] === 'category' && screenParts[2]) return <ProductComparisonScreen {...commonProps} categoryId={screenParts[2]} />;
         if (baseScreenKey === 'products' && screenParts[1] === 'competitive-analysis' && screenParts[2]) return <CompetitiveAnalysisScreen {...commonProps} categoryId={screenParts[2]} />;
