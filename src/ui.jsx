@@ -972,8 +972,43 @@ const InstallInstructionsScreen = ({ theme }) => {
 };
 
 export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) => {
+    // --- START: Added state for fetching live data ---
+    const [finishes, setFinishes] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    // --- END: Added state for fetching live data ---
+
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedFinish, setSelectedFinish] = useState(null);
+
+    // --- START: Added useEffect to fetch data from Power Automate ---
+    useEffect(() => {
+        const fetchFinishes = async () => {
+            // Reads the URL from your Vercel environment variable
+            const powerAutomateURL = import.meta.env.VITE_OUTDATED_FINISHES_URL;
+
+            if (!powerAutomateURL) {
+                console.error("Power Automate URL is not configured.");
+                setIsLoading(false);
+                return;
+            }
+
+            try {
+                const response = await fetch(powerAutomateURL, { method: 'POST' });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                setFinishes(data);
+            } catch (error) {
+                console.error("Failed to fetch finishes:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchFinishes();
+    }, []); // Empty dependency array means this runs once when the component loads
+    // --- END: Added useEffect ---
 
     const formatFinishName = (name) => {
         if (!name) return '';
@@ -984,34 +1019,36 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
 
     const groupedFinishes = useMemo(() => {
         const lowercasedFilter = searchTerm.toLowerCase().trim();
-        const filtered = Data.DISCONTINUED_FINISHES.filter(finish =>
-            finish.oldName.toLowerCase().includes(lowercasedFilter) ||
-            finish.newName.toLowerCase().includes(lowercasedFilter) ||
-            finish.category.toLowerCase().includes(lowercasedFilter)
+        // MODIFIED: Use the 'finishes' state variable from the API call
+        const filtered = finishes.filter(finish =>
+            (finish.OldFinishName || '').toLowerCase().includes(lowercasedFilter) ||
+            (finish.NewFinishName || '').toLowerCase().includes(lowercasedFilter) ||
+            (finish.Category || '').toLowerCase().includes(lowercasedFilter)
         );
 
         return filtered.reduce((acc, finish) => {
-            const { category } = finish;
-            if (!acc[category]) acc[category] = [];
-            acc[category].push(finish);
+            // MODIFIED: Use 'Category' property from Microsoft List
+            const { Category } = finish;
+            if (!acc[Category]) acc[Category] = [];
+            acc[Category].push(finish);
             return acc;
         }, {});
-    }, [searchTerm]);
+    }, [searchTerm, finishes]); // MODIFIED: Now depends on the fetched 'finishes'
 
     const handleOrderClick = () => {
         if (!selectedFinish) return;
+        // MODIFIED: Use property names from Microsoft List
         const newItem = {
-            id: `sample-${selectedFinish.newName.toLowerCase().replace(/\s/g, '-')}`,
-            name: formatFinishName(selectedFinish.newName),
-            category: selectedFinish.category,
-            color: selectedFinish.newColor,
+            id: `sample-${selectedFinish.NewFinishName.toLowerCase().replace(/\s/g, '-')}`,
+            name: formatFinishName(selectedFinish.NewFinishName),
+            category: selectedFinish.Category,
+            image: selectedFinish.NewFinishImageURL,
         };
         onUpdateCart(newItem, 1);
         setSelectedFinish(null);
         onNavigate('samples');
     };
 
-    // A new sub-component for rendering each row cleanly
     const FinishRow = ({ finish, isLast }) => (
         <button
             onClick={() => setSelectedFinish(finish)}
@@ -1020,26 +1057,25 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
         >
             <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4 w-[45%]">
-                    <div className="w-10 h-10 rounded-full flex-shrink-0" style={{ backgroundColor: finish.oldColor, border: `1px solid ${theme.colors.border}` }} />
+                    {/* MODIFIED: Removed old color swatch, as it's not in the new data */}
                     <div className="min-w-0">
-                        <p className="font-semibold text-sm truncate" style={{ color: theme.colors.textPrimary }}>{formatFinishName(finish.oldName)}</p>
-                        <p className="font-mono text-xs" style={{ color: theme.colors.textSecondary }}>{finish.veneer}</p>
+                        <p className="font-semibold text-sm truncate" style={{ color: theme.colors.textPrimary }}>{formatFinishName(finish.OldFinishName)}</p>
+                        <p className="font-mono text-xs" style={{ color: theme.colors.textSecondary }}>{finish.OldVeneerCode}</p>
                     </div>
                 </div>
                 <ArrowRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
                 <div className="flex items-center space-x-4 w-[45%]">
-                    {/* --- THIS IS THE UPDATED PART --- */}
-                    <div className="w-10 h-10 rounded-full flex-shrink-0 overflow-hidden" style={{ border: `1px solid ${theme.colors.border}` }}>
-                        {finish.newImage ? (
-                            <img src={finish.newImage} alt={finish.newName} className="w-full h-full object-cover" />
+                    <div className="w-10 h-10 rounded-full flex-shrink-0 overflow-hidden" style={{ border: `1px solid ${theme.colors.border}`, backgroundColor: theme.colors.subtle }}>
+                        {/* MODIFIED: Use NewFinishImageURL property from Microsoft List */}
+                        {finish.NewFinishImageURL ? (
+                            <img src={finish.NewFinishImageURL} alt={finish.NewFinishName} className="w-full h-full object-cover" />
                         ) : (
-                            <div className="w-full h-full" style={{ backgroundColor: finish.newColor }} />
+                            <div className="w-full h-full" />
                         )}
                     </div>
-                    {/* --- END OF UPDATE --- */}
                     <div className="min-w-0">
-                        <p className="font-semibold text-sm truncate" style={{ color: theme.colors.textPrimary }}>{formatFinishName(finish.newName)}</p>
-                        <p className="font-mono text-xs" style={{ color: theme.colors.textSecondary }}>{finish.veneer}</p>
+                        <p className="font-semibold text-sm truncate" style={{ color: theme.colors.textPrimary }}>{formatFinishName(finish.NewFinishName)}</p>
+                        <p className="font-mono text-xs" style={{ color: theme.colors.textSecondary }}>{finish.OldLaminateInfo || finish.OldSolidCode}</p>
                     </div>
                 </div>
             </div>
@@ -1058,18 +1094,21 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
                 />
             </div>
             <div className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-hide">
-                {Object.keys(groupedFinishes).length > 0 ? (
-                    Object.entries(groupedFinishes).map(([category, finishes]) => (
+                {/* MODIFIED: Show loading indicator while fetching */}
+                {isLoading ? (
+                    <div className="text-center p-8"><Hourglass className="w-8 h-8 animate-spin mx-auto" style={{ color: theme.colors.accent }} /></div>
+                ) : Object.keys(groupedFinishes).length > 0 ? (
+                    Object.entries(groupedFinishes).map(([category, finishItems]) => (
                         <section key={category} className="mb-6">
                             <h2 className="text-2xl font-bold capitalize mb-3 px-1" style={{ color: theme.colors.textPrimary }}>
                                 {category}
                             </h2>
                             <GlassCard theme={theme} className="p-2 space-y-1">
-                                {finishes.map((finish, index) => (
+                                {finishItems.map((finish, index) => (
                                     <FinishRow
-                                        key={`${finish.oldName}-${index}`}
+                                        key={finish.id || index}
                                         finish={finish}
-                                        isLast={index === finishes.length - 1}
+                                        isLast={index === finishItems.length - 1}
                                     />
                                 ))}
                             </GlassCard>
@@ -1084,7 +1123,7 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
             </div>
             <Modal show={!!selectedFinish} onClose={() => setSelectedFinish(null)} title="Order Sample" theme={theme}>
                 <p style={{ color: theme.colors.textPrimary }}>
-                    Would you like to order a sample of the new replacement finish, <span className="font-bold">{formatFinishName(selectedFinish?.newName)}</span>?
+                    Would you like to order a sample of the new replacement finish, <span className="font-bold">{formatFinishName(selectedFinish?.NewFinishName)}</span>?
                 </p>
                 <div className="flex justify-end space-x-3 pt-4 mt-4 border-t" style={{ borderColor: theme.colors.border }}>
                     <button onClick={() => setSelectedFinish(null)} className="font-bold py-2 px-5 rounded-lg" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }}>Cancel</button>
