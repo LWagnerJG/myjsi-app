@@ -1689,15 +1689,12 @@ export const CommissionRatesScreen = ({ theme }) => {
             try {
                 const powerAutomateURL = import.meta.env.VITE_COMMISSION_RATES_URL;
                 if (!powerAutomateURL) {
-                    throw new Error("Flow URL is not configured.");
+                    throw new Error("Flow URL is not configured in Vercel.");
                 }
 
-                // This has been updated to explicitly use the POST method
                 const response = await fetch(powerAutomateURL, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
+                    headers: { 'Content-Type': 'application/json' }
                 });
 
                 if (!response.ok) {
@@ -1720,17 +1717,22 @@ export const CommissionRatesScreen = ({ theme }) => {
         fetchRates();
     }, []);
 
-    const rows = useMemo(() => {
-        return [
-            ...rates.standard.map(d => ({ ...d, isContract: false })),
-            ...rates.contract.map(d => ({ ...d, isContract: true })),
-        ];
-    }, [rates]);
-
     const split = { specifying: 70, ordering: 30 };
-    const { subtle, surface, accent, secondary, textPrimary, textSecondary, border } = theme.colors;
-    const zebra = i => (i % 2 ? 'transparent' : subtle + '60');
-    const contractBg = `${accent}1A`;
+    const { accent, secondary, textPrimary, textSecondary, border, subtle } = theme.colors;
+
+    const RateRow = ({ item, isLast }) => (
+        <div className={`grid grid-cols-[1.5fr,1fr,1fr] gap-x-4 py-3 ${!isLast ? 'border-b' : ''}`} style={{ borderColor: subtle }}>
+            <span className="font-medium" style={{ color: textPrimary }}>{item.discount}</span>
+            <span className="text-center font-semibold" style={{ color: accent }}>{item.rep}</span>
+            <span className="text-right" style={{ color: textPrimary }}>{item.spiff}</span>
+        </div>
+    );
+
+    const SectionHeader = ({ title }) => (
+        <div className="pb-2 border-b" style={{ borderColor: border }}>
+            <h3 className="text-sm font-bold uppercase tracking-wider" style={{ color: textSecondary }}>{title}</h3>
+        </div>
+    );
 
     if (loading) {
         return (
@@ -1757,55 +1759,46 @@ export const CommissionRatesScreen = ({ theme }) => {
     }
 
     return (
-        <div className="px-4 pb-8 space-y-4">
+        <div className="px-4 py-6">
             <PageTitle title="Commission Rates" theme={theme} />
 
-            <GlassCard theme={theme} className="p-0 overflow-hidden rounded-2xl shadow ring-1" style={{ ringColor: border }}>
-                <table className="w-full text-sm">
-                    <thead className="border-b" style={{ borderColor: border }}>
-                        <tr style={{ backgroundColor: subtle, color: textPrimary }} className="uppercase text-[11px] tracking-wide">
-                            <th className="py-2.5 pl-4 text-left">Discounts</th>
-                            <th className="py-2.5 text-center">Rep Comm.</th>
-                            <th className="py-2.5 pr-4 text-right">Spiff</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {rows.map((r, i) => (
-                            <tr key={`${r.discount}-${i}`} style={{ backgroundColor: r.isContract ? contractBg : zebra(i) }}>
-                                <td className="py-2.5 pl-4 font-medium break-all" style={{ color: textPrimary }}>
-                                    {r.discount}
-                                </td>
-                                <td className="py-2.5 text-center font-semibold" style={{ color: accent }}>
-                                    {r.rep}
-                                </td>
-                                <td className="py-2.5 pr-4 text-right">
-                                    <span className="font-medium" style={{ color: textPrimary }}>
-                                        {r.spiff}
-                                    </span>
-                                </td>
-                            </tr>
+            <div className="space-y-6">
+                <GlassCard theme={theme} className="p-4 space-y-6">
+                    {/* Standard Discounts Section */}
+                    <div className="space-y-2">
+                        <SectionHeader title="Standard Discounts" />
+                        {rates.standard.map((r, i) => (
+                            <RateRow key={r.discount} item={r} isLast={i === rates.standard.length - 1} />
                         ))}
-                    </tbody>
-                </table>
-            </GlassCard>
+                    </div>
 
-            <GlassCard theme={theme} className="p-6 rounded-2xl shadow ring-1" style={{ ringColor: border }}>
-                <h3 className="mb-3 font-bold uppercase text-center tracking-wide text-[12px]" style={{ color: textSecondary }}>
-                    Commission Split
-                </h3>
-                <div className="w-full h-6 flex rounded-full overflow-hidden ring-1" style={{ ringColor: border }}>
-                    <div className="flex items-center pl-2 text-[11px] font-semibold text-white" style={{ width: `${split.specifying}%`, backgroundColor: accent }}>
-                        {split.specifying}%
+                    {/* Contract Discounts Section */}
+                    <div className="space-y-2">
+                        <SectionHeader title="Contract Discounts" />
+                        {rates.contract.map((r, i) => (
+                            <RateRow key={r.discount} item={r} isLast={i === rates.contract.length - 1} />
+                        ))}
                     </div>
-                    <div className="flex items-center justify-end pr-2 text-[11px] font-semibold" style={{ width: `${split.ordering}%`, backgroundColor: secondary, color: 'white' }}>
-                        {split.ordering}%
+                </GlassCard>
+
+                <GlassCard theme={theme} className="p-6">
+                    <h3 className="mb-3 font-bold uppercase text-center tracking-wide text-sm" style={{ color: textSecondary }}>
+                        Commission Split
+                    </h3>
+                    <div className="w-full h-6 flex rounded-full overflow-hidden ring-1" style={{ ringColor: border }}>
+                        <div className="flex items-center pl-3 text-sm font-semibold text-white" style={{ width: `${split.specifying}%`, backgroundColor: accent }}>
+                            {split.specifying}%
+                        </div>
+                        <div className="flex items-center justify-end pr-3 text-sm font-semibold" style={{ width: `${split.ordering}%`, backgroundColor: secondary, color: 'white' }}>
+                            {split.ordering}%
+                        </div>
                     </div>
-                </div>
-                <div className="mt-2 flex justify-between text-[12px] font-medium">
-                    <span style={{ color: textSecondary }}>Specifying</span>
-                    <span style={{ color: textSecondary }}>Ordering</span>
-                </div>
-            </GlassCard>
+                    <div className="mt-2 flex justify-between text-sm font-medium">
+                        <span style={{ color: textSecondary }}>Specifying</span>
+                        <span style={{ color: textSecondary }}>Ordering</span>
+                    </div>
+                </GlassCard>
+            </div>
         </div>
     );
 };
