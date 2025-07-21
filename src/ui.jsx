@@ -4,6 +4,7 @@
     useMemo,
     useCallback,
     useEffect,
+    useLayoutEffect,
 } from 'react';
 
 import ReactDOM from 'react-dom'; // for createPortal
@@ -41,6 +42,7 @@ import {
     Copy,
     Database,
     DollarSign,
+    ExternalLink,
     FileText,
     Film,
     Filter,
@@ -1223,85 +1225,130 @@ Stops: The Mart – Wells & Kinzie → Emily Hotel Welcome Center`,
     );
 };
 
-const ContractsScreen = ({ theme, onNavigate }) => {
-    const ContractCard = React.memo(({ contract, theme }) => (
-        <GlassCard theme={theme} className="p-4 flex flex-col space-y-3">
-            <h2
-                className="text-3xl font-bold"
-                style={{ color: theme.colors.textPrimary }}
-            >
-                {contract.name}
-            </h2>
+export const ContractsScreen = ({ theme, setSuccessMessage }) => {
+    const [activeContract, setActiveContract] = useState('omnia');
 
-            <div className="text-sm space-y-2">
-                {contract.tiers.map((tier, i) => (
-                    <div
-                        key={i}
-                        className="border-t pt-2"
-                        style={{ borderColor: theme.colors.subtle }}
-                    >
-                        <p className="font-bold" style={{ color: theme.colors.textPrimary }}>
-                            {tier.off}
-                        </p>
-                        <ul
-                            className="list-disc list-inside pl-2"
-                            style={{ color: theme.colors.textSecondary }}
-                        >
-                            <li>{tier.dealer}</li>
-                            <li>{tier.rep}</li>
-                        </ul>
-                    </div>
-                ))}
-            </div>
+    const contracts = useMemo(() => ({
+        omnia: CONTRACTS_DATA.omnia,
+        tips: CONTRACTS_DATA.tips,
+        premier: CONTRACTS_DATA.premier,
+    }), []);
 
-            {contract.margin && (
-                <div
-                    className="text-sm border-t pt-2"
-                    style={{ borderColor: theme.colors.subtle }}
-                >
-                    <p
-                        className="font-bold"
-                        style={{ color: theme.colors.textPrimary }}
-                    >
-                        Dealer margin discount:
-                    </p>
-                    {contract.margin.map((m, i) => (
-                        <p key={i} style={{ color: theme.colors.textSecondary }}>
-                            {m}
-                        </p>
+    // A new, highly-styled component to display the details of the selected contract
+    const ContractDetails = ({ contract, theme }) => {
+
+        const handleShare = async () => {
+            const shareText = `Check out the JSI ${contract.name} contract details.`;
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: `${contract.name} Contract Details`,
+                        text: shareText,
+                        url: window.location.href,
+                    });
+                } catch (error) {
+                    console.error('Error sharing:', error);
+                }
+            } else {
+                navigator.clipboard.writeText(shareText);
+                setSuccessMessage("Content copied to clipboard!");
+                setTimeout(() => setSuccessMessage(""), 2000);
+            }
+        };
+
+        return (
+            <GlassCard theme={theme} className="p-4 space-y-5 animate-fade-in">
+                {/* Header */}
+                <div className="flex justify-between items-center px-2">
+                    <h2 className="text-3xl font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>
+                        {contract.name}
+                    </h2>
+                    <button onClick={handleShare} className="p-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10">
+                        <Share2 className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
+                    </button>
+                </div>
+
+                {/* Tiers */}
+                <div className="space-y-3">
+                    {contract.tiers.map((tier, i) => (
+                        <div key={i} className="rounded-2xl p-4 flex items-center space-x-4" style={{ backgroundColor: theme.colors.subtle }}>
+                            <div className="flex-shrink-0 flex flex-col items-center justify-center w-24 h-24 rounded-full border-4" style={{ borderColor: theme.colors.accent, color: theme.colors.accent }}>
+                                <span className="text-4xl font-bold tracking-tighter">{tier.off.split(' ')[0]}</span>
+                                <span className="text-xs font-bold uppercase tracking-wider -mt-1">OFF</span>
+                            </div>
+                            <div className="flex-1">
+                                <p className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>
+                                    {tier.off.substring(tier.off.indexOf("(") + 1, tier.off.lastIndexOf(")"))}
+                                </p>
+                                <div className="mt-2 pt-2 border-t" style={{ borderColor: theme.colors.border }}>
+                                    <div className="flex justify-between text-sm">
+                                        <span style={{ color: theme.colors.textSecondary }}>Dealer commission</span>
+                                        <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>{tier.dealer.replace(' dealer commission', '')}</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <span style={{ color: theme.colors.textSecondary }}>Rep commission</span>
+                                        <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>{tier.rep.replace(' rep commission', '')}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     ))}
                 </div>
-            )}
 
-            {contract.note && (
-                <p className="text-sm" style={{ color: theme.colors.textSecondary }}>
-                    {contract.note}
-                </p>
-            )}
+                {/* Margin/Notes Section */}
+                {(contract.margin || contract.note) && (
+                    <div className="text-sm space-y-3 pt-3 border-t" style={{ borderColor: theme.colors.subtle }}>
+                        {contract.margin && (
+                            <div className="px-2">
+                                <p className="font-bold mb-1" style={{ color: theme.colors.textPrimary }}>
+                                    Dealer Margin Discount
+                                </p>
+                                <p className="text-xs" style={{ color: theme.colors.textSecondary }}>
+                                    {contract.margin.join('  •  ')}
+                                </p>
+                            </div>
+                        )}
+                        {contract.note && (
+                            <p className="italic px-2" style={{ color: theme.colors.textSecondary }}>
+                                {contract.note}
+                            </p>
+                        )}
+                    </div>
+                )}
 
-            <div className="pt-2">
-                <button
-                    onClick={() => window.open(contract.url, '_blank')}
-                    className="w-full font-bold py-2.5 px-5 rounded-lg transition-colors text-white"
-                    style={{ backgroundColor: theme.colors.accent }}
-                >
-                    Link to Contract
-                </button>
-            </div>
-        </GlassCard>
-    ));
+                {/* Link Button */}
+                <div className="pt-2">
+                    <button
+                        onClick={() => window.open(contract.url, '_blank')}
+                        className="w-full font-bold py-3 px-5 rounded-full flex items-center justify-center space-x-2 transition-transform hover:scale-105 active:scale-95"
+                        style={{ backgroundColor: theme.colors.accent, color: 'white' }}
+                    >
+                        <span>View Full Contract</span>
+                        <ExternalLink className="w-4 h-4" />
+                    </button>
+                </div>
+            </GlassCard>
+        );
+    }
 
     return (
-        <div className="px-4 pb-4 space-y-6">
-            <PageTitle title="Contracts" theme={theme} />
-            <ContractCard contract={CONTRACTS_DATA.omnia} theme={theme} />
-            <ContractCard contract={CONTRACTS_DATA.tips} theme={theme} />
-            <ContractCard contract={CONTRACTS_DATA.premier} theme={theme} />
+        <div className="px-4 py-6 space-y-4">
+            <ToggleButtonGroup
+                value={activeContract}
+                onChange={setActiveContract}
+                options={[
+                    { label: "Omnia", value: "omnia" },
+                    { label: "TIPS", value: "tips" },
+                    { label: "Premier", value: "premier" },
+                ]}
+                theme={theme}
+            />
+
+            <ContractDetails contract={contracts[activeContract]} theme={theme} />
         </div>
     );
 };
 
-// New helper component for an editable person row
 const EditablePersonRow = ({ person, theme, onUpdateRole, onRemovePerson }) => {
     const [isEditing, setIsEditing] = useState(false); // State to control editing mode
 
@@ -1354,6 +1401,54 @@ const EditablePersonRow = ({ person, theme, onUpdateRole, onRemovePerson }) => {
 };
 
 
+const PopoverPortal = ({ anchorEl, onClose, children }) => {
+    const popoverRef = useRef(null);
+    const [position, setPosition] = useState({ top: -9999, left: -9999 });
+
+    // This effect calculates the correct position next to the clicked element
+    useLayoutEffect(() => {
+        if (anchorEl && popoverRef.current) {
+            const anchorRect = anchorEl.getBoundingClientRect();
+            const popoverRect = popoverRef.current.getBoundingClientRect();
+
+            let top = anchorRect.bottom + 8;
+            let left = anchorRect.right - popoverRect.width;
+
+            // Prevent vertical overflow
+            if (top + popoverRect.height > window.innerHeight - 20) {
+                top = anchorRect.top - popoverRect.height - 8;
+            }
+            // Prevent horizontal overflow
+            if (left < 20) {
+                left = 20;
+            }
+            if (left + popoverRect.width > window.innerWidth - 20) {
+                left = window.innerWidth - popoverRect.width - 20;
+            }
+
+            setPosition({ top, left });
+        }
+    }, [anchorEl]);
+
+    // Handles closing the menu when clicking outside of it
+    useEffect(() => {
+        const handleOutsideClick = (e) => {
+            if (popoverRef.current && !popoverRef.current.contains(e.target) && !anchorEl.contains(e.target)) {
+                onClose();
+            }
+        };
+        document.addEventListener('mousedown', handleOutsideClick);
+        return () => document.removeEventListener('mousedown', handleOutsideClick);
+    }, [anchorEl, onClose]);
+
+    return ReactDOM.createPortal(
+        <div ref={popoverRef} className="fixed z-[1001] animate-fade-in" style={{ top: position.top, left: position.left }}>
+            {children}
+        </div>,
+        document.body
+    );
+};
+
 export const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage, dealers }) => {
     const [localDealers, setLocalDealers] = useState(dealers);
     const [searchTerm, setSearchTerm] = useState('');
@@ -1365,8 +1460,8 @@ export const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage, dea
     const [showAddPersonModal, setShowAddPersonModal] = useState(false);
     const [newPerson, setNewPerson] = useState({ firstName: '', lastName: '', email: '', role: 'Sales' });
 
-    // State for the new popover menu
-    const [menuState, setMenuState] = useState({ open: false, anchorEl: null, person: null });
+    const [menuState, setMenuState] = useState({ open: false, person: null, top: 0, left: 0 });
+    const modalContentRef = useRef(null);
 
     useEffect(() => {
         setLocalDealers(dealers);
@@ -1450,7 +1545,7 @@ export const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage, dea
             setSuccessMessage("Role Updated!");
             setTimeout(() => setSuccessMessage(""), 1000);
         }
-        setMenuState({ open: false, anchorEl: null, person: null }); // Close menu
+        setMenuState({ open: false, person: null, top: 0, left: 0 });
     }, [selectedDealer, setLocalDealers]);
 
     const handleRemovePerson = useCallback((personName) => {
@@ -1463,21 +1558,25 @@ export const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage, dea
         });
         setLocalDealers(prev => prev.map(d => d.id === updatedDealer.id ? updatedDealer : d));
         setSelectedDealer(updatedDealer);
+        setMenuState({ open: false, person: null, top: 0, left: 0 });
         setSuccessMessage("Person Removed!");
         setTimeout(() => setSuccessMessage(""), 1000);
-        setMenuState({ open: false, anchorEl: null, person: null }); // Close menu
     }, [selectedDealer, setLocalDealers]);
 
     const handleMenuOpen = (event, person) => {
-        setMenuState({ open: true, anchorEl: event.currentTarget, person });
+        event.stopPropagation();
+        const button = event.currentTarget;
+        const container = modalContentRef.current;
+        if (!container) return;
+        const buttonRect = button.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+        const top = buttonRect.top - containerRect.top + button.offsetHeight;
+        const left = buttonRect.left - containerRect.left + button.offsetWidth - 224;
+        setMenuState({ open: true, person: person, top, left });
     };
 
-    const handleMenuClose = () => {
-        setMenuState({ open: false, anchorEl: null, person: null });
-    };
-
+    const handleMenuClose = () => setMenuState({ open: false, person: null, top: 0, left: 0 });
     const ModalSectionHeader = ({ title }) => <p className="font-bold text-lg pt-4 pb-2" style={{ color: theme.colors.textPrimary }}>{title}</p>;
-
     const roleOptions = useMemo(() => [
         { label: 'Administrator', value: 'Administrator' }, { label: 'Admin/Sales Support', value: 'Admin/Sales Support' },
         { label: 'Sales', value: 'Sales' }, { label: 'Designer', value: 'Designer' },
@@ -1523,36 +1622,54 @@ export const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage, dea
 
             <Modal show={!!selectedDealer} onClose={() => setSelectedDealer(null)} title={selectedDealer?.name || ''} theme={theme}>
                 {selectedDealer && (
-                    <div>
+                    <div ref={modalContentRef} className="relative">
                         <div className="flex justify-between items-start mb-4">
                             <p className="text-sm" style={{ color: theme.colors.textSecondary }}>{selectedDealer.address}</p>
                             <button onClick={() => setShowAddPersonModal(true)} className="p-2 -mr-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10"><UserPlus className="w-5 h-5" style={{ color: theme.colors.accent }} /></button>
                         </div>
-                        <div className="grid grid-cols-2 gap-x-6">
+
+                        {/* Daily Discount section is restored here */}
+                        <div className="space-y-2">
+                            <ModalSectionHeader title="Daily Discount" />
+                            <PortalNativeSelect
+                                label=""
+                                theme={theme}
+                                value={selectedDealer.dailyDiscount}
+                                onChange={e => setPendingDiscountChange({ dealerId: selectedDealer.id, newDiscount: e.target.value })}
+                                options={Data.DAILY_DISCOUNT_OPTIONS.map(opt => ({ label: opt, value: opt }))}
+                            />
+                        </div>
+
+                        {/* The staff list is now in a single column */}
+                        <div className="space-y-4">
                             <StaffSection title="Salespeople" members={selectedDealer.salespeople} />
                             <StaffSection title="Designers" members={selectedDealer.designers} />
                             <StaffSection title="Administration" members={selectedDealer.administration} />
                             <StaffSection title="Installers" members={selectedDealer.installers} />
                         </div>
+
+                        {menuState.open && (
+                            <>
+                                <div className="absolute inset-0 z-10 -m-6" onClick={handleMenuClose} />
+                                <div className="absolute z-20 animate-fade-in" style={{ top: menuState.top, left: menuState.left }}>
+                                    <GlassCard theme={theme} className="p-1 w-56">
+                                        <div className="px-2 py-1 text-xs font-bold uppercase" style={{ color: theme.colors.textSecondary }}>Change Role</div>
+                                        {roleOptions.map(opt => (
+                                            <button key={opt.value} onClick={() => handleUpdatePersonRole(menuState.person, opt.value)} className="w-full flex justify-between items-center text-left py-2 px-2 text-sm font-semibold rounded-lg hover:bg-black/5 dark:hover:bg-white/5">
+                                                <span style={{ color: menuState.person.roleLabel === opt.value ? theme.colors.accent : theme.colors.textPrimary }}>{opt.label}</span>
+                                                {menuState.person.roleLabel === opt.value && <CheckCircle className="w-4 h-4" style={{ color: theme.colors.accent }} />}
+                                            </button>
+                                        ))}
+                                        <div className="border-t my-1 mx-2" style={{ borderColor: theme.colors.subtle }} />
+                                        <button onClick={() => handleRemovePerson(menuState.person.name)} className="w-full flex items-center text-left py-2 px-2 text-sm font-semibold rounded-lg text-red-600 hover:bg-red-500/10">
+                                            <Trash2 className="w-4 h-4 mr-2" />
+                                            Remove Person
+                                        </button>
+                                    </GlassCard>
+                                </div>
+                            </>
+                        )}
                     </div>
-                )}
-                {menuState.open && (
-                    <DropdownPortal parentRef={{ current: menuState.anchorEl }} onClose={handleMenuClose}>
-                        <GlassCard theme={theme} className="p-1 w-56">
-                            <div className="px-2 py-1 text-xs font-bold" style={{ color: theme.colors.textSecondary }}>Change Role</div>
-                            {roleOptions.map(opt => (
-                                <button key={opt.value} onClick={() => handleUpdatePersonRole(menuState.person, opt.value)} className="w-full flex justify-between items-center text-left py-2 px-2 text-sm font-semibold rounded-lg hover:bg-black/5">
-                                    <span style={{ color: menuState.person.roleLabel === opt.value ? theme.colors.accent : theme.colors.textPrimary }}>{opt.label}</span>
-                                    {menuState.person.roleLabel === opt.value && <CheckCircle className="w-4 h-4" style={{ color: theme.colors.accent }} />}
-                                </button>
-                            ))}
-                            <div className="border-t my-1" style={{ borderColor: theme.colors.subtle }} />
-                            <button onClick={() => handleRemovePerson(menuState.person.name)} className="w-full flex items-center text-left py-2 px-2 text-sm font-semibold rounded-lg text-red-600 hover:bg-red-500/10">
-                                <Trash2 className="w-4 h-4 mr-2" />
-                                Remove Person
-                            </button>
-                        </GlassCard>
-                    </DropdownPortal>
                 )}
             </Modal>
 
@@ -1561,7 +1678,6 @@ export const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage, dea
         </>
     );
 };
-
 
 const CommissionRatesScreen = ({ theme }) => {
     const rows = useMemo(() => {
@@ -2167,22 +2283,6 @@ export const DealerRegistrationScreen = ({ theme, onNavigate, setSuccessMessage,
     );
 };
 
-const styles = {
-    container: {
-        padding: '20px',
-        backgroundColor: '#fff',
-        display: 'flex',
-        justifyContent: 'center',
-    },
-    title: {
-        fontSize: '24px',
-        marginBottom: '20px',
-    },
-};
-<div style={styles.container}>
-    <h1 style={styles.title}>Hello</h1>
-    …
-</div>
 
 export const LoanerPoolScreen = ({ theme, onNavigate, setSuccessMessage, userSettings }) => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -2396,7 +2496,7 @@ export const ResourceDetailScreen = ({ theme, onNavigate, setSuccessMessage, use
 
         // --- Misc. Resources ---
         case 'contracts':
-            return <ContractsScreen theme={theme} />;
+            return <ContractsScreen theme={theme} setSuccessMessage={setSuccessMessage} />;
         case 'design days':
             return <DesignDaysScreen theme={theme} />;
         case 'discontinued finishes':
@@ -2430,6 +2530,7 @@ export const ResourceDetailScreen = ({ theme, onNavigate, setSuccessMessage, use
             );
     }
 };
+
 
 const COMRequestScreen = ({ theme, onNavigate, showAlert }) => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -2750,12 +2851,12 @@ export const FabricSearchForm = ({ theme, showAlert, onNavigate }) => {
     );
 };
 
-export const COMYardageRequestScreen = ({ theme, showAlert, onNavigate }) => {
+export const COMYardageRequestScreen = ({ theme, showAlert, onNavigate, userSettings }) => {
     const [selectedModels, setSelectedModels] = useState([]);
     const [showConfirm, setShowConfirm] = useState(false);
     const [summary, setSummary] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    /* ----- data ----- */
     const fabricStrings = useMemo(() =>
         Data.FABRICS_DATA.map(f => `${f.manufacturer}, ${f.name}`), []);
 
@@ -2763,7 +2864,6 @@ export const COMYardageRequestScreen = ({ theme, showAlert, onNavigate }) => {
         Data.JSI_MODELS.filter(m => m.isUpholstered)
             .map(m => `${m.name} (${m.id})`), []);
 
-    /* ----- helpers ----- */
     const addModel = rawVal => {
         if (!rawVal) return;
         const match = rawVal.match(/\(([^)]+)\)/);
@@ -2785,22 +2885,51 @@ export const COMYardageRequestScreen = ({ theme, showAlert, onNavigate }) => {
         const incomplete = selectedModels.some(m => !m.fabric.trim() || m.quantity < 1);
         if (incomplete) return showAlert('Please ensure all models have a fabric and a quantity greater than 0.');
         const list = selectedModels
-            .map(m => `${m.name} (${m.quantity}×) – ${m.fabric}`)
+            .map(m => `${m.name} (${m.quantity}x) – ${m.fabric}`)
             .join('\n');
         setSummary(list);
         setShowConfirm(true);
     };
 
+    const handleFinalSubmit = async () => {
+        setIsSubmitting(true);
+        const powerAutomateURL = "https://prod-27.westus.logic.azure.com:443/workflows/f8a11797ba9b4d96a21d90882f82ed12/triggers/manual/paths/invoke?api-version=2016-06-01";
+
+        const payload = {
+            requester: userSettings.email,
+            summary: summary,
+        };
+
+        try {
+            const response = await fetch(powerAutomateURL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+
+            if (response.ok) {
+                showAlert('COM Yardage Request Submitted!');
+                setShowConfirm(false);
+                onNavigate('resources');
+            } else {
+                throw new Error('Server responded with an error.');
+            }
+        } catch (error) {
+            console.error('Submission failed:', error);
+            showAlert('Submission failed. Please try again later.');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     return (
         <div className="flex flex-col h-full">
             <PageTitle title="COM Yardage Request" theme={theme} />
-
             <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4">
                 <GlassCard theme={theme} className="p-4">
                     <h3 className="font-bold mb-3 text-xl" style={{ color: theme.colors.textPrimary }}>
                         Select Model(s)
                     </h3>
-
                     {selectedModels.map(m => (
                         <GlassCard key={m.key} theme={theme} className="p-4 mb-3 space-y-3">
                             <div className="flex items-center justify-between">
@@ -2808,13 +2937,11 @@ export const COMYardageRequestScreen = ({ theme, showAlert, onNavigate }) => {
                                     <p className="font-semibold">{m.name}</p>
                                     <p className="text-sm font-mono">{m.id}</p>
                                 </div>
-
                                 <div className="flex items-center space-x-2">
                                     <button onClick={() => removeModel(m.key)}
                                         className="p-1.5 rounded-full hover:bg-red-500/10 transition">
                                         <Trash2 className="w-5 h-5 text-red-500" />
                                     </button>
-                                    {/* Quantity Input */}
                                     <input
                                         type="number"
                                         min="1"
@@ -2833,7 +2960,6 @@ export const COMYardageRequestScreen = ({ theme, showAlert, onNavigate }) => {
                                     />
                                 </div>
                             </div>
-
                             <AutoCompleteCombobox
                                 value={m.fabric}
                                 onChange={v => updateModel(m.key, { fabric: v })}
@@ -2844,7 +2970,6 @@ export const COMYardageRequestScreen = ({ theme, showAlert, onNavigate }) => {
                             />
                         </GlassCard>
                     ))}
-
                     <AutoCompleteCombobox
                         value=""
                         onChange={() => { }}
@@ -2855,7 +2980,6 @@ export const COMYardageRequestScreen = ({ theme, showAlert, onNavigate }) => {
                         resetOnSelect={true}
                     />
                 </GlassCard>
-
                 <button
                     onClick={handleSubmit}
                     disabled={selectedModels.length === 0 || selectedModels.some(m => m.quantity < 1)}
@@ -2865,37 +2989,32 @@ export const COMYardageRequestScreen = ({ theme, showAlert, onNavigate }) => {
                 </button>
             </div>
 
-            {showConfirm &&
-                ReactDOM.createPortal(
-                    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-                        <GlassCard theme={theme} className="p-6 max-w-sm mx-4">
-                            <h2 className="text-xl font-bold mb-2">Request Received</h2>
-                            <pre className="text-sm whitespace-pre-wrap mb-4">{summary}</pre>
-                            <p className="text-sm mb-4">
-                                JSI will email you the requested yardages shortly.
-                            </p>
-                            <button onClick={() => { setShowConfirm(false); onNavigate('resources'); }}
-                                className="w-full py-2 rounded-full text-white"
-                                style={{ backgroundColor: theme.colors.accent }}>
-                                Done
-                            </button>
-                        </GlassCard>
-                    </div>, document.body)}
+            <Modal show={showConfirm} onClose={() => setShowConfirm(false)} title="Confirm Submission" theme={theme}>
+                <div>
+                    <p className="text-sm mb-2" style={{ color: theme.colors.textSecondary }}>The following request will be sent:</p>
+                    <pre className="text-sm whitespace-pre-wrap p-3 rounded-md mb-4" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }}>
+                        {summary}
+                    </pre>
+                    <button onClick={handleFinalSubmit} disabled={isSubmitting}
+                        className="w-full py-2 rounded-full text-white disabled:opacity-70"
+                        style={{ backgroundColor: theme.colors.accent }}>
+                        {isSubmitting ? 'Submitting...' : 'Confirm and Send'}
+                    </button>
+                </div>
+            </Modal>
         </div>
     );
 };
 
-export const FabricsScreen = ({ onNavigate, theme, currentScreen, showAlert }) => {
+export const FabricsScreen = ({ onNavigate, theme, currentScreen, showAlert, userSettings }) => {
     const subScreen = currentScreen.split('/')[1];
 
     if (subScreen === 'search_form') {
-        // FIX: Ensure the theme prop is passed here
         return <FabricSearchForm theme={theme} showAlert={showAlert} onNavigate={onNavigate} />;
     }
 
     if (subScreen === 'com_request') {
-        // FIX: Ensure the theme prop is passed here
-        return <COMYardageRequestScreen theme={theme} showAlert={showAlert} onNavigate={onNavigate} />;
+        return <COMYardageRequestScreen theme={theme} showAlert={showAlert} onNavigate={onNavigate} userSettings={userSettings} />;
     }
 
     // This is the main menu for the Fabrics section
@@ -3167,17 +3286,22 @@ export const CartScreen = ({ theme, onNavigate, cart, setCart, onUpdateCart, use
     const cartItems = useMemo(() => {
         return Object.entries(cart).map(([id, quantity]) => {
             if (id === 'full-jsi-set') {
-                return { id, name: 'Full JSI Sample Set', quantity };
+                return { id, name: 'Full JSI Sample Set', quantity, isSet: true };
             }
             if (id.startsWith('set-')) {
                 const categoryId = id.replace('set-', '');
                 const categoryName = Data.SAMPLE_CATEGORIES.find(c => c.id === categoryId)?.name || 'Unknown';
-                return { id, name: `Complete ${categoryName} Set`, quantity };
+                return { id, name: `Complete ${categoryName} Set`, quantity, isSet: true };
             }
             const product = Data.SAMPLE_PRODUCTS.find(p => String(p.id) === id);
-            return product ? { ...product, quantity } : null;
+            return product ? { ...product, quantity, isSet: false } : null;
         }).filter(Boolean);
     }, [cart]);
+
+    const totalCartItems = useMemo(
+        () => Object.values(cart).reduce((sum, qty) => sum + qty, 0),
+        [cart]
+    );
 
     const handleSubmit = useCallback(() => {
         setIsSubmitted(true);
@@ -3199,32 +3323,63 @@ export const CartScreen = ({ theme, onNavigate, cart, setCart, onUpdateCart, use
     }
 
     return (
-        <>
+        <div className="flex flex-col h-full">
             <PageTitle title="Cart" theme={theme} />
-            <div className="px-4 space-y-4 pb-4">
-                <GlassCard theme={theme} className="p-4 space-y-2">
-                    <h3 className="font-bold" style={{ color: theme.colors.textPrimary }}>Selected Samples</h3>
-                    {cartItems.length > 0 ? cartItems.map((item) => (
-                        <div key={item.id} className="flex justify-between items-center text-sm py-1">
-                            <span style={{ color: theme.colors.textPrimary }}>{item.name}</span>
-                            <div className="flex items-center space-x-3">
-                                <button onClick={() => onUpdateCart(item, -1)} className="w-6 h-6 flex items-center justify-center rounded-md" style={{ backgroundColor: theme.colors.subtle }}><Minus className="w-4 h-4" style={{ color: theme.colors.textSecondary }} /></button>
-                                <span className="font-bold w-4 text-center">{item.quantity}</span>
-                                <button onClick={() => onUpdateCart(item, 1)} className="w-6 h-6 flex items-center justify-center rounded-md" style={{ backgroundColor: theme.colors.subtle }}><Plus className="w-4 h-4" style={{ color: theme.colors.textSecondary }} /></button>
-                            </div>
+            <div className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-hide">
+                <GlassCard theme={theme} className="p-2">
+                    <h3 className="font-bold text-xl px-2 pt-2" style={{ color: theme.colors.textPrimary }}>Selected Samples</h3>
+                    {cartItems.length > 0 ? (
+                        <div className="mt-2">
+                            {cartItems.map((item, index) => (
+                                <React.Fragment key={item.id}>
+                                    {index > 0 && <div className="border-t mx-2" style={{ borderColor: theme.colors.border }}></div>}
+                                    <div className="flex items-center space-x-4 p-2">
+                                        <div
+                                            className="w-16 h-16 rounded-lg flex-shrink-0 flex items-center justify-center"
+                                            style={{
+                                                backgroundColor: item.isSet ? theme.colors.subtle : item.color,
+                                                border: `1px solid ${theme.colors.border}`
+                                            }}
+                                        >
+                                            {item.isSet && <Package className="w-8 h-8" style={{ color: theme.colors.secondary }} />}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{item.name}</p>
+                                        </div>
+                                        <div className="flex items-center space-x-3">
+                                            <button onClick={() => onUpdateCart(item, -1)} className="w-8 h-8 flex items-center justify-center rounded-full transition-colors hover:bg-black/5 dark:hover:bg-white/5">
+                                                {item.quantity === 1 ? <Trash2 className="w-5 h-5 text-red-500" /> : <Minus className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />}
+                                            </button>
+                                            <span className="font-bold w-4 text-center">{item.quantity}</span>
+                                            <button onClick={() => onUpdateCart(item, 1)} className="w-8 h-8 flex items-center justify-center rounded-full transition-colors hover:bg-black/5 dark:hover:bg-white/5">
+                                                <Plus className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </React.Fragment>
+                            ))}
                         </div>
-                    )) : <p className="text-sm" style={{ color: theme.colors.textSecondary }}>Your cart is empty.</p>}
+                    ) : <p className="text-sm p-4 text-center" style={{ color: theme.colors.textSecondary }}>Your cart is empty.</p>}
                 </GlassCard>
-                <GlassCard theme={theme} className="p-4 space-y-2">
-                    <h3 className="font-bold" style={{ color: theme.colors.textPrimary }}>Ship To</h3>
-                    <div className="relative">
-                        <textarea value={address} onChange={(e) => setAddress(e.target.value)} rows="3" placeholder="Enter shipping address..." className="w-full p-2 pr-10 border rounded-lg" style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border, color: theme.colors.textPrimary }}></textarea>
-                        <button onClick={() => setAddress(userSettings.homeAddress)} className="absolute top-2 right-2 p-1 rounded-full" style={{ backgroundColor: theme.colors.surface }}><Home className="w-5 h-5" style={{ color: theme.colors.secondary }} /></button>
-                    </div>
-                </GlassCard>
-                <button onClick={handleSubmit} disabled={Object.keys(cart).length === 0 || !address.trim()} className="w-full font-bold py-3 px-6 rounded-full transition-colors disabled:opacity-50" style={{ backgroundColor: theme.colors.accent, color: '#FFFFFF' }}>Submit</button>
             </div>
-        </>
+
+            {/* --- Sticky Footer --- */}
+            <div className="px-4 space-y-3 pt-3 pb-4 border-t" style={{ backgroundColor: theme.colors.background, borderColor: theme.colors.border }}>
+                <GlassCard theme={theme} className="p-3 space-y-2">
+                    <div className="flex justify-between items-center">
+                        <h3 className="font-bold px-1" style={{ color: theme.colors.textPrimary }}>Ship To</h3>
+                        <button onClick={() => setAddress(userSettings.homeAddress)} className="flex items-center space-x-1.5 text-sm font-semibold p-2 rounded-lg hover:bg-black/5">
+                            <Home className="w-4 h-4" style={{ color: theme.colors.secondary }} />
+                            <span>Use Home Address</span>
+                        </button>
+                    </div>
+                    <textarea value={address} onChange={(e) => setAddress(e.target.value)} rows="2" placeholder="Enter shipping address..." className="w-full p-2 border rounded-lg" style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border, color: theme.colors.textPrimary, resize: 'none' }}></textarea>
+                </GlassCard>
+                <button onClick={handleSubmit} disabled={Object.keys(cart).length === 0 || !address.trim()} className="w-full font-bold py-3.5 px-6 rounded-full transition-colors disabled:opacity-50" style={{ backgroundColor: theme.colors.accent, color: '#FFFFFF' }}>
+                    Submit Order ({totalCartItems} Items)
+                </button>
+            </div>
+        </div>
     );
 };
 
@@ -5923,7 +6078,6 @@ export const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSetti
     // Handlers
     const handleAddSetToCart = useCallback(() => {
         const categoryName = Data.SAMPLE_CATEGORIES.find(c => c.id === selectedCategory)?.name || 'Unknown';
-        // Always adds a quantity of 1
         onUpdateCart(
             { id: `set-${selectedCategory}`, name: `Complete ${categoryName} Set` },
             1
@@ -5949,7 +6103,6 @@ export const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSetti
 
     return (
         <>
-            {/* Header with full set and cart */}
             <PageTitle title="Samples" theme={theme}>
                 <div className="flex items-center space-x-3">
                     <button
@@ -5981,7 +6134,6 @@ export const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSetti
                 </div>
             </PageTitle>
 
-            {/* Category filter with brown accent pill */}
             <div className="px-4 mb-4">
                 <GlassCard theme={theme} className="p-1">
                     <div
@@ -6017,7 +6169,6 @@ export const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSetti
                 </GlassCard>
             </div>
 
-            {/* Banner to add complete set */}
             <div className="px-4 mb-4">
                 <div className="relative">
                     <button
@@ -6044,52 +6195,51 @@ export const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSetti
                 </div>
             </div>
 
-
-            {/* Product grid showing squares with names and add/remove */}
             <div className="px-4 grid grid-cols-2 gap-4 pb-4">
                 {filteredProducts.map(product => {
                     const quantity = cart[product.id] || 0;
                     return (
-                        <button
+                        <div
                             key={product.id}
-                            onClick={() => onUpdateCart(product, 1)}
                             className="relative w-full aspect-square rounded-2xl overflow-hidden transition-colors"
                             style={{
-                                border: `2px solid ${quantity > 0 ? '#689a5e' : theme.colors.border}`,
+                                border: `2px solid ${quantity > 0 ? theme.colors.accent : theme.colors.border}`,
                                 backgroundColor: product.color
                             }}
                         >
-                            {/* Name overlay */}
                             <div
                                 className="absolute top-2 left-2 bg-white bg-opacity-75 px-2 py-1 rounded text-xs font-semibold"
                                 style={{ color: theme.colors.textPrimary }}
                             >
                                 {product.name}
                             </div>
-                            {quantity > 0 && (
-                                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-28">
-                                    <GlassCard theme={theme} className="p-1 flex justify-between items-center">
-                                        <button
-                                            onClick={e => { e.stopPropagation(); onUpdateCart(product, -1); }}
-                                            className="w-7 h-7 rounded-full flex items-center justify-center transition"
-                                            style={{ backgroundColor: theme.colors.subtle }}
-                                        >
-                                            <Minus className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
+
+                            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-28">
+                                <GlassCard theme={theme} className="p-1 flex justify-around items-center">
+                                    {quantity === 0 ? (
+                                        <button onClick={() => onUpdateCart(product, 1)} className="w-full h-7 flex items-center justify-center transition-colors hover:bg-black/5 dark:hover:bg-white/5 rounded-full">
+                                            <Plus className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
                                         </button>
-                                        <span className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>
-                                            {quantity}
-                                        </span>
-                                        <button
-                                            onClick={e => { e.stopPropagation(); onUpdateCart(product, 1); }}
-                                            className="w-7 h-7 rounded-full flex items-center justify-center transition"
-                                            style={{ backgroundColor: theme.colors.subtle }}
-                                        >
-                                            <Plus className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
-                                        </button>
-                                    </GlassCard>
-                                </div>
-                            )}
-                        </button>
+                                    ) : (
+                                        <>
+                                            <button onClick={(e) => { e.stopPropagation(); onUpdateCart(product, -1); }} className="w-8 h-8 flex items-center justify-center rounded-full transition-colors hover:bg-black/5 dark:hover:bg-white/5">
+                                                {quantity === 1 ? (
+                                                    <Trash2 className="w-5 h-5 text-red-500" />
+                                                ) : (
+                                                    <Minus className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
+                                                )}
+                                            </button>
+                                            <span className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>
+                                                {quantity}
+                                            </span>
+                                            <button onClick={(e) => { e.stopPropagation(); onUpdateCart(product, 1); }} className="w-8 h-8 flex items-center justify-center rounded-full transition-colors hover:bg-black/5 dark:hover:bg-white/5">
+                                                <Plus className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
+                                            </button>
+                                        </>
+                                    )}
+                                </GlassCard>
+                            </div>
+                        </div>
                     );
                 })}
             </div>
@@ -6765,8 +6915,6 @@ export {
     // “Rep Functions” screens
     RequestFieldVisitScreen,
 
-    // Misc. resource screens
-    ContractsScreen,
     InstallInstructionsScreen,
     PresentationsScreen,
     SocialMediaScreen,
