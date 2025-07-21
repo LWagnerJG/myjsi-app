@@ -6838,13 +6838,21 @@ const FeedbackScreen = ({ theme, setSuccessMessage, onNavigate }) => {
 
         let attachmentBase64 = null;
         if (attachment) {
-            // Convert attachment to Base64
-            attachmentBase64 = await new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(attachment);
-                reader.onload = () => resolve(reader.result.split(',')[1]); // Get only the Base64 part
-                reader.onerror = error => reject(error);
-            });
+            try {
+                // Convert attachment to Base64
+                attachmentBase64 = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(attachment);
+                    reader.onload = () => resolve(reader.result.split(',')[1]); // Get only the Base64 part
+                    reader.onerror = error => reject(error);
+                });
+            } catch (fileReadError) {
+                console.error('Error reading file:', fileReadError);
+                setSuccessMessage("Error reading attachment. Please try again.");
+                setLoading(false);
+                setTimeout(() => setSuccessMessage(""), 3000);
+                return; // Stop execution if file reading fails
+            }
         }
 
         const payload = {
@@ -6854,8 +6862,18 @@ const FeedbackScreen = ({ theme, setSuccessMessage, onNavigate }) => {
             AttachmentFileName: attachment ? attachment.name : null
         };
 
-        // Replace with your actual Power Automate HTTP POST URL
-        const powerAutomateUrl = 'https://prod-153.westus.logic.azure.com:443/workflows/b3071f58012a474d854f3536b62b9179/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=9AXVZU8L1sscS-1IcTV0p4LFoHpNW884ljYeB3WN9Cw';
+        // --- TWEAKED CONNECTION HERE ---
+        // Access the Power Automate URL from Vercel's environment variables
+        const powerAutomateUrl = import.meta.env.VITE_FEEDBACK_POWER_AUTOMATE_URL;
+
+        if (!powerAutomateUrl) {
+            console.error("Configuration Error: VITE_FEEDBACK_POWER_AUTOMATE_URL is not defined.");
+            setSuccessMessage("Configuration error. Please contact support.");
+            setLoading(false);
+            setTimeout(() => setSuccessMessage(""), 3000);
+            return; // Stop if URL is missing
+        }
+        // --- END TWEAKED CONNECTION ---
 
         try {
             const response = await fetch(powerAutomateUrl, {
@@ -6868,12 +6886,18 @@ const FeedbackScreen = ({ theme, setSuccessMessage, onNavigate }) => {
 
             if (response.ok) {
                 setSuccessMessage("Feedback Submitted!");
+                // Clear the form fields upon successful submission
+                setSubject('');
+                setMessage('');
+                setAttachment(null);
                 setTimeout(() => {
                     setSuccessMessage("");
                     onNavigate('home');
                 }, 1200);
             } else {
-                console.error('Error submitting feedback:', response.statusText);
+                // Improved error logging
+                const errorText = await response.text();
+                console.error('Error submitting feedback:', response.status, response.statusText, errorText);
                 setSuccessMessage("Failed to submit feedback. Please try again.");
                 setTimeout(() => setSuccessMessage(""), 3000);
             }
@@ -6890,10 +6914,31 @@ const FeedbackScreen = ({ theme, setSuccessMessage, onNavigate }) => {
         <>
             <PageTitle title="Feedback" theme={theme} />
             <div className="px-4 pb-4 space-y-4">
-                <FormInput label="Subject" value={subject} onChange={e => setSubject(e.target.value)} placeholder="e.g. Feature Request" theme={theme} />
-                <FormInput label="Message" type="textarea" value={message} onChange={e => setMessage(e.target.value)} placeholder="Your detailed feedback..." theme={theme} />
+                <FormInput
+                    label="Subject"
+                    value={subject}
+                    onChange={e => setSubject(e.target.value)}
+                    placeholder="e.g. Feature Request"
+                    theme={theme}
+                    // Added required to reflect real-world validation (optional)
+                    required
+                />
+                <FormInput
+                    label="Message"
+                    type="textarea"
+                    value={message}
+                    onChange={e => setMessage(e.target.value)}
+                    placeholder="Your detailed feedback..."
+                    theme={theme}
+                    // Added required to reflect real-world validation (optional)
+                    required
+                />
                 <div>
-                    <label htmlFor="file-upload" className="w-full font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center cursor-pointer" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }}>
+                    <label
+                        htmlFor="file-upload"
+                        className="w-full font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center cursor-pointer"
+                        style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }}
+                    >
                         <Paperclip className="w-4 h-4 mr-2" />
                         Add Attachment
                     </label>
@@ -6904,7 +6949,8 @@ const FeedbackScreen = ({ theme, setSuccessMessage, onNavigate }) => {
                     className="w-full font-bold py-3 px-6 rounded-lg transition-colors"
                     style={{ backgroundColor: theme.colors.accent, color: '#FFFFFF' }}
                     onClick={handleSubmit}
-                    disabled={loading} // Disable button when loading
+                    // Disable button if loading or if subject/message are empty (basic validation)
+                    disabled={loading || !subject.trim() || !message.trim()}
                 >
                     {loading ? 'Submitting...' : 'Submit Feedback'}
                 </button>
