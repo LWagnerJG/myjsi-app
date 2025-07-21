@@ -1691,21 +1691,17 @@ export const CommissionRatesScreen = ({ theme }) => {
                 if (!powerAutomateURL) {
                     throw new Error("Flow URL is not configured in Vercel.");
                 }
-
                 const response = await fetch(powerAutomateURL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' }
                 });
-
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const data = await response.json();
-
                 const standard = data.filter(d => d.category === 'Standard');
                 const contract = data.filter(d => d.category === 'Contract');
                 setRates({ standard, contract });
-
             } catch (e) {
                 console.error("Failed to fetch commission rates:", e);
                 setError("Could not load data. Please try again later.");
@@ -1713,23 +1709,22 @@ export const CommissionRatesScreen = ({ theme }) => {
                 setLoading(false);
             }
         };
-
         fetchRates();
     }, []);
 
     const split = { specifying: 70, ordering: 30 };
     const { accent, secondary, textPrimary, textSecondary, border, subtle } = theme.colors;
 
-    const RateRow = ({ item, isLast }) => (
-        <div className={`grid grid-cols-[1.5fr,1fr,1fr] gap-x-4 py-3 ${!isLast ? 'border-b' : ''}`} style={{ borderColor: subtle }}>
+    const RateRow = ({ item, isFirst }) => (
+        <div className={`grid grid-cols-[1.5fr,1fr,1fr] gap-x-4 py-3 ${!isFirst ? 'border-t' : ''}`} style={{ borderColor: subtle }}>
             <span className="font-medium" style={{ color: textPrimary }}>{item.discount}</span>
             <span className="text-center font-semibold" style={{ color: accent }}>{item.rep}</span>
             <span className="text-right" style={{ color: textPrimary }}>{item.spiff}</span>
         </div>
     );
 
-    const SectionHeader = ({ title }) => (
-        <div className="pb-2 border-b" style={{ borderColor: border }}>
+    const SectionDivider = ({ title }) => (
+        <div className="pt-4 mt-4 border-t" style={{ borderColor: border }}>
             <h3 className="text-sm font-bold uppercase tracking-wider" style={{ color: textSecondary }}>{title}</h3>
         </div>
     );
@@ -1738,9 +1733,7 @@ export const CommissionRatesScreen = ({ theme }) => {
         return (
             <>
                 <PageTitle title="Commission Rates" theme={theme} />
-                <div className="text-center p-8">
-                    <Hourglass className="w-8 h-8 animate-spin mx-auto" style={{ color: accent }} />
-                </div>
+                <div className="text-center p-8"><Hourglass className="w-8 h-8 animate-spin mx-auto" style={{ color: accent }} /></div>
             </>
         );
     }
@@ -1750,9 +1743,7 @@ export const CommissionRatesScreen = ({ theme }) => {
             <>
                 <PageTitle title="Commission Rates" theme={theme} />
                 <div className="px-4">
-                    <GlassCard theme={theme} className="p-8 text-center">
-                        <p className="font-semibold text-red-500">{error}</p>
-                    </GlassCard>
+                    <GlassCard theme={theme} className="p-8 text-center"><p className="font-semibold text-red-500">{error}</p></GlassCard>
                 </div>
             </>
         );
@@ -1761,23 +1752,23 @@ export const CommissionRatesScreen = ({ theme }) => {
     return (
         <div className="px-4 py-6">
             <PageTitle title="Commission Rates" theme={theme} />
-
             <div className="space-y-6">
-                <GlassCard theme={theme} className="p-4 space-y-6">
-                    {/* Standard Discounts Section */}
-                    <div className="space-y-2">
-                        <SectionHeader title="Standard Discounts" />
-                        {rates.standard.map((r, i) => (
-                            <RateRow key={r.discount} item={r} isLast={i === rates.standard.length - 1} />
-                        ))}
+                <GlassCard theme={theme} className="p-4">
+                    {/* Column Headers */}
+                    <div className="grid grid-cols-[1.5fr,1fr,1fr] gap-x-4 px-1 pb-2">
+                        <span className="text-xs font-bold uppercase" style={{ color: textSecondary }}>Discounts</span>
+                        <span className="text-xs font-bold uppercase text-center" style={{ color: textSecondary }}>Rep Comm.</span>
+                        <span className="text-xs font-bold uppercase text-right" style={{ color: textSecondary }}>Spiff</span>
+                    </div>
+                    {/* Standard Discounts */}
+                    <div className="border-t" style={{ borderColor: border }}>
+                        {rates.standard.map((r, i) => <RateRow key={r.discount} item={r} isFirst={i === 0} />)}
                     </div>
 
-                    {/* Contract Discounts Section */}
-                    <div className="space-y-2">
-                        <SectionHeader title="Contract Discounts" />
-                        {rates.contract.map((r, i) => (
-                            <RateRow key={r.discount} item={r} isLast={i === rates.contract.length - 1} />
-                        ))}
+                    {/* Contract Discounts */}
+                    <SectionDivider title="Contract Discounts" />
+                    <div>
+                        {rates.contract.map((r, i) => <RateRow key={r.discount} item={r} isFirst={i === 0} />)}
                     </div>
                 </GlassCard>
 
@@ -1785,7 +1776,8 @@ export const CommissionRatesScreen = ({ theme }) => {
                     <h3 className="mb-3 font-bold uppercase text-center tracking-wide text-sm" style={{ color: textSecondary }}>
                         Commission Split
                     </h3>
-                    <div className="w-full h-6 flex rounded-full overflow-hidden ring-1" style={{ ringColor: border }}>
+                    {/* Border removed from this container */}
+                    <div className="w-full h-6 flex rounded-full overflow-hidden">
                         <div className="flex items-center pl-3 text-sm font-semibold text-white" style={{ width: `${split.specifying}%`, backgroundColor: accent }}>
                             {split.specifying}%
                         </div>
