@@ -1028,7 +1028,15 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
                 </div>
                 <ArrowRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
                 <div className="flex items-center space-x-4 w-[45%]">
-                    <div className="w-10 h-10 rounded-full flex-shrink-0" style={{ backgroundColor: finish.newColor, border: `1px solid ${theme.colors.border}` }} />
+                    {/* --- THIS IS THE UPDATED PART --- */}
+                    <div className="w-10 h-10 rounded-full flex-shrink-0 overflow-hidden" style={{ border: `1px solid ${theme.colors.border}` }}>
+                        {finish.newImage ? (
+                            <img src={finish.newImage} alt={finish.newName} className="w-full h-full object-cover" />
+                        ) : (
+                            <div className="w-full h-full" style={{ backgroundColor: finish.newColor }} />
+                        )}
+                    </div>
+                    {/* --- END OF UPDATE --- */}
                     <div className="min-w-0">
                         <p className="font-semibold text-sm truncate" style={{ color: theme.colors.textPrimary }}>{formatFinishName(finish.newName)}</p>
                         <p className="font-mono text-xs" style={{ color: theme.colors.textSecondary }}>{finish.veneer}</p>

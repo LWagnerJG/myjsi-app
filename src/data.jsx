@@ -519,7 +519,18 @@ export const DEALER_DIRECTORY_DATA = [
     dailyDiscount: dealer.dailyDiscount || '50/20 (60.00%)'
 }));
 
-export const DISCONTINUED_FINISHES = [{ category: "Maple", oldName: "ALE MEDIUM", veneer: "#3610", solid: "#3610", oldColor: "#d3b48c", newName: "PILSNER", newColor: "#e6d3b1" }, { category: "Maple", oldName: "BUTTERSCOTCH", veneer: "#3381", solid: "#3381", oldColor: "#a96e41", newName: "OUTBACK", newColor: "#966642" }, { category: "Maple", oldName: "VENETIAN", veneer: "#3593", solid: "#3593", oldColor: "#5e3a2f", newName: "BRICKDUST", newColor: "#744334" }, { category: "Cherry", oldName: "BOURBON MEDIUM", veneer: "#3581", solid: "#3683", oldColor: "#744334", newName: "OUTBACK", newColor: "#966642" }, { category: "Cherry", oldName: "BRIGHTON MEDIUM", veneer: "#3611", solid: "#3684", oldColor: "#5e3a2f", newName: "BRICKDUST", newColor: "#744334" }, { category: "Oak", oldName: "GOLDEN OAK", veneer: "#3321", solid: "#3321", oldColor: "#c68e41", newName: "DUNE", newColor: "#d1b38b" }, { category: "Oak", oldName: "TRADITIONAL OAK", veneer: "#3351", solid: "#3351", oldColor: "#a46e3a", newName: "FAWN", newColor: "#c8a57a" }, { category: "Walnut", oldName: "NATURAL WALNUT", veneer: "#3401", solid: "#3401", oldColor: "#6b4a39", newName: "NATURAL", newColor: "#6f4f3a" }, { category: "Laminate", oldName: "KENSINGTON MAPLE", veneer: "N/A", solid: "N/A", oldColor: "#d8b48b", newName: "HARD ROCK MAPLE", newColor: "#dcb992" }, { category: "Laminate", oldName: "WINDSOR CHERRY", veneer: "N/A", solid: "N/A", oldColor: "#8b4b3b", newName: "WILD CHERRY", newColor: "#8f5245" },];
+export const DISCONTINUED_FINISHES = [
+    { category: "Maple", oldName: "ALE MEDIUM", veneer: "#3610", solid: "#3610", oldColor: "#d3b48c", newName: "PILSNER", newColor: "#e6d3b1", newImage: "/jsi_finish_PIL_Pilsner_Laminate.jpg" },
+    { category: "Maple", oldName: "BUTTERSCOTCH", veneer: "#3381", solid: "#3381", oldColor: "#a96e41", newName: "OUTBACK", newColor: "#966642", newImage: "/jsi_finish_OBK_Outback_Laminate.jpg" },
+    { category: "Maple", oldName: "VENETIAN", veneer: "#3593", solid: "#3593", oldColor: "#5e3a2f", newName: "BRICKDUST", newColor: "#744334", newImage: "/jsi_finish_BRD_Brickdust_Laminate.jpg" },
+    { category: "Cherry", oldName: "BOURBON MEDIUM", veneer: "#3581", solid: "#3683", oldColor: "#744334", newName: "OUTBACK", newColor: "#966642", newImage: "/jsi_finish_OBK_Outback_Laminate.jpg" },
+    { category: "Cherry", oldName: "BRIGHTON MEDIUM", veneer: "#3611", solid: "#3684", oldColor: "#5e3a2f", newName: "BRICKDUST", newColor: "#744334", newImage: "/jsi_finish_BRD_Brickdust_Laminate.jpg" },
+    { category: "Oak", oldName: "GOLDEN OAK", veneer: "#3321", solid: "#3321", oldColor: "#c68e41", newName: "DUNE", newColor: "#d1b38b" },
+    { category: "Oak", oldName: "TRADITIONAL OAK", veneer: "#3351", solid: "#3351", oldColor: "#a46e3a", newName: "FAWN", newColor: "#c8a57a", newImage: "/jsi_finish_FAW_Fawn_Laminate.jpg" },
+    { category: "Walnut", oldName: "NATURAL WALNUT", veneer: "#3401", solid: "#3401", oldColor: "#6b4a39", newName: "NATURAL", newColor: "#6f4f3a" },
+    { category: "Laminate", oldName: "KENSINGTON MAPLE", veneer: "N/A", solid: "N/A", oldColor: "#d8b48b", newName: "HARD ROCK MAPLE", newColor: "#dcb992" },
+    { category: "Laminate", oldName: "WINDSOR CHERRY", veneer: "N/A", solid: "N/A", oldColor: "#8b4b3b", newName: "WILD CHERRY", newColor: "#8f5245" },
+];
 
 export const PRODUCT_DATA = {
     'bar-stools': {
