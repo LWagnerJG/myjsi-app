@@ -2531,7 +2531,6 @@ export const ResourceDetailScreen = ({ theme, onNavigate, setSuccessMessage, use
     }
 };
 
-
 const COMRequestScreen = ({ theme, onNavigate, showAlert }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedModels, setSelectedModels] = useState([]);
