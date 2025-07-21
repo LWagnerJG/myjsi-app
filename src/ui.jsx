@@ -1687,10 +1687,12 @@ export const CommissionRatesScreen = ({ theme }) => {
     useEffect(() => {
         const fetchRates = async () => {
             try {
-                // IMPORTANT: Add this URL to your Vercel Environment Variables
+                // This line now correctly and securely reads the URL 
+                // from your Vercel environment variables.
                 const powerAutomateURL = import.meta.env.VITE_COMMISSION_RATES_URL;
+
                 if (!powerAutomateURL) {
-                    throw new Error("Flow URL is not configured.");
+                    throw new Error("Flow URL is not configured in Vercel.");
                 }
 
                 const response = await fetch(powerAutomateURL);
@@ -1724,7 +1726,7 @@ export const CommissionRatesScreen = ({ theme }) => {
 
     const split = { specifying: 70, ordering: 30 };
     const { subtle, surface, accent, secondary, textPrimary, textSecondary, border } = theme.colors;
-    const zebra = i => (i % 2 ? 'transparent' : subtle + '60'); // Lighter zebra
+    const zebra = i => (i % 2 ? 'transparent' : subtle + '60');
     const contractBg = `${accent}1A`;
 
     if (loading) {
@@ -1750,7 +1752,6 @@ export const CommissionRatesScreen = ({ theme }) => {
             </>
         );
     }
-
 
     return (
         <div className="px-4 pb-8 space-y-4">
@@ -2296,7 +2297,6 @@ export const DealerRegistrationScreen = ({ theme, onNavigate, setSuccessMessage,
         </div>
     );
 };
-
 
 export const LoanerPoolScreen = ({ theme, onNavigate, setSuccessMessage, userSettings }) => {
     const [searchTerm, setSearchTerm] = useState('');
