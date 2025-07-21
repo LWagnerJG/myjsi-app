@@ -2892,7 +2892,11 @@ export const COMYardageRequestScreen = ({ theme, showAlert, onNavigate, userSett
 
     const handleFinalSubmit = async () => {
         setIsSubmitting(true);
-        const powerAutomateURL = "https://prod-27.westus.logic.azure.com:443/workflows/f8a11797ba9b4d96a21d90882f82ed12/triggers/manual/paths/invoke?api-version=2016-06-01";
+        // This now securely reads the correct URL from your Vercel Environment Variable
+        const powerAutomateURL = import.meta.env.VITE_POWER_AUTOMATE_URL;
+
+        // For debugging, you can check the console in your live app to see the URL it's using
+        console.log("Attempting to submit to URL:", powerAutomateURL);
 
         const payload = {
             requester: userSettings.email,
