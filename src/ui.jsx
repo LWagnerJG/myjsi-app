@@ -2892,15 +2892,16 @@ export const COMYardageRequestScreen = ({ theme, showAlert, onNavigate, userSett
 
     const handleFinalSubmit = async () => {
         setIsSubmitting(true);
-        // This now securely reads the correct URL from your Vercel Environment Variable
         const powerAutomateURL = import.meta.env.VITE_POWER_AUTOMATE_URL;
 
-        // For debugging, you can check the console in your live app to see the URL it's using
-        console.log("Attempting to submit to URL:", powerAutomateURL);
-
+        // This payload sends the data in the correct structured format with a "models" array
         const payload = {
             requester: userSettings.email,
-            summary: summary,
+            models: selectedModels.map(m => ({
+                name: m.name,
+                quantity: m.quantity,
+                fabric: m.fabric,
+            }))
         };
 
         try {
@@ -2909,14 +2910,12 @@ export const COMYardageRequestScreen = ({ theme, showAlert, onNavigate, userSett
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
             });
+            if (!response.ok) throw new Error('Server responded with an error.');
 
-            if (response.ok) {
-                showAlert('COM Yardage Request Submitted!');
-                setShowConfirm(false);
-                onNavigate('resources');
-            } else {
-                throw new Error('Server responded with an error.');
-            }
+            showAlert('COM Yardage Request Submitted!');
+            setShowConfirm(false);
+            onNavigate('resources');
+
         } catch (error) {
             console.error('Submission failed:', error);
             showAlert('Submission failed. Please try again later.');
@@ -2974,14 +2973,9 @@ export const COMYardageRequestScreen = ({ theme, showAlert, onNavigate, userSett
                         </GlassCard>
                     ))}
                     <AutoCompleteCombobox
-                        value=""
-                        onChange={() => { }}
-                        onSelect={addModel}
-                        placeholder="+ Add model"
-                        options={modelOptions}
-                        theme={theme}
-                        resetOnSelect={true}
-                    />
+                        value="" onChange={() => { }} onSelect={addModel}
+                        placeholder="+ Add model" options={modelOptions}
+                        theme={theme} resetOnSelect={true} />
                 </GlassCard>
                 <button
                     onClick={handleSubmit}
