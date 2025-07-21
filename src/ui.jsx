@@ -3935,7 +3935,7 @@ export const AppHeader = React.memo(({ onHomeClick, isDarkMode, theme, onProfile
                 backdropFilter: theme.backdropFilter,
                 WebkitBackdropFilter: theme.backdropFilter
             }}
-            className="mx-auto mt-4 w-[90%] px-6 py-3 flex justify-between items-center sticky top-0 z-20 rounded-full shadow-lg backdrop-blur"
+            className="mx-auto w-[90%] px-6 py-3 flex justify-between items-center fixed top-4 left-0 right-0 z-20 rounded-full shadow-lg backdrop-blur"
         >
             <div className="flex items-center">
                 <button
