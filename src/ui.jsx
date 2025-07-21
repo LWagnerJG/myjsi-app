@@ -972,18 +972,13 @@ const InstallInstructionsScreen = ({ theme }) => {
 };
 
 export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) => {
-    // --- START: Added state for fetching live data ---
     const [finishes, setFinishes] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    // --- END: Added state for fetching live data ---
-
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedFinish, setSelectedFinish] = useState(null);
 
-    // --- START: Added useEffect to fetch data from Power Automate ---
     useEffect(() => {
         const fetchFinishes = async () => {
-            // Reads the URL from your Vercel environment variable
             const powerAutomateURL = import.meta.env.VITE_OUTDATED_FINISHES_URL;
 
             if (!powerAutomateURL) {
@@ -1007,8 +1002,7 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
         };
 
         fetchFinishes();
-    }, []); // Empty dependency array means this runs once when the component loads
-    // --- END: Added useEffect ---
+    }, []);
 
     const formatFinishName = (name) => {
         if (!name) return '';
@@ -1019,7 +1013,6 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
 
     const groupedFinishes = useMemo(() => {
         const lowercasedFilter = searchTerm.toLowerCase().trim();
-        // MODIFIED: Use the 'finishes' state variable from the API call
         const filtered = finishes.filter(finish =>
             (finish.OldFinishName || '').toLowerCase().includes(lowercasedFilter) ||
             (finish.NewFinishName || '').toLowerCase().includes(lowercasedFilter) ||
@@ -1027,17 +1020,15 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
         );
 
         return filtered.reduce((acc, finish) => {
-            // MODIFIED: Use 'Category' property from Microsoft List
             const { Category } = finish;
             if (!acc[Category]) acc[Category] = [];
             acc[Category].push(finish);
             return acc;
         }, {});
-    }, [searchTerm, finishes]); // MODIFIED: Now depends on the fetched 'finishes'
+    }, [searchTerm, finishes]);
 
     const handleOrderClick = () => {
         if (!selectedFinish) return;
-        // MODIFIED: Use property names from Microsoft List
         const newItem = {
             id: `sample-${selectedFinish.NewFinishName.toLowerCase().replace(/\s/g, '-')}`,
             name: formatFinishName(selectedFinish.NewFinishName),
@@ -1057,7 +1048,6 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
         >
             <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4 w-[45%]">
-                    {/* MODIFIED: Removed old color swatch, as it's not in the new data */}
                     <div className="min-w-0">
                         <p className="font-semibold text-sm truncate" style={{ color: theme.colors.textPrimary }}>{formatFinishName(finish.OldFinishName)}</p>
                         <p className="font-mono text-xs" style={{ color: theme.colors.textSecondary }}>{finish.OldVeneerCode}</p>
@@ -1066,7 +1056,6 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
                 <ArrowRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
                 <div className="flex items-center space-x-4 w-[45%]">
                     <div className="w-10 h-10 rounded-full flex-shrink-0 overflow-hidden" style={{ border: `1px solid ${theme.colors.border}`, backgroundColor: theme.colors.subtle }}>
-                        {/* MODIFIED: Use NewFinishImageURL property from Microsoft List */}
                         {finish.NewFinishImageURL ? (
                             <img src={finish.NewFinishImageURL} alt={finish.NewFinishName} className="w-full h-full object-cover" />
                         ) : (
@@ -1094,7 +1083,6 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
                 />
             </div>
             <div className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-hide">
-                {/* MODIFIED: Show loading indicator while fetching */}
                 {isLoading ? (
                     <div className="text-center p-8"><Hourglass className="w-8 h-8 animate-spin mx-auto" style={{ color: theme.colors.accent }} /></div>
                 ) : Object.keys(groupedFinishes).length > 0 ? (
