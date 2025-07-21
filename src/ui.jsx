@@ -1687,21 +1687,24 @@ export const CommissionRatesScreen = ({ theme }) => {
     useEffect(() => {
         const fetchRates = async () => {
             try {
-                // This line now correctly and securely reads the URL 
-                // from your Vercel environment variables.
                 const powerAutomateURL = import.meta.env.VITE_COMMISSION_RATES_URL;
-
                 if (!powerAutomateURL) {
-                    throw new Error("Flow URL is not configured in Vercel.");
+                    throw new Error("Flow URL is not configured.");
                 }
 
-                const response = await fetch(powerAutomateURL);
+                // This has been updated to explicitly use the POST method
+                const response = await fetch(powerAutomateURL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const data = await response.json();
 
-                // Group the data fetched from the flow
                 const standard = data.filter(d => d.category === 'Standard');
                 const contract = data.filter(d => d.category === 'Contract');
                 setRates({ standard, contract });
