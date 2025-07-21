@@ -1679,71 +1679,105 @@ export const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage, dea
     );
 };
 
-const CommissionRatesScreen = ({ theme }) => {
-    const rows = useMemo(() => {
-        const tag = (d, isContract = false) => ({ ...d, isContract });
-        return [
-            ...COMMISSION_RATES_TABLE_DATA.standard.map(d => tag(d)),
-            ...COMMISSION_RATES_TABLE_DATA.contract.map(d => tag(d, true)),
-        ];
+export const CommissionRatesScreen = ({ theme }) => {
+    const [rates, setRates] = useState({ standard: [], contract: [] });
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchRates = async () => {
+            try {
+                // IMPORTANT: Add this URL to your Vercel Environment Variables
+                const powerAutomateURL = import.meta.env.VITE_COMMISSION_RATES_URL;
+                if (!powerAutomateURL) {
+                    throw new Error("Flow URL is not configured.");
+                }
+
+                const response = await fetch(powerAutomateURL);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+
+                // Group the data fetched from the flow
+                const standard = data.filter(d => d.category === 'Standard');
+                const contract = data.filter(d => d.category === 'Contract');
+                setRates({ standard, contract });
+
+            } catch (e) {
+                console.error("Failed to fetch commission rates:", e);
+                setError("Could not load data. Please try again later.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchRates();
     }, []);
 
-    const split = { specifying: 70, ordering: 30 };
+    const rows = useMemo(() => {
+        return [
+            ...rates.standard.map(d => ({ ...d, isContract: false })),
+            ...rates.contract.map(d => ({ ...d, isContract: true })),
+        ];
+    }, [rates]);
 
-    const { subtle, surface, accent, secondary, textPrimary, textSecondary } =
-        theme.colors;
-    const zebra = i => (i % 2 ? surface : 'transparent');
+    const split = { specifying: 70, ordering: 30 };
+    const { subtle, surface, accent, secondary, textPrimary, textSecondary, border } = theme.colors;
+    const zebra = i => (i % 2 ? 'transparent' : subtle + '60'); // Lighter zebra
     const contractBg = `${accent}1A`;
+
+    if (loading) {
+        return (
+            <>
+                <PageTitle title="Commission Rates" theme={theme} />
+                <div className="text-center p-8">
+                    <Hourglass className="w-8 h-8 animate-spin mx-auto" style={{ color: accent }} />
+                </div>
+            </>
+        );
+    }
+
+    if (error) {
+        return (
+            <>
+                <PageTitle title="Commission Rates" theme={theme} />
+                <div className="px-4">
+                    <GlassCard theme={theme} className="p-8 text-center">
+                        <p className="font-semibold text-red-500">{error}</p>
+                    </GlassCard>
+                </div>
+            </>
+        );
+    }
+
 
     return (
         <div className="px-4 pb-8 space-y-4">
             <PageTitle title="Commission Rates" theme={theme} />
 
-            <GlassCard
-                theme={theme}
-                className="p-0 overflow-hidden rounded-2xl shadow ring-1 ring-black/5"
-            >
+            <GlassCard theme={theme} className="p-0 overflow-hidden rounded-2xl shadow ring-1" style={{ ringColor: border }}>
                 <table className="w-full text-sm">
-                    <thead>
-                        <tr
-                            style={{ backgroundColor: subtle, color: textPrimary }}
-                            className="uppercase text-[11px] tracking-wide"
-                        >
+                    <thead className="border-b" style={{ borderColor: border }}>
+                        <tr style={{ backgroundColor: subtle, color: textPrimary }} className="uppercase text-[11px] tracking-wide">
                             <th className="py-2.5 pl-4 text-left">Discounts</th>
-                            <th className="py-2.5 text-center">Rep&nbsp;Comm.</th>
+                            <th className="py-2.5 text-center">Rep Comm.</th>
                             <th className="py-2.5 pr-4 text-right">Spiff</th>
                         </tr>
                     </thead>
                     <tbody>
                         {rows.map((r, i) => (
-                            <tr
-                                key={r.discount}
-                                style={{ backgroundColor: r.isContract ? contractBg : zebra(i) }}
-                            >
-                                <td
-                                    className="py-2.5 pl-4 font-medium break-all"
-                                    style={{ color: textPrimary }}
-                                >
+                            <tr key={`${r.discount}-${i}`} style={{ backgroundColor: r.isContract ? contractBg : zebra(i) }}>
+                                <td className="py-2.5 pl-4 font-medium break-all" style={{ color: textPrimary }}>
                                     {r.discount}
                                 </td>
-                                <td
-                                    className="py-2.5 text-center font-semibold"
-                                    style={{ color: accent }}
-                                >
+                                <td className="py-2.5 text-center font-semibold" style={{ color: accent }}>
                                     {r.rep}
                                 </td>
                                 <td className="py-2.5 pr-4 text-right">
                                     <span className="font-medium" style={{ color: textPrimary }}>
-                                        {typeof r.spiff === 'object' ? r.spiff.value : r.spiff}
+                                        {r.spiff}
                                     </span>
-                                    {typeof r.spiff === 'object' && (
-                                        <div
-                                            className="text-[11px] italic"
-                                            style={{ color: textSecondary }}
-                                        >
-                                            {r.spiff.note}
-                                        </div>
-                                    )}
                                 </td>
                             </tr>
                         ))}
@@ -1751,38 +1785,18 @@ const CommissionRatesScreen = ({ theme }) => {
                 </table>
             </GlassCard>
 
-            <GlassCard
-                theme={theme}
-                className="p-6 rounded-2xl shadow ring-1 ring-black/5"
-            >
-                <h3
-                    className="mb-3 font-bold uppercase text-center tracking-wide text-[12px]"
-                    style={{ color: textSecondary }}
-                >
+            <GlassCard theme={theme} className="p-6 rounded-2xl shadow ring-1" style={{ ringColor: border }}>
+                <h3 className="mb-3 font-bold uppercase text-center tracking-wide text-[12px]" style={{ color: textSecondary }}>
                     Commission Split
                 </h3>
-
-                <div className="w-full h-6 flex rounded-full overflow-hidden ring-1 ring-black/5">
-                    <div
-                        className="flex items-center pl-2 text-[11px] font-semibold text-white"
-                        style={{
-                            width: `${split.specifying}%`,
-                            backgroundColor: accent,
-                        }}
-                    >
+                <div className="w-full h-6 flex rounded-full overflow-hidden ring-1" style={{ ringColor: border }}>
+                    <div className="flex items-center pl-2 text-[11px] font-semibold text-white" style={{ width: `${split.specifying}%`, backgroundColor: accent }}>
                         {split.specifying}%
                     </div>
-                    <div
-                        className="flex items-center justify-end pr-2 text-[11px] font-semibold text-white"
-                        style={{
-                            width: `${split.ordering}%`,
-                            backgroundColor: secondary,
-                        }}
-                    >
+                    <div className="flex items-center justify-end pr-2 text-[11px] font-semibold" style={{ width: `${split.ordering}%`, backgroundColor: secondary, color: 'white' }}>
                         {split.ordering}%
                     </div>
                 </div>
-
                 <div className="mt-2 flex justify-between text-[12px] font-medium">
                     <span style={{ color: textSecondary }}>Specifying</span>
                     <span style={{ color: textSecondary }}>Ordering</span>
