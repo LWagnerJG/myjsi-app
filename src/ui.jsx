@@ -6825,6 +6825,7 @@ const FeedbackScreen = ({ theme, setSuccessMessage, onNavigate }) => {
     const [subject, setSubject] = useState('');
     const [message, setMessage] = useState('');
     const [attachment, setAttachment] = useState(null);
+    const [loading, setLoading] = useState(false); // Add loading state for UX
 
     const handleFileChange = (e) => {
         if (e.target.files && e.target.files[0]) {
@@ -6832,13 +6833,57 @@ const FeedbackScreen = ({ theme, setSuccessMessage, onNavigate }) => {
         }
     };
 
-    const handleSubmit = () => {
-        console.log({ subject, message, attachment });
-        setSuccessMessage("Feedback Submitted!");
-        setTimeout(() => {
-            setSuccessMessage("");
-            onNavigate('home');
-        }, 1200);
+    const handleSubmit = async () => {
+        setLoading(true); // Start loading
+
+        let attachmentBase64 = null;
+        if (attachment) {
+            // Convert attachment to Base64
+            attachmentBase64 = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(attachment);
+                reader.onload = () => resolve(reader.result.split(',')[1]); // Get only the Base64 part
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        const payload = {
+            Subject: subject,
+            Message: message,
+            AttachmentContent: attachmentBase64,
+            AttachmentFileName: attachment ? attachment.name : null
+        };
+
+        // Replace with your actual Power Automate HTTP POST URL
+        const powerAutomateUrl = 'https://prod-153.westus.logic.azure.com:443/workflows/b3071f58012a474d854f3536b62b9179/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=9AXVZU8L1sscS-1IcTV0p4LFoHpNW884ljYeB3WN9Cw';
+
+        try {
+            const response = await fetch(powerAutomateUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (response.ok) {
+                setSuccessMessage("Feedback Submitted!");
+                setTimeout(() => {
+                    setSuccessMessage("");
+                    onNavigate('home');
+                }, 1200);
+            } else {
+                console.error('Error submitting feedback:', response.statusText);
+                setSuccessMessage("Failed to submit feedback. Please try again.");
+                setTimeout(() => setSuccessMessage(""), 3000);
+            }
+        } catch (error) {
+            console.error('Network error submitting feedback:', error);
+            setSuccessMessage("Network error. Please check your connection.");
+            setTimeout(() => setSuccessMessage(""), 3000);
+        } finally {
+            setLoading(false); // End loading
+        }
     };
 
     return (
@@ -6855,7 +6900,14 @@ const FeedbackScreen = ({ theme, setSuccessMessage, onNavigate }) => {
                     <input id="file-upload" type="file" className="hidden" onChange={handleFileChange} />
                     {attachment && <p className="text-xs text-center mt-2" style={{ color: theme.colors.textSecondary }}>Selected: {attachment.name}</p>}
                 </div>
-                <button className="w-full font-bold py-3 px-6 rounded-lg transition-colors" style={{ backgroundColor: theme.colors.accent, color: '#FFFFFF' }} onClick={handleSubmit}>Submit Feedback</button>
+                <button
+                    className="w-full font-bold py-3 px-6 rounded-lg transition-colors"
+                    style={{ backgroundColor: theme.colors.accent, color: '#FFFFFF' }}
+                    onClick={handleSubmit}
+                    disabled={loading} // Disable button when loading
+                >
+                    {loading ? 'Submitting...' : 'Submit Feedback'}
+                </button>
             </div>
         </>
     );
