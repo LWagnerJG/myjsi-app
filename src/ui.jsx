@@ -5235,7 +5235,6 @@ export const NewLeadScreen = ({
     dealers,
     setDealers,
 }) => {
-    /* -------- state -------- */
     const [newLead, setNewLead] = useState({
         ...Data.EMPTY_LEAD,
         winProbability: 50,
@@ -5246,20 +5245,31 @@ export const NewLeadScreen = ({
         jsiPastProjectInfo: '',
     });
 
-    /* -------- helpers -------- */
     const updateField = useCallback((field, value) =>
         setNewLead(prev => ({ ...prev, [field]: value })), []);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (!newLead.projectStatus) {
             alert('Please select a Project Stage before submitting.');
             return;
         }
+
+        // Send to Power Automate webhook
+        try {
+            const webhookUrl = import.meta.env.VITE_NEWLEAD_URL;
+            await fetch(webhookUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newLead)
+            });
+        } catch (err) {
+            console.error("Failed to sync with Microsoft List:", err);
+        }
+
         onSuccess(newLead);
     };
 
-    /* products --------------------------------------------------- */
     const addProduct = useCallback((series) => {
         if (!series) return;
         setNewLead(prev => ({ ...prev, products: [...prev.products, { series, hasGlassDoors: false, materials: [], hasWoodBack: false, polyColor: '' }] }));
@@ -5269,10 +5279,12 @@ export const NewLeadScreen = ({
     const updateProductOption = (pi, key, value) => setNewLead(prev => ({ ...prev, products: prev.products.map((p, i) => i === pi ? { ...p, [key]: value } : p) }));
     const availableSeries = useMemo(() => Data.JSI_PRODUCT_SERIES.filter(s => !newLead.products.some(p => p.series === s)), [newLead.products]);
 
-    /* competitors ------------------------------------------------ */
-    const toggleCompetitor = useCallback((c) => setNewLead(prev => { const list = prev.competitors || []; const next = list.includes(c) ? list.filter(x => x !== c) : [...list, c]; return { ...prev, competitors: next }; }), []);
+    const toggleCompetitor = useCallback((c) => setNewLead(prev => {
+        const list = prev.competitors || [];
+        const next = list.includes(c) ? list.filter(x => x !== c) : [...list, c];
+        return { ...prev, competitors: next };
+    }), []);
 
-    /* lightweight sub-component for the two checkboxes ------------- */
     const CheckboxRow = ({ label, checked, onChange }) => (
         <div className="flex items-center justify-between text-sm px-3 py-2 rounded-full" style={{ backgroundColor: theme.colors.subtle }}>
             <label className="font-semibold" style={{ color: theme.colors.textSecondary }}>{label}</label>
@@ -5280,7 +5292,6 @@ export const NewLeadScreen = ({
         </div>
     );
 
-    /* -------- render -------- */
     return (
         <form onSubmit={handleSubmit} className="flex flex-col h-full">
             <PageTitle title="Create New Lead" theme={theme} />
@@ -5289,7 +5300,11 @@ export const NewLeadScreen = ({
                     <FormInput required label="Project Name" value={newLead.project} onChange={e => updateField('project', e.target.value)} placeholder="e.g., Acme Corp Headquarters" theme={theme} />
                     <PortalNativeSelect required label="Project Stage" value={newLead.projectStatus} onChange={e => updateField('projectStatus', e.target.value)} options={Data.STAGES.map(s => ({ label: s, value: s }))} placeholder="Select stage" theme={theme} />
                     <PortalNativeSelect required label="Vertical" value={newLead.vertical} onChange={e => updateField('vertical', e.target.value)} options={Data.VERTICALS.map(v => ({ label: v, value: v }))} placeholder="Select vertical" theme={theme} />
-                    {newLead.vertical === 'Other (Please specify)' && (<div className="pl-4 animate-fade-in"><FormInput required value={newLead.otherVertical} onChange={e => updateField('otherVertical', e.target.value)} placeholder="Specify the vertical..." theme={theme} /></div>)}
+                    {newLead.vertical === 'Other (Please specify)' && (
+                        <div className="pl-4 animate-fade-in">
+                            <FormInput required value={newLead.otherVertical} onChange={e => updateField('otherVertical', e.target.value)} placeholder="Specify the vertical..." theme={theme} />
+                        </div>
+                    )}
                 </FormSection>
 
                 <FormSection title="Stakeholders" theme={theme}>
@@ -5302,13 +5317,39 @@ export const NewLeadScreen = ({
                         <CheckboxRow label="Bid?" checked={!!newLead.isBid} onChange={e => updateField('isBid', e.target.checked)} />
                         <CheckboxRow label="Competition?" checked={!!newLead.competitionPresent} onChange={e => updateField('competitionPresent', e.target.checked)} />
                     </div>
-                    {newLead.competitionPresent && (<div className="space-y-2 pt-4 border-t mt-4" style={{ borderColor: theme.colors.subtle }}><div className="p-2 flex flex-wrap gap-2 rounded-2xl" style={{ backgroundColor: theme.colors.subtle }}>{Data.COMPETITORS.filter(c => c !== 'None').map(c => (<button key={c} type="button" onClick={() => toggleCompetitor(c)} className="px-3 py-1.5 text-sm rounded-full font-medium transition-colors border" style={{ backgroundColor: newLead.competitors.includes(c) ? theme.colors.accent : theme.colors.surface, color: newLead.competitors.includes(c) ? theme.colors.surface : theme.colors.textPrimary, borderColor: newLead.competitors.includes(c) ? theme.colors.accent : theme.colors.border }}>{c}</button>))}</div></div>)}
+                    {newLead.competitionPresent && (
+                        <div className="space-y-2 pt-4 border-t mt-4" style={{ borderColor: theme.colors.subtle }}>
+                            <div className="p-2 flex flex-wrap gap-2 rounded-2xl" style={{ backgroundColor: theme.colors.subtle }}>
+                                {Data.COMPETITORS.filter(c => c !== 'None').map(c => (
+                                    <button key={c} type="button" onClick={() => toggleCompetitor(c)} className="px-3 py-1.5 text-sm rounded-full font-medium transition-colors border" style={{ backgroundColor: newLead.competitors.includes(c) ? theme.colors.accent : theme.colors.surface, color: newLead.competitors.includes(c) ? theme.colors.surface : theme.colors.textPrimary, borderColor: newLead.competitors.includes(c) ? theme.colors.accent : theme.colors.border }}>{c}</button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                     <div className="pt-4 mt-2 space-y-3">
                         <div className="flex items-center justify-between px-3">
                             <label className="text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>Products</label>
-                            <div className="w-1/2">{availableSeries.length > 0 && (<PortalNativeSelect value="" onChange={(e) => addProduct(e.target.value)} placeholder="+ Add" options={availableSeries.map(series => ({ label: series, value: series }))} theme={theme} />)}</div>
+                            <div className="w-1/2">{availableSeries.length > 0 && (
+                                <PortalNativeSelect value="" onChange={(e) => addProduct(e.target.value)} placeholder="+ Add" options={availableSeries.map(series => ({ label: series, value: series }))} theme={theme} />
+                            )}</div>
                         </div>
-                        <div className="space-y-3">{newLead.products.map((p, idx) => (<div key={idx} className="space-y-2"><div className="flex items-center justify-between py-2 pl-4 pr-2 rounded-full" style={{ backgroundColor: theme.colors.subtle }}><span className="font-semibold" style={{ color: theme.colors.textPrimary }}>{p.series}</span><button type="button" onClick={() => removeProduct(idx)} className="w-7 h-7 flex items-center justify-center rounded-full transition-colors hover:bg-red-500/10"><X className="w-5 h-5 text-red-500" /></button></div>{(p.series === 'Vision' || p.series === 'Knox' || p.series === 'Wink' || p.series === 'Hoopz') && (<div className="pl-4 animate-fade-in">{p.series === 'Vision' && <VisionOptions theme={theme} product={p} productIndex={idx} onUpdate={updateProductOption} />}{p.series === 'Knox' && <KnoxOptions theme={theme} product={p} productIndex={idx} onUpdate={updateProductOption} />}{(p.series === 'Wink' || p.series === 'Hoopz') && <WinkHoopzOptions theme={theme} product={p} productIndex={idx} onUpdate={updateProductOption} />}</div>)}</div>))}</div>
+                        <div className="space-y-3">{newLead.products.map((p, idx) => (
+                            <div key={idx} className="space-y-2">
+                                <div className="flex items-center justify-between py-2 pl-4 pr-2 rounded-full" style={{ backgroundColor: theme.colors.subtle }}>
+                                    <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>{p.series}</span>
+                                    <button type="button" onClick={() => removeProduct(idx)} className="w-7 h-7 flex items-center justify-center rounded-full transition-colors hover:bg-red-500/10">
+                                        <X className="w-5 h-5 text-red-500" />
+                                    </button>
+                                </div>
+                                {(p.series === 'Vision' || p.series === 'Knox' || p.series === 'Wink' || p.series === 'Hoopz') && (
+                                    <div className="pl-4 animate-fade-in">
+                                        {p.series === 'Vision' && <VisionOptions theme={theme} product={p} productIndex={idx} onUpdate={updateProductOption} />}
+                                        {p.series === 'Knox' && <KnoxOptions theme={theme} product={p} productIndex={idx} onUpdate={updateProductOption} />}
+                                        {(p.series === 'Wink' || p.series === 'Hoopz') && <WinkHoopzOptions theme={theme} product={p} productIndex={idx} onUpdate={updateProductOption} />}
+                                    </div>
+                                )}
+                            </div>
+                        ))}</div>
                     </div>
                 </FormSection>
 
@@ -5318,16 +5359,34 @@ export const NewLeadScreen = ({
                     <PortalNativeSelect label="Discount" value={newLead.discount} onChange={e => updateField('discount', e.target.value)} options={Data.DISCOUNT_OPTIONS.map(d => ({ label: d, value: d }))} placeholder="Select a Discount" theme={theme} />
                     <PortalNativeSelect label="PO Timeframe" required value={newLead.poTimeframe} onChange={e => updateField('poTimeframe', e.target.value)} options={Data.PO_TIMEFRAMES.map(t => ({ label: t, value: t }))} placeholder="Select a Timeframe" theme={theme} />
                     <CheckboxRow label="Contract?" checked={!!newLead.isContract} onChange={e => updateField('isContract', e.target.checked)} />
-                    {newLead.isContract && (<div className="animate-fade-in"><PortalNativeSelect required placeholder="Select a Contract" value={newLead.contractType} onChange={e => updateField('contractType', e.target.value)} options={Data.CONTRACT_OPTIONS.map(c => ({ label: c, value: c }))} theme={theme} /></div>)}
+                    {newLead.isContract && (
+                        <div className="animate-fade-in">
+                            <PortalNativeSelect required placeholder="Select a Contract" value={newLead.contractType} onChange={e => updateField('contractType', e.target.value)} options={Data.CONTRACT_OPTIONS.map(c => ({ label: c, value: c }))} theme={theme} />
+                        </div>
+                    )}
                 </FormSection>
 
                 <FormSection title="Services & Notes" theme={theme}>
                     <CheckboxRow label="JSI Spec Services Required?" checked={!!newLead.jsiSpecServices} onChange={e => updateField('jsiSpecServices', e.target.checked)} />
-                    {newLead.jsiSpecServices && (<div className="animate-fade-in pt-4 space-y-4 border-t" style={{ borderColor: theme.colors.subtle }}><ToggleButtonGroup value={newLead.jsiSpecServicesType} onChange={(val) => updateField('jsiSpecServicesType', val)} options={[{ label: 'New Quote', value: 'New Quote' }, { label: 'Revision', value: 'Revision' }, { label: 'Past Project', value: 'Past Project' }]} theme={theme} />{newLead.jsiSpecServicesType === 'Revision' && (<FormInput label="Revision Quote #" value={newLead.jsiRevisionQuoteNumber} onChange={(e) => updateField('jsiRevisionQuoteNumber', e.target.value)} placeholder="Enter original quote #" theme={theme} required />)}{newLead.jsiSpecServicesType === 'Past Project' && (<FormInput label="Past Project Info" value={newLead.jsiPastProjectInfo} onChange={(e) => updateField('jsiPastProjectInfo', e.target.value)} placeholder="Enter past project name or #" theme={theme} required />)}</div>)}
-                    <div className="pt-2"><FormInput label="Other Notes" type="textarea" value={newLead.notes} onChange={e => updateField('notes', e.target.value)} placeholder="Enter details..." theme={theme} /></div>
+                    {newLead.jsiSpecServices && (
+                        <div className="animate-fade-in pt-4 space-y-4 border-t" style={{ borderColor: theme.colors.subtle }}>
+                            <ToggleButtonGroup value={newLead.jsiSpecServicesType} onChange={(val) => updateField('jsiSpecServicesType', val)} options={[{ label: 'New Quote', value: 'New Quote' }, { label: 'Revision', value: 'Revision' }, { label: 'Past Project', value: 'Past Project' }]} theme={theme} />
+                            {newLead.jsiSpecServicesType === 'Revision' && (
+                                <FormInput label="Revision Quote #" value={newLead.jsiRevisionQuoteNumber} onChange={(e) => updateField('jsiRevisionQuoteNumber', e.target.value)} placeholder="Enter original quote #" theme={theme} required />
+                            )}
+                            {newLead.jsiSpecServicesType === 'Past Project' && (
+                                <FormInput label="Past Project Info" value={newLead.jsiPastProjectInfo} onChange={(e) => updateField('jsiPastProjectInfo', e.target.value)} placeholder="Enter past project name or #" theme={theme} required />
+                            )}
+                        </div>
+                    )}
+                    <div className="pt-2">
+                        <FormInput label="Other Notes" type="textarea" value={newLead.notes} onChange={e => updateField('notes', e.target.value)} placeholder="Enter details..." theme={theme} />
+                    </div>
                 </FormSection>
 
-                <div className="pt-4 pb-4"><button type="submit" className="w-full text-white font-bold py-3.5 rounded-full" style={{ backgroundColor: theme.colors.accent }}>Submit Lead</button></div>
+                <div className="pt-4 pb-4">
+                    <button type="submit" className="w-full text-white font-bold py-3.5 rounded-full" style={{ backgroundColor: theme.colors.accent }}>Submit Lead</button>
+                </div>
             </div>
         </form>
     );
