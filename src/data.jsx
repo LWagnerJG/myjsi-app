@@ -411,10 +411,33 @@ export const SAMPLE_PRODUCTS = [
     { id: 'tfl-2', category: 'tfl', name: 'Morning Mist', color: '#F1EBE0' },
     { id: 'tfl-3', category: 'tfl', name: 'Sandstone', color: '#D8CBB8' },
 
-    // HPL samples
-    { id: 'hpl-white', category: 'hpl', name: 'White HPL', color: '#fafafa' },
-    { id: 'hpl-gray', category: 'hpl', name: 'Gray HPL', color: '#cccccc' },
-    // ... more HPL entries
+    // HPL samples - UPDATED WITH YOUR IMAGES
+    { id: 'hpl-alabaster', category: 'hpl', name: 'Alabaster Laminate', image: '/jsi_finish_ALB_Alabaster_Laminate.jpg' },
+    { id: 'hpl-bridalblanco', category: 'hpl', name: 'Bridal Blanco Laminate', image: '/jsi_finish_BBL_BridalBlanco_Laminate.jpg' },
+    { id: 'hpl-belair', category: 'hpl', name: 'Belair Laminate', image: '/jsi_finish_BEL_Belair_Laminate.jpg' },
+    { id: 'hpl-black', category: 'hpl', name: 'Black Laminate', image: '/jsi_finish_BLK_Black_Laminate.jpg' },
+    { id: 'hpl-brickdust', category: 'hpl', name: 'Brickdust Laminate', image: '/jsi_finish_BRD_Brickdust_Laminate.jpg' },
+    { id: 'hpl-clay', category: 'hpl', name: 'Clay Laminate', image: '/jsi_finish_CLY_Clay_Laminate.jpg' },
+    { id: 'hpl-cask', category: 'hpl', name: 'Cask Laminate', image: '/jsi_finish_CSK_Cask_Laminate.jpg' },
+    { id: 'hpl-designerwhite', category: 'hpl', name: 'Designer White Laminate', image: '/jsi_finish_DWH_DesignerWhite_Laminate.jpg' },
+    { id: 'hpl-egret', category: 'hpl', name: 'Egret Laminate', image: '/jsi_finish_EGR_Egret_Laminate.jpg' },
+    { id: 'hpl-fawn', category: 'hpl', name: 'Fawn Laminate', image: '/jsi_finish_FAW_Fawn_Laminate.jpg' },
+    { id: 'hpl-flint', category: 'hpl', name: 'Flint Laminate', image: '/jsi_finish_FLN_Flint_Laminate.jpg' },
+    { id: 'hpl-florencewalnut', category: 'hpl', name: 'Florence Walnut Laminate', image: '/jsi_finish_FLO_FlorenceWalnut_Laminate.jpg' },
+    { id: 'hpl-loft', category: 'hpl', name: 'Loft Laminate', image: '/jsi_finish_LOF_Loft_Laminate.jpg' },
+    { id: 'hpl-mocha', category: 'hpl', name: 'Mocha Laminate', image: '/jsi_finish_MCH_Mocha_Laminate.jpg' },
+    { id: 'hpl-mesa', category: 'hpl', name: 'Mesa Laminate', image: '/jsi_finish_MES_Mesa_Laminate.jpg' },
+    { id: 'hpl-mineral', category: 'hpl', name: 'Mineral Laminate', image: '/jsi_finish_MIN_Mineral_Laminate.jpg' },
+    { id: 'hpl-outback', category: 'hpl', name: 'Outback Laminate', image: '/jsi_finish_OBK_Outback_Laminate.jpg' },
+    { id: 'hpl-pilsner', category: 'hpl', name: 'Pilsner Laminate', image: '/jsi_finish_PIL_Pilsner_Laminate.jpg' },
+    { id: 'hpl-pinnaclewalnut', category: 'hpl', name: 'Pinnacle Walnut Laminate', image: '/jsi_finish_PIN_PinnacleWalnut_Laminate.jpg' },
+    { id: 'hpl-shadow', category: 'hpl', name: 'Shadow Laminate', image: '/jsi_finish_SHD_Shadow_Laminate.jpg' },
+    { id: 'hpl-slategrey', category: 'hpl', name: 'Slate Grey Laminate', image: '/jsi_finish_SLG_SlateGrey_Laminate.jpg' },
+    { id: 'hpl-umber', category: 'hpl', name: 'Umber Laminate', image: '/jsi_finish_UMB_Umber_Laminate.jpg' },
+    { id: 'hpl-valley', category: 'hpl', name: 'Valley Laminate', image: '/jsi_finish_VAL_Valley_Laminate.jpg' },
+    { id: 'hpl-weatheredash', category: 'hpl', name: 'Weathered Ash Laminate', image: '/jsi_finish_WEA_WeatheredAsh_Laminate.jpg' },
+    { id: 'hpl-walnutheights', category: 'hpl', name: 'Walnut Heights Laminate', image: '/jsi_finish_WLH_WalnutHeights_Laminate.jpg' },
+    { id: 'hpl-zengrey', category: 'hpl', name: 'Zen Grey Laminate', image: '/jsi_finish_ZEN_ZenGrey_Laminate.jpg' },
 
     // Veneer samples
     { id: 'veneer-light', category: 'veneer', name: 'Light Veneer', color: '#e5d3b3' },

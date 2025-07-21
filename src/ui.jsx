@@ -6262,9 +6262,18 @@ export const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSetti
                             className="relative w-full aspect-square rounded-2xl overflow-hidden transition-colors"
                             style={{
                                 border: `2px solid ${quantity > 0 ? theme.colors.accent : theme.colors.border}`,
-                                backgroundColor: product.color
+                                backgroundColor: product.image ? theme.colors.subtle : product.color
                             }}
                         >
+                            {/* Conditionally render image or keep color background */}
+                            {product.image && (
+                                <img
+                                    src={product.image}
+                                    alt={product.name}
+                                    className="w-full h-full object-cover"
+                                />
+                            )}
+
                             <div
                                 className="absolute top-2 left-2 bg-white bg-opacity-75 px-2 py-1 rounded text-xs font-semibold"
                                 style={{ color: theme.colors.textPrimary }}

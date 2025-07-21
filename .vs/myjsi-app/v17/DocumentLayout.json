@@ -7,12 +7,12 @@
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\ui.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\App.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\App.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\data.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\data.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\index.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\index.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\App.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\App.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\index.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
@@ -26,11 +26,24 @@
       "DocumentGroups": [
         {
           "DockedHeight": 310,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Document",
               "DocumentIndex": 1,
+              "Title": "data.jsx",
+              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\data.jsx",
+              "RelativeDocumentMoniker": "src\\data.jsx",
+              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\data.jsx",
+              "RelativeToolTip": "src\\data.jsx",
+              "ViewState": "AgIAAIkBAAAAAAAAAAAUwMIBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
+              "WhenOpened": "2025-07-21T20:40:47.769Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
               "Title": "App.jsx",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\App.jsx",
               "RelativeDocumentMoniker": "src\\App.jsx",
@@ -60,7 +73,7 @@
               "RelativeDocumentMoniker": "src\\ui.jsx",
               "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\ui.jsx",
               "RelativeToolTip": "src\\ui.jsx",
-              "ViewState": "AgIAADoUAAAAAAAAAAAiwGAUAAAfAAAAAAAAAA==",
+              "ViewState": "AgIAAGwYAAAAAAAAAAAgwKsYAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
               "WhenOpened": "2025-07-14T14:57:10.088Z",
               "EditorCaption": ""
@@ -69,21 +82,8 @@
         },
         {
           "DockedHeight": 90,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": -1,
           "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "index.css",
-              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\index.css",
-              "RelativeDocumentMoniker": "src\\index.css",
-              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\index.css",
-              "RelativeToolTip": "src\\index.css",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAIwA4AAAAcAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
-              "WhenOpened": "2025-07-21T12:50:42.171Z",
-              "EditorCaption": ""
-            },
             {
               "$type": "Bookmark",
               "Name": "ST:1:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
