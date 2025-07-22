@@ -1023,7 +1023,7 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
             // Handle case where Category might be an object or null/undefined
             const category = typeof finish.Category === 'string'
                 ? finish.Category
-                : finish.Category?.name || finish.Category?.title || 'Uncategorized';
+                : finish.Category?.name || finish.Category?.title || '';
 
             if (!acc[category]) acc[category] = [];
             acc[category].push(finish);
