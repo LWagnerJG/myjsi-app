@@ -977,7 +977,27 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedFinish, setSelectedFinish] = useState(null);
 
+    // CORRECTED: This map's values now align with the filenames in your /public directory.
     const oldFinishImageMap = {
+        "WEATHERED ASH": "WEA_WeatheredAsh_Laminate",     // This one was already correct
+        "FLINT": "FLN_Flint_Laminate",                   // Corrected from FLI
+        "LOFT": "LOF_Loft_Laminate",                      // Correct
+        "EGRET": "EGR_Egret_Laminate",                   // Correct
+        "MOCHA": "MCH_Mocha_Laminate",                   // Corrected from MOC
+        "VALLEY": "VAL_Valley_Laminate",                 // Correct
+        "MINERAL": "MIN_Mineral_Laminate",               // Correct
+        "PILSNEER": "PIL_Pilsner_Laminate",                // Corrected: removed "jsi_finish_" prefix
+        "OUTBACK": "OBK_Outback_Laminate",                 // Corrected from OUT
+        "CLAY": "CLY_Clay_Laminate",                     // Corrected from CLA
+        "BRICKDUST": "BRD_Brickdust_Laminate",             // Corrected from BRI
+        "MESA": "MES_Mesa_Laminate",                     // Correct
+        "CASK": "CSK_Cask_Laminate",                     // Corrected from CAS
+        "FAWN": "FAW_Fawn_Laminate",                     // Corrected (assumed key from filename)
+        "WALNUT HEIGHTS": "WLH_WalnutHeights_Laminate",   // Corrected from WALNUT
+        "DESIGNER WHITE": "DWH_DesignerWhite_Laminate",    // New mapping based on filename
+
+        // These keys were in your original map but no matching file was visible in the screenshot.
+        // Their image paths will likely still be broken until matching files are added or names are corrected.
         "ALE MEDIUM": "ALB_Alebedrock_Laminate",
         "BUTTERSCOTCH": "BUT_Butterscotch_Laminate",
         "VENETIAN": "VEN_Venetian_Laminate",
@@ -996,27 +1016,13 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
         "PORTER": "POR_Porter_Laminate",
         "WHITEWASH": "WHW_Whitewash_Laminate",
         "STUDIO TEAK": "STT_StudioTeak_Laminate",
-        "WEATHERED ASH": "WEA_WeatheredAsh_Laminate",
         "ALE LIGHT": "ALL_Alelight_Laminate",
         "BRAZILWOOD": "BRZ_Brazilwood_Laminate",
         "COLLECTORS": "COL_Collectors_Laminate",
         "OATMEAL COOKIE": "OAC_OatmealCookie_Laminate",
         "WALNUT": "WAL_Walnut_Laminate",
         "LUMBER": "LUM_Lumber_Laminate",
-        "LOFT": "LOF_Loft_Laminate",
         "BARREL": "BAR_Barrel_Laminate",
-        "EGRET": "EGR_Egret_Laminate",
-        "MOCHA": "MOC_Mocha_Laminate",
-        "FLINT": "FLI_Flint_Laminate",
-        "VALLEY": "VAL_Valley_Laminate",
-        "MINERAL": "MIN_Mineral_Laminate",
-        "PILSNEER": "jsi_finish_PIL_Pilsner_Laminate",
-        "OUTBACK": "OUT_Outback_Laminate",
-        "CLAY": "CLA_Clay_Laminate",
-        "BRICKDUST": "BRI_Brickdust_Laminate",
-        "MESA": "MES_Mesa_Laminate",
-        "CASK": "CAS_Cask_Laminate",
-        // Ensure all your OldFinish names are mapped here to their file identifiers
     };
 
     const getLocalOldFinishImagePath = (finishName) => {
