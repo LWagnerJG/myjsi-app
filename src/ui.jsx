@@ -986,7 +986,7 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
         "MOCHA": "MCH_Mocha_Laminate",
         "VALLEY": "VAL_Valley_Laminate",
         "MINERAL": "MIN_Mineral_Laminate",
-        "PILSNEER": "PIL_Pilsner_Laminate",
+        "PILSNER": "PIL_Pilsner_Laminate",
         "OUTBACK": "OBK_Outback_Laminate",
         "CLAY": "CLY_Clay_Laminate",
         "BRICKDUST": "BRD_Brickdust_Laminate",
