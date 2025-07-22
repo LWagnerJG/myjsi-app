@@ -1828,7 +1828,61 @@ export const CommissionRatesScreen = ({ theme }) => {
 
     const { accent, textPrimary, textSecondary, border, subtle, secondary } = theme.colors;
 
-    // Data for the new Donut Chart
+    // Custom Donut Chart component to display percentages instead of dollars.
+    const CommissionSplitDonut = ({ data, theme }) => {
+        const total = data.reduce((acc, item) => acc + item.value, 0);
+        if (total === 0) return null;
+
+        let cumulative = 0;
+        const size = 150;
+        const strokeWidth = 20;
+        const radius = (size - strokeWidth) / 2;
+        const circumference = 2 * Math.PI * radius;
+
+        return (
+            <div className="flex items-center space-x-6">
+                <div className="relative" style={{ width: size, height: size }}>
+                    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+                        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke={theme.colors.subtle} strokeWidth={strokeWidth} />
+                        <g transform={`rotate(-90 ${size / 2} ${size / 2})`}>
+                            {data.map((item, index) => {
+                                const dasharray = (circumference * item.value) / total;
+                                const dashoffset = circumference * (1 - (cumulative / total));
+                                cumulative += item.value;
+                                return (
+                                    <circle
+                                        key={index}
+                                        cx={size / 2}
+                                        cy={size / 2}
+                                        r={radius}
+                                        fill="none"
+                                        stroke={item.color}
+                                        strokeWidth={strokeWidth}
+                                        strokeDasharray={`${dasharray} ${circumference}`}
+                                        strokeDashoffset={-circumference + dashoffset}
+                                        className="transition-all duration-500"
+                                    />
+                                );
+                            })}
+                        </g>
+                    </svg>
+                </div>
+                <div className="space-y-2">
+                    {data.map(item => (
+                        <div key={item.label} className="flex items-center">
+                            <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: item.color }}></div>
+                            <div>
+                                <p className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>{item.label}</p>
+                                {/* This now correctly displays percentages */}
+                                <p className="text-sm font-normal" style={{ color: theme.colors.textSecondary }}>{item.value}%</p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    };
+
     const commissionSplitData = [
         { label: 'Specifying', value: 70, color: accent },
         { label: 'Ordering', value: 30, color: secondary }
@@ -1836,21 +1890,21 @@ export const CommissionRatesScreen = ({ theme }) => {
 
     if (loading) {
         return (
-            <>
+            <div className="flex flex-col h-full">
                 <PageTitle title="Commission Rates" theme={theme} />
                 <div className="text-center p-8"><Hourglass className="w-8 h-8 animate-spin mx-auto" style={{ color: accent }} /></div>
-            </>
+            </div>
         );
     }
 
     if (error) {
         return (
-            <>
+            <div className="flex flex-col h-full">
                 <PageTitle title="Commission Rates" theme={theme} />
                 <div className="px-4">
                     <GlassCard theme={theme} className="p-8 text-center"><p className="font-semibold text-red-500">{error}</p></GlassCard>
                 </div>
-            </>
+            </div>
         );
     }
 
@@ -1861,14 +1915,14 @@ export const CommissionRatesScreen = ({ theme }) => {
 
         return (
             <div className="grid grid-cols-[2fr,1fr,1.5fr] items-center gap-x-4 py-4 px-3">
-                <span className="font-semibold text-base" style={{ color: textPrimary }}>
+                <span className="font-semibold" style={{ color: textPrimary }}>
                     {item.discount}
                 </span>
-                <span className="text-center font-bold text-base" style={{ color: accent }}>
+                <span className="text-center font-bold" style={{ color: accent }}>
                     {item.rep}
                 </span>
                 <div className="text-center">
-                    <span className="font-semibold text-base" style={{ color: textPrimary }}>
+                    <span className="font-semibold" style={{ color: textPrimary }}>
                         {spiffValue}
                     </span>
                     {spiffNote && (
@@ -1891,14 +1945,15 @@ export const CommissionRatesScreen = ({ theme }) => {
 
     return (
         <div className="h-full flex flex-col">
+            {/* This structure ensures the title scrolls with the content */}
             <PageTitle title="Commission Rates" theme={theme} />
             <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-6 scrollbar-hide">
                 <GlassCard theme={theme} className="p-4">
-                    {/* Uniform Headers with background */}
-                    <div className="grid grid-cols-[2fr,1fr,1.5fr] gap-x-4 p-3 rounded-xl" style={{ backgroundColor: subtle }}>
-                        <span className="text-sm font-bold uppercase tracking-wider" style={{ color: textSecondary }}>Discounts</span>
-                        <span className="text-sm font-bold uppercase text-center tracking-wider" style={{ color: textSecondary }}>Rep Comm.</span>
-                        <span className="text-sm font-bold uppercase text-center tracking-wider" style={{ color: textSecondary }}>Spiff</span>
+                    {/* Improved Headers: Bolder, uppercase, and more distinct */}
+                    <div className="grid grid-cols-[2fr,1fr,1.5fr] gap-x-4 p-3 rounded-xl mb-2" style={{ backgroundColor: subtle }}>
+                        <span className="text-xs font-bold uppercase tracking-wider" style={{ color: textSecondary }}>Discounts</span>
+                        <span className="text-xs font-bold uppercase tracking-wider text-center" style={{ color: textSecondary }}>Rep Comm.</span>
+                        <span className="text-xs font-bold uppercase tracking-wider text-center" style={{ color: textSecondary }}>Spiff</span>
                     </div>
 
                     <div className="divide-y" style={{ borderColor: subtle }}>
@@ -1912,13 +1967,12 @@ export const CommissionRatesScreen = ({ theme }) => {
                     </div>
                 </GlassCard>
 
-                {/* Donut Chart for Commission Split */}
                 <GlassCard theme={theme} className="p-4">
                     <h3 className="font-bold text-xl mb-4 text-center" style={{ color: textPrimary }}>
                         Commission Split
                     </h3>
                     <div className="flex justify-center">
-                        <DonutChart data={commissionSplitData} theme={theme} />
+                        <CommissionSplitDonut data={commissionSplitData} theme={theme} />
                     </div>
                 </GlassCard>
             </div>
