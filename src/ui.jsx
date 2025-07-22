@@ -5033,7 +5033,7 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
             const dateStr = order[dateType];
             if (!dateStr || isNaN(new Date(dateStr))) return acc;
             const date = new Date(dateStr);
-            const groupKey = date.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' }).toUpperCase();
+            const groupKey = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase();
             if (!acc[groupKey]) {
                 acc[groupKey] = { orders: [], total: 0 };
             }
@@ -5055,7 +5055,7 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
     return (
         <div className="flex flex-col h-full">
             <PageTitle title="Orders" theme={theme} />
-            <div className="px-4 pt-2 pb-4 flex items-center space-x-2 sticky top-0 z-10" style={{ backgroundColor: theme.colors.background, backdropFilter: 'blur(12px)' }}>
+            <div className="px-4 pt-2 pb-4 flex items-center space-x-2 sticky top-0 z-10" style={{ backgroundColor: `${theme.colors.background}e0`, backdropFilter: 'blur(10px)' }}>
                 <SearchInput value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Search Orders..." theme={theme} className="flex-grow" />
                 <div className="relative">
                     <button onClick={() => setShowDateFilter(f => !f)} className="p-3.5 rounded-full" style={{ backgroundColor: theme.colors.subtle }}>
@@ -5078,8 +5078,8 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
                     <div className="space-y-6">
                         {sortedGroupKeys.map(dateKey => (
                             <div key={dateKey}>
-                                <div className="flex justify-between items-baseline mb-2 px-1 pb-2 border-b" style={{ borderColor: theme.colors.border }}>
-                                    <h2 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>{dateKey}</h2>
+                                <div className="flex justify-between items-baseline mb-3 px-1 pb-2 border-b" style={{ borderColor: theme.colors.border }}>
+                                    <h2 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>{dateKey.replace(/, \d{4}$/, '')}</h2>
                                     <p className="font-bold text-xl" style={{ color: theme.colors.accent }}>
                                         ${groupedOrders[dateKey].total.toLocaleString('en-US', { maximumFractionDigits: 0 })}
                                     </p>
@@ -5088,24 +5088,29 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
                                     {groupedOrders[dateKey].orders.map((order) => {
                                         const statusColor = Data.STATUS_COLORS[order.status] || theme.colors.secondary;
                                         return (
-                                            <GlassCard key={order.orderNumber} theme={theme} className="p-4 cursor-pointer hover:border-gray-400/50 flex items-center space-x-4" onClick={() => setSelectedOrder(order)}>
-                                                <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: statusColor }}></div>
-                                                <div className="flex-1 flex justify-between items-center min-w-0">
-                                                    <div className="truncate pr-4">
-                                                        <p className="font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{order.details || 'N/A'}</p>
-                                                        <p className="text-sm" style={{ color: theme.colors.textSecondary }}>{order.company}</p>
+                                            <GlassCard
+                                                key={order.orderNumber}
+                                                theme={theme}
+                                                className="p-4 cursor-pointer hover:border-gray-400/50 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
+                                                onClick={() => setSelectedOrder(order)}
+                                            >
+                                                <div className="flex items-center space-x-4">
+                                                    <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: statusColor }} />
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="font-bold text-base truncate" style={{ color: theme.colors.textPrimary }}>
+                                                            {order.details || 'N/A'}
+                                                        </p>
+                                                        <p className="text-sm truncate" style={{ color: theme.colors.textSecondary }}>
+                                                            {order.company}
+                                                        </p>
                                                     </div>
-                                                    <div className="text-right flex-shrink-0 space-y-1">
-                                                        {order.net != null && (
-                                                            <p className="font-semibold text-lg whitespace-nowrap" style={{ color: theme.colors.textPrimary }}>
-                                                                ${order.net.toLocaleString('en-US', { maximumFractionDigits: 0 })}
-                                                            </p>
-                                                        )}
-                                                        <div className="flex justify-end">
-                                                            <span className="text-xs font-mono px-2 py-0.5 rounded-md" style={{ color: theme.colors.textSecondary, backgroundColor: theme.colors.subtle }}>
-                                                                {order.orderNumber}
-                                                            </span>
-                                                        </div>
+                                                    <div className="text-right flex-shrink-0">
+                                                        <p className="font-bold text-lg" style={{ color: theme.colors.accent }}>
+                                                            ${(order.net || 0).toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                                                        </p>
+                                                        <p className="text-xs font-mono" style={{ color: theme.colors.textSecondary }}>
+                                                            {order.orderNumber}
+                                                        </p>
                                                     </div>
                                                 </div>
                                             </GlassCard>
