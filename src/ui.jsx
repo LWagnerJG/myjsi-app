@@ -5055,14 +5055,18 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
     }, [groupedOrders]);
 
     return (
-        <>
-            <div className="sticky top-[80px] z-10 px-4 py-4" style={{ backgroundColor: theme.colors.background }}>
+        <div className="absolute top-0 left-0 w-full h-full">
+            <div
+                className="fixed top-[88px] left-4 right-4 z-10"
+            >
                 <div
+                    className="flex items-center space-x-2 rounded-full p-2 shadow-lg backdrop-blur"
                     style={{
                         backgroundColor: theme.colors.surface,
+                        backdropFilter: theme.backdropFilter,
+                        WebkitBackdropFilter: theme.backdropFilter,
                         boxShadow: `0 8px 32px 0 ${theme.colors.shadow}`,
                     }}
-                    className="flex items-center space-x-2 rounded-full p-2"
                 >
                     <SearchInput
                         value={searchTerm}
@@ -5088,61 +5092,63 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
                 </div>
             </div>
 
-            <div className="px-4 pb-4 space-y-4 -mt-4">
+            <div className="h-full overflow-y-auto px-4 pb-4 pt-[164px] scrollbar-hide">
                 {viewMode === 'list' ? (
-                    sortedGroupKeys.map(dateKey => {
-                        const date = new Date(dateKey);
-                        date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
-                        const formattedDate = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                    <div className="space-y-4">
+                        {sortedGroupKeys.map(dateKey => {
+                            const date = new Date(dateKey);
+                            date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
+                            const formattedDate = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 
-                        return (
-                            <GlassCard key={dateKey} theme={theme} className="p-0 overflow-hidden">
-                                <div className="px-4 pt-4 pb-3 flex justify-between items-baseline border-b" style={{ borderColor: theme.colors.subtle }}>
-                                    <h2 className="font-semibold text-base" style={{ color: theme.colors.textPrimary }}>
-                                        {formattedDate}
-                                    </h2>
-                                    <p className="font-semibold text-base" style={{ color: theme.colors.textSecondary }}>
-                                        ${groupedOrders[dateKey].total.toLocaleString('en-US', { maximumFractionDigits: 0 })}
-                                    </p>
-                                </div>
+                            return (
+                                <GlassCard key={dateKey} theme={theme} className="p-0 overflow-hidden">
+                                    <div className="px-4 pt-4 pb-3 flex justify-between items-baseline border-b" style={{ borderColor: theme.colors.subtle }}>
+                                        <h2 className="font-semibold text-base" style={{ color: theme.colors.textPrimary }}>
+                                            {formattedDate}
+                                        </h2>
+                                        <p className="font-semibold text-base" style={{ color: theme.colors.textSecondary }}>
+                                            ${groupedOrders[dateKey].total.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                                        </p>
+                                    </div>
 
-                                <div className="divide-y" style={{ borderColor: theme.colors.subtle }}>
-                                    {groupedOrders[dateKey].orders.map((order) => {
-                                        const statusColor = Data.STATUS_COLORS[order.status] || theme.colors.secondary;
-                                        return (
-                                            <button
-                                                key={order.orderNumber}
-                                                onClick={() => setSelectedOrder(order)}
-                                                className="w-full text-left p-4 transition-colors hover:bg-black/5 dark:hover:bg-white/10"
-                                            >
-                                                <div className="flex items-start justify-between space-x-4">
-                                                    <div className="flex items-start space-x-3 flex-1 min-w-0">
-                                                        <div className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style={{ backgroundColor: statusColor }} />
-                                                        <div className="flex-1">
-                                                            <p className="font-semibold truncate text-sm" style={{ color: theme.colors.textPrimary }}>
-                                                                {order.details || 'N/A'}
+                                    <div className="divide-y" style={{ borderColor: theme.colors.subtle }}>
+                                        {groupedOrders[dateKey].orders.map((order) => {
+                                            const statusColor = Data.STATUS_COLORS[order.status] || theme.colors.secondary;
+                                            return (
+                                                <button
+                                                    key={order.orderNumber}
+                                                    onClick={() => setSelectedOrder(order)}
+                                                    className="w-full text-left p-4 transition-colors hover:bg-black/5 dark:hover:bg-white/10"
+                                                >
+                                                    <div className="flex items-start justify-between space-x-4">
+                                                        <div className="flex items-start space-x-3 flex-1 min-w-0">
+                                                            <div className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style={{ backgroundColor: statusColor }} />
+                                                            <div className="flex-1">
+                                                                <p className="font-semibold truncate text-sm" style={{ color: theme.colors.textPrimary }}>
+                                                                    {order.details || 'N/A'}
+                                                                </p>
+                                                                <p className="text-sm truncate" style={{ color: theme.colors.textSecondary }}>
+                                                                    {formatCompanyName(order.company)}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-right flex-shrink-0 space-y-1">
+                                                            <p className="font-semibold text-sm" style={{ color: theme.colors.textPrimary }}>
+                                                                ${(order.net || 0).toLocaleString('en-US', { maximumFractionDigits: 0 })}
                                                             </p>
-                                                            <p className="text-sm truncate" style={{ color: theme.colors.textSecondary }}>
-                                                                {formatCompanyName(order.company)}
+                                                            <p className="text-xs" style={{ color: theme.colors.textSecondary }}>
+                                                                #{order.orderNumber}
                                                             </p>
                                                         </div>
                                                     </div>
-                                                    <div className="text-right flex-shrink-0 space-y-1">
-                                                        <p className="font-semibold text-sm" style={{ color: theme.colors.textPrimary }}>
-                                                            ${(order.net || 0).toLocaleString('en-US', { maximumFractionDigits: 0 })}
-                                                        </p>
-                                                        <p className="text-xs" style={{ color: theme.colors.textSecondary }}>
-                                                            #{order.orderNumber}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </button>
-                                        )
-                                    })}
-                                </div>
-                            </GlassCard>
-                        )
-                    })
+                                                </button>
+                                            )
+                                        })}
+                                    </div>
+                                </GlassCard>
+                            )
+                        })}
+                    </div>
                 ) : (
                     <OrderCalendarView
                         orders={filteredOrders}
@@ -5152,10 +5158,9 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
                     />
                 )}
             </div>
-        </>
+        </div>
     );
 };
-
 
 export const SalesScreen = ({ theme, onNavigate }) => {
     const { MONTHLY_SALES_DATA, ORDER_DATA, SALES_VERTICALS_DATA, STATUS_COLORS } = Data;
