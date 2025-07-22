@@ -1010,7 +1010,7 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
         "FLINT": "FLI_Flint_Laminate",
         "VALLEY": "VAL_Valley_Laminate",
         "MINERAL": "MIN_Mineral_Laminate",
-        "PILSNEER": "PIL_Pilsner_Laminate",
+        "PILSNEER": "jsi_finish_PIL_Pilsner_Laminate",
         "OUTBACK": "OUT_Outback_Laminate",
         "CLAY": "CLA_Clay_Laminate",
         "BRICKDUST": "BRI_Brickdust_Laminate",
