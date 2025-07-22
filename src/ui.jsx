@@ -5009,6 +5009,11 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
     const [showDateFilter, setShowDateFilter] = useState(false);
     const filterMenuRef = useRef(null);
 
+    const formatCompanyName = (name) => {
+        if (!name) return '';
+        return name.toLowerCase().replace(/\b(\w)/g, s => s.toUpperCase());
+    };
+
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (filterMenuRef.current && !filterMenuRef.current.contains(e.target)) {
@@ -5033,7 +5038,7 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
             const dateStr = order[dateType];
             if (!dateStr || isNaN(new Date(dateStr))) return acc;
             const date = new Date(dateStr);
-            const groupKey = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase();
+            const groupKey = date.toISOString().split('T')[0];
             if (!acc[groupKey]) {
                 acc[groupKey] = { orders: [], total: 0 };
             }
@@ -5041,9 +5046,6 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
             acc[groupKey].total += order.net || 0;
             return acc;
         }, {});
-        for (const key in groups) {
-            groups[key].orders.sort((a, b) => new Date(b[dateType]) - new Date(a[dateType]));
-        }
         return groups;
     }, [filteredOrders, dateType]);
 
@@ -5076,50 +5078,60 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
             <div className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-hide">
                 {viewMode === 'list' ? (
                     <div className="space-y-4">
-                        {sortedGroupKeys.map(dateKey => (
-                            <GlassCard key={dateKey} theme={theme} className="p-4">
-                                <div className="flex justify-between items-baseline mb-3 pb-3 border-b" style={{ borderColor: theme.colors.subtle }}>
-                                    <h2 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>
-                                        {dateKey.replace(/, \d{4}$/, '')}
-                                    </h2>
-                                    <p className="font-bold text-xl" style={{ color: theme.colors.accent }}>
-                                        ${groupedOrders[dateKey].total.toLocaleString('en-US', { maximumFractionDigits: 0 })}
-                                    </p>
-                                </div>
-                                <div className="space-y-1">
-                                    {groupedOrders[dateKey].orders.map((order) => {
-                                        const statusColor = Data.STATUS_COLORS[order.status] || theme.colors.secondary;
-                                        return (
-                                            <button
-                                                key={order.orderNumber}
-                                                onClick={() => setSelectedOrder(order)}
-                                                className="w-full text-left p-3 rounded-xl transition-colors hover:bg-black/5 dark:hover:bg-white/10"
-                                            >
-                                                <div className="flex items-center space-x-4">
-                                                    <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: statusColor }} />
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className="font-bold text-base truncate" style={{ color: theme.colors.textPrimary }}>
-                                                            {order.details || 'N/A'}
-                                                        </p>
-                                                        <p className="text-sm truncate" style={{ color: theme.colors.textSecondary }}>
-                                                            {order.company}
-                                                        </p>
+                        {sortedGroupKeys.map(dateKey => {
+                            const date = new Date(dateKey);
+                            // Adjust for timezone offset to display the correct local date
+                            date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
+                            const formattedDate = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+
+                            return (
+                                <GlassCard key={dateKey} theme={theme} className="p-0 overflow-hidden">
+                                    <div className="px-4 pt-4 pb-3 flex justify-between items-baseline border-b" style={{ borderColor: theme.colors.subtle }}>
+                                        <h2 className="font-semibold text-base" style={{ color: theme.colors.textPrimary }}>
+                                            {formattedDate}
+                                        </h2>
+                                        <p className="font-semibold text-base" style={{ color: theme.colors.textSecondary }}>
+                                            ${groupedOrders[dateKey].total.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                                        </p>
+                                    </div>
+
+                                    <div className="divide-y" style={{ borderColor: theme.colors.subtle }}>
+                                        {groupedOrders[dateKey].orders.map((order) => {
+                                            const statusColor = Data.STATUS_COLORS[order.status] || theme.colors.secondary;
+                                            return (
+                                                <button
+                                                    key={order.orderNumber}
+                                                    onClick={() => setSelectedOrder(order)}
+                                                    className="w-full text-left p-4 transition-colors hover:bg-black/5 dark:hover:bg-white/10"
+                                                >
+                                                    <div className="flex items-start justify-between space-x-4">
+                                                        <div className="flex items-start space-x-3 flex-1 min-w-0">
+                                                            <div className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style={{ backgroundColor: statusColor }} />
+                                                            <div className="flex-1">
+                                                                <p className="font-semibold truncate text-sm" style={{ color: theme.colors.textPrimary }}>
+                                                                    {order.details || 'N/A'}
+                                                                </p>
+                                                                <p className="text-sm truncate" style={{ color: theme.colors.textSecondary }}>
+                                                                    {formatCompanyName(order.company)}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-right flex-shrink-0 space-y-1">
+                                                            <p className="font-semibold text-sm" style={{ color: theme.colors.textPrimary }}>
+                                                                ${(order.net || 0).toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                                                            </p>
+                                                            <p className="text-xs font-mono" style={{ color: theme.colors.textSecondary }}>
+                                                                #{order.orderNumber}
+                                                            </p>
+                                                        </div>
                                                     </div>
-                                                    <div className="text-right flex-shrink-0">
-                                                        <p className="font-bold text-lg" style={{ color: theme.colors.accent }}>
-                                                            ${(order.net || 0).toLocaleString('en-US', { maximumFractionDigits: 0 })}
-                                                        </p>
-                                                        <p className="text-xs font-mono" style={{ color: theme.colors.textSecondary }}>
-                                                            {order.orderNumber}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </button>
-                                        )
-                                    })}
-                                </div>
-                            </GlassCard>
-                        ))}
+                                                </button>
+                                            )
+                                        })}
+                                    </div>
+                                </GlassCard>
+                            )
+                        })}
                     </div>
                 ) : (
                     <OrderCalendarView
