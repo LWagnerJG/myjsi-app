@@ -993,7 +993,7 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const data = await response.json();
-                console.log("Fetched data:", data); // IMPORTANT: Check this in your browser's console!
+                console.log("Fetched data:", data); // Keep this for future debugging if needed
                 setFinishes(data);
             } catch (error) {
                 console.error("Failed to fetch finishes:", error);
@@ -1015,13 +1015,13 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
     const groupedFinishes = useMemo(() => {
         const lowercasedFilter = searchTerm.toLowerCase().trim();
         const filtered = finishes.filter(finish => {
-            // Robust access for OldFinishName
-            const oldFinishName = finish.OldFinishName || finish.oldFinishName || finish.Oldfinishname || '';
+            // Corrected: Use 'OldFinish' as the property name
+            const oldFinishName = finish.OldFinish || '';
 
-            // Robust access for Category
+            // Corrected: Access Category.Value
             const category = typeof finish.Category === 'string'
                 ? finish.Category
-                : finish.Category?.Value || finish.Category?.name || finish.Category?.title || ''; // Added .Value for SharePoint Choice columns
+                : finish.Category?.Value || '';
 
             return (
                 oldFinishName.toLowerCase().includes(lowercasedFilter) ||
@@ -1031,12 +1031,12 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
         });
 
         return filtered.reduce((acc, finish) => {
-            // Use the same robust category extraction here
+            // Corrected: Access Category.Value
             const category = typeof finish.Category === 'string'
                 ? finish.Category
-                : finish.Category?.Value || finish.Category?.name || finish.Category?.title || '';
+                : finish.Category?.Value || '';
 
-            const categoryKey = category || 'Uncategorized'; // Handle potentially empty categories
+            const categoryKey = category || 'Uncategorized';
             if (!acc[categoryKey]) acc[categoryKey] = [];
             acc[categoryKey].push(finish);
             return acc;
@@ -1048,10 +1048,10 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
         const newItem = {
             id: `sample-${selectedFinish.NewFinishName.toLowerCase().replace(/\s/g, '-')}`,
             name: formatFinishName(selectedFinish.NewFinishName),
-            // Use robust category access for the cart item
+            // Corrected: Access Category.Value
             category: typeof selectedFinish.Category === 'string'
                 ? selectedFinish.Category
-                : selectedFinish.Category?.Value || selectedFinish.Category?.name || selectedFinish.Category?.title || '',
+                : selectedSelectedFinish.Category?.Value || '',
             image: selectedFinish.NewFinishImageURL,
         };
         onUpdateCart(newItem, 1);
@@ -1068,8 +1068,8 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
             <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4 w-[45%]">
                     <div className="min-w-0">
-                        {/* Use robust access for OldFinishName */}
-                        <p className="font-semibold text-sm truncate" style={{ color: theme.colors.textPrimary }}>{formatFinishName(finish.OldFinishName || finish.oldFinishName || finish.Oldfinishname)}</p>
+                        {/* Corrected: Use 'OldFinish' */}
+                        <p className="font-semibold text-sm truncate" style={{ color: theme.colors.textPrimary }}>{formatFinishName(finish.OldFinish)}</p>
                         <p className="font-mono text-xs" style={{ color: theme.colors.textSecondary }}>{finish.OldVeneerCode}</p>
                     </div>
                 </div>
@@ -1141,7 +1141,6 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
         </div>
     );
 };
-
 
 
 
