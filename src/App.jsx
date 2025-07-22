@@ -11,7 +11,7 @@ import * as Data from './data.jsx';
 
 function App() {
     // --- CORE APP STATE ---
-    const [navigationHistory, setNavigationHistory] = useState(['home']);
+    const [navigationHistory, setNavigationHistory] = useState([]);
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
@@ -61,8 +61,25 @@ function App() {
     const swipeStartTime = useRef(0);
     const lastTouchX = useRef(0);
 
+    // --- URL SYNC FUNCTIONS ---
+    const urlToScreen = useCallback((url) => {
+        const path = url.replace(window.location.origin, '').replace('/', '') || 'home';
+        return path;
+    }, []);
+
+    const screenToUrl = useCallback((screen) => {
+        return screen === 'home' ? '/' : `/${screen}`;
+    }, []);
+
+    // Initialize navigation from URL
+    useEffect(() => {
+        const currentPath = window.location.pathname;
+        const initialScreen = currentPath === '/' ? 'home' : currentPath.substring(1);
+        setNavigationHistory([initialScreen]);
+    }, []);
+
     // --- DERIVED STATE ---
-    const currentScreen = navigationHistory[navigationHistory.length - 1];
+    const currentScreen = navigationHistory[navigationHistory.length - 1] || 'home';
     const previousScreen = navigationHistory.length > 1 ? navigationHistory[navigationHistory.length - 2] : null;
     const currentTheme = useMemo(() => (isDarkMode ? darkTheme : lightTheme), [isDarkMode]);
 
@@ -91,6 +108,37 @@ function App() {
                 : member
         ));
     }, [userSettings, currentUserId]);
+
+    // Sync URL with current screen
+    useEffect(() => {
+        if (currentScreen) {
+            const newUrl = screenToUrl(currentScreen);
+            if (window.location.pathname !== newUrl) {
+                window.history.pushState({ screen: currentScreen }, '', newUrl);
+            }
+        }
+    }, [currentScreen, screenToUrl]);
+
+    // Handle browser back/forward buttons
+    useEffect(() => {
+        const handlePopState = (event) => {
+            const screen = event.state?.screen || urlToScreen(window.location.pathname);
+            setNavigationHistory(prev => {
+                // Find if this screen exists in history
+                const existingIndex = prev.findIndex(s => s === screen);
+                if (existingIndex !== -1) {
+                    // Go back to existing screen
+                    return prev.slice(0, existingIndex + 1);
+                } else {
+                    // Add new screen
+                    return [...prev, screen];
+                }
+            });
+        };
+
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, [urlToScreen]);
 
     // --- HANDLERS ---
     const handleNavigate = useCallback((screen) => {
@@ -140,7 +188,6 @@ function App() {
         };
         setDealerDirectory(prev => [newDealer, ...prev]);
     }, [dealerDirectory]);
-
 
     const handleSaveSettings = useCallback(() => { setSuccessMessage("Settings Saved!"); setTimeout(() => setSuccessMessage(""), 2000); handleBack(); }, [handleBack]);
 
