@@ -2137,6 +2137,8 @@ export const SampleDiscountsScreen = ({ theme, onNavigate, setSuccessMessage }) 
         const fetchDiscounts = async () => {
             const powerAutomateURL = import.meta.env.VITE_SAMPLE_DISCOUNTS_URL;
 
+            console.log("Power Automate URL:", powerAutomateURL); // Debug log
+
             if (!powerAutomateURL) {
                 console.error("Sample Discounts URL is not configured.");
                 setError("Configuration error. Please contact support.");
@@ -2146,15 +2148,10 @@ export const SampleDiscountsScreen = ({ theme, onNavigate, setSuccessMessage }) 
 
             try {
                 const response = await fetch(powerAutomateURL, {
-                    method: 'POST',
+                    method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        // Add authentication headers if needed
-                        // 'Authorization': 'Bearer your-token-here',
-                        // 'X-API-Key': 'your-api-key-here',
                     },
-                    // Add body if the API expects it
-                    body: JSON.stringify({})
                 });
 
                 if (response.status === 401) {
@@ -2166,10 +2163,28 @@ export const SampleDiscountsScreen = ({ theme, onNavigate, setSuccessMessage }) 
                 }
 
                 const data = await response.json();
+                console.log("API Response:", data); // Debug log
                 // The API returns an object with a 'value' property containing the array
                 setDiscounts(data.value || []);
             } catch (e) {
                 console.error("Failed to fetch discounts:", e);
+
+                // TEMPORARY: Use mock data for testing
+                console.log("Using mock data for testing...");
+                setDiscounts([
+                    {
+                        SSANumber: "12345",
+                        Discount: "15",
+                        Title: "Sample Product A",
+                        CommissionInfo: "Standard commission rates apply"
+                    },
+                    {
+                        SSANumber: "67890",
+                        Discount: "20",
+                        Title: "Sample Product B",
+                        CommissionInfo: "Enhanced commission rates"
+                    }
+                ]);
 
                 // More specific error handling
                 if (e.message.includes('Authentication failed')) {
