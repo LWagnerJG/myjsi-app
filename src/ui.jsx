@@ -2145,16 +2145,40 @@ export const SampleDiscountsScreen = ({ theme, onNavigate, setSuccessMessage }) 
             }
 
             try {
-                const response = await fetch(powerAutomateURL, { method: 'POST' });
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                const response = await fetch(powerAutomateURL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // Add authentication headers if needed
+                        // 'Authorization': 'Bearer your-token-here',
+                        // 'X-API-Key': 'your-api-key-here',
+                    },
+                    // Add body if the API expects it
+                    body: JSON.stringify({})
+                });
+
+                if (response.status === 401) {
+                    throw new Error('Authentication failed. Please check API credentials.');
                 }
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
+                }
+
                 const data = await response.json();
                 // The API returns an object with a 'value' property containing the array
                 setDiscounts(data.value || []);
             } catch (e) {
                 console.error("Failed to fetch discounts:", e);
-                setError("Could not load data. Please try again later.");
+
+                // More specific error handling
+                if (e.message.includes('Authentication failed')) {
+                    setError("Authentication error. Please contact support.");
+                } else if (e.message.includes('Failed to fetch')) {
+                    setError("Network error. Please check your connection and try again.");
+                } else {
+                    setError("Could not load data. Please try again later.");
+                }
             } finally {
                 setIsLoading(false);
             }
@@ -2164,8 +2188,25 @@ export const SampleDiscountsScreen = ({ theme, onNavigate, setSuccessMessage }) 
     }, []);
 
     const handleCopy = useCallback((textToCopy) => {
+        if (!navigator.clipboard) {
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = textToCopy;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            setSuccessMessage("SSA# Copied!");
+            setTimeout(() => setSuccessMessage(""), 1200);
+            return;
+        }
+
         navigator.clipboard.writeText(textToCopy).then(() => {
             setSuccessMessage("SSA# Copied!");
+            setTimeout(() => setSuccessMessage(""), 1200);
+        }).catch(err => {
+            console.error('Failed to copy text: ', err);
+            setSuccessMessage("Copy failed. Please try again.");
             setTimeout(() => setSuccessMessage(""), 1200);
         });
     }, [setSuccessMessage]);
@@ -2188,6 +2229,26 @@ export const SampleDiscountsScreen = ({ theme, onNavigate, setSuccessMessage }) 
                 <div className="px-4">
                     <GlassCard theme={theme} className="p-8 text-center">
                         <p className="font-semibold text-red-500">{error}</p>
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="mt-4 px-4 py-2 rounded-md bg-blue-500 text-white hover:bg-blue-600"
+                        >
+                            Retry
+                        </button>
+                    </GlassCard>
+                </div>
+            </>
+        );
+    }
+
+    // Handle empty results
+    if (discounts.length === 0) {
+        return (
+            <>
+                <PageTitle title="Sample Discounts" theme={theme} />
+                <div className="px-4">
+                    <GlassCard theme={theme} className="p-8 text-center">
+                        <p style={{ color: theme.colors.textSecondary }}>No discounts available at this time.</p>
                     </GlassCard>
                 </div>
             </>
@@ -2201,18 +2262,29 @@ export const SampleDiscountsScreen = ({ theme, onNavigate, setSuccessMessage }) 
                 {discounts.map((discount) => (
                     <GlassCard key={discount.SSANumber} theme={theme} className="p-4 flex items-center space-x-4">
                         <div className="flex-shrink-0 w-24 text-center">
-                            {/* Formatting the Discount value */}
-                            <p className="text-5xl font-bold" style={{ color: theme.colors.accent }}>{discount.Discount}%</p>
-                            <p className="text-xs font-semibold" style={{ color: theme.colors.textSecondary }}>Off List</p>
+                            <p className="text-5xl font-bold" style={{ color: theme.colors.accent }}>
+                                {discount.Discount}%
+                            </p>
+                            <p className="text-xs font-semibold" style={{ color: theme.colors.textSecondary }}>
+                                Off List
+                            </p>
                         </div>
                         <div className="flex-1 space-y-3 border-l pl-4" style={{ borderColor: theme.colors.subtle }}>
-                            <h3 className="font-bold text-lg text-center pb-2 border-b" style={{ color: theme.colors.textPrimary, borderColor: theme.colors.subtle }}>
+                            <h3 className="font-bold text-lg text-center pb-2 border-b" style={{
+                                color: theme.colors.textPrimary,
+                                borderColor: theme.colors.subtle
+                            }}>
                                 {discount.Title}
                             </h3>
                             <div className="flex items-center justify-between text-sm">
-                                {/* Formatting the SSA Number */}
-                                <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>SSA: {discount.SSANumber}</span>
-                                <button onClick={() => handleCopy(discount.SSANumber)} className="p-1 rounded-md hover:bg-black/10 dark:hover:bg-white/10 ml-2">
+                                <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>
+                                    SSA: {discount.SSANumber}
+                                </span>
+                                <button
+                                    onClick={() => handleCopy(discount.SSANumber)}
+                                    className="p-1 rounded-md hover:bg-black/10 dark:hover:bg-white/10 ml-2 transition-colors"
+                                    aria-label="Copy SSA Number"
+                                >
                                     <Copy className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
                                 </button>
                             </div>
