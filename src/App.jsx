@@ -30,7 +30,7 @@ function App() {
     const [userSettings, setUserSettings] = useState({
         id: 1,
         firstName: 'Luke',
-        lastName: 'Miller',
+        lastName: 'Wagner',
         email: 'luke.wagner@example.com',
         homeAddress: '5445 N Deerwood Lake Rd, Jasper, IN 47546',
         tShirtSize: 'L',
