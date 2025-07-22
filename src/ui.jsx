@@ -4952,14 +4952,14 @@ export const OrderModal = React.memo(({ order, onClose, theme }) => {
 
                 <dl className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm border-t border-b py-4" style={{ borderColor: theme.colors.subtle }}>
                     <dt className="font-medium" style={{ color: theme.colors.textSecondary }}>SO:</dt>
-                    <dd className="font-mono text-right" style={{ color: theme.colors.textPrimary }}>{order.orderNumber}</dd>
+                    <dd className="text-right" style={{ color: theme.colors.textPrimary }}>{order.orderNumber}</dd>
                     {order.po && <>
                         <dt className="font-medium" style={{ color: theme.colors.textSecondary }}>PO:</dt>
-                        <dd className="font-mono text-right" style={{ color: theme.colors.textPrimary }}>{order.po}</dd>
+                        <dd className="text-right" style={{ color: theme.colors.textPrimary }}>{order.po}</dd>
                     </>}
                     {order.net && <>
                         <dt className="font-medium" style={{ color: theme.colors.textSecondary }}>NET:</dt>
-                        <dd className="font-mono text-right font-semibold" style={{ color: theme.colors.textPrimary }}>${order.net.toLocaleString(undefined, { maximumFractionDigits: 0 })}</dd>
+                        <dd className="font-semibold text-right" style={{ color: theme.colors.textPrimary }}>${order.net.toLocaleString(undefined, { maximumFractionDigits: 0 })}</dd>
                     </>}
                     {order.reward && <>
                         <dt className="font-medium" style={{ color: theme.colors.textSecondary }}>REWARDS:</dt>
@@ -5001,6 +5001,7 @@ export const OrderModal = React.memo(({ order, onClose, theme }) => {
         </Modal>
     );
 });
+
 
 export const OrdersScreen = ({ theme, setSelectedOrder }) => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -5075,12 +5076,11 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
                 </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-hide">
+            <div className="flex-1 overflow-y-auto px-4 pt-4 pb-4 scrollbar-hide">
                 {viewMode === 'list' ? (
                     <div className="space-y-4">
                         {sortedGroupKeys.map(dateKey => {
                             const date = new Date(dateKey);
-                            // Adjust for timezone offset to display the correct local date
                             date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
                             const formattedDate = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 
@@ -5120,7 +5120,7 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
                                                             <p className="font-semibold text-sm" style={{ color: theme.colors.textPrimary }}>
                                                                 ${(order.net || 0).toLocaleString('en-US', { maximumFractionDigits: 0 })}
                                                             </p>
-                                                            <p className="text-xs font-mono" style={{ color: theme.colors.textSecondary }}>
+                                                            <p className="text-xs" style={{ color: theme.colors.textSecondary }}>
                                                                 #{order.orderNumber}
                                                             </p>
                                                         </div>
