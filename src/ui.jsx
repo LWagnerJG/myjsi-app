@@ -1020,7 +1020,7 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
         );
 
         return filtered.reduce((acc, finish) => {
-            const { Category }. = finish;
+            const { Category } = finish;
             if (!acc[Category]) acc[Category] = [];
             acc[Category].push(finish);
             return acc;
