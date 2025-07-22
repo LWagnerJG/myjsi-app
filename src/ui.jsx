@@ -2129,6 +2129,40 @@ export const CommissionsScreen = ({ theme }) => {
 };
 
 export const SampleDiscountsScreen = ({ theme, onNavigate, setSuccessMessage }) => {
+    const [discounts, setDiscounts] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchDiscounts = async () => {
+            const powerAutomateURL = import.meta.env.VITE_SAMPLE_DISCOUNTS_URL;
+
+            if (!powerAutomateURL) {
+                console.error("Sample Discounts URL is not configured.");
+                setError("Configuration error. Please contact support.");
+                setIsLoading(false);
+                return;
+            }
+
+            try {
+                const response = await fetch(powerAutomateURL, { method: 'POST' });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                // The API returns an object with a 'value' property containing the array
+                setDiscounts(data.value || []);
+            } catch (e) {
+                console.error("Failed to fetch discounts:", e);
+                setError("Could not load data. Please try again later.");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchDiscounts();
+    }, []);
+
     const handleCopy = useCallback((textToCopy) => {
         navigator.clipboard.writeText(textToCopy).then(() => {
             setSuccessMessage("SSA# Copied!");
@@ -2136,30 +2170,54 @@ export const SampleDiscountsScreen = ({ theme, onNavigate, setSuccessMessage }) 
         });
     }, [setSuccessMessage]);
 
+    if (isLoading) {
+        return (
+            <>
+                <PageTitle title="Sample Discounts" theme={theme} />
+                <div className="text-center p-8">
+                    <Hourglass className="w-8 h-8 animate-spin mx-auto" style={{ color: theme.colors.accent }} />
+                </div>
+            </>
+        );
+    }
+
+    if (error) {
+        return (
+            <>
+                <PageTitle title="Sample Discounts" theme={theme} />
+                <div className="px-4">
+                    <GlassCard theme={theme} className="p-8 text-center">
+                        <p className="font-semibold text-red-500">{error}</p>
+                    </GlassCard>
+                </div>
+            </>
+        );
+    }
+
     return (
         <>
-            {/* The redundant "Back to Resources" button has been removed from here */}
             <PageTitle title="Sample Discounts" theme={theme} />
-
             <div className="px-4 space-y-4 pb-4">
-                {Data.SAMPLE_DISCOUNTS_DATA.map((discount) => (
-                    <GlassCard key={discount.ssa} theme={theme} className="p-4 flex items-center space-x-4">
+                {discounts.map((discount) => (
+                    <GlassCard key={discount.SSANumber} theme={theme} className="p-4 flex items-center space-x-4">
                         <div className="flex-shrink-0 w-24 text-center">
-                            <p className="text-5xl font-bold" style={{ color: theme.colors.accent }}>{discount.off.match(/\d+/)[0]}%</p>
+                            {/* Formatting the Discount value */}
+                            <p className="text-5xl font-bold" style={{ color: theme.colors.accent }}>{discount.Discount}%</p>
                             <p className="text-xs font-semibold" style={{ color: theme.colors.textSecondary }}>Off List</p>
                         </div>
                         <div className="flex-1 space-y-3 border-l pl-4" style={{ borderColor: theme.colors.subtle }}>
                             <h3 className="font-bold text-lg text-center pb-2 border-b" style={{ color: theme.colors.textPrimary, borderColor: theme.colors.subtle }}>
-                                {discount.title}
+                                {discount.Title}
                             </h3>
                             <div className="flex items-center justify-between text-sm">
-                                <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>SSA: {discount.ssa}</span>
-                                <button onClick={() => handleCopy(discount.ssa)} className="p-1 rounded-md hover:bg-black/10 dark:hover:bg-white/10 ml-2">
+                                {/* Formatting the SSA Number */}
+                                <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>SSA: {discount.SSANumber}</span>
+                                <button onClick={() => handleCopy(discount.SSANumber)} className="p-1 rounded-md hover:bg-black/10 dark:hover:bg-white/10 ml-2">
                                     <Copy className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
                                 </button>
                             </div>
                             <div className="text-sm text-center pt-1 font-medium" style={{ color: theme.colors.textSecondary }}>
-                                {discount.commission}
+                                {discount.CommissionInfo}
                             </div>
                         </div>
                     </GlassCard>
