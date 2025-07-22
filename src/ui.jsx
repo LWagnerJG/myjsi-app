@@ -1803,9 +1803,10 @@ export const CommissionRatesScreen = ({ theme }) => {
     useEffect(() => {
         const fetchRates = async () => {
             try {
+                // The backend connection logic remains the same.
                 const powerAutomateURL = import.meta.env.VITE_COMMISSION_RATES_URL;
                 if (!powerAutomateURL) {
-                    throw new Error("Flow URL is not configured in Vercel.");
+                    throw new Error("Flow URL is not configured.");
                 }
                 const response = await fetch(powerAutomateURL, {
                     method: 'POST',
@@ -1828,22 +1829,8 @@ export const CommissionRatesScreen = ({ theme }) => {
         fetchRates();
     }, []);
 
+    const { accent, textPrimary, textSecondary, border, subtle } = theme.colors;
     const split = { specifying: 70, ordering: 30 };
-    const { accent, secondary, textPrimary, textSecondary, border, subtle } = theme.colors;
-
-    const RateRow = ({ item, isFirst }) => (
-        <div className={`grid grid-cols-[1.5fr,1fr,1fr] gap-x-4 py-3 ${!isFirst ? 'border-t' : ''}`} style={{ borderColor: subtle }}>
-            <span className="font-medium" style={{ color: textPrimary }}>{item.discount}</span>
-            <span className="text-center font-semibold" style={{ color: accent }}>{item.rep}</span>
-            <span className="text-right" style={{ color: textPrimary }}>{item.spiff}</span>
-        </div>
-    );
-
-    const SectionDivider = ({ title }) => (
-        <div className="pt-4 mt-4 border-t" style={{ borderColor: border }}>
-            <h3 className="text-sm font-bold uppercase tracking-wider" style={{ color: textSecondary }}>{title}</h3>
-        </div>
-    );
 
     if (loading) {
         return (
@@ -1865,26 +1852,61 @@ export const CommissionRatesScreen = ({ theme }) => {
         );
     }
 
+    // A Row component for cleaner mapping
+    const RateRow = ({ item }) => {
+        // Special handling for the note on the last item
+        const hasNote = item.spiff?.includes('*');
+        const spiffValue = hasNote ? item.spiff.split('*')[0].trim() : item.spiff;
+        const spiffNote = hasNote ? `*${item.spiff.split('*')[1]}` : null;
+
+        return (
+            <div className="grid grid-cols-[2fr,1fr,1.5fr] items-center gap-x-4 py-4 px-2">
+                <span className="font-semibold text-lg" style={{ color: textPrimary }}>
+                    {item.discount}
+                </span>
+                <span className="text-center font-bold text-lg" style={{ color: accent }}>
+                    {item.rep}
+                </span>
+                <div className="text-center">
+                    <span className="font-semibold text-lg" style={{ color: textPrimary }}>
+                        {spiffValue}
+                    </span>
+                    {spiffNote && (
+                        <p className="text-xs -mt-1" style={{ color: textSecondary }}>
+                            {spiffNote}
+                        </p>
+                    )}
+                </div>
+            </div>
+        );
+    };
+
+    const SectionHeader = ({ title }) => (
+        <div className="px-2 pt-6 pb-2 border-t" style={{ borderColor: border }}>
+            <h3 className="font-bold text-base" style={{ color: textPrimary }}>
+                {title}
+            </h3>
+        </div>
+    );
+
     return (
-        <div className="px-4 py-6">
+        <div className="h-full flex flex-col">
             <PageTitle title="Commission Rates" theme={theme} />
-            <div className="space-y-6">
+            <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-6 scrollbar-hide">
                 <GlassCard theme={theme} className="p-4">
                     {/* Column Headers */}
-                    <div className="grid grid-cols-[1.5fr,1fr,1fr] gap-x-4 px-1 pb-2">
-                        <span className="text-xs font-bold uppercase" style={{ color: textSecondary }}>Discounts</span>
-                        <span className="text-xs font-bold uppercase text-center" style={{ color: textSecondary }}>Rep Comm.</span>
-                        <span className="text-xs font-bold uppercase text-right" style={{ color: textSecondary }}>Spiff</span>
-                    </div>
-                    {/* Standard Discounts */}
-                    <div className="border-t" style={{ borderColor: border }}>
-                        {rates.standard.map((r, i) => <RateRow key={r.discount} item={r} isFirst={i === 0} />)}
+                    <div className="grid grid-cols-[2fr,1fr,1.5fr] gap-x-4 px-2 pb-2 border-b" style={{ borderColor: border }}>
+                        <span className="text-sm font-bold uppercase tracking-wider" style={{ color: textSecondary }}>Discounts</span>
+                        <span className="text-sm font-bold uppercase text-center tracking-wider" style={{ color: textSecondary }}>Rep Comm.</span>
+                        <span className="text-sm font-bold uppercase text-center tracking-wider" style={{ color: textSecondary }}>Spiff</span>
                     </div>
 
-                    {/* Contract Discounts */}
-                    <SectionDivider title="Contract Discounts" />
-                    <div>
-                        {rates.contract.map((r, i) => <RateRow key={r.discount} item={r} isFirst={i === 0} />)}
+                    {/* Rates List */}
+                    <div className="divide-y" style={{ borderColor: subtle }}>
+                        {rates.standard.map(r => <RateRow key={r.discount} item={r} />)}
+
+                        {rates.contract.length > 0 && <SectionHeader title="Contract Discounts" />}
+                        {rates.contract.map(r => <RateRow key={r.discount} item={r} />)}
                     </div>
                 </GlassCard>
 
@@ -1892,12 +1914,11 @@ export const CommissionRatesScreen = ({ theme }) => {
                     <h3 className="mb-3 font-bold uppercase text-center tracking-wide text-sm" style={{ color: textSecondary }}>
                         Commission Split
                     </h3>
-                    {/* Border removed from this container */}
-                    <div className="w-full h-6 flex rounded-full overflow-hidden">
-                        <div className="flex items-center pl-3 text-sm font-semibold text-white" style={{ width: `${split.specifying}%`, backgroundColor: accent }}>
+                    <div className="w-full h-6 flex rounded-full overflow-hidden border" style={{ borderColor: border }}>
+                        <div className="flex items-center justify-center text-sm font-semibold text-white" style={{ width: `${split.specifying}%`, backgroundColor: accent }}>
                             {split.specifying}%
                         </div>
-                        <div className="flex items-center justify-end pr-3 text-sm font-semibold" style={{ width: `${split.ordering}%`, backgroundColor: secondary, color: 'white' }}>
+                        <div className="flex items-center justify-center text-sm font-semibold" style={{ width: `${split.ordering}%`, backgroundColor: subtle, color: textPrimary }}>
                             {split.ordering}%
                         </div>
                     </div>
