@@ -1020,9 +1020,13 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
         );
 
         return filtered.reduce((acc, finish) => {
-            const { Category } = finish;
-            if (!acc[Category]) acc[Category] = [];
-            acc[Category].push(finish);
+            // Handle case where Category might be an object or null/undefined
+            const category = typeof finish.Category === 'string'
+                ? finish.Category
+                : finish.Category?.name || finish.Category?.title || 'Uncategorized';
+
+            if (!acc[category]) acc[category] = [];
+            acc[category].push(finish);
             return acc;
         }, {});
     }, [searchTerm, finishes]);
@@ -1064,7 +1068,7 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
                     </div>
                     <div className="min-w-0">
                         <p className="font-semibold text-sm truncate" style={{ color: theme.colors.textPrimary }}>{formatFinishName(finish.NewFinishName)}</p>
-                        <p className="font-mono text-xs" style={{ color: theme.colors.textSecondary }}>{finish.OldLaminateInfo || finish.OldSolidCode}</p>
+                        <p className="font-mono text-xs" style={{ color: theme.colors.textSecondary }}>{finish.NewVeneerCode || finish.NewSolidCode || finish.OldLaminateInfo || finish.OldSolidCode}</p>
                     </div>
                 </div>
             </div>
