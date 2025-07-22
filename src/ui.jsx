@@ -5004,112 +5004,131 @@ export const OrderModal = React.memo(({ order, onClose, theme }) => {
 
 export const OrdersScreen = ({ theme, setSelectedOrder }) => {
     const [searchTerm, setSearchTerm] = useState('');
-    const [sortOption, setSortOption] = useState('Recent First');
+    const [dateType, setDateType] = useState('shipDate');
+    const [viewMode, setViewMode] = useState('list');
+    const [showDateFilter, setShowDateFilter] = useState(false);
+    const filterMenuRef = useRef(null);
 
-    const sortOptions = [
-        { value: 'Recent First', label: 'Recent First' },
-        { value: 'Oldest First', label: 'Oldest First' },
-        { value: 'Highest Amount', label: 'Highest Amount' },
-        { value: 'Lowest Amount', label: 'Lowest Amount' },
-    ];
-
-    // Utility function to convert to title case
-    const toTitleCase = (str) => {
-        return str.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
-    };
-
-    // Group orders by date
-    const groupedOrders = useMemo(() => {
-        return ORDER_DATA.reduce((acc, order) => {
-            const dateKey = order.date
-                ? new Date(order.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
-                : 'Unknown';
-            if (!acc[dateKey]) acc[dateKey] = { orders: [], total: 0 };
-            acc[dateKey].orders.push(order);
-            acc[dateKey].total += parseFloat(order.amount.replace(/[$,]/g, '')) || 0;
-            return acc;
-        }, {});
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (filterMenuRef.current && !filterMenuRef.current.contains(e.target)) {
+                setShowDateFilter(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // Filter and sort logic
-    const filteredAndSortedGroups = useMemo(() => {
-        let groups = Object.entries(groupedOrders);
+    const filteredOrders = useMemo(() => {
+        return Data.ORDER_DATA.filter(order =>
+            (order.company?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+            (order.details?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+            (order.orderNumber?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+            (order.po?.toLowerCase() || '').includes(searchTerm.toLowerCase())
+        );
+    }, [searchTerm]);
 
-        // Filter
-        if (searchTerm) {
-            const lowerTerm = searchTerm.toLowerCase();
-            groups = groups.filter(([_, group]) =>
-                group.orders.some(order =>
-                    order.company.toLowerCase().includes(lowerTerm) ||
-                    order.details.toLowerCase().includes(lowerTerm) ||
-                    order.orderNumber.toLowerCase().includes(lowerTerm)
-                )
-            );
-        }
-
-        // Sort groups based on selected sort option
-        groups.sort((a, b) => {
-            let comparison = 0;
-            if (sortOption === 'Recent First' || sortOption === 'Oldest First') {
-                comparison = new Date(b[0]) - new Date(a[0]);
-            } else if (sortOption === 'Highest Amount' || sortOption === 'Lowest Amount') {
-                comparison = b[1].total - a[1].total;
+    const groupedOrders = useMemo(() => {
+        const groups = filteredOrders.reduce((acc, order) => {
+            const dateStr = order[dateType];
+            if (!dateStr || isNaN(new Date(dateStr))) return acc;
+            const date = new Date(dateStr);
+            const groupKey = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase();
+            if (!acc[groupKey]) {
+                acc[groupKey] = { orders: [], total: 0 };
             }
-            return (sortOption === 'Recent First' || sortOption === 'Highest Amount') ? comparison : -comparison;
-        });
-
+            acc[groupKey].orders.push(order);
+            acc[groupKey].total += order.net || 0;
+            return acc;
+        }, {});
+        for (const key in groups) {
+            groups[key].orders.sort((a, b) => new Date(b[dateType]) - new Date(a[dateType]));
+        }
         return groups;
-    }, [groupedOrders, searchTerm, sortOption]);
+    }, [filteredOrders, dateType]);
+
+    const sortedGroupKeys = useMemo(() => {
+        if (!groupedOrders) return [];
+        return Object.keys(groupedOrders).sort((a, b) => new Date(b) - new Date(a));
+    }, [groupedOrders]);
 
     return (
         <div className="flex flex-col h-full">
             <PageTitle title="Orders" theme={theme} />
-            <div className="px-4 pb-4 flex items-center space-x-2">
-                <SearchInput
-                    className="flex-grow"
-                    value={searchTerm}
-                    onChange={e => setSearchTerm(e.target.value)}
-                    placeholder="Search orders..."
-                    theme={theme}
-                />
-                <div className="w-40">
-                    <PortalNativeSelect
-                        value={sortOption}
-                        onChange={e => setSortOption(e.target.value)}
-                        options={sortOptions}
-                        theme={theme}
-                        placeholder="Sort by"
-                    />
+            <div className="px-4 pt-2 pb-4 flex items-center space-x-2 sticky top-0 z-10" style={{ backgroundColor: `${theme.colors.background}e0`, backdropFilter: 'blur(10px)' }}>
+                <SearchInput value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Search Orders..." theme={theme} className="flex-grow" />
+                <div className="relative">
+                    <button onClick={() => setShowDateFilter(f => !f)} className="p-3.5 rounded-full" style={{ backgroundColor: theme.colors.subtle }}>
+                        <Filter className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />
+                    </button>
+                    {showDateFilter && (
+                        <GlassCard ref={filterMenuRef} theme={theme} className="absolute top-14 right-0 z-10 w-40 p-2">
+                            <button onClick={() => { setDateType('shipDate'); setShowDateFilter(false); }} className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${dateType === 'shipDate' ? 'font-bold' : ''}`} style={{ color: theme.colors.textPrimary, backgroundColor: dateType === 'shipDate' ? theme.colors.subtle : 'transparent' }}>Ship Date</button>
+                            <button onClick={() => { setDateType('date'); setShowDateFilter(false); }} className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${dateType === 'date' ? 'font-bold' : ''}`} style={{ color: theme.colors.textPrimary, backgroundColor: dateType === 'date' ? theme.colors.subtle : 'transparent' }}>PO Date</button>
+                        </GlassCard>
+                    )}
                 </div>
+                <button onClick={() => setViewMode(v => v === 'list' ? 'calendar' : 'list')} className="p-3.5 rounded-full" style={{ backgroundColor: viewMode === 'calendar' ? theme.colors.accent : theme.colors.subtle, }}>
+                    <Calendar className="w-5 h-5" style={{ color: viewMode === 'calendar' ? 'white' : theme.colors.textPrimary }} />
+                </button>
             </div>
-            <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-6 scrollbar-hide">
-                {filteredAndSortedGroups.map(([date, group]) => (
-                    <GlassCard
-                        key={date}
+
+            <div className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-hide">
+                {viewMode === 'list' ? (
+                    <div className="space-y-4">
+                        {sortedGroupKeys.map(dateKey => (
+                            <GlassCard key={dateKey} theme={theme} className="p-4">
+                                <div className="flex justify-between items-baseline mb-3 pb-3 border-b" style={{ borderColor: theme.colors.subtle }}>
+                                    <h2 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>
+                                        {dateKey.replace(/, \d{4}$/, '')}
+                                    </h2>
+                                    <p className="font-bold text-xl" style={{ color: theme.colors.accent }}>
+                                        ${groupedOrders[dateKey].total.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                                    </p>
+                                </div>
+                                <div className="space-y-1">
+                                    {groupedOrders[dateKey].orders.map((order) => {
+                                        const statusColor = Data.STATUS_COLORS[order.status] || theme.colors.secondary;
+                                        return (
+                                            <button
+                                                key={order.orderNumber}
+                                                onClick={() => setSelectedOrder(order)}
+                                                className="w-full text-left p-3 rounded-xl transition-colors hover:bg-black/5 dark:hover:bg-white/10"
+                                            >
+                                                <div className="flex items-center space-x-4">
+                                                    <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: statusColor }} />
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="font-bold text-base truncate" style={{ color: theme.colors.textPrimary }}>
+                                                            {order.details || 'N/A'}
+                                                        </p>
+                                                        <p className="text-sm truncate" style={{ color: theme.colors.textSecondary }}>
+                                                            {order.company}
+                                                        </p>
+                                                    </div>
+                                                    <div className="text-right flex-shrink-0">
+                                                        <p className="font-bold text-lg" style={{ color: theme.colors.accent }}>
+                                                            ${(order.net || 0).toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                                                        </p>
+                                                        <p className="text-xs font-mono" style={{ color: theme.colors.textSecondary }}>
+                                                            {order.orderNumber}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </button>
+                                        )
+                                    })}
+                                </div>
+                            </GlassCard>
+                        ))}
+                    </div>
+                ) : (
+                    <OrderCalendarView
+                        orders={filteredOrders}
                         theme={theme}
-                        className="space-y-3 rounded-2xl shadow-md overflow-hidden"
-                        style={{ backgroundColor: theme.colors.subtle }}
-                    >
-                        <div className="p-3 flex justify-between items-center border-b" style={{ borderColor: theme.colors.border }}>
-                            <h3 className="text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>{date}</h3>
-                            <p className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>${group.total.toLocaleString()}</p>
-                        </div>
-                        <div className="px-3 pb-3 space-y-3">
-                            {group.orders.slice(0, 3).map(order => (
-                                <OrderCard
-                                    key={order.orderNumber}
-                                    order={{
-                                        ...order,
-                                        company: toTitleCase(order.company),
-                                        details: toTitleCase(order.details)
-                                    }}
-                                    theme={theme}
-                                    onClick={() => setSelectedOrder(order)}
-                                />
-                            ))}
-                        </div>
-                    </GlassCard>
-                ))}
+                        dateType={dateType}
+                        onOrderClick={setSelectedOrder}
+                    />
+                )}
             </div>
         </div>
     );
