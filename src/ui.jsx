@@ -2147,28 +2147,56 @@ export const SampleDiscountsScreen = ({ theme, onNavigate, setSuccessMessage }) 
             }
 
             try {
-                // Try POST first (most Power Automate flows expect POST)
-                const response = await fetch(powerAutomateURL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({}) // Empty JSON object
-                });
+                // Try POST with different configurations
+                let response;
+
+                // First attempt: POST with JSON body
+                try {
+                    response = await fetch(powerAutomateURL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({})
+                    });
+                } catch (err) {
+                    console.log('First attempt failed, trying without body...');
+                    // Second attempt: POST without body
+                    response = await fetch(powerAutomateURL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+                }
+
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
 
                 if (response.status === 401) {
                     throw new Error('Authentication failed. Please check API credentials.');
                 }
 
                 if (!response.ok) {
-                    // Log the full error details
+                    // Get the full error response
                     const errorText = await response.text();
-                    console.error(`HTTP error! status: ${response.status} - ${response.statusText}`, errorText);
+                    console.error(`HTTP error! status: ${response.status} - ${response.statusText}`);
+                    console.error('Error response body:', errorText);
                     throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
                 }
 
-                const data = await response.json();
-                console.log("API Response:", data); // Debug log
+                const responseText = await response.text();
+                console.log('Raw response:', responseText);
+
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch (parseError) {
+                    console.error('Failed to parse JSON:', parseError);
+                    throw new Error('Invalid JSON response from server');
+                }
+
+                console.log("Parsed API Response:", data);
 
                 // Handle different response formats
                 if (Array.isArray(data)) {
@@ -2177,8 +2205,13 @@ export const SampleDiscountsScreen = ({ theme, onNavigate, setSuccessMessage }) 
                     setDiscounts(data.value);
                 } else if (data.body && Array.isArray(data.body)) {
                     setDiscounts(data.body);
+                } else if (data.d && Array.isArray(data.d)) {
+                    setDiscounts(data.d);
+                } else if (data.results && Array.isArray(data.results)) {
+                    setDiscounts(data.results);
                 } else {
                     console.log("Unexpected response format:", data);
+                    console.log("Available keys:", Object.keys(data));
                     setDiscounts([]);
                 }
             } catch (e) {
