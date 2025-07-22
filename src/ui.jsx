@@ -5013,12 +5013,17 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
         { value: 'Lowest Amount', label: 'Lowest Amount' },
     ];
 
+    // Utility function to convert to title case
+    const toTitleCase = (str) => {
+        return str.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
+    };
+
     // Group orders by date
     const groupedOrders = useMemo(() => {
         return ORDER_DATA.reduce((acc, order) => {
             const dateKey = order.date
-                ? new Date(order.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase()
-                : 'UNKNOWN';
+                ? new Date(order.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
+                : 'Unknown';
             if (!acc[dateKey]) acc[dateKey] = { orders: [], total: 0 };
             acc[dateKey].orders.push(order);
             acc[dateKey].total += parseFloat(order.amount.replace(/[$,]/g, '')) || 0;
@@ -5079,26 +5084,31 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
             </div>
             <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-6 scrollbar-hide">
                 {filteredAndSortedGroups.map(([date, group]) => (
-                    <div key={date} className="space-y-3">
-                        <GlassCard
-                            theme={theme}
-                            className="p-3 flex justify-between items-center rounded-2xl shadow-md"
-                            style={{ backgroundColor: theme.colors.subtle }}
-                        >
+                    <GlassCard
+                        key={date}
+                        theme={theme}
+                        className="space-y-3 rounded-2xl shadow-md overflow-hidden"
+                        style={{ backgroundColor: theme.colors.subtle }}
+                    >
+                        <div className="p-3 flex justify-between items-center border-b" style={{ borderColor: theme.colors.border }}>
                             <h3 className="text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>{date}</h3>
                             <p className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>${group.total.toLocaleString()}</p>
-                        </GlassCard>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        </div>
+                        <div className="px-3 pb-3 space-y-3">
                             {group.orders.slice(0, 3).map(order => (
                                 <OrderCard
                                     key={order.orderNumber}
-                                    order={order}
+                                    order={{
+                                        ...order,
+                                        company: toTitleCase(order.company),
+                                        details: toTitleCase(order.details)
+                                    }}
                                     theme={theme}
                                     onClick={() => setSelectedOrder(order)}
                                 />
                             ))}
                         </div>
-                    </div>
+                    </GlassCard>
                 ))}
             </div>
         </div>
