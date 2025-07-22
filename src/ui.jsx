@@ -979,8 +979,7 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
 
     useEffect(() => {
         const fetchFinishes = async () => {
-            // MODIFIED: Changed to match your Vercel environment variable key
-            const powerAutomateURL = import.meta.env.VITE_OUTDATEDFINISHES_URL;[cite: 1]
+            const powerAutomateURL = import.meta.env.VITE_OUTDATED_FINISHES_URL;
 
             if (!powerAutomateURL) {
                 console.error("Power Automate URL is not configured.");
@@ -1021,7 +1020,7 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
         );
 
         return filtered.reduce((acc, finish) => {
-            const { Category } = finish;
+            const { Category }. = finish;
             if (!acc[Category]) acc[Category] = [];
             acc[Category].push(finish);
             return acc;
