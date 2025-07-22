@@ -977,15 +977,56 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedFinish, setSelectedFinish] = useState(null);
 
-    // Helper function to get local image path
+    const oldFinishImageMap = {
+        "ALE MEDIUM": "ALB_Alebedrock_Laminate",
+        "BUTTERSCOTCH": "BUT_Butterscotch_Laminate",
+        "VENETIAN": "VEN_Venetian_Laminate",
+        "BOURBON MEDIUM": "BOU_Bourbon_Laminate",
+        "BRIGHTON MEDIUM": "BRI_Brighton_Laminate",
+        "CLASSIC": "CLA_Classic_Laminate",
+        "COFFEE": "COF_Coffee_Laminate",
+        "MAPLE": "MAR_Maple_Laminate",
+        "PRALINE": "PN_Praline_Laminate",
+        "GRAPHITE": "GRA_Graphite_Laminate",
+        "KHAKI": "KHA_Khaki_Laminate",
+        "ESPRESSO": "ESP_Espresso_Laminate",
+        "ACORN": "ACO_Acorn_Laminate",
+        "BURLAP": "BUP_Burlap_Laminate",
+        "CHESTNUT": "CHE_Chestnut_Laminate",
+        "PORTER": "POR_Porter_Laminate",
+        "WHITEWASH": "WHW_Whitewash_Laminate",
+        "STUDIO TEAK": "STT_StudioTeak_Laminate",
+        "WEATHERED ASH": "WEA_WeatheredAsh_Laminate",
+        "ALE LIGHT": "ALL_Alelight_Laminate",
+        "BRAZILWOOD": "BRZ_Brazilwood_Laminate",
+        "COLLECTORS": "COL_Collectors_Laminate",
+        "OATMEAL COOKIE": "OAC_OatmealCookie_Laminate",
+        "WALNUT": "WAL_Walnut_Laminate",
+        "LUMBER": "LUM_Lumber_Laminate",
+        "LOFT": "LOF_Loft_Laminate",
+        "BARREL": "BAR_Barrel_Laminate",
+        "EGRET": "EGR_Egret_Laminate",
+        "MOCHA": "MOC_Mocha_Laminate",
+        "FLINT": "FLI_Flint_Laminate",
+        "VALLEY": "VAL_Valley_Laminate",
+        "MINERAL": "MIN_Mineral_Laminate",
+        "PILSNEER": "PIL_Pilsner_Laminate",
+        "OUTBACK": "OUT_Outback_Laminate",
+        "CLAY": "CLA_Clay_Laminate",
+        "BRICKDUST": "BRI_Brickdust_Laminate",
+        "MESA": "MES_Mesa_Laminate",
+        "CASK": "CAS_Cask_Laminate",
+        // Ensure all your OldFinish names are mapped here to their file identifiers
+    };
+
     const getLocalOldFinishImagePath = (finishName) => {
         if (!finishName) return '';
-        // Convert "ALE MEDIUM" to "ale_medium"
-        const formattedName = finishName.toLowerCase().replace(/\s+/g, '_');
-        // Construct the path assuming images are directly in the public folder or a subfolder like /images
-        // Adjust the prefix 'laminate_' and suffix '.jpg' based on your actual filenames
-        // Example: /laminate_ale_medium.jpg or /images/laminate_ale_medium.jpg
-        return `/laminate_${formattedName}.jpg`;
+        const mappedFileNamePart = oldFinishImageMap[finishName.toUpperCase()];
+        if (mappedFileNamePart) {
+            return `/jsi_finish_${mappedFileNamePart}.jpg`;
+        }
+        console.warn(`No image mapping found for OldFinish: ${finishName}`);
+        return '';
     };
 
     useEffect(() => {
@@ -1004,7 +1045,7 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const data = await response.json();
-                console.log("Fetched data:", data); // Keep this for future debugging if needed
+                console.log("Fetched data:", data);
                 setFinishes(data);
             } catch (error) {
                 console.error("Failed to fetch finishes:", error);
@@ -1059,7 +1100,7 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
             category: typeof selectedFinish.Category === 'string'
                 ? selectedFinish.Category
                 : selectedFinish.Category?.Value || '',
-            image: selectedFinish.NewFinishImageURL, // Still using URL from SharePoint for NewFinishImage
+            image: selectedFinish.NewFinishImageURL,
         };
         onUpdateCart(newItem, 1);
         setSelectedFinish(null);
@@ -1067,7 +1108,6 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
     };
 
     const FinishRow = ({ finish, isLast }) => {
-        // Construct the local path for the old finish image
         const oldFinishLocalImageUrl = getLocalOldFinishImagePath(finish.OldFinish);
 
         return (
@@ -1077,9 +1117,7 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
                 style={{ borderColor: theme.colors.subtle }}
             >
                 <div className="flex items-center justify-between">
-                    {/* Section for Old Finish details */}
                     <div className="flex items-center space-x-4 w-[45%]">
-                        {/* Old Finish Image - now from public folder */}
                         <div className="w-10 h-10 rounded-full flex-shrink-0 overflow-hidden" style={{ border: `1px solid ${theme.colors.border}`, backgroundColor: theme.colors.subtle }}>
                             {oldFinishLocalImageUrl ? (
                                 <img src={oldFinishLocalImageUrl} alt={finish.OldFinish} className="w-full h-full object-cover" />
@@ -1095,9 +1133,7 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
 
                     <ArrowRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
 
-                    {/* Section for New Finish details */}
                     <div className="flex items-center space-x-4 w-[45%]">
-                        {/* New Finish Image (still from SharePoint URL) */}
                         <div className="w-10 h-10 rounded-full flex-shrink-0 overflow-hidden" style={{ border: `1px solid ${theme.colors.border}`, backgroundColor: theme.colors.subtle }}>
                             {finish.NewFinishImageURL ? (
                                 <img src={finish.NewFinishImageURL} alt={finish.NewFinishName} className="w-full h-full object-cover" />
