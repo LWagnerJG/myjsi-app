@@ -30,7 +30,7 @@ function App() {
     const [userSettings, setUserSettings] = useState({
         id: 1,
         firstName: 'Luke',
-        lastName: 'Wagner',
+        lastName: 'Miller',
         email: 'luke.wagner@example.com',
         homeAddress: '5445 N Deerwood Lake Rd, Jasper, IN 47546',
         tShirtSize: 'L',
@@ -64,12 +64,8 @@ function App() {
 
     useEffect(() => {
         const currentPath = window.location.pathname;
-        if (currentPath !== '/') {
-            window.history.replaceState({ screen: 'home' }, '', '/');
-            setNavigationHistory(['home']);
-        } else {
-            setNavigationHistory(['home']);
-        }
+        const initialScreen = currentPath === '/' ? 'home' : currentPath.substring(1);
+        setNavigationHistory([initialScreen]);
     }, []);
 
     const currentScreen = navigationHistory[navigationHistory.length - 1] || 'home';
