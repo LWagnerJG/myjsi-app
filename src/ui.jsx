@@ -977,27 +977,24 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedFinish, setSelectedFinish] = useState(null);
 
-    // CORRECTED: This map's values now align with the filenames in your /public directory.
+    // This map must be accurate for both old and new finishes for this to work.
     const oldFinishImageMap = {
-        "WEATHERED ASH": "WEA_WeatheredAsh_Laminate",     // This one was already correct
-        "FLINT": "FLN_Flint_Laminate",                   // Corrected from FLI
-        "LOFT": "LOF_Loft_Laminate",                      // Correct
-        "EGRET": "EGR_Egret_Laminate",                   // Correct
-        "MOCHA": "MCH_Mocha_Laminate",                   // Corrected from MOC
-        "VALLEY": "VAL_Valley_Laminate",                 // Correct
-        "MINERAL": "MIN_Mineral_Laminate",               // Correct
-        "PILSNEER": "PIL_Pilsner_Laminate",                // Corrected: removed "jsi_finish_" prefix
-        "OUTBACK": "OBK_Outback_Laminate",                 // Corrected from OUT
-        "CLAY": "CLY_Clay_Laminate",                     // Corrected from CLA
-        "BRICKDUST": "BRD_Brickdust_Laminate",             // Corrected from BRI
-        "MESA": "MES_Mesa_Laminate",                     // Correct
-        "CASK": "CSK_Cask_Laminate",                     // Corrected from CAS
-        "FAWN": "FAW_Fawn_Laminate",                     // Corrected (assumed key from filename)
-        "WALNUT HEIGHTS": "WLH_WalnutHeights_Laminate",   // Corrected from WALNUT
-        "DESIGNER WHITE": "DWH_DesignerWhite_Laminate",    // New mapping based on filename
-
-        // These keys were in your original map but no matching file was visible in the screenshot.
-        // Their image paths will likely still be broken until matching files are added or names are corrected.
+        "WEATHERED ASH": "WEA_WeatheredAsh_Laminate",
+        "FLINT": "FLN_Flint_Laminate",
+        "LOFT": "LOF_Loft_Laminate",
+        "EGRET": "EGR_Egret_Laminate",
+        "MOCHA": "MCH_Mocha_Laminate",
+        "VALLEY": "VAL_Valley_Laminate",
+        "MINERAL": "MIN_Mineral_Laminate",
+        "PILSNEER": "PIL_Pilsner_Laminate",
+        "OUTBACK": "OBK_Outback_Laminate",
+        "CLAY": "CLY_Clay_Laminate",
+        "BRICKDUST": "BRD_Brickdust_Laminate",
+        "MESA": "MES_Mesa_Laminate",
+        "CASK": "CSK_Cask_Laminate",
+        "FAWN": "FAW_Fawn_Laminate",
+        "WALNUT HEIGHTS": "WLH_WalnutHeights_Laminate",
+        "DESIGNER WHITE": "DWH_DesignerWhite_Laminate",
         "ALE MEDIUM": "ALB_Alebedrock_Laminate",
         "BUTTERSCOTCH": "BUT_Butterscotch_Laminate",
         "VENETIAN": "VEN_Venetian_Laminate",
@@ -1031,7 +1028,7 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
         if (mappedFileNamePart) {
             return `/jsi_finish_${mappedFileNamePart}.jpg`;
         }
-        console.warn(`No image mapping found for OldFinish: ${finishName}`);
+        console.warn(`No image mapping found for finish: ${finishName}`);
         return '';
     };
 
@@ -1051,7 +1048,6 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const data = await response.json();
-                console.log("Fetched data:", data);
                 setFinishes(data);
             } catch (error) {
                 console.error("Failed to fetch finishes:", error);
@@ -1074,23 +1070,19 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
         const lowercasedFilter = searchTerm.toLowerCase().trim();
         const filtered = finishes.filter(finish => {
             const oldFinishName = finish.OldFinish || '';
-
             const category = typeof finish.Category === 'string'
                 ? finish.Category
                 : finish.Category?.Value || '';
-
             return (
                 oldFinishName.toLowerCase().includes(lowercasedFilter) ||
                 (finish.NewFinishName || '').toLowerCase().includes(lowercasedFilter) ||
                 category.toLowerCase().includes(lowercasedFilter)
             );
         });
-
         return filtered.reduce((acc, finish) => {
             const category = typeof finish.Category === 'string'
                 ? finish.Category
                 : finish.Category?.Value || '';
-
             const categoryKey = category || 'Uncategorized';
             if (!acc[categoryKey]) acc[categoryKey] = [];
             acc[categoryKey].push(finish);
@@ -1106,7 +1098,7 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
             category: typeof selectedFinish.Category === 'string'
                 ? selectedFinish.Category
                 : selectedFinish.Category?.Value || '',
-            image: selectedFinish.NewFinishImageURL,
+            image: getLocalOldFinishImagePath(selectedFinish.NewFinishName), // Use local path for cart item
         };
         onUpdateCart(newItem, 1);
         setSelectedFinish(null);
@@ -1114,7 +1106,9 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
     };
 
     const FinishRow = ({ finish, isLast }) => {
+        // This function now gets used for BOTH old and new finishes.
         const oldFinishLocalImageUrl = getLocalOldFinishImagePath(finish.OldFinish);
+        const newFinishLocalImageUrl = getLocalOldFinishImagePath(finish.NewFinishName);
 
         return (
             <button
@@ -1141,8 +1135,9 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
 
                     <div className="flex items-center space-x-4 w-[45%]">
                         <div className="w-10 h-10 rounded-full flex-shrink-0 overflow-hidden" style={{ border: `1px solid ${theme.colors.border}`, backgroundColor: theme.colors.subtle }}>
-                            {finish.NewFinishImageURL ? (
-                                <img src={finish.NewFinishImageURL} alt={finish.NewFinishName} className="w-full h-full object-cover" />
+                            {/* CHANGED: Use the locally generated URL */}
+                            {newFinishLocalImageUrl ? (
+                                <img src={newFinishLocalImageUrl} alt={finish.NewFinishName} className="w-full h-full object-cover" />
                             ) : (
                                 <div className="w-full h-full" />
                             )}
