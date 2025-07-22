@@ -1018,7 +1018,7 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
         "COLLECTORS": "COL_Collectors_Laminate",
         "OATMEAL COOKIE": "OAC_OatmealCookie_Laminate",
         "WALNUT": "WAL_Walnut_Laminate",
-        "LUMBER": "LUM_Lumber_Laminate",
+        "UMBER": "UMB_Umber_Laminate",
         "BARREL": "BAR_Barrel_Laminate",
     };
 
