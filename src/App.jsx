@@ -10,7 +10,6 @@ import {
 import * as Data from './data.jsx';
 
 function App() {
-    // --- CORE APP STATE ---
     const [navigationHistory, setNavigationHistory] = useState([]);
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -19,8 +18,6 @@ function App() {
     const [voiceMessage, setVoiceMessage] = useState('');
     const [swipeTranslateX, setSwipeTranslateX] = useState(0);
     const [isTransitioning, setIsTransitioning] = useState(false);
-
-    // --- SCREEN-SPECIFIC STATE ---
     const [members, setMembers] = useState(INITIAL_MEMBERS);
     const [currentUserId, setCurrentUserId] = useState(1);
     const [selectedOrder, setSelectedOrder] = useState(null);
@@ -40,10 +37,7 @@ function App() {
         permissions: { salesData: true, commissions: true, projects: true, customerRanking: true, dealerRewards: true, submittingReplacements: true }
     });
     const [cart, setCart] = useState({});
-    // --- ADDED STATE for Dealer Directory ---
     const [dealerDirectory, setDealerDirectory] = useState(Data.DEALER_DIRECTORY_DATA);
-
-    // --- COMMUNITY & AI STATE ---
     const [posts, setPosts] = useState(INITIAL_POSTS);
     const [polls, setPolls] = useState(INITIAL_POLLS);
     const [likedPosts, setLikedPosts] = useState({});
@@ -52,8 +46,6 @@ function App() {
     const [aiResponse, setAiResponse] = useState('');
     const [isAILoading, setIsAILoading] = useState(false);
     const [showAIDropdown, setShowAIDropdown] = useState(false);
-
-    // --- GESTURE STATE ---
     const touchStartX = useRef(0);
     const touchStartY = useRef(0);
     const hasSwipeStarted = useRef(false);
@@ -61,7 +53,6 @@ function App() {
     const swipeStartTime = useRef(0);
     const lastTouchX = useRef(0);
 
-    // --- URL SYNC FUNCTIONS ---
     const urlToScreen = useCallback((url) => {
         const path = url.replace(window.location.origin, '').replace('/', '') || 'home';
         return path;
@@ -71,19 +62,20 @@ function App() {
         return screen === 'home' ? '/' : `/${screen}`;
     }, []);
 
-    // Initialize navigation from URL
     useEffect(() => {
         const currentPath = window.location.pathname;
-        const initialScreen = currentPath === '/' ? 'home' : currentPath.substring(1);
-        setNavigationHistory([initialScreen]);
+        if (currentPath !== '/') {
+            window.history.replaceState({ screen: 'home' }, '', '/');
+            setNavigationHistory(['home']);
+        } else {
+            setNavigationHistory(['home']);
+        }
     }, []);
 
-    // --- DERIVED STATE ---
     const currentScreen = navigationHistory[navigationHistory.length - 1] || 'home';
     const previousScreen = navigationHistory.length > 1 ? navigationHistory[navigationHistory.length - 2] : null;
     const currentTheme = useMemo(() => (isDarkMode ? darkTheme : lightTheme), [isDarkMode]);
 
-    // --- SIDE EFFECTS ---
     useEffect(() => {
         const themeColor = isDarkMode ? darkTheme.colors.background : lightTheme.colors.background;
         const metaThemeColor = document.querySelector("meta[name=theme-color]");
@@ -109,7 +101,6 @@ function App() {
         ));
     }, [userSettings, currentUserId]);
 
-    // Sync URL with current screen
     useEffect(() => {
         if (currentScreen) {
             const newUrl = screenToUrl(currentScreen);
@@ -119,18 +110,14 @@ function App() {
         }
     }, [currentScreen, screenToUrl]);
 
-    // Handle browser back/forward buttons
     useEffect(() => {
         const handlePopState = (event) => {
             const screen = event.state?.screen || urlToScreen(window.location.pathname);
             setNavigationHistory(prev => {
-                // Find if this screen exists in history
                 const existingIndex = prev.findIndex(s => s === screen);
                 if (existingIndex !== -1) {
-                    // Go back to existing screen
                     return prev.slice(0, existingIndex + 1);
                 } else {
-                    // Add new screen
                     return [...prev, screen];
                 }
             });
@@ -140,7 +127,6 @@ function App() {
         return () => window.removeEventListener('popstate', handlePopState);
     }, [urlToScreen]);
 
-    // --- HANDLERS ---
     const handleNavigate = useCallback((screen) => {
         setIsTransitioning(true);
         setSwipeTranslateX(-window.innerWidth);
@@ -171,7 +157,6 @@ function App() {
         }
     }, [navigationHistory.length, isTransitioning]);
 
-    // --- ADDED HANDLER to add a dealer to the directory ---
     const handleAddDealer = useCallback((newDealerData) => {
         const newDealer = {
             id: dealerDirectory.length + 1,
@@ -338,12 +323,10 @@ function App() {
         swipeStartTime.current = 0;
     };
 
-    // --- RENDER LOGIC ---
     const renderScreen = (screenKey) => {
         if (!screenKey) return null;
         const screenParts = screenKey.split('/');
         const baseScreenKey = screenParts[0];
-        // --- Pass new state and handler down ---
         const commonProps = { theme: currentTheme, onNavigate: handleNavigate, setSuccessMessage, showAlert: handleShowAlert, handleBack, userSettings, currentScreen: screenKey, dealerDirectory, handleAddDealer };
 
         if (baseScreenKey === 'products' && screenParts[1] === 'category' && screenParts[2]) return <ProductComparisonScreen {...commonProps} categoryId={screenParts[2]} />;
