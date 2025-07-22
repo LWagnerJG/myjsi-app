@@ -775,7 +775,6 @@ export const LeadTimesScreen = ({ theme = {} }) => {
     );
 };
 
-
 const PresentationsScreen = ({ theme, onNavigate }) => {
     // Navigate to the series list or a future “by type” screen
     const handleNavigateByType = () =>
@@ -1515,7 +1514,6 @@ const EditablePersonRow = ({ person, theme, onUpdateRole, onRemovePerson }) => {
         </button>
     );
 };
-
 
 const PopoverPortal = ({ anchorEl, onClose, children }) => {
     const popoverRef = useRef(null);
@@ -2608,7 +2606,6 @@ export const LoanerItemCard = ({ item, isSelected, onSelect, theme }) => {
         </GlassCard>
     );
 };
-
 
 export const ResourceDetailScreen = ({ theme, onNavigate, setSuccessMessage, userSettings, showAlert, currentScreen, onUpdateCart, dealerDirectory, handleAddDealer }) => {
     // Extract the specific resource type from the URL-like path
@@ -4111,7 +4108,6 @@ export const AppHeader = React.memo(({ onHomeClick, isDarkMode, theme, onProfile
     );
 });
 
-
 export const SmartSearch = ({
     theme,
     onNavigate,
@@ -4238,7 +4234,6 @@ export const SmartSearch = ({
         </div>
     );
 };
-
 
 export const HomeScreen = ({ onNavigate, theme, onAskAI, showAIDropdown, aiResponse, isAILoading, onCloseAIDropdown, onVoiceActivate }) => {
     const handleFeedbackClick = useCallback(() => {
@@ -5080,7 +5075,6 @@ export const SalesScreen = ({ theme, onNavigate }) => {
         </div>
     );
 };
-
 
 export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => {
     const [currentDate, setCurrentDate] = useState(new Date());
