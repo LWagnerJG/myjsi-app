@@ -2147,11 +2147,13 @@ export const SampleDiscountsScreen = ({ theme, onNavigate, setSuccessMessage }) 
             }
 
             try {
+                // Try POST first (most Power Automate flows expect POST)
                 const response = await fetch(powerAutomateURL, {
-                    method: 'GET',
+                    method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
+                    body: JSON.stringify({}) // Empty JSON object
                 });
 
                 if (response.status === 401) {
@@ -2159,13 +2161,26 @@ export const SampleDiscountsScreen = ({ theme, onNavigate, setSuccessMessage }) 
                 }
 
                 if (!response.ok) {
+                    // Log the full error details
+                    const errorText = await response.text();
+                    console.error(`HTTP error! status: ${response.status} - ${response.statusText}`, errorText);
                     throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
                 }
 
                 const data = await response.json();
                 console.log("API Response:", data); // Debug log
-                // The API returns an object with a 'value' property containing the array
-                setDiscounts(data.value || []);
+
+                // Handle different response formats
+                if (Array.isArray(data)) {
+                    setDiscounts(data);
+                } else if (data.value && Array.isArray(data.value)) {
+                    setDiscounts(data.value);
+                } else if (data.body && Array.isArray(data.body)) {
+                    setDiscounts(data.body);
+                } else {
+                    console.log("Unexpected response format:", data);
+                    setDiscounts([]);
+                }
             } catch (e) {
                 console.error("Failed to fetch discounts:", e);
 
