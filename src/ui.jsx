@@ -1803,7 +1803,6 @@ export const CommissionRatesScreen = ({ theme }) => {
     useEffect(() => {
         const fetchRates = async () => {
             try {
-                // The backend connection logic remains the same.
                 const powerAutomateURL = import.meta.env.VITE_COMMISSION_RATES_URL;
                 if (!powerAutomateURL) {
                     throw new Error("Flow URL is not configured.");
@@ -1829,8 +1828,13 @@ export const CommissionRatesScreen = ({ theme }) => {
         fetchRates();
     }, []);
 
-    const { accent, textPrimary, textSecondary, border, subtle } = theme.colors;
-    const split = { specifying: 70, ordering: 30 };
+    const { accent, textPrimary, textSecondary, border, subtle, secondary } = theme.colors;
+
+    // Data for the new Donut Chart
+    const commissionSplitData = [
+        { label: 'Specifying', value: 70, color: accent },
+        { label: 'Ordering', value: 30, color: secondary }
+    ];
 
     if (loading) {
         return (
@@ -1852,23 +1856,21 @@ export const CommissionRatesScreen = ({ theme }) => {
         );
     }
 
-    // A Row component for cleaner mapping
     const RateRow = ({ item }) => {
-        // Special handling for the note on the last item
         const hasNote = item.spiff?.includes('*');
         const spiffValue = hasNote ? item.spiff.split('*')[0].trim() : item.spiff;
         const spiffNote = hasNote ? `*${item.spiff.split('*')[1]}` : null;
 
         return (
-            <div className="grid grid-cols-[2fr,1fr,1.5fr] items-center gap-x-4 py-4 px-2">
-                <span className="font-semibold text-lg" style={{ color: textPrimary }}>
+            <div className="grid grid-cols-[2fr,1fr,1.5fr] items-center gap-x-4 py-4 px-3">
+                <span className="font-semibold text-base" style={{ color: textPrimary }}>
                     {item.discount}
                 </span>
-                <span className="text-center font-bold text-lg" style={{ color: accent }}>
+                <span className="text-center font-bold text-base" style={{ color: accent }}>
                     {item.rep}
                 </span>
                 <div className="text-center">
-                    <span className="font-semibold text-lg" style={{ color: textPrimary }}>
+                    <span className="font-semibold text-base" style={{ color: textPrimary }}>
                         {spiffValue}
                     </span>
                     {spiffNote && (
@@ -1882,8 +1884,8 @@ export const CommissionRatesScreen = ({ theme }) => {
     };
 
     const SectionHeader = ({ title }) => (
-        <div className="px-2 pt-6 pb-2 border-t" style={{ borderColor: border }}>
-            <h3 className="font-bold text-base" style={{ color: textPrimary }}>
+        <div className="px-3 pt-6 pb-2">
+            <h3 className="font-bold text-lg" style={{ color: textPrimary }}>
                 {title}
             </h3>
         </div>
@@ -1894,37 +1896,31 @@ export const CommissionRatesScreen = ({ theme }) => {
             <PageTitle title="Commission Rates" theme={theme} />
             <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-6 scrollbar-hide">
                 <GlassCard theme={theme} className="p-4">
-                    {/* Column Headers */}
-                    <div className="grid grid-cols-[2fr,1fr,1.5fr] gap-x-4 px-2 pb-2 border-b" style={{ borderColor: border }}>
+                    {/* Uniform Headers with background */}
+                    <div className="grid grid-cols-[2fr,1fr,1.5fr] gap-x-4 p-3 rounded-xl" style={{ backgroundColor: subtle }}>
                         <span className="text-sm font-bold uppercase tracking-wider" style={{ color: textSecondary }}>Discounts</span>
                         <span className="text-sm font-bold uppercase text-center tracking-wider" style={{ color: textSecondary }}>Rep Comm.</span>
                         <span className="text-sm font-bold uppercase text-center tracking-wider" style={{ color: textSecondary }}>Spiff</span>
                     </div>
 
-                    {/* Rates List */}
                     <div className="divide-y" style={{ borderColor: subtle }}>
                         {rates.standard.map(r => <RateRow key={r.discount} item={r} />)}
-
-                        {rates.contract.length > 0 && <SectionHeader title="Contract Discounts" />}
-                        {rates.contract.map(r => <RateRow key={r.discount} item={r} />)}
+                        {rates.contract.length > 0 && (
+                            <>
+                                <SectionHeader title="Contract Discounts" />
+                                {rates.contract.map(r => <RateRow key={r.discount} item={r} />)}
+                            </>
+                        )}
                     </div>
                 </GlassCard>
 
-                <GlassCard theme={theme} className="p-6">
-                    <h3 className="mb-3 font-bold uppercase text-center tracking-wide text-sm" style={{ color: textSecondary }}>
+                {/* Donut Chart for Commission Split */}
+                <GlassCard theme={theme} className="p-4">
+                    <h3 className="font-bold text-xl mb-4 text-center" style={{ color: textPrimary }}>
                         Commission Split
                     </h3>
-                    <div className="w-full h-6 flex rounded-full overflow-hidden border" style={{ borderColor: border }}>
-                        <div className="flex items-center justify-center text-sm font-semibold text-white" style={{ width: `${split.specifying}%`, backgroundColor: accent }}>
-                            {split.specifying}%
-                        </div>
-                        <div className="flex items-center justify-center text-sm font-semibold" style={{ width: `${split.ordering}%`, backgroundColor: subtle, color: textPrimary }}>
-                            {split.ordering}%
-                        </div>
-                    </div>
-                    <div className="mt-2 flex justify-between text-sm font-medium">
-                        <span style={{ color: textSecondary }}>Specifying</span>
-                        <span style={{ color: textSecondary }}>Ordering</span>
+                    <div className="flex justify-center">
+                        <DonutChart data={commissionSplitData} theme={theme} />
                     </div>
                 </GlassCard>
             </div>
