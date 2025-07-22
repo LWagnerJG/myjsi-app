@@ -977,6 +977,17 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedFinish, setSelectedFinish] = useState(null);
 
+    // Helper function to get local image path
+    const getLocalOldFinishImagePath = (finishName) => {
+        if (!finishName) return '';
+        // Convert "ALE MEDIUM" to "ale_medium"
+        const formattedName = finishName.toLowerCase().replace(/\s+/g, '_');
+        // Construct the path assuming images are directly in the public folder or a subfolder like /images
+        // Adjust the prefix 'laminate_' and suffix '.jpg' based on your actual filenames
+        // Example: /laminate_ale_medium.jpg or /images/laminate_ale_medium.jpg
+        return `/laminate_${formattedName}.jpg`;
+    };
+
     useEffect(() => {
         const fetchFinishes = async () => {
             const powerAutomateURL = import.meta.env.VITE_OUTDATED_FINISHES_URL;
@@ -1015,7 +1026,7 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
     const groupedFinishes = useMemo(() => {
         const lowercasedFilter = searchTerm.toLowerCase().trim();
         const filtered = finishes.filter(finish => {
-            const oldFinishName = finish.OldFinish || ''; // This was corrected in the last iteration
+            const oldFinishName = finish.OldFinish || '';
 
             const category = typeof finish.Category === 'string'
                 ? finish.Category
@@ -1047,57 +1058,62 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
             name: formatFinishName(selectedFinish.NewFinishName),
             category: typeof selectedFinish.Category === 'string'
                 ? selectedFinish.Category
-                : selectedFinish.Category?.Value || '', // Corrected `selectedSelectedFinish` to `selectedFinish`
-            image: selectedFinish.NewFinishImageURL,
+                : selectedFinish.Category?.Value || '',
+            image: selectedFinish.NewFinishImageURL, // Still using URL from SharePoint for NewFinishImage
         };
         onUpdateCart(newItem, 1);
         setSelectedFinish(null);
         onNavigate('samples');
     };
 
-    const FinishRow = ({ finish, isLast }) => (
-        <button
-            onClick={() => setSelectedFinish(finish)}
-            className={`w-full text-left p-3 transition-colors hover:bg-black/5 rounded-2xl ${!isLast ? 'border-b' : ''}`}
-            style={{ borderColor: theme.colors.subtle }}
-        >
-            <div className="flex items-center justify-between">
-                {/* Section for Old Finish details */}
-                <div className="flex items-center space-x-4 w-[45%]">
-                    {/* Old Finish Image */}
-                    <div className="w-10 h-10 rounded-full flex-shrink-0 overflow-hidden" style={{ border: `1px solid ${theme.colors.border}`, backgroundColor: theme.colors.subtle }}>
-                        {finish.OldFinishImage ? ( // Assuming OldFinishImage is the property name for the URL
-                            <img src={finish.OldFinishImage} alt={finish.OldFinish} className="w-full h-full object-cover" />
-                        ) : (
-                            <div className="w-full h-full" />
-                        )}
+    const FinishRow = ({ finish, isLast }) => {
+        // Construct the local path for the old finish image
+        const oldFinishLocalImageUrl = getLocalOldFinishImagePath(finish.OldFinish);
+
+        return (
+            <button
+                onClick={() => setSelectedFinish(finish)}
+                className={`w-full text-left p-3 transition-colors hover:bg-black/5 rounded-2xl ${!isLast ? 'border-b' : ''}`}
+                style={{ borderColor: theme.colors.subtle }}
+            >
+                <div className="flex items-center justify-between">
+                    {/* Section for Old Finish details */}
+                    <div className="flex items-center space-x-4 w-[45%]">
+                        {/* Old Finish Image - now from public folder */}
+                        <div className="w-10 h-10 rounded-full flex-shrink-0 overflow-hidden" style={{ border: `1px solid ${theme.colors.border}`, backgroundColor: theme.colors.subtle }}>
+                            {oldFinishLocalImageUrl ? (
+                                <img src={oldFinishLocalImageUrl} alt={finish.OldFinish} className="w-full h-full object-cover" />
+                            ) : (
+                                <div className="w-full h-full" />
+                            )}
+                        </div>
+                        <div className="min-w-0">
+                            <p className="font-semibold text-sm truncate" style={{ color: theme.colors.textPrimary }}>{formatFinishName(finish.OldFinish)}</p>
+                            <p className="font-mono text-xs" style={{ color: theme.colors.textSecondary }}>{finish.OldVeneerCode}</p>
+                        </div>
                     </div>
-                    <div className="min-w-0">
-                        <p className="font-semibold text-sm truncate" style={{ color: theme.colors.textPrimary }}>{formatFinishName(finish.OldFinish)}</p>
-                        <p className="font-mono text-xs" style={{ color: theme.colors.textSecondary }}>{finish.OldVeneerCode}</p>
+
+                    <ArrowRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
+
+                    {/* Section for New Finish details */}
+                    <div className="flex items-center space-x-4 w-[45%]">
+                        {/* New Finish Image (still from SharePoint URL) */}
+                        <div className="w-10 h-10 rounded-full flex-shrink-0 overflow-hidden" style={{ border: `1px solid ${theme.colors.border}`, backgroundColor: theme.colors.subtle }}>
+                            {finish.NewFinishImageURL ? (
+                                <img src={finish.NewFinishImageURL} alt={finish.NewFinishName} className="w-full h-full object-cover" />
+                            ) : (
+                                <div className="w-full h-full" />
+                            )}
+                        </div>
+                        <div className="min-w-0">
+                            <p className="font-semibold text-sm truncate" style={{ color: theme.colors.textPrimary }}>{formatFinishName(finish.NewFinishName)}</p>
+                            <p className="font-mono text-xs" style={{ color: theme.colors.textSecondary }}>{finish.NewVeneerCode || finish.NewSolidCode || finish.OldLaminateInfo || finish.OldSolidCode}</p>
+                        </div>
                     </div>
                 </div>
-
-                <ArrowRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
-
-                {/* Section for New Finish details */}
-                <div className="flex items-center space-x-4 w-[45%]">
-                    {/* New Finish Image (already existing) */}
-                    <div className="w-10 h-10 rounded-full flex-shrink-0 overflow-hidden" style={{ border: `1px solid ${theme.colors.border}`, backgroundColor: theme.colors.subtle }}>
-                        {finish.NewFinishImageURL ? (
-                            <img src={finish.NewFinishImageURL} alt={finish.NewFinishName} className="w-full h-full object-cover" />
-                        ) : (
-                            <div className="w-full h-full" />
-                        )}
-                    </div>
-                    <div className="min-w-0">
-                        <p className="font-semibold text-sm truncate" style={{ color: theme.colors.textPrimary }}>{formatFinishName(finish.NewFinishName)}</p>
-                        <p className="font-mono text-xs" style={{ color: theme.colors.textSecondary }}>{finish.NewVeneerCode || finish.NewSolidCode || finish.OldLaminateInfo || finish.OldSolidCode}</p>
-                    </div>
-                </div>
-            </div>
-        </button>
-    );
+            </button>
+        );
+    };
 
     return (
         <div className="h-full flex flex-col">
@@ -1149,7 +1165,6 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
         </div>
     );
 };
-
 
 export const DesignDaysScreen = ({ theme }) => {
     // Hard-coded schedule and transport data from the site
