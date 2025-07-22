@@ -10,29 +10,29 @@ export const lightTheme = {
         background: '#f8f8f8',
         surface: '#FFFFFF',
         primary: '#b3b3af',
-        accent: '#AD8A77', 
+        accent: '#AD8A77',
         secondary: '#414141',
         textPrimary: '#111111',
         textSecondary: '#555555',
         border: 'rgba(0,0,0,0.08)',
         shadow: 'rgba(0,0,0,0.10)'
     },
-    backdropFilter: 'blur(12px)'
+    backdropFilter: 'blur(8px)'
 };
 
-export const darkTheme = { 
-    colors: { 
-        background: '#1E1E1E', 
-        surface: 'rgba(40,40,40,0.85)', 
-        primary: '#BBBBBB', 
-        accent: '#BBBBBB', 
-        secondary: '#999999', 
-        textPrimary: '#F5F5F5', 
-        textSecondary: '#CCCCCC', 
-        border: 'rgba(255,255,255,0.08)', 
-        shadow: 'rgba(0,0,0,0.25)' 
-    }, 
-    backdropFilter: 'blur(12px)' 
+export const darkTheme = {
+    colors: {
+        background: '#1E1E1E',
+        surface: 'rgba(40,40,40,0.85)',
+        primary: '#BBBBBB',
+        accent: '#BBBBBB',
+        secondary: '#999999',
+        textPrimary: '#F5F5F5',
+        textSecondary: '#CCCCCC',
+        border: 'rgba(255,255,255,0.08)',
+        shadow: 'rgba(0,0,0,0.25)'
+    },
+    backdropFilter: 'blur(8px)'
 };
 
 export const logoLight = 'https://i.imgur.com/qskYhB0.png';
