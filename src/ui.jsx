@@ -1015,10 +1015,8 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
     const groupedFinishes = useMemo(() => {
         const lowercasedFilter = searchTerm.toLowerCase().trim();
         const filtered = finishes.filter(finish => {
-            // Corrected: Use 'OldFinish' as the property name
-            const oldFinishName = finish.OldFinish || '';
+            const oldFinishName = finish.OldFinish || ''; // This was corrected in the last iteration
 
-            // Corrected: Access Category.Value
             const category = typeof finish.Category === 'string'
                 ? finish.Category
                 : finish.Category?.Value || '';
@@ -1031,7 +1029,6 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
         });
 
         return filtered.reduce((acc, finish) => {
-            // Corrected: Access Category.Value
             const category = typeof finish.Category === 'string'
                 ? finish.Category
                 : finish.Category?.Value || '';
@@ -1048,10 +1045,9 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
         const newItem = {
             id: `sample-${selectedFinish.NewFinishName.toLowerCase().replace(/\s/g, '-')}`,
             name: formatFinishName(selectedFinish.NewFinishName),
-            // Corrected: Access Category.Value
             category: typeof selectedFinish.Category === 'string'
                 ? selectedFinish.Category
-                : selectedSelectedFinish.Category?.Value || '',
+                : selectedFinish.Category?.Value || '', // Corrected `selectedSelectedFinish` to `selectedFinish`
             image: selectedFinish.NewFinishImageURL,
         };
         onUpdateCart(newItem, 1);
@@ -1066,15 +1062,27 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
             style={{ borderColor: theme.colors.subtle }}
         >
             <div className="flex items-center justify-between">
+                {/* Section for Old Finish details */}
                 <div className="flex items-center space-x-4 w-[45%]">
+                    {/* Old Finish Image */}
+                    <div className="w-10 h-10 rounded-full flex-shrink-0 overflow-hidden" style={{ border: `1px solid ${theme.colors.border}`, backgroundColor: theme.colors.subtle }}>
+                        {finish.OldFinishImage ? ( // Assuming OldFinishImage is the property name for the URL
+                            <img src={finish.OldFinishImage} alt={finish.OldFinish} className="w-full h-full object-cover" />
+                        ) : (
+                            <div className="w-full h-full" />
+                        )}
+                    </div>
                     <div className="min-w-0">
-                        {/* Corrected: Use 'OldFinish' */}
                         <p className="font-semibold text-sm truncate" style={{ color: theme.colors.textPrimary }}>{formatFinishName(finish.OldFinish)}</p>
                         <p className="font-mono text-xs" style={{ color: theme.colors.textSecondary }}>{finish.OldVeneerCode}</p>
                     </div>
                 </div>
+
                 <ArrowRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
+
+                {/* Section for New Finish details */}
                 <div className="flex items-center space-x-4 w-[45%]">
+                    {/* New Finish Image (already existing) */}
                     <div className="w-10 h-10 rounded-full flex-shrink-0 overflow-hidden" style={{ border: `1px solid ${theme.colors.border}`, backgroundColor: theme.colors.subtle }}>
                         {finish.NewFinishImageURL ? (
                             <img src={finish.NewFinishImageURL} alt={finish.NewFinishName} className="w-full h-full object-cover" />
@@ -1141,7 +1149,6 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
         </div>
     );
 };
-
 
 
 export const DesignDaysScreen = ({ theme }) => {
