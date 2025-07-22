@@ -5219,7 +5219,7 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
                 className="fixed top-[88px] left-4 right-4 z-10"
             >
                 <div
-                    className="flex items-center space-x-2 rounded-full p-2 shadow-lg backdrop-blur"
+                    className="flex items-center space-x-2 rounded-full p-2 shadow-lg"
                     style={{
                         backgroundColor: theme.colors.surface,
                         backdropFilter: theme.backdropFilter,
