@@ -5004,135 +5004,106 @@ export const OrderModal = React.memo(({ order, onClose, theme }) => {
 
 export const OrdersScreen = ({ theme, setSelectedOrder }) => {
     const [searchTerm, setSearchTerm] = useState('');
-    const [dateType, setDateType] = useState('shipDate');
-    const [viewMode, setViewMode] = useState('list');
-    const [showDateFilter, setShowDateFilter] = useState(false);
-    const filterMenuRef = useRef(null);
+    const [sortOption, setSortOption] = useState('Recent First');
 
-    useEffect(() => {
-        const handleClickOutside = (e) => {
-            if (filterMenuRef.current && !filterMenuRef.current.contains(e.target)) {
-                setShowDateFilter(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
+    const sortOptions = [
+        { value: 'Recent First', label: 'Recent First' },
+        { value: 'Oldest First', label: 'Oldest First' },
+        { value: 'Highest Amount', label: 'Highest Amount' },
+        { value: 'Lowest Amount', label: 'Lowest Amount' },
+    ];
 
-    const filteredOrders = useMemo(() => {
-        return Data.ORDER_DATA.filter(order =>
-            (order.company?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-            (order.details?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-            (order.orderNumber?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-            (order.po?.toLowerCase() || '').includes(searchTerm.toLowerCase())
-        );
-    }, [searchTerm]);
-
+    // Group orders by date
     const groupedOrders = useMemo(() => {
-        const groups = filteredOrders.reduce((acc, order) => {
-            const dateStr = order[dateType];
-            if (!dateStr || isNaN(new Date(dateStr))) return acc;
-            const date = new Date(dateStr);
-            const groupKey = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase();
-            if (!acc[groupKey]) {
-                acc[groupKey] = { orders: [], total: 0 };
-            }
-            acc[groupKey].orders.push(order);
-            acc[groupKey].total += order.net || 0;
+        return ORDER_DATA.reduce((acc, order) => {
+            const dateKey = order.date
+                ? new Date(order.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase()
+                : 'UNKNOWN';
+            if (!acc[dateKey]) acc[dateKey] = { orders: [], total: 0 };
+            acc[dateKey].orders.push(order);
+            acc[dateKey].total += parseFloat(order.amount.replace(/[$,]/g, '')) || 0;
             return acc;
         }, {});
-        for (const key in groups) {
-            groups[key].orders.sort((a, b) => new Date(b[dateType]) - new Date(a[dateType]));
-        }
-        return groups;
-    }, [filteredOrders, dateType]);
+    }, []);
 
-    const sortedGroupKeys = useMemo(() => {
-        if (!groupedOrders) return [];
-        return Object.keys(groupedOrders).sort((a, b) => new Date(b) - new Date(a));
-    }, [groupedOrders]);
+    // Filter and sort logic
+    const filteredAndSortedGroups = useMemo(() => {
+        let groups = Object.entries(groupedOrders);
+
+        // Filter
+        if (searchTerm) {
+            const lowerTerm = searchTerm.toLowerCase();
+            groups = groups.filter(([_, group]) =>
+                group.orders.some(order =>
+                    order.company.toLowerCase().includes(lowerTerm) ||
+                    order.details.toLowerCase().includes(lowerTerm) ||
+                    order.orderNumber.toLowerCase().includes(lowerTerm)
+                )
+            );
+        }
+
+        // Sort groups based on selected sort option
+        groups.sort((a, b) => {
+            let comparison = 0;
+            if (sortOption === 'Recent First' || sortOption === 'Oldest First') {
+                comparison = new Date(b[0]) - new Date(a[0]);
+            } else if (sortOption === 'Highest Amount' || sortOption === 'Lowest Amount') {
+                comparison = b[1].total - a[1].total;
+            }
+            return (sortOption === 'Recent First' || sortOption === 'Highest Amount') ? comparison : -comparison;
+        });
+
+        return groups;
+    }, [groupedOrders, searchTerm, sortOption]);
 
     return (
         <div className="flex flex-col h-full">
             <PageTitle title="Orders" theme={theme} />
-            <div className="px-4 pt-2 pb-4 flex items-center space-x-2 sticky top-0 z-10" style={{ backgroundColor: `${theme.colors.background}e0`, backdropFilter: 'blur(10px)' }}>
-                <SearchInput value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Search Orders..." theme={theme} className="flex-grow" />
-                <div className="relative">
-                    <button onClick={() => setShowDateFilter(f => !f)} className="p-3.5 rounded-full" style={{ backgroundColor: theme.colors.subtle }}>
-                        <Filter className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />
-                    </button>
-                    {showDateFilter && (
-                        <GlassCard ref={filterMenuRef} theme={theme} className="absolute top-14 right-0 z-10 w-40 p-2">
-                            <button onClick={() => { setDateType('shipDate'); setShowDateFilter(false); }} className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${dateType === 'shipDate' ? 'font-bold' : ''}`} style={{ color: theme.colors.textPrimary, backgroundColor: dateType === 'shipDate' ? theme.colors.subtle : 'transparent' }}>Ship Date</button>
-                            <button onClick={() => { setDateType('date'); setShowDateFilter(false); }} className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${dateType === 'date' ? 'font-bold' : ''}`} style={{ color: theme.colors.textPrimary, backgroundColor: dateType === 'date' ? theme.colors.subtle : 'transparent' }}>PO Date</button>
-                        </GlassCard>
-                    )}
-                </div>
-                <button onClick={() => setViewMode(v => v === 'list' ? 'calendar' : 'list')} className="p-3.5 rounded-full" style={{ backgroundColor: viewMode === 'calendar' ? theme.colors.accent : theme.colors.subtle, }}>
-                    <Calendar className="w-5 h-5" style={{ color: viewMode === 'calendar' ? 'white' : theme.colors.textPrimary }} />
-                </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-hide">
-                {viewMode === 'list' ? (
-                    <div className="space-y-6">
-                        {sortedGroupKeys.map(dateKey => (
-                            <div key={dateKey}>
-                                <div className="flex justify-between items-baseline mb-3 px-1 pb-2 border-b" style={{ borderColor: theme.colors.border }}>
-                                    <h2 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>{dateKey.replace(/, \d{4}$/, '')}</h2>
-                                    <p className="font-bold text-xl" style={{ color: theme.colors.accent }}>
-                                        ${groupedOrders[dateKey].total.toLocaleString('en-US', { maximumFractionDigits: 0 })}
-                                    </p>
-                                </div>
-                                <div className="space-y-3">
-                                    {groupedOrders[dateKey].orders.map((order) => {
-                                        const statusColor = Data.STATUS_COLORS[order.status] || theme.colors.secondary;
-                                        return (
-                                            <GlassCard
-                                                key={order.orderNumber}
-                                                theme={theme}
-                                                className="p-4 cursor-pointer hover:border-gray-400/50 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
-                                                onClick={() => setSelectedOrder(order)}
-                                            >
-                                                <div className="flex items-center space-x-4">
-                                                    <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: statusColor }} />
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className="font-bold text-base truncate" style={{ color: theme.colors.textPrimary }}>
-                                                            {order.details || 'N/A'}
-                                                        </p>
-                                                        <p className="text-sm truncate" style={{ color: theme.colors.textSecondary }}>
-                                                            {order.company}
-                                                        </p>
-                                                    </div>
-                                                    <div className="text-right flex-shrink-0">
-                                                        <p className="font-bold text-lg" style={{ color: theme.colors.accent }}>
-                                                            ${(order.net || 0).toLocaleString('en-US', { maximumFractionDigits: 0 })}
-                                                        </p>
-                                                        <p className="text-xs font-mono" style={{ color: theme.colors.textSecondary }}>
-                                                            {order.orderNumber}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </GlassCard>
-                                        )
-                                    })}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                ) : (
-                    <OrderCalendarView
-                        orders={filteredOrders}
+            <div className="px-4 pb-4 flex items-center space-x-2">
+                <SearchInput
+                    className="flex-grow"
+                    value={searchTerm}
+                    onChange={e => setSearchTerm(e.target.value)}
+                    placeholder="Search orders..."
+                    theme={theme}
+                />
+                <div className="w-40">
+                    <PortalNativeSelect
+                        value={sortOption}
+                        onChange={e => setSortOption(e.target.value)}
+                        options={sortOptions}
                         theme={theme}
-                        dateType={dateType}
-                        onOrderClick={setSelectedOrder}
+                        placeholder="Sort by"
                     />
-                )}
+                </div>
+            </div>
+            <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-6 scrollbar-hide">
+                {filteredAndSortedGroups.map(([date, group]) => (
+                    <div key={date} className="space-y-3">
+                        <GlassCard
+                            theme={theme}
+                            className="p-3 flex justify-between items-center rounded-2xl shadow-md"
+                            style={{ backgroundColor: theme.colors.subtle }}
+                        >
+                            <h3 className="text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>{date}</h3>
+                            <p className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>${group.total.toLocaleString()}</p>
+                        </GlassCard>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {group.orders.slice(0, 3).map(order => (
+                                <OrderCard
+                                    key={order.orderNumber}
+                                    order={order}
+                                    theme={theme}
+                                    onClick={() => setSelectedOrder(order)}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                ))}
             </div>
         </div>
     );
 };
-
 
 export const SalesScreen = ({ theme, onNavigate }) => {
     const { MONTHLY_SALES_DATA, ORDER_DATA, SALES_VERTICALS_DATA, STATUS_COLORS } = Data;
