@@ -993,6 +993,7 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const data = await response.json();
+                console.log("Fetched data:", data); // IMPORTANT: Check this in your browser's console!
                 setFinishes(data);
             } catch (error) {
                 console.error("Failed to fetch finishes:", error);
@@ -1013,20 +1014,31 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
 
     const groupedFinishes = useMemo(() => {
         const lowercasedFilter = searchTerm.toLowerCase().trim();
-        const filtered = finishes.filter(finish =>
-            (finish.OldFinishName || '').toLowerCase().includes(lowercasedFilter) ||
-            (finish.NewFinishName || '').toLowerCase().includes(lowercasedFilter) ||
-            (finish.Category || '').toLowerCase().includes(lowercasedFilter)
-        );
+        const filtered = finishes.filter(finish => {
+            // Robust access for OldFinishName
+            const oldFinishName = finish.OldFinishName || finish.oldFinishName || finish.Oldfinishname || '';
 
-        return filtered.reduce((acc, finish) => {
-            // Handle case where Category might be an object or null/undefined
+            // Robust access for Category
             const category = typeof finish.Category === 'string'
                 ? finish.Category
-                : finish.Category?.name || finish.Category?.title || '';
+                : finish.Category?.Value || finish.Category?.name || finish.Category?.title || ''; // Added .Value for SharePoint Choice columns
 
-            if (!acc[category]) acc[category] = [];
-            acc[category].push(finish);
+            return (
+                oldFinishName.toLowerCase().includes(lowercasedFilter) ||
+                (finish.NewFinishName || '').toLowerCase().includes(lowercasedFilter) ||
+                category.toLowerCase().includes(lowercasedFilter)
+            );
+        });
+
+        return filtered.reduce((acc, finish) => {
+            // Use the same robust category extraction here
+            const category = typeof finish.Category === 'string'
+                ? finish.Category
+                : finish.Category?.Value || finish.Category?.name || finish.Category?.title || '';
+
+            const categoryKey = category || 'Uncategorized'; // Handle potentially empty categories
+            if (!acc[categoryKey]) acc[categoryKey] = [];
+            acc[categoryKey].push(finish);
             return acc;
         }, {});
     }, [searchTerm, finishes]);
@@ -1036,7 +1048,10 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
         const newItem = {
             id: `sample-${selectedFinish.NewFinishName.toLowerCase().replace(/\s/g, '-')}`,
             name: formatFinishName(selectedFinish.NewFinishName),
-            category: selectedFinish.Category,
+            // Use robust category access for the cart item
+            category: typeof selectedFinish.Category === 'string'
+                ? selectedFinish.Category
+                : selectedFinish.Category?.Value || selectedFinish.Category?.name || selectedFinish.Category?.title || '',
             image: selectedFinish.NewFinishImageURL,
         };
         onUpdateCart(newItem, 1);
@@ -1053,7 +1068,8 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
             <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4 w-[45%]">
                     <div className="min-w-0">
-                        <p className="font-semibold text-sm truncate" style={{ color: theme.colors.textPrimary }}>{formatFinishName(finish.OldFinishName)}</p>
+                        {/* Use robust access for OldFinishName */}
+                        <p className="font-semibold text-sm truncate" style={{ color: theme.colors.textPrimary }}>{formatFinishName(finish.OldFinishName || finish.oldFinishName || finish.Oldfinishname)}</p>
                         <p className="font-mono text-xs" style={{ color: theme.colors.textSecondary }}>{finish.OldVeneerCode}</p>
                     </div>
                 </div>
@@ -1125,6 +1141,9 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
         </div>
     );
 };
+
+
+
 
 export const DesignDaysScreen = ({ theme }) => {
     // Hard-coded schedule and transport data from the site
