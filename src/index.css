@@ -8,18 +8,6 @@ body {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
-.container {
-    padding: 20px;
-    background: #fff;
-    display: flex;
-    justify-content: center;
-}
-
-.title {
-    font-size: 24px;
-    margin-bottom: 20px;
-}
-
 /* ---- Scrollbar-Hide Utility ---- */
 .scrollbar-hide {
     -ms-overflow-style: none;
@@ -32,26 +20,57 @@ body {
 
 /*
  =================================================================
- === NEW ANIMATION STYLES (Add this entire block) ===
+ === NEW, SIMPLIFIED ANIMATION SYSTEM ===
  =================================================================
 */
 
-.screen-container {
+/* This is the main container that holds both screens */
+.app-container {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    padding-top: 85px; /* IMPORTANT: Adjust if your header height is different */
-    background-color: inherit;
-    will-change: transform;
+    inset: 0;
+    /* IMPORTANT: No overflow: hidden; here. This fixes the "cut-off" screen glitch. */
 }
 
-    /*
-  The `is-animating` class is the key. 
-  The transition property is ONLY applied when this class is active.
-  This allows for smooth animations when navigating, but instant dragging when swiping.
-*/
-    .screen-container.is-animating {
-        transition: transform 0.3s ease-out;
+.screen-container {
+    position: absolute;
+    inset: 0;
+    padding-top: 85px; /* Adjust if header height is different */
+    background-color: inherit;
+    transition: transform 0.3s ease-out;
+}
+
+    /* --- Default Screen Positions ('idle' state) --- */
+    .screen-container.current-screen {
+        transform: translateX(0);
+        z-index: 2;
     }
+
+    .screen-container.previous-screen {
+        transform: translateX(-30%); /* Start slightly off-screen for a parallax effect */
+        z-index: 1;
+    }
+
+/* --- Forward Animation --- */
+.app-container.anim-forward .current-screen {
+    /* The new screen starts off-screen to the right... */
+    transform: translateX(100%);
+}
+
+.app-container.anim-forward .previous-screen {
+    /* ...while the old screen stays put and will be covered. */
+    transform: translateX(0);
+}
+
+
+/* --- Backward Animation --- */
+.app-container.anim-backward .current-screen {
+    /* The current screen slides out to the right. */
+    transform: translateX(100%);
+    z-index: 2;
+}
+
+.app-container.anim-backward .previous-screen {
+    /* The previous screen slides into view from its starting position. */
+    transform: translateX(0);
+    z-index: 1;
+}

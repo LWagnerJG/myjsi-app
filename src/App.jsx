@@ -1,94 +1,55 @@
 ﻿import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
-import { lightTheme, darkTheme, INITIAL_MEMBERS, INITIAL_OPPORTUNITIES, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS, INITIAL_POSTS, INITIAL_POLLS, MY_PROJECTS_DATA } from './data.jsx';
-import {
-    AppHeader, ProfileMenu, SCREEN_MAP, OrderModal, Modal, SuccessToast,
-    ResourceDetailScreen, CartScreen, VoiceModal, ProductComparisonScreen,
-    CompetitiveAnalysisScreen, PlaceholderScreen, FabricsScreen, ProjectDetailModal, CreateContentModal,
-    AddNewInstallScreen, MyProjectDetailModal
-} from './ui.jsx';
-import * as Data from './data.jsx';
+import { lightTheme, darkTheme } from './data.jsx';
+import { AppHeader, ProfileMenu, SCREEN_MAP } from './ui.jsx';
 
-// --- Main App Component ---
 function App() {
-    // --- Core State for Navigation ---
+    // --- Core State ---
     const [navigationHistory, setNavigationHistory] = useState(['home']);
-    const [isAnimating, setIsAnimating] = useState(false);
-
-    // --- Ref for the main container to attach listeners ---
+    const [animation, setAnimation] = useState('idle'); // 'idle', 'forward', 'backward'
     const appContainerRef = useRef(null);
 
-    // --- All other application state remains the same ---
+    // All other application state
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
-    const [successMessage, setSuccessMessage] = useState('');
-    const [alertInfo, setAlertInfo] = useState({ show: false, message: '' });
-    const [voiceMessage, setVoiceMessage] = useState('');
-    const [userSettings, setUserSettings] = useState({
-        id: 1, firstName: 'Luke', lastName: 'Wagner', email: 'luke.wagner@example.com',
-        homeAddress: '5445 N Deerwood Lake Rd, Jasper, IN 47546', tShirtSize: 'L',
-        permissions: { salesData: true, commissions: true, projects: true, customerRanking: true, dealerRewards: true, submittingReplacements: true }
-    });
-    const [cart, setCart] = useState({});
-    const [selectedOrder, setSelectedOrder] = useState(null);
-    const [opportunities, setOpportunities] = useState(INITIAL_OPPORTUNITIES);
-    const [designFirms, setDesignFirms] = useState(INITIAL_DESIGN_FIRMS);
-    const [dealers, setDealers] = useState(INITIAL_DEALERS);
-    const [selectedOpportunity, setSelectedOpportunity] = useState(null);
-    const [myProjects, setMyProjects] = useState(MY_PROJECTS_DATA);
-    const [selectedProject, setSelectedProject] = useState(null);
-    const [posts, setPosts] = useState(INITIAL_POSTS);
-    const [polls, setPolls] = useState(INITIAL_POLLS);
-    const [likedPosts, setLikedPosts] = useState({});
-    const [pollChoices, setPollChoices] = useState({});
-    const [showCreateContentModal, setShowCreateContentModal] = useState(false);
-    const [aiResponse, setAiResponse] = useState('');
-    const [isAILoading, setIsAILoading] = useState(false);
-    const [showAIDropdown, setShowAIDropdown] = useState(false);
+    const [userSettings, setUserSettings] = useState({ firstName: 'Luke' });
+    // ... add any other states like cart, orders, etc. here if needed
 
-    // --- Derived state and memoization ---
     const currentScreen = navigationHistory[navigationHistory.length - 1];
     const previousScreen = navigationHistory.length > 1 ? navigationHistory[navigationHistory.length - 2] : null;
     const currentTheme = useMemo(() => (isDarkMode ? darkTheme : lightTheme), [isDarkMode]);
 
     // --- One-time setup effect ---
     useEffect(() => {
-        document.body.style.position = 'fixed';
-        document.body.style.width = '100%';
-        document.body.style.height = '100%';
-        document.body.style.overflow = 'hidden';
-        let viewportMeta = document.querySelector('meta[name="viewport"]');
-        if (!viewportMeta) {
-            viewportMeta = document.createElement('meta');
-            viewportMeta.name = 'viewport';
-            document.head.appendChild(viewportMeta);
-        }
-        viewportMeta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover';
+        document.body.style.overflow = 'hidden'; // Prevents bounce on the whole page
     }, []);
 
-    // --- Simplified Navigation Logic ---
+    // --- Simplified Navigation ---
     const handleNavigate = useCallback((screen) => {
-        if (isAnimating) return;
-        setIsAnimating(true);
+        if (animation !== 'idle') return;
+        setAnimation('forward');
         setNavigationHistory(prev => [...prev, screen]);
-    }, [isAnimating]);
+        setTimeout(() => setAnimation('idle'), 350); // Animation duration + buffer
+    }, [animation]);
 
     const handleBack = useCallback(() => {
-        if (navigationHistory.length <= 1 || isAnimating) return;
-        setIsAnimating(true);
+        if (navigationHistory.length <= 1 || animation !== 'idle') return;
+        setAnimation('backward');
         setTimeout(() => {
             setNavigationHistory(prev => prev.slice(0, -1));
-            setIsAnimating(false);
-        }, 300);
-    }, [navigationHistory.length, isAnimating]);
+            setAnimation('idle');
+        }, 300); // Animation duration
+    }, [navigationHistory.length, animation]);
 
     const handleHome = useCallback(() => {
-        if (isAnimating) return;
-        setIsAnimating(true);
-        setTimeout(() => {
-            setNavigationHistory(['home']);
-            setIsAnimating(false);
-        }, 300);
-    }, [isAnimating]);
+        if (animation !== 'idle') return;
+        if (navigationHistory.length > 1) {
+            setAnimation('backward');
+            setTimeout(() => {
+                setNavigationHistory(['home']);
+                setAnimation('idle');
+            }, 300);
+        }
+    }, [animation, navigationHistory.length]);
 
     // --- FIX: Programmatic Event Listeners for Swipe Gesture ---
     useEffect(() => {
@@ -99,8 +60,7 @@ function App() {
         let isSwiping = false;
 
         const handleTouchStart = (e) => {
-            // Only start swipe if not animating, there's a page to go back to, and touch is on the left edge
-            if (!isAnimating && navigationHistory.length > 1 && e.touches[0].clientX < 50) {
+            if (animation !== 'idle' && navigationHistory.length > 1 && e.touches[0].clientX < 50) {
                 isSwiping = true;
                 touchStartX = e.touches[0].clientX;
             }
@@ -108,94 +68,71 @@ function App() {
 
         const handleTouchMove = (e) => {
             if (!isSwiping) return;
-            // This is the key: we prevent the default browser scroll action
+            // This is the key: we prevent the default browser scroll action, fixing the console error.
             e.preventDefault();
         };
 
         const handleTouchEnd = (e) => {
             if (!isSwiping) return;
+            isSwiping = false;
             const touchEndX = e.changedTouches[0].clientX;
             const swipeDistance = touchEndX - touchStartX;
-
-            // If the user swiped more than 1/4 of the screen, go back
-            if (swipeDistance > window.innerWidth / 4) {
+            if (swipeDistance > 80) { // A generous swipe threshold
                 handleBack();
             }
-
-            isSwiping = false;
         };
 
-        // Add event listeners programmatically
-        container.addEventListener('touchstart', handleTouchStart);
-        container.addEventListener('touchmove', handleTouchMove, { passive: false }); // Explicitly set passive to false
-        container.addEventListener('touchend', handleTouchEnd);
+        container.addEventListener('touchstart', handleTouchStart, { passive: true });
+        container.addEventListener('touchmove', handleTouchMove, { passive: false });
+        container.addEventListener('touchend', handleTouchEnd, { passive: true });
 
-        // Cleanup function to remove listeners
         return () => {
             container.removeEventListener('touchstart', handleTouchStart);
             container.removeEventListener('touchmove', handleTouchMove);
             container.removeEventListener('touchend', handleTouchEnd);
         };
-    }, [isAnimating, navigationHistory.length, handleBack]); // Re-attach listeners if state changes
+    }, [animation, navigationHistory.length, handleBack]);
 
-
-    const handleSaveSettings = useCallback(() => {
-        setSuccessMessage("Settings Saved!");
-        setTimeout(() => setSuccessMessage(""), 2000);
-        handleBack();
-    }, [handleBack]);
-
-    const handleNewLeadSuccess = useCallback((newLead) => {
-        setOpportunities(prev => [...prev, {
-            id: opportunities.length + 1, name: newLead.project, stage: newLead.projectStatus,
-            value: `$${parseInt(String(newLead.estimatedList).replace(/[^0-9]/g, '')).toLocaleString()}`,
-            company: newLead.dealer, ...newLead
-        }]);
-        handleNavigate('projects');
-        setSuccessMessage("Lead Created!");
-        setTimeout(() => setSuccessMessage(""), 2000);
-    }, [opportunities.length, handleNavigate]);
-
+    // --- Render function for screens ---
     const renderScreen = (screenKey) => {
         if (!screenKey) return null;
-        const screenParts = screenKey.split('/');
-        const baseScreenKey = screenParts[0];
-        const commonProps = { theme: currentTheme, onNavigate: handleNavigate, handleBack };
+        const ScreenComponent = SCREEN_MAP[screenKey];
+        if (!ScreenComponent) return <div>Screen not found: {screenKey}</div>;
 
-        const ScreenComponent = SCREEN_MAP[baseScreenKey];
-        if (!ScreenComponent) return <PlaceholderScreen {...commonProps} category="Page Not Found" />;
-
-        const allProps = {
-            ...commonProps,
-            userSettings,
-            setSuccessMessage,
-            showAlert: (message) => setAlertInfo({ show: true, message }),
-            ...(baseScreenKey === 'samples' && { cart, onUpdateCart: (item, change) => setCart(p => ({ ...p, [item.id]: (p[item.id] || 0) + change > 0 ? (p[item.id] || 0) + change : undefined })) }),
-            ...(baseScreenKey === 'settings' && { setUserSettings, onSave: handleSaveSettings }),
-            ...(baseScreenKey === 'projects' && { opportunities, setSelectedOpportunity, myProjects, setSelectedProject }),
-        };
-
-        return <ScreenComponent {...allProps} />;
+        // Pass only the necessary props
+        return <ScreenComponent
+            theme={currentTheme}
+            onNavigate={handleNavigate}
+            handleBack={handleBack}
+            // Add other globally needed props here
+            userSettings={userSettings}
+        />;
     };
 
-    const animationClass = isAnimating ? 'is-animating' : '';
-
     return (
-        <div ref={appContainerRef} className="h-screen w-screen font-sans flex flex-col relative overflow-hidden" style={{ backgroundColor: currentTheme.colors.background }}>
+        // The ref is attached here, and overflow-hidden is REMOVED to fix the "cut-off" screen
+        <div ref={appContainerRef} className="h-screen w-screen font-sans bg-gray-100 relative">
             <AppHeader
-                theme={currentTheme} userName={userSettings.firstName} isHome={currentScreen === 'home'}
-                showBack={navigationHistory.length > 1} handleBack={handleBack} isDarkMode={isDarkMode}
-                onToggleDark={() => setIsDarkMode(d => !d)} onHomeClick={handleHome} onProfileClick={() => setShowProfileMenu(p => !p)}
+                theme={currentTheme}
+                userName={userSettings.firstName}
+                showBack={navigationHistory.length > 1}
+                handleBack={handleBack}
+                onHomeClick={handleHome}
+                onProfileClick={() => setShowProfileMenu(p => !p)}
+                isDarkMode={isDarkMode}
+                onToggleDark={() => setIsDarkMode(d => !d)}
             />
 
-            <div className="flex-1 relative">
-                <div className={`screen-container ${animationClass} previous-screen`}>
+            <div className={`app-container anim-${animation}`}>
+                {/* Previous Screen */}
+                <div className="screen-container previous-screen">
                     <div className="h-full overflow-y-auto scrollbar-hide">
                         {renderScreen(previousScreen)}
                     </div>
                 </div>
 
-                <div className={`screen-container ${animationClass} current-screen`}>
+                {/* Current Screen */}
+                <div className="screen-container current-screen">
                     <div className="h-full overflow-y-auto scrollbar-hide">
                         {renderScreen(currentScreen)}
                     </div>
@@ -203,7 +140,6 @@ function App() {
             </div>
 
             {showProfileMenu && <ProfileMenu show={showProfileMenu} onClose={() => setShowProfileMenu(false)} onNavigate={handleNavigate} toggleTheme={() => setIsDarkMode(d => !d)} theme={currentTheme} isDarkMode={isDarkMode} />}
-            {/* ... other modals ... */}
         </div>
     );
 }
