@@ -4317,7 +4317,8 @@ export const AppHeader = React.memo(({ onHomeClick, isDarkMode, theme, onProfile
     return (
         <div
             style={{
-                backgroundColor: theme.colors.surface,
+                // FIX: Added transparency ('e6') to the background color to enable the blur effect.
+                backgroundColor: `${theme.colors.surface}e6`,
                 backdropFilter: theme.backdropFilter,
                 WebkitBackdropFilter: theme.backdropFilter
             }}
@@ -4362,6 +4363,7 @@ export const AppHeader = React.memo(({ onHomeClick, isDarkMode, theme, onProfile
         </div>
     );
 });
+
 
 export const OrdersScreen = ({ theme, setSelectedOrder }) => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -4416,13 +4418,11 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
     }, [groupedOrders]);
 
     return (
-        // This new outer container enables the sticky header layout
         <div className="flex flex-col h-full">
-            {/* This div is now the sticky header */}
             <div
                 className="sticky top-0 z-10 p-4"
                 style={{
-                    backgroundColor: `${theme.colors.background}e6`, // Semi-transparent background for the sticky header
+                    backgroundColor: `${theme.colors.background}e6`,
                     backdropFilter: 'blur(10px)',
                     WebkitBackdropFilter: 'blur(10px)',
                 }}
@@ -4458,8 +4458,8 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
                 </div>
             </div>
 
-            {/* This div is now the main scrollable content area */}
-            <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4">
+            {/* FIX: Added 'pt-4' to this container to add space below the sticky header */}
+            <div className="flex-1 overflow-y-auto px-4 pt-4 pb-4 space-y-4">
                 {viewMode === 'list' ? (
                     <div className="space-y-4">
                         {sortedGroupKeys.map(dateKey => {
