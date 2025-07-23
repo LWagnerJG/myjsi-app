@@ -1,5 +1,5 @@
 ﻿import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { lightTheme, darkTheme, INITIAL_OPPORTUNITIES, MY_PROJECTS_DATA, INITIAL_MEMBERS, INITIAL_POSTS, INITIAL_POLLS, DEALER_DIRECTORY_DATA } from './data.jsx';
+import { lightTheme, darkTheme, INITIAL_OPPORTUNITIES, MY_PROJECTS_DATA, INITIAL_MEMBERS, INITIAL_POSTS, INITIAL_POLLS, DEALER_DIRECTORY_DATA, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS } from './data.jsx';
 import { AppHeader, ProfileMenu, SCREEN_MAP, VoiceModal, OrderModal, SuccessToast, ProductComparisonScreen, ResourceDetailScreen, CreateContentModal, AddNewInstallScreen, Modal } from './ui.jsx';
 
 function App() {
@@ -27,6 +27,9 @@ function App() {
     const [pollChoices, setPollChoices] = useState({});
     const [showCreateContentModal, setShowCreateContentModal] = useState(false);
     const [dealerDirectory, setDealerDirectory] = useState(DEALER_DIRECTORY_DATA);
+    const [designFirms, setDesignFirms] = useState(INITIAL_DESIGN_FIRMS);
+    const [dealers, setDealers] = useState(INITIAL_DEALERS);
+
 
     // Derived State
     const currentScreen = navigationHistory[navigationHistory.length - 1];
@@ -99,6 +102,18 @@ function App() {
             ...(baseScreenKey === 'members' && { members, setMembers, currentUserId }),
             ...(baseScreenKey === 'community' && { posts, polls, likedPosts, onToggleLike: handleToggleLike, pollChoices, onPollVote: handlePollVote, openCreateContentModal: () => setShowCreateContentModal(true) }),
             ...(baseScreenKey === 'add-new-install' && { onAddInstall: handleAddNewInstall }),
+            ...(baseScreenKey === 'new-lead' && {
+                designFirms, setDesignFirms, dealers, setDealers, onSuccess: (newLead) => {
+                    setOpportunities(prev => [...prev, {
+                        id: opportunities.length + 1, name: newLead.project, stage: newLead.projectStatus,
+                        value: `$${parseInt(String(newLead.estimatedList).replace(/[^0-9]/g, '')).toLocaleString()}`,
+                        company: newLead.dealer, ...newLead
+                    }]);
+                    handleNavigate('projects');
+                    setSuccessMessage("Lead Created!");
+                    setTimeout(() => setSuccessMessage(""), 2000);
+                }
+            }),
         };
 
         return <ScreenComponent {...allProps} />;

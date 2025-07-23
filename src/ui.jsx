@@ -4417,7 +4417,6 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
 
     return (
         <>
-            {/* This container is no longer fixed, allowing it to scroll naturally */}
             <div className="p-4 space-y-4">
                 <div
                     className="flex items-center space-x-2 rounded-full p-2 shadow-lg"
@@ -4440,6 +4439,7 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
                             <Filter className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />
                         </button>
                         {showDateFilter && (
+                            // This z-index is increased to ensure it appears on top
                             <GlassCard ref={filterMenuRef} theme={theme} className="absolute top-14 right-0 z-20 w-40 p-2">
                                 <button onClick={() => { setDateType('shipDate'); setShowDateFilter(false); }} className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${dateType === 'shipDate' ? 'font-bold' : ''}`} style={{ color: theme.colors.textPrimary, backgroundColor: dateType === 'shipDate' ? theme.colors.subtle : 'transparent' }}>Ship Date</button>
                                 <button onClick={() => { setDateType('date'); setShowDateFilter(false); }} className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${dateType === 'date' ? 'font-bold' : ''}`} style={{ color: theme.colors.textPrimary, backgroundColor: dateType === 'date' ? theme.colors.subtle : 'transparent' }}>PO Date</button>
