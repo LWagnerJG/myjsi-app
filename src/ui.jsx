@@ -4377,7 +4377,7 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
 
     useEffect(() => {
         const handleClickOutside = (e) => {
-            if (filterMenuRef.current && !filterMenu - ref.current.contains(e.target)) {
+            if (filterMenuRef.current && !filterMenuRef.current.contains(e.target)) {
                 setShowDateFilter(false);
             }
         };
@@ -4416,15 +4416,21 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
     }, [groupedOrders]);
 
     return (
-        <>
-            <div className="p-4 space-y-4">
-                {/* FIX: Added 'relative' and 'z-10' to this container to lift it above the content below */}
+        // This new outer container enables the sticky header layout
+        <div className="flex flex-col h-full">
+            {/* This div is now the sticky header */}
+            <div
+                className="sticky top-0 z-10 p-4"
+                style={{
+                    backgroundColor: `${theme.colors.background}e6`, // Semi-transparent background for the sticky header
+                    backdropFilter: 'blur(10px)',
+                    WebkitBackdropFilter: 'blur(10px)',
+                }}
+            >
                 <div
-                    className="relative z-10 flex items-center space-x-2 rounded-full p-2 shadow-lg"
+                    className="flex items-center space-x-2 rounded-full p-2 shadow-lg"
                     style={{
-                        backgroundColor: `${theme.colors.surface}e6`,
-                        backdropFilter: theme.backdropFilter,
-                        WebkitBackdropFilter: theme.backdropFilter,
+                        backgroundColor: theme.colors.surface,
                         boxShadow: `0 8px 32px 0 ${theme.colors.shadow}`,
                     }}
                 >
@@ -4450,7 +4456,10 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
                         <Calendar className="w-5 h-5" style={{ color: viewMode === 'calendar' ? 'white' : theme.colors.textPrimary }} />
                     </button>
                 </div>
+            </div>
 
+            {/* This div is now the main scrollable content area */}
+            <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4">
                 {viewMode === 'list' ? (
                     <div className="space-y-4">
                         {sortedGroupKeys.map(dateKey => {
@@ -4516,10 +4525,9 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
                     />
                 )}
             </div>
-        </>
+        </div>
     );
 };
-
 
 export const SmartSearch = ({
     theme,
