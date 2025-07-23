@@ -1,6 +1,6 @@
 ﻿import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { lightTheme, darkTheme, INITIAL_OPPORTUNITIES, MY_PROJECTS_DATA, INITIAL_MEMBERS, INITIAL_POSTS, INITIAL_POLLS, DEALER_DIRECTORY_DATA } from './data.jsx';
-import { AppHeader, ProfileMenu, SCREEN_MAP, VoiceModal, OrderModal, SuccessToast, ProductComparisonScreen, ResourceDetailScreen, CreateContentModal, AddNewInstallScreen } from './ui.jsx';
+import { AppHeader, ProfileMenu, SCREEN_MAP, VoiceModal, OrderModal, SuccessToast, ProductComparisonScreen, ResourceDetailScreen, CreateContentModal, AddNewInstallScreen, Modal } from './ui.jsx';
 
 function App() {
     // Core State
@@ -11,6 +11,7 @@ function App() {
     const [voiceMessage, setVoiceMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const [cart, setCart] = useState({});
+    const [alertInfo, setAlertInfo] = useState({ show: false, message: '' });
 
     // State for Screen Components
     const [opportunities, setOpportunities] = useState(INITIAL_OPPORTUNITIES);
@@ -31,7 +32,6 @@ function App() {
     const currentScreen = navigationHistory[navigationHistory.length - 1];
     const currentTheme = useMemo(() => (isDarkMode ? darkTheme : lightTheme), [isDarkMode]);
 
-    // One-time Setup Effect
     useEffect(() => {
         document.body.style.position = 'fixed';
         document.body.style.width = '100%';
@@ -47,72 +47,34 @@ function App() {
     }, []);
 
     // Handlers
-    const handleNavigate = useCallback((screen) => {
-        setNavigationHistory(prev => [...prev, screen]);
-    }, []);
-
-    const handleBack = useCallback(() => {
-        if (navigationHistory.length > 1) {
-            setNavigationHistory(prev => prev.slice(0, -1));
-        }
-    }, [navigationHistory.length]);
-
-    const handleHome = useCallback(() => {
-        setNavigationHistory(['home']);
-    }, []);
-
-    const handleVoiceActivate = useCallback((message) => {
-        setVoiceMessage(message);
-        setTimeout(() => setVoiceMessage(''), 1500);
-    }, []);
-
+    const handleNavigate = useCallback((screen) => setNavigationHistory(prev => [...prev, screen]), []);
+    const handleBack = useCallback(() => { if (navigationHistory.length > 1) setNavigationHistory(prev => prev.slice(0, -1)); }, [navigationHistory.length]);
+    const handleHome = useCallback(() => setNavigationHistory(['home']), []);
+    const handleVoiceActivate = useCallback((message) => { setVoiceMessage(message); setTimeout(() => setVoiceMessage(''), 1500); }, []);
     const handleUpdateCart = useCallback((item, change) => {
         setCart(prevCart => {
             const newCart = { ...prevCart };
             const currentQty = newCart[item.id] || 0;
             const newQty = currentQty + change;
-            if (newQty > 0) newCart[item.id] = newQty;
-            else delete newCart[item.id];
+            if (newQty > 0) newCart[item.id] = newQty; else delete newCart[item.id];
             return newCart;
         });
     }, []);
-
     const handleToggleLike = useCallback((postId) => {
         setLikedPosts(prev => ({ ...prev, [postId]: !prev[postId] }));
-        setPosts(prevPosts =>
-            prevPosts.map(post =>
-                post.id === postId ? { ...post, likes: likedPosts[postId] ? post.likes - 1 : post.likes + 1 } : post
-            )
-        );
+        setPosts(prevPosts => prevPosts.map(post => post.id === postId ? { ...post, likes: likedPosts[postId] ? post.likes - 1 : post.likes + 1 } : post));
     }, [likedPosts]);
-
-    const handlePollVote = useCallback((pollId, optionId) => {
-        setPollChoices(prev => ({ ...prev, [pollId]: optionId }));
-    }, []);
-
-    const handleAddItem = useCallback((type, obj) => {
-        if (type === 'post') setPosts(prev => [obj, ...prev]);
-        if (type === 'poll') setPolls(prev => [obj, ...prev]);
-    }, []);
-
+    const handlePollVote = useCallback((pollId, optionId) => setPollChoices(prev => ({ ...prev, [pollId]: optionId })), []);
+    const handleAddItem = useCallback((type, obj) => { if (type === 'post') setPosts(prev => [obj, ...prev]); if (type === 'poll') setPolls(prev => [obj, ...prev]); }, []);
     const handleAddDealer = useCallback((newDealerData) => {
-        const newDealer = {
-            id: dealerDirectory.length + 1,
-            name: newDealerData.dealerName,
-            address: 'N/A', bookings: 0, sales: 0, salespeople: [], designers: [],
-            administration: [{ name: newDealerData.email, status: 'pending' }],
-            installers: [], recentOrders: [], dailyDiscount: newDealerData.dailyDiscount,
-        };
+        const newDealer = { id: dealerDirectory.length + 1, name: newDealerData.dealerName, address: 'N/A', bookings: 0, sales: 0, salespeople: [], designers: [], administration: [{ name: newDealerData.email, status: 'pending' }], installers: [], recentOrders: [], dailyDiscount: newDealerData.dailyDiscount };
         setDealerDirectory(prev => [newDealer, ...prev]);
     }, [dealerDirectory.length]);
-
     const handleAddNewInstall = useCallback((newInstall) => {
-        setMyProjects(prev => [{
-            id: `proj${prev.length + 1}_${Date.now()}`,
-            ...newInstall,
-        }, ...prev]);
+        setMyProjects(prev => [{ id: `proj${prev.length + 1}_${Date.now()}`, ...newInstall }, ...prev]);
         handleBack();
     }, [handleBack]);
+    const handleShowAlert = useCallback((message) => setAlertInfo({ show: true, message }), []);
 
     // Screen Router
     const renderScreen = (screenKey) => {
@@ -120,16 +82,10 @@ function App() {
         const screenParts = screenKey.split('/');
         const baseScreenKey = screenParts[0];
 
-        // This is the fix: Added currentScreen to the common props passed to every component.
-        const commonProps = { theme: currentTheme, onNavigate: handleNavigate, handleBack, userSettings, setSuccessMessage, currentScreen: screenKey };
+        const commonProps = { theme: currentTheme, onNavigate: handleNavigate, handleBack, userSettings, setSuccessMessage, currentScreen: screenKey, showAlert: handleShowAlert };
 
-        if (baseScreenKey === 'products' && screenParts.length > 1) {
-            return <ProductComparisonScreen {...commonProps} categoryId={screenParts[2]} />;
-        }
-
-        if (baseScreenKey === 'resources' && screenParts.length > 1) {
-            return <ResourceDetailScreen {...commonProps} onUpdateCart={handleUpdateCart} dealerDirectory={dealerDirectory} handleAddDealer={handleAddDealer} />;
-        }
+        if (baseScreenKey === 'products' && screenParts.length > 1) return <ProductComparisonScreen {...commonProps} categoryId={screenParts[2]} />;
+        if (baseScreenKey === 'resources' && screenParts.length > 1) return <ResourceDetailScreen {...commonProps} onUpdateCart={handleUpdateCart} dealerDirectory={dealerDirectory} handleAddDealer={handleAddDealer} />;
 
         const ScreenComponent = SCREEN_MAP[baseScreenKey];
         if (!ScreenComponent) return <div>Screen not found: {screenKey}</div>;
@@ -160,17 +116,13 @@ function App() {
                 isDarkMode={isDarkMode}
                 onToggleDark={() => setIsDarkMode(d => !d)}
             />
-
-            <div className="flex-1 pt-[88px] overflow-y-auto scrollbar-hide">
-                {renderScreen(currentScreen)}
-            </div>
-
+            <div className="flex-1 pt-[88px] overflow-y-auto scrollbar-hide">{renderScreen(currentScreen)}</div>
             {showProfileMenu && <ProfileMenu show={showProfileMenu} onClose={() => setShowProfileMenu(false)} onNavigate={handleNavigate} toggleTheme={() => setIsDarkMode(d => !d)} theme={currentTheme} isDarkMode={isDarkMode} />}
-
             <VoiceModal message={voiceMessage} show={!!voiceMessage} theme={currentTheme} />
             <OrderModal order={selectedOrder} onClose={() => setSelectedOrder(null)} theme={currentTheme} />
             <SuccessToast message={successMessage} show={!!successMessage} theme={currentTheme} />
             {showCreateContentModal && <CreateContentModal close={() => setShowCreateContentModal(false)} theme={currentTheme} onAdd={handleAddItem} />}
+            <Modal show={alertInfo.show} onClose={() => setAlertInfo({ show: false, message: '' })} title="Alert" theme={currentTheme}><p>{alertInfo.message}</p></Modal>
         </div>
     );
 }

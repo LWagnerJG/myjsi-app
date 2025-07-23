@@ -3390,7 +3390,7 @@ export const COMYardageRequestScreen = ({ theme, showAlert, onNavigate, userSett
 };
 
 export const FabricsScreen = ({ onNavigate, theme, currentScreen, showAlert, userSettings }) => {
-    const subScreen = currentScreen.split('/')[1];
+    const subScreen = (currentScreen || '').split('/')[1];
 
     if (subScreen === 'search_form') {
         return <FabricSearchForm theme={theme} showAlert={showAlert} onNavigate={onNavigate} />;
@@ -3421,6 +3421,8 @@ export const FabricsScreen = ({ onNavigate, theme, currentScreen, showAlert, use
         </>
     );
 };
+
+
 
 const SearchFormScreen = ({ theme }) => {
     const fabricSuppliers = [
