@@ -14,17 +14,8 @@ function App() {
     const [navigationHistory, setNavigationHistory] = useState(['home']);
     const [isAnimating, setIsAnimating] = useState(false);
 
-    // --- Ref for the main container to attach listeners ---
+    // --- Ref for the main container is no longer needed for swipe ---
     const appContainerRef = useRef(null);
-
-    // --- Swipe state management ---
-    const swipeStateRef = useRef({
-        isActive: false,
-        startX: 0,
-        startY: 0,
-        currentX: 0,
-        startTime: 0
-    });
 
     // --- All other application state remains the same ---
     const [isDarkMode, setIsDarkMode] = useState(false);
@@ -103,97 +94,7 @@ function App() {
         }, 300);
     }, [isAnimating]);
 
-    // --- IMPROVED: Better Swipe Back Implementation ---
-    useEffect(() => {
-        const container = appContainerRef.current;
-        if (!container) return;
-
-        const SWIPE_THRESHOLD = 80; // Minimum distance to trigger swipe
-        const EDGE_THRESHOLD = 60; // How far from left edge to start swipe
-        const MAX_VERTICAL_DEVIATION = 100; // Max vertical movement allowed
-        const HEADER_HEIGHT = 88; // Account for fixed header height
-
-        const handleTouchStart = (e) => {
-            const touch = e.touches[0];
-            const swipeState = swipeStateRef.current;
-
-            // Only start if we can go back, not animating, touch is near left edge, and below header
-            if (navigationHistory.length > 1 &&
-                !isAnimating &&
-                touch.clientX <= EDGE_THRESHOLD &&
-                touch.clientY > HEADER_HEIGHT) {
-                swipeState.isActive = true;
-                swipeState.startX = touch.clientX;
-                swipeState.startY = touch.clientY;
-                swipeState.currentX = touch.clientX;
-                swipeState.startTime = Date.now();
-            }
-        };
-
-        const handleTouchMove = (e) => {
-            const swipeState = swipeStateRef.current;
-            if (!swipeState.isActive) return;
-
-            const touch = e.touches[0];
-            const deltaX = touch.clientX - swipeState.startX;
-            const deltaY = Math.abs(touch.clientY - swipeState.startY);
-
-            swipeState.currentX = touch.clientX;
-
-            // If moving too much vertically, cancel the swipe
-            if (deltaY > MAX_VERTICAL_DEVIATION) {
-                swipeState.isActive = false;
-                return;
-            }
-
-            // Only prevent default if we're actively swiping horizontally
-            if (deltaX > 10) {
-                e.preventDefault();
-            }
-        };
-
-        const handleTouchEnd = (e) => {
-            const swipeState = swipeStateRef.current;
-            if (!swipeState.isActive) return;
-
-            const touch = e.changedTouches[0];
-            const deltaX = touch.clientX - swipeState.startX;
-            const deltaY = Math.abs(touch.clientY - swipeState.startY);
-            const swipeTime = Date.now() - swipeState.startTime;
-            const velocity = deltaX / swipeTime; // pixels per ms
-
-            // Reset swipe state
-            swipeState.isActive = false;
-
-            // Determine if this should trigger navigation
-            const shouldNavigateBack = (
-                deltaX > SWIPE_THRESHOLD || // Swiped far enough
-                (deltaX > 30 && velocity > 0.3) // Quick swipe
-            ) && deltaY < MAX_VERTICAL_DEVIATION; // Not too vertical
-
-            if (shouldNavigateBack) {
-                handleBack();
-            }
-        };
-
-        const handleTouchCancel = () => {
-            swipeStateRef.current.isActive = false;
-        };
-
-        // Add listeners with proper options
-        container.addEventListener('touchstart', handleTouchStart, { passive: true });
-        container.addEventListener('touchmove', handleTouchMove, { passive: false });
-        container.addEventListener('touchend', handleTouchEnd, { passive: true });
-        container.addEventListener('touchcancel', handleTouchCancel, { passive: true });
-
-        // Cleanup
-        return () => {
-            container.removeEventListener('touchstart', handleTouchStart);
-            container.removeEventListener('touchmove', handleTouchMove);
-            container.removeEventListener('touchend', handleTouchEnd);
-            container.removeEventListener('touchcancel', handleTouchCancel);
-        };
-    }, [navigationHistory.length, isAnimating, handleBack]);
+    // --- REMOVED: The entire useEffect for swipe back implementation has been deleted. ---
 
     const handleSaveSettings = useCallback(() => {
         setSuccessMessage("Settings Saved!");

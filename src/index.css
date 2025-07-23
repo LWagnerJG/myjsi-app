@@ -14,9 +14,9 @@ body {
     scrollbar-width: none;
 }
 
-.scrollbar-hide::-webkit-scrollbar {
-    display: none;
-}
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
 
 /*
  =================================================================
@@ -39,41 +39,36 @@ body {
     will-change: transform;
 }
 
-/* Default positions when not animating */
-.screen-container.current-screen {
-    transform: translateX(0%);
-    z-index: 15; /* Below header but above previous screen */
-}
+    /* Default positions when not animating */
+    .screen-container.current-screen {
+        transform: translateX(0%);
+        z-index: 15; /* Below header but above previous screen */
+    }
 
-.screen-container.previous-screen {
-    transform: translateX(-30%);
-    z-index: 14; /* Below current screen */
-}
+    .screen-container.previous-screen {
+        transform: translateX(-30%);
+        z-index: 14; /* Below current screen */
+    }
 
-/* Animation states */
-.screen-container.is-animating.current-screen {
-    transform: translateX(100%);
-    z-index: 15;
-}
+    /* Animation states */
+    .screen-container.is-animating.current-screen {
+        transform: translateX(100%);
+        z-index: 15;
+    }
 
-.screen-container.is-animating.previous-screen {
-    transform: translateX(0%);
-    z-index: 14;
-}
+    .screen-container.is-animating.previous-screen {
+        transform: translateX(0%);
+        z-index: 14;
+    }
 
-/* Prevent any overflow issues during animations */
-.screen-container > div {
-    height: 100%;
-    overflow-y: auto;
-    overflow-x: hidden;
-}
+    /* Prevent any overflow issues during animations */
+    .screen-container > div {
+        height: 100%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
 
-/* Ensure touch events work properly */
-.screen-container {
-    touch-action: pan-y; /* Allow vertical scrolling but handle horizontal ourselves */
-}
-
-/* Optional: Add a subtle shadow to the current screen */
-.screen-container.current-screen {
-    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
-}
+    /* Optional: Add a subtle shadow to the current screen */
+    .screen-container.current-screen {
+        box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+    }
