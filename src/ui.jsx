@@ -4407,14 +4407,14 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
     }, [groupedOrders]);
 
     return (
-        <div className="absolute top-0 left-0 w-full h-full">
+        <>
             <div
                 className="fixed top-[88px] left-4 right-4 z-10"
             >
                 <div
                     className="flex items-center space-x-2 rounded-full p-2 shadow-lg"
                     style={{
-                        backgroundColor: theme.colors.surface,
+                        backgroundColor: `${theme.colors.surface}e6`,
                         backdropFilter: theme.backdropFilter,
                         WebkitBackdropFilter: theme.backdropFilter,
                         boxShadow: `0 8px 32px 0 ${theme.colors.shadow}`,
@@ -4444,7 +4444,7 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
                 </div>
             </div>
 
-            <div className="h-full overflow-y-auto px-4 pb-4 pt-[164px] scrollbar-hide">
+            <div className="px-4 pb-4 pt-[76px]">
                 {viewMode === 'list' ? (
                     <div className="space-y-4">
                         {sortedGroupKeys.map(dateKey => {
@@ -4510,7 +4510,7 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
                     />
                 )}
             </div>
-        </div>
+        </>
     );
 };
 

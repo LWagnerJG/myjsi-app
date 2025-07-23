@@ -352,13 +352,11 @@ function App() {
         <div className="h-screen w-screen font-sans flex flex-col relative overflow-hidden" style={{ backgroundColor: currentTheme.colors.background }} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
             <AppHeader theme={currentTheme} userName={userSettings.firstName} isHome={currentScreen === 'home'} showBack={navigationHistory.length > 1} handleBack={handleBack} isDarkMode={isDarkMode} onToggleDark={() => setIsDarkMode(d => !d)} onHomeClick={handleHome} onProfileClick={() => setShowProfileMenu(p => !p)} />
             {previousScreen && (
-                <div className={`absolute inset-0 ${isTransitioning ? 'transition-transform duration-200 ease-out' : ''} ${swipeTranslateX > 0 ? 'overflow-hidden' : (previousScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto')} scrollbar-hide`} style={{ backgroundColor: currentTheme.colors.background, transform: `translateX(${swipeTranslateX - window.innerWidth}px)`, willChange: 'transform' }}>
-                    <div className="pt-24" />
+                <div className={`absolute inset-0 ${isTransitioning ? 'transition-transform duration-200 ease-out' : ''} ${swipeTranslateX > 0 ? 'overflow-hidden' : (previousScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto')} scrollbar-hide`} style={{ paddingTop: '85px', backgroundColor: currentTheme.colors.background, transform: `translateX(${swipeTranslateX - window.innerWidth}px)`, willChange: 'transform' }}>
                     {renderScreen(previousScreen)}
                 </div>
             )}
-            <div className={`absolute inset-0 ${isTransitioning ? 'transition-transform duration-200 ease-out' : ''} ${currentScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto'} scrollbar-hide`} style={{ backgroundColor: currentTheme.colors.background, transform: `translateX(${swipeTranslateX}px)`, willChange: 'transform' }}>
-                <div className="pt-24" />
+            <div className={`absolute inset-0 ${isTransitioning ? 'transition-transform duration-200 ease-out' : ''} ${currentScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto'} scrollbar-hide`} style={{ paddingTop: '85px', backgroundColor: currentTheme.colors.background, transform: `translateX(${swipeTranslateX}px)`, willChange: 'transform' }}>
                 {renderScreen(currentScreen)}
             </div>
             <div className="absolute inset-0 z-[100] pointer-events-none">
@@ -378,4 +376,5 @@ function App() {
         </div>
     );
 }
+
 export default App;
