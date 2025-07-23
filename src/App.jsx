@@ -1,6 +1,6 @@
 ﻿import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { lightTheme, darkTheme, INITIAL_OPPORTUNITIES, MY_PROJECTS_DATA, INITIAL_MEMBERS, INITIAL_POSTS, INITIAL_POLLS, DEALER_DIRECTORY_DATA, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS } from './data.jsx';
-import { AppHeader, ProfileMenu, SCREEN_MAP, VoiceModal, OrderModal, SuccessToast, ProductComparisonScreen, ResourceDetailScreen, CreateContentModal, AddNewInstallScreen, Modal } from './ui.jsx';
+import { AppHeader, ProfileMenu, SCREEN_MAP, VoiceModal, OrderModal, SuccessToast, ProductComparisonScreen, ResourceDetailScreen, CreateContentModal, AddNewInstallScreen, Modal, CartScreen } from './ui.jsx';
 
 function App() {
     // Core State
@@ -29,7 +29,6 @@ function App() {
     const [dealerDirectory, setDealerDirectory] = useState(DEALER_DIRECTORY_DATA);
     const [designFirms, setDesignFirms] = useState(INITIAL_DESIGN_FIRMS);
     const [dealers, setDealers] = useState(INITIAL_DEALERS);
-
 
     // Derived State
     const currentScreen = navigationHistory[navigationHistory.length - 1];
@@ -86,6 +85,11 @@ function App() {
         const baseScreenKey = screenParts[0];
 
         const commonProps = { theme: currentTheme, onNavigate: handleNavigate, handleBack, userSettings, setSuccessMessage, currentScreen: screenKey, showAlert: handleShowAlert };
+
+        // FIX: Added specific logic to handle the 'samples/cart' route
+        if (screenKey === 'samples/cart') {
+            return <CartScreen {...commonProps} cart={cart} setCart={setCart} onUpdateCart={handleUpdateCart} />;
+        }
 
         if (baseScreenKey === 'products' && screenParts.length > 1) return <ProductComparisonScreen {...commonProps} categoryId={screenParts[2]} />;
         if (baseScreenKey === 'resources' && screenParts.length > 1) return <ResourceDetailScreen {...commonProps} onUpdateCart={handleUpdateCart} dealerDirectory={dealerDirectory} handleAddDealer={handleAddDealer} />;
