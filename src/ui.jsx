@@ -1828,7 +1828,6 @@ export const CommissionRatesScreen = ({ theme }) => {
 
     const { accent, textPrimary, textSecondary, border, subtle, secondary } = theme.colors;
 
-    // Custom Donut Chart component to display percentages instead of dollars.
     const CommissionSplitDonut = ({ data, theme }) => {
         const total = data.reduce((acc, item) => acc + item.value, 0);
         if (total === 0) return null;
@@ -1873,7 +1872,6 @@ export const CommissionRatesScreen = ({ theme }) => {
                             <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: item.color }}></div>
                             <div>
                                 <p className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>{item.label}</p>
-                                {/* This now correctly displays percentages */}
                                 <p className="text-sm font-normal" style={{ color: theme.colors.textSecondary }}>{item.value}%</p>
                             </div>
                         </div>
@@ -1891,7 +1889,6 @@ export const CommissionRatesScreen = ({ theme }) => {
     if (loading) {
         return (
             <div className="flex flex-col h-full">
-                <PageTitle title="Commission Rates" theme={theme} />
                 <div className="text-center p-8"><Hourglass className="w-8 h-8 animate-spin mx-auto" style={{ color: accent }} /></div>
             </div>
         );
@@ -1900,7 +1897,6 @@ export const CommissionRatesScreen = ({ theme }) => {
     if (error) {
         return (
             <div className="flex flex-col h-full">
-                <PageTitle title="Commission Rates" theme={theme} />
                 <div className="px-4">
                     <GlassCard theme={theme} className="p-8 text-center"><p className="font-semibold text-red-500">{error}</p></GlassCard>
                 </div>
@@ -1945,11 +1941,9 @@ export const CommissionRatesScreen = ({ theme }) => {
 
     return (
         <div className="h-full flex flex-col">
-            {/* This structure ensures the title scrolls with the content */}
-            <PageTitle title="Commission Rates" theme={theme} />
-            <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-6 scrollbar-hide">
+            {/* The PageTitle component has been removed from here. */}
+            <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6 scrollbar-hide">
                 <GlassCard theme={theme} className="p-4">
-                    {/* Improved Headers: Bolder, uppercase, and more distinct */}
                     <div className="grid grid-cols-[2fr,1fr,1.5fr] gap-x-4 p-3 rounded-xl mb-2" style={{ backgroundColor: subtle }}>
                         <span className="text-xs font-bold uppercase tracking-wider" style={{ color: textSecondary }}>Discounts</span>
                         <span className="text-xs font-bold uppercase tracking-wider text-center" style={{ color: textSecondary }}>Rep Comm.</span>
@@ -3060,7 +3054,7 @@ const fabricTypeOptions = ['Type1', 'Type2', 'Type3'];
 const tackableOptions = ['Yes', 'No'];
 
 export const FabricSearchForm = ({ theme, showAlert, onNavigate }) => {
-    const [form, setForm] = useState({ supplier: '', pattern: '', jsiSeries: '', grade: [], textile: 'Any', tackable: 'Any' }); // Added 'textile' and 'tackable' to form state, default to 'Any'
+    const [form, setForm] = useState({ supplier: '', pattern: '', jsiSeries: '', grade: [], textile: 'Any', tackable: 'Any' });
     const [results, setResults] = useState(null);
     const [error, setError] = useState('');
 
@@ -3107,23 +3101,23 @@ export const FabricSearchForm = ({ theme, showAlert, onNavigate }) => {
             item.series === form.jsiSeries &&
             (!form.pattern || item.pattern === form.pattern) &&
             (form.grade.length === 0 || form.grade.includes(item.grade)) &&
-            (form.textile === 'Any' || item.textile === form.textile) && // Filter by textile
-            (form.tackable === 'Any' || item.tackable === form.tackable) // Filter by tackable
+            (form.textile === 'Any' || item.textile === form.textile) &&
+            (form.tackable === 'Any' || item.tackable === form.tackable)
         );
         setResults(filtered);
     }, [form]);
 
     const resetSearch = useCallback(() => {
-        setForm({ supplier: '', pattern: '', jsiSeries: '', grade: [], textile: 'Any', tackable: 'Any' }); // Reset all fields
+        setForm({ supplier: '', pattern: '', jsiSeries: '', grade: [], textile: 'Any', tackable: 'Any' });
         setResults(null);
         setError('');
     }, []);
 
     return (
         <div className="flex flex-col h-full">
-            <PageTitle title="Search Fabrics" theme={theme} />
+            {/* The PageTitle component that rendered "Search Fabrics" has been removed. */}
 
-            <div className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-hide">
+            <div className="flex-1 overflow-y-auto px-4 py-6 scrollbar-hide">
                 {!results ? (
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <FormSection title="" theme={theme}>
@@ -3133,13 +3127,12 @@ export const FabricSearchForm = ({ theme, showAlert, onNavigate }) => {
                             <AutoCompleteCombobox label="Pattern" value={form.pattern} onChange={v => updateField('pattern', v)} options={fabricPatterns} placeholder="Search Patterns (Optional)" theme={theme} dropdownClassName="max-h-72" />
                             <AutoCompleteCombobox label="JSI Series" required value={form.jsiSeries} onChange={v => updateField('jsiSeries', v)} options={jsiSeriesOptions} placeholder="Search JSI Series" theme={theme} dropdownClassName="max-h-72" />
 
-                            {/* Grade Selection */}
                             <div>
                                 <label className="block text-sm font-semibold px-3 mb-2" style={{ color: theme.colors.textSecondary }}>Grade</label>
                                 <div className="flex flex-wrap gap-2 p-1.5 rounded-full" style={{ backgroundColor: theme.colors.subtle }}>
                                     <button
                                         type="button"
-                                        onClick={() => setForm(prev => ({ ...prev, grade: [] }))} // Select "Any"
+                                        onClick={() => setForm(prev => ({ ...prev, grade: [] }))}
                                         className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-colors duration-200 border-2`}
                                         style={{
                                             backgroundColor: form.grade.length === 0 ? theme.colors.surface : 'transparent',
@@ -3167,7 +3160,6 @@ export const FabricSearchForm = ({ theme, showAlert, onNavigate }) => {
                                 </div>
                             </div>
 
-                            {/* Textile Selection */}
                             <div>
                                 <label className="block text-sm font-semibold px-3 mb-2" style={{ color: theme.colors.textSecondary }}>Textile</label>
                                 <ToggleButtonGroup
@@ -3178,7 +3170,6 @@ export const FabricSearchForm = ({ theme, showAlert, onNavigate }) => {
                                 />
                             </div>
 
-                            {/* Tackable Selection */}
                             <div>
                                 <label className="block text-sm font-semibold px-3 mb-2" style={{ color: theme.colors.textSecondary }}>Tackable</label>
                                 <ToggleButtonGroup
