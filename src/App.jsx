@@ -79,14 +79,18 @@ function App() {
         if (isAnimating) return;
         setIsAnimating(true);
         setNavigationHistory(prev => [...prev, screen]);
+        // Reset animation state after a brief delay
+        setTimeout(() => setIsAnimating(false), 350);
     }, [isAnimating]);
 
     const handleBack = useCallback(() => {
         if (navigationHistory.length <= 1 || isAnimating) return;
         setIsAnimating(true);
+        // Wait for animation to complete before updating navigation
         setTimeout(() => {
             setNavigationHistory(prev => prev.slice(0, -1));
-            setIsAnimating(false);
+            // Reset animation state after navigation update
+            setTimeout(() => setIsAnimating(false), 50);
         }, 300);
     }, [navigationHistory.length, isAnimating]);
 
@@ -95,7 +99,7 @@ function App() {
         setIsAnimating(true);
         setTimeout(() => {
             setNavigationHistory(['home']);
-            setIsAnimating(false);
+            setTimeout(() => setIsAnimating(false), 50);
         }, 300);
     }, [isAnimating]);
 
@@ -109,9 +113,6 @@ function App() {
         const MAX_VERTICAL_DEVIATION = 100; // Max vertical movement allowed
 
         const handleTouchStart = (e) => {
-            // Reset animation state when starting
-            setIsAnimating(false);
-
             const touch = e.touches[0];
             const swipeState = swipeStateRef.current;
 
@@ -122,9 +123,6 @@ function App() {
                 swipeState.startY = touch.clientY;
                 swipeState.currentX = touch.clientX;
                 swipeState.startTime = Date.now();
-
-                // Prevent scrolling when starting a potential swipe
-                e.preventDefault();
             }
         };
 
@@ -179,7 +177,7 @@ function App() {
         };
 
         // Add listeners with proper options
-        container.addEventListener('touchstart', handleTouchStart, { passive: false });
+        container.addEventListener('touchstart', handleTouchStart, { passive: true });
         container.addEventListener('touchmove', handleTouchMove, { passive: false });
         container.addEventListener('touchend', handleTouchEnd, { passive: true });
         container.addEventListener('touchcancel', handleTouchCancel, { passive: true });
