@@ -4464,46 +4464,38 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
 
     return (
         <div className="flex flex-col h-full">
+            {/* FIX: The search bar and icons are now direct children of the sticky container for a flat layout */}
             <div
-                className="sticky top-0 z-10 p-4"
+                className="sticky top-0 z-10 p-4 flex items-center space-x-2"
                 style={{
                     backgroundColor: `${theme.colors.background}e6`,
                     backdropFilter: 'blur(10px)',
                     WebkitBackdropFilter: 'blur(10px)',
                 }}
             >
-                <div
-                    className="flex items-center space-x-2 rounded-full p-2 shadow-lg"
-                    style={{
-                        backgroundColor: theme.colors.surface,
-                        boxShadow: `0 8px 32px 0 ${theme.colors.shadow}`,
-                    }}
-                >
-                    <SearchInput
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        placeholder="Search Orders..."
-                        theme={theme}
-                        className="flex-grow"
-                    />
-                    <div className="relative">
-                        <button onClick={() => setShowDateFilter(f => !f)} className="p-3.5 rounded-full" style={{ backgroundColor: theme.colors.subtle }}>
-                            <Filter className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />
-                        </button>
-                        {showDateFilter && (
-                            <GlassCard ref={filterMenuRef} theme={theme} className="absolute top-14 right-0 z-20 w-40 p-2">
-                                <button onClick={() => { setDateType('shipDate'); setShowDateFilter(false); }} className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${dateType === 'shipDate' ? 'font-bold' : ''}`} style={{ color: theme.colors.textPrimary, backgroundColor: dateType === 'shipDate' ? theme.colors.subtle : 'transparent' }}>Ship Date</button>
-                                <button onClick={() => { setDateType('date'); setShowDateFilter(false); }} className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${dateType === 'date' ? 'font-bold' : ''}`} style={{ color: theme.colors.textPrimary, backgroundColor: dateType === 'date' ? theme.colors.subtle : 'transparent' }}>PO Date</button>
-                            </GlassCard>
-                        )}
-                    </div>
-                    <button onClick={() => setViewMode(v => v === 'list' ? 'calendar' : 'list')} className="p-3.5 rounded-full" style={{ backgroundColor: viewMode === 'calendar' ? theme.colors.accent : theme.colors.subtle, }}>
-                        <Calendar className="w-5 h-5" style={{ color: viewMode === 'calendar' ? 'white' : theme.colors.textPrimary }} />
+                <SearchInput
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Search Orders..."
+                    theme={theme}
+                    className="flex-grow"
+                />
+                <div className="relative">
+                    <button onClick={() => setShowDateFilter(f => !f)} className="p-3.5 rounded-full shadow-lg" style={{ backgroundColor: theme.colors.surface }}>
+                        <Filter className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />
                     </button>
+                    {showDateFilter && (
+                        <GlassCard ref={filterMenuRef} theme={theme} className="absolute top-14 right-0 z-20 w-40 p-2">
+                            <button onClick={() => { setDateType('shipDate'); setShowDateFilter(false); }} className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${dateType === 'shipDate' ? 'font-bold' : ''}`} style={{ color: theme.colors.textPrimary, backgroundColor: dateType === 'shipDate' ? theme.colors.subtle : 'transparent' }}>Ship Date</button>
+                            <button onClick={() => { setDateType('date'); setShowDateFilter(false); }} className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${dateType === 'date' ? 'font-bold' : ''}`} style={{ color: theme.colors.textPrimary, backgroundColor: dateType === 'date' ? theme.colors.subtle : 'transparent' }}>PO Date</button>
+                        </GlassCard>
+                    )}
                 </div>
+                <button onClick={() => setViewMode(v => v === 'list' ? 'calendar' : 'list')} className="p-3.5 rounded-full shadow-lg" style={{ backgroundColor: viewMode === 'calendar' ? theme.colors.accent : theme.colors.surface, }}>
+                    <Calendar className="w-5 h-5" style={{ color: viewMode === 'calendar' ? 'white' : theme.colors.textPrimary }} />
+                </button>
             </div>
 
-            {/* FIX: Added 'pt-4' to this container to add space below the sticky header */}
             <div className="flex-1 overflow-y-auto px-4 pt-4 pb-4 space-y-4">
                 {viewMode === 'list' ? (
                     <div className="space-y-4">
@@ -4522,16 +4514,11 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
                                             ${groupedOrders[dateKey].total.toLocaleString('en-US', { maximumFractionDigits: 0 })}
                                         </p>
                                     </div>
-
                                     <div className="divide-y" style={{ borderColor: theme.colors.subtle }}>
                                         {groupedOrders[dateKey].orders.map((order) => {
                                             const statusColor = Data.STATUS_COLORS[order.status] || theme.colors.secondary;
                                             return (
-                                                <button
-                                                    key={order.orderNumber}
-                                                    onClick={() => setSelectedOrder(order)}
-                                                    className="w-full text-left p-4 transition-colors hover:bg-black/5 dark:hover:bg-white/10"
-                                                >
+                                                <button key={order.orderNumber} onClick={() => setSelectedOrder(order)} className="w-full text-left p-4 transition-colors hover:bg-black/5 dark:hover:bg-white/10">
                                                     <div className="flex items-start justify-between space-x-4">
                                                         <div className="flex items-start space-x-3 flex-1 min-w-0">
                                                             <div className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style={{ backgroundColor: statusColor }} />
@@ -4562,12 +4549,7 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
                         })}
                     </div>
                 ) : (
-                    <OrderCalendarView
-                        orders={filteredOrders}
-                        theme={theme}
-                        dateType={dateType}
-                        onOrderClick={setSelectedOrder}
-                    />
+                    <OrderCalendarView orders={filteredOrders} theme={theme} dateType={dateType} onOrderClick={setSelectedOrder} />
                 )}
             </div>
         </div>
