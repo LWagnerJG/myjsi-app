@@ -1897,7 +1897,7 @@ export const CommissionRatesScreen = ({ theme }) => {
     if (error) {
         return (
             <div className="flex flex-col h-full">
-                <div className="px-4">
+                <div className="px-4 py-6">
                     <GlassCard theme={theme} className="p-8 text-center"><p className="font-semibold text-red-500">{error}</p></GlassCard>
                 </div>
             </div>
@@ -1941,9 +1941,9 @@ export const CommissionRatesScreen = ({ theme }) => {
 
     return (
         <div className="h-full flex flex-col">
-            {/* The PageTitle component has been removed from here. */}
             <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6 scrollbar-hide">
                 <GlassCard theme={theme} className="p-4">
+                    {/* This is the restyled header container */}
                     <div className="grid grid-cols-[2fr,1fr,1.5fr] gap-x-4 p-3 rounded-xl mb-2" style={{ backgroundColor: subtle }}>
                         <span className="text-xs font-bold uppercase tracking-wider" style={{ color: textSecondary }}>Discounts</span>
                         <span className="text-xs font-bold uppercase tracking-wider text-center" style={{ color: textSecondary }}>Rep Comm.</span>
