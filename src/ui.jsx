@@ -1857,7 +1857,14 @@ export const CommissionRatesScreen = ({ theme }) => {
             <div className="flex items-center space-x-6">
                 <div className="relative" style={{ width: size, height: size }}>
                     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-                        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke={theme.colors.subtle} strokeWidth={strokeWidth} />
+                        <circle
+                            cx={size / 2}
+                            cy={size / 2}
+                            r={radius}
+                            fill="none"
+                            stroke={theme.colors.subtle}
+                            strokeWidth={strokeWidth}
+                        />
                         <g transform={`rotate(-90 ${size / 2} ${size / 2})`}>
                             {data.map((item, index) => {
                                 const dasharray = (circumference * item.value) / total;
@@ -1884,10 +1891,23 @@ export const CommissionRatesScreen = ({ theme }) => {
                 <div className="space-y-2">
                     {data.map(item => (
                         <div key={item.label} className="flex items-center">
-                            <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: item.color }}></div>
+                            <div
+                                className="w-3 h-3 rounded-full mr-2"
+                                style={{ backgroundColor: item.color }}
+                            ></div>
                             <div>
-                                <p className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>{item.label}</p>
-                                <p className="text-sm font-normal" style={{ color: theme.colors.textSecondary }}>{item.value}%</p>
+                                <p
+                                    className="text-sm font-semibold"
+                                    style={{ color: theme.colors.textPrimary }}
+                                >
+                                    {item.label}
+                                </p>
+                                <p
+                                    className="text-sm font-normal"
+                                    style={{ color: theme.colors.textSecondary }}
+                                >
+                                    {item.value}%
+                                </p>
                             </div>
                         </div>
                     ))}
@@ -1904,7 +1924,12 @@ export const CommissionRatesScreen = ({ theme }) => {
     if (loading) {
         return (
             <div className="flex flex-col h-full">
-                <div className="text-center p-8"><Hourglass className="w-8 h-8 animate-spin mx-auto" style={{ color: accent }} /></div>
+                <div className="text-center p-8">
+                    <Hourglass
+                        className="w-8 h-8 animate-spin mx-auto"
+                        style={{ color: accent }}
+                    />
+                </div>
             </div>
         );
     }
@@ -1912,7 +1937,9 @@ export const CommissionRatesScreen = ({ theme }) => {
     if (error) {
         return (
             <div className="flex flex-col h-full py-6 px-4">
-                <GlassCard theme={theme} className="p-8 text-center"><p className="font-semibold text-red-500">{error}</p></GlassCard>
+                <GlassCard theme={theme} className="p-8 text-center">
+                    <p className="font-semibold text-red-500">{error}</p>
+                </GlassCard>
             </div>
         );
     }
