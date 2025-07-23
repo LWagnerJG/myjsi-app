@@ -1,9 +1,9 @@
 ﻿import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { lightTheme, darkTheme, INITIAL_OPPORTUNITIES, MY_PROJECTS_DATA, INITIAL_MEMBERS, INITIAL_POSTS, INITIAL_POLLS } from './data.jsx';
-import { AppHeader, ProfileMenu, SCREEN_MAP, VoiceModal, OrderModal, SuccessToast, ProductComparisonScreen } from './ui.jsx';
+import { lightTheme, darkTheme, INITIAL_OPPORTUNITIES, MY_PROJECTS_DATA, INITIAL_MEMBERS, INITIAL_POSTS, INITIAL_POLLS, DEALER_DIRECTORY_DATA } from './data.jsx';
+import { AppHeader, ProfileMenu, SCREEN_MAP, VoiceModal, OrderModal, SuccessToast, ProductComparisonScreen, ResourceDetailScreen, CreateContentModal } from './ui.jsx';
 
 function App() {
-    // --- All Application State ---
+    // Core State
     const [navigationHistory, setNavigationHistory] = useState(['home']);
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -11,6 +11,8 @@ function App() {
     const [voiceMessage, setVoiceMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const [cart, setCart] = useState({});
+
+    // State for Screen Components
     const [opportunities, setOpportunities] = useState(INITIAL_OPPORTUNITIES);
     const [myProjects, setMyProjects] = useState(MY_PROJECTS_DATA);
     const [selectedOpportunity, setSelectedOpportunity] = useState(null);
@@ -22,12 +24,14 @@ function App() {
     const [polls, setPolls] = useState(INITIAL_POLLS);
     const [likedPosts, setLikedPosts] = useState({});
     const [pollChoices, setPollChoices] = useState({});
+    const [showCreateContentModal, setShowCreateContentModal] = useState(false);
+    const [dealerDirectory, setDealerDirectory] = useState(DEALER_DIRECTORY_DATA);
 
-    // --- Derived State ---
+    // Derived State
     const currentScreen = navigationHistory[navigationHistory.length - 1];
     const currentTheme = useMemo(() => (isDarkMode ? darkTheme : lightTheme), [isDarkMode]);
 
-    // --- One-time Setup Effect ---
+    // One-time Setup Effect
     useEffect(() => {
         document.body.style.position = 'fixed';
         document.body.style.width = '100%';
@@ -42,7 +46,7 @@ function App() {
         viewportMeta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover';
     }, []);
 
-    // --- Handlers ---
+    // Handlers
     const handleNavigate = useCallback((screen) => {
         setNavigationHistory(prev => [...prev, screen]);
     }, []);
@@ -86,7 +90,23 @@ function App() {
         setPollChoices(prev => ({ ...prev, [pollId]: optionId }));
     }, []);
 
-    // --- Screen Router ---
+    const handleAddItem = useCallback((type, obj) => {
+        if (type === 'post') setPosts(prev => [obj, ...prev]);
+        if (type === 'poll') setPolls(prev => [obj, ...prev]);
+    }, []);
+
+    const handleAddDealer = useCallback((newDealerData) => {
+        const newDealer = {
+            id: dealerDirectory.length + 1,
+            name: newDealerData.dealerName,
+            address: 'N/A', bookings: 0, sales: 0, salespeople: [], designers: [],
+            administration: [{ name: newDealerData.email, status: 'pending' }],
+            installers: [], recentOrders: [], dailyDiscount: newDealerData.dailyDiscount,
+        };
+        setDealerDirectory(prev => [newDealer, ...prev]);
+    }, [dealerDirectory.length]);
+
+    // Screen Router
     const renderScreen = (screenKey) => {
         if (!screenKey) return null;
         const screenParts = screenKey.split('/');
@@ -94,9 +114,12 @@ function App() {
 
         const commonProps = { theme: currentTheme, onNavigate: handleNavigate, handleBack, userSettings, setSuccessMessage };
 
-        // Fix for Product Category navigation
         if (baseScreenKey === 'products' && screenParts.length > 1) {
             return <ProductComparisonScreen {...commonProps} categoryId={screenParts[2]} />;
+        }
+
+        if (baseScreenKey === 'resources' && screenParts.length > 1) {
+            return <ResourceDetailScreen {...commonProps} currentScreen={screenKey} onUpdateCart={handleUpdateCart} dealerDirectory={dealerDirectory} handleAddDealer={handleAddDealer} />;
         }
 
         const ScreenComponent = SCREEN_MAP[baseScreenKey];
@@ -109,7 +132,7 @@ function App() {
             ...(baseScreenKey === 'samples' && { cart, onUpdateCart: handleUpdateCart }),
             ...(baseScreenKey === 'orders' && { setSelectedOrder }),
             ...(baseScreenKey === 'members' && { members, setMembers, currentUserId }),
-            ...(baseScreenKey === 'community' && { posts, polls, likedPosts, onToggleLike: handleToggleLike, pollChoices, onPollVote: handlePollVote }),
+            ...(baseScreenKey === 'community' && { posts, polls, likedPosts, onToggleLike: handleToggleLike, pollChoices, onPollVote: handlePollVote, openCreateContentModal: () => setShowCreateContentModal(true) }),
         };
 
         return <ScreenComponent {...allProps} />;
@@ -137,6 +160,7 @@ function App() {
             <VoiceModal message={voiceMessage} show={!!voiceMessage} theme={currentTheme} />
             <OrderModal order={selectedOrder} onClose={() => setSelectedOrder(null)} theme={currentTheme} />
             <SuccessToast message={successMessage} show={!!successMessage} theme={currentTheme} />
+            {showCreateContentModal && <CreateContentModal close={() => setShowCreateContentModal(false)} theme={currentTheme} onAdd={handleAddItem} />}
         </div>
     );
 }
