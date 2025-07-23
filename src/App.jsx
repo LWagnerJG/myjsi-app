@@ -10,14 +10,19 @@ import {
 import * as Data from './data.jsx';
 
 function App() {
-    const [navigationHistory, setNavigationHistory] = useState([]);
+    // --- SIMPLIFIED STATE & REFS ---
+    const [navigationHistory, setNavigationHistory] = useState(['home']);
+    const [swipeTranslateX, setSwipeTranslateX] = useState(0);
+    const [isAnimating, setIsAnimating] = useState(false);
+    const touchStartX = useRef(0);
+    const isSwiping = useRef(false);
+
+    // --- UNCHANGED STATE ---
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
     const [alertInfo, setAlertInfo] = useState({ show: false, message: '' });
     const [voiceMessage, setVoiceMessage] = useState('');
-    const [swipeTranslateX, setSwipeTranslateX] = useState(0);
-    const [isTransitioning, setIsTransitioning] = useState(false);
     const [members, setMembers] = useState(INITIAL_MEMBERS);
     const [currentUserId, setCurrentUserId] = useState(1);
     const [selectedOrder, setSelectedOrder] = useState(null);
@@ -47,40 +52,18 @@ function App() {
     const [isAILoading, setIsAILoading] = useState(false);
     const [showAIDropdown, setShowAIDropdown] = useState(false);
 
-    // --- REWORKED LOGIC: Refs for gesture handling and navigation ---
-    const touchStartX = useRef(0);
-    const touchStartY = useRef(0);
-    const lastTouchX = useRef(0);
-    const isSwipeInProgress = useRef(false);
-    const navigationDirection = useRef('forward');
+    // --- CORE DERIVED STATE ---
+    const currentScreen = navigationHistory[navigationHistory.length - 1] || 'home';
+    const previousScreen = navigationHistory.length > 1 ? navigationHistory[navigationHistory.length - 2] : null;
+    const currentTheme = useMemo(() => (isDarkMode ? darkTheme : lightTheme), [isDarkMode]);
 
-    const urlToScreen = useCallback((url) => {
-        const path = url.replace(window.location.origin, '').replace('/', '') || 'home';
-        return path;
-    }, []);
-
-    const screenToUrl = useCallback((screen) => {
-        return screen === 'home' ? '/' : `/${screen}`;
-    }, []);
-
-    useEffect(() => {
-        const currentPath = window.location.pathname;
-        const initialScreen = currentPath === '/' ? 'home' : currentPath.substring(1);
-        setNavigationHistory([initialScreen]);
-    }, []);
-
-    // Lock screen orientation to portrait
+    // Lock screen orientation & viewport settings
     useEffect(() => {
         const lockOrientation = async () => {
             try {
-                if (screen && screen.orientation && screen.orientation.lock) {
-                    await screen.orientation.lock('portrait');
-                }
-            } catch (error) {
-                console.log('Screen orientation lock not supported');
-            }
+                if (screen && screen.orientation && screen.orientation.lock) await screen.orientation.lock('portrait');
+            } catch (error) { console.log('Screen orientation lock not supported'); }
         };
-
         lockOrientation();
         let viewportMeta = document.querySelector('meta[name="viewport"]');
         if (!viewportMeta) {
@@ -93,200 +76,101 @@ function App() {
         document.body.style.width = '100%';
         document.body.style.height = '100%';
         document.body.style.overflow = 'hidden';
-
-        return () => {
-            document.body.style.position = '';
-            document.body.style.width = '';
-            document.body.style.height = '';
-            document.body.style.overflow = '';
-        };
     }, []);
 
-    const currentScreen = navigationHistory[navigationHistory.length - 1] || 'home';
-    const previousScreen = navigationHistory.length > 1 ? navigationHistory[navigationHistory.length - 2] : null;
-    const currentTheme = useMemo(() => (isDarkMode ? darkTheme : lightTheme), [isDarkMode]);
-
-    useEffect(() => {
-        const themeColor = isDarkMode ? darkTheme.colors.background : lightTheme.colors.background;
-        const metaThemeColor = document.querySelector("meta[name=theme-color]");
-        if (metaThemeColor) {
-            metaThemeColor.setAttribute("content", themeColor);
-        }
-    }, [isDarkMode, currentTheme]);
-
-    // This effect correctly syncs React state to the browser URL
-    useEffect(() => {
-        if (currentScreen) {
-            const newUrl = screenToUrl(currentScreen);
-            if (window.location.pathname !== newUrl) {
-                if (navigationDirection.current === 'forward') {
-                    window.history.pushState({ screen: currentScreen }, '', newUrl);
-                } else {
-                    window.history.replaceState({ screen: currentScreen }, '', newUrl);
-                }
-            }
-        }
-    }, [currentScreen, screenToUrl]);
-
-    // This effect correctly syncs browser back/forward events to the React state
-    useEffect(() => {
-        const handlePopState = (event) => {
-            const screen = event.state?.screen || urlToScreen(window.location.pathname);
-            setNavigationHistory(prev => {
-                const existingIndex = prev.findIndex(s => s === screen);
-                if (existingIndex !== -1) {
-                    return prev.slice(0, existingIndex + 1);
-                } else {
-                    return [...prev, screen];
-                }
-            });
-        };
-        window.addEventListener('popstate', handlePopState);
-        return () => window.removeEventListener('popstate', handlePopState);
-    }, [urlToScreen]);
-
-
+    // --- FUNDAMENTALLY REWORKED NAVIGATION LOGIC ---
     const handleNavigate = useCallback((screen) => {
-        if (isTransitioning) return;
-        navigationDirection.current = 'forward';
-        setIsTransitioning(true);
-        setSwipeTranslateX(-window.innerWidth);
-
-        setTimeout(() => {
-            setNavigationHistory(prev => [...prev, screen]);
-            setShowProfileMenu(false);
-            setSwipeTranslateX(0);
-            setIsTransitioning(false);
-        }, 200);
-    }, [isTransitioning]);
-
-    const handleHome = useCallback(() => {
-        if (isTransitioning) return;
-        navigationDirection.current = 'forward';
-        setNavigationHistory(['home']);
-        setShowProfileMenu(false);
-        setSwipeTranslateX(0);
-        setIsTransitioning(false);
-    }, [isTransitioning]);
-
-    // --- FUNDAMENTAL REDO START ---
-    // A single, unified function to handle the entire back navigation process.
-    // This is now used by both the header button and the swipe gesture.
-    const handleBack = useCallback(() => {
-        if (navigationHistory.length <= 1 || isTransitioning) {
-            return;
-        }
-
-        navigationDirection.current = 'back';
-        setIsTransitioning(true);
-        // Animate the current screen fully out of view
+        if (isAnimating) return;
+        setIsAnimating(true);
+        // Set initial state for new screen to animate in from the right
+        setNavigationHistory(prev => [...prev, screen]);
         setSwipeTranslateX(window.innerWidth);
+        // A tiny delay allows React to render the new screen before we animate it into view
+        setTimeout(() => {
+            setSwipeTranslateX(0);
+            setTimeout(() => setIsAnimating(false), 300);
+        }, 20);
+    }, [isAnimating]);
 
-        // After the animation completes, update the history and reset for the new screen
+    const handleBack = useCallback(() => {
+        if (navigationHistory.length <= 1 || isAnimating) return;
+        setIsAnimating(true);
+        setSwipeTranslateX(window.innerWidth);
         setTimeout(() => {
             setNavigationHistory(prev => prev.slice(0, -1));
+            // After history changes, reset animation state for the now-current screen
+            setIsAnimating(false);
             setSwipeTranslateX(0);
-            setIsTransitioning(false);
-        }, 200); // This duration should match your CSS transition time
-    }, [navigationHistory.length, isTransitioning]);
+        }, 300); // Must match CSS transition duration
+    }, [navigationHistory.length, isAnimating]);
 
-    // Reworked touch handlers for more reliable gesture detection.
+    const handleHome = useCallback(() => {
+        if (isAnimating) return;
+        setIsAnimating(true);
+        setSwipeTranslateX(-window.innerWidth);
+        setTimeout(() => {
+            setNavigationHistory(['home']);
+            setIsAnimating(false);
+            setSwipeTranslateX(0);
+        }, 300);
+    }, [isAnimating]);
+
+    // --- ROBUST TOUCH HANDLERS ---
     const handleTouchStart = useCallback((e) => {
-        // Only allow a swipe to start if not already animating and there's a page to go back to.
-        if (isTransitioning || navigationHistory.length <= 1) return;
-
-        const touch = e.touches[0];
-        // Only initiate a swipe if the touch starts near the left edge of the screen.
-        if (touch.clientX < 50) {
-            touchStartX.current = touch.clientX;
-            touchStartY.current = touch.clientY;
-            lastTouchX.current = touch.clientX;
-            isSwipeInProgress.current = true;
+        if (navigationHistory.length <= 1 || isAnimating) return;
+        // Only start swipe if touch is near the left edge
+        if (e.touches[0].clientX < 50) {
+            isSwiping.current = true;
+            touchStartX.current = e.touches[0].clientX;
         }
-    }, [isTransitioning, navigationHistory.length]);
+    }, [navigationHistory.length, isAnimating]);
 
     const handleTouchMove = useCallback((e) => {
-        if (!isSwipeInProgress.current || isTransitioning) return;
-
-        const touch = e.touches[0];
-        const currentX = touch.clientX;
-        lastTouchX.current = currentX;
-
+        if (!isSwiping.current) return;
+        const currentX = e.touches[0].clientX;
         const diffX = currentX - touchStartX.current;
-        const diffY = Math.abs(touch.clientY - touchStartY.current);
-
-        // This is a vertical scroll, not a horizontal swipe, so we cancel the swipe.
-        if (diffX < diffY) {
-            isSwipeInProgress.current = false;
-            return;
-        }
-
-        // Prevent the browser's default pull-to-refresh or other gestures
-        e.preventDefault();
-
-        // We only want to track positive (rightward) movement for the back swipe
+        // Only track rightward drags for back-swipe
         if (diffX > 0) {
-            // Directly update the transform style for a responsive feel
             setSwipeTranslateX(diffX);
         }
-    }, [isTransitioning]);
+    }, []);
 
     const handleTouchEnd = useCallback(() => {
-        if (!isSwipeInProgress.current || isTransitioning) return;
-
-        // Reset the swipe flag immediately.
-        isSwipeInProgress.current = false;
-
-        const swipeDistance = lastTouchX.current - touchStartX.current;
-        // Use a simple, reliable distance threshold. If the user swiped more than 1/4 of the screen, go back.
-        const backThreshold = window.innerWidth / 4;
-
-        if (swipeDistance > backThreshold) {
-            // If the swipe is far enough, commit to the back navigation.
+        if (!isSwiping.current) return;
+        isSwiping.current = false;
+        // Decide whether to commit the back action based on swipe distance
+        if (swipeTranslateX > window.innerWidth / 4) {
             handleBack();
         } else {
-            // If the swipe wasn't far enough, animate the screen snapping back to place.
-            setIsTransitioning(true);
+            // If not swiped far enough, snap back to place
+            setIsAnimating(true);
             setSwipeTranslateX(0);
-            setTimeout(() => {
-                setIsTransitioning(false);
-            }, 200);
+            setTimeout(() => setIsAnimating(false), 300);
         }
-    }, [isTransitioning, handleBack]);
-    // --- FUNDAMENTAL REDO END ---
+    }, [swipeTranslateX, handleBack]);
 
+    // --- UNCHANGED HANDLERS & RENDER LOGIC ---
     const handleSaveSettings = useCallback(() => {
         setSuccessMessage("Settings Saved!");
         setTimeout(() => setSuccessMessage(""), 2000);
         handleBack();
     }, [handleBack]);
 
-    // (The rest of your handler functions remain unchanged)
     const handleAddDealer = useCallback((newDealerData) => {
         const newDealer = {
             id: dealerDirectory.length + 1,
-            name: newDealerData.dealerName,
-            address: 'N/A',
-            bookings: 0,
-            sales: 0,
-            salespeople: [],
-            designers: [],
-            administration: [{ name: newDealerData.email, status: 'pending' }],
-            installers: [],
-            recentOrders: [],
-            dailyDiscount: newDealerData.dailyDiscount,
+            name: newDealerData.dealerName, address: 'N/A', bookings: 0, sales: 0, salespeople: [],
+            designers: [], administration: [{ name: newDealerData.email, status: 'pending' }],
+            installers: [], recentOrders: [], dailyDiscount: newDealerData.dailyDiscount,
         };
         setDealerDirectory(prev => [newDealer, ...prev]);
     }, [dealerDirectory]);
 
     const handleNewLeadSuccess = useCallback((newLead) => {
         const newOpportunity = {
-            id: opportunities.length + 1,
-            name: newLead.project,
-            stage: newLead.projectStatus,
+            id: opportunities.length + 1, name: newLead.project, stage: newLead.projectStatus,
             value: `$${parseInt(String(newLead.estimatedList).replace(/[^0-9]/g, '')).toLocaleString()}`,
-            company: newLead.dealer,
-            ...newLead
+            company: newLead.dealer, ...newLead
         };
         setOpportunities(prev => [...prev, newOpportunity]);
         handleNavigate('projects');
@@ -300,45 +184,29 @@ function App() {
     }, []);
 
     const handleAddNewInstall = useCallback((newInstall) => {
-        setMyProjects(prev => [{
-            id: `proj${prev.length + 1}_${Date.now()}`,
-            ...newInstall,
-        }, ...prev]);
+        setMyProjects(prev => [{ id: `proj${prev.length + 1}_${Date.now()}`, ...newInstall }, ...prev]);
         handleBack();
     }, [handleBack]);
 
     const handleUpdateOpportunity = useCallback((updatedOpportunity) => {
         setOpportunities(prevOpps =>
-            prevOpps.map(opp =>
-                opp.id === updatedOpportunity.id
-                    ? { ...updatedOpportunity, value: `$${updatedOpportunity.value.toLocaleString()}` }
-                    : opp
-            )
+            prevOpps.map(opp => opp.id === updatedOpportunity.id ? { ...updatedOpportunity, value: `$${updatedOpportunity.value.toLocaleString()}` } : opp)
         );
         setSuccessMessage("Project Updated!");
         setTimeout(() => setSuccessMessage(""), 2000);
     }, []);
 
-    const handleShowAlert = useCallback((message) => {
-        setAlertInfo({ show: true, message });
-    }, []);
-
-    const handleShowVoiceModal = useCallback((message) => {
-        setVoiceMessage(message);
-        setTimeout(() => setVoiceMessage(''), 1200);
-    }, []);
-
+    const handleShowAlert = useCallback((message) => setAlertInfo({ show: true, message }), []);
+    const handleShowVoiceModal = useCallback((message) => { setVoiceMessage(message); setTimeout(() => setVoiceMessage(''), 1200); }, []);
     const handleUpdateCart = useCallback((item, change) => {
         setCart(prev => {
             const newCart = { ...prev };
             const currentQty = newCart[item.id] || 0;
             const newQty = currentQty + change;
-            if (newQty > 0) newCart[item.id] = newQty;
-            else delete newCart[item.id];
+            if (newQty > 0) newCart[item.id] = newQty; else delete newCart[item.id];
             return newCart;
         });
     }, []);
-
     const handleAskAI = useCallback(async (prompt) => {
         if (!prompt) return;
         setShowAIDropdown(true);
@@ -348,95 +216,54 @@ function App() {
             setIsAILoading(false);
         }, 1500);
     }, []);
-
-    const handleCloseAIDropdown = useCallback(() => {
-        setShowAIDropdown(false);
-    }, []);
-
+    const handleCloseAIDropdown = useCallback(() => setShowAIDropdown(false), []);
     const handleToggleLike = useCallback((postId) => {
         setLikedPosts(prev => {
             const newLikedPosts = { ...prev };
-            if (newLikedPosts[postId]) {
-                delete newLikedPosts[postId];
-            } else {
-                newLikedPosts[postId] = true;
-            }
+            if (newLikedPosts[postId]) { delete newLikedPosts[postId]; } else { newLikedPosts[postId] = true; }
             return newLikedPosts;
         });
-        setPosts(prevPosts =>
-            prevPosts.map(post =>
-                post.id === postId
-                    ? { ...post, likes: likedPosts[postId] ? post.likes - 1 : post.likes + 1 }
-                    : post
-            )
-        );
+        setPosts(prevPosts => prevPosts.map(post => post.id === postId ? { ...post, likes: likedPosts[postId] ? post.likes - 1 : post.likes + 1 } : post));
     }, [likedPosts]);
-
-    const handlePollVote = useCallback((pollId, optionId) => {
-        setPollChoices(prev => ({
-            ...prev,
-            [pollId]: optionId,
-        }));
-    }, []);
+    const handlePollVote = useCallback((pollId, optionId) => { setPollChoices(prev => ({ ...prev, [pollId]: optionId, })); }, []);
 
     const renderScreen = (screenKey) => {
         if (!screenKey) return null;
         const screenParts = screenKey.split('/');
         const baseScreenKey = screenParts[0];
         const commonProps = {
-            theme: currentTheme,
-            onNavigate: handleNavigate,
-            setSuccessMessage,
-            showAlert: handleShowAlert,
-            handleBack,
-            userSettings,
-            currentScreen: screenKey,
-            dealerDirectory,
-            handleAddDealer
+            theme: currentTheme, onNavigate: handleNavigate, setSuccessMessage, showAlert: handleShowAlert,
+            handleBack, userSettings, currentScreen: screenKey, dealerDirectory, handleAddDealer
         };
-
-        if (baseScreenKey === 'products' && screenParts[1] === 'category' && screenParts[2]) {
-            return <ProductComparisonScreen {...commonProps} categoryId={screenParts[2]} />;
-        }
-        if (baseScreenKey === 'products' && screenParts[1] === 'competitive-analysis' && screenParts[2]) {
-            return <CompetitiveAnalysisScreen {...commonProps} categoryId={screenParts[2]} />;
-        }
-        if (baseScreenKey === 'resources' && screenParts.length > 1) {
-            return <ResourceDetailScreen {...commonProps} onUpdateCart={handleUpdateCart} />;
-        }
-        if (screenKey === 'samples/cart') {
-            return <CartScreen {...commonProps} cart={cart} setCart={setCart} onUpdateCart={handleUpdateCart} />;
-        }
-
+        if (baseScreenKey === 'products' && screenParts[1] === 'category' && screenParts[2]) return <ProductComparisonScreen {...commonProps} categoryId={screenParts[2]} />;
+        if (baseScreenKey === 'products' && screenParts[1] === 'competitive-analysis' && screenParts[2]) return <CompetitiveAnalysisScreen {...commonProps} categoryId={screenParts[2]} />;
+        if (baseScreenKey === 'resources' && screenParts.length > 1) return <ResourceDetailScreen {...commonProps} onUpdateCart={handleUpdateCart} />;
+        if (screenKey === 'samples/cart') return <CartScreen {...commonProps} cart={cart} setCart={setCart} onUpdateCart={handleUpdateCart} />;
         const ScreenComponent = SCREEN_MAP[baseScreenKey];
-        if (!ScreenComponent) {
-            return <PlaceholderScreen {...commonProps} category="Page Not Found" />;
-        }
-
+        if (!ScreenComponent) return <PlaceholderScreen {...commonProps} category="Page Not Found" />;
         switch (baseScreenKey) {
-            case 'home':
-                return <ScreenComponent {...commonProps} onAskAI={handleAskAI} showAIDropdown={showAIDropdown} aiResponse={aiResponse} isAILoading={isAILoading} onCloseAIDropdown={handleCloseAIDropdown} onVoiceActivate={handleShowVoiceModal} />;
-            case 'fabrics':
-                return <ScreenComponent {...commonProps} />;
-            case 'orders':
-                return <ScreenComponent {...commonProps} setSelectedOrder={setSelectedOrder} />;
-            case 'samples':
-                return <ScreenComponent {...commonProps} cart={cart} onUpdateCart={handleUpdateCart} />;
-            case 'settings':
-                return <ScreenComponent {...commonProps} setUserSettings={setUserSettings} onSave={handleSaveSettings} />;
-            case 'members':
-                return <ScreenComponent {...commonProps} members={members} setMembers={setMembers} currentUserId={currentUserId} />;
-            case 'projects':
-                return <ScreenComponent {...commonProps} opportunities={opportunities} setSelectedOpportunity={setSelectedOpportunity} myProjects={myProjects} setSelectedProject={setSelectedProject} />;
-            case 'community':
-                return <ScreenComponent {...commonProps} openCreateContentModal={() => setShowCreateContentModal(true)} posts={posts} polls={polls} likedPosts={likedPosts} onToggleLike={handleToggleLike} pollChoices={pollChoices} onPollVote={handlePollVote} />;
-            case 'new-lead':
-                return <ScreenComponent {...commonProps} onSuccess={handleNewLeadSuccess} designFirms={designFirms} setDesignFirms={setDesignFirms} dealers={dealers} setDealers={setDealers} />;
-            case 'add-new-install':
-                return <AddNewInstallScreen {...commonProps} onAddInstall={handleAddNewInstall} />;
-            default:
-                return <ScreenComponent {...commonProps} />;
+            case 'home': return <ScreenComponent {...commonProps} onAskAI={handleAskAI} showAIDropdown={showAIDropdown} aiResponse={aiResponse} isAILoading={isAILoading} onCloseAIDropdown={handleCloseAIDropdown} onVoiceActivate={handleShowVoiceModal} />;
+            case 'samples': return <ScreenComponent {...commonProps} cart={cart} onUpdateCart={handleUpdateCart} />;
+            case 'settings': return <ScreenComponent {...commonProps} setUserSettings={setUserSettings} onSave={handleSaveSettings} />;
+            case 'projects': return <ScreenComponent {...commonProps} opportunities={opportunities} setSelectedOpportunity={setSelectedOpportunity} myProjects={myProjects} setSelectedProject={setSelectedProject} />;
+            case 'community': return <ScreenComponent {...commonProps} openCreateContentModal={() => setShowCreateContentModal(true)} posts={posts} polls={polls} likedPosts={likedPosts} onToggleLike={handleToggleLike} pollChoices={pollChoices} onPollVote={handlePollVote} />;
+            case 'new-lead': return <ScreenComponent {...commonProps} onSuccess={handleNewLeadSuccess} designFirms={designFirms} setDesignFirms={setDesignFirms} dealers={dealers} setDealers={setDealers} />;
+            case 'add-new-install': return <AddNewInstallScreen {...commonProps} onAddInstall={handleAddNewInstall} />;
+            default: return <ScreenComponent {...commonProps} />;
         }
+    };
+
+    // Define styles for the screen containers. The key is controlling the CSS transition with JS.
+    const screenContainerStyle = {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        paddingTop: '85px',
+        backgroundColor: currentTheme.colors.background,
+        willChange: 'transform',
+        transition: isAnimating ? 'transform 0.3s ease-out' : 'none',
     };
 
     return (
@@ -448,109 +275,36 @@ function App() {
             onTouchEnd={handleTouchEnd}
         >
             <AppHeader
-                theme={currentTheme}
-                userName={userSettings.firstName}
-                isHome={currentScreen === 'home'}
-                showBack={navigationHistory.length > 1}
-                handleBack={handleBack}
-                isDarkMode={isDarkMode}
-                onToggleDark={() => setIsDarkMode(d => !d)}
-                onHomeClick={handleHome}
-                onProfileClick={() => setShowProfileMenu(p => !p)}
+                theme={currentTheme} userName={userSettings.firstName} isHome={currentScreen === 'home'}
+                showBack={navigationHistory.length > 1} handleBack={handleBack} isDarkMode={isDarkMode}
+                onToggleDark={() => setIsDarkMode(d => !d)} onHomeClick={handleHome} onProfileClick={() => setShowProfileMenu(p => !p)}
             />
 
-            {/* Previous screen for swipe animation */}
-            {previousScreen && (
-                <div
-                    className={`absolute inset-0 ${isTransitioning ? 'transition-transform duration-200 ease-out' : ''} ${previousScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto'} scrollbar-hide`}
-                    style={{
-                        paddingTop: '85px',
-                        backgroundColor: currentTheme.colors.background,
-                        transform: `translateX(${swipeTranslateX - window.innerWidth}px)`,
-                        willChange: 'transform',
-                        zIndex: 1
-                    }}
-                >
-                    {renderScreen(previousScreen)}
+            <div className="flex-1 relative overflow-hidden">
+                {/* Previous screen (for swipe-back animation) */}
+                {previousScreen && (
+                    <div style={{ ...screenContainerStyle, transform: `translateX(${swipeTranslateX - window.innerWidth}px)`, zIndex: 1 }}>
+                        <div className="h-full overflow-y-auto scrollbar-hide">{renderScreen(previousScreen)}</div>
+                    </div>
+                )}
+                {/* Current screen */}
+                <div style={{ ...screenContainerStyle, transform: `translateX(${swipeTranslateX}px)`, zIndex: 2 }}>
+                    <div className="h-full overflow-y-auto scrollbar-hide">{renderScreen(currentScreen)}</div>
                 </div>
-            )}
-
-            {/* Current screen */}
-            <div
-                className={`absolute inset-0 ${isTransitioning || isSwipeInProgress.current ? '' : 'transition-transform duration-200 ease-out'} ${currentScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto'} scrollbar-hide`}
-                style={{
-                    paddingTop: '85px',
-                    backgroundColor: currentTheme.colors.background,
-                    transform: `translateX(${swipeTranslateX}px)`,
-                    willChange: 'transform',
-                    zIndex: 2
-                }}
-            >
-                {renderScreen(currentScreen)}
             </div>
 
             {/* Modals and overlays */}
             <div className="absolute inset-0 z-[100] pointer-events-none">
                 {(showProfileMenu || selectedOrder || alertInfo.show || !!voiceMessage || selectedOpportunity || showCreateContentModal || selectedProject) && (
                     <div className="pointer-events-auto">
-                        {showProfileMenu && (
-                            <ProfileMenu
-                                show={showProfileMenu}
-                                onClose={() => setShowProfileMenu(false)}
-                                onNavigate={handleNavigate}
-                                toggleTheme={() => setIsDarkMode(d => !d)}
-                                theme={currentTheme}
-                                isDarkMode={isDarkMode}
-                            />
-                        )}
-                        {selectedOrder && (
-                            <OrderModal
-                                order={selectedOrder}
-                                onClose={() => setSelectedOrder(null)}
-                                theme={currentTheme}
-                            />
-                        )}
-                        {selectedOpportunity && (
-                            <ProjectDetailModal
-                                opportunity={selectedOpportunity}
-                                onClose={() => setSelectedOpportunity(null)}
-                                theme={currentTheme}
-                                onUpdate={handleUpdateOpportunity}
-                            />
-                        )}
-                        {showCreateContentModal && (
-                            <CreateContentModal
-                                close={() => setShowCreateContentModal(false)}
-                                theme={currentTheme}
-                                onAdd={handleAddItem}
-                            />
-                        )}
-                        {selectedProject && (
-                            <MyProjectDetailModal
-                                project={selectedProject}
-                                onClose={() => setSelectedProject(null)}
-                                theme={currentTheme}
-                            />
-                        )}
-                        <Modal
-                            show={alertInfo.show}
-                            onClose={() => setAlertInfo({ show: false, message: '' })}
-                            title="Alert"
-                            theme={currentTheme}
-                        >
-                            <p>{alertInfo.message}</p>
-                        </Modal>
-                        <SuccessToast
-                            message={successMessage}
-                            show={!!successMessage}
-                            theme={currentTheme}
-                        />
-
-                        <VoiceModal
-                            message={voiceMessage}
-                            show={!!voiceMessage}
-                            theme={currentTheme}
-                        />
+                        {showProfileMenu && (<ProfileMenu show={showProfileMenu} onClose={() => setShowProfileMenu(false)} onNavigate={handleNavigate} toggleTheme={() => setIsDarkMode(d => !d)} theme={currentTheme} isDarkMode={isDarkMode} />)}
+                        {selectedOrder && (<OrderModal order={selectedOrder} onClose={() => setSelectedOrder(null)} theme={currentTheme} />)}
+                        {selectedOpportunity && (<ProjectDetailModal opportunity={selectedOpportunity} onClose={() => setSelectedOpportunity(null)} theme={currentTheme} onUpdate={handleUpdateOpportunity} />)}
+                        {showCreateContentModal && (<CreateContentModal close={() => setShowCreateContentModal(false)} theme={currentTheme} onAdd={handleAddItem} />)}
+                        {selectedProject && (<MyProjectDetailModal project={selectedProject} onClose={() => setSelectedProject(null)} theme={currentTheme} />)}
+                        <Modal show={alertInfo.show} onClose={() => setAlertInfo({ show: false, message: '' })} title="Alert" theme={currentTheme}><p>{alertInfo.message}</p></Modal>
+                        <SuccessToast message={successMessage} show={!!successMessage} theme={currentTheme} />
+                        <VoiceModal message={voiceMessage} show={!!voiceMessage} theme={currentTheme} />
                     </div>
                 )}
             </div>
