@@ -1896,10 +1896,8 @@ export const CommissionRatesScreen = ({ theme }) => {
 
     if (error) {
         return (
-            <div className="flex flex-col h-full">
-                <div className="px-4 py-6">
-                    <GlassCard theme={theme} className="p-8 text-center"><p className="font-semibold text-red-500">{error}</p></GlassCard>
-                </div>
+            <div className="flex flex-col h-full py-6 px-4">
+                <GlassCard theme={theme} className="p-8 text-center"><p className="font-semibold text-red-500">{error}</p></GlassCard>
             </div>
         );
     }
@@ -1909,12 +1907,14 @@ export const CommissionRatesScreen = ({ theme }) => {
         const spiffValue = hasNote ? item.spiff.split('*')[0].trim() : item.spiff;
         const spiffNote = hasNote ? `*${item.spiff.split('*')[1]}` : null;
 
+        // FIX: Adjusted column widths to prevent text wrapping.
         return (
-            <div className="grid grid-cols-[2fr,1fr,1.5fr] items-center gap-x-4 py-4 px-3">
+            <div className="grid grid-cols-[2fr,1.5fr,1.5fr] items-center gap-x-4 py-3 px-3">
                 <span className="font-semibold" style={{ color: textPrimary }}>
                     {item.discount}
                 </span>
-                <span className="text-center font-bold" style={{ color: accent }}>
+                {/* FIX: Added whitespace-nowrap to ensure percentages stay on one line. */}
+                <span className="text-center font-bold whitespace-nowrap" style={{ color: accent }}>
                     {item.rep}
                 </span>
                 <div className="text-center">
@@ -1943,19 +1943,27 @@ export const CommissionRatesScreen = ({ theme }) => {
         <div className="h-full flex flex-col">
             <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6 scrollbar-hide">
                 <GlassCard theme={theme} className="p-4">
-                    {/* This is the restyled header container */}
-                    <div className="grid grid-cols-[2fr,1fr,1.5fr] gap-x-4 p-3 rounded-xl mb-2" style={{ backgroundColor: subtle }}>
-                        <span className="text-xs font-bold uppercase tracking-wider" style={{ color: textSecondary }}>Discounts</span>
-                        <span className="text-xs font-bold uppercase tracking-wider text-center" style={{ color: textSecondary }}>Rep Comm.</span>
-                        <span className="text-xs font-bold uppercase tracking-wider text-center" style={{ color: textSecondary }}>Spiff</span>
+                    {/* FIX: Restyled the headers to be simpler and use the primary text color. */}
+                    <div className="grid grid-cols-[2fr,1.5fr,1.5fr] gap-x-4 px-3 pb-3 mb-2 border-b" style={{ borderColor: subtle }}>
+                        <span className="text-sm font-semibold" style={{ color: textPrimary }}>Discounts</span>
+                        <span className="text-sm font-semibold text-center" style={{ color: textPrimary }}>Rep Comm.</span>
+                        <span className="text-sm font-semibold text-center" style={{ color: textPrimary }}>Spiff</span>
                     </div>
 
-                    <div className="divide-y" style={{ borderColor: subtle }}>
-                        {rates.standard.map(r => <RateRow key={r.discount} item={r} />)}
+                    <div>
+                        {rates.standard.map((r, index) => (
+                            <div key={r.discount} className={index > 0 ? 'border-t' : ''} style={{ borderColor: subtle }}>
+                                <RateRow item={r} />
+                            </div>
+                        ))}
                         {rates.contract.length > 0 && (
                             <>
                                 <SectionHeader title="Contract Discounts" />
-                                {rates.contract.map(r => <RateRow key={r.discount} item={r} />)}
+                                {rates.contract.map((r, index) => (
+                                    <div key={r.discount} className={index > 0 ? 'border-t' : ''} style={{ borderColor: subtle }}>
+                                        <RateRow item={r} />
+                                    </div>
+                                ))}
                             </>
                         )}
                     </div>
