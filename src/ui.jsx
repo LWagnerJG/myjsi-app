@@ -5208,13 +5208,11 @@ export const SalesScreen = ({ theme, onNavigate }) => {
     const handleShowOrderDetails = useCallback(order => setSelectedOrder(order), []);
     const handleCloseModal = useCallback(() => setSelectedOrder(null), []);
 
-    // Helper to format company names like "OFFICEWORKS INC." to "Officeworks Inc."
     const formatCompanyName = (name) => {
         if (!name) return '';
         return name.toLowerCase().replace(/\b(\w)/g, s => s.toUpperCase());
     };
 
-    // New helper to format large numbers into millions
     const formatMillion = (n) => {
         if (typeof n !== 'number') return '0.00M';
         return `${(n / 1000000).toFixed(2)}M`;
@@ -5238,7 +5236,9 @@ export const SalesScreen = ({ theme, onNavigate }) => {
         <div className="flex flex-col h-full">
             <div
                 className="sticky top-0 z-10 backdrop-blur-md"
-                style={{ backgroundColor: `${theme.colors.background}e0` }}
+                // FIX: Changed background from theme.colors.background to theme.colors.surface
+                // to create the frosted glass effect against the scrolling content.
+                style={{ backgroundColor: `${theme.colors.surface}e6` }}
             >
                 <PageTitle title="Sales Dashboard" theme={theme}>
                     <button
