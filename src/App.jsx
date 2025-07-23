@@ -78,14 +78,18 @@ function App() {
         document.body.style.overflow = 'hidden';
     }, []);
 
-    // --- FUNDAMENTALLY REWORKED NAVIGATION LOGIC ---
+    // --- FIXED NAVIGATION LOGIC ---
     const handleNavigate = useCallback((screen) => {
         if (isAnimating) return;
         setIsAnimating(true);
-        // Set initial state for new screen to animate in from the right
+
+        // Add new screen to history first
         setNavigationHistory(prev => [...prev, screen]);
+
+        // Start with new screen positioned off-screen to the right
         setSwipeTranslateX(window.innerWidth);
-        // A tiny delay allows React to render the new screen before we animate it into view
+
+        // Animate the new screen sliding in from right
         setTimeout(() => {
             setSwipeTranslateX(0);
             setTimeout(() => setIsAnimating(false), 300);
@@ -95,13 +99,16 @@ function App() {
     const handleBack = useCallback(() => {
         if (navigationHistory.length <= 1 || isAnimating) return;
         setIsAnimating(true);
+
+        // Animate current screen sliding out to the right
         setSwipeTranslateX(window.innerWidth);
+
+        // After animation completes, update history
         setTimeout(() => {
             setNavigationHistory(prev => prev.slice(0, -1));
-            // After history changes, reset animation state for the now-current screen
-            setIsAnimating(false);
             setSwipeTranslateX(0);
-        }, 300); // Must match CSS transition duration
+            setIsAnimating(false);
+        }, 300);
     }, [navigationHistory.length, isAnimating]);
 
     const handleHome = useCallback(() => {
@@ -138,16 +145,24 @@ function App() {
     const handleTouchEnd = useCallback(() => {
         if (!isSwiping.current) return;
         isSwiping.current = false;
-        // Decide whether to commit the back action based on swipe distance
+
+        // If swiped far enough, complete the back navigation
         if (swipeTranslateX > window.innerWidth / 4) {
-            handleBack();
+            setIsAnimating(true);
+            setSwipeTranslateX(window.innerWidth);
+
+            setTimeout(() => {
+                setNavigationHistory(prev => prev.slice(0, -1));
+                setSwipeTranslateX(0);
+                setIsAnimating(false);
+            }, 300);
         } else {
-            // If not swiped far enough, snap back to place
+            // Snap back to original position
             setIsAnimating(true);
             setSwipeTranslateX(0);
             setTimeout(() => setIsAnimating(false), 300);
         }
-    }, [swipeTranslateX, handleBack]);
+    }, [swipeTranslateX]);
 
     // --- UNCHANGED HANDLERS & RENDER LOGIC ---
     const handleSaveSettings = useCallback(() => {
@@ -253,7 +268,16 @@ function App() {
         }
     };
 
-    // Define styles for the screen containers. The key is controlling the CSS transition with JS.
+    // Memoized screen rendering for better performance
+    const renderCurrentScreen = useMemo(() => {
+        return renderScreen(currentScreen);
+    }, [currentScreen]);
+
+    const renderPreviousScreen = useMemo(() => {
+        return previousScreen ? renderScreen(previousScreen) : null;
+    }, [previousScreen]);
+
+    // Define styles for the screen containers with GPU acceleration
     const screenContainerStyle = {
         position: 'absolute',
         top: 0,
@@ -263,6 +287,8 @@ function App() {
         paddingTop: '85px',
         backgroundColor: currentTheme.colors.background,
         willChange: 'transform',
+        backfaceVisibility: 'hidden',
+        perspective: '1000px',
         transition: isAnimating ? 'transform 0.3s ease-out' : 'none',
     };
 
@@ -283,13 +309,21 @@ function App() {
             <div className="flex-1 relative overflow-hidden">
                 {/* Previous screen (for swipe-back animation) */}
                 {previousScreen && (
-                    <div style={{ ...screenContainerStyle, transform: `translateX(${swipeTranslateX - window.innerWidth}px)`, zIndex: 1 }}>
-                        <div className="h-full overflow-y-auto scrollbar-hide">{renderScreen(previousScreen)}</div>
+                    <div style={{
+                        ...screenContainerStyle,
+                        transform: `translate3d(${swipeTranslateX - window.innerWidth}px, 0, 0)`,
+                        zIndex: 1
+                    }}>
+                        <div className="h-full overflow-y-auto scrollbar-hide">{renderPreviousScreen}</div>
                     </div>
                 )}
                 {/* Current screen */}
-                <div style={{ ...screenContainerStyle, transform: `translateX(${swipeTranslateX}px)`, zIndex: 2 }}>
-                    <div className="h-full overflow-y-auto scrollbar-hide">{renderScreen(currentScreen)}</div>
+                <div style={{
+                    ...screenContainerStyle,
+                    transform: `translate3d(${swipeTranslateX}px, 0, 0)`,
+                    zIndex: 2
+                }}>
+                    <div className="h-full overflow-y-auto scrollbar-hide">{renderCurrentScreen}</div>
                 </div>
             </div>
 
