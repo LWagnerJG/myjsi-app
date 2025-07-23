@@ -55,6 +55,9 @@ function App() {
     const swipeStartTime = useRef(0);
     const lastTouchX = useRef(0);
     const swipeAnimationRef = useRef(null);
+    // --- CHANGE START: Added ref to track navigation direction ---
+    const navigationDirection = useRef('forward');
+    // --- CHANGE END ---
 
     const urlToScreen = useCallback((url) => {
         const path = url.replace(window.location.origin, '').replace('/', '') || 'home';
@@ -139,14 +142,20 @@ function App() {
         ));
     }, [userSettings, currentUserId]);
 
+    // --- CHANGE START: Modified this effect to handle back navigation correctly ---
     useEffect(() => {
         if (currentScreen) {
             const newUrl = screenToUrl(currentScreen);
             if (window.location.pathname !== newUrl) {
-                window.history.pushState({ screen: currentScreen }, '', newUrl);
+                if (navigationDirection.current === 'forward') {
+                    window.history.pushState({ screen: currentScreen }, '', newUrl);
+                } else { // 'back'
+                    window.history.replaceState({ screen: currentScreen }, '', newUrl);
+                }
             }
         }
     }, [currentScreen, screenToUrl]);
+    // --- CHANGE END ---
 
     useEffect(() => {
         const handlePopState = (event) => {
@@ -168,6 +177,10 @@ function App() {
     const handleNavigate = useCallback((screen) => {
         if (isTransitioning) return;
 
+        // --- CHANGE START: Set navigation direction ---
+        navigationDirection.current = 'forward';
+        // --- CHANGE END ---
+
         setIsTransitioning(true);
         setSwipeTranslateX(-window.innerWidth);
 
@@ -182,6 +195,10 @@ function App() {
     const handleHome = useCallback(() => {
         if (isTransitioning) return;
 
+        // --- CHANGE START: Set navigation direction ---
+        navigationDirection.current = 'forward';
+        // --- CHANGE END ---
+
         setNavigationHistory(['home']);
         setShowProfileMenu(false);
         setSwipeTranslateX(0);
@@ -190,6 +207,10 @@ function App() {
 
     const handleBack = useCallback(() => {
         if (navigationHistory.length > 1 && !isTransitioning) {
+            // --- CHANGE START: Set navigation direction ---
+            navigationDirection.current = 'back';
+            // --- CHANGE END ---
+
             setIsTransitioning(true);
             setSwipeTranslateX(window.innerWidth);
 
