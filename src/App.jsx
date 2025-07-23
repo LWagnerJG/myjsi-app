@@ -10,9 +10,12 @@ import * as Data from './data.jsx';
 
 // --- Main App Component ---
 function App() {
-    // --- Simplified Core State for Navigation ---
+    // --- Core State for Navigation ---
     const [navigationHistory, setNavigationHistory] = useState(['home']);
     const [isAnimating, setIsAnimating] = useState(false);
+
+    // --- Ref for the main container to attach listeners ---
+    const appContainerRef = useRef(null);
 
     // --- All other application state remains the same ---
     const [isDarkMode, setIsDarkMode] = useState(false);
@@ -49,7 +52,6 @@ function App() {
 
     // --- One-time setup effect ---
     useEffect(() => {
-        // Lock screen orientation & viewport settings
         document.body.style.position = 'fixed';
         document.body.style.width = '100%';
         document.body.style.height = '100%';
@@ -63,9 +65,7 @@ function App() {
         viewportMeta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover';
     }, []);
 
-    // --- SIMPLIFIED AND ROBUST NAVIGATION LOGIC ---
-    // No more URL syncing, no more complex state machines.
-
+    // --- Simplified Navigation Logic ---
     const handleNavigate = useCallback((screen) => {
         if (isAnimating) return;
         setIsAnimating(true);
@@ -75,11 +75,10 @@ function App() {
     const handleBack = useCallback(() => {
         if (navigationHistory.length <= 1 || isAnimating) return;
         setIsAnimating(true);
-        // After the slide-out animation, update the history stack
         setTimeout(() => {
             setNavigationHistory(prev => prev.slice(0, -1));
             setIsAnimating(false);
-        }, 300); // Must match CSS transition duration
+        }, 300);
     }, [navigationHistory.length, isAnimating]);
 
     const handleHome = useCallback(() => {
@@ -91,7 +90,55 @@ function App() {
         }, 300);
     }, [isAnimating]);
 
-    // --- All other handlers remain, using the new simplified navigation ---
+    // --- FIX: Programmatic Event Listeners for Swipe Gesture ---
+    useEffect(() => {
+        const container = appContainerRef.current;
+        if (!container) return;
+
+        let touchStartX = 0;
+        let isSwiping = false;
+
+        const handleTouchStart = (e) => {
+            // Only start swipe if not animating, there's a page to go back to, and touch is on the left edge
+            if (!isAnimating && navigationHistory.length > 1 && e.touches[0].clientX < 50) {
+                isSwiping = true;
+                touchStartX = e.touches[0].clientX;
+            }
+        };
+
+        const handleTouchMove = (e) => {
+            if (!isSwiping) return;
+            // This is the key: we prevent the default browser scroll action
+            e.preventDefault();
+        };
+
+        const handleTouchEnd = (e) => {
+            if (!isSwiping) return;
+            const touchEndX = e.changedTouches[0].clientX;
+            const swipeDistance = touchEndX - touchStartX;
+
+            // If the user swiped more than 1/4 of the screen, go back
+            if (swipeDistance > window.innerWidth / 4) {
+                handleBack();
+            }
+
+            isSwiping = false;
+        };
+
+        // Add event listeners programmatically
+        container.addEventListener('touchstart', handleTouchStart);
+        container.addEventListener('touchmove', handleTouchMove, { passive: false }); // Explicitly set passive to false
+        container.addEventListener('touchend', handleTouchEnd);
+
+        // Cleanup function to remove listeners
+        return () => {
+            container.removeEventListener('touchstart', handleTouchStart);
+            container.removeEventListener('touchmove', handleTouchMove);
+            container.removeEventListener('touchend', handleTouchEnd);
+        };
+    }, [isAnimating, navigationHistory.length, handleBack]); // Re-attach listeners if state changes
+
+
     const handleSaveSettings = useCallback(() => {
         setSuccessMessage("Settings Saved!");
         setTimeout(() => setSuccessMessage(""), 2000);
@@ -109,7 +156,6 @@ function App() {
         setTimeout(() => setSuccessMessage(""), 2000);
     }, [opportunities.length, handleNavigate]);
 
-    // --- Render function for screens ---
     const renderScreen = (screenKey) => {
         if (!screenKey) return null;
         const screenParts = screenKey.split('/');
@@ -119,7 +165,6 @@ function App() {
         const ScreenComponent = SCREEN_MAP[baseScreenKey];
         if (!ScreenComponent) return <PlaceholderScreen {...commonProps} category="Page Not Found" />;
 
-        // Add other props based on screenKey
         const allProps = {
             ...commonProps,
             userSettings,
@@ -133,11 +178,10 @@ function App() {
         return <ScreenComponent {...allProps} />;
     };
 
-    // Define animation classes based on state
     const animationClass = isAnimating ? 'is-animating' : '';
 
     return (
-        <div className="h-screen w-screen font-sans flex flex-col relative overflow-hidden" style={{ backgroundColor: currentTheme.colors.background }}>
+        <div ref={appContainerRef} className="h-screen w-screen font-sans flex flex-col relative overflow-hidden" style={{ backgroundColor: currentTheme.colors.background }}>
             <AppHeader
                 theme={currentTheme} userName={userSettings.firstName} isHome={currentScreen === 'home'}
                 showBack={navigationHistory.length > 1} handleBack={handleBack} isDarkMode={isDarkMode}
@@ -145,14 +189,12 @@ function App() {
             />
 
             <div className="flex-1 relative">
-                {/* Previous Screen (Only exists during back navigation) */}
                 <div className={`screen-container ${animationClass} previous-screen`}>
                     <div className="h-full overflow-y-auto scrollbar-hide">
                         {renderScreen(previousScreen)}
                     </div>
                 </div>
 
-                {/* Current Screen */}
                 <div className={`screen-container ${animationClass} current-screen`}>
                     <div className="h-full overflow-y-auto scrollbar-hide">
                         {renderScreen(currentScreen)}
@@ -160,7 +202,6 @@ function App() {
                 </div>
             </div>
 
-            {/* All modals and overlays are unchanged */}
             {showProfileMenu && <ProfileMenu show={showProfileMenu} onClose={() => setShowProfileMenu(false)} onNavigate={handleNavigate} toggleTheme={() => setIsDarkMode(d => !d)} theme={currentTheme} isDarkMode={isDarkMode} />}
             {/* ... other modals ... */}
         </div>
