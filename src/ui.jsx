@@ -621,6 +621,48 @@ const LineItemCard = React.memo(({ lineItem, index, theme }) => {
     );
 });
 
+const AddressBookModal = ({ show, onClose, addresses, onSelectAddress, theme }) => {
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const filteredAddresses = useMemo(() => {
+        if (!searchTerm) return addresses;
+        const lowercasedFilter = searchTerm.toLowerCase();
+        return addresses.filter(item =>
+            item.name.toLowerCase().includes(lowercasedFilter) ||
+            (item.address || '').toLowerCase().includes(lowercasedFilter)
+        );
+    }, [searchTerm, addresses]);
+
+    return (
+        <Modal show={show} onClose={onClose} title="Select an Address" theme={theme}>
+            <div className="space-y-4">
+                <SearchInput
+                    value={searchTerm}
+                    onChange={e => setSearchTerm(e.target.value)}
+                    placeholder="Search by name or address..."
+                    theme={theme}
+                />
+                <div className="max-h-80 overflow-y-auto scrollbar-hide space-y-2">
+                    {filteredAddresses.length > 0 ? filteredAddresses.map(item => (
+                        <button
+                            key={item.id}
+                            onClick={() => onSelectAddress(item.address)}
+                            className="w-full text-left p-3 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/10"
+                            style={{ backgroundColor: theme.colors.subtle }}
+                        >
+                            <p className="font-semibold" style={{ color: theme.colors.textPrimary }}>{item.name}</p>
+                            <p className="text-sm" style={{ color: theme.colors.textSecondary }}>{item.address}</p>
+                        </button>
+                    )) : (
+                        <p className="text-center text-sm p-4" style={{ color: theme.colors.textSecondary }}>No results found.</p>
+                    )}
+                </div>
+            </div>
+        </Modal>
+    );
+};
+
+
 export const LeadTimesScreen = ({ theme = {} }) => {
     // State and hooks
     const [searchTerm, setSearchTerm] = useState('');
@@ -3702,16 +3744,19 @@ const Avatar = ({ src, alt, theme }) => {
     );
 };
 
-export const CartScreen = ({ theme, onNavigate, cart, setCart, onUpdateCart, userSettings }) => {
-    // FIX: Initialize address with home address if available, otherwise use an empty string.
+export const CartScreen = ({ theme, onNavigate, cart, setCart, onUpdateCart, userSettings, dealerDirectory }) => {
     const [address, setAddress] = useState(userSettings?.homeAddress || '');
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const [showAddressModal, setShowAddressModal] = useState(false);
+
+    const handleSelectAddress = (selectedAddress) => {
+        setAddress(selectedAddress);
+        setShowAddressModal(false);
+    };
 
     const cartItems = useMemo(() => {
         return Object.entries(cart).map(([id, quantity]) => {
-            if (id === 'full-jsi-set') {
-                return { id, name: 'Full JSI Sample Set', quantity, isSet: true };
-            }
+            if (id === 'full-jsi-set') return { id, name: 'Full JSI Sample Set', quantity, isSet: true };
             if (id.startsWith('set-')) {
                 const categoryId = id.replace('set-', '');
                 const categoryName = Data.SAMPLE_CATEGORIES.find(c => c.id === categoryId)?.name || 'Unknown';
@@ -3722,10 +3767,7 @@ export const CartScreen = ({ theme, onNavigate, cart, setCart, onUpdateCart, use
         }).filter(Boolean);
     }, [cart]);
 
-    const totalCartItems = useMemo(
-        () => Object.values(cart).reduce((sum, qty) => sum + qty, 0),
-        [cart]
-    );
+    const totalCartItems = useMemo(() => Object.values(cart).reduce((sum, qty) => sum + qty, 0), [cart]);
 
     const handleSubmit = useCallback(() => {
         setIsSubmitted(true);
@@ -3747,62 +3789,65 @@ export const CartScreen = ({ theme, onNavigate, cart, setCart, onUpdateCart, use
     }
 
     return (
-        <div className="flex flex-col h-full">
-            <PageTitle title="Cart" theme={theme} />
-            <div className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-hide">
-                <GlassCard theme={theme} className="p-2">
-                    <h3 className="font-bold text-xl px-2 pt-2" style={{ color: theme.colors.textPrimary }}>Selected Samples</h3>
-                    {cartItems.length > 0 ? (
-                        <div className="mt-2">
-                            {cartItems.map((item, index) => (
-                                <React.Fragment key={item.id}>
-                                    {index > 0 && <div className="border-t mx-2" style={{ borderColor: theme.colors.border }}></div>}
-                                    <div className="flex items-center space-x-4 p-2">
-                                        <div
-                                            className="w-16 h-16 rounded-lg flex-shrink-0 flex items-center justify-center"
-                                            style={{
-                                                backgroundColor: item.isSet ? theme.colors.subtle : item.color,
-                                                border: `1px solid ${theme.colors.border}`
-                                            }}
-                                        >
-                                            {item.isSet && <Package className="w-8 h-8" style={{ color: theme.colors.secondary }} />}
+        <>
+            <div className="flex flex-col h-full">
+                <PageTitle title="Cart" theme={theme} />
+                <div className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-hide">
+                    <GlassCard theme={theme} className="p-2">
+                        <h3 className="font-bold text-xl px-2 pt-2" style={{ color: theme.colors.textPrimary }}>Selected Samples</h3>
+                        {cartItems.length > 0 ? (
+                            <div className="mt-2">
+                                {cartItems.map((item, index) => (
+                                    <React.Fragment key={item.id}>
+                                        {index > 0 && <div className="border-t mx-2" style={{ borderColor: theme.colors.border }}></div>}
+                                        <div className="flex items-center space-x-4 p-2">
+                                            <div className="w-16 h-16 rounded-lg flex-shrink-0 flex items-center justify-center" style={{ backgroundColor: item.isSet ? theme.colors.subtle : item.color, border: `1px solid ${theme.colors.border}` }}>
+                                                {item.isSet && <Package className="w-8 h-8" style={{ color: theme.colors.secondary }} />}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{item.name}</p>
+                                            </div>
+                                            <div className="flex items-center space-x-3">
+                                                <button onClick={() => onUpdateCart(item, -1)} className="w-8 h-8 flex items-center justify-center rounded-full transition-colors hover:bg-black/5 dark:hover:bg-white/5">
+                                                    {item.quantity === 1 ? <Trash2 className="w-5 h-5 text-red-500" /> : <Minus className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />}
+                                                </button>
+                                                <span className="font-bold w-4 text-center">{item.quantity}</span>
+                                                <button onClick={() => onUpdateCart(item, 1)} className="w-8 h-8 flex items-center justify-center rounded-full transition-colors hover:bg-black/5 dark:hover:bg-white/5">
+                                                    <Plus className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
+                                                </button>
+                                            </div>
                                         </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{item.name}</p>
-                                        </div>
-                                        <div className="flex items-center space-x-3">
-                                            <button onClick={() => onUpdateCart(item, -1)} className="w-8 h-8 flex items-center justify-center rounded-full transition-colors hover:bg-black/5 dark:hover:bg-white/5">
-                                                {item.quantity === 1 ? <Trash2 className="w-5 h-5 text-red-500" /> : <Minus className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />}
-                                            </button>
-                                            <span className="font-bold w-4 text-center">{item.quantity}</span>
-                                            <button onClick={() => onUpdateCart(item, 1)} className="w-8 h-8 flex items-center justify-center rounded-full transition-colors hover:bg-black/5 dark:hover:bg-white/5">
-                                                <Plus className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
-                                            </button>
-                                        </div>
-                                    </div>
-                                </React.Fragment>
-                            ))}
-                        </div>
-                    ) : <p className="text-sm p-4 text-center" style={{ color: theme.colors.textSecondary }}>Your cart is empty.</p>}
-                </GlassCard>
-            </div>
+                                    </React.Fragment>
+                                ))}
+                            </div>
+                        ) : <p className="text-sm p-4 text-center" style={{ color: theme.colors.textSecondary }}>Your cart is empty.</p>}
+                    </GlassCard>
+                </div>
 
-            <div className="px-4 space-y-3 pt-3 pb-4 border-t" style={{ backgroundColor: theme.colors.background, borderColor: theme.colors.border }}>
-                <GlassCard theme={theme} className="p-3 space-y-2">
-                    <div className="flex justify-between items-center">
-                        <h3 className="font-bold px-1" style={{ color: theme.colors.textPrimary }}>Ship To</h3>
-                        <button onClick={() => setAddress(userSettings?.homeAddress || '')} className="flex items-center space-x-1.5 text-sm font-semibold p-2 rounded-lg hover:bg-black/5">
-                            <Home className="w-4 h-4" style={{ color: theme.colors.secondary }} />
-                            <span>Use Home Address</span>
-                        </button>
-                    </div>
-                    <textarea value={address} onChange={(e) => setAddress(e.target.value)} rows="2" placeholder="Enter shipping address..." className="w-full p-2 border rounded-lg" style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border, color: theme.colors.textPrimary, resize: 'none' }}></textarea>
-                </GlassCard>
-                <button onClick={handleSubmit} disabled={Object.keys(cart).length === 0 || !(address || '').trim()} className="w-full font-bold py-3.5 px-6 rounded-full transition-colors disabled:opacity-50" style={{ backgroundColor: theme.colors.accent, color: '#FFFFFF' }}>
-                    Submit Order ({totalCartItems} Items)
-                </button>
+                <div className="px-4 space-y-3 pt-3 pb-4 border-t" style={{ backgroundColor: theme.colors.background, borderColor: theme.colors.border }}>
+                    <GlassCard theme={theme} className="p-3 space-y-2">
+                        <div className="flex justify-between items-center">
+                            <h3 className="font-bold px-1" style={{ color: theme.colors.textPrimary }}>Ship To</h3>
+                            <div className="flex items-center space-x-2">
+                                <button onClick={() => setShowAddressModal(true)} className="flex items-center space-x-1.5 text-sm font-semibold p-2 rounded-lg hover:bg-black/5">
+                                    <Users className="w-4 h-4" style={{ color: theme.colors.secondary }} />
+                                    <span>Directory</span>
+                                </button>
+                                <button onClick={() => setAddress(userSettings?.homeAddress || '')} className="flex items-center space-x-1.5 text-sm font-semibold p-2 rounded-lg hover:bg-black/5">
+                                    <Home className="w-4 h-4" style={{ color: theme.colors.secondary }} />
+                                    <span>Use Home</span>
+                                </button>
+                            </div>
+                        </div>
+                        <textarea value={address} onChange={(e) => setAddress(e.target.value)} rows="3" placeholder="Enter shipping address..." className="w-full p-2 border rounded-lg" style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border, color: theme.colors.textPrimary, resize: 'none' }}></textarea>
+                    </GlassCard>
+                    <button onClick={handleSubmit} disabled={Object.keys(cart).length === 0 || !(address || '').trim()} className="w-full font-bold py-3.5 px-6 rounded-full transition-colors disabled:opacity-50" style={{ backgroundColor: theme.colors.accent, color: '#FFFFFF' }}>
+                        Submit Order ({totalCartItems} Items)
+                    </button>
+                </div>
             </div>
-        </div>
+            <AddressBookModal show={showAddressModal} onClose={() => setShowAddressModal(false)} addresses={dealerDirectory} onSelectAddress={handleSelectAddress} theme={theme} />
+        </>
     );
 };
 

@@ -86,7 +86,9 @@ function App() {
 
         const commonProps = { theme: currentTheme, onNavigate: handleNavigate, handleBack, userSettings, setSuccessMessage, currentScreen: screenKey, showAlert: handleShowAlert };
 
-        if (screenKey === 'samples/cart') return <CartScreen {...commonProps} cart={cart} setCart={setCart} onUpdateCart={handleUpdateCart} />;
+        // FIX: Pass the dealerDirectory data to the CartScreen
+        if (screenKey === 'samples/cart') return <CartScreen {...commonProps} cart={cart} setCart={setCart} onUpdateCart={handleUpdateCart} dealerDirectory={dealerDirectory} />;
+
         if (baseScreenKey === 'products' && screenParts[1] === 'category') return <ProductComparisonScreen {...commonProps} categoryId={screenParts[2]} />;
         if (baseScreenKey === 'products' && screenParts[1] === 'competitive-analysis') return <CompetitiveAnalysisScreen {...commonProps} />;
         if (baseScreenKey === 'resources' && screenParts.length > 1) return <ResourceDetailScreen {...commonProps} onUpdateCart={handleUpdateCart} dealerDirectory={dealerDirectory} handleAddDealer={handleAddDealer} />;
