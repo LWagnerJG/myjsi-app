@@ -46,12 +46,15 @@ function App() {
     const [aiResponse, setAiResponse] = useState('');
     const [isAILoading, setIsAILoading] = useState(false);
     const [showAIDropdown, setShowAIDropdown] = useState(false);
+
+    // Touch handling refs
     const touchStartX = useRef(0);
     const touchStartY = useRef(0);
     const hasSwipeStarted = useRef(false);
     const isHorizontalSwipe = useRef(false);
     const swipeStartTime = useRef(0);
     const lastTouchX = useRef(0);
+    const swipeAnimationRef = useRef(null);
 
     const urlToScreen = useCallback((url) => {
         const path = url.replace(window.location.origin, '').replace('/', '') || 'home';
@@ -68,6 +71,43 @@ function App() {
         setNavigationHistory([initialScreen]);
     }, []);
 
+    // Lock screen orientation to portrait
+    useEffect(() => {
+        const lockOrientation = async () => {
+            try {
+                if (screen && screen.orientation && screen.orientation.lock) {
+                    await screen.orientation.lock('portrait');
+                }
+            } catch (error) {
+                console.log('Screen orientation lock not supported');
+            }
+        };
+
+        lockOrientation();
+
+        // Add viewport meta tag to prevent zooming and ensure proper mobile behavior
+        let viewportMeta = document.querySelector('meta[name="viewport"]');
+        if (!viewportMeta) {
+            viewportMeta = document.createElement('meta');
+            viewportMeta.name = 'viewport';
+            document.head.appendChild(viewportMeta);
+        }
+        viewportMeta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover';
+
+        // Set body styles to prevent orientation issues
+        document.body.style.position = 'fixed';
+        document.body.style.width = '100%';
+        document.body.style.height = '100%';
+        document.body.style.overflow = 'hidden';
+
+        return () => {
+            document.body.style.position = '';
+            document.body.style.width = '';
+            document.body.style.height = '';
+            document.body.style.overflow = '';
+        };
+    }, []);
+
     const currentScreen = navigationHistory[navigationHistory.length - 1] || 'home';
     const previousScreen = navigationHistory.length > 1 ? navigationHistory[navigationHistory.length - 2] : null;
     const currentTheme = useMemo(() => (isDarkMode ? darkTheme : lightTheme), [isDarkMode]);
@@ -78,11 +118,13 @@ function App() {
         if (metaThemeColor) {
             metaThemeColor.setAttribute("content", themeColor);
         }
+
         const preventDefaultGlobal = (e) => {
             if (currentScreen === 'home') {
                 e.preventDefault();
             }
         };
+
         document.body.addEventListener('touchmove', preventDefaultGlobal, { passive: false });
         return () => {
             document.body.removeEventListener('touchmove', preventDefaultGlobal);
@@ -124,27 +166,33 @@ function App() {
     }, [urlToScreen]);
 
     const handleNavigate = useCallback((screen) => {
+        if (isTransitioning) return;
+
         setIsTransitioning(true);
         setSwipeTranslateX(-window.innerWidth);
+
         setTimeout(() => {
             setNavigationHistory(prev => [...prev, screen]);
             setShowProfileMenu(false);
             setSwipeTranslateX(0);
             setIsTransitioning(false);
-        }, 100);
-    }, []);
+        }, 200);
+    }, [isTransitioning]);
 
     const handleHome = useCallback(() => {
+        if (isTransitioning) return;
+
         setNavigationHistory(['home']);
         setShowProfileMenu(false);
         setSwipeTranslateX(0);
         setIsTransitioning(false);
-    }, []);
+    }, [isTransitioning]);
 
     const handleBack = useCallback(() => {
         if (navigationHistory.length > 1 && !isTransitioning) {
             setIsTransitioning(true);
             setSwipeTranslateX(window.innerWidth);
+
             setTimeout(() => {
                 setNavigationHistory(prev => prev.slice(0, -1));
                 setSwipeTranslateX(0);
@@ -170,7 +218,11 @@ function App() {
         setDealerDirectory(prev => [newDealer, ...prev]);
     }, [dealerDirectory]);
 
-    const handleSaveSettings = useCallback(() => { setSuccessMessage("Settings Saved!"); setTimeout(() => setSuccessMessage(""), 2000); handleBack(); }, [handleBack]);
+    const handleSaveSettings = useCallback(() => {
+        setSuccessMessage("Settings Saved!");
+        setTimeout(() => setSuccessMessage(""), 2000);
+        handleBack();
+    }, [handleBack]);
 
     const handleNewLeadSuccess = useCallback((newLead) => {
         const newOpportunity = {
@@ -212,8 +264,15 @@ function App() {
         setTimeout(() => setSuccessMessage(""), 2000);
     }, []);
 
-    const handleShowAlert = useCallback((message) => { setAlertInfo({ show: true, message }); }, []);
-    const handleShowVoiceModal = useCallback((message) => { setVoiceMessage(message); setTimeout(() => setVoiceMessage(''), 1200); }, []);
+    const handleShowAlert = useCallback((message) => {
+        setAlertInfo({ show: true, message });
+    }, []);
+
+    const handleShowVoiceModal = useCallback((message) => {
+        setVoiceMessage(message);
+        setTimeout(() => setVoiceMessage(''), 1200);
+    }, []);
+
     const handleUpdateCart = useCallback((item, change) => {
         setCart(prev => {
             const newCart = { ...prev };
@@ -224,6 +283,7 @@ function App() {
             return newCart;
         });
     }, []);
+
     const handleAskAI = useCallback(async (prompt) => {
         if (!prompt) return;
         setShowAIDropdown(true);
@@ -233,7 +293,10 @@ function App() {
             setIsAILoading(false);
         }, 1500);
     }, []);
-    const handleCloseAIDropdown = useCallback(() => { setShowAIDropdown(false); }, []);
+
+    const handleCloseAIDropdown = useCallback(() => {
+        setShowAIDropdown(false);
+    }, []);
 
     const handleToggleLike = useCallback((postId) => {
         setLikedPosts(prev => {
@@ -261,10 +324,15 @@ function App() {
         }));
     }, []);
 
-    const handleTouchStart = (e) => {
+    // Improved touch handling for swipe-back functionality
+    const handleTouchStart = useCallback((e) => {
         if (isTransitioning || navigationHistory.length <= 1) return;
-        const touchX = e.touches[0].clientX;
-        const touchY = e.touches[0].clientY;
+
+        const touch = e.touches[0];
+        const touchX = touch.clientX;
+        const touchY = touch.clientY;
+
+        // Only start swipe detection if touch starts near the left edge
         if (touchX < 50) {
             touchStartX.current = touchX;
             touchStartY.current = touchY;
@@ -272,108 +340,276 @@ function App() {
             hasSwipeStarted.current = true;
             isHorizontalSwipe.current = false;
             swipeStartTime.current = Date.now();
-        }
-    };
 
-    const handleTouchMove = (e) => {
+            // Cancel any existing animation
+            if (swipeAnimationRef.current) {
+                cancelAnimationFrame(swipeAnimationRef.current);
+                swipeAnimationRef.current = null;
+            }
+        }
+    }, [isTransitioning, navigationHistory.length]);
+
+    const handleTouchMove = useCallback((e) => {
         if (!hasSwipeStarted.current || isTransitioning) return;
-        const currentX = e.touches[0].clientX;
-        const currentY = e.touches[0].clientY;
+
+        const touch = e.touches[0];
+        const currentX = touch.clientX;
+        const currentY = touch.clientY;
         const diffX = currentX - touchStartX.current;
         const diffY = Math.abs(currentY - touchStartY.current);
 
+        // Determine if this is a horizontal swipe
         if (!isHorizontalSwipe.current) {
-            if (diffX > 15 && diffX > diffY * 1.5) { isHorizontalSwipe.current = true; }
-            else if (diffY > 15) { hasSwipeStarted.current = false; return; }
+            if (Math.abs(diffX) > 15 && Math.abs(diffX) > diffY * 1.5) {
+                isHorizontalSwipe.current = true;
+            } else if (diffY > 15) {
+                // This is a vertical scroll, cancel swipe
+                hasSwipeStarted.current = false;
+                return;
+            }
         }
 
-        if (isHorizontalSwipe.current) {
+        if (isHorizontalSwipe.current && diffX > 0) {
             e.preventDefault();
+            e.stopPropagation();
+
             const maxSwipe = window.innerWidth * 0.8;
-            const resistance = Math.max(0, Math.min(maxSwipe, diffX));
-            const easedTransform = resistance * (1 - resistance / (maxSwipe * 2));
-            setSwipeTranslateX(Math.max(0, easedTransform));
+            const normalizedDiff = Math.max(0, Math.min(maxSwipe, diffX));
+
+            // Apply easing for smoother feel
+            const easedTransform = normalizedDiff * (1 - normalizedDiff / (maxSwipe * 2));
+
+            swipeAnimationRef.current = requestAnimationFrame(() => {
+                setSwipeTranslateX(Math.max(0, easedTransform));
+            });
+
             lastTouchX.current = currentX;
         }
-    };
+    }, [isTransitioning]);
 
-    const handleTouchEnd = () => {
+    const handleTouchEnd = useCallback(() => {
         if (!hasSwipeStarted.current || isTransitioning) return;
+
+        if (swipeAnimationRef.current) {
+            cancelAnimationFrame(swipeAnimationRef.current);
+            swipeAnimationRef.current = null;
+        }
+
         if (isHorizontalSwipe.current) {
             const swipeDistance = lastTouchX.current - touchStartX.current;
             const swipeTime = Date.now() - swipeStartTime.current;
             const swipeVelocity = swipeDistance / swipeTime;
-            const shouldGoBack = swipeDistance > window.innerWidth * 0.25 || (swipeDistance > window.innerWidth * 0.15 && swipeVelocity > 0.3);
-            if (shouldGoBack) { handleBack(); }
-            else {
+
+            // Determine if we should complete the back navigation
+            const threshold = window.innerWidth * 0.25;
+            const velocityThreshold = 0.3;
+            const shouldGoBack = swipeDistance > threshold ||
+                (swipeDistance > window.innerWidth * 0.15 && swipeVelocity > velocityThreshold);
+
+            if (shouldGoBack && navigationHistory.length > 1) {
+                handleBack();
+            } else {
+                // Animate back to original position
                 setIsTransitioning(true);
                 setSwipeTranslateX(0);
-                setTimeout(() => setIsTransitioning(false), 150);
+                setTimeout(() => setIsTransitioning(false), 200);
             }
         }
+
+        // Reset all touch state
         hasSwipeStarted.current = false;
         isHorizontalSwipe.current = false;
         touchStartX.current = 0;
         touchStartY.current = 0;
         lastTouchX.current = 0;
         swipeStartTime.current = 0;
-    };
+    }, [isTransitioning, navigationHistory.length, handleBack]);
+
+    // Cleanup animation frame on unmount
+    useEffect(() => {
+        return () => {
+            if (swipeAnimationRef.current) {
+                cancelAnimationFrame(swipeAnimationRef.current);
+            }
+        };
+    }, []);
 
     const renderScreen = (screenKey) => {
         if (!screenKey) return null;
         const screenParts = screenKey.split('/');
         const baseScreenKey = screenParts[0];
-        const commonProps = { theme: currentTheme, onNavigate: handleNavigate, setSuccessMessage, showAlert: handleShowAlert, handleBack, userSettings, currentScreen: screenKey, dealerDirectory, handleAddDealer };
+        const commonProps = {
+            theme: currentTheme,
+            onNavigate: handleNavigate,
+            setSuccessMessage,
+            showAlert: handleShowAlert,
+            handleBack,
+            userSettings,
+            currentScreen: screenKey,
+            dealerDirectory,
+            handleAddDealer
+        };
 
-        if (baseScreenKey === 'products' && screenParts[1] === 'category' && screenParts[2]) return <ProductComparisonScreen {...commonProps} categoryId={screenParts[2]} />;
-        if (baseScreenKey === 'products' && screenParts[1] === 'competitive-analysis' && screenParts[2]) return <CompetitiveAnalysisScreen {...commonProps} categoryId={screenParts[2]} />;
-        if (baseScreenKey === 'resources' && screenParts.length > 1) return <ResourceDetailScreen {...commonProps} onUpdateCart={handleUpdateCart} />;
-        if (screenKey === 'samples/cart') return <CartScreen {...commonProps} cart={cart} setCart={setCart} onUpdateCart={handleUpdateCart} />;
+        if (baseScreenKey === 'products' && screenParts[1] === 'category' && screenParts[2]) {
+            return <ProductComparisonScreen {...commonProps} categoryId={screenParts[2]} />;
+        }
+        if (baseScreenKey === 'products' && screenParts[1] === 'competitive-analysis' && screenParts[2]) {
+            return <CompetitiveAnalysisScreen {...commonProps} categoryId={screenParts[2]} />;
+        }
+        if (baseScreenKey === 'resources' && screenParts.length > 1) {
+            return <ResourceDetailScreen {...commonProps} onUpdateCart={handleUpdateCart} />;
+        }
+        if (screenKey === 'samples/cart') {
+            return <CartScreen {...commonProps} cart={cart} setCart={setCart} onUpdateCart={handleUpdateCart} />;
+        }
 
         const ScreenComponent = SCREEN_MAP[baseScreenKey];
-        if (!ScreenComponent) return <PlaceholderScreen {...commonProps} category="Page Not Found" />;
+        if (!ScreenComponent) {
+            return <PlaceholderScreen {...commonProps} category="Page Not Found" />;
+        }
 
         switch (baseScreenKey) {
-            case 'home': return <ScreenComponent {...commonProps} onAskAI={handleAskAI} showAIDropdown={showAIDropdown} aiResponse={aiResponse} isAILoading={isAILoading} onCloseAIDropdown={handleCloseAIDropdown} onVoiceActivate={handleShowVoiceModal} />;
-            case 'fabrics': return <ScreenComponent {...commonProps} />;
-            case 'orders': return <ScreenComponent {...commonProps} setSelectedOrder={setSelectedOrder} />;
-            case 'samples': return <ScreenComponent {...commonProps} cart={cart} onUpdateCart={handleUpdateCart} />;
-            case 'settings': return <ScreenComponent {...commonProps} setUserSettings={setUserSettings} onSave={handleSaveSettings} />;
-            case 'members': return <ScreenComponent {...commonProps} members={members} setMembers={setMembers} currentUserId={currentUserId} />;
-            case 'projects': return <ScreenComponent {...commonProps} opportunities={opportunities} setSelectedOpportunity={setSelectedOpportunity} myProjects={myProjects} setSelectedProject={setSelectedProject} />;
-            case 'community': return <ScreenComponent {...commonProps} openCreateContentModal={() => setShowCreateContentModal(true)} posts={posts} polls={polls} likedPosts={likedPosts} onToggleLike={handleToggleLike} pollChoices={pollChoices} onPollVote={handlePollVote} />;
-            case 'new-lead': return <ScreenComponent {...commonProps} onSuccess={handleNewLeadSuccess} designFirms={designFirms} setDesignFirms={setDesignFirms} dealers={dealers} setDealers={setDealers} />;
-            case 'add-new-install': return <AddNewInstallScreen {...commonProps} onAddInstall={handleAddNewInstall} />;
-            default: return <ScreenComponent {...commonProps} />;
+            case 'home':
+                return <ScreenComponent {...commonProps} onAskAI={handleAskAI} showAIDropdown={showAIDropdown} aiResponse={aiResponse} isAILoading={isAILoading} onCloseAIDropdown={handleCloseAIDropdown} onVoiceActivate={handleShowVoiceModal} />;
+            case 'fabrics':
+                return <ScreenComponent {...commonProps} />;
+            case 'orders':
+                return <ScreenComponent {...commonProps} setSelectedOrder={setSelectedOrder} />;
+            case 'samples':
+                return <ScreenComponent {...commonProps} cart={cart} onUpdateCart={handleUpdateCart} />;
+            case 'settings':
+                return <ScreenComponent {...commonProps} setUserSettings={setUserSettings} onSave={handleSaveSettings} />;
+            case 'members':
+                return <ScreenComponent {...commonProps} members={members} setMembers={setMembers} currentUserId={currentUserId} />;
+            case 'projects':
+                return <ScreenComponent {...commonProps} opportunities={opportunities} setSelectedOpportunity={setSelectedOpportunity} myProjects={myProjects} setSelectedProject={setSelectedProject} />;
+            case 'community':
+                return <ScreenComponent {...commonProps} openCreateContentModal={() => setShowCreateContentModal(true)} posts={posts} polls={polls} likedPosts={likedPosts} onToggleLike={handleToggleLike} pollChoices={pollChoices} onPollVote={handlePollVote} />;
+            case 'new-lead':
+                return <ScreenComponent {...commonProps} onSuccess={handleNewLeadSuccess} designFirms={designFirms} setDesignFirms={setDesignFirms} dealers={dealers} setDealers={setDealers} />;
+            case 'add-new-install':
+                return <AddNewInstallScreen {...commonProps} onAddInstall={handleAddNewInstall} />;
+            default:
+                return <ScreenComponent {...commonProps} />;
         }
     };
 
     return (
-        <div className="h-screen w-screen font-sans flex flex-col relative overflow-hidden" style={{ backgroundColor: currentTheme.colors.background }} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
-            <AppHeader theme={currentTheme} userName={userSettings.firstName} isHome={currentScreen === 'home'} showBack={navigationHistory.length > 1} handleBack={handleBack} isDarkMode={isDarkMode} onToggleDark={() => setIsDarkMode(d => !d)} onHomeClick={handleHome} onProfileClick={() => setShowProfileMenu(p => !p)} />
+        <div
+            className="h-screen w-screen font-sans flex flex-col relative overflow-hidden"
+            style={{ backgroundColor: currentTheme.colors.background, touchAction: 'pan-y pinch-zoom' }}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+        >
+            <AppHeader
+                theme={currentTheme}
+                userName={userSettings.firstName}
+                isHome={currentScreen === 'home'}
+                showBack={navigationHistory.length > 1}
+                handleBack={handleBack}
+                isDarkMode={isDarkMode}
+                onToggleDark={() => setIsDarkMode(d => !d)}
+                onHomeClick={handleHome}
+                onProfileClick={() => setShowProfileMenu(p => !p)}
+            />
+
+            {/* Previous screen for swipe animation */}
             {previousScreen && (
-                <div className={`absolute inset-0 ${isTransitioning ? 'transition-transform duration-200 ease-out' : ''} ${swipeTranslateX > 0 ? 'overflow-hidden' : (previousScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto')} scrollbar-hide`} style={{ paddingTop: '85px', backgroundColor: currentTheme.colors.background, transform: `translateX(${swipeTranslateX - window.innerWidth}px)`, willChange: 'transform' }}>
+                <div
+                    className={`absolute inset-0 ${isTransitioning ? 'transition-transform duration-200 ease-out' : ''} ${swipeTranslateX > 0 ? 'overflow-hidden' : (previousScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto')} scrollbar-hide`}
+                    style={{
+                        paddingTop: '85px',
+                        backgroundColor: currentTheme.colors.background,
+                        transform: `translateX(${swipeTranslateX - window.innerWidth}px)`,
+                        willChange: 'transform',
+                        zIndex: swipeTranslateX > 0 ? 2 : 1
+                    }}
+                >
                     {renderScreen(previousScreen)}
                 </div>
             )}
-            <div className={`absolute inset-0 ${isTransitioning ? 'transition-transform duration-200 ease-out' : ''} ${currentScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto'} scrollbar-hide`} style={{ paddingTop: '85px', backgroundColor: currentTheme.colors.background, transform: `translateX(${swipeTranslateX}px)`, willChange: 'transform' }}>
+
+            {/* Current screen */}
+            <div
+                className={`absolute inset-0 ${isTransitioning ? 'transition-transform duration-200 ease-out' : ''} ${currentScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto'} scrollbar-hide`}
+                style={{
+                    paddingTop: '85px',
+                    backgroundColor: currentTheme.colors.background,
+                    transform: `translateX(${swipeTranslateX}px)`,
+                    willChange: 'transform',
+                    zIndex: swipeTranslateX > 0 ? 1 : 2
+                }}
+            >
                 {renderScreen(currentScreen)}
             </div>
+
+            {/* Modals and overlays */}
             <div className="absolute inset-0 z-[100] pointer-events-none">
                 {(showProfileMenu || selectedOrder || alertInfo.show || !!voiceMessage || selectedOpportunity || showCreateContentModal || selectedProject) && (
                     <div className="pointer-events-auto">
-                        {showProfileMenu && <ProfileMenu show={showProfileMenu} onClose={() => setShowProfileMenu(false)} onNavigate={handleNavigate} toggleTheme={() => setIsDarkMode(d => !d)} theme={currentTheme} isDarkMode={isDarkMode} />}
-                        {selectedOrder && <OrderModal order={selectedOrder} onClose={() => setSelectedOrder(null)} theme={currentTheme} />}
-                        {selectedOpportunity && <ProjectDetailModal opportunity={selectedOpportunity} onClose={() => setSelectedOpportunity(null)} theme={currentTheme} onUpdate={handleUpdateOpportunity} />}
-                        {showCreateContentModal && <CreateContentModal close={() => setShowCreateContentModal(false)} theme={currentTheme} onAdd={handleAddItem} />}
-                        {selectedProject && <MyProjectDetailModal project={selectedProject} onClose={() => setSelectedProject(null)} theme={currentTheme} />}
-                        <Modal show={alertInfo.show} onClose={() => setAlertInfo({ show: false, message: '' })} title="Alert" theme={currentTheme}><p>{alertInfo.message}</p></Modal>
-                        <SuccessToast message={successMessage} show={!!successMessage} theme={currentTheme} />
-                        <VoiceModal message={voiceMessage} show={!!voiceMessage} theme={currentTheme} />
+                        {showProfileMenu && (
+                            <ProfileMenu
+                                show={showProfileMenu}
+                                onClose={() => setShowProfileMenu(false)}
+                                onNavigate={handleNavigate}
+                                toggleTheme={() => setIsDarkMode(d => !d)}
+                                theme={currentTheme}
+                                isDarkMode={isDarkMode}
+                            />
+                        )}
+                        {selectedOrder && (
+                            <OrderModal
+                                order={selectedOrder}
+                                onClose={() => setSelectedOrder(null)}
+                                theme={currentTheme}
+                            />
+                        )}
+                        {selectedOpportunity && (
+                            <ProjectDetailModal
+                                opportunity={selectedOpportunity}
+                                onClose={() => setSelectedOpportunity(null)}
+                                theme={currentTheme}
+                                onUpdate={handleUpdateOpportunity}
+                            />
+                        )}
+                        {showCreateContentModal && (
+                            <CreateContentModal
+                                close={() => setShowCreateContentModal(false)}
+                                theme={currentTheme}
+                                onAdd={handleAddItem}
+                            />
+                        )}
+                        {selectedProject && (
+                            <MyProjectDetailModal
+                                project={selectedProject}
+                                onClose={() => setSelectedProject(null)}
+                                theme={currentTheme}
+                            />
+                        )}
+                        <Modal
+                            show={alertInfo.show}
+                            onClose={() => setAlertInfo({ show: false, message: '' })}
+                            title="Alert"
+                            theme={currentTheme}
+                        >
+                            <p>{alertInfo.message}</p>
+                        </Modal>
+                        <SuccessToast
+                            message={successMessage}
+                            show={!!successMessage}
+                            theme={currentTheme}
+                        />
+                        <VoiceModal
+                            message={voiceMessage}
+                            show={!!voiceMessage}
+                            theme={currentTheme}
+                        />
                     </div>
                 )}
             </div>
         </div>
     );
 }
+
 export default App;
