@@ -6568,6 +6568,21 @@ export const CommunityScreen = ({ theme, onNavigate, openCreateContentModal, pos
     );
 };
 
+
+
+const OrderFullSetButton = React.memo(({ onClick, theme }) => {
+    return (
+        <button
+            onClick={onClick}
+            className="px-4 py-2 rounded-full text-sm font-semibold transition-transform hover:scale-105 active:scale-95"
+            style={{ backgroundColor: theme.colors.accent, color: 'white' }}
+        >
+            Order Full JSI Sample Set
+        </button>
+    );
+});
+
+
 export const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSettings }) => {
     const [selectedCategory, setSelectedCategory] = useState('tfl');
 
@@ -6591,6 +6606,7 @@ export const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSetti
         );
     }, [selectedCategory, onUpdateCart]);
 
+    // This handler is now wrapped in useCallback for optimization
     const handleOrderFullSet = useCallback(
         () => onUpdateCart({ id: 'full-jsi-set', name: 'Full JSI Sample Set' }, 1),
         [onUpdateCart]
@@ -6612,13 +6628,8 @@ export const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSetti
         <>
             <PageTitle title="Samples" theme={theme}>
                 <div className="flex items-center space-x-3">
-                    <button
-                        onClick={handleOrderFullSet}
-                        className="px-4 py-2 rounded-full text-sm font-semibold transition-transform hover:scale-105 active:scale-95"
-                        style={{ backgroundColor: theme.colors.accent, color: 'white' }}
-                    >
-                        Order Full JSI Sample Set
-                    </button>
+                    {/* The regular button is replaced with our new optimized component */}
+                    <OrderFullSetButton onClick={handleOrderFullSet} theme={theme} />
                     <div className="relative">
                         <button
                             onClick={() => onNavigate('samples/cart')}
@@ -6714,7 +6725,6 @@ export const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSetti
                                 backgroundColor: product.image ? theme.colors.subtle : product.color
                             }}
                         >
-                            {/* Conditionally render image or keep color background */}
                             {product.image && (
                                 <img
                                     src={product.image}
