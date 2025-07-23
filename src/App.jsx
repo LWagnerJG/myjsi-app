@@ -111,13 +111,17 @@ function App() {
         const SWIPE_THRESHOLD = 80; // Minimum distance to trigger swipe
         const EDGE_THRESHOLD = 60; // How far from left edge to start swipe
         const MAX_VERTICAL_DEVIATION = 100; // Max vertical movement allowed
+        const HEADER_HEIGHT = 88; // Account for fixed header height
 
         const handleTouchStart = (e) => {
             const touch = e.touches[0];
             const swipeState = swipeStateRef.current;
 
-            // Only start if we can go back, not animating, and touch is near left edge
-            if (navigationHistory.length > 1 && !isAnimating && touch.clientX <= EDGE_THRESHOLD) {
+            // Only start if we can go back, not animating, touch is near left edge, and below header
+            if (navigationHistory.length > 1 &&
+                !isAnimating &&
+                touch.clientX <= EDGE_THRESHOLD &&
+                touch.clientY > HEADER_HEIGHT) {
                 swipeState.isActive = true;
                 swipeState.startX = touch.clientX;
                 swipeState.startY = touch.clientY;
