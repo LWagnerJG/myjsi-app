@@ -1573,7 +1573,6 @@ export const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage, dea
     const [pendingDiscountChange, setPendingDiscountChange] = useState(null);
     const [showAddPersonModal, setShowAddPersonModal] = useState(false);
     const [newPerson, setNewPerson] = useState({ firstName: '', lastName: '', email: '', role: 'Sales' });
-
     const [menuState, setMenuState] = useState({ open: false, person: null, top: 0, left: 0 });
     const modalContentRef = useRef(null);
 
@@ -1721,19 +1720,47 @@ export const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage, dea
     );
 
     return (
-        <>
-            <PageTitle title="Dealer Directory" theme={theme} />
-            <div className="px-4 pb-4 flex items-center space-x-2">
-                <SearchInput className="flex-grow" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder="Search by name or city..." theme={theme} />
-                <div className="relative">
-                    <button onClick={() => setShowFilterMenu(f => !f)} className="p-3.5 rounded-lg" style={{ backgroundColor: theme.colors.subtle }}><Filter className="w-5 h-5" style={{ color: theme.colors.textPrimary }} /></button>
-                    {showFilterMenu && (<GlassCard ref={filterMenuRef} theme={theme} className="absolute top-14 right-0 z-10 w-40 p-2"><button onClick={() => handleSort('name')} className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${sortConfig.key === 'name' ? 'font-bold' : ''}`} style={{ color: theme.colors.textPrimary, backgroundColor: sortConfig.key === 'name' ? theme.colors.subtle : 'transparent' }}> A-Z </button><button onClick={() => handleSort('sales')} className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${sortConfig.key === 'sales' ? 'font-bold' : ''}`} style={{ color: theme.colors.textPrimary, backgroundColor: sortConfig.key === 'sales' ? theme.colors.subtle : 'transparent' }}> By Sales </button><button onClick={() => handleSort('bookings')} className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${sortConfig.key === 'bookings' ? 'font-bold' : ''}`} style={{ color: theme.colors.textPrimary, backgroundColor: sortConfig.key === 'bookings' ? theme.colors.subtle : 'transparent' }}> By Bookings </button></GlassCard>)}
+        // FIX: Restructured to a flex column layout to enable a sticky header.
+        <div className="flex flex-col h-full">
+            {/* This container holds the title and search bar, and will stick to the top. */}
+            <div className="sticky top-0 z-10" style={{ backgroundColor: `${theme.colors.background}e6`, backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }}>
+                <PageTitle title="Dealer Directory" theme={theme} />
+                <div className="px-4 pb-4 flex items-center space-x-2">
+                    <SearchInput className="flex-grow" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder="Search by name or city..." theme={theme} />
+                    <div className="relative">
+                        <button onClick={() => setShowFilterMenu(f => !f)} className="p-3.5 rounded-full shadow-lg" style={{ backgroundColor: theme.colors.surface }}>
+                            <Filter className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />
+                        </button>
+                        {showFilterMenu && (
+                            <GlassCard ref={filterMenuRef} theme={theme} className="absolute top-14 right-0 z-20 w-40 p-2">
+                                <button onClick={() => handleSort('name')} className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${sortConfig.key === 'name' ? 'font-bold' : ''}`} style={{ color: theme.colors.textPrimary, backgroundColor: sortConfig.key === 'name' ? theme.colors.subtle : 'transparent' }}> A-Z </button>
+                                <button onClick={() => handleSort('sales')} className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${sortConfig.key === 'sales' ? 'font-bold' : ''}`} style={{ color: theme.colors.textPrimary, backgroundColor: sortConfig.key === 'sales' ? theme.colors.subtle : 'transparent' }}> By Sales </button>
+                                <button onClick={() => handleSort('bookings')} className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${sortConfig.key === 'bookings' ? 'font-bold' : ''}`} style={{ color: theme.colors.textPrimary, backgroundColor: sortConfig.key === 'bookings' ? theme.colors.subtle : 'transparent' }}> By Bookings </button>
+                            </GlassCard>
+                        )}
+                    </div>
                 </div>
             </div>
-            <div className="px-4 space-y-3 pb-4">
-                {sortedAndFilteredDealers.map(dealer => (<GlassCard key={dealer.id} theme={theme} className="p-4 cursor-pointer hover:border-gray-400/50" onClick={() => { setSelectedDealer(dealer); }}><div className="flex justify-between items-start"><div><h3 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>{dealer.name}</h3><p className="text-sm" style={{ color: theme.colors.textSecondary }}>{dealer.address}</p></div><div className="text-right flex-shrink-0 ml-2"><p className="text-xs font-semibold capitalize" style={{ color: theme.colors.textSecondary }}>{sortConfig.key}</p><p className="font-bold" style={{ color: theme.colors.textPrimary }}>${(dealer[sortConfig.key === 'name' ? 'bookings' : sortConfig.key] || 0).toLocaleString()}</p></div></div></GlassCard>))}
+
+            {/* This container holds the list of dealers and will scroll. */}
+            <div className="flex-1 overflow-y-auto px-4 pt-4 space-y-3 pb-4">
+                {sortedAndFilteredDealers.map(dealer => (
+                    <GlassCard key={dealer.id} theme={theme} className="p-4 cursor-pointer hover:border-gray-400/50" onClick={() => { setSelectedDealer(dealer); }}>
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <h3 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>{dealer.name}</h3>
+                                <p className="text-sm" style={{ color: theme.colors.textSecondary }}>{dealer.address}</p>
+                            </div>
+                            <div className="text-right flex-shrink-0 ml-2">
+                                <p className="text-xs font-semibold capitalize" style={{ color: theme.colors.textSecondary }}>{sortConfig.key}</p>
+                                <p className="font-bold" style={{ color: theme.colors.textPrimary }}>${(dealer[sortConfig.key === 'name' ? 'bookings' : sortConfig.key] || 0).toLocaleString()}</p>
+                            </div>
+                        </div>
+                    </GlassCard>
+                ))}
             </div>
 
+            {/* Modals remain unchanged */}
             <Modal show={!!selectedDealer} onClose={() => setSelectedDealer(null)} title={selectedDealer?.name || ''} theme={theme}>
                 {selectedDealer && (
                     <div ref={modalContentRef} className="relative">
@@ -1741,27 +1768,16 @@ export const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage, dea
                             <p className="text-sm" style={{ color: theme.colors.textSecondary }}>{selectedDealer.address}</p>
                             <button onClick={() => setShowAddPersonModal(true)} className="p-2 -mr-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10"><UserPlus className="w-5 h-5" style={{ color: theme.colors.accent }} /></button>
                         </div>
-
-                        {/* Daily Discount section is restored here */}
                         <div className="space-y-2">
                             <ModalSectionHeader title="Daily Discount" />
-                            <PortalNativeSelect
-                                label=""
-                                theme={theme}
-                                value={selectedDealer.dailyDiscount}
-                                onChange={e => setPendingDiscountChange({ dealerId: selectedDealer.id, newDiscount: e.target.value })}
-                                options={Data.DAILY_DISCOUNT_OPTIONS.map(opt => ({ label: opt, value: opt }))}
-                            />
+                            <PortalNativeSelect label="" theme={theme} value={selectedDealer.dailyDiscount} onChange={e => setPendingDiscountChange({ dealerId: selectedDealer.id, newDiscount: e.target.value })} options={Data.DAILY_DISCOUNT_OPTIONS.map(opt => ({ label: opt, value: opt }))} />
                         </div>
-
-                        {/* The staff list is now in a single column */}
                         <div className="space-y-4">
                             <StaffSection title="Salespeople" members={selectedDealer.salespeople} />
                             <StaffSection title="Designers" members={selectedDealer.designers} />
                             <StaffSection title="Administration" members={selectedDealer.administration} />
                             <StaffSection title="Installers" members={selectedDealer.installers} />
                         </div>
-
                         {menuState.open && (
                             <>
                                 <div className="absolute inset-0 z-10 -m-6" onClick={handleMenuClose} />
@@ -1786,7 +1802,6 @@ export const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage, dea
                     </div>
                 )}
             </Modal>
-
             <Modal show={!!pendingDiscountChange} onClose={() => setPendingDiscountChange(null)} title="Confirm Change" theme={theme}><p style={{ color: theme.colors.textPrimary }}>Are you sure you want to change the daily discount to <span className="font-bold">{pendingDiscountChange?.newDiscount}</span>?</p><div className="flex justify-end space-x-3 pt-4"><button onClick={() => setPendingDiscountChange(null)} className="font-bold py-2 px-5 rounded-lg" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }}>Cancel</button><button onClick={confirmDiscountChange} className="font-bold py-2 px-5 rounded-lg text-white" style={{ backgroundColor: theme.colors.accent }}>Save</button></div></Modal>
             <Modal show={showAddPersonModal} onClose={() => setShowAddPersonModal(false)} title="Add New Person" theme={theme}><form onSubmit={handleAddPerson} className="space-y-4"><FormInput label="First Name" value={newPerson.firstName} onChange={e => setNewPerson(p => ({ ...p, firstName: e.target.value }))} theme={theme} required /><FormInput label="Last Name" value={newPerson.lastName} onChange={e => setNewPerson(p => ({ ...p, lastName: e.target.value }))} theme={theme} required /><FormInput label="Email" type="email" value={newPerson.email} onChange={e => setNewPerson(p => ({ ...p, email: e.target.value }))} theme={theme} required /><PortalNativeSelect label="Role" value={newPerson.role} onChange={e => setNewPerson(p => ({ ...p, role: e.target.value }))} theme={theme} options={roleOptions} /><div className="pt-2 text-center"><p className="text-xs mb-2" style={{ color: theme.colors.textSecondary }}>This will send an invitation to the user to join the MyJSI app.</p><button type="submit" className="w-full font-bold py-3 px-6 rounded-full text-white" style={{ backgroundColor: theme.colors.accent }} > Send Invite </button></div></form></Modal>
         </>
@@ -1907,13 +1922,11 @@ export const CommissionRatesScreen = ({ theme }) => {
         const spiffValue = hasNote ? item.spiff.split('*')[0].trim() : item.spiff;
         const spiffNote = hasNote ? `*${item.spiff.split('*')[1]}` : null;
 
-        // FIX: Adjusted column widths to prevent text wrapping.
         return (
             <div className="grid grid-cols-[2fr,1.5fr,1.5fr] items-center gap-x-4 py-3 px-3">
                 <span className="font-semibold" style={{ color: textPrimary }}>
                     {item.discount}
                 </span>
-                {/* FIX: Added whitespace-nowrap to ensure percentages stay on one line. */}
                 <span className="text-center font-bold whitespace-nowrap" style={{ color: accent }}>
                     {item.rep}
                 </span>
@@ -1943,7 +1956,6 @@ export const CommissionRatesScreen = ({ theme }) => {
         <div className="h-full flex flex-col">
             <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6 scrollbar-hide">
                 <GlassCard theme={theme} className="p-4">
-                    {/* FIX: Restyled the headers to be simpler and use the primary text color. */}
                     <div className="grid grid-cols-[2fr,1.5fr,1.5fr] gap-x-4 px-3 pb-3 mb-2 border-b" style={{ borderColor: subtle }}>
                         <span className="text-sm font-semibold" style={{ color: textPrimary }}>Discounts</span>
                         <span className="text-sm font-semibold text-center" style={{ color: textPrimary }}>Rep Comm.</span>
@@ -4214,8 +4226,15 @@ export const SearchInput = React.memo(({ onSubmit, value, onChange, placeholder,
             placeholder={placeholder}
             value={value}
             onChange={onChange}
-            className="w-full pl-12 pr-12 py-3 border rounded-full focus:ring-2 text-base outline-none"
-            style={{ backgroundColor: theme.colors.subtle, borderColor: 'transparent', color: theme.colors.textPrimary, ringColor: theme.colors.accent, }}
+            // FIX: Added shadow-lg for a more prominent look
+            className="w-full pl-12 pr-12 py-3 border rounded-full focus:ring-2 text-base outline-none shadow-lg"
+            style={{
+                // FIX: Changed background from 'subtle' to 'surface' (white)
+                backgroundColor: theme.colors.surface,
+                borderColor: 'transparent',
+                color: theme.colors.textPrimary,
+                ringColor: theme.colors.accent,
+            }}
         />
         {onVoiceClick && (
             <button type="button" onClick={onVoiceClick} className="absolute inset-y-0 right-0 pr-4 flex items-center">
