@@ -4377,7 +4377,7 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
 
     useEffect(() => {
         const handleClickOutside = (e) => {
-            if (filterMenuRef.current && !filterMenuRef.current.contains(e.target)) {
+            if (filterMenuRef.current && !filterMenu - ref.current.contains(e.target)) {
                 setShowDateFilter(false);
             }
         };
@@ -4418,8 +4418,9 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
     return (
         <>
             <div className="p-4 space-y-4">
+                {/* FIX: Added 'relative' and 'z-10' to this container to lift it above the content below */}
                 <div
-                    className="flex items-center space-x-2 rounded-full p-2 shadow-lg"
+                    className="relative z-10 flex items-center space-x-2 rounded-full p-2 shadow-lg"
                     style={{
                         backgroundColor: `${theme.colors.surface}e6`,
                         backdropFilter: theme.backdropFilter,
@@ -4439,7 +4440,6 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
                             <Filter className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />
                         </button>
                         {showDateFilter && (
-                            // This z-index is increased to ensure it appears on top
                             <GlassCard ref={filterMenuRef} theme={theme} className="absolute top-14 right-0 z-20 w-40 p-2">
                                 <button onClick={() => { setDateType('shipDate'); setShowDateFilter(false); }} className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${dateType === 'shipDate' ? 'font-bold' : ''}`} style={{ color: theme.colors.textPrimary, backgroundColor: dateType === 'shipDate' ? theme.colors.subtle : 'transparent' }}>Ship Date</button>
                                 <button onClick={() => { setDateType('date'); setShowDateFilter(false); }} className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${dateType === 'date' ? 'font-bold' : ''}`} style={{ color: theme.colors.textPrimary, backgroundColor: dateType === 'date' ? theme.colors.subtle : 'transparent' }}>PO Date</button>
@@ -4519,6 +4519,7 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
         </>
     );
 };
+
 
 export const SmartSearch = ({
     theme,
