@@ -3273,9 +3273,8 @@ export const COMYardageRequestScreen = ({ theme, showAlert, onNavigate, userSett
         setIsSubmitting(true);
         const powerAutomateURL = import.meta.env.VITE_POWER_AUTOMATE_URL;
 
-        // This check prevents the app from crashing if the URL is missing in Vercel.
         if (!powerAutomateURL) {
-            console.error("VITE_POWER_AUTOMATE_URL is not defined. Please check environment variables in Vercel.");
+            console.error("VITE_POWER_AUTOMATE_URL is not defined. Please check your environment variables.");
             showAlert("Application is not configured correctly. Please contact support.");
             setIsSubmitting(false);
             return;
@@ -3313,7 +3312,8 @@ export const COMYardageRequestScreen = ({ theme, showAlert, onNavigate, userSett
     return (
         <div className="flex flex-col h-full">
             <PageTitle title="COM Yardage Request" theme={theme} />
-            <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4">
+            {/* FIX: Added 'pt-4' to this container to add space below the title */}
+            <div className="flex-1 overflow-y-auto px-4 pt-4 pb-4 space-y-4">
                 <GlassCard theme={theme} className="p-4">
                     <h3 className="font-bold mb-3 text-xl" style={{ color: theme.colors.textPrimary }}>
                         Select Model(s)
@@ -5208,11 +5208,13 @@ export const SalesScreen = ({ theme, onNavigate }) => {
     const handleShowOrderDetails = useCallback(order => setSelectedOrder(order), []);
     const handleCloseModal = useCallback(() => setSelectedOrder(null), []);
 
+    // Helper to format company names like "OFFICEWORKS INC." to "Officeworks Inc."
     const formatCompanyName = (name) => {
         if (!name) return '';
         return name.toLowerCase().replace(/\b(\w)/g, s => s.toUpperCase());
     };
 
+    // New helper to format large numbers into millions
     const formatMillion = (n) => {
         if (typeof n !== 'number') return '0.00M';
         return `${(n / 1000000).toFixed(2)}M`;
@@ -5236,9 +5238,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
         <div className="flex flex-col h-full">
             <div
                 className="sticky top-0 z-10 backdrop-blur-md"
-                // FIX: Changed background from theme.colors.background to theme.colors.surface
-                // to create the frosted glass effect against the scrolling content.
-                style={{ backgroundColor: `${theme.colors.surface}e6` }}
+                style={{ backgroundColor: `${theme.colors.background}e0` }}
             >
                 <PageTitle title="Sales Dashboard" theme={theme}>
                     <button
