@@ -1974,182 +1974,149 @@ export const CommissionRatesScreen = ({ theme }) => {
     );
 };
 
-export const CommissionRatesScreen = ({ theme }) => {
-    const [rates, setRates] = useState({ standard: [], contract: [] });
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+export const CommissionsScreen = ({ theme }) => {
+    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
+    const [expandedMonth, setExpandedMonth] = useState(null);
+    const [expandedRow, setExpandedRow] = useState(null); // State for individual row expansion
 
-    useEffect(() => {
-        const fetchRates = async () => {
-            try {
-                const powerAutomateURL = import.meta.env.VITE_COMMISSION_RATES_URL;
-                if (!powerAutomateURL) {
-                    throw new Error("Flow URL is not configured.");
-                }
-                const response = await fetch(powerAutomateURL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
-                const standard = data.filter(d => d.category === 'Standard');
-                const contract = data.filter(d => d.category === 'Contract');
-                setRates({ standard, contract });
-            } catch (e) {
-                console.error("Failed to fetch commission rates:", e);
-                setError("Could not load data. Please try again later.");
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchRates();
-    }, []);
+    const years = Object.keys(Data.COMMISSIONS_DATA).sort((a, b) => b - a);
+    const monthlyData = Data.COMMISSIONS_DATA[selectedYear] || [];
 
-    const { accent, textPrimary, textSecondary, border, subtle, secondary } = theme.colors;
-
-    const CommissionSplitDonut = ({ data, theme }) => {
-        const total = data.reduce((acc, item) => acc + item.value, 0);
-        if (total === 0) return null;
-
-        let cumulative = 0;
-        const size = 150;
-        const strokeWidth = 20;
-        const radius = (size - strokeWidth) / 2;
-        const circumference = 2 * Math.PI * radius;
-
-        return (
-            <div className="flex items-center space-x-6">
-                <div className="relative" style={{ width: size, height: size }}>
-                    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-                        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke={theme.colors.subtle} strokeWidth={strokeWidth} />
-                        <g transform={`rotate(-90 ${size / 2} ${size / 2})`}>
-                            {data.map((item, index) => {
-                                const dasharray = (circumference * item.value) / total;
-                                const dashoffset = circumference * (1 - (cumulative / total));
-                                cumulative += item.value;
-                                return (
-                                    <circle
-                                        key={index}
-                                        cx={size / 2}
-                                        cy={size / 2}
-                                        r={radius}
-                                        fill="none"
-                                        stroke={item.color}
-                                        strokeWidth={strokeWidth}
-                                        strokeDasharray={`${dasharray} ${circumference}`}
-                                        strokeDashoffset={-circumference + dashoffset}
-                                        className="transition-all duration-500"
-                                    />
-                                );
-                            })}
-                        </g>
-                    </svg>
-                </div>
-                <div className="space-y-2">
-                    {data.map(item => (
-                        <div key={item.label} className="flex items-center">
-                            <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: item.color }}></div>
-                            <div>
-                                <p className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>{item.label}</p>
-                                <p className="text-sm font-normal" style={{ color: theme.colors.textSecondary }}>{item.value}%</p>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        );
+    const toggleMonth = (month) => {
+        setExpandedMonth(prev => prev === month ? null : month);
+        setExpandedRow(null); // Collapse any open row when month changes
     };
 
-    const commissionSplitData = [
-        { label: 'Specifying', value: 70, color: accent },
-        { label: 'Ordering', value: 30, color: secondary }
-    ];
-
-    if (loading) {
-        return (
-            <div className="flex flex-col h-full">
-                <div className="text-center p-8"><Hourglass className="w-8 h-8 animate-spin mx-auto" style={{ color: accent }} /></div>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="flex flex-col h-full">
-                <div className="px-4 py-6">
-                    <GlassCard theme={theme} className="p-8 text-center"><p className="font-semibold text-red-500">{error}</p></GlassCard>
-                </div>
-            </div>
-        );
-    }
-
-    const RateRow = ({ item }) => {
-        const hasNote = item.spiff?.includes('*');
-        const spiffValue = hasNote ? item.spiff.split('*')[0].trim() : item.spiff;
-        const spiffNote = hasNote ? `*${item.spiff.split('*')[1]}` : null;
-
-        return (
-            <div className="grid grid-cols-[2fr,1fr,1.5fr] items-center gap-x-4 py-4 px-3">
-                <span className="font-semibold" style={{ color: textPrimary }}>
-                    {item.discount}
-                </span>
-                <span className="text-center font-bold" style={{ color: accent }}>
-                    {item.rep}
-                </span>
-                <div className="text-center">
-                    <span className="font-semibold" style={{ color: textPrimary }}>
-                        {spiffValue}
-                    </span>
-                    {spiffNote && (
-                        <p className="text-xs -mt-1" style={{ color: textSecondary }}>
-                            {spiffNote}
-                        </p>
-                    )}
-                </div>
-            </div>
-        );
+    const toggleRow = (rowIndex) => {
+        setExpandedRow(prev => prev === rowIndex ? null : rowIndex);
     };
-
-    const SectionHeader = ({ title }) => (
-        <div className="px-3 pt-6 pb-2">
-            <h3 className="font-bold text-lg" style={{ color: textPrimary }}>
-                {title}
-            </h3>
-        </div>
-    );
 
     return (
         <div className="h-full flex flex-col">
-            <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6 scrollbar-hide">
-                <GlassCard theme={theme} className="p-4">
-                    {/* This is the restyled header container */}
-                    <div className="grid grid-cols-[2fr,1fr,1.5fr] gap-x-4 p-3 rounded-xl mb-2" style={{ backgroundColor: subtle }}>
-                        <span className="text-xs font-bold uppercase tracking-wider" style={{ color: textSecondary }}>Discounts</span>
-                        <span className="text-xs font-bold uppercase tracking-wider text-center" style={{ color: textSecondary }}>Rep Comm.</span>
-                        <span className="text-xs font-bold uppercase tracking-wider text-center" style={{ color: textSecondary }}>Spiff</span>
-                    </div>
+            <div className="px-4 pt-6 pb-4 flex justify-between items-center">
+                <h1 className="text-3xl font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>Commissions</h1>
+                <div className="flex items-center">
+                    <CustomSelect
+                        value={selectedYear}
+                        onChange={(e) => setSelectedYear(e.target.value)}
+                        options={years.map(y => ({ value: y, label: y }))}
+                        theme={theme}
+                    />
+                </div>
+            </div>
 
-                    <div className="divide-y" style={{ borderColor: subtle }}>
-                        {rates.standard.map(r => <RateRow key={r.discount} item={r} />)}
-                        {rates.contract.length > 0 && (
-                            <>
-                                <SectionHeader title="Contract Discounts" />
-                                {rates.contract.map(r => <RateRow key={r.discount} item={r} />)}
-                            </>
+            <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-3 scrollbar-hide">
+                {monthlyData.map((check, index) => (
+                    <GlassCard
+                        key={check.month}
+                        theme={theme}
+                        className="p-4 cursor-pointer hover:border-gray-400/50" // Apply card styling to the whole month section
+                    >
+                        <div
+                            onClick={() => toggleMonth(check.month)}
+                            className="flex justify-between items-center"
+                        >
+                            <div className="flex-1">
+                                <div className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>{check.month}</div>
+                                <div className="text-sm" style={{ color: theme.colors.textSecondary }}>Paid: {new Date(check.issuedDate).toLocaleDateString()}</div>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <span className="font-bold text-lg" style={{ color: theme.colors.accent }}>${check.amount.toLocaleString()}</span>
+                                <ChevronDown className={`w-5 h-5 transition-transform ${expandedMonth === check.month ? 'rotate-180' : ''}`} style={{ color: theme.colors.textSecondary }} />
+                            </div>
+                        </div>
+
+                        {expandedMonth === check.month && check.details && (
+                            <div className="mt-4 pt-4 border-t animate-fade-in" style={{ borderColor: theme.colors.border }}> {/* Add top border for separation */}
+                                {check.details.map((detail, dIndex) => {
+                                    if (detail.invoices) {
+                                        const totalCommission = detail.invoices.reduce((sum, inv) => sum + inv.commission, 0);
+                                        const totalNetAmount = detail.invoices.reduce((sum, inv) => sum + inv.netAmount, 0);
+                                        const avgRate = totalNetAmount > 0 ? ((totalCommission / totalNetAmount) * 100).toFixed(1) : '0.0';
+
+                                        return (
+                                            <div key={dIndex} className="space-y-2"> {/* Reduced space-y for tighter rows */}
+                                                <div className="text-left font-semibold py-2 px-3" style={{ color: theme.colors.textSecondary, backgroundColor: theme.colors.subtle }}>
+                                                    <div className="grid grid-cols-[2.5fr,1fr,1fr,0.8fr] gap-x-2"> {/* Adjusted grid for headers */}
+                                                        <div>SO # / Project</div>
+                                                        <div className="text-right">Net</div>
+                                                        <div className="text-right">Comm.</div>
+                                                        <div className="text-right">Rate</div>
+                                                    </div>
+                                                </div>
+                                                {detail.invoices.map((inv, iIndex) => {
+                                                    const commissionRate = inv.netAmount ? ((inv.commission / inv.netAmount) * 100).toFixed(1) : '0.0';
+                                                    return (
+                                                        <div
+                                                            key={iIndex}
+                                                            // Removed onClick handler as project name is now static
+                                                            className={`transition-all duration-200 group relative p-3 rounded-xl`} // Changed to rounded-xl
+                                                            style={{
+                                                                marginTop: '0.25rem', // Small margin to separate rounded rows
+                                                                marginBottom: '0.25rem',
+                                                                backgroundColor: iIndex % 2 === 0 ? 'transparent' : 'rgba(0,0,0,0.03)' // Very light zebra striping
+                                                            }}
+                                                        >
+                                                            <div className="grid grid-cols-[2.5fr,1fr,1fr,0.8fr] gap-x-2 items-center text-sm"> {/* Adjusted grid and font size */}
+                                                                <div className="relative">
+                                                                    <div className="font-medium break-words" style={{ color: theme.colors.textPrimary }}>{inv.so || inv.invoice}</div> {/* Changed to font-medium */}
+                                                                    {/* Project name is now a static subtitle */}
+                                                                    {inv.project && (
+                                                                        <div className="text-xs mt-1 break-words" style={{ color: theme.colors.textSecondary }}>{inv.project}</div>
+                                                                    )}
+                                                                    {/* Removed ChevronDown icon */}
+                                                                </div>
+                                                                <div className="text-right font-medium" style={{ color: theme.colors.textPrimary }}>${inv.netAmount.toLocaleString()}</div> {/* Changed to font-medium */}
+                                                                <div className="text-right font-bold" style={{ color: theme.colors.accent }}>${inv.commission.toLocaleString()}</div>
+                                                                <div className="text-right font-medium" style={{ color: theme.colors.textPrimary }}>{commissionRate}%</div> {/* Changed to font-medium */}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                                {/* Average Rate Row */}
+                                                <div className="font-semibold border-t pt-4 mt-4 text-right pr-2" style={{ borderColor: theme.colors.border }}> {/* Adjusted padding and font-semibold */}
+                                                    <span style={{ color: theme.colors.textPrimary }}>Avg. Rate:</span>{' '}
+                                                    <span className="font-bold" style={{ color: theme.colors.accent }}>{avgRate}%</span> {/* Bolded percentage */}
+                                                </div>
+                                            </div>
+                                        );
+                                    } else if (detail.customer && detail.total > 0) {
+                                        return (
+                                            <div key={dIndex} className="flex justify-between items-center text-sm p-3 rounded-lg" style={{ backgroundColor: theme.colors.subtle }}>
+                                                <span className="font-medium" style={{ color: theme.colors.textPrimary }}>{detail.customer}</span>
+                                                <span style={{ color: theme.colors.accent }}>${detail.total.toLocaleString()}</span>
+                                            </div>
+                                        );
+                                    } else if (detail.brandTotal) {
+                                        return (
+                                            <div key={dIndex} className="pt-4 mt-4 border-t" style={{ borderColor: theme.colors.border }}>
+                                                <h4 className="font-bold text-lg mb-3 flex items-center" style={{ color: theme.colors.textPrimary }}>
+                                                    <DollarSign className="w-5 h-5 mr-2" style={{ color: theme.colors.accent }} />
+                                                    Totals
+                                                </h4>
+                                                <div className="space-y-2 text-base">
+                                                    <div className="flex justify-between items-center">
+                                                        <span style={{ color: theme.colors.textSecondary }}>Invoiced Total:</span>
+                                                        <span className="font-medium" style={{ color: theme.colors.textPrimary }}>${detail.listTotal.toLocaleString()}</span> {/* Changed to font-medium */}
+                                                    </div>
+                                                    <div className="flex justify-between items-center">
+                                                        <span style={{ color: theme.colors.textSecondary }}>Commissioned Value:</span>
+                                                        <span className="font-medium" style={{ color: theme.colors.textPrimary }}>${detail.netTotal.toLocaleString()}</span> {/* Changed to font-medium */}
+                                                    </div>
+                                                    <div className="flex justify-between items-center pt-2 font-semibold" style={{ color: theme.colors.textPrimary }}>
+                                                        <span>Commission Amount:</span>
+                                                        <span className="text-lg font-bold" style={{ color: theme.colors.accent }}>${detail.commissionTotal.toLocaleString()}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    }
+                                    return null;
+                                })}
+                            </div>
                         )}
-                    </div>
-                </GlassCard>
-
-                <GlassCard theme={theme} className="p-4">
-                    <h3 className="font-bold text-xl mb-4 text-center" style={{ color: textPrimary }}>
-                        Commission Split
-                    </h3>
-                    <div className="flex justify-center">
-                        <CommissionSplitDonut data={commissionSplitData} theme={theme} />
-                    </div>
-                </GlassCard>
+                    </GlassCard>
+                ))}
             </div>
         </div>
     );
