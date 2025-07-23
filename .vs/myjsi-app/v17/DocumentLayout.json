@@ -29,7 +29,7 @@
       "VerticalTabListWidth": 256,
       "DocumentGroups": [
         {
-          "DockedHeight": 310,
+          "DockedHeight": 160,
           "SelectedChildIndex": 4,
           "Children": [
             {
@@ -42,8 +42,7 @@
               "RelativeToolTip": "src\\index.css",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
-              "WhenOpened": "2025-07-23T15:06:41.037Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-23T15:06:41.037Z"
             },
             {
               "$type": "Document",
@@ -67,8 +66,7 @@
               "RelativeToolTip": "src\\App.jsx",
               "ViewState": "AgIAAGAAAAAAAAAAAADwv3YAAAAaAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
-              "WhenOpened": "2025-07-14T23:21:04.731Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-14T23:21:04.731Z"
             },
             {
               "$type": "Document",
@@ -80,8 +78,7 @@
               "RelativeToolTip": "index.html",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABkAAAAHAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
-              "WhenOpened": "2025-07-14T16:39:19.571Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-14T16:39:19.571Z"
             },
             {
               "$type": "Document",
@@ -91,7 +88,7 @@
               "RelativeDocumentMoniker": "src\\ui.jsx",
               "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\ui.jsx",
               "RelativeToolTip": "src\\ui.jsx",
-              "ViewState": "AgIAAL0HAAAAAAAAAADwv98HAAAcAAAAAAAAAA==",
+              "ViewState": "AgIAAAEHAAAAAAAAAAAkwAoHAAASAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
               "WhenOpened": "2025-07-14T14:57:10.088Z",
               "EditorCaption": ""
@@ -99,7 +96,7 @@
           ]
         },
         {
-          "DockedHeight": 90,
+          "DockedHeight": 240,
           "SelectedChildIndex": -1,
           "Children": [
             {
