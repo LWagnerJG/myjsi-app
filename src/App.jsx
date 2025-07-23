@@ -47,17 +47,12 @@ function App() {
     const [isAILoading, setIsAILoading] = useState(false);
     const [showAIDropdown, setShowAIDropdown] = useState(false);
 
-    // Touch handling refs
+    // --- REWORKED LOGIC: Refs for gesture handling and navigation ---
     const touchStartX = useRef(0);
     const touchStartY = useRef(0);
-    const hasSwipeStarted = useRef(false);
-    const isHorizontalSwipe = useRef(false);
-    const swipeStartTime = useRef(0);
     const lastTouchX = useRef(0);
-    const swipeAnimationRef = useRef(null);
-    // --- CHANGE START: Added ref to track navigation direction ---
+    const isSwipeInProgress = useRef(false);
     const navigationDirection = useRef('forward');
-    // --- CHANGE END ---
 
     const urlToScreen = useCallback((url) => {
         const path = url.replace(window.location.origin, '').replace('/', '') || 'home';
@@ -87,8 +82,6 @@ function App() {
         };
 
         lockOrientation();
-
-        // Add viewport meta tag to prevent zooming and ensure proper mobile behavior
         let viewportMeta = document.querySelector('meta[name="viewport"]');
         if (!viewportMeta) {
             viewportMeta = document.createElement('meta');
@@ -96,8 +89,6 @@ function App() {
             document.head.appendChild(viewportMeta);
         }
         viewportMeta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover';
-
-        // Set body styles to prevent orientation issues
         document.body.style.position = 'fixed';
         document.body.style.width = '100%';
         document.body.style.height = '100%';
@@ -121,42 +112,23 @@ function App() {
         if (metaThemeColor) {
             metaThemeColor.setAttribute("content", themeColor);
         }
+    }, [isDarkMode, currentTheme]);
 
-        const preventDefaultGlobal = (e) => {
-            if (currentScreen === 'home') {
-                e.preventDefault();
-            }
-        };
-
-        document.body.addEventListener('touchmove', preventDefaultGlobal, { passive: false });
-        return () => {
-            document.body.removeEventListener('touchmove', preventDefaultGlobal);
-        };
-    }, [currentScreen, isDarkMode, currentTheme]);
-
-    useEffect(() => {
-        setMembers(prevMembers => prevMembers.map(member =>
-            member.id === currentUserId
-                ? { ...member, firstName: userSettings.firstName, lastName: userSettings.lastName, email: userSettings.email }
-                : member
-        ));
-    }, [userSettings, currentUserId]);
-
-    // --- CHANGE START: Modified this effect to handle back navigation correctly ---
+    // This effect correctly syncs React state to the browser URL
     useEffect(() => {
         if (currentScreen) {
             const newUrl = screenToUrl(currentScreen);
             if (window.location.pathname !== newUrl) {
                 if (navigationDirection.current === 'forward') {
                     window.history.pushState({ screen: currentScreen }, '', newUrl);
-                } else { // 'back'
+                } else {
                     window.history.replaceState({ screen: currentScreen }, '', newUrl);
                 }
             }
         }
     }, [currentScreen, screenToUrl]);
-    // --- CHANGE END ---
 
+    // This effect correctly syncs browser back/forward events to the React state
     useEffect(() => {
         const handlePopState = (event) => {
             const screen = event.state?.screen || urlToScreen(window.location.pathname);
@@ -169,18 +141,14 @@ function App() {
                 }
             });
         };
-
         window.addEventListener('popstate', handlePopState);
         return () => window.removeEventListener('popstate', handlePopState);
     }, [urlToScreen]);
 
+
     const handleNavigate = useCallback((screen) => {
         if (isTransitioning) return;
-
-        // --- CHANGE START: Set navigation direction ---
         navigationDirection.current = 'forward';
-        // --- CHANGE END ---
-
         setIsTransitioning(true);
         setSwipeTranslateX(-window.innerWidth);
 
@@ -194,34 +162,106 @@ function App() {
 
     const handleHome = useCallback(() => {
         if (isTransitioning) return;
-
-        // --- CHANGE START: Set navigation direction ---
         navigationDirection.current = 'forward';
-        // --- CHANGE END ---
-
         setNavigationHistory(['home']);
         setShowProfileMenu(false);
         setSwipeTranslateX(0);
         setIsTransitioning(false);
     }, [isTransitioning]);
 
+    // --- FUNDAMENTAL REDO START ---
+    // A single, unified function to handle the entire back navigation process.
+    // This is now used by both the header button and the swipe gesture.
     const handleBack = useCallback(() => {
-        if (navigationHistory.length > 1 && !isTransitioning) {
-            // --- CHANGE START: Set navigation direction ---
-            navigationDirection.current = 'back';
-            // --- CHANGE END ---
+        if (navigationHistory.length <= 1 || isTransitioning) {
+            return;
+        }
 
+        navigationDirection.current = 'back';
+        setIsTransitioning(true);
+        // Animate the current screen fully out of view
+        setSwipeTranslateX(window.innerWidth);
+
+        // After the animation completes, update the history and reset for the new screen
+        setTimeout(() => {
+            setNavigationHistory(prev => prev.slice(0, -1));
+            setSwipeTranslateX(0);
+            setIsTransitioning(false);
+        }, 200); // This duration should match your CSS transition time
+    }, [navigationHistory.length, isTransitioning]);
+
+    // Reworked touch handlers for more reliable gesture detection.
+    const handleTouchStart = useCallback((e) => {
+        // Only allow a swipe to start if not already animating and there's a page to go back to.
+        if (isTransitioning || navigationHistory.length <= 1) return;
+
+        const touch = e.touches[0];
+        // Only initiate a swipe if the touch starts near the left edge of the screen.
+        if (touch.clientX < 50) {
+            touchStartX.current = touch.clientX;
+            touchStartY.current = touch.clientY;
+            lastTouchX.current = touch.clientX;
+            isSwipeInProgress.current = true;
+        }
+    }, [isTransitioning, navigationHistory.length]);
+
+    const handleTouchMove = useCallback((e) => {
+        if (!isSwipeInProgress.current || isTransitioning) return;
+
+        const touch = e.touches[0];
+        const currentX = touch.clientX;
+        lastTouchX.current = currentX;
+
+        const diffX = currentX - touchStartX.current;
+        const diffY = Math.abs(touch.clientY - touchStartY.current);
+
+        // This is a vertical scroll, not a horizontal swipe, so we cancel the swipe.
+        if (diffX < diffY) {
+            isSwipeInProgress.current = false;
+            return;
+        }
+
+        // Prevent the browser's default pull-to-refresh or other gestures
+        e.preventDefault();
+
+        // We only want to track positive (rightward) movement for the back swipe
+        if (diffX > 0) {
+            // Directly update the transform style for a responsive feel
+            setSwipeTranslateX(diffX);
+        }
+    }, [isTransitioning]);
+
+    const handleTouchEnd = useCallback(() => {
+        if (!isSwipeInProgress.current || isTransitioning) return;
+
+        // Reset the swipe flag immediately.
+        isSwipeInProgress.current = false;
+
+        const swipeDistance = lastTouchX.current - touchStartX.current;
+        // Use a simple, reliable distance threshold. If the user swiped more than 1/4 of the screen, go back.
+        const backThreshold = window.innerWidth / 4;
+
+        if (swipeDistance > backThreshold) {
+            // If the swipe is far enough, commit to the back navigation.
+            handleBack();
+        } else {
+            // If the swipe wasn't far enough, animate the screen snapping back to place.
             setIsTransitioning(true);
-            setSwipeTranslateX(window.innerWidth);
-
+            setSwipeTranslateX(0);
             setTimeout(() => {
-                setNavigationHistory(prev => prev.slice(0, -1));
-                setSwipeTranslateX(0);
                 setIsTransitioning(false);
             }, 200);
         }
-    }, [navigationHistory.length, isTransitioning]);
+    }, [isTransitioning, handleBack]);
+    // --- FUNDAMENTAL REDO END ---
 
+    const handleSaveSettings = useCallback(() => {
+        setSuccessMessage("Settings Saved!");
+        setTimeout(() => setSuccessMessage(""), 2000);
+        handleBack();
+    }, [handleBack]);
+
+    // (The rest of your handler functions remain unchanged)
     const handleAddDealer = useCallback((newDealerData) => {
         const newDealer = {
             id: dealerDirectory.length + 1,
@@ -238,12 +278,6 @@ function App() {
         };
         setDealerDirectory(prev => [newDealer, ...prev]);
     }, [dealerDirectory]);
-
-    const handleSaveSettings = useCallback(() => {
-        setSuccessMessage("Settings Saved!");
-        setTimeout(() => setSuccessMessage(""), 2000);
-        handleBack();
-    }, [handleBack]);
 
     const handleNewLeadSuccess = useCallback((newLead) => {
         const newOpportunity = {
@@ -345,116 +379,6 @@ function App() {
         }));
     }, []);
 
-    // Improved touch handling for swipe-back functionality
-    const handleTouchStart = useCallback((e) => {
-        if (isTransitioning || navigationHistory.length <= 1) return;
-
-        const touch = e.touches[0];
-        const touchX = touch.clientX;
-        const touchY = touch.clientY;
-
-        // Only start swipe detection if touch starts near the left edge
-        if (touchX < 50) {
-            touchStartX.current = touchX;
-            touchStartY.current = touchY;
-            lastTouchX.current = touchX;
-            hasSwipeStarted.current = true;
-            isHorizontalSwipe.current = false;
-            swipeStartTime.current = Date.now();
-
-            // Cancel any existing animation
-            if (swipeAnimationRef.current) {
-                cancelAnimationFrame(swipeAnimationRef.current);
-                swipeAnimationRef.current = null;
-            }
-        }
-    }, [isTransitioning, navigationHistory.length]);
-
-    const handleTouchMove = useCallback((e) => {
-        if (!hasSwipeStarted.current || isTransitioning) return;
-
-        const touch = e.touches[0];
-        const currentX = touch.clientX;
-        const currentY = touch.clientY;
-        const diffX = currentX - touchStartX.current;
-        const diffY = Math.abs(currentY - touchStartY.current);
-
-        // Determine if this is a horizontal swipe
-        if (!isHorizontalSwipe.current) {
-            if (Math.abs(diffX) > 15 && Math.abs(diffX) > diffY * 1.5) {
-                isHorizontalSwipe.current = true;
-            } else if (diffY > 15) {
-                // This is a vertical scroll, cancel swipe
-                hasSwipeStarted.current = false;
-                return;
-            }
-        }
-
-        if (isHorizontalSwipe.current && diffX > 0) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            const maxSwipe = window.innerWidth * 0.8;
-            const normalizedDiff = Math.max(0, Math.min(maxSwipe, diffX));
-
-            // Apply easing for smoother feel
-            const easedTransform = normalizedDiff * (1 - normalizedDiff / (maxSwipe * 2));
-
-            swipeAnimationRef.current = requestAnimationFrame(() => {
-                setSwipeTranslateX(Math.max(0, easedTransform));
-            });
-
-            lastTouchX.current = currentX;
-        }
-    }, [isTransitioning]);
-
-    const handleTouchEnd = useCallback(() => {
-        if (!hasSwipeStarted.current || isTransitioning) return;
-
-        if (swipeAnimationRef.current) {
-            cancelAnimationFrame(swipeAnimationRef.current);
-            swipeAnimationRef.current = null;
-        }
-
-        if (isHorizontalSwipe.current) {
-            const swipeDistance = lastTouchX.current - touchStartX.current;
-            const swipeTime = Date.now() - swipeStartTime.current;
-            const swipeVelocity = swipeDistance / swipeTime;
-
-            // Determine if we should complete the back navigation
-            const threshold = window.innerWidth * 0.25;
-            const velocityThreshold = 0.3;
-            const shouldGoBack = swipeDistance > threshold ||
-                (swipeDistance > window.innerWidth * 0.15 && swipeVelocity > velocityThreshold);
-
-            if (shouldGoBack && navigationHistory.length > 1) {
-                handleBack();
-            } else {
-                // Animate back to original position
-                setIsTransitioning(true);
-                setSwipeTranslateX(0);
-                setTimeout(() => setIsTransitioning(false), 200);
-            }
-        }
-
-        // Reset all touch state
-        hasSwipeStarted.current = false;
-        isHorizontalSwipe.current = false;
-        touchStartX.current = 0;
-        touchStartY.current = 0;
-        lastTouchX.current = 0;
-        swipeStartTime.current = 0;
-    }, [isTransitioning, navigationHistory.length, handleBack]);
-
-    // Cleanup animation frame on unmount
-    useEffect(() => {
-        return () => {
-            if (swipeAnimationRef.current) {
-                cancelAnimationFrame(swipeAnimationRef.current);
-            }
-        };
-    }, []);
-
     const renderScreen = (screenKey) => {
         if (!screenKey) return null;
         const screenParts = screenKey.split('/');
@@ -518,7 +442,7 @@ function App() {
     return (
         <div
             className="h-screen w-screen font-sans flex flex-col relative overflow-hidden"
-            style={{ backgroundColor: currentTheme.colors.background, touchAction: 'pan-y pinch-zoom' }}
+            style={{ backgroundColor: currentTheme.colors.background }}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
@@ -538,13 +462,13 @@ function App() {
             {/* Previous screen for swipe animation */}
             {previousScreen && (
                 <div
-                    className={`absolute inset-0 ${isTransitioning ? 'transition-transform duration-200 ease-out' : ''} ${swipeTranslateX > 0 ? 'overflow-hidden' : (previousScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto')} scrollbar-hide`}
+                    className={`absolute inset-0 ${isTransitioning ? 'transition-transform duration-200 ease-out' : ''} ${previousScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto'} scrollbar-hide`}
                     style={{
                         paddingTop: '85px',
                         backgroundColor: currentTheme.colors.background,
                         transform: `translateX(${swipeTranslateX - window.innerWidth}px)`,
                         willChange: 'transform',
-                        zIndex: swipeTranslateX > 0 ? 2 : 1
+                        zIndex: 1
                     }}
                 >
                     {renderScreen(previousScreen)}
@@ -553,13 +477,13 @@ function App() {
 
             {/* Current screen */}
             <div
-                className={`absolute inset-0 ${isTransitioning ? 'transition-transform duration-200 ease-out' : ''} ${currentScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto'} scrollbar-hide`}
+                className={`absolute inset-0 ${isTransitioning || isSwipeInProgress.current ? '' : 'transition-transform duration-200 ease-out'} ${currentScreen === 'home' ? 'overflow-hidden' : 'overflow-y-auto'} scrollbar-hide`}
                 style={{
                     paddingTop: '85px',
                     backgroundColor: currentTheme.colors.background,
                     transform: `translateX(${swipeTranslateX}px)`,
                     willChange: 'transform',
-                    zIndex: swipeTranslateX > 0 ? 1 : 2
+                    zIndex: 2
                 }}
             >
                 {renderScreen(currentScreen)}
@@ -621,6 +545,7 @@ function App() {
                             show={!!successMessage}
                             theme={currentTheme}
                         />
+
                         <VoiceModal
                             message={voiceMessage}
                             show={!!voiceMessage}
