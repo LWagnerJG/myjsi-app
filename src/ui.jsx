@@ -3703,7 +3703,8 @@ const Avatar = ({ src, alt, theme }) => {
 };
 
 export const CartScreen = ({ theme, onNavigate, cart, setCart, onUpdateCart, userSettings }) => {
-    const [address, setAddress] = useState('');
+    // FIX: Initialize address with home address if available, otherwise use an empty string.
+    const [address, setAddress] = useState(userSettings?.homeAddress || '');
     const [isSubmitted, setIsSubmitted] = useState(false);
 
     const cartItems = useMemo(() => {
@@ -3786,19 +3787,18 @@ export const CartScreen = ({ theme, onNavigate, cart, setCart, onUpdateCart, use
                 </GlassCard>
             </div>
 
-            {/* --- Sticky Footer --- */}
             <div className="px-4 space-y-3 pt-3 pb-4 border-t" style={{ backgroundColor: theme.colors.background, borderColor: theme.colors.border }}>
                 <GlassCard theme={theme} className="p-3 space-y-2">
                     <div className="flex justify-between items-center">
                         <h3 className="font-bold px-1" style={{ color: theme.colors.textPrimary }}>Ship To</h3>
-                        <button onClick={() => setAddress(userSettings.homeAddress)} className="flex items-center space-x-1.5 text-sm font-semibold p-2 rounded-lg hover:bg-black/5">
+                        <button onClick={() => setAddress(userSettings?.homeAddress || '')} className="flex items-center space-x-1.5 text-sm font-semibold p-2 rounded-lg hover:bg-black/5">
                             <Home className="w-4 h-4" style={{ color: theme.colors.secondary }} />
                             <span>Use Home Address</span>
                         </button>
                     </div>
                     <textarea value={address} onChange={(e) => setAddress(e.target.value)} rows="2" placeholder="Enter shipping address..." className="w-full p-2 border rounded-lg" style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border, color: theme.colors.textPrimary, resize: 'none' }}></textarea>
                 </GlassCard>
-                <button onClick={handleSubmit} disabled={Object.keys(cart).length === 0 || !address.trim()} className="w-full font-bold py-3.5 px-6 rounded-full transition-colors disabled:opacity-50" style={{ backgroundColor: theme.colors.accent, color: '#FFFFFF' }}>
+                <button onClick={handleSubmit} disabled={Object.keys(cart).length === 0 || !(address || '').trim()} className="w-full font-bold py-3.5 px-6 rounded-full transition-colors disabled:opacity-50" style={{ backgroundColor: theme.colors.accent, color: '#FFFFFF' }}>
                     Submit Order ({totalCartItems} Items)
                 </button>
             </div>

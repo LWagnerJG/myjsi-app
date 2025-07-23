@@ -7,7 +7,7 @@ function App() {
     const [navigationHistory, setNavigationHistory] = useState(['home']);
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
-    const [userSettings, setUserSettings] = useState({ id: 1, firstName: 'Luke', lastName: 'Wagner' });
+    const [userSettings, setUserSettings] = useState({ id: 1, firstName: 'Luke', lastName: 'Wagner', homeAddress: '5445 N Deerwood Lake Rd, Jasper, IN 47546' });
     const [voiceMessage, setVoiceMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const [cart, setCart] = useState({});
@@ -88,10 +88,7 @@ function App() {
 
         if (screenKey === 'samples/cart') return <CartScreen {...commonProps} cart={cart} setCart={setCart} onUpdateCart={handleUpdateCart} />;
         if (baseScreenKey === 'products' && screenParts[1] === 'category') return <ProductComparisonScreen {...commonProps} categoryId={screenParts[2]} />;
-
-        // FIX: Added routing logic for the Competitive Analysis screen
         if (baseScreenKey === 'products' && screenParts[1] === 'competitive-analysis') return <CompetitiveAnalysisScreen {...commonProps} />;
-
         if (baseScreenKey === 'resources' && screenParts.length > 1) return <ResourceDetailScreen {...commonProps} onUpdateCart={handleUpdateCart} dealerDirectory={dealerDirectory} handleAddDealer={handleAddDealer} />;
 
         const ScreenComponent = SCREEN_MAP[baseScreenKey];
