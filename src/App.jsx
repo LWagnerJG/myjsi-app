@@ -1,6 +1,6 @@
 ﻿import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { lightTheme, darkTheme, INITIAL_OPPORTUNITIES, MY_PROJECTS_DATA, INITIAL_MEMBERS, INITIAL_POSTS, INITIAL_POLLS, DEALER_DIRECTORY_DATA } from './data.jsx';
-import { AppHeader, ProfileMenu, SCREEN_MAP, VoiceModal, OrderModal, SuccessToast, ProductComparisonScreen, ResourceDetailScreen, CreateContentModal } from './ui.jsx';
+import { AppHeader, ProfileMenu, SCREEN_MAP, VoiceModal, OrderModal, SuccessToast, ProductComparisonScreen, ResourceDetailScreen, CreateContentModal, AddNewInstallScreen } from './ui.jsx';
 
 function App() {
     // Core State
@@ -106,20 +106,29 @@ function App() {
         setDealerDirectory(prev => [newDealer, ...prev]);
     }, [dealerDirectory.length]);
 
+    const handleAddNewInstall = useCallback((newInstall) => {
+        setMyProjects(prev => [{
+            id: `proj${prev.length + 1}_${Date.now()}`,
+            ...newInstall,
+        }, ...prev]);
+        handleBack();
+    }, [handleBack]);
+
     // Screen Router
     const renderScreen = (screenKey) => {
         if (!screenKey) return null;
         const screenParts = screenKey.split('/');
         const baseScreenKey = screenParts[0];
 
-        const commonProps = { theme: currentTheme, onNavigate: handleNavigate, handleBack, userSettings, setSuccessMessage };
+        // This is the fix: Added currentScreen to the common props passed to every component.
+        const commonProps = { theme: currentTheme, onNavigate: handleNavigate, handleBack, userSettings, setSuccessMessage, currentScreen: screenKey };
 
         if (baseScreenKey === 'products' && screenParts.length > 1) {
             return <ProductComparisonScreen {...commonProps} categoryId={screenParts[2]} />;
         }
 
         if (baseScreenKey === 'resources' && screenParts.length > 1) {
-            return <ResourceDetailScreen {...commonProps} currentScreen={screenKey} onUpdateCart={handleUpdateCart} dealerDirectory={dealerDirectory} handleAddDealer={handleAddDealer} />;
+            return <ResourceDetailScreen {...commonProps} onUpdateCart={handleUpdateCart} dealerDirectory={dealerDirectory} handleAddDealer={handleAddDealer} />;
         }
 
         const ScreenComponent = SCREEN_MAP[baseScreenKey];
@@ -133,6 +142,7 @@ function App() {
             ...(baseScreenKey === 'orders' && { setSelectedOrder }),
             ...(baseScreenKey === 'members' && { members, setMembers, currentUserId }),
             ...(baseScreenKey === 'community' && { posts, polls, likedPosts, onToggleLike: handleToggleLike, pollChoices, onPollVote: handlePollVote, openCreateContentModal: () => setShowCreateContentModal(true) }),
+            ...(baseScreenKey === 'add-new-install' && { onAddInstall: handleAddNewInstall }),
         };
 
         return <ScreenComponent {...allProps} />;

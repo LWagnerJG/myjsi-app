@@ -3273,7 +3273,14 @@ export const COMYardageRequestScreen = ({ theme, showAlert, onNavigate, userSett
         setIsSubmitting(true);
         const powerAutomateURL = import.meta.env.VITE_POWER_AUTOMATE_URL;
 
-        // This payload sends the data in the correct structured format with a "models" array
+        // This check prevents the app from crashing if the URL is missing in Vercel.
+        if (!powerAutomateURL) {
+            console.error("VITE_POWER_AUTOMATE_URL is not defined. Please check environment variables in Vercel.");
+            showAlert("Application is not configured correctly. Please contact support.");
+            setIsSubmitting(false);
+            return;
+        }
+
         const payload = {
             requester: userSettings.email,
             models: selectedModels.map(m => ({
