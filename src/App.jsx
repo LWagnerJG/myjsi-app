@@ -1,22 +1,33 @@
-﻿import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
-import { lightTheme, darkTheme } from './data.jsx';
-import { AppHeader, ProfileMenu, SCREEN_MAP } from './ui.jsx';
+﻿import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { lightTheme, darkTheme, INITIAL_OPPORTUNITIES, MY_PROJECTS_DATA, INITIAL_MEMBERS, INITIAL_POSTS, INITIAL_POLLS } from './data.jsx';
+import { AppHeader, ProfileMenu, SCREEN_MAP, VoiceModal, OrderModal, SuccessToast, ProductComparisonScreen } from './ui.jsx';
 
-// --- Main App Component ---
 function App() {
-    // --- BASIC NAVIGATION STATE ---
+    // --- All Application State ---
     const [navigationHistory, setNavigationHistory] = useState(['home']);
-
-    // --- All other application state ---
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [userSettings, setUserSettings] = useState({ id: 1, firstName: 'Luke', lastName: 'Wagner' });
-    // ... add any other states like cart, orders, etc. here if needed from your data.jsx or ui.jsx
+    const [voiceMessage, setVoiceMessage] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
+    const [cart, setCart] = useState({});
+    const [opportunities, setOpportunities] = useState(INITIAL_OPPORTUNITIES);
+    const [myProjects, setMyProjects] = useState(MY_PROJECTS_DATA);
+    const [selectedOpportunity, setSelectedOpportunity] = useState(null);
+    const [selectedProject, setSelectedProject] = useState(null);
+    const [selectedOrder, setSelectedOrder] = useState(null);
+    const [members, setMembers] = useState(INITIAL_MEMBERS);
+    const [currentUserId, setCurrentUserId] = useState(1);
+    const [posts, setPosts] = useState(INITIAL_POSTS);
+    const [polls, setPolls] = useState(INITIAL_POLLS);
+    const [likedPosts, setLikedPosts] = useState({});
+    const [pollChoices, setPollChoices] = useState({});
 
+    // --- Derived State ---
     const currentScreen = navigationHistory[navigationHistory.length - 1];
     const currentTheme = useMemo(() => (isDarkMode ? darkTheme : lightTheme), [isDarkMode]);
 
-    // --- One-time setup effect ---
+    // --- One-time Setup Effect ---
     useEffect(() => {
         document.body.style.position = 'fixed';
         document.body.style.width = '100%';
@@ -31,7 +42,7 @@ function App() {
         viewportMeta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover';
     }, []);
 
-    // --- STABLE NAVIGATION LOGIC ---
+    // --- Handlers ---
     const handleNavigate = useCallback((screen) => {
         setNavigationHistory(prev => [...prev, screen]);
     }, []);
@@ -46,20 +57,62 @@ function App() {
         setNavigationHistory(['home']);
     }, []);
 
-    // --- Render function for screens ---
+    const handleVoiceActivate = useCallback((message) => {
+        setVoiceMessage(message);
+        setTimeout(() => setVoiceMessage(''), 1500);
+    }, []);
+
+    const handleUpdateCart = useCallback((item, change) => {
+        setCart(prevCart => {
+            const newCart = { ...prevCart };
+            const currentQty = newCart[item.id] || 0;
+            const newQty = currentQty + change;
+            if (newQty > 0) newCart[item.id] = newQty;
+            else delete newCart[item.id];
+            return newCart;
+        });
+    }, []);
+
+    const handleToggleLike = useCallback((postId) => {
+        setLikedPosts(prev => ({ ...prev, [postId]: !prev[postId] }));
+        setPosts(prevPosts =>
+            prevPosts.map(post =>
+                post.id === postId ? { ...post, likes: likedPosts[postId] ? post.likes - 1 : post.likes + 1 } : post
+            )
+        );
+    }, [likedPosts]);
+
+    const handlePollVote = useCallback((pollId, optionId) => {
+        setPollChoices(prev => ({ ...prev, [pollId]: optionId }));
+    }, []);
+
+    // --- Screen Router ---
     const renderScreen = (screenKey) => {
         if (!screenKey) return null;
-        const ScreenComponent = SCREEN_MAP[screenKey];
+        const screenParts = screenKey.split('/');
+        const baseScreenKey = screenParts[0];
+
+        const commonProps = { theme: currentTheme, onNavigate: handleNavigate, handleBack, userSettings, setSuccessMessage };
+
+        // Fix for Product Category navigation
+        if (baseScreenKey === 'products' && screenParts.length > 1) {
+            return <ProductComparisonScreen {...commonProps} categoryId={screenParts[2]} />;
+        }
+
+        const ScreenComponent = SCREEN_MAP[baseScreenKey];
         if (!ScreenComponent) return <div>Screen not found: {screenKey}</div>;
 
-        // Pass only the necessary props
-        return <ScreenComponent
-            theme={currentTheme}
-            onNavigate={handleNavigate}
-            handleBack={handleBack}
-            userSettings={userSettings}
-        // Add any other props your components might need here
-        />;
+        const allProps = {
+            ...commonProps,
+            ...(baseScreenKey === 'home' && { onVoiceActivate: handleVoiceActivate }),
+            ...(baseScreenKey === 'projects' && { opportunities, setSelectedOpportunity, myProjects, setSelectedProject }),
+            ...(baseScreenKey === 'samples' && { cart, onUpdateCart: handleUpdateCart }),
+            ...(baseScreenKey === 'orders' && { setSelectedOrder }),
+            ...(baseScreenKey === 'members' && { members, setMembers, currentUserId }),
+            ...(baseScreenKey === 'community' && { posts, polls, likedPosts, onToggleLike: handleToggleLike, pollChoices, onPollVote: handlePollVote }),
+        };
+
+        return <ScreenComponent {...allProps} />;
     };
 
     return (
@@ -75,12 +128,15 @@ function App() {
                 onToggleDark={() => setIsDarkMode(d => !d)}
             />
 
-            {/* Simple, stable container for the current screen */}
             <div className="flex-1 pt-[88px] overflow-y-auto scrollbar-hide">
                 {renderScreen(currentScreen)}
             </div>
 
             {showProfileMenu && <ProfileMenu show={showProfileMenu} onClose={() => setShowProfileMenu(false)} onNavigate={handleNavigate} toggleTheme={() => setIsDarkMode(d => !d)} theme={currentTheme} isDarkMode={isDarkMode} />}
+
+            <VoiceModal message={voiceMessage} show={!!voiceMessage} theme={currentTheme} />
+            <OrderModal order={selectedOrder} onClose={() => setSelectedOrder(null)} theme={currentTheme} />
+            <SuccessToast message={successMessage} show={!!successMessage} theme={currentTheme} />
         </div>
     );
 }
