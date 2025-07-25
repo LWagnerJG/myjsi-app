@@ -5850,12 +5850,32 @@ export const NewLeadScreen = ({
                     <div>
                         <SettingsRow label="A&D Firm" isFirst={true} theme={theme}>
                             <div className="w-7/12">
-                                <AutoCompleteCombobox label="" required value={newLead.designFirm} onSelect={val => updateField('designFirm', val)} onChange={val => updateField('designFirm', val)} placeholder="Search..." options={designFirms} onAddNew={(f) => setDesignFirms(p => [...new Set([f, ...p])])} theme={theme} />
+                                <AutoCompleteCombobox
+                                    label=""
+                                    required
+                                    value={newLead.designFirm}
+                                    onChange={val => updateField('designFirm', val)}
+                                    onSelect={val => updateField('designFirm', val)}
+                                    placeholder="Search..."
+                                    options={designFirms}
+                                    onAddNew={(f) => setDesignFirms(p => [...new Set([f, ...p])])}
+                                    theme={theme}
+                                />
                             </div>
                         </SettingsRow>
                         <SettingsRow label="Dealer" theme={theme}>
                             <div className="w-7/12">
-                                <AutoCompleteCombobox label="" required value={newLead.dealer} onSelect={val => updateField('dealer', val)} onChange={val => updateField('dealer', val)} placeholder="Search..." options={dealers} onAddNew={(d) => setDealers(p => [...new Set([d, ...p])])} theme={theme} />
+                                <AutoCompleteCombobox
+                                    label=""
+                                    required
+                                    value={newLead.dealer}
+                                    onChange={val => updateField('dealer', val)}
+                                    onSelect={val => updateField('dealer', val)}
+                                    placeholder="Search..."
+                                    options={dealers}
+                                    onAddNew={(d) => setDealers(p => [...new Set([d, ...p])])}
+                                    theme={theme}
+                                />
                             </div>
                         </SettingsRow>
                     </div>
