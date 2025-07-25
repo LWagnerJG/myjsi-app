@@ -30,7 +30,7 @@ function App() {
     const [designFirms, setDesignFirms] = useState(INITIAL_DESIGN_FIRMS);
     const [dealers, setDealers] = useState(INITIAL_DEALERS);
 
-    // NEW: State for the New Lead form is now managed here in the main App
+    // NEW: State for the New Lead form is managed here
     const [newLeadData, setNewLeadData] = useState(EMPTY_LEAD);
 
     // Derived State
@@ -95,7 +95,6 @@ function App() {
 
         const commonProps = { theme: currentTheme, onNavigate: handleNavigate, handleBack, userSettings, setSuccessMessage, currentScreen: screenKey, showAlert: handleShowAlert };
 
-        // FIX: Pass the dealerDirectory data to the CartScreen
         if (screenKey === 'samples/cart') return <CartScreen {...commonProps} cart={cart} setCart={setCart} onUpdateCart={handleUpdateCart} dealerDirectory={dealerDirectory} />;
 
         if (baseScreenKey === 'products' && screenParts[1] === 'category') return <ProductComparisonScreen {...commonProps} categoryId={screenParts[2]} />;
