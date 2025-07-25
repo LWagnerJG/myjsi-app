@@ -1,6 +1,34 @@
 ﻿import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { lightTheme, darkTheme, INITIAL_OPPORTUNITIES, MY_PROJECTS_DATA, INITIAL_MEMBERS, INITIAL_POSTS, INITIAL_POLLS, DEALER_DIRECTORY_DATA, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS, EMPTY_LEAD } from './data.jsx';
-import { AppHeader, ProfileMenu, SCREEN_MAP, VoiceModal, OrderModal, SuccessToast, ProductComparisonScreen, ResourceDetailScreen, CreateContentModal, AddNewInstallScreen, Modal, CartScreen, CompetitiveAnalysisScreen } from './ui.jsx';
+import { AppHeader, ProfileMenu, SCREEN_MAP, VoiceModal, OrderModal, SuccessToast, ProductComparisonScreen, ResourceDetailScreen, CreateContentModal, AddNewInstallScreen, Modal, CartScreen, CompetitiveAnalysisScreen, NewLeadScreen } from './ui.jsx';
+
+// Helper component to handle the routing logic cleanly
+const ScreenRouter = (props) => {
+    const { screenKey, ...rest } = props;
+    if (!screenKey) return null;
+
+    const screenParts = screenKey.split('/');
+    const baseScreenKey = screenParts[0];
+
+    // Special case routing for screens with dynamic parts
+    if (baseScreenKey === 'products' && screenParts[1] === 'category') {
+        return <ProductComparisonScreen {...rest} categoryId={screenParts[2]} />;
+    }
+    if (baseScreenKey === 'products' && screenParts[1] === 'competitive-analysis') {
+        return <CompetitiveAnalysisScreen {...rest} />;
+    }
+    if (baseScreenKey === 'resources' && screenParts.length > 1) {
+        return <ResourceDetailScreen {...rest} />;
+    }
+
+    const ScreenComponent = SCREEN_MAP[baseScreenKey];
+    if (!ScreenComponent) {
+        return <div>Screen not found: {screenKey}</div>;
+    }
+
+    return <ScreenComponent {...rest} />;
+};
+
 
 function App() {
     // Core State
@@ -29,15 +57,25 @@ function App() {
     const [dealerDirectory, setDealerDirectory] = useState(DEALER_DIRECTORY_DATA);
     const [designFirms, setDesignFirms] = useState(INITIAL_DESIGN_FIRMS);
     const [dealers, setDealers] = useState(INITIAL_DEALERS);
-
-    // NEW: State for the New Lead form is managed here
     const [newLeadData, setNewLeadData] = useState(EMPTY_LEAD);
 
     // Derived State
     const currentScreen = navigationHistory[navigationHistory.length - 1];
     const currentTheme = useMemo(() => (isDarkMode ? darkTheme : lightTheme), [isDarkMode]);
 
-
+    useEffect(() => {
+        document.body.style.position = 'fixed';
+        document.body.style.width = '100%';
+        document.body.style.height = '100%';
+        document.body.style.overflow = 'hidden';
+        let viewportMeta = document.querySelector('meta[name="viewport"]');
+        if (!viewportMeta) {
+            viewportMeta = document.createElement('meta');
+            viewportMeta.name = 'viewport';
+            document.head.appendChild(viewportMeta);
+        }
+        viewportMeta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover';
+    }, []);
 
     // Handlers
     const handleNavigate = useCallback((screen) => setNavigationHistory(prev => [...prev, screen]), []);
@@ -68,59 +106,41 @@ function App() {
         handleBack();
     }, [handleBack]);
     const handleShowAlert = useCallback((message) => setAlertInfo({ show: true, message }), []);
-
-    // NEW: Centralized function to update the new lead form data
     const handleNewLeadChange = useCallback((updates) => {
         setNewLeadData(prev => ({ ...prev, ...updates }));
     }, []);
 
-
-    // Screen Router
-    const renderScreen = (screenKey) => {
-        if (!screenKey) return null;
-        const screenParts = screenKey.split('/');
-        const baseScreenKey = screenParts[0];
-
-        const commonProps = { theme: currentTheme, onNavigate: handleNavigate, handleBack, userSettings, setSuccessMessage, currentScreen: screenKey, showAlert: handleShowAlert };
-
-        if (screenKey === 'samples/cart') return <CartScreen {...commonProps} cart={cart} setCart={setCart} onUpdateCart={handleUpdateCart} dealerDirectory={dealerDirectory} />;
-
-        if (baseScreenKey === 'products' && screenParts[1] === 'category') return <ProductComparisonScreen {...commonProps} categoryId={screenParts[2]} />;
-        if (baseScreenKey === 'products' && screenParts[1] === 'competitive-analysis') return <CompetitiveAnalysisScreen {...commonProps} />;
-        if (baseScreenKey === 'resources' && screenParts.length > 1) return <ResourceDetailScreen {...commonProps} onUpdateCart={handleUpdateCart} dealerDirectory={dealerDirectory} handleAddDealer={handleAddDealer} />;
-
-        const ScreenComponent = SCREEN_MAP[baseScreenKey];
-        if (!ScreenComponent) return <div>Screen not found: {screenKey}</div>;
-
-        const allProps = {
-            ...commonProps,
-            ...(baseScreenKey === 'home' && { onVoiceActivate: handleVoiceActivate }),
-            ...(baseScreenKey === 'projects' && { opportunities, setSelectedOpportunity, myProjects, setSelectedProject }),
-            ...(baseScreenKey === 'samples' && { cart, onUpdateCart: handleUpdateCart }),
-            ...(baseScreenKey === 'orders' && { setSelectedOrder }),
-            ...(baseScreenKey === 'members' && { members, setMembers, currentUserId }),
-            ...(baseScreenKey === 'community' && { posts, polls, likedPosts, onToggleLike: handleToggleLike, pollChoices, onPollVote: handlePollVote, openCreateContentModal: () => setShowCreateContentModal(true) }),
-            ...(baseScreenKey === 'add-new-install' && { onAddInstall: handleAddNewInstall }),
-            // MODIFIED: Pass state and handlers to NewLeadScreen
-            ...(baseScreenKey === 'new-lead' && {
-                newLeadData,
-                onNewLeadChange: handleNewLeadChange,
-                designFirms, setDesignFirms, dealers, setDealers,
-                onSuccess: (submittedLead) => {
-                    setOpportunities(prev => [...prev, {
-                        id: opportunities.length + 1, name: submittedLead.project, stage: submittedLead.projectStatus,
-                        value: `$${parseInt(String(submittedLead.estimatedList).replace(/[^0-9]/g, '')).toLocaleString()}`,
-                        company: submittedLead.dealer, ...submittedLead
-                    }]);
-                    handleNavigate('projects');
-                    setSuccessMessage("Lead Created!");
-                    setNewLeadData(EMPTY_LEAD); // Reset form state after success
-                    setTimeout(() => setSuccessMessage(""), 2000);
-                }
-            }),
-        };
-
-        return <ScreenComponent {...allProps} />;
+    // Create a single props object to pass to the router
+    const screenProps = {
+        theme: currentTheme,
+        onNavigate: handleNavigate,
+        handleBack,
+        userSettings,
+        setSuccessMessage,
+        showAlert: handleShowAlert,
+        currentScreen: currentScreen,
+        // Screen-specific props
+        opportunities, setSelectedOpportunity,
+        myProjects, setSelectedProject,
+        selectedOrder, setSelectedOrder,
+        members, setMembers, currentUserId,
+        posts, polls, likedPosts, onToggleLike: handleToggleLike, pollChoices, onPollVote: handlePollVote, openCreateContentModal: () => setShowCreateContentModal(true),
+        cart, setCart, onUpdateCart: handleUpdateCart,
+        dealerDirectory, handleAddDealer,
+        onAddInstall: handleAddNewInstall,
+        newLeadData, onNewLeadChange: handleNewLeadChange,
+        designFirms, setDesignFirms, dealers, setDealers,
+        onSuccess: (submittedLead) => {
+            setOpportunities(prev => [...prev, {
+                id: opportunities.length + 1, name: submittedLead.project, stage: submittedLead.projectStatus,
+                value: `$${parseInt(String(submittedLead.estimatedList).replace(/[^0-9]/g, '') || '0').toLocaleString()}`,
+                company: submittedLead.dealer, ...submittedLead
+            }]);
+            handleNavigate('projects');
+            setSuccessMessage("Lead Created!");
+            setNewLeadData(EMPTY_LEAD); // Reset form state after success
+            setTimeout(() => setSuccessMessage(""), 2000);
+        }
     };
 
     return (
@@ -135,7 +155,10 @@ function App() {
                 isDarkMode={isDarkMode}
                 onToggleDark={() => setIsDarkMode(d => !d)}
             />
-            <div className="flex-1 pt-[88px] overflow-y-auto scrollbar-hide">{renderScreen(currentScreen)}</div>
+            <div className="flex-1 pt-[88px] overflow-y-auto scrollbar-hide">
+                {/* The new router component handles rendering */}
+                <ScreenRouter screenKey={currentScreen} {...screenProps} />
+            </div>
             {showProfileMenu && <ProfileMenu show={showProfileMenu} onClose={() => setShowProfileMenu(false)} onNavigate={handleNavigate} toggleTheme={() => setIsDarkMode(d => !d)} theme={currentTheme} isDarkMode={isDarkMode} />}
             <VoiceModal message={voiceMessage} show={!!voiceMessage} theme={currentTheme} />
             <OrderModal order={selectedOrder} onClose={() => setSelectedOrder(null)} theme={currentTheme} />
