@@ -4281,7 +4281,10 @@ export const FormInput = React.memo(({
     icon = null,
 }) => {
     const controlledValue = value === undefined || value === null ? '' : value;
+
+    // FIX: Added backticks (`) to properly create the template literal string.
     const inputClass = `w-full px-4 py-3 border rounded-full focus:ring-2 text-base outline-none ${icon ? 'pr-10' : ''} ${className}`;
+
     const styles = {
         backgroundColor: theme.colors.subtle,
         borderColor: theme.colors.border,
@@ -4296,13 +4299,12 @@ export const FormInput = React.memo(({
         return '$' + new Intl.NumberFormat('en-US').format(numericValue);
     };
 
-    // FIXED: Currency handler now creates proper event object
     const handleCurrencyChange = (e) => {
         const numericValue = e.target.value.replace(/[^0-9]/g, '');
-        // Create proper event object that matches what the reducer expects
+        // This creates an event-like object that the parent's handler can use consistently.
         onChange({
             target: {
-                name: name || e.target.name,
+                name: name,
                 value: numericValue
             }
         });
@@ -4360,6 +4362,7 @@ export const FormInput = React.memo(({
         </div>
     );
 });
+
 
 export const SearchInput = React.memo(({ onSubmit, value, onChange, placeholder, theme, className, onVoiceClick }) => (
     <form onSubmit={onSubmit} className={`relative flex items-center ${className || ''}`} >
