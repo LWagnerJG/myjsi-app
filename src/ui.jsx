@@ -137,7 +137,14 @@ export const PortalNativeSelect = ({
         <>
             <div ref={wrapRef} className="relative space-y-2">
                 {label && (<label className="block text-sm font-semibold px-3" style={{ color: theme.colors.textSecondary }}>{label}</label>)}
-                <button type="button" onClick={toggleOpen} aria-expanded={isOpen} aria-required={required} className="w-full px-4 py-3 border rounded-lg text-base text-left flex justify-between items-center" style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border, color: value ? theme.colors.textPrimary : theme.colors.textSecondary, }}>
+                <button
+                    type="button"
+                    onClick={toggleOpen}
+                    aria-expanded={isOpen}
+                    aria-required={required}
+                    className="w-full px-4 py-3 border rounded-full text-base text-left flex justify-between items-center"
+                    style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border, color: value ? theme.colors.textPrimary : theme.colors.textSecondary, }}
+                >
                     <span className="pr-6">{selectedLabel}</span>
                     <ChevronDown className={`absolute right-4 w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} style={{ color: theme.colors.textSecondary }} />
                 </button>
@@ -146,7 +153,6 @@ export const PortalNativeSelect = ({
         </>
     );
 };
-
 
 export const GlassCard = React.memo(
     React.forwardRef(({ children, className = '', theme, ...props }, ref) => (
@@ -294,7 +300,7 @@ export const IncentiveRewardsScreen = ({ theme }) => {
 };
 
 
-export const AutoCompleteCombobox = ({
+export const AutoCompleteCombobox = React.memo(({
     label,
     options = [],
     value,
@@ -345,8 +351,6 @@ export const AutoCompleteCombobox = ({
         setPos({ top, left, width: w, height: dropdownMaxHeight });
     }, []);
 
-    // FIX: The `value` dependency was removed from this effect's dependency array.
-    // This prevents the position from being recalculated on every keystroke, which was causing the input to lose focus.
     useLayoutEffect(() => {
         if (isOpen) {
             calcPos();
@@ -432,7 +436,7 @@ export const AutoCompleteCombobox = ({
             )}
         </div>
     );
-};
+});
 
 export const ToggleButtonGroup = ({ value, onChange, options, theme }) => {
     // Find the index of the currently selected option
@@ -5777,6 +5781,15 @@ export const NewLeadScreen = ({
     const updateField = useCallback((field, value) =>
         setNewLead(prev => ({ ...prev, [field]: value })), []);
 
+    // FIX: Memoized handlers to prevent re-renders in the memoized AutoCompleteCombobox
+    const handleDesignFirmChange = useCallback(value => {
+        updateField('designFirm', value);
+    }, [updateField]);
+
+    const handleDealerChange = useCallback(value => {
+        updateField('dealer', value);
+    }, [updateField]);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!newLead.projectStatus) {
@@ -5856,8 +5869,8 @@ export const NewLeadScreen = ({
                                     label=""
                                     required
                                     value={newLead.designFirm}
-                                    onChange={val => updateField('designFirm', val)}
-                                    onSelect={val => updateField('designFirm', val)}
+                                    onChange={handleDesignFirmChange}
+                                    onSelect={handleDesignFirmChange}
                                     placeholder="Search..."
                                     options={designFirms}
                                     onAddNew={(f) => setDesignFirms(p => [...new Set([f, ...p])])}
@@ -5871,8 +5884,8 @@ export const NewLeadScreen = ({
                                     label=""
                                     required
                                     value={newLead.dealer}
-                                    onChange={val => updateField('dealer', val)}
-                                    onSelect={val => updateField('dealer', val)}
+                                    onChange={handleDealerChange}
+                                    onSelect={handleDealerChange}
                                     placeholder="Search..."
                                     options={dealers}
                                     onAddNew={(d) => setDealers(p => [...new Set([d, ...p])])}
