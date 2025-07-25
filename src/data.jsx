@@ -289,7 +289,7 @@ export const EMPTY_LEAD = {
     project: '',
     designFirm: '',
     dealer: '',
-    winProbability: 50, // FIXED: Should be number, not empty string
+    winProbability: 50, // FIXED: Changed from '' to a default number
     projectStatus: '',
     vertical: '',
     otherVertical: '',
