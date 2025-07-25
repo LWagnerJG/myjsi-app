@@ -1,5 +1,5 @@
 ﻿import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { lightTheme, darkTheme, INITIAL_OPPORTUNITIES, MY_PROJECTS_DATA, INITIAL_MEMBERS, INITIAL_POSTS, INITIAL_POLLS, DEALER_DIRECTORY_DATA, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS } from './data.jsx';
+import { lightTheme, darkTheme, INITIAL_OPPORTUNITIES, MY_PROJECTS_DATA, INITIAL_MEMBERS, INITIAL_POSTS, INITIAL_POLLS, DEALER_DIRECTORY_DATA, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS, EMPTY_LEAD } from './data.jsx';
 import { AppHeader, ProfileMenu, SCREEN_MAP, VoiceModal, OrderModal, SuccessToast, ProductComparisonScreen, ResourceDetailScreen, CreateContentModal, AddNewInstallScreen, Modal, CartScreen, CompetitiveAnalysisScreen } from './ui.jsx';
 
 function App() {
@@ -29,6 +29,9 @@ function App() {
     const [dealerDirectory, setDealerDirectory] = useState(DEALER_DIRECTORY_DATA);
     const [designFirms, setDesignFirms] = useState(INITIAL_DESIGN_FIRMS);
     const [dealers, setDealers] = useState(INITIAL_DEALERS);
+
+    // NEW: State for the New Lead form is now managed here in the main App
+    const [newLeadData, setNewLeadData] = useState(EMPTY_LEAD);
 
     // Derived State
     const currentScreen = navigationHistory[navigationHistory.length - 1];
@@ -78,6 +81,12 @@ function App() {
     }, [handleBack]);
     const handleShowAlert = useCallback((message) => setAlertInfo({ show: true, message }), []);
 
+    // NEW: Centralized function to update the new lead form data
+    const handleNewLeadChange = useCallback((updates) => {
+        setNewLeadData(prev => ({ ...prev, ...updates }));
+    }, []);
+
+
     // Screen Router
     const renderScreen = (screenKey) => {
         if (!screenKey) return null;
@@ -105,15 +114,20 @@ function App() {
             ...(baseScreenKey === 'members' && { members, setMembers, currentUserId }),
             ...(baseScreenKey === 'community' && { posts, polls, likedPosts, onToggleLike: handleToggleLike, pollChoices, onPollVote: handlePollVote, openCreateContentModal: () => setShowCreateContentModal(true) }),
             ...(baseScreenKey === 'add-new-install' && { onAddInstall: handleAddNewInstall }),
+            // MODIFIED: Pass state and handlers to NewLeadScreen
             ...(baseScreenKey === 'new-lead' && {
-                designFirms, setDesignFirms, dealers, setDealers, onSuccess: (newLead) => {
+                newLeadData,
+                onNewLeadChange: handleNewLeadChange,
+                designFirms, setDesignFirms, dealers, setDealers,
+                onSuccess: (submittedLead) => {
                     setOpportunities(prev => [...prev, {
-                        id: opportunities.length + 1, name: newLead.project, stage: newLead.projectStatus,
-                        value: `$${parseInt(String(newLead.estimatedList).replace(/[^0-9]/g, '')).toLocaleString()}`,
-                        company: newLead.dealer, ...newLead
+                        id: opportunities.length + 1, name: submittedLead.project, stage: submittedLead.projectStatus,
+                        value: `$${parseInt(String(submittedLead.estimatedList).replace(/[^0-9]/g, '')).toLocaleString()}`,
+                        company: submittedLead.dealer, ...submittedLead
                     }]);
                     handleNavigate('projects');
                     setSuccessMessage("Lead Created!");
+                    setNewLeadData(EMPTY_LEAD); // Reset form state after success
                     setTimeout(() => setSuccessMessage(""), 2000);
                 }
             }),

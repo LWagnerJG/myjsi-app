@@ -5809,14 +5809,19 @@ export const NewLeadScreen = ({
     setDesignFirms,
     dealers,
     setDealers,
+    newLeadData,       // NEW: Receives state as a prop
+    onNewLeadChange,   // NEW: Receives update function as a prop
 }) => {
-    // FIX: Replaced useState with useReducer for more stable and robust state management.
-    const [newLead, dispatch] = useReducer(leadReducer, initialLeadState);
     const [productSearch, setProductSearch] = useState('');
+
+    // Centralized update handler that calls the prop function
+    const updateField = (field, value) => {
+        onNewLeadChange({ [field]: value });
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!newLead.projectStatus) {
+        if (!newLeadData.projectStatus) {
             alert('Please select a Project Stage before submitting.');
             return;
         }
@@ -5826,16 +5831,38 @@ export const NewLeadScreen = ({
             await fetch(webhookUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newLead)
+                body: JSON.stringify(newLeadData)
             });
         } catch (err) {
             console.error("Failed to sync with Microsoft List:", err);
         }
 
-        onSuccess(newLead);
+        onSuccess(newLeadData);
     };
 
-    const availableSeries = useMemo(() => Data.JSI_PRODUCT_SERIES.filter(s => !newLead.products.some(p => p.series === s)), [newLead.products]);
+    const toggleCompetitor = (c) => {
+        const list = newLeadData.competitors || [];
+        const next = list.includes(c) ? list.filter(x => x !== c) : [...list, c];
+        updateField('competitors', next);
+    };
+
+    const addProduct = (series) => {
+        if (!series) return;
+        const newProducts = [...newLeadData.products, { series, hasGlassDoors: false, materials: [], hasWoodBack: false, polyColor: '' }];
+        updateField('products', newProducts);
+    };
+
+    const removeProduct = (idx) => {
+        const newProducts = newLeadData.products.filter((_, i) => i !== idx);
+        updateField('products', newProducts);
+    };
+
+    const updateProductOption = (pi, key, value) => {
+        const newProducts = newLeadData.products.map((p, i) => i === pi ? { ...p, [key]: value } : p);
+        updateField('products', newProducts);
+    };
+
+    const availableSeries = useMemo(() => Data.JSI_PRODUCT_SERIES.filter(s => !newLeadData.products.some(p => p.series === s)), [newLeadData.products]);
 
     const SettingsRow = ({ label, children, isFirst = false, theme }) => (
         <div className={`flex items-center justify-between min-h-[60px] py-2 ${!isFirst ? 'border-t' : ''}`} style={{ borderColor: theme.colors.border }}>
@@ -5851,23 +5878,23 @@ export const NewLeadScreen = ({
                     <div>
                         <SettingsRow label="Project Name" isFirst={true} theme={theme}>
                             <div className="w-7/12">
-                                <FormInput label="" required value={newLead.project} onChange={e => dispatch({ type: 'UPDATE_FIELD', field: 'project', value: e.target.value })} placeholder="Required" theme={theme} />
+                                <FormInput label="" required value={newLeadData.project} onChange={e => updateField('project', e.target.value)} placeholder="Required" theme={theme} />
                             </div>
                         </SettingsRow>
                         <SettingsRow label="Project Stage" theme={theme}>
                             <div className="w-7/12">
-                                <PortalNativeSelect label="" required value={newLead.projectStatus} onChange={e => dispatch({ type: 'UPDATE_FIELD', field: 'projectStatus', value: e.target.value })} options={Data.STAGES.map(s => ({ label: s, value: s }))} placeholder="Select..." theme={theme} />
+                                <PortalNativeSelect label="" required value={newLeadData.projectStatus} onChange={e => updateField('projectStatus', e.target.value)} options={Data.STAGES.map(s => ({ label: s, value: s }))} placeholder="Select..." theme={theme} />
                             </div>
                         </SettingsRow>
                         <SettingsRow label="Vertical" theme={theme}>
                             <div className="w-7/12">
-                                <PortalNativeSelect label="" required value={newLead.vertical} onChange={e => dispatch({ type: 'UPDATE_FIELD', field: 'vertical', value: e.target.value })} options={Data.VERTICALS.map(v => ({ label: v, value: v }))} placeholder="Select..." theme={theme} />
+                                <PortalNativeSelect label="" required value={newLeadData.vertical} onChange={e => updateField('vertical', e.target.value)} options={Data.VERTICALS.map(v => ({ label: v, value: v }))} placeholder="Select..." theme={theme} />
                             </div>
                         </SettingsRow>
                     </div>
-                    {newLead.vertical === 'Other (Please specify)' && (
+                    {newLeadData.vertical === 'Other (Please specify)' && (
                         <div className="animate-fade-in pt-2 pl-4">
-                            <FormInput required value={newLead.otherVertical} onChange={e => dispatch({ type: 'UPDATE_FIELD', field: 'otherVertical', value: e.target.value })} placeholder="Specify other vertical..." theme={theme} />
+                            <FormInput required value={newLeadData.otherVertical} onChange={e => updateField('otherVertical', e.target.value)} placeholder="Specify other vertical..." theme={theme} />
                         </div>
                     )}
                 </FormSection>
@@ -5876,12 +5903,12 @@ export const NewLeadScreen = ({
                     <div>
                         <SettingsRow label="A&D Firm" isFirst={true} theme={theme}>
                             <div className="w-7/12">
-                                <AutoCompleteCombobox label="" required value={newLead.designFirm} onChange={val => dispatch({ type: 'UPDATE_FIELD', field: 'designFirm', value: val })} onSelect={val => dispatch({ type: 'UPDATE_FIELD', field: 'designFirm', value: val })} placeholder="Search..." options={designFirms} onAddNew={(f) => setDesignFirms(p => [...new Set([f, ...p])])} theme={theme} />
+                                <AutoCompleteCombobox label="" required value={newLeadData.designFirm} onChange={val => updateField('designFirm', val)} onSelect={val => updateField('designFirm', val)} placeholder="Search..." options={designFirms} onAddNew={(f) => setDesignFirms(p => [...new Set([f, ...p])])} theme={theme} />
                             </div>
                         </SettingsRow>
                         <SettingsRow label="Dealer" theme={theme}>
                             <div className="w-7/12">
-                                <AutoCompleteCombobox label="" required value={newLead.dealer} onChange={val => dispatch({ type: 'UPDATE_FIELD', field: 'dealer', value: val })} onSelect={val => dispatch({ type: 'UPDATE_FIELD', field: 'dealer', value: val })} placeholder="Search..." options={dealers} onAddNew={(d) => setDealers(p => [...new Set([d, ...p])])} theme={theme} />
+                                <AutoCompleteCombobox label="" required value={newLeadData.dealer} onChange={val => updateField('dealer', val)} onSelect={val => updateField('dealer', val)} placeholder="Search..." options={dealers} onAddNew={(d) => setDealers(p => [...new Set([d, ...p])])} theme={theme} />
                             </div>
                         </SettingsRow>
                     </div>
@@ -5890,44 +5917,44 @@ export const NewLeadScreen = ({
                 <FormSection title="Competition & Products" theme={theme}>
                     <div>
                         <SettingsRow label="Bid?" isFirst={true} theme={theme}>
-                            <ToggleSwitch checked={!!newLead.isBid} onChange={e => dispatch({ type: 'UPDATE_FIELD', field: 'isBid', value: e.target.checked })} theme={theme} />
+                            <ToggleSwitch checked={!!newLeadData.isBid} onChange={e => updateField('isBid', e.target.checked)} theme={theme} />
                         </SettingsRow>
                         <SettingsRow label="Competition?" theme={theme}>
-                            <ToggleSwitch checked={!!newLead.competitionPresent} onChange={e => dispatch({ type: 'UPDATE_FIELD', field: 'competitionPresent', value: e.target.checked })} theme={theme} />
+                            <ToggleSwitch checked={!!newLeadData.competitionPresent} onChange={e => updateField('competitionPresent', e.target.checked)} theme={theme} />
                         </SettingsRow>
                     </div>
-                    {newLead.competitionPresent && (
+                    {newLeadData.competitionPresent && (
                         <div className="pt-4">
                             <div className="p-2 flex flex-wrap gap-2 rounded-2xl" style={{ backgroundColor: theme.colors.subtle }}>
                                 {Data.COMPETITORS.filter(c => c !== 'None').map(c => (
-                                    <button key={c} type="button" onClick={() => dispatch({ type: 'TOGGLE_COMPETITOR', competitor: c })} className="px-3 py-1.5 text-sm rounded-full font-medium transition-colors border" style={{ backgroundColor: newLead.competitors.includes(c) ? theme.colors.accent : theme.colors.surface, color: newLead.competitors.includes(c) ? theme.colors.surface : theme.colors.textPrimary, borderColor: newLead.competitors.includes(c) ? theme.colors.accent : theme.colors.border }}>{c}</button>
+                                    <button key={c} type="button" onClick={() => toggleCompetitor(c)} className="px-3 py-1.5 text-sm rounded-full font-medium transition-colors border" style={{ backgroundColor: newLeadData.competitors.includes(c) ? theme.colors.accent : theme.colors.surface, color: newLeadData.competitors.includes(c) ? theme.colors.surface : theme.colors.textPrimary, borderColor: newLeadData.competitors.includes(c) ? theme.colors.accent : theme.colors.border }}>{c}</button>
                                 ))}
                             </div>
                         </div>
                     )}
                     <SettingsRow label="Products" theme={theme}>
                         <div className="w-7/12">
-                            <AutoCompleteCombobox label="" value={productSearch} onChange={setProductSearch} onSelect={(series) => dispatch({ type: 'ADD_PRODUCT', series })} placeholder="Search..." options={availableSeries} theme={theme} resetOnSelect={true} />
+                            <AutoCompleteCombobox label="" value={productSearch} onChange={setProductSearch} onSelect={addProduct} placeholder="Search..." options={availableSeries} theme={theme} resetOnSelect={true} />
                         </div>
                     </SettingsRow>
-                    {newLead.products.length > 0 && (
+                    {newLeadData.products.length > 0 && (
                         <div className="space-y-3 pt-2">
-                            {newLead.products.map((p, idx) => {
+                            {newLeadData.products.map((p, idx) => {
                                 const hasOptions = ['Vision', 'Knox', 'Wink', 'Hoopz'].includes(p.series);
                                 const itemStyle = hasOptions ? "p-3 border rounded-2xl" : "p-2 pl-4 border rounded-full";
                                 return (
                                     <div key={idx} className={`${itemStyle} space-y-2`} style={{ borderColor: theme.colors.border, backgroundColor: theme.colors.surface }}>
                                         <div className="flex items-center justify-between">
                                             <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>{p.series}</span>
-                                            <button type="button" onClick={() => dispatch({ type: 'REMOVE_PRODUCT', index: idx })} className="w-7 h-7 flex items-center justify-center rounded-full transition-colors hover:bg-red-500/10">
+                                            <button type="button" onClick={() => removeProduct(idx)} className="w-7 h-7 flex items-center justify-center rounded-full transition-colors hover:bg-red-500/10">
                                                 <X className="w-5 h-5 text-red-500" />
                                             </button>
                                         </div>
                                         {hasOptions && (
                                             <div className="animate-fade-in pr-2">
-                                                <VisionOptions theme={theme} product={p} productIndex={idx} onUpdate={(index, key, value) => dispatch({ type: 'UPDATE_PRODUCT_OPTION', index, key, value })} />
-                                                <KnoxOptions theme={theme} product={p} productIndex={idx} onUpdate={(index, key, value) => dispatch({ type: 'UPDATE_PRODUCT_OPTION', index, key, value })} />
-                                                <WinkHoopzOptions theme={theme} product={p} productIndex={idx} onUpdate={(index, key, value) => dispatch({ type: 'UPDATE_PRODUCT_OPTION', index, key, value })} />
+                                                {p.series === 'Vision' && <VisionOptions theme={theme} product={p} productIndex={idx} onUpdate={updateProductOption} />}
+                                                {p.series === 'Knox' && <KnoxOptions theme={theme} product={p} productIndex={idx} onUpdate={updateProductOption} />}
+                                                {(p.series === 'Wink' || p.series === 'Hoopz') && <WinkHoopzOptions theme={theme} product={p} productIndex={idx} onUpdate={updateProductOption} />}
                                             </div>
                                         )}
                                     </div>
@@ -5941,34 +5968,34 @@ export const NewLeadScreen = ({
                     <div>
                         <SettingsRow label="Estimated List Price" isFirst={true} theme={theme}>
                             <div className="w-7/12">
-                                <FormInput label="" required type="currency" value={newLead.estimatedList} onChange={e => dispatch({ type: 'UPDATE_FIELD', field: 'estimatedList', value: e.target.value })} placeholder="$0" theme={theme} />
+                                <FormInput label="" required type="currency" value={newLeadData.estimatedList} onChange={e => updateField('estimatedList', e.target.value)} placeholder="$0" theme={theme} />
                             </div>
                         </SettingsRow>
                         <SettingsRow label="Win Probability" theme={theme}>
                             <div className="w-7/12">
-                                <ProbabilitySlider showLabel={false} value={newLead.winProbability} onChange={v => dispatch({ type: 'UPDATE_FIELD', field: 'winProbability', value: v })} theme={theme} />
+                                <ProbabilitySlider showLabel={false} value={newLeadData.winProbability} onChange={v => updateField('winProbability', v)} theme={theme} />
                             </div>
                         </SettingsRow>
                         <SettingsRow label="Discount" theme={theme}>
                             <div className="w-7/12">
-                                <PortalNativeSelect label="" value={newLead.discount} onChange={e => dispatch({ type: 'UPDATE_FIELD', field: 'discount', value: e.target.value })} options={Data.DISCOUNT_OPTIONS.map(d => ({ label: d, value: d }))} placeholder="Select..." theme={theme} />
+                                <PortalNativeSelect label="" value={newLeadData.discount} onChange={e => updateField('discount', e.target.value)} options={Data.DISCOUNT_OPTIONS.map(d => ({ label: d, value: d }))} placeholder="Select..." theme={theme} />
                             </div>
                         </SettingsRow>
                         <SettingsRow label="PO Timeframe" theme={theme}>
                             <div className="w-7/12">
-                                <PortalNativeSelect label="" required value={newLead.poTimeframe} onChange={e => dispatch({ type: 'UPDATE_FIELD', field: 'poTimeframe', value: e.target.value })} options={Data.PO_TIMEFRAMES.map(t => ({ label: t, value: t }))} placeholder="Select..." theme={theme} />
+                                <PortalNativeSelect label="" required value={newLeadData.poTimeframe} onChange={e => updateField('poTimeframe', e.target.value)} options={Data.PO_TIMEFRAMES.map(t => ({ label: t, value: t }))} placeholder="Select..." theme={theme} />
                             </div>
                         </SettingsRow>
                         <SettingsRow label="Contract?" theme={theme}>
-                            {newLead.isContract ? (
+                            {newLeadData.isContract ? (
                                 <div className="w-7/12 flex items-center space-x-2">
                                     <div className="flex-1">
-                                        <PortalNativeSelect label="" required value={newLead.contractType} onChange={e => dispatch({ type: 'UPDATE_FIELD', field: 'contractType', value: e.target.value })} options={Data.CONTRACT_OPTIONS.map(c => ({ label: c, value: c }))} placeholder="Select..." theme={theme} />
+                                        <PortalNativeSelect label="" required value={newLeadData.contractType} onChange={e => updateField('contractType', e.target.value)} options={Data.CONTRACT_OPTIONS.map(c => ({ label: c, value: c }))} placeholder="Select..." theme={theme} />
                                     </div>
-                                    <ToggleSwitch checked={true} onChange={e => dispatch({ type: 'UPDATE_FIELD', field: 'isContract', value: e.target.checked })} theme={theme} />
+                                    <ToggleSwitch checked={true} onChange={e => updateField('isContract', e.target.checked)} theme={theme} />
                                 </div>
                             ) : (
-                                <ToggleSwitch checked={false} onChange={e => dispatch({ type: 'UPDATE_FIELD', field: 'isContract', value: e.target.checked })} theme={theme} />
+                                <ToggleSwitch checked={false} onChange={e => updateField('isContract', e.target.checked)} theme={theme} />
                             )}
                         </SettingsRow>
                     </div>
@@ -5977,25 +6004,25 @@ export const NewLeadScreen = ({
                 <FormSection title="Services & Notes" theme={theme}>
                     <div>
                         <SettingsRow label="JSI Spec Services Required?" isFirst={true} theme={theme}>
-                            <ToggleSwitch checked={!!newLead.jsiSpecServices} onChange={e => dispatch({ type: 'UPDATE_FIELD', field: 'jsiSpecServices', value: e.target.checked })} theme={theme} />
+                            <ToggleSwitch checked={!!newLeadData.jsiSpecServices} onChange={e => updateField('jsiSpecServices', e.target.checked)} theme={theme} />
                         </SettingsRow>
                     </div>
-                    {newLead.jsiSpecServices && (
+                    {newLeadData.jsiSpecServices && (
                         <div className="animate-fade-in pt-2">
-                            <ToggleButtonGroup value={newLead.jsiSpecServicesType} onChange={(val) => dispatch({ type: 'UPDATE_FIELD', field: 'jsiSpecServicesType', value: val })} options={[{ label: 'New Quote', value: 'New Quote' }, { label: 'Revision', value: 'Revision' }, { label: 'Past Project', value: 'Past Project' }]} theme={theme} />
+                            <ToggleButtonGroup value={newLeadData.jsiSpecServicesType} onChange={(val) => updateField('jsiSpecServicesType', val)} options={[{ label: 'New Quote', value: 'New Quote' }, { label: 'Revision', value: 'Revision' }, { label: 'Past Project', value: 'Past Project' }]} theme={theme} />
                             <div className="mt-4">
-                                {newLead.jsiSpecServicesType === 'Revision' && (
-                                    <FormInput label="Revision Quote #" value={newLead.jsiRevisionQuoteNumber} onChange={(e) => dispatch({ type: 'UPDATE_FIELD', field: 'jsiRevisionQuoteNumber', value: e.target.value })} placeholder="Enter original quote #" theme={theme} required />
+                                {newLeadData.jsiSpecServicesType === 'Revision' && (
+                                    <FormInput label="Revision Quote #" value={newLeadData.jsiRevisionQuoteNumber} onChange={(e) => updateField('jsiRevisionQuoteNumber', e.target.value)} placeholder="Enter original quote #" theme={theme} required />
                                 )}
-                                {newLead.jsiSpecServicesType === 'Past Project' && (
-                                    <FormInput label="Past Project Info" value={newLead.jsiPastProjectInfo} onChange={(e) => dispatch({ type: 'UPDATE_FIELD', field: 'jsiPastProjectInfo', value: e.target.value })} placeholder="Enter past project name or #" theme={theme} required />
+                                {newLeadData.jsiSpecServicesType === 'Past Project' && (
+                                    <FormInput label="Past Project Info" value={newLeadData.jsiPastProjectInfo} onChange={(e) => updateField('jsiPastProjectInfo', e.target.value)} placeholder="Enter past project name or #" theme={theme} required />
                                 )}
                             </div>
                         </div>
                     )}
                     <SettingsRow label="Other Notes" theme={theme}>
                         <div className="w-7/12">
-                            <FormInput label="" type="textarea" value={newLead.notes} onChange={e => dispatch({ type: 'UPDATE_FIELD', field: 'notes', value: e.target.value })} placeholder="Enter details..." theme={theme} />
+                            <FormInput label="" type="textarea" value={newLeadData.notes} onChange={e => updateField('notes', e.target.value)} placeholder="Enter details..." theme={theme} />
                         </div>
                     </SettingsRow>
                 </FormSection>
