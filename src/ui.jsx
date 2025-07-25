@@ -136,9 +136,8 @@ export const PortalNativeSelect = ({
     return (
         <>
             <div ref={wrapRef} className="relative space-y-2">
-                {/* FIX: Updated label style to text-sm and px-3 */}
                 {label && (<label className="block text-sm font-semibold px-3" style={{ color: theme.colors.textSecondary }}>{label}</label>)}
-                <button type="button" onClick={toggleOpen} aria-expanded={isOpen} aria-required={required} className="w-full px-4 py-3 border rounded-full text-base text-left flex justify-between items-center" style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border, color: value ? theme.colors.textPrimary : theme.colors.textSecondary, }}>
+                <button type="button" onClick={toggleOpen} aria-expanded={isOpen} aria-required={required} className="w-full px-4 py-3 border rounded-lg text-base text-left flex justify-between items-center" style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border, color: value ? theme.colors.textPrimary : theme.colors.textSecondary, }}>
                     <span className="pr-6">{selectedLabel}</span>
                     <ChevronDown className={`absolute right-4 w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} style={{ color: theme.colors.textSecondary }} />
                 </button>
@@ -147,6 +146,7 @@ export const PortalNativeSelect = ({
         </>
     );
 };
+
 
 export const GlassCard = React.memo(
     React.forwardRef(({ children, className = '', theme, ...props }, ref) => (
@@ -298,16 +298,16 @@ export const AutoCompleteCombobox = ({
     label,
     options = [],
     value,
-    onChange, // handles raw input text changes
-    onSelect, // handles selection of an item from the filtered list
+    onChange,
+    onSelect,
     onAddNew,
     placeholder = '',
     theme,
-    dropdownClassName = '', // Added prop for custom dropdown styling
-    resetOnSelect = false, // New prop to clear input on selection
+    dropdownClassName = '',
+    resetOnSelect = false,
 }) => {
     const [isOpen, setIsOpen] = useState(false);
-    const [pos, setPos] = useState({ top: 0, left: 0, width: 0 });
+    const [pos, setPos] = useState({ top: 0, left: 0, width: 0, height: 'auto' });
     const wrapRef = useRef(null);
     const dropRef = useRef(null);
 
@@ -322,17 +322,34 @@ export const AutoCompleteCombobox = ({
         const r = wrapRef.current.getBoundingClientRect();
         const vw = window.innerWidth;
         const vh = window.innerHeight;
-        // Adjusted height calculation to consider available space and dynamic content
-        const contentHeight = filtered.length * 44 + (onAddNew && value ? 44 : 0) + 20; // Estimate height based on items + 'add new' button + padding
-        const h = Math.min(contentHeight, vh * 0.4); // Cap height at 40% of viewport height
+        const spaceBelow = vh - r.bottom;
+        const spaceAbove = r.top;
+        const maxHeight = vh * 0.4;
         const w = Math.max(r.width, DROPDOWN_MIN_WIDTH);
-        let top = r.bottom + DROPDOWN_GAP;
-        if (top + h > vh - DROPDOWN_SIDE_PADDING) top = r.top - h - DROPDOWN_GAP; // Flip upwards if not enough space below
+
+        let top;
+        let dropdownMaxHeight;
+
+        if (spaceBelow > maxHeight || spaceBelow > spaceAbove) {
+            top = r.bottom + DROPDOWN_GAP;
+            dropdownMaxHeight = Math.min(maxHeight, spaceBelow - DROPDOWN_SIDE_PADDING * 2);
+        } else {
+            top = r.top - Math.min(maxHeight, spaceAbove - DROPDOWN_SIDE_PADDING * 2) - DROPDOWN_GAP;
+            dropdownMaxHeight = Math.min(maxHeight, spaceAbove - DROPDOWN_SIDE_PADDING * 2);
+        }
+
         let left = r.left;
         if (left + w > vw - DROPDOWN_SIDE_PADDING) left = vw - w - DROPDOWN_SIDE_PADDING;
         if (left < DROPDOWN_SIDE_PADDING) left = DROPDOWN_SIDE_PADDING;
-        setPos({ top, left, width: w, height: h });
-    }, [filtered, onAddNew, value]);
+
+        setPos({ top, left, width: w, height: dropdownMaxHeight });
+    }, []);
+
+    useLayoutEffect(() => {
+        if (isOpen) {
+            calcPos();
+        }
+    }, [isOpen, calcPos, value]);
 
     useEffect(() => {
         if (!isOpen) return;
@@ -356,25 +373,25 @@ export const AutoCompleteCombobox = ({
     }, []);
 
     const handleSelectOption = (opt) => {
-        onSelect?.(opt); // Use optional chaining for onSelect
+        onSelect?.(opt);
         setIsOpen(false);
         if (resetOnSelect) {
-            onChange(''); // Clear the input if resetOnSelect is true
+            onChange('');
         } else {
-            onChange(opt); // Set the input value to the selected option if not resetting
+            onChange(opt);
         }
     };
 
     const handleAdd = () => {
         if (!value) return;
         onAddNew?.(value);
+        onSelect?.(value);
+        onChange(value);
         setIsOpen(false);
-        onChange(''); // Clear the input after adding new item
     };
 
     return (
         <div ref={wrapRef} className="space-y-2">
-            {/* FIX: Updated label style to text-sm and px-3 */}
             {label && (
                 <label className="block text-sm font-semibold px-3" style={{ color: theme.colors.textSecondary }}>
                     {label}
@@ -385,7 +402,7 @@ export const AutoCompleteCombobox = ({
                 <input
                     type="text"
                     value={value || ''}
-                    onFocus={() => { calcPos(); setIsOpen(true); }}
+                    onFocus={() => setIsOpen(true)}
                     onChange={(e) => onChange(e.target.value)}
                     placeholder={placeholder}
                     className="w-full pl-12 pr-4 py-3 border rounded-full text-base"
@@ -587,37 +604,41 @@ const LineItemCard = React.memo(({ lineItem, index, theme }) => {
     const [isExpanded, setIsExpanded] = useState(false);
 
     return (
-        <GlassCard theme={theme} className="p-3" style={{ backgroundColor: theme.colors.subtle }}>
+        <div className="p-3 rounded-2xl border" style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border }}>
             <div className="flex items-start space-x-4">
                 <div className="text-sm font-bold text-center w-8 flex-shrink-0" style={{ color: theme.colors.accent }}>
                     <div className="text-xs" style={{ color: theme.colors.textSecondary }}>LINE</div>
-                    <div>{index + 1}</div>
+                    <div>{String(index + 1).padStart(2, '0')}</div>
                 </div>
                 <div className="flex-1 min-w-0">
                     <p className="font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{lineItem.name}</p>
-                    <div className="flex items-center justify-between text-xs font-mono" style={{ color: theme.colors.textSecondary }}>
-                        <span>{lineItem.model}</span>
+                    <div className="flex items-center justify-between text-xs" style={{ color: theme.colors.textSecondary }}>
+                        <span className="font-mono">{lineItem.model}</span>
                         <span>QTY: {lineItem.quantity}</span>
                         <span className="font-sans font-semibold">${lineItem.extNet?.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
                     </div>
                 </div>
-                <button onClick={() => setIsExpanded(!isExpanded)} className="p-1">
+                <button onClick={() => setIsExpanded(!isExpanded)} className="p-1 -mr-1">
                     <ChevronDown className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} style={{ color: theme.colors.textSecondary }} />
                 </button>
             </div>
 
             {isExpanded && (
-                <div className="border-t mt-3 pt-3 space-y-2 text-sm" style={{ borderColor: theme.colors.border }}>
-                    <p className="font-bold text-xs" style={{ color: theme.colors.textSecondary }}>SPECIFICATIONS:</p>
-                    {lineItem.specs && lineItem.specs.length > 0 ? lineItem.specs.map(spec => (
-                        <div key={spec.label}>
-                            <p className="font-semibold text-xs" style={{ color: theme.colors.textSecondary }}>{spec.label}</p>
-                            <p className="font-mono text-xs" style={{ color: theme.colors.textPrimary }}>{spec.value}</p>
+                <div className="mt-3 pt-3 border-t space-y-2 text-xs" style={{ borderColor: theme.colors.border }}>
+                    <p className="font-bold uppercase" style={{ color: theme.colors.textSecondary }}>Specifications</p>
+                    {lineItem.specs && lineItem.specs.length > 0 ? (
+                        <div className="pl-2 space-y-1">
+                            {lineItem.specs.map(spec => (
+                                <div key={spec.label} className="grid grid-cols-[1fr,2fr]">
+                                    <p className="font-semibold" style={{ color: theme.colors.textSecondary }}>{spec.label}</p>
+                                    <p className="font-mono" style={{ color: theme.colors.textPrimary }}>{spec.value}</p>
+                                </div>
+                            ))}
                         </div>
-                    )) : <p className="text-xs" style={{ color: theme.colors.textSecondary }}>No specific options.</p>}
+                    ) : <p className="pl-2 text-xs" style={{ color: theme.colors.textSecondary }}>No specific options.</p>}
                 </div>
             )}
-        </GlassCard>
+        </div>
     );
 });
 
@@ -5166,83 +5187,73 @@ export const CustomerRankingScreen = ({ theme, onNavigate }) => {
 };
 
 export const OrderModal = React.memo(({ order, onClose, theme }) => {
-    const [isExpanded, setIsExpanded] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(true);
 
     if (!order) return null;
 
     const handleClose = () => {
-        setIsExpanded(false);
         onClose();
     };
 
     const statusColor = Data.STATUS_COLORS[order.status] || theme.colors.primary;
-    const statusText = (order.status || 'N/A').toUpperCase();
-    const formattedShipDate = order.shipDate ? new Date(order.shipDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'N/A';
+    const formattedShipDate = order.shipDate ? new Date(order.shipDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A';
+
+    const DetailRow = ({ label, value, isFirst = false }) => (
+        <div className={`flex justify-between items-center py-3 ${!isFirst ? 'border-t' : ''}`} style={{ borderColor: theme.colors.subtle }}>
+            <span className="font-medium" style={{ color: theme.colors.textSecondary }}>{label}</span>
+            <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>{value}</span>
+        </div>
+    );
 
     return (
         <Modal show={!!order} onClose={handleClose} title="" theme={theme}>
             <div className="space-y-4">
                 <div className="flex justify-between items-start">
-                    <div className="pr-4">
-                        <h2 className="text-xl font-bold" style={{ color: theme.colors.textPrimary }}>{order.details || 'Order Details'}</h2>
-                        <p className="-mt-1 text-sm" style={{ color: theme.colors.textSecondary }}>{order.company}</p>
+                    <div>
+                        <h2 className="text-2xl font-bold" style={{ color: theme.colors.textPrimary }}>{order.details || 'Order Details'}</h2>
+                        <p className="-mt-1 text-base" style={{ color: theme.colors.textSecondary }}>{order.company}</p>
                     </div>
-                    <button onClick={handleClose} className="text-sm font-medium p-2 -mr-2 flex-shrink-0" style={{ color: theme.colors.textSecondary }}>
-                        Close
+                    <button onClick={handleClose} className="p-1 rounded-full -mt-1 -mr-1" style={{ backgroundColor: theme.colors.subtle }}>
+                        <X className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
                     </button>
                 </div>
 
-                <div className="text-center py-2 rounded-full font-semibold text-white tracking-wider text-sm" style={{ backgroundColor: statusColor }}>
-                    {statusText}
+                <div className="text-center py-2.5 rounded-full font-semibold text-white tracking-wider text-sm shadow-inner" style={{ backgroundColor: statusColor }}>
+                    {order.status?.toUpperCase() || 'N/A'}
                 </div>
 
-                <dl className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm border-t border-b py-4" style={{ borderColor: theme.colors.subtle }}>
-                    <dt className="font-medium" style={{ color: theme.colors.textSecondary }}>SO:</dt>
-                    <dd className="text-right" style={{ color: theme.colors.textPrimary }}>{order.orderNumber}</dd>
-                    {order.po && <>
-                        <dt className="font-medium" style={{ color: theme.colors.textSecondary }}>PO:</dt>
-                        <dd className="text-right" style={{ color: theme.colors.textPrimary }}>{order.po}</dd>
-                    </>}
-                    {order.net && <>
-                        <dt className="font-medium" style={{ color: theme.colors.textSecondary }}>NET:</dt>
-                        <dd className="font-semibold text-right" style={{ color: theme.colors.textPrimary }}>${order.net.toLocaleString(undefined, { maximumFractionDigits: 0 })}</dd>
-                    </>}
-                    {order.reward && <>
-                        <dt className="font-medium" style={{ color: theme.colors.textSecondary }}>REWARDS:</dt>
-                        <dd className="text-right" style={{ color: theme.colors.textPrimary }}>{order.reward}</dd>
-                    </>}
-                    {order.shipDate && <>
-                        <dt className="font-medium" style={{ color: theme.colors.textSecondary }}>SHIP DATE:</dt>
-                        <dd className="text-right font-semibold" style={{ color: theme.colors.textPrimary }}>{formattedShipDate}</dd>
-                    </>}
-                </dl>
+                <GlassCard theme={theme} className="p-4">
+                    <div className="text-sm">
+                        <DetailRow label="Sales Order #" value={order.orderNumber} isFirst={true} />
+                        <DetailRow label="PO #" value={order.po} />
+                        <DetailRow label="Net Amount" value={`$${order.net?.toLocaleString(undefined, { maximumFractionDigits: 0 })}`} />
+                        <DetailRow label="Est. Ship Date" value={formattedShipDate} />
+                        <DetailRow label="Discount" value={order.discount} />
+                    </div>
+                </GlassCard>
 
-                <div className="space-y-3">
-                    {order.shipTo && <div>
-                        <p className="font-semibold text-xs" style={{ color: theme.colors.textSecondary }}>SHIP TO:</p>
+                {order.shipTo && (
+                    <GlassCard theme={theme} className="p-4">
+                        <p className="font-semibold text-xs mb-1" style={{ color: theme.colors.textSecondary }}>SHIP TO</p>
                         <p className="whitespace-pre-line leading-tight text-sm" style={{ color: theme.colors.textPrimary }}>{order.shipTo}</p>
-                    </div>}
-                    {order.discount && <div className="flex justify-between items-center text-sm pt-3 border-t" style={{ borderColor: theme.colors.subtle }}>
-                        <span className="font-medium" style={{ color: theme.colors.textSecondary }}>DISCOUNT:</span>
-                        <span className="font-semibold text-base" style={{ color: theme.colors.textPrimary }}>{order.discount}</span>
-                    </div>}
-                </div>
+                    </GlassCard>
+                )}
 
-                <button onClick={() => setIsExpanded(p => !p)} className="w-full py-3 rounded-full font-medium text-white transition" style={{ backgroundColor: theme.colors.accent }} disabled={!order.lineItems || order.lineItems.length === 0}>
-                    {isExpanded ? 'Hide Order Details' : 'Show Order Details'}
-                </button>
-
-                <div className={`transition-all duration-500 ease-in-out grid ${isExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
-                    <div className="overflow-hidden">
-                        <div className="space-y-3 pt-4 border-t" style={{ borderColor: theme.colors.subtle }}>
+                <GlassCard theme={theme} className="p-2">
+                    <button onClick={() => setIsExpanded(p => !p)} className="w-full flex justify-between items-center p-2 rounded-lg">
+                        <h3 className="font-bold" style={{ color: theme.colors.textPrimary }}>Line Items</h3>
+                        <ChevronDown className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} style={{ color: theme.colors.textSecondary }} />
+                    </button>
+                    {isExpanded && (
+                        <div className="p-2 space-y-2 animate-fade-in">
                             {(order.lineItems && order.lineItems.length > 0) ? (
                                 order.lineItems.map((item, index) => <LineItemCard key={item.line} lineItem={item} index={index} theme={theme} />)
                             ) : (
-                                <p className="text-center text-sm p-4" style={{ color: theme.colors.textSecondary }}>No line items for this order.</p>
+                                <p className="p-4 text-center text-sm" style={{ color: theme.colors.textSecondary }}>No line items for this order.</p>
                             )}
                         </div>
-                    </div>
-                </div>
+                    )}
+                </GlassCard>
             </div>
         </Modal>
     );
@@ -5674,7 +5685,7 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
     );
 };
 
-export const ProbabilitySlider = ({ value, onChange, theme }) => {
+export const ProbabilitySlider = ({ value, onChange, theme, showLabel = true }) => {
     const [isDragging, setIsDragging] = useState(false);
     const sliderRef = useRef(null);
     const updateFromClientX = (clientX) => {
@@ -5705,11 +5716,12 @@ export const ProbabilitySlider = ({ value, onChange, theme }) => {
         };
     }, [isDragging, onMouseMove, onMouseUp, onTouchMove, onTouchEnd]);
     return (
-        <div className="space-y-2">
-            {/* FIX: Label style updated to text-sm and px-3 */}
-            <label className="text-sm font-semibold px-3" style={{ color: theme.colors.textSecondary }}>
-                Win Probability
-            </label>
+        <div className="space-y-2 w-full">
+            {showLabel && (
+                <label className="text-sm font-semibold px-3" style={{ color: theme.colors.textSecondary }}>
+                    Win Probability
+                </label>
+            )}
             <div className="relative pt-4 pb-2 px-2">
                 <div ref={sliderRef} className="relative h-2 rounded-full cursor-pointer" style={{ backgroundColor: theme.colors.border || '#d1d5db' }} onMouseDown={onMouseDown} onTouchStart={onTouchStart}>
                     <div className="absolute top-0 left-0 h-full rounded-full" style={{ backgroundColor: theme.colors.accent || '#3b82f6', width: `${value}%` }} />
@@ -5720,6 +5732,26 @@ export const ProbabilitySlider = ({ value, onChange, theme }) => {
         </div>
     );
 };
+
+const ToggleSwitch = React.memo(({ checked, onChange, theme }) => (
+    <button
+        type="button"
+        onClick={() => onChange({ target: { checked: !checked } })}
+        className="relative w-11 h-6 rounded-full transition-colors duration-200 flex-shrink-0"
+        style={{ backgroundColor: checked ? theme.colors.accent : theme.colors.border }}
+    >
+        <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${checked ? 'translate-x-5' : ''}`} />
+    </button>
+));
+
+const SettingsRow = React.memo(({ label, children, isFirst = false, theme }) => (
+    <div className={`flex items-center justify-between py-3 ${!isFirst ? 'border-t' : ''}`} style={{ borderColor: theme.colors.border }}>
+        <label className="font-semibold" style={{ color: theme.colors.textPrimary }}>{label}</label>
+        {children}
+    </div>
+));
+
+
 
 export const NewLeadScreen = ({
     theme,
@@ -5738,6 +5770,7 @@ export const NewLeadScreen = ({
         jsiRevisionQuoteNumber: '',
         jsiPastProjectInfo: '',
     });
+    const [productSearch, setProductSearch] = useState('');
 
     const updateField = useCallback((field, value) =>
         setNewLead(prev => ({ ...prev, [field]: value })), []);
@@ -5749,7 +5782,6 @@ export const NewLeadScreen = ({
             return;
         }
 
-        // Send to Power Automate webhook
         try {
             const webhookUrl = import.meta.env.VITE_NEWLEAD_URL;
             await fetch(webhookUrl, {
@@ -5779,40 +5811,67 @@ export const NewLeadScreen = ({
         return { ...prev, competitors: next };
     }), []);
 
-    const CheckboxRow = ({ label, checked, onChange }) => (
-        <div className="flex items-center justify-between text-sm px-3 py-2 rounded-full" style={{ backgroundColor: theme.colors.subtle }}>
-            <label className="font-semibold" style={{ color: theme.colors.textSecondary }}>{label}</label>
-            <input type="checkbox" className="h-5 w-5 rounded-md border-2" style={{ accentColor: theme.colors.accent, borderColor: theme.colors.border }} checked={checked} onChange={onChange} />
+    const SettingsRow = ({ label, children, isFirst = false, theme }) => (
+        <div className={`flex items-center justify-between min-h-[60px] py-2 ${!isFirst ? 'border-t' : ''}`} style={{ borderColor: theme.colors.border }}>
+            <label className="font-semibold" style={{ color: theme.colors.textPrimary }}>{label}</label>
+            {children}
         </div>
     );
 
     return (
-        <form onSubmit={handleSubmit} className="flex flex-col h-full">
-            <PageTitle title="Create New Lead" theme={theme} />
-            <div className="flex-1 px-4 pb-4 pt-4 space-y-4" style={{ overflow: 'visible' }}>
+        <form onSubmit={handleSubmit} className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
+            <div className="flex-1 overflow-y-auto px-4 pt-6 pb-4 space-y-4 scrollbar-hide">
                 <FormSection title="Project Details" theme={theme}>
-                    <FormInput required label="Project Name" value={newLead.project} onChange={e => updateField('project', e.target.value)} placeholder="e.g., Acme Corp Headquarters" theme={theme} />
-                    <PortalNativeSelect required label="Project Stage" value={newLead.projectStatus} onChange={e => updateField('projectStatus', e.target.value)} options={Data.STAGES.map(s => ({ label: s, value: s }))} placeholder="Select stage" theme={theme} />
-                    <PortalNativeSelect required label="Vertical" value={newLead.vertical} onChange={e => updateField('vertical', e.target.value)} options={Data.VERTICALS.map(v => ({ label: v, value: v }))} placeholder="Select vertical" theme={theme} />
+                    <div>
+                        <SettingsRow label="Project Name" isFirst={true} theme={theme}>
+                            <div className="w-7/12">
+                                <FormInput label="" required value={newLead.project} onChange={e => updateField('project', e.target.value)} placeholder="Required" theme={theme} />
+                            </div>
+                        </SettingsRow>
+                        <SettingsRow label="Project Stage" theme={theme}>
+                            <div className="w-7/12">
+                                <PortalNativeSelect label="" required value={newLead.projectStatus} onChange={e => updateField('projectStatus', e.target.value)} options={Data.STAGES.map(s => ({ label: s, value: s }))} placeholder="Select..." theme={theme} />
+                            </div>
+                        </SettingsRow>
+                        <SettingsRow label="Vertical" theme={theme}>
+                            <div className="w-7/12">
+                                <PortalNativeSelect label="" required value={newLead.vertical} onChange={e => updateField('vertical', e.target.value)} options={Data.VERTICALS.map(v => ({ label: v, value: v }))} placeholder="Select..." theme={theme} />
+                            </div>
+                        </SettingsRow>
+                    </div>
                     {newLead.vertical === 'Other (Please specify)' && (
-                        <div className="pl-4 animate-fade-in">
-                            <FormInput required value={newLead.otherVertical} onChange={e => updateField('otherVertical', e.target.value)} placeholder="Specify the vertical..." theme={theme} />
+                        <div className="animate-fade-in pt-2 pl-4">
+                            <FormInput required value={newLead.otherVertical} onChange={e => updateField('otherVertical', e.target.value)} placeholder="Specify other vertical..." theme={theme} />
                         </div>
                     )}
                 </FormSection>
 
                 <FormSection title="Stakeholders" theme={theme}>
-                    <AutoCompleteCombobox label="A&D Firm" required value={newLead.designFirm} onSelect={val => updateField('designFirm', val)} onChange={val => updateField('designFirm', val)} placeholder="Search or add a design firm..." options={designFirms} onAddNew={(f) => setDesignFirms(p => [...new Set([f, ...p])])} theme={theme} />
-                    <AutoCompleteCombobox label="Dealer" required value={newLead.dealer} onSelect={val => updateField('dealer', val)} onChange={val => updateField('dealer', val)} placeholder="Search or add a dealer..." options={dealers} onAddNew={(d) => setDealers(p => [...new Set([d, ...p])])} theme={theme} />
+                    <div>
+                        <SettingsRow label="A&D Firm" isFirst={true} theme={theme}>
+                            <div className="w-7/12">
+                                <AutoCompleteCombobox label="" required value={newLead.designFirm} onSelect={val => updateField('designFirm', val)} onChange={val => updateField('designFirm', val)} placeholder="Search..." options={designFirms} onAddNew={(f) => setDesignFirms(p => [...new Set([f, ...p])])} theme={theme} />
+                            </div>
+                        </SettingsRow>
+                        <SettingsRow label="Dealer" theme={theme}>
+                            <div className="w-7/12">
+                                <AutoCompleteCombobox label="" required value={newLead.dealer} onSelect={val => updateField('dealer', val)} onChange={val => updateField('dealer', val)} placeholder="Search..." options={dealers} onAddNew={(d) => setDealers(p => [...new Set([d, ...p])])} theme={theme} />
+                            </div>
+                        </SettingsRow>
+                    </div>
                 </FormSection>
 
                 <FormSection title="Competition & Products" theme={theme}>
-                    <div className="space-y-4">
-                        <CheckboxRow label="Bid?" checked={!!newLead.isBid} onChange={e => updateField('isBid', e.target.checked)} />
-                        <CheckboxRow label="Competition?" checked={!!newLead.competitionPresent} onChange={e => updateField('competitionPresent', e.target.checked)} />
+                    <div>
+                        <SettingsRow label="Bid?" isFirst={true} theme={theme}>
+                            <ToggleSwitch checked={!!newLead.isBid} onChange={e => updateField('isBid', e.target.checked)} theme={theme} />
+                        </SettingsRow>
+                        <SettingsRow label="Competition?" theme={theme}>
+                            <ToggleSwitch checked={!!newLead.competitionPresent} onChange={e => updateField('competitionPresent', e.target.checked)} theme={theme} />
+                        </SettingsRow>
                     </div>
                     {newLead.competitionPresent && (
-                        <div className="space-y-2 pt-4 border-t mt-4" style={{ borderColor: theme.colors.subtle }}>
+                        <div className="pt-4">
                             <div className="p-2 flex flex-wrap gap-2 rounded-2xl" style={{ backgroundColor: theme.colors.subtle }}>
                                 {Data.COMPETITORS.filter(c => c !== 'None').map(c => (
                                     <button key={c} type="button" onClick={() => toggleCompetitor(c)} className="px-3 py-1.5 text-sm rounded-full font-medium transition-colors border" style={{ backgroundColor: newLead.competitors.includes(c) ? theme.colors.accent : theme.colors.surface, color: newLead.competitors.includes(c) ? theme.colors.surface : theme.colors.textPrimary, borderColor: newLead.competitors.includes(c) ? theme.colors.accent : theme.colors.border }}>{c}</button>
@@ -5820,66 +5879,105 @@ export const NewLeadScreen = ({
                             </div>
                         </div>
                     )}
-                    <div className="pt-4 mt-2 space-y-3">
-                        <div className="flex items-center justify-between px-3">
-                            <label className="text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>Products</label>
-                            <div className="w-1/2">{availableSeries.length > 0 && (
-                                <PortalNativeSelect value="" onChange={(e) => addProduct(e.target.value)} placeholder="+ Add" options={availableSeries.map(series => ({ label: series, value: series }))} theme={theme} />
-                            )}</div>
+                    <SettingsRow label="Products" theme={theme}>
+                        <div className="w-7/12">
+                            <AutoCompleteCombobox label="" value={productSearch} onChange={setProductSearch} onSelect={addProduct} placeholder="Search..." options={availableSeries} theme={theme} resetOnSelect={true} />
                         </div>
-                        <div className="space-y-3">{newLead.products.map((p, idx) => (
-                            <div key={idx} className="space-y-2">
-                                <div className="flex items-center justify-between py-2 pl-4 pr-2 rounded-full" style={{ backgroundColor: theme.colors.subtle }}>
-                                    <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>{p.series}</span>
-                                    <button type="button" onClick={() => removeProduct(idx)} className="w-7 h-7 flex items-center justify-center rounded-full transition-colors hover:bg-red-500/10">
-                                        <X className="w-5 h-5 text-red-500" />
-                                    </button>
-                                </div>
-                                {(p.series === 'Vision' || p.series === 'Knox' || p.series === 'Wink' || p.series === 'Hoopz') && (
-                                    <div className="pl-4 animate-fade-in">
-                                        {p.series === 'Vision' && <VisionOptions theme={theme} product={p} productIndex={idx} onUpdate={updateProductOption} />}
-                                        {p.series === 'Knox' && <KnoxOptions theme={theme} product={p} productIndex={idx} onUpdate={updateProductOption} />}
-                                        {(p.series === 'Wink' || p.series === 'Hoopz') && <WinkHoopzOptions theme={theme} product={p} productIndex={idx} onUpdate={updateProductOption} />}
+                    </SettingsRow>
+                    {newLead.products.length > 0 && (
+                        <div className="space-y-3 pt-2">
+                            {newLead.products.map((p, idx) => {
+                                const hasOptions = ['Vision', 'Knox', 'Wink', 'Hoopz'].includes(p.series);
+                                const itemStyle = hasOptions
+                                    ? "p-3 border rounded-2xl"
+                                    : "p-2 pl-4 border rounded-full";
+                                return (
+                                    <div key={idx} className={`${itemStyle} space-y-2`} style={{ borderColor: theme.colors.border, backgroundColor: theme.colors.surface }}>
+                                        <div className="flex items-center justify-between">
+                                            <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>{p.series}</span>
+                                            <button type="button" onClick={() => removeProduct(idx)} className="w-7 h-7 flex items-center justify-center rounded-full transition-colors hover:bg-red-500/10">
+                                                <X className="w-5 h-5 text-red-500" />
+                                            </button>
+                                        </div>
+                                        {hasOptions && (
+                                            <div className="animate-fade-in pr-2">
+                                                {p.series === 'Vision' && <VisionOptions theme={theme} product={p} productIndex={idx} onUpdate={updateProductOption} />}
+                                                {p.series === 'Knox' && <KnoxOptions theme={theme} product={p} productIndex={idx} onUpdate={updateProductOption} />}
+                                                {(p.series === 'Wink' || p.series === 'Hoopz') && <WinkHoopzOptions theme={theme} product={p} productIndex={idx} onUpdate={updateProductOption} />}
+                                            </div>
+                                        )}
                                     </div>
-                                )}
-                            </div>
-                        ))}</div>
-                    </div>
+                                )
+                            })}
+                        </div>
+                    )}
                 </FormSection>
 
                 <FormSection title="Financials & Timeline" theme={theme}>
-                    <FormInput label="Estimated List Price" required type="currency" value={newLead.estimatedList} onChange={e => updateField('estimatedList', e.target.value)} placeholder="$0" theme={theme} />
-                    <ProbabilitySlider value={newLead.winProbability} onChange={v => updateField('winProbability', v)} theme={theme} />
-                    <PortalNativeSelect label="Discount" value={newLead.discount} onChange={e => updateField('discount', e.target.value)} options={Data.DISCOUNT_OPTIONS.map(d => ({ label: d, value: d }))} placeholder="Select a Discount" theme={theme} />
-                    <PortalNativeSelect label="PO Timeframe" required value={newLead.poTimeframe} onChange={e => updateField('poTimeframe', e.target.value)} options={Data.PO_TIMEFRAMES.map(t => ({ label: t, value: t }))} placeholder="Select a Timeframe" theme={theme} />
-                    <CheckboxRow label="Contract?" checked={!!newLead.isContract} onChange={e => updateField('isContract', e.target.checked)} />
-                    {newLead.isContract && (
-                        <div className="animate-fade-in">
-                            <PortalNativeSelect required placeholder="Select a Contract" value={newLead.contractType} onChange={e => updateField('contractType', e.target.value)} options={Data.CONTRACT_OPTIONS.map(c => ({ label: c, value: c }))} theme={theme} />
-                        </div>
-                    )}
-                </FormSection>
-
-                <FormSection title="Services & Notes" theme={theme}>
-                    <CheckboxRow label="JSI Spec Services Required?" checked={!!newLead.jsiSpecServices} onChange={e => updateField('jsiSpecServices', e.target.checked)} />
-                    {newLead.jsiSpecServices && (
-                        <div className="animate-fade-in pt-4 space-y-4 border-t" style={{ borderColor: theme.colors.subtle }}>
-                            <ToggleButtonGroup value={newLead.jsiSpecServicesType} onChange={(val) => updateField('jsiSpecServicesType', val)} options={[{ label: 'New Quote', value: 'New Quote' }, { label: 'Revision', value: 'Revision' }, { label: 'Past Project', value: 'Past Project' }]} theme={theme} />
-                            {newLead.jsiSpecServicesType === 'Revision' && (
-                                <FormInput label="Revision Quote #" value={newLead.jsiRevisionQuoteNumber} onChange={(e) => updateField('jsiRevisionQuoteNumber', e.target.value)} placeholder="Enter original quote #" theme={theme} required />
+                    <div>
+                        <SettingsRow label="Estimated List Price" isFirst={true} theme={theme}>
+                            <div className="w-7/12">
+                                <FormInput label="" required type="currency" value={newLead.estimatedList} onChange={e => updateField('estimatedList', e.target.value)} placeholder="$0" theme={theme} />
+                            </div>
+                        </SettingsRow>
+                        <SettingsRow label="Win Probability" theme={theme}>
+                            <div className="w-7/12">
+                                <ProbabilitySlider showLabel={false} value={newLead.winProbability} onChange={v => updateField('winProbability', v)} theme={theme} />
+                            </div>
+                        </SettingsRow>
+                        <SettingsRow label="Discount" theme={theme}>
+                            <div className="w-7/12">
+                                <PortalNativeSelect label="" value={newLead.discount} onChange={e => updateField('discount', e.target.value)} options={Data.DISCOUNT_OPTIONS.map(d => ({ label: d, value: d }))} placeholder="Select..." theme={theme} />
+                            </div>
+                        </SettingsRow>
+                        <SettingsRow label="PO Timeframe" theme={theme}>
+                            <div className="w-7/12">
+                                <PortalNativeSelect label="" required value={newLead.poTimeframe} onChange={e => updateField('poTimeframe', e.target.value)} options={Data.PO_TIMEFRAMES.map(t => ({ label: t, value: t }))} placeholder="Select..." theme={theme} />
+                            </div>
+                        </SettingsRow>
+                        <SettingsRow label="Contract?" theme={theme}>
+                            {newLead.isContract ? (
+                                <div className="w-7/12 flex items-center space-x-2">
+                                    <div className="flex-1">
+                                        <PortalNativeSelect label="" required value={newLead.contractType} onChange={e => updateField('contractType', e.target.value)} options={Data.CONTRACT_OPTIONS.map(c => ({ label: c, value: c }))} placeholder="Select..." theme={theme} />
+                                    </div>
+                                    <ToggleSwitch checked={true} onChange={e => updateField('isContract', e.target.checked)} theme={theme} />
+                                </div>
+                            ) : (
+                                <ToggleSwitch checked={false} onChange={e => updateField('isContract', e.target.checked)} theme={theme} />
                             )}
-                            {newLead.jsiSpecServicesType === 'Past Project' && (
-                                <FormInput label="Past Project Info" value={newLead.jsiPastProjectInfo} onChange={(e) => updateField('jsiPastProjectInfo', e.target.value)} placeholder="Enter past project name or #" theme={theme} required />
-                            )}
-                        </div>
-                    )}
-                    <div className="pt-2">
-                        <FormInput label="Other Notes" type="textarea" value={newLead.notes} onChange={e => updateField('notes', e.target.value)} placeholder="Enter details..." theme={theme} />
+                        </SettingsRow>
                     </div>
                 </FormSection>
 
-                <div className="pt-4 pb-4">
-                    <button type="submit" className="w-full text-white font-bold py-3.5 rounded-full" style={{ backgroundColor: theme.colors.accent }}>Submit Lead</button>
+                <FormSection title="Services & Notes" theme={theme}>
+                    <div>
+                        <SettingsRow label="JSI Spec Services Required?" isFirst={true} theme={theme}>
+                            <ToggleSwitch checked={!!newLead.jsiSpecServices} onChange={e => updateField('jsiSpecServices', e.target.checked)} theme={theme} />
+                        </SettingsRow>
+                    </div>
+                    {newLead.jsiSpecServices && (
+                        <div className="animate-fade-in pt-2">
+                            <ToggleButtonGroup value={newLead.jsiSpecServicesType} onChange={(val) => updateField('jsiSpecServicesType', val)} options={[{ label: 'New Quote', value: 'New Quote' }, { label: 'Revision', value: 'Revision' }, { label: 'Past Project', value: 'Past Project' }]} theme={theme} />
+                            <div className="mt-4">
+                                {newLead.jsiSpecServicesType === 'Revision' && (
+                                    <FormInput label="Revision Quote #" value={newLead.jsiRevisionQuoteNumber} onChange={(e) => updateField('jsiRevisionQuoteNumber', e.target.value)} placeholder="Enter original quote #" theme={theme} required />
+                                )}
+                                {newLead.jsiSpecServicesType === 'Past Project' && (
+                                    <FormInput label="Past Project Info" value={newLead.jsiPastProjectInfo} onChange={(e) => updateField('jsiPastProjectInfo', e.target.value)} placeholder="Enter past project name or #" theme={theme} required />
+                                )}
+                            </div>
+                        </div>
+                    )}
+                    <SettingsRow label="Other Notes" theme={theme}>
+                        <div className="w-7/12">
+                            <FormInput label="" type="textarea" value={newLead.notes} onChange={e => updateField('notes', e.target.value)} placeholder="Enter details..." theme={theme} />
+                        </div>
+                    </SettingsRow>
+                </FormSection>
+
+                <div className="pt-2 pb-4">
+                    <button type="submit" className="w-full text-white font-bold py-3.5 rounded-full shadow-lg transition-transform hover:scale-105 active:scale-95" style={{ backgroundColor: theme.colors.accent }}>Submit Lead</button>
                 </div>
             </div>
         </form>
