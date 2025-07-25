@@ -4288,29 +4288,74 @@ export const FormInput = React.memo(({
         color: readOnly && !controlledValue ? theme.colors.textSecondary : theme.colors.textPrimary,
         ringColor: theme.colors.accent,
     };
+
     const formatCurrency = (val) => {
         if (!val) return '';
         const numericValue = String(val).replace(/[^0-9]/g, '');
         if (!numericValue) return '$';
         return '$' + new Intl.NumberFormat('en-US').format(numericValue);
     };
+
+    // FIXED: Currency handler now creates proper event object
     const handleCurrencyChange = (e) => {
         const numericValue = e.target.value.replace(/[^0-9]/g, '');
-        onChange({ target: { name, value: numericValue } });
+        // Create proper event object that matches what the reducer expects
+        onChange({
+            target: {
+                name: name || e.target.name,
+                value: numericValue
+            }
+        });
     };
+
     return (
         <div className="space-y-2">
-            {/* FIX: Label style updated to text-sm and px-3 */}
             {label && (
                 <label className="text-sm font-semibold px-3" style={{ color: theme.colors.textSecondary }}>
                     {label}
                 </label>
             )}
             <div className="relative">
-                {type === 'currency' ? (<input type="text" name={name} value={formatCurrency(controlledValue)} onChange={handleCurrencyChange} className={inputClass} style={styles} placeholder={placeholder} required={required} />)
-                    : type === 'textarea' ? (<textarea name={name} value={controlledValue} onChange={onChange} className="w-full px-4 py-3 border rounded-3xl focus:ring-2 text-base outline-none" style={{ ...styles, resize: 'none' }} rows="4" placeholder={placeholder} readOnly={readOnly} />)
-                        : (<input type={type} name={name} value={controlledValue} onChange={onChange} className={inputClass} style={styles} placeholder={placeholder} readOnly={readOnly} required={required} />)}
-                {icon && (<div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">{icon}</div>)}
+                {type === 'currency' ? (
+                    <input
+                        type="text"
+                        name={name}
+                        value={formatCurrency(controlledValue)}
+                        onChange={handleCurrencyChange}
+                        className={inputClass}
+                        style={styles}
+                        placeholder={placeholder}
+                        required={required}
+                    />
+                ) : type === 'textarea' ? (
+                    <textarea
+                        name={name}
+                        value={controlledValue}
+                        onChange={onChange}
+                        className="w-full px-4 py-3 border rounded-3xl focus:ring-2 text-base outline-none"
+                        style={{ ...styles, resize: 'none' }}
+                        rows="4"
+                        placeholder={placeholder}
+                        readOnly={readOnly}
+                    />
+                ) : (
+                    <input
+                        type={type}
+                        name={name}
+                        value={controlledValue}
+                        onChange={onChange}
+                        className={inputClass}
+                        style={styles}
+                        placeholder={placeholder}
+                        readOnly={readOnly}
+                        required={required}
+                    />
+                )}
+                {icon && (
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+                        {icon}
+                    </div>
+                )}
             </div>
         </div>
     );

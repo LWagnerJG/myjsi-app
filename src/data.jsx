@@ -285,7 +285,29 @@ export const STAGES = ['Discovery', 'Specifying', 'Decision/Bidding', 'PO Expect
 
 export const STAGE_COLORS = { 'Discovery': `bg-blue-200 text-blue-900`, 'Specifying': `bg-green-200 text-green-900`, 'Decision/Bidding': `bg-orange-200 text-orange-900`, 'PO Expected': `bg-purple-200 text-purple-900`, 'Won': `bg-emerald-200 text-emerald-900`, 'Lost': `bg-red-200 text-red-900`, };
 
-export const EMPTY_LEAD = { project: '', designFirm: '', dealer: '', winProbability: '', projectStatus: '', vertical: '', otherVertical: '', estimatedList: '', poTimeframe: '', competitors: [], competitionPresent: false, isBid: false, jsiSpecServices: false, quoteType: 'New Quote', pastProjectRef: '', discount: 'Undecided', products: [], notes: '', jsiQuoteNumber: '', isContract: false, contractType: '' };
+export const EMPTY_LEAD = {
+    project: '',
+    designFirm: '',
+    dealer: '',
+    winProbability: 50, // FIXED: Should be number, not empty string
+    projectStatus: '',
+    vertical: '',
+    otherVertical: '',
+    estimatedList: '',
+    poTimeframe: '',
+    competitors: [],
+    competitionPresent: false,
+    isBid: false,
+    jsiSpecServices: false,
+    quoteType: 'New Quote',
+    pastProjectRef: '',
+    discount: 'Undecided',
+    products: [],
+    notes: '',
+    jsiQuoteNumber: '',
+    isContract: false,
+    contractType: ''
+};
 
 export const URGENCY_LEVELS = ['Low', 'Medium', 'High'];
 
