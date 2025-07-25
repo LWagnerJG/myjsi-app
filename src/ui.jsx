@@ -345,11 +345,13 @@ export const AutoCompleteCombobox = ({
         setPos({ top, left, width: w, height: dropdownMaxHeight });
     }, []);
 
+    // FIX: The `value` dependency was removed from this effect's dependency array.
+    // This prevents the position from being recalculated on every keystroke, which was causing the input to lose focus.
     useLayoutEffect(() => {
         if (isOpen) {
             calcPos();
         }
-    }, [isOpen, calcPos, value]);
+    }, [isOpen, calcPos]);
 
     useEffect(() => {
         if (!isOpen) return;
