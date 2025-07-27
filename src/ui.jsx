@@ -4546,29 +4546,22 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
 
     const orderStages = ['Order Entry', 'Acknowledged', 'In Production', 'Shipping', 'Delivered'];
 
-    // FIX: Helper function to properly capitalize names as requested.
     const formatTitleCase = (str) => {
         if (!str) return '';
         return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
     };
 
     if (!order) {
-        return ( /* Error handling remains the same */ );
+        return (
+            <div className="p-4">
+                <PageTitle title="Error" theme={theme} onBack={() => onNavigate('orders')} />
+                <GlassCard theme={theme} className="p-8 text-center">
+                    <p style={{ color: theme.colors.textPrimary }}>Order not found.</p>
+                </GlassCard>
+            </div>
+        );
     }
 
-    // --- NEW & IMPROVED SUB-COMPONENTS ---
-
-    const HeroMetric = ({ label, value, icon: Icon }) => (
-        <div className="flex-1">
-            <div className="flex items-center space-x-2 mb-1">
-                <Icon className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
-                <p className="text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>{label}</p>
-            </div>
-            <p className="text-2xl font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>{value}</p>
-        </div>
-    );
-
-    // FIX: A more functional and visually appealing vertical status stepper.
     const VerticalStatusStepper = ({ stages, currentStatus, entryDate }) => {
         const currentIndex = stages.indexOf(currentStatus);
 
@@ -4594,7 +4587,6 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
 
                     return (
                         <div key={stage} className="flex items-center space-x-4 relative">
-                            {/* The vertical connecting line */}
                             {index < stages.length - 1 && (
                                 <div className="absolute left-[9px] top-6 h-full w-0.5" style={{ backgroundColor: isCompleted ? theme.colors.accent : theme.colors.border }} />
                             )}
@@ -4625,13 +4617,22 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
         );
     };
 
+    const HeroMetric = ({ label, value, icon: Icon }) => (
+        <div className="flex-1">
+            <div className="flex items-center space-x-2 mb-1">
+                <Icon className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
+                <p className="text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>{label}</p>
+            </div>
+            <p className="text-2xl font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>{value}</p>
+        </div>
+    );
+
     return (
         <div className="flex flex-col h-full">
             <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4 scrollbar-hide pt-6">
 
                 <GlassCard theme={theme} className="p-4 space-y-3">
                     <div>
-                        {/* FIX: Applying title case formatting to project and customer names */}
                         <p className="text-2xl font-bold" style={{ color: theme.colors.textPrimary }}>{formatTitleCase(order.details)}</p>
                         <p className="text-base" style={{ color: theme.colors.textSecondary }}>for {formatTitleCase(order.company)}</p>
                     </div>
@@ -4659,7 +4660,6 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
                     <VerticalStatusStepper stages={orderStages} currentStatus={order.status} entryDate={order.date} />
                 </GlassCard>
 
-                {/* FIX: Unifying the design of all info cards */}
                 <GlassCard theme={theme} className="p-4">
                     <div className="flex items-center space-x-2 mb-2">
                         <List className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
@@ -4683,7 +4683,7 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
                             <Home className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
                             <h3 className="font-bold text-sm" style={{ color: theme.colors.textSecondary }}>Ship To</h3>
                         </div>
-                        <a href={`http://googleusercontent.com/maps.google.com/3{encodeURIComponent(order.shipTo)}`} target="_blank" rel="noopener noreferrer" className="p-2 -m-2 rounded-full hover:bg-black/10">
+                        <a href={`http://googleusercontent.com/maps.google.com/4{encodeURIComponent(order.shipTo)}`} target="_blank" rel="noopener noreferrer" className="p-2 -m-2 rounded-full hover:bg-black/10">
                             <MapPin className="w-4 h-4" style={{ color: theme.colors.accent }} />
                         </a>
                     </div>
