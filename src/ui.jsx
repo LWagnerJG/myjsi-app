@@ -697,6 +697,71 @@ const AddressBookModal = ({ show, onClose, addresses, onSelectAddress, theme }) 
 };
 
 
+const HeroMetric = ({ label, value, icon: Icon, theme }) => (
+    <div className="flex-1">
+        <div className="flex items-center space-x-2 mb-1">
+            <Icon className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
+            <p className="text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>{label}</p>
+        </div>
+        <p className="text-2xl font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>{value}</p>
+    </div>
+);
+
+const VerticalStatusStepper = ({ stages, currentStatus, entryDate, theme }) => {
+    const currentIndex = stages.indexOf(currentStatus);
+
+    return (
+        <div className="space-y-1">
+            {stages.map((stage, index) => {
+                const isCompleted = index < currentIndex;
+                const isCurrent = index === currentIndex;
+
+                let IconComponent = Circle;
+                let iconColor = theme.colors.border;
+                let textColor = theme.colors.textSecondary;
+
+                if (isCompleted) {
+                    IconComponent = CheckCircle;
+                    iconColor = theme.colors.accent;
+                    textColor = theme.colors.textSecondary;
+                } else if (isCurrent) {
+                    IconComponent = Hourglass;
+                    iconColor = theme.colors.accent;
+                    textColor = theme.colors.textPrimary;
+                }
+
+                return (
+                    <div key={stage} className="flex items-center space-x-4 relative">
+                        {index < stages.length - 1 && (
+                            <div className="absolute left-[9px] top-6 h-full w-0.5" style={{ backgroundColor: isCompleted ? theme.colors.accent : theme.colors.border }} />
+                        )}
+
+                        <div className="z-10 p-1 rounded-full" style={{ backgroundColor: theme.colors.surface }}>
+                            <IconComponent className="w-5 h-5" style={{ color: iconColor, transition: 'color 0.3s ease' }} />
+                        </div>
+
+                        <div className="flex-1 flex justify-between items-center">
+                            <p className={`font-bold ${isCurrent ? 'text-lg' : 'text-base'}`} style={{ color: textColor, transition: 'all 0.3s ease' }}>
+                                {stage}
+                            </p>
+                            {isCompleted && index === 0 && (
+                                <p className="text-xs font-semibold" style={{ color: theme.colors.textSecondary }}>
+                                    {new Date(entryDate).toLocaleDateString()}
+                                </p>
+                            )}
+                            {isCurrent && (
+                                <p className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: theme.colors.accent + '20', color: theme.colors.accent }}>
+                                    Current
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                );
+            })}
+        </div>
+    );
+};
+
 export const LeadTimesScreen = ({ theme = {} }) => {
     // State and hooks
     const [searchTerm, setSearchTerm] = useState('');
@@ -4562,71 +4627,6 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
         );
     }
 
-    const VerticalStatusStepper = ({ stages, currentStatus, entryDate }) => {
-        const currentIndex = stages.indexOf(currentStatus);
-
-        return (
-            <div className="space-y-1">
-                {stages.map((stage, index) => {
-                    const isCompleted = index < currentIndex;
-                    const isCurrent = index === currentIndex;
-
-                    let IconComponent = Circle;
-                    let iconColor = theme.colors.border;
-                    let textColor = theme.colors.textSecondary;
-
-                    if (isCompleted) {
-                        IconComponent = CheckCircle;
-                        iconColor = theme.colors.accent;
-                        textColor = theme.colors.textSecondary;
-                    } else if (isCurrent) {
-                        IconComponent = Hourglass;
-                        iconColor = theme.colors.accent;
-                        textColor = theme.colors.textPrimary;
-                    }
-
-                    return (
-                        <div key={stage} className="flex items-center space-x-4 relative">
-                            {index < stages.length - 1 && (
-                                <div className="absolute left-[9px] top-6 h-full w-0.5" style={{ backgroundColor: isCompleted ? theme.colors.accent : theme.colors.border }} />
-                            )}
-
-                            <div className="z-10 p-1 rounded-full" style={{ backgroundColor: theme.colors.surface }}>
-                                <IconComponent className="w-5 h-5" style={{ color: iconColor, transition: 'color 0.3s ease' }} />
-                            </div>
-
-                            <div className="flex-1 flex justify-between items-center">
-                                <p className={`font-bold ${isCurrent ? 'text-lg' : 'text-base'}`} style={{ color: textColor, transition: 'all 0.3s ease' }}>
-                                    {stage}
-                                </p>
-                                {isCompleted && index === 0 && (
-                                    <p className="text-xs font-semibold" style={{ color: theme.colors.textSecondary }}>
-                                        {new Date(entryDate).toLocaleDateString()}
-                                    </p>
-                                )}
-                                {isCurrent && (
-                                    <p className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: theme.colors.accent + '20', color: theme.colors.accent }}>
-                                        Current
-                                    </p>
-                                )}
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
-        );
-    };
-
-    const HeroMetric = ({ label, value, icon: Icon }) => (
-        <div className="flex-1">
-            <div className="flex items-center space-x-2 mb-1">
-                <Icon className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
-                <p className="text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>{label}</p>
-            </div>
-            <p className="text-2xl font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>{value}</p>
-        </div>
-    );
-
     return (
         <div className="flex flex-col h-full">
             <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4 scrollbar-hide pt-6">
@@ -4641,11 +4641,13 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
                             label="Sales Order #"
                             value={order.orderNumber}
                             icon={FileText}
+                            theme={theme}
                         />
                         <HeroMetric
                             label="Net Amount"
                             value={`$${order.net?.toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
                             icon={DollarSign}
+                            theme={theme}
                         />
                     </div>
                 </GlassCard>
@@ -4657,7 +4659,12 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
                             Est. Ship: {order.shipDate ? new Date(order.shipDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}
                         </p>
                     </div>
-                    <VerticalStatusStepper stages={orderStages} currentStatus={order.status} entryDate={order.date} />
+                    <VerticalStatusStepper
+                        stages={orderStages}
+                        currentStatus={order.status}
+                        entryDate={order.date}
+                        theme={theme}
+                    />
                 </GlassCard>
 
                 <GlassCard theme={theme} className="p-4">
@@ -4683,7 +4690,7 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
                             <Home className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
                             <h3 className="font-bold text-sm" style={{ color: theme.colors.textSecondary }}>Ship To</h3>
                         </div>
-                        <a href={`http://googleusercontent.com/maps.google.com/4{encodeURIComponent(order.shipTo)}`} target="_blank" rel="noopener noreferrer" className="p-2 -m-2 rounded-full hover:bg-black/10">
+                        <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(order.shipTo)}`} target="_blank" rel="noopener noreferrer" className="p-2 -m-2 rounded-full hover:bg-black/10">
                             <MapPin className="w-4 h-4" style={{ color: theme.colors.accent }} />
                         </a>
                     </div>
@@ -4709,6 +4716,7 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
         </div>
     );
 };
+
 
 export const OrdersScreen = ({ theme, onNavigate }) => { // Changed prop
     const [searchTerm, setSearchTerm] = useState('');
