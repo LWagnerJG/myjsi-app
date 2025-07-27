@@ -611,24 +611,23 @@ const LineItemCard = React.memo(({ lineItem, index, theme }) => {
     const [isExpanded, setIsExpanded] = useState(false);
 
     return (
-        // 5. ENHANCED LINE ITEM DESIGN
-        <div className="p-3 rounded-2xl border" style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.border }}>
+        <div className="p-3 rounded-2xl" style={{ backgroundColor: theme.colors.subtle }}>
             <div className="flex items-center space-x-4">
-                {/* Line number is now more visually distinct */}
-                <div className="text-sm font-bold text-center w-8 flex-shrink-0 p-2 rounded-full" style={{ color: theme.colors.accent, backgroundColor: theme.colors.subtle }}>
+                <div className="text-sm font-bold text-center w-8 flex-shrink-0 p-2 rounded-full" style={{ color: theme.colors.accent, backgroundColor: theme.colors.surface }}>
                     {String(lineItem.line).padStart(2, '0')}
                 </div>
                 <div className="flex-1 min-w-0">
-                    {/* Model # is now a subtitle, making the name more prominent */}
-                    <p className="font-bold truncate" style={{ color: theme.colors.textPrimary }}>{lineItem.name}</p>
+                    {/* FIX: Stronger hierarchy - Product Name is bold and larger */}
+                    <p className="font-bold truncate text-base" style={{ color: theme.colors.textPrimary }}>{lineItem.name}</p>
+                    {/* FIX: Model # is now a visually secondary subtitle */}
                     <p className="text-xs font-mono" style={{ color: theme.colors.textSecondary }}>{lineItem.model}</p>
                 </div>
-                <button onClick={() => setIsExpanded(!isExpanded)} className="p-1">
+                {/* FIX: Removed the heavy box around the chevron for a cleaner look */}
+                <button onClick={() => setIsExpanded(!isExpanded)} className="p-1 rounded-full hover:bg-black/10">
                     <ChevronDown className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} style={{ color: theme.colors.textSecondary }} />
                 </button>
             </div>
 
-            {/* Expanded view is more detailed and better organized */}
             {isExpanded && (
                 <div className="mt-3 pt-3 border-t space-y-2 text-sm" style={{ borderColor: theme.colors.border }}>
                     <div className="flex justify-between">
@@ -639,14 +638,14 @@ const LineItemCard = React.memo(({ lineItem, index, theme }) => {
                         <span style={{ color: theme.colors.textSecondary }}>Net Price:</span>
                         <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>${lineItem.extNet?.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
                     </div>
-                    {lineItem.specs && lineItem.specs.length > 0 && (
+                    {lineItem.specs?.length > 0 && (
                         <div className="pt-2">
                             <p className="font-bold text-xs uppercase mb-1" style={{ color: theme.colors.textSecondary }}>Specifications</p>
                             <div className="pl-2 space-y-1">
                                 {lineItem.specs.map(spec => (
-                                    <div key={spec.label} className="grid grid-cols-[1fr,2fr]">
-                                        <p className="font-semibold" style={{ color: theme.colors.textSecondary }}>{spec.label}</p>
-                                        <p className="font-mono" style={{ color: theme.colors.textPrimary }}>{spec.value}</p>
+                                    <div key={spec.label} className="grid grid-cols-[auto,1fr] gap-x-4">
+                                        <p className="font-semibold" style={{ color: theme.colors.textSecondary }}>{spec.label}:</p>
+                                        <p className="font-mono text-right" style={{ color: theme.colors.textPrimary }}>{spec.value}</p>
                                     </div>
                                 ))}
                             </div>
@@ -4540,14 +4539,13 @@ export const AppHeader = React.memo(({ onHomeClick, isDarkMode, theme, onProfile
 });
 
 export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
-    const [isExpanded, setIsExpanded] = useState(true);
+    const [lineItemsExpanded, setLineItemsExpanded] = useState(true);
     const orderId = currentScreen.split('/')[1];
 
     const order = useMemo(() => {
         return Data.ORDER_DATA.find(o => o.orderNumber === orderId);
     }, [orderId]);
 
-    // Define the full lifecycle of an order for the status tracker
     const orderStages = ['Order Entry', 'Acknowledged', 'In Production', 'Shipping', 'Delivered'];
 
     if (!order) {
@@ -4561,12 +4559,13 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
         );
     }
 
-    // --- NEW SUB-COMPONENTS FOR IMPROVED UI ---
+    // --- NEW & IMPROVED SUB-COMPONENTS ---
 
     const KeyMetric = ({ label, value, icon: Icon }) => (
         <div className="flex-1 p-4 rounded-2xl" style={{ backgroundColor: theme.colors.subtle }}>
             <div className="flex items-center space-x-2 mb-1">
                 <Icon className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
+                {/* FIX: Standardized label styling */}
                 <p className="text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>{label}</p>
             </div>
             <p className="text-3xl font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>{value}</p>
@@ -4576,78 +4575,93 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
     const StatusTracker = ({ stages, currentStatus }) => {
         const currentIndex = stages.indexOf(currentStatus);
         return (
-            <div className="flex space-x-1">
-                {stages.map((stage, index) => (
-                    <div
-                        key={stage}
-                        className="flex-1 h-2 rounded-full transition-all duration-500"
-                        style={{
-                            backgroundColor: index <= currentIndex ? theme.colors.accent : theme.colors.border,
-                            opacity: index === currentIndex ? 1 : (index < currentIndex ? 0.5 : 1)
-                        }}
-                    />
-                ))}
+            <div>
+                <div className="flex space-x-1">
+                    {stages.map((stage, index) => (
+                        <div
+                            key={stage}
+                            className="flex-1 h-2 rounded-full transition-all duration-500"
+                            style={{
+                                backgroundColor: index <= currentIndex ? theme.colors.accent : theme.colors.border,
+                                opacity: index === currentIndex ? 1 : (index < currentIndex ? 0.5 : 1)
+                            }}
+                        />
+                    ))}
+                </div>
+                {/* FIX: Added context labels to the status tracker, as discussed */}
+                <div className="flex text-center text-[10px] font-semibold mt-1.5" style={{ color: theme.colors.textSecondary }}>
+                    {stages.map(stage => (
+                        <div key={stage} className="flex-1">{stage.replace(' ', '\n')}</div>
+                    ))}
+                </div>
             </div>
         );
     };
 
     return (
         <div className="flex flex-col h-full">
-            {/* 1. UNIFIED & DYNAMIC HEADER */}
-            <PageTitle title={`Order #${order.orderNumber}`} theme={theme} onBack={() => onNavigate('orders')}>
-                {/* We can add action buttons to the header later if needed */}
-            </PageTitle>
+            {/* FIX: A single, unambiguous header that removes the redundant back arrow */}
+            <PageTitle title={`Order #${order.orderNumber}`} theme={theme} onBack={() => onNavigate('orders')} />
 
             <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4 scrollbar-hide">
-                {/* PROJECT SUBTITLE & STATUS */}
+                {/* FIX: Improved visual hierarchy for project/customer info */}
                 <div className="px-1">
-                    <p className="text-xl font-bold" style={{ color: theme.colors.textPrimary }}>{order.details}</p>
+                    <p className="text-2xl font-bold" style={{ color: theme.colors.textPrimary }}>{order.details}</p>
                     <p className="text-base" style={{ color: theme.colors.textSecondary }}>for {order.company}</p>
                 </div>
 
-                {/* 2. KEY METRIC "HERO" SECTION */}
                 <div className="flex space-x-4">
                     <KeyMetric
                         label="Net Amount"
                         value={`$${order.net?.toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
                         icon={DollarSign}
                     />
+                    {/* FIX: Date now includes the year to remove ambiguity */}
                     <KeyMetric
                         label="Est. Ship Date"
-                        value={order.shipDate ? new Date(order.shipDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'N/A'}
+                        value={order.shipDate ? new Date(order.shipDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}
                         icon={Calendar}
                     />
                 </div>
 
-                {/* 3. VISUAL STATUS TRACKER */}
                 <GlassCard theme={theme} className="p-4 space-y-2">
                     <p className="text-center font-bold text-lg" style={{ color: theme.colors.textPrimary }}>{order.status}</p>
                     <StatusTracker stages={orderStages} currentStatus={order.status} />
                 </GlassCard>
 
-                {/* 4. IMPROVED CARD ORGANIZATION */}
+                {/* FIX: Grouped PO# and Discount into a logical card with a header */}
                 <GlassCard theme={theme} className="p-4">
-                    <div className="flex justify-between items-center text-sm py-2">
-                        <span className="font-medium" style={{ color: theme.colors.textSecondary }}>PO #</span>
-                        <span className="font-semibold font-mono" style={{ color: theme.colors.textPrimary }}>{order.po}</span>
-                    </div>
-                    <div className="flex justify-between items-center text-sm py-2 border-t" style={{ borderColor: theme.colors.subtle }}>
-                        <span className="font-medium" style={{ color: theme.colors.textSecondary }}>Discount</span>
-                        <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>{order.discount}</span>
+                    <h3 className="font-bold text-sm mb-1" style={{ color: theme.colors.textSecondary }}>Details</h3>
+                    <div className="text-sm space-y-2 pt-2 border-t" style={{ borderColor: theme.colors.border }}>
+                        <div className="flex justify-between items-center">
+                            <span className="font-medium" style={{ color: theme.colors.textSecondary }}>PO #</span>
+                            <span className="font-semibold font-mono" style={{ color: theme.colors.textPrimary }}>{order.po}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="font-medium" style={{ color: theme.colors.textSecondary }}>Discount</span>
+                            <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>{order.discount}</span>
+                        </div>
                     </div>
                 </GlassCard>
 
                 <GlassCard theme={theme} className="p-4">
-                    <p className="font-semibold text-sm mb-1" style={{ color: theme.colors.textSecondary }}>SHIP TO</p>
-                    <p className="whitespace-pre-line leading-tight" style={{ color: theme.colors.textPrimary }}>{order.shipTo}</p>
+                    <div className="flex justify-between items-center mb-1">
+                        {/* FIX: Standardized header to "Ship To" (Title Case) */}
+                        <h3 className="font-bold text-sm" style={{ color: theme.colors.textSecondary }}>Ship To</h3>
+                        {/* FIX: Made the address actionable */}
+                        <a href={`http://maps.google.com/?q=${encodeURIComponent(order.shipTo)}`} target="_blank" rel="noopener noreferrer" className="p-2 -m-2 rounded-full hover:bg-black/10">
+                            <MapPin className="w-4 h-4" style={{ color: theme.colors.accent }} />
+                        </a>
+                    </div>
+                    <p className="whitespace-pre-line leading-tight pt-2 border-t" style={{ color: theme.colors.textPrimary, borderColor: theme.colors.border }}>{order.shipTo}</p>
                 </GlassCard>
 
                 <GlassCard theme={theme} className="p-2">
-                    <button onClick={() => setIsExpanded(p => !p)} className="w-full flex justify-between items-center p-2 rounded-lg">
+                    <button onClick={() => setLineItemsExpanded(p => !p)} className="w-full flex justify-between items-center p-2 rounded-lg">
                         <h3 className="font-bold text-xl" style={{ color: theme.colors.textPrimary }}>Line Items</h3>
-                        <ChevronDown className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} style={{ color: theme.colors.textSecondary }} />
+                        <ChevronDown className={`w-5 h-5 transition-transform ${lineItemsExpanded ? 'rotate-180' : ''}`} style={{ color: theme.colors.textSecondary }} />
                     </button>
-                    {isExpanded && (
+                    {lineItemsExpanded && (
                         <div className="p-2 space-y-2 animate-fade-in">
                             {order.lineItems?.length > 0 ? (
                                 order.lineItems.map((item, index) => <LineItemCard key={item.line} lineItem={item} index={index} theme={theme} />)
@@ -4658,10 +4672,9 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
                     )}
                 </GlassCard>
 
-                {/* ACTION BUTTON */}
                 <div className="pt-2">
                     <button
-                        onClick={() => onNavigate('resources/request_field_visit')}
+                        onClick={() => onNavigate('replacements')}
                         className="w-full flex items-center justify-center space-x-2 py-3 rounded-full font-bold transition-colors text-white"
                         style={{ backgroundColor: theme.colors.accent }}
                     >
