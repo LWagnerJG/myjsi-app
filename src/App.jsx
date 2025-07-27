@@ -1,6 +1,6 @@
 ﻿import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { lightTheme, darkTheme, INITIAL_OPPORTUNITIES, MY_PROJECTS_DATA, INITIAL_MEMBERS, INITIAL_POSTS, INITIAL_POLLS, DEALER_DIRECTORY_DATA, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS, EMPTY_LEAD } from './data.jsx';
-import { AppHeader, ProfileMenu, SCREEN_MAP, VoiceModal, OrderModal, SuccessToast, ProductComparisonScreen, ResourceDetailScreen, CreateContentModal, AddNewInstallScreen, Modal, CartScreen, CompetitiveAnalysisScreen, NewLeadScreen } from './ui.jsx';
+import { AppHeader, ProfileMenu, SCREEN_MAP, VoiceModal, SuccessToast, ProductComparisonScreen, ResourceDetailScreen, CreateContentModal, AddNewInstallScreen, Modal, CartScreen, CompetitiveAnalysisScreen, NewLeadScreen, OrderDetailScreen } from './ui.jsx';
 
 // Helper component to handle the routing logic cleanly
 const ScreenRouter = (props) => {
@@ -20,6 +20,11 @@ const ScreenRouter = (props) => {
     if (baseScreenKey === 'resources' && screenParts.length > 1) {
         return <ResourceDetailScreen {...rest} />;
     }
+    // NEW: Add a specific route for a single order detail page
+    if (baseScreenKey === 'orders' && screenParts.length > 1) {
+        return <OrderDetailScreen {...rest} />;
+    }
+
 
     const ScreenComponent = SCREEN_MAP[baseScreenKey];
     if (!ScreenComponent) {
@@ -46,7 +51,6 @@ function App() {
     const [myProjects, setMyProjects] = useState(MY_PROJECTS_DATA);
     const [selectedOpportunity, setSelectedOpportunity] = useState(null);
     const [selectedProject, setSelectedProject] = useState(null);
-    const [selectedOrder, setSelectedOrder] = useState(null);
     const [members, setMembers] = useState(INITIAL_MEMBERS);
     const [currentUserId, setCurrentUserId] = useState(1);
     const [posts, setPosts] = useState(INITIAL_POSTS);
@@ -122,7 +126,6 @@ function App() {
         // Screen-specific props
         opportunities, setSelectedOpportunity,
         myProjects, setSelectedProject,
-        selectedOrder, setSelectedOrder,
         members, setMembers, currentUserId,
         posts, polls, likedPosts, onToggleLike: handleToggleLike, pollChoices, onPollVote: handlePollVote, openCreateContentModal: () => setShowCreateContentModal(true),
         cart, setCart, onUpdateCart: handleUpdateCart,
@@ -161,7 +164,6 @@ function App() {
             </div>
             {showProfileMenu && <ProfileMenu show={showProfileMenu} onClose={() => setShowProfileMenu(false)} onNavigate={handleNavigate} toggleTheme={() => setIsDarkMode(d => !d)} theme={currentTheme} isDarkMode={isDarkMode} />}
             <VoiceModal message={voiceMessage} show={!!voiceMessage} theme={currentTheme} />
-            <OrderModal order={selectedOrder} onClose={() => setSelectedOrder(null)} theme={currentTheme} />
             <SuccessToast message={successMessage} show={!!successMessage} theme={currentTheme} />
             {showCreateContentModal && <CreateContentModal close={() => setShowCreateContentModal(false)} theme={currentTheme} onAdd={handleAddItem} />}
             <Modal show={alertInfo.show} onClose={() => setAlertInfo({ show: false, message: '' })} title="Alert" theme={currentTheme}><p>{alertInfo.message}</p></Modal>

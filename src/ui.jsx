@@ -4530,8 +4530,87 @@ export const AppHeader = React.memo(({ onHomeClick, isDarkMode, theme, onProfile
     );
 });
 
+export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
+    const [isExpanded, setIsExpanded] = useState(true);
+    const orderId = currentScreen.split('/')[1];
 
-export const OrdersScreen = ({ theme, setSelectedOrder }) => {
+    const order = useMemo(() => {
+        return Data.ORDER_DATA.find(o => o.orderNumber === orderId);
+    }, [orderId]);
+
+
+    if (!order) {
+        return (
+            <div className="p-4">
+                <PageTitle title="Error" theme={theme} onBack={() => onNavigate('orders')} />
+                <GlassCard theme={theme} className="p-8 text-center">
+                    <p style={{ color: theme.colors.textPrimary }}>Order not found.</p>
+                </GlassCard>
+            </div>
+        );
+    }
+
+    const statusColor = Data.STATUS_COLORS[order.status] || theme.colors.primary;
+    const formattedShipDate = order.shipDate ? new Date(order.shipDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A';
+
+    const DetailRow = ({ label, value, isFirst = false }) => (
+        <div className={`flex justify-between items-center py-3 ${!isFirst ? 'border-t' : ''}`} style={{ borderColor: theme.colors.subtle }}>
+            <span className="font-medium" style={{ color: theme.colors.textSecondary }}>{label}</span>
+            <span className="font-semibold text-right" style={{ color: theme.colors.textPrimary }}>{value}</span>
+        </div>
+    );
+
+    return (
+        <div className="flex flex-col h-full">
+            <PageTitle title="Order Details" theme={theme} onBack={() => onNavigate('orders')} />
+            <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4 scrollbar-hide">
+                <div className="text-center">
+                    <h2 className="text-2xl font-bold" style={{ color: theme.colors.textPrimary }}>{order.details || 'Order Details'}</h2>
+                    <p className="-mt-1 text-base" style={{ color: theme.colors.textSecondary }}>{order.company}</p>
+                </div>
+
+                <div className="text-center py-2.5 rounded-full font-semibold text-white tracking-wider text-sm shadow-inner" style={{ backgroundColor: statusColor }}>
+                    {order.status?.toUpperCase() || 'N/A'}
+                </div>
+
+                <GlassCard theme={theme} className="p-4">
+                    <div className="text-sm">
+                        <DetailRow label="Sales Order #" value={order.orderNumber} isFirst={true} />
+                        <DetailRow label="PO #" value={order.po} />
+                        <DetailRow label="Net Amount" value={`$${order.net?.toLocaleString(undefined, { maximumFractionDigits: 0 })}`} />
+                        <DetailRow label="Est. Ship Date" value={formattedShipDate} />
+                        <DetailRow label="Discount" value={order.discount} />
+                    </div>
+                </GlassCard>
+
+                {order.shipTo && (
+                    <GlassCard theme={theme} className="p-4">
+                        <p className="font-semibold text-xs mb-1" style={{ color: theme.colors.textSecondary }}>SHIP TO</p>
+                        <p className="whitespace-pre-line leading-tight text-sm" style={{ color: theme.colors.textPrimary }}>{order.shipTo}</p>
+                    </GlassCard>
+                )}
+
+                <GlassCard theme={theme} className="p-2">
+                    <button onClick={() => setIsExpanded(p => !p)} className="w-full flex justify-between items-center p-2 rounded-lg">
+                        <h3 className="font-bold" style={{ color: theme.colors.textPrimary }}>Line Items</h3>
+                        <ChevronDown className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} style={{ color: theme.colors.textSecondary }} />
+                    </button>
+                    {isExpanded && (
+                        <div className="p-2 space-y-2 animate-fade-in">
+                            {(order.lineItems && order.lineItems.length > 0) ? (
+                                order.lineItems.map((item, index) => <LineItemCard key={item.line} lineItem={item} index={index} theme={theme} />)
+                            ) : (
+                                <p className="p-4 text-center text-sm" style={{ color: theme.colors.textSecondary }}>No line items for this order.</p>
+                            )}
+                        </div>
+                    )}
+                </GlassCard>
+            </div>
+        </div>
+    );
+};
+
+export const OrdersScreen = ({ theme, onNavigate }) => { // Changed prop
     const [searchTerm, setSearchTerm] = useState('');
     const [dateType, setDateType] = useState('shipDate');
     const [viewMode, setViewMode] = useState('list');
@@ -4585,7 +4664,6 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
 
     return (
         <div className="flex flex-col h-full">
-            {/* FIX: The search bar and icons are now direct children of the sticky container for a flat layout */}
             <div
                 className="sticky top-0 z-10 p-4 flex items-center space-x-2"
                 style={{
@@ -4639,7 +4717,7 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
                                         {groupedOrders[dateKey].orders.map((order) => {
                                             const statusColor = Data.STATUS_COLORS[order.status] || theme.colors.secondary;
                                             return (
-                                                <button key={order.orderNumber} onClick={() => setSelectedOrder(order)} className="w-full text-left p-4 transition-colors hover:bg-black/5 dark:hover:bg-white/10">
+                                                <button key={order.orderNumber} onClick={() => onNavigate(`orders/${order.orderNumber}`)} className="w-full text-left p-4 transition-colors hover:bg-black/5 dark:hover:bg-white/10"> {/* Changed onClick */}
                                                     <div className="flex items-start justify-between space-x-4">
                                                         <div className="flex items-start space-x-3 flex-1 min-w-0">
                                                             <div className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style={{ backgroundColor: statusColor }} />
@@ -4670,7 +4748,7 @@ export const OrdersScreen = ({ theme, setSelectedOrder }) => {
                         })}
                     </div>
                 ) : (
-                    <OrderCalendarView orders={filteredOrders} theme={theme} dateType={dateType} onOrderClick={setSelectedOrder} />
+                    <OrderCalendarView orders={filteredOrders} theme={theme} dateType={dateType} onOrderClick={(order) => onNavigate(`orders/${order.orderNumber}`)} /> // Changed onOrderClick
                 )}
             </div>
         </div>
@@ -5241,78 +5319,6 @@ export const CustomerRankingScreen = ({ theme, onNavigate }) => {
     );
 };
 
-export const OrderModal = React.memo(({ order, onClose, theme }) => {
-    const [isExpanded, setIsExpanded] = useState(true);
-
-    if (!order) return null;
-
-    const handleClose = () => {
-        onClose();
-    };
-
-    const statusColor = Data.STATUS_COLORS[order.status] || theme.colors.primary;
-    const formattedShipDate = order.shipDate ? new Date(order.shipDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A';
-
-    const DetailRow = ({ label, value, isFirst = false }) => (
-        <div className={`flex justify-between items-center py-3 ${!isFirst ? 'border-t' : ''}`} style={{ borderColor: theme.colors.subtle }}>
-            <span className="font-medium" style={{ color: theme.colors.textSecondary }}>{label}</span>
-            <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>{value}</span>
-        </div>
-    );
-
-    return (
-        <Modal show={!!order} onClose={handleClose} title="" theme={theme}>
-            <div className="space-y-4">
-                <div className="flex justify-between items-start">
-                    <div>
-                        <h2 className="text-2xl font-bold" style={{ color: theme.colors.textPrimary }}>{order.details || 'Order Details'}</h2>
-                        <p className="-mt-1 text-base" style={{ color: theme.colors.textSecondary }}>{order.company}</p>
-                    </div>
-                    <button onClick={handleClose} className="p-1 rounded-full -mt-1 -mr-1" style={{ backgroundColor: theme.colors.subtle }}>
-                        <X className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
-                    </button>
-                </div>
-
-                <div className="text-center py-2.5 rounded-full font-semibold text-white tracking-wider text-sm shadow-inner" style={{ backgroundColor: statusColor }}>
-                    {order.status?.toUpperCase() || 'N/A'}
-                </div>
-
-                <GlassCard theme={theme} className="p-4">
-                    <div className="text-sm">
-                        <DetailRow label="Sales Order #" value={order.orderNumber} isFirst={true} />
-                        <DetailRow label="PO #" value={order.po} />
-                        <DetailRow label="Net Amount" value={`$${order.net?.toLocaleString(undefined, { maximumFractionDigits: 0 })}`} />
-                        <DetailRow label="Est. Ship Date" value={formattedShipDate} />
-                        <DetailRow label="Discount" value={order.discount} />
-                    </div>
-                </GlassCard>
-
-                {order.shipTo && (
-                    <GlassCard theme={theme} className="p-4">
-                        <p className="font-semibold text-xs mb-1" style={{ color: theme.colors.textSecondary }}>SHIP TO</p>
-                        <p className="whitespace-pre-line leading-tight text-sm" style={{ color: theme.colors.textPrimary }}>{order.shipTo}</p>
-                    </GlassCard>
-                )}
-
-                <GlassCard theme={theme} className="p-2">
-                    <button onClick={() => setIsExpanded(p => !p)} className="w-full flex justify-between items-center p-2 rounded-lg">
-                        <h3 className="font-bold" style={{ color: theme.colors.textPrimary }}>Line Items</h3>
-                        <ChevronDown className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} style={{ color: theme.colors.textSecondary }} />
-                    </button>
-                    {isExpanded && (
-                        <div className="p-2 space-y-2 animate-fade-in">
-                            {(order.lineItems && order.lineItems.length > 0) ? (
-                                order.lineItems.map((item, index) => <LineItemCard key={item.line} lineItem={item} index={index} theme={theme} />)
-                            ) : (
-                                <p className="p-4 text-center text-sm" style={{ color: theme.colors.textSecondary }}>No line items for this order.</p>
-                            )}
-                        </div>
-                    )}
-                </GlassCard>
-            </div>
-        </Modal>
-    );
-});
 
 export const SalesScreen = ({ theme, onNavigate }) => {
     const { MONTHLY_SALES_DATA, ORDER_DATA, SALES_VERTICALS_DATA, STATUS_COLORS } = Data;
