@@ -4622,45 +4622,64 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
         return (
             <div className="p-4">
                 <PageTitle title="Error" theme={theme} onBack={() => onNavigate('orders')} />
-                <GlassCard theme={theme} className="p-8 text-center"><p style={{ color: theme.colors.textPrimary }}>Order not found.</p></GlassCard>
+                <GlassCard theme={theme} className="p-8 text-center">
+                    <p style={{ color: theme.colors.textPrimary }}>Order not found.</p>
+                </GlassCard>
             </div>
         );
     }
 
     const InfoRow = ({ label, value, valueIsMono = true, children }) => (
         <div>
-            <p className="text-sm" style={{ color: theme.colors.textSecondary }}>{label}</p>
-            <p className={`font-semibold text-lg ${valueIsMono ? 'font-mono' : ''}`} style={{ color: theme.colors.textPrimary }}>{value || children}</p>
+            <p className="text-sm font-medium" style={{ color: theme.colors.textSecondary }}>{label}</p>
+            <p className={`font-semibold text-base ${valueIsMono ? 'font-mono' : ''}`} style={{ color: theme.colors.textPrimary }}>
+                {value || children}
+            </p>
         </div>
     );
 
-    const VerticalStatusStepper = ({ stages, currentStatus, entryDate }) => {
+    const VerticalStatusStepper = ({ stages, currentStatus }) => {
         const currentIndex = stages.findIndex(s => s.name === currentStatus);
         return (
-            <div className="space-y-1">
+            <div className="space-y-4">
                 {stages.map((stage, index) => {
                     const isCompleted = index < currentIndex;
                     const isCurrent = index === currentIndex;
                     let IconComponent = Circle;
-                    let iconColor = theme.colors.border;
+                    let iconColor = '#D1D5DB';
                     let textColor = theme.colors.textSecondary;
+                    let bgColor = 'transparent';
 
-                    if (isCompleted) { IconComponent = CheckCircle; iconColor = theme.colors.accent; }
-                    else if (isCurrent) { IconComponent = Hourglass; iconColor = theme.colors.accent; textColor = theme.colors.textPrimary; }
+                    if (isCompleted) {
+                        IconComponent = CheckCircle;
+                        iconColor = '#10B981';
+                        textColor = theme.colors.textPrimary;
+                    } else if (isCurrent) {
+                        IconComponent = Clock;
+                        iconColor = '#3B82F6';
+                        textColor = theme.colors.textPrimary;
+                        bgColor = 'rgba(59, 130, 246, 0.05)';
+                    }
 
                     return (
-                        <div key={stage.name} className={`flex items-center space-x-4 relative p-2 rounded-lg ${isCurrent ? 'bg-black/5' : ''}`}>
+                        <div key={stage.name} className="flex items-center space-x-3 relative p-3 rounded-lg" style={{ backgroundColor: bgColor }}>
                             {index < stages.length - 1 && (
-                                <div className="absolute left-[19px] top-10 h-full w-0.5" style={{ backgroundColor: isCompleted ? theme.colors.accent : theme.colors.border }} />
+                                <div
+                                    className="absolute left-[18px] top-12 h-6 w-0.5"
+                                    style={{ backgroundColor: isCompleted ? '#10B981' : '#E5E7EB' }}
+                                />
                             )}
-                            <div className="z-10 p-1.5 rounded-full bg-white">
+                            <div className="z-10 flex-shrink-0">
                                 <IconComponent className="w-6 h-6" style={{ color: iconColor }} />
                             </div>
-                            <div className="flex-1 flex justify-between items-center">
-                                <p className={`font-bold ${isCurrent ? 'text-lg text-black' : 'text-gray-500'}`}>{stage.name}</p>
-                                <p className="text-xs font-semibold text-gray-400">
-                                    {stage.name === 'Shipping' ? `Est. ${new Date(stage.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : ''}
-                                    {isCompleted && stage.date ? new Date(stage.date).toLocaleDateString() : ''}
+                            <div className="flex-1 flex justify-between items-center min-w-0">
+                                <p className="font-medium text-sm" style={{ color: textColor }}>{stage.name}</p>
+                                <p className="text-xs font-medium" style={{ color: theme.colors.textSecondary }}>
+                                    {stage.name === 'Shipping' && stage.date ?
+                                        `Est. ${new Date(stage.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` :
+                                        isCompleted && stage.date ? new Date(stage.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) :
+                                            isCurrent ? 'Current' : ''
+                                    }
                                 </p>
                             </div>
                         </div>
@@ -4670,56 +4689,115 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
         );
     };
 
+    const LineItemCard = ({ lineItem, index, theme }) => (
+        <div className="p-4 rounded-lg" style={{ backgroundColor: theme.colors.cardBackground, border: `1px solid ${theme.colors.border}` }}>
+            <div className="flex justify-between items-start mb-2">
+                <div className="flex items-center space-x-3">
+                    <div
+                        className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white"
+                        style={{ backgroundColor: theme.colors.accent }}
+                    >
+                        {lineItem.line}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                        <p className="font-medium text-sm" style={{ color: theme.colors.textPrimary }}>
+                            {lineItem.description}
+                        </p>
+                        <p className="text-xs font-mono" style={{ color: theme.colors.textSecondary }}>
+                            {lineItem.model}
+                        </p>
+                    </div>
+                </div>
+                <div className="text-right flex-shrink-0">
+                    <p className="font-semibold text-sm" style={{ color: theme.colors.textPrimary }}>
+                        ${lineItem.price?.toLocaleString()}
+                    </p>
+                    <p className="text-xs" style={{ color: theme.colors.textSecondary }}>
+                        Qty: {lineItem.quantity}
+                    </p>
+                </div>
+            </div>
+        </div>
+    );
+
     return (
-        <div className="flex flex-col h-full bg-gray-50">
+        <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
             <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4 scrollbar-hide pt-6">
 
-                <GlassCard theme={theme} className="p-4">
-                    <div className="text-center mb-4">
-                        <p className="text-3xl font-bold" style={{ color: theme.colors.textPrimary }}>{formatTitleCase(order.details)}</p>
-                        <p className="text-base" style={{ color: theme.colors.textSecondary }}>for {formatTitleCase(order.company)}</p>
+                {/* Header Card */}
+                <GlassCard theme={theme} className="p-6">
+                    <div className="text-center mb-6">
+                        <h1 className="text-2xl font-bold mb-1" style={{ color: theme.colors.textPrimary }}>
+                            {formatTitleCase(order.details)}
+                        </h1>
+                        <p className="text-sm font-medium" style={{ color: theme.colors.textSecondary }}>
+                            for {formatTitleCase(order.company)}
+                        </p>
                     </div>
-                    <div className="grid grid-cols-2 gap-x-4 pt-4 border-t text-center" style={{ borderColor: theme.colors.border }}>
+                    <div className="grid grid-cols-2 gap-6 pt-4 border-t" style={{ borderColor: theme.colors.border }}>
                         <InfoRow label="Sales Order #" value={order.orderNumber} />
                         <InfoRow label="Net Amount" value={`$${order.net?.toLocaleString()}`} />
                     </div>
                 </GlassCard>
 
-                <GlassCard theme={theme} className="p-4">
-                    <h3 className="font-bold text-lg mb-3" style={{ color: theme.colors.textPrimary }}>Order Progress</h3>
+                {/* Order Progress */}
+                <GlassCard theme={theme} className="p-6">
+                    <h2 className="font-semibold text-lg mb-4" style={{ color: theme.colors.textPrimary }}>
+                        Order Progress
+                    </h2>
                     <VerticalStatusStepper stages={orderStages} currentStatus={order.status} />
                 </GlassCard>
 
-                <GlassCard theme={theme} className="p-4 space-y-4">
-                    <div className="text-sm space-y-2">
+                {/* Order Details */}
+                <GlassCard theme={theme} className="p-6">
+                    <div className="space-y-4">
                         <div className="flex justify-between items-center">
-                            <span className="font-medium text-gray-500">PO #</span>
-                            <span className="font-semibold font-mono text-gray-800">{order.po}</span>
+                            <span className="text-sm font-medium" style={{ color: theme.colors.textSecondary }}>PO #</span>
+                            <span className="font-semibold font-mono text-sm" style={{ color: theme.colors.textPrimary }}>{order.po}</span>
                         </div>
                         <div className="flex justify-between items-center">
-                            <span className="font-medium text-gray-500">Discount</span>
-                            <span className="font-semibold font-mono text-gray-800">{order.discount}</span>
+                            <span className="text-sm font-medium" style={{ color: theme.colors.textSecondary }}>Discount</span>
+                            <span className="font-semibold font-mono text-sm" style={{ color: theme.colors.textPrimary }}>{order.discount}</span>
                         </div>
-                        <div className="flex justify-between items-start pt-2">
-                            <span className="font-medium text-gray-500">Ship To</span>
-                            <a href={`http://googleusercontent.com/maps.google.com/9{encodeURIComponent(order.shipTo)}`} target="_blank" rel="noopener noreferrer" className="text-right font-semibold text-gray-800 hover:underline">
-                                {order.shipTo.split('\n').map((line, i) => <span key={i} className="block">{line}</span>)}
-                            </a>
+                        <div className="pt-2 border-t" style={{ borderColor: theme.colors.border }}>
+                            <div className="flex justify-between items-start">
+                                <span className="text-sm font-medium" style={{ color: theme.colors.textSecondary }}>Ship To</span>
+                                <div className="text-right max-w-[60%]">
+                                    {order.shipTo.split('\n').map((line, i) => (
+                                        <p key={i} className="text-sm font-medium" style={{ color: theme.colors.textPrimary }}>
+                                            {line}
+                                        </p>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </GlassCard>
 
-                <GlassCard theme={theme} className="p-2">
-                    <button onClick={() => setLineItemsExpanded(p => !p)} className="w-full flex justify-between items-center p-2 rounded-lg">
-                        <h3 className="font-bold text-xl" style={{ color: theme.colors.textPrimary }}>Line Items</h3>
-                        <ChevronDown className={`w-5 h-5 transition-transform ${lineItemsExpanded ? 'rotate-180' : ''}`} style={{ color: theme.colors.textSecondary }} />
+                {/* Line Items */}
+                <GlassCard theme={theme} className="p-4">
+                    <button
+                        onClick={() => setLineItemsExpanded(p => !p)}
+                        className="w-full flex justify-between items-center p-2 rounded-lg hover:bg-black/5 transition-colors"
+                    >
+                        <h2 className="font-semibold text-lg" style={{ color: theme.colors.textPrimary }}>
+                            Line Items
+                        </h2>
+                        <ChevronDown
+                            className={`w-5 h-5 transition-transform ${lineItemsExpanded ? 'rotate-180' : ''}`}
+                            style={{ color: theme.colors.textSecondary }}
+                        />
                     </button>
                     {lineItemsExpanded && (
-                        <div className="p-2 space-y-2 animate-fade-in">
+                        <div className="pt-4 space-y-3">
                             {order.lineItems?.length > 0 ? (
-                                order.lineItems.map((item, index) => <LineItemCard key={item.line} lineItem={item} index={index} theme={theme} />)
+                                order.lineItems.map((item, index) => (
+                                    <LineItemCard key={item.line} lineItem={item} index={index} theme={theme} />
+                                ))
                             ) : (
-                                <p className="p-4 text-center text-sm" style={{ color: theme.colors.textSecondary }}>No line items for this order.</p>
+                                <p className="p-4 text-center text-sm" style={{ color: theme.colors.textSecondary }}>
+                                    No line items for this order.
+                                </p>
                             )}
                         </div>
                     )}
