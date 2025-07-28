@@ -4764,7 +4764,7 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
     );
 };
 
-export const OrdersScreen = ({ theme, onNavigate }) => { // Changed prop
+export const OrdersScreen = ({ theme, onNavigate }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [dateType, setDateType] = useState('shipDate');
     const [viewMode, setViewMode] = useState('list');
@@ -4849,7 +4849,11 @@ export const OrdersScreen = ({ theme, onNavigate }) => { // Changed prop
                 </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-4 pt-4 pb-4 space-y-4">
+            {/* FIX: Added scrollbar-hide, pb-24 for padding, and a white background */}
+            <div
+                className="flex-1 overflow-y-auto px-4 pt-4 pb-24 space-y-4 scrollbar-hide"
+                style={{ backgroundColor: theme.colors.surface }}
+            >
                 {viewMode === 'list' ? (
                     <div className="space-y-4">
                         {sortedGroupKeys.map(dateKey => {
@@ -4858,8 +4862,8 @@ export const OrdersScreen = ({ theme, onNavigate }) => { // Changed prop
                             const formattedDate = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 
                             return (
-                                <GlassCard key={dateKey} theme={theme} className="p-0 overflow-hidden">
-                                    <div className="px-4 pt-4 pb-3 flex justify-between items-baseline border-b" style={{ borderColor: theme.colors.subtle }}>
+                                <div key={dateKey}>
+                                    <div className="px-4 pt-4 pb-3 flex justify-between items-baseline">
                                         <h2 className="font-semibold text-base" style={{ color: theme.colors.textPrimary }}>
                                             {formattedDate}
                                         </h2>
@@ -4867,11 +4871,11 @@ export const OrdersScreen = ({ theme, onNavigate }) => { // Changed prop
                                             ${groupedOrders[dateKey].total.toLocaleString('en-US', { maximumFractionDigits: 0 })}
                                         </p>
                                     </div>
-                                    <div className="divide-y" style={{ borderColor: theme.colors.subtle }}>
+                                    <div className="divide-y rounded-2xl overflow-hidden border" style={{ borderColor: theme.colors.border }}>
                                         {groupedOrders[dateKey].orders.map((order) => {
                                             const statusColor = Data.STATUS_COLORS[order.status] || theme.colors.secondary;
                                             return (
-                                                <button key={order.orderNumber} onClick={() => onNavigate(`orders/${order.orderNumber}`)} className="w-full text-left p-4 transition-colors hover:bg-black/5 dark:hover:bg-white/10"> {/* Changed onClick */}
+                                                <button key={order.orderNumber} onClick={() => onNavigate(`orders/${order.orderNumber}`)} className="w-full text-left p-4 transition-colors hover:bg-black/5 dark:hover:bg-white/10">
                                                     <div className="flex items-start justify-between space-x-4">
                                                         <div className="flex items-start space-x-3 flex-1 min-w-0">
                                                             <div className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style={{ backgroundColor: statusColor }} />
@@ -4897,12 +4901,12 @@ export const OrdersScreen = ({ theme, onNavigate }) => { // Changed prop
                                             )
                                         })}
                                     </div>
-                                </GlassCard>
+                                </div>
                             )
                         })}
                     </div>
                 ) : (
-                    <OrderCalendarView orders={filteredOrders} theme={theme} dateType={dateType} onOrderClick={(order) => onNavigate(`orders/${order.orderNumber}`)} /> // Changed onOrderClick
+                    <OrderCalendarView orders={filteredOrders} theme={theme} dateType={dateType} onOrderClick={(order) => onNavigate(`orders/${order.orderNumber}`)} />
                 )}
             </div>
         </div>

@@ -158,7 +158,7 @@ function App() {
                 isDarkMode={isDarkMode}
                 onToggleDark={() => setIsDarkMode(d => !d)}
             />
-            <div className="flex-1 pt-[88px] overflow-y-auto scrollbar-hide pb-24">
+            <div className="flex-1 pt-[88px] overflow-y-auto scrollbar-hide">
                 {/* The new router component handles rendering */}
                 <ScreenRouter screenKey={currentScreen} {...screenProps} />
             </div>
