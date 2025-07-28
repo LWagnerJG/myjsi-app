@@ -608,48 +608,74 @@ const SocialMediaScreen = ({ theme, showAlert, setSuccessMessage }) => {
     );
 };
 
-const LineItemCard = React.memo(({ lineItem, index, theme }) => {
-    const [isExpanded, setIsExpanded] = useState(false);
+const LineItemCard = React.memo(({ lineItem, theme, isExpanded, onToggleExpand, formatTitleCase }) => {
+    const ProductIcon = lineItem.name.toLowerCase().includes('chair') ? Armchair : Package;
 
     return (
-        <div className={`p-3 rounded-2xl transition-all duration-300 ${isExpanded ? 'bg-white shadow-md' : 'bg-gray-50'}`}>
-            <div className="flex items-start space-x-4">
-                <div className="text-sm font-bold text-center w-8 flex-shrink-0 p-2 mt-1 rounded-full text-blue-800 bg-blue-100">
-                    {String(lineItem.line).padStart(2, '0')}
+        <div className={`rounded-2xl transition-all duration-300 border-2 ${isExpanded ? 'bg-white shadow-md' : 'bg-gray-50'}`}
+            style={{ borderColor: isExpanded ? theme.colors.accent + '40' : 'transparent' }}>
+            <button onClick={onToggleExpand} className="w-full p-3 text-left">
+                <div className="flex items-start space-x-4">
+                    <div
+                        className="text-sm font-bold text-center w-8 flex-shrink-0 p-2 mt-1 rounded-full"
+                        style={{ color: theme.colors.accent, backgroundColor: theme.colors.accent + '20' }}
+                    >
+                        {String(lineItem.line).padStart(2, '0')}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <div className="flex items-center space-x-2">
+                            <ProductIcon className="w-4 h-4 flex-shrink-0" style={{ color: theme.colors.textSecondary }} />
+                            <p className="font-bold truncate text-base text-gray-900">{formatTitleCase(lineItem.name)}</p>
+                        </div>
+                        <p className="text-xs text-gray-500 pl-6">{lineItem.model}</p>
+                    </div>
+
+                    <div className="flex items-center space-x-4 text-right">
+                        <div>
+                            <p className="text-xs text-gray-500">Qty</p>
+                            <p className="font-bold text-gray-800">{lineItem.quantity}</p>
+                        </div>
+                        <div>
+                            <p className="text-xs text-gray-500">Price</p>
+                            <p className="font-bold" style={{ color: theme.colors.accent }}>${lineItem.extNet?.toLocaleString()}</p>
+                        </div>
+                    </div>
+
+                    <div className="p-1 mt-1">
+                        <ChevronDown className={`w-5 h-5 transition-transform text-gray-400 ${isExpanded ? 'rotate-180' : ''}`} />
+                    </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                    <p className="font-bold truncate text-base text-gray-900">{lineItem.name}</p>
-                    <p className="text-xs font-mono text-gray-500">{lineItem.model}</p>
-                </div>
-                <div className="text-right flex-shrink-0">
-                    <p className="font-semibold font-mono text-gray-900">${lineItem.extNet?.toLocaleString()}</p>
-                    <p className="text-xs text-gray-500">Qty: {lineItem.quantity}</p>
-                </div>
-                <button onClick={() => setIsExpanded(!isExpanded)} className="p-1 mt-1 rounded-full hover:bg-black/10">
-                    <ChevronDown className={`w-5 h-5 transition-transform text-gray-400 ${isExpanded ? 'rotate-180' : ''}`} />
-                </button>
-            </div>
+            </button>
 
             {isExpanded && (
-                <div className="mt-3 pt-3 border-t space-y-2 text-sm">
-                    {lineItem.specs?.length > 0 && (
-                        <div>
-                            <p className="font-bold text-xs uppercase mb-1 text-gray-400">Specifications</p>
-                            <div className="pl-2 space-y-1">
-                                {lineItem.specs.map(spec => (
-                                    <div key={spec.label} className="flex justify-between">
-                                        <p className="font-semibold text-gray-500">{spec.label}:</p>
-                                        <p className="font-mono text-gray-800">{spec.value}</p>
-                                    </div>
-                                ))}
+                <div className="px-3 pb-3">
+                    <div className="mt-2 pt-3 border-t space-y-2 text-sm ml-12" style={{ borderColor: theme.colors.border }}>
+                        {lineItem.specs?.length > 0 && (
+                            <div>
+                                <p className="font-bold text-xs uppercase mb-1 text-gray-400">Specifications</p>
+                                <div className="pl-2 space-y-1">
+                                    {lineItem.specs.map(spec => (
+                                        <div key={spec.label} className="flex justify-between">
+                                            <p className="font-semibold text-gray-500">{spec.label}:</p>
+                                            <p className="text-gray-800">{spec.value}</p>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
             )}
         </div>
     );
 });
+const InfoBlock = ({ label, value, subValue, theme }) => (
+    <div>
+        <p className="text-sm" style={{ color: theme.colors.textSecondary }}>{label}</p>
+        <p className="font-bold text-xl text-gray-800">{value}</p>
+        {subValue && <p className="text-xs text-gray-500">{subValue}</p>}
+    </div>
+);
 
 const AddressBookModal = ({ show, onClose, addresses, onSelectAddress, theme }) => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -4597,8 +4623,10 @@ export const AppHeader = React.memo(({ onHomeClick, isDarkMode, theme, onProfile
     );
 });
 
+
 export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
     const [lineItemsExpanded, setLineItemsExpanded] = useState(true);
+    const [expandedLineItem, setExpandedLineItem] = useState(null);
     const orderId = currentScreen.split('/')[1];
 
     const order = useMemo(() => {
@@ -4615,108 +4643,27 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
 
     const formatTitleCase = (str) => {
         if (!str) return '';
-        return str.toLowerCase().replace(/\b(\w)/g, s => s.toUpperCase());
+        return str.toLowerCase().replace(/\b(\w)|(LLC)|(IN)\b/g, s => s.toUpperCase());
+    };
+
+    const handleLineItemToggle = (lineItemId) => {
+        setExpandedLineItem(prevId => (prevId === lineItemId ? null : lineItemId));
     };
 
     if (!order) {
         return (
             <div className="p-4">
                 <PageTitle title="Error" theme={theme} onBack={() => onNavigate('orders')} />
-                <GlassCard theme={theme} className="p-8 text-center">
-                    <p style={{ color: theme.colors.textPrimary }}>Order not found.</p>
-                </GlassCard>
+                <GlassCard theme={theme} className="p-8 text-center"><p style={{ color: theme.colors.textPrimary }}>Order not found.</p></GlassCard>
             </div>
         );
     }
 
-    const InfoRow = ({ label, value, valueIsMono = true, children }) => (
+    const InfoBlock = ({ label, value, subValue }) => (
         <div>
-            <p className="text-sm font-medium" style={{ color: theme.colors.textSecondary }}>{label}</p>
-            <p className={`font-semibold text-base ${valueIsMono ? 'font-mono' : ''}`} style={{ color: theme.colors.textPrimary }}>
-                {value || children}
-            </p>
-        </div>
-    );
-
-    const VerticalStatusStepper = ({ stages, currentStatus }) => {
-        const currentIndex = stages.findIndex(s => s.name === currentStatus);
-        return (
-            <div className="space-y-4">
-                {stages.map((stage, index) => {
-                    const isCompleted = index < currentIndex;
-                    const isCurrent = index === currentIndex;
-                    let IconComponent = Circle;
-                    let iconColor = '#D1D5DB';
-                    let textColor = theme.colors.textSecondary;
-                    let bgColor = 'transparent';
-
-                    if (isCompleted) {
-                        IconComponent = CheckCircle;
-                        iconColor = '#10B981';
-                        textColor = theme.colors.textPrimary;
-                    } else if (isCurrent) {
-                        IconComponent = Clock;
-                        iconColor = '#3B82F6';
-                        textColor = theme.colors.textPrimary;
-                        bgColor = 'rgba(59, 130, 246, 0.05)';
-                    }
-
-                    return (
-                        <div key={stage.name} className="flex items-center space-x-3 relative p-3 rounded-lg" style={{ backgroundColor: bgColor }}>
-                            {index < stages.length - 1 && (
-                                <div
-                                    className="absolute left-[18px] top-12 h-6 w-0.5"
-                                    style={{ backgroundColor: isCompleted ? '#10B981' : '#E5E7EB' }}
-                                />
-                            )}
-                            <div className="z-10 flex-shrink-0">
-                                <IconComponent className="w-6 h-6" style={{ color: iconColor }} />
-                            </div>
-                            <div className="flex-1 flex justify-between items-center min-w-0">
-                                <p className="font-medium text-sm" style={{ color: textColor }}>{stage.name}</p>
-                                <p className="text-xs font-medium" style={{ color: theme.colors.textSecondary }}>
-                                    {stage.name === 'Shipping' && stage.date ?
-                                        `Est. ${new Date(stage.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` :
-                                        isCompleted && stage.date ? new Date(stage.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) :
-                                            isCurrent ? 'Current' : ''
-                                    }
-                                </p>
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
-        );
-    };
-
-    const LineItemCard = ({ lineItem, index, theme }) => (
-        <div className="p-4 rounded-lg" style={{ backgroundColor: theme.colors.cardBackground, border: `1px solid ${theme.colors.border}` }}>
-            <div className="flex justify-between items-start mb-2">
-                <div className="flex items-center space-x-3">
-                    <div
-                        className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white"
-                        style={{ backgroundColor: theme.colors.accent }}
-                    >
-                        {lineItem.line}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                        <p className="font-medium text-sm" style={{ color: theme.colors.textPrimary }}>
-                            {lineItem.description}
-                        </p>
-                        <p className="text-xs font-mono" style={{ color: theme.colors.textSecondary }}>
-                            {lineItem.model}
-                        </p>
-                    </div>
-                </div>
-                <div className="text-right flex-shrink-0">
-                    <p className="font-semibold text-sm" style={{ color: theme.colors.textPrimary }}>
-                        ${lineItem.price?.toLocaleString()}
-                    </p>
-                    <p className="text-xs" style={{ color: theme.colors.textSecondary }}>
-                        Qty: {lineItem.quantity}
-                    </p>
-                </div>
-            </div>
+            <p className="text-sm text-gray-500">{label}</p>
+            <p className="font-bold text-xl text-gray-800">{value}</p>
+            {subValue && <p className="text-xs text-gray-500">{subValue}</p>}
         </div>
     );
 
@@ -4724,82 +4671,92 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
         <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
             <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4 scrollbar-hide pt-6">
 
-                {/* Header Card */}
-                <GlassCard theme={theme} className="p-6">
-                    <div className="text-center mb-6">
-                        <h1 className="text-2xl font-bold mb-1" style={{ color: theme.colors.textPrimary }}>
-                            {formatTitleCase(order.details)}
-                        </h1>
-                        <p className="text-sm font-medium" style={{ color: theme.colors.textSecondary }}>
-                            for {formatTitleCase(order.company)}
-                        </p>
+                <GlassCard theme={theme} className="p-4" style={{ backgroundColor: theme.colors.surface }}>
+                    <div className="text-center mb-4">
+                        <p className="text-3xl font-bold text-gray-800">{formatTitleCase(order.details)}</p>
+                        <p className="text-base text-gray-500">for {formatTitleCase(order.company)}</p>
                     </div>
-                    <div className="grid grid-cols-2 gap-6 pt-4 border-t" style={{ borderColor: theme.colors.border }}>
-                        <InfoRow label="Sales Order #" value={order.orderNumber} />
-                        <InfoRow label="Net Amount" value={`$${order.net?.toLocaleString()}`} />
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-4 pt-4 border-t text-center" style={{ borderColor: theme.colors.border }}>
+                        <InfoBlock label="Sales Order #" value={order.orderNumber} subValue={`PO# ${order.po}`} />
+                        <InfoBlock label="Net Amount" value={`$${order.net?.toLocaleString()}`} subValue={`${order.discount} Discount`} />
                     </div>
                 </GlassCard>
 
-                {/* Order Progress */}
-                <GlassCard theme={theme} className="p-6">
-                    <h2 className="font-semibold text-lg mb-4" style={{ color: theme.colors.textPrimary }}>
-                        Order Progress
-                    </h2>
-                    <VerticalStatusStepper stages={orderStages} currentStatus={order.status} />
-                </GlassCard>
+                <GlassCard theme={theme} className="p-4" style={{ backgroundColor: theme.colors.surface }}>
+                    <h3 className="font-bold text-lg mb-3 text-gray-800">Order Progress</h3>
+                    <div className="space-y-0">
+                        {orderStages.map((stage, index) => {
+                            const currentIndex = orderStages.findIndex(s => s.name === order.status);
+                            const isCompleted = index < currentIndex;
+                            const isCurrent = index === currentIndex;
 
-                {/* Order Details */}
-                <GlassCard theme={theme} className="p-6">
-                    <div className="space-y-4">
-                        <div className="flex justify-between items-center">
-                            <span className="text-sm font-medium" style={{ color: theme.colors.textSecondary }}>PO #</span>
-                            <span className="font-semibold font-mono text-sm" style={{ color: theme.colors.textPrimary }}>{order.po}</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                            <span className="text-sm font-medium" style={{ color: theme.colors.textSecondary }}>Discount</span>
-                            <span className="font-semibold font-mono text-sm" style={{ color: theme.colors.textPrimary }}>{order.discount}</span>
-                        </div>
-                        <div className="pt-2 border-t" style={{ borderColor: theme.colors.border }}>
-                            <div className="flex justify-between items-start">
-                                <span className="text-sm font-medium" style={{ color: theme.colors.textSecondary }}>Ship To</span>
-                                <div className="text-right max-w-[60%]">
-                                    {order.shipTo.split('\n').map((line, i) => (
-                                        <p key={i} className="text-sm font-medium" style={{ color: theme.colors.textPrimary }}>
-                                            {line}
-                                        </p>
-                                    ))}
+                            let IconComponent = Circle;
+                            let iconColor = theme.colors.border;
+
+                            if (isCompleted) { IconComponent = CheckCircle; iconColor = theme.colors.accent; }
+                            else if (isCurrent) { IconComponent = Hourglass; iconColor = theme.colors.accent; }
+
+                            return (
+                                <div key={stage.name}>
+                                    <div className="flex items-start space-x-4">
+                                        <div className="flex flex-col items-center">
+                                            <div className="z-10 p-1.5 rounded-full" style={{ backgroundColor: theme.colors.surface }}>
+                                                <IconComponent className="w-6 h-6" style={{ color: iconColor }} />
+                                            </div>
+                                            {index < orderStages.length - 1 && (
+                                                <div className="w-0.5 flex-grow mt-1 h-12"
+                                                    style={{
+                                                        backgroundColor: isCompleted ? theme.colors.accent : 'transparent',
+                                                        borderColor: isCompleted ? 'transparent' : theme.colors.border,
+                                                        borderLeftStyle: isCompleted ? 'solid' : 'dashed',
+                                                        borderLeftWidth: '2px'
+                                                    }} />
+                                            )}
+                                        </div>
+
+                                        <div className={`flex-1 flex justify-between items-center rounded-lg h-10 ${isCurrent ? 'bg-black/5 -ml-2 pl-2' : ''}`}>
+                                            <p className={`font-bold ${isCurrent ? 'text-lg text-black' : 'text-gray-500'}`}>{stage.name}</p>
+                                            <p className="text-xs font-semibold text-gray-400">
+                                                {stage.name === 'Shipping' ? `Est. ${new Date(stage.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : ''}
+                                                {isCompleted && stage.date ? new Date(stage.date).toLocaleDateString() : ''}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {stage.name === 'Shipping' && (
+                                        <div className="pl-12 -mt-1 pb-4">
+                                            <a href={`http://googleusercontent.com/maps.google.com/?q=${encodeURIComponent(order.shipTo)}`} target="_blank" rel="noopener noreferrer"
+                                                className="p-2 rounded-lg flex space-x-2 transition-colors hover:bg-black/5">
+                                                <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: theme.colors.textSecondary }} />
+                                                <p className="text-xs whitespace-pre-line" style={{ color: theme.colors.textSecondary }}>{formatTitleCase(order.shipTo)}</p>
+                                            </a>
+                                        </div>
+                                    )}
                                 </div>
-                            </div>
-                        </div>
+                            );
+                        })}
                     </div>
                 </GlassCard>
 
-                {/* Line Items */}
-                <GlassCard theme={theme} className="p-4">
-                    <button
-                        onClick={() => setLineItemsExpanded(p => !p)}
-                        className="w-full flex justify-between items-center p-2 rounded-lg hover:bg-black/5 transition-colors"
-                    >
-                        <h2 className="font-semibold text-lg" style={{ color: theme.colors.textPrimary }}>
-                            Line Items
-                        </h2>
-                        <ChevronDown
-                            className={`w-5 h-5 transition-transform ${lineItemsExpanded ? 'rotate-180' : ''}`}
-                            style={{ color: theme.colors.textSecondary }}
-                        />
-                    </button>
-                    {lineItemsExpanded && (
-                        <div className="pt-4 space-y-3">
-                            {order.lineItems?.length > 0 ? (
-                                order.lineItems.map((item, index) => (
-                                    <LineItemCard key={item.line} lineItem={item} index={index} theme={theme} />
-                                ))
-                            ) : (
-                                <p className="p-4 text-center text-sm" style={{ color: theme.colors.textSecondary }}>
-                                    No line items for this order.
-                                </p>
-                            )}
+                <GlassCard theme={theme} className="p-2" style={{ backgroundColor: theme.colors.surface }}>
+                    <div className="p-2">
+                        <h3 className="font-bold text-xl text-gray-800">Line Items</h3>
+                    </div>
+                    {order.lineItems?.length > 0 ? (
+                        <div className="space-y-2">
+                            {order.lineItems.map((item) => (
+                                <LineItemCard
+                                    key={item.line}
+                                    lineItem={item}
+                                    theme={theme}
+                                    isExpanded={expandedLineItem === item.line}
+                                    onToggleExpand={() => handleLineItemToggle(item.line)}
+                                    formatTitleCase={formatTitleCase}
+                                />
+                            ))}
                         </div>
+                    ) : (
+                        <p className="p-4 text-center text-sm text-gray-500">No line items for this order.</p>
                     )}
                 </GlassCard>
             </div>
