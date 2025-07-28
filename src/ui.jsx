@@ -4605,10 +4605,9 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
         return Data.ORDER_DATA.find(o => o.orderNumber === orderId);
     }, [orderId]);
 
-    // FIX: Enhanced with more realistic date data for a true timeline feel
     const orderStages = [
         { name: 'Order Entry', date: order?.date },
-        { name: 'Acknowledged', date: new Date(new Date(order?.date).getTime() + 2 * 24 * 60 * 60 * 1000) }, // Simulating +2 days
+        { name: 'Acknowledged', date: new Date(new Date(order?.date).getTime() + 2 * 24 * 60 * 60 * 1000) },
         { name: 'In Production', date: 'Current' },
         { name: 'Shipping', date: order?.shipDate },
         { name: 'Delivered', date: null },
@@ -4619,7 +4618,14 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
         return str.toLowerCase().replace(/\b(\w)/g, s => s.toUpperCase());
     };
 
-    if (!order) { return (/* Error handling remains the same */); }
+    if (!order) {
+        return (
+            <div className="p-4">
+                <PageTitle title="Error" theme={theme} onBack={() => onNavigate('orders')} />
+                <GlassCard theme={theme} className="p-8 text-center"><p style={{ color: theme.colors.textPrimary }}>Order not found.</p></GlassCard>
+            </div>
+        );
+    }
 
     const InfoRow = ({ label, value, valueIsMono = true, children }) => (
         <div>
@@ -4628,11 +4634,46 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
         </div>
     );
 
+    const VerticalStatusStepper = ({ stages, currentStatus, entryDate }) => {
+        const currentIndex = stages.findIndex(s => s.name === currentStatus);
+        return (
+            <div className="space-y-1">
+                {stages.map((stage, index) => {
+                    const isCompleted = index < currentIndex;
+                    const isCurrent = index === currentIndex;
+                    let IconComponent = Circle;
+                    let iconColor = theme.colors.border;
+                    let textColor = theme.colors.textSecondary;
+
+                    if (isCompleted) { IconComponent = CheckCircle; iconColor = theme.colors.accent; }
+                    else if (isCurrent) { IconComponent = Hourglass; iconColor = theme.colors.accent; textColor = theme.colors.textPrimary; }
+
+                    return (
+                        <div key={stage.name} className={`flex items-center space-x-4 relative p-2 rounded-lg ${isCurrent ? 'bg-black/5' : ''}`}>
+                            {index < stages.length - 1 && (
+                                <div className="absolute left-[19px] top-10 h-full w-0.5" style={{ backgroundColor: isCompleted ? theme.colors.accent : theme.colors.border }} />
+                            )}
+                            <div className="z-10 p-1.5 rounded-full bg-white">
+                                <IconComponent className="w-6 h-6" style={{ color: iconColor }} />
+                            </div>
+                            <div className="flex-1 flex justify-between items-center">
+                                <p className={`font-bold ${isCurrent ? 'text-lg text-black' : 'text-gray-500'}`}>{stage.name}</p>
+                                <p className="text-xs font-semibold text-gray-400">
+                                    {stage.name === 'Shipping' ? `Est. ${new Date(stage.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : ''}
+                                    {isCompleted && stage.date ? new Date(stage.date).toLocaleDateString() : ''}
+                                </p>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        );
+    };
+
     return (
         <div className="flex flex-col h-full bg-gray-50">
             <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4 scrollbar-hide pt-6">
 
-                {/* FIX: Refined hero card with polished typography and spacing */}
                 <GlassCard theme={theme} className="p-4">
                     <div className="text-center mb-4">
                         <p className="text-3xl font-bold" style={{ color: theme.colors.textPrimary }}>{formatTitleCase(order.details)}</p>
@@ -4644,47 +4685,12 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
                     </div>
                 </GlassCard>
 
-                {/* FIX: A single, unified card for all status and detail information */}
+                <GlassCard theme={theme} className="p-4">
+                    <h3 className="font-bold text-lg mb-3" style={{ color: theme.colors.textPrimary }}>Order Progress</h3>
+                    <VerticalStatusStepper stages={orderStages} currentStatus={order.status} />
+                </GlassCard>
+
                 <GlassCard theme={theme} className="p-4 space-y-4">
-                    {/* --- IMPROVED ORDER PROGRESS SECTION --- */}
-                    <div>
-                        <h3 className="font-bold text-lg mb-3" style={{ color: theme.colors.textPrimary }}>Order Progress</h3>
-                        <div className="space-y-1">
-                            {orderStages.map((stage, index) => {
-                                const currentIndex = orderStages.findIndex(s => s.name === order.status);
-                                const isCompleted = index < currentIndex;
-                                const isCurrent = index === currentIndex;
-
-                                let IconComponent = Circle;
-                                let iconColor = theme.colors.border;
-
-                                if (isCompleted) { IconComponent = CheckCircle; iconColor = theme.colors.accent; }
-                                else if (isCurrent) { IconComponent = Hourglass; iconColor = theme.colors.accent; }
-
-                                return (
-                                    <div key={stage.name} className={`flex items-center space-x-4 relative p-2 rounded-lg ${isCurrent ? 'bg-black/5' : ''}`}>
-                                        {index < orderStages.length - 1 && (
-                                            <div className="absolute left-[19px] top-10 h-full w-0.5" style={{ backgroundColor: isCompleted ? theme.colors.accent : theme.colors.border }} />
-                                        )}
-                                        <div className="z-10 p-1.5 rounded-full bg-white">
-                                            <IconComponent className="w-6 h-6" style={{ color: iconColor }} />
-                                        </div>
-                                        <div className="flex-1 flex justify-between items-center">
-                                            <p className={`font-bold ${isCurrent ? 'text-lg text-black' : 'text-gray-500'}`}>{stage.name}</p>
-                                            <p className="text-xs font-semibold text-gray-400">
-                                                {stage.name === 'Shipping' ? `Est. ${new Date(stage.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : ''}
-                                                {isCompleted && stage.date ? new Date(stage.date).toLocaleDateString() : ''}
-                                            </p>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-
-                    <div className="border-t" style={{ borderColor: theme.colors.border }} />
-
-                    {/* --- DETAILS & SHIP TO SECTIONS --- */}
                     <div className="text-sm space-y-2">
                         <div className="flex justify-between items-center">
                             <span className="font-medium text-gray-500">PO #</span>
@@ -4696,7 +4702,7 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
                         </div>
                         <div className="flex justify-between items-start pt-2">
                             <span className="font-medium text-gray-500">Ship To</span>
-                            <a href={`http://googleusercontent.com/maps.google.com/8{encodeURIComponent(order.shipTo)}`} target="_blank" rel="noopener noreferrer" className="text-right font-semibold text-gray-800 hover:underline">
+                            <a href={`http://googleusercontent.com/maps.google.com/9{encodeURIComponent(order.shipTo)}`} target="_blank" rel="noopener noreferrer" className="text-right font-semibold text-gray-800 hover:underline">
                                 {order.shipTo.split('\n').map((line, i) => <span key={i} className="block">{line}</span>)}
                             </a>
                         </div>
