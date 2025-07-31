@@ -1,0 +1,200 @@
+.animated-screen-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    touch-action: pan-y; /* Allow vertical scrolling but capture horizontal gestures */
+}
+
+.screen-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+}
+
+/* Current screen - default position */
+.screen-slide.current {
+    transform: translateX(0%) translateZ(0);
+    z-index: 1;
+}
+
+/* Next screen - starts off-screen */
+.screen-slide.next {
+    z-index: 2;
+}
+
+/* Swipe preview screen */
+.screen-slide.swipe-preview {
+    z-index: 0;
+    background: linear-gradient(135deg, #f8f8f8 0%, #e8e8e8 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.swipe-preview-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    pointer-events: none;
+}
+
+.swipe-back-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    color: #333;
+    margin-bottom: 12px;
+    transition: all 0.2s ease;
+}
+
+/* Dark mode support for swipe preview */
+@media (prefers-color-scheme: dark) {
+    .screen-slide.swipe-preview {
+        background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+    }
+    
+    .swipe-back-indicator {
+        background: rgba(255, 255, 255, 0.1);
+        color: #ccc;
+    }
+}
+
+/* Swipe progress indicator */
+.swipe-progress-indicator {
+    position: absolute;
+    top: 50%;
+    left: 40px;
+    transform: translateY(-50%);
+    z-index: 10;
+    pointer-events: none;
+}
+
+.swipe-back-hint {
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    backdrop-filter: blur(10px);
+}
+
+/* Forward navigation animations */
+.screen-slide.next.entering.forward {
+    animation: slideInFromRight 0.28s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+.screen-slide.current.exiting.forward {
+    animation: slideOutToLeft 0.28s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+/* Backward navigation animations */
+.screen-slide.next.entering.backward {
+    animation: slideInFromLeft 0.28s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+.screen-slide.current.exiting.backward {
+    animation: slideOutToRight 0.28s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+/* Keyframe animations */
+@keyframes slideInFromRight {
+    0% {
+        transform: translateX(100%) translateZ(0);
+    }
+    100% {
+        transform: translateX(0%) translateZ(0);
+    }
+}
+
+@keyframes slideOutToLeft {
+    0% {
+        transform: translateX(0%) translateZ(0);
+    }
+    100% {
+        transform: translateX(-100%) translateZ(0);
+    }
+}
+
+@keyframes slideInFromLeft {
+    0% {
+        transform: translateX(-100%) translateZ(0);
+    }
+    100% {
+        transform: translateX(0%) translateZ(0);
+    }
+}
+
+@keyframes slideOutToRight {
+    0% {
+        transform: translateX(0%) translateZ(0);
+    }
+    100% {
+        transform: translateX(100%) translateZ(0);
+    }
+}
+
+/* Performance optimizations */
+.animated-screen-container,
+.screen-slide {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Prevent content shifting during animation */
+.screen-slide * {
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Ensure no flash of content */
+.screen-slide.current.exiting,
+.screen-slide.next.entering {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Enhanced touch responsiveness */
+.animated-screen-container {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Smooth transitions for swipe gestures */
+.screen-slide.current {
+    transition: transform 0s linear; /* No transition during active swipe */
+}
+
+/* Ensure swipe works on all devices */
+@supports (touch-action: pan-y) {
+    .animated-screen-container {
+        touch-action: pan-y;
+    }
+}
+
+/* Fallback for older browsers */
+@supports not (touch-action: pan-y) {
+    .animated-screen-container {
+        -ms-touch-action: pan-y;
+        -webkit-overflow-scrolling: touch;
+    }
+}

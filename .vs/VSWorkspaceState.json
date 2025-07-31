@@ -1,7 +1,16 @@
 {
   "ExpandedNodes": [
     "",
-    "\\src"
+    "\\src",
+    "\\src\\screens",
+    "\\src\\screens\\orders",
+    "\\src\\screens\\products",
+    "\\src\\screens\\projects",
+    "\\src\\screens\\replacements",
+    "\\src\\screens\\resources",
+    "\\src\\screens\\samples",
+    "\\src\\screens\\utility"
   ],
+  "SelectedNode": "\\src\\screens\\utility\\UtilityScreens.jsx",
   "PreviewInSolutionExplorer": false
 }
