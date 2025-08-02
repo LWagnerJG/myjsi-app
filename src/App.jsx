@@ -143,10 +143,13 @@ function App() {
     const currentTheme = useMemo(() => (isDarkMode ? darkTheme : lightTheme), [isDarkMode]);
 
     useEffect(() => {
-        document.body.style.position = 'fixed';
-        document.body.style.width = '100%';
-        document.body.style.height = '100%';
-        document.body.style.overflow = 'hidden';
+        // Remove problematic body styles and use proper viewport handling
+        document.body.style.position = '';
+        document.body.style.width = '';
+        document.body.style.height = '';
+        document.body.style.overflow = '';
+        
+        // Ensure proper viewport meta tag
         let viewportMeta = document.querySelector('meta[name="viewport"]');
         if (!viewportMeta) {
             viewportMeta = document.createElement('meta');
@@ -154,6 +157,21 @@ function App() {
             document.head.appendChild(viewportMeta);
         }
         viewportMeta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover';
+        
+        // Set dynamic viewport height on iOS
+        const setAppHeight = () => {
+            const vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
+        };
+        
+        setAppHeight();
+        window.addEventListener('resize', setAppHeight);
+        window.addEventListener('orientationchange', setAppHeight);
+        
+        return () => {
+            window.removeEventListener('resize', setAppHeight);
+            window.removeEventListener('orientationchange', setAppHeight);
+        };
     }, []);
 
     const handleNavigate = useCallback((screen) => {
@@ -274,7 +292,7 @@ function App() {
     };
 
     return (
-        <div className="h-screen w-screen font-sans flex flex-col relative" style={{ backgroundColor: currentTheme.colors.background }}>
+        <div className="h-screen-safe w-screen font-sans flex flex-col relative" style={{ backgroundColor: currentTheme.colors.background }}>
             <AppHeader
                 theme={currentTheme}
                 userName={userSettings.firstName}

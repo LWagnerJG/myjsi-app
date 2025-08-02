@@ -162,7 +162,7 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate }) => {
                 ))}
             </div>
 
-            <div className="px-4 pt-3 pb-4">
+            <div className="px-4 pt-3 pb-safe-bottom" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
                 <button 
                     onClick={() => onNavigate('feedback')} 
                     className="w-full p-5 rounded-[28px] flex items-center justify-center space-x-3 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]" 
