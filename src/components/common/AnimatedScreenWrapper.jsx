@@ -45,7 +45,7 @@ export const AnimatedScreenWrapper = ({ children, screenKey, direction = 'forwar
                 setCurrentContent(children);
                 setNextContent(null);
                 setIsAnimating(false);
-            }, 280);
+            }, 300); // Slightly longer for smoother feel
         } else {
             // Update content if screenKey is same but children changed
             setCurrentContent(children);
@@ -62,6 +62,11 @@ export const AnimatedScreenWrapper = ({ children, screenKey, direction = 'forwar
         if (isAnimating || !onSwipeBack) return;
         
         const touch = e.touches[0];
+        // Only initiate swipe from the left edge of the screen
+        if (touch.clientX > 50) {
+            return;
+        }
+        
         touchStartRef.current = { x: touch.clientX, y: touch.clientY };
         touchCurrentRef.current = { x: touch.clientX, y: touch.clientY };
         lastTouchTimeRef.current = Date.now();
@@ -78,65 +83,52 @@ export const AnimatedScreenWrapper = ({ children, screenKey, direction = 'forwar
         const deltaX = touch.clientX - touchStartRef.current.x;
         const deltaY = Math.abs(touch.clientY - touchStartRef.current.y);
         
-        // Only handle horizontal swipes from the left edge (first 50px)
-        const isFromLeftEdge = touchStartRef.current.x <= 50;
-        const isHorizontalSwipe = Math.abs(deltaX) > deltaY && Math.abs(deltaX) > 10;
+        // Prioritize vertical scroll if the swipe is more vertical than horizontal
+        if (Math.abs(deltaY) > Math.abs(deltaX) && !isSwipeActive) {
+            setIsDragging(false); // Cancel horizontal swipe
+            return;
+        }
+        
         const isRightwardSwipe = deltaX > 0;
         
-        if (isFromLeftEdge && isHorizontalSwipe && isRightwardSwipe) {
-            e.preventDefault(); // Prevent scrolling
+        if (isRightwardSwipe) {
+            e.preventDefault(); // Prevent default browser actions like scrolling
             
             const containerWidth = containerRef.current?.offsetWidth || window.innerWidth;
             const progress = Math.min(Math.max(deltaX / containerWidth, 0), 1);
             
-            setIsSwipeActive(true);
+            if (!isSwipeActive) setIsSwipeActive(true);
             setSwipeProgress(progress);
-        } else if (isSwipeActive && !isRightwardSwipe) {
-            // Cancel swipe if user moves back left
-            setIsSwipeActive(false);
-            setSwipeProgress(0);
         }
     }, [isDragging, isAnimating, onSwipeBack, isSwipeActive]);
 
-    const handleTouchEnd = useCallback((e) => {
-        if (!isDragging || !onSwipeBack) return;
+    const handleTouchEnd = useCallback(() => {
+        if (!isDragging || !onSwipeBack || !isSwipeActive) {
+            setIsDragging(false);
+            return;
+        }
         
         setIsDragging(false);
         
-        if (!isSwipeActive) return;
-        
-        const touch = e.changedTouches[0];
-        const deltaX = touch.clientX - touchStartRef.current.x;
+        const deltaX = touchCurrentRef.current.x - touchStartRef.current.x;
         const containerWidth = containerRef.current?.offsetWidth || window.innerWidth;
         const progress = deltaX / containerWidth;
         
         // Calculate velocity
         const currentTime = Date.now();
         const timeDelta = currentTime - lastTouchTimeRef.current;
-        const velocity = Math.abs(touch.clientX - lastTouchXRef.current) / timeDelta;
+        const velocity = Math.abs(touchCurrentRef.current.x - lastTouchXRef.current) / (timeDelta || 1);
         
-        // Trigger navigation if:
-        // 1. Swiped past threshold (30% of screen width), OR
-        // 2. High velocity swipe (even if short distance)
         const shouldNavigateBack = progress >= swipeThreshold || velocity >= velocityThreshold;
         
         if (shouldNavigateBack) {
-            // Trigger back navigation
-            setIsAnimating(true);
             onSwipeBack();
-            
-            // Complete the swipe animation
-            setSwipeProgress(1);
-            setTimeout(() => {
-                setIsSwipeActive(false);
-                setSwipeProgress(0);
-            }, 280);
         } else {
-            // Snap back to original position
+            // Snap back smoothly
             setSwipeProgress(0);
             setTimeout(() => {
                 setIsSwipeActive(false);
-            }, 200);
+            }, 300); // Match animation duration
         }
     }, [isDragging, onSwipeBack, isSwipeActive, swipeThreshold, velocityThreshold]);
 
@@ -145,8 +137,10 @@ export const AnimatedScreenWrapper = ({ children, screenKey, direction = 'forwar
         onTouchStart: handleTouchStart,
         onTouchMove: handleTouchMove,
         onTouchEnd: handleTouchEnd,
-        onTouchCancel: handleTouchEnd, // Handle touch cancellation
+        onTouchCancel: handleTouchEnd,
     } : {};
+
+    const transitionStyle = isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)';
 
     return (
         <div 
@@ -154,13 +148,15 @@ export const AnimatedScreenWrapper = ({ children, screenKey, direction = 'forwar
             className="animated-screen-container"
             {...touchHandlers}
         >
-            {/* Previous Screen Preview - only during swipe */}
-            {isSwipeActive && !isAnimating && previousScreenContent && (
+            {/* Previous Screen Preview */}
+            {onSwipeBack && (
                 <div 
                     className="screen-slide swipe-preview"
                     style={{
-                        transform: `translateX(${-50 + (swipeProgress * 50)}%) scale(${0.9 + (swipeProgress * 0.1)}) translateZ(0)`,
+                        transform: `translateX(${-25 + (swipeProgress * 25)}%) scale(${0.95 + (swipeProgress * 0.05)})`,
                         opacity: swipeProgress,
+                        transition: transitionStyle,
+                        visibility: isSwipeActive || (isAnimating && direction === 'backward') ? 'visible' : 'hidden',
                     }}
                 >
                     {previousScreenContent}
@@ -171,21 +167,15 @@ export const AnimatedScreenWrapper = ({ children, screenKey, direction = 'forwar
             <div 
                 className={`screen-slide current ${isAnimating ? `exiting ${direction}` : ''}`}
                 style={{
-                    transform: isSwipeActive && !isAnimating 
-                        ? `translateX(${swipeProgress * 100}%) translateZ(0)` 
-                        : undefined,
-                    transition: isSwipeActive && !isAnimating 
-                        ? swipeProgress === 0 ? 'transform 0.2s ease-out' : 'none'
-                        : undefined,
-                    boxShadow: isSwipeActive && !isAnimating
-                        ? `0 10px 30px rgba(0,0,0,${swipeProgress * 0.2})`
-                        : undefined
+                    transform: `translateX(${swipeProgress * 100}%)`,
+                    transition: transitionStyle,
+                    boxShadow: `0 10px 30px rgba(0,0,0,${swipeProgress * 0.2})`,
                 }}
             >
                 {currentContent}
             </div>
             
-            {/* Next Screen - only during animation */}
+            {/* Next Screen (for forward navigation) */}
             {isAnimating && nextContent && (
                 <div 
                     className={`screen-slide next entering ${direction}`}
