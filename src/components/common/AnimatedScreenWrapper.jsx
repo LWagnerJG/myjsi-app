@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './AnimatedScreenWrapper.css';
 
-export const AnimatedScreenWrapper = ({ children, screenKey, direction = 'forward', onSwipeBack }) => {
+export const AnimatedScreenWrapper = ({ children, screenKey, direction = 'forward', onSwipeBack, previousScreenContent }) => {
     const [isAnimating, setIsAnimating] = useState(false);
     const [currentScreenKey, setCurrentScreenKey] = useState(screenKey);
     const [currentContent, setCurrentContent] = useState(children);
@@ -154,6 +154,19 @@ export const AnimatedScreenWrapper = ({ children, screenKey, direction = 'forwar
             className="animated-screen-container"
             {...touchHandlers}
         >
+            {/* Previous Screen Preview - only during swipe */}
+            {isSwipeActive && !isAnimating && previousScreenContent && (
+                <div 
+                    className="screen-slide swipe-preview"
+                    style={{
+                        transform: `translateX(${-50 + (swipeProgress * 50)}%) scale(${0.9 + (swipeProgress * 0.1)}) translateZ(0)`,
+                        opacity: swipeProgress,
+                    }}
+                >
+                    {previousScreenContent}
+                </div>
+            )}
+
             {/* Current Screen */}
             <div 
                 className={`screen-slide current ${isAnimating ? `exiting ${direction}` : ''}`}
@@ -163,6 +176,9 @@ export const AnimatedScreenWrapper = ({ children, screenKey, direction = 'forwar
                         : undefined,
                     transition: isSwipeActive && !isAnimating 
                         ? swipeProgress === 0 ? 'transform 0.2s ease-out' : 'none'
+                        : undefined,
+                    boxShadow: isSwipeActive && !isAnimating
+                        ? `0 10px 30px rgba(0,0,0,${swipeProgress * 0.2})`
                         : undefined
                 }}
             >
@@ -175,40 +191,6 @@ export const AnimatedScreenWrapper = ({ children, screenKey, direction = 'forwar
                     className={`screen-slide next entering ${direction}`}
                 >
                     {nextContent}
-                </div>
-            )}
-            
-            {/* Previous Screen Preview - only during swipe */}
-            {isSwipeActive && !isAnimating && (
-                <div 
-                    className="screen-slide swipe-preview"
-                    style={{
-                        transform: `translateX(${-100 + (swipeProgress * 100)}%) translateZ(0)`,
-                        opacity: swipeProgress * 0.8,
-                        filter: `brightness(${0.7 + (swipeProgress * 0.3)})` // Subtle darkening effect
-                    }}
-                >
-                    {/* This would show the previous screen content */}
-                    <div className="swipe-preview-placeholder">
-                        <div className="swipe-back-indicator">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-            )}
-            
-            {/* Swipe Progress Indicator */}
-            {isSwipeActive && !isAnimating && (
-                <div 
-                    className="swipe-progress-indicator"
-                    style={{
-                        opacity: swipeProgress,
-                        transform: `scale(${0.8 + (swipeProgress * 0.2)})`
-                    }}
-                >
-                    <div className="swipe-back-hint">Swipe to go back</div>
                 </div>
             )}
         </div>

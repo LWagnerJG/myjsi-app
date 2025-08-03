@@ -2,6 +2,7 @@
 import { SalesScreen } from '../screens/sales/SalesScreen.jsx';
 import { CustomerRankingScreen } from '../screens/sales/CustomerRankingScreen.jsx';
 import { IncentiveRewardsScreen } from '../screens/sales/IncentiveRewardsScreen.jsx';
+import { CommissionsScreen } from '../screens/sales/CommissionsScreen.jsx';
 import { OrdersScreen } from '../screens/orders/OrdersScreen.jsx';
 import { ProductsScreen } from '../screens/products/ProductsScreen.jsx';
 import { ResourcesScreen } from '../screens/resources/ResourcesScreen.jsx';
@@ -43,6 +44,7 @@ export const SCREEN_MAP = {
     'replacements': ReplacementsScreen,
     'incentive-rewards': IncentiveRewardsScreen,
     'customer-rank': CustomerRankingScreen,
+    'commissions': CommissionsScreen,
     'commission-rates': CommissionRatesScreen,
     'sample-discounts': SampleDiscountsScreen,
     'lead-times': LeadTimesScreen,

@@ -70,7 +70,7 @@ const CustomSelect = ({ label, value, onChange, options, theme, placeholder, req
     };
 
     return (
-        <div className="relative">
+        <div className={`relative ${isOpen ? 'z-20' : ''}`}>
             {label && (
                 <label className="block text-sm font-medium mb-1 px-1" style={{ color: theme.colors.textSecondary }}>
                     {label} {required && <span className="text-red-500">*</span>}
@@ -1300,10 +1300,6 @@ export const HelpScreen = ({ theme }) => {
         <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
             <div className="flex-1 overflow-y-auto px-4 pb-4 pt-6 space-y-4 scrollbar-hide">
                 <GlassCard theme={theme} className="p-4">
-                    <h1 className="text-2xl font-bold mb-6" style={{ color: theme.colors.textPrimary }}>
-                        Help & Support
-                    </h1>
-
                     <div className="space-y-4">
                         {helpSections.map((section, index) => (
                             <div key={index} className="border rounded-lg p-4" style={{ borderColor: theme.colors.border }}>
@@ -1591,123 +1587,128 @@ export const CreateContentModal = ({ close, theme, onAdd }) => (
     </Modal>
 );
 
-export const SettingsScreen = ({ theme, onNavigate }) => {
-    const [notifications, setNotifications] = useState(true);
-    const [emailUpdates, setEmailUpdates] = useState(true);
-    const [autoSync, setAutoSync] = useState(false);
+// Refined SettingsScreen for a cleaner, more intuitive user experience
+export const SettingsScreen = ({ theme, onNavigate, userSettings, setUserSettings, setSuccessMessage }) => {
+    const [localSettings, setLocalSettings] = useState(userSettings);
+    const [hasChanges, setHasChanges] = useState(false);
 
-    const settingsSections = [
-        {
-            title: "Account",
-            icon: User,
-            items: [
-                { label: "Profile Information", action: () => alert("Profile settings coming soon") },
-                { label: "Change Password", action: () => alert("Password change coming soon") },
-                { label: "Email Preferences", action: () => alert("Email preferences coming soon") }
-            ]
-        },
-        {
-            title: "Notifications",
-            icon: Bell,
-            items: [
-                { 
-                    label: "Push Notifications", 
-                    toggle: true, 
-                    value: notifications, 
-                    onChange: setNotifications 
-                },
-                { 
-                    label: "Email Updates", 
-                    toggle: true, 
-                    value: emailUpdates, 
-                    onChange: setEmailUpdates 
-                }
-            ]
-        },
-        {
-            title: "App Preferences",
-            icon: Smartphone,
-            items: [
-                { 
-                    label: "Auto Sync", 
-                    toggle: true, 
-                    value: autoSync, 
-                    onChange: setAutoSync 
-                },
-                { label: "Clear Cache", action: () => alert("Cache cleared") },
-                { label: "Export Data", action: () => alert("Data export coming soon") }
-            ]
-        }
-    ];
+    useEffect(() => {
+        setLocalSettings(userSettings);
+    }, [userSettings]);
+
+    const handleSettingChange = (key, value) => {
+        setLocalSettings(prev => ({ ...prev, [key]: value }));
+        if (!hasChanges) setHasChanges(true);
+    };
+
+    const handleSave = () => {
+        setUserSettings(localSettings);
+        setHasChanges(false);
+        setSuccessMessage("Settings Saved!");
+        setTimeout(() => setSuccessMessage(""), 2000);
+    };
+
+    const TShirtIcon = ({ color }) => (
+        <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20.38 3.46L16 2a4 4 0 0 0-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z" />
+        </svg>
+    );
 
     return (
-        <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
-            <div className="flex-1 overflow-y-auto px-4 pb-4 pt-6 space-y-4 scrollbar-hide">
+        <div className="flex flex-col h-full">
+            <div className="flex-1 overflow-y-auto px-4 py-6 space-y-5 scrollbar-hide">
+                
+                {/* Account Information Section - Direct Editing */}
                 <GlassCard theme={theme} className="p-4">
-                    <h1 className="text-2xl font-bold mb-6" style={{ color: theme.colors.textPrimary }}>
-                        Settings
-                    </h1>
-
-                    <div className="space-y-6">
-                        {settingsSections.map((section, index) => (
-                            <div key={index}>
-                                <div className="flex items-center space-x-3 mb-3">
-                                    <section.icon className="w-5 h-5" style={{ color: theme.colors.accent }} />
-                                    <h3 className="font-semibold text-lg" style={{ color: theme.colors.textPrimary }}>
-                                        {section.title}
-                                    </h3>
-                                </div>
-                                <div className="space-y-2">
-                                    {section.items.map((item, itemIndex) => (
-                                        <div 
-                                            key={itemIndex}
-                                            className="flex items-center justify-between p-3 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/5"
-                                        >
-                                            <span className="text-base" style={{ color: theme.colors.textPrimary }}>
-                                                {item.label}
-                                            </span>
-                                            {item.toggle ? (
-                                                <button
-                                                    onClick={() => item.onChange(!item.value)}
-                                                    className={`w-12 h-6 rounded-full transition-colors ${
-                                                        item.value ? 'bg-blue-500' : 'bg-gray-300'
-                                                    }`}
-                                                >
-                                                    <div className={`w-5 h-5 bg-white rounded-full transition-transform ${
-                                                        item.value ? 'translate-x-6' : 'translate-x-0.5'
-                                                    }`} />
-                                                </button>
-                                            ) : (
-                                                <button
-                                                    onClick={item.action}
-                                                    className="text-sm font-semibold px-3 py-1 rounded transition-colors"
-                                                    style={{ color: theme.colors.accent }}
-                                                >
-                                                    Configure
-                                                </button>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        ))}
+                    <div className="flex items-center space-x-3 mb-4">
+                        <User className="w-5 h-5" style={{ color: theme.colors.accent }} />
+                        <h3 className="font-semibold text-lg" style={{ color: theme.colors.textPrimary }}>
+                            Account
+                        </h3>
                     </div>
+                    <div className="space-y-4">
+                        <FormInput 
+                            label="First Name" 
+                            value={localSettings.firstName} 
+                            onChange={e => handleSettingChange('firstName', e.target.value)} 
+                            theme={theme} 
+                        />
+                        <FormInput 
+                            label="Last Name" 
+                            value={localSettings.lastName} 
+                            onChange={e => handleSettingChange('lastName', e.target.value)} 
+                            theme={theme} 
+                        />
+                    </div>
+                </GlassCard>
 
-                    <div className="mt-6 p-4 rounded-lg" style={{ backgroundColor: theme.colors.subtle }}>
-                        <div className="flex items-center space-x-3 mb-2">
-                            <AlertCircle className="w-5 h-5" style={{ color: theme.colors.accent }} />
-                            <h3 className="font-semibold" style={{ color: theme.colors.textPrimary }}>
-                                App Information
+                {/* Notifications Section - Simplified Toggle */}
+                <GlassCard theme={theme} className="p-4">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                            <Bell className="w-5 h-5" style={{ color: theme.colors.accent }} />
+                            <h3 className="font-semibold text-lg" style={{ color: theme.colors.textPrimary }}>
+                                Notifications
                             </h3>
                         </div>
-                        <div className="space-y-1 text-sm" style={{ color: theme.colors.textSecondary }}>
-                            <p>Version: 1.0.0</p>
-                            <p>Last Updated: Dec 2024</p>
-                            <p>Build: JSI-Mobile-001</p>
-                        </div>
+                        <button
+                            onClick={() => handleSettingChange('notifications', !localSettings.notifications)}
+                            className={`w-12 h-7 rounded-full transition-colors flex items-center p-1 ${
+                                localSettings.notifications ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
+                            }`}
+                        >
+                            <div className={`w-5 h-5 bg-white rounded-full shadow-sm transition-transform ${
+                                localSettings.notifications ? 'translate-x-5' : 'translate-x-0'
+                            }`} />
+                        </button>
+                    </div>
+                </GlassCard>
+
+                {/* T-Shirt Size Section - Dropdown Menu */}
+                <GlassCard theme={theme} className="p-4">
+                    <div className="flex items-center space-x-3 mb-3">
+                        <TShirtIcon color={theme.colors.accent} />
+                        <h3 className="font-semibold text-lg" style={{ color: theme.colors.textPrimary }}>
+                            T-Shirt Size
+                        </h3>
+                    </div>
+                    <CustomSelect
+                        value={localSettings.tShirtSize}
+                        onChange={e => handleSettingChange('tShirtSize', e.target.value)}
+                        options={['S', 'M', 'L', 'XL', '2XL', '3XL'].map(size => ({ value: size, label: size }))}
+                        theme={theme}
+                        placeholder="Select your size"
+                    />
+                </GlassCard>
+
+                {/* App Information Section */}
+                <GlassCard theme={theme} className="p-4">
+                    <div className="flex items-center space-x-3 mb-2">
+                        <AlertCircle className="w-5 h-5" style={{ color: theme.colors.accent }} />
+                        <h3 className="font-semibold" style={{ color: theme.colors.textPrimary }}>
+                            App Information
+                        </h3>
+                    </div>
+                    <div className="space-y-2 text-sm p-3 rounded-lg" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textSecondary }}>
+                        <div className="flex justify-between"><span>Version:</span> <span className="font-medium" style={{color: theme.colors.textPrimary}}>1.0.0</span></div>
+                        <div className="flex justify-between"><span>Last Updated:</span> <span className="font-medium" style={{color: theme.colors.textPrimary}}>Dec 2024</span></div>
+                        <div className="flex justify-between"><span>Build:</span> <span className="font-medium" style={{color: theme.colors.textPrimary}}>JSI-Mobile-001</span></div>
                     </div>
                 </GlassCard>
             </div>
+
+            {/* Save Button */}
+            {hasChanges && (
+                <div className="px-4 pb-4 pt-2">
+                    <button 
+                        onClick={handleSave}
+                        className="w-full font-bold py-3.5 px-6 rounded-full text-white shadow-lg transition-all duration-300 hover:scale-105"
+                        style={{ backgroundColor: theme.colors.accent }}
+                    >
+                        Save Changes
+                    </button>
+                </div>
+            )}
         </div>
     );
 };

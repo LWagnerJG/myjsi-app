@@ -260,6 +260,7 @@ function App() {
         onVoiceActivate: handleVoiceActivate,
         handleBack,
         userSettings,
+        setUserSettings,
         setSuccessMessage,
         showAlert: handleShowAlert,
         currentScreen: currentScreen,
@@ -291,6 +292,8 @@ function App() {
         }
     };
 
+    const previousScreen = navigationHistory.length > 1 ? navigationHistory[navigationHistory.length - 2] : null;
+
     return (
         <div className="h-screen-safe w-screen font-sans flex flex-col relative" style={{ backgroundColor: currentTheme.colors.background }}>
             <AppHeader
@@ -308,6 +311,7 @@ function App() {
                     screenKey={currentScreen} 
                     direction={lastNavigationDirection}
                     onSwipeBack={navigationHistory.length > 1 ? handleBack : null}
+                    previousScreenContent={previousScreen ? <ScreenRouter screenKey={previousScreen} {...screenProps} /> : null}
                 >
                     <ScreenRouter screenKey={currentScreen} {...screenProps} />
                 </AnimatedScreenWrapper>

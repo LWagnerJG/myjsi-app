@@ -1048,3 +1048,215 @@ export const SAMPLE_PRODUCTS = [
     { id: 'fabric-001', name: 'Eco Wool', category: 'fabric', color: '#D3D3D3' },
     { id: 'fabric-002', name: 'Heritage Tweed', category: 'fabric', color: '#A9A9A9' },
 ];
+
+export const COMMISSIONS_DATA = {
+    '2025': [
+        {
+            month: 'January',
+            amount: 3250.75,
+            issuedDate: '2025-02-15T00:00:00Z',
+            details: [
+                {
+                    invoices: [
+                        {
+                            so: 'SO-250101001',
+                            project: 'Tech Park Offices Phase 1',
+                            netAmount: 25000,
+                            commission: 1250.00,
+                        },
+                        {
+                            so: 'SO-250101002', 
+                            project: 'Downtown Medical Center',
+                            netAmount: 18000,
+                            commission: 900.00,
+                        },
+                        {
+                            so: 'SO-250101003',
+                            project: 'University Library Renovation',
+                            netAmount: 22000,
+                            commission: 1100.75,
+                        }
+                    ]
+                },
+                {
+                    brandTotal: true,
+                    listTotal: 75000,
+                    netTotal: 65000,
+                    commissionTotal: 3250.75,
+                }
+            ]
+        },
+        {
+            month: 'February',
+            amount: 2875.50,
+            issuedDate: '2025-03-15T00:00:00Z',
+            details: [
+                {
+                    invoices: [
+                        {
+                            so: 'SO-250201001',
+                            project: 'Corporate Headquarters Refresh',
+                            netAmount: 32000,
+                            commission: 1600.00,
+                        },
+                        {
+                            so: 'SO-250201002',
+                            project: 'Law Firm Conference Rooms',
+                            netAmount: 25500,
+                            commission: 1275.50,
+                        }
+                    ]
+                },
+                {
+                    brandTotal: true,
+                    listTotal: 65000,
+                    netTotal: 57500,
+                    commissionTotal: 2875.50,
+                }
+            ]
+        },
+        {
+            month: 'March',
+            amount: 4125.25,
+            issuedDate: '2025-04-15T00:00:00Z',
+            details: [
+                {
+                    invoices: [
+                        {
+                            so: 'SO-250301001',
+                            project: 'Hospital Administration Wing',
+                            netAmount: 45000,
+                            commission: 2250.00,
+                        },
+                        {
+                            so: 'SO-250301002',
+                            project: 'City Hall Meeting Rooms',
+                            netAmount: 37500,
+                            commission: 1875.25,
+                        }
+                    ]
+                },
+                {
+                    brandTotal: true,
+                    listTotal: 95000,
+                    netTotal: 82500,
+                    commissionTotal: 4125.25,
+                }
+            ]
+        },
+        {
+            month: 'April',
+            amount: 3650.00,
+            issuedDate: '2025-05-15T00:00:00Z',
+            details: [
+                {
+                    invoices: [
+                        {
+                            so: 'SO-250401001',
+                            project: 'Insurance Company Lobby',
+                            netAmount: 28000,
+                            commission: 1400.00,
+                        },
+                        {
+                            so: 'SO-250401002',
+                            project: 'Engineering Firm Workstations',
+                            netAmount: 45000,
+                            commission: 2250.00,
+                        }
+                    ]
+                },
+                {
+                    brandTotal: true,
+                    listTotal: 78000,
+                    netTotal: 73000,
+                    commissionTotal: 3650.00,
+                }
+            ]
+        },
+        {
+            month: 'May',
+            amount: 5200.75,
+            issuedDate: '2025-06-15T00:00:00Z',
+            details: [
+                {
+                    invoices: [
+                        {
+                            so: 'SO-250501001',
+                            project: 'Regional Bank Branch',
+                            netAmount: 55000,
+                            commission: 2750.00,
+                        },
+                        {
+                            so: 'SO-250501002',
+                            project: 'Accounting Firm Expansion',
+                            netAmount: 49015,
+                            commission: 2450.75,
+                        }
+                    ]
+                },
+                {
+                    brandTotal: true,
+                    listTotal: 115000,
+                    netTotal: 104015,
+                    commissionTotal: 5200.75,
+                }
+            ]
+        }
+    ],
+    '2024': [
+        {
+            month: 'January',
+            amount: 2950.00,
+            issuedDate: '2024-02-15T00:00:00Z',
+            details: [
+                {
+                    invoices: [
+                        {
+                            so: 'SO-240101001',
+                            project: 'Community College Classroom',
+                            netAmount: 35000,
+                            commission: 1750.00,
+                        },
+                        {
+                            so: 'SO-240101002',
+                            project: 'Dental Office Waiting Area',
+                            netAmount: 24000,
+                            commission: 1200.00,
+                        }
+                    ]
+                },
+                {
+                    brandTotal: true,
+                    listTotal: 65000,
+                    netTotal: 59000,
+                    commissionTotal: 2950.00,
+                }
+            ]
+        }
+    ],
+    '2023': [
+        {
+            month: 'December',
+            amount: 3800.50,
+            issuedDate: '2024-01-15T00:00:00Z',
+            details: [
+                {
+                    invoices: [
+                        {
+                            so: 'SO-231201001',
+                            project: 'Hotel Conference Center',
+                            netAmount: 76000,
+                            commission: 3800.50,
+                        }
+                    ]
+                },
+                {
+                    brandTotal: true,
+                    listTotal: 85000,
+                    netTotal: 76000,
+                    commissionTotal: 3800.50,
+                }
+            ]
+        }
+    ]
+};

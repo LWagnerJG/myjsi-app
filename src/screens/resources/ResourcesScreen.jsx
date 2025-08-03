@@ -13,7 +13,7 @@ export const ResourcesScreen = ({ theme, onNavigate }) => {
 
     const getResourceIcon = (label) => {
         if (label.includes('Lead Times')) return Clock;
-        if (label.includes('Commission') || label.includes('Discount')) return DollarSign;
+        if (label.includes('Commission' ) || label.includes('Discount')) return DollarSign;
         if (label.includes('Contract')) return FileText;
         if (label.includes('Social')) return Share2;
         if (label.includes('Percent') || label.includes('Sample')) return Percent;
@@ -28,59 +28,94 @@ export const ResourcesScreen = ({ theme, onNavigate }) => {
         return Database;
     };
 
-    const ResourceListItem = ({ item }) => {
+    const getCategoryIcon = (categoryName) => {
+        switch (categoryName) {
+            case 'Product & Finish Resources':
+                return Palette;
+            case 'Sales & Rep Tools':
+                return DollarSign;
+            case 'Dealer & Field Support':
+                return Wrench;
+            case 'Marketing & Communication':
+                return Share2;
+            default:
+                return Database;
+        }
+    };
+
+    const ResourceCard = ({ item }) => {
         const IconComponent = getResourceIcon(item.label);
+        
         return (
             <button
                 onClick={() => onNavigate(item.nav)}
-                className="w-full p-4 text-left rounded-2xl transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/5 active:scale-[0.98]"
-                style={{ 
-                    backgroundColor: theme.colors.surface,
-                }}
+                className="group w-full p-6 text-left rounded-3xl transition-all duration-200 hover:shadow-md active:scale-[0.98] border-0"
+                style={{ backgroundColor: theme.colors.surface }}
             >
                 <div className="flex items-center space-x-4">
-                    <IconComponent 
-                        className="w-6 h-6" 
-                        style={{ color: theme.colors.accent }} 
-                        strokeWidth={1.5}
-                    />
-                    <span className="font-semibold text-base" style={{ color: theme.colors.textPrimary }}>
-                        {item.label}
-                    </span>
+                    <div 
+                        className="w-12 h-12 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200"
+                        style={{ backgroundColor: theme.colors.subtle }}
+                    >
+                        <IconComponent 
+                            className="w-6 h-6" 
+                            style={{ color: theme.colors.accent }} 
+                            strokeWidth={1.5}
+                        />
+                    </div>
+                    <div className="flex-1">
+                        <h4 className="font-semibold text-base" style={{ color: theme.colors.textPrimary }}>
+                            {item.label}
+                        </h4>
+                    </div>
                 </div>
             </button>
         );
     };
 
-    const CategorySection = ({ category }) => (
-        <GlassCard theme={theme} className="overflow-hidden">
-            <div className="px-4 pt-4 pb-3">
-                <h3 className="font-bold text-xl" style={{ color: theme.colors.textPrimary }}>
-                    {category.category}
-                </h3>
-            </div>
-            <div className="p-2 space-y-1">
-                {category.items?.map((item) => (
-                    <ResourceListItem 
-                        key={item.nav} 
-                        item={item} 
-                    />
-                ))}
-            </div>
-        </GlassCard>
-    );
-
-    return (
-        <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
-            <div className="flex-1 overflow-y-auto px-4 pt-4 pb-4">
-                <div className="space-y-4">
-                    {resourceCategories.map((category) => (
-                        <CategorySection 
-                            key={category.category}
-                            category={category}
+    const CategorySection = ({ category }) => {
+        const CategoryIcon = getCategoryIcon(category.category);
+        
+        return (
+            <div className="space-y-4">
+                {/* Category Header */}
+                <div className="flex items-center space-x-3 px-2">
+                    <div 
+                        className="w-10 h-10 rounded-2xl flex items-center justify-center"
+                        style={{ backgroundColor: theme.colors.subtle }}
+                    >
+                        <CategoryIcon className="w-5 h-5" style={{ color: theme.colors.accent }} />
+                    </div>
+                    <div>
+                        <h3 className="font-bold text-xl" style={{ color: theme.colors.textPrimary }}>
+                            {category.category}
+                        </h3>
+                    </div>
+                </div>
+                
+                {/* Grid of Resource Cards */}
+                <div className="grid grid-cols-2 gap-4">
+                    {category.items?.map((item) => (
+                        <ResourceCard 
+                            key={item.nav} 
+                            item={item}
                         />
                     ))}
                 </div>
+            </div>
+        );
+    };
+
+    return (
+        <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto px-4 pt-6 pb-4 space-y-8 scrollbar-hide">
+                {resourceCategories.map((category) => (
+                    <CategorySection 
+                        key={category.category}
+                        category={category}
+                    />
+                ))}
             </div>
         </div>
     );
