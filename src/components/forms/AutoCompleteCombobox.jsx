@@ -32,25 +32,36 @@ export const AutoCompleteCombobox = React.memo(({
         const r = wrapRef.current.getBoundingClientRect();
         const vw = window.innerWidth;
         const vh = window.innerHeight;
+        
+        // Calculate available space
         const spaceBelow = vh - r.bottom;
         const spaceAbove = r.top;
-        const maxHeight = vh * 0.4;
+        const maxHeight = Math.min(vh * 0.4, 300); // Max 40% of viewport or 300px
         const w = Math.max(r.width, DROPDOWN_MIN_WIDTH);
 
         let top;
         let dropdownMaxHeight;
 
-        if (spaceBelow > maxHeight || spaceBelow > spaceAbove) {
+        // Decide if dropdown should appear above or below
+        if (spaceBelow >= maxHeight || spaceBelow >= spaceAbove) {
+            // Position below the input
             top = r.bottom + DROPDOWN_GAP;
-            dropdownMaxHeight = Math.min(maxHeight, spaceBelow - DROPDOWN_SIDE_PADDING * 2);
+            dropdownMaxHeight = Math.min(maxHeight, spaceBelow - DROPDOWN_GAP * 2);
         } else {
-            top = r.top - Math.min(maxHeight, spaceAbove - DROPDOWN_SIDE_PADDING * 2) - DROPDOWN_GAP;
-            dropdownMaxHeight = Math.min(maxHeight, spaceAbove - DROPDOWN_SIDE_PADDING * 2);
+            // Position above the input
+            const calculatedHeight = Math.min(maxHeight, spaceAbove - DROPDOWN_GAP * 2);
+            top = r.top - calculatedHeight - DROPDOWN_GAP;
+            dropdownMaxHeight = calculatedHeight;
         }
 
+        // Horizontal positioning
         let left = r.left;
-        if (left + w > vw - DROPDOWN_SIDE_PADDING) left = vw - w - DROPDOWN_SIDE_PADDING;
-        if (left < DROPDOWN_SIDE_PADDING) left = DROPDOWN_SIDE_PADDING;
+        if (left + w > vw - DROPDOWN_SIDE_PADDING) {
+            left = vw - w - DROPDOWN_SIDE_PADDING;
+        }
+        if (left < DROPDOWN_SIDE_PADDING) {
+            left = DROPDOWN_SIDE_PADDING;
+        }
 
         setPos({ top, left, width: w, height: dropdownMaxHeight });
     }, []);
@@ -74,7 +85,8 @@ export const AutoCompleteCombobox = React.memo(({
 
     useEffect(() => {
         const away = (e) => {
-            if (wrapRef.current && !wrapRef.current.contains(e.target) && dropRef.current && !dropRef.current.contains(e.target)) {
+            if (wrapRef.current && !wrapRef.current.contains(e.target) && 
+                dropRef.current && !dropRef.current.contains(e.target)) {
                 setIsOpen(false);
             }
         };
@@ -100,6 +112,34 @@ export const AutoCompleteCombobox = React.memo(({
         setIsOpen(false);
     };
 
+    const handleInputFocus = () => {
+        setIsOpen(true);
+    };
+
+    const handleInputChange = (e) => {
+        onChange(e.target.value);
+        if (!isOpen) {
+            setIsOpen(true);
+        }
+    };
+
+    // Calculate dynamic height based on number of items
+    const dropdownHeight = useMemo(() => {
+        const itemHeight = 40; // Approximate height per item
+        const padding = 12; // GlassCard padding
+        const maxItems = 8; // Maximum visible items before scrolling
+        
+        let totalItems = filtered.length;
+        if (onAddNew && value && !options.some(o => o.toLowerCase() === value.toLowerCase())) {
+            totalItems += 1; // Add one for the "Add new" option
+        }
+        
+        const visibleItems = Math.min(totalItems, maxItems);
+        const calculatedHeight = Math.max(60, visibleItems * itemHeight + padding);
+        
+        return Math.min(calculatedHeight, pos.height);
+    }, [filtered.length, value, options, onAddNew, pos.height]);
+
     return (
         <div ref={wrapRef} className="space-y-2">
             {label && (
@@ -112,25 +152,55 @@ export const AutoCompleteCombobox = React.memo(({
                 <input
                     type="text"
                     value={value || ''}
-                    onFocus={() => setIsOpen(true)}
-                    onChange={(e) => onChange(e.target.value)}
+                    onFocus={handleInputFocus}
+                    onChange={handleInputChange}
                     placeholder={placeholder}
-                    className="w-full pl-12 pr-4 py-3 border rounded-full text-base"
-                    style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border, color: theme.colors.textPrimary }}
+                    className="w-full pl-12 pr-4 py-3 border rounded-full text-base transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                    style={{ 
+                        backgroundColor: theme.colors.subtle, 
+                        borderColor: theme.colors.border, 
+                        color: theme.colors.textPrimary 
+                    }}
                 />
             </div>
 
-            {isOpen && (
+            {isOpen && (filtered.length > 0 || (onAddNew && value)) && (
                 <DropdownPortal parentRef={wrapRef} onClose={() => setIsOpen(false)}>
-                    <div ref={dropRef} className={`fixed z-[9999] pointer-events-auto ${dropdownClassName}`} style={{ top: pos.top, left: pos.left, width: pos.width }}>
-                        <GlassCard theme={theme} className="p-1.5 overflow-y-auto scrollbar-hide rounded-2xl shadow-lg" style={{ maxHeight: pos.height, backgroundColor: '#FFFFFF' }}>
+                    <div 
+                        ref={dropRef} 
+                        className={`fixed z-[9999] pointer-events-auto ${dropdownClassName}`} 
+                        style={{ 
+                            top: pos.top, 
+                            left: pos.left, 
+                            width: pos.width 
+                        }}
+                    >
+                        <GlassCard 
+                            theme={theme} 
+                            className="p-1.5 overflow-y-auto scrollbar-hide rounded-2xl shadow-lg" 
+                            style={{ 
+                                maxHeight: `${dropdownHeight}px`,
+                                // Remove the hardcoded backgroundColor - let GlassCard handle it
+                            }}
+                        >
                             {filtered.length > 0 && filtered.map((opt) => (
-                                <button key={opt} type="button" onClick={() => handleSelectOption(opt)} className="block w-full text-left py-2.5 px-3.5 text-sm rounded-lg hover:bg-black/5" style={{ color: theme.colors.textPrimary }}>
+                                <button 
+                                    key={opt} 
+                                    type="button" 
+                                    onClick={() => handleSelectOption(opt)} 
+                                    className="block w-full text-left py-2.5 px-3.5 text-sm rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors" 
+                                    style={{ color: theme.colors.textPrimary }}
+                                >
                                     {opt}
                                 </button>
                             ))}
                             {onAddNew && value && !options.some(o => o.toLowerCase() === value.toLowerCase()) && (
-                                <button type="button" onClick={handleAdd} className="block w-full text-left py-2.5 px-3.5 text-sm mt-1 rounded-lg font-semibold" style={{ color: theme.colors.accent }}>
+                                <button 
+                                    type="button" 
+                                    onClick={handleAdd} 
+                                    className="block w-full text-left py-2.5 px-3.5 text-sm mt-1 rounded-lg font-semibold hover:bg-black/5 dark:hover:bg-white/5 transition-colors" 
+                                    style={{ color: theme.colors.accent }}
+                                >
                                     + Add "{value}"
                                 </button>
                             )}

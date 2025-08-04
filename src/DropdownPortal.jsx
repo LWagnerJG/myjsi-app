@@ -26,8 +26,13 @@ export function DropdownPortal({ parentRef, onClose, children }) {
         // Look for height in children's style or calculate from content
         if (React.isValidElement(children)) {
             const childProps = React.Children.toArray(children)[0]?.props;
-            if (childProps?.style?.height) {
-                dropdownHeight = parseInt(childProps.style.height) || 320;
+            if (childProps?.style?.maxHeight) {
+                const heightValue = childProps.style.maxHeight;
+                if (typeof heightValue === 'string' && heightValue.includes('px')) {
+                    dropdownHeight = parseInt(heightValue) || 320;
+                } else if (typeof heightValue === 'number') {
+                    dropdownHeight = heightValue;
+                }
             }
         }
         
@@ -42,11 +47,20 @@ export function DropdownPortal({ parentRef, onClose, children }) {
             width: rect.width
         })
         
-        // Set positioned flag after a microtask to ensure position is applied
-        requestAnimationFrame(() => {
-            setIsPositioned(true)
-        })
+        // Set positioned flag immediately for autocomplete components
+        setIsPositioned(true)
     }, [parentRef.current, children])
+
+    // Reset positioning flag when portal opens
+    useEffect(() => {
+        setIsPositioned(false)
+        // Set positioned flag after a microtask to ensure position is applied
+        const timer = setTimeout(() => {
+            setIsPositioned(true)
+        }, 0)
+        
+        return () => clearTimeout(timer)
+    }, [])
 
     // Close when clicking outside
     useEffect(() => {
@@ -74,7 +88,7 @@ export function DropdownPortal({ parentRef, onClose, children }) {
                 width: `${pos.width}px`,
                 opacity: isPositioned ? 1 : 0,
                 visibility: isPositioned ? 'visible' : 'hidden',
-                transition: 'opacity 0.15s ease-out'
+                transition: 'opacity 0.1s ease-out'
             }}
         >
             {children}
