@@ -250,3 +250,34 @@
     will-change: transform;
     transform-style: preserve-3d;
 }
+
+/* Additional animations for form transitions */
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out forwards;
+}
+
+.animate-slide-in-left {
+    animation: slideInFromLeftSmall 0.3s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInFromLeftSmall {
+    0% {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}

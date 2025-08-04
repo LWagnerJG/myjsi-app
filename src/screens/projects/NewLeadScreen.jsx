@@ -195,30 +195,58 @@ export const NewLeadScreen = ({
                             </div>
                         </SettingsRow>
                         <SettingsRow label="Vertical" theme={theme}>
-                            <div className="w-7/12">
-                                <PortalNativeSelect 
-                                    label="" 
-                                    required 
-                                    value={newLeadData.vertical || ''} 
-                                    onChange={e => updateField('vertical', e.target.value)} 
-                                    options={(Data.VERTICALS || []).map(v => ({ label: v, value: v }))} 
-                                    placeholder="Select..." 
-                                    theme={theme} 
-                                />
+                            <div className="w-7/12 relative">
+                                {newLeadData.vertical === 'Other (Please specify)' ? (
+                                    // Show "Other" label with smooth transition
+                                    <div className="flex items-center space-x-3 transition-all duration-300 ease-in-out">
+                                        <div className="flex items-center space-x-2 animate-slide-in-left">
+                                            <span 
+                                                className="text-sm font-medium px-3 py-2 rounded-lg border transition-all duration-300"
+                                                style={{ 
+                                                    backgroundColor: theme.colors.subtle,
+                                                    borderColor: theme.colors.border,
+                                                    color: theme.colors.textPrimary 
+                                                }}
+                                            >
+                                                Other
+                                            </span>
+                                        </div>
+                                        <div className="flex-1 animate-fade-in">
+                                            <FormInput 
+                                                label="" 
+                                                required 
+                                                value={newLeadData.otherVertical || ''} 
+                                                onChange={e => updateField('otherVertical', e.target.value)} 
+                                                placeholder="Specify other vertical..." 
+                                                theme={theme} 
+                                            />
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => updateField('vertical', '')}
+                                            className="p-2 rounded-full hover:bg-red-100 transition-colors"
+                                            title="Clear selection"
+                                        >
+                                            <X className="w-4 h-4 text-red-500" />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    // Show normal dropdown
+                                    <div className="transition-all duration-300 ease-in-out">
+                                        <PortalNativeSelect 
+                                            label="" 
+                                            required 
+                                            value={newLeadData.vertical || ''} 
+                                            onChange={e => updateField('vertical', e.target.value)} 
+                                            options={(Data.VERTICALS || []).map(v => ({ label: v, value: v }))} 
+                                            placeholder="Select..." 
+                                            theme={theme} 
+                                        />
+                                    </div>
+                                )}
                             </div>
                         </SettingsRow>
                     </div>
-                    {newLeadData.vertical === 'Other (Please specify)' && (
-                        <div className="animate-fade-in pt-2 pl-4">
-                            <FormInput 
-                                required 
-                                value={newLeadData.otherVertical || ''} 
-                                onChange={e => updateField('otherVertical', e.target.value)} 
-                                placeholder="Specify other vertical..." 
-                                theme={theme} 
-                            />
-                        </div>
-                    )}
                 </FormSection>
 
                 <FormSection title="Stakeholders" theme={theme}>

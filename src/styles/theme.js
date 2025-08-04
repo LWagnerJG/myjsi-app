@@ -11,6 +11,7 @@ export const lightTheme = {
         textSecondary: '#6c757d',
         border: '#d1d1d6',
         subtle: '#e9ecef',
+        shadow: 'rgba(0, 0, 0, 0.1)',
     },
     backdropFilter: 'blur(10px)',
 };
@@ -26,6 +27,7 @@ export const darkTheme = {
         textSecondary: '#8e8e93',
         border: '#38383a',
         subtle: '#2c2c2e',
+        shadow: 'rgba(0, 0, 0, 0.3)',
     },
     backdropFilter: 'blur(10px)',
 };

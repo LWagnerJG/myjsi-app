@@ -128,6 +128,10 @@ const CustomSelect = ({ label, value, onChange, options, theme, placeholder, req
                         backgroundColor: theme.colors.surface, 
                         borderColor: theme.colors.border,
                         transformOrigin: 'top center',
+                        boxShadow: `0 4px 30px ${theme.colors.shadow || 'rgba(0, 0, 0, 0.1)'}`,
+                        // Explicitly remove backdrop filters for solid appearance
+                        backdropFilter: 'none',
+                        WebkitBackdropFilter: 'none',
                         ...dropdownStyle
                     }}
                 >
@@ -1388,7 +1392,11 @@ export const HelpScreen = ({ theme }) => {
                             </button>
                             <button 
                                 className="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-semibold transition-colors"
-                                style={{ backgroundColor: theme.colors.surface, color: theme.colors.textPrimary, border: `1px solid ${theme.colors.border}` }}
+                                style={{ 
+                                    backgroundColor: theme.colors.surface, 
+                                    color: theme.colors.textPrimary, 
+                                    border: `1px solid ${theme.colors.border}` 
+                                }}
                             >
                                 <Phone className="w-4 h-4" />
                                 <span>Call Support</span>
@@ -1435,8 +1443,8 @@ export const LogoutScreen = ({ theme, onNavigate }) => {
                             className="w-full py-3 px-6 rounded-full font-semibold transition-colors"
                             style={{ 
                                 backgroundColor: theme.colors.surface, 
-                                color: theme.colors.textPrimary,
-                                border: `1px solid ${theme.colors.border}`
+                                color: theme.colors.textPrimary, 
+                                border: `1px solid ${theme.colors.border}` 
                             }}
                         >
                             Cancel
@@ -1793,7 +1801,10 @@ export const CreateContentModal = ({ close, theme, onAdd }) => {
                             <button 
                                 onClick={() => setType(null)} 
                                 className="flex-1 font-semibold py-3 px-6 rounded-full transition-colors"
-                                style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }}
+                                style={{ 
+                                    backgroundColor: theme.colors.subtle, 
+                                    color: theme.colors.textPrimary 
+                                }}
                             >
                                 Back
                             </button>

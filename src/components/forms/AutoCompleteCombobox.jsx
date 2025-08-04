@@ -1,6 +1,5 @@
 import React, { useState, useRef, useMemo, useCallback, useLayoutEffect, useEffect } from 'react';
 import { Search } from 'lucide-react';
-import { GlassCard } from '../common/GlassCard.jsx';
 import { DropdownPortal } from '../../DropdownPortal.jsx';
 import { DROPDOWN_MIN_WIDTH, DROPDOWN_SIDE_PADDING, DROPDOWN_GAP } from '../../constants/dropdown.js';
 
@@ -175,12 +174,17 @@ export const AutoCompleteCombobox = React.memo(({
                             width: pos.width 
                         }}
                     >
-                        <GlassCard 
-                            theme={theme} 
-                            className="p-1.5 overflow-y-auto scrollbar-hide rounded-2xl shadow-lg" 
+                        {/* Use a direct div instead of GlassCard to avoid backdrop filter */}
+                        <div 
+                            className="p-1.5 overflow-y-auto scrollbar-hide rounded-2xl shadow-lg border transition-all duration-300" 
                             style={{ 
                                 maxHeight: `${dropdownHeight}px`,
-                                // Remove the hardcoded backgroundColor - let GlassCard handle it
+                                backgroundColor: theme.colors.surface,
+                                borderColor: theme.colors.border,
+                                boxShadow: `0 4px 30px ${theme.colors.shadow || 'rgba(0, 0, 0, 0.1)'}`,
+                                // Explicitly remove backdrop filters for solid appearance
+                                backdropFilter: 'none',
+                                WebkitBackdropFilter: 'none',
                             }}
                         >
                             {filtered.length > 0 && filtered.map((opt) => (
@@ -204,7 +208,7 @@ export const AutoCompleteCombobox = React.memo(({
                                     + Add "{value}"
                                 </button>
                             )}
-                        </GlassCard>
+                        </div>
                     </div>
                 </DropdownPortal>
             )}

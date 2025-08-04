@@ -143,12 +143,18 @@ export const PortalNativeSelect = ({
                             width: pos.width 
                         }}
                     >
-                        <GlassCard 
-                            theme={theme} 
-                            className={`p-1.5 rounded-2xl shadow-lg ${needsScrolling ? 'overflow-y-auto scrollbar-hide' : ''}`}
+                        {/* Use a direct div instead of GlassCard to avoid backdrop filter */}
+                        <div 
+                            className={`p-1.5 rounded-2xl shadow-lg border transition-all duration-300 ${needsScrolling ? 'overflow-y-auto scrollbar-hide' : ''}`}
                             style={{ 
+                                backgroundColor: theme.colors.surface,
+                                borderColor: theme.colors.border,
+                                boxShadow: `0 4px 30px ${theme.colors.shadow || 'rgba(0, 0, 0, 0.1)'}`,
                                 height: `${pos.height}px`,
-                                maxHeight: needsScrolling ? `${pos.height}px` : 'none'
+                                maxHeight: needsScrolling ? `${pos.height}px` : 'none',
+                                // Explicitly remove backdrop filters for solid appearance
+                                backdropFilter: 'none',
+                                WebkitBackdropFilter: 'none',
                             }}
                         >
                             {options.map((opt) => (
@@ -166,7 +172,7 @@ export const PortalNativeSelect = ({
                                     {opt.label}
                                 </button>
                             ))}
-                        </GlassCard>
+                        </div>
                     </div>
                 </DropdownPortal>
             )}
