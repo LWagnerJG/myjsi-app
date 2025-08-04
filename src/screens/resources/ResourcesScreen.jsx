@@ -4,6 +4,7 @@ import {
     Palette, Package, Users, MapPin, MonitorPlay, Wrench, Clock
 } from 'lucide-react';
 import * as Data from '../../data.jsx';
+import { GlassCard } from '../../components/common/GlassCard.jsx';
 
 export const ResourcesScreen = ({ theme, onNavigate }) => {
     const resourceCategories = useMemo(() => {
@@ -48,50 +49,46 @@ export const ResourcesScreen = ({ theme, onNavigate }) => {
         return (
             <button
                 onClick={() => onNavigate(item.nav)}
-                className="group w-full p-4 text-left rounded-3xl transition-all duration-200 hover:shadow-md active:scale-[0.98] border-0 flex items-center space-x-4"
-                style={{ backgroundColor: theme.colors.surface }}
+                className="group w-full p-3 text-left rounded-2xl transition-all duration-200 hover:shadow-md active:scale-[0.98] border-0 flex flex-col items-center justify-center text-center"
+                style={{ backgroundColor: theme.colors.surface, minHeight: '80px' }}
             >
                 <div 
-                    className="w-12 h-12 rounded-2xl flex-shrink-0 flex items-center justify-center group-hover:scale-110 transition-transform duration-200"
+                    className="w-10 h-10 mb-2 rounded-full flex-shrink-0 flex items-center justify-center group-hover:scale-110 transition-transform duration-200"
                     style={{ backgroundColor: theme.colors.subtle }}
                 >
                     <IconComponent 
-                        className="w-6 h-6" 
+                        className="w-5 h-5" 
                         style={{ color: theme.colors.accent }} 
                         strokeWidth={1.5}
                     />
                 </div>
-                <div className="flex-1">
-                    <h4 className="font-semibold text-base" style={{ color: theme.colors.textPrimary }}>
-                        {item.label}
-                    </h4>
-                </div>
+                <h4 className="font-medium text-xs leading-tight" style={{ color: theme.colors.textPrimary }}>
+                    {item.label}
+                </h4>
             </button>
         );
     };
 
-    const CategorySection = ({ category }) => {
+    const CategorySection = ({ category, isFirst }) => {
         const CategoryIcon = getCategoryIcon(category.category);
         
         return (
-            <div className="space-y-4">
-                {/* Category Header */}
-                <div className="flex items-center space-x-3 px-2">
+            <div className={`space-y-3 ${!isFirst ? 'pt-4 border-t' : ''}`} style={{borderColor: theme.colors.border}}>
+                {/* Compact Category Header */}
+                <div className="flex items-center space-x-2 px-1">
                     <div 
-                        className="w-10 h-10 rounded-full flex items-center justify-center"
+                        className="w-6 h-6 rounded-full flex items-center justify-center"
                         style={{ backgroundColor: theme.colors.subtle }}
                     >
-                        <CategoryIcon className="w-5 h-5" style={{ color: theme.colors.accent }} />
+                        <CategoryIcon className="w-3.5 h-3.5" style={{ color: theme.colors.accent }} />
                     </div>
-                    <div>
-                        <h3 className="font-bold text-xl" style={{ color: theme.colors.textPrimary }}>
-                            {category.category}
-                        </h3>
-                    </div>
+                    <h3 className="font-bold text-base" style={{ color: theme.colors.textPrimary }}>
+                        {category.category}
+                    </h3>
                 </div>
                 
-                {/* Grid of Resource Cards */}
-                <div className="grid grid-cols-2 gap-3">
+                {/* Compact Grid */}
+                <div className="grid grid-cols-2 gap-2">
                     {category.items?.map((item) => (
                         <ResourceCard 
                             key={item.nav} 
@@ -105,14 +102,17 @@ export const ResourcesScreen = ({ theme, onNavigate }) => {
 
     return (
         <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto px-4 pt-6 pb-4 space-y-8 scrollbar-hide">
-                {resourceCategories.map((category) => (
-                    <CategorySection 
-                        key={category.category}
-                        category={category}
-                    />
-                ))}
+            {/* Content with minimal padding */}
+            <div className="flex-1 overflow-y-auto px-4 pt-4 pb-4 scrollbar-hide">
+                <GlassCard theme={theme} className="p-3 space-y-4">
+                    {resourceCategories.map((category, index) => (
+                        <CategorySection 
+                            key={category.category}
+                            category={category}
+                            isFirst={index === 0}
+                        />
+                    ))}
+                </GlassCard>
             </div>
         </div>
     );
