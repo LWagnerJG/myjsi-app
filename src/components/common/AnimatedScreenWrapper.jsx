@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './AnimatedScreenWrapper.css';
 
-export const AnimatedScreenWrapper = ({ children, screenKey, direction = 'forward', onSwipeBack, previousScreenContent }) => {
+export const AnimatedScreenWrapper = ({ children, screenKey, direction = 'forward', onSwipeBack }) => {
     const [isAnimating, setIsAnimating] = useState(false);
     const [currentScreenKey, setCurrentScreenKey] = useState(screenKey);
     const [currentContent, setCurrentContent] = useState(children);
@@ -10,21 +10,25 @@ export const AnimatedScreenWrapper = ({ children, screenKey, direction = 'forwar
     const isFirstRender = useRef(true);
     
     // Swipe gesture state
+    const [isSwipeActive, setIsSwipeActive] = useState(false);
+    const [swipeProgress, setSwipeProgress] = useState(0);
     const [isDragging, setIsDragging] = useState(false);
-    const [translateX, setTranslateX] = useState(0);
-    const touchStartRef = useRef({ x: 0 });
+    const touchStartRef = useRef({ x: 0, y: 0 });
     const containerRef = useRef(null);
-    const swipeThreshold = 0.3; // 30% of screen width
+    const swipeThreshold = 0.3; // 30% of screen width to trigger back
 
-    // Standard forward/backward navigation
     useEffect(() => {
         if (isFirstRender.current) {
             isFirstRender.current = false;
+            setCurrentScreenKey(screenKey);
+            setCurrentContent(children);
             return;
         }
 
         if (screenKey !== currentScreenKey) {
-            if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
+            if (animationTimeoutRef.current) {
+                clearTimeout(animationTimeoutRef.current);
+            }
 
             setIsAnimating(true);
             setNextContent(children);
@@ -40,21 +44,20 @@ export const AnimatedScreenWrapper = ({ children, screenKey, direction = 'forwar
         }
 
         return () => {
-            if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
+            if (animationTimeoutRef.current) {
+                clearTimeout(animationTimeoutRef.current);
+            }
         };
     }, [screenKey, children, currentScreenKey]);
-
-    // --- Simplified Swipe Gesture Handling ---
 
     const handleTouchStart = useCallback((e) => {
         if (isAnimating || !onSwipeBack) return;
         
         const touch = e.touches[0];
-        // Only allow swipe from the left edge
-        if (touch.clientX < 50) {
-            touchStartRef.current.x = touch.clientX;
-            setIsDragging(true);
-        }
+        if (touch.clientX > 50) return; // Only from left edge
+
+        touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+        setIsDragging(true);
     }, [isAnimating, onSwipeBack]);
 
     const handleTouchMove = useCallback((e) => {
@@ -62,32 +65,40 @@ export const AnimatedScreenWrapper = ({ children, screenKey, direction = 'forwar
 
         const touch = e.touches[0];
         const deltaX = touch.clientX - touchStartRef.current.x;
+        const deltaY = Math.abs(touch.clientY - touchStartRef.current.y);
 
-        // Only swipe right
-        if (deltaX > 0) {
-            e.preventDefault();
-            setTranslateX(deltaX);
+        if (!isSwipeActive && Math.abs(deltaX) > deltaY && deltaX > 10) {
+            setIsSwipeActive(true);
         }
-    }, [isDragging]);
+        
+        if (isSwipeActive) {
+            e.preventDefault();
+            const containerWidth = containerRef.current?.offsetWidth || window.innerWidth;
+            const progress = Math.min(Math.max(deltaX / containerWidth, 0), 1);
+            setSwipeProgress(progress);
+        }
+    }, [isDragging, isSwipeActive]);
 
     const handleTouchEnd = useCallback(() => {
-        if (!isDragging) return;
-
-        const containerWidth = containerRef.current?.offsetWidth || window.innerWidth;
-        const progress = translateX / containerWidth;
-
-        setIsDragging(false);
-
-        if (progress > swipeThreshold) {
-            // Animate out and trigger navigation
-            setTranslateX(containerWidth);
-            onSwipeBack();
-            setTimeout(() => setTranslateX(0), 300); // Reset after animation
-        } else {
-            // Snap back
-            setTranslateX(0);
+        if (!isSwipeActive) {
+            setIsDragging(false);
+            return;
         }
-    }, [isDragging, translateX, onSwipeBack, swipeThreshold]);
+        
+        const shouldNavigateBack = swipeProgress > swipeThreshold;
+        
+        if (shouldNavigateBack) {
+            onSwipeBack();
+        }
+
+        // Reset styles with a transition
+        setIsDragging(false);
+        setSwipeProgress(0); 
+        setTimeout(() => {
+            setIsSwipeActive(false);
+        }, 300);
+
+    }, [isSwipeActive, swipeProgress, onSwipeBack, swipeThreshold]);
 
     const touchHandlers = onSwipeBack ? {
         onTouchStart: handleTouchStart,
@@ -96,7 +107,6 @@ export const AnimatedScreenWrapper = ({ children, screenKey, direction = 'forwar
         onTouchCancel: handleTouchEnd,
     } : {};
 
-    // Use a simple ease-out transition only when not dragging
     const transitionStyle = !isDragging ? 'transform 0.3s ease-out' : 'none';
 
     return (
@@ -105,33 +115,29 @@ export const AnimatedScreenWrapper = ({ children, screenKey, direction = 'forwar
             className="animated-screen-container"
             {...touchHandlers}
         >
-            {/* Previous Screen Preview */}
-            {onSwipeBack && (
-                <div 
-                    className="screen-slide swipe-preview"
-                    style={{ 
-                        // The previous screen is always visible underneath
-                        visibility: isDragging || (isAnimating && direction === 'backward') ? 'visible' : 'hidden'
-                    }}
-                >
-                    {previousScreenContent}
-                </div>
-            )}
+            {/* Previous Screen Placeholder */}
+            <div 
+                className="screen-slide swipe-preview"
+                style={{
+                    transform: `translateX(${-50 + (swipeProgress * 50)}%)`,
+                    visibility: isSwipeActive ? 'visible' : 'hidden',
+                    transition: transitionStyle,
+                }}
+            />
 
             {/* Current Screen */}
             <div 
                 className={`screen-slide current ${isAnimating ? `exiting ${direction}` : ''}`}
                 style={{
-                    transform: `translateX(${translateX}px)`,
+                    transform: `translateX(${swipeProgress * 100}%)`,
                     transition: transitionStyle,
-                    // Add a subtle shadow when swiping
-                    boxShadow: isDragging ? '0 0 20px rgba(0,0,0,0.15)' : 'none'
+                    boxShadow: isSwipeActive ? `0 0 20px rgba(0,0,0,${swipeProgress * 0.15})` : 'none'
                 }}
             >
                 {currentContent}
             </div>
             
-            {/* Next Screen (for forward navigation) */}
+            {/* Next Screen */}
             {isAnimating && nextContent && (
                 <div className={`screen-slide next entering ${direction}`}>
                     {nextContent}
