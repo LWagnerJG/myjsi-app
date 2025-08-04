@@ -215,6 +215,24 @@ export const FABRICS_DATA = [
     { supplier: 'Kravet', pattern: 'Sophisticate', grade: 'F', tackable: 'no', textile: 'Coated', series: 'Wink' }
 ];
 
+export const JSI_MODELS = [
+    { id: 'AW6007', name: 'Arwyn Swivel Chair', isUpholstered: true },
+    { id: 'BR2301', name: 'Bryn Guest Chair', isUpholstered: true },
+    { id: 'CV4501', name: 'Caav Lounge Chair', isUpholstered: true },
+    { id: 'WK4501', name: 'Wink Task Chair', isUpholstered: true },
+    { id: 'KN2301', name: 'Knox Counter Stool', isUpholstered: true },
+    { id: 'FN5001', name: 'Finn Lounge Chair', isUpholstered: true },
+    { id: 'PT5301', name: 'Poet Barstool', isUpholstered: false },
+    { id: 'VCT1248', name: 'Vision Conference Table', isUpholstered: false },
+    { id: 'AR6001', name: 'Arwyn Guest Chair', isUpholstered: true },
+    { id: 'MD5501', name: 'Madison Lounge Chair', isUpholstered: true },
+    { id: 'PR4001', name: 'Protocol Task Chair', isUpholstered: true },
+    { id: 'GV2301', name: 'Garvey RS Chair', isUpholstered: true },
+    { id: 'HN3001', name: 'Henley Guest Chair', isUpholstered: true },
+    { id: 'JD4501', name: 'Jude Lounge Chair', isUpholstered: true },
+    { id: 'KL2001', name: 'Kyla Guest Chair', isUpholstered: true }
+];
+
 export const allApps = [
     { name: 'Samples', route: 'samples', icon: Package },
     { name: 'Request Replacement', route: 'replacements', icon: RotateCw },

@@ -122,6 +122,7 @@ const StickyHeader = React.memo(({
             backgroundColor: isScrolled ? `${theme.colors.background}e0` : 'transparent',
             backdropFilter: isScrolled ? 'blur(12px)' : 'none',
             WebkitBackdropFilter: isScrolled ? 'blur(12px)' : 'none',
+            borderBottom: isScrolled ? `1px solid ${theme.colors.border}40` : '1px solid transparent',
         }}
     >
         <PageTitle title="Products" theme={theme}>

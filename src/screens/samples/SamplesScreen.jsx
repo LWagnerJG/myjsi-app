@@ -64,95 +64,96 @@ export const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSetti
     const fullSetInCart = cart['full-jsi-set'] > 0;
 
     return (
-        <>
-            <PageTitle title="Samples" theme={theme}>
-                <div className="flex items-center space-x-3">
-                    {/* The regular button is replaced with our new optimized component */}
-                    <OrderFullSetButton onClick={handleOrderFullSet} theme={theme} inCart={fullSetInCart} />
+        <div className="flex flex-col h-full">
+            <div className={`sticky top-0 z-10 transition-all duration-300`}>
+                <PageTitle title="Samples" theme={theme}>
+                    <div className="flex items-center space-x-3">
+                        <OrderFullSetButton onClick={handleOrderFullSet} theme={theme} inCart={fullSetInCart} />
+                        <div className="relative">
+                            <button
+                                onClick={() => onNavigate('samples/cart')}
+                                className="p-2 rounded-full hover:bg-black/10 transition"
+                            >
+                                <ShoppingCart
+                                    className="w-7 h-7"
+                                    style={{ color: theme.colors.textPrimary }}
+                                />
+                            </button>
+                            {totalCartItems > 0 && (
+                                <div
+                                    className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
+                                    style={{ backgroundColor: theme.colors.accent }}
+                                >
+                                    {totalCartItems}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </PageTitle>
+            </div>
+
+            <div className="flex-1 overflow-y-auto scrollbar-hide pt-4">
+                <div className="px-4 mb-4">
+                    <GlassCard theme={theme} className="p-1">
+                        <div
+                            ref={containerRef}
+                            className="relative flex space-x-2 overflow-x-auto scrollbar-hide whitespace-nowrap"
+                        >
+                            <div
+                                className="absolute top-1 bottom-1 rounded-full transition-all duration-300 ease-in-out"
+                                style={{
+                                    backgroundColor: theme.colors.accent,
+                                    left: pillStyle.left,
+                                    width: pillStyle.width,
+                                    opacity: pillStyle.opacity
+                                }}
+                            />
+                            {Data.SAMPLE_CATEGORIES.map((cat, index) => (
+                                <button
+                                    key={cat.id}
+                                    ref={el => (buttonRefs.current[index] = el)}
+                                    onClick={() => setSelectedCategory(cat.id)}
+                                    className="relative z-10 px-4 py-2 rounded-full font-semibold text-sm transition-colors duration-300"
+                                    style={{
+                                        color:
+                                            selectedCategory === cat.id
+                                                ? 'white'
+                                                : theme.colors.textPrimary
+                                    }}
+                                >
+                                    {cat.name}
+                                </button>
+                            ))}
+                        </div>
+                    </GlassCard>
+                </div>
+                
+                <div className="px-4 mb-4">
                     <div className="relative">
                         <button
-                            onClick={() => onNavigate('samples/cart')}
-                            className="p-2 rounded-full hover:bg-black/10 transition"
+                            onClick={handleAddSetToCart}
+                            className="w-full py-2.5 rounded-full text-sm font-semibold text-white shadow-md transition-transform hover:scale-105 active:scale-95"
+                            style={{
+                                backgroundColor: theme.colors.accent,
+                            }}
                         >
-                            <ShoppingCart
-                                className="w-7 h-7"
-                                style={{ color: theme.colors.textPrimary }}
-                            />
+                            Add Complete {Data.SAMPLE_CATEGORIES.find(c => c.id === selectedCategory)?.name} Set
                         </button>
-                        {totalCartItems > 0 && (
+                        {setInCartQuantity > 0 && (
                             <div
-                                className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
-                                style={{ backgroundColor: theme.colors.accent }}
+                                className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shadow"
+                                style={{
+                                    backgroundColor: theme.colors.surface,
+                                    color: theme.colors.accent,
+                                    border: `1px solid ${theme.colors.border}`
+                                }}
                             >
-                                {totalCartItems}
+                                {setInCartQuantity}
                             </div>
                         )}
                     </div>
                 </div>
-            </PageTitle>
 
-            <div className="px-4 mb-4">
-                <GlassCard theme={theme} className="p-1">
-                    <div
-                        ref={containerRef}
-                        className="relative flex space-x-2 overflow-x-auto scrollbar-hide whitespace-nowrap"
-                    >
-                        <div
-                            className="absolute top-1 bottom-1 rounded-full transition-all duration-300 ease-in-out"
-                            style={{
-                                backgroundColor: theme.colors.accent,
-                                left: pillStyle.left,
-                                width: pillStyle.width,
-                                opacity: pillStyle.opacity
-                            }}
-                        />
-                        {Data.SAMPLE_CATEGORIES.map((cat, index) => (
-                            <button
-                                key={cat.id}
-                                ref={el => (buttonRefs.current[index] = el)}
-                                onClick={() => setSelectedCategory(cat.id)}
-                                className="relative z-10 px-4 py-2 rounded-full font-semibold text-sm transition-colors duration-300"
-                                style={{
-                                    color:
-                                        selectedCategory === cat.id
-                                            ? 'white'
-                                            : theme.colors.textPrimary
-                                }}
-                            >
-                                {cat.name}
-                            </button>
-                        ))}
-                    </div>
-                </GlassCard>
-            </div>
-
-            <div className="px-4 mb-4">
-                <div className="relative">
-                    <button
-                        onClick={handleAddSetToCart}
-                        className="w-full py-2.5 rounded-full text-sm font-semibold text-white shadow-md transition-transform hover:scale-105 active:scale-95"
-                        style={{
-                            backgroundColor: theme.colors.accent,
-                        }}
-                    >
-                        Add Complete {Data.SAMPLE_CATEGORIES.find(c => c.id === selectedCategory)?.name} Set
-                    </button>
-                    {setInCartQuantity > 0 && (
-                        <div
-                            className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shadow"
-                            style={{
-                                backgroundColor: theme.colors.surface,
-                                color: theme.colors.accent,
-                                border: `1px solid ${theme.colors.border}`
-                            }}
-                        >
-                            {setInCartQuantity}
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            <div className="flex-1 overflow-y-auto scrollbar-hide">
                 <div className="px-4 grid grid-cols-2 gap-4 pb-4">
                     {filteredProducts.map(product => {
                         const quantity = cart[product.id] || 0;
@@ -213,6 +214,6 @@ export const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSetti
                     })}
                 </div>
             </div>
-        </>
+        </div>
     );
 };

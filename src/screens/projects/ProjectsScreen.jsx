@@ -119,6 +119,14 @@ export const ProjectsScreen = ({
     const [projectsTab, setProjectsTab] = useState('pipeline');
     const [selectedPipelineStage, setSelectedPipelineStage] = useState('Discovery');
     const [selectedOpportunity, setSelectedOpportunity] = useState(null);
+    const [isScrolled, setIsScrolled] = useState(false);
+    const scrollContainerRef = useRef(null);
+
+    const handleScroll = useCallback(() => {
+        if (scrollContainerRef.current) {
+            setIsScrolled(scrollContainerRef.current.scrollTop > 10);
+        }
+    }, []);
 
     // Unified slider state for both tab sections
     const [mainTabSlider, setMainTabSlider] = useState({ left: 0, width: 0, opacity: 0 });
@@ -189,83 +197,99 @@ export const ProjectsScreen = ({
 
     return (
         <div className="h-full flex flex-col">
-            <PageTitle title="Projects" theme={theme}>
-                <button
-                    onClick={handleAddClick}
-                    className="flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 hover:scale-105 active:scale-95"
-                    style={{ backgroundColor: theme.colors.accent, color: 'white' }}
-                >
-                    <div className="relative h-5 w-[110px] flex items-center justify-center">
-                        <span className={`absolute transition-opacity duration-200 ${projectsTab === 'pipeline' ? 'opacity-100' : 'opacity-0'}`}>New Lead</span>
-                        <span className={`absolute transition-opacity duration-200 ${projectsTab === 'my-projects' ? 'opacity-100' : 'opacity-0'}`}>Add Install</span>
-                    </div>
-                    <Plus className="w-4 h-4" />
-                </button>
-            </PageTitle>
+            <div 
+                className={`sticky top-0 z-10 transition-all duration-300 ${isScrolled ? 'shadow-md' : ''}`}
+                style={{
+                    backgroundColor: isScrolled ? `${theme.colors.background}e0` : 'transparent',
+                    backdropFilter: isScrolled ? 'blur(12px)' : 'none',
+                    WebkitBackdropFilter: isScrolled ? 'blur(12px)' : 'none',
+                    borderBottom: `1px solid ${isScrolled ? theme.colors.border + '40' : 'transparent'}`
+                }}
+            >
+                <PageTitle title="Projects" theme={theme}>
+                    <button
+                        onClick={handleAddClick}
+                        className="flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 hover:scale-105 active:scale-95"
+                        style={{ backgroundColor: theme.colors.accent, color: 'white' }}
+                    >
+                        <div className="relative h-5 w-[110px] flex items-center justify-center">
+                            <span className={`absolute transition-opacity duration-200 ${projectsTab === 'pipeline' ? 'opacity-100' : 'opacity-0'}`}>New Lead</span>
+                            <span className={`absolute transition-opacity duration-200 ${projectsTab === 'my-projects' ? 'opacity-100' : 'opacity-0'}`}>Add Install</span>
+                        </div>
+                        <Plus className="w-4 h-4" />
+                    </button>
+                </PageTitle>
+            </div>
 
-            <div className="px-4 space-y-3">
-                {/* Main Tab Selector - Now consistent with stage selector */}
-                <GlassCard theme={theme} className="p-1.5">
-                    <div className="relative flex space-x-1">
-                        {/* Animated background pill */}
-                        <div 
-                            className="absolute top-0 bottom-0 rounded-full transition-all duration-300 ease-out" 
-                            style={{ 
-                                backgroundColor: theme.colors.accent, 
-                                left: mainTabSlider.left, 
-                                width: mainTabSlider.width, 
-                                opacity: mainTabSlider.opacity 
-                            }} 
-                        />
-                        
-                        <button 
-                            ref={el => (mainTabRefs.current[0] = el)}
-                            onClick={() => setProjectsTab('pipeline')} 
-                            className="relative z-10 flex-1 py-2.5 text-sm font-semibold rounded-full transition-colors duration-200" 
-                            style={{ color: projectsTab === 'pipeline' ? 'white' : theme.colors.textSecondary }}
-                        >
-                            Pipeline
-                        </button>
-                        <button 
-                            ref={el => (mainTabRefs.current[1] = el)}
-                            onClick={() => setProjectsTab('my-projects')} 
-                            className="relative z-10 flex-1 py-2.5 text-sm font-semibold rounded-full transition-colors duration-200" 
-                            style={{ color: projectsTab === 'my-projects' ? 'white' : theme.colors.textSecondary }}
-                        >
-                            My Projects
-                        </button>
-                    </div>
-                </GlassCard>
-
-                {/* Stage Selector - Improved with better spacing and consistency */}
-                {projectsTab === 'pipeline' && (
+            <div 
+                ref={scrollContainerRef}
+                onScroll={handleScroll}
+                className="flex-1 overflow-y-auto scrollbar-hide"
+            >
+                <div className="px-4 space-y-3">
+                    {/* Main Tab Selector - Now consistent with stage selector */}
                     <GlassCard theme={theme} className="p-1.5">
-                        <div className="relative flex space-x-1 overflow-x-auto scrollbar-hide">
+                        <div className="relative flex space-x-1">
                             {/* Animated background pill */}
                             <div 
                                 className="absolute top-0 bottom-0 rounded-full transition-all duration-300 ease-out" 
                                 style={{ 
                                     backgroundColor: theme.colors.accent, 
-                                    left: stageSlider.left, 
-                                    width: stageSlider.width, 
-                                    opacity: stageSlider.opacity 
+                                    left: mainTabSlider.left, 
+                                    width: mainTabSlider.width, 
+                                    opacity: mainTabSlider.opacity 
                                 }} 
                             />
                             
-                            {Data.STAGES.map((stage, index) => (
-                                <button 
-                                    key={stage} 
-                                    ref={el => (stageButtonRefs.current[index] = el)} 
-                                    onClick={() => setSelectedPipelineStage(stage)} 
-                                    className="relative z-10 px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-colors duration-200 flex-shrink-0" 
-                                    style={{ color: selectedPipelineStage === stage ? 'white' : theme.colors.textSecondary }}
-                                >
-                                    {stage}
-                                </button>
-                            ))}
+                            <button 
+                                ref={el => (mainTabRefs.current[0] = el)}
+                                onClick={() => setProjectsTab('pipeline')} 
+                                className="relative z-10 flex-1 py-2.5 text-sm font-semibold rounded-full transition-colors duration-200" 
+                                style={{ color: projectsTab === 'pipeline' ? 'white' : theme.colors.textSecondary }}
+                            >
+                                Pipeline
+                            </button>
+                            <button 
+                                ref={el => (mainTabRefs.current[1] = el)}
+                                onClick={() => setProjectsTab('my-projects')} 
+                                className="relative z-10 flex-1 py-2.5 text-sm font-semibold rounded-full transition-colors duration-200" 
+                                style={{ color: projectsTab === 'my-projects' ? 'white' : theme.colors.textSecondary }}
+                            >
+                                My Projects
+                            </button>
                         </div>
                     </GlassCard>
-                )}
+
+                    {/* Stage Selector - Improved with better spacing and consistency */}
+                    {projectsTab === 'pipeline' && (
+                        <GlassCard theme={theme} className="p-1.5">
+                            <div className="relative flex space-x-1 overflow-x-auto scrollbar-hide">
+                                {/* Animated background pill */}
+                                <div 
+                                    className="absolute top-0 bottom-0 rounded-full transition-all duration-300 ease-out" 
+                                    style={{ 
+                                        backgroundColor: theme.colors.accent, 
+                                        left: stageSlider.left, 
+                                        width: stageSlider.width, 
+                                        opacity: stageSlider.opacity 
+                                    }} 
+                                />
+                                
+                                {Data.STAGES.map((stage, index) => (
+                                    <button 
+                                        key={stage} 
+                                        ref={el => (stageButtonRefs.current[index] = el)} 
+                                        onClick={() => setSelectedPipelineStage(stage)} 
+                                        className="relative z-10 px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-colors duration-200 flex-shrink-0" 
+                                        style={{ color: selectedPipelineStage === stage ? 'white' : theme.colors.textSecondary }}
+                                    >
+                                        {stage}
+                                    </button>
+                                ))}
+                            </div>
+                        </GlassCard>
+                    )}
+                </div>
             </div>
 
             <div className="flex-1 overflow-y-auto px-4 pt-4 pb-4 space-y-3 scrollbar-hide">

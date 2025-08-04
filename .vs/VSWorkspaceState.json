@@ -3,13 +3,13 @@
     "",
     "\\src",
     "\\src\\screens",
-    "\\src\\screens\\orders",
     "\\src\\screens\\products",
     "\\src\\screens\\projects",
     "\\src\\screens\\replacements",
     "\\src\\screens\\resources",
+    "\\src\\screens\\sales",
     "\\src\\screens\\samples",
-    "\\src\\screens\\utility"
+    "\\src\\styles"
   ],
   "SelectedNode": "\\src\\screens\\utility\\UtilityScreens.jsx",
   "PreviewInSolutionExplorer": false

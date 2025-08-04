@@ -1,80 +1,44 @@
-import React, { useState, useMemo, useCallback } from 'react';
+ï»¿import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { PageTitle } from '../../components/common/PageTitle.jsx';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
-import { ToggleButtonGroup } from '../../components/common/ToggleButtonGroup.jsx';
 import { Modal } from '../../components/common/Modal.jsx';
-import { RotateCw, Search, Plus, Package, AlertCircle, CheckCircle, Clock } from 'lucide-react';
+import { Camera, Image, AlertCircle, CheckCircle, Clock, XCircle } from 'lucide-react';
 import * as Data from '../../data.jsx';
+import jsQR from 'jsqr';
 
 export const ReplacementsScreen = ({ theme, onNavigate }) => {
-    const [view, setView] = useState('request');
+    const [view, setView] = useState('list');
+    const [isScanning, setIsScanning] = useState(false);
     const [selectedRequest, setSelectedRequest] = useState(null);
     const [formData, setFormData] = useState({
-        productSeries: '',
-        model: '',
-        quantity: '',
-        reason: '',
-        description: '',
-        urgency: 'Medium',
-        customerInfo: '',
-        orderNumber: ''
+        salesOrder: '',
+        lineItem: '',
+        notes: '',
     });
+    const videoRef = useRef(null);
+    const canvasRef = useRef(null);
+    const intervalRef = useRef(null);
 
     // Mock replacement requests data
-    const replacementRequests = useMemo(() => [
-        {
-            id: 'REP-001',
-            productSeries: 'Vision',
-            model: 'VCT12048',
-            quantity: 2,
-            reason: 'Damaged in shipping',
-            status: 'Pending',
-            submittedDate: '2025-01-15',
-            expectedDate: '2025-01-22',
-            urgency: 'High'
-        },
-        {
-            id: 'REP-002',
-            productSeries: 'Arwyn',
-            model: 'AW6007C',
-            quantity: 1,
-            reason: 'Manufacturing defect',
-            status: 'Approved',
-            submittedDate: '2025-01-10',
-            expectedDate: '2025-01-18',
-            urgency: 'Medium'
-        },
-        {
-            id: 'REP-003',
-            productSeries: 'Caav',
-            model: 'CV4501A',
-            quantity: 3,
-            reason: 'Wrong configuration',
-            status: 'Shipped',
-            submittedDate: '2025-01-05',
-            expectedDate: '2025-01-15',
-            urgency: 'Low'
-        }
-    ], []);
+    const [replacementRequests, setReplacementRequests] = useState(Data.REPLACEMENT_REQUESTS_DATA || []);
 
     const handleInputChange = useCallback((field, value) => {
         setFormData(prev => ({ ...prev, [field]: value }));
     }, []);
 
     const handleSubmitRequest = useCallback(() => {
-        // This would typically submit to an API
         alert('Replacement request submitted successfully!');
-        setFormData({
-            productSeries: '',
-            model: '',
-            quantity: '',
-            reason: '',
-            description: '',
-            urgency: 'Medium',
-            customerInfo: '',
-            orderNumber: ''
-        });
-    }, []);
+        setReplacementRequests(prev => [
+            {
+                name: `${formData.salesOrder} - ${formData.lineItem}`,
+                date: new Date().toLocaleDateString('en-US'),
+                status: 'Pending',
+            },
+            ...prev,
+        ]);
+        setFormData({ salesOrder: '', lineItem: '', notes: '' });
+        setView('list');
+    }, [formData]);
 
     const handleRequestClick = useCallback((request) => {
         setSelectedRequest(request);
@@ -86,260 +50,120 @@ export const ReplacementsScreen = ({ theme, onNavigate }) => {
 
     const getStatusIcon = (status) => {
         switch (status) {
-            case 'Pending':
-                return <Clock className="w-5 h-5 text-yellow-500" />;
-            case 'Approved':
-                return <CheckCircle className="w-5 h-5 text-green-500" />;
-            case 'Shipped':
-                return <Package className="w-5 h-5 text-blue-500" />;
-            default:
-                return <AlertCircle className="w-5 h-5 text-gray-500" />;
+            case 'Pending': return <Clock className="w-5 h-5 text-yellow-500" />;
+            case 'Approved': return <CheckCircle className="w-5 h-5 text-green-500" />;
+            case 'Rejected': return <XCircle className="w-5 h-5 text-red-500" />;
+            default: return <AlertCircle className="w-5 h-5 text-gray-500" />;
         }
     };
 
-    const getUrgencyColor = (urgency) => {
-        switch (urgency) {
-            case 'High':
-                return '#ef4444';
-            case 'Medium':
-                return '#f59e0b';
-            case 'Low':
-                return '#10b981';
-            default:
-                return '#6b7280';
-        }
+    const getStatusColor = (status) => {
+        const colors = {
+            Pending: theme.colors.accent + '30',
+            Approved: '#4ade80' + '30',
+            Rejected: '#f87171' + '30',
+        };
+        return colors[status] || theme.colors.subtle;
     };
+    
+    const getStatusTextColor = (status) => {
+        const colors = {
+            Pending: theme.colors.accent,
+            Approved: '#16a34a',
+            Rejected: '#dc2626',
+        };
+        return colors[status] || theme.colors.textSecondary;
+    };
+
+    const stopScanning = useCallback(() => {
+        setIsScanning(false);
+        if (videoRef.current && videoRef.current.srcObject) {
+            videoRef.current.srcObject.getTracks().forEach(track => track.stop());
+            videoRef.current.srcObject = null;
+        }
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+        }
+    }, []);
+
+    const startScanning = useCallback(() => {
+        const initScanner = async () => {
+            if (!('BarcodeDetector' in window)) {
+                alert('Barcode Detector API is not supported in this browser.');
+                return;
+            }
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                if (videoRef.current) {
+                    videoRef.current.srcObject = stream;
+                    await videoRef.current.play();
+                    setIsScanning(true);
+                }
+
+                const detector = new BarcodeDetector({ formats: ['qr_code'] });
+                intervalRef.current = setInterval(async () => {
+                    if (videoRef.current?.readyState === videoRef.current?.HAVE_ENOUGH_DATA) {
+                        if (canvasRef.current) {
+                            canvasRef.current.height = videoRef.current.videoHeight;
+                            canvasRef.current.width = videoRef.current.videoWidth;
+                            const ctx = canvasRef.current.getContext('2d');
+                            ctx.drawImage(videoRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
+                            const barcodes = await detector.detect(canvasRef.current);
+                            if (barcodes.length > 0) {
+                                setFormData({
+                                    salesOrder: 'SO-450080',
+                                    lineItem: '001',
+                                    notes: `Scanned from QR: ${barcodes[0].rawValue}`,
+                                });
+                                stopScanning();
+                                setView('form');
+                            }
+                        }
+                    }
+                }, 500);
+            } catch (error) {
+                console.error('Error accessing camera:', error);
+                alert('Unable to access camera. Please check permissions and try again.');
+                setIsScanning(false);
+            }
+        };
+        initScanner();
+    }, [stopScanning]);
+
+    useEffect(() => {
+        return () => stopScanning();
+    }, [stopScanning]);
 
     const RequestCard = ({ request, theme, onClick }) => (
         <button
             onClick={() => onClick(request)}
-            className="w-full p-4 text-left rounded-xl transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+            className="w-full p-4 text-left rounded-xl transition-colors hover:bg-black/5 dark:hover:bg-white/5 flex items-center justify-between"
             style={{ backgroundColor: theme.colors.surface, border: `1px solid ${theme.colors.border}` }}
         >
-            <div className="flex items-start justify-between">
-                <div className="flex-1">
-                    <div className="flex items-center space-x-2 mb-2">
-                        <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>
-                            {request.id}
-                        </span>
-                        <span 
-                            className="px-2 py-1 rounded-full text-xs font-medium"
-                            style={{ 
-                                backgroundColor: getUrgencyColor(request.urgency) + '20',
-                                color: getUrgencyColor(request.urgency)
-                            }}
-                        >
-                            {request.urgency}
-                        </span>
-                    </div>
-                    <h3 className="font-bold text-lg mb-1" style={{ color: theme.colors.textPrimary }}>
-                        {request.productSeries} - {request.model}
-                    </h3>
-                    <p className="text-sm mb-2" style={{ color: theme.colors.textSecondary }}>
-                        Quantity: {request.quantity} • {request.reason}
-                    </p>
-                    <p className="text-xs" style={{ color: theme.colors.textSecondary }}>
-                        Submitted: {new Date(request.submittedDate).toLocaleDateString()}
-                    </p>
-                </div>
-                <div className="flex flex-col items-center space-y-2">
-                    {getStatusIcon(request.status)}
-                    <span className="text-xs font-medium" style={{ color: theme.colors.textSecondary }}>
-                        {request.status}
-                    </span>
-                </div>
+            <div className="flex-1 min-w-0">
+                <h3 className="font-semibold truncate" style={{ color: theme.colors.textPrimary }}>
+                    {request.name || request.product}
+                </h3>
+                <p className="text-sm" style={{ color: theme.colors.textSecondary }}>
+                    {new Date(request.date).toLocaleDateString()}
+                </p>
+            </div>
+            <div
+                className="px-3 py-1 rounded-full text-sm font-medium flex-shrink-0"
+                style={{ backgroundColor: getStatusColor(request.status), color: getStatusTextColor(request.status) }}
+            >
+                {request.status}
             </div>
         </button>
-    );
-
-    const RequestForm = () => (
-        <div className="space-y-4">
-            <GlassCard theme={theme} className="p-4 space-y-4">
-                <h3 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>
-                    Product Information
-                </h3>
-                
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium mb-2" style={{ color: theme.colors.textSecondary }}>
-                            Product Series
-                        </label>
-                        <select
-                            value={formData.productSeries}
-                            onChange={(e) => handleInputChange('productSeries', e.target.value)}
-                            className="w-full p-3 rounded-lg text-sm"
-                            style={{ 
-                                backgroundColor: theme.colors.surface, 
-                                border: `1px solid ${theme.colors.border}`,
-                                color: theme.colors.textPrimary
-                            }}
-                        >
-                            <option value="">Select Series</option>
-                            {Data.JSI_PRODUCT_SERIES?.map(series => (
-                                <option key={series} value={series}>{series}</option>
-                            ))}
-                        </select>
-                    </div>
-                    
-                    <div>
-                        <label className="block text-sm font-medium mb-2" style={{ color: theme.colors.textSecondary }}>
-                            Model Number
-                        </label>
-                        <input
-                            type="text"
-                            value={formData.model}
-                            onChange={(e) => handleInputChange('model', e.target.value)}
-                            placeholder="Enter model number"
-                            className="w-full p-3 rounded-lg text-sm"
-                            style={{ 
-                                backgroundColor: theme.colors.surface, 
-                                border: `1px solid ${theme.colors.border}`,
-                                color: theme.colors.textPrimary
-                            }}
-                        />
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium mb-2" style={{ color: theme.colors.textSecondary }}>
-                            Quantity
-                        </label>
-                        <input
-                            type="number"
-                            value={formData.quantity}
-                            onChange={(e) => handleInputChange('quantity', e.target.value)}
-                            placeholder="How many pieces?"
-                            className="w-full p-3 rounded-lg text-sm"
-                            style={{ 
-                                backgroundColor: theme.colors.surface, 
-                                border: `1px solid ${theme.colors.border}`,
-                                color: theme.colors.textPrimary
-                            }}
-                        />
-                    </div>
-                    
-                    <div>
-                        <label className="block text-sm font-medium mb-2" style={{ color: theme.colors.textSecondary }}>
-                            Urgency Level
-                        </label>
-                        <select
-                            value={formData.urgency}
-                            onChange={(e) => handleInputChange('urgency', e.target.value)}
-                            className="w-full p-3 rounded-lg text-sm"
-                            style={{ 
-                                backgroundColor: theme.colors.surface, 
-                                border: `1px solid ${theme.colors.border}`,
-                                color: theme.colors.textPrimary
-                            }}
-                        >
-                            {Data.URGENCY_LEVELS?.map(level => (
-                                <option key={level} value={level}>{level}</option>
-                            ))}
-                        </select>
-                    </div>
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: theme.colors.textSecondary }}>
-                        Reason for Replacement
-                    </label>
-                    <select
-                        value={formData.reason}
-                        onChange={(e) => handleInputChange('reason', e.target.value)}
-                        className="w-full p-3 rounded-lg text-sm"
-                        style={{ 
-                            backgroundColor: theme.colors.surface, 
-                            border: `1px solid ${theme.colors.border}`,
-                            color: theme.colors.textPrimary
-                        }}
-                    >
-                        <option value="">Select reason</option>
-                        <option value="Damaged in shipping">Damaged in shipping</option>
-                        <option value="Manufacturing defect">Manufacturing defect</option>
-                        <option value="Wrong configuration">Wrong configuration</option>
-                        <option value="Customer request">Customer request</option>
-                        <option value="Other">Other</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: theme.colors.textSecondary }}>
-                        Description
-                    </label>
-                    <textarea
-                        value={formData.description}
-                        onChange={(e) => handleInputChange('description', e.target.value)}
-                        placeholder="Provide additional details about the replacement request..."
-                        rows={3}
-                        className="w-full p-3 rounded-lg text-sm resize-none"
-                        style={{ 
-                            backgroundColor: theme.colors.surface, 
-                            border: `1px solid ${theme.colors.border}`,
-                            color: theme.colors.textPrimary
-                        }}
-                    />
-                </div>
-            </GlassCard>
-
-            <GlassCard theme={theme} className="p-4 space-y-4">
-                <h3 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>
-                    Order Information
-                </h3>
-                
-                <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: theme.colors.textSecondary }}>
-                        Original Order Number
-                    </label>
-                    <input
-                        type="text"
-                        value={formData.orderNumber}
-                        onChange={(e) => handleInputChange('orderNumber', e.target.value)}
-                        placeholder="Enter order number"
-                        className="w-full p-3 rounded-lg text-sm"
-                        style={{ 
-                            backgroundColor: theme.colors.surface, 
-                            border: `1px solid ${theme.colors.border}`,
-                            color: theme.colors.textPrimary
-                        }}
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: theme.colors.textSecondary }}>
-                        Customer Information
-                    </label>
-                    <input
-                        type="text"
-                        value={formData.customerInfo}
-                        onChange={(e) => handleInputChange('customerInfo', e.target.value)}
-                        placeholder="Customer name or company"
-                        className="w-full p-3 rounded-lg text-sm"
-                        style={{ 
-                            backgroundColor: theme.colors.surface, 
-                            border: `1px solid ${theme.colors.border}`,
-                            color: theme.colors.textPrimary
-                        }}
-                    />
-                </div>
-
-                <button
-                    onClick={handleSubmitRequest}
-                    className="w-full py-3 px-6 rounded-full font-semibold"
-                    style={{ backgroundColor: theme.colors.accent, color: 'white' }}
-                >
-                    Submit Replacement Request
-                </button>
-            </GlassCard>
-        </div>
     );
 
     const RequestsList = () => (
         <div className="space-y-3">
             {replacementRequests.length > 0 ? (
-                replacementRequests.map((request) => (
+                replacementRequests.map((request, index) => (
                     <RequestCard
-                        key={request.id}
+                        key={index}
                         request={request}
                         theme={theme}
                         onClick={handleRequestClick}
@@ -347,51 +171,161 @@ export const ReplacementsScreen = ({ theme, onNavigate }) => {
                 ))
             ) : (
                 <GlassCard theme={theme} className="p-8 text-center">
-                    <RotateCw className="w-12 h-12 mx-auto mb-4" style={{ color: theme.colors.accent }} />
                     <h3 className="font-bold text-lg mb-2" style={{ color: theme.colors.textPrimary }}>
-                        No Replacement Requests
+                        No Previous Requests
                     </h3>
-                    <p className="text-sm mb-4" style={{ color: theme.colors.textSecondary }}>
-                        You haven't submitted any replacement requests yet.
+                    <p className="text-sm" style={{ color: theme.colors.textSecondary }}>
+                        You haven't submitted any requests yet.
                     </p>
-                    <button
-                        onClick={() => setView('request')}
-                        className="px-6 py-3 rounded-full font-semibold"
-                        style={{ backgroundColor: theme.colors.accent, color: 'white' }}
-                    >
-                        Submit First Request
-                    </button>
                 </GlassCard>
             )}
         </div>
     );
 
-    return (
-        <div className="flex flex-col h-full">
-            <PageTitle title="Replacements" theme={theme} />
-
-            <div className="px-4 pb-4">
-                <ToggleButtonGroup
-                    value={view}
-                    onChange={setView}
-                    options={[
-                        { label: 'Submit Request', value: 'request' },
-                        { label: 'My Requests', value: 'list' }
-                    ]}
-                    theme={theme}
+    const ReplacementForm = () => (
+        <div className="space-y-4 px-4">
+            <div>
+                <label className="block text-sm font-medium mb-2" style={{ color: theme.colors.textSecondary }}>
+                    Sales Order
+                </label>
+                <input
+                    type="text"
+                    value={formData.salesOrder}
+                    onChange={(e) => handleInputChange('salesOrder', e.target.value)}
+                    className="w-full p-3 rounded-lg text-sm"
+                    style={{
+                        backgroundColor: theme.colors.surface,
+                        border: `1px solid ${theme.colors.border}`,
+                        color: theme.colors.textPrimary,
+                    }}
                 />
             </div>
-
-            <div className="flex-1 overflow-y-auto scrollbar-hide">
-                <div className="px-4 pb-4">
-                    {view === 'request' ? <RequestForm /> : <RequestsList />}
+            <div>
+                <label className="block text-sm font-medium mb-2" style={{ color: theme.colors.textSecondary }}>
+                    Line Item
+                </label>
+                <input
+                    type="text"
+                    value={formData.lineItem}
+                    onChange={(e) => handleInputChange('lineItem', e.target.value)}
+                    className="w-full p-3 rounded-lg text-sm"
+                    style={{
+                        backgroundColor: theme.colors.surface,
+                        border: `1px solid ${theme.colors.border}`,
+                        color: theme.colors.textPrimary,
+                    }}
+                />
+            </div>
+            <div>
+                <label className="block text-sm font-medium mb-2" style={{ color: theme.colors.textSecondary }}>
+                    Notes
+                </label>
+                <textarea
+                    value={formData.notes}
+                    onChange={(e) => handleInputChange('notes', e.target.value)}
+                    placeholder="Describe the issue or parts needed..."
+                    rows={3}
+                    className="w-full p-3 rounded-lg text-sm resize-none"
+                    style={{
+                        backgroundColor: theme.colors.surface,
+                        border: `1px solid ${theme.colors.border}`,
+                        color: theme.colors.textPrimary,
+                    }}
+                />
+            </div>
+            <div>
+                <label className="block text-sm font-medium mb-2" style={{ color: theme.colors.textSecondary }}>
+                    Photos
+                </label>
+                <div
+                    className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer"
+                    style={{ color: theme.colors.textSecondary }}
+                >
+                    <Image className="mx-auto mb-2 w-6 h-6" />
+                    Add Photo
                 </div>
             </div>
+            <div className="flex space-x-4 pt-4">
+                <button
+                    onClick={() => setView('list')}
+                    className="flex-1 py-3 rounded-full font-semibold"
+                    style={{ backgroundColor: theme.colors.surface, color: theme.colors.textPrimary, border: `1px solid ${theme.colors.border}` }}
+                >
+                    Back to Requests
+                </button>
+                <button
+                    onClick={handleSubmitRequest}
+                    className="flex-1 py-3 rounded-full font-semibold"
+                    style={{ backgroundColor: theme.colors.accent, color: 'white' }}
+                >
+                    Submit Replacement
+                </button>
+            </div>
+        </div>
+    );
 
-            <Modal 
-                show={!!selectedRequest} 
-                onClose={handleCloseModal} 
-                title={`Request ${selectedRequest?.id || ''}`} 
+    return (
+        <div className="flex flex-col h-full">
+            <PageTitle title={view === 'form' ? "New Replacement" : "My JSI"} theme={theme} />
+            
+            <div className="flex-1 overflow-y-auto scrollbar-hide">
+                {view === 'list' && (
+                    <div className="px-4 pb-4 space-y-4">
+                        <div 
+                            className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer overflow-hidden transition-all duration-300"
+                            style={{ 
+                                color: theme.colors.textSecondary,
+                                borderColor: isScanning ? theme.colors.accent : 'rgb(209 213 219)',
+                                height: isScanning ? '24rem' : 'auto'
+                            }}
+                            onClick={!isScanning ? startScanning : undefined}
+                        >
+                            {isScanning ? (
+                                <div className="relative w-full h-full">
+                                    <video ref={videoRef} className="absolute top-0 left-0 w-full h-full object-cover rounded-md" />
+                                    <canvas ref={canvasRef} className="hidden" />
+                                    <button 
+                                        onClick={stopScanning}
+                                        className="absolute bottom-2 right-2 px-3 py-1 text-xs bg-red-500 text-white rounded-full font-semibold"
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="py-4">
+                                    <Camera className="mx-auto mb-2 w-10 h-10" />
+                                    Scan QR Code
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="text-center" style={{ color: theme.colors.textSecondary }}>
+                            OR
+                        </div>
+                        <div
+                            onClick={() => {
+                                setFormData({ salesOrder: '', lineItem: '', notes: '' });
+                                setView('form');
+                            }}
+                            className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer"
+                            style={{ color: theme.colors.textSecondary }}
+                        >
+                            Enter Details Manually
+                        </div>
+                        <h2 className="font-bold text-lg pt-4" style={{ color: theme.colors.textPrimary }}>
+                            Previous Requests
+                        </h2>
+                        <RequestsList />
+                    </div>
+                )}
+
+                {view === 'form' && <ReplacementForm />}
+            </div>
+
+            <Modal
+                show={!!selectedRequest}
+                onClose={handleCloseModal}
+                title={selectedRequest?.name || selectedRequest?.product || ''}
                 theme={theme}
             >
                 {selectedRequest && (
@@ -403,37 +337,11 @@ export const ReplacementsScreen = ({ theme, onNavigate }) => {
                                     {selectedRequest.status}
                                 </span>
                             </div>
-                            <span 
-                                className="px-3 py-1 rounded-full text-sm font-medium"
-                                style={{ 
-                                    backgroundColor: getUrgencyColor(selectedRequest.urgency) + '20',
-                                    color: getUrgencyColor(selectedRequest.urgency)
-                                }}
-                            >
-                                {selectedRequest.urgency} Priority
-                            </span>
                         </div>
-                        
                         <div className="grid grid-cols-2 gap-4 text-sm">
                             <div>
-                                <div className="font-semibold mb-1" style={{ color: theme.colors.textSecondary }}>Product</div>
-                                <div style={{ color: theme.colors.textPrimary }}>
-                                    {selectedRequest.productSeries} - {selectedRequest.model}
-                                </div>
-                            </div>
-                            <div>
-                                <div className="font-semibold mb-1" style={{ color: theme.colors.textSecondary }}>Quantity</div>
-                                <div style={{ color: theme.colors.textPrimary }}>{selectedRequest.quantity}</div>
-                            </div>
-                            <div>
-                                <div className="font-semibold mb-1" style={{ color: theme.colors.textSecondary }}>Reason</div>
-                                <div style={{ color: theme.colors.textPrimary }}>{selectedRequest.reason}</div>
-                            </div>
-                            <div>
-                                <div className="font-semibold mb-1" style={{ color: theme.colors.textSecondary }}>Expected Date</div>
-                                <div style={{ color: theme.colors.textPrimary }}>
-                                    {new Date(selectedRequest.expectedDate).toLocaleDateString()}
-                                </div>
+                                <div className="font-semibold mb-1" style={{ color: theme.colors.textSecondary }}>Date</div>
+                                <div style={{ color: theme.colors.textPrimary }}>{new Date(selectedRequest.date).toLocaleDateString()}</div>
                             </div>
                         </div>
                     </div>

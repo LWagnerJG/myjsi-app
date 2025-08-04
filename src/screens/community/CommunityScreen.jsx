@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { PageTitle } from '../../components/common/PageTitle.jsx';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { Modal } from '../../components/common/Modal.jsx';
@@ -7,6 +7,14 @@ import * as Data from '../../data.jsx';
 
 export const CommunityScreen = ({ theme, posts, polls, likedPosts, onToggleLike, pollChoices, onPollVote, openCreateContentModal }) => {
     const [selectedPost, setSelectedPost] = useState(null);
+    const [isScrolled, setIsScrolled] = useState(false);
+    const scrollContainerRef = useRef(null);
+
+    const handleScroll = useCallback(() => {
+        if (scrollContainerRef.current) {
+            setIsScrolled(scrollContainerRef.current.scrollTop > 10);
+        }
+    }, []);
 
     const allContent = useMemo(() => {
         const postsList = posts || Data.INITIAL_POSTS || [];
@@ -210,18 +218,32 @@ export const CommunityScreen = ({ theme, posts, polls, likedPosts, onToggleLike,
 
     return (
         <div className="flex flex-col h-full">
-            <PageTitle title="Community" theme={theme}>
-                <button
-                    onClick={openCreateContentModal}
-                    className="flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold"
-                    style={{ backgroundColor: theme.colors.accent, color: 'white' }}
-                >
-                    <Plus className="w-4 h-4" />
-                    <span>Post</span>
-                </button>
-            </PageTitle>
+            <div 
+                className={`sticky top-0 z-10 transition-shadow duration-200 ${isScrolled ? 'shadow-md' : ''}`}
+                style={{
+                    backgroundColor: `${theme.colors.background}e6`,
+                    backdropFilter: 'blur(10px)',
+                    WebkitBackdropFilter: 'blur(10px)',
+                    borderBottom: `1px solid ${isScrolled ? theme.colors.border + '40' : 'transparent'}`
+                }}
+            >
+                <PageTitle title="Community" theme={theme}>
+                    <button
+                        onClick={openCreateContentModal}
+                        className="flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold"
+                        style={{ backgroundColor: theme.colors.accent, color: 'white' }}
+                    >
+                        <Plus className="w-4 h-4" />
+                        <span>Post</span>
+                    </button>
+                </PageTitle>
+            </div>
 
-            <div className="flex-1 overflow-y-auto scrollbar-hide">
+            <div 
+                ref={scrollContainerRef}
+                onScroll={handleScroll}
+                className="flex-1 overflow-y-auto scrollbar-hide"
+            >
                 <div className="p-4 space-y-4">
                     {allContent.length > 0 ? (
                         allContent.map(renderContentItem)

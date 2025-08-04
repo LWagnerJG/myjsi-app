@@ -10,7 +10,7 @@ import { ProjectsScreen } from '../screens/projects/ProjectsScreen.jsx';
 import { CommunityScreen } from '../screens/community/CommunityScreen.jsx';
 import { SamplesScreen } from '../screens/samples/SamplesScreen.jsx';
 import { CommissionRatesScreen } from '../screens/resources/CommissionRatesScreen.jsx';
-import { SampleDiscountsScreen } from '../screens/sales/SampleDiscountsScreen.jsx';
+import { SampleDiscountsScreen } from '../screens/resources/SampleDiscountsScreen.jsx';
 import { LeadTimesScreen } from '../screens/resources/LeadTimesScreen.jsx';
 import { HomeScreen } from '../screens/home/HomeScreen.jsx';
 import { NewLeadScreen } from '../screens/projects/NewLeadScreen.jsx';
