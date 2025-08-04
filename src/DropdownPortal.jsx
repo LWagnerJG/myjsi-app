@@ -1,7 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react'
 import ReactDOM from 'react-dom'
 
-
 import {
     DROPDOWN_MAX_HEIGHT,
     DROPDOWN_PORTAL_HEIGHT,
@@ -13,13 +12,25 @@ import {
 export function DropdownPortal({ parentRef, onClose, children }) {
     const portalRef = useRef(null)
     const [pos, setPos] = useState({ top: 0, left: 0, width: 0 })
+    const [isPositioned, setIsPositioned] = useState(false)
 
     // Calculate position (and flip up/down) on mount and whenever parentRef moves
     useEffect(() => {
         if (!parentRef.current) return
 
         const rect = parentRef.current.getBoundingClientRect()
-        const dropdownHeight = 320  // must match your max-h-80
+        
+        // Try to get the actual dropdown height from children if available
+        let dropdownHeight = 320; // Default fallback
+        
+        // Look for height in children's style or calculate from content
+        if (React.isValidElement(children)) {
+            const childProps = React.Children.toArray(children)[0]?.props;
+            if (childProps?.style?.height) {
+                dropdownHeight = parseInt(childProps.style.height) || 320;
+            }
+        }
+        
         let top = rect.bottom + 4
         if (top + dropdownHeight > window.innerHeight) {
             top = rect.top - dropdownHeight - 4
@@ -30,7 +41,12 @@ export function DropdownPortal({ parentRef, onClose, children }) {
             left: rect.left,
             width: rect.width
         })
-    }, [parentRef.current])
+        
+        // Set positioned flag after a microtask to ensure position is applied
+        requestAnimationFrame(() => {
+            setIsPositioned(true)
+        })
+    }, [parentRef.current, children])
 
     // Close when clicking outside
     useEffect(() => {
@@ -55,7 +71,10 @@ export function DropdownPortal({ parentRef, onClose, children }) {
             style={{
                 top: `${pos.top}px`,
                 left: `${pos.left}px`,
-                width: `${pos.width}px`
+                width: `${pos.width}px`,
+                opacity: isPositioned ? 1 : 0,
+                visibility: isPositioned ? 'visible' : 'hidden',
+                transition: 'opacity 0.15s ease-out'
             }}
         >
             {children}
