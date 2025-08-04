@@ -1,36 +1,35 @@
-import React, { 
-    useState, 
-    useMemo, 
-    useCallback, 
-    useRef, 
+import React, {
+    useState,
+    useMemo,
+    useCallback,
+    useRef,
     useEffect,
-    useLayoutEffect 
+    useLayoutEffect
 } from 'react';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { SearchInput } from '../../components/common/SearchInput.jsx';
-import { 
-    List, 
-    BarChart2, 
-    ArrowRight, 
+import {
+    List,
+    BarChart2,
+    ArrowRight,
     Package,
     Armchair,
     Grid,
-    Filter 
+    Filter
 } from 'lucide-react';
 import * as Data from '../../data.jsx';
 
 // Memoized category card component for better performance
-const CategoryCard = React.memo(({ 
-    category, 
-    theme, 
-    viewMode, 
+const CategoryCard = React.memo(({
+    category,
+    theme,
+    viewMode,
     onClick,
-    className = '' 
+    className = ''
 }) => {
     const handleClick = useCallback(() => {
         onClick(category);
     }, [category, onClick]);
-
     if (viewMode === 'grid') {
         return (
             <GlassCard
@@ -47,11 +46,10 @@ const CategoryCard = React.memo(({
                             key={index}
                             src={img}
                             alt={`${category.name} example ${index + 1}`}
-                            className={`rounded-md object-cover transition-opacity ${
-                                category.images.length === 1 && category.name !== 'Swivels'
+                            className={`rounded-md object-cover transition-opacity ${category.images.length === 1 && category.name !== 'Swivels'
                                     ? 'w-2/3 h-32'
                                     : 'w-16 h-16'
-                            }`}
+                                }`}
                             loading="lazy"
                         />
                     ))}
@@ -59,7 +57,6 @@ const CategoryCard = React.memo(({
             </GlassCard>
         );
     }
-
     return (
         <GlassCard
             theme={theme}
@@ -83,7 +80,6 @@ const CategoryCard = React.memo(({
         </GlassCard>
     );
 });
-
 CategoryCard.displayName = 'CategoryCard';
 
 // Toggle button component
@@ -101,22 +97,20 @@ const ViewModeToggle = React.memo(({ viewMode, onToggle, theme }) => (
         )}
     </button>
 ));
-
 ViewModeToggle.displayName = 'ViewModeToggle';
 
-// Sticky header component 
-const StickyHeader = React.memo(({ 
-    isScrolled, 
-    theme, 
-    viewMode, 
-    onToggleViewMode, 
-    searchTerm, 
-    onSearchChange 
+// Sticky header component
+const StickyHeader = React.memo(({
+    isScrolled,
+    theme,
+    viewMode,
+    onToggleViewMode,
+    searchTerm,
+    onSearchChange
 }) => (
     <div
-        className={`sticky top-0 z-10 transition-all duration-300 ${
-            isScrolled ? 'shadow-md' : ''
-        }`}
+        className={`sticky top-0 z-10 transition-all duration-300 ${isScrolled ? 'shadow-md' : ''
+            }`}
         style={{
             backgroundColor: isScrolled ? `${theme.colors.background}e0` : 'transparent',
             backdropFilter: isScrolled ? 'blur(12px)' : 'none',
@@ -130,17 +124,17 @@ const StickyHeader = React.memo(({
                 onChange={onSearchChange}
                 placeholder="Search products..."
                 theme={theme}
-                className="flex-grow"
+                className="flex-grow rounded-full"
+                style={{ borderRadius: '50px' }}
             />
-            <ViewModeToggle 
-                viewMode={viewMode} 
-                onToggle={onToggleViewMode} 
-                theme={theme} 
+            <ViewModeToggle
+                viewMode={viewMode}
+                onToggle={onToggleViewMode}
+                theme={theme}
             />
         </div>
     </div>
 ));
-
 StickyHeader.displayName = 'StickyHeader';
 
 // Empty state component
@@ -155,7 +149,6 @@ const EmptyState = React.memo(({ searchTerm, theme }) => (
         </p>
     </GlassCard>
 ));
-
 EmptyState.displayName = 'EmptyState';
 
 export const ProductsScreen = ({ theme, onNavigate }) => {
@@ -174,7 +167,7 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
     // Memoized filtered categories with better search logic
     const filteredCategories = useMemo(() => {
         if (!searchTerm.trim()) return Data.PRODUCTS_CATEGORIES_DATA || [];
-        
+
         const lowerSearch = searchTerm.toLowerCase();
         return Data.PRODUCTS_CATEGORIES_DATA.filter(category =>
             category.name.toLowerCase().includes(lowerSearch) ||
@@ -209,7 +202,6 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
                 searchTerm={searchTerm}
                 onSearchChange={handleSearchChange}
             />
-
             <div
                 ref={scrollContainerRef}
                 onScroll={handleScroll}
@@ -218,7 +210,7 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
                 {filteredCategories.length === 0 ? (
                     <EmptyState searchTerm={searchTerm} theme={theme} />
                 ) : (
-                    <div className={viewMode === 'grid' ? 'space-y-4' : 'space-y-2'}>
+                    <div className={viewMode === 'grid' ? 'space-y-6' : 'space-y-2'} style={{ paddingTop: '8px' }}>
                         {filteredCategories.map(category => (
                             <CategoryCard
                                 key={category.name}
@@ -226,6 +218,7 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
                                 theme={theme}
                                 viewMode={viewMode}
                                 onClick={handleCategoryClick}
+                                className={category.name === 'Benches' ? 'mt-4' : ''}
                             />
                         ))}
                     </div>

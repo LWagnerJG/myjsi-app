@@ -89,10 +89,6 @@ export const ReplacementsScreen = ({ theme, onNavigate }) => {
 
     const startScanning = useCallback(() => {
         const initScanner = async () => {
-            if (!('BarcodeDetector' in window)) {
-                alert('Barcode Detector API is not supported in this browser.');
-                return;
-            }
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
                 if (videoRef.current) {
@@ -101,20 +97,20 @@ export const ReplacementsScreen = ({ theme, onNavigate }) => {
                     setIsScanning(true);
                 }
 
-                const detector = new BarcodeDetector({ formats: ['qr_code'] });
-                intervalRef.current = setInterval(async () => {
+                intervalRef.current = setInterval(() => {
                     if (videoRef.current?.readyState === videoRef.current?.HAVE_ENOUGH_DATA) {
                         if (canvasRef.current) {
                             canvasRef.current.height = videoRef.current.videoHeight;
                             canvasRef.current.width = videoRef.current.videoWidth;
                             const ctx = canvasRef.current.getContext('2d');
                             ctx.drawImage(videoRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
-                            const barcodes = await detector.detect(canvasRef.current);
-                            if (barcodes.length > 0) {
+                            const imageData = ctx.getImageData(0, 0, canvasRef.current.width, canvasRef.current.height);
+                            const code = jsQR(imageData.data, canvasRef.current.width, canvasRef.current.height);
+                            if (code) {
                                 setFormData({
                                     salesOrder: 'SO-450080',
                                     lineItem: '001',
-                                    notes: `Scanned from QR: ${barcodes[0].rawValue}`,
+                                    notes: `Scanned from QR: ${code.data}`,
                                 });
                                 stopScanning();
                                 setView('form');
