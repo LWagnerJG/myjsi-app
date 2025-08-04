@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { X } from 'lucide-react';
 import { FormInput } from '../../components/forms/FormInput.jsx';
 import { PortalNativeSelect } from '../../components/forms/PortalNativeSelect.jsx';
@@ -21,6 +21,7 @@ const MultiSelectCombobox = ({
     theme 
 }) => {
     const [searchValue, setSearchValue] = useState('');
+    const inputRef = useRef(null); // Create a ref for the input wrapper
 
     const handleSelectItem = (item) => {
         if (!selectedItems.includes(item)) {
@@ -41,17 +42,20 @@ const MultiSelectCombobox = ({
 
     return (
         <div className="space-y-2">
-            <AutoCompleteCombobox
-                label={label}
-                value={searchValue}
-                onChange={setSearchValue}
-                onSelect={handleSelectItem}
-                onAddNew={handleAddNew}
-                placeholder={placeholder}
-                options={availableOptions}
-                theme={theme}
-                resetOnSelect={true}
-            />
+            <div ref={inputRef}> {/* Attach the ref to the div wrapping the AutoCompleteCombobox */}
+                <AutoCompleteCombobox
+                    label={label}
+                    value={searchValue}
+                    onChange={setSearchValue}
+                    onSelect={handleSelectItem}
+                    onAddNew={handleAddNew}
+                    placeholder={placeholder}
+                    options={availableOptions}
+                    theme={theme}
+                    resetOnSelect={true}
+                    anchorRef={inputRef} // Pass the ref to the child
+                />
+            </div>
             
             {/* Display selected items */}
             {selectedItems.length > 0 && (

@@ -14,10 +14,12 @@ export const AutoCompleteCombobox = React.memo(({
     theme,
     dropdownClassName = '',
     resetOnSelect = false,
+    anchorRef, // Accept an optional anchorRef
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [pos, setPos] = useState({ top: 0, left: 0, width: 0, height: 'auto' });
-    const wrapRef = useRef(null);
+    const internalWrapRef = useRef(null);
+    const wrapRef = anchorRef || internalWrapRef; // Use the passed ref, or the internal one
     const dropRef = useRef(null);
 
     const filtered = useMemo(() => {
@@ -142,7 +144,7 @@ export const AutoCompleteCombobox = React.memo(({
     }, [filtered.length, pos.height]);
 
     return (
-        <div ref={wrapRef} className="space-y-2">
+        <div ref={internalWrapRef} className="space-y-2">
             {label && (
                 <label className="block text-sm font-semibold px-3" style={{ color: theme.colors.textSecondary }}>
                     {label}
