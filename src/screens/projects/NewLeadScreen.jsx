@@ -166,12 +166,11 @@ const WinkHoopzOptions = ({ theme, product, productIndex, onUpdate }) => {
     return (
         <div className="mt-3 pt-3 border-t" style={{ borderColor: theme.colors.border }}>
             <PortalNativeSelect
-                label="Select poly"
                 value={product.polyColor}
                 onChange={(e) => onUpdate(productIndex, 'polyColor', e.target.value)}
-                placeholder="Select a poly color"
+                placeholder="Select poly color"
                 theme={theme}
-                options={(Data.JSI_POLY_COLORS || []).map(c => ({ value: c, label: c }))}
+                options={(Data.SAMPLES_DATA || []).map(c => ({ value: c.color, label: c.color }))}
             />
         </div>
     );
