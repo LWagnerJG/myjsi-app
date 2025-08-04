@@ -1109,6 +1109,7 @@ export const CartScreen = ({
         </>
     );
 };
+
 // Resource detail screen placeholder
 export const ResourceDetailScreen = ({ theme, currentScreen }) => (
     <div className="p-4">
@@ -1519,9 +1520,26 @@ export const ReplacementsScreen = ({ theme, onNavigate, setSuccessMessage }) => 
                                 <input type="file" ref={fileInputRef} multiple accept="image/*" className="hidden" onChange={handleFileChange} />
                             </div>
 
-                            <button onClick={handleSubmit} className="w-full py-3.5 rounded-full font-bold transition-colors text-white" style={{ backgroundColor: theme.colors.accent }}>
-                                Submit Request
-                            </button>
+                            <div className="flex space-x-3 pt-2">
+                                <button 
+                                    onClick={() => setView('list')} 
+                                    className="flex-1 font-semibold py-3 px-6 rounded-full transition-colors"
+                                    style={{ 
+                                        backgroundColor: theme.colors.subtle, 
+                                        color: theme.colors.textPrimary 
+                                    }}
+                                >
+                                    Back to Requests
+                                </button>
+                                <button 
+                                    onClick={handleSubmit} 
+                                    disabled={!formData.so || !formData.lineItem}
+                                    className="flex-1 font-bold py-3 px-6 rounded-full text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed" 
+                                    style={{ backgroundColor: theme.colors.accent }}
+                                >
+                                    Submit Replacement
+                                </button>
+                            </div>
                         </div>
                     </GlassCard>
                 </div>
@@ -1848,5 +1866,218 @@ export const CreateContentModal = ({ close, theme, onAdd }) => {
                 {renderForm()}
             </div>
         </Modal>
+    );
+};
+
+export const SettingsScreen = ({ theme, userSettings, onUpdateUserSettings, onNavigate }) => {
+    const [localSettings, setLocalSettings] = useState(userSettings || {});
+    const [isDirty, setIsDirty] = useState(false);
+
+    const handleSettingChange = useCallback((key, value) => {
+        setLocalSettings(prev => ({ ...prev, [key]: value }));
+        setIsDirty(true);
+    }, []);
+
+    const handleSave = useCallback(() => {
+        onUpdateUserSettings(localSettings);
+        setIsDirty(false);
+        alert('Settings saved successfully!');
+    }, [localSettings, onUpdateUserSettings]);
+
+    const handleReset = useCallback(() => {
+        setLocalSettings(userSettings || {});
+        setIsDirty(false);
+    }, [userSettings]);
+
+    const settingsSections = [
+        {
+            title: "Account",
+            icon: User,
+            settings: [
+                {
+                    key: "firstName",
+                    label: "First Name",
+                    type: "text",
+                    value: localSettings.firstName || "",
+                    placeholder: "Enter your first name"
+                },
+                {
+                    key: "lastName", 
+                    label: "Last Name",
+                    type: "text",
+                    value: localSettings.lastName || "",
+                    placeholder: "Enter your last name"
+                },
+                {
+                    key: "email",
+                    label: "Email",
+                    type: "email",
+                    value: localSettings.email || "",
+                    placeholder: "Enter your email"
+                }
+            ]
+        },
+        {
+            title: "Notifications",
+            icon: Bell,
+            settings: [
+                {
+                    key: "emailNotifications",
+                    label: "Email Notifications",
+                    type: "toggle",
+                    value: localSettings.emailNotifications ?? true,
+                    description: "Receive email updates about orders and activities"
+                },
+                {
+                    key: "pushNotifications",
+                    label: "Push Notifications", 
+                    type: "toggle",
+                    value: localSettings.pushNotifications ?? true,
+                    description: "Receive push notifications on your device"
+                }
+            ]
+        },
+        {
+            title: "Privacy",
+            icon: Shield,
+            settings: [
+                {
+                    key: "profileVisibility",
+                    label: "Profile Visibility",
+                    type: "select",
+                    value: localSettings.profileVisibility || "public",
+                    options: [
+                        { value: "public", label: "Public" },
+                        { value: "private", label: "Private" },
+                        { value: "contacts", label: "Contacts Only" }
+                    ]
+                }
+            ]
+        },
+        {
+            title: "Preferences",
+            icon: Palette,
+            settings: [
+                {
+                    key: "theme",
+                    label: "App Theme",
+                    type: "select", 
+                    value: localSettings.theme || "auto",
+                    options: [
+                        { value: "light", label: "Light" },
+                        { value: "dark", label: "Dark" },
+                        { value: "auto", label: "Auto" }
+                    ]
+                },
+                {
+                    key: "language",
+                    label: "Language",
+                    type: "select",
+                    value: localSettings.language || "en",
+                    options: [
+                        { value: "en", label: "English" },
+                        { value: "es", label: "Spanish" },
+                        { value: "fr", label: "French" }
+                    ]
+                }
+            ]
+        }
+    ];
+
+    const renderSetting = (setting) => {
+        switch (setting.type) {
+            case 'text':
+            case 'email':
+                return (
+                    <FormInput
+                        label={setting.label}
+                        type={setting.type}
+                        value={setting.value}
+                        onChange={(e) => handleSettingChange(setting.key, e.target.value)}
+                        placeholder={setting.placeholder}
+                        theme={theme}
+                    />
+                );
+            case 'toggle':
+                return (
+                    <PermissionToggle
+                        label={setting.label}
+                        isEnabled={setting.value}
+                        onToggle={() => handleSettingChange(setting.key, !setting.value)}
+                        theme={theme}
+                    />
+                );
+            case 'select':
+                return (
+                    <CustomSelect
+                        label={setting.label}
+                        value={setting.value}
+                        onChange={(e) => handleSettingChange(setting.key, e.target.value)}
+                        options={setting.options}
+                        theme={theme}
+                    />
+                );
+            default:
+                return null;
+        }
+    };
+
+    return (
+        <div className="flex flex-col h-full">
+            <PageTitle title="Settings" theme={theme} onBack={() => onNavigate('home')} showBack={false} />
+            
+            <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4 scrollbar-hide">
+                {settingsSections.map((section, index) => (
+                    <GlassCard key={index} theme={theme} className="p-4">
+                        <div className="flex items-center space-x-3 mb-4 pb-2 border-b" style={{ borderColor: theme.colors.border }}>
+                            <section.icon className="w-5 h-5" style={{ color: theme.colors.accent }} />
+                            <h2 className="text-lg font-bold" style={{ color: theme.colors.textPrimary }}>
+                                {section.title}
+                            </h2>
+                        </div>
+                        
+                        <div className="space-y-4">
+                            {section.settings.map((setting, settingIndex) => (
+                                <div key={settingIndex}>
+                                    {renderSetting(setting)}
+                                    {setting.description && (
+                                        <p className="text-xs mt-1 px-1" style={{ color: theme.colors.textSecondary }}>
+                                            {setting.description}
+                                        </p>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </GlassCard>
+                ))}
+
+                {/* Save/Reset buttons */}
+                {isDirty && (
+                    <div className="sticky bottom-4 pt-4">
+                        <GlassCard theme={theme} className="p-4">
+                            <div className="flex space-x-3">
+                                <button
+                                    onClick={handleReset}
+                                    className="flex-1 py-3 px-6 rounded-full font-semibold transition-colors"
+                                    style={{ 
+                                        backgroundColor: theme.colors.subtle, 
+                                        color: theme.colors.textPrimary 
+                                    }}
+                                >
+                                    Reset
+                                </button>
+                                <button
+                                    onClick={handleSave}
+                                    className="flex-1 py-3 px-6 rounded-full font-bold text-white transition-colors"
+                                    style={{ backgroundColor: theme.colors.accent }}
+                                >
+                                    Save Changes
+                                </button>
+                            </div>
+                        </GlassCard>
+                    </div>
+                )}
+            </div>
+        </div>
     );
 };
