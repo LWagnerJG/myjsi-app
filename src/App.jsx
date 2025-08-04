@@ -293,7 +293,13 @@ function App() {
     };
 
     return (
-        <div className="h-screen-safe w-screen font-sans flex flex-col relative" style={{ backgroundColor: currentTheme.colors.background }}>
+        <div 
+            className="h-screen-safe w-screen font-sans flex flex-col relative" 
+            style={{ 
+                backgroundColor: currentTheme.colors.background,
+                '--background-color': currentTheme.colors.background
+            }}
+        >
             <AppHeader
                 theme={currentTheme}
                 userName={userSettings.firstName}
@@ -304,7 +310,10 @@ function App() {
                 isDarkMode={isDarkMode}
                 onToggleDark={() => setIsDarkMode(d => !d)}
             />
-            <div className="flex-1 pt-[88px] overflow-hidden">
+            <div 
+                className="flex-1 pt-[88px] overflow-hidden"
+                style={{ backgroundColor: currentTheme.colors.background }}
+            >
                 <AnimatedScreenWrapper 
                     screenKey={currentScreen} 
                     direction={lastNavigationDirection}

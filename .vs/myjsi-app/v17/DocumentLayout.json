@@ -41,6 +41,14 @@
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\components\\common\\AnimatedScreenWrapper.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\components\\common\\AnimatedScreenWrapper.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\components\\common\\AnimatedScreenWrapper.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\components\\common\\AnimatedScreenWrapper.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\components\\common\\AnimatedScreenWrapper.css||{8B382828-6202-11D1-8870-0000F87579D2}|",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\components\\common\\AnimatedScreenWrapper.css||{8B382828-6202-11D1-8870-0000F87579D2}|"
     }
   ],
   "DocumentGroupContainers": [
@@ -50,8 +58,33 @@
       "DocumentGroups": [
         {
           "DockedHeight": 239,
-          "SelectedChildIndex": 4,
+          "SelectedChildIndex": 6,
           "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "AnimatedScreenWrapper.css",
+              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\components\\common\\AnimatedScreenWrapper.css",
+              "RelativeDocumentMoniker": "src\\components\\common\\AnimatedScreenWrapper.css",
+              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\components\\common\\AnimatedScreenWrapper.css",
+              "RelativeToolTip": "src\\components\\common\\AnimatedScreenWrapper.css",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2025-08-04T01:17:43.558Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "AnimatedScreenWrapper.css",
+              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\components\\common\\AnimatedScreenWrapper.css",
+              "RelativeDocumentMoniker": "src\\components\\common\\AnimatedScreenWrapper.css",
+              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\components\\common\\AnimatedScreenWrapper.css",
+              "RelativeToolTip": "src\\components\\common\\AnimatedScreenWrapper.css",
+              "ViewState": "AgIAAOsAAAAAAAAAAIBJwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2025-08-04T01:17:43.357Z",
+              "EditorCaption": ""
+            },
             {
               "$type": "Document",
               "DocumentIndex": 9,
@@ -60,7 +93,7 @@
               "RelativeDocumentMoniker": "src\\components\\common\\AnimatedScreenWrapper.jsx",
               "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\components\\common\\AnimatedScreenWrapper.jsx",
               "RelativeToolTip": "src\\components\\common\\AnimatedScreenWrapper.jsx",
-              "ViewState": "AgIAAH4AAAAAAAAAAIBJwAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAIsAAAAAAAAAAIBJwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
               "WhenOpened": "2025-08-03T23:49:50.731Z",
               "EditorCaption": ""
@@ -99,7 +132,7 @@
               "RelativeDocumentMoniker": "src\\App.jsx",
               "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\App.jsx",
               "RelativeToolTip": "src\\App.jsx",
-              "ViewState": "AgIAABEBAAAAAAAAAAAnwAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAACgBAAAAAAAAAAAnwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
               "WhenOpened": "2025-08-02T14:42:55.96Z",
               "EditorCaption": ""

@@ -4,6 +4,7 @@
     height: 100%;
     overflow: hidden;
     touch-action: pan-y; /* Allow vertical scrolling but capture horizontal gestures */
+    background-color: inherit; /* Inherit background from parent */
 }
 
 .screen-slide {
@@ -17,17 +18,27 @@
     -webkit-backface-visibility: hidden;
     transform: translateZ(0);
     -webkit-transform: translateZ(0);
+    background-color: inherit; /* Ensure each slide has proper background */
 }
 
 /* Current screen - default position */
 .screen-slide.current {
     transform: translateX(0%) translateZ(0);
-    z-index: 1;
+    z-index: 2; /* Higher z-index to ensure it's on top during transitions */
 }
 
 /* Next screen - starts off-screen */
 .screen-slide.next {
-    z-index: 2;
+    z-index: 3; /* Highest z-index for incoming screen */
+}
+
+/* Ensure backward navigation shows proper layering */
+.screen-slide.current.exiting.backward {
+    z-index: 3; /* Current screen on top when going backward */
+}
+
+.screen-slide.next.entering.backward {
+    z-index: 1; /* Next screen behind when going backward */
 }
 
 /* Swipe preview screen */
@@ -97,56 +108,64 @@
 
 /* Forward navigation animations */
 .screen-slide.next.entering.forward {
-    animation: slideInFromRight 0.28s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+    animation: slideInFromRight 0.3s cubic-bezier(0.23, 1, 0.32, 1) forwards;
 }
 
 .screen-slide.current.exiting.forward {
-    animation: slideOutToLeft 0.28s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+    animation: slideOutToLeft 0.3s cubic-bezier(0.23, 1, 0.32, 1) forwards;
 }
 
 /* Backward navigation animations */
 .screen-slide.next.entering.backward {
-    animation: slideInFromLeft 0.28s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+    animation: slideInFromLeft 0.3s cubic-bezier(0.23, 1, 0.32, 1) forwards;
 }
 
 .screen-slide.current.exiting.backward {
-    animation: slideOutToRight 0.28s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+    animation: slideOutToRight 0.3s cubic-bezier(0.23, 1, 0.32, 1) forwards;
 }
 
 /* Keyframe animations */
 @keyframes slideInFromRight {
     0% {
         transform: translateX(100%) translateZ(0);
+        opacity: 1;
     }
     100% {
         transform: translateX(0%) translateZ(0);
+        opacity: 1;
     }
 }
 
 @keyframes slideOutToLeft {
     0% {
         transform: translateX(0%) translateZ(0);
+        opacity: 1;
     }
     100% {
         transform: translateX(-100%) translateZ(0);
+        opacity: 1;
     }
 }
 
 @keyframes slideInFromLeft {
     0% {
         transform: translateX(-100%) translateZ(0);
+        opacity: 1;
     }
     100% {
         transform: translateX(0%) translateZ(0);
+        opacity: 1;
     }
 }
 
 @keyframes slideOutToRight {
     0% {
         transform: translateX(0%) translateZ(0);
+        opacity: 1;
     }
     100% {
         transform: translateX(100%) translateZ(0);
+        opacity: 1;
     }
 }
 
@@ -162,11 +181,17 @@
     -webkit-overflow-scrolling: touch;
 }
 
-/* Ensure no flash of content */
+/* Ensure no flash of content and proper opacity during transitions */
 .screen-slide.current.exiting,
 .screen-slide.next.entering {
     opacity: 1;
     visibility: visible;
+}
+
+/* Prevent any background bleeding during transitions */
+.screen-slide.current.exiting.backward,
+.screen-slide.next.entering.backward {
+    background-color: inherit;
 }
 
 /* Enhanced touch responsiveness */
@@ -197,4 +222,17 @@
         -ms-touch-action: pan-y;
         -webkit-overflow-scrolling: touch;
     }
+}
+
+/* Additional fix for background bleeding */
+.animated-screen-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: inherit;
+    z-index: -1;
+    pointer-events: none;
 }

@@ -28,6 +28,11 @@ export const AnimatedScreenWrapper = ({ children, screenKey, direction = 'forwar
             setIsAnimating(true);
             setNextContent(children);
             
+            // Immediately set the background for the container to prevent showing through
+            if (containerRef.current) {
+                containerRef.current.style.backgroundColor = direction === 'backward' ? 'var(--bg-color)' : '';
+            }
+            
             animationTimeoutRef.current = setTimeout(() => {
                 setCurrentScreenKey(screenKey);
                 setCurrentContent(children);
@@ -35,7 +40,12 @@ export const AnimatedScreenWrapper = ({ children, screenKey, direction = 'forwar
                 setIsAnimating(false);
                 // Reset position after a standard navigation completes
                 setTranslateX(0);
-            }, 300); // CSS animation duration
+                
+                // Clear background override
+                if (containerRef.current) {
+                    containerRef.current.style.backgroundColor = '';
+                }
+            }, 320); // Slightly longer than CSS animation duration to ensure complete transition
         } else {
             // If only content changes, not the screen key
             setCurrentContent(children);
@@ -44,7 +54,7 @@ export const AnimatedScreenWrapper = ({ children, screenKey, direction = 'forwar
         return () => {
             if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
         };
-    }, [screenKey, children, currentScreenKey]);
+    }, [screenKey, children, currentScreenKey, direction]);
 
     // Touch handlers for swipe-to-go-back
     const handleTouchStart = useCallback((e) => {
@@ -105,6 +115,9 @@ export const AnimatedScreenWrapper = ({ children, screenKey, direction = 'forwar
         <div 
             ref={containerRef}
             className="animated-screen-container"
+            style={{
+                '--bg-color': 'var(--background-color, #ffffff)'
+            }}
             {...touchHandlers}
         >
             {/* Current Screen */}
