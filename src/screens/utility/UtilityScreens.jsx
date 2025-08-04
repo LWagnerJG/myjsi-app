@@ -1579,136 +1579,274 @@ export const ReplacementsScreen = ({ theme, onNavigate, setSuccessMessage }) => 
     );
 };
 
-export const CreateContentModal = ({ close, theme, onAdd }) => (
-    <Modal show={true} onClose={close} title="Create Content" theme={theme}>
-        <div className="p-4">
-            <p style={{ color: theme.colors.textPrimary }}>Content creation form coming soon.</p>
-        </div>
-    </Modal>
-);
+export const CreateContentModal = ({ close, theme, onAdd }) => {
+    const [type, setType] = useState(null);
+    const [text, setText] = useState('');
+    const [file, setFile] = useState(null);
+    const [question, setQuestion] = useState('');
+    const [optA, setOptA] = useState('');
+    const [optB, setOptB] = useState('');
+    const [optC, setOptC] = useState('');
+    const [optD, setOptD] = useState('');
+    const fileInputRef = useRef(null);
 
-// Refined SettingsScreen for a cleaner, more intuitive user experience
-export const SettingsScreen = ({ theme, onNavigate, userSettings, setUserSettings, setSuccessMessage }) => {
-    const [localSettings, setLocalSettings] = useState(userSettings);
-    const [hasChanges, setHasChanges] = useState(false);
+    const handleSubmit = () => {
+        if (type === 'post') {
+            if (!text.trim()) {
+                alert('Please enter some text for your post.');
+                return;
+            }
+            const newPost = {
+                id: Date.now(),
+                user: { name: 'You', avatar: '' },
+                timeAgo: 'just now',
+                text: text.trim(),
+                image: file ? URL.createObjectURL(file) : null,
+                likes: 0,
+                comments: [],
+            };
+            onAdd('post', newPost);
+        }
+        
+        if (type === 'poll') {
+            if (!question.trim() || !optA.trim() || !optB.trim()) {
+                alert('Please fill out the question and at least two options.');
+                return;
+            }
+            const options = [
+                { id: 'a', text: optA.trim(), votes: 0 },
+                { id: 'b', text: optB.trim(), votes: 0 },
+            ];
+            if (optC.trim()) options.push({ id: 'c', text: optC.trim(), votes: 0 });
+            if (optD.trim()) options.push({ id: 'd', text: optD.trim(), votes: 0 });
 
-    useEffect(() => {
-        setLocalSettings(userSettings);
-    }, [userSettings]);
-
-    const handleSettingChange = (key, value) => {
-        setLocalSettings(prev => ({ ...prev, [key]: value }));
-        if (!hasChanges) setHasChanges(true);
+            const newPoll = {
+                id: Date.now(),
+                user: { name: 'You', avatar: '' },
+                timeAgo: 'just now',
+                question: question.trim(),
+                options,
+            };
+            onAdd('poll', newPoll);
+        }
+        
+        // Reset form and close
+        setText('');
+        setFile(null);
+        setQuestion('');
+        setOptA('');
+        setOptB('');
+        setOptC('');
+        setOptD('');
+        close();
     };
 
-    const handleSave = () => {
-        setUserSettings(localSettings);
-        setHasChanges(false);
-        setSuccessMessage("Settings Saved!");
-        setTimeout(() => setSuccessMessage(""), 2000);
+    const handleFileChange = (e) => {
+        if (e.target.files && e.target.files[0]) {
+            setFile(e.target.files[0]);
+        }
     };
 
-    const TShirtIcon = ({ color }) => (
-        <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M20.38 3.46L16 2a4 4 0 0 0-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z" />
-        </svg>
+    const removeFile = () => {
+        setFile(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
+    const OptionButton = ({ icon: Icon, title, description, onClick }) => (
+        <button 
+            onClick={onClick} 
+            className="w-full text-left p-4 rounded-2xl flex items-center space-x-4 transition-all duration-200 hover:scale-[0.98] active:scale-[0.96]" 
+            style={{ backgroundColor: theme.colors.subtle }}
+        >
+            <div className="p-3 rounded-full" style={{ backgroundColor: theme.colors.surface }}>
+                <Icon className="w-6 h-6" style={{ color: theme.colors.accent }} />
+            </div>
+            <div>
+                <p className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>{title}</p>
+                <p className="text-sm" style={{ color: theme.colors.textSecondary }}>{description}</p>
+            </div>
+        </button>
     );
 
-    return (
-        <div className="flex flex-col h-full">
-            <div className="flex-1 overflow-y-auto px-4 py-6 space-y-5 scrollbar-hide">
-                
-                {/* Account Information Section - Direct Editing */}
-                <GlassCard theme={theme} className="p-4">
-                    <div className="flex items-center space-x-3 mb-4">
-                        <User className="w-5 h-5" style={{ color: theme.colors.accent }} />
-                        <h3 className="font-semibold text-lg" style={{ color: theme.colors.textPrimary }}>
-                            Account
-                        </h3>
-                    </div>
+    const renderForm = () => {
+        switch (type) {
+            case 'post':
+                return (
                     <div className="space-y-4">
-                        <FormInput 
-                            label="First Name" 
-                            value={localSettings.firstName} 
-                            onChange={e => handleSettingChange('firstName', e.target.value)} 
-                            theme={theme} 
-                        />
-                        <FormInput 
-                            label="Last Name" 
-                            value={localSettings.lastName} 
-                            onChange={e => handleSettingChange('lastName', e.target.value)} 
-                            theme={theme} 
-                        />
-                    </div>
-                </GlassCard>
-
-                {/* Notifications Section - Simplified Toggle */}
-                <GlassCard theme={theme} className="p-4">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                            <Bell className="w-5 h-5" style={{ color: theme.colors.accent }} />
-                            <h3 className="font-semibold text-lg" style={{ color: theme.colors.textPrimary }}>
-                                Notifications
-                            </h3>
+                        <div className="flex items-center space-x-3 pb-2">
+                            <MessageSquare className="w-6 h-6" style={{ color: theme.colors.accent }} />
+                            <h3 className="text-xl font-bold" style={{ color: theme.colors.textPrimary }}>New Post</h3>
                         </div>
-                        <button
-                            onClick={() => handleSettingChange('notifications', !localSettings.notifications)}
-                            className={`w-12 h-7 rounded-full transition-colors flex items-center p-1 ${
-                                localSettings.notifications ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
-                            }`}
-                        >
-                            <div className={`w-5 h-5 bg-white rounded-full shadow-sm transition-transform ${
-                                localSettings.notifications ? 'translate-x-5' : 'translate-x-0'
-                            }`} />
-                        </button>
+                        
+                        <FormInput 
+                            type="textarea" 
+                            value={text} 
+                            onChange={(e) => setText(e.target.value)} 
+                            placeholder="Share an update, ask a question, or start a discussion..." 
+                            theme={theme}
+                            rows={4}
+                        />
+                        
+                        {/* File Upload Section */}
+                        <div className="space-y-3">
+                            {file && (
+                                <div className="relative inline-block">
+                                    <div className="p-3 rounded-lg border" style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.border }}>
+                                        <div className="flex items-center space-x-3">
+                                            <ImageIcon className="w-5 h-5" style={{ color: theme.colors.accent }} />
+                                            <span className="text-sm font-medium" style={{ color: theme.colors.textPrimary }}>
+                                                {file.name}
+                                            </span>
+                                            <button 
+                                                onClick={removeFile}
+                                                className="ml-auto p-1 rounded-full hover:bg-red-100 transition-colors"
+                                            >
+                                                <X className="w-4 h-4 text-red-500" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                            
+                            <button
+                                type="button"
+                                onClick={() => fileInputRef.current?.click()}
+                                className="inline-flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors hover:bg-black/5"
+                                style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }}
+                            >
+                                <ImageIcon className="w-4 h-4" />
+                                <span className="font-medium">{file ? 'Change Photo' : 'Add Photo'}</span>
+                            </button>
+                            
+                            <input 
+                                ref={fileInputRef}
+                                type="file" 
+                                accept="image/*,video/*" 
+                                hidden 
+                                onChange={handleFileChange} 
+                            />
+                        </div>
+                        
+                        <div className="flex space-x-3 pt-2">
+                            <button 
+                                onClick={() => setType(null)} 
+                                className="flex-1 font-semibold py-3 px-6 rounded-full transition-colors"
+                                style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }}
+                            >
+                                Back
+                            </button>
+                            <button 
+                                onClick={handleSubmit} 
+                                disabled={!text.trim()}
+                                className="flex-1 font-bold py-3 px-6 rounded-full text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed" 
+                                style={{ backgroundColor: theme.colors.accent }}
+                            >
+                                Post
+                            </button>
+                        </div>
                     </div>
-                </GlassCard>
+                );
+                
+            case 'poll':
+                return (
+                    <div className="space-y-4">
+                        <div className="flex items-center space-x-3 pb-2">
+                            <BarChart3 className="w-6 h-6" style={{ color: theme.colors.accent }} />
+                            <h3 className="text-xl font-bold" style={{ color: theme.colors.textPrimary }}>Create Poll</h3>
+                        </div>
+                        
+                        <FormInput 
+                            value={question} 
+                            onChange={(e) => setQuestion(e.target.value)} 
+                            placeholder="What's your question?" 
+                            theme={theme} 
+                        />
+                        
+                        <div className="space-y-3">
+                            <FormInput 
+                                value={optA} 
+                                onChange={(e) => setOptA(e.target.value)} 
+                                placeholder="Option A" 
+                                theme={theme} 
+                            />
+                            <FormInput 
+                                value={optB} 
+                                onChange={(e) => setOptB(e.target.value)} 
+                                placeholder="Option B" 
+                                theme={theme} 
+                            />
+                            <FormInput 
+                                value={optC} 
+                                onChange={(e) => setOptC(e.target.value)} 
+                                placeholder="Option C (Optional)" 
+                                theme={theme} 
+                            />
+                            <FormInput 
+                                value={optD} 
+                                onChange={(e) => setOptD(e.target.value)} 
+                                placeholder="Option D (Optional)" 
+                                theme={theme} 
+                            />
+                        </div>
+                        
+                        <div className="flex space-x-3 pt-2">
+                            <button 
+                                onClick={() => setType(null)} 
+                                className="flex-1 font-semibold py-3 px-6 rounded-full transition-colors"
+                                style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }}
+                            >
+                                Back
+                            </button>
+                            <button 
+                                onClick={handleSubmit} 
+                                disabled={!question.trim() || !optA.trim() || !optB.trim()}
+                                className="flex-1 font-bold py-3 px-6 rounded-full text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed" 
+                                style={{ backgroundColor: theme.colors.accent }}
+                            >
+                                Post Poll
+                            </button>
+                        </div>
+                    </div>
+                );
+                
+            default:
+                return (
+                    <div className="space-y-4">
+                        <div className="text-center pb-2">
+                            <h3 className="text-xl font-bold mb-2" style={{ color: theme.colors.textPrimary }}>
+                                Create Content
+                            </h3>
+                            <p className="text-sm" style={{ color: theme.colors.textSecondary }}>
+                                Choose what you'd like to share with the community
+                            </p>
+                        </div>
+                        
+                        <div className="space-y-3">
+                            <OptionButton 
+                                icon={MessageSquare} 
+                                title="Post" 
+                                description="Share an update, photo, or start a discussion" 
+                                onClick={() => setType('post')} 
+                            />
+                            <OptionButton 
+                                icon={BarChart3} 
+                                title="Poll" 
+                                description="Ask a question and get community feedback" 
+                                onClick={() => setType('poll')} 
+                            />
+                        </div>
+                    </div>
+                );
+        }
+    };
 
-                {/* T-Shirt Size Section - Dropdown Menu */}
-                <GlassCard theme={theme} className="p-4">
-                    <div className="flex items-center space-x-3 mb-3">
-                        <TShirtIcon color={theme.colors.accent} />
-                        <h3 className="font-semibold text-lg" style={{ color: theme.colors.textPrimary }}>
-                            T-Shirt Size
-                        </h3>
-                    </div>
-                    <CustomSelect
-                        value={localSettings.tShirtSize}
-                        onChange={e => handleSettingChange('tShirtSize', e.target.value)}
-                        options={['S', 'M', 'L', 'XL', '2XL', '3XL'].map(size => ({ value: size, label: size }))}
-                        theme={theme}
-                        placeholder="Select your size"
-                    />
-                </GlassCard>
-
-                {/* App Information Section */}
-                <GlassCard theme={theme} className="p-4">
-                    <div className="flex items-center space-x-3 mb-2">
-                        <AlertCircle className="w-5 h-5" style={{ color: theme.colors.accent }} />
-                        <h3 className="font-semibold" style={{ color: theme.colors.textPrimary }}>
-                            App Information
-                        </h3>
-                    </div>
-                    <div className="space-y-2 text-sm p-3 rounded-lg" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textSecondary }}>
-                        <div className="flex justify-between"><span>Version:</span> <span className="font-medium" style={{color: theme.colors.textPrimary}}>1.0.0</span></div>
-                        <div className="flex justify-between"><span>Last Updated:</span> <span className="font-medium" style={{color: theme.colors.textPrimary}}>Dec 2024</span></div>
-                        <div className="flex justify-between"><span>Build:</span> <span className="font-medium" style={{color: theme.colors.textPrimary}}>JSI-Mobile-001</span></div>
-                    </div>
-                </GlassCard>
+    return (
+        <Modal show={true} onClose={close} title="" theme={theme}>
+            <div className="p-4">
+                {renderForm()}
             </div>
-
-            {/* Save Button */}
-            {hasChanges && (
-                <div className="px-4 pb-4 pt-2">
-                    <button 
-                        onClick={handleSave}
-                        className="w-full font-bold py-3.5 px-6 rounded-full text-white shadow-lg transition-all duration-300 hover:scale-105"
-                        style={{ backgroundColor: theme.colors.accent }}
-                    >
-                        Save Changes
-                    </button>
-                </div>
-            )}
-        </div>
+        </Modal>
     );
 };
