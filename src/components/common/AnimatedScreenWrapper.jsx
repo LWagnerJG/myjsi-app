@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './AnimatedScreenWrapper.css';
 
-export const AnimatedScreenWrapper = ({ children, screenKey, direction = 'forward', onSwipeBack }) => {
+export const AnimatedScreenWrapper = ({ children, screenKey, direction = 'forward', onSwipeBack, previousScreenContent }) => {
     const [isAnimating, setIsAnimating] = useState(false);
     const [currentScreenKey, setCurrentScreenKey] = useState(screenKey);
     const [currentContent, setCurrentContent] = useState(children);
@@ -115,6 +115,20 @@ export const AnimatedScreenWrapper = ({ children, screenKey, direction = 'forwar
             className="animated-screen-container"
             {...touchHandlers}
         >
+            {/* Previous Screen - only visible during swipe */}
+            {onSwipeBack && previousScreenContent && (
+                <div 
+                    className="screen-slide swipe-preview"
+                    style={{
+                        visibility: isDragging && swipeDistance > 0 ? 'visible' : 'hidden',
+                        transform: `translateX(${-25 + (swipeDistance / window.innerWidth) * 25}%)`,
+                        opacity: swipeDistance / window.innerWidth,
+                    }}
+                >
+                    {previousScreenContent}
+                </div>
+            )}
+
             {/* Current Screen */}
             <div 
                 className={`screen-slide current ${isAnimating ? `exiting ${direction}` : ''}`}
