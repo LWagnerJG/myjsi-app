@@ -9,6 +9,79 @@ import { ToggleButtonGroup } from '../../components/common/ToggleButtonGroup.jsx
 import { FormSection, SettingsRow } from '../../components/forms/FormSections.jsx';
 import * as Data from '../../data.jsx';
 
+// Multi-select Combobox Component for Stakeholders
+const MultiSelectCombobox = ({ 
+    label, 
+    selectedItems = [], 
+    onAddItem, 
+    onRemoveItem, 
+    options = [], 
+    onAddNew, 
+    placeholder = '', 
+    theme 
+}) => {
+    const [searchValue, setSearchValue] = useState('');
+
+    const handleSelectItem = (item) => {
+        if (!selectedItems.includes(item)) {
+            onAddItem(item);
+        }
+        setSearchValue('');
+    };
+
+    const handleAddNew = (newItem) => {
+        if (onAddNew) {
+            onAddNew(newItem);
+        }
+        onAddItem(newItem);
+        setSearchValue('');
+    };
+
+    const availableOptions = options.filter(option => !selectedItems.includes(option));
+
+    return (
+        <div className="space-y-2">
+            <AutoCompleteCombobox
+                label={label}
+                value={searchValue}
+                onChange={setSearchValue}
+                onSelect={handleSelectItem}
+                onAddNew={handleAddNew}
+                placeholder={placeholder}
+                options={availableOptions}
+                theme={theme}
+                resetOnSelect={true}
+            />
+            
+            {/* Display selected items */}
+            {selectedItems.length > 0 && (
+                <div className="flex flex-wrap gap-2 pt-2">
+                    {selectedItems.map((item, index) => (
+                        <div
+                            key={index}
+                            className="flex items-center space-x-2 px-3 py-1.5 rounded-full border text-sm font-medium transition-colors"
+                            style={{
+                                backgroundColor: theme.colors.surface,
+                                borderColor: theme.colors.border,
+                                color: theme.colors.textPrimary
+                            }}
+                        >
+                            <span>{item}</span>
+                            <button
+                                type="button"
+                                onClick={() => onRemoveItem(item)}
+                                className="w-4 h-4 flex items-center justify-center rounded-full hover:bg-red-100 transition-colors"
+                            >
+                                <X className="w-3 h-3 text-red-500" />
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};
+
 // Product option components
 const KnoxOptions = ({ theme, product, productIndex, onUpdate }) => {
     return (
@@ -117,7 +190,12 @@ export const NewLeadScreen = ({
     const [productSearch, setProductSearch] = useState('');
 
     const updateField = (field, value) => {
-        onNewLeadChange({ [field]: value });
+        // Clear otherVertical when vertical changes away from "Other"
+        if (field === 'vertical' && value !== 'Other (Please specify)') {
+            onNewLeadChange({ [field]: value, otherVertical: '' });
+        } else {
+            onNewLeadChange({ [field]: value });
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -155,6 +233,31 @@ export const NewLeadScreen = ({
     const updateProductOption = (pi, key, value) => {
         const newProducts = (newLeadData.products || []).map((p, i) => i === pi ? { ...p, [key]: value } : p);
         updateField('products', newProducts);
+    };
+
+    // Stakeholder management functions
+    const addDesignFirm = (firm) => {
+        const currentFirms = newLeadData.designFirms || [];
+        if (!currentFirms.includes(firm)) {
+            updateField('designFirms', [...currentFirms, firm]);
+        }
+    };
+
+    const removeDesignFirm = (firm) => {
+        const currentFirms = newLeadData.designFirms || [];
+        updateField('designFirms', currentFirms.filter(f => f !== firm));
+    };
+
+    const addDealer = (dealer) => {
+        const currentDealers = newLeadData.dealers || [];
+        if (!currentDealers.includes(dealer)) {
+            updateField('dealers', [...currentDealers, dealer]);
+        }
+    };
+
+    const removeDealer = (dealer) => {
+        const currentDealers = newLeadData.dealers || [];
+        updateField('dealers', currentDealers.filter(d => d !== dealer));
     };
 
     const availableSeries = useMemo(() => 
@@ -197,7 +300,7 @@ export const NewLeadScreen = ({
                         <SettingsRow label="Vertical" theme={theme}>
                             <div className="w-7/12 relative">
                                 {newLeadData.vertical === 'Other (Please specify)' ? (
-                                    // Show "Other" label with smooth transition
+                                    // Show "Other" label with smooth transition - removed X button
                                     <div className="flex items-center space-x-3 transition-all duration-300 ease-in-out">
                                         <div className="flex items-center space-x-2 animate-slide-in-left">
                                             <span 
@@ -221,14 +324,6 @@ export const NewLeadScreen = ({
                                                 theme={theme} 
                                             />
                                         </div>
-                                        <button
-                                            type="button"
-                                            onClick={() => updateField('vertical', '')}
-                                            className="p-2 rounded-full hover:bg-red-100 transition-colors"
-                                            title="Clear selection"
-                                        >
-                                            <X className="w-4 h-4 text-red-500" />
-                                        </button>
                                     </div>
                                 ) : (
                                     // Show normal dropdown
@@ -253,31 +348,27 @@ export const NewLeadScreen = ({
                     <div>
                         <SettingsRow label="A&D Firm" isFirst={true} theme={theme}>
                             <div className="w-7/12">
-                                <AutoCompleteCombobox 
-                                    label="" 
-                                    required 
-                                    value={newLeadData.designFirm || ''} 
-                                    onChange={val => updateField('designFirm', val)} 
-                                    onSelect={val => updateField('designFirm', val)} 
-                                    placeholder="Search..." 
-                                    options={designFirms || []} 
-                                    onAddNew={(f) => setDesignFirms(p => [...new Set([f, ...p])])} 
-                                    theme={theme} 
+                                <MultiSelectCombobox
+                                    selectedItems={newLeadData.designFirms || []}
+                                    onAddItem={addDesignFirm}
+                                    onRemoveItem={removeDesignFirm}
+                                    placeholder="Search..."
+                                    options={designFirms || []}
+                                    onAddNew={(f) => setDesignFirms(p => [...new Set([f, ...p])])}
+                                    theme={theme}
                                 />
                             </div>
                         </SettingsRow>
                         <SettingsRow label="Dealer" theme={theme}>
                             <div className="w-7/12">
-                                <AutoCompleteCombobox 
-                                    label="" 
-                                    required 
-                                    value={newLeadData.dealer || ''} 
-                                    onChange={val => updateField('dealer', val)} 
-                                    onSelect={val => updateField('dealer', val)} 
-                                    placeholder="Search..." 
-                                    options={dealers || []} 
-                                    onAddNew={(d) => setDealers(p => [...new Set([d, ...p])])} 
-                                    theme={theme} 
+                                <MultiSelectCombobox
+                                    selectedItems={newLeadData.dealers || []}
+                                    onAddItem={addDealer}
+                                    onRemoveItem={removeDealer}
+                                    placeholder="Search..."
+                                    options={dealers || []}
+                                    onAddNew={(d) => setDealers(p => [...new Set([d, ...p])])}
+                                    theme={theme}
                                 />
                             </div>
                         </SettingsRow>

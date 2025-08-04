@@ -26,6 +26,11 @@ export const AutoCompleteCombobox = React.memo(({
         return options.filter(o => o.toLowerCase().includes(q));
     }, [value, options]);
 
+    // Check if the current value should show the "+ Add" button
+    const shouldShowAddButton = useMemo(() => {
+        return onAddNew && value && value.trim() && !options.some(o => o.toLowerCase() === value.toLowerCase());
+    }, [onAddNew, value, options]);
+
     const calcPos = useCallback(() => {
         if (!wrapRef.current) return;
         const r = wrapRef.current.getBoundingClientRect();
@@ -125,19 +130,16 @@ export const AutoCompleteCombobox = React.memo(({
     // Calculate dynamic height based on number of items
     const dropdownHeight = useMemo(() => {
         const itemHeight = 40; // Approximate height per item
-        const padding = 12; // GlassCard padding
+        const padding = 12; // Dropdown padding
         const maxItems = 8; // Maximum visible items before scrolling
         
         let totalItems = filtered.length;
-        if (onAddNew && value && !options.some(o => o.toLowerCase() === value.toLowerCase())) {
-            totalItems += 1; // Add one for the "Add new" option
-        }
         
         const visibleItems = Math.min(totalItems, maxItems);
         const calculatedHeight = Math.max(60, visibleItems * itemHeight + padding);
         
         return Math.min(calculatedHeight, pos.height);
-    }, [filtered.length, value, options, onAddNew, pos.height]);
+    }, [filtered.length, pos.height]);
 
     return (
         <div ref={wrapRef} className="space-y-2">
@@ -163,7 +165,25 @@ export const AutoCompleteCombobox = React.memo(({
                 />
             </div>
 
-            {isOpen && (filtered.length > 0 || (onAddNew && value)) && (
+            {/* Inline "+ Add" button that appears next to the input field */}
+            {shouldShowAddButton && (
+                <div className="animate-fade-in">
+                    <button 
+                        type="button" 
+                        onClick={handleAdd} 
+                        className="inline-flex items-center space-x-1 px-3 py-2 text-sm font-semibold rounded-full transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                        style={{ 
+                            color: theme.colors.accent,
+                            backgroundColor: 'transparent'
+                        }}
+                    >
+                        <span>+ Add "{value}"</span>
+                    </button>
+                </div>
+            )}
+
+            {/* Dropdown portal for filtered options */}
+            {isOpen && filtered.length > 0 && (
                 <DropdownPortal parentRef={wrapRef} onClose={() => setIsOpen(false)}>
                     <div 
                         ref={dropRef} 
@@ -174,7 +194,6 @@ export const AutoCompleteCombobox = React.memo(({
                             width: pos.width 
                         }}
                     >
-                        {/* Use a direct div instead of GlassCard to avoid backdrop filter */}
                         <div 
                             className="p-1.5 overflow-y-auto scrollbar-hide rounded-2xl shadow-lg border transition-all duration-300" 
                             style={{ 
@@ -182,12 +201,11 @@ export const AutoCompleteCombobox = React.memo(({
                                 backgroundColor: theme.colors.surface,
                                 borderColor: theme.colors.border,
                                 boxShadow: `0 4px 30px ${theme.colors.shadow || 'rgba(0, 0, 0, 0.1)'}`,
-                                // Explicitly remove backdrop filters for solid appearance
                                 backdropFilter: 'none',
                                 WebkitBackdropFilter: 'none',
                             }}
                         >
-                            {filtered.length > 0 && filtered.map((opt) => (
+                            {filtered.map((opt) => (
                                 <button 
                                     key={opt} 
                                     type="button" 
@@ -198,16 +216,6 @@ export const AutoCompleteCombobox = React.memo(({
                                     {opt}
                                 </button>
                             ))}
-                            {onAddNew && value && !options.some(o => o.toLowerCase() === value.toLowerCase()) && (
-                                <button 
-                                    type="button" 
-                                    onClick={handleAdd} 
-                                    className="block w-full text-left py-2.5 px-3.5 text-sm mt-1 rounded-lg font-semibold hover:bg-black/5 dark:hover:bg-white/5 transition-colors" 
-                                    style={{ color: theme.colors.accent }}
-                                >
-                                    + Add "{value}"
-                                </button>
-                            )}
                         </div>
                     </div>
                 </DropdownPortal>
