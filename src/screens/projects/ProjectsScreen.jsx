@@ -226,7 +226,7 @@ export const ProjectsScreen = ({
                 onScroll={handleScroll}
                 className="flex-1 overflow-y-auto scrollbar-hide"
             >
-                <div className="px-4 space-y-3">
+                <div className="px-4 pt-4 space-y-3">
                     {/* Main Tab Selector - Now consistent with stage selector */}
                     <GlassCard theme={theme} className="p-1.5">
                         <div className="relative flex space-x-1">
@@ -290,104 +290,104 @@ export const ProjectsScreen = ({
                         </GlassCard>
                     )}
                 </div>
-            </div>
 
-            <div className="flex-1 overflow-y-auto px-4 pt-4 pb-4 space-y-3 scrollbar-hide">
-                {projectsTab === 'pipeline' ? (
-                    filteredOpportunities.length > 0 ? (
-                        filteredOpportunities.map(opp => (
-                            <GlassCard 
-                                key={opp.id} 
-                                theme={theme} 
-                                className="overflow-hidden p-4 cursor-pointer transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]" 
-                                onClick={() => setSelectedOpportunity(opp)}
-                                style={{
-                                    border: `1px solid ${theme.colors.border}`,
-                                    background: `linear-gradient(135deg, ${theme.colors.surface} 0%, ${theme.colors.subtle} 100%)`
-                                }}
-                            >
-                                <div className="flex justify-between items-start mb-2">
-                                    <h3 className="font-bold text-lg leading-tight" style={{ color: theme.colors.textPrimary }}>
-                                        {opp.name}
-                                    </h3>
-                                    <span 
-                                        className={`px-2.5 py-1 text-xs font-semibold rounded-full ${Data.STAGE_COLORS[opp.stage]}`}
-                                    >
-                                        {opp.stage}
-                                    </span>
-                                </div>
-                                <p className="text-sm mb-3" style={{ color: theme.colors.textSecondary }}>
-                                    {opp.company}
-                                </p>
-                                <div className="flex items-center justify-between">
-                                    <p className="font-bold text-2xl" style={{ color: theme.colors.accent }}>
-                                        {opp.value}
-                                    </p>
-                                    {opp.discount && (
-                                        <span className="text-xs px-2 py-1 rounded-full" style={{ 
-                                            backgroundColor: theme.colors.subtle, 
-                                            color: theme.colors.textSecondary 
-                                        }}>
-                                            {opp.discount}
-                                        </span>
-                                    )}
-                                </div>
-                            </GlassCard>
-                        ))
-                    ) : (
-                        <div className="flex flex-col items-center justify-center py-12">
-                            <Briefcase className="w-12 h-12 mb-4" style={{ color: theme.colors.textSecondary }} />
-                            <p className="text-center text-sm font-medium" style={{ color: theme.colors.textSecondary }}>
-                                No projects in {selectedPipelineStage} stage
-                            </p>
-                            <p className="text-center text-xs mt-1" style={{ color: theme.colors.textSecondary }}>
-                                Add a new lead to get started
-                            </p>
-                        </div>
-                    )
-                ) : (
-                    myProjects && myProjects.length > 0 ? (
-                        myProjects.map(project => (
-                            <GlassCard 
-                                key={project.id} 
-                                theme={theme} 
-                                className="p-0 overflow-hidden cursor-pointer group transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]" 
-                                onClick={() => setSelectedProject(project)}
-                                style={{
-                                    border: `1px solid ${theme.colors.border}`,
-                                    borderRadius: '16px'
-                                }}
-                            >
-                                <div className="relative aspect-video w-full">
-                                    <img 
-                                        src={project.image} 
-                                        alt={project.name} 
-                                        className="absolute h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" 
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                                    <div className="absolute bottom-0 left-0 p-4">
-                                        <h3 className="text-xl font-bold text-white tracking-tight mb-1">
-                                            {project.name}
+                <div className="px-4 pt-4 pb-4 space-y-3">
+                    {projectsTab === 'pipeline' ? (
+                        filteredOpportunities.length > 0 ? (
+                            filteredOpportunities.map(opp => (
+                                <GlassCard 
+                                    key={opp.id} 
+                                    theme={theme} 
+                                    className="overflow-hidden p-4 cursor-pointer transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]" 
+                                    onClick={() => setSelectedOpportunity(opp)}
+                                    style={{
+                                        border: `1px solid ${theme.colors.border}`,
+                                        background: `linear-gradient(135deg, ${theme.colors.surface} 0%, ${theme.colors.subtle} 100%)`
+                                    }}
+                                >
+                                    <div className="flex justify-between items-start mb-2">
+                                        <h3 className="font-bold text-lg leading-tight" style={{ color: theme.colors.textPrimary }}>
+                                            {opp.name}
                                         </h3>
-                                        <p className="text-white/90 font-medium text-sm">
-                                            {project.location}
-                                        </p>
+                                        <span 
+                                            className={`px-2.5 py-1 text-xs font-semibold rounded-full ${Data.STAGE_COLORS[opp.stage]}`}
+                                        >
+                                            {opp.stage}
+                                        </span>
                                     </div>
-                                </div>
-                            </GlassCard>
-                        ))
+                                    <p className="text-sm mb-3" style={{ color: theme.colors.textSecondary }}>
+                                        {opp.company}
+                                    </p>
+                                    <div className="flex items-center justify-between">
+                                        <p className="font-bold text-2xl" style={{ color: theme.colors.accent }}>
+                                            {opp.value}
+                                        </p>
+                                        {opp.discount && (
+                                            <span className="text-xs px-2 py-1 rounded-full" style={{ 
+                                                backgroundColor: theme.colors.subtle, 
+                                                color: theme.colors.textSecondary 
+                                            }}>
+                                                {opp.discount}
+                                            </span>
+                                        )}
+                                    </div>
+                                </GlassCard>
+                            ))
+                        ) : (
+                            <div className="flex flex-col items-center justify-center py-12">
+                                <Briefcase className="w-12 h-12 mb-4" style={{ color: theme.colors.textSecondary }} />
+                                <p className="text-center text-sm font-medium" style={{ color: theme.colors.textSecondary }}>
+                                    No projects in {selectedPipelineStage} stage
+                                </p>
+                                <p className="text-center text-xs mt-1" style={{ color: theme.colors.textSecondary }}>
+                                    Add a new lead to get started
+                                </p>
+                            </div>
+                        )
                     ) : (
-                        <div className="flex flex-col items-center justify-center py-12">
-                            <Briefcase className="w-12 h-12 mb-4" style={{ color: theme.colors.textSecondary }} />
-                            <p className="text-center text-sm font-medium" style={{ color: theme.colors.textSecondary }}>
-                                No projects added yet
-                            </p>
-                            <p className="text-center text-xs mt-1" style={{ color: theme.colors.textSecondary }}>
-                                Add your first install to get started
-                            </p>
-                        </div>
-                    )
-                )}
+                        myProjects && myProjects.length > 0 ? (
+                            myProjects.map(project => (
+                                <GlassCard 
+                                    key={project.id} 
+                                    theme={theme} 
+                                    className="p-0 overflow-hidden cursor-pointer group transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]" 
+                                    onClick={() => setSelectedProject(project)}
+                                    style={{
+                                        border: `1px solid ${theme.colors.border}`,
+                                        borderRadius: '16px'
+                                    }}
+                                >
+                                    <div className="relative aspect-video w-full">
+                                        <img 
+                                            src={project.image} 
+                                            alt={project.name} 
+                                            className="absolute h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" 
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                                        <div className="absolute bottom-0 left-0 p-4">
+                                            <h3 className="text-xl font-bold text-white tracking-tight mb-1">
+                                                {project.name}
+                                            </h3>
+                                            <p className="text-white/90 font-medium text-sm">
+                                                {project.location}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </GlassCard>
+                            ))
+                        ) : (
+                            <div className="flex flex-col items-center justify-center py-12">
+                                <Briefcase className="w-12 h-12 mb-4" style={{ color: theme.colors.textSecondary }} />
+                                <p className="text-center text-sm font-medium" style={{ color: theme.colors.textSecondary }}>
+                                    No projects added yet
+                                </p>
+                                <p className="text-center text-xs mt-1" style={{ color: theme.colors.textSecondary }}>
+                                    Add your first install to get started
+                                </p>
+                            </div>
+                        )
+                    )}
+                </div>
             </div>
         </div>
     );

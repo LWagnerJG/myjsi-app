@@ -179,7 +179,7 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                     borderBottom: `1px solid ${isScrolled ? theme.colors.border + '40' : 'transparent'}`
                 }}
             >
-                <PageTitle title="Orders" theme={theme}>
+                <div className="p-4 flex items-center space-x-2">
                     <SearchInput
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -188,7 +188,7 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                         className="flex-grow"
                     />
                     <div className="relative">
-                        <button onClick={() => setShowDateFilter(f => !f)} className="p-3.5 rounded-full shadow-lg" style={{ backgroundColor: theme.colors.surface }}>
+                        <button onClick={() => setShowDateFilter(f => !f)} className="p-3.5 rounded-full shadow-sm" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${theme.colors.border}` }}>
                             <Filter className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />
                         </button>
                         {showDateFilter && (
@@ -198,10 +198,10 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                             </GlassCard>
                         )}
                     </div>
-                    <button onClick={() => setViewMode(v => v === 'list' ? 'calendar' : 'list')} className="p-3.5 rounded-full shadow-lg" style={{ backgroundColor: viewMode === 'calendar' ? theme.colors.accent : theme.colors.surface, }}>
+                    <button onClick={() => setViewMode(v => v === 'list' ? 'calendar' : 'list')} className="p-3.5 rounded-full shadow-sm" style={{ backgroundColor: viewMode === 'calendar' ? theme.colors.accent : theme.colors.surface, border: `1px solid ${theme.colors.border}` }}>
                         <Calendar className="w-5 h-5" style={{ color: viewMode === 'calendar' ? 'white' : theme.colors.textPrimary }} />
                     </button>
-                </PageTitle>
+                </div>
             </div>
 
             <div 

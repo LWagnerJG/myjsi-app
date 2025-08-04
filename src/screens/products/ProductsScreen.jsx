@@ -6,7 +6,6 @@ import React, {
     useEffect,
     useLayoutEffect 
 } from 'react';
-import { PageTitle } from '../../components/common/PageTitle.jsx';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { SearchInput } from '../../components/common/SearchInput.jsx';
 import { 
@@ -116,28 +115,27 @@ const StickyHeader = React.memo(({
 }) => (
     <div
         className={`sticky top-0 z-10 transition-all duration-300 ${
-            isScrolled ? 'shadow-md' : 'shadow-none'
+            isScrolled ? 'shadow-md' : ''
         }`}
         style={{
             backgroundColor: isScrolled ? `${theme.colors.background}e0` : 'transparent',
             backdropFilter: isScrolled ? 'blur(12px)' : 'none',
             WebkitBackdropFilter: isScrolled ? 'blur(12px)' : 'none',
-            borderBottom: isScrolled ? `1px solid ${theme.colors.border}40` : '1px solid transparent',
+            borderBottom: `1px solid ${isScrolled ? theme.colors.border + '40' : 'transparent'}`,
         }}
     >
-        <PageTitle title="Products" theme={theme}>
-            <ViewModeToggle 
-                viewMode={viewMode} 
-                onToggle={onToggleViewMode} 
-                theme={theme} 
-            />
-        </PageTitle>
-        <div className="px-4 pb-4">
+        <div className="p-4 flex items-center space-x-2">
             <SearchInput
                 value={searchTerm}
                 onChange={onSearchChange}
                 placeholder="Search products..."
                 theme={theme}
+                className="flex-grow"
+            />
+            <ViewModeToggle 
+                viewMode={viewMode} 
+                onToggle={onToggleViewMode} 
+                theme={theme} 
             />
         </div>
     </div>
@@ -215,7 +213,7 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
             <div
                 ref={scrollContainerRef}
                 onScroll={handleScroll}
-                className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-hide -mt-[7.5rem] pt-[7.5rem]"
+                className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-hide"
             >
                 {filteredCategories.length === 0 ? (
                     <EmptyState searchTerm={searchTerm} theme={theme} />
