@@ -14,12 +14,10 @@ export const AutoCompleteCombobox = React.memo(({
     theme,
     dropdownClassName = '',
     resetOnSelect = false,
-    anchorRef, // Accept an optional anchorRef
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [pos, setPos] = useState({ top: 0, left: 0, width: 0, height: 'auto' });
-    const internalWrapRef = useRef(null);
-    const wrapRef = anchorRef || internalWrapRef; // Use the passed ref, or the internal one
+    const inputWrapperRef = useRef(null);
     const dropRef = useRef(null);
 
     const filtered = useMemo(() => {
@@ -28,36 +26,39 @@ export const AutoCompleteCombobox = React.memo(({
         return options.filter(o => o.toLowerCase().includes(q));
     }, [value, options]);
 
-    // Check if the current value should show the "+ Add" button
     const shouldShowAddButton = useMemo(() => {
         return onAddNew && value && value.trim() && !options.some(o => o.toLowerCase() === value.toLowerCase());
     }, [onAddNew, value, options]);
 
     const calcPos = useCallback(() => {
-        if (!wrapRef.current) return;
-        const r = wrapRef.current.getBoundingClientRect();
+        if (!inputWrapperRef.current) return;
+        const r = inputWrapperRef.current.getBoundingClientRect();
         const vw = window.innerWidth;
         const vh = window.innerHeight;
-        
-        // Calculate available space
+
+        const itemHeight = 40;
+        const padding = 12;
+        const maxItems = 8;
+        const totalItems = filtered.length;
+        const visibleItems = Math.min(totalItems, maxItems);
+        const contentHeight = totalItems > 0 ? Math.max(60, visibleItems * itemHeight + padding) : 0;
+
         const spaceBelow = vh - r.bottom;
         const spaceAbove = r.top;
-        const maxHeight = Math.min(vh * 0.4, 300); // Max 40% of viewport or 300px
         const w = Math.max(r.width, DROPDOWN_MIN_WIDTH);
 
         let top;
-        let dropdownMaxHeight;
+        let finalHeight;
 
         // Decide if dropdown should appear above or below
-        if (spaceBelow >= maxHeight || spaceBelow >= spaceAbove) {
-            // Position below the input
+        if (spaceBelow >= contentHeight || spaceBelow >= spaceAbove) {
+            // Position below
             top = r.bottom + DROPDOWN_GAP;
-            dropdownMaxHeight = Math.min(maxHeight, spaceBelow - DROPDOWN_GAP * 2);
+            finalHeight = Math.min(contentHeight, spaceBelow - DROPDOWN_GAP * 2, 300);
         } else {
-            // Position above the input
-            const calculatedHeight = Math.min(maxHeight, spaceAbove - DROPDOWN_GAP * 2);
-            top = r.top - calculatedHeight - DROPDOWN_GAP;
-            dropdownMaxHeight = calculatedHeight;
+            // Position above
+            finalHeight = Math.min(contentHeight, spaceAbove - DROPDOWN_GAP * 2, 300);
+            top = r.top - finalHeight - DROPDOWN_GAP;
         }
 
         // Horizontal positioning
@@ -69,8 +70,8 @@ export const AutoCompleteCombobox = React.memo(({
             left = DROPDOWN_SIDE_PADDING;
         }
 
-        setPos({ top, left, width: w, height: dropdownMaxHeight });
-    }, []);
+        setPos({ top, left, width: w, height: finalHeight });
+    }, [filtered.length]);
 
     useLayoutEffect(() => {
         if (isOpen) {
@@ -91,7 +92,7 @@ export const AutoCompleteCombobox = React.memo(({
 
     useEffect(() => {
         const away = (e) => {
-            if (wrapRef.current && !wrapRef.current.contains(e.target) && 
+            if (inputWrapperRef.current && !inputWrapperRef.current.contains(e.target) && 
                 dropRef.current && !dropRef.current.contains(e.target)) {
                 setIsOpen(false);
             }
@@ -129,28 +130,14 @@ export const AutoCompleteCombobox = React.memo(({
         }
     };
 
-    // Calculate dynamic height based on number of items
-    const dropdownHeight = useMemo(() => {
-        const itemHeight = 40; // Approximate height per item
-        const padding = 12; // Dropdown padding
-        const maxItems = 8; // Maximum visible items before scrolling
-        
-        let totalItems = filtered.length;
-        
-        const visibleItems = Math.min(totalItems, maxItems);
-        const calculatedHeight = Math.max(60, visibleItems * itemHeight + padding);
-        
-        return Math.min(calculatedHeight, pos.height);
-    }, [filtered.length, pos.height]);
-
     return (
-        <div ref={internalWrapRef} className="space-y-2">
+        <div className="space-y-2">
             {label && (
                 <label className="block text-sm font-semibold px-3" style={{ color: theme.colors.textSecondary }}>
                     {label}
                 </label>
             )}
-            <div className="relative">
+            <div className="relative" ref={inputWrapperRef}>
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: theme.colors.textSecondary }} />
                 <input
                     type="text"
@@ -186,7 +173,7 @@ export const AutoCompleteCombobox = React.memo(({
 
             {/* Dropdown portal for filtered options */}
             {isOpen && filtered.length > 0 && (
-                <DropdownPortal parentRef={wrapRef} onClose={() => setIsOpen(false)}>
+                <DropdownPortal parentRef={inputWrapperRef} onClose={() => setIsOpen(false)}>
                     <div 
                         ref={dropRef} 
                         className={`fixed z-[9999] pointer-events-auto ${dropdownClassName}`} 
@@ -199,7 +186,7 @@ export const AutoCompleteCombobox = React.memo(({
                         <div 
                             className="p-1.5 overflow-y-auto scrollbar-hide rounded-2xl shadow-lg border transition-all duration-300" 
                             style={{ 
-                                maxHeight: `${dropdownHeight}px`,
+                                height: `${pos.height}px`,
                                 backgroundColor: theme.colors.surface,
                                 borderColor: theme.colors.border,
                                 boxShadow: `0 4px 30px ${theme.colors.shadow || 'rgba(0, 0, 0, 0.1)'}`,

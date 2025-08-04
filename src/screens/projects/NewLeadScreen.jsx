@@ -21,7 +21,6 @@ const MultiSelectCombobox = ({
     theme 
 }) => {
     const [searchValue, setSearchValue] = useState('');
-    const inputRef = useRef(null); // Create a ref for the input wrapper
 
     const handleSelectItem = (item) => {
         if (!selectedItems.includes(item)) {
@@ -42,20 +41,17 @@ const MultiSelectCombobox = ({
 
     return (
         <div className="space-y-2">
-            <div ref={inputRef}> {/* Attach the ref to the div wrapping the AutoCompleteCombobox */}
-                <AutoCompleteCombobox
-                    label={label}
-                    value={searchValue}
-                    onChange={setSearchValue}
-                    onSelect={handleSelectItem}
-                    onAddNew={handleAddNew}
-                    placeholder={placeholder}
-                    options={availableOptions}
-                    theme={theme}
-                    resetOnSelect={true}
-                    anchorRef={inputRef} // Pass the ref to the child
-                />
-            </div>
+            <AutoCompleteCombobox
+                label={label}
+                value={searchValue}
+                onChange={setSearchValue}
+                onSelect={handleSelectItem}
+                onAddNew={handleAddNew}
+                placeholder={placeholder}
+                options={availableOptions}
+                theme={theme}
+                resetOnSelect={true}
+            />
             
             {/* Display selected items */}
             {selectedItems.length > 0 && (
@@ -264,12 +260,11 @@ export const NewLeadScreen = ({
         updateField('dealers', currentDealers.filter(d => d !== dealer));
     };
 
-    const availableSeries = useMemo(() => 
-        (Data.JSI_PRODUCT_SERIES || []).filter(s => 
-            !(newLeadData.products || []).some(p => p.series === s)
-        ), 
-        [newLeadData.products]
-    );
+    const availableSeries = useMemo(() => {
+        const allSeries = (Data.LEAD_TIMES_DATA || []).map(item => item.series);
+        const uniqueSeries = Array.from(new Set(allSeries));
+        return uniqueSeries.filter(s => !(newLeadData.products || []).some(p => p.series === s));
+    }, [newLeadData.products]);
 
     return (
         <form onSubmit={handleSubmit} className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
@@ -389,34 +384,36 @@ export const NewLeadScreen = ({
                             />
                         </SettingsRow>
                         <SettingsRow label="Competition?" theme={theme}>
-                            <ToggleSwitch 
-                                checked={!!newLeadData.competitionPresent} 
-                                onChange={e => updateField('competitionPresent', e.target.checked)} 
-                                theme={theme} 
-                            />
+                            <div>
+                                <ToggleSwitch 
+                                    checked={!!newLeadData.competitionPresent} 
+                                    onChange={e => updateField('competitionPresent', e.target.checked)} 
+                                    theme={theme} 
+                                />
+                                {newLeadData.competitionPresent && (
+                                    <div className="pt-2 animate-fade-in">
+                                        <div className="p-3 flex flex-wrap gap-2 rounded-2xl" style={{ backgroundColor: theme.colors.subtle }}>
+                                            {(Data.COMPETITORS || []).filter(c => c !== 'None').map(c => (
+                                                <button 
+                                                    key={c} 
+                                                    type="button" 
+                                                    onClick={() => toggleCompetitor(c)} 
+                                                    className="px-3 py-1.5 text-sm rounded-full font-medium transition-colors border" 
+                                                    style={{ 
+                                                        backgroundColor: (newLeadData.competitors || []).includes(c) ? theme.colors.accent : theme.colors.surface, 
+                                                        color: (newLeadData.competitors || []).includes(c) ? theme.colors.surface : theme.colors.textPrimary, 
+                                                        borderColor: (newLeadData.competitors || []).includes(c) ? theme.colors.accent : theme.colors.border 
+                                                    }}
+                                                >
+                                                    {c}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </SettingsRow>
                     </div>
-                    {newLeadData.competitionPresent && (
-                        <div className="pt-4">
-                            <div className="p-2 flex flex-wrap gap-2 rounded-2xl" style={{ backgroundColor: theme.colors.subtle }}>
-                                {(Data.COMPETITORS || []).filter(c => c !== 'None').map(c => (
-                                    <button 
-                                        key={c} 
-                                        type="button" 
-                                        onClick={() => toggleCompetitor(c)} 
-                                        className="px-3 py-1.5 text-sm rounded-full font-medium transition-colors border" 
-                                        style={{ 
-                                            backgroundColor: (newLeadData.competitors || []).includes(c) ? theme.colors.accent : theme.colors.surface, 
-                                            color: (newLeadData.competitors || []).includes(c) ? theme.colors.surface : theme.colors.textPrimary, 
-                                            borderColor: (newLeadData.competitors || []).includes(c) ? theme.colors.accent : theme.colors.border 
-                                        }}
-                                    >
-                                        {c}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    )}
                     <SettingsRow label="Products" theme={theme}>
                         <div className="w-7/12">
                             <AutoCompleteCombobox 
@@ -494,7 +491,7 @@ export const NewLeadScreen = ({
 
                 <FormSection title="Financials & Timeline" theme={theme}>
                     <div>
-                        <SettingsRow label="Estimated List Price" isFirst={true} theme={theme}>
+                        <SettingsRow label="Estimated List" isFirst={true} theme={theme}>
                             <div className="w-7/12">
                                 <FormInput 
                                     label="" 
@@ -530,7 +527,7 @@ export const NewLeadScreen = ({
                             </div>
                         </SettingsRow>
                         <SettingsRow label="PO Timeframe" theme={theme}>
-                            <div className="w-7/12">
+                            <div className="w-7/12 relative">
                                 <PortalNativeSelect 
                                     label="" 
                                     required 
@@ -542,33 +539,25 @@ export const NewLeadScreen = ({
                                 />
                             </div>
                         </SettingsRow>
+
                         <SettingsRow label="Contract?" theme={theme}>
-                            {newLeadData.isContract ? (
-                                <div className="w-7/12 flex items-center space-x-2">
-                                    <div className="flex-1">
-                                        <PortalNativeSelect 
-                                            label="" 
-                                            required 
-                                            value={newLeadData.contractType || ''} 
-                                            onChange={e => updateField('contractType', e.target.value)} 
-                                            options={(Data.CONTRACT_OPTIONS || []).map(c => ({ label: c, value: c }))} 
-                                            placeholder="Select..." 
-                                            theme={theme} 
-                                        />
-                                    </div>
-                                    <ToggleSwitch 
-                                        checked={true} 
-                                        onChange={e => updateField('isContract', e.target.checked)} 
-                                        theme={theme} 
-                                    />
-                                </div>
-                            ) : (
-                                <ToggleSwitch 
-                                    checked={false} 
-                                    onChange={e => updateField('isContract', e.target.checked)} 
+                            <div className="w-7/12 relative">
+                                <PortalNativeSelect 
+                                    label="" 
+                                    required 
+                                    value={newLeadData.contractType || 'None'} 
+                                    onChange={e => updateField('contractType', e.target.value)} 
+                                    options={[
+                                        { label: 'None', value: '' },
+                                        ...(Object.keys(Data.CONTRACTS_DATA || {}).map(key => ({
+                                            label: Data.CONTRACTS_DATA[key].name,
+                                            value: key,
+                                        }))) || []
+                                    ]} 
+                                    placeholder="Select..." 
                                     theme={theme} 
                                 />
-                            )}
+                            </div>
                         </SettingsRow>
                     </div>
                 </FormSection>
@@ -582,43 +571,43 @@ export const NewLeadScreen = ({
                                 theme={theme} 
                             />
                         </SettingsRow>
-                    </div>
-                    {newLeadData.jsiSpecServices && (
-                        <div className="animate-fade-in pt-2">
-                            <ToggleButtonGroup 
-                                value={newLeadData.jsiSpecServicesType || ''} 
-                                onChange={(val) => updateField('jsiSpecServicesType', val)} 
-                                options={[
-                                    { label: 'New Quote', value: 'New Quote' }, 
-                                    { label: 'Revision', value: 'Revision' }, 
-                                    { label: 'Past Project', value: 'Past Project' }
-                                ]} 
-                                theme={theme} 
-                            />
-                            <div className="mt-4">
-                                {newLeadData.jsiSpecServicesType === 'Revision' && (
-                                    <FormInput 
-                                        label="Revision Quote #" 
-                                        value={newLeadData.jsiRevisionQuoteNumber || ''} 
-                                        onChange={(e) => updateField('jsiRevisionQuoteNumber', e.target.value)} 
-                                        placeholder="Enter original quote #" 
-                                        theme={theme} 
-                                        required 
-                                    />
-                                )}
-                                {newLeadData.jsiSpecServicesType === 'Past Project' && (
-                                    <FormInput 
-                                        label="Past Project Info" 
-                                        value={newLeadData.jsiPastProjectInfo || ''} 
-                                        onChange={(e) => updateField('jsiPastProjectInfo', e.target.value)} 
-                                        placeholder="Enter past project name or #" 
-                                        theme={theme} 
-                                        required 
-                                    />
-                                )}
+                        {newLeadData.jsiSpecServices && (
+                            <div className="animate-fade-in pt-2">
+                                <ToggleButtonGroup 
+                                    value={newLeadData.jsiSpecServicesType || 'New Quote'} 
+                                    onChange={(val) => updateField('jsiSpecServicesType', val)} 
+                                    options={[
+                                        { label: 'New Quote', value: 'New Quote' }, 
+                                        { label: 'Revision', value: 'Revision' }, 
+                                        { label: 'Past Project', value: 'Past Project' }
+                                    ]} 
+                                    theme={theme} 
+                                />
+                                <div className="mt-4">
+                                    {newLeadData.jsiSpecServicesType === 'Revision' && (
+                                        <FormInput 
+                                            label="Revision Quote #" 
+                                            value={newLeadData.jsiRevisionQuoteNumber || ''} 
+                                            onChange={(e) => updateField('jsiRevisionQuoteNumber', e.target.value)} 
+                                            placeholder="Enter original quote #" 
+                                            theme={theme} 
+                                            required 
+                                        />
+                                    )}
+                                    {newLeadData.jsiSpecServicesType === 'Past Project' && (
+                                        <FormInput 
+                                            label="Past Project Info" 
+                                            value={newLeadData.jsiPastProjectInfo || ''} 
+                                            onChange={(e) => updateField('jsiPastProjectInfo', e.target.value)} 
+                                            placeholder="Enter past project name or #" 
+                                            theme={theme} 
+                                            required 
+                                        />
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
                     <SettingsRow label="Other Notes" theme={theme}>
                         <div className="w-7/12">
                             <FormInput 

@@ -1260,3 +1260,36 @@ export const COMMISSIONS_DATA = {
         }
     ]
 };
+
+export const CONTRACTS_DATA = {
+    omnia: {
+        name: 'Omnia',
+        tiers: [
+            { off: '10% (Tier 1)', dealer: '5% dealer commission', rep: '5% rep commission' },
+            { off: '15% (Tier 2)', dealer: '7% dealer commission', rep: '8% rep commission' },
+        ],
+        margin: ['5%', '10%', '15%'],
+        note: 'Omnia contract details.',
+        url: 'https://example.com/omnia-contract',
+    },
+    tips: {
+        name: 'TIPS',
+        tiers: [
+            { off: '12% (Tier 1)', dealer: '6% dealer commission', rep: '6% rep commission' },
+            { off: '18% (Tier 2)', dealer: '9% dealer commission', rep: '9% rep commission' },
+        ],
+        margin: ['6%', '12%', '18%'],
+        note: 'TIPS contract details.',
+        url: 'https://example.com/tips-contract',
+    },
+    premier: {
+        name: 'Premier',
+        tiers: [
+            { off: '20% (Tier 1)', dealer: '10% dealer commission', rep: '10% rep commission' },
+            { off: '25% (Tier 2)', dealer: '12% dealer commission', rep: '13% rep commission' },
+        ],
+        margin: ['10%', '20%', '25%'],
+        note: 'Premier contract details.',
+        url: 'https://example.com/premier-contract',
+    },
+};
