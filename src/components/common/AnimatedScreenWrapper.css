@@ -25,6 +25,12 @@
 .screen-slide.current {
     transform: translateX(0%) translateZ(0);
     z-index: 2; /* Higher z-index to ensure it's on top during transitions */
+    /* Remove the conflicting transition rule - now handled by JavaScript */
+}
+
+/* Dragging state - no transition during active drag */
+.screen-slide.current.dragging {
+    transition: none !important;
 }
 
 /* Next screen - starts off-screen */
@@ -204,11 +210,6 @@
     -webkit-tap-highlight-color: transparent;
 }
 
-/* Smooth transitions for swipe gestures */
-.screen-slide.current {
-    transition: transform 0s linear; /* No transition during active swipe */
-}
-
 /* Ensure swipe works on all devices */
 @supports (touch-action: pan-y) {
     .animated-screen-container {
@@ -235,4 +236,17 @@
     background-color: inherit;
     z-index: -1;
     pointer-events: none;
+}
+
+/* Improve touch sensitivity on mobile devices */
+@media (hover: none) and (pointer: coarse) {
+    .animated-screen-container {
+        touch-action: pan-y pinch-zoom;
+    }
+}
+
+/* Enhance performance during swipe gestures */
+.screen-slide.current.dragging {
+    will-change: transform;
+    transform-style: preserve-3d;
 }

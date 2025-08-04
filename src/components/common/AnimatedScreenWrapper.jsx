@@ -108,9 +108,6 @@ export const AnimatedScreenWrapper = ({ children, screenKey, direction = 'forwar
         onTouchCancel: handleTouchEnd,
     } : {};
 
-    // Apply transition only when not dragging
-    const transitionStyle = !isDragging ? 'transform 0.3s ease-out' : 'none';
-
     return (
         <div 
             ref={containerRef}
@@ -122,10 +119,10 @@ export const AnimatedScreenWrapper = ({ children, screenKey, direction = 'forwar
         >
             {/* Current Screen */}
             <div 
-                className={`screen-slide current ${isAnimating && direction === 'backward' ? 'exiting backward-manual' : isAnimating ? `exiting ${direction}` : ''}`}
+                className={`screen-slide current ${isDragging ? 'dragging' : ''} ${isAnimating && direction === 'backward' ? 'exiting backward-manual' : isAnimating ? `exiting ${direction}` : ''}`}
                 style={{
                     transform: `translateX(${translateX}px)`,
-                    transition: transitionStyle,
+                    transition: isDragging ? 'none' : 'transform 0.3s ease-out',
                 }}
             >
                 {currentContent}
