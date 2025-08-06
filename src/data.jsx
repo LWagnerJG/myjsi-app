@@ -663,9 +663,9 @@ export const PRODUCTS_CATEGORIES_DATA = [
         name: 'Benches',
         nav: 'products/category/benches',
         images: [
-            '/series-images/jsi_native_comp_00001.jpg',
-            '/series-images/jsi_poet_comp_00001.jpg',
-            '/series-images/jsi_indie_comp_00001.jpg',
+            '/series-images/jsi_native_comp_00028.jpg',
+            '/series-images/jsi_poet_comp_00050.jpg',
+            '/series-images/jsi_oxley_comp_00001.jpg',
         ],
     },
     {

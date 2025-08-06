@@ -3,8 +3,8 @@
     width: 100%;
     height: 100%;
     overflow: hidden;
-    touch-action: pan-y; /* Allow vertical scrolling but capture horizontal gestures */
-    background-color: inherit; /* Inherit background from parent */
+    touch-action: pan-y;
+    background-color: inherit;
 }
 
 .screen-slide {
@@ -13,102 +13,42 @@
     left: 0;
     width: 100%;
     height: 100%;
+    background-color: inherit;
     will-change: transform;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
-    transform: translateZ(0);
-    -webkit-transform: translateZ(0);
-    background-color: inherit; /* Ensure each slide has proper background */
 }
 
-/* Current screen - default position */
 .screen-slide.current {
-    transform: translateX(0%) translateZ(0);
-    z-index: 2; /* Higher z-index to ensure it's on top during transitions */
-    /* Remove the conflicting transition rule - now handled by JavaScript */
+    z-index: 2;
 }
 
-/* Dragging state - no transition during active drag */
-.screen-slide.current.dragging {
-    transition: none !important;
-}
-
-/* Next screen - starts off-screen */
 .screen-slide.next {
-    z-index: 3; /* Highest z-index for incoming screen */
+    z-index: 3;
 }
 
-/* Ensure backward navigation shows proper layering */
-.screen-slide.current.exiting.backward {
-    z-index: 3; /* Current screen on top when going backward */
-}
-
-.screen-slide.next.entering.backward {
-    z-index: 1; /* Next screen behind when going backward */
-}
-
-/* Swipe preview screen */
-.screen-slide.swipe-preview {
-    z-index: 0;
-    background: linear-gradient(135deg, #f8f8f8 0%, #e8e8e8 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.swipe-preview-placeholder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: #666;
-    pointer-events: none;
-}
-
-.swipe-back-indicator {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(10px);
-    color: #333;
-    margin-bottom: 12px;
-    transition: all 0.2s ease;
-}
-
-/* Dark mode support for swipe preview */
-@media (prefers-color-scheme: dark) {
-    .screen-slide.swipe-preview {
-        background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-    }
-    
-    .swipe-back-indicator {
-        background: rgba(255, 255, 255, 0.1);
-        color: #ccc;
-    }
-}
-
-/* Swipe progress indicator */
-.swipe-progress-indicator {
+/* Swipe indicator */
+.swipe-indicator {
     position: absolute;
     top: 50%;
-    left: 40px;
+    left: 20px;
     transform: translateY(-50%);
     z-index: 10;
     pointer-events: none;
+    transition: opacity 0.1s ease;
 }
 
-.swipe-back-hint {
+.swipe-arrow {
+    width: 40px;
+    height: 40px;
     background: rgba(0, 0, 0, 0.8);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: white;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 14px;
-    font-weight: 500;
-    white-space: nowrap;
+    font-size: 18px;
+    font-weight: bold;
     backdrop-filter: blur(10px);
 }
 
@@ -133,151 +73,36 @@
 /* Keyframe animations */
 @keyframes slideInFromRight {
     0% {
-        transform: translateX(100%) translateZ(0);
-        opacity: 1;
+        transform: translateX(100%);
     }
     100% {
-        transform: translateX(0%) translateZ(0);
-        opacity: 1;
+        transform: translateX(0%);
     }
 }
 
 @keyframes slideOutToLeft {
     0% {
-        transform: translateX(0%) translateZ(0);
-        opacity: 1;
+        transform: translateX(0%);
     }
     100% {
-        transform: translateX(-100%) translateZ(0);
-        opacity: 1;
+        transform: translateX(-100%);
     }
 }
 
 @keyframes slideInFromLeft {
     0% {
-        transform: translateX(-100%) translateZ(0);
-        opacity: 1;
+        transform: translateX(-100%);
     }
     100% {
-        transform: translateX(0%) translateZ(0);
-        opacity: 1;
+        transform: translateX(0%);
     }
 }
 
 @keyframes slideOutToRight {
     0% {
-        transform: translateX(0%) translateZ(0);
-        opacity: 1;
+        transform: translateX(0%);
     }
     100% {
-        transform: translateX(100%) translateZ(0);
-        opacity: 1;
-    }
-}
-
-/* Performance optimizations */
-.animated-screen-container,
-.screen-slide {
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-/* Prevent content shifting during animation */
-.screen-slide * {
-    -webkit-overflow-scrolling: touch;
-}
-
-/* Ensure no flash of content and proper opacity during transitions */
-.screen-slide.current.exiting,
-.screen-slide.next.entering {
-    opacity: 1;
-    visibility: visible;
-}
-
-/* Prevent any background bleeding during transitions */
-.screen-slide.current.exiting.backward,
-.screen-slide.next.entering.backward {
-    background-color: inherit;
-}
-
-/* Enhanced touch responsiveness */
-.animated-screen-container {
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    -webkit-touch-callout: none;
-    -webkit-tap-highlight-color: transparent;
-}
-
-/* Ensure swipe works on all devices */
-@supports (touch-action: pan-y) {
-    .animated-screen-container {
-        touch-action: pan-y;
-    }
-}
-
-/* Fallback for older browsers */
-@supports not (touch-action: pan-y) {
-    .animated-screen-container {
-        -ms-touch-action: pan-y;
-        -webkit-overflow-scrolling: touch;
-    }
-}
-
-/* Additional fix for background bleeding */
-.animated-screen-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: inherit;
-    z-index: -1;
-    pointer-events: none;
-}
-
-/* Improve touch sensitivity on mobile devices */
-@media (hover: none) and (pointer: coarse) {
-    .animated-screen-container {
-        touch-action: pan-y pinch-zoom;
-    }
-}
-
-/* Enhance performance during swipe gestures */
-.screen-slide.current.dragging {
-    will-change: transform;
-    transform-style: preserve-3d;
-}
-
-/* Additional animations for form transitions */
-.animate-fade-in {
-    animation: fadeIn 0.3s ease-in-out forwards;
-}
-
-.animate-slide-in-left {
-    animation: slideInFromLeftSmall 0.3s ease-in-out forwards;
-}
-
-@keyframes fadeIn {
-    0% {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes slideInFromLeftSmall {
-    0% {
-        opacity: 0;
-        transform: translateX(-20px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateX(0);
+        transform: translateX(100%);
     }
 }

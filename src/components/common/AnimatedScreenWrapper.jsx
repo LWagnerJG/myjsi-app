@@ -9,13 +9,13 @@ export const AnimatedScreenWrapper = ({ children, screenKey, direction = 'forwar
     const animationTimeoutRef = useRef(null);
     const isFirstRender = useRef(true);
     
-    // State for the swipe gesture
+    // Swipe gesture state
     const [translateX, setTranslateX] = useState(0);
     const [isDragging, setIsDragging] = useState(false);
     const startXRef = useRef(0);
     const containerRef = useRef(null);
 
-    // Standard navigation animation (when using back button)
+    // Handle screen transitions
     useEffect(() => {
         if (isFirstRender.current) {
             isFirstRender.current = false;
@@ -23,38 +23,30 @@ export const AnimatedScreenWrapper = ({ children, screenKey, direction = 'forwar
         }
 
         if (screenKey !== currentScreenKey) {
-            if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
+            if (animationTimeoutRef.current) {
+                clearTimeout(animationTimeoutRef.current);
+            }
 
             setIsAnimating(true);
             setNextContent(children);
-            
-            // Immediately set the background for the container to prevent showing through
-            if (containerRef.current) {
-                containerRef.current.style.backgroundColor = direction === 'backward' ? 'var(--bg-color)' : '';
-            }
             
             animationTimeoutRef.current = setTimeout(() => {
                 setCurrentScreenKey(screenKey);
                 setCurrentContent(children);
                 setNextContent(null);
                 setIsAnimating(false);
-                // Reset position after a standard navigation completes
                 setTranslateX(0);
-                
-                // Clear background override
-                if (containerRef.current) {
-                    containerRef.current.style.backgroundColor = '';
-                }
-            }, 320); // Slightly longer than CSS animation duration to ensure complete transition
+            }, 300);
         } else {
-            // If only content changes, not the screen key
             setCurrentContent(children);
         }
 
         return () => {
-            if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
+            if (animationTimeoutRef.current) {
+                clearTimeout(animationTimeoutRef.current);
+            }
         };
-    }, [screenKey, children, currentScreenKey, direction]);
+    }, [screenKey, children, currentScreenKey]);
 
     // Touch handlers for swipe-to-go-back
     const handleTouchStart = useCallback((e) => {
@@ -76,7 +68,7 @@ export const AnimatedScreenWrapper = ({ children, screenKey, direction = 'forwar
         
         if (distance > 0) {
             e.preventDefault();
-            setTranslateX(distance);
+            setTranslateX(Math.min(distance, window.innerWidth));
         }
     }, [isDragging]);
 
@@ -86,15 +78,16 @@ export const AnimatedScreenWrapper = ({ children, screenKey, direction = 'forwar
         setIsDragging(false);
         
         const containerWidth = containerRef.current?.offsetWidth || window.innerWidth;
-        const swipeThreshold = containerWidth / 3; // Swipe 1/3 of the screen
+        const swipeThreshold = containerWidth / 3;
 
         if (translateX > swipeThreshold) {
-            // Animate out fully
+            // Complete the swipe
             setTranslateX(containerWidth);
-            // Trigger navigation after animation
             setTimeout(() => {
-                onSwipeBack();
-            }, 300);
+                if (onSwipeBack) {
+                    onSwipeBack();
+                }
+            }, 200);
         } else {
             // Snap back
             setTranslateX(0);
@@ -108,27 +101,38 @@ export const AnimatedScreenWrapper = ({ children, screenKey, direction = 'forwar
         onTouchCancel: handleTouchEnd,
     } : {};
 
+    const swipeProgress = Math.min(translateX / (window.innerWidth / 3), 1);
+
     return (
         <div 
             ref={containerRef}
             className="animated-screen-container"
-            style={{
-                '--bg-color': 'var(--background-color, #ffffff)'
-            }}
+            style={{ backgroundColor: 'inherit' }}
             {...touchHandlers}
         >
-            {/* Current Screen */}
+            {/* Swipe indicator */}
+            {isDragging && translateX > 10 && (
+                <div 
+                    className="swipe-indicator"
+                    style={{
+                        opacity: swipeProgress,
+                        transform: `translateX(${Math.min(translateX * 0.3, 60)}px)`,
+                    }}
+                >
+                    <div className="swipe-arrow">?</div>
+                </div>
+            )}
+            
             <div 
-                className={`screen-slide current ${isDragging ? 'dragging' : ''} ${isAnimating && direction === 'backward' ? 'exiting backward-manual' : isAnimating ? `exiting ${direction}` : ''}`}
+                className={`screen-slide current ${isAnimating ? `exiting ${direction}` : ''}`}
                 style={{
                     transform: `translateX(${translateX}px)`,
-                    transition: isDragging ? 'none' : 'transform 0.3s ease-out',
+                    transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.23, 1, 0.32, 1)',
                 }}
             >
                 {currentContent}
             </div>
             
-            {/* Next Screen (for standard navigation) */}
             {isAnimating && nextContent && (
                 <div className={`screen-slide next entering ${direction}`}>
                     {nextContent}
