@@ -146,12 +146,20 @@ function App() {
         const setAppHeight = () => {
             document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
         };
-
-        window.addEventListener('resize', setAppHeight);
+        
         setAppHeight();
-
-        return () => window.removeEventListener('resize', setAppHeight);
+        window.addEventListener('resize', setAppHeight);
+        window.addEventListener('orientationchange', setAppHeight);
+        
+        return () => {
+            window.removeEventListener('resize', setAppHeight);
+            window.removeEventListener('orientationchange', setAppHeight);
+        };
     }, []);
+
+    useEffect(() => {
+        document.body.style.backgroundColor = currentTheme.colors.background;
+    }, [currentTheme.colors.background]);
 
     const handleNavigate = useCallback((screen) => {
         setLastNavigationDirection('forward');
