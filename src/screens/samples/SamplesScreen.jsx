@@ -50,20 +50,38 @@ export const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSetti
         if (btn) setPillStyle({ left: btn.offsetLeft, width: btn.offsetWidth, opacity: 1 });
     }, [selectedCategory]);
 
-    // Handlers
+    // Handlers - now toggle functionality
     const handleAddSetToCart = useCallback(() => {
         const categoryName = Data.SAMPLE_CATEGORIES.find(c => c.id === selectedCategory)?.name || 'Unknown';
-        onUpdateCart(
-            { id: `set-${selectedCategory}`, name: `Complete ${categoryName} Set` },
-            1
-        );
-    }, [selectedCategory, onUpdateCart]);
+        const currentQuantity = cart[`set-${selectedCategory}`] || 0;
+        
+        if (currentQuantity > 0) {
+            // Remove from cart if already in cart
+            onUpdateCart(
+                { id: `set-${selectedCategory}`, name: `Complete ${categoryName} Set` },
+                -currentQuantity // Remove all quantities
+            );
+        } else {
+            // Add to cart if not in cart
+            onUpdateCart(
+                { id: `set-${selectedCategory}`, name: `Complete ${categoryName} Set` },
+                1
+            );
+        }
+    }, [selectedCategory, onUpdateCart, cart]);
 
-    // This handler is now wrapped in useCallback for optimization
-    const handleOrderFullSet = useCallback(
-        () => onUpdateCart({ id: 'full-jsi-set', name: 'Full JSI Sample Set' }, 1),
-        [onUpdateCart]
-    );
+    // This handler is now wrapped in useCallback for optimization - now toggle functionality
+    const handleOrderFullSet = useCallback(() => {
+        const currentQuantity = cart['full-jsi-set'] || 0;
+        
+        if (currentQuantity > 0) {
+            // Remove from cart if already in cart
+            onUpdateCart({ id: 'full-jsi-set', name: 'Full JSI Sample Set' }, -currentQuantity);
+        } else {
+            // Add to cart if not in cart
+            onUpdateCart({ id: 'full-jsi-set', name: 'Full JSI Sample Set' }, 1);
+        }
+    }, [onUpdateCart, cart]);
 
     const totalCartItems = useMemo(
         () => Object.values(cart).reduce((sum, qty) => sum + qty, 0),

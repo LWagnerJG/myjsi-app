@@ -72,8 +72,8 @@ const DonutChart = React.memo(({ data, theme }) => {
     const circumference = 2 * Math.PI * radius;
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 items-center gap-6">
-            <div className="relative mx-auto" style={{ width: size, height: size }}>
+        <div className="flex flex-col sm:flex-row items-center gap-4">
+            <div className="relative flex-shrink-0" style={{ width: size, height: size }}>
                 <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
                     <g transform={`rotate(-90 ${size / 2} ${size / 2})`}>
                         {chartData.map((item, index) => {
@@ -107,28 +107,25 @@ const DonutChart = React.memo(({ data, theme }) => {
                     </div>
                 </div>
             </div>
-            <div className="flex flex-col space-y-3">
-                {chartData.map((item) => {
-                    const percentage = ((item.value / total) * 100).toFixed(1);
-                    return (
-                        <div key={item.label} className="flex items-center space-x-3">
-                            <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: item.color }} />
-                            <div className="flex-1 flex justify-between items-center min-w-0">
-                                <p className="text-sm font-medium truncate" style={{ color: theme.colors.textPrimary }}>
-                                    {item.label}
-                                </p>
-                                <div className="text-right flex-shrink-0 ml-2">
-                                    <p className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>
-                                        ${item.value.toLocaleString()}
+            <div className="w-full flex-1 min-w-0">
+                <div className="flex flex-wrap justify-center sm:justify-start gap-x-4 gap-y-2">
+                    {chartData.map((item) => {
+                        const percentage = ((item.value / total) * 100).toFixed(1);
+                        return (
+                            <div key={item.label} className="flex items-center space-x-2">
+                                <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: item.color }} />
+                                <div>
+                                    <p className="text-sm font-medium" style={{ color: theme.colors.textPrimary }}>
+                                        {item.label}
                                     </p>
                                     <p className="text-xs" style={{ color: theme.colors.textSecondary }}>
-                                        {percentage}%
+                                        <span className="font-semibold">${item.value.toLocaleString()}</span> ({percentage}%)
                                     </p>
                                 </div>
                             </div>
-                        </div>
-                    );
-                })}
+                        );
+                    })}
+                </div>
             </div>
         </div>
     );
