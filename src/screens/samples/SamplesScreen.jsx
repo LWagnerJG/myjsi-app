@@ -32,7 +32,7 @@ const AddCompleteSetButton = ({ onClick, theme, inCart, categoryName }) => (
         }}
     >
         {inCart && <CheckCircle className="w-3.5 h-3.5" />}
-        <span>{categoryName} Set</span>
+        <span>Complete {categoryName} Set</span>
     </button>
 );
 
@@ -174,6 +174,9 @@ export const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSetti
                 <div className="px-4 grid grid-cols-2 gap-4 pb-4">
                     {filteredProducts.map(product => {
                         const quantity = cart[product.id] || 0;
+                        const hasImage = product.image && product.image !== '';
+                        const backgroundColor = hasImage ? theme.colors.subtle : (product.color || '#E5E7EB');
+                        
                         return (
                             <div
                                 key={product.id}
@@ -181,21 +184,25 @@ export const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSetti
                                 className="relative w-full aspect-square rounded-2xl overflow-hidden transition-all duration-200 cursor-pointer group"
                                 style={{
                                     border: `2px solid ${quantity > 0 ? theme.colors.accent : theme.colors.border}`,
-                                    backgroundColor: product.image ? theme.colors.subtle : product.color,
+                                    backgroundColor: backgroundColor,
                                     transform: quantity > 0 ? 'scale(0.95)' : 'scale(1)',
                                     boxShadow: quantity > 0 ? `0 0 15px ${theme.colors.accent}40` : 'none'
                                 }}
                             >
-                                {product.image && (
+                                {hasImage && (
                                     <img
                                         src={product.image}
                                         alt={product.name}
                                         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                        onError={(e) => {
+                                            // Hide image if it fails to load and show color background instead
+                                            e.target.style.display = 'none';
+                                        }}
                                     />
                                 )}
 
                                 <div
-                                    className="absolute top-2 left-2 bg-white bg-opacity-75 px-2 py-1 rounded text-xs font-semibold"
+                                    className="absolute top-2 left-2 bg-white bg-opacity-90 px-2 py-1 rounded text-xs font-semibold shadow-sm"
                                     style={{ color: theme.colors.textPrimary }}
                                 >
                                     {product.name}

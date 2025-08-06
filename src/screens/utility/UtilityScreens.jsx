@@ -936,16 +936,16 @@ const CartItem = React.memo(({
             {!isLast && (
                 <div className="border-t mx-2" style={{ borderColor: theme.colors.border }} />
             )}
-            <div className="flex items-center space-x-4 p-2">
+            <div className="flex items-center space-x-3 py-2 px-1">
                 <div 
-                    className="w-16 h-16 rounded-lg flex-shrink-0 flex items-center justify-center" 
+                    className="w-12 h-12 rounded-lg flex-shrink-0 flex items-center justify-center" 
                     style={{ 
                         backgroundColor: item.isSet ? theme.colors.subtle : item.color, 
                         border: `1px solid ${theme.colors.border}` 
                     }}
                 >
                     {item.isSet && (
-                        <Package className="w-8 h-8" style={{ color: theme.colors.secondary }} />
+                        <Package className="w-6 h-6" style={{ color: theme.colors.secondary }} />
                     )}
                     {item.image && !item.isSet && (
                         <img 
@@ -956,27 +956,27 @@ const CartItem = React.memo(({
                     )}
                 </div>
                 <div className="flex-1 min-w-0">
-                    <p className="font-semibold truncate" style={{ color: theme.colors.textPrimary }}>
+                    <p className="font-semibold truncate text-sm" style={{ color: theme.colors.textPrimary }}>
                         {item.name}
                     </p>
                 </div>
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-2">
                     <button 
                         onClick={handleDecrease} 
-                        className="w-8 h-8 flex items-center justify-center rounded-full transition-all duration-200 transform active:scale-90 hover:bg-black/5 dark:hover:bg-white/5"
+                        className="w-7 h-7 flex items-center justify-center rounded-full transition-all duration-200 transform active:scale-90 hover:bg-black/5 dark:hover:bg-white/5"
                     >
                         {item.quantity === 1 ? (
-                            <Trash2 className="w-5 h-5 text-red-500" />
+                            <Trash2 className="w-4 h-4 text-red-500" />
                         ) : (
-                            <Minus className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
+                            <Minus className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
                         )}
                     </button>
-                    <span className="font-bold w-4 text-center">{item.quantity}</span>
+                    <span className="font-bold w-4 text-center text-sm">{item.quantity}</span>
                     <button 
                         onClick={handleIncrease} 
-                        className="w-8 h-8 flex items-center justify-center rounded-full transition-all duration-200 transform active:scale-90 hover:bg-black/5 dark:hover:bg-white/5"
+                        className="w-7 h-7 flex items-center justify-center rounded-full transition-all duration-200 transform active:scale-90 hover:bg-black/5 dark:hover:bg-white/5"
                     >
-                        <Plus className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
+                        <Plus className="w-4 h-4" style={{ color: theme.colors.secondary }} />
                     </button>
                 </div>
             </div>
@@ -986,19 +986,42 @@ const CartItem = React.memo(({
 
 CartItem.displayName = 'CartItem';
 
-// Success state for cart submission
-const CartSuccess = React.memo(({ theme }) => (
-    <div className="flex flex-col items-center justify-center h-full">
-        <GlassCard theme={theme} className="p-8 flex flex-col items-center justify-center">
-            <CheckCircle className="w-16 h-16 mb-4" style={{ color: theme.colors.accent }} />
-            <h2 className="text-2xl font-bold" style={{ color: theme.colors.textPrimary }}>
-                Ordered!
+// Cart success component
+const CartSuccess = ({ theme }) => {
+    return (
+        <div className="flex flex-col items-center justify-center flex-1 p-4 text-center">
+            <CheckCircle className="w-16 h-16 text-green-500" />
+            <h2 className="mt-4 text-2xl font-bold" style={{ color: theme.colors.textPrimary }}>
+                Order Submitted!
             </h2>
-        </GlassCard>
-    </div>
-));
-
-CartSuccess.displayName = 'CartSuccess';
+            <p className="mt-2 text-sm" style={{ color: theme.colors.textSecondary }}>
+                Thank you for your order. Your items will be shipped to you shortly.
+            </p>
+            <div className="flex items-center justify-center mt-4 space-x-2">
+                <button 
+                    onClick={() => window.print()} 
+                    className="px-4 py-2 text-sm font-semibold rounded-full transition-all duration-200 transform active:scale-95" 
+                    style={{ 
+                        backgroundColor: theme.colors.accent, 
+                        color: '#FFFFFF' 
+                    }}
+                >
+                    Print Receipt
+                </button>
+                <button 
+                    onClick={() => window.location.href = '/home'} 
+                    className="px-4 py-2 text-sm font-semibold rounded-full transition-all duration-200 transform active:scale-95" 
+                    style={{ 
+                        backgroundColor: theme.colors.subtle, 
+                        color: theme.colors.textPrimary 
+                    }}
+                >
+                    Back to Home
+                </button>
+            </div>
+        </div>
+    );
+};
 
 // Cart screen with improved organization
 export const CartScreen = ({ 
@@ -1076,13 +1099,13 @@ export const CartScreen = ({
     return (
         <>
             <div className="flex flex-col h-full">
-                {/* This spacer pushes content below the main AppHeader */}
-                <div className="h-6" />
+                {/* Increased spacer to lower the cart content */}
+                <div className="h-12" />
                 
                 <div className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-hide">
                     <GlassCard theme={theme} className="p-2">
                         <h3 className="font-bold text-xl px-2 pt-2" style={{ color: theme.colors.textPrimary }}>
-                            Selected Samples
+                            Cart
                         </h3>
                         {cartItems.length > 0 ? (
                             <div className="mt-2">
@@ -1173,6 +1196,274 @@ export const CartScreen = ({
     );
 };
 
+// Export CreateContentModal
+export const CreateContentModal = ({ show, onClose, theme, onCreatePost }) => {
+    const [postType, setPostType] = useState('post');
+    const [title, setTitle] = useState('');
+    const [content, setContent] = useState('');
+    const [images, setImages] = useState([]);
+    const fileInputRef = useRef(null);
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (title.trim() && content.trim()) {
+            onCreatePost({
+                type: postType,
+                title: title.trim(),
+                content: content.trim(),
+                images: images,
+                timestamp: new Date().toISOString()
+            });
+            // Reset form
+            setTitle('');
+            setContent('');
+            setImages([]);
+            onClose();
+        }
+    };
+
+    const handleFileChange = (e) => {
+        if (e.target.files) {
+            setImages(prev => [...prev, ...Array.from(e.target.files)]);
+        }
+    };
+
+    const removeImage = (index) => {
+        setImages(prev => prev.filter((_, i) => i !== index));
+    };
+
+    if (!show) return null;
+
+    return (
+        <Modal show={show} onClose={onClose} title="Create New Post" theme={theme}>
+            <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                    <label className="block text-sm font-medium mb-2" style={{ color: theme.colors.textSecondary }}>
+                        Post Type
+                    </label>
+                    <div className="flex space-x-2">
+                        {['post', 'win', 'poll'].map(type => (
+                            <button
+                                key={type}
+                                type="button"
+                                onClick={() => setPostType(type)}
+                                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 transform active:scale-95 ${
+                                    postType === type ? 'shadow-md' : ''
+                                }`}
+                                style={{
+                                    backgroundColor: postType === type ? theme.colors.accent : theme.colors.subtle,
+                                    color: postType === type ? 'white' : theme.colors.textPrimary
+                                }}
+                            >
+                                {type.charAt(0).toUpperCase() + type.slice(1)}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                <FormInput
+                    label="Title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Enter post title..."
+                    theme={theme}
+                    required
+                />
+
+                <FormInput
+                    label="Content"
+                    type="textarea"
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    placeholder="What's on your mind?"
+                    theme={theme}
+                    required
+                />
+
+                <div>
+                    <label className="block text-sm font-medium mb-2" style={{ color: theme.colors.textSecondary }}>
+                        Images
+                    </label>
+                    <div className="space-y-3">
+                        {images.length > 0 && (
+                            <div className="grid grid-cols-3 gap-3">
+                                {images.map((file, index) => (
+                                    <div key={index} className="relative aspect-square">
+                                        <img 
+                                            src={URL.createObjectURL(file)} 
+                                            alt={`preview-${index}`} 
+                                            className="w-full h-full object-cover rounded-lg shadow-md" 
+                                        />
+                                        <button 
+                                            type="button" 
+                                            onClick={() => removeImage(index)} 
+                                            className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5 transition-all duration-200 transform active:scale-90"
+                                        >
+                                            <X className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        <button 
+                            type="button" 
+                            onClick={() => fileInputRef.current?.click()} 
+                            className="w-full flex items-center justify-center space-x-2 py-3 rounded-lg border-2 border-dashed transition-all duration-200 transform active:scale-95"
+                            style={{ borderColor: theme.colors.border, color: theme.colors.textSecondary }}
+                        >
+                            <ImageIcon className="w-5 h-5" />
+                            <span className="font-semibold">Add Images</span>
+                        </button>
+                        <input 
+                            type="file" 
+                            ref={fileInputRef} 
+                            multiple 
+                            accept="image/*" 
+                            className="hidden" 
+                            onChange={handleFileChange} 
+                        />
+                    </div>
+                </div>
+
+                <div className="flex space-x-3 pt-4">
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="flex-1 py-3 px-6 rounded-full font-semibold transition-all duration-200 transform active:scale-95"
+                        style={{ 
+                            backgroundColor: theme.colors.subtle, 
+                            color: theme.colors.textPrimary 
+                        }}
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="submit"
+                        className="flex-1 py-3 px-6 rounded-full font-semibold text-white transition-all duration-200 transform active:scale-95"
+                        style={{ backgroundColor: theme.colors.accent }}
+                    >
+                        Create Post
+                    </button>
+                </div>
+            </form>
+        </Modal>
+    );
+};
+
+// Export SettingsScreen
+export const SettingsScreen = ({ theme, onNavigate }) => {
+    const [notifications, setNotifications] = useState(true);
+    const [darkMode, setDarkMode] = useState(false);
+    const [autoSync, setAutoSync] = useState(true);
+
+    const settingsSections = [
+        {
+            title: "Account",
+            items: [
+                { label: "Profile Settings", icon: User, action: () => {} },
+                { label: "Privacy", icon: Shield, action: () => {} },
+                { label: "Security", icon: Shield, action: () => {} }
+            ]
+        },
+        {
+            title: "Notifications",
+            items: [
+                { 
+                    label: "Push Notifications", 
+                    icon: Bell, 
+                    toggle: true, 
+                    value: notifications, 
+                    onChange: setNotifications 
+                }
+            ]
+        },
+        {
+            title: "Appearance",
+            items: [
+                { 
+                    label: "Dark Mode", 
+                    icon: Palette, 
+                    toggle: true, 
+                    value: darkMode, 
+                    onChange: setDarkMode 
+                }
+            ]
+        },
+        {
+            title: "Data & Storage",
+            items: [
+                { 
+                    label: "Auto Sync", 
+                    icon: Database, 
+                    toggle: true, 
+                    value: autoSync, 
+                    onChange: setAutoSync 
+                },
+                { label: "Clear Cache", icon: Download, action: () => {} }
+            ]
+        }
+    ];
+
+    return (
+        <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
+            <div className="px-4 pt-6 pb-4">
+                <h1 className="text-3xl font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>
+                    Settings
+                </h1>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-6 scrollbar-hide">
+                {settingsSections.map((section, sectionIndex) => (
+                    <GlassCard key={sectionIndex} theme={theme} className="p-0">
+                        <h2 className="font-bold text-xl p-4" style={{ color: theme.colors.textPrimary }}>
+                            {section.title}
+                        </h2>
+                        <div>
+                            {section.items.map((item, itemIndex) => (
+                                <div 
+                                    key={itemIndex}
+                                    className={`flex items-center justify-between p-4 ${
+                                        itemIndex < section.items.length - 1 ? 'border-b' : ''
+                                    }`}
+                                    style={{ borderColor: theme.colors.subtle }}
+                                >
+                                    <div className="flex items-center space-x-3">
+                                        <item.icon className="w-5 h-5" style={{ color: theme.colors.accent }} />
+                                        <span className="font-medium" style={{ color: theme.colors.textPrimary }}>
+                                            {item.label}
+                                        </span>
+                                    </div>
+                                    {item.toggle ? (
+                                        <PermissionToggle 
+                                            label=""
+                                            isEnabled={item.value}
+                                            onToggle={() => item.onChange(!item.value)}
+                                            theme={theme}
+                                        />
+                                    ) : (
+                                        <ChevronRight className="w-5 h-5" style={{ color: theme.colors.secondary }} />
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </GlassCard>
+                ))}
+
+                <div className="pt-4">
+                    <button
+                        onClick={() => onNavigate('logout')}
+                        className="w-full flex items-center justify-center space-x-2 py-3 rounded-full font-semibold transition-all duration-200 transform active:scale-95"
+                        style={{ backgroundColor: '#EF4444', color: 'white' }}
+                    >
+                        <LogOut className="w-5 h-5" />
+                        <span>Sign Out</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 // Resource detail screen placeholder
 export const ResourceDetailScreen = ({ theme, currentScreen }) => (
     <div className="p-4">
@@ -1185,7 +1476,7 @@ export const ResourceDetailScreen = ({ theme, currentScreen }) => (
     </div>
 );
 
-// Other utility screens
+// Feedback screen
 export const FeedbackScreen = ({ theme, setSuccessMessage, onNavigate }) => {
     const [subject, setSubject] = useState('');
     const [message, setMessage] = useState('');
@@ -1485,14 +1776,4 @@ export const LogoutScreen = ({ theme, onNavigate }) => {
             </div>
         </div>
     );
-};
-
-// Export CreateContentModal
-export const CreateContentModal = () => {
-    return null; // Simplified implementation for testing
-};
-
-// Export SettingsScreen
-export const SettingsScreen = () => {
-    return null; // Simplified implementation for testing
 };
