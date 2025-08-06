@@ -143,35 +143,14 @@ function App() {
     const currentTheme = useMemo(() => (isDarkMode ? darkTheme : lightTheme), [isDarkMode]);
 
     useEffect(() => {
-        // Remove problematic body styles and use proper viewport handling
-        document.body.style.position = '';
-        document.body.style.width = '';
-        document.body.style.height = '';
-        document.body.style.overflow = '';
-        
-        // Ensure proper viewport meta tag
-        let viewportMeta = document.querySelector('meta[name="viewport"]');
-        if (!viewportMeta) {
-            viewportMeta = document.createElement('meta');
-            viewportMeta.name = 'viewport';
-            document.head.appendChild(viewportMeta);
-        }
-        viewportMeta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover';
-        
-        // Set dynamic viewport height on iOS
         const setAppHeight = () => {
-            const vh = window.innerHeight * 0.01;
             document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
         };
-        
-        setAppHeight();
+
         window.addEventListener('resize', setAppHeight);
-        window.addEventListener('orientationchange', setAppHeight);
-        
-        return () => {
-            window.removeEventListener('resize', setAppHeight);
-            window.removeEventListener('orientationchange', setAppHeight);
-        };
+        setAppHeight();
+
+        return () => window.removeEventListener('resize', setAppHeight);
     }, []);
 
     const handleNavigate = useCallback((screen) => {
