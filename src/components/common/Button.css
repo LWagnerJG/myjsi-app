@@ -1,0 +1,12 @@
+/* Button.css */
+
+/* Add any additional styles for the button here */
+
+/* Ensure smooth scaling effect */
+button {
+    transition: transform 0.15s ease-in-out;
+}
+
+button:active {
+    transform: scale(0.95);
+}

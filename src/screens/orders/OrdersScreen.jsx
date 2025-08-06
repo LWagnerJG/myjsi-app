@@ -48,13 +48,13 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
         <div className="space-y-4">
             <GlassCard theme={theme} className="p-4">
                 <div className="flex justify-between items-center mb-4">
-                    <button onClick={() => setCurrentDate(new Date(year, month - 1, 1))} className="p-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10">
+                    <button onClick={() => setCurrentDate(new Date(year, month - 1, 1))} className="p-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10 transition-all duration-200 transform active:scale-90">
                         <ChevronLeft style={{ color: theme.colors.textSecondary }} />
                     </button>
                     <h3 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>
                         {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
                     </h3>
-                    <button onClick={() => setCurrentDate(new Date(year, month + 1, 1))} className="p-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10">
+                    <button onClick={() => setCurrentDate(new Date(year, month + 1, 1))} className="p-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10 transition-all duration-200 transform active:scale-90">
                         <ChevronRight style={{ color: theme.colors.textSecondary }} />
                     </button>
                 </div>
@@ -73,7 +73,7 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
                             <button
                                 key={day}
                                 onClick={() => handleDateClick(day)}
-                                className={`relative h-10 flex items-center justify-center rounded-full transition-colors duration-200 ${isSelected ? 'bg-blue-600 text-white font-bold' : 'hover:bg-black/5'}`}
+                                className={`relative h-10 flex items-center justify-center rounded-full transition-all duration-200 transform active:scale-90 ${isSelected ? 'bg-blue-600 text-white font-bold' : 'hover:bg-black/5'}`}
                             >
                                 <span>{day}</span>
                                 {hasOrder && <div className={`absolute bottom-1 h-1.5 w-1.5 rounded-full ${isSelected ? 'bg-white' : 'bg-blue-500'}`}></div>}
@@ -89,7 +89,7 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
                         Orders for {selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </h3>
                     {ordersForSelectedDate.map(order => (
-                        <GlassCard key={order.orderNumber} theme={theme} className="p-4 cursor-pointer hover:border-gray-400/50 flex items-center space-x-4" onClick={() => onOrderClick(order)}>
+                        <GlassCard key={order.orderNumber} theme={theme} className="p-4 cursor-pointer hover:border-gray-400/50 flex items-center space-x-4 transition-all duration-200 transform active:scale-[0.99]" onClick={() => onOrderClick(order)}>
                             <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: Data.STATUS_COLORS[order.status] || theme.colors.secondary }}></div>
                             <div className="flex-1 min-w-0">
                                 <p className="font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{order.details || 'N/A'}</p>
@@ -188,17 +188,17 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                         className="flex-grow"
                     />
                     <div className="relative">
-                        <button onClick={() => setShowDateFilter(f => !f)} className="p-3.5 rounded-full shadow-sm" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${theme.colors.border}` }}>
+                        <button onClick={() => setShowDateFilter(f => !f)} className="p-3.5 rounded-full shadow-sm transition-all duration-200 transform active:scale-90" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${theme.colors.border}` }}>
                             <Filter className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />
                         </button>
                         {showDateFilter && (
                             <GlassCard ref={filterMenuRef} theme={theme} className="absolute top-14 right-0 z-20 w-40 p-2">
-                                <button onClick={() => { setDateType('shipDate'); setShowDateFilter(false); }} className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${dateType === 'shipDate' ? 'font-bold' : ''}`} style={{ color: theme.colors.textPrimary, backgroundColor: dateType === 'shipDate' ? theme.colors.subtle : 'transparent' }}>Ship Date</button>
-                                <button onClick={() => { setDateType('date'); setShowDateFilter(false); }} className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${dateType === 'date' ? 'font-bold' : ''}`} style={{ color: theme.colors.textPrimary, backgroundColor: dateType === 'date' ? theme.colors.subtle : 'transparent' }}>PO Date</button>
+                                <button onClick={() => { setDateType('shipDate'); setShowDateFilter(false); }} className={`w-full text-left px-2 py-1.5 text-sm rounded-md transition-all duration-200 transform active:scale-95 ${dateType === 'shipDate' ? 'font-bold' : ''}`} style={{ color: theme.colors.textPrimary, backgroundColor: dateType === 'shipDate' ? theme.colors.subtle : 'transparent' }}>Ship Date</button>
+                                <button onClick={() => { setDateType('date'); setShowDateFilter(false); }} className={`w-full text-left px-2 py-1.5 text-sm rounded-md transition-all duration-200 transform active:scale-95 ${dateType === 'date' ? 'font-bold' : ''}`} style={{ color: theme.colors.textPrimary, backgroundColor: dateType === 'date' ? theme.colors.subtle : 'transparent' }}>PO Date</button>
                             </GlassCard>
                         )}
                     </div>
-                    <button onClick={() => setViewMode(v => v === 'list' ? 'calendar' : 'list')} className="p-3.5 rounded-full shadow-sm" style={{ backgroundColor: viewMode === 'calendar' ? theme.colors.accent : theme.colors.surface, border: `1px solid ${theme.colors.border}` }}>
+                    <button onClick={() => setViewMode(v => v === 'list' ? 'calendar' : 'list')} className="p-3.5 rounded-full shadow-sm transition-all duration-200 transform active:scale-90" style={{ backgroundColor: viewMode === 'calendar' ? theme.colors.accent : theme.colors.surface, border: `1px solid ${theme.colors.border}` }}>
                         <Calendar className="w-5 h-5" style={{ color: viewMode === 'calendar' ? 'white' : theme.colors.textPrimary }} />
                     </button>
                 </div>
@@ -232,7 +232,7 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                                                 const statusColor = Data.STATUS_COLORS[order.status] || theme.colors.secondary;
                                                 return (
                                                     <React.Fragment key={order.orderNumber}>
-                                                        <button onClick={() => onNavigate(`orders/${order.orderNumber}`)} className="w-full text-left p-3 transition-colors hover:bg-black/5 dark:hover:bg-white/10 rounded-lg">
+                                                        <button onClick={() => onNavigate(`orders/${order.orderNumber}`)} className="w-full text-left p-3 transition-all duration-200 transform active:scale-[0.99] hover:bg-black/5 dark:hover:bg-white/10 rounded-lg">
                                                             <div className="flex items-center justify-between space-x-4">
                                                                 <div className="flex items-center space-x-4 flex-1 min-w-0">
                                                                     <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: statusColor }} />

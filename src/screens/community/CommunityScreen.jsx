@@ -82,7 +82,7 @@ export const CommunityScreen = ({ theme, posts, polls, likedPosts, onToggleLike,
                 <div className="flex items-center space-x-4">
                     <button
                         onClick={() => onToggleLike && onToggleLike(post.id)}
-                        className="flex items-center space-x-1 text-sm"
+                        className="flex items-center space-x-1 text-sm transition-all duration-200 transform active:scale-90"
                     >
                         <Heart 
                             className={`w-4 h-4 ${likedPosts?.[post.id] ? 'fill-current' : ''}`}
@@ -92,14 +92,14 @@ export const CommunityScreen = ({ theme, posts, polls, likedPosts, onToggleLike,
                             {post.likes}
                         </span>
                     </button>
-                    <button className="flex items-center space-x-1 text-sm">
+                    <button className="flex items-center space-x-1 text-sm transition-all duration-200 transform active:scale-90">
                         <MessageCircle className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
                         <span style={{ color: theme.colors.textSecondary }}>
                             {post.comments?.length || 0}
                         </span>
                     </button>
                 </div>
-                <button className="p-1">
+                <button className="p-1 transition-all duration-200 transform active:scale-90">
                     <Share2 className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
                 </button>
             </div>
@@ -141,7 +141,7 @@ export const CommunityScreen = ({ theme, posts, polls, likedPosts, onToggleLike,
                         <button
                             key={option.id}
                             onClick={() => onPollVote && onPollVote(poll.id, option.id)}
-                            className={`w-full p-3 rounded-lg text-left relative overflow-hidden ${isSelected ? 'ring-2' : ''}`}
+                            className={`w-full p-3 rounded-lg text-left relative overflow-hidden transition-all duration-200 transform active:scale-[0.98] ${isSelected ? 'ring-2' : ''}`}
                             style={{ 
                                 backgroundColor: theme.colors.subtle,
                                 ringColor: isSelected ? theme.colors.accent : 'transparent'
@@ -230,7 +230,7 @@ export const CommunityScreen = ({ theme, posts, polls, likedPosts, onToggleLike,
                 <PageTitle title="Community" theme={theme}>
                     <button
                         onClick={openCreateContentModal}
-                        className="flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold"
+                        className="flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 transform active:scale-95"
                         style={{ backgroundColor: theme.colors.accent, color: 'white' }}
                     >
                         <Plus className="w-4 h-4" />
@@ -258,7 +258,7 @@ export const CommunityScreen = ({ theme, posts, polls, likedPosts, onToggleLike,
                             </p>
                             <button
                                 onClick={openCreateContentModal}
-                                className="px-6 py-3 rounded-full font-semibold"
+                                className="px-6 py-3 rounded-full font-semibold transition-all duration-200 transform active:scale-95"
                                 style={{ backgroundColor: theme.colors.accent, color: 'white' }}
                             >
                                 Create First Post

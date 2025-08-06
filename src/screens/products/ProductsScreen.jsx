@@ -86,7 +86,7 @@ CategoryCard.displayName = 'CategoryCard';
 const ViewModeToggle = React.memo(({ viewMode, onToggle, theme }) => (
     <button
         onClick={onToggle}
-        className="p-2 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+        className="p-2 rounded-lg transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/5 transform active:scale-95"
         style={{ backgroundColor: theme.colors.subtle }}
         aria-label={`Switch to ${viewMode === 'grid' ? 'list' : 'grid'} view`}
     >

@@ -14,6 +14,7 @@ import { SampleDiscountsScreen } from '../screens/resources/SampleDiscountsScree
 import { LeadTimesScreen } from '../screens/resources/LeadTimesScreen.jsx';
 import { HomeScreen } from '../screens/home/HomeScreen.jsx';
 import { NewLeadScreen } from '../screens/projects/NewLeadScreen.jsx';
+import { ReplacementsScreen } from '../screens/replacements/ReplacementsScreen.jsx';
 
 // Import utility screens
 import {
@@ -23,7 +24,6 @@ import {
     FeedbackScreen,
     HelpScreen,
     LogoutScreen,
-    ReplacementsScreen,
     CreateContentModal,
     AddNewInstallScreen,
     CartScreen,

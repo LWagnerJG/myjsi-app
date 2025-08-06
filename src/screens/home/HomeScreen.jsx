@@ -88,7 +88,7 @@ const SmartSearch = ({
                 <button
                     type="button"
                     onClick={handleVoiceClick}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 p-1"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 p-1 transition-all duration-200 transform active:scale-90"
                 >
                     <Mic
                         className="h-5 w-5"
@@ -104,7 +104,7 @@ const SmartSearch = ({
                             <li
                                 key={app.route}
                                 onMouseDown={() => handleNavigation(app.route)}
-                                className="flex items-center gap-3 cursor-pointer px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                                className="flex items-center gap-3 cursor-pointer px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 transform active:scale-95"
                                 style={{ color: theme.colors.textPrimary }}
                             >
                                 <app.icon
@@ -140,7 +140,7 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate }) => {
                     <button 
                         key={item.id} 
                         onClick={() => onNavigate(item.id)} 
-                        className="p-4 rounded-[28px] flex flex-col items-start justify-between transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] w-full h-full" 
+                        className="p-4 rounded-[28px] flex flex-col items-start justify-between transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] w-full h-full transform" 
                         style={{ 
                             backgroundColor: theme.colors.surface, 
                             border: 'none', 
@@ -165,7 +165,7 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate }) => {
             <div className="px-4 pt-3 pb-safe-bottom" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
                 <button 
                     onClick={() => onNavigate('feedback')} 
-                    className="w-full p-5 rounded-[28px] flex items-center justify-center space-x-3 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]" 
+                    className="w-full p-5 rounded-[28px] flex items-center justify-center space-x-3 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] transform" 
                     style={{ 
                         backgroundColor: theme.colors.surface, 
                         border: 'none', 

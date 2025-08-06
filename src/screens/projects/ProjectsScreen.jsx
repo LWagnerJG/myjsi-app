@@ -27,7 +27,7 @@ const ProjectDetailScreen = ({ project, theme, onBack, onUpdateProject, onDelete
             <PageTitle title="Project Details" theme={theme} showBack={false}>
                 <button
                     onClick={handleSave}
-                    className="flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-colors"
+                    className="flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 transform active:scale-95"
                     style={{ backgroundColor: theme.colors.accent, color: 'white' }}
                 >
                     <Check className="w-4 h-4" />
@@ -97,7 +97,7 @@ const ProjectDetailScreen = ({ project, theme, onBack, onUpdateProject, onDelete
                 <div className="px-4">
                     <button
                         onClick={handleDelete}
-                        className="w-full flex items-center justify-center space-x-2 font-bold py-3 px-6 rounded-lg text-red-500 bg-red-500/10"
+                        className="w-full flex items-center justify-center space-x-2 font-bold py-3 px-6 rounded-lg text-red-500 bg-red-500/10 transition-all duration-200 transform active:scale-95"
                     >
                         <Trash2 className="w-4 h-4" />
                         <span>Delete Project</span>
@@ -209,7 +209,7 @@ export const ProjectsScreen = ({
                 <PageTitle title="Projects" theme={theme}>
                     <button
                         onClick={handleAddClick}
-                        className="flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 hover:scale-105 active:scale-95"
+                        className="flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 hover:scale-105 active:scale-95 transform"
                         style={{ backgroundColor: theme.colors.accent, color: 'white' }}
                     >
                         <div className="relative h-5 w-[110px] flex items-center justify-center">
@@ -244,7 +244,7 @@ export const ProjectsScreen = ({
                             <button 
                                 ref={el => (mainTabRefs.current[0] = el)}
                                 onClick={() => setProjectsTab('pipeline')} 
-                                className="relative z-10 flex-1 py-2.5 text-sm font-semibold rounded-full transition-colors duration-200" 
+                                className="relative z-10 flex-1 py-2.5 text-sm font-semibold rounded-full transition-all duration-200 transform active:scale-95" 
                                 style={{ color: projectsTab === 'pipeline' ? 'white' : theme.colors.textSecondary }}
                             >
                                 Pipeline
@@ -252,7 +252,7 @@ export const ProjectsScreen = ({
                             <button 
                                 ref={el => (mainTabRefs.current[1] = el)}
                                 onClick={() => setProjectsTab('my-projects')} 
-                                className="relative z-10 flex-1 py-2.5 text-sm font-semibold rounded-full transition-colors duration-200" 
+                                className="relative z-10 flex-1 py-2.5 text-sm font-semibold rounded-full transition-all duration-200 transform active:scale-95" 
                                 style={{ color: projectsTab === 'my-projects' ? 'white' : theme.colors.textSecondary }}
                             >
                                 My Projects
@@ -280,7 +280,7 @@ export const ProjectsScreen = ({
                                         key={stage} 
                                         ref={el => (stageButtonRefs.current[index] = el)} 
                                         onClick={() => setSelectedPipelineStage(stage)} 
-                                        className="relative z-10 px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-colors duration-200 flex-shrink-0" 
+                                        className="relative z-10 px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-200 flex-shrink-0 transform active:scale-95" 
                                         style={{ color: selectedPipelineStage === stage ? 'white' : theme.colors.textSecondary }}
                                     >
                                         {stage}
@@ -298,7 +298,7 @@ export const ProjectsScreen = ({
                                 <GlassCard 
                                     key={opp.id} 
                                     theme={theme} 
-                                    className="overflow-hidden p-4 cursor-pointer transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]" 
+                                    className="overflow-hidden p-4 cursor-pointer transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] transform" 
                                     onClick={() => setSelectedOpportunity(opp)}
                                     style={{
                                         border: `1px solid ${theme.colors.border}`,
@@ -350,7 +350,7 @@ export const ProjectsScreen = ({
                                 <GlassCard 
                                     key={project.id} 
                                     theme={theme} 
-                                    className="p-0 overflow-hidden cursor-pointer group transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]" 
+                                    className="p-0 overflow-hidden cursor-pointer group transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] transform" 
                                     onClick={() => setSelectedProject(project)}
                                     style={{
                                         border: `1px solid ${theme.colors.border}`,

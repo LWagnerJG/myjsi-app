@@ -233,7 +233,7 @@ export const ReplacementsScreen = ({ theme, onNavigate }) => {
     const RequestCard = ({ request, theme, onClick }) => (
         <button
             onClick={() => onClick(request)}
-            className="w-full p-4 text-left rounded-xl transition-colors hover:bg-black/5 dark:hover:bg-white/5 flex items-center justify-between"
+            className="w-full p-4 text-left rounded-xl transition-all duration-200 transform active:scale-95 hover:bg-black/5 dark:hover:bg-white/5 flex items-center justify-between"
             style={{ backgroundColor: theme.colors.surface, border: `1px solid ${theme.colors.border}` }}
         >
             <div className="flex-1 min-w-0">
@@ -343,14 +343,14 @@ export const ReplacementsScreen = ({ theme, onNavigate }) => {
             <div className="flex space-x-4 pt-4">
                 <button
                     onClick={() => setView('list')}
-                    className="flex-1 py-3 rounded-full font-semibold"
+                    className="flex-1 py-3 rounded-full font-semibold transition-all duration-200 transform active:scale-95"
                     style={{ backgroundColor: theme.colors.surface, color: theme.colors.textPrimary, border: `1px solid ${theme.colors.border}` }}
                 >
                     Back to Requests
                 </button>
                 <button
                     onClick={handleSubmitRequest}
-                    className="flex-1 py-3 rounded-full font-semibold"
+                    className="flex-1 py-3 rounded-full font-semibold transition-all duration-200 transform active:scale-95"
                     style={{ backgroundColor: theme.colors.accent, color: 'white' }}
                 >
                     Submit Replacement
@@ -394,7 +394,7 @@ export const ReplacementsScreen = ({ theme, onNavigate }) => {
                                             e.stopPropagation();
                                             stopScanning();
                                         }}
-                                        className="absolute bottom-4 right-4 px-4 py-2 text-sm bg-red-500 text-white rounded-full font-semibold shadow-lg hover:bg-red-600 transition-colors"
+                                        className="absolute bottom-4 right-4 px-4 py-2 text-sm bg-red-500 text-white rounded-full font-semibold shadow-lg hover:bg-red-600 transition-all duration-200 transform active:scale-95"
                                     >
                                         Cancel
                                     </button>
@@ -425,7 +425,7 @@ export const ReplacementsScreen = ({ theme, onNavigate }) => {
                                 setFormData({ salesOrder: '', lineItem: '', notes: '' });
                                 setView('form');
                             }}
-                            className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-gray-400 transition-colors"
+                            className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-gray-400 transition-all duration-200 transform active:scale-95"
                             style={{ color: theme.colors.textSecondary }}
                         >
                             <h3 className="font-semibold text-lg mb-2" style={{ color: theme.colors.textPrimary }}>

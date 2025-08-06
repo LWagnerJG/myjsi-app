@@ -1,22 +1,38 @@
 import React, { useMemo } from 'react';
 import {
     Database, Search, Share2, FileText, DollarSign, Calendar, Percent,
-    Palette, Package, Users, MapPin, MonitorPlay, Wrench, Clock
+    Palette, Package, Users, MapPin, MonitorPlay, Wrench, Clock, ChevronRight
 } from 'lucide-react';
 import * as Data from '../../data.jsx';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 
+// NOTE: The 'importantItems' Set has been removed as all items are now treated equally.
+
+const sublabelMap = {
+    'Lead Times': 'Check current production & shipping estimates',
+    'Discontinued Finishes Database': 'Look up archived finishes and fabrics',
+    'Request COM Yardage': 'Calculate and request customer materials',
+    'Search Fabrics': 'Browse all available JSI textiles',
+    'Commission Rates': 'View your current rate sheet',
+    'Contracts': 'Access active and pending agreements',
+    'Dealer Directory': 'Find contact information for dealers',
+    'Sample Discounts': 'View available discounts for samples',
+    'Install Instructions': 'Get guides for product installation',
+    'Loaner Pool': 'Request or return showroom samples',
+    'Field Visit Request': 'Schedule a visit from a JSI representative',
+    'Social Media Assets': 'Download approved images and copy',
+    'Presentations': 'Access official JSI slideshows & templates'
+};
+
 export const ResourcesScreen = ({ theme, onNavigate }) => {
-    const resourceCategories = useMemo(() => {
-        return Data.RESOURCES_DATA || [];
-    }, []);
+    const resourceCategories = useMemo(() => Data.RESOURCES_DATA || [], []);
 
     const getResourceIcon = (label) => {
         if (label.includes('Lead Times')) return Clock;
-        if (label.includes('Commission') || label.includes('Discount')) return DollarSign;
+        if (label.includes('Commission')) return DollarSign;
         if (label.includes('Contract')) return FileText;
         if (label.includes('Social')) return Share2;
-        if (label.includes('Percent') || label.includes('Sample')) return Percent;
+        if (label.includes('Sample')) return Percent;
         if (label.includes('Search Fabrics')) return Search;
         if (label.includes('Discontinued')) return Palette;
         if (label.includes('Loaner')) return Package;
@@ -28,58 +44,70 @@ export const ResourcesScreen = ({ theme, onNavigate }) => {
         return Database;
     };
 
-    const ResourceCard = ({ item }) => {
+    const ResourceListItem = ({ item }) => {
         const IconComponent = getResourceIcon(item.label);
+        const sublabel = sublabelMap[item.label] || 'Access resource';
 
         return (
-            <button
-                onClick={() => onNavigate(item.nav)}
-                className="group w-full p-3 text-left rounded-xl transition-all duration-200 hover:shadow-lg active:scale-[0.98] flex flex-col items-center justify-center text-center border"
-                style={{ backgroundColor: theme.colors.surface, minHeight: '80px', borderColor: theme.colors.border, borderWidth: 1 }}
-            >
-                <div
-                    className="w-10 h-10 mb-2 rounded-full flex-shrink-0 flex items-center justify-center group-hover:scale-110 transition-transform duration-200"
-                    style={{ backgroundColor: theme.colors.subtle }}
+            <li>
+                <button
+                    onClick={() => onNavigate(item.nav)}
+                    // TWEAK: Increased roundness to 'rounded-full' for a pill shape.
+                    className="group w-full p-3 text-left rounded-full transition-all duration-200 hover:shadow-md active:scale-[0.99] flex items-center border"
+                    style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.border }}
                 >
-                    <IconComponent
-                        className="w-5 h-5"
-                        style={{ color: theme.colors.accent }}
-                        strokeWidth={1.5}
-                    />
-                </div>
-                <h4 className="font-semibold text-xs leading-tight max-w-full" style={{ color: theme.colors.textPrimary, hyphens: 'auto' }}>
-                    {item.label}
-                </h4>
-            </button>
+                    <div
+                        className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center transition-all duration-200 group-hover:scale-110"
+                        // STYLE CHANGE: Simplified style, no more conditional border.
+                        style={{ backgroundColor: theme.colors.subtle }}
+                    >
+                        <IconComponent
+                            className="w-5 h-5"
+                            style={{ color: theme.colors.accent }}
+                            // STYLE CHANGE: Consistent stroke width for all icons.
+                            strokeWidth={1.5}
+                        />
+                    </div>
+
+                    <div className="flex-1 ml-4">
+                        <h4 className="font-semibold text-sm" style={{ color: theme.colors.textPrimary }}>
+                            {item.label}
+                        </h4>
+                        <p className="text-xs" style={{ color: theme.colors.textSecondary }}>
+                            {sublabel}
+                        </p>
+                    </div>
+
+                    <ChevronRight className="w-5 h-5 ml-2 flex-shrink-0" style={{ color: theme.colors.border }} />
+                </button>
+            </li>
         );
     };
 
     const CategorySection = ({ category, isFirst }) => {
         return (
-            <div className={`space-y-3 ${!isFirst ? 'pt-4 border-t' : ''}`} style={{ borderColor: theme.colors.border }}>
-                {/* Category Header */}
-                <h3 className="font-bold text-base pl-1" style={{ color: theme.colors.textPrimary }}>
+            <div className={`space-y-3 ${!isFirst ? 'pt-5 border-t' : ''}`} style={{ borderColor: theme.colors.border }}>
+                <h3 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>
                     {category.category}
                 </h3>
 
-                {/* Enhanced Grid */}
-                <div className="grid grid-cols-2 gap-3">
+                <ul className="space-y-2">
+                    {/* CHANGE: Mapping directly over category.items, as sorting is no longer needed. */}
                     {category.items?.map((item) => (
-                        <ResourceCard
+                        <ResourceListItem
                             key={item.nav}
                             item={item}
                         />
                     ))}
-                </div>
+                </ul>
             </div>
         );
     };
 
     return (
         <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
-            {/* Content with improved padding */}
             <div className="flex-1 overflow-y-auto px-4 pt-4 pb-4 scrollbar-hide">
-                <GlassCard theme={theme} className="p-4 space-y-4">
+                <GlassCard theme={theme} className="p-4 space-y-5">
                     {resourceCategories.map((category, index) => (
                         <CategorySection
                             key={category.category}

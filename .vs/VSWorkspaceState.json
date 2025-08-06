@@ -3,14 +3,12 @@
     "",
     "\\src",
     "\\src\\screens",
+    "\\src\\screens\\orders",
     "\\src\\screens\\products",
     "\\src\\screens\\projects",
     "\\src\\screens\\replacements",
-    "\\src\\screens\\resources",
-    "\\src\\screens\\sales",
-    "\\src\\screens\\samples",
-    "\\src\\styles"
+    "\\src\\screens\\resources"
   ],
-  "SelectedNode": "\\src\\screens\\utility\\UtilityScreens.jsx",
+  "SelectedNode": "\\src\\screens\\resources\\LoanerPoolScreen.jsx",
   "PreviewInSolutionExplorer": false
 }
