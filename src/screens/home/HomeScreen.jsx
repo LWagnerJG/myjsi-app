@@ -64,7 +64,7 @@ const SmartSearch = ({
     };
 
     return (
-        <div ref={searchContainerRef} className="relative z-20">
+        <div ref={searchContainerRef} className="relative z-[100]">
             <form onSubmit={handleFormSubmit} className="relative">
                 <Search
                     className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5"
@@ -98,24 +98,32 @@ const SmartSearch = ({
             </form>
 
             {isFocused && filteredApps.length > 0 && (
-                <GlassCard theme={theme} className="absolute top-full mt-2 w-full p-2 z-50">
-                    <ul className="max-h-60 overflow-y-auto scrollbar-hide">
-                        {filteredApps.map(app => (
-                            <li
-                                key={app.route}
-                                onMouseDown={() => handleNavigation(app.route)}
-                                className="flex items-center gap-3 cursor-pointer px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 transform active:scale-95"
-                                style={{ color: theme.colors.textPrimary }}
-                            >
-                                <app.icon
-                                    className="w-4 h-4"
-                                    style={{ color: theme.colors.textSecondary }}
-                                />
-                                {app.name}
-                            </li>
-                        ))}
-                    </ul>
-                </GlassCard>
+                <div 
+                    className="absolute top-full mt-2 w-full z-[9999]"
+                    style={{
+                        position: 'absolute',
+                        zIndex: 9999
+                    }}
+                >
+                    <GlassCard theme={theme} className="p-2">
+                        <ul className="max-h-60 overflow-y-auto scrollbar-hide">
+                            {filteredApps.map(app => (
+                                <li
+                                    key={app.route}
+                                    onMouseDown={() => handleNavigation(app.route)}
+                                    className="flex items-center gap-3 cursor-pointer px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 transform active:scale-95"
+                                    style={{ color: theme.colors.textPrimary }}
+                                >
+                                    <app.icon
+                                        className="w-4 h-4"
+                                        style={{ color: theme.colors.textSecondary }}
+                                    />
+                                    {app.name}
+                                </li>
+                            ))}
+                        </ul>
+                    </GlassCard>
+                </div>
             )}
         </div>
     );
