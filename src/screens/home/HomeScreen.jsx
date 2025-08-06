@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Search, Mic } from 'lucide-react';
 import { MENU_ITEMS, allApps } from '../../data.jsx';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
+import { DropdownPortal } from '../../DropdownPortal.jsx';
 
 const SmartSearch = ({
     theme,
@@ -13,6 +14,28 @@ const SmartSearch = ({
     const [filteredApps, setFilteredApps] = useState([]);
     const [isFocused, setIsFocused] = useState(false);
     const searchContainerRef = useRef(null);
+    const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
+
+    const updateDropdownPosition = useCallback(() => {
+        if (searchContainerRef.current) {
+            const rect = searchContainerRef.current.getBoundingClientRect();
+            setDropdownPosition({
+                top: rect.bottom + window.scrollY,
+                left: rect.left + window.scrollX,
+                width: rect.width,
+            });
+        }
+    }, []);
+
+    useEffect(() => {
+        if (isFocused) {
+            updateDropdownPosition();
+            window.addEventListener('resize', updateDropdownPosition);
+        } else {
+            window.removeEventListener('resize', updateDropdownPosition);
+        }
+        return () => window.removeEventListener('resize', updateDropdownPosition);
+    }, [isFocused, updateDropdownPosition]);
 
     useEffect(() => {
         if (!isFocused) {
@@ -98,32 +121,36 @@ const SmartSearch = ({
             </form>
 
             {isFocused && filteredApps.length > 0 && (
-                <div 
-                    className="absolute top-full mt-2 w-full z-[9999]"
-                    style={{
-                        position: 'absolute',
-                        zIndex: 9999
-                    }}
-                >
-                    <GlassCard theme={theme} className="p-2">
-                        <ul className="max-h-60 overflow-y-auto scrollbar-hide">
-                            {filteredApps.map(app => (
-                                <li
-                                    key={app.route}
-                                    onMouseDown={() => handleNavigation(app.route)}
-                                    className="flex items-center gap-3 cursor-pointer px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 transform active:scale-95"
-                                    style={{ color: theme.colors.textPrimary }}
-                                >
-                                    <app.icon
-                                        className="w-4 h-4"
-                                        style={{ color: theme.colors.textSecondary }}
-                                    />
-                                    {app.name}
-                                </li>
-                            ))}
-                        </ul>
-                    </GlassCard>
-                </div>
+                <DropdownPortal>
+                    <div 
+                        className="absolute mt-2"
+                        style={{
+                            top: `${dropdownPosition.top}px`,
+                            left: `${dropdownPosition.left}px`,
+                            width: `${dropdownPosition.width}px`,
+                            zIndex: 9999
+                        }}
+                    >
+                        <GlassCard theme={theme} className="p-2">
+                            <ul className="max-h-60 overflow-y-auto scrollbar-hide">
+                                {filteredApps.map(app => (
+                                    <li
+                                        key={app.route}
+                                        onMouseDown={() => handleNavigation(app.route)}
+                                        className="flex items-center gap-3 cursor-pointer px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 transform active:scale-95"
+                                        style={{ color: theme.colors.textPrimary }}
+                                    >
+                                        <app.icon
+                                            className="w-4 h-4"
+                                            style={{ color: theme.colors.textSecondary }}
+                                        />
+                                        {app.name}
+                                    </li>
+                                ))}
+                            </ul>
+                        </GlassCard>
+                    </div>
+                </DropdownPortal>
             )}
         </div>
     );

@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react'
-import ReactDOM from 'react-dom'
+import { createPortal } from 'react-dom';
 
 import {
     DROPDOWN_MAX_HEIGHT,
@@ -78,7 +78,7 @@ export function DropdownPortal({ parentRef, onClose, children }) {
         return () => document.removeEventListener('mousedown', handleOutsideClick)
     }, [onClose, parentRef])
 
-    return ReactDOM.createPortal(
+    return createPortal(
         <div
             ref={portalRef}
             className="fixed z-[9999] pointer-events-auto"
