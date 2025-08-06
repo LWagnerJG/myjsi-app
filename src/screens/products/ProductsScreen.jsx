@@ -30,6 +30,10 @@ const CategoryCard = React.memo(({
     const handleClick = useCallback(() => {
         onClick(category);
     }, [category, onClick]);
+
+    // Special handling for Benches category to make images larger and span further right
+    const isBenches = category.name === 'Benches';
+    
     if (viewMode === 'grid') {
         return (
             <GlassCard
@@ -40,16 +44,19 @@ const CategoryCard = React.memo(({
                 <h2 className="text-2xl font-bold mb-2" style={{ color: theme.colors.textPrimary }}>
                     {category.name}
                 </h2>
-                <div className="flex space-x-2 -mb-2">
+                <div className={`flex space-x-2 -mb-2 ${isBenches ? 'justify-start' : ''}`}>
                     {category.images?.map((img, index) => (
                         <img
                             key={index}
                             src={img}
                             alt={`${category.name} example ${index + 1}`}
-                            className={`rounded-md object-cover transition-opacity ${category.images.length === 1 && category.name !== 'Swivels'
-                                    ? 'w-2/3 h-32'
-                                    : 'w-16 h-16'
-                                }`}
+                            className={`rounded-md object-cover transition-opacity ${
+                                isBenches 
+                                    ? 'w-20 h-20' // Larger images for Benches
+                                    : category.images.length === 1 && category.name !== 'Swivels'
+                                        ? 'w-2/3 h-32'
+                                        : 'w-16 h-16'
+                            }`}
                             loading="lazy"
                         />
                     ))}
@@ -124,8 +131,7 @@ const StickyHeader = React.memo(({
                 onChange={onSearchChange}
                 placeholder="Search products..."
                 theme={theme}
-                className="flex-grow rounded-full"
-                style={{ borderRadius: '50px' }}
+                className="flex-grow"
             />
             <ViewModeToggle
                 viewMode={viewMode}

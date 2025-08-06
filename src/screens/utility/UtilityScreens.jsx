@@ -599,39 +599,46 @@ const ProductTabs = React.memo(({
     products, 
     activeProduct, 
     onProductSelect, 
-    theme 
-}) => (
-    <GlassCard theme={theme} className="p-4">
-        <div className="flex space-x-3 overflow-x-auto scrollbar-hide">
-            {products.map(product => (
-                <button
-                    key={product.id}
-                    onClick={() => onProductSelect(product)}
-                    className={`flex-shrink-0 w-24 h-24 rounded-2xl border-2 transition-all duration-150 p-1 overflow-hidden transform active:scale-95 ${
-                        activeProduct.id === product.id 
-                            ? 'border-blue-500' 
-                            : 'border-transparent opacity-70'
-                    } hover:opacity-100`}
-                    style={{ backgroundColor: theme.colors.surface }}
-                >
-                    <img 
-                        src={product.image} 
-                        alt={product.name} 
-                        className="w-full h-full object-cover rounded-xl scale-150" 
-                    />
-                </button>
-            ))}
+    theme,
+    categoryName
+}) => {
+    // Special sizing for Benches category
+    const isBenches = categoryName?.toLowerCase() === 'benches';
+    const tabSize = isBenches ? 'w-28 h-28' : 'w-24 h-24';
+    
+    return (
+        <GlassCard theme={theme} className="p-4">
+            <div className="flex space-x-3 overflow-x-auto scrollbar-hide">
+                {products.map(product => (
+                    <button
+                        key={product.id}
+                        onClick={() => onProductSelect(product)}
+                        className={`flex-shrink-0 ${tabSize} rounded-2xl border-2 transition-all duration-150 p-1 overflow-hidden transform active:scale-95 ${
+                            activeProduct.id === product.id 
+                                ? 'border-blue-500' 
+                                : 'border-transparent opacity-70'
+                        } hover:opacity-100`}
+                        style={{ backgroundColor: theme.colors.surface }}
+                    >
+                        <img 
+                            src={product.image} 
+                            alt={product.name} 
+                            className="w-full h-full object-cover rounded-xl scale-150" 
+                        />
+                    </button>
+                ))}
 
-            {/* Add New Product Button */}
-            <button className="flex-shrink-0 w-24 h-24 rounded-2xl border-2 transition-all duration-150 p-1 overflow-hidden transform active:scale-95" style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border }}>
-                <div className="w-full h-full flex flex-col items-center justify-center">
-                    <Plus className="w-6 h-6" style={{ color: theme.colors.accent }} />
-                    <span className="text-xs font-semibold" style={{ color: theme.colors.textPrimary }}>Add Product</span>
-                </div>
-            </button>
-        </div>
-    </GlassCard>
-));
+                {/* Add New Product Button */}
+                <button className={`flex-shrink-0 ${tabSize} rounded-2xl border-2 transition-all duration-150 p-1 overflow-hidden transform active:scale-95`} style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border }}>
+                    <div className="w-full h-full flex flex-col items-center justify-center">
+                        <Plus className="w-6 h-6" style={{ color: theme.colors.accent }} />
+                        <span className="text-xs font-semibold" style={{ color: theme.colors.textPrimary }}>Add Product</span>
+                    </div>
+                </button>
+            </div>
+        </GlassCard>
+    );
+});
 
 ProductTabs.displayName = 'ProductTabs';
 
@@ -829,6 +836,7 @@ export const ProductComparisonScreen = ({ categoryId, onNavigate, theme }) => {
                         activeProduct={activeProduct}
                         onProductSelect={handleProductSelect}
                         theme={theme}
+                        categoryName={categoryData.name}
                     />
 
                     <ProductHero
@@ -884,6 +892,7 @@ export const CompetitiveAnalysisScreen = ({ categoryId, onNavigate, theme }) => 
                         activeProduct={activeProduct}
                         onProductSelect={handleProductSelect}
                         theme={theme}
+                        categoryName={categoryData.name}
                     />
 
                     {/* Large product image */}
