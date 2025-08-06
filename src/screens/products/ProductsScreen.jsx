@@ -10,16 +10,14 @@ import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { SearchInput } from '../../components/common/SearchInput.jsx';
 import {
     List,
-    BarChart2,
+    Grid,
     ArrowRight,
     Package,
     Armchair,
-    Grid,
     Filter
 } from 'lucide-react';
 import * as Data from '../../data.jsx';
 
-// Memoized category card component for better performance
 const CategoryCard = React.memo(({
     category,
     theme,
@@ -31,9 +29,8 @@ const CategoryCard = React.memo(({
         onClick(category);
     }, [category, onClick]);
 
-    // Special handling for Benches category to make images larger and span further right
     const isBenches = category.name === 'Benches';
-    
+
     if (viewMode === 'grid') {
         return (
             <GlassCard
@@ -50,13 +47,12 @@ const CategoryCard = React.memo(({
                             key={index}
                             src={img}
                             alt={`${category.name} example ${index + 1}`}
-                            className={`rounded-md object-cover transition-opacity ${
-                                isBenches 
-                                    ? 'w-20 h-20' // Larger images for Benches
-                                    : category.images.length === 1 && category.name !== 'Swivels'
-                                        ? 'w-2/3 h-32'
-                                        : 'w-16 h-16'
-                            }`}
+                            className={`rounded-md object-cover transition-opacity ${isBenches
+                                ? 'w-20 h-20'
+                                : category.images.length === 1 && category.name !== 'Swivels'
+                                    ? 'w-2/3 h-32'
+                                    : 'w-16 h-16'
+                                }`}
                             loading="lazy"
                         />
                     ))}
@@ -89,24 +85,25 @@ const CategoryCard = React.memo(({
 });
 CategoryCard.displayName = 'CategoryCard';
 
-// Toggle button component
 const ViewModeToggle = React.memo(({ viewMode, onToggle, theme }) => (
     <button
         onClick={onToggle}
-        className="p-2 rounded-lg transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/5 transform active:scale-95"
-        style={{ backgroundColor: theme.colors.subtle }}
+        className="p-3.5 rounded-full shadow-sm transition-all duration-200 transform active:scale-90"
+        style={{
+            backgroundColor: theme.colors.surface,
+            border: `1px solid ${theme.colors.border}`
+        }}
         aria-label={`Switch to ${viewMode === 'grid' ? 'list' : 'grid'} view`}
     >
         {viewMode === 'grid' ? (
-            <List className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
+            <List className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />
         ) : (
-            <BarChart2 className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
+            <Grid className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />
         )}
     </button>
 ));
 ViewModeToggle.displayName = 'ViewModeToggle';
 
-// Sticky header component
 const StickyHeader = React.memo(({
     isScrolled,
     theme,
@@ -123,9 +120,10 @@ const StickyHeader = React.memo(({
             backdropFilter: isScrolled ? 'blur(12px)' : 'none',
             WebkitBackdropFilter: isScrolled ? 'blur(12px)' : 'none',
             borderBottom: `1px solid ${isScrolled ? theme.colors.border + '40' : 'transparent'}`,
+            padding: '16px'
         }}
     >
-        <div className="p-4 flex items-center space-x-2">
+        <div className="flex items-center space-x-3">
             <SearchInput
                 value={searchTerm}
                 onChange={onSearchChange}
@@ -143,7 +141,6 @@ const StickyHeader = React.memo(({
 ));
 StickyHeader.displayName = 'StickyHeader';
 
-// Empty state component
 const EmptyState = React.memo(({ searchTerm, theme }) => (
     <GlassCard theme={theme} className="p-8 text-center">
         <Package className="w-12 h-12 mx-auto mb-4" style={{ color: theme.colors.textSecondary }} />
@@ -163,14 +160,12 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
     const [isScrolled, setIsScrolled] = useState(false);
     const scrollContainerRef = useRef(null);
 
-    // Scroll handler with throttling for better performance
     const handleScroll = useCallback(() => {
         if (scrollContainerRef.current) {
             setIsScrolled(scrollContainerRef.current.scrollTop > 10);
         }
     }, []);
 
-    // Memoized filtered categories with better search logic
     const filteredCategories = useMemo(() => {
         if (!searchTerm.trim()) return Data.PRODUCTS_CATEGORIES_DATA || [];
 
@@ -181,19 +176,16 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
         );
     }, [searchTerm]);
 
-    // Optimized category click handler
     const handleCategoryClick = useCallback((category) => {
         if (category.nav) {
             onNavigate(category.nav);
         }
     }, [onNavigate]);
 
-    // View mode toggle handler
     const toggleViewMode = useCallback(() => {
         setViewMode(prev => prev === 'grid' ? 'list' : 'grid');
     }, []);
 
-    // Search input change handler
     const handleSearchChange = useCallback((e) => {
         setSearchTerm(e.target.value);
     }, []);

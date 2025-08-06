@@ -186,9 +186,17 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                         placeholder="Search Orders..."
                         theme={theme}
                         className="flex-grow"
+                        style={{
+                            backgroundColor: '#ffffff', // Changed from theme.colors.surface
+                            border: '1px solid #E5E7EB', // Use a light border or 'transparent'
+                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)', // A softer shadow
+                            color: theme.colors.textPrimary,
+                            padding: '12px 16px',
+                            borderRadius: '999px',
+                        }}
                     />
                     <div className="relative">
-                        <button onClick={() => setShowDateFilter(f => !f)} className="p-3.5 rounded-full shadow-sm transition-all duration-200 transform active:scale-90" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${theme.colors.border}` }}>
+                        <button onClick={() => setShowDateFilter(f => !f)} className="p-3.5 rounded-full shadow-sm transition-all duration-200 transform active:scale-90" style={{ backgroundColor: '#ffffff', border: '1px solid #ffffff' }}>
                             <Filter className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />
                         </button>
                         {showDateFilter && (
@@ -198,8 +206,8 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                             </GlassCard>
                         )}
                     </div>
-                    <button onClick={() => setViewMode(v => v === 'list' ? 'calendar' : 'list')} className="p-3.5 rounded-full shadow-sm transition-all duration-200 transform active:scale-90" style={{ backgroundColor: viewMode === 'calendar' ? theme.colors.accent : theme.colors.surface, border: `1px solid ${theme.colors.border}` }}>
-                        <Calendar className="w-5 h-5" style={{ color: viewMode === 'calendar' ? 'white' : theme.colors.textPrimary }} />
+                    <button onClick={() => setViewMode(v => v === 'list' ? 'calendar' : 'list')} className="p-3.5 rounded-full shadow-sm transition-all duration-200 transform active:scale-90" style={{ backgroundColor: '#ffffff', border: '1px solid #ffffff' }}>
+                        <Calendar className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />
                     </button>
                 </div>
             </div>

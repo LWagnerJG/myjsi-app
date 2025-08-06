@@ -2,13 +2,14 @@
   "ExpandedNodes": [
     "",
     "\\src",
+    "\\src\\constants",
+    "\\src\\hooks",
     "\\src\\screens",
-    "\\src\\screens\\orders",
-    "\\src\\screens\\products",
-    "\\src\\screens\\projects",
-    "\\src\\screens\\replacements",
-    "\\src\\screens\\resources"
+    "\\src\\screens\\community",
+    "\\src\\screens\\home",
+    "\\src\\screens\\sales",
+    "\\src\\screens\\samples",
+    "\\src\\screens\\utility"
   ],
-  "SelectedNode": "\\src\\screens\\resources\\LoanerPoolScreen.jsx",
   "PreviewInSolutionExplorer": false
 }

@@ -1,15 +1,15 @@
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react';
 import { Modal } from '../../components/common/Modal';
 import { ArrowUp, Plus, ArrowLeft, TrendingUp, Award, DollarSign, BarChart } from 'lucide-react';
 import * as Data from '../../data';
 
-// Helper Components & Functions
 const formatMillion = (num) => `${(num / 1000000).toFixed(1)}M`;
 const formatCompanyName = (name) => name.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
 const monthNameToNumber = {
     'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
     'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
 };
+
 const MonthlyBarChart = ({ data, theme, onMonthSelect, dataType = 'bookings' }) => {
     const maxValue = Math.max(...data.map(d => dataType === 'bookings' ? d.bookings : d.sales));
     return (
@@ -41,51 +41,40 @@ const MonthlyBarChart = ({ data, theme, onMonthSelect, dataType = 'bookings' }) 
         </div>
     );
 };
+
 const DonutChart = React.memo(({ data, theme }) => {
     const chartData = useMemo(() => {
         if (!data || !Array.isArray(data)) return [];
-
         const colors = [
-            theme.colors.primary,
-            theme.colors.accent,
-            theme.colors.secondary,
-            '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4',
+            '#8B5CF6', '#10B981', '#F59E0B', '#EF4444', theme.colors.primary, theme.colors.accent,
         ];
-
         return data.map((item, index) => ({
             label: item.vertical || item.label || `Vertical ${index + 1}`,
             value: item.value || item.sales || item.amount || 0,
             color: colors[index % colors.length]
         })).filter(item => item.value > 0);
     }, [data, theme]);
+
     const total = chartData.reduce((acc, item) => acc + item.value, 0);
 
     if (total === 0 || chartData.length === 0) {
         return (
             <div className="flex items-center justify-center h-40">
-                <p className="text-sm" style={{ color: theme.colors.textSecondary }}>
-                    No sales data available
-                </p>
+                <p className="text-sm" style={{ color: theme.colors.textSecondary }}>No sales data available</p>
             </div>
         );
     }
+
     let cumulative = 0;
     const size = 160;
     const strokeWidth = 24;
     const radius = (size - strokeWidth) / 2;
     const circumference = 2 * Math.PI * radius;
+
     return (
-        <div className="flex items-center justify-center space-x-8">
-            <div className="relative" style={{ width: size, height: size }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 items-center gap-6">
+            <div className="relative mx-auto" style={{ width: size, height: size }}>
                 <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-                    <circle
-                        cx={size / 2}
-                        cy={size / 2}
-                        r={radius}
-                        fill="none"
-                        stroke={theme.colors.subtle}
-                        strokeWidth={strokeWidth}
-                    />
                     <g transform={`rotate(-90 ${size / 2} ${size / 2})`}>
                         {chartData.map((item, index) => {
                             const dasharray = (circumference * item.value) / total;
@@ -111,35 +100,29 @@ const DonutChart = React.memo(({ data, theme }) => {
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center">
                     <div className="text-center">
-                        <div className="text-lg font-bold" style={{ color: theme.colors.textPrimary }}>
+                        <div className="text-2xl font-bold" style={{ color: theme.colors.textPrimary }}>
                             ${(total / 1000000).toFixed(1)}M
                         </div>
-                        <div className="text-xs" style={{ color: theme.colors.textSecondary }}>
-                            Total
-                        </div>
+                        <div className="text-sm" style={{ color: theme.colors.textSecondary }}>Total</div>
                     </div>
                 </div>
             </div>
-
-            <div className="space-y-3 max-w-xs">
-                {chartData.map((item, index) => {
+            <div className="flex flex-col space-y-3">
+                {chartData.map((item) => {
                     const percentage = ((item.value / total) * 100).toFixed(1);
                     return (
                         <div key={item.label} className="flex items-center space-x-3">
-                            <div
-                                className="w-3 h-3 rounded-full flex-shrink-0"
-                                style={{ backgroundColor: item.color }}
-                            />
-                            <div className="flex-1 min-w-0">
-                                <p className="text-sm font-semibold truncate" style={{ color: theme.colors.textPrimary }}>
+                            <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: item.color }} />
+                            <div className="flex-1 flex justify-between items-center min-w-0">
+                                <p className="text-sm font-medium truncate" style={{ color: theme.colors.textPrimary }}>
                                     {item.label}
                                 </p>
-                                <div className="flex items-center space-x-2">
-                                    <p className="text-sm" style={{ color: theme.colors.accent }}>
+                                <div className="text-right flex-shrink-0 ml-2">
+                                    <p className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>
                                         ${item.value.toLocaleString()}
                                     </p>
                                     <p className="text-xs" style={{ color: theme.colors.textSecondary }}>
-                                        ({percentage}%)
+                                        {percentage}%
                                     </p>
                                 </div>
                             </div>
@@ -150,7 +133,8 @@ const DonutChart = React.memo(({ data, theme }) => {
         </div>
     );
 });
-const MonthlyTable = ({ data, theme, totalBookings, totalSales, onMonthSelect }) => (
+
+const MonthlyTable = ({ data, theme, onMonthSelect }) => (
     <div className="text-sm" style={{ color: theme.colors.textPrimary }}>
         <div className="grid grid-cols-3 font-bold border-b" style={{ borderColor: theme.colors.border }}>
             <div className="p-2">Month</div>
@@ -169,18 +153,13 @@ const MonthlyTable = ({ data, theme, totalBookings, totalSales, onMonthSelect })
                 <div className="p-2 text-right">${m.sales.toLocaleString()}</div>
             </div>
         ))}
-        <div className="grid grid-cols-3 font-bold pt-2">
-            <div className="p-2">Total</div>
-            <div className="p-2 text-right">${totalBookings.toLocaleString()}</div>
-            <div className="p-2 text-right">${totalSales.toLocaleString()}</div>
-        </div>
     </div>
 );
+
 const CustomerMonthlyBreakdown = ({ monthData, orders, theme, onBack }) => {
     const monthlyOrders = useMemo(() => {
         const monthNumber = monthNameToNumber[monthData.month];
         if (monthNumber === undefined) return [];
-
         return orders.filter(order => {
             const orderDate = new Date(order.date);
             return orderDate.getMonth() === monthNumber;
@@ -217,6 +196,7 @@ const CustomerMonthlyBreakdown = ({ monthData, orders, theme, onBack }) => {
         </div>
     );
 };
+
 const OrderModal = ({ order, onClose, theme }) => {
     if (!order) return null;
     return (
@@ -264,16 +244,17 @@ const OrderModal = ({ order, onClose, theme }) => {
         </Modal>
     );
 };
-// Main Screen Component
+
 export const SalesScreen = ({ theme, onNavigate }) => {
     const { MONTHLY_SALES_DATA, ORDER_DATA, SALES_VERTICALS_DATA, STATUS_COLORS } = Data;
     const [monthlyView, setMonthlyView] = useState('chart');
     const [chartDataType, setChartDataType] = useState('bookings');
     const [selectedOrder, setSelectedOrder] = useState(null);
-    const [numRecentOrders, setNumRecentOrders] = useState(3);
+    const [numRecentOrders, setNumRecentOrders] = useState(5);
     const [selectedMonth, setSelectedMonth] = useState(null);
     const [isScrolled, setIsScrolled] = useState(false);
-    const scrollContainerRef = React.useRef(null);
+    const scrollContainerRef = useRef(null);
+    const loadMoreRef = useRef(null);
 
     const handleScroll = useCallback(() => {
         if (scrollContainerRef.current) {
@@ -286,44 +267,65 @@ export const SalesScreen = ({ theme, onNavigate }) => {
         const sales = MONTHLY_SALES_DATA.reduce((acc, m) => acc + m.sales, 0);
         return { totalBookings: bookings, totalSales: sales };
     }, [MONTHLY_SALES_DATA]);
+
     const salesByVertical = useMemo(() => {
         if (SALES_VERTICALS_DATA && Array.isArray(SALES_VERTICALS_DATA) && SALES_VERTICALS_DATA.length > 0) {
             return SALES_VERTICALS_DATA;
         }
-
         const verticalSales = {};
         ORDER_DATA.forEach(order => {
             if (order.vertical && order.net) {
                 verticalSales[order.vertical] = (verticalSales[order.vertical] || 0) + order.net;
             }
         });
-
         return Object.entries(verticalSales)
             .map(([vertical, value]) => ({ vertical, value }))
             .sort((a, b) => b.value - a.value)
             .slice(0, 8);
     }, [SALES_VERTICALS_DATA, ORDER_DATA]);
+
     const allRecentOrders = useMemo(() => {
         return ORDER_DATA
             .filter(o => o.date && o.net)
             .sort((a, b) => new Date(b.date) - new Date(a.date));
     }, [ORDER_DATA]);
+
     const displayedRecentOrders = useMemo(() => {
         return allRecentOrders.slice(0, numRecentOrders);
     }, [allRecentOrders, numRecentOrders]);
-    const handleShowMoreOrders = useCallback(() => {
-        setNumRecentOrders(8);
-    }, []);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting && numRecentOrders < allRecentOrders.length) {
+                    setNumRecentOrders(prev => prev + 5);
+                }
+            },
+            { threshold: 1.0 }
+        );
+
+        const currentRef = loadMoreRef.current;
+        if (currentRef) {
+            observer.observe(currentRef);
+        }
+
+        return () => {
+            if (currentRef) {
+                observer.unobserve(currentRef);
+            }
+        };
+    }, [loadMoreRef, numRecentOrders, allRecentOrders.length]);
+
     const goal = 7000000;
     const percentToGoal = useMemo(() => (totalBookings / goal) * 100, [totalBookings, goal]);
     const handleShowOrderDetails = useCallback(order => setSelectedOrder(order), []);
     const handleCloseModal = useCallback(() => setSelectedOrder(null), []);
     const handleMonthSelect = useCallback(month => setSelectedMonth(month), []);
     const handleBackToMonthly = useCallback(() => setSelectedMonth(null), []);
+
     return (
         <div className="flex flex-col h-full">
-            {/* Header with adjusted sizes for mobile */}
-            <div 
+            <div
                 className={`sticky top-0 z-10 transition-all duration-300 ${isScrolled ? 'shadow-md' : ''}`}
                 style={{
                     backgroundColor: isScrolled ? `${theme.colors.background}e0` : 'transparent',
@@ -334,40 +336,9 @@ export const SalesScreen = ({ theme, onNavigate }) => {
             >
                 <div className="px-4 py-3">
                     <div className="flex justify-between items-center w-full gap-2">
-                        {/* Adjusted secondary buttons with more roundedness */}
-                        <div className="flex items-center rounded-3xl border p-1" style={{
-                            backgroundColor: theme.colors.surface,
-                            borderColor: theme.colors.border
-                        }}>
-                            <button
-                                onClick={() => onNavigate('incentive-rewards')}
-                                className="text-xs px-2 py-1 rounded-2xl transition-all flex items-center space-x-1 hover:bg-black/5"
-                                style={{ color: theme.colors.textSecondary }}
-                            >
-                                <Award className="w-3 h-3" />
-                                <span className="font-medium">Rewards</span>
-                            </button>
-                            <button
-                                onClick={() => onNavigate('customer-rank')}
-                                className="text-xs px-2 py-1 rounded-2xl transition-all flex items-center space-x-1 hover:bg-black/5"
-                                style={{ color: theme.colors.textSecondary }}
-                            >
-                                <TrendingUp className="w-3 h-3" />
-                                <span className="font-medium">Rankings</span>
-                            </button>
-                            <button
-                                onClick={() => onNavigate('commissions')}
-                                className="text-xs px-2 py-1 rounded-2xl transition-all flex items-center space-x-1 hover:bg-black/5"
-                                style={{ color: theme.colors.textSecondary }}
-                            >
-                                <DollarSign className="w-3 h-3" />
-                                <span className="font-medium">Commissions</span>
-                            </button>
-                        </div>
-                        {/* Adjusted New Lead button with more roundedness and right-aligned margin */}
                         <button
                             onClick={() => onNavigate('new-lead')}
-                            className="flex items-center space-x-1 px-3 py-1.5 rounded-3xl text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg active:scale-95 flex-shrink-0 ml-auto"
+                            className="flex-shrink-0 flex items-center space-x-1.5 px-3 py-2 rounded-full text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg active:scale-95"
                             style={{
                                 backgroundColor: theme.colors.accent,
                                 color: 'white'
@@ -376,16 +347,44 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                             <Plus className="w-4 h-4" />
                             <span>New Lead</span>
                         </button>
+                        <div className="flex-shrink min-w-0 flex items-center rounded-full border p-1" style={{
+                            backgroundColor: theme.colors.surface,
+                            borderColor: theme.colors.border
+                        }}>
+                            <button
+                                onClick={() => onNavigate('incentive-rewards')}
+                                className="text-xs px-2 py-1.5 rounded-full transition-all flex items-center space-x-1 whitespace-nowrap hover:bg-black/5"
+                                style={{ color: theme.colors.textSecondary }}
+                            >
+                                <Award className="w-3.5 h-3.5" />
+                                <span className="font-medium">Rewards</span>
+                            </button>
+                            <button
+                                onClick={() => onNavigate('customer-rank')}
+                                className="text-xs px-2 py-1.5 rounded-full transition-all flex items-center space-x-1 whitespace-nowrap hover:bg-black/5"
+                                style={{ color: theme.colors.textSecondary }}
+                            >
+                                <TrendingUp className="w-3.5 h-3.5" />
+                                <span className="font-medium">Ranking</span>
+                            </button>
+                            <button
+                                onClick={() => onNavigate('commissions')}
+                                className="text-xs px-2 py-1.5 rounded-full transition-all flex items-center space-x-1 whitespace-nowrap hover:bg-black/5"
+                                style={{ color: theme.colors.textSecondary }}
+                            >
+                                <DollarSign className="w-3.5 h-3.5" />
+                                <span className="font-medium">Comms</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div 
+            <div
                 ref={scrollContainerRef}
                 onScroll={handleScroll}
-                className="flex-1 overflow-y-auto scrollbar-hide pt-2"
+                className="flex-1 overflow-y-auto scrollbar-hide"
             >
-                <div className="px-4 space-y-4 py-4 max-w-6xl mx-auto">
-                    {/* Progress to Goal with more roundedness */}
+                <div className="px-4 space-y-4 pt-2 pb-4 max-w-6xl mx-auto">
                     <div className="p-6 rounded-[2.5rem] shadow-sm border" style={{
                         backgroundColor: theme.colors.surface,
                         borderColor: theme.colors.border
@@ -413,8 +412,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                             />
                         </div>
                     </div>
-                    {/* Monthly Performance with cleaner, more rounded toggles */}
-                    <div className="p-4 rounded-[2.5rem] shadow-sm border" style={{
+                    <div className="p-6 rounded-[2.5rem] shadow-sm border" style={{
                         backgroundColor: theme.colors.surface,
                         borderColor: theme.colors.border
                     }}>
@@ -427,151 +425,136 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                             />
                         ) : (
                             <>
-                                {/* Cleaned up, more rounded toggle controls with swapped positions */}
-                                <div className="flex flex-wrap items-center justify-between mb-4 space-x-2 gap-y-2">
-                                    {/* Data type toggle - more rounded, only for chart */}
-                                    {monthlyView === 'chart' && (
-                                        <div className="flex items-center rounded-3xl border p-1" style={{
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <h3 className="font-bold text-xl" style={{ color: theme.colors.textPrimary }}>
+                                            {chartDataType === 'bookings' ? 'Bookings' : 'Sales'}
+                                        </h3>
+                                        <p className="text-base font-semibold mt-1" style={{ color: theme.colors.textSecondary }}>
+                                            ${(chartDataType === 'bookings' ? totalBookings : totalSales).toLocaleString()}
+                                        </p>
+                                    </div>
+                                    <div className="flex flex-col items-end gap-2">
+                                        <div className="flex items-center rounded-full border p-1" style={{
                                             backgroundColor: theme.colors.subtle,
                                             borderColor: theme.colors.border
                                         }}>
                                             <button
-                                                onClick={() => setChartDataType('bookings')}
-                                                className={`px-3 py-1 rounded-2xl text-xs font-medium transition-all`}
+                                                onClick={() => setMonthlyView('chart')}
+                                                className={`px-3 py-1 rounded-full text-xs font-medium transition-all flex items-center space-x-1.5`}
                                                 style={{
-                                                    backgroundColor: chartDataType === 'bookings' ? theme.colors.accent : 'transparent',
-                                                    color: chartDataType === 'bookings' ? 'white' : theme.colors.textSecondary
+                                                    backgroundColor: monthlyView === 'chart' ? theme.colors.accent : 'transparent',
+                                                    color: monthlyView === 'chart' ? 'white' : theme.colors.textSecondary
                                                 }}
                                             >
-                                                Bookings
+                                                <BarChart className="w-3.5 h-3.5" />
+                                                <span>Chart</span>
                                             </button>
                                             <button
-                                                onClick={() => setChartDataType('sales')}
-                                                className={`px-3 py-1 rounded-2xl text-xs font-medium transition-all`}
+                                                onClick={() => setMonthlyView('table')}
+                                                className={`px-3 py-1 rounded-full text-xs font-medium transition-all flex items-center space-x-1.5`}
                                                 style={{
-                                                    backgroundColor: chartDataType === 'sales' ? theme.colors.accent : 'transparent',
-                                                    color: chartDataType === 'sales' ? 'white' : theme.colors.textSecondary
+                                                    backgroundColor: monthlyView === 'table' ? theme.colors.accent : 'transparent',
+                                                    color: monthlyView === 'table' ? 'white' : theme.colors.textSecondary
                                                 }}
                                             >
-                                                Sales
+                                                Table
                                             </button>
                                         </div>
-                                    )}
-                                    {/* View toggle - more rounded */}
-                                    <div className="flex items-center rounded-3xl border p-1" style={{
-                                        backgroundColor: theme.colors.subtle,
-                                        borderColor: theme.colors.border
-                                    }}>
-                                        <button
-                                            onClick={() => setMonthlyView('chart')}
-                                            className={`px-3 py-1 rounded-2xl text-xs font-medium transition-all flex items-center space-x-1`}
-                                            style={{
-                                                backgroundColor: monthlyView === 'chart' ? theme.colors.accent : 'transparent',
-                                                color: monthlyView === 'chart' ? 'white' : theme.colors.textSecondary
-                                            }}
-                                        >
-                                            <BarChart className="w-3 h-3" />
-                                            <span>Chart</span>
-                                        </button>
-                                        <button
-                                            onClick={() => setMonthlyView('table')}
-                                            className={`px-3 py-1 rounded-2xl text-xs font-medium transition-all`}
-                                            style={{
-                                                backgroundColor: monthlyView === 'table' ? theme.colors.accent : 'transparent',
-                                                color: monthlyView === 'table' ? 'white' : theme.colors.textSecondary
-                                            }}
-                                        >
-                                            Table
-                                        </button>
+                                        {monthlyView === 'chart' && (
+                                            <div className="flex items-center rounded-full border p-1" style={{
+                                                backgroundColor: theme.colors.subtle,
+                                                borderColor: theme.colors.border
+                                            }}>
+                                                <button
+                                                    onClick={() => setChartDataType('bookings')}
+                                                    className={`px-3 py-1 rounded-full text-xs font-medium transition-all`}
+                                                    style={{
+                                                        backgroundColor: chartDataType === 'bookings' ? theme.colors.accent : 'transparent',
+                                                        color: chartDataType === 'bookings' ? 'white' : theme.colors.textSecondary
+                                                    }}
+                                                >
+                                                    Bookings
+                                                </button>
+                                                <button
+                                                    onClick={() => setChartDataType('sales')}
+                                                    className={`px-3 py-1 rounded-full text-xs font-medium transition-all`}
+                                                    style={{
+                                                        backgroundColor: chartDataType === 'sales' ? theme.colors.accent : 'transparent',
+                                                        color: chartDataType === 'sales' ? 'white' : theme.colors.textSecondary
+                                                    }}
+                                                >
+                                                    Sales
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
-                                {monthlyView === 'chart' ? (
-                                    <div className="space-y-3">
-                                        <div className="mb-2">
-                                            <h3 className="font-bold text-xl mb-1" style={{ color: theme.colors.textPrimary }}>
-                                                {chartDataType === 'bookings' ? 'Bookings' : 'Sales'}
-                                            </h3>
-                                            <p className="text-2xl font-bold" style={{ color: theme.colors.accent }}>
-                                                ${(chartDataType === 'bookings' ? totalBookings : totalSales).toLocaleString()}
-                                            </p>
-                                        </div>
+                                <div className="mt-4">
+                                    {monthlyView === 'chart' ? (
                                         <MonthlyBarChart
                                             data={MONTHLY_SALES_DATA}
                                             theme={theme}
                                             onMonthSelect={handleMonthSelect}
                                             dataType={chartDataType}
                                         />
-                                    </div>
-                                ) : (
-                                    <MonthlyTable
-                                        data={MONTHLY_SALES_DATA}
-                                        theme={theme}
-                                        totalBookings={totalBookings}
-                                        totalSales={totalSales}
-                                        onMonthSelect={handleMonthSelect}
-                                    />
-                                )}
+                                    ) : (
+                                        <MonthlyTable
+                                            data={MONTHLY_SALES_DATA}
+                                            theme={theme}
+                                            onMonthSelect={handleMonthSelect}
+                                        />
+                                    )}
+                                </div>
                             </>
                         )}
                     </div>
-                    {/* Two-column layout */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                        {/* Recent Orders */}
-                        <div className="p-6 rounded-[2.5rem] shadow-sm border" style={{
-                            backgroundColor: theme.colors.surface,
-                            borderColor: theme.colors.border
-                        }}>
-                            <h3 className="font-bold text-xl mb-5" style={{ color: theme.colors.textPrimary }}>Recent Orders</h3>
-                            <div className="space-y-2">
-                                {displayedRecentOrders.map(order => (
-                                    <div key={order.orderNumber} className="flex items-center justify-between p-3 rounded-3xl transition-all cursor-pointer hover:shadow-sm border"
-                                        style={{ borderColor: theme.colors.border + '80', backgroundColor: theme.colors.background }}
-                                        onClick={() => handleShowOrderDetails(order)}>
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex items-center justify-between mb-1">
-                                                <span className="text-xs" style={{ color: theme.colors.textSecondary }}>
-                                                    {new Date(order.date).toLocaleDateString()}
-                                                </span>
-                                                <span className="text-lg font-bold" style={{ color: theme.colors.accent }}>
-                                                    ${order.net.toLocaleString()}
-                                                </span>
-                                            </div>
-                                            <div className="font-semibold mb-1 truncate" style={{ color: theme.colors.textPrimary }}>
-                                                {formatCompanyName(order.company)}
-                                            </div>
-                                            <div className="flex items-center space-x-2">
-                                                <span className="px-2 py-1 rounded-full text-xs font-medium" style={{
-                                                    backgroundColor: (STATUS_COLORS[order.status] || theme.colors.secondary) + '20',
-                                                    color: STATUS_COLORS[order.status] || theme.colors.secondary
-                                                }}>
-                                                    {order.status}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                            {numRecentOrders < allRecentOrders.length && (
-                                <button
-                                    onClick={handleShowMoreOrders}
-                                    className="w-full mt-4 py-3 rounded-3xl text-sm font-semibold transition-all duration-200 border hover:shadow-sm"
-                                    style={{
-                                        color: theme.colors.textPrimary,
-                                        backgroundColor: theme.colors.subtle,
-                                        borderColor: theme.colors.border
-                                    }}
-                                >
-                                    Show More Orders
-                                </button>
-                            )}
-                        </div>
-                        {/* Sales by Vertical */}
                         <div className="p-6 rounded-[2.5rem] shadow-sm border" style={{
                             backgroundColor: theme.colors.surface,
                             borderColor: theme.colors.border
                         }}>
                             <h3 className="font-bold text-xl mb-4" style={{ color: theme.colors.textPrimary }}>Sales by Vertical</h3>
                             <DonutChart data={salesByVertical} theme={theme} />
+                        </div>
+                        <div className="p-6 rounded-[2.5rem] shadow-sm border" style={{
+                            backgroundColor: theme.colors.surface,
+                            borderColor: theme.colors.border
+                        }}>
+                            <h3 className="font-bold text-xl mb-5" style={{ color: theme.colors.textPrimary }}>Recent Orders</h3>
+                            <div className="rounded-3xl border overflow-hidden" style={{ borderColor: theme.colors.border }}>
+                                {displayedRecentOrders.map((order, index) => (
+                                    <div
+                                        key={order.orderNumber}
+                                        className={`p-4 transition-all cursor-pointer hover:bg-black/5 dark:hover:bg-white/10 ${index < displayedRecentOrders.length - 1 ? 'border-b' : ''}`}
+                                        style={{ borderColor: theme.colors.subtle }}
+                                        onClick={() => handleShowOrderDetails(order)}
+                                    >
+                                        <div className="flex items-center justify-between mb-2">
+                                            <span className="text-sm" style={{ color: theme.colors.textSecondary }}>
+                                                {new Date(order.date).toLocaleDateString()}
+                                            </span>
+                                            <span className="text-lg font-bold" style={{ color: theme.colors.accent }}>
+                                                ${order.net.toLocaleString()}
+                                            </span>
+                                        </div>
+                                        <p className="font-semibold mb-2 truncate" style={{ color: theme.colors.textPrimary }}>
+                                            {formatCompanyName(order.company)}
+                                        </p>
+                                        <div>
+                                            <span className="px-2 py-1 rounded-full text-xs font-medium" style={{
+                                                backgroundColor: (STATUS_COLORS[order.status] || theme.colors.secondary) + '20',
+                                                color: STATUS_COLORS[order.status] || theme.colors.secondary
+                                            }}>
+                                                {order.status}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            {numRecentOrders < allRecentOrders.length && (
+                                <div ref={loadMoreRef} className="h-1" />
+                            )}
                         </div>
                     </div>
                 </div>

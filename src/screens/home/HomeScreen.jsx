@@ -167,6 +167,14 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate }) => {
                     onNavigate={onNavigate}
                     onAskAI={onAskAI}
                     onVoiceActivate={onVoiceActivate}
+                    style={{
+                        backgroundColor: '#ffffff', // Pure white background
+                        border: '1px solid #E5E7EB', // Light border
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)', // Softer shadow
+                        color: theme.colors.textPrimary,
+                        padding: '12px 16px',
+                        borderRadius: '999px',
+                    }}
                 />
             </div>
 

@@ -1,23 +1,38 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import { PageTitle } from '../../components/common/PageTitle.jsx';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { Package, Search, Filter, Plus, Palette, Ruler, ShoppingCart, Trash2, Minus, CheckCircle, Users, Home } from 'lucide-react';
 import * as Data from '../../data.jsx';
 import { AddressBookModal } from '../../components/common/AddressBookModal.jsx';
 
-// A new component, as it was referenced in the provided code.
+// Updated OrderFullSetButton component - now toggleable
 const OrderFullSetButton = ({ onClick, theme, inCart }) => (
     <button
         onClick={onClick}
-        className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 flex items-center space-x-2 ${inCart ? 'scale-105' : ''}`}
+        className={`px-3 py-2 rounded-full text-xs font-semibold transition-all duration-200 flex items-center space-x-1.5 ${inCart ? 'scale-105' : ''}`}
         style={{
             border: `1px solid ${inCart ? theme.colors.accent : theme.colors.border}`,
             color: inCart ? theme.colors.accent : theme.colors.textPrimary,
             backgroundColor: theme.colors.surface
         }}
     >
-        {inCart && <CheckCircle className="w-4 h-4" />}
-        <span>Order Full JSI Set</span>
+        {inCart && <CheckCircle className="w-3.5 h-3.5" />}
+        <span>Full JSI Set</span>
+    </button>
+);
+
+// New component for the TFL Set button with same styling - now toggleable
+const AddCompleteSetButton = ({ onClick, theme, inCart, categoryName }) => (
+    <button
+        onClick={onClick}
+        className={`px-3 py-2 rounded-full text-xs font-semibold transition-all duration-200 flex items-center space-x-1.5 ${inCart ? 'scale-105' : ''}`}
+        style={{
+            border: `1px solid ${inCart ? theme.colors.accent : theme.colors.border}`,
+            color: inCart ? theme.colors.accent : theme.colors.textPrimary,
+            backgroundColor: theme.colors.surface
+        }}
+    >
+        {inCart && <CheckCircle className="w-3.5 h-3.5" />}
+        <span>{categoryName} Set</span>
     </button>
 );
 
@@ -62,38 +77,47 @@ export const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSetti
 
     const setInCartQuantity = cart[`set-${selectedCategory}`] || 0;
     const fullSetInCart = cart['full-jsi-set'] > 0;
+    const currentCategoryName = Data.SAMPLE_CATEGORIES.find(c => c.id === selectedCategory)?.name || 'TFL';
 
     return (
         <div className="flex flex-col h-full">
-            <div className={`sticky top-0 z-10 transition-all duration-300`}>
-                <PageTitle title="Samples" theme={theme}>
+            {/* Header with action buttons - no title */}
+            <div className="sticky top-0 z-10 transition-all duration-300 px-4 py-3">
+                <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                         <OrderFullSetButton onClick={handleOrderFullSet} theme={theme} inCart={fullSetInCart} />
-                        <div className="relative">
-                            <button
-                                onClick={() => onNavigate('samples/cart')}
-                                className="p-2 rounded-full hover:bg-black/10 transition"
-                            >
-                                <ShoppingCart
-                                    className="w-7 h-7"
-                                    style={{ color: theme.colors.textPrimary }}
-                                />
-                            </button>
-                            {totalCartItems > 0 && (
-                                <div
-                                    className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
-                                    style={{ backgroundColor: theme.colors.accent }}
-                                >
-                                    {totalCartItems}
-                                </div>
-                            )}
-                        </div>
+                        <AddCompleteSetButton 
+                            onClick={handleAddSetToCart} 
+                            theme={theme} 
+                            inCart={setInCartQuantity > 0}
+                            categoryName={currentCategoryName}
+                        />
                     </div>
-                </PageTitle>
+                    <div className="relative">
+                        <button
+                            onClick={() => onNavigate('samples/cart')}
+                            className="p-2 rounded-full hover:bg-black/10 transition"
+                        >
+                            <ShoppingCart
+                                className="w-7 h-7"
+                                style={{ color: theme.colors.textPrimary }}
+                            />
+                        </button>
+                        {totalCartItems > 0 && (
+                            <div
+                                className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
+                                style={{ backgroundColor: theme.colors.accent }}
+                            >
+                                {totalCartItems}
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto scrollbar-hide pt-4">
-                <div className="px-4 mb-4">
+            <div className="flex-1 overflow-y-auto scrollbar-hide">
+                {/* Category selection pills */}
+                <div className="px-4 mb-6">
                     <GlassCard theme={theme} className="p-1">
                         <div
                             ref={containerRef}
@@ -127,33 +151,8 @@ export const SamplesScreen = ({ theme, onNavigate, cart, onUpdateCart, userSetti
                         </div>
                     </GlassCard>
                 </div>
-                
-                <div className="px-4 mb-4">
-                    <div className="relative">
-                        <button
-                            onClick={handleAddSetToCart}
-                            className="w-full py-2.5 rounded-full text-sm font-semibold text-white shadow-md transition-transform hover:scale-105 active:scale-95"
-                            style={{
-                                backgroundColor: theme.colors.accent,
-                            }}
-                        >
-                            Add Complete {Data.SAMPLE_CATEGORIES.find(c => c.id === selectedCategory)?.name} Set
-                        </button>
-                        {setInCartQuantity > 0 && (
-                            <div
-                                className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shadow"
-                                style={{
-                                    backgroundColor: theme.colors.surface,
-                                    color: theme.colors.accent,
-                                    border: `1px solid ${theme.colors.border}`
-                                }}
-                            >
-                                {setInCartQuantity}
-                            </div>
-                        )}
-                    </div>
-                </div>
 
+                {/* Product grid */}
                 <div className="px-4 grid grid-cols-2 gap-4 pb-4">
                     {filteredProducts.map(product => {
                         const quantity = cart[product.id] || 0;
