@@ -1,35 +1,40 @@
 // Screen component imports
-import { SalesScreen } from '../screens/sales/SalesScreen.jsx';
-import { CustomerRankingScreen } from '../screens/sales/CustomerRankingScreen.jsx';
-import { IncentiveRewardsScreen } from '../screens/sales/IncentiveRewardsScreen.jsx';
-import { CommissionsScreen } from '../screens/sales/CommissionsScreen.jsx';
-import { OrdersScreen } from '../screens/orders/OrdersScreen.jsx';
-import { ProductsScreen } from '../screens/products/ProductsScreen.jsx';
+import { SalesScreen, CustomerRankingScreen, IncentiveRewardsScreen, CommissionsScreen } from '../screens/sales/index.js';
+import { OrdersScreen } from '../screens/orders/index.js';
+import { ProductsScreen, ProductComparisonScreen, CompetitiveAnalysisScreen } from '../screens/products/index.js';
 import { ResourcesScreen } from '../screens/resources/ResourcesScreen.jsx';
-import { ProjectsScreen } from '../screens/projects/ProjectsScreen.jsx';
-import { CommunityScreen } from '../screens/community/CommunityScreen.jsx';
-import { SamplesScreen } from '../screens/samples/SamplesScreen.jsx';
-import { CommissionRatesScreen } from '../screens/resources/CommissionRatesScreen.jsx';
-import { SampleDiscountsScreen } from '../screens/resources/SampleDiscountsScreen.jsx';
-import { LeadTimesScreen } from '../screens/resources/LeadTimesScreen.jsx';
-import { HomeScreen } from '../screens/home/HomeScreen.jsx';
-import { NewLeadScreen } from '../screens/projects/NewLeadScreen.jsx';
+import { ProjectsScreen, NewLeadScreen, AddNewInstallScreen } from '../screens/projects/index.js';
+import { CommunityScreen, CreateContentModal } from '../screens/community/index.js';
+import { SamplesScreen, CartScreen } from '../screens/samples/index.js';
 import { ReplacementsScreen } from '../screens/replacements/ReplacementsScreen.jsx';
+import { FeedbackScreen } from '../screens/feedback/index.js';
+import { MembersScreen } from '../screens/members/index.js';
+import { HelpScreen } from '../screens/help/HelpScreen.jsx';
+import { LogoutScreen } from '../screens/logout/LogoutScreen.jsx';
+import { HomeScreen } from '../screens/home/HomeScreen.jsx';
+import { SettingsScreen } from '../screens/settings/index.js';
 
-// Import utility screens
-import {
-    ResourceDetailScreen,
-    MembersScreen,
-    ProductComparisonScreen,
-    FeedbackScreen,
-    HelpScreen,
-    LogoutScreen,
-    CreateContentModal,
-    AddNewInstallScreen,
-    CartScreen,
-    CompetitiveAnalysisScreen,
-    SettingsScreen
-} from '../screens/utility/UtilityScreens.jsx';
+// Import feature-based resource screens
+import { LoanerPoolScreen } from '../screens/resources/loaner-pool/index.js';
+import { DealerDirectoryScreen } from '../screens/resources/dealer-directory/index.js';
+import { CommissionRatesScreen } from '../screens/resources/commission-rates/index.js';
+import { ContractsScreen } from '../screens/resources/contracts/index.js';
+import { LeadTimesScreen } from '../screens/resources/lead-times/index.js';
+import { SampleDiscountsScreen } from '../screens/resources/sample-discounts/index.js';
+import { DesignDaysScreen } from '../screens/resources/design-days/index.js';
+import { DiscontinuedFinishesScreen } from '../screens/resources/discontinued-finishes/index.js';
+import { RequestComYardageScreen } from '../screens/resources/request-com-yardage/index.js';
+
+// Import newly organized resource screens
+import { SocialMediaScreen } from '../screens/resources/social-media/index.js';
+import { InstallInstructionsScreen } from '../screens/resources/install-instructions/index.js';
+import { PresentationsScreen } from '../screens/resources/presentations/index.js';
+import { RequestFieldVisitScreen } from '../screens/resources/request-field-visit/index.js';
+import { NewDealerSignUpScreen } from '../screens/resources/new-dealer-signup/index.js';
+import { SearchFabricsScreen } from '../screens/resources/search-fabrics/index.js';
+
+// Import remaining utility screens
+import { ResourceDetailScreen } from '../screens/utility/UtilityScreens.jsx';
 
 export const SCREEN_MAP = {
     'home': HomeScreen,
@@ -45,9 +50,6 @@ export const SCREEN_MAP = {
     'incentive-rewards': IncentiveRewardsScreen,
     'customer-rank': CustomerRankingScreen,
     'commissions': CommissionsScreen,
-    'commission-rates': CommissionRatesScreen,
-    'sample-discounts': SampleDiscountsScreen,
-    'lead-times': LeadTimesScreen,
     'settings': SettingsScreen,
     'members': MembersScreen,
     'help': HelpScreen,
@@ -57,15 +59,64 @@ export const SCREEN_MAP = {
     'add-new-install': AddNewInstallScreen,
     'product-comparison': ProductComparisonScreen,
     'competitive-analysis': CompetitiveAnalysisScreen,
+
+    // Feature-based resource screens
+    'loaner-pool': LoanerPoolScreen,
+    'dealer-directory': DealerDirectoryScreen,
+    'commission-rates': CommissionRatesScreen,
+    'contracts': ContractsScreen,
+    'lead-times': LeadTimesScreen,
+    'sample-discounts': SampleDiscountsScreen,
+    'design-days': DesignDaysScreen,
+    'discontinued-finishes': DiscontinuedFinishesScreen,
+
+    // Newly organized resource screens  
+    'social-media': SocialMediaScreen,
+    'install-instructions': InstallInstructionsScreen,
+    'presentations': PresentationsScreen,
+    'request-field-visit': RequestFieldVisitScreen,
+    'new-dealer-signup': NewDealerSignUpScreen,
+    'request-com-yardage': RequestComYardageScreen,
+    'search-fabrics': SearchFabricsScreen,
 };
 
-// Export utility components that are still needed in other parts of the app
+// Export components that are still needed in other parts of the app
 export {
+    // Utility components
     ResourceDetailScreen,
+
+    // Feature-organized components
     ProductComparisonScreen,
-    CreateContentModal,
+    CompetitiveAnalysisScreen,
     AddNewInstallScreen,
     CartScreen,
-    CompetitiveAnalysisScreen,
-    NewLeadScreen
+    SettingsScreen,
+    NewLeadScreen,
+    MembersScreen,
+
+    // Resource components
+    LoanerPoolScreen,
+    DealerDirectoryScreen,
+    CommissionRatesScreen,
+    ContractsScreen,
+    LeadTimesScreen,
+    SampleDiscountsScreen,
+    DesignDaysScreen,
+    DiscontinuedFinishesScreen,
+    SocialMediaScreen,
+    InstallInstructionsScreen,
+    PresentationsScreen,
+    RequestFieldVisitScreen,
+    NewDealerSignUpScreen,
+    SearchFabricsScreen,
+
+    // Sales components
+    SalesScreen,
+    CustomerRankingScreen,
+    IncentiveRewardsScreen,
+    CommissionsScreen,
+
+    // Community components
+    CommunityScreen,
+    CreateContentModal,
 };

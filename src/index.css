@@ -84,3 +84,220 @@ html, body {
     -webkit-perspective: 1000px;
     perspective: 1000px;
 }
+
+/* Dropdown animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.2s ease-out forwards;
+}
+
+/* Cart drawer slide-up animation */
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+}
+
+.cart-drawer-enter {
+    animation: slideUp 0.3s ease-out forwards;
+}
+
+.cart-drawer-exit {
+    animation: slideDown 0.3s ease-out forwards;
+}
+
+/* Focus ring utilities */
+.focus-ring {
+    transition: box-shadow 0.2s ease-in-out;
+}
+
+.focus-ring:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(173, 138, 119, 0.3);
+}
+
+/* Native select styling improvements */
+select {
+    background-image: none !important;
+    cursor: pointer;
+}
+
+/* Remove default select arrow on IE/Edge */
+select::-ms-expand {
+    display: none;
+}
+
+/* Ensure select options have solid backgrounds */
+select option {
+    background-color: white;
+    color: black;
+    padding: 8px;
+}
+
+/* Dark theme select options */
+.dark select option,
+[data-theme="dark"] select option {
+    background-color: #2A2A2A;
+    color: #F5F5F5;
+}
+
+/* Force solid dropdown backgrounds - high specificity */
+div[class*="z-[10000]"] > div[class*="rounded-2xl"] {
+    background-color: #FFFFFF !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* Dark theme dropdown backgrounds */
+.dark div[class*="z-[10000]"] > div[class*="rounded-2xl"],
+[data-theme="dark"] div[class*="z-[10000]"] > div[class*="rounded-2xl"] {
+    background-color: #2A2A2A !important;
+    color: #F5F5F5 !important;
+}
+
+/* Ensure dropdown containers are never transparent */
+.dropdown-container {
+    background: inherit !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* AutoComplete specific overrides */
+.autocomplete-dropdown {
+    background-color: var(--dropdown-bg, #FFFFFF) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 1px solid var(--dropdown-border, rgba(0,0,0,0.12)) !important;
+}
+
+/* Cart drawer specific styles */
+.cart-drawer {
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+/* Sample card hover effects */
+.sample-card {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sample-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.sample-card:active {
+    transform: translateY(0);
+    transition-duration: 0.1s;
+}
+
+/* Tab-style material selector with smooth underline */
+.material-tab-container {
+    position: relative;
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.material-tab {
+    position: relative;
+    padding: 12px 16px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    border: none;
+    background: none;
+    outline: none;
+}
+
+.material-tab:hover {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.material-tab.active {
+    color: var(--accent-color);
+}
+
+.material-tab-underline {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background: var(--accent-color);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 1px 1px 0 0;
+}
+
+/* Full-width set buttons */
+.set-button {
+    flex: 1;
+    padding: 12px 16px;
+    border-radius: 16px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    outline: none;
+}
+
+.set-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.set-button:active {
+    transform: translateY(0);
+    transition-duration: 0.1s;
+}
+
+.set-button.selected {
+    transform: scale(1.02);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Smooth pill animation - legacy support */
+.category-pill-container {
+    position: relative;
+    overflow: visible;
+}
+
+.category-pill-indicator {
+    position: absolute;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform, width;
+}

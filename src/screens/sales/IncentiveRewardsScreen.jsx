@@ -1,7 +1,7 @@
 import { useMemo, useState, useCallback } from 'react';
 import { GlassCard } from '../../components/common/GlassCard';
 import { PortalNativeSelect } from '../../components/forms/PortalNativeSelect';
-import { REWARDS_DATA } from '../../data.jsx';
+import { INCENTIVE_REWARDS_DATA } from './data.js';
 
 export const IncentiveRewardsScreen = ({ theme }) => {
     const generateTimePeriods = useCallback(() => {
@@ -37,7 +37,7 @@ export const IncentiveRewardsScreen = ({ theme }) => {
 
             for (let q = 1; q <= 4; q++) {
                 const periodKey = `${year}-Q${q}`;
-                const periodData = REWARDS_DATA[periodKey];
+                const periodData = INCENTIVE_REWARDS_DATA[periodKey];
                 if (periodData) {
                     periodData.sales?.forEach(person => {
                         salesMap.set(person.name, (salesMap.get(person.name) || 0) + person.amount);
@@ -52,7 +52,7 @@ export const IncentiveRewardsScreen = ({ theme }) => {
             designersMap.forEach((amount, name) => cumulativeData.designers.push({ name, amount }));
             return cumulativeData;
         }
-        return REWARDS_DATA[selectedPeriod] || { sales: [], designers: [] };
+        return INCENTIVE_REWARDS_DATA[selectedPeriod] || { sales: [], designers: [] };
     }, [selectedPeriod]);
 
     const sortedSales = useMemo(() => [...(rewardsData.sales || [])].sort((a, b) => b.amount - a.amount), [rewardsData.sales]);

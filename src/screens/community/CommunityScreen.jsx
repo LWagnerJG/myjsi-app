@@ -3,7 +3,7 @@ import { PageTitle } from '../../components/common/PageTitle.jsx';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { Modal } from '../../components/common/Modal.jsx';
 import { MessageSquare, Heart, MessageCircle, Share2, Plus, TrendingUp, Users } from 'lucide-react';
-import * as Data from '../../data.jsx';
+import { INITIAL_POSTS, INITIAL_WINS, INITIAL_POLLS } from './data.js';
 
 export const CommunityScreen = ({ theme, posts, polls, likedPosts, onToggleLike, pollChoices, onPollVote, openCreateContentModal }) => {
     const [selectedPost, setSelectedPost] = useState(null);
@@ -17,9 +17,9 @@ export const CommunityScreen = ({ theme, posts, polls, likedPosts, onToggleLike,
     }, []);
 
     const allContent = useMemo(() => {
-        const postsList = posts || Data.INITIAL_POSTS || [];
-        const pollsList = polls || Data.INITIAL_POLLS || [];
-        const winsList = Data.INITIAL_WINS || [];
+        const postsList = posts || INITIAL_POSTS || [];
+        const pollsList = polls || INITIAL_POLLS || [];
+        const winsList = INITIAL_WINS || [];
         
         return [...postsList, ...pollsList, ...winsList].sort((a, b) => {
             const timeOrder = { '2h': 1, 'yesterday': 2, '1d': 3 };

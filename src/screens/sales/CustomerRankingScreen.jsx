@@ -3,14 +3,14 @@ import { PageTitle } from '../../components/common/PageTitle';
 import { GlassCard } from '../../components/common/GlassCard';
 import { ToggleButtonGroup } from '../../components/common/ToggleButtonGroup';
 import { Modal } from '../../components/common/Modal';
-import * as Data from '../../data';
+import { CUSTOMER_RANK_DATA } from './data.js';
 
 export const CustomerRankingScreen = ({ theme, onNavigate }) => {
     const [sortKey, setSortKey] = useState('sales');
     const [modalData, setModalData] = useState(null);
 
     const sortedCustomers = useMemo(() => {
-        return [...Data.CUSTOMER_RANK_DATA].sort((a, b) => (b[sortKey] || 0) - (a[sortKey] || 0));
+        return [...CUSTOMER_RANK_DATA].sort((a, b) => (b[sortKey] || 0) - (a[sortKey] || 0));
     }, [sortKey]);
 
     const handleOpenModal = useCallback((customer) => {
@@ -146,7 +146,7 @@ export const CustomerRankingScreen = ({ theme, onNavigate }) => {
                                     {modalData.orders.map((order, index) => (
                                         <div key={order.id || index} className="flex justify-between items-center text-sm">
                                             <span style={{ color: theme.colors.textPrimary }}>
-                                                {order.name}
+                                                {order.projectName || order.name}
                                             </span>
                                             <span className="font-semibold" style={{ color: theme.colors.accent }}>
                                                 ${order.amount.toLocaleString()}

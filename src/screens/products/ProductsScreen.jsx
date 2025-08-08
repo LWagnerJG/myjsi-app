@@ -16,7 +16,7 @@ import {
     Armchair,
     Filter
 } from 'lucide-react';
-import * as Data from '../../data.jsx';
+import { PRODUCTS_CATEGORIES_DATA, PRODUCT_DATA, FABRICS_DATA, JSI_MODELS } from './data.js';
 
 const CategoryCard = React.memo(({
     category,
@@ -167,10 +167,10 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
     }, []);
 
     const filteredCategories = useMemo(() => {
-        if (!searchTerm.trim()) return Data.PRODUCTS_CATEGORIES_DATA || [];
+        if (!searchTerm.trim()) return PRODUCTS_CATEGORIES_DATA || [];
 
         const lowerSearch = searchTerm.toLowerCase();
-        return Data.PRODUCTS_CATEGORIES_DATA.filter(category =>
+        return PRODUCTS_CATEGORIES_DATA.filter(category =>
             category.name.toLowerCase().includes(lowerSearch) ||
             category.description?.toLowerCase().includes(lowerSearch)
         );

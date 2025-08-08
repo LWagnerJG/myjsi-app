@@ -2,13 +2,13 @@
   "ExpandedNodes": [
     "",
     "\\src",
-    "\\src\\constants",
-    "\\src\\hooks",
     "\\src\\screens",
-    "\\src\\screens\\community",
-    "\\src\\screens\\home",
-    "\\src\\screens\\sales",
-    "\\src\\screens\\samples",
+    "\\src\\screens\\feedback",
+    "\\src\\screens\\logout",
+    "\\src\\screens\\members",
+    "\\src\\screens\\projects",
+    "\\src\\screens\\resources",
+    "\\src\\screens\\resources\\discontinued-finishes",
     "\\src\\screens\\utility"
   ],
   "PreviewInSolutionExplorer": false

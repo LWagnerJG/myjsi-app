@@ -1,29 +1,46 @@
 ﻿import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { INITIAL_OPPORTUNITIES, MY_PROJECTS_DATA, INITIAL_MEMBERS, INITIAL_POSTS, INITIAL_POLLS, DEALER_DIRECTORY_DATA, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS, EMPTY_LEAD, lightTheme, darkTheme } from './data.jsx';
+import { 
+    INITIAL_OPPORTUNITIES, 
+    MY_PROJECTS_DATA, 
+    INITIAL_POSTS, 
+    INITIAL_POLLS, 
+    DEALER_DIRECTORY_DATA, 
+    INITIAL_DESIGN_FIRMS, 
+    INITIAL_DEALERS, 
+    EMPTY_LEAD, 
+    lightTheme, 
+    darkTheme 
+} from './data/index.js';
+import { INITIAL_MEMBERS } from './screens/members/data.js';
 import { AppHeader, ProfileMenu, SCREEN_MAP, VoiceModal, SuccessToast, NewLeadScreen } from './ui.jsx';
-import { OrderDetailScreen } from './screens/orders/OrderDetailScreen.jsx';
+import { OrderDetailScreen } from './screens/orders/index.js';
 import { SalesScreen } from './screens/sales/SalesScreen.jsx';
 import { Modal } from './components/common/Modal.jsx';
-import { ProductComparisonScreen, CompetitiveAnalysisScreen, CartScreen, ResourceDetailScreen, CreateContentModal, AddNewInstallScreen } from './screens/utility/UtilityScreens.jsx';
+import { ResourceDetailScreen } from './screens/utility/UtilityScreens.jsx';
+import { ProductComparisonScreen, CompetitiveAnalysisScreen } from './screens/products/index.js';
+import { CartScreen } from './screens/samples/index.js';
+import { AddNewInstallScreen } from './screens/projects/index.js';
+import { CreateContentModal } from './screens/community/index.js';
 import { AnimatedScreenWrapper } from './components/common/AnimatedScreenWrapper.jsx';
 
-// Import resource screens
-import { CommissionRatesScreen } from './screens/resources/CommissionRatesScreen.jsx';
-import { LeadTimesScreen } from './screens/resources/LeadTimesScreen.jsx';
-import { ContractsScreen } from './screens/resources/ContractsScreen.jsx';
-import { DealerDirectoryScreen } from './screens/resources/DealerDirectoryScreen.jsx';
-import { DiscontinuedFinishesScreen } from './screens/resources/DiscontinuedFinishesScreen.jsx';
-import { DesignDaysScreen } from './screens/resources/DesignDaysScreen.jsx';
-import { SocialMediaScreen } from './screens/resources/SocialMediaScreen.jsx';
-import { SampleDiscountsScreen } from './screens/resources/SampleDiscountsScreen.jsx';
-import { SearchFabricsScreen } from './screens/resources/SearchFabricsScreen.jsx';
-import { InstallInstructionsScreen } from './screens/resources/InstallInstructionsScreen.jsx';
-import { LoanerPoolScreen } from './screens/resources/LoanerPoolScreen.jsx';
-import { PresentationsScreen } from './screens/resources/PresentationsScreen.jsx';
-import { RequestFieldVisitScreen } from './screens/resources/RequestFieldVisitScreen.jsx';
-import { NewDealerSignUpScreen } from './screens/resources/NewDealerSignUpScreen.jsx';
-import { RequestComYardageScreen } from './screens/resources/RequestComYardageScreen.jsx';
+// Import feature-based resource screens
+import { CommissionRatesScreen } from './screens/resources/commission-rates/index.js';
+import { LeadTimesScreen } from './screens/resources/lead-times/index.js';
+import { ContractsScreen } from './screens/resources/contracts/index.js';
+import { DealerDirectoryScreen } from './screens/resources/dealer-directory/index.js';
+import { DiscontinuedFinishesScreen } from './screens/resources/discontinued-finishes/index.js';
+import { DesignDaysScreen } from './screens/resources/design-days/index.js';
+import { SampleDiscountsScreen } from './screens/resources/sample-discounts/index.js';
+import { LoanerPoolScreen } from './screens/resources/loaner-pool/index.js';
 
+// Import newly organized resource screens
+import { InstallInstructionsScreen } from './screens/resources/install-instructions/index.js';
+import { NewDealerSignUpScreen } from './screens/resources/new-dealer-signup/index.js';
+import { PresentationsScreen } from './screens/resources/presentations/index.js';
+import { RequestFieldVisitScreen } from './screens/resources/request-field-visit/index.js';
+import { SearchFabricsScreen } from './screens/resources/search-fabrics/index.js';
+import { SocialMediaScreen } from './screens/resources/social-media/index.js';
+import { RequestComYardageScreen } from './screens/resources/request-com-yardage/index.js';
 
 const ScreenRouter = (props) => {
     const { screenKey, ...rest } = props;

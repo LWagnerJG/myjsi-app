@@ -1,13 +1,213 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useLayoutEffect, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { FormInput } from '../../components/forms/FormInput.jsx';
 import { PortalNativeSelect } from '../../components/forms/PortalNativeSelect.jsx';
-import { AutoCompleteCombobox } from '../../components/forms/AutoCompleteCombobox.jsx';
 import { ToggleSwitch } from '../../components/forms/ToggleSwitch.jsx';
 import { ProbabilitySlider } from '../../components/forms/ProbabilitySlider.jsx';
 import { ToggleButtonGroup } from '../../components/common/ToggleButtonGroup.jsx';
 import { FormSection, SettingsRow } from '../../components/forms/FormSections.jsx';
-import * as Data from '../../data.jsx';
+
+// Import data from proper feature-based sources
+import { 
+    STAGES, 
+    VERTICALS, 
+    COMPETITORS, 
+    DISCOUNT_OPTIONS, 
+    PO_TIMEFRAMES 
+} from '../../data/projects.js';
+import { LEAD_TIMES_DATA, JSI_LAMINATES, JSI_VENEERS } from '../../data/products.js';
+import { SAMPLES_DATA } from '../../data/samples.js';
+import { CONTRACTS_DATA } from '../resources/contracts/data.js';
+
+
+const AutoCompleteCombobox = ({
+    label,
+    value,
+    onChange,
+    onSelect,
+    onAddNew,
+    placeholder,
+    options = [],
+    theme,
+    resetOnSelect = false
+}) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [position, setPosition] = useState({ top: 0, left: 0, width: 0 });
+    const inputRef = useRef(null);
+    const dropdownRef = useRef(null);
+
+    const filteredOptions = useMemo(() => {
+        if (!value) return options;
+        return options.filter(option =>
+            option.toLowerCase().includes(value.toLowerCase())
+        );
+    }, [value, options]);
+
+    const canAddNew = onAddNew && value && !options.some(opt => opt.toLowerCase() === value.toLowerCase());
+
+    // Calculate dynamic height based on number of options
+    const calculateDropdownHeight = useMemo(() => {
+        const optionHeight = 40; // Height per option (py-2 + text height)
+        const padding = 16; // p-2 = 8px top + 8px bottom
+        const maxVisibleOptions = 8; // Max options before scrolling
+        const minHeight = 60; // Minimum dropdown height
+        
+        const totalOptions = filteredOptions.length + (canAddNew ? 1 : 0);
+        const visibleOptions = Math.min(totalOptions, maxVisibleOptions);
+        const calculatedHeight = Math.max(minHeight, visibleOptions * optionHeight + padding);
+        
+        return {
+            height: calculatedHeight,
+            needsScroll: totalOptions > maxVisibleOptions
+        };
+    }, [filteredOptions.length, canAddNew]);
+
+    useLayoutEffect(() => {
+        if (isOpen && inputRef.current) {
+            const rect = inputRef.current.getBoundingClientRect();
+            setPosition({
+                top: rect.bottom + window.scrollY,
+                left: rect.left + window.scrollX,
+                width: rect.width,
+            });
+        }
+    }, [isOpen, value]); // Recalculate on open and when value changes (for filtering)
+
+    // Handle clicks outside dropdown
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (
+                inputRef.current && 
+                !inputRef.current.contains(event.target) &&
+                dropdownRef.current &&
+                !dropdownRef.current.contains(event.target)
+            ) {
+                setIsOpen(false);
+            }
+        };
+
+        if (isOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+            document.addEventListener('touchstart', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('touchstart', handleClickOutside);
+        };
+    }, [isOpen]);
+
+    const handleSelect = useCallback((option) => {
+        onSelect(option);
+        if (resetOnSelect) {
+            onChange('');
+        } else {
+            onChange(option);
+        }
+        setIsOpen(false);
+    }, [onSelect, onChange, resetOnSelect]);
+
+    const handleAddNewClick = useCallback(() => {
+        if (onAddNew && value) {
+            onAddNew(value);
+        }
+        onChange('');
+        setIsOpen(false);
+    }, [onAddNew, value, onChange]);
+
+    const { height: dropdownHeight, needsScroll } = calculateDropdownHeight;
+
+    const DropdownPortal = () => createPortal(
+        <div
+            ref={dropdownRef}
+            className={`fixed shadow-2xl rounded-2xl border ${needsScroll ? 'overflow-y-scroll scrollbar-hide' : ''}`}
+            style={{
+                top: `${position.top + 8}px`, // Add small gap
+                left: `${position.left}px`,
+                width: `${position.width}px`,
+                height: `${dropdownHeight}px`,
+                backgroundColor: theme.colors.surface,
+                borderColor: theme.colors.border,
+                zIndex: 99999, // Ensure it's on top
+                pointerEvents: 'auto',
+            }}
+            onMouseDown={(e) => e.stopPropagation()}
+        >
+            <ul className="p-2">
+                {filteredOptions.length > 0 ? (
+                    filteredOptions.map((option, index) => (
+                        <li
+                            key={index}
+                            onMouseDown={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleSelect(option);
+                            }}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleSelect(option);
+                            }}
+                            className="px-3 py-2 text-sm font-medium rounded-lg cursor-pointer hover:bg-neutral-500/10 transition-colors"
+                            style={{ 
+                                color: theme.colors.textPrimary,
+                                pointerEvents: 'auto'
+                            }}
+                        >
+                            {option}
+                        </li>
+                    ))
+                ) : !canAddNew && (
+                    <li className="px-3 py-2 text-sm text-center" style={{ color: theme.colors.textSecondary }}>
+                        No results found
+                    </li>
+                )}
+                {canAddNew && (
+                    <li
+                        onMouseDown={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleAddNewClick();
+                        }}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleAddNewClick();
+                        }}
+                        className="px-3 py-2 text-sm font-medium rounded-lg cursor-pointer hover:bg-neutral-500/10 transition-colors border-t"
+                        style={{ 
+                            color: theme.colors.accent,
+                            borderColor: theme.colors.border,
+                            pointerEvents: 'auto'
+                        }}
+                    >
+                        Add new: "{value}"
+                    </li>
+                )}
+            </ul>
+        </div>,
+        document.body
+    );
+
+    return (
+        <div className="relative w-full">
+            <div ref={inputRef}>
+                <FormInput
+                    label={label}
+                    value={value}
+                    onChange={(e) => onChange(e.target.value)}
+                    onFocus={() => setIsOpen(true)}
+                    placeholder={placeholder}
+                    theme={theme}
+                    autoComplete="off"
+                />
+            </div>
+            {isOpen && <DropdownPortal />}
+        </div>
+    );
+};
+
 
 // Multi-select Combobox Component for Stakeholders
 const MultiSelectCombobox = ({
@@ -21,20 +221,26 @@ const MultiSelectCombobox = ({
     theme
 }) => {
     const [searchValue, setSearchValue] = useState('');
-    const handleSelectItem = (item) => {
+    
+    const handleSelectItem = useCallback((item) => {
         if (!selectedItems.includes(item)) {
             onAddItem(item);
         }
         setSearchValue('');
-    };
-    const handleAddNew = (newItem) => {
+    }, [selectedItems, onAddItem]);
+    
+    const handleAddNew = useCallback((newItem) => {
         if (onAddNew) {
             onAddNew(newItem);
         }
         onAddItem(newItem);
         setSearchValue('');
-    };
-    const availableOptions = options.filter(option => !selectedItems.includes(option));
+    }, [onAddNew, onAddItem]);
+    
+    const availableOptions = useMemo(() => {
+        return options.filter(option => !selectedItems.includes(option));
+    }, [options, selectedItems]);
+    
     return (
         <div className="space-y-2">
             <AutoCompleteCombobox
@@ -78,6 +284,35 @@ const MultiSelectCombobox = ({
     );
 };
 
+// Material Button Group Component for Vision options
+const MaterialButtonGroup = ({ label, options, theme, selectedMaterials, onMaterialToggle }) => (
+    <div>
+        <p className="text-sm font-semibold mb-2" style={{ color: theme.colors.textSecondary }}>
+            {label}
+        </p>
+        <div className="flex flex-wrap gap-2">
+            {options.map(opt => {
+                const isSelected = selectedMaterials?.includes(opt);
+                return (
+                    <button
+                        key={opt}
+                        type="button"
+                        onClick={() => onMaterialToggle(opt)}
+                        className="px-3 py-1.5 text-sm rounded-full font-medium transition-colors border"
+                        style={{
+                            backgroundColor: isSelected ? theme.colors.accent : theme.colors.surface,
+                            color: isSelected ? theme.colors.surface : theme.colors.textPrimary,
+                            borderColor: isSelected ? theme.colors.accent : theme.colors.border,
+                        }}
+                    >
+                        {opt}
+                    </button>
+                );
+            })}
+        </div>
+    </div>
+);
+
 // Product option components
 const KnoxOptions = ({ theme, product, productIndex, onUpdate }) => {
     return (
@@ -106,33 +341,7 @@ const VisionOptions = ({ theme, product, productIndex, onUpdate }) => {
             : [...currentMaterials, material];
         onUpdate(productIndex, 'materials', nextMaterials);
     };
-    const MaterialButtonGroup = ({ label, options }) => (
-        <div>
-            <p className="text-sm font-semibold mb-2" style={{ color: theme.colors.textSecondary }}>
-                {label}
-            </p>
-            <div className="flex flex-wrap gap-2">
-                {options.map(opt => {
-                    const isSelected = product.materials?.includes(opt);
-                    return (
-                        <button
-                            key={opt}
-                            type="button"
-                            onClick={() => handleMaterialToggle(opt)}
-                            className="px-3 py-1.5 text-sm rounded-full font-medium transition-colors border"
-                            style={{
-                                backgroundColor: isSelected ? theme.colors.accent : theme.colors.surface,
-                                color: isSelected ? theme.colors.surface : theme.colors.textPrimary,
-                                borderColor: isSelected ? theme.colors.accent : theme.colors.border,
-                            }}
-                        >
-                            {opt}
-                        </button>
-                    );
-                })}
-            </div>
-        </div>
-    );
+    
     return (
         <div className="space-y-4 mt-3 pt-3 border-t" style={{ borderColor: theme.colors.border }}>
             <div className="flex items-center justify-between p-3 rounded-xl" style={{ backgroundColor: theme.colors.background }}>
@@ -148,8 +357,20 @@ const VisionOptions = ({ theme, product, productIndex, onUpdate }) => {
                 />
             </div>
             <div className="space-y-4">
-                <MaterialButtonGroup label="Laminate" options={Data.JSI_LAMINATES || []} />
-                <MaterialButtonGroup label="Veneer" options={Data.JSI_VENEERS || []} />
+                <MaterialButtonGroup 
+                    label="Laminate" 
+                    options={JSI_LAMINATES} 
+                    theme={theme}
+                    selectedMaterials={product.materials}
+                    onMaterialToggle={handleMaterialToggle}
+                />
+                <MaterialButtonGroup 
+                    label="Veneer" 
+                    options={JSI_VENEERS} 
+                    theme={theme}
+                    selectedMaterials={product.materials}
+                    onMaterialToggle={handleMaterialToggle}
+                />
             </div>
         </div>
     );
@@ -163,7 +384,7 @@ const WinkHoopzOptions = ({ theme, product, productIndex, onUpdate }) => {
                 onChange={(e) => onUpdate(productIndex, 'polyColor', e.target.value)}
                 placeholder="Select poly color"
                 theme={theme}
-                options={(Data.SAMPLES_DATA || []).map(c => ({ value: c.color, label: c.color }))}
+                options={SAMPLES_DATA.map(c => ({ value: c.color, label: c.color }))}
             />
         </div>
     );
@@ -180,6 +401,7 @@ export const NewLeadScreen = ({
     onNewLeadChange,
 }) => {
     const [productSearch, setProductSearch] = useState('');
+    
     const updateField = (field, value) => {
         // Clear otherVertical when vertical changes away from "Other"
         if (field === 'vertical' && value !== 'Other (Please specify)') {
@@ -188,6 +410,7 @@ export const NewLeadScreen = ({
             onNewLeadChange({ [field]: value });
         }
     };
+    
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!newLeadData.projectStatus) {
@@ -196,11 +419,13 @@ export const NewLeadScreen = ({
         }
         onSuccess(newLeadData);
     };
+    
     const toggleCompetitor = (c) => {
         const list = newLeadData.competitors || [];
         const next = list.includes(c) ? list.filter(x => x !== c) : [...list, c];
         updateField('competitors', next);
     };
+    
     const addProduct = (series) => {
         if (!series) return;
         const newProducts = [...(newLeadData.products || []), {
@@ -212,14 +437,17 @@ export const NewLeadScreen = ({
         }];
         updateField('products', newProducts);
     };
+    
     const removeProduct = (idx) => {
         const newProducts = (newLeadData.products || []).filter((_, i) => i !== idx);
         updateField('products', newProducts);
     };
+    
     const updateProductOption = (pi, key, value) => {
         const newProducts = (newLeadData.products || []).map((p, i) => i === pi ? { ...p, [key]: value } : p);
         updateField('products', newProducts);
     };
+    
     // Stakeholder management functions
     const addDesignFirm = (firm) => {
         const currentFirms = newLeadData.designFirms || [];
@@ -227,28 +455,33 @@ export const NewLeadScreen = ({
             updateField('designFirms', [...currentFirms, firm]);
         }
     };
+    
     const removeDesignFirm = (firm) => {
         const currentFirms = newLeadData.designFirms || [];
         updateField('designFirms', currentFirms.filter(f => f !== firm));
     };
+    
     const addDealer = (dealer) => {
         const currentDealers = newLeadData.dealers || [];
         if (!currentDealers.includes(dealer)) {
             updateField('dealers', [...currentDealers, dealer]);
         }
     };
+    
     const removeDealer = (dealer) => {
         const currentDealers = newLeadData.dealers || [];
         updateField('dealers', currentDealers.filter(d => d !== dealer));
     };
+    
     const availableSeries = useMemo(() => {
-        const allSeries = (Data.LEAD_TIMES_DATA || []).map(item => item.series);
+        const allSeries = LEAD_TIMES_DATA.map(item => item.series);
         const uniqueSeries = Array.from(new Set(allSeries));
         return uniqueSeries.filter(s => !(newLeadData.products || []).some(p => p.series === s));
     }, [newLeadData.products]);
+    
     return (
         <form onSubmit={handleSubmit} className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
-            <div className="flex-1 overflow-y-auto px-4 pt-12 pb-4 space-y-6 scrollbar-hide"> {/* Increased pt-8 to pt-12 for more space under header, space-y-4 to space-y-6 for better spacing */}
+            <div className="flex-1 overflow-y-auto px-4 pt-12 pb-4 space-y-6 scrollbar-hide">
                 <FormSection title="Project Details" theme={theme}>
                     <div>
                         <SettingsRow label="Project Name" isFirst={true} theme={theme}>
@@ -270,7 +503,7 @@ export const NewLeadScreen = ({
                                     required
                                     value={newLeadData.projectStatus || ''}
                                     onChange={e => updateField('projectStatus', e.target.value)}
-                                    options={(Data.STAGES || []).map(s => ({ label: s, value: s }))}
+                                    options={STAGES.map(s => ({ label: s, value: s }))}
                                     placeholder="Select..."
                                     theme={theme}
                                 />
@@ -310,7 +543,7 @@ export const NewLeadScreen = ({
                                             required
                                             value={newLeadData.vertical || ''}
                                             onChange={e => updateField('vertical', e.target.value)}
-                                            options={(Data.VERTICALS || []).map(v => ({ label: v, value: v }))}
+                                            options={VERTICALS.map(v => ({ label: v, value: v }))}
                                             placeholder="Select..."
                                             theme={theme}
                                         />
@@ -320,6 +553,7 @@ export const NewLeadScreen = ({
                         </SettingsRow>
                     </div>
                 </FormSection>
+                
                 <FormSection title="Stakeholders" theme={theme}>
                     <div>
                         <SettingsRow label="A&D Firm" isFirst={true} theme={theme}>
@@ -350,6 +584,7 @@ export const NewLeadScreen = ({
                         </SettingsRow>
                     </div>
                 </FormSection>
+                
                 <FormSection title="Competition & Products" theme={theme}>
                     <div>
                         <SettingsRow label="Bid?" isFirst={true} theme={theme}>
@@ -361,7 +596,7 @@ export const NewLeadScreen = ({
                         </SettingsRow>
                         <SettingsRow label="Competition?" theme={theme}>
                             <div className="w-full">
-                                <div className="flex justify-end mb-2"> {/* mb-2 for a bit of space under toggle */}
+                                <div className="flex justify-end mb-2">
                                     <ToggleSwitch
                                         checked={!!newLeadData.competitionPresent}
                                         onChange={e => updateField('competitionPresent', e.target.checked)}
@@ -370,8 +605,8 @@ export const NewLeadScreen = ({
                                 </div>
                                 {newLeadData.competitionPresent && (
                                     <div className="animate-fade-in">
-                                        <div className="p-3 grid grid-cols-3 gap-2 rounded-2xl" style={{ backgroundColor: theme.colors.subtle }}> {/* Changed to grid grid-cols-3 for 3 columns, approximately 4-5 rows */}
-                                            {(Data.COMPETITORS || []).filter(c => c !== 'None').map(c => (
+                                        <div className="p-3 grid grid-cols-3 gap-2 rounded-2xl" style={{ backgroundColor: theme.colors.subtle }}>
+                                            {COMPETITORS.filter(c => c !== 'None').map(c => (
                                                 <button
                                                     key={c}
                                                     type="button"
@@ -466,6 +701,7 @@ export const NewLeadScreen = ({
                         </div>
                     )}
                 </FormSection>
+                
                 <FormSection title="Financials & Timeline" theme={theme}>
                     <div>
                         <SettingsRow label="Estimated List" isFirst={true} theme={theme}>
@@ -497,7 +733,7 @@ export const NewLeadScreen = ({
                                     label=""
                                     value={newLeadData.discount || ''}
                                     onChange={e => updateField('discount', e.target.value)}
-                                    options={(Data.DISCOUNT_OPTIONS || []).map(d => ({ label: d, value: d }))}
+                                    options={DISCOUNT_OPTIONS.map(d => ({ label: d, value: d }))}
                                     placeholder="Select..."
                                     theme={theme}
                                 />
@@ -510,7 +746,7 @@ export const NewLeadScreen = ({
                                     required
                                     value={newLeadData.poTimeframe || ''}
                                     onChange={e => updateField('poTimeframe', e.target.value)}
-                                    options={(Data.PO_TIMEFRAMES || []).map(t => ({ label: t, value: t }))}
+                                    options={PO_TIMEFRAMES.map(t => ({ label: t, value: t }))}
                                     placeholder="Select..."
                                     theme={theme}
                                 />
@@ -525,10 +761,10 @@ export const NewLeadScreen = ({
                                     onChange={e => updateField('contractType', e.target.value)}
                                     options={[
                                         { label: 'None', value: '' },
-                                        ...(Object.keys(Data.CONTRACTS_DATA || {}).map(key => ({
-                                            label: Data.CONTRACTS_DATA[key].name,
+                                        ...Object.keys(CONTRACTS_DATA).map(key => ({
+                                            label: CONTRACTS_DATA[key].name,
                                             value: key,
-                                        }))) || []
+                                        }))
                                     ]}
                                     placeholder="Select..."
                                     theme={theme}
@@ -537,6 +773,7 @@ export const NewLeadScreen = ({
                         </SettingsRow>
                     </div>
                 </FormSection>
+                
                 <FormSection title="Services & Notes" theme={theme}>
                     <div>
                         <SettingsRow label="JSI Spec Services Required?" isFirst={true} theme={theme}>
@@ -596,6 +833,7 @@ export const NewLeadScreen = ({
                         </div>
                     </SettingsRow>
                 </FormSection>
+                
                 <div className="pt-2 pb-4">
                     <button
                         type="submit"

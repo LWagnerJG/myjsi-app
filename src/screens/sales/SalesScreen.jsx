@@ -1,7 +1,8 @@
 import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react';
 import { Modal } from '../../components/common/Modal';
 import { ArrowUp, Plus, ArrowLeft, TrendingUp, Award, DollarSign, BarChart } from 'lucide-react';
-import * as Data from '../../data';
+import { MONTHLY_SALES_DATA, SALES_VERTICALS_DATA } from './data.js';
+import { ORDER_DATA, STATUS_COLORS } from '../orders/data.js';
 
 const formatMillion = (num) => `${(num / 1000000).toFixed(1)}M`;
 const formatCompanyName = (name) => name.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
@@ -224,8 +225,8 @@ const OrderModal = ({ order, onClose, theme }) => {
                     <div>
                         <div className="font-semibold" style={{ color: theme.colors.textSecondary }}>Status</div>
                         <span className="text-xs font-semibold px-2 py-1 rounded-full" style={{
-                            backgroundColor: (Data.STATUS_COLORS[order.status] || theme.colors.secondary) + '20',
-                            color: Data.STATUS_COLORS[order.status] || theme.colors.secondary
+                            backgroundColor: (STATUS_COLORS[order.status] || theme.colors.secondary) + '20',
+                            color: STATUS_COLORS[order.status] || theme.colors.secondary
                         }}>
                             {order.status}
                         </span>
@@ -248,7 +249,6 @@ const OrderModal = ({ order, onClose, theme }) => {
 };
 
 export const SalesScreen = ({ theme, onNavigate }) => {
-    const { MONTHLY_SALES_DATA, ORDER_DATA, SALES_VERTICALS_DATA, STATUS_COLORS } = Data;
     const [monthlyView, setMonthlyView] = useState('chart');
     const [chartDataType, setChartDataType] = useState('bookings');
     const [selectedOrder, setSelectedOrder] = useState(null);
@@ -268,7 +268,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
         const bookings = MONTHLY_SALES_DATA.reduce((acc, m) => acc + m.bookings, 0);
         const sales = MONTHLY_SALES_DATA.reduce((acc, m) => acc + m.sales, 0);
         return { totalBookings: bookings, totalSales: sales };
-    }, [MONTHLY_SALES_DATA]);
+    }, []);
 
     const salesByVertical = useMemo(() => {
         if (SALES_VERTICALS_DATA && Array.isArray(SALES_VERTICALS_DATA) && SALES_VERTICALS_DATA.length > 0) {
@@ -284,13 +284,13 @@ export const SalesScreen = ({ theme, onNavigate }) => {
             .map(([vertical, value]) => ({ vertical, value }))
             .sort((a, b) => b.value - a.value)
             .slice(0, 8);
-    }, [SALES_VERTICALS_DATA, ORDER_DATA]);
+    }, []);
 
     const allRecentOrders = useMemo(() => {
         return ORDER_DATA
             .filter(o => o.date && o.net)
             .sort((a, b) => new Date(b.date) - new Date(a.date));
-    }, [ORDER_DATA]);
+    }, []);
 
     const displayedRecentOrders = useMemo(() => {
         return allRecentOrders.slice(0, numRecentOrders);
