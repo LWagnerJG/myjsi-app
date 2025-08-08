@@ -24,16 +24,82 @@ export const SALES_VERTICALS_DATA = [
 ];
 
 export const CUSTOMER_RANK_DATA = [
-    { id: 1, name: 'Business Furniture LLC', bookings: 450000, sales: 435000, orders: [{ projectName: 'Lawrence Township LECC', amount: 43034 }, { projectName: 'Monreau Seminary', amount: 137262 }] },
-    { id: 2, name: 'Corporate Design Inc', bookings: 380000, sales: 395000, orders: [{ projectName: 'OneMain Financial HQ', amount: 1250 }, { projectName: 'OneMain Financial Branch', amount: 643 }] },
-    { id: 3, name: 'OfficeWorks', bookings: 490000, sales: 510000, orders: [{ projectName: 'Main Office Remodel', amount: 510000 }] },
-    { id: 4, name: 'LOTH Inc.', bookings: 310000, sales: 320000, orders: [] },
-    { id: 5, name: 'One Eleven Design', bookings: 280000, sales: 275000, orders: [{ projectName: 'Centlivre, LLC', amount: 3415 }] },
-    { id: 6, name: 'RJE Business Interiors', bookings: 650000, sales: 470000, orders: [] },
-    { id: 7, name: 'Sharp School Services', bookings: 185000, sales: 190000, orders: [] },
-    { id: 8, name: 'Braden Business Systems', bookings: 205000, sales: 210000, orders: [] },
-    { id: 9, name: 'Schroeder\'s', bookings: 150000, sales: 140000, orders: [] },
-    { id: 10, name: 'CVC', bookings: 230000, sales: 220000, orders: [] }
+    {
+        id: 1,
+        name: 'Business Furniture LLC',
+        bookings: 450000,
+        sales: 435000,
+        orders: [
+            { projectName: 'Lawrence Township LECC', amount: 43034 },
+            { projectName: 'Monreau Seminary', amount: 137262 }
+        ]
+    },
+    {
+        id: 2,
+        name: 'Corporate Design Inc',
+        bookings: 380000,
+        sales: 395000,
+        orders: [
+            { projectName: 'OneMain Financial HQ', amount: 1250 },
+            { projectName: 'OneMain Financial Branch', amount: 643 }
+        ]
+    },
+    {
+        id: 3,
+        name: 'OfficeWorks',
+        bookings: 490000,
+        sales: 510000,
+        orders: [{ projectName: 'Main Office Remodel', amount: 510000 }]
+    },
+    {
+        id: 4,
+        name: 'LOTH Inc.',
+        bookings: 310000,
+        sales: 320000,
+        orders: [{ projectName: 'Regional Office Refresh', amount: 320000 }]
+    },
+    {
+        id: 5,
+        name: 'One Eleven Design',
+        bookings: 280000,
+        sales: 275000,
+        orders: [{ projectName: 'Centlivre, LLC', amount: 3415 }]
+    },
+    {
+        id: 6,
+        name: 'RJE Business Interiors',
+        bookings: 650000,
+        sales: 470000,
+        orders: [{ projectName: 'Downtown Campus Buildout', amount: 470000 }]
+    },
+    {
+        id: 7,
+        name: 'Sharp School Services',
+        bookings: 185000,
+        sales: 190000,
+        orders: [{ projectName: 'STEM Wing Expansion', amount: 190000 }]
+    },
+    {
+        id: 8,
+        name: 'Braden Business Systems',
+        bookings: 205000,
+        sales: 210000,
+        orders: [{ projectName: 'Executive Suite Upgrade', amount: 210000 }]
+    },
+    {
+        id: 9,
+        name: "Schroeder's",
+        bookings: 150000,
+        sales: 140000,
+        orders: [{ projectName: 'Clinic Lobby Refresh', amount: 140000 }]
+    },
+    {
+        id: 10,
+        name: 'CVC',
+        bookings: 230000,
+        sales: 220000,
+        orders: [{ projectName: 'Operations Center', amount: 220000 }]
+    }
 ];
 
 export const INCENTIVE_REWARDS_DATA = {
