@@ -3,13 +3,14 @@
     "",
     "\\src",
     "\\src\\screens",
+    "\\src\\screens\\community",
     "\\src\\screens\\feedback",
-    "\\src\\screens\\logout",
     "\\src\\screens\\members",
-    "\\src\\screens\\projects",
+    "\\src\\screens\\orders",
     "\\src\\screens\\resources",
-    "\\src\\screens\\resources\\discontinued-finishes",
+    "\\src\\screens\\sales",
     "\\src\\screens\\utility"
   ],
+  "SelectedNode": "\\src\\screens\\members\\MembersScreen.jsx",
   "PreviewInSolutionExplorer": false
 }

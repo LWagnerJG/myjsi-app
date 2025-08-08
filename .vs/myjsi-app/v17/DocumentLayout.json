@@ -305,6 +305,54 @@
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\members\\data.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}|",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\members\\data.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\members\\index.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\members\\index.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\data\\index.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\data\\index.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\products\\CompetitiveAnalysisScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\products\\CompetitiveAnalysisScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\samples\\index.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\samples\\index.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\projects\\installation-data.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\projects\\installation-data.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\projects\\AddNewInstallScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\projects\\AddNewInstallScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\projects\\index.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\projects\\index.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\settings\\SettingsScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\settings\\SettingsScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\settings\\index.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\settings\\index.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\search-fabrics\\SearchFabricsScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\resources\\search-fabrics\\SearchFabricsScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\SearchFabricsScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\resources\\SearchFabricsScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\RequestComYardageScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\resources\\RequestComYardageScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     }
   ],
   "DocumentGroupContainers": [
@@ -314,7 +362,7 @@
       "DocumentGroups": [
         {
           "DockedHeight": 239,
-          "SelectedChildIndex": 6,
+          "SelectedChildIndex": 18,
           "Children": [
             {
               "$type": "Bookmark",
@@ -327,6 +375,162 @@
             {
               "$type": "Bookmark",
               "Name": "ST:1:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 87,
+              "Title": "RequestComYardageScreen.jsx",
+              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\RequestComYardageScreen.jsx",
+              "RelativeDocumentMoniker": "src\\screens\\resources\\RequestComYardageScreen.jsx",
+              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\RequestComYardageScreen.jsx",
+              "RelativeToolTip": "src\\screens\\resources\\RequestComYardageScreen.jsx",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
+              "WhenOpened": "2025-08-08T18:11:27.205Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 86,
+              "Title": "SearchFabricsScreen.jsx",
+              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\SearchFabricsScreen.jsx",
+              "RelativeDocumentMoniker": "src\\screens\\resources\\SearchFabricsScreen.jsx",
+              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\SearchFabricsScreen.jsx",
+              "RelativeToolTip": "src\\screens\\resources\\SearchFabricsScreen.jsx",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
+              "WhenOpened": "2025-08-08T18:11:26.961Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 85,
+              "Title": "SearchFabricsScreen.jsx",
+              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\search-fabrics\\SearchFabricsScreen.jsx",
+              "RelativeDocumentMoniker": "src\\screens\\resources\\search-fabrics\\SearchFabricsScreen.jsx",
+              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\search-fabrics\\SearchFabricsScreen.jsx",
+              "RelativeToolTip": "src\\screens\\resources\\search-fabrics\\SearchFabricsScreen.jsx",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
+              "WhenOpened": "2025-08-08T18:11:26.751Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 84,
+              "Title": "index.js",
+              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\settings\\index.js",
+              "RelativeDocumentMoniker": "src\\screens\\settings\\index.js",
+              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\settings\\index.js",
+              "RelativeToolTip": "src\\screens\\settings\\index.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2025-08-08T18:11:26.704Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 83,
+              "Title": "SettingsScreen.jsx",
+              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\settings\\SettingsScreen.jsx",
+              "RelativeDocumentMoniker": "src\\screens\\settings\\SettingsScreen.jsx",
+              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\settings\\SettingsScreen.jsx",
+              "RelativeToolTip": "src\\screens\\settings\\SettingsScreen.jsx",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
+              "WhenOpened": "2025-08-08T18:11:26.634Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 82,
+              "Title": "index.js",
+              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\projects\\index.js",
+              "RelativeDocumentMoniker": "src\\screens\\projects\\index.js",
+              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\projects\\index.js",
+              "RelativeToolTip": "src\\screens\\projects\\index.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2025-08-08T18:11:26.59Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 81,
+              "Title": "AddNewInstallScreen.jsx",
+              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\projects\\AddNewInstallScreen.jsx",
+              "RelativeDocumentMoniker": "src\\screens\\projects\\AddNewInstallScreen.jsx",
+              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\projects\\AddNewInstallScreen.jsx",
+              "RelativeToolTip": "src\\screens\\projects\\AddNewInstallScreen.jsx",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
+              "WhenOpened": "2025-08-08T18:11:26.543Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 80,
+              "Title": "installation-data.js",
+              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\projects\\installation-data.js",
+              "RelativeDocumentMoniker": "src\\screens\\projects\\installation-data.js",
+              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\projects\\installation-data.js",
+              "RelativeToolTip": "src\\screens\\projects\\installation-data.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2025-08-08T18:11:26.497Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 79,
+              "Title": "index.js",
+              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\samples\\index.js",
+              "RelativeDocumentMoniker": "src\\screens\\samples\\index.js",
+              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\samples\\index.js",
+              "RelativeToolTip": "src\\screens\\samples\\index.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2025-08-08T18:11:26.453Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 78,
+              "Title": "CompetitiveAnalysisScreen.jsx",
+              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\products\\CompetitiveAnalysisScreen.jsx",
+              "RelativeDocumentMoniker": "src\\screens\\products\\CompetitiveAnalysisScreen.jsx",
+              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\products\\CompetitiveAnalysisScreen.jsx",
+              "RelativeToolTip": "src\\screens\\products\\CompetitiveAnalysisScreen.jsx",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
+              "WhenOpened": "2025-08-08T18:11:26.398Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 77,
+              "Title": "index.js",
+              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\data\\index.js",
+              "RelativeDocumentMoniker": "src\\data\\index.js",
+              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\data\\index.js",
+              "RelativeToolTip": "src\\data\\index.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2025-08-08T18:11:26.343Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 76,
+              "Title": "index.js",
+              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\members\\index.js",
+              "RelativeDocumentMoniker": "src\\screens\\members\\index.js",
+              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\members\\index.js",
+              "RelativeToolTip": "src\\screens\\members\\index.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2025-08-08T18:11:26.286Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Bookmark",
@@ -357,7 +561,7 @@
               "RelativeDocumentMoniker": "src\\screens\\members\\MembersScreen.jsx",
               "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\members\\MembersScreen.jsx",
               "RelativeToolTip": "src\\screens\\members\\MembersScreen.jsx",
-              "ViewState": "AgIAAB8BAAAAAAAAAAAYwE8BAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAB8BAAAAAAAAAAAYwD0BAAAPAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
               "WhenOpened": "2025-08-08T18:01:17.47Z",
               "EditorCaption": ""
