@@ -3,16 +3,40 @@
   "WorkspaceRootPath": "C:\\Users\\Luke Wagner\\myjsi-app\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\search-fabrics\\index.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}|",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\resources\\search-fabrics\\index.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\request-com-yardage\\index.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}|",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\resources\\request-com-yardage\\index.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\App.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}|",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\App.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\ResourcesScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\resources\\ResourcesScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\request-com-yardage\\RequestComYardageScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}|",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\resources\\request-com-yardage\\RequestComYardageScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\components\\common\\AnimatedScreenWrapper.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\components\\common\\AnimatedScreenWrapper.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\index.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\index.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\projects\\ProjectsScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\projects\\ProjectsScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\orders\\OrdersScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\orders\\OrdersScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\App.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}|",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\App.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}|"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\settings\\SettingsScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
@@ -35,10 +59,6 @@
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\resources\\RequestFieldVisitScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\ResourcesScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\resources\\ResourcesScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\request-field-visit\\RequestFieldVisitScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}|",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\resources\\request-field-visit\\RequestFieldVisitScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}|"
     },
@@ -53,10 +73,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\sample-discounts\\SampleDiscountsScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\resources\\sample-discounts\\SampleDiscountsScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\request-com-yardage\\RequestComYardageScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}|",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\resources\\request-com-yardage\\RequestComYardageScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}|"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\design-days\\DesignDaysScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
@@ -151,20 +167,12 @@
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\resources\\loaner-pool\\data\\loanerPoolData.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\request-com-yardage\\index.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}|",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\resources\\request-com-yardage\\index.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}|"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\components\\forms\\AutoCompleteCombobox.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\components\\forms\\AutoCompleteCombobox.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\data\\theme\\themeData.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\data\\theme\\themeData.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\index.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\index.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\index.css||{8B382828-6202-11D1-8870-0000F87579D2}|",
@@ -253,10 +261,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\search-fabrics\\data.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}|",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\resources\\search-fabrics\\data.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}|"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\search-fabrics\\index.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}|",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\resources\\search-fabrics\\index.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}|"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\social-media\\data.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}|",
@@ -355,14 +359,6 @@
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\resources\\search-fabrics\\SearchFabricsScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\SearchFabricsScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\resources\\SearchFabricsScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\RequestComYardageScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\resources\\RequestComYardageScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\components\\navigation\\ProfileMenu.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\components\\navigation\\ProfileMenu.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     }
@@ -374,7 +370,7 @@
       "DocumentGroups": [
         {
           "DockedHeight": 239,
-          "SelectedChildIndex": 3,
+          "SelectedChildIndex": 5,
           "Children": [
             {
               "$type": "Bookmark",
@@ -390,20 +386,111 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "ResourcesScreen.jsx",
+              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\ResourcesScreen.jsx",
+              "RelativeDocumentMoniker": "src\\screens\\resources\\ResourcesScreen.jsx",
+              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\ResourcesScreen.jsx",
+              "RelativeToolTip": "src\\screens\\resources\\ResourcesScreen.jsx",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
+              "WhenOpened": "2025-08-08T17:13:32.186Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "App.jsx",
+              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\App.jsx",
+              "RelativeDocumentMoniker": "src\\App.jsx",
+              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\App.jsx",
+              "RelativeToolTip": "src\\App.jsx",
+              "ViewState": "AgIAABcBAAAAAAAAAAAYwEcBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
+              "WhenOpened": "2025-08-08T17:51:46.065Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "index.js",
+              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\search-fabrics\\index.js",
+              "RelativeDocumentMoniker": "src\\screens\\resources\\search-fabrics\\index.js",
+              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\search-fabrics\\index.js",
+              "RelativeToolTip": "src\\screens\\resources\\search-fabrics\\index.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2025-08-08T17:11:37.577Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "index.js",
+              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\request-com-yardage\\index.js",
+              "RelativeDocumentMoniker": "src\\screens\\resources\\request-com-yardage\\index.js",
+              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\request-com-yardage\\index.js",
+              "RelativeToolTip": "src\\screens\\resources\\request-com-yardage\\index.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2025-08-08T13:28:25.652Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "RequestComYardageScreen.jsx",
+              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\request-com-yardage\\RequestComYardageScreen.jsx",
+              "RelativeDocumentMoniker": "src\\screens\\resources\\request-com-yardage\\RequestComYardageScreen.jsx",
+              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\request-com-yardage\\RequestComYardageScreen.jsx",
+              "RelativeToolTip": "src\\screens\\resources\\request-com-yardage\\RequestComYardageScreen.jsx",
+              "ViewState": "AgIAAKkAAAAAAAAAAAAYwMoAAAACAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
+              "WhenOpened": "2025-08-08T13:28:19.764Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "AnimatedScreenWrapper.jsx",
+              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\components\\common\\AnimatedScreenWrapper.jsx",
+              "RelativeDocumentMoniker": "src\\components\\common\\AnimatedScreenWrapper.jsx",
+              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\components\\common\\AnimatedScreenWrapper.jsx",
+              "RelativeToolTip": "src\\components\\common\\AnimatedScreenWrapper.jsx",
+              "ViewState": "AgIAAH4AAAAAAAAAAAAYwK4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
+              "WhenOpened": "2025-08-08T21:24:26.522Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "index.css",
+              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\index.css",
+              "RelativeDocumentMoniker": "src\\index.css",
+              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\index.css",
+              "RelativeToolTip": "src\\index.css",
+              "ViewState": "AgIAAAMBAAAAAAAAAAAuwC8BAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2025-08-08T13:39:22.231Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
               "Title": "ProjectsScreen.jsx",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\projects\\ProjectsScreen.jsx",
               "RelativeDocumentMoniker": "src\\screens\\projects\\ProjectsScreen.jsx",
               "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\projects\\ProjectsScreen.jsx",
               "RelativeToolTip": "src\\screens\\projects\\ProjectsScreen.jsx",
-              "ViewState": "AgIAAFEBAAAAAAAAAAAYwIEBAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAFsBAAAAAAAAAAAIwIoBAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
               "WhenOpened": "2025-08-08T21:04:21.378Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 8,
               "Title": "OrdersScreen.jsx",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\orders\\OrdersScreen.jsx",
               "RelativeDocumentMoniker": "src\\screens\\orders\\OrdersScreen.jsx",
@@ -415,8 +502,25 @@
               "EditorCaption": ""
             },
             {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            },
+            {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 9,
+              "Title": "SettingsScreen.jsx",
+              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\settings\\SettingsScreen.jsx",
+              "RelativeDocumentMoniker": "src\\screens\\settings\\SettingsScreen.jsx",
+              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\settings\\SettingsScreen.jsx",
+              "RelativeToolTip": "src\\screens\\settings\\SettingsScreen.jsx",
+              "ViewState": "AgIAAIwAAAAAAAAAAAAIwLYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
+              "WhenOpened": "2025-08-08T18:11:26.634Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
               "Title": "CustomerRankingScreen.jsx",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\sales\\CustomerRankingScreen.jsx",
               "RelativeDocumentMoniker": "src\\screens\\sales\\CustomerRankingScreen.jsx",
@@ -429,37 +533,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "SettingsScreen.jsx",
-              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\settings\\SettingsScreen.jsx",
-              "RelativeDocumentMoniker": "src\\screens\\settings\\SettingsScreen.jsx",
-              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\settings\\SettingsScreen.jsx",
-              "RelativeToolTip": "src\\screens\\settings\\SettingsScreen.jsx",
-              "ViewState": "AgIAAIwAAAAAAAAAAAAIwLYAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
-              "WhenOpened": "2025-08-08T18:11:26.634Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "App.jsx",
-              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\App.jsx",
-              "RelativeDocumentMoniker": "src\\App.jsx",
-              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\App.jsx",
-              "RelativeToolTip": "src\\App.jsx",
-              "ViewState": "AgIAADwBAAAAAAAAAAAQwFABAAATAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
-              "WhenOpened": "2025-08-08T17:51:46.065Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 90,
+              "DocumentIndex": 89,
               "Title": "ProfileMenu.jsx",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\components\\navigation\\ProfileMenu.jsx",
               "RelativeDocumentMoniker": "src\\components\\navigation\\ProfileMenu.jsx",
@@ -472,7 +546,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 11,
               "Title": "data.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\sales\\data.js",
               "RelativeDocumentMoniker": "src\\screens\\sales\\data.js",
@@ -485,7 +559,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 12,
               "Title": "MembersScreen.jsx",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\members\\MembersScreen.jsx",
               "RelativeDocumentMoniker": "src\\screens\\members\\MembersScreen.jsx",
@@ -498,7 +572,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 85,
+              "DocumentIndex": 86,
               "Title": "index.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\projects\\index.js",
               "RelativeDocumentMoniker": "src\\screens\\projects\\index.js",
@@ -510,7 +584,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 86,
+              "DocumentIndex": 87,
               "Title": "index.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\settings\\index.js",
               "RelativeDocumentMoniker": "src\\screens\\settings\\index.js",
@@ -522,7 +596,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 87,
+              "DocumentIndex": 88,
               "Title": "SearchFabricsScreen.jsx",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\search-fabrics\\SearchFabricsScreen.jsx",
               "RelativeDocumentMoniker": "src\\screens\\resources\\search-fabrics\\SearchFabricsScreen.jsx",
@@ -534,31 +608,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 88,
-              "Title": "SearchFabricsScreen.jsx",
-              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\SearchFabricsScreen.jsx",
-              "RelativeDocumentMoniker": "src\\screens\\resources\\SearchFabricsScreen.jsx",
-              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\SearchFabricsScreen.jsx",
-              "RelativeToolTip": "src\\screens\\resources\\SearchFabricsScreen.jsx",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
-              "WhenOpened": "2025-08-08T18:11:26.961Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 89,
-              "Title": "RequestComYardageScreen.jsx",
-              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\RequestComYardageScreen.jsx",
-              "RelativeDocumentMoniker": "src\\screens\\resources\\RequestComYardageScreen.jsx",
-              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\RequestComYardageScreen.jsx",
-              "RelativeToolTip": "src\\screens\\resources\\RequestComYardageScreen.jsx",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
-              "WhenOpened": "2025-08-08T18:11:27.205Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 84,
+              "DocumentIndex": 85,
               "Title": "AddNewInstallScreen.jsx",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\projects\\AddNewInstallScreen.jsx",
               "RelativeDocumentMoniker": "src\\screens\\projects\\AddNewInstallScreen.jsx",
@@ -570,7 +620,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 83,
+              "DocumentIndex": 84,
               "Title": "installation-data.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\projects\\installation-data.js",
               "RelativeDocumentMoniker": "src\\screens\\projects\\installation-data.js",
@@ -582,7 +632,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 82,
+              "DocumentIndex": 83,
               "Title": "index.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\samples\\index.js",
               "RelativeDocumentMoniker": "src\\screens\\samples\\index.js",
@@ -594,7 +644,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 81,
+              "DocumentIndex": 82,
               "Title": "CompetitiveAnalysisScreen.jsx",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\products\\CompetitiveAnalysisScreen.jsx",
               "RelativeDocumentMoniker": "src\\screens\\products\\CompetitiveAnalysisScreen.jsx",
@@ -606,7 +656,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 80,
+              "DocumentIndex": 81,
               "Title": "index.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\data\\index.js",
               "RelativeDocumentMoniker": "src\\data\\index.js",
@@ -618,7 +668,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 79,
+              "DocumentIndex": 80,
               "Title": "index.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\members\\index.js",
               "RelativeDocumentMoniker": "src\\screens\\members\\index.js",
@@ -630,7 +680,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 78,
+              "DocumentIndex": 79,
               "Title": "data.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\members\\data.js",
               "RelativeDocumentMoniker": "src\\screens\\members\\data.js",
@@ -642,7 +692,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 77,
+              "DocumentIndex": 78,
               "Title": "UtilityScreens.jsx",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\utility\\UtilityScreens.jsx",
               "RelativeDocumentMoniker": "src\\screens\\utility\\UtilityScreens.jsx",
@@ -654,7 +704,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 76,
+              "DocumentIndex": 77,
               "Title": "CartScreen.jsx",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\samples\\CartScreen.jsx",
               "RelativeDocumentMoniker": "src\\screens\\samples\\CartScreen.jsx",
@@ -666,7 +716,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 13,
               "Title": "RequestFieldVisitScreen.jsx",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\RequestFieldVisitScreen.jsx",
               "RelativeDocumentMoniker": "src\\screens\\resources\\RequestFieldVisitScreen.jsx",
@@ -678,7 +728,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 73,
+              "DocumentIndex": 74,
               "Title": "comparison-data.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\products\\comparison-data.js",
               "RelativeDocumentMoniker": "src\\screens\\products\\comparison-data.js",
@@ -690,7 +740,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 75,
+              "DocumentIndex": 76,
               "Title": "cart-data.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\samples\\cart-data.js",
               "RelativeDocumentMoniker": "src\\screens\\samples\\cart-data.js",
@@ -702,7 +752,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 74,
+              "DocumentIndex": 75,
               "Title": "ProductComparisonScreen.jsx",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\products\\ProductComparisonScreen.jsx",
               "RelativeDocumentMoniker": "src\\screens\\products\\ProductComparisonScreen.jsx",
@@ -714,19 +764,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "ResourcesScreen.jsx",
-              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\ResourcesScreen.jsx",
-              "RelativeDocumentMoniker": "src\\screens\\resources\\ResourcesScreen.jsx",
-              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\ResourcesScreen.jsx",
-              "RelativeToolTip": "src\\screens\\resources\\ResourcesScreen.jsx",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
-              "WhenOpened": "2025-08-08T17:13:32.186Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 66,
+              "DocumentIndex": 67,
               "Title": "index.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\social-media\\index.js",
               "RelativeDocumentMoniker": "src\\screens\\resources\\social-media\\index.js",
@@ -738,7 +776,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 67,
+              "DocumentIndex": 68,
               "Title": "data.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\feedback\\data.js",
               "RelativeDocumentMoniker": "src\\screens\\feedback\\data.js",
@@ -750,7 +788,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 72,
+              "DocumentIndex": 73,
               "Title": "SocialMediaScreen.jsx",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\SocialMediaScreen.jsx",
               "RelativeDocumentMoniker": "src\\screens\\resources\\SocialMediaScreen.jsx",
@@ -762,7 +800,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 71,
+              "DocumentIndex": 72,
               "Title": "PresentationsScreen.jsx",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\PresentationsScreen.jsx",
               "RelativeDocumentMoniker": "src\\screens\\resources\\PresentationsScreen.jsx",
@@ -774,7 +812,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 70,
+              "DocumentIndex": 71,
               "Title": "NewDealerSignUpScreen.jsx",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\NewDealerSignUpScreen.jsx",
               "RelativeDocumentMoniker": "src\\screens\\resources\\NewDealerSignUpScreen.jsx",
@@ -786,7 +824,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 69,
+              "DocumentIndex": 70,
               "Title": "InstallInstructionsScreen.jsx",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\InstallInstructionsScreen.jsx",
               "RelativeDocumentMoniker": "src\\screens\\resources\\InstallInstructionsScreen.jsx",
@@ -798,7 +836,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 68,
+              "DocumentIndex": 69,
               "Title": "index.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\feedback\\index.js",
               "RelativeDocumentMoniker": "src\\screens\\feedback\\index.js",
@@ -810,7 +848,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 51,
+              "DocumentIndex": 53,
               "Title": "data.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\install-instructions\\data.js",
               "RelativeDocumentMoniker": "src\\screens\\resources\\install-instructions\\data.js",
@@ -822,7 +860,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 14,
               "Title": "RequestFieldVisitScreen.jsx",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\request-field-visit\\RequestFieldVisitScreen.jsx",
               "RelativeDocumentMoniker": "src\\screens\\resources\\request-field-visit\\RequestFieldVisitScreen.jsx",
@@ -834,7 +872,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 52,
+              "DocumentIndex": 54,
               "Title": "InstallInstructionsScreen.jsx",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\install-instructions\\InstallInstructionsScreen.jsx",
               "RelativeDocumentMoniker": "src\\screens\\resources\\install-instructions\\InstallInstructionsScreen.jsx",
@@ -846,7 +884,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 53,
+              "DocumentIndex": 55,
               "Title": "index.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\install-instructions\\index.js",
               "RelativeDocumentMoniker": "src\\screens\\resources\\install-instructions\\index.js",
@@ -858,7 +896,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 65,
+              "DocumentIndex": 66,
               "Title": "SocialMediaScreen.jsx",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\social-media\\SocialMediaScreen.jsx",
               "RelativeDocumentMoniker": "src\\screens\\resources\\social-media\\SocialMediaScreen.jsx",
@@ -870,7 +908,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 64,
+              "DocumentIndex": 65,
               "Title": "data.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\social-media\\data.js",
               "RelativeDocumentMoniker": "src\\screens\\resources\\social-media\\data.js",
@@ -882,19 +920,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 63,
-              "Title": "index.js",
-              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\search-fabrics\\index.js",
-              "RelativeDocumentMoniker": "src\\screens\\resources\\search-fabrics\\index.js",
-              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\search-fabrics\\index.js",
-              "RelativeToolTip": "src\\screens\\resources\\search-fabrics\\index.js",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAaAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2025-08-08T17:11:37.577Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 62,
+              "DocumentIndex": 64,
               "Title": "data.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\search-fabrics\\data.js",
               "RelativeDocumentMoniker": "src\\screens\\resources\\search-fabrics\\data.js",
@@ -906,7 +932,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 61,
+              "DocumentIndex": 63,
               "Title": "index.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\request-field-visit\\index.js",
               "RelativeDocumentMoniker": "src\\screens\\resources\\request-field-visit\\index.js",
@@ -918,7 +944,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 60,
+              "DocumentIndex": 62,
               "Title": "data.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\request-field-visit\\data.js",
               "RelativeDocumentMoniker": "src\\screens\\resources\\request-field-visit\\data.js",
@@ -930,7 +956,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 59,
+              "DocumentIndex": 61,
               "Title": "index.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\presentations\\index.js",
               "RelativeDocumentMoniker": "src\\screens\\resources\\presentations\\index.js",
@@ -942,7 +968,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 58,
+              "DocumentIndex": 60,
               "Title": "PresentationsScreen.jsx",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\presentations\\PresentationsScreen.jsx",
               "RelativeDocumentMoniker": "src\\screens\\resources\\presentations\\PresentationsScreen.jsx",
@@ -954,7 +980,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 57,
+              "DocumentIndex": 59,
               "Title": "data.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\presentations\\data.js",
               "RelativeDocumentMoniker": "src\\screens\\resources\\presentations\\data.js",
@@ -966,7 +992,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 56,
+              "DocumentIndex": 58,
               "Title": "index.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\new-dealer-signup\\index.js",
               "RelativeDocumentMoniker": "src\\screens\\resources\\new-dealer-signup\\index.js",
@@ -978,7 +1004,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 55,
+              "DocumentIndex": 57,
               "Title": "NewDealerSignUpScreen.jsx",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\new-dealer-signup\\NewDealerSignUpScreen.jsx",
               "RelativeDocumentMoniker": "src\\screens\\resources\\new-dealer-signup\\NewDealerSignUpScreen.jsx",
@@ -990,7 +1016,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 54,
+              "DocumentIndex": 56,
               "Title": "data.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\new-dealer-signup\\data.js",
               "RelativeDocumentMoniker": "src\\screens\\resources\\new-dealer-signup\\data.js",
@@ -1002,7 +1028,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 15,
               "Title": "data.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\discontinued-finishes\\data.js",
               "RelativeDocumentMoniker": "src\\screens\\resources\\discontinued-finishes\\data.js",
@@ -1014,7 +1040,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 16,
               "Title": "NewLeadScreen.jsx",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\projects\\NewLeadScreen.jsx",
               "RelativeDocumentMoniker": "src\\screens\\projects\\NewLeadScreen.jsx",
@@ -1026,7 +1052,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 17,
               "Title": "SampleDiscountsScreen.jsx",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\sample-discounts\\SampleDiscountsScreen.jsx",
               "RelativeDocumentMoniker": "src\\screens\\resources\\sample-discounts\\SampleDiscountsScreen.jsx",
@@ -1038,19 +1064,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
-              "Title": "RequestComYardageScreen.jsx",
-              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\request-com-yardage\\RequestComYardageScreen.jsx",
-              "RelativeDocumentMoniker": "src\\screens\\resources\\request-com-yardage\\RequestComYardageScreen.jsx",
-              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\request-com-yardage\\RequestComYardageScreen.jsx",
-              "RelativeToolTip": "src\\screens\\resources\\request-com-yardage\\RequestComYardageScreen.jsx",
-              "ViewState": "AgIAAJoAAAAAAAAAAAAYwMoAAAACAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
-              "WhenOpened": "2025-08-08T13:28:19.764Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 18,
               "Title": "DesignDaysScreen.jsx",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\design-days\\DesignDaysScreen.jsx",
               "RelativeDocumentMoniker": "src\\screens\\resources\\design-days\\DesignDaysScreen.jsx",
@@ -1062,7 +1076,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 19,
               "Title": "DealerDirectoryScreen.jsx",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\dealer-directory\\DealerDirectoryScreen.jsx",
               "RelativeDocumentMoniker": "src\\screens\\resources\\dealer-directory\\DealerDirectoryScreen.jsx",
@@ -1074,7 +1088,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 50,
+              "DocumentIndex": 52,
               "Title": "data.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\loaner-pool\\data.js",
               "RelativeDocumentMoniker": "src\\screens\\resources\\loaner-pool\\data.js",
@@ -1086,7 +1100,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 49,
+              "DocumentIndex": 51,
               "Title": "LoanerPoolScreen.jsx",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\loaner-pool\\LoanerPoolScreen.jsx",
               "RelativeDocumentMoniker": "src\\screens\\resources\\loaner-pool\\LoanerPoolScreen.jsx",
@@ -1098,7 +1112,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 45,
+              "DocumentIndex": 47,
               "Title": "index.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\community\\index.js",
               "RelativeDocumentMoniker": "src\\screens\\community\\index.js",
@@ -1110,7 +1124,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 46,
+              "DocumentIndex": 48,
               "Title": "CreateContentModal.jsx",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\community\\CreateContentModal.jsx",
               "RelativeDocumentMoniker": "src\\screens\\community\\CreateContentModal.jsx",
@@ -1122,7 +1136,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 47,
+              "DocumentIndex": 49,
               "Title": "data.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\community\\data.js",
               "RelativeDocumentMoniker": "src\\screens\\community\\data.js",
@@ -1134,7 +1148,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 48,
+              "DocumentIndex": 50,
               "Title": "CommunityScreen.jsx",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\community\\CommunityScreen.jsx",
               "RelativeDocumentMoniker": "src\\screens\\community\\CommunityScreen.jsx",
@@ -1146,7 +1160,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 44,
+              "DocumentIndex": 46,
               "Title": "samples.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\data\\samples.js",
               "RelativeDocumentMoniker": "src\\data\\samples.js",
@@ -1158,7 +1172,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 43,
+              "DocumentIndex": 45,
               "Title": "StyledSelect.jsx",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\components\\forms\\StyledSelect.jsx",
               "RelativeDocumentMoniker": "src\\components\\forms\\StyledSelect.jsx",
@@ -1170,7 +1184,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 42,
+              "DocumentIndex": 44,
               "Title": "DropdownTest.jsx",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\test\\DropdownTest.jsx",
               "RelativeDocumentMoniker": "src\\test\\DropdownTest.jsx",
@@ -1181,7 +1195,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 39,
+              "DocumentIndex": 42,
               "Title": "themeData.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\data\\theme\\themeData.js",
               "RelativeDocumentMoniker": "src\\data\\theme\\themeData.js",
@@ -1193,33 +1207,20 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 40,
+              "DocumentIndex": 43,
               "Title": "index.css",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\index.css",
               "RelativeDocumentMoniker": "src\\index.css",
               "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\index.css",
               "RelativeToolTip": "src\\index.css",
-              "ViewState": "AgIAADYBAAAAAAAAAIBJwAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
-              "WhenOpened": "2025-08-08T13:39:22.231Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 41,
-              "Title": "index.css",
-              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\index.css",
-              "RelativeDocumentMoniker": "src\\index.css",
-              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\index.css",
-              "RelativeToolTip": "src\\index.css",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAC8BAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
               "WhenOpened": "2025-08-08T13:39:22.945Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 38,
+              "DocumentIndex": 41,
               "Title": "AutoCompleteCombobox.jsx",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\components\\forms\\AutoCompleteCombobox.jsx",
               "RelativeDocumentMoniker": "src\\components\\forms\\AutoCompleteCombobox.jsx",
@@ -1231,7 +1232,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 20,
               "Title": "data.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\request-com-yardage\\data.js",
               "RelativeDocumentMoniker": "src\\screens\\resources\\request-com-yardage\\data.js",
@@ -1243,19 +1244,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 37,
-              "Title": "index.js",
-              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\request-com-yardage\\index.js",
-              "RelativeDocumentMoniker": "src\\screens\\resources\\request-com-yardage\\index.js",
-              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\request-com-yardage\\index.js",
-              "RelativeToolTip": "src\\screens\\resources\\request-com-yardage\\index.js",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAaAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2025-08-08T13:28:25.652Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 21,
               "Title": "ContractsScreen.jsx",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\contracts\\ContractsScreen.jsx",
               "RelativeDocumentMoniker": "src\\screens\\resources\\contracts\\ContractsScreen.jsx",
@@ -1267,7 +1256,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 34,
+              "DocumentIndex": 38,
               "Title": "index.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\design-days\\index.js",
               "RelativeDocumentMoniker": "src\\screens\\resources\\design-days\\index.js",
@@ -1279,7 +1268,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 35,
+              "DocumentIndex": 39,
               "Title": "loanerPoolData.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\loaner-pool\\loanerPoolData.js",
               "RelativeDocumentMoniker": "src\\screens\\resources\\loaner-pool\\loanerPoolData.js",
@@ -1291,7 +1280,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 36,
+              "DocumentIndex": 40,
               "Title": "loanerPoolData.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\loaner-pool\\data\\loanerPoolData.js",
               "RelativeDocumentMoniker": "src\\screens\\resources\\loaner-pool\\data\\loanerPoolData.js",
@@ -1303,7 +1292,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 33,
+              "DocumentIndex": 37,
               "Title": "data.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\design-days\\data.js",
               "RelativeDocumentMoniker": "src\\screens\\resources\\design-days\\data.js",
@@ -1315,7 +1304,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 32,
+              "DocumentIndex": 36,
               "Title": "index.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\sample-discounts\\index.js",
               "RelativeDocumentMoniker": "src\\screens\\resources\\sample-discounts\\index.js",
@@ -1327,7 +1316,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 31,
+              "DocumentIndex": 35,
               "Title": "data.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\sample-discounts\\data.js",
               "RelativeDocumentMoniker": "src\\screens\\resources\\sample-discounts\\data.js",
@@ -1339,7 +1328,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 30,
+              "DocumentIndex": 34,
               "Title": "data.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\contracts\\data.js",
               "RelativeDocumentMoniker": "src\\screens\\resources\\contracts\\data.js",
@@ -1351,7 +1340,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 29,
+              "DocumentIndex": 33,
               "Title": "index.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\discontinued-finishes\\index.js",
               "RelativeDocumentMoniker": "src\\screens\\resources\\discontinued-finishes\\index.js",
@@ -1363,7 +1352,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 28,
+              "DocumentIndex": 32,
               "Title": "index.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\products\\index.js",
               "RelativeDocumentMoniker": "src\\screens\\products\\index.js",
@@ -1375,7 +1364,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 27,
+              "DocumentIndex": 31,
               "Title": "ProductsScreen.jsx",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\products\\ProductsScreen.jsx",
               "RelativeDocumentMoniker": "src\\screens\\products\\ProductsScreen.jsx",
@@ -1387,7 +1376,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 26,
+              "DocumentIndex": 30,
               "Title": "index.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\sales\\index.js",
               "RelativeDocumentMoniker": "src\\screens\\sales\\index.js",
@@ -1399,7 +1388,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 25,
+              "DocumentIndex": 29,
               "Title": "SalesScreen.jsx",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\sales\\SalesScreen.jsx",
               "RelativeDocumentMoniker": "src\\screens\\sales\\SalesScreen.jsx",
@@ -1411,7 +1400,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 24,
+              "DocumentIndex": 28,
               "Title": "IncentiveRewardsScreen.jsx",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\sales\\IncentiveRewardsScreen.jsx",
               "RelativeDocumentMoniker": "src\\screens\\sales\\IncentiveRewardsScreen.jsx",
@@ -1423,7 +1412,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 23,
+              "DocumentIndex": 27,
               "Title": "data.jsx",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\data.jsx",
               "RelativeDocumentMoniker": "src\\data.jsx",
@@ -1436,7 +1425,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 22,
+              "DocumentIndex": 26,
               "Title": "data.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\dealer-directory\\data.js",
               "RelativeDocumentMoniker": "src\\screens\\resources\\dealer-directory\\data.js",
@@ -1448,7 +1437,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 21,
+              "DocumentIndex": 25,
               "Title": "screenMap.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\config\\screenMap.js",
               "RelativeDocumentMoniker": "src\\config\\screenMap.js",
@@ -1460,7 +1449,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 20,
+              "DocumentIndex": 24,
               "Title": "index.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\orders\\index.js",
               "RelativeDocumentMoniker": "src\\screens\\orders\\index.js",
@@ -1472,7 +1461,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 19,
+              "DocumentIndex": 23,
               "Title": "data.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\products\\data.js",
               "RelativeDocumentMoniker": "src\\screens\\products\\data.js",
@@ -1484,7 +1473,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 18,
+              "DocumentIndex": 22,
               "Title": "data.js",
               "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\orders\\data.js",
               "RelativeDocumentMoniker": "src\\screens\\orders\\data.js",
