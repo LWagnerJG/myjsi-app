@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo, useCallback, useEffect } from 'react';
+﻿import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { 
     INITIAL_OPPORTUNITIES, 
     MY_PROJECTS_DATA, 
@@ -22,6 +22,7 @@ import { CartScreen } from './screens/samples/index.js';
 import { AddNewInstallScreen } from './screens/projects/index.js';
 import { CreateContentModal } from './screens/community/index.js';
 import { AnimatedScreenWrapper } from './components/common/AnimatedScreenWrapper.jsx';
+import { ProjectsScreen } from './screens/projects/ProjectsScreen.jsx';
 
 // Import feature-based resource screens
 import { CommissionRatesScreen } from './screens/resources/commission-rates/index.js';
@@ -42,12 +43,16 @@ import { SearchFabricsScreen } from './screens/resources/search-fabrics/index.js
 import { SocialMediaScreen } from './screens/resources/social-media/index.js';
 import { RequestComYardageScreen } from './screens/resources/request-com-yardage/index.js';
 
-const ScreenRouter = (props) => {
-    const { screenKey, ...rest } = props;
+const ScreenRouter = ({ screenKey, projectsScreenRef, ...rest }) => {
     if (!screenKey) return null;
 
     const screenParts = screenKey.split('/');
     const baseScreenKey = screenParts[0];
+
+    // Handle projects screen with ref
+    if (baseScreenKey === 'projects') {
+        return <ProjectsScreen ref={projectsScreenRef} {...rest} />;
+    }
 
     // Handle specific resource sub-routes
     if (screenKey === 'resources/commission-rates') {
@@ -156,6 +161,9 @@ function App() {
     const [dealers, setDealers] = useState(INITIAL_DEALERS);
     const [newLeadData, setNewLeadData] = useState(EMPTY_LEAD);
 
+    // Ref for ProjectsScreen to handle back navigation
+    const projectsScreenRef = useRef(null);
+
     const currentScreen = navigationHistory[navigationHistory.length - 1];
     const currentTheme = useMemo(() => (isDarkMode ? darkTheme : lightTheme), [isDarkMode]);
 
@@ -184,11 +192,20 @@ function App() {
     }, []);
     
     const handleBack = useCallback(() => { 
+        // Check if we're on the projects screen and it has a selection that can be cleared
+        if (currentScreen === 'projects' && projectsScreenRef.current?.clearSelection) {
+            const handled = projectsScreenRef.current.clearSelection();
+            if (handled) {
+                return; // ProjectsScreen handled the back action internally
+            }
+        }
+        
+        // Default back behavior
         if (navigationHistory.length > 1) {
             setLastNavigationDirection('backward');
             setNavigationHistory(prev => prev.slice(0, -1));
         }
-    }, [navigationHistory.length]);
+    }, [navigationHistory.length, currentScreen]);
     
     const handleHome = useCallback(() => {
         setLastNavigationDirection('backward');
@@ -322,7 +339,7 @@ function App() {
                     direction={lastNavigationDirection}
                     onSwipeBack={navigationHistory.length > 1 ? handleBack : null}
                 >
-                    <ScreenRouter screenKey={currentScreen} {...screenProps} />
+                    <ScreenRouter screenKey={currentScreen} projectsScreenRef={projectsScreenRef} {...screenProps} />
                 </AnimatedScreenWrapper>
             </div>
             {showProfileMenu && <ProfileMenu show={showProfileMenu} onClose={() => setShowProfileMenu(false)} onNavigate={handleNavigate} theme={currentTheme} />}

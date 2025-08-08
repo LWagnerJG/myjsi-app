@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { Plus, Briefcase, Check, Trash2 } from 'lucide-react';
 import * as Data from '../../data.jsx';
@@ -190,33 +190,30 @@ const ProjectDetailScreen = ({ project, theme, onBack, onUpdateProject, onDelete
     );
 };
 
-export const ProjectsScreen = ({
+export const ProjectsScreen = forwardRef(({
     onNavigate,
     theme,
     opportunities,
     setOpportunities,
     myProjects,
-    setSelectedProject,
-    handleBack
-}) => {
+    setSelectedProject
+}, ref) => {
     const [projectsTab, setProjectsTab] = useState('pipeline');
     const [selectedPipelineStage, setSelectedPipelineStage] = useState('Discovery');
     const [selectedOpportunity, setSelectedOpportunity] = useState(null);
     const [isScrolled, setIsScrolled] = useState(false);
     const scrollContainerRef = useRef(null);
 
-    // Handle main app header back button when project detail is open
-    useEffect(() => {
-        if (selectedOpportunity && handleBack) {
-            // Override the default back behavior to clear the selected opportunity
-            const originalHandleBack = handleBack;
-            const customHandleBack = () => {
+    // Expose clearSelection function to parent via ref
+    useImperativeHandle(ref, () => ({
+        clearSelection: () => {
+            if (selectedOpportunity) {
                 setSelectedOpportunity(null);
-            };
-            // Note: This is a simplified approach. In a real app, you might want to 
-            // integrate this more deeply with the navigation system
+                return true; // Indicate that we handled the back action
+            }
+            return false; // Indicate that we didn't handle it
         }
-    }, [selectedOpportunity, handleBack]);
+    }));
 
     const handleScroll = useCallback(() => {
         if (scrollContainerRef.current) setIsScrolled(scrollContainerRef.current.scrollTop > 10);
@@ -394,4 +391,4 @@ export const ProjectsScreen = ({
             </div>
         </div>
     );
-};
+});
