@@ -288,16 +288,54 @@ div[class*="z-[9999]"], div[class*="z-[10000]"], .dropdown-container {
 /* Back-swipe UX helpers */
 .animated-screen-container {
     overscroll-behavior: contain;
+    /* Ensure touch events work properly */
+    touch-action: pan-y;
 }
 
 .gesture-lock {
     touch-action: none;
+    /* Prevent any scrolling during gesture */
+    overscroll-behavior: none;
 }
 
 .animated-screen-container [data-screen="current"] {
     will-change: transform;
+    /* Improve performance during animations */
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
 }
 
 .animated-screen-container [data-screen="previous"] {
     pointer-events: none;
+    /* Ensure smooth compositing */
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+}
+
+/* Improve swipe shadow performance */
+.swipe-shadow {
+    will-change: opacity;
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+}
+
+/* Ensure proper viewport handling for animations */
+@supports (-webkit-touch-callout: none) {
+    /* iOS specific touch optimizations */
+    .animated-screen-container {
+        -webkit-overflow-scrolling: touch;
+        /* Prevent momentum scrolling during gestures */
+    }
+    
+    .gesture-lock {
+        -webkit-overflow-scrolling: auto;
+    }
+}
+
+/* Prevent text selection during gestures */
+.gesture-lock * {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }

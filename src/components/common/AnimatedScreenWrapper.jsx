@@ -1,5 +1,5 @@
 // AnimatedScreenWrapper.jsx
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState, useCallback } from 'react';
 
 export const AnimatedScreenWrapper = ({
     children,
@@ -14,7 +14,8 @@ export const AnimatedScreenWrapper = ({
     const [prevNode, setPrevNode] = useState(null);
     const [animating, setAnimating] = useState(false);
 
-    const [gesture, setGesture] = useState({
+    // Use useRef for gesture state to avoid stale closures
+    const gestureRef = useRef({
         active: false,
         startX: 0,
         startY: 0,
@@ -27,7 +28,7 @@ export const AnimatedScreenWrapper = ({
         setPrevNode(currentRef.current ? currentRef.current.cloneNode(true) : null);
         setCurrentKey(screenKey);
         setAnimating(true);
-    }, [screenKey]);
+    }, [screenKey, currentKey]);
 
     useEffect(() => {
         const root = containerRef.current;
@@ -65,96 +66,121 @@ export const AnimatedScreenWrapper = ({
         }
     }, [animating, direction]);
 
+    const handleTouchStart = useCallback((e) => {
+        if (!onSwipeBack) return;
+        
+        const touch = e.touches?.[0];
+        if (!touch) return;
+        
+        const x = touch.clientX;
+        const y = touch.clientY;
+        const EDGE = 28;
+        
+        // Only start gesture if touch begins near the left edge
+        if (x > EDGE) {
+            gestureRef.current = { active: false, startX: x, startY: y, dx: 0, locked: false };
+            return;
+        }
+        
+        gestureRef.current = { active: true, startX: x, startY: y, dx: 0, locked: false };
+    }, [onSwipeBack]);
+
+    const handleTouchMove = useCallback((e) => {
+        const gesture = gestureRef.current;
+        if (!gesture.active || !onSwipeBack) return;
+        
+        const touch = e.touches?.[0];
+        if (!touch) return;
+
+        const dx = Math.max(0, touch.clientX - gesture.startX);
+        const dy = Math.abs(touch.clientY - gesture.startY);
+
+        if (!gesture.locked) {
+            if (dx > 8 && dx > dy) {
+                // Lock to horizontal swipe
+                gesture.locked = true;
+                document.body.style.overflow = 'hidden';
+                containerRef.current?.classList.add('gesture-lock');
+            } else if (dy > 8 && dy > dx) {
+                // Cancel gesture for vertical scroll
+                gesture.active = false;
+                return;
+            }
+        }
+
+        if (gesture.locked) {
+            e.preventDefault();
+            
+            const root = containerRef.current;
+            if (!root) return;
+            
+            const w = root.clientWidth || window.innerWidth;
+            const progress = Math.min(1, dx / w);
+            const current = root.querySelector('[data-screen="current"]');
+            const shadow = root.querySelector('.swipe-shadow');
+            
+            if (current) {
+                current.style.transition = 'none';
+                current.style.transform = `translateX(${dx}px)`;
+            }
+            if (shadow) {
+                shadow.style.opacity = String(0.25 * (1 - progress));
+            }
+            
+            gesture.dx = dx;
+        }
+    }, [onSwipeBack]);
+
+    const handleTouchEnd = useCallback(() => {
+        const gesture = gestureRef.current;
+        if (!gesture.locked || !onSwipeBack) {
+            gestureRef.current = { active: false, startX: 0, startY: 0, dx: 0, locked: false };
+            return;
+        }
+        
+        const root = containerRef.current;
+        if (!root) return;
+        
+        const w = root.clientWidth || window.innerWidth;
+        const shouldCommit = gesture.dx > w * 0.28; // 28% threshold
+        const current = root.querySelector('[data-screen="current"]');
+        const shadow = root.querySelector('.swipe-shadow');
+
+        if (current) {
+            current.style.transition = 'transform 260ms ease';
+            current.style.transform = shouldCommit ? `translateX(${w}px)` : 'translateX(0px)';
+        }
+        if (shadow) {
+            shadow.style.transition = 'opacity 260ms ease';
+            shadow.style.opacity = shouldCommit ? '0' : '0.25';
+        }
+
+        setTimeout(() => {
+            document.body.style.overflow = '';
+            root.classList.remove('gesture-lock');
+            gestureRef.current = { active: false, startX: 0, startY: 0, dx: 0, locked: false };
+            if (shouldCommit) {
+                onSwipeBack();
+            }
+        }, 280);
+    }, [onSwipeBack]);
+
     useEffect(() => {
         const root = containerRef.current;
         if (!root || !onSwipeBack) return;
 
-        const EDGE = 28;
-
-        const start = (e) => {
-            const t = e.touches?.[0];
-            if (!t) return;
-            const x = t.clientX;
-            const y = t.clientY;
-            if (x > EDGE) {
-                setGesture({ active: false, startX: x, startY: y, dx: 0, locked: false });
-                return;
-            }
-            setGesture({ active: true, startX: x, startY: y, dx: 0, locked: false });
-        };
-
-        const move = (e) => {
-            if (!gesture.active) return;
-            const t = e.touches?.[0];
-            if (!t) return;
-
-            const dx = Math.max(0, t.clientX - gesture.startX);
-            const dy = Math.abs(t.clientY - gesture.startY);
-
-            if (!gesture.locked) {
-                if (dx > 8 && dx > dy) {
-                    setGesture((g) => ({ ...g, locked: true }));
-                    document.body.style.overflow = 'hidden';
-                    root.classList.add('gesture-lock');
-                } else if (dy > 8 && dy > dx) {
-                    setGesture((g) => ({ ...g, active: false }));
-                    return;
-                }
-            }
-
-            if (gesture.locked) {
-                e.preventDefault();
-                const w = root.clientWidth || window.innerWidth;
-                const p = Math.min(1, dx / w);
-                const cur = root.querySelector('[data-screen="current"]');
-                const shadow = root.querySelector('.swipe-shadow');
-                if (cur) {
-                    cur.style.transition = 'none';
-                    cur.style.transform = `translateX(${dx}px)`;
-                }
-                if (shadow) shadow.style.opacity = String(0.25 * (1 - p));
-                setGesture((g) => ({ ...g, dx }));
-            }
-        };
-
-        const end = () => {
-            if (!gesture.locked) {
-                setGesture({ active: false, startX: 0, startY: 0, dx: 0, locked: false });
-                return;
-            }
-            const w = root.clientWidth || window.innerWidth;
-            const commit = gesture.dx > w * 0.28;
-            const cur = root.querySelector('[data-screen="current"]');
-            const shadow = root.querySelector('.swipe-shadow');
-
-            if (cur) {
-                cur.style.transition = 'transform 260ms ease';
-                cur.style.transform = commit ? `translateX(${w}px)` : 'translateX(0px)';
-            }
-            if (shadow) {
-                shadow.style.transition = 'opacity 260ms ease';
-                shadow.style.opacity = commit ? '0' : '0.25';
-            }
-
-            setTimeout(() => {
-                document.body.style.overflow = '';
-                root.classList.remove('gesture-lock');
-                setGesture({ active: false, startX: 0, startY: 0, dx: 0, locked: false });
-                if (commit && onSwipeBack) onSwipeBack();
-            }, 280);
-        };
-
-        root.addEventListener('touchstart', start, { passive: true });
-        root.addEventListener('touchmove', move, { passive: false });
-        root.addEventListener('touchend', end, { passive: true });
-        root.addEventListener('touchcancel', end, { passive: true });
+        root.addEventListener('touchstart', handleTouchStart, { passive: true });
+        root.addEventListener('touchmove', handleTouchMove, { passive: false });
+        root.addEventListener('touchend', handleTouchEnd, { passive: true });
+        root.addEventListener('touchcancel', handleTouchEnd, { passive: true });
+        
         return () => {
-            root.removeEventListener('touchstart', start);
-            root.removeEventListener('touchmove', move);
-            root.removeEventListener('touchend', end);
-            root.removeEventListener('touchcancel', end);
+            root.removeEventListener('touchstart', handleTouchStart);
+            root.removeEventListener('touchmove', handleTouchMove);
+            root.removeEventListener('touchend', handleTouchEnd);
+            root.removeEventListener('touchcancel', handleTouchEnd);
         };
-    }, [gesture.active, gesture.locked, gesture.dx, onSwipeBack]);
+    }, [handleTouchStart, handleTouchMove, handleTouchEnd, onSwipeBack]);
 
     return (
         <div ref={containerRef} className="animated-screen-container relative h-full w-full overflow-hidden">
