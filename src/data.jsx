@@ -148,6 +148,92 @@ export const INITIAL_POLLS = [
     },
 ];
 
+// Sales related constants
+export const COMMISSIONS_DATA = [
+    { id: 1, project: 'Acme Corp Office', amount: 2500.00, status: 'Paid', date: '2025-01-15' },
+    { id: 2, project: 'Tech Start-up HQ', amount: 1800.50, status: 'Pending', date: '2025-01-10' },
+    { id: 3, project: 'Medical Center Lobby', amount: 3200.75, status: 'Paid', date: '2025-01-05' },
+    { id: 4, project: 'Law Firm Offices', amount: 1450.25, status: 'Processing', date: '2025-01-01' }
+];
+
+// Projects related constants
+export const STAGES = ['Discovery', 'Specifying', 'Decision/Bidding', 'PO Expected', 'Won', 'Lost'];
+
+export const COMPETITORS = ['None', 'Kimball', 'OFS', 'Indiana Furniture', 'National', 'Haworth', 'MillerKnoll', 'Steelcase', 'Versteel', 'Krug', 'Lazyboy', 'DarRan', 'Hightower', 'Allsteel'];
+
+export const DISCOUNT_OPTIONS = ['Undecided', '50/20 (60.00%)', '50/20/1 (60.4%)', '50/20/2 (60.80%)', '50/20/4 (61.60%)', '50/20/2/3 (61.98%)', '50/20/5 (62.00%)', '50/20/3 (61.20%)', '50/20/6 (62.40%)', '50/25 (62.50%)', '50/20/5/2 (62.76%)', '50/20/7 (62.80%)', '50/20/8 (63.20%)', '50/10/10/10 (63.55%)', '50/20/9 (63.6%)', '50/20/10 (64.00%)', '50/20/8/3 (64.30%)', '50/20/10/3 (65.08%)', '50/20/10/5 (65.80%)', '50/20/15 (66.00%)'];
+
+export const WIN_PROBABILITY_OPTIONS = ['20%', '40%', '60%', '80%', '100%'];
+
+export const STATUS_COLORS = {
+    'Discovery': 'bg-blue-100 text-blue-800',
+    'Specifying': 'bg-yellow-100 text-yellow-800',
+    'Decision/Bidding': 'bg-orange-100 text-orange-800',
+    'PO Expected': 'bg-purple-100 text-purple-800',
+    'Won': 'bg-green-100 text-green-800',
+    'Lost': 'bg-red-100 text-red-800'
+};
+
+export const INITIAL_OPPORTUNITIES = [
+    { id: 1, name: 'New Office Furnishings', stage: 'Discovery', discount: '5%', value: '$50,000', company: 'ABC Corporation', contact: 'John Smith', poTimeframe: '30-60 days' },
+    { id: 2, name: 'Lobby Refresh', stage: 'Specifying', value: '$75,000', company: 'XYZ Industries', contact: 'Jane Doe', poTimeframe: '60-90 days' }
+];
+
+export const MY_PROJECTS_DATA = [
+    {
+        id: 'proj1',
+        name: 'Acme Corp HQ',
+        location: 'Indianapolis, IN',
+        image: 'https://webresources.jsifurniture.com/production/uploads/jsi_vision_install_0000010.jpg'
+    },
+    {
+        id: 'proj2',
+        name: 'Tech Park Offices',
+        location: 'Fishers, IN',
+        image: 'https://webresources.jsifurniture.com/production/uploads/jsi_caav_install_00024_pldPbiW.jpg'
+    },
+    {
+        id: 'proj3',
+        name: 'Community Hospital',
+        location: 'Carmel, IN',
+        image: 'https://webresources.jsifurniture.com/production/uploads/original_images/jsi_finn_enviro_00004_aOu5872.jpg'
+    },
+    {
+        id: 'proj4',
+        name: 'Downtown Library',
+        location: 'Indianapolis, IN',
+        image: 'https://webresources.jsifurniture.com/production/uploads/jsi_coldjet_install_00001.jpg'
+    },
+];
+
+export const EMPTY_LEAD = {
+    project: '',
+    designFirm: '',
+    dealer: '',
+    winProbability: 50,
+    projectStatus: '',
+    vertical: '',
+    otherVertical: '',
+    estimatedList: '',
+    poTimeframe: '',
+    competitors: [],
+    competitionPresent: false,
+    isBid: false,
+    jsiSpecServices: false,
+    quoteType: 'New Quote',
+    pastProjectRef: '',
+    discount: 'Undecided',
+    products: [],
+    notes: '',
+    jsiQuoteNumber: '',
+    isContract: false,
+    contractType: ''
+};
+
+export const INITIAL_DESIGN_FIRMS = ['N/A', 'Undecided', 'McGee Designhouse', 'Ratio', 'CSO', 'IDO', 'Studio M'];
+
+export const INITIAL_DEALERS = ['Undecided', 'Business Furniture', 'COE', 'OfficeWorks', 'RJE'];
+
 export const PERMISSION_LABELS = {
     salesData: "Sales Data",
     customerRanking: "Customer Ranking",

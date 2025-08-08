@@ -1,16 +1,11 @@
 import React from 'react';
-import { Sun, Moon, Settings, User, HelpCircle, LogOut } from 'lucide-react';
+import { Settings, User, HelpCircle, LogOut } from 'lucide-react';
 import { GlassCard } from '../common/GlassCard.jsx';
 
-export const ProfileMenu = ({ show, onClose, onNavigate, toggleTheme, theme, isDarkMode }) => {
+export const ProfileMenu = ({ show, onClose, onNavigate, theme }) => {
     if (!show) return null;
     
     const menuItems = [
-        { 
-            label: isDarkMode ? 'Light Mode' : 'Dark Mode', 
-            action: () => { toggleTheme(); onClose(); }, 
-            icon: isDarkMode ? Sun : Moon 
-        },
         { label: 'Settings', action: () => onNavigate('settings'), icon: Settings },
         { label: 'App Users', action: () => onNavigate('members'), icon: User },
         { label: 'Help', action: () => onNavigate('help'), icon: HelpCircle },

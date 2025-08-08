@@ -167,8 +167,16 @@ select option {
     color: #F5F5F5;
 }
 
+/* Force all dropdowns to highest z-index */
+div[class*="z-[9999]"],
+div[class*="z-[10000]"],
+.dropdown-container {
+    z-index: 9999 !important;
+}
+
 /* Force solid dropdown backgrounds - high specificity */
-div[class*="z-[10000]"] > div[class*="rounded-2xl"] {
+div[class*="z-[10000]"] > div[class*="rounded-2xl"],
+div[class*="z-[9999]"] > div[class*="rounded"] {
     background-color: #FFFFFF !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
@@ -176,7 +184,9 @@ div[class*="z-[10000]"] > div[class*="rounded-2xl"] {
 
 /* Dark theme dropdown backgrounds */
 .dark div[class*="z-[10000]"] > div[class*="rounded-2xl"],
-[data-theme="dark"] div[class*="z-[10000]"] > div[class*="rounded-2xl"] {
+[data-theme="dark"] div[class*="z-[10000]"] > div[class*="rounded-2xl"],
+.dark div[class*="z-[9999]"] > div[class*="rounded"],
+[data-theme="dark"] div[class*="z-[9999]"] > div[class*="rounded"] {
     background-color: #2A2A2A !important;
     color: #F5F5F5 !important;
 }

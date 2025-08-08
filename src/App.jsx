@@ -312,10 +312,9 @@ function App() {
                 onHomeClick={handleHome}
                 onProfileClick={() => setShowProfileMenu(p => !p)}
                 isDarkMode={isDarkMode}
-                onToggleDark={() => setIsDarkMode(d => !d)}
             />
             <div 
-                className="flex-1 pt-[88px] overflow-hidden"
+                className="flex-1 pt-[104px] overflow-hidden"
                 style={{ backgroundColor: currentTheme.colors.background }}
             >
                 <AnimatedScreenWrapper 
@@ -326,7 +325,7 @@ function App() {
                     <ScreenRouter screenKey={currentScreen} {...screenProps} />
                 </AnimatedScreenWrapper>
             </div>
-            {showProfileMenu && <ProfileMenu show={showProfileMenu} onClose={() => setShowProfileMenu(false)} onNavigate={handleNavigate} toggleTheme={() => setIsDarkMode(d => !d)} theme={currentTheme} isDarkMode={isDarkMode} />}
+            {showProfileMenu && <ProfileMenu show={showProfileMenu} onClose={() => setShowProfileMenu(false)} onNavigate={handleNavigate} theme={currentTheme} />}
             <VoiceModal message={voiceMessage} show={!!voiceMessage} theme={currentTheme} />
             <SuccessToast message={successMessage} show={!!successMessage} theme={currentTheme} />
             {showCreateContentModal && <CreateContentModal close={() => setShowCreateContentModal(false)} theme={currentTheme} onAdd={handleAddItem} />}
