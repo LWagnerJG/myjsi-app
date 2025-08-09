@@ -11,6 +11,7 @@ export const SearchInput = React.memo(({
     onSubmit,
     value,
     onChange,
+    onFocus,
     placeholder,
     theme,
     className,
@@ -49,6 +50,7 @@ export const SearchInput = React.memo(({
                 placeholder={placeholder}
                 value={value}
                 onChange={onChange}
+                onFocus={onFocus}
                 className={`w-full ${isBare ? 'bg-transparent' : 'bg-transparent'} pl-12 pr-12 text-base outline-none border-none rounded-full placeholder-gray-500/70 focus:placeholder-gray-400/80`}
                 style={{
                     color: theme.colors.textPrimary,

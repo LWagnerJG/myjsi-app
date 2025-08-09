@@ -66,6 +66,7 @@ const SmartSearch = ({ theme, onNavigate, onAskAI, onVoiceActivate }) => {
                     onSubmit={submit}
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
+                    onFocus={() => setIsFocused(true)}
                     placeholder="Ask me anything..."
                     onVoiceClick={() => onVoiceActivate('Voice Activated')}
                     theme={theme}
@@ -122,8 +123,8 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate }) => {
 
     return (
         <div className="flex flex-col h-full">
-            {/* tighter gap below header */}
-            <div className="px-4 pt-3 pb-2">
+            {/* More margin below search bar */}
+            <div className="px-4 pt-3 pb-4">
                 <SmartSearch
                     theme={theme}
                     onNavigate={onNavigate}

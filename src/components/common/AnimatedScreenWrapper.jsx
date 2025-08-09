@@ -1,199 +1,165 @@
-// AnimatedScreenWrapper.jsx
 import React, { useEffect, useLayoutEffect, useRef, useState, useCallback } from 'react';
+import './AnimatedScreenWrapper.css';
 
 export const AnimatedScreenWrapper = ({
     children,
     screenKey,
-    direction = 'forward',
-    onSwipeBack = null,
+    direction = 'forward',        // 'forward' | 'backward'
+    onSwipeBack = null            // () => void
 }) => {
     const containerRef = useRef(null);
-    const currentRef = useRef(null);
 
+    // Keep the *React* trees for current and previous screens
     const [currentKey, setCurrentKey] = useState(screenKey);
+    const [currentNode, setCurrentNode] = useState(children);
     const [prevNode, setPrevNode] = useState(null);
     const [animating, setAnimating] = useState(false);
 
-    // Use useRef for gesture state to avoid stale closures
-    const gestureRef = useRef({
-        active: false,
-        startX: 0,
-        startY: 0,
-        dx: 0,
-        locked: false,
-    });
+    // Gesture state (refs so they don’t re-render during move)
+    const gesture = useRef({ active: false, locked: false, startX: 0, startY: 0, dx: 0 });
 
+    // When the route (screenKey) changes, stage a transition
     useLayoutEffect(() => {
         if (screenKey === currentKey) return;
-        setPrevNode(currentRef.current ? currentRef.current.cloneNode(true) : null);
+        setPrevNode(currentNode);            // keep the *previous React element*
         setCurrentKey(screenKey);
+        setCurrentNode(children);
         setAnimating(true);
-    }, [screenKey, currentKey]);
+    }, [screenKey, currentKey, children, currentNode]);
 
+    // Kick off CSS animations when animating toggles on
     useEffect(() => {
+        if (!animating || !containerRef.current) return;
+
         const root = containerRef.current;
-        if (!root) return;
+        const cur = root.querySelector('[data-role="current"]');
+        const prev = root.querySelector('[data-role="previous"]');
 
-        if (animating) {
-            const incoming = root.querySelector('[data-screen="current"]');
-            const outgoing = root.querySelector('[data-screen="previous"]');
+        // reset classes
+        [cur, prev].forEach(el => el && (el.className = 'panel'));
 
-            if (incoming) {
-                incoming.style.transform = direction === 'forward' ? 'translateX(100%)' : 'translateX(-30%)';
-                incoming.style.opacity = '0.98';
-                incoming.style.transition = 'none';
-                requestAnimationFrame(() => {
-                    incoming.style.transition = 'transform 280ms ease, opacity 280ms ease';
-                    incoming.style.transform = 'translateX(0%)';
-                    incoming.style.opacity = '1';
-                });
-            }
-            if (outgoing) {
-                outgoing.style.transform = 'translateX(0%)';
-                outgoing.style.opacity = '1';
-                outgoing.style.transition = 'transform 280ms ease, opacity 280ms ease';
-                requestAnimationFrame(() => {
-                    outgoing.style.transform = direction === 'forward' ? 'translateX(-10%)' : 'translateX(100%)';
-                    outgoing.style.opacity = '0.0';
-                });
-            }
-
-            const t = setTimeout(() => {
-                setPrevNode(null);
-                setAnimating(false);
-            }, 320);
-            return () => clearTimeout(t);
+        // apply directionally-correct classes
+        if (direction === 'forward') {
+            prev && prev.classList.add('panel', 'exit-left');
+            cur && cur.classList.add('panel', 'enter-right');
+        } else {
+            prev && prev.classList.add('panel', 'exit-right');
+            cur && cur.classList.add('panel', 'enter-left');
         }
+
+        const done = () => {
+            setPrevNode(null);
+            setAnimating(false);
+        };
+
+        const t = setTimeout(done, 320);
+        return () => clearTimeout(t);
     }, [animating, direction]);
 
-    const handleTouchStart = useCallback((e) => {
+    // ----- Edge swipe back (iOS-like) -----
+    const onTouchStart = useCallback((e) => {
         if (!onSwipeBack) return;
-        
-        const touch = e.touches?.[0];
-        if (!touch) return;
-        
-        const x = touch.clientX;
-        const y = touch.clientY;
-        const EDGE = 28;
-        
-        // Only start gesture if touch begins near the left edge
-        if (x > EDGE) {
-            gestureRef.current = { active: false, startX: x, startY: y, dx: 0, locked: false };
-            return;
-        }
-        
-        gestureRef.current = { active: true, startX: x, startY: y, dx: 0, locked: false };
+        const t = e.touches?.[0]; if (!t) return;
+
+        // start only near left edge
+        if (t.clientX > 28) { gesture.current = { active: false, locked: false, startX: 0, startY: 0, dx: 0 }; return; }
+        gesture.current = { active: true, locked: false, startX: t.clientX, startY: t.clientY, dx: 0 };
     }, [onSwipeBack]);
 
-    const handleTouchMove = useCallback((e) => {
-        const gesture = gestureRef.current;
-        if (!gesture.active || !onSwipeBack) return;
-        
-        const touch = e.touches?.[0];
-        if (!touch) return;
+    const onTouchMove = useCallback((e) => {
+        const g = gesture.current;
+        if (!g.active || !onSwipeBack) return;
+        const t = e.touches?.[0]; if (!t) return;
 
-        const dx = Math.max(0, touch.clientX - gesture.startX);
-        const dy = Math.abs(touch.clientY - gesture.startY);
+        const dx = Math.max(0, t.clientX - g.startX);
+        const dy = Math.abs(t.clientY - g.startY);
 
-        if (!gesture.locked) {
+        if (!g.locked) {
+            // decide axis
             if (dx > 8 && dx > dy) {
-                // Lock to horizontal swipe
-                gesture.locked = true;
+                g.locked = true;
                 document.body.style.overflow = 'hidden';
                 containerRef.current?.classList.add('gesture-lock');
             } else if (dy > 8 && dy > dx) {
-                // Cancel gesture for vertical scroll
-                gesture.active = false;
-                return;
+                g.active = false; return;
             }
         }
 
-        if (gesture.locked) {
+        if (g.locked) {
             e.preventDefault();
-            
+            g.dx = dx;
+
             const root = containerRef.current;
-            if (!root) return;
-            
-            const w = root.clientWidth || window.innerWidth;
-            const progress = Math.min(1, dx / w);
-            const current = root.querySelector('[data-screen="current"]');
-            const shadow = root.querySelector('.swipe-shadow');
-            
-            if (current) {
-                current.style.transition = 'none';
-                current.style.transform = `translateX(${dx}px)`;
+            const cur = root?.querySelector('[data-role="current"]');
+            const shadow = root?.querySelector('.swipe-shadow');
+
+            if (cur) {
+                cur.style.transition = 'none';
+                cur.style.transform = `translateX(${dx}px)`;
             }
             if (shadow) {
-                shadow.style.opacity = String(0.25 * (1 - progress));
+                const w = root?.clientWidth || window.innerWidth;
+                const p = Math.min(1, dx / w);
+                shadow.style.opacity = String(0.25 * (1 - p));
             }
-            
-            gesture.dx = dx;
         }
     }, [onSwipeBack]);
 
-    const handleTouchEnd = useCallback(() => {
-        const gesture = gestureRef.current;
-        if (!gesture.locked || !onSwipeBack) {
-            gestureRef.current = { active: false, startX: 0, startY: 0, dx: 0, locked: false };
-            return;
-        }
-        
-        const root = containerRef.current;
-        if (!root) return;
-        
-        const w = root.clientWidth || window.innerWidth;
-        const shouldCommit = gesture.dx > w * 0.28; // 28% threshold
-        const current = root.querySelector('[data-screen="current"]');
-        const shadow = root.querySelector('.swipe-shadow');
+    const onTouchEnd = useCallback(() => {
+        const g = gesture.current;
+        if (!g.locked || !onSwipeBack) { gesture.current = { active: false, locked: false, startX: 0, startY: 0, dx: 0 }; return; }
 
-        if (current) {
-            current.style.transition = 'transform 260ms ease';
-            current.style.transform = shouldCommit ? `translateX(${w}px)` : 'translateX(0px)';
+        const root = containerRef.current;
+        const cur = root?.querySelector('[data-role="current"]');
+        const shadow = root?.querySelector('.swipe-shadow');
+        const w = root?.clientWidth || window.innerWidth;
+        const commit = g.dx > w * 0.28;
+
+        if (cur) {
+            cur.style.transition = 'transform 260ms ease';
+            cur.style.transform = commit ? `translateX(${w}px)` : 'translateX(0px)';
         }
         if (shadow) {
             shadow.style.transition = 'opacity 260ms ease';
-            shadow.style.opacity = shouldCommit ? '0' : '0.25';
+            shadow.style.opacity = commit ? '0' : '0.25';
         }
 
         setTimeout(() => {
             document.body.style.overflow = '';
-            root.classList.remove('gesture-lock');
-            gestureRef.current = { active: false, startX: 0, startY: 0, dx: 0, locked: false };
-            if (shouldCommit) {
-                onSwipeBack();
-            }
+            root?.classList.remove('gesture-lock');
+            gesture.current = { active: false, locked: false, startX: 0, startY: 0, dx: 0 };
+            if (commit) onSwipeBack();
         }, 280);
     }, [onSwipeBack]);
 
     useEffect(() => {
         const root = containerRef.current;
         if (!root || !onSwipeBack) return;
-
-        root.addEventListener('touchstart', handleTouchStart, { passive: true });
-        root.addEventListener('touchmove', handleTouchMove, { passive: false });
-        root.addEventListener('touchend', handleTouchEnd, { passive: true });
-        root.addEventListener('touchcancel', handleTouchEnd, { passive: true });
-        
+        root.addEventListener('touchstart', onTouchStart, { passive: true });
+        root.addEventListener('touchmove', onTouchMove, { passive: false });
+        root.addEventListener('touchend', onTouchEnd, { passive: true });
+        root.addEventListener('touchcancel', onTouchEnd, { passive: true });
         return () => {
-            root.removeEventListener('touchstart', handleTouchStart);
-            root.removeEventListener('touchmove', handleTouchMove);
-            root.removeEventListener('touchend', handleTouchEnd);
-            root.removeEventListener('touchcancel', handleTouchEnd);
+            root.removeEventListener('touchstart', onTouchStart);
+            root.removeEventListener('touchmove', onTouchMove);
+            root.removeEventListener('touchend', onTouchEnd);
+            root.removeEventListener('touchcancel', onTouchEnd);
         };
-    }, [handleTouchStart, handleTouchMove, handleTouchEnd, onSwipeBack]);
+    }, [onTouchStart, onTouchMove, onTouchEnd, onSwipeBack]);
 
     return (
-        <div ref={containerRef} className="animated-screen-container relative h-full w-full overflow-hidden">
+        <div ref={containerRef} className="animated-screen-container">
+            {/* Previous screen (kept as React) */}
             {prevNode && (
-                <div
-                    data-screen="previous"
-                    className="absolute inset-0 will-change-transform"
-                    dangerouslySetInnerHTML={{ __html: prevNode.outerHTML }}
-                />
+                <div data-role="previous" className="panel">
+                    {prevNode}
+                </div>
             )}
-            <div data-screen="current" ref={currentRef} className="absolute inset-0 will-change-transform">
-                <div className="swipe-shadow pointer-events-none absolute inset-0" style={{ background: 'rgba(0,0,0,0.25)', opacity: 0 }} />
-                <div className="relative h-full w-full overflow-hidden">{children}</div>
+
+            {/* Current screen */}
+            <div data-role="current" className="panel">
+                <div className="swipe-shadow" />
+                <div className="panel-content">{currentNode}</div>
             </div>
         </div>
     );
