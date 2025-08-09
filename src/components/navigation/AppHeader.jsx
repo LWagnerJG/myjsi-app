@@ -14,18 +14,18 @@ export const AppHeader = React.memo(({
     const filterStyle = isDarkMode ? 'brightness(0) invert(1)' : 'none';
     const isHome = !showBack;
 
-    const SURFACE = {
+    // Unified pill shell (matches search + feedback)
+    const PILL = {
         backgroundColor: theme.colors.surface,
         border: `1px solid ${theme.colors.border}`,
-        boxShadow: `0 8px 24px ${theme.colors.shadow}`
+        boxShadow: `0 8px 24px ${theme.colors.shadow}`,
+        borderRadius: 9999,
+        height: 56
     };
 
     return (
-        <div className="px-4 pt-4 pb-2 fixed top-0 left-0 right-0 z-20">
-            <div
-                className="w-full px-5 py-3.5 flex justify-between items-center rounded-full"
-                style={SURFACE}
-            >
+        <div className="px-4 pt-4 pb-1 fixed top-0 left-0 right-0 z-20">
+            <div className="w-full flex items-center justify-between px-5" style={PILL}>
                 <div className="flex items-center">
                     <button
                         aria-label="Go back"
@@ -42,13 +42,14 @@ export const AppHeader = React.memo(({
                         onClick={onHomeClick}
                         className="hover:opacity-90 transition-opacity"
                     >
-                        <img src={logoLight} alt="MyJSI Logo" className="h-9 w-auto" style={{ filter: filterStyle }} />
+                        {/* slightly bigger logo */}
+                        <img src={logoLight} alt="MyJSI Logo" className="h-7 w-auto" style={{ filter: filterStyle }} />
                     </button>
                 </div>
 
                 <div className="flex items-center space-x-2">
                     <div
-                        className={`transition-all duration-300 ease-in-out text-[15px] leading-tight whitespace-nowrap overflow-hidden ${isHome ? 'max-w-[160px] opacity-100' : 'max-w-0 opacity-0'
+                        className={`transition-all duration-300 ease-in-out text-[15px] leading-tight whitespace-nowrap overflow-hidden ${isHome ? 'max-w-[170px] opacity-100' : 'max-w-0 opacity-0'
                             }`}
                         style={{ color: theme.colors.textPrimary }}
                         aria-hidden={!isHome}
@@ -59,7 +60,7 @@ export const AppHeader = React.memo(({
                     <button
                         aria-label="Open profile menu"
                         onClick={onProfileClick}
-                        className="w-9 h-9 rounded-full flex items-center justify-center border transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                        className="w-9 h-9 rounded-full flex items-center justify-center border transition-colors hover:bg-black/5 dark:hover:bg:white/5"
                         style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border }}
                     >
                         <User className="w-5 h-5" style={{ color: theme.colors.secondary }} />
