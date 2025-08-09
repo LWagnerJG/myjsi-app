@@ -2,15 +2,15 @@
   "ExpandedNodes": [
     "",
     "\\src",
+    "\\src\\components",
+    "\\src\\components\\common",
     "\\src\\screens",
-    "\\src\\screens\\community",
-    "\\src\\screens\\feedback",
-    "\\src\\screens\\members",
-    "\\src\\screens\\orders",
+    "\\src\\screens\\projects",
     "\\src\\screens\\resources",
-    "\\src\\screens\\sales",
-    "\\src\\screens\\utility"
+    "\\src\\screens\\resources\\commission-rates",
+    "\\src\\screens\\resources\\request-com-yardage",
+    "\\src\\screens\\resources\\search-fabrics"
   ],
-  "SelectedNode": "\\src\\screens\\members\\MembersScreen.jsx",
+  "SelectedNode": "\\src\\screens\\resources\\commission-rates\\index.js",
   "PreviewInSolutionExplorer": false
 }

@@ -302,7 +302,7 @@ function App() {
                 onProfileClick={() => setShowProfileMenu((p) => !p)}
                 isDarkMode={isDarkMode}
             />
-            <div className="flex-1 pt-[104px] overflow-hidden" style={{ backgroundColor: currentTheme.colors.background }}>
+            <div className="flex-1 pt-[90px] overflow-hidden" style={{ backgroundColor: currentTheme.colors.background }}>
                 <AnimatedScreenWrapper
                     screenKey={currentScreen}
                     direction={lastNavigationDirection}
