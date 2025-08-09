@@ -42,8 +42,8 @@ export const AppHeader = React.memo(({
                         onClick={onHomeClick}
                         className="hover:opacity-90 transition-opacity"
                     >
-                        {/* slightly bigger logo */}
-                        <img src={logoLight} alt="MyJSI Logo" className="h-7 w-auto" style={{ filter: filterStyle }} />
+                        {/* 15% larger logo */}
+                        <img src={logoLight} alt="MyJSI Logo" className="h-8 w-auto" style={{ filter: filterStyle }} />
                     </button>
                 </div>
 
