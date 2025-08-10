@@ -3,7 +3,7 @@
     width: 100%;
     height: 100%;
     overflow: hidden;
-    touch-action: pan-y; /* allow vertical scroll until gesture locks */
+    touch-action: manipulation; /* allow precise touch interactions */
     background-color: inherit;
 }
 
@@ -108,7 +108,8 @@
     overscroll-behavior: none;
 }
 
-    .gesture-lock * {
-        user-select: none;
-        -webkit-user-select: none;
-    }
+/* Only disable user-select for direct children during gesture, not nested elements */
+.gesture-lock > .panel {
+    user-select: none;
+    -webkit-user-select: none;
+}

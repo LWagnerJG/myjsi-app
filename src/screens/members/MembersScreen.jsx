@@ -1,26 +1,74 @@
-import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+// screens/members/MembersScreen.jsx
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
-import { Mail, Phone, ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
+import { StyledSelect } from '../../components/forms/StyledSelect.jsx';
+import {
+    Mail,
+    Phone,
+    ChevronDown,
+    ChevronUp,
+    Trash2,
+    Shield,
+    User as UserIcon,
+} from 'lucide-react';
+
 import {
     INITIAL_MEMBERS,
     PERMISSION_LABELS,
     USER_TITLES,
     USER_ROLES,
-    EMPTY_USER,
-    PERMISSION_DESCRIPTIONS
+    PERMISSION_DESCRIPTIONS,
 } from './data.js';
 
+/* ===========================
+   Error Boundary (unchanged)
+   =========================== */
+class MembersErrorBoundary extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { hasError: false, error: null };
+    }
+    static getDerivedStateFromError(error) {
+        return { hasError: true, error };
+    }
+    componentDidCatch(error, info) {
+        console.error('Members screen error:', error, info);
+    }
+    render() {
+        if (this.state.hasError) {
+            return (
+                <div className="flex flex-col items-center justify-center h-full p-4">
+                    <h2 className="text-lg font-bold mb-2">Something went wrong</h2>
+                    <p className="text-sm text-gray-600 mb-4">
+                        There was an error loading the members screen.
+                    </p>
+                    <button
+                        onClick={() => this.setState({ hasError: false, error: null })}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-lg"
+                    >
+                        Try Again
+                    </button>
+                </div>
+            );
+        }
+        return this.props.children;
+    }
+}
+
+/* =======================
+   Permission pill toggle
+   ======================= */
 const PillToggle = ({ label, enabled, onToggle, theme, disabled }) => {
     return (
         <button
             type="button"
             onClick={disabled ? undefined : onToggle}
-            className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${enabled ? 'shadow-sm' : ''
-                } ${disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'
+                } ${enabled ? 'shadow-sm' : ''}`}
             style={{
                 backgroundColor: enabled ? theme.colors.accent : theme.colors.subtle,
                 color: enabled ? '#fff' : theme.colors.textPrimary,
-                border: `1px solid ${enabled ? theme.colors.accent : theme.colors.border}`
+                border: `1px solid ${enabled ? theme.colors.accent : theme.colors.border}`,
             }}
             title={PERMISSION_DESCRIPTIONS?.[label] || ''}
             aria-pressed={enabled}
@@ -30,59 +78,9 @@ const PillToggle = ({ label, enabled, onToggle, theme, disabled }) => {
     );
 };
 
-const InlineSelect = ({ value, onChange, options, theme, placeholder = 'Select…' }) => {
-    const [open, setOpen] = useState(false);
-    const ref = useRef(null);
-    useEffect(() => {
-        const clickAway = (e) => {
-            if (ref.current && !ref.current.contains(e.target)) setOpen(false);
-        };
-        document.addEventListener('mousedown', clickAway);
-        return () => document.removeEventListener('mousedown', clickAway);
-    }, []);
-    const current = options.find((o) => o.value === value)?.label || placeholder;
-    return (
-        <div className="relative" ref={ref}>
-            <button
-                type="button"
-                onClick={() => setOpen((o) => !o)}
-                className="w-full px-3 py-2 rounded-xl text-sm flex justify-between items-center"
-                style={{
-                    backgroundColor: theme.colors.surface,
-                    border: `1px solid ${theme.colors.border}`,
-                    color: theme.colors.textPrimary
-                }}
-            >
-                <span className="truncate">{current}</span>
-                <ChevronDown
-                    className={`w-4 h-4 transition-transform ${open ? 'rotate-180' : ''}`}
-                    style={{ color: theme.colors.textSecondary }}
-                />
-            </button>
-            {open && (
-                <div className="absolute z-10 mt-1 w-full">
-                    <GlassCard theme={theme} className="p-1 max-h-56 overflow-y-auto">
-                        {options.map((o) => (
-                            <button
-                                key={o.value}
-                                type="button"
-                                onClick={() => {
-                                    onChange(o.value);
-                                    setOpen(false);
-                                }}
-                                className="w-full text-left px-3 py-2 rounded-lg hover:bg-black/5 text-sm"
-                                style={{ color: theme.colors.textPrimary }}
-                            >
-                                {o.label}
-                            </button>
-                        ))}
-                    </GlassCard>
-                </div>
-            )}
-        </div>
-    );
-};
-
+/* =================
+   Member row (tile)
+   ================= */
 const MemberRow = ({
     theme,
     user,
@@ -90,72 +88,73 @@ const MemberRow = ({
     onToggle,
     onChangeField,
     onTogglePerm,
-    onDelete
+    onDelete,
 }) => {
+    if (!user || !user.permissions) return null;
+
     return (
-        <div className="rounded-2xl overflow-hidden border" style={{ borderColor: theme.colors.border }}>
+        <GlassCard theme={theme} className="p-0 rounded-[24px]">
             <button
                 type="button"
                 onClick={onToggle}
-                className="w-full px-4 py-3 text-left bg-white/50 backdrop-blur hover:bg-white/70 transition-colors"
+                className="w-full px-4 py-4 text-left rounded-[24px]"
+                style={{ backgroundColor: 'transparent' }}
             >
                 <div className="flex items-center justify-between gap-3">
-                    <div className="min-w-0">
-                        <div className="font-semibold truncate" style={{ color: theme.colors.textPrimary }}>
-                            {user.firstName} {user.lastName}
+                    <div className="flex items-center gap-3 min-w-0">
+                        <div
+                            className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                            style={{ backgroundColor: theme.colors.subtle }}
+                        >
+                            <UserIcon className="w-5 h-5" style={{ color: theme.colors.accent }} />
                         </div>
-                        <div className="text-xs mt-0.5 truncate" style={{ color: theme.colors.textSecondary }}>
-                            {user.email}
+                        <div className="min-w-0">
+                            <div className="font-semibold truncate" style={{ color: theme.colors.textPrimary }}>
+                                {(user.firstName || '') + ' ' + (user.lastName || '')}
+                            </div>
+                            <div className="text-xs mt-0.5 truncate flex items-center gap-1 opacity-80" style={{ color: theme.colors.textSecondary }}>
+                                <Mail className="w-3.5 h-3.5" />
+                                {user.email || ''}
+                            </div>
                         </div>
                     </div>
                     {expanded ? (
-                        <ChevronUp className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
+                        <ChevronUp className="w-5 h-5" style={{ color: theme.colors.secondary }} />
                     ) : (
-                        <ChevronDown className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
+                        <ChevronDown className="w-5 h-5" style={{ color: theme.colors.secondary }} />
                     )}
                 </div>
             </button>
 
             {expanded && (
-                <div className="px-4 pt-3 pb-4 space-y-4" style={{ backgroundColor: theme.colors.surface }}>
-                    <div className="grid grid-cols-1 gap-2 text-sm">
-                        <div className="flex items-center gap-2">
-                            <Mail className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
-                            <span style={{ color: theme.colors.textSecondary }}>{user.email}</span>
+                <div className="px-4 pb-4 pt-2 space-y-4">
+                    {/* Contact bits */}
+                    {user.phone && (
+                        <div className="flex items-center gap-2 text-sm" style={{ color: theme.colors.textSecondary }}>
+                            <Phone className="w-4 h-4" />
+                            {user.phone}
                         </div>
-                        {user.phone && (
-                            <div className="flex items-center gap-2">
-                                <Phone className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
-                                <span style={{ color: theme.colors.textSecondary }}>{user.phone}</span>
-                            </div>
-                        )}
-                    </div>
+                    )}
 
+                    {/* Role & Title using StyledSelect */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <div>
-                            <div className="text-xs mb-1" style={{ color: theme.colors.textSecondary }}>
-                                Role
-                            </div>
-                            <InlineSelect
-                                value={user.role}
-                                onChange={(val) => onChangeField('role', val)}
-                                options={USER_ROLES.map((r) => ({ value: r, label: r }))}
-                                theme={theme}
-                            />
-                        </div>
-                        <div>
-                            <div className="text-xs mb-1" style={{ color: theme.colors.textSecondary }}>
-                                Title
-                            </div>
-                            <InlineSelect
-                                value={user.title}
-                                onChange={(val) => onChangeField('title', val)}
-                                options={USER_TITLES.map((t) => ({ value: t, label: t }))}
-                                theme={theme}
-                            />
-                        </div>
+                        <StyledSelect
+                            label="Role"
+                            value={user.role || 'User'}
+                            onChange={(e) => onChangeField('role', e.target.value)}
+                            options={USER_ROLES}
+                            theme={theme}
+                        />
+                        <StyledSelect
+                            label="Title"
+                            value={user.title || 'Sales'}
+                            onChange={(e) => onChangeField('title', e.target.value)}
+                            options={USER_TITLES}
+                            theme={theme}
+                        />
                     </div>
 
+                    {/* Permissions */}
                     {user.role !== 'Admin' && (
                         <div className="space-y-2">
                             <div className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>
@@ -181,7 +180,7 @@ const MemberRow = ({
                         </div>
                     )}
 
-                    <div className="flex items-center justify-between pt-2">
+                    <div className="pt-1">
                         <button
                             type="button"
                             onClick={() => {
@@ -189,36 +188,44 @@ const MemberRow = ({
                                     onDelete();
                                 }
                             }}
-                            className="inline-flex items-center gap-2 px-3 py-2 rounded-full text-sm font-semibold"
-                            style={{ backgroundColor: 'rgba(239,68,68,0.1)', color: '#ef4444' }}
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-full font-semibold text-sm"
+                            style={{ backgroundColor: '#fee2e2', color: '#b91c1c' }}
                         >
-                            <Trash2 className="w-4 h-4" /> Delete User
+                            <Trash2 className="w-4 h-4" />
+                            Delete User
                         </button>
                     </div>
                 </div>
             )}
-        </div>
+        </GlassCard>
     );
 };
 
-export const MembersScreen = ({ theme }) => {
+/* ==================
+   Screen component
+   ================== */
+const MembersScreenContent = ({ theme }) => {
     const [original, setOriginal] = useState(INITIAL_MEMBERS);
     const [members, setMembers] = useState(INITIAL_MEMBERS);
     const [expandedId, setExpandedId] = useState(null);
     const [dirty, setDirty] = useState(false);
 
-    const handleToggleExpand = (id) => setExpandedId((prev) => (prev === id ? null : id));
+    const handleToggleExpand = useCallback((id) => {
+        setExpandedId((prev) => (prev === id ? null : id));
+    }, []);
 
-    const updateUser = (id, updater) => {
+    const updateUser = useCallback((id, updater) => {
         setMembers((prev) =>
             prev.map((m) => (m.id === id ? (typeof updater === 'function' ? updater(m) : { ...m, ...updater }) : m))
         );
         setDirty(true);
-    };
+    }, []);
 
-    const onChangeField = (id, field, value) => updateUser(id, { [field]: value });
+    const onChangeField = useCallback((id, field, value) => {
+        updateUser(id, { [field]: value });
+    }, [updateUser]);
 
-    const onTogglePerm = (id, key) =>
+    const onTogglePerm = useCallback((id, key) => {
         updateUser(id, (m) => {
             const next = { ...m.permissions, [key]: !m.permissions[key] };
             if (key === 'salesData' && !next.salesData) {
@@ -228,25 +235,26 @@ export const MembersScreen = ({ theme }) => {
             }
             return { ...m, permissions: next };
         });
+    }, [updateUser]);
 
-    const onDelete = (id) => {
+    const onDelete = useCallback((id) => {
         setMembers((prev) => prev.filter((m) => m.id !== id));
-        if (expandedId === id) setExpandedId(null);
+        setExpandedId((prev) => (prev === id ? null : prev));
         setDirty(true);
-    };
+    }, []);
 
-    const saveAll = () => {
-        // replace with API call later
+    const saveAll = useCallback(() => {
+        // TODO: replace with API
         console.log('Saved members:', members);
         setOriginal(members);
         setDirty(false);
-    };
+    }, [members]);
 
-    const cancelAll = () => {
+    const cancelAll = useCallback(() => {
         setMembers(original);
         setDirty(false);
         setExpandedId(null);
-    };
+    }, [original]);
 
     const admins = useMemo(() => members.filter((m) => m.role === 'Admin'), [members]);
     const users = useMemo(() => members.filter((m) => m.role !== 'Admin'), [members]);
@@ -254,10 +262,13 @@ export const MembersScreen = ({ theme }) => {
     return (
         <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
             <div className="flex-1 overflow-y-auto px-4 pb-28 pt-4 space-y-6 scrollbar-hide">
+
+                {/* Administrators */}
                 {admins.length > 0 && (
-                    <GlassCard theme={theme} className="p-3">
-                        <div className="px-1 pb-2">
-                            <h2 className="font-bold" style={{ color: theme.colors.textPrimary }}>
+                    <section>
+                        <div className="mb-3 flex items-center gap-2">
+                            <Shield className="w-5 h-5" style={{ color: theme.colors.accent }} />
+                            <h2 className="text-lg font-bold" style={{ color: theme.colors.textPrimary }}>
                                 Administrators
                             </h2>
                         </div>
@@ -275,15 +286,14 @@ export const MembersScreen = ({ theme }) => {
                                 />
                             ))}
                         </div>
-                    </GlassCard>
+                    </section>
                 )}
 
-                <GlassCard theme={theme} className="p-3">
-                    <div className="px-1 pb-2">
-                        <h2 className="font-bold" style={{ color: theme.colors.textPrimary }}>
-                            Users
-                        </h2>
-                    </div>
+                {/* Users */}
+                <section>
+                    <h2 className="text-lg font-bold mb-3" style={{ color: theme.colors.textPrimary }}>
+                        Users
+                    </h2>
                     <div className="space-y-3">
                         {users.map((u) => (
                             <MemberRow
@@ -298,7 +308,7 @@ export const MembersScreen = ({ theme }) => {
                             />
                         ))}
                     </div>
-                </GlassCard>
+                </section>
             </div>
 
             {dirty && (
@@ -307,7 +317,7 @@ export const MembersScreen = ({ theme }) => {
                     style={{
                         backgroundColor: theme.colors.surface,
                         borderTop: `1px solid ${theme.colors.border}`,
-                        backdropFilter: 'blur(8px)'
+                        backdropFilter: 'blur(8px)',
                     }}
                 >
                     <div className="max-w-screen-md mx-auto flex items-center gap-2">
@@ -315,7 +325,11 @@ export const MembersScreen = ({ theme }) => {
                             type="button"
                             onClick={cancelAll}
                             className="px-4 py-2 rounded-full font-semibold text-sm"
-                            style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary, border: `1px solid ${theme.colors.border}` }}
+                            style={{
+                                backgroundColor: theme.colors.subtle,
+                                color: theme.colors.textPrimary,
+                                border: `1px solid ${theme.colors.border}`,
+                            }}
                         >
                             Cancel
                         </button>
@@ -333,3 +347,9 @@ export const MembersScreen = ({ theme }) => {
         </div>
     );
 };
+
+export const MembersScreen = (props) => (
+    <MembersErrorBoundary>
+        <MembersScreenContent {...props} />
+    </MembersErrorBoundary>
+);

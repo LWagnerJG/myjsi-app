@@ -1,16 +1,34 @@
-// Community feature data - moved from src/data/community.js
+// Community seed data
 export const INITIAL_POSTS = [
     {
         id: 1,
         type: 'post',
         user: { name: 'Natalie Parker', avatar: 'https://i.pravatar.cc/150?u=natalie' },
         timeAgo: '2h',
+        createdAt: Date.now() - 1000 * 60 * 60 * 2,
         text: 'Great install in Chicago! The Vision series looks amazing in the new corporate headquarters.',
         image: 'https://webresources.jsifurniture.com/production/uploads/jsi_vision_install_0000010.jpg',
         likes: 12,
         comments: [{ id: 1, name: 'John Doe', text: 'Looks fantastic!' }],
     },
 ];
+
+export const INITIAL_POLLS = [
+    {
+        id: 3,
+        type: 'poll',
+        user: { name: 'Doug Shapiro', avatar: null },
+        timeAgo: '1d',
+        createdAt: Date.now() - 1000 * 60 * 60 * 24,
+        question: 'Which Vision base finish do you spec the most?',
+        options: [
+            { id: 'truss', text: 'Truss', votes: 8 },
+            { id: 'torii', text: 'Torii', votes: 5 },
+            { id: 'exec', text: 'Executive', votes: 12 },
+        ],
+    },
+];
+
 
 export const INITIAL_WINS = [
     {
@@ -22,20 +40,6 @@ export const INITIAL_WINS = [
         images: [
             'https://webresources.jsifurniture.com/production/uploads/jsi_caav_install_00024_pldPbiW.jpg',
             'https://webresources.jsifurniture.com/production/uploads/original_images/jsi_finn_enviro_00004_aOu5872.jpg',
-        ],
-    },
-];
-
-export const INITIAL_POLLS = [
-    {
-        id: 3,
-        user: { name: 'Doug Shapiro', avatar: null },
-        timeAgo: '1d',
-        question: 'Which Vision base finish do you spec the most?',
-        options: [
-            { id: 'carbon', text: 'Truss', votes: 8 },
-            { id: 'oak', text: 'Torii', votes: 5 },
-            { id: 'white', text: 'Executive', votes: 12 },
         ],
     },
 ];

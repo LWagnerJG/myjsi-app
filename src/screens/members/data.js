@@ -162,10 +162,7 @@ export const USER_TITLES = [
     "Field Installer"
 ];
 
-export const USER_ROLES = [
-    { value: 'Admin', label: 'Administrator' },
-    { value: 'User', label: 'Standard User' }
-];
+export const USER_ROLES = ["Admin", "User"];
 
 export const USER_STATUS = {
     ACTIVE: 'active',

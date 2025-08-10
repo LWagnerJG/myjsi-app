@@ -4,30 +4,27 @@ import './AnimatedScreenWrapper.css';
 export const AnimatedScreenWrapper = ({
     children,
     screenKey,
-    direction = 'forward',        // 'forward' | 'backward'
-    onSwipeBack = null            // () => void
+    direction = 'forward',
+    onSwipeBack = null
 }) => {
     const containerRef = useRef(null);
 
-    // Keep the *React* trees for current and previous screens
     const [currentKey, setCurrentKey] = useState(screenKey);
-    const [currentNode, setCurrentNode] = useState(children);
     const [prevNode, setPrevNode] = useState(null);
     const [animating, setAnimating] = useState(false);
+    const prevChildrenRef = useRef(children);
 
-    // Gesture state (refs so they don’t re-render during move)
     const gesture = useRef({ active: false, locked: false, startX: 0, startY: 0, dx: 0 });
 
-    // When the route (screenKey) changes, stage a transition
     useLayoutEffect(() => {
-        if (screenKey === currentKey) return;
-        setPrevNode(currentNode);            // keep the *previous React element*
-        setCurrentKey(screenKey);
-        setCurrentNode(children);
-        setAnimating(true);
-    }, [screenKey, currentKey, children, currentNode]);
+        if (screenKey !== currentKey) {
+            setPrevNode(prevChildrenRef.current);
+            setCurrentKey(screenKey);
+            setAnimating(true);
+        }
+        prevChildrenRef.current = children;
+    }, [screenKey, children, currentKey]);
 
-    // Kick off CSS animations when animating toggles on
     useEffect(() => {
         if (!animating || !containerRef.current) return;
 
@@ -35,10 +32,8 @@ export const AnimatedScreenWrapper = ({
         const cur = root.querySelector('[data-role="current"]');
         const prev = root.querySelector('[data-role="previous"]');
 
-        // reset classes
         [cur, prev].forEach(el => el && (el.className = 'panel'));
 
-        // apply directionally-correct classes
         if (direction === 'forward') {
             prev && prev.classList.add('panel', 'exit-left');
             cur && cur.classList.add('panel', 'enter-right');
@@ -56,13 +51,14 @@ export const AnimatedScreenWrapper = ({
         return () => clearTimeout(t);
     }, [animating, direction]);
 
-    // ----- Edge swipe back (iOS-like) -----
     const onTouchStart = useCallback((e) => {
         if (!onSwipeBack) return;
         const t = e.touches?.[0]; if (!t) return;
 
-        // start only near left edge
-        if (t.clientX > 28) { gesture.current = { active: false, locked: false, startX: 0, startY: 0, dx: 0 }; return; }
+        if (t.clientX > 28 || window.innerWidth > 768) { 
+            gesture.current = { active: false, locked: false, startX: 0, startY: 0, dx: 0 }; 
+            return; 
+        }
         gesture.current = { active: true, locked: false, startX: t.clientX, startY: t.clientY, dx: 0 };
     }, [onSwipeBack]);
 
@@ -75,12 +71,11 @@ export const AnimatedScreenWrapper = ({
         const dy = Math.abs(t.clientY - g.startY);
 
         if (!g.locked) {
-            // decide axis
-            if (dx > 8 && dx > dy) {
+            if (dx > 12 && dx > dy * 1.5) {
                 g.locked = true;
                 document.body.style.overflow = 'hidden';
                 containerRef.current?.classList.add('gesture-lock');
-            } else if (dy > 8 && dy > dx) {
+            } else if (dy > 12 || dx < dy) {
                 g.active = false; return;
             }
         }
@@ -149,17 +144,14 @@ export const AnimatedScreenWrapper = ({
 
     return (
         <div ref={containerRef} className="animated-screen-container">
-            {/* Previous screen (kept as React) */}
             {prevNode && (
                 <div data-role="previous" className="panel">
                     {prevNode}
                 </div>
             )}
-
-            {/* Current screen */}
             <div data-role="current" className="panel">
                 <div className="swipe-shadow" />
-                <div className="panel-content">{currentNode}</div>
+                <div className="panel-content">{children}</div>
             </div>
         </div>
     );
