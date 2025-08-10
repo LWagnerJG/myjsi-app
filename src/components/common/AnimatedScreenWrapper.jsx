@@ -8,26 +8,20 @@ export const AnimatedScreenWrapper = ({
     onSwipeBack = null
 }) => {
     const containerRef = useRef(null);
-
-    // Keep the *React* trees for current and previous screens
     const [currentKey, setCurrentKey] = useState(screenKey);
-    const [currentNode, setCurrentNode] = useState(children);
     const [prevNode, setPrevNode] = useState(null);
     const [animating, setAnimating] = useState(false);
+    const prevChildrenRef = useRef(children);
 
-    // Gesture state (refs so they don’t re-render during move)
-    const gesture = useRef({ active: false, locked: false, startX: 0, startY: 0, dx: 0 });
-
-    // When the route (screenKey) changes, stage a transition
     useLayoutEffect(() => {
-        if (screenKey === currentKey) return;
-        setPrevNode(currentNode);            // keep the *previous React element*
-        setCurrentKey(screenKey);
-        setCurrentNode(children);
-        setAnimating(true);
-    }, [screenKey, currentKey, children, currentNode]);
+        if (screenKey !== currentKey) {
+            setPrevNode(prevChildrenRef.current);
+            setCurrentKey(screenKey);
+            setAnimating(true);
+        }
+        prevChildrenRef.current = children;
+    }, [screenKey, children, currentKey]);
 
-    // Kick off CSS animations when animating toggles on
     useEffect(() => {
         if (!animating || !containerRef.current) return;
 
@@ -35,10 +29,8 @@ export const AnimatedScreenWrapper = ({
         const cur = root.querySelector('[data-role="current"]');
         const prev = root.querySelector('[data-role="previous"]');
 
-        // reset classes
         [cur, prev].forEach(el => el && (el.className = 'panel'));
 
-        // apply directionally-correct classes
         if (direction === 'forward') {
             prev && prev.classList.add('panel', 'exit-left');
             cur && cur.classList.add('panel', 'enter-right');
@@ -52,19 +44,19 @@ export const AnimatedScreenWrapper = ({
             setAnimating(false);
         };
 
-        const t = setTimeout(done, 250); // REDUCED from 320ms
+        const t = setTimeout(done, 250);
         return () => clearTimeout(t);
     }, [animating, direction]);
 
-    // ----- Edge swipe back (iOS-like) -----
+    const gesture = useRef({ active: false, locked: false, startX: 0, startY: 0, dx: 0 });
+
     const onTouchStart = useCallback((e) => {
         if (!onSwipeBack) return;
         const t = e.touches?.[0]; if (!t) return;
 
-        // start only near left edge - and only for actual touch devices
-        if (t.clientX > 28 || window.innerWidth > 768) { 
-            gesture.current = { active: false, locked: false, startX: 0, startY: 0, dx: 0 }; 
-            return; 
+        if (t.clientX > 28 || window.innerWidth > 768) {
+            gesture.current = { active: false, locked: false, startX: 0, startY: 0, dx: 0 };
+            return;
         }
         gesture.current = { active: true, locked: false, startX: t.clientX, startY: t.clientY, dx: 0 };
     }, [onSwipeBack]);
@@ -78,7 +70,6 @@ export const AnimatedScreenWrapper = ({
         const dy = Math.abs(t.clientY - g.startY);
 
         if (!g.locked) {
-            // decide axis - be more strict about horizontal vs vertical
             if (dx > 12 && dx > dy * 1.5) {
                 g.locked = true;
                 document.body.style.overflow = 'hidden';
@@ -110,7 +101,10 @@ export const AnimatedScreenWrapper = ({
 
     const onTouchEnd = useCallback(() => {
         const g = gesture.current;
-        if (!g.locked || !onSwipeBack) { gesture.current = { active: false, locked: false, startX: 0, startY: 0, dx: 0 }; return; }
+        if (!g.locked || !onSwipeBack) {
+            gesture.current = { active: false, locked: false, startX: 0, startY: 0, dx: 0 };
+            return;
+        }
 
         const root = containerRef.current;
         const cur = root?.querySelector('[data-role="current"]');
@@ -119,11 +113,11 @@ export const AnimatedScreenWrapper = ({
         const commit = g.dx > w * 0.28;
 
         if (cur) {
-            cur.style.transition = 'transform 220ms ease'; // REDUCED from 260ms
+            cur.style.transition = 'transform 220ms ease';
             cur.style.transform = commit ? `translateX(${w}px)` : 'translateX(0px)';
         }
         if (shadow) {
-            shadow.style.transition = 'opacity 220ms ease'; // REDUCED from 260ms
+            shadow.style.transition = 'opacity 220ms ease';
             shadow.style.opacity = commit ? '0' : '0.25';
         }
 
@@ -132,7 +126,7 @@ export const AnimatedScreenWrapper = ({
             root?.classList.remove('gesture-lock');
             gesture.current = { active: false, locked: false, startX: 0, startY: 0, dx: 0 };
             if (commit) onSwipeBack();
-        }, 240); // REDUCED from 280ms
+        }, 240);
     }, [onSwipeBack]);
 
     useEffect(() => {
@@ -152,17 +146,14 @@ export const AnimatedScreenWrapper = ({
 
     return (
         <div ref={containerRef} className="animated-screen-container">
-            {/* Previous screen (kept as React) */}
             {prevNode && (
                 <div data-role="previous" className="panel">
                     {prevNode}
                 </div>
             )}
-
-            {/* Current screen */}
             <div data-role="current" className="panel">
                 <div className="swipe-shadow" />
-                <div className="panel-content">{currentNode}</div>
+                <div className="panel-content">{children}</div>
             </div>
         </div>
     );
