@@ -20,6 +20,27 @@ import {
     PERMISSION_DESCRIPTIONS,
 } from './data.js';
 
+const DropdownMenu = ({ options, onSelect, theme }) => {
+    return (
+        <GlassCard
+            theme={theme}
+            className="absolute top-20 right-2 w-48 p-2 space-y-1 z-30"
+        >
+            {options.map((option) => (
+                <button
+                    key={option.label}
+                    onClick={() => onSelect(option.value)}
+                    className="w-full text-left flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-black/10 dark:hover:bg-white/10"
+                    style={{ color: theme.colors.textPrimary }}
+                >
+                    <option.icon className="w-4 h-4 mr-3" style={{ color: theme.colors.secondary }} />
+                    {option.label}
+                </button>
+            ))}
+        </GlassCard>
+    );
+};
+
 /* ===========================
    Error Boundary (unchanged)
    =========================== */
@@ -209,6 +230,7 @@ const MembersScreenContent = ({ theme }) => {
     const [members, setMembers] = useState(INITIAL_MEMBERS);
     const [expandedId, setExpandedId] = useState(null);
     const [dirty, setDirty] = useState(false);
+    const [showDropdown, setShowDropdown] = useState(false);
 
     const handleToggleExpand = useCallback((id) => {
         setExpandedId((prev) => (prev === id ? null : id));
@@ -259,10 +281,35 @@ const MembersScreenContent = ({ theme }) => {
     const admins = useMemo(() => members.filter((m) => m.role === 'Admin'), [members]);
     const users = useMemo(() => members.filter((m) => m.role !== 'Admin'), [members]);
 
+    const dropdownOptions = [
+        { label: 'Settings', value: 'settings', icon: Shield },
+        { label: 'Help', value: 'help', icon: Mail },
+        { label: 'Log Out', value: 'logout', icon: Trash2 },
+    ];
+
     return (
         <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
-            <div className="flex-1 overflow-y-auto px-4 pb-28 pt-4 space-y-6 scrollbar-hide">
+            <div className="relative">
+                <button
+                    onClick={() => setShowDropdown((prev) => !prev)}
+                    className="absolute top-4 right-4 w-9 h-9 rounded-full flex items-center justify-center border transition-colors hover:bg-black/5 dark:hover:bg:white/5"
+                    style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border }}
+                >
+                    <UserIcon className="w-5 h-5" style={{ color: theme.colors.secondary }} />
+                </button>
+                {showDropdown && (
+                    <DropdownMenu
+                        options={dropdownOptions}
+                        onSelect={(value) => {
+                            console.log('Selected:', value);
+                            setShowDropdown(false);
+                        }}
+                        theme={theme}
+                    />
+                )}
+            </div>
 
+            <div className="flex-1 overflow-y-auto px-4 pb-28 pt-4 space-y-6 scrollbar-hide">
                 {/* Administrators */}
                 {admins.length > 0 && (
                     <section>

@@ -6,17 +6,17 @@ export const ProfileMenu = ({ show, onClose, onNavigate, theme }) => {
     if (!show) return null;
     
     const menuItems = [
-        { label: 'Settings', action: () => onNavigate('settings'), icon: Settings },
-        { label: 'App Users', action: () => onNavigate('members'), icon: User },
-        { label: 'Help', action: () => onNavigate('help'), icon: HelpCircle },
-        { label: 'Log Out', action: () => onNavigate('logout'), icon: LogOut },
+        { label: 'Settings', action: () => { onNavigate('settings'); onClose(); }, icon: Settings },
+        { label: 'App Users', action: () => { onNavigate('members'); onClose(); }, icon: User },
+        { label: 'Help', action: () => { onNavigate('help'); onClose(); }, icon: HelpCircle },
+        { label: 'Log Out', action: () => { onNavigate('logout'); onClose(); }, icon: LogOut },
     ];
 
     return (
         <div className="fixed inset-0 z-30 pointer-events-auto" onClick={onClose}>
             <GlassCard 
                 theme={theme} 
-                className="absolute top-24 right-4 w-48 p-2 space-y-1" 
+                className="absolute top-20 right-2 w-48 p-2 space-y-1" 
                 onClick={(e) => e.stopPropagation()}
             >
                 {menuItems.map(item => (

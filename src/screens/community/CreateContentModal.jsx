@@ -1,204 +1,255 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { Modal } from '../../components/common/Modal.jsx';
 import { X, ImageIcon, ListChecks } from 'lucide-react';
 
 export const CreateContentModal = ({ show, onClose, theme, onCreatePost }) => {
-    const [isPoll, setIsPoll] = useState(false);
-    const [content, setContent] = useState('');        // Post text OR Poll question
-    const [images, setImages] = useState([]);
-    const [opts, setOpts] = useState(['', '', '', '']);  // 4 fields; first 2 required for polls
+    const [mode, setMode] = useState('post'); // 'post' | 'poll'
+    const [content, setContent] = useState('');
+    const [files, setFiles] = useState([]); // [{file, url}]
+    const [opts, setOpts] = useState(['', '']); // always render 2; can expand to 4
+    const [showMoreOptions, setShowMoreOptions] = useState(false);
     const fileInputRef = useRef(null);
 
     if (!show) return null;
 
     const reset = () => {
-        setIsPoll(false);
+        setMode('post');
         setContent('');
-        setImages([]);
-        setOpts(['', '', '', '']);
+        setFiles((prev) => {
+            prev.forEach((o) => URL.revokeObjectURL(o.url));
+            return [];
+        });
+        setOpts(['', '']);
+        setShowMoreOptions(false);
     };
 
-    const handleSubmit = (e) => {
+    const canSubmit = useMemo(() => {
+        if (mode === 'poll') {
+            const a = opts[0]?.trim();
+            const b = opts[1]?.trim();
+            return !!content.trim() && !!a && !!b;
+        }
+        return !!content.trim() || files.length > 0;
+    }, [mode, content, opts, files.length]);
+
+    const handleFileChange = (e) => {
+        if (!e.target.files) return;
+        const next = Array.from(e.target.files).map((f) => ({ file: f, url: URL.createObjectURL(f) }));
+        setFiles((prev) => [...prev, ...next]);
+    };
+
+    const removeImage = (idx) => {
+        setFiles((prev) => {
+            const copy = [...prev];
+            const [removed] = copy.splice(idx, 1);
+            if (removed) URL.revokeObjectURL(removed.url);
+            return copy;
+        });
+    };
+
+    const submit = (e) => {
         e.preventDefault();
+        if (!canSubmit) return;
+
         const now = Date.now();
 
-        if (!isPoll) {
-            if (!content.trim() && images.length === 0) return;
+        if (mode === 'poll') {
+            const optionTexts = [
+                ...opts,
+                ...(showMoreOptions ? ['', ''] : []),
+            ]
+                .map((t) => t?.trim())
+                .filter(Boolean)
+                .slice(0, 4);
+
             const payload = {
                 id: now,
-                type: 'post',
+                type: 'poll',
                 user: { name: 'You', avatar: null },
                 timeAgo: 'now',
                 createdAt: now,
-                text: content.trim(),
-                image: images.length === 1 ? URL.createObjectURL(images[0]) : null,
-                images: images.length > 1 ? images.map(f => URL.createObjectURL(f)) : [],
-                likes: 0,
-                comments: [],
+                question: content.trim(),
+                options: optionTexts.map((text, i) => ({ id: `opt${i + 1}`, text, votes: 0 })),
             };
+
             onCreatePost?.(payload);
             reset();
             onClose?.();
             return;
         }
 
-        // Poll
-        const clean = opts.map(o => o.trim()).filter(Boolean);
-        if (!content.trim() || clean.slice(0, 2).length < 2) return; // need question + first two options
-        const optionObjs = clean.map((text, i) => ({ id: `opt${i + 1}`, text, votes: 0 }));
         const payload = {
             id: now,
-            type: 'poll',
+            type: 'post',
             user: { name: 'You', avatar: null },
             timeAgo: 'now',
             createdAt: now,
-            question: content.trim(),
-            options: optionObjs,
+            text: content.trim(),
+            image: files.length === 1 ? files[0].url : null,
+            images: files.length > 1 ? files.map((o) => o.url) : [],
+            likes: 0,
+            comments: [],
         };
+
         onCreatePost?.(payload);
         reset();
         onClose?.();
     };
 
-    const handleFileChange = (e) => {
-        if (e.target.files) setImages(prev => [...prev, ...Array.from(e.target.files)]);
-    };
-    const removeImage = (i) => setImages(prev => prev.filter((_, idx) => idx !== i));
-
     return (
         <Modal show={show} onClose={onClose} title="Create New Post" theme={theme}>
-            <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Mode toggle */}
-                <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium" style={{ color: theme.colors.textSecondary }}>
-                        {isPoll ? 'Creating a Poll' : 'Creating a Post'}
-                    </span>
-                    <button
-                        type="button"
-                        onClick={() => setIsPoll(v => !v)}
-                        className="flex items-center gap-2 px-3 py-2 rounded-full text-sm font-semibold active:scale-95 transition"
-                        style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary, border: `1px solid ${theme.colors.border}` }}
-                        aria-pressed={isPoll}
-                        title={isPoll ? 'Switch to Post' : 'Add Poll'}
-                    >
-                        <ListChecks className="w-4 h-4" />
-                        {isPoll ? 'Post' : 'Add Poll'}
-                    </button>
+            <form onSubmit={submit} className="space-y-4">
+                <div
+                    className="grid grid-cols-2 p-1 rounded-full"
+                    style={{ background: theme.colors.subtle, border: `1px solid ${theme.colors.border}` }}
+                >
+                    {['post', 'poll'].map((m) => (
+                        <button
+                            key={m}
+                            type="button"
+                            onClick={() => setMode(m)}
+                            className="h-9 rounded-full text-sm font-semibold transition"
+                            style={{
+                                background: mode === m ? theme.colors.surface : 'transparent',
+                                color: mode === m ? theme.colors.textPrimary : theme.colors.textSecondary,
+                                boxShadow: mode === m ? `0 6px 24px ${theme.colors.shadow}` : 'none',
+                            }}
+                        >
+                            {m === 'poll' ? <span className="inline-flex items-center gap-1.5"><ListChecks className="w-4 h-4" />Poll</span> : 'Post'}
+                        </button>
+                    ))}
                 </div>
 
-                {/* Content / Question */}
                 <div>
                     <label className="block text-sm font-medium mb-2" style={{ color: theme.colors.textSecondary }}>
-                        {isPoll ? 'Poll Question' : 'What’s on your mind?'}
+                        {mode === 'poll' ? 'Poll question' : 'What is on your mind?'}
                     </label>
                     <textarea
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
-                        rows={isPoll ? 2 : 4}
-                        className="w-full px-3 py-2 rounded-lg outline-none"
+                        rows={mode === 'poll' ? 2 : 4}
+                        className="w-full px-3 py-2 rounded-[16px] outline-none"
                         style={{
                             backgroundColor: theme.colors.subtle,
                             color: theme.colors.textPrimary,
                             border: `1px solid ${theme.colors.border}`,
                         }}
-                        placeholder={isPoll ? 'Which Vision base finish do you spec most?' : 'Share an update, install, or photo…'}
-                        required={!isPoll} /* for polls we validate below */
+                        placeholder={mode === 'poll' ? 'Which finish do you spec most?' : 'Share an update, install, or photo…'}
                     />
                 </div>
 
-                {/* Poll options (first two required, last two optional) */}
-                {isPoll && (
-                    <div className="space-y-2">
-                        {[0, 1, 2, 3].map((idx) => (
-                            <div key={idx} className="flex items-center gap-2">
+                {mode === 'poll' ? (
+                    <>
+                        <div className="space-y-2">
+                            {[0, 1].map((i) => (
                                 <input
-                                    value={opts[idx]}
+                                    key={`opt-${i}`}
+                                    value={opts[i] ?? ''}
                                     onChange={(e) => {
                                         const next = [...opts];
-                                        next[idx] = e.target.value;
+                                        next[i] = e.target.value;
                                         setOpts(next);
                                     }}
-                                    className="flex-1 px-3 py-2 rounded-lg outline-none"
-                                    style={{
-                                        backgroundColor: theme.colors.subtle,
-                                        color: theme.colors.textPrimary,
-                                        border: `1px solid ${theme.colors.border}`,
-                                    }}
-                                    placeholder={`Option ${idx + 1}${idx > 1 ? ' (optional)' : ''}`}
-                                    required={idx < 2}
+                                    placeholder={`Option ${i + 1}`}
+                                    className="w-full px-3 py-2 rounded-[12px] outline-none"
+                                    style={{ background: theme.colors.subtle, border: `1px solid ${theme.colors.border}`, color: theme.colors.textPrimary }}
                                 />
-                                {opts[idx] && (
-                                    <button
-                                        type="button"
-                                        onClick={() => { const next = [...opts]; next[idx] = ''; setOpts(next); }}
-                                        className="p-2 rounded-full active:scale-95 transition"
-                                        style={{ backgroundColor: theme.colors.subtle }}
-                                        aria-label="Clear option"
-                                    >
-                                        <X className="w-4 h-4" />
-                                    </button>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                )}
-
-                {/* Images (post only) */}
-                {!isPoll && (
+                            ))}
+                            {showMoreOptions && [2, 3].map((i) => (
+                                <div key={`opt-${i}`} className="flex items-center gap-2">
+                                    <input
+                                        value={opts[i] ?? ''}
+                                        onChange={(e) => {
+                                            const next = [...opts];
+                                            next[i] = e.target.value;
+                                            setOpts(next);
+                                        }}
+                                        placeholder={`Option ${i + 1} (optional)`}
+                                        className="flex-1 px-3 py-2 rounded-[12px] outline-none"
+                                        style={{ background: theme.colors.subtle, border: `1px solid ${theme.colors.border}`, color: theme.colors.textPrimary }}
+                                    />
+                                    {!!opts[i] && (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                const next = [...opts];
+                                                next[i] = '';
+                                                setOpts(next);
+                                            }}
+                                            className="p-2 rounded-full"
+                                            style={{ background: theme.colors.subtle, border: `1px solid ${theme.colors.border}` }}
+                                            aria-label="Clear option"
+                                        >
+                                            <X className="w-4 h-4" />
+                                        </button>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                        {!showMoreOptions && (
+                            <button
+                                type="button"
+                                onClick={() => setShowMoreOptions(true)}
+                                className="px-3 py-2 rounded-full text-sm font-semibold"
+                                style={{ background: theme.colors.surface, border: `1px solid ${theme.colors.border}`, color: theme.colors.textSecondary }}
+                            >
+                                Add more options
+                            </button>
+                        )}
+                    </>
+                ) : (
                     <div>
                         <label className="block text-sm font-medium mb-2" style={{ color: theme.colors.textSecondary }}>
                             Images
                         </label>
-                        <div className="space-y-3">
-                            {images.length > 0 && (
-                                <div className="grid grid-cols-3 gap-3">
-                                    {images.map((file, idx) => (
-                                        <div key={idx} className="relative aspect-square">
-                                            <img
-                                                src={URL.createObjectURL(file)}
-                                                alt={`preview-${idx}`}
-                                                className="w-full h-full object-cover rounded-lg shadow"
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={() => removeImage(idx)}
-                                                className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5 active:scale-90 transition"
-                                            >
-                                                <X className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                            <button
-                                type="button"
-                                onClick={() => fileInputRef.current?.click()}
-                                className="w-full flex items-center justify-center gap-2 py-3 rounded-lg border-2 border-dashed active:scale-95 transition"
-                                style={{ borderColor: theme.colors.border, color: theme.colors.textSecondary }}
-                            >
-                                <ImageIcon className="w-5 h-5" />
-                                <span className="font-semibold">Add Images</span>
-                            </button>
-                            <input ref={fileInputRef} type="file" multiple accept="image/*" className="hidden" onChange={handleFileChange} />
-                        </div>
+                        {files.length > 0 && (
+                            <div className="grid grid-cols-3 gap-3 mb-3">
+                                {files.map((o, idx) => (
+                                    <div key={idx} className="relative aspect-square">
+                                        <img src={o.url} alt={`preview-${idx}`} className="w-full h-full object-cover rounded-[14px] shadow" />
+                                        <button
+                                            type="button"
+                                            onClick={() => removeImage(idx)}
+                                            className="absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full p-1"
+                                        >
+                                            <X className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            className="w-full flex items-center justify-center gap-2 py-3 rounded-[16px] border-2 border-dashed"
+                            style={{ borderColor: theme.colors.border, color: theme.colors.textSecondary, background: theme.colors.surface }}
+                        >
+                            <ImageIcon className="w-5 h-5" />
+                            <span className="font-semibold">Add Images</span>
+                        </button>
+                        <input ref={fileInputRef} type="file" multiple accept="image/*" className="hidden" onChange={handleFileChange} />
                     </div>
                 )}
 
-                <div className="flex gap-3 pt-4">
+                <div className="flex gap-3 pt-2">
                     <button
                         type="button"
-                        onClick={() => { reset(); onClose?.(); }}
-                        className="flex-1 py-3 rounded-full font-semibold active:scale-95 transition"
+                        onClick={() => {
+                            reset();
+                            onClose?.();
+                        }}
+                        className="flex-1 py-3 rounded-full font-semibold"
                         style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }}
                     >
                         Cancel
                     </button>
                     <button
                         type="submit"
-                        className="flex-1 py-3 rounded-full font-semibold text-white active:scale-95 transition"
+                        disabled={!canSubmit}
+                        className="flex-1 py-3 rounded-full font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed"
                         style={{ backgroundColor: theme.colors.accent }}
                     >
-                        Post
+                        {mode === 'poll' ? 'Create Poll' : 'Post'}
                     </button>
                 </div>
             </form>
