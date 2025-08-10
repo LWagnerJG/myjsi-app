@@ -35,19 +35,19 @@
 
 /* Enter / Exit animations (programmatically added) */
 .enter-right {
-    animation: enterRight 300ms cubic-bezier(0.23,1,0.32,1) forwards;
+    animation: enterRight 250ms cubic-bezier(0.23,1,0.32,1) forwards;
 }
 
 .exit-left {
-    animation: exitLeft 300ms cubic-bezier(0.23,1,0.32,1) forwards;
+    animation: exitLeft 250ms cubic-bezier(0.23,1,0.32,1) forwards;
 }
 
 .enter-left {
-    animation: enterLeft 300ms cubic-bezier(0.23,1,0.32,1) forwards;
+    animation: enterLeft 250ms cubic-bezier(0.23,1,0.32,1) forwards;
 }
 
 .exit-right {
-    animation: exitRight 300ms cubic-bezier(0.23,1,0.32,1) forwards;
+    animation: exitRight 250ms cubic-bezier(0.23,1,0.32,1) forwards;
 }
 
 @keyframes enterRight {
