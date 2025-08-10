@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { PageTitle } from '../../components/common/PageTitle.jsx';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
-import { MessageSquare, Heart, MessageCircle, Share2, Plus, TrendingUp, Users, Send } from 'lucide-react';
+import { MessageSquare, Heart, MessageCircle, Share2, Plus, TrendingUp, Users, Send, ChevronDown } from 'lucide-react';
 
 export const CommunityScreen = ({
     theme,
@@ -35,6 +35,28 @@ export const CommunityScreen = ({
         setExpandedComments((p) => ({ ...p, [postId]: !p[postId] }));
     }, []);
 
+    const Avatar = ({ src, alt }) => (
+        <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center" style={{ backgroundColor: theme.colors.accent }}>
+            {src ? <img src={src} alt={alt} className="w-full h-full object-cover" /> : <Users className="w-5 h-5 text-white" />}
+        </div>
+    );
+
+    const StatButton = ({ active, icon: Icon, count, onClick, ariaLabel }) => (
+        <button
+            onClick={onClick}
+            aria-label={ariaLabel}
+            className="flex items-center gap-1.5 text-sm px-2 py-1 rounded-full transition-all active:scale-95"
+            style={{
+                backgroundColor: active ? `${theme.colors.accent}0F` : theme.colors.subtle,
+                border: `1px solid ${active ? theme.colors.accent : theme.colors.border}`,
+                color: active ? theme.colors.accent : theme.colors.textSecondary,
+            }}
+        >
+            <Icon className="w-4 h-4" />
+            <span>{count}</span>
+        </button>
+    );
+
     const PostCard = ({ post }) => {
         const [draft, setDraft] = useState('');
         const isLiked = !!likedPosts?.[post.id];
@@ -43,85 +65,98 @@ export const CommunityScreen = ({
             e.preventDefault();
             const text = draft.trim();
             if (!text) return;
-            onAddComment?.(post.id, text); // immediate parent state update
+            onAddComment?.(post.id, text);
             setDraft('');
             if (!expandedComments[post.id]) toggleComments(post.id);
         };
 
         return (
-            <GlassCard theme={theme} className="p-4 space-y-3 rounded-[24px]">
+            <GlassCard theme={theme} className="p-4 rounded-[24px] shadow-sm space-y-3">
                 <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center" style={{ backgroundColor: theme.colors.accent }}>
-                        {post.user?.avatar ? <img src={post.user.avatar} alt={post.user.name} className="w-full h-full object-cover" /> : <Users className="w-5 h-5 text-white" />}
-                    </div>
+                    <Avatar src={post.user?.avatar} alt={post.user?.name} />
                     <div className="flex-1">
                         <div className="flex items-center gap-2">
                             <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>{post.user?.name || 'Anonymous'}</span>
-                            <span className="text-sm" style={{ color: theme.colors.textSecondary }}>{post.timeAgo || 'now'}</span>
+                            <span className="text-xs px-2 py-0.5 rounded-full" style={{ color: theme.colors.textSecondary, background: theme.colors.subtle }}>
+                                {post.timeAgo || 'now'}
+                            </span>
                         </div>
-                        {post.text && <p className="mt-2 text-[15px]" style={{ color: theme.colors.textPrimary }}>{post.text}</p>}
+                        {post.text && (
+                            <p className="mt-2 text-[15px] leading-6" style={{ color: theme.colors.textPrimary }}>
+                                {post.text}
+                            </p>
+                        )}
                     </div>
                 </div>
 
-                {post.image && <div className="rounded-xl overflow-hidden"><img src={post.image} alt="" className="w-full h-48 object-cover" /></div>}
+                {post.image && (
+                    <div className="rounded-xl overflow-hidden">
+                        <img src={post.image} alt="" className="w-full h-52 object-cover select-none pointer-events-none" />
+                    </div>
+                )}
+
                 {post.images?.length > 0 && (
                     <div className={`grid gap-2 ${post.images.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
                         {post.images.map((src, i) => (
-                            <div key={i} className="rounded-xl overflow-hidden"><img src={src} alt="" className="w-full h-32 object-cover" /></div>
+                            <div key={i} className="rounded-xl overflow-hidden">
+                                <img src={src} alt="" className="w-full h-32 object-cover select-none pointer-events-none" />
+                            </div>
                         ))}
                     </div>
                 )}
 
                 <div className="flex items-center justify-between pt-2 border-t" style={{ borderColor: theme.colors.border }}>
-                    <div className="flex items-center gap-4">
-                        <button
+                    <div className="flex items-center gap-2">
+                        <StatButton
+                            active={isLiked}
+                            icon={Heart}
+                            count={post.likes ?? 0}
                             onClick={() => onToggleLike?.(post.id)}
-                            className="flex items-center gap-1 text-sm active:scale-95 transition"
-                            aria-label="Like"
-                        >
-                            <Heart className="w-4 h-4" style={{ color: isLiked ? theme.colors.accent : theme.colors.textSecondary, fill: isLiked ? 'currentColor' : 'none' }} />
-                            <span style={{ color: theme.colors.textSecondary }}>{post.likes ?? 0}</span>
-                        </button>
-
-                        <button
+                            ariaLabel="Like"
+                        />
+                        <StatButton
+                            active={!!expandedComments[post.id]}
+                            icon={MessageCircle}
+                            count={post.comments?.length || 0}
                             onClick={() => toggleComments(post.id)}
-                            className="flex items-center gap-1 text-sm active:scale-95 transition"
-                            aria-expanded={!!expandedComments[post.id]}
-                            aria-controls={`comments-${post.id}`}
-                        >
-                            <MessageCircle className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
-                            <span style={{ color: theme.colors.textSecondary }}>{post.comments?.length || 0}</span>
-                        </button>
+                            ariaLabel="Comments"
+                        />
                     </div>
-                    <button className="p-1 active:scale-95 transition" aria-label="Share">
-                        <Share2 className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
+                    <button className="px-2 py-1 rounded-full active:scale-95" aria-label="Share" style={{ color: theme.colors.textSecondary }}>
+                        <Share2 className="w-4 h-4" />
                     </button>
                 </div>
 
                 {expandedComments[post.id] && (
                     <div id={`comments-${post.id}`} className="pt-2 space-y-3">
-                        {(post.comments || []).map((c) => (
-                            <div key={c.id} className="flex items-start gap-2">
-                                <div className="w-7 h-7 rounded-full" style={{ background: theme.colors.subtle }} />
-                                <div className="flex-1 text-sm">
-                                    <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>{c.name || 'User'}</span>{' '}
-                                    <span style={{ color: theme.colors.textSecondary }}>{c.text}</span>
+                        <div className="space-y-2">
+                            {(post.comments || []).map((c) => (
+                                <div key={c.id} className="flex items-start gap-2">
+                                    <div className="w-7 h-7 rounded-full" style={{ background: theme.colors.subtle }} />
+                                    <div className="flex-1 text-sm">
+                                        <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>{c.name || 'User'}</span>{' '}
+                                        <span style={{ color: theme.colors.textSecondary }}>{c.text}</span>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
 
-                        {/* Comment composer */}
                         <form onSubmit={submitComment} className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full" style={{ background: theme.colors.subtle }} />
                             <input
                                 value={draft}
                                 onChange={(e) => setDraft(e.target.value)}
                                 placeholder="Add a comment…"
                                 className="flex-1 px-3 py-2 rounded-full text-sm outline-none"
-                                style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary, border: `1px solid ${theme.colors.border}` }}
+                                style={{
+                                    backgroundColor: theme.colors.subtle,
+                                    color: theme.colors.textPrimary,
+                                    border: `1px solid ${theme.colors.border}`,
+                                }}
                             />
                             <button
                                 type="submit"
-                                className="rounded-full px-3 py-2 text-sm font-semibold active:scale-95 transition flex items-center gap-1"
+                                className="rounded-full px-3 py-2 text-sm font-semibold flex items-center gap-1 active:scale-95"
                                 style={{ backgroundColor: theme.colors.accent, color: 'white' }}
                             >
                                 <Send className="w-4 h-4" /> Send
@@ -136,15 +171,15 @@ export const CommunityScreen = ({
     const PollCard = ({ poll }) => {
         const total = poll.options?.reduce((s, o) => s + o.votes, 0) || 0;
         return (
-            <GlassCard theme={theme} className="p-4 space-y-3 rounded-[24px]">
+            <GlassCard theme={theme} className="p-4 rounded-[24px] shadow-sm space-y-3">
                 <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: theme.colors.accent }}>
-                        {poll.user?.avatar ? <img src={poll.user.avatar} alt={poll.user.name} className="w-full h-full rounded-full object-cover" /> : <TrendingUp className="w-5 h-5 text-white" />}
-                    </div>
+                    <Avatar src={poll.user?.avatar} alt={poll.user?.name} />
                     <div className="flex-1">
                         <div className="flex items-center gap-2">
                             <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>{poll.user?.name || 'Anonymous'}</span>
-                            <span className="text-sm" style={{ color: theme.colors.textSecondary }}>{poll.timeAgo}</span>
+                            <span className="text-xs px-2 py-0.5 rounded-full" style={{ color: theme.colors.textSecondary, background: theme.colors.subtle }}>
+                                {poll.timeAgo}
+                            </span>
                         </div>
                         <p className="mt-2 font-semibold" style={{ color: theme.colors.textPrimary }}>{poll.question}</p>
                     </div>
@@ -158,13 +193,15 @@ export const CommunityScreen = ({
                             <button
                                 key={o.id}
                                 onClick={() => onPollVote?.(poll.id, o.id)}
-                                className={`w-full p-3 rounded-lg text-left relative overflow-hidden active:scale-[0.98] transition ${isSelected ? 'ring-2' : ''}`}
+                                className={`w-full p-3 rounded-xl text-left relative overflow-hidden active:scale-[0.98] transition ${isSelected ? 'ring-2' : ''}`}
                                 style={{ backgroundColor: theme.colors.subtle, ringColor: isSelected ? theme.colors.accent : 'transparent' }}
                             >
                                 <div className="absolute inset-y-0 left-0 opacity-15" style={{ backgroundColor: theme.colors.accent, width: `${pct}%` }} />
                                 <div className="relative flex items-center justify-between">
                                     <span style={{ color: theme.colors.textPrimary }}>{o.text}</span>
-                                    <span className="text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>{o.votes} ({pct}%)</span>
+                                    <span className="text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>
+                                        {o.votes} ({pct}%)
+                                    </span>
                                 </div>
                             </button>
                         );
@@ -203,7 +240,9 @@ export const CommunityScreen = ({
                         <GlassCard theme={theme} className="p-8 text-center rounded-[24px]">
                             <MessageSquare className="w-12 h-12 mx-auto mb-4" style={{ color: theme.colors.accent }} />
                             <h3 className="font-bold text-lg mb-2" style={{ color: theme.colors.textPrimary }}>No Community Posts Yet</h3>
-                            <p className="text-sm mb-4" style={{ color: theme.colors.textSecondary }}>Be the first to share your projects and connect with the JSI community.</p>
+                            <p className="text-sm mb-4" style={{ color: theme.colors.textSecondary }}>
+                                Be the first to share your projects and connect with the JSI community.
+                            </p>
                             <button
                                 onClick={openCreateContentModal}
                                 className="px-6 py-3 rounded-full font-semibold active:scale-95 transition"
@@ -221,6 +260,13 @@ export const CommunityScreen = ({
                             ),
                         )
                     )}
+                </div>
+            </div>
+
+            <div className="pointer-events-none fixed bottom-2 left-0 right-0 flex justify-center">
+                <div className="px-3 py-1.5 rounded-full flex items-center gap-2 pointer-events-auto" style={{ background: theme.colors.surface, border: `1px solid ${theme.colors.border}` }}>
+                    <ChevronDown className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
+                    <span className="text-xs" style={{ color: theme.colors.textSecondary }}>Pull to refresh</span>
                 </div>
             </div>
         </div>
