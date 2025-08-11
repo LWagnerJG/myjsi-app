@@ -15,7 +15,7 @@ const StageChip = ({ stage, theme }) => (
         style={{
             backgroundColor: theme.colors.subtle,
             color: theme.colors.textSecondary,
-            border: `1px solid ${theme.colors.border}`
+            border: `1px solid ${theme.colors.border}`,
         }}
     >
         {stage}
@@ -27,8 +27,12 @@ const StatTile = ({ label, value, theme }) => (
         className="rounded-xl px-3 py-2 text-center flex-1"
         style={{ backgroundColor: theme.colors.surface, border: `1px solid ${theme.colors.border}` }}
     >
-        <div className="text-xs mb-1" style={{ color: theme.colors.textSecondary }}>{label}</div>
-        <div className="font-bold" style={{ color: theme.colors.textPrimary }}>{value}</div>
+        <div className="text-xs mb-1" style={{ color: theme.colors.textSecondary }}>
+            {label}
+        </div>
+        <div className="font-bold" style={{ color: theme.colors.textPrimary }}>
+            {value}
+        </div>
     </div>
 );
 
@@ -39,7 +43,7 @@ const ProjectCard = ({ opp, theme, onClick }) => (
             className="p-4 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
             style={{
                 background: `linear-gradient(145deg, ${theme.colors.surface} 0%, ${theme.colors.subtle} 100%)`,
-                border: `1px solid ${theme.colors.border}`
+                border: `1px solid ${theme.colors.border}`,
             }}
         >
             <div className="flex items-start justify-between gap-3 mb-2">
@@ -61,7 +65,11 @@ const ProjectCard = ({ opp, theme, onClick }) => (
                 {opp.winProbability && (
                     <span
                         className="px-2 py-1 text-xs font-bold rounded-full"
-                        style={{ backgroundColor: `${theme.colors.accent}14`, color: theme.colors.accent, border: `1px solid ${theme.colors.accent}40` }}
+                        style={{
+                            backgroundColor: `${theme.colors.accent}14`,
+                            color: theme.colors.accent,
+                            border: `1px solid ${theme.colors.accent}40`,
+                        }}
                     >
                         {opp.winProbability}
                     </span>
@@ -75,9 +83,16 @@ const ProjectDetailScreen = ({ project, theme, onBack, onUpdateProject, onDelete
     const [edited, setEdited] = useState(project);
     const [dirty, setDirty] = useState(false);
 
-    const setField = (k, v) => { setEdited(p => ({ ...p, [k]: v })); setDirty(true); };
+    const setField = (k, v) => {
+        setEdited((p) => ({ ...p, [k]: v }));
+        setDirty(true);
+    };
 
-    const save = () => { onUpdateProject(edited); setDirty(false); onBack(); };
+    const save = () => {
+        onUpdateProject(edited);
+        setDirty(false);
+        onBack();
+    };
     const remove = () => {
         if (window.confirm('Delete this project? This cannot be undone.')) {
             onDeleteProject(project.id);
@@ -89,8 +104,6 @@ const ProjectDetailScreen = ({ project, theme, onBack, onUpdateProject, onDelete
 
     return (
         <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
-            {/* Removed PageTitle component - main header back button will handle navigation */}
-            
             <div className="px-4 pt-6 space-y-4">
                 <GlassCard theme={theme} className="p-4">
                     <div className="flex items-start justify-between gap-3">
@@ -126,7 +139,7 @@ const ProjectDetailScreen = ({ project, theme, onBack, onUpdateProject, onDelete
                             label="Stage"
                             value={edited.stage}
                             onChange={(e) => setField('stage', e.target.value)}
-                            options={Data.STAGES.map(s => ({ label: s, value: s }))}
+                            options={Data.STAGES.map((s) => ({ label: s, value: s }))}
                             theme={theme}
                         />
                     </div>
@@ -134,14 +147,14 @@ const ProjectDetailScreen = ({ project, theme, onBack, onUpdateProject, onDelete
                         label="Discount"
                         value={edited.discount}
                         onChange={(e) => setField('discount', e.target.value)}
-                        options={Data.DISCOUNT_OPTIONS.map(d => ({ label: d, value: d }))}
+                        options={Data.DISCOUNT_OPTIONS.map((d) => ({ label: d, value: d }))}
                         theme={theme}
                     />
                     <PortalNativeSelect
                         label="Win Probability"
                         value={edited.winProbability}
                         onChange={(e) => setField('winProbability', e.target.value)}
-                        options={Data.WIN_PROBABILITY_OPTIONS.map(p => ({ label: p, value: p }))}
+                        options={Data.WIN_PROBABILITY_OPTIONS.map((p) => ({ label: p, value: p }))}
                         theme={theme}
                     />
                 </GlassCard>
@@ -182,7 +195,9 @@ const ProjectDetailScreen = ({ project, theme, onBack, onUpdateProject, onDelete
                         className="px-5 py-2 rounded-full font-semibold text-sm text-white disabled:opacity-50"
                         style={{ backgroundColor: theme.colors.accent }}
                     >
-                        <span className="inline-flex items-center gap-2"><Check className="w-4 h-4" /> Save</span>
+                        <span className="inline-flex items-center gap-2">
+                            <Check className="w-4 h-4" /> Save
+                        </span>
                     </button>
                 </div>
             </div>
@@ -190,163 +205,170 @@ const ProjectDetailScreen = ({ project, theme, onBack, onUpdateProject, onDelete
     );
 };
 
-export const ProjectsScreen = forwardRef(({
-    onNavigate,
-    theme,
-    opportunities,
-    setOpportunities,
-    myProjects,
-    setSelectedProject
-}, ref) => {
-    const [projectsTab, setProjectsTab] = useState('pipeline');
-    const [selectedPipelineStage, setSelectedPipelineStage] = useState('Discovery');
-    const [selectedOpportunity, setSelectedOpportunity] = useState(null);
-    const [isScrolled, setIsScrolled] = useState(false);
-    const scrollContainerRef = useRef(null);
+export const ProjectsScreen = forwardRef(
+    ({ onNavigate, theme, opportunities, setOpportunities, myProjects, setSelectedProject }, ref) => {
+        const [projectsTab, setProjectsTab] = useState('pipeline');
+        const [selectedPipelineStage, setSelectedPipelineStage] = useState('Discovery');
+        const [selectedOpportunity, setSelectedOpportunity] = useState(null);
+        const [isScrolled, setIsScrolled] = useState(false);
+        const scrollContainerRef = useRef(null);
 
-    // Expose clearSelection function to parent via ref
-    useImperativeHandle(ref, () => ({
-        clearSelection: () => {
-            if (selectedOpportunity) {
-                setSelectedOpportunity(null);
-                return true; // Indicate that we handled the back action
-            }
-            return false; // Indicate that we didn't handle it
-        }
-    }));
+        useImperativeHandle(ref, () => ({
+            clearSelection: () => {
+                if (selectedOpportunity) {
+                    setSelectedOpportunity(null);
+                    return true;
+                }
+                return false;
+            },
+        }));
 
-    const handleScroll = useCallback(() => {
-        if (scrollContainerRef.current) setIsScrolled(scrollContainerRef.current.scrollTop > 10);
-    }, []);
+        const handleScroll = useCallback(() => {
+            if (scrollContainerRef.current) setIsScrolled(scrollContainerRef.current.scrollTop > 10);
+        }, []);
 
-    const [mainTabSlider, setMainTabSlider] = useState({ left: 0, width: 0, opacity: 0 });
-    const [stageSlider, setStageSlider] = useState({ left: 0, width: 0, opacity: 0 });
-    const mainTabRefs = useRef([]);
-    const stageButtonRefs = useRef([]);
+        const [mainTabSlider, setMainTabSlider] = useState({ left: 0, width: 0, opacity: 0 });
+        const [stageSlider, setStageSlider] = useState({ left: 0, width: 0, opacity: 0 });
+        const mainTabRefs = useRef([]);
+        const stageButtonRefs = useRef([]);
 
-    useEffect(() => {
-        const idx = projectsTab === 'pipeline' ? 0 : 1;
-        const el = mainTabRefs.current[idx];
-        if (el) setMainTabSlider({ left: el.offsetLeft, width: el.offsetWidth, opacity: 1 });
-    }, [projectsTab]);
+        useEffect(() => {
+            const idx = projectsTab === 'pipeline' ? 0 : 1;
+            const el = mainTabRefs.current[idx];
+            if (el) setMainTabSlider({ left: el.offsetLeft, width: el.offsetWidth, opacity: 1 });
+        }, [projectsTab]);
 
-    useEffect(() => {
-        const idx = Data.STAGES.findIndex(s => s === selectedPipelineStage);
-        const el = stageButtonRefs.current[idx];
-        if (el) setStageSlider({ left: el.offsetLeft, width: el.offsetWidth, opacity: 1 });
-    }, [selectedPipelineStage]);
+        useEffect(() => {
+            const idx = Data.STAGES.findIndex((s) => s === selectedPipelineStage);
+            const el = stageButtonRefs.current[idx];
+            if (el) setStageSlider({ left: el.offsetLeft, width: el.offsetWidth, opacity: 1 });
+        }, [selectedPipelineStage]);
 
-    const handleAddClick = () => {
-        if (projectsTab === 'pipeline') onNavigate('new-lead');
-        else onNavigate('add-new-install');
-    };
+        const handleAddClick = () => {
+            if (projectsTab === 'pipeline') onNavigate('new-lead');
+            else onNavigate('add-new-install');
+        };
 
-    const updateProject = (updated) => {
-        setOpportunities(prev => prev.map(o => (o.id === updated.id ? updated : o)));
-        setSelectedOpportunity(updated);
-    };
+        const updateProject = (updated) => {
+            setOpportunities((prev) => prev.map((o) => (o.id === updated.id ? updated : o)));
+            setSelectedOpportunity(updated);
+        };
 
-    const deleteProject = (id) => {
-        setOpportunities(prev => prev.filter(o => o.id !== id));
-    };
+        const deleteProject = (id) => {
+            setOpportunities((prev) => prev.filter((o) => o.id !== id));
+        };
 
-    const filteredOpportunities = useMemo(
-        () => (opportunities || []).filter(o => o.stage === selectedPipelineStage),
-        [selectedPipelineStage, opportunities]
-    );
-
-    if (selectedOpportunity) {
-        return (
-            <ProjectDetailScreen
-                project={selectedOpportunity}
-                theme={theme}
-                onBack={() => setSelectedOpportunity(null)}
-                onUpdateProject={updateProject}
-                onDeleteProject={deleteProject}
-            />
+        const filteredOpportunities = useMemo(
+            () => (opportunities || []).filter((o) => o.stage === selectedPipelineStage),
+            [selectedPipelineStage, opportunities]
         );
-    }
 
-    return (
-        <div className="h-full flex flex-col" style={{ backgroundColor: theme.colors.background }}>
-            <div
-                className={`sticky top-0 z-10 transition-all duration-300 ${isScrolled ? 'shadow-md' : ''}`}
-                style={{
-                    backgroundColor: isScrolled ? `${theme.colors.background}e0` : theme.colors.background,
-                    backdropFilter: isScrolled ? 'blur(12px)' : 'none',
-                    WebkitBackdropFilter: isScrolled ? 'blur(12px)' : 'none',
-                    borderBottom: `1px solid ${isScrolled ? theme.colors.border + '40' : 'transparent'}`
-                }}
-            >
-                <div className="px-4 pt-6 pb-2 flex justify-between items-center gap-4">
-                    <div className="flex-grow">
-                        <GlassCard theme={theme} className="p-1.5">
-                            <div className="relative flex space-x-1">
+        if (selectedOpportunity) {
+            return (
+                <ProjectDetailScreen
+                    project={selectedOpportunity}
+                    theme={theme}
+                    onBack={() => setSelectedOpportunity(null)}
+                    onUpdateProject={updateProject}
+                    onDeleteProject={deleteProject}
+                />
+            );
+        }
+
+        return (
+            <div className="h-full flex flex-col" style={{ backgroundColor: theme.colors.background }}>
+                <div
+                    className={`sticky top-0 z-10 transition-all duration-300 ${isScrolled ? 'shadow-md' : ''}`}
+                    style={{
+                        backgroundColor: isScrolled ? `${theme.colors.background}e0` : theme.colors.background,
+                        backdropFilter: isScrolled ? 'blur(12px)' : 'none',
+                        WebkitBackdropFilter: isScrolled ? 'blur(12px)' : 'none',
+                        borderBottom: `1px solid ${isScrolled ? theme.colors.border + '40' : 'transparent'}`,
+                    }}
+                >
+                    <div className="px-4 pt-6 pb-2 flex items-center gap-4">
+                        <div className="flex-1">
+                            <div className="relative">
+                                <div className="flex gap-6 pb-2">
+                                    <button
+                                        ref={(el) => (mainTabRefs.current[0] = el)}
+                                        onClick={() => setProjectsTab('pipeline')}
+                                        className="text-sm font-semibold"
+                                        style={{ color: projectsTab === 'pipeline' ? theme.colors.accent : theme.colors.textSecondary }}
+                                    >
+                                        Pipeline
+                                    </button>
+                                    <button
+                                        ref={(el) => (mainTabRefs.current[1] = el)}
+                                        onClick={() => setProjectsTab('my-projects')}
+                                        className="text-sm font-semibold"
+                                        style={{ color: projectsTab === 'my-projects' ? theme.colors.accent : theme.colors.textSecondary }}
+                                    >
+                                        My Projects
+                                    </button>
+                                </div>
+                                <div className="absolute left-0 right-0 bottom-0 h-px" style={{ backgroundColor: theme.colors.border }} />
                                 <div
-                                    className="absolute top-0 bottom-0 rounded-full transition-all duration-300 ease-out"
-                                    style={{ backgroundColor: theme.colors.accent, left: mainTabSlider.left, width: mainTabSlider.width, opacity: mainTabSlider.opacity }}
+                                    className="absolute bottom-0 h-[2px] rounded-full transition-all duration-300"
+                                    style={{
+                                        left: mainTabSlider.left,
+                                        width: mainTabSlider.width,
+                                        backgroundColor: theme.colors.accent,
+                                        opacity: mainTabSlider.opacity,
+                                    }}
                                 />
-                                <button
-                                    ref={(el) => (mainTabRefs.current[0] = el)}
-                                    onClick={() => setProjectsTab('pipeline')}
-                                    className="relative z-10 flex-1 py-2 text-sm font-semibold rounded-full transition-colors"
-                                    style={{ color: projectsTab === 'pipeline' ? '#fff' : theme.colors.textSecondary }}
-                                >
-                                    Pipeline
-                                </button>
-                                <button
-                                    ref={(el) => (mainTabRefs.current[1] = el)}
-                                    onClick={() => setProjectsTab('my-projects')}
-                                    className="relative z-10 flex-1 py-2 text-sm font-semibold rounded-full transition-colors"
-                                    style={{ color: projectsTab === 'my-projects' ? '#fff' : theme.colors.textSecondary }}
-                                >
-                                    My Projects
-                                </button>
                             </div>
-                        </GlassCard>
+                        </div>
+
+                        <button
+                            onClick={handleAddClick}
+                            className="flex-shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all hover:scale-105 active:scale-95"
+                            style={{ backgroundColor: theme.colors.accent, color: '#fff' }}
+                        >
+                            <span>{projectsTab === 'pipeline' ? 'New Lead' : 'Add Install'}</span>
+                            <Plus className="w-4 h-4" />
+                        </button>
                     </div>
 
-                    <button
-                        onClick={handleAddClick}
-                        className="flex-shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all hover:scale-105 active:scale-95"
-                        style={{ backgroundColor: theme.colors.accent, color: '#fff' }}
-                    >
-                        <span>{projectsTab === 'pipeline' ? 'New Lead' : 'Add Install'}</span>
-                        <Plus className="w-4 h-4" />
-                    </button>
-                </div>
-            </div>
-
-            <div ref={scrollContainerRef} onScroll={handleScroll} className="flex-1 overflow-y-auto scrollbar-hide">
-                <div className="px-4 pt-4 pb-6 space-y-3">
                     {projectsTab === 'pipeline' && (
-                        <GlassCard theme={theme} className="p-1.5">
-                            <div className="relative flex space-x-1 overflow-x-auto scrollbar-hide">
-                                <div
-                                    className="absolute top-0 bottom-0 rounded-full transition-all duration-300 ease-out"
-                                    style={{ backgroundColor: theme.colors.accent, left: stageSlider.left, width: stageSlider.width, opacity: stageSlider.opacity }}
-                                />
-                                {Data.STAGES.map((stage, i) => (
-                                    <button
-                                        key={stage}
-                                        ref={(el) => (stageButtonRefs.current[i] = el)}
-                                        onClick={() => setSelectedPipelineStage(stage)}
-                                        className="relative z-10 px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap flex-shrink-0 transition-colors"
-                                        style={{ color: selectedPipelineStage === stage ? '#fff' : theme.colors.textSecondary }}
-                                    >
-                                        {stage}
-                                    </button>
-                                ))}
+                        <div className="px-4 pt-1 pb-2">
+                            <div className="relative overflow-x-auto scrollbar-hide">
+                                <div className="relative flex gap-6 pb-2 whitespace-nowrap">
+                                    {Data.STAGES.map((stage, i) => (
+                                        <button
+                                            key={stage}
+                                            ref={(el) => (stageButtonRefs.current[i] = el)}
+                                            onClick={() => setSelectedPipelineStage(stage)}
+                                            className="text-sm font-semibold"
+                                            style={{ color: selectedPipelineStage === stage ? theme.colors.accent : theme.colors.textSecondary }}
+                                        >
+                                            {stage}
+                                        </button>
+                                    ))}
+                                    <div className="absolute left-0 right-0 bottom-0 h-px" style={{ backgroundColor: theme.colors.border }} />
+                                    <div
+                                        className="absolute bottom-0 h-[2px] rounded-full transition-all duration-300"
+                                        style={{
+                                            left: stageSlider.left,
+                                            width: stageSlider.width,
+                                            backgroundColor: theme.colors.accent,
+                                            opacity: stageSlider.opacity,
+                                        }}
+                                    />
+                                </div>
                             </div>
-                        </GlassCard>
+                        </div>
                     )}
+                </div>
 
-                    {projectsTab === 'pipeline'
-                        ? filteredOpportunities.length
-                            ? filteredOpportunities.map((opp) => (
-                                <ProjectCard key={opp.id} opp={opp} theme={theme} onClick={() => setSelectedOpportunity(opp)} />
-                            ))
-                            : (
+                <div ref={scrollContainerRef} onScroll={handleScroll} className="flex-1 overflow-y-auto scrollbar-hide">
+                    <div className="px-4 pt-4 pb-6 space-y-3">
+                        {projectsTab === 'pipeline' ? (
+                            filteredOpportunities.length ? (
+                                filteredOpportunities.map((opp) => (
+                                    <ProjectCard key={opp.id} opp={opp} theme={theme} onClick={() => setSelectedOpportunity(opp)} />
+                                ))
+                            ) : (
                                 <div className="flex flex-col items-center justify-center py-12">
                                     <Briefcase className="w-12 h-12 mb-4" style={{ color: theme.colors.textSecondary }} />
                                     <p className="text-center text-sm font-medium" style={{ color: theme.colors.textSecondary }}>
@@ -357,8 +379,8 @@ export const ProjectsScreen = forwardRef(({
                                     </p>
                                 </div>
                             )
-                        : myProjects?.length
-                            ? myProjects.map((p) => (
+                        ) : myProjects?.length ? (
+                            myProjects.map((p) => (
                                 <GlassCard
                                     key={p.id}
                                     theme={theme}
@@ -376,19 +398,20 @@ export const ProjectsScreen = forwardRef(({
                                     </div>
                                 </GlassCard>
                             ))
-                            : (
-                                <div className="flex flex-col items-center justify-center py-12">
-                                    <Briefcase className="w-12 h-12 mb-4" style={{ color: theme.colors.textSecondary }} />
-                                    <p className="text-center text-sm font-medium" style={{ color: theme.colors.textSecondary }}>
-                                        No projects added yet
-                                    </p>
-                                    <p className="text-center text-xs mt-1" style={{ color: theme.colors.textSecondary }}>
-                                        Add your first install to get started
-                                    </p>
-                                </div>
-                            )}
+                        ) : (
+                            <div className="flex flex-col items-center justify-center py-12">
+                                <Briefcase className="w-12 h-12 mb-4" style={{ color: theme.colors.textSecondary }} />
+                                <p className="text-center text-sm font-medium" style={{ color: theme.colors.textSecondary }}>
+                                    No projects added yet
+                                </p>
+                                <p className="text-center text-xs mt-1" style={{ color: theme.colors.textSecondary }}>
+                                    Add your first install to get started
+                                </p>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
-        </div>
-    );
-});
+        );
+    }
+);

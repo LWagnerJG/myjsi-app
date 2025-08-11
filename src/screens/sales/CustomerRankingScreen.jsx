@@ -8,24 +8,24 @@ export const CustomerRankingScreen = ({ theme }) => {
     const [sortKey, setSortKey] = useState('sales');
     const [modalData, setModalData] = useState(null);
 
-    const sortedCustomers = useMemo(() => {
-        return [...CUSTOMER_RANK_DATA].sort((a, b) => (b[sortKey] || 0) - (a[sortKey] || 0));
+    const sorted = useMemo(() => {
+        const arr = [...CUSTOMER_RANK_DATA].sort((a, b) => (b[sortKey] || 0) - (a[sortKey] || 0));
+        return arr.map((c, i) => ({ ...c, rank: i + 1 }));
     }, [sortKey]);
 
-    const handleOpenModal = useCallback((customer) => setModalData(customer), []);
-    const handleCloseModal = useCallback(() => setModalData(null), []);
+    const maxValue = useMemo(() => Math.max(...sorted.map((c) => c[sortKey] || 0), 1), [sorted, sortKey]);
+
+    const open = useCallback((c) => setModalData(c), []);
+    const close = useCallback(() => setModalData(null), []);
 
     const Segmented = () => (
         <div
-            className="inline-flex p-1 rounded-full"
-            style={{
-                backgroundColor: theme.colors.subtle,
-                border: `1px solid ${theme.colors.border}`
-            }}
+            className="inline-flex items-center p-1 rounded-full"
+            style={{ backgroundColor: theme.colors.subtle, border: `1px solid ${theme.colors.border}` }}
         >
             {[
                 { label: 'By Sales', value: 'sales' },
-                { label: 'By Bookings', value: 'bookings' }
+                { label: 'By Bookings', value: 'bookings' },
             ].map((opt) => {
                 const active = sortKey === opt.value;
                 return (
@@ -35,7 +35,8 @@ export const CustomerRankingScreen = ({ theme }) => {
                         className="px-4 py-2 rounded-full text-sm font-semibold transition-all"
                         style={{
                             backgroundColor: active ? theme.colors.accent : 'transparent',
-                            color: active ? '#fff' : theme.colors.textPrimary
+                            color: active ? '#fff' : theme.colors.textPrimary,
+                            boxShadow: active ? `0 6px 24px ${theme.colors.shadow}` : 'none',
                         }}
                     >
                         {opt.label}
@@ -46,120 +47,149 @@ export const CustomerRankingScreen = ({ theme }) => {
     );
 
     const rankBadgeStyle = (rank) => {
-        const styles = {
-            1: { ring: '#E8C767', fill: '#F7E8AD' }, // gold
-            2: { ring: '#C8CDD3', fill: '#ECEFF2' }, // silver
-            3: { ring: '#D9A079', fill: '#F4D1BE' }  // bronze
-        };
-        const s = styles[rank];
-        if (!s) {
+        const medal = {
+            1: { ring: '#E8C767', fill: '#F7E8AD' },
+            2: { ring: '#C8CDD3', fill: '#ECEFF2' },
+            3: { ring: '#D9A079', fill: '#F4D1BE' },
+        }[rank];
+        if (!medal)
             return {
-                backgroundColor: theme.colors.subtle,
-                border: `1px solid ${theme.colors.border}`
+                backgroundColor: theme.colors.surface,
+                border: `1px solid ${theme.colors.border}`,
             };
-        }
         return {
-            background: `radial-gradient(100% 100% at 50% 0%, ${s.fill} 0%, #fff 100%)`,
-            border: `1px solid ${s.ring}`,
-            boxShadow: `0 0 0 2px ${s.ring}33 inset`
+            background: `radial-gradient(100% 100% at 50% 0%, ${medal.fill} 0%, #fff 100%)`,
+            border: `1px solid ${medal.ring}`,
+            boxShadow: `0 0 0 2px ${medal.ring}33 inset`,
         };
     };
 
-    const RankListItem = ({ customer, rank, onClick }) => (
-        <button
-            onClick={onClick}
-            className="w-full px-4 py-3 text-left transition-colors hover:bg-black/5 rounded-xl"
-        >
-            <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3 min-w-0">
+    const Item = ({ c }) => {
+        const pct = Math.min(100, Math.round(((c[sortKey] || 0) / maxValue) * 100));
+        return (
+            <button
+                onClick={() => open(c)}
+                className="w-full text-left rounded-2xl px-3 py-3 transition-colors hover:bg-black/5"
+                style={{ backgroundColor: theme.colors.surface, border: `1px solid ${theme.colors.border}` }}
+            >
+                <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                        <div
+                            className={`flex items-center justify-center flex-shrink-0 font-bold rounded-full ${c.rank <= 3 ? 'w-9 h-9 text-sm' : 'w-8 h-8 text-xs'
+                                }`}
+                            style={rankBadgeStyle(c.rank)}
+                        >
+                            {c.rank}
+                        </div>
+                        <div className="min-w-0">
+                            <div
+                                className="font-semibold truncate"
+                                style={{ color: theme.colors.textPrimary }}
+                            >
+                                {c.name}
+                            </div>
+                            <div className="text-[11px]" style={{ color: theme.colors.textSecondary }}>
+                                {sortKey === 'sales' ? 'Sales' : 'Bookings'}
+                            </div>
+                        </div>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                        <div
+                            className="font-extrabold text-lg tabular-nums"
+                            style={{ color: theme.colors.accent }}
+                        >
+                            ${Number(c[sortKey] || 0).toLocaleString()}
+                        </div>
+                    </div>
+                </div>
+                <div className="mt-2 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: theme.colors.subtle }}>
                     <div
-                        className={`flex items-center justify-center flex-shrink-0 font-bold ${rank <= 3 ? 'w-9 h-9 text-sm' : 'w-8 h-8 text-sm'
-                            } rounded-full`}
-                        style={rankBadgeStyle(rank)}
-                    >
-                        {rank}
-                    </div>
-
-                    <div className="min-w-0">
-                        <p className="font-semibold truncate" style={{ color: theme.colors.textPrimary }}>
-                            {customer.name}
-                        </p>
-                        <p className="text-xs" style={{ color: theme.colors.textSecondary }}>
-                            {sortKey === 'sales' ? 'Sales' : 'Bookings'}
-                        </p>
-                    </div>
+                        className="h-full rounded-full"
+                        style={{
+                            width: `${pct}%`,
+                            background: `linear-gradient(90deg, ${theme.colors.accent} 0%, ${theme.colors.accent}AA 100%)`,
+                        }}
+                    />
                 </div>
-
-                <div className="text-right flex-shrink-0">
-                    <p className="font-bold text-lg whitespace-nowrap" style={{ color: theme.colors.accent }}>
-                        ${customer[sortKey].toLocaleString()}
-                    </p>
-                </div>
-            </div>
-        </button>
-    );
+            </button>
+        );
+    };
 
     return (
         <div className="h-full flex flex-col" style={{ backgroundColor: theme.colors.background }}>
             <div className="px-4 pt-4">
                 <Segmented />
             </div>
-
             <div className="flex-1 overflow-y-auto scrollbar-hide">
-                <div className="px-4 pb-4 pt-3">
-                    <GlassCard theme={theme} className="overflow-hidden">
+                <div className="px-4 pt-3 pb-6">
+                    <GlassCard theme={theme} className="p-2 rounded-[24px]" style={{ backgroundColor: '#fff', boxShadow: `0 4px 12px ${theme.colors.shadow}` }}>
                         <div className="divide-y" style={{ borderColor: theme.colors.subtle }}>
-                            {sortedCustomers.map((customer, index) => (
-                                <RankListItem
-                                    key={customer.id}
-                                    customer={customer}
-                                    rank={index + 1}
-                                    onClick={() => handleOpenModal(customer)}
-                                />
+                            {sorted.map((c) => (
+                                <Item key={c.id} c={c} />
                             ))}
                         </div>
                     </GlassCard>
                 </div>
             </div>
 
-            <Modal show={!!modalData} onClose={handleCloseModal} title={modalData?.name || ''} theme={theme}>
-                {modalData && (
+            <Modal show={!!modalData} onClose={close} title={modalData?.name || ''} theme={theme}>
+                {!!modalData && (
                     <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-3 text-center">
-                            <div className="rounded-2xl p-3" style={{ backgroundColor: theme.colors.subtle }}>
+                        <div className="flex items-center gap-3">
+                            <div
+                                className="w-10 h-10 rounded-full flex items-center justify-center font-bold"
+                                style={rankBadgeStyle(modalData.rank)}
+                            >
+                                {modalData.rank}
+                            </div>
+                            <div className="text-sm" style={{ color: theme.colors.textSecondary }}>
+                                {sortKey === 'sales' ? 'Sales' : 'Bookings'}
+                            </div>
+                            <div
+                                className="ml-auto font-extrabold text-xl tabular-nums"
+                                style={{ color: theme.colors.accent }}
+                            >
+                                ${Number(modalData[sortKey] || 0).toLocaleString()}
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                            <div
+                                className="rounded-2xl p-3 text-center"
+                                style={{ backgroundColor: theme.colors.subtle, border: `1px solid ${theme.colors.border}` }}
+                            >
+                                <div className="text-xs" style={{ color: theme.colors.textSecondary }}>Sales</div>
                                 <div className="text-xl font-bold" style={{ color: theme.colors.accent }}>
-                                    ${modalData.sales?.toLocaleString()}
-                                </div>
-                                <div className="text-xs mt-1" style={{ color: theme.colors.textSecondary }}>
-                                    Sales
+                                    ${Number(modalData.sales || 0).toLocaleString()}
                                 </div>
                             </div>
-                            <div className="rounded-2xl p-3" style={{ backgroundColor: theme.colors.subtle }}>
+                            <div
+                                className="rounded-2xl p-3 text-center"
+                                style={{ backgroundColor: theme.colors.subtle, border: `1px solid ${theme.colors.border}` }}
+                            >
+                                <div className="text-xs" style={{ color: theme.colors.textSecondary }}>Bookings</div>
                                 <div className="text-xl font-bold" style={{ color: theme.colors.textPrimary }}>
-                                    ${modalData.bookings?.toLocaleString()}
-                                </div>
-                                <div className="text-xs mt-1" style={{ color: theme.colors.textSecondary }}>
-                                    Bookings
+                                    ${Number(modalData.bookings || 0).toLocaleString()}
                                 </div>
                             </div>
                         </div>
 
                         <div className="border-t pt-3" style={{ borderColor: theme.colors.subtle }}>
-                            <h4 className="font-semibold text-sm mb-2" style={{ color: theme.colors.textPrimary }}>
+                            <div className="font-semibold text-sm mb-2" style={{ color: theme.colors.textPrimary }}>
                                 Recent Orders
-                            </h4>
+                            </div>
                             <div className="space-y-2">
-                                {modalData.orders.map((order, i) => (
+                                {(modalData.orders || []).map((o, i) => (
                                     <div
-                                        key={`${order.projectName}-${i}`}
+                                        key={`${o.projectName}-${i}`}
                                         className="flex items-center justify-between text-sm rounded-xl px-3 py-2"
                                         style={{ backgroundColor: theme.colors.surface, border: `1px solid ${theme.colors.border}` }}
                                     >
                                         <span className="truncate" style={{ color: theme.colors.textPrimary }}>
-                                            {order.projectName}
+                                            {o.projectName}
                                         </span>
                                         <span className="font-semibold" style={{ color: theme.colors.accent }}>
-                                            ${order.amount.toLocaleString()}
+                                            ${Number(o.amount || 0).toLocaleString()}
                                         </span>
                                     </div>
                                 ))}

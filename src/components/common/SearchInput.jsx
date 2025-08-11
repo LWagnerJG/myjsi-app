@@ -1,75 +1,118 @@
-import React from 'react';
+// components/common/SearchInput.jsx
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Search, Mic } from 'lucide-react';
 
-/**
- * Props:
- * - variant: "elevated" | "bare"
- *   - "elevated": renders its own background/border/shadow (default)
- *   - "bare": renders a transparent field; parent provides the shell
- */
-export const SearchInput = React.memo(({
-    onSubmit,
-    value,
-    onChange,
-    onFocus,
-    placeholder,
+export const SearchInput = React.memo(function SearchInput({
     theme,
-    className,
-    style,
+    value = '',
+    onChange,
+    onSubmit,
     onVoiceClick,
-    variant = 'elevated'
-}) => {
-    const isBare = variant === 'bare';
+    className = '',
+}) {
+    const [focused, setFocused] = useState(false);
+    const [i, setI] = useState(0);
+    const inputRef = useRef(null);
 
-    const shellStyle = isBare
-        ? {}
-        : {
-            borderRadius: '9999px',
-            backgroundColor: '#ffffff',
-            border: '1px solid #E5E7EB',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
-            minHeight: 56,
-            height: 56
-        };
+    const phrases = useMemo(
+        () => [
+            'Lead times today...',
+            'Dealer contacts nearby...',
+            'Compare Vision vs...',
+            'Create sample order...',
+            'Track commissions now...',
+            'Draft quote fast...',
+            'Design days schedule...',
+            'Loaner pool status...',
+            'Install guides please...',
+            'Find fabrics quick...',
+            'Commission rates table...',
+            'Dealer directory lookup...',
+            'Start new project...',
+            'Competitive analysis tips...',
+            'Product specs summary...',
+        ],
+        []
+    );
+
+    const DISPLAY_MS = 5200;
+
+    useEffect(() => {
+        const id = setInterval(() => setI((p) => (p + 1) % phrases.length), DISPLAY_MS);
+        return () => clearInterval(id);
+    }, [phrases.length]);
+
+    const showHint = !value && !focused;
+    const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
+
+    const pill = {
+        backgroundColor: theme.colors.surface,
+        border: `1px solid ${theme.colors.border}`,
+        boxShadow: `0 6px 24px ${theme.colors.shadow}`,
+        borderRadius: 9999,
+        height: 56,
+    };
 
     return (
         <form
-            onSubmit={onSubmit}
-            className={`relative flex items-center transition-all duration-200 outline-none ${className || ''}`}
-            style={{ ...shellStyle, ...style }}
+            onSubmit={(e) => {
+                e.preventDefault();
+                onSubmit && onSubmit(value);
+            }}
+            className={`w-full ${className}`}
         >
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <Search
-                    className="h-5 w-5"
-                    style={{ color: theme.colors.textSecondary, opacity: 0.7 }}
+            <style>{`
+        @keyframes siFade {
+          0% { opacity: 0 }
+          10% { opacity: .92 }
+          90% { opacity: .92 }
+          100% { opacity: 0 }
+        }
+      `}</style>
+
+            <div className="w-full flex items-center px-4 relative" style={pill}>
+                <Search className="w-5 h-5 mr-2 flex-shrink-0" style={{ color: theme.colors.textSecondary }} />
+
+                <input
+                    ref={inputRef}
+                    value={value}
+                    onChange={(e) => onChange && onChange(e.target.value)}
+                    onFocus={() => setFocused(true)}
+                    onBlur={() => setFocused(false)}
+                    placeholder=""
+                    className="flex-1 bg-transparent outline-none text-[14px]"
+                    style={{ color: theme.colors.textPrimary }}
+                    aria-label="Search"
                 />
-            </div>
 
-            <input
-                type="text"
-                placeholder={placeholder}
-                value={value}
-                onChange={onChange}
-                onFocus={onFocus}
-                className={`w-full ${isBare ? 'bg-transparent' : 'bg-transparent'} pl-12 pr-12 text-base outline-none border-none rounded-full placeholder-gray-500/70 focus:placeholder-gray-400/80`}
-                style={{
-                    color: theme.colors.textPrimary,
-                    fontWeight: 400,
-                    fontSize: 16,
-                    height: 56,
-                    lineHeight: '56px'
-                }}
-            />
+                {showHint && (
+                    <span
+                        key={i}
+                        className="pointer-events-none absolute left-11 right-11 truncate select-none text-[13.5px]"
+                        style={{
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            color: theme.colors.textSecondary,
+                            opacity: 0.58,
+                            whiteSpace: 'nowrap',
+                            animation: `siFade ${DISPLAY_MS}ms ease-in-out 1`,
+                        }}
+                        aria-hidden="true"
+                    >
+                        {cap(phrases[i])}
+                    </span>
+                )}
 
-            {onVoiceClick && (
                 <button
                     type="button"
                     onClick={onVoiceClick}
-                    className="absolute inset-y-0 right-0 pr-4 flex items-center hover:bg-black/5 dark:hover:bg-white/5 rounded-full transition-colors duration-200"
+                    className="ml-2 w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-black/5"
+                    style={{ color: theme.colors.textSecondary }}
+                    aria-label="Voice input"
                 >
-                    <Mic className="h-5 w-5" style={{ color: theme.colors.textSecondary, opacity: 0.7 }} />
+                    <Mic className="w-5 h-5" />
                 </button>
-            )}
+            </div>
         </form>
     );
 });

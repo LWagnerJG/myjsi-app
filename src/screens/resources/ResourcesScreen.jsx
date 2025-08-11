@@ -6,10 +6,8 @@ import {
 import * as Data from '../../data.jsx';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 
-// NOTE: The 'importantItems' Set has been removed as all items are now treated equally.
-
 const sublabelMap = {
-    'Lead Times': 'Check current production & shipping estimates',
+    'Lead Times': 'Check current production time estimates',
     'Discontinued Finishes Database': 'Look up archived finishes and fabrics',
     'Request COM Yardage': 'Calculate and request customer materials',
     'Search Fabrics': 'Browse all available JSI textiles',
