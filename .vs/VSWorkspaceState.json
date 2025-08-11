@@ -1,14 +1,12 @@
 {
   "ExpandedNodes": [
     "",
-    "\\public",
     "\\src",
     "\\src\\assets",
-    "\\src\\components",
-    "\\src\\components\\common",
     "\\src\\screens",
-    "\\src\\screens\\projects"
+    "\\src\\screens\\orders",
+    "\\src\\screens\\resources",
+    "\\src\\screens\\resources\\search-fabrics"
   ],
-  "SelectedNode": "\\src\\components\\common\\SpotlightMultiSelect.jsx",
   "PreviewInSolutionExplorer": false
 }

@@ -2,7 +2,6 @@
 import {
     INITIAL_OPPORTUNITIES,
     MY_PROJECTS_DATA,
-    DEALER_DIRECTORY_DATA,
     INITIAL_DESIGN_FIRMS,
     INITIAL_DEALERS,
     EMPTY_LEAD,
@@ -11,6 +10,8 @@ import {
 } from './data/index.js';
 import { INITIAL_POSTS, INITIAL_POLLS } from './screens/community/data.js';
 import { INITIAL_MEMBERS } from './screens/members/data.js';
+// Import dealer directory data from the screen-specific location
+import { DEALER_DIRECTORY_DATA } from './screens/resources/dealer-directory/data.js';
 
 import { AppHeader, ProfileMenu, SCREEN_MAP, VoiceModal, SuccessToast } from './ui.jsx';
 import { OrderDetailScreen } from './screens/orders/index.js';

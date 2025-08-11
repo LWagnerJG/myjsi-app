@@ -5,17 +5,25 @@ import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { SearchInput } from '../../components/common/SearchInput.jsx';
 import { ORDER_DATA, STATUS_COLORS } from './data.js';
 
+/* ----------------------- Small helpers ----------------------- */
+const formatCompanyName = (name) =>
+    name ? name.toLowerCase().replace(/\b(\w)/g, (s) => s.toUpperCase()) : '';
+
+const currency0 = (n = 0) =>
+    `$${Number(n).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+
+/* ----------------------- Calendar View ----------------------- */
 export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState(null);
 
     const ordersByDate = useMemo(() => {
         const map = new Map();
-        orders.forEach(order => {
+        orders.forEach((order) => {
             const dateStr = order[dateType];
             if (dateStr) {
-                const date = new Date(dateStr);
-                const key = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+                const d = new Date(dateStr);
+                const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
                 if (!map.has(key)) map.set(key, []);
                 map.get(key).push(order);
             }
@@ -57,8 +65,11 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
                     </button>
                 </div>
 
-                <div className="grid grid-cols-7 gap-1 text-center text-xs font-semibold" style={{ color: theme.colors.textSecondary }}>
-                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
+                <div
+                    className="grid grid-cols-7 gap-1 text-center text-xs font-semibold"
+                    style={{ color: theme.colors.textSecondary }}
+                >
+                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
                         <div key={d}>{d}</div>
                     ))}
                 </div>
@@ -66,7 +77,7 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
                     {blanks.map((_, i) => (
                         <div key={`b-${i}`} />
                     ))}
-                    {days.map(day => {
+                    {days.map((day) => {
                         const date = new Date(year, month, day);
                         const isSelected = selectedDate?.toDateString() === date.toDateString();
                         const key = `${year}-${month}-${day}`;
@@ -86,7 +97,7 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
                                 </span>
                                 {hasOrder && (
                                     <span className="text-[10px]" style={{ color: theme.colors.textSecondary }}>
-                                        ${dayTotal.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                                        {currency0(dayTotal)}
                                     </span>
                                 )}
                             </button>
@@ -100,7 +111,7 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
                     <h3 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>
                         Orders for {selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </h3>
-                    {ordersForSelectedDate.map(order => (
+                    {ordersForSelectedDate.map((order) => (
                         <GlassCard
                             key={order.orderNumber}
                             theme={theme}
@@ -121,11 +132,9 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
                             </div>
                             <div className="text-right flex-shrink-0">
                                 <p className="font-semibold text-lg whitespace-nowrap" style={{ color: theme.colors.textPrimary }}>
-                                    ${(order.net || 0).toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                                    {currency0(order.net)}
                                 </p>
-                                <p className="text-xs" style={{ color: theme.colors.textSecondary }}>
-                                    #{order.orderNumber}
-                                </p>
+                                {/* keep SO off this card; detail page will show it */}
                             </div>
                         </GlassCard>
                     ))}
@@ -135,6 +144,97 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
     );
 };
 
+/* ----------------------- Group Tile ----------------------- */
+const GroupTile = ({ theme, dateKey, group, onNavigate }) => {
+    // Normalize TZ for label
+    const date = new Date(dateKey);
+    date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
+    const formatted = date.toLocaleDateString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric'
+    });
+
+    // Shared typography for header date & total
+    const headerTextStyle = {
+        color: theme.colors.textPrimary
+    };
+
+    return (
+        <GlassCard theme={theme} className="p-0 overflow-hidden">
+            {/* Header inside the card: date (L) and total (R), same style */}
+            <div
+                className="flex items-center justify-between px-4 py-3"
+                style={{
+                    background:
+                        'linear-gradient(180deg, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0.00) 100%)',
+                    borderBottom: `1px solid ${theme.colors.border}`
+                }}
+            >
+                <h2 className="font-semibold text-base tracking-wide" style={headerTextStyle}>
+                    {formatted}
+                </h2>
+                <div className="font-semibold text-base tracking-wide" style={headerTextStyle}>
+                    {currency0(group.total)}
+                </div>
+            </div>
+
+            {/* Orders */}
+            <div className="p-2 space-y-2">
+                {group.orders.map((order, idx) => {
+                    const statusColor = STATUS_COLORS[order.status] || theme.colors.secondary;
+                    const showDivider = idx < group.orders.length - 1;
+
+                    return (
+                        <React.Fragment key={order.orderNumber}>
+                            <button
+                                onClick={() => onNavigate(`orders/${order.orderNumber}`)}
+                                className="w-full text-left p-3 transition-all duration-200 active:scale-[0.99] hover:bg-black/5 rounded-xl"
+                            >
+                                <div className="flex items-center justify-between gap-4">
+                                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                                        <div
+                                            className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                                            style={{ backgroundColor: statusColor }}
+                                        />
+                                        <div className="min-w-0">
+                                            <p
+                                                className="font-semibold truncate text-base"
+                                                style={{ color: theme.colors.textPrimary }}
+                                            >
+                                                {order.details || 'N/A'}
+                                            </p>
+                                            <p className="text-sm truncate" style={{ color: theme.colors.textSecondary }}>
+                                                {formatCompanyName(order.company)}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="text-right flex-shrink-0">
+                                        {/* Same vibe as header but a tad smaller */}
+                                        <p
+                                            className="font-semibold text-[15px] whitespace-nowrap tracking-wide"
+                                            style={{ color: theme.colors.textPrimary }}
+                                        >
+                                            {currency0(order.net)}
+                                        </p>
+                                        {/* SO hidden here; still searchable & shown on detail page */}
+                                    </div>
+                                </div>
+                            </button>
+
+                            {showDivider && (
+                                <div className="mx-4" style={{ borderTop: `1px dashed ${theme.colors.border}` }} />
+                            )}
+                        </React.Fragment>
+                    );
+                })}
+            </div>
+        </GlassCard>
+    );
+};
+
+/* ----------------------- Orders Screen ----------------------- */
 export const OrdersScreen = ({ theme, onNavigate }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [dateType, setDateType] = useState('shipDate');
@@ -144,14 +244,12 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
     const scrollContainerRef = useRef(null);
     const filterMenuRef = useRef(null);
 
-    const formatCompanyName = name => (name ? name.toLowerCase().replace(/\b(\w)/g, s => s.toUpperCase()) : '');
-
     const handleScroll = useCallback(() => {
         if (scrollContainerRef.current) setIsScrolled(scrollContainerRef.current.scrollTop > 10);
     }, []);
 
     useEffect(() => {
-        const handleClickOutside = e => {
+        const handleClickOutside = (e) => {
             if (filterMenuRef.current && !filterMenuRef.current.contains(e.target)) setShowDateFilter(false);
         };
         document.addEventListener('mousedown', handleClickOutside);
@@ -160,7 +258,7 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
 
     const filteredOrders = useMemo(() => {
         return ORDER_DATA.filter(
-            order =>
+            (order) =>
                 (order.company?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
                 (order.details?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
                 (order.orderNumber?.toLowerCase() || '').includes(searchTerm.toLowerCase())
@@ -171,11 +269,11 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
         const groups = filteredOrders.reduce((acc, order) => {
             const dateStr = order[dateType];
             if (!dateStr || isNaN(new Date(dateStr))) return acc;
-            const date = new Date(dateStr);
-            const groupKey = date.toISOString().split('T')[0];
-            if (!acc[groupKey]) acc[groupKey] = { orders: [], total: 0 };
-            acc[groupKey].orders.push(order);
-            acc[groupKey].total += order.net || 0;
+            const d = new Date(dateStr);
+            const key = d.toISOString().split('T')[0];
+            if (!acc[key]) acc[key] = { orders: [], total: 0 };
+            acc[key].orders.push(order);
+            acc[key].total += order.net || 0;
             return acc;
         }, {});
         return groups;
@@ -188,6 +286,7 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
 
     return (
         <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
+            {/* Top bar */}
             <div
                 className={`sticky top-0 z-10 transition-all duration-300 ${isScrolled ? 'shadow-md' : ''}`}
                 style={{
@@ -205,17 +304,28 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                         theme={theme}
                         className="flex-grow"
                     />
+
                     <div className="relative">
                         <button
-                            onClick={() => setShowDateFilter(f => !f)}
-                            className="p-2.5 rounded-full shadow-sm transition-all duration-200 active:scale-90 bg-white border border-gray-200"
-                            style={{ minHeight: 0, height: 44, width: 44, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                            onClick={() => setShowDateFilter((f) => !f)}
+                            className="p-2.5 rounded-full transition-all duration-200 active:scale-90 border"
+                            style={{
+                                minHeight: 0,
+                                height: 44,
+                                width: 44,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                backgroundColor: theme.colors.subtle,
+                                borderColor: theme.colors.border
+                            }}
                         >
                             <span className="sr-only">Filter</span>
                             <Filter className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />
                         </button>
+
                         {showDateFilter && (
-                            <GlassCard ref={filterMenuRef} theme={theme} className="absolute top-14 right-0 z-20 w-40 p-2">
+                            <GlassCard ref={filterMenuRef} theme={theme} className="absolute top-14 right-0 z-20 w-44 p-2">
                                 <button
                                     onClick={() => {
                                         setDateType('shipDate');
@@ -247,107 +357,47 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                             </GlassCard>
                         )}
                     </div>
+
                     <button
-                        onClick={() => setViewMode(v => (v === 'list' ? 'calendar' : 'list'))}
-                        className="p-2.5 rounded-full shadow-sm transition-all duration-200 active:scale-90 bg-white border border-gray-200"
-                        style={{ minHeight: 0, height: 44, width: 44, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        onClick={() => setViewMode((v) => (v === 'list' ? 'calendar' : 'list'))}
+                        className="p-2.5 rounded-full transition-all duration-200 active:scale-90 border"
+                        style={{
+                            minHeight: 0,
+                            height: 44,
+                            width: 44,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: theme.colors.subtle,
+                            borderColor: theme.colors.border
+                        }}
                     >
                         <Calendar className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />
                     </button>
                 </div>
             </div>
 
+            {/* Content */}
             <div ref={scrollContainerRef} onScroll={handleScroll} className="flex-1 overflow-y-auto scrollbar-hide">
                 <div className="px-4 pt-4 pb-24 space-y-4 scrollbar-hide">
                     {viewMode === 'list' ? (
-                        <div className="space-y-6">
-                            {sortedGroupKeys.map(dateKey => {
-                                const date = new Date(dateKey);
-                                date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
-                                const formattedDate = date.toLocaleDateString('en-US', {
-                                    weekday: 'short',
-                                    month: 'short',
-                                    day: 'numeric'
-                                });
-
-                                const dayTotal = groupedOrders[dateKey].total;
-
-                                return (
-                                    <div key={dateKey}>
-                                        <div className="px-1 pb-2 flex items-center justify-between">
-                                            <h2 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>
-                                                {formattedDate}
-                                            </h2>
-                                            <span
-                                                className="px-2 py-1 rounded-full text-xs font-semibold"
-                                                style={{
-                                                    backgroundColor: theme.colors.subtle,
-                                                    border: `1px solid ${theme.colors.border}`,
-                                                    color: theme.colors.textPrimary
-                                                }}
-                                                title="Day total"
-                                            >
-                                                ${dayTotal.toLocaleString('en-US', { maximumFractionDigits: 0 })}
-                                            </span>
-                                        </div>
-
-                                        <GlassCard theme={theme} className="p-2 space-y-2">
-                                            {groupedOrders[dateKey].orders.map((order, index) => {
-                                                const statusColor = STATUS_COLORS[order.status] || theme.colors.secondary;
-
-                                                return (
-                                                    <React.Fragment key={order.orderNumber}>
-                                                        <button
-                                                            onClick={() => onNavigate(`orders/${order.orderNumber}`)}
-                                                            className="w-full text-left p-3 transition-all duration-200 active:scale-[0.99] hover:bg-black/5 rounded-xl"
-                                                        >
-                                                            <div className="flex items-center justify-between gap-4">
-                                                                <div className="flex items-center gap-3 flex-1 min-w-0">
-                                                                    <div
-                                                                        className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                                                                        style={{ backgroundColor: statusColor }}
-                                                                    />
-                                                                    <div className="min-w-0">
-                                                                        <p
-                                                                            className="font-semibold truncate text-base"
-                                                                            style={{ color: theme.colors.textPrimary }}
-                                                                        >
-                                                                            {order.details || 'N/A'}
-                                                                        </p>
-                                                                        <p className="text-sm truncate" style={{ color: theme.colors.textSecondary }}>
-                                                                            {formatCompanyName(order.company)}
-                                                                        </p>
-                                                                    </div>
-                                                                </div>
-
-                                                                <div className="text-right flex-shrink-0">
-                                                                    <p className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>
-                                                                        ${(order.net || 0).toLocaleString('en-US', { maximumFractionDigits: 0 })}
-                                                                    </p>
-                                                                    <p className="text-xs" style={{ color: theme.colors.textSecondary }}>
-                                                                        #{order.orderNumber}
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                        </button>
-
-                                                        {index < groupedOrders[dateKey].orders.length - 1 && (
-                                                            <div className="mx-4" style={{ borderTop: `1px dashed ${theme.colors.border}` }} />
-                                                        )}
-                                                    </React.Fragment>
-                                                );
-                                            })}
-                                        </GlassCard>
-                                    </div>
-                                );
-                            })}
+                        <div className="space-y-4">
+                            {sortedGroupKeys.map((dateKey) => (
+                                <GroupTile
+                                    key={dateKey}
+                                    theme={theme}
+                                    dateKey={dateKey}
+                                    group={groupedOrders[dateKey]}
+                                    onNavigate={onNavigate}
+                                />
+                            ))}
                         </div>
                     ) : (
                         <OrderCalendarView
                             orders={filteredOrders}
                             theme={theme}
                             dateType={dateType}
-                            onOrderClick={order => onNavigate(`orders/${order.orderNumber}`)}
+                            onOrderClick={(order) => onNavigate(`orders/${order.orderNumber}`)}
                         />
                     )}
                 </div>

@@ -1,152 +1,106 @@
-// Contracts specific data
+// Contracts: service-based discounts + accurate dealer/rep commissions per screenshot
+// Keep it high-level for the UI.
+
 export const CONTRACTS_DATA = {
     omnia: {
         id: 'omnia',
-        name: 'Omnia Partners',
-        type: 'Cooperative Purchasing',
-        contractNumber: 'R191902',
-        effectiveDate: '2019-04-01',
-        expirationDate: '2024-03-31',
-        tiers: [
-            { 
-                name: 'Tier 1', 
-                discount: '10%', 
-                dealerCommission: '5%', 
-                repCommission: '5%',
-                requirements: 'Minimum $50K annual volume'
+        name: 'Omnia Partners (TCPN)',
+        documentUrl: 'https://webresources.jsifurniture.com/production/uploads/jsi_contracts_tcpn.pdf',
+        discounts: [
+            {
+                label: 'Dock Delivery',
+                discount: '54%',
+                dealerCommission: '15%',
+                repCommission: '3.90%',
             },
-            { 
-                name: 'Tier 2', 
-                discount: '15%', 
-                dealerCommission: '7%', 
-                repCommission: '8%',
-                requirements: 'Minimum $150K annual volume + training completion'
+            {
+                label: 'Inside Delivery',
+                discount: '53%',
+                dealerCommission: '17%',
+                repCommission: '3.83%',
+            },
+            {
+                label: 'Delivered & Installed',
+                discount: '52%',
+                dealerCommission: '18%',
+                repCommission: '3.75%',
             },
         ],
-        eligibleProducts: ['All JSI seating', 'Vision casegoods', 'Tables'],
-        territories: ['All US States', 'Select Canadian Provinces'],
-        note: 'Omnia Partners contract provides access to cooperative purchasing for public sector entities.',
-        documentUrl: 'https://example.com/omnia-contract.pdf',
-        contactInfo: {
-            name: 'Sarah Johnson',
-            email: 'sarah.johnson@omniapartners.com',
-            phone: '(555) 123-4567'
-        }
+        marginCalcs: [
+            '54/15 = 60.90%',
+            '53/17 = 60.99%',
+            '52/18 = 60.64%',
+        ],
     },
+
     tips: {
         id: 'tips',
-        name: 'TIPS (The Interlocal Purchasing System)',
-        type: 'Cooperative Purchasing',
-        contractNumber: '230105',
-        effectiveDate: '2023-01-01',
-        expirationDate: '2026-12-31',
-        tiers: [
-            { 
-                name: 'Standard', 
-                discount: '12%', 
-                dealerCommission: '6%', 
-                repCommission: '6%',
-                requirements: 'TIPS membership required'
+        name: 'TIPS / TAPS',
+        documentUrl: 'https://webresources.jsifurniture.com/production/uploads/jsi_contracts_tips_taps.pdf',
+        discounts: [
+            {
+                label: 'Delivery & Installed',
+                discount: '51%',
+                dealerCommission: '24%',
+                repCommission: '3.67%',
             },
-            { 
-                name: 'Volume Tier', 
-                discount: '18%', 
-                dealerCommission: '9%', 
-                repCommission: '9%',
-                requirements: 'Minimum $200K annual volume through TIPS'
+            {
+                label: 'Dock Delivery',
+                discount: '53%',
+                dealerCommission: '20%',
+                repCommission: '3.83%',
             },
         ],
-        eligibleProducts: ['All JSI products', 'Installation services'],
-        territories: ['Texas', 'New Mexico', 'Louisiana', 'Oklahoma'],
-        note: 'TIPS contract serves educational institutions, government entities, and nonprofits.',
-        documentUrl: 'https://example.com/tips-contract.pdf',
-        contactInfo: {
-            name: 'Mike Rodriguez',
-            email: 'mike.rodriguez@tips-usa.com',
-            phone: '(555) 234-5678'
-        }
+        disclaimer: 'Spiff is not allowed.',
     },
+
     premier: {
         id: 'premier',
-        name: 'Premier Healthcare',
-        type: 'Healthcare GPO',
-        contractNumber: 'PHC-2024-JSI',
-        effectiveDate: '2024-01-01',
-        expirationDate: '2026-12-31',
-        tiers: [
-            { 
-                name: 'Basic', 
-                discount: '20%', 
-                dealerCommission: '10%', 
-                repCommission: '10%',
-                requirements: 'Premier member hospital'
+        name: 'Premier (Healthcare GPO)',
+        documentUrl: 'https://webresources.jsifurniture.com/production/uploads/j_contracts_premier.pdf',
+        discounts: [
+            {
+                label: 'Up to $500k list',
+                discount: '56%',
+                dealerCommission: '14%',
+                repCommission: '4.09%',
             },
-            { 
-                name: 'Committed', 
-                discount: '25%', 
-                dealerCommission: '12%', 
-                repCommission: '13%',
-                requirements: 'Premier committed volume agreement'
+            {
+                label: '$500k - $750k list',
+                discount: '57%',
+                dealerCommission: '13%',
+                repCommission: '4.19%',
+            },
+            {
+                label: '$750k+ list',
+                discount: '58%',
+                dealerCommission: '12%',
+                repCommission: '4.29%',
             },
         ],
-        eligibleProducts: ['Healthcare seating', 'Patient room furniture', 'Waiting area furniture'],
-        territories: ['All US States'],
-        note: 'Premier Healthcare contract for hospital and healthcare facility furnishings.',
-        documentUrl: 'https://example.com/premier-contract.pdf',
-        contactInfo: {
-            name: 'Dr. Jennifer Chen',
-            email: 'jennifer.chen@premierinc.com',
-            phone: '(555) 345-6789'
-        }
     },
-    gsa: {
-        id: 'gsa',
-        name: 'GSA Multiple Award Schedule',
-        type: 'Government Contract',
-        contractNumber: 'GS-28F-0086X',
-        effectiveDate: '2023-06-01',
-        expirationDate: '2028-05-31',
-        tiers: [
-            { 
-                name: 'Standard GSA', 
-                discount: '22%', 
-                dealerCommission: '8%', 
-                repCommission: '12%',
-                requirements: 'Federal agency procurement'
-            }
-        ],
-        eligibleProducts: ['All JSI products', 'Installation services', 'Maintenance services'],
-        territories: ['All US States and Territories'],
-        note: 'GSA Schedule contract for federal government procurement.',
-        documentUrl: 'https://example.com/gsa-contract.pdf',
-        contactInfo: {
-            name: 'Robert Miller',
-            email: 'robert.miller@gsa.gov',
-            phone: '(555) 456-7890'
-        }
-    }
 };
 
+// enums kept in case other modules import them
 export const CONTRACT_TYPES = [
     { value: 'cooperative', label: 'Cooperative Purchasing' },
     { value: 'gpo', label: 'Group Purchasing Organization' },
     { value: 'government', label: 'Government Contract' },
-    { value: 'corporate', label: 'Corporate Agreement' }
+    { value: 'corporate', label: 'Corporate Agreement' },
 ];
 
 export const CONTRACT_STATUS = {
     ACTIVE: 'active',
     EXPIRED: 'expired',
     PENDING: 'pending',
-    SUSPENDED: 'suspended'
+    SUSPENDED: 'suspended',
 };
 
 export const getContractStatus = (contract) => {
     const today = new Date();
-    const expiration = new Date(contract.expirationDate);
-    const effective = new Date(contract.effectiveDate);
-    
-    if (today < effective) return CONTRACT_STATUS.PENDING;
-    if (today > expiration) return CONTRACT_STATUS.EXPIRED;
+    const expiration = contract.expirationDate ? new Date(contract.expirationDate) : null;
+    const effective = contract.effectiveDate ? new Date(contract.effectiveDate) : null;
+    if (effective && today < effective) return CONTRACT_STATUS.PENDING;
+    if (expiration && today > expiration) return CONTRACT_STATUS.EXPIRED;
     return CONTRACT_STATUS.ACTIVE;
 };
