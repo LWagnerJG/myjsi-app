@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Search, Mic } from 'lucide-react';
 
-export const SearchInput = React.memo(function SearchInput({
+// HomeSearchInput: Only for home screen - animated placeholder + voice
+export const HomeSearchInput = React.memo(function HomeSearchInput({
     theme,
     value = '',
     onChange,
@@ -39,7 +40,6 @@ export const SearchInput = React.memo(function SearchInput({
     const DISPLAY_MS = 8200;
     const FADE_MS = 1500;
     const FADE_IN_DELAY = 360;
-    const H = 56;
 
     const phraseFor = (i) => phrases[i % phrases.length];
 
@@ -85,22 +85,22 @@ export const SearchInput = React.memo(function SearchInput({
         @keyframes siPulseSlow { 0% { transform: scale(1) } 50% { transform: scale(1.01) } 100% { transform: scale(1) } }
       `}</style>
 
-            <div className="flex items-center justify-center mr-2" style={{ width: 24, height: 24 }}>
+            <div className="flex items-center justify-center mr-3" style={{ width: 24, height: 24 }}>
                 <Search className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
             </div>
 
             <div className="flex-1 relative">
                 <input
                     value={value}
-                    onChange={(e) => onChange(e.target.value)}
+                    onChange={(e) => onChange && onChange(e.target.value)}
                     onFocus={handleFocus}
                     onBlur={handleBlur}
                     placeholder=""
-                    className="w-full bg-transparent outline-none text-[14px]"
+                    className="w-full bg-transparent outline-none text-[15px]"
                     style={{
                         color: theme.colors.textPrimary,
-                        height: H,
-                        lineHeight: `${H}px`,
+                        height: 56,
+                        lineHeight: '56px',
                         fontWeight: 400,
                         WebkitFontSmoothing: 'antialiased',
                     }}
@@ -135,8 +135,7 @@ export const SearchInput = React.memo(function SearchInput({
                                 zIndex: 1,
                                 color: theme.colors.textSecondary,
                                 opacity: 0.52,
-                                animation: `siFadeIn ${FADE_MS}ms ${FADE_IN_DELAY}ms ease both${shouldPulse ? `, siPulseSlow 2600ms ease-in-out infinite` : ''
-                                    }`,
+                                animation: `siFadeIn ${FADE_MS}ms ${FADE_IN_DELAY}ms ease both${shouldPulse ? `, siPulseSlow 2600ms ease-in-out infinite` : ''}`,
                                 transformOrigin: 'center',
                                 fontWeight: 400,
                                 WebkitFontSmoothing: 'antialiased',
@@ -151,12 +150,40 @@ export const SearchInput = React.memo(function SearchInput({
             <button
                 type="button"
                 onClick={onVoiceClick}
-                className="ml-2 w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                className="ml-3 w-10 h-10 rounded-full flex items-center justify-center transition-colors hover:bg-black/5 dark:hover:bg-white/5"
                 style={{ color: theme.colors.textSecondary }}
                 aria-label="Voice input"
             >
                 <Mic className="w-5 h-5" />
             </button>
         </form>
+    );
+});
+
+// Standard search input for all other pages - no animation, no voice
+export const SearchInput = React.memo(function SearchInput({
+    value = '',
+    onChange,
+    placeholder,
+    theme,
+    className = '',
+    style = {},
+}) {
+    return (
+        <div
+            className={`flex items-center flex-1 bg-white rounded-full shadow-sm border border-gray-200/80 px-4 ${className}`}
+            style={{ height: 44, ...style }}
+        >
+            <Search className="w-5 h-5 mr-2.5" style={{ color: theme.colors.textSecondary }} />
+            <input
+                type="text"
+                value={value}
+                onChange={(e) => onChange && onChange(e.target.value)}
+                placeholder={placeholder}
+                className="w-full h-full bg-transparent outline-none text-[15px]"
+                style={{ color: theme.colors.textPrimary }}
+                aria-label={placeholder}
+            />
+        </div>
     );
 });

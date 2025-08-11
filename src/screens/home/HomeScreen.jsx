@@ -1,7 +1,7 @@
 ﻿import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { MENU_ITEMS, allApps } from '../../data.jsx';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
-import { SearchInput } from '../../components/common/SearchInput.jsx';
+import { HomeSearchInput } from '../../components/common/SearchInput.jsx';
 import { DropdownPortal } from '../../DropdownPortal.jsx';
 
 const SmartSearch = ({ theme, onNavigate, onAskAI, onVoiceActivate }) => {
@@ -51,21 +51,16 @@ const SmartSearch = ({ theme, onNavigate, onAskAI, onVoiceActivate }) => {
         }
     };
 
-    const PILL = {
-        backgroundColor: '#FFFFFF',
-        border: `1px solid ${theme.colors.border}`,
-        boxShadow: `0 8px 24px ${theme.colors.shadow}`,
-        borderRadius: 9999,
-        height: 56,
-    };
-
     return (
         <div ref={anchorRef} className="relative">
-            <div className="w-full flex items-center px-4" style={PILL}>
-                <SearchInput
+            <div 
+                className="w-full flex items-center px-4 bg-white rounded-full border border-gray-200 shadow-lg"
+                style={{ height: 56 }}
+            >
+                <HomeSearchInput
                     onSubmit={submit}
                     value={query}
-                    onChange={(value) => setQuery(value)}
+                    onChange={setQuery}
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setIsFocused(false)}
                     onVoiceClick={() => onVoiceActivate('Voice Activated')}
@@ -122,7 +117,6 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate }) => {
 
     return (
         <div className="flex flex-col h-full">
-            {/* More margin below search bar */}
             <div className="px-4 pt-3 pb-4">
                 <SmartSearch
                     theme={theme}
@@ -141,7 +135,6 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate }) => {
                         style={SURFACE_TILE}
                     >
                         <item.icon className="w-[22px] h-[22px] mb-1" style={{ color: theme.colors.accent }} strokeWidth={1.6} />
-                        {/* label slightly bigger */}
                         <span className="text-[16px] font-semibold tracking-tight" style={{ color: theme.colors.textPrimary }}>
                             {item.label}
                         </span>

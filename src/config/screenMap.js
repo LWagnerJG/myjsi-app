@@ -32,6 +32,7 @@ import { PresentationsScreen } from '../screens/resources/presentations/index.js
 import { RequestFieldVisitScreen } from '../screens/resources/request-field-visit/index.js';
 import { NewDealerSignUpScreen } from '../screens/resources/new-dealer-signup/index.js';
 import { SearchFabricsScreen } from '../screens/resources/search-fabrics/index.js';
+import { ComColRequest } from '../screens/resources/search-fabrics/ComColRequest.jsx';
 
 // Import remaining utility screens
 import { ResourceDetailScreen } from '../screens/utility/UtilityScreens.jsx';
@@ -78,6 +79,7 @@ export const SCREEN_MAP = {
     'new-dealer-signup': NewDealerSignUpScreen,
     'request-com-yardage': RequestComYardageScreen,
     'search-fabrics': SearchFabricsScreen,
+    'comcol-request': ComColRequest,
 };
 
 // Export components that are still needed in other parts of the app
@@ -109,6 +111,7 @@ export {
     RequestFieldVisitScreen,
     NewDealerSignUpScreen,
     SearchFabricsScreen,
+    ComColRequest,
 
     // Sales components
     SalesScreen,

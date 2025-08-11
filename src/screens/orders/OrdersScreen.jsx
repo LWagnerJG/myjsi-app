@@ -163,8 +163,7 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
             order =>
                 (order.company?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
                 (order.details?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-                (order.orderNumber?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-                (order.po?.toLowerCase() || '').includes(searchTerm.toLowerCase())
+                (order.orderNumber?.toLowerCase() || '').includes(searchTerm.toLowerCase())
         );
     }, [searchTerm]);
 
@@ -201,27 +200,17 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                 <div className="p-4 flex items-center space-x-2">
                     <SearchInput
                         value={searchTerm}
-                        onChange={e => setSearchTerm(e.target.value)}
-                        placeholder="Search Orders..."
+                        onChange={setSearchTerm}
+                        placeholder="Search Orders"
                         theme={theme}
                         className="flex-grow"
-                        style={{
-                            backgroundColor: '#ffffff',
-                            border: '1px solid #E5E7EB',
-                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
-                            color: theme.colors.textPrimary,
-                            padding: '12px 16px',
-                            borderRadius: '999px'
-                        }}
                     />
                     <div className="relative">
                         <button
                             onClick={() => setShowDateFilter(f => !f)}
-                            className="p-3.5 rounded-full shadow-sm transition-all duration-200 active:scale-90"
-                            style={{ backgroundColor: '#ffffff', border: '1px solid #ffffff' }}
+                            className="p-2.5 rounded-full shadow-sm transition-all duration-200 active:scale-90 bg-white border border-gray-200"
+                            style={{ minHeight: 0, height: 44, width: 44, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                         >
-                            <svg width="0" height="0" />
-                            {/* icon from SearchInput theme */}
                             <span className="sr-only">Filter</span>
                             <Filter className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />
                         </button>
@@ -260,8 +249,8 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                     </div>
                     <button
                         onClick={() => setViewMode(v => (v === 'list' ? 'calendar' : 'list'))}
-                        className="p-3.5 rounded-full shadow-sm transition-all duration-200 active:scale-90"
-                        style={{ backgroundColor: '#ffffff', border: '1px solid #ffffff' }}
+                        className="p-2.5 rounded-full shadow-sm transition-all duration-200 active:scale-90 bg-white border border-gray-200"
+                        style={{ minHeight: 0, height: 44, width: 44, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                     >
                         <Calendar className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />
                     </button>

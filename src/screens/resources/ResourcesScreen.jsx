@@ -42,29 +42,30 @@ export const ResourcesScreen = ({ theme, onNavigate }) => {
         return Database;
     };
 
-    const ResourceListItem = ({ item }) => {
-        const IconComponent = getResourceIcon(item.label);
-        const sublabel = sublabelMap[item.label] || 'Access resource';
+    const Row = ({ item, isFirst, isLast }) => {
+        const Icon = getResourceIcon(item.label);
+        const sub = sublabelMap[item.label] || 'Access resource';
+
+        // single divider lines between rows only
+        const borderTop = isFirst ? 'transparent' : theme.colors.border;
+        const borderBottom = 'transparent'; // never on bottom to avoid double bars
 
         return (
             <li>
                 <button
                     onClick={() => onNavigate(item.nav)}
-                    // TWEAK: Increased roundness to 'rounded-full' for a pill shape.
-                    className="group w-full p-3 text-left rounded-full transition-all duration-200 hover:shadow-md active:scale-[0.99] flex items-center border"
-                    style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.border }}
+                    className="group w-full py-3 text-left flex items-center transition-colors duration-150"
+                    style={{
+                        backgroundColor: 'transparent',
+                        borderTop: `1px solid ${borderTop}`,
+                        borderBottom: `1px solid ${borderBottom}`
+                    }}
                 >
                     <div
-                        className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center transition-all duration-200 group-hover:scale-110"
-                        // STYLE CHANGE: Simplified style, no more conditional border.
+                        className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center transition-transform duration-200 group-hover:scale-105"
                         style={{ backgroundColor: theme.colors.subtle }}
                     >
-                        <IconComponent
-                            className="w-5 h-5"
-                            style={{ color: theme.colors.accent }}
-                            // STYLE CHANGE: Consistent stroke width for all icons.
-                            strokeWidth={1.5}
-                        />
+                        <Icon className="w-5 h-5" style={{ color: theme.colors.accent }} strokeWidth={1.5} />
                     </div>
 
                     <div className="flex-1 ml-4">
@@ -72,46 +73,60 @@ export const ResourcesScreen = ({ theme, onNavigate }) => {
                             {item.label}
                         </h4>
                         <p className="text-xs" style={{ color: theme.colors.textSecondary }}>
-                            {sublabel}
+                            {sub}
                         </p>
                     </div>
 
-                    <ChevronRight className="w-5 h-5 ml-2 flex-shrink-0" style={{ color: theme.colors.border }} />
+                    <ChevronRight
+                        className="w-5 h-5 ml-2 flex-shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
+                        style={{ color: theme.colors.border }}
+                    />
                 </button>
             </li>
         );
     };
 
-    const CategorySection = ({ category, isFirst }) => {
+    const Category = ({ category, isFirst }) => {
         return (
-            <div className={`space-y-3 ${!isFirst ? 'pt-5 border-t' : ''}`} style={{ borderColor: theme.colors.border }}>
-                <h3 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>
-                    {category.category}
-                </h3>
+            <section
+                className={isFirst ? '' : 'pt-6'}
+                style={{ borderTop: isFirst ? 'none' : `1px solid ${theme.colors.border}` }}
+            >
+                {/* Header: a hairline underline + slightly larger weight/size */}
+                <div
+                    className="pb-3"
+                    style={{
+                        borderBottom: `1px solid ${theme.colors.border}`
+                    }}
+                >
+                    <h3
+                        className="font-extrabold tracking-tight"
+                        style={{ color: theme.colors.textPrimary, fontSize: '1.125rem' }} // ~text-lg
+                    >
+                        {category.category}
+                    </h3>
+                </div>
 
-                <ul className="space-y-2">
-                    {/* CHANGE: Mapping directly over category.items, as sorting is no longer needed. */}
-                    {category.items?.map((item) => (
-                        <ResourceListItem
+                <ul className="mt-1">
+                    {category.items?.map((item, idx) => (
+                        <Row
                             key={item.nav}
                             item={item}
+                            isFirst={idx === 0}
+                            isLast={idx === category.items.length - 1}
                         />
                     ))}
                 </ul>
-            </div>
+            </section>
         );
     };
 
     return (
         <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
-            <div className="flex-1 overflow-y-auto px-4 pt-2 pb-4 scrollbar-hide">
-                <GlassCard theme={theme} className="p-4 space-y-5">
-                    {resourceCategories.map((category, index) => (
-                        <CategorySection
-                            key={category.category}
-                            category={category}
-                            isFirst={index === 0}
-                        />
+            <div className="flex-1 overflow-y-auto px-4 pt-2 pb-4">
+                <GlassCard theme={theme} className="p-4 space-y-6">
+                    {resourceCategories.map((cat, i) => (
+                        <Category key={cat.category} category={cat} isFirst={i === 0} />
                     ))}
                 </GlassCard>
             </div>
