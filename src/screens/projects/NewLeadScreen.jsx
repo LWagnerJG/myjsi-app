@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useLayoutEffect, useEffect, useCallback } from 'react';
+﻿import React, { useState, useMemo, useRef, useLayoutEffect, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { FormInput } from '../../components/forms/FormInput.jsx';
@@ -7,6 +7,7 @@ import { ToggleSwitch } from '../../components/forms/ToggleSwitch.jsx';
 import { ProbabilitySlider } from '../../components/forms/ProbabilitySlider.jsx';
 import { ToggleButtonGroup } from '../../components/common/ToggleButtonGroup.jsx';
 import { FormSection, SettingsRow } from '../../components/forms/FormSections.jsx';
+import { SpotlightMultiSelect } from '../../components/common/SpotlightMultiSelect.jsx';
 
 // Import data from proper feature-based sources
 import { 
@@ -208,82 +209,6 @@ const AutoCompleteCombobox = ({
     );
 };
 
-
-// Multi-select Combobox Component for Stakeholders
-const MultiSelectCombobox = ({
-    label,
-    selectedItems = [],
-    onAddItem,
-    onRemoveItem,
-    options = [],
-    onAddNew,
-    placeholder = '',
-    theme
-}) => {
-    const [searchValue, setSearchValue] = useState('');
-    
-    const handleSelectItem = useCallback((item) => {
-        if (!selectedItems.includes(item)) {
-            onAddItem(item);
-        }
-        setSearchValue('');
-    }, [selectedItems, onAddItem]);
-    
-    const handleAddNew = useCallback((newItem) => {
-        if (onAddNew) {
-            onAddNew(newItem);
-        }
-        onAddItem(newItem);
-        setSearchValue('');
-    }, [onAddNew, onAddItem]);
-    
-    const availableOptions = useMemo(() => {
-        return options.filter(option => !selectedItems.includes(option));
-    }, [options, selectedItems]);
-    
-    return (
-        <div className="space-y-2">
-            <AutoCompleteCombobox
-                label={label}
-                value={searchValue}
-                onChange={setSearchValue}
-                onSelect={handleSelectItem}
-                onAddNew={handleAddNew}
-                placeholder={placeholder}
-                options={availableOptions}
-                theme={theme}
-                resetOnSelect={true}
-            />
-
-            {/* Display selected items */}
-            {selectedItems.length > 0 && (
-                <div className="flex flex-wrap gap-2 pt-2">
-                    {selectedItems.map((item, index) => (
-                        <div
-                            key={index}
-                            className="flex items-center space-x-2 px-3 py-1.5 rounded-full border text-sm font-medium transition-colors"
-                            style={{
-                                backgroundColor: theme.colors.surface,
-                                borderColor: theme.colors.border,
-                                color: theme.colors.textPrimary
-                            }}
-                        >
-                            <span>{item}</span>
-                            <button
-                                type="button"
-                                onClick={() => onRemoveItem(item)}
-                                className="w-4 h-4 flex items-center justify-center rounded-full hover:bg-red-100 transition-colors"
-                            >
-                                <X className="w-3 h-3 text-red-500" />
-                            </button>
-                        </div>
-                    ))}
-                </div>
-            )}
-        </div>
-    );
-};
-
 // Material Button Group Component for Vision options
 const MaterialButtonGroup = ({ label, options, theme, selectedMaterials, onMaterialToggle }) => (
     <div>
@@ -397,7 +322,7 @@ export const NewLeadScreen = ({
     setDesignFirms,
     dealers,
     setDealers,
-    newLeadData,
+    newLeadData = {},
     onNewLeadChange,
 }) => {
     const [productSearch, setProductSearch] = useState('');
@@ -481,7 +406,7 @@ export const NewLeadScreen = ({
     
     return (
         <form onSubmit={handleSubmit} className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
-            <div className="flex-1 overflow-y-auto px-4 pt-12 pb-4 space-y-6 scrollbar-hide">
+            <div className="flex-1 overflow-y-auto px-4 pt-4 pb-4 space-y-6 scrollbar-hide">
                 <FormSection title="Project Details" theme={theme}>
                     <div>
                         <SettingsRow label="Project Name" isFirst={true} theme={theme}>
@@ -558,26 +483,26 @@ export const NewLeadScreen = ({
                     <div>
                         <SettingsRow label="A&D Firm" isFirst={true} theme={theme}>
                             <div className="w-7/12">
-                                <MultiSelectCombobox
+                                <SpotlightMultiSelect
                                     selectedItems={newLeadData.designFirms || []}
                                     onAddItem={addDesignFirm}
                                     onRemoveItem={removeDesignFirm}
-                                    placeholder="Search..."
                                     options={designFirms || []}
-                                    onAddNew={(f) => setDesignFirms(p => [...new Set([f, ...p])])}
+                                    onAddNew={(f) => setDesignFirms((p) => [...new Set([f, ...p])])}
+                                    placeholder="Search..."
                                     theme={theme}
                                 />
                             </div>
                         </SettingsRow>
                         <SettingsRow label="Dealer" theme={theme}>
                             <div className="w-7/12">
-                                <MultiSelectCombobox
+                                <SpotlightMultiSelect
                                     selectedItems={newLeadData.dealers || []}
                                     onAddItem={addDealer}
                                     onRemoveItem={removeDealer}
-                                    placeholder="Search..."
                                     options={dealers || []}
-                                    onAddNew={(d) => setDealers(p => [...new Set([d, ...p])])}
+                                    onAddNew={(d) => setDealers((p) => [...new Set([d, ...p])])}
+                                    placeholder="Search..."
                                     theme={theme}
                                 />
                             </div>
@@ -594,38 +519,56 @@ export const NewLeadScreen = ({
                                 theme={theme}
                             />
                         </SettingsRow>
+                        {/* Row 1: label (left) + toggle (right) */}
                         <SettingsRow label="Competition?" theme={theme}>
-                            <div className="w-full">
-                                <div className="flex justify-end mb-2">
+                            <div className="w-full flex justify-end">
+                                <div className="w-7/12 h-10 flex items-center justify-end">
                                     <ToggleSwitch
                                         checked={!!newLeadData.competitionPresent}
-                                        onChange={e => updateField('competitionPresent', e.target.checked)}
+                                        onChange={(e) => updateField('competitionPresent', e.target.checked)}
                                         theme={theme}
                                     />
                                 </div>
-                                {newLeadData.competitionPresent && (
-                                    <div className="animate-fade-in">
-                                        <div className="p-3 grid grid-cols-3 gap-2 rounded-2xl" style={{ backgroundColor: theme.colors.subtle }}>
-                                            {COMPETITORS.filter(c => c !== 'None').map(c => (
-                                                <button
-                                                    key={c}
-                                                    type="button"
-                                                    onClick={() => toggleCompetitor(c)}
-                                                    className="px-3 py-1.5 text-sm rounded-full font-medium transition-colors border text-center"
-                                                    style={{
-                                                        backgroundColor: (newLeadData.competitors || []).includes(c) ? theme.colors.accent : theme.colors.surface,
-                                                        color: (newLeadData.competitors || []).includes(c) ? theme.colors.surface : theme.colors.textPrimary,
-                                                        borderColor: (newLeadData.competitors || []).includes(c) ? theme.colors.accent : theme.colors.border
-                                                    }}
-                                                >
-                                                    {c}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
                             </div>
                         </SettingsRow>
+
+                        {/* Row 2: full-width chip grid (left edge of tile → right edge of tile) */}
+                        {newLeadData.competitionPresent && (
+                            <div className="-mx-4 mt-3">
+                                <div className="px-4">
+                                    <div
+                                        className="rounded-2xl p-3"
+                                        style={{ backgroundColor: theme.colors.subtle }}
+                                    >
+                                        <div
+                                            className="grid gap-2"
+                                            style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(132px, 1fr))' }}
+                                        >
+                                            {COMPETITORS.filter(c => c !== 'None').map((c) => {
+                                                const on = (newLeadData.competitors || []).includes(c);
+                                                return (
+                                                    <button
+                                                        key={c}
+                                                        type="button"
+                                                        onClick={() => toggleCompetitor(c)}
+                                                        className="px-3 py-1.5 text-[13px] rounded-full font-medium transition-colors border text-center whitespace-nowrap"
+                                                        style={{
+                                                            backgroundColor: on ? theme.colors.accent : theme.colors.surface,
+                                                            color: on ? theme.colors.surface : theme.colors.textPrimary,
+                                                            borderColor: on ? theme.colors.accent : theme.colors.border
+                                                        }}
+                                                    >
+                                                        {c}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+
                     </div>
                     <SettingsRow label="Products" theme={theme}>
                         <div className="w-7/12">

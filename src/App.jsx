@@ -300,6 +300,10 @@ function App() {
         dealers,
         setDealers,
 
+        // new lead
+        newLeadData,
+        onNewLeadChange: handleNewLeadChange,
+
         // theming
         isDarkMode,
         onToggleTheme: () => setIsDarkMode((d) => !d),
