@@ -1,4 +1,3 @@
-// components/common/SearchInput.jsx
 import React, { useEffect, useMemo, useState } from 'react';
 import { Search, Mic } from 'lucide-react';
 
@@ -9,6 +8,8 @@ export const SearchInput = React.memo(function SearchInput({
     onSubmit,
     onVoiceClick,
     className = '',
+    onFocus,
+    onBlur,
 }) {
     const [focused, setFocused] = useState(false);
     const [tick, setTick] = useState(0);
@@ -16,6 +17,7 @@ export const SearchInput = React.memo(function SearchInput({
 
     const phrases = useMemo(
         () => [
+            'Ask me anything...',
             'Find install guides...',
             'Compare product specs...',
             'Start sample order...',
@@ -30,17 +32,16 @@ export const SearchInput = React.memo(function SearchInput({
             'Draft install checklist...',
             'Analyze win chances...',
             'Plan design days...',
-            'Build product comparison...',
         ],
         []
     );
 
     const DISPLAY_MS = 8200;
     const FADE_MS = 1500;
-    const FADE_IN_DELAY = 320;
+    const FADE_IN_DELAY = 360;
+    const H = 56;
 
-    const phraseFor = (i) =>
-        i % 3 === 0 ? 'Ask me anything...' : phrases[(i - 1 + phrases.length) % phrases.length];
+    const phraseFor = (i) => phrases[i % phrases.length];
 
     useEffect(() => {
         const id = setInterval(() => setTick((p) => p + 1), DISPLAY_MS);
@@ -56,15 +57,17 @@ export const SearchInput = React.memo(function SearchInput({
 
     const currentText = phraseFor(tick);
     const isAskCycle = currentText === 'Ask me anything...';
-    const shouldPulse = isAskCycle && tick !== 0; // no pulse on very first render
+    const shouldPulse = isAskCycle && tick !== 0;
     const showHint = !value && !focused;
 
-    const pill = {
-        backgroundColor: theme.colors.surface,
-        border: `1px solid ${theme.colors.border}`,
-        boxShadow: `0 6px 24px ${theme.colors.shadow}`,
-        borderRadius: 9999,
-        height: 56,
+    const handleFocus = (e) => {
+        setFocused(true);
+        if (onFocus) onFocus(e);
+    };
+
+    const handleBlur = (e) => {
+        setFocused(false);
+        if (onBlur) onBlur(e);
     };
 
     return (
@@ -73,7 +76,8 @@ export const SearchInput = React.memo(function SearchInput({
                 e.preventDefault();
                 onSubmit && onSubmit(value);
             }}
-            className={`w-full ${className}`}
+            className={`flex items-center flex-1 ${className}`}
+            autoComplete="off"
         >
             <style>{`
         @keyframes siFadeIn { from { opacity: 0 } to { opacity: .52 } }
@@ -81,31 +85,32 @@ export const SearchInput = React.memo(function SearchInput({
         @keyframes siPulseSlow { 0% { transform: scale(1) } 50% { transform: scale(1.01) } 100% { transform: scale(1) } }
       `}</style>
 
-            <div className="w-full relative flex items-center px-4" style={pill}>
-                <Search className="w-5 h-5 mr-2 flex-shrink-0" style={{ color: theme.colors.textSecondary }} />
+            <div className="flex items-center justify-center mr-2" style={{ width: 24, height: 24 }}>
+                <Search className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
+            </div>
 
+            <div className="flex-1 relative">
                 <input
                     value={value}
-                    onChange={(e) => onChange && onChange(e.target.value)}
-                    onFocus={() => setFocused(true)}
-                    onBlur={() => setFocused(false)}
+                    onChange={(e) => onChange(e.target.value)}
+                    onFocus={handleFocus}
+                    onBlur={handleBlur}
                     placeholder=""
-                    className="flex-1 bg-transparent outline-none text-[13px]"
-                    style={{ color: theme.colors.textPrimary, lineHeight: 1.25 }}
+                    className="w-full bg-transparent outline-none text-[14px]"
+                    style={{
+                        color: theme.colors.textPrimary,
+                        height: H,
+                        lineHeight: `${H}px`,
+                        fontWeight: 400,
+                        WebkitFontSmoothing: 'antialiased',
+                    }}
                     aria-label="Search"
                 />
 
                 {showHint && (
                     <div
-                        className="pointer-events-none absolute left-11 right-11"
-                        style={{
-                            top: 0,
-                            bottom: 0,
-                            display: 'flex',
-                            alignItems: 'center',
-                            overflow: 'visible',
-                            lineHeight: 1.25,
-                        }}
+                        className="pointer-events-none absolute"
+                        style={{ left: 0, right: 0, top: 0, bottom: 0, display: 'flex', alignItems: 'center' }}
                         aria-hidden="true"
                     >
                         {prevText && (
@@ -116,7 +121,8 @@ export const SearchInput = React.memo(function SearchInput({
                                     color: theme.colors.textSecondary,
                                     opacity: 0.52,
                                     animation: `siFadeOut ${FADE_MS}ms ease both`,
-                                    willChange: 'opacity',
+                                    fontWeight: 400,
+                                    WebkitFontSmoothing: 'antialiased',
                                 }}
                             >
                                 {prevText}
@@ -132,24 +138,25 @@ export const SearchInput = React.memo(function SearchInput({
                                 animation: `siFadeIn ${FADE_MS}ms ${FADE_IN_DELAY}ms ease both${shouldPulse ? `, siPulseSlow 2600ms ease-in-out infinite` : ''
                                     }`,
                                 transformOrigin: 'center',
-                                willChange: 'opacity, transform',
+                                fontWeight: 400,
+                                WebkitFontSmoothing: 'antialiased',
                             }}
                         >
                             {currentText}
                         </span>
                     </div>
                 )}
-
-                <button
-                    type="button"
-                    onClick={onVoiceClick}
-                    className="ml-2 w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-black/5"
-                    style={{ color: theme.colors.textSecondary }}
-                    aria-label="Voice input"
-                >
-                    <Mic className="w-5 h-5" />
-                </button>
             </div>
+
+            <button
+                type="button"
+                onClick={onVoiceClick}
+                className="ml-2 w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                style={{ color: theme.colors.textSecondary }}
+                aria-label="Voice input"
+            >
+                <Mic className="w-5 h-5" />
+            </button>
         </form>
     );
 });

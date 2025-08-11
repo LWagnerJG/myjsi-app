@@ -1,7 +1,7 @@
 export const lightTheme = {
     colors: {
         background: '#f8f8f8',
-        surface: '#FFFFFF',
+        surface: '#FFFFFF', // Changed from '#FEFEFE' to '#FFFFFF'
         primary: '#b3b3af',
         accent: '#AD8A77',
         secondary: '#414141',

@@ -52,26 +52,25 @@ const SmartSearch = ({ theme, onNavigate, onAskAI, onVoiceActivate }) => {
     };
 
     const PILL = {
-        backgroundColor: theme.colors.surface,
+        backgroundColor: '#FFFFFF',
         border: `1px solid ${theme.colors.border}`,
         boxShadow: `0 8px 24px ${theme.colors.shadow}`,
         borderRadius: 9999,
-        height: 56
+        height: 56,
     };
 
     return (
         <div ref={anchorRef} className="relative">
-            <div className="w-full" style={PILL}>
+            <div className="w-full flex items-center px-4" style={PILL}>
                 <SearchInput
                     onSubmit={submit}
                     value={query}
-                    onChange={(e) => setQuery(e.target.value)}
+                    onChange={(value) => setQuery(value)}
                     onFocus={() => setIsFocused(true)}
-                    placeholder="Ask me anything..."
+                    onBlur={() => setIsFocused(false)}
                     onVoiceClick={() => onVoiceActivate('Voice Activated')}
                     theme={theme}
                     className="w-full"
-                    variant="bare"
                 />
             </div>
 

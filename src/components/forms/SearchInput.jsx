@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { Search, Mic } from 'lucide-react';
 
-export const SearchInput = React.memo(({
+export const SearchInput = React.memo(function SearchInput({
     onSubmit,
     value,
     onChange,
@@ -9,41 +9,44 @@ export const SearchInput = React.memo(({
     theme,
     className,
     style,
-    onVoiceClick
-}) => {
-    const inputRef = useRef();
+    onVoiceClick,
+}) {
+    const inputRef = useRef(null);
+
+    const PILL = {
+        backgroundColor: theme.colors.surface,
+        border: `1px solid ${theme.colors.border}`,
+        boxShadow: `0 8px 24px ${theme.colors.shadow}`,
+        borderRadius: 9999,
+        height: 56,            // <-- same as header
+    };
+
     return (
         <form
             onSubmit={onSubmit}
-            className={`relative flex items-center transition-all duration-200 outline-none ${className || ''}`}
-            style={{
-                borderRadius: '9999px',
-                backgroundColor: '#ffffff',
-                border: '1px solid #E5E7EB',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
-                minHeight: 48,
-                height: 48,
-                padding: 0,
-                ...style
-            }}
+            className={`relative w-full flex items-center gap-3 px-5 ${className || ''}`}
+            style={{ ...PILL, ...style }}
         >
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <Search
-                    className="h-5 w-5"
-                    style={{ color: theme.colors.textSecondary, opacity: 0.7 }}
-                />
-            </div>
+            <Search className="h-5 w-5" style={{ color: theme.colors.textSecondary, opacity: 0.7 }} />
             <input
                 ref={inputRef}
                 type="text"
-                placeholder={placeholder}
                 value={value}
                 onChange={onChange}
-                className="w-full bg-transparent pl-12 pr-12 py-3 text-base outline-none border-none rounded-full placeholder-gray-500/70 focus:placeholder-gray-400/80 transition-colors duration-200"
-                style={{ color: theme.colors.textPrimary, fontWeight: 400, fontSize: 16, height: 48, lineHeight: '48px' }}
+                placeholder={placeholder}
+                className="flex-1 bg-transparent outline-none border-0 text-[15px] placeholder-gray-500/70"
+                style={{
+                    color: theme.colors.textPrimary,
+                    height: 56,
+                    lineHeight: '56px', // perfect vertical centering
+                }}
             />
             {onVoiceClick && (
-                <button type="button" onClick={onVoiceClick} className="absolute inset-y-0 right-0 pr-4 flex items-center hover:bg-blue-50/60 rounded-full transition-colors duration-200">
+                <button
+                    type="button"
+                    onClick={onVoiceClick}
+                    className="rounded-full p-2 -mr-1 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                >
                     <Mic className="h-5 w-5" style={{ color: theme.colors.textSecondary, opacity: 0.7 }} />
                 </button>
             )}
