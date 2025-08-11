@@ -11,39 +11,40 @@ export const SearchInput = React.memo(function SearchInput({
     className = '',
 }) {
     const [focused, setFocused] = useState(false);
-    const [i, setI] = useState(0);
+    const [tick, setTick] = useState(0);
     const inputRef = useRef(null);
 
     const phrases = useMemo(
         () => [
-            'Lead times today...',
-            'Dealer contacts nearby...',
-            'Compare Vision vs...',
-            'Create sample order...',
-            'Track commissions now...',
-            'Draft quote fast...',
-            'Design days schedule...',
-            'Loaner pool status...',
-            'Install guides please...',
-            'Find fabrics quick...',
-            'Commission rates table...',
-            'Dealer directory lookup...',
-            'Start new project...',
-            'Competitive analysis tips...',
-            'Product specs summary...',
+            'Find install guides...',
+            'Compare product specs...',
+            'Start sample order...',
+            'Check lead times...',
+            'Create social posts...',
+            'Show commission rates...',
+            'Price out package...',
+            'Search dealer directory...',
+            'Summarize a contract...',
+            'Suggest finish pairings...',
+            'Write customer email...',
+            'Draft install checklist...',
+            'Analyze win chances...',
+            'Plan design days...',
+            'Build product comparison...',
         ],
         []
     );
 
-    const DISPLAY_MS = 5200;
+    const DISPLAY_MS = 7200;
 
     useEffect(() => {
-        const id = setInterval(() => setI((p) => (p + 1) % phrases.length), DISPLAY_MS);
+        const id = setInterval(() => setTick((p) => p + 1), DISPLAY_MS);
         return () => clearInterval(id);
-    }, [phrases.length]);
+    }, []);
 
     const showHint = !value && !focused;
-    const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
+    const isAskCycle = tick % 3 === 0;
+    const hintText = isAskCycle ? 'Ask me anything...' : phrases[(tick - 1 + phrases.length) % phrases.length];
 
     const pill = {
         backgroundColor: theme.colors.surface,
@@ -62,11 +63,16 @@ export const SearchInput = React.memo(function SearchInput({
             className={`w-full ${className}`}
         >
             <style>{`
-        @keyframes siFade {
-          0% { opacity: 0 }
-          10% { opacity: .92 }
-          90% { opacity: .92 }
-          100% { opacity: 0 }
+        @keyframes siCrossfade {
+          0% { opacity: 0; transform: translateY(2px) }
+          15% { opacity: .95; transform: translateY(0) }
+          85% { opacity: .95; transform: translateY(0) }
+          100% { opacity: 0; transform: translateY(-2px) }
+        }
+        @keyframes siPulse {
+          0% { transform: translateY(0) scale(1); }
+          50% { transform: translateY(0) scale(1.02); }
+          100% { transform: translateY(0) scale(1); }
         }
       `}</style>
 
@@ -87,19 +93,19 @@ export const SearchInput = React.memo(function SearchInput({
 
                 {showHint && (
                     <span
-                        key={i}
-                        className="pointer-events-none absolute left-11 right-11 truncate select-none text-[13.5px]"
+                        key={tick}
+                        className="pointer-events-none absolute left-11 right-11 truncate select-none text-[13px]"
                         style={{
                             top: '50%',
                             transform: 'translateY(-50%)',
                             color: theme.colors.textSecondary,
-                            opacity: 0.58,
+                            opacity: 0.52,
                             whiteSpace: 'nowrap',
-                            animation: `siFade ${DISPLAY_MS}ms ease-in-out 1`,
+                            animation: `siCrossfade ${DISPLAY_MS}ms ease-in-out 1${isAskCycle ? `, siPulse 2400ms ease-in-out infinite` : ''}`,
                         }}
                         aria-hidden="true"
                     >
-                        {cap(phrases[i])}
+                        {hintText}
                     </span>
                 )}
 
