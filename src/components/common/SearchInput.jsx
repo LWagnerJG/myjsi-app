@@ -1,5 +1,5 @@
 // components/common/SearchInput.jsx
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Search, Mic } from 'lucide-react';
 
 export const SearchInput = React.memo(function SearchInput({
@@ -12,7 +12,7 @@ export const SearchInput = React.memo(function SearchInput({
 }) {
     const [focused, setFocused] = useState(false);
     const [tick, setTick] = useState(0);
-    const inputRef = useRef(null);
+    const [prevText, setPrevText] = useState(null);
 
     const phrases = useMemo(
         () => [
@@ -35,16 +35,29 @@ export const SearchInput = React.memo(function SearchInput({
         []
     );
 
-    const DISPLAY_MS = 7200;
+    const DISPLAY_MS = 8200;
+    const FADE_MS = 1500;
+    const FADE_IN_DELAY = 320;
+
+    const phraseFor = (i) =>
+        i % 3 === 0 ? 'Ask me anything...' : phrases[(i - 1 + phrases.length) % phrases.length];
 
     useEffect(() => {
         const id = setInterval(() => setTick((p) => p + 1), DISPLAY_MS);
         return () => clearInterval(id);
     }, []);
 
+    useEffect(() => {
+        if (tick === 0) return;
+        setPrevText(phraseFor(tick - 1));
+        const t = setTimeout(() => setPrevText(null), FADE_MS + 120);
+        return () => clearTimeout(t);
+    }, [tick]);
+
+    const currentText = phraseFor(tick);
+    const isAskCycle = currentText === 'Ask me anything...';
+    const shouldPulse = isAskCycle && tick !== 0; // no pulse on very first render
     const showHint = !value && !focused;
-    const isAskCycle = tick % 3 === 0;
-    const hintText = isAskCycle ? 'Ask me anything...' : phrases[(tick - 1 + phrases.length) % phrases.length];
 
     const pill = {
         backgroundColor: theme.colors.surface,
@@ -63,50 +76,68 @@ export const SearchInput = React.memo(function SearchInput({
             className={`w-full ${className}`}
         >
             <style>{`
-        @keyframes siCrossfade {
-          0% { opacity: 0; transform: translateY(2px) }
-          15% { opacity: .95; transform: translateY(0) }
-          85% { opacity: .95; transform: translateY(0) }
-          100% { opacity: 0; transform: translateY(-2px) }
-        }
-        @keyframes siPulse {
-          0% { transform: translateY(0) scale(1); }
-          50% { transform: translateY(0) scale(1.02); }
-          100% { transform: translateY(0) scale(1); }
-        }
+        @keyframes siFadeIn { from { opacity: 0 } to { opacity: .52 } }
+        @keyframes siFadeOut { from { opacity: .52 } to { opacity: 0 } }
+        @keyframes siPulseSlow { 0% { transform: scale(1) } 50% { transform: scale(1.01) } 100% { transform: scale(1) } }
       `}</style>
 
-            <div className="w-full flex items-center px-4 relative" style={pill}>
+            <div className="w-full relative flex items-center px-4" style={pill}>
                 <Search className="w-5 h-5 mr-2 flex-shrink-0" style={{ color: theme.colors.textSecondary }} />
 
                 <input
-                    ref={inputRef}
                     value={value}
                     onChange={(e) => onChange && onChange(e.target.value)}
                     onFocus={() => setFocused(true)}
                     onBlur={() => setFocused(false)}
                     placeholder=""
-                    className="flex-1 bg-transparent outline-none text-[14px]"
-                    style={{ color: theme.colors.textPrimary }}
+                    className="flex-1 bg-transparent outline-none text-[13px]"
+                    style={{ color: theme.colors.textPrimary, lineHeight: 1.25 }}
                     aria-label="Search"
                 />
 
                 {showHint && (
-                    <span
-                        key={tick}
-                        className="pointer-events-none absolute left-11 right-11 truncate select-none text-[13px]"
+                    <div
+                        className="pointer-events-none absolute left-11 right-11"
                         style={{
-                            top: '50%',
-                            transform: 'translateY(-50%)',
-                            color: theme.colors.textSecondary,
-                            opacity: 0.52,
-                            whiteSpace: 'nowrap',
-                            animation: `siCrossfade ${DISPLAY_MS}ms ease-in-out 1${isAskCycle ? `, siPulse 2400ms ease-in-out infinite` : ''}`,
+                            top: 0,
+                            bottom: 0,
+                            display: 'flex',
+                            alignItems: 'center',
+                            overflow: 'visible',
+                            lineHeight: 1.25,
                         }}
                         aria-hidden="true"
                     >
-                        {hintText}
-                    </span>
+                        {prevText && (
+                            <span
+                                className="absolute w-full truncate"
+                                style={{
+                                    zIndex: 0,
+                                    color: theme.colors.textSecondary,
+                                    opacity: 0.52,
+                                    animation: `siFadeOut ${FADE_MS}ms ease both`,
+                                    willChange: 'opacity',
+                                }}
+                            >
+                                {prevText}
+                            </span>
+                        )}
+                        <span
+                            key={tick}
+                            className="absolute w-full truncate"
+                            style={{
+                                zIndex: 1,
+                                color: theme.colors.textSecondary,
+                                opacity: 0.52,
+                                animation: `siFadeIn ${FADE_MS}ms ${FADE_IN_DELAY}ms ease both${shouldPulse ? `, siPulseSlow 2600ms ease-in-out infinite` : ''
+                                    }`,
+                                transformOrigin: 'center',
+                                willChange: 'opacity, transform',
+                            }}
+                        >
+                            {currentText}
+                        </span>
+                    </div>
                 )}
 
                 <button
