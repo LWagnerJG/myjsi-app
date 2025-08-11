@@ -88,26 +88,17 @@ export const ResourcesScreen = ({ theme, onNavigate }) => {
 
     const Category = ({ category, isFirst }) => {
         return (
-            <section
-                className={isFirst ? '' : 'pt-6'}
-                style={{ borderTop: isFirst ? 'none' : `1px solid ${theme.colors.border}` }}
-            >
-                {/* Header: a hairline underline + slightly larger weight/size */}
-                <div
-                    className="pb-3"
+            <section className={isFirst ? '' : 'pt-6'}>
+                <h3
+                    className="text-base font-medium text-center mb-2"
                     style={{
-                        borderBottom: `1px solid ${theme.colors.border}`
+                        color: theme.colors.textPrimary
                     }}
                 >
-                    <h3
-                        className="font-extrabold tracking-tight"
-                        style={{ color: theme.colors.textPrimary, fontSize: '1.125rem' }} // ~text-lg
-                    >
-                        {category.category}
-                    </h3>
-                </div>
+                    {category.category}
+                </h3>
 
-                <ul className="mt-1">
+                <ul>
                     {category.items?.map((item, idx) => (
                         <Row
                             key={item.nav}
@@ -120,6 +111,7 @@ export const ResourcesScreen = ({ theme, onNavigate }) => {
             </section>
         );
     };
+
 
     return (
         <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
