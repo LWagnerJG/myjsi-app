@@ -1,33 +1,34 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport"
-          content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
     <meta name="theme-color" content="#000000" />
-    <meta name="description"
-          content="Web site created using create-react-app" />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <meta name="description" content="MyJSI PWA" />
+    <link rel="apple-touch-icon" href="/logo192.png" />
+    <link rel="manifest" href="/manifest.json" />
     <title>MyJSI</title>
     <style>
-        /* Splash screen styling */
+        /* Splash screen */
         #splash {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #000000;
+            inset: 0;
+            background: #000;
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 9999;
+            transition: opacity .25s ease;
         }
 
+            #splash.fade-out {
+                opacity: 0;
+                pointer-events: none;
+            }
+
             #splash img {
-                width: 150px;
+                width: 160px;
                 height: auto;
             }
     </style>
@@ -35,19 +36,19 @@
 <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
 
-    <!-- Splash screen -->
+    <!-- Splash (shows instantly) -->
     <div id="splash">
-        <img src="%PUBLIC_URL%/myjsi-icon.png" alt="MyJSI Logo" />
+        <!-- NOTE: absolute path works in both CRA and Vite -->
+        <img src="/myjsi-icon.png" alt="MyJSI" />
     </div>
 
-    <!-- React root -->
     <div id="root"></div>
 
+    <!-- Fallback: if React never loads for some reason, hide splash after full page load -->
     <script>
-        // Remove splash screen when React is ready
-        window.addEventListener('DOMContentLoaded', () => {
-            const splash = document.getElementById('splash');
-            if (splash) splash.remove();
+        window.addEventListener('load', () => {
+            const s = document.getElementById('splash');
+            if (s) { s.classList.add('fade-out'); setTimeout(() => s.remove(), 280); }
         });
     </script>
 </body>

@@ -42,13 +42,11 @@ export const ResourcesScreen = ({ theme, onNavigate }) => {
         return Database;
     };
 
-    const Row = ({ item, isFirst, isLast }) => {
+    const Row = ({ item, isFirst }) => {
         const Icon = getResourceIcon(item.label);
         const sub = sublabelMap[item.label] || 'Access resource';
 
-        // single divider lines between rows only
         const borderTop = isFirst ? 'transparent' : theme.colors.border;
-        const borderBottom = 'transparent'; // never on bottom to avoid double bars
 
         return (
             <li>
@@ -58,7 +56,7 @@ export const ResourcesScreen = ({ theme, onNavigate }) => {
                     style={{
                         backgroundColor: 'transparent',
                         borderTop: `1px solid ${borderTop}`,
-                        borderBottom: `1px solid ${borderBottom}`
+                        borderBottom: '1px solid transparent'
                     }}
                 >
                     <div
@@ -86,41 +84,32 @@ export const ResourcesScreen = ({ theme, onNavigate }) => {
         );
     };
 
-    const Category = ({ category, isFirst }) => {
+    const CategoryCard = ({ category, isFirst }) => {
         return (
             <section className={isFirst ? '' : 'pt-6'}>
-                <h3
-                    className="text-base font-medium text-center mb-2"
-                    style={{
-                        color: theme.colors.textPrimary
-                    }}
-                >
-                    {category.category}
-                </h3>
-
-                <ul>
-                    {category.items?.map((item, idx) => (
-                        <Row
-                            key={item.nav}
-                            item={item}
-                            isFirst={idx === 0}
-                            isLast={idx === category.items.length - 1}
-                        />
-                    ))}
-                </ul>
+                <GlassCard theme={theme} className="p-2">
+                    <h3
+                        className="text-lg font-semibold text-center mb-2"
+                        style={{ color: theme.colors.textPrimary }}
+                    >
+                        {category.category}
+                    </h3>
+                    <ul>
+                        {category.items?.map((item, idx) => (
+                            <Row key={item.nav} item={item} isFirst={idx === 0} />
+                        ))}
+                    </ul>
+                </GlassCard>
             </section>
         );
     };
 
-
     return (
         <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
             <div className="flex-1 overflow-y-auto px-4 pt-2 pb-4">
-                <GlassCard theme={theme} className="p-4 space-y-6">
-                    {resourceCategories.map((cat, i) => (
-                        <Category key={cat.category} category={cat} isFirst={i === 0} />
-                    ))}
-                </GlassCard>
+                {resourceCategories.map((cat, i) => (
+                    <CategoryCard key={cat.category} category={cat} isFirst={i === 0} />
+                ))}
             </div>
         </div>
     );
