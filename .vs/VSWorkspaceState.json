@@ -2,11 +2,11 @@
   "ExpandedNodes": [
     "",
     "\\src",
-    "\\src\\assets",
+    "\\src\\data",
     "\\src\\screens",
-    "\\src\\screens\\orders",
     "\\src\\screens\\resources",
-    "\\src\\screens\\resources\\search-fabrics"
+    "\\src\\screens\\resources\\contracts"
   ],
+  "SelectedNode": "\\src\\screens\\resources\\contracts\\data.js",
   "PreviewInSolutionExplorer": false
 }
