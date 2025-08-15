@@ -19,7 +19,7 @@ import { SalesScreen } from './screens/sales/SalesScreen.jsx';
 import { Modal } from './components/common/Modal.jsx';
 import { ResourceDetailScreen } from './screens/utility/UtilityScreens.jsx';
 import { ProductComparisonScreen, CompetitiveAnalysisScreen } from './screens/products/index.js';
-import { CartScreen } from './screens/samples/index.js';
+import { SamplesScreen } from './screens/samples/index.js';
 import { CreateContentModal } from './screens/community/CreateContentModal.jsx';
 import { AnimatedScreenWrapper } from './components/common/AnimatedScreenWrapper.jsx';
 import { ProjectsScreen } from './screens/projects/ProjectsScreen.jsx';
@@ -66,8 +66,8 @@ const ScreenRouter = ({ screenKey, projectsScreenRef, ...rest }) => {
     if (screenKey === 'fabrics/search_form') return <SearchFabricsScreen {...rest} />;
     if (screenKey === 'fabrics/com_request') return <RequestComYardageScreen {...rest} />;
 
-    if (screenKey === 'samples/cart') return <CartScreen {...rest} />;
-
+    if (base === 'samples') return <SamplesScreen {...rest} />;
+    if (screenKey === 'samples/cart') return <SamplesScreen {...rest} initialCartOpen />;
     if (base === 'products' && parts[1] === 'category' && parts.length === 3) {
         return <ProductComparisonScreen {...rest} categoryId={parts[2]} />;
     }
@@ -274,6 +274,7 @@ function App() {
         opportunities,
         setOpportunities,
         myProjects,
+        setMyProjects,
         setSelectedProject,
         members,
         setMembers,

@@ -5,7 +5,6 @@ import { ProductsScreen, ProductComparisonScreen, CompetitiveAnalysisScreen } fr
 import { ResourcesScreen } from '../screens/resources/ResourcesScreen.jsx';
 import { ProjectsScreen, NewLeadScreen, AddNewInstallScreen } from '../screens/projects/index.js';
 import { CommunityScreen, CreateContentModal } from '../screens/community/index.js';
-import { SamplesScreen, CartScreen } from '../screens/samples/index.js';
 import { ReplacementsScreen } from '../screens/replacements/ReplacementsScreen.jsx';
 import { FeedbackScreen } from '../screens/feedback/index.js';
 import { MembersScreen } from '../screens/members/index.js';
@@ -45,8 +44,6 @@ export const SCREEN_MAP = {
     'resources': ResourcesScreen,
     'projects': ProjectsScreen,
     'community': CommunityScreen,
-    'samples': SamplesScreen,
-    'samples/cart': CartScreen,
     'replacements': ReplacementsScreen,
     'incentive-rewards': IncentiveRewardsScreen,
     'customer-rank': CustomerRankingScreen,
@@ -91,7 +88,6 @@ export {
     ProductComparisonScreen,
     CompetitiveAnalysisScreen,
     AddNewInstallScreen,
-    CartScreen,
     SettingsScreen,
     NewLeadScreen,
     MembersScreen,

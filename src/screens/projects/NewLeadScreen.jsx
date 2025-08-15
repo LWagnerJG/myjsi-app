@@ -18,7 +18,7 @@ import {
     PO_TIMEFRAMES 
 } from '../../data/projects.js';
 import { LEAD_TIMES_DATA, JSI_LAMINATES, JSI_VENEERS } from '../../data/products.js';
-import { SAMPLES_DATA } from '../../data/samples.js';
+import { FINISH_SAMPLES } from '../samples'; // re-exported by screens/samples/index.js
 import { CONTRACTS_DATA } from '../resources/contracts/data.js';
 
 
@@ -33,6 +33,7 @@ const AutoCompleteCombobox = ({
     theme,
     resetOnSelect = false
 }) => {
+    // Keeping for backward compatibility (not used after spotlight migration)
     const [isOpen, setIsOpen] = useState(false);
     const [position, setPosition] = useState({ top: 0, left: 0, width: 0 });
     const inputRef = useRef(null);
@@ -209,108 +210,77 @@ const AutoCompleteCombobox = ({
     );
 };
 
-// Material Button Group Component for Vision options
-const MaterialButtonGroup = ({ label, options, theme, selectedMaterials, onMaterialToggle }) => (
-    <div>
-        <p className="text-sm font-semibold mb-2" style={{ color: theme.colors.textSecondary }}>
-            {label}
-        </p>
-        <div className="flex flex-wrap gap-2">
-            {options.map(opt => {
-                const isSelected = selectedMaterials?.includes(opt);
+// Material toggle groups removed for Vision; replaced with dropdown stipulations
+
+const KnoxOptions = ({ theme, product, productIndex, onUpdate }) => (
+    <div className="mt-3 pt-3 border-t" style={{ borderColor: theme.colors.border }}>
+        <div className="flex items-center justify-between">
+            <label className="text-sm font-medium" style={{ color: theme.colors.textSecondary }}>
+                Wood back?
+            </label>
+            <input
+                type="checkbox"
+                className="h-5 w-5 rounded-md border-2"
+                style={{ accentColor: theme.colors.accent, borderColor: theme.colors.border }}
+                checked={!!product.hasWoodBack}
+                onChange={(e) => onUpdate(productIndex, 'hasWoodBack', e.target.checked)}
+            />
+        </div>
+    </div>
+);
+
+const GlassDoorsSelector = ({ theme, value, onChange }) => (
+    <div className="flex flex-col gap-2">
+        <p className="font-semibold" style={{ color: theme.colors.textPrimary }}>Glass Doors?</p>
+        <div className="flex gap-4">
+            {['Yes','No'].map(opt => {
+                const selected = (value === true && opt==='Yes') || (value === false && opt==='No');
                 return (
-                    <button
-                        key={opt}
-                        type="button"
-                        onClick={() => onMaterialToggle(opt)}
-                        className="px-3 py-1.5 text-sm rounded-full font-medium transition-colors border"
-                        style={{
-                            backgroundColor: isSelected ? theme.colors.accent : theme.colors.surface,
-                            color: isSelected ? theme.colors.surface : theme.colors.textPrimary,
-                            borderColor: isSelected ? theme.colors.accent : theme.colors.border,
-                        }}
-                    >
+                    <button key={opt} type="button" onClick={() => onChange(opt==='Yes')} className="px-4 py-2 rounded-full text-sm font-medium border transition-colors" style={{ backgroundColor: selected ? theme.colors.accent : theme.colors.surface, color: selected ? theme.colors.surface : theme.colors.textPrimary, borderColor: selected ? theme.colors.accent : theme.colors.border }}>
                         {opt}
                     </button>
                 );
             })}
         </div>
+        {value === null && (
+            <p className="text-xs" style={{ color: theme.colors.textSecondary }}>* Required</p>
+        )}
     </div>
 );
 
-// Product option components
-const KnoxOptions = ({ theme, product, productIndex, onUpdate }) => {
-    return (
-        <div className="mt-3 pt-3 border-t" style={{ borderColor: theme.colors.border }}>
-            <div className="flex items-center justify-between">
-                <label className="text-sm font-medium" style={{ color: theme.colors.textSecondary }}>
-                    Wood back?
-                </label>
-                <input
-                    type="checkbox"
-                    className="h-5 w-5 rounded-md border-2"
-                    style={{ accentColor: theme.colors.accent, borderColor: theme.colors.border }}
-                    checked={!!product.hasWoodBack}
-                    onChange={(e) => onUpdate(productIndex, 'hasWoodBack', e.target.checked)}
-                />
-            </div>
-        </div>
-    );
-};
-
 const VisionOptions = ({ theme, product, productIndex, onUpdate }) => {
-    const handleMaterialToggle = (material) => {
-        const currentMaterials = product.materials || [];
-        const nextMaterials = currentMaterials.includes(material)
-            ? currentMaterials.filter(m => m !== material)
-            : [...currentMaterials, material];
-        onUpdate(productIndex, 'materials', nextMaterials);
-    };
-    
+    const laminateOptions = JSI_LAMINATES.map(l => ({ value: l, label: l }));
+    const veneerOptions = JSI_VENEERS.map(v => ({ value: v, label: v }));
+
+    // Backward compatibility: if old shape (materials array) translate first match
+    useEffect(() => {
+        if (product.materials && !product.laminate && !product.veneer) {
+            const firstLam = product.materials.find(m => JSI_LAMINATES.includes(m));
+            const firstVen = product.materials.find(m => JSI_VENEERS.includes(m));
+            if (firstLam) onUpdate(productIndex, 'laminate', firstLam);
+            if (firstVen) onUpdate(productIndex, 'veneer', firstVen);
+        }
+    }, [product.materials, product.laminate, product.veneer, productIndex, onUpdate]);
+
     return (
-        <div className="space-y-4 mt-3 pt-3 border-t" style={{ borderColor: theme.colors.border }}>
-            <div className="flex items-center justify-between p-3 rounded-xl" style={{ backgroundColor: theme.colors.background }}>
-                <label className="font-semibold" style={{ color: theme.colors.textPrimary }}>
-                    Glass Doors?
-                </label>
-                <input
-                    type="checkbox"
-                    className="h-5 w-5 rounded-md border-2"
-                    style={{ accentColor: theme.colors.accent, borderColor: theme.colors.border }}
-                    checked={!!product.hasGlassDoors}
-                    onChange={(e) => onUpdate(productIndex, 'hasGlassDoors', e.target.checked)}
-                />
+        <div className="space-y-6 mt-3 pt-3 border-t" style={{ borderColor: theme.colors.border }}>
+            <GlassDoorsSelector theme={theme} value={product.hasGlassDoors} onChange={(val) => onUpdate(productIndex, 'hasGlassDoors', val)} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <PortalNativeSelect label="Laminate (if applicable)" value={product.laminate || ''} onChange={(e) => onUpdate(productIndex, 'laminate', e.target.value)} placeholder="Select laminate" options={[{ label: 'None', value: '' }, ...laminateOptions]} theme={theme} />
+                <PortalNativeSelect label="Veneer (if applicable)" value={product.veneer || ''} onChange={(e) => onUpdate(productIndex, 'veneer', e.target.value)} placeholder="Select veneer" options={[{ label: 'None', value: '' }, ...veneerOptions]} theme={theme} />
             </div>
-            <div className="space-y-4">
-                <MaterialButtonGroup 
-                    label="Laminate" 
-                    options={JSI_LAMINATES} 
-                    theme={theme}
-                    selectedMaterials={product.materials}
-                    onMaterialToggle={handleMaterialToggle}
-                />
-                <MaterialButtonGroup 
-                    label="Veneer" 
-                    options={JSI_VENEERS} 
-                    theme={theme}
-                    selectedMaterials={product.materials}
-                    onMaterialToggle={handleMaterialToggle}
-                />
-            </div>
+            {(!product.laminate && !product.veneer) && (
+                <p className="text-xs" style={{ color: theme.colors.textSecondary }}>Select at least a laminate or veneer.</p>
+            )}
         </div>
     );
 };
 
 const WinkHoopzOptions = ({ theme, product, productIndex, onUpdate }) => {
+    const POLY_COLORS = React.useMemo(() => Array.from(new Set((FINISH_SAMPLES || []).map(s => s.color).filter(Boolean))), []);
     return (
         <div className="mt-3 pt-3 border-t" style={{ borderColor: theme.colors.border }}>
-            <PortalNativeSelect
-                value={product.polyColor}
-                onChange={(e) => onUpdate(productIndex, 'polyColor', e.target.value)}
-                placeholder="Select poly color"
-                theme={theme}
-                options={SAMPLES_DATA.map(c => ({ value: c.color, label: c.color }))}
-            />
+            <PortalNativeSelect value={product.polyColor} onChange={(e) => onUpdate(productIndex, 'polyColor', e.target.value)} placeholder="Select poly color" theme={theme} options={POLY_COLORS.map(c => ({ value: c, label: c }))} />
         </div>
     );
 };
@@ -325,113 +295,112 @@ export const NewLeadScreen = ({
     newLeadData = {},
     onNewLeadChange,
 }) => {
-    const [productSearch, setProductSearch] = useState('');
-    
+    const [productSearch, setProductSearch] = useState(''); // retained (unused after migration but kept to avoid breaking external refs)
+
     const updateField = (field, value) => {
-        // Clear otherVertical when vertical changes away from "Other"
         if (field === 'vertical' && value !== 'Other (Please specify)') {
             onNewLeadChange({ [field]: value, otherVertical: '' });
         } else {
             onNewLeadChange({ [field]: value });
         }
     };
-    
+
+    const addProduct = (series) => {
+        if (!series) return;
+        // Avoid duplicates
+        if ((newLeadData.products || []).some(p => p.series === series)) return;
+        const base = {
+            series,
+            hasGlassDoors: series === 'Vision' ? null : false, // null forces user decision
+            laminate: '',
+            veneer: '',
+            hasWoodBack: false,
+            polyColor: '',
+            materials: [] // legacy field for conversion
+        };
+        updateField('products', [...(newLeadData.products || []), base]);
+    };
+
+    const removeProduct = (idx) => {
+        const newProducts = (newLeadData.products || []).filter((_, i) => i !== idx);
+        updateField('products', newProducts);
+    };
+
+    const removeProductSeries = (series) => {
+        const idx = (newLeadData.products || []).findIndex(p => p.series === series);
+        if (idx !== -1) removeProduct(idx);
+    };
+
+    const updateProductOption = (pi, key, value) => {
+        const newProducts = (newLeadData.products || []).map((p, i) => i === pi ? { ...p, [key]: value } : p);
+        updateField('products', newProducts);
+    };
+
+    const availableSeries = useMemo(() => {
+        const allSeries = LEAD_TIMES_DATA.map(item => item.series);
+        return Array.from(new Set(allSeries));
+    }, []);
+
+    const selectedSeries = (newLeadData.products || []).map(p => p.series);
+
+    const validateProducts = () => {
+        for (const p of (newLeadData.products || [])) {
+            if (p.series === 'Vision') {
+                if (p.hasGlassDoors === null) {
+                    alert('Please specify Glass Doors selection for Vision.');
+                    return false;
+                }
+                if (!p.laminate && !p.veneer) {
+                    alert('Please select at least a laminate or veneer for Vision.');
+                    return false;
+                }
+            }
+        }
+        return true;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!newLeadData.projectStatus) {
             alert('Please select a Project Stage before submitting.');
             return;
         }
+        if (!validateProducts()) return;
         onSuccess(newLeadData);
     };
-    
+
     const toggleCompetitor = (c) => {
         const list = newLeadData.competitors || [];
         const next = list.includes(c) ? list.filter(x => x !== c) : [...list, c];
         updateField('competitors', next);
     };
-    
-    const addProduct = (series) => {
-        if (!series) return;
-        const newProducts = [...(newLeadData.products || []), {
-            series,
-            hasGlassDoors: false,
-            materials: [],
-            hasWoodBack: false,
-            polyColor: ''
-        }];
-        updateField('products', newProducts);
-    };
-    
-    const removeProduct = (idx) => {
-        const newProducts = (newLeadData.products || []).filter((_, i) => i !== idx);
-        updateField('products', newProducts);
-    };
-    
-    const updateProductOption = (pi, key, value) => {
-        const newProducts = (newLeadData.products || []).map((p, i) => i === pi ? { ...p, [key]: value } : p);
-        updateField('products', newProducts);
-    };
-    
-    // Stakeholder management functions
+
+    // Stakeholder add/remove functions unchanged...
     const addDesignFirm = (firm) => {
         const currentFirms = newLeadData.designFirms || [];
-        if (!currentFirms.includes(firm)) {
-            updateField('designFirms', [...currentFirms, firm]);
-        }
+        if (!currentFirms.includes(firm)) updateField('designFirms', [...currentFirms, firm]);
     };
-    
-    const removeDesignFirm = (firm) => {
-        const currentFirms = newLeadData.designFirms || [];
-        updateField('designFirms', currentFirms.filter(f => f !== firm));
-    };
-    
+    const removeDesignFirm = (firm) => updateField('designFirms', (newLeadData.designFirms || []).filter(f => f !== firm));
     const addDealer = (dealer) => {
         const currentDealers = newLeadData.dealers || [];
-        if (!currentDealers.includes(dealer)) {
-            updateField('dealers', [...currentDealers, dealer]);
-        }
+        if (!currentDealers.includes(dealer)) updateField('dealers', [...currentDealers, dealer]);
     };
-    
-    const removeDealer = (dealer) => {
-        const currentDealers = newLeadData.dealers || [];
-        updateField('dealers', currentDealers.filter(d => d !== dealer));
-    };
-    
-    const availableSeries = useMemo(() => {
-        const allSeries = LEAD_TIMES_DATA.map(item => item.series);
-        const uniqueSeries = Array.from(new Set(allSeries));
-        return uniqueSeries.filter(s => !(newLeadData.products || []).some(p => p.series === s));
-    }, [newLeadData.products]);
-    
+    const removeDealer = (dealer) => updateField('dealers', (newLeadData.dealers || []).filter(d => d !== dealer));
+
     return (
         <form onSubmit={handleSubmit} className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
             <div className="flex-1 overflow-y-auto px-4 pt-4 pb-4 space-y-6 scrollbar-hide">
+                {/* Project Details Section (unchanged) */}
                 <FormSection title="Project Details" theme={theme}>
                     <div>
                         <SettingsRow label="Project Name" isFirst={true} theme={theme}>
                             <div className="w-7/12">
-                                <FormInput
-                                    label=""
-                                    required
-                                    value={newLeadData.project || ''}
-                                    onChange={e => updateField('project', e.target.value)}
-                                    placeholder="Required"
-                                    theme={theme}
-                                />
+                                <FormInput label="" required value={newLeadData.project || ''} onChange={e => updateField('project', e.target.value)} placeholder="Required" theme={theme} surface muted />
                             </div>
                         </SettingsRow>
                         <SettingsRow label="Project Stage" theme={theme}>
                             <div className="w-7/12">
-                                <PortalNativeSelect
-                                    label=""
-                                    required
-                                    value={newLeadData.projectStatus || ''}
-                                    onChange={e => updateField('projectStatus', e.target.value)}
-                                    options={STAGES.map(s => ({ label: s, value: s }))}
-                                    placeholder="Select..."
-                                    theme={theme}
-                                />
+                                <PortalNativeSelect label="" required value={newLeadData.projectStatus || ''} onChange={e => updateField('projectStatus', e.target.value)} options={STAGES.map(s => ({ label: s, value: s }))} placeholder="Select..." theme={theme} />
                             </div>
                         </SettingsRow>
                         <SettingsRow label="Vertical" theme={theme}>
@@ -458,6 +427,8 @@ export const NewLeadScreen = ({
                                                 onChange={e => updateField('otherVertical', e.target.value)}
                                                 placeholder="Specify other vertical..."
                                                 theme={theme}
+                                                surface
+                                                muted
                                             />
                                         </div>
                                     </div>
@@ -491,6 +462,7 @@ export const NewLeadScreen = ({
                                     onAddNew={(f) => setDesignFirms((p) => [...new Set([f, ...p])])}
                                     placeholder="Search..."
                                     theme={theme}
+                                    label=""
                                 />
                             </div>
                         </SettingsRow>
@@ -504,6 +476,7 @@ export const NewLeadScreen = ({
                                     onAddNew={(d) => setDealers((p) => [...new Set([d, ...p])])}
                                     placeholder="Search..."
                                     theme={theme}
+                                    label=""
                                 />
                             </div>
                         </SettingsRow>
@@ -519,7 +492,6 @@ export const NewLeadScreen = ({
                                 theme={theme}
                             />
                         </SettingsRow>
-                        {/* Row 1: label (left) + toggle (right) */}
                         <SettingsRow label="Competition?" theme={theme}>
                             <div className="w-full flex justify-end">
                                 <div className="w-7/12 h-10 flex items-center justify-end">
@@ -531,8 +503,6 @@ export const NewLeadScreen = ({
                                 </div>
                             </div>
                         </SettingsRow>
-
-                        {/* Row 2: full-width chip grid (left edge of tile → right edge of tile) */}
                         {newLeadData.competitionPresent && (
                             <div className="-mx-4 mt-3">
                                 <div className="px-4">
@@ -567,20 +537,16 @@ export const NewLeadScreen = ({
                                 </div>
                             </div>
                         )}
-
-
                     </div>
                     <SettingsRow label="Products" theme={theme}>
                         <div className="w-7/12">
-                            <AutoCompleteCombobox
-                                label=""
-                                value={productSearch}
-                                onChange={setProductSearch}
-                                onSelect={addProduct}
-                                placeholder="Search..."
-                                options={availableSeries}
+                            <SpotlightMultiSelect
+                                selectedItems={selectedSeries}
+                                onAddItem={addProduct}
+                                onRemoveItem={removeProductSeries}
+                                options={availableSeries.filter(s => !selectedSeries.includes(s))}
+                                placeholder="Search series..."
                                 theme={theme}
-                                resetOnSelect={true}
                             />
                         </div>
                     </SettingsRow>
@@ -588,16 +554,9 @@ export const NewLeadScreen = ({
                         <div className="space-y-3 pt-2">
                             {(newLeadData.products || []).map((p, idx) => {
                                 const hasOptions = ['Vision', 'Knox', 'Wink', 'Hoopz'].includes(p.series);
-                                const itemStyle = hasOptions ? "p-3 border rounded-2xl" : "p-2 pl-4 border rounded-full";
+                                const itemStyle = hasOptions ? 'p-3 border rounded-2xl' : 'p-2 pl-4 border rounded-full';
                                 return (
-                                    <div
-                                        key={idx}
-                                        className={`${itemStyle} space-y-2`}
-                                        style={{
-                                            borderColor: theme.colors.border,
-                                            backgroundColor: theme.colors.surface
-                                        }}
-                                    >
+                                    <div key={idx} className={`${itemStyle} space-y-2`} style={{ borderColor: theme.colors.border, backgroundColor: theme.colors.surface }}>
                                         <div className="flex items-center justify-between">
                                             <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>
                                                 {p.series}
@@ -657,6 +616,8 @@ export const NewLeadScreen = ({
                                     onChange={e => updateField('estimatedList', e.target.value)}
                                     placeholder="$0"
                                     theme={theme}
+                                    surface
+                                    muted
                                 />
                             </div>
                         </SettingsRow>
@@ -664,9 +625,10 @@ export const NewLeadScreen = ({
                             <div className="w-7/12">
                                 <ProbabilitySlider
                                     showLabel={false}
-                                    value={newLeadData.winProbability || 50}
-                                    onChange={v => updateField('winProbability', v)}
+                                    value={Math.min(newLeadData.winProbability || 50,95)}
+                                    onChange={v => updateField('winProbability', Math.min(v,95))}
                                     theme={theme}
+                                    max={95}
                                 />
                             </div>
                         </SettingsRow>
@@ -772,6 +734,8 @@ export const NewLeadScreen = ({
                                 onChange={e => updateField('notes', e.target.value)}
                                 placeholder="Enter details..."
                                 theme={theme}
+                                surface
+                                muted
                             />
                         </div>
                     </SettingsRow>

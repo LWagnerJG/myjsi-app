@@ -109,8 +109,7 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
 
                 {showHint && (
                     <div
-                        className="pointer-events-none absolute"
-                        style={{ left: 0, right: 0, top: 0, bottom: 0, display: 'flex', alignItems: 'center' }}
+                        className="pointer-events-none absolute inset-0 flex items-center"
                         aria-hidden="true"
                     >
                         {prevText && (
@@ -122,7 +121,6 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
                                     opacity: 0.52,
                                     animation: `siFadeOut ${FADE_MS}ms ease both`,
                                     fontWeight: 400,
-                                    WebkitFontSmoothing: 'antialiased',
                                 }}
                             >
                                 {prevText}
@@ -138,7 +136,6 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
                                 animation: `siFadeIn ${FADE_MS}ms ${FADE_IN_DELAY}ms ease both${shouldPulse ? `, siPulseSlow 2600ms ease-in-out infinite` : ''}`,
                                 transformOrigin: 'center',
                                 fontWeight: 400,
-                                WebkitFontSmoothing: 'antialiased',
                             }}
                         >
                             {currentText}
@@ -160,7 +157,7 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
     );
 });
 
-// Standard search input for all other pages - no animation, no voice
+// Standard search input with variants
 export const SearchInput = React.memo(function SearchInput({
     value = '',
     onChange,
@@ -168,20 +165,38 @@ export const SearchInput = React.memo(function SearchInput({
     theme,
     className = '',
     style = {},
+    variant = 'default', // 'default' | 'header'
+    inputClassName = ''
 }) {
+    const isHeader = variant === 'header';
+
+    const baseStyle = isHeader
+        ? {
+              height: 56,
+              backgroundColor: theme?.colors?.surface,
+              border: `1px solid ${theme?.colors?.border}`,
+              boxShadow: '0 2px 4px rgba(0,0,0,0.10), 0 1px 1px rgba(0,0,0,0.06)',
+          }
+        : {
+              height: 44,
+              backgroundColor: '#ffffff',
+              border: '1px solid rgba(0,0,0,0.12)',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.06)',
+          };
+
     return (
         <div
-            className={`flex items-center flex-1 bg-white rounded-full shadow-sm border border-gray-200/80 px-4 ${className}`}
-            style={{ height: 44, ...style }}
+            className={`flex items-center flex-1 rounded-full px-4 ${className}`}
+            style={{ ...baseStyle, ...style }}
         >
-            <Search className="w-5 h-5 mr-2.5" style={{ color: theme.colors.textSecondary }} />
+            <Search className="w-5 h-5 mr-2.5" style={{ color: theme?.colors?.textSecondary || '#666' }} />
             <input
                 type="text"
                 value={value}
                 onChange={(e) => onChange && onChange(e.target.value)}
                 placeholder={placeholder}
-                className="w-full h-full bg-transparent outline-none text-[15px]"
-                style={{ color: theme.colors.textPrimary }}
+                className={`w-full h-full bg-transparent outline-none text-[15px] ${inputClassName}`}
+                style={{ color: theme?.colors?.textPrimary || '#111' }}
                 aria-label={placeholder}
             />
         </div>

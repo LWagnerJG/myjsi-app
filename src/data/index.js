@@ -7,7 +7,6 @@ export * from './products.js';
 export * from './orders.js';
 export * from './projects.js';
 export * from './community.js';
-export * from './samples.js';
 export * from './resources.js';
 export * from './replacements.js';
 // Note: Members data moved to src/screens/members/data.js for feature organization
