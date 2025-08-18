@@ -10,17 +10,10 @@ const formatCompanyName = (name) => (name ? name.toLowerCase().replace(/\b(\w)/g
 const currency0 = (n = 0) => `$${Number(n).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
 const discountInt = (orderNumber) => { // deterministic 54..64
     if (!orderNumber) return 54;
-    let h = 0;
-    for (let i = 0; i < orderNumber.length; i++) h = (h * 131 + orderNumber.charCodeAt(i)) >>> 0;
-    return 54 + (h % 11);
+    let h = 0; for (let i = 0; i < orderNumber.length; i++) h = (h * 131 + orderNumber.charCodeAt(i)) >>> 0; return 54 + (h % 11);
 };
 const Pill = ({ children, theme }) => (
-    <span
-        className="px-2 py-0.5 rounded-full text-[10px] font-medium tracking-wide"
-        style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textSecondary, border: `1px solid ${theme.colors.border}` }}
-    >
-        {children}
-    </span>
+    <span className="px-2 py-0.5 rounded-full text-[10px] font-medium tracking-wide" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textSecondary, border: `1px solid ${theme.colors.border}` }}>{children}</span>
 );
 
 /* ---------------------- Calendar View ---------------------- */
@@ -230,7 +223,7 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                     borderBottom: `1px solid ${isScrolled ? theme.colors.border + '40' : 'transparent'}`
                 }}
             >
-                <div className="p-4 flex flex-col gap-3">
+                <div className="px-4 pt-4 pb-2 flex flex-col gap-3">
                     {/* Search Input styled like header pill (match size & feel) */}
                     <SearchInput
                         value={searchTerm}

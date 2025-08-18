@@ -130,7 +130,8 @@ export function SpotlightMultiSelect({
         style={{ background: palette.field, border: `1px solid ${palette.border}` }}
         onClick={() => setOpen(true)}
       >
-        <Search className="w-4.5 h-4.5" style={{ color: palette.hint }} />
+        {/* Increased icon size for better visibility */}
+        <Search className="w-5.5 h-5.5" style={{ color: palette.hint }} />
         <input
             value={q}
             onChange={(e) => { setQ(e.target.value); setOpen(true); }}
@@ -140,7 +141,8 @@ export function SpotlightMultiSelect({
             style={{ color: palette.text }}
         />
         {!q && (
-          <span className="absolute left-11 top-1/2 -translate-y-1/2 text-base font-normal tracking-wide pointer-events-none" style={{ color: palette.hint }}>
+          // Adjust left offset to accommodate larger icon
+          <span className="absolute left-12 top-1/2 -translate-y-1/2 text-base font-normal tracking-wide pointer-events-none" style={{ color: palette.hint }}>
             {placeholder}
           </span>
         )}

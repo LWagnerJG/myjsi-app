@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Search, Mic } from 'lucide-react';
 
-// HomeSearchInput: Only for home screen - animated placeholder + voice
+// HomeSearchInput (unchanged)
 export const HomeSearchInput = React.memo(function HomeSearchInput({
     theme,
     value = '',
@@ -15,61 +15,43 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
     const [focused, setFocused] = useState(false);
     const [tick, setTick] = useState(0);
     const [prevText, setPrevText] = useState(null);
-
-    const phrases = useMemo(
-        () => [
-            'Ask me anything...',
-            'Find install guides...',
-            'Compare product specs...',
-            'Start sample order...',
-            'Check lead times...',
-            'Create social posts...',
-            'Show commission rates...',
-            'Price out package...',
-            'Search dealer directory...',
-            'Summarize a contract...',
-            'Suggest finish pairings...',
-            'Write customer email...',
-            'Draft install checklist...',
-            'Analyze win chances...',
-            'Plan design days...',
-        ],
-        []
-    );
-
+    const phrases = useMemo(() => [
+        'Ask me anything...',
+        'Find install guides...',
+        'Compare product specs...',
+        'Start sample order...',
+        'Check lead times...',
+        'Create social posts...',
+        'Show commission rates...',
+        'Price out package...',
+        'Search dealer directory...',
+        'Summarize a contract...',
+        'Suggest finish pairings...',
+        'Write customer email...',
+        'Draft install checklist...',
+        'Analyze win chances...',
+        'Plan design days...',
+    ], []);
     const DISPLAY_MS = 8200;
     const FADE_MS = 1500;
     const FADE_IN_DELAY = 360;
-
     const phraseFor = (i) => phrases[i % phrases.length];
-
     useEffect(() => {
-        const id = setInterval(() => setTick((p) => p + 1), DISPLAY_MS);
+        const id = setInterval(() => setTick(p => p + 1), DISPLAY_MS);
         return () => clearInterval(id);
-    }, []);
-
+    }, [DISPLAY_MS]);
     useEffect(() => {
         if (tick === 0) return;
         setPrevText(phraseFor(tick - 1));
         const t = setTimeout(() => setPrevText(null), FADE_MS + 120);
         return () => clearTimeout(t);
     }, [tick]);
-
     const currentText = phraseFor(tick);
     const isAskCycle = currentText === 'Ask me anything...';
     const shouldPulse = isAskCycle && tick !== 0;
     const showHint = !value && !focused;
-
-    const handleFocus = (e) => {
-        setFocused(true);
-        if (onFocus) onFocus(e);
-    };
-
-    const handleBlur = (e) => {
-        setFocused(false);
-        if (onBlur) onBlur(e);
-    };
-
+    const handleFocus = (e) => { setFocused(true); onFocus && onFocus(e); };
+    const handleBlur = (e) => { setFocused(false); onBlur && onBlur(e); };
     return (
         <form
             onSubmit={(e) => {
@@ -157,7 +139,7 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
     );
 });
 
-// Standard search input with variants
+// Standard search input with header variant EXACT match to AppHeader pill
 export const SearchInput = React.memo(function SearchInput({
     value = '',
     onChange,
@@ -170,32 +152,36 @@ export const SearchInput = React.memo(function SearchInput({
 }) {
     const isHeader = variant === 'header';
 
-    const baseStyle = isHeader
-        ? {
-              height: 56,
-              backgroundColor: theme?.colors?.surface,
-              border: `1px solid ${theme?.colors?.border}`,
-              boxShadow: '0 2px 4px rgba(0,0,0,0.10), 0 1px 1px rgba(0,0,0,0.06)',
-          }
-        : {
-              height: 44,
-              backgroundColor: '#ffffff',
-              border: '1px solid rgba(0,0,0,0.12)',
-              boxShadow: '0 1px 2px rgba(0,0,0,0.06)',
-          };
+    // Pill style pulled from AppHeader (keep in sync)
+    const pill = isHeader ? {
+        height: 56,
+        backgroundColor: theme?.colors?.surface,
+        border: `1px solid ${theme?.colors?.border}`,
+        boxShadow: `0 8px 24px ${theme?.colors?.shadow}`,
+        borderRadius: 9999,
+        paddingLeft: 18,
+        paddingRight: 18
+    } : {
+        height: 44,
+        backgroundColor: theme?.colors?.surface,
+        border: `1px solid ${theme?.colors?.border}`,
+        borderRadius: 9999,
+        paddingLeft: 16,
+        paddingRight: 16
+    };
+
+    const iconColor = theme?.colors?.textSecondary || '#666';
 
     return (
-        <div
-            className={`flex items-center flex-1 rounded-full px-4 ${className}`}
-            style={{ ...baseStyle, ...style }}
-        >
-            <Search className="w-5 h-5 mr-2.5" style={{ color: theme?.colors?.textSecondary || '#666' }} />
+        <div className={`flex items-center flex-1 ${isHeader ? 'gap-2' : 'gap-2'} ${className}`}
+             style={{ ...pill, ...style }}>
+            <Search className="w-5 h-5" style={{ color: iconColor }} />
             <input
                 type="text"
                 value={value}
                 onChange={(e) => onChange && onChange(e.target.value)}
                 placeholder={placeholder}
-                className={`w-full h-full bg-transparent outline-none text-[15px] ${inputClassName}`}
+                className={`flex-1 h-full bg-transparent outline-none text-[15px] placeholder:opacity-70 ${inputClassName}`}
                 style={{ color: theme?.colors?.textPrimary || '#111' }}
                 aria-label={placeholder}
             />
