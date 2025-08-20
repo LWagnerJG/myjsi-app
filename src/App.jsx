@@ -1,13 +1,6 @@
 ﻿import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
-import {
-    INITIAL_OPPORTUNITIES,
-    MY_PROJECTS_DATA,
-    INITIAL_DESIGN_FIRMS,
-    INITIAL_DEALERS,
-    EMPTY_LEAD,
-    lightTheme,
-    darkTheme,
-} from './data/index.js';
+import { lightTheme, darkTheme } from './data/index.js';
+import { INITIAL_OPPORTUNITIES, MY_PROJECTS_DATA, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS, EMPTY_LEAD } from './screens/projects/data.js';
 import { INITIAL_POSTS, INITIAL_POLLS } from './screens/community/data.js';
 import { INITIAL_MEMBERS } from './screens/members/data.js';
 // Import dealer directory data from the screen-specific location

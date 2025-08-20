@@ -12,7 +12,7 @@ import {
   SAMPLE_FABRIC_RESULTS,
   SEARCH_FORM_INITIAL
 } from './data.js';
-import { FABRICS_DATA } from '../../../data/products.js';
+import { FABRICS_DATA } from '../../products/data.js';
 
 /** ---------- Tethered searchable dropdown (portal) ---------- */
 const LocalSearchSelect = ({

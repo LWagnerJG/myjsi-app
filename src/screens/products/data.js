@@ -1,4 +1,5 @@
-// Products specific data
+// Products feature specific data (authoritative after migration)
+// NOTE: Root data/products.js has been migrated and can be removed.
 export const PRODUCT_DATA = {
     'benches': {
         name: 'Benches',

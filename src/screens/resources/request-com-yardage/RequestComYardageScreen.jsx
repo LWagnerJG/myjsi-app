@@ -4,7 +4,7 @@ import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import { StyledSelect } from '../../../components/forms/StyledSelect.jsx';
 import { Modal } from '../../../components/common/Modal.jsx';
 import { Trash2 } from 'lucide-react';
-import { FABRICS_DATA, JSI_MODELS } from '../../../data/products.js';
+import { FABRICS_DATA, JSI_MODELS } from '../../products/data.js';
 
 export const RequestComYardageScreen = ({ theme, showAlert, onNavigate, userSettings }) => {
     const [selectedModels, setSelectedModels] = useState([]);

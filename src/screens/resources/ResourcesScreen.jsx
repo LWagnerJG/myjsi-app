@@ -3,7 +3,7 @@ import {
     Database, Search, Share2, FileText, DollarSign, Calendar, Percent,
     Palette, Package, Users, MapPin, MonitorPlay, Wrench, Clock, ChevronRight
 } from 'lucide-react';
-import * as Data from '../../data.jsx';
+import { RESOURCES_DATA } from './data.js';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 
 const sublabelMap = {
@@ -23,7 +23,7 @@ const sublabelMap = {
 };
 
 export const ResourcesScreen = ({ theme, onNavigate }) => {
-    const resourceCategories = useMemo(() => Data.RESOURCES_DATA || [], []);
+    const resourceCategories = useMemo(() => RESOURCES_DATA || [], []);
 
     const getResourceIcon = (label) => {
         if (label.includes('Lead Times')) return Clock;

@@ -1,12 +1,6 @@
-// Centralized data exports - organized by feature
-// Import all feature-specific data modules
+// Centralized data exports (legacy) - many modules migrated to screen folders
 export * from './theme/themeData.js';
 export * from './navigation.js';
 export * from './sales.js';
-export * from './products.js';
-export * from './orders.js';
-export * from './projects.js';
-export * from './community.js';
-export * from './resources.js';
-export * from './replacements.js';
-// Note: Members data moved to src/screens/members/data.js for feature organization
+// Backward compatibility shim: re-export project data from feature folder
+export { INITIAL_OPPORTUNITIES, MY_PROJECTS_DATA, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS, EMPTY_LEAD } from '../screens/projects/data.js';

@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { Plus, Briefcase, Check, Trash2, DollarSign, LineChart, Percent } from 'lucide-react';
-import * as Data from '../../data.jsx';
+import { STAGES, DISCOUNT_OPTIONS, WIN_PROBABILITY_OPTIONS, COMPETITORS } from './data.js';
 import { FormInput, PortalNativeSelect, TagInput } from '../../components/common/FormComponents.jsx';
 
 const fmtCurrency = (v) =>
@@ -109,13 +109,13 @@ const ProjectDetailScreen = ({ project, theme, onBack, onUpdateProject, onDelete
                 <GlassCard theme={theme} className="p-5 space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                         <FormInput label="Value" value={edited.value} onChange={(e) => setField('value', e.target.value)} theme={theme} />
-                        <PortalNativeSelect label="Stage" value={edited.stage} onChange={(e) => setField('stage', e.target.value)} options={Data.STAGES.map(s => ({ label: s, value: s }))} theme={theme} />
+                        <PortalNativeSelect label="Stage" value={edited.stage} onChange={(e) => setField('stage', e.target.value)} options={STAGES.map(s => ({ label: s, value: s }))} theme={theme} />
                     </div>
-                    <PortalNativeSelect label="Discount" value={edited.discount} onChange={(e) => setField('discount', e.target.value)} options={Data.DISCOUNT_OPTIONS.map(d => ({ label: d, value: d }))} theme={theme} />
-                    <PortalNativeSelect label="Win Probability" value={edited.winProbability} onChange={(e) => setField('winProbability', e.target.value)} options={Data.WIN_PROBABILITY_OPTIONS.map(p => ({ label: p, value: p }))} theme={theme} />
+                    <PortalNativeSelect label="Discount" value={edited.discount} onChange={(e) => setField('discount', e.target.value)} options={DISCOUNT_OPTIONS.map(d => ({ label: d, value: d }))} theme={theme} />
+                    <PortalNativeSelect label="Win Probability" value={edited.winProbability} onChange={(e) => setField('winProbability', e.target.value)} options={WIN_PROBABILITY_OPTIONS.map(p => ({ label: p, value: p }))} theme={theme} />
                 </GlassCard>
                 <GlassCard theme={theme} className="p-5 space-y-4">
-                    <TagInput label="Competitors" tags={edited.competitors || []} onTagsChange={(tags) => setField('competitors', tags)} theme={theme} suggestions={Data.COMPETITORS} />
+                    <TagInput label="Competitors" tags={edited.competitors || []} onTagsChange={(tags) => setField('competitors', tags)} theme={theme} suggestions={COMPETITORS} />
                 </GlassCard>
                 <button onClick={remove} className="w-full flex items-center justify-center gap-2 font-bold py-3 rounded-xl text-red-500 bg-red-500/10">
                     <Trash2 className="w-4 h-4" /> Delete Project
@@ -165,7 +165,7 @@ export const ProjectsScreen = forwardRef(
         const mainTabRefs = useRef([]); const stageButtonRefs = useRef([]);
 
         useEffect(() => { const idx = projectsTab === 'pipeline' ? 0 : 1; const el = mainTabRefs.current[idx]; if (el) setMainTabSlider({ left: el.offsetLeft, width: el.offsetWidth, opacity: 1 }); }, [projectsTab]);
-        useEffect(() => { const idx = Data.STAGES.findIndex(s => s === selectedPipelineStage); const el = stageButtonRefs.current[idx]; if (el) setStageSlider({ left: el.offsetLeft, width: el.offsetWidth, opacity: 1 }); }, [selectedPipelineStage]);
+        useEffect(() => { const idx = STAGES.findIndex(s => s === selectedPipelineStage); const el = stageButtonRefs.current[idx]; if (el) setStageSlider({ left: el.offsetLeft, width: el.offsetWidth, opacity: 1 }); }, [selectedPipelineStage]);
         useEffect(() => { updateStageFade(); }, [projectsTab, updateStageFade]);
 
         const handleAddClick = () => { if (projectsTab === 'pipeline') onNavigate('new-lead'); else onNavigate('add-new-install'); };
@@ -255,7 +255,7 @@ export const ProjectsScreen = forwardRef(
                         <div className="px-4 pt-1 pb-2 relative">
                             <div ref={stagesScrollRef} onScroll={updateStageFade} className="relative overflow-x-auto scrollbar-hide" style={{ scrollSnapType: 'x proximity' }}>
                                 <div className="relative flex gap-7 pb-2 whitespace-nowrap pr-2">
-                                    {Data.STAGES.map((stage, i) => {
+                                    {STAGES.map((stage, i) => {
                                         const active = selectedPipelineStage === stage;
                                         return (
                                             <button
@@ -329,11 +329,10 @@ export const ProjectsScreen = forwardRef(
                     >
                         <div className="max-w-screen-md mx-auto px-4 py-3">
                             <div className="flex items-center justify-between">
-                                <div className="inline-flex items-center gap-2 text-[12px] font-semibold" style={{ color: theme.colors.textSecondary }}>
-                                    <DollarSign className="w-4 h-4" style={{ color: theme.colors.accent }} />
-                                    <span>{selectedPipelineStage} Total</span>
+                                <div className="inline-flex items-center gap-2 text-[14px] font-bold" style={{ color: theme.colors.textPrimary }}>
+                                    <span>Total:</span>
                                 </div>
-                                <div className="text-lg font-extrabold tracking-tight" style={{ color: theme.colors.accent }}>
+                                <div className="text-2xl font-extrabold tracking-tight" style={{ color: theme.colors.accent }}>
                                     {fmtCurrency(stageTotals.totalValue)}
                                 </div>
                             </div>

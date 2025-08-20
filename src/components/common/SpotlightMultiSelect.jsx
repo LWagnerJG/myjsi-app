@@ -82,14 +82,22 @@ export function SpotlightMultiSelect({
     createPortal(
       <div
         ref={menuRef}
-        className="fixed rounded-2xl overflow-hidden shadow-2xl border"
-        style={{ top: pos.top, left: pos.left, width: pos.width, background: palette.bg, borderColor: palette.border, zIndex: 9999 }}
+        className="fixed rounded-2xl overflow-hidden"
+        style={{
+          top: pos.top,
+          left: pos.left,
+          width: pos.width,
+          background: palette.bg,
+          border: `1px solid ${palette.border}`,
+          boxShadow: "0 18px 44px rgba(0,0,0,.14)",
+          zIndex: 9999,
+        }}
       >
         <div className="max-h-72 overflow-auto py-1">
           {filtered.map((opt) => (
             <button
               key={opt}
-              className="w-full text-left px-3 py-2 text-sm hover:bg-black/5 dark:hover:bg-white/5 transition-colors font-normal tracking-wide"
+              className="w-full text-left px-3 py-2 text-sm hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
               style={{ color: palette.text }}
               onMouseDown={(e) => { e.preventDefault(); pick(opt); }}
             >
@@ -100,7 +108,7 @@ export function SpotlightMultiSelect({
             <>
               {filtered.length > 0 && <div className="h-px my-1" style={{ background: palette.border }} />}
               <button
-                className="w-full text-left px-3 py-2 text-sm flex items-center gap-2 hover:bg-black/5 dark:hover:bg-white/5 transition-colors font-medium"
+                className="w-full text-left px-3 py-2 text-sm font-semibold flex items-center gap-2 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                 style={{ color: palette.accent }}
                 onMouseDown={(e) => { e.preventDefault(); create(); }}
               >
@@ -109,7 +117,7 @@ export function SpotlightMultiSelect({
             </>
           )}
           {!filtered.length && !canCreate && (
-            <div className="px-3 py-3 text-sm font-normal tracking-wide" style={{ color: palette.hint }}>No matches</div>
+            <div className="px-3 py-3 text-sm" style={{ color: palette.hint }}>No matches</div>
           )}
         </div>
       </div>,
@@ -119,33 +127,31 @@ export function SpotlightMultiSelect({
   return (
     <div className="w-full">
       {label ? (
-        <label className="block text-sm font-semibold mb-1 px-3" style={{ color: theme.colors.textSecondary }}>
+        <label className="block text-sm font-medium mb-1 px-1" style={{ color: theme.colors.textSecondary }}>
           {label}
         </label>
       ) : null}
 
       <div
         ref={anchorRef}
-        className="relative flex items-center gap-2 px-4 h-12 border rounded-full cursor-text"
-        style={{ background: palette.field, border: `1px solid ${palette.border}` }}
+        className="flex items-center gap-2 px-3 cursor-text focus-ring"
+        style={{
+          height: 48,
+          borderRadius: 24, // Increased border radius for rounder shape
+          background: palette.field,
+          border: `1px solid ${palette.border}`,
+        }}
         onClick={() => setOpen(true)}
       >
-        {/* Increased icon size for better visibility */}
-        <Search className="w-5.5 h-5.5" style={{ color: palette.hint }} />
+        <Search className="w-4.5 h-4.5" style={{ color: palette.hint }} />
         <input
-            value={q}
-            onChange={(e) => { setQ(e.target.value); setOpen(true); }}
-            onFocus={() => setOpen(true)}
-            placeholder=""
-            className="flex-1 bg-transparent outline-none text-base font-normal tracking-wide"
-            style={{ color: palette.text }}
+          value={q}
+          onChange={(e) => { setQ(e.target.value); setOpen(true); }}
+          onFocus={() => setOpen(true)}
+          placeholder={placeholder}
+          className="flex-1 bg-transparent outline-none text-[14px]"
+          style={{ color: palette.text }}
         />
-        {!q && (
-          // Adjust left offset to accommodate larger icon
-          <span className="absolute left-12 top-1/2 -translate-y-1/2 text-base font-normal tracking-wide pointer-events-none" style={{ color: palette.hint }}>
-            {placeholder}
-          </span>
-        )}
       </div>
 
       {selectedItems.length > 0 && (
@@ -153,7 +159,7 @@ export function SpotlightMultiSelect({
           {selectedItems.map((s) => (
             <span
               key={s}
-              className="inline-flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-full text-sm border font-normal tracking-wide"
+              className="inline-flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-full text-sm border"
               style={{ background: palette.chipBg, borderColor: palette.border, color: palette.text }}
             >
               {s}
