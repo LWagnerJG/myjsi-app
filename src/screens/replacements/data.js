@@ -6,6 +6,7 @@ export const REPLACEMENT_REQUESTS_DATA = [
         dealer: 'Workplace Interiors',
         date: '2023-05-22',
         status: 'Pending',
+        photos: [], // data URL strings
     },
     {
         id: 'req1',
@@ -13,6 +14,7 @@ export const REPLACEMENT_REQUESTS_DATA = [
         dealer: 'Acme Office Solutions',
         date: '2023-05-20',
         status: 'Approved',
+        photos: [],
     },
     {
         id: 'req3',
@@ -20,5 +22,6 @@ export const REPLACEMENT_REQUESTS_DATA = [
         dealer: 'Midwest Contract Furnishings',
         date: '2023-05-18',
         status: 'Rejected',
+        photos: [],
     },
 ];

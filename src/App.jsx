@@ -1,6 +1,6 @@
 ﻿import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { lightTheme, darkTheme } from './data/index.js';
-import { INITIAL_OPPORTUNITIES, MY_PROJECTS_DATA, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS, EMPTY_LEAD } from './screens/projects/data.js';
+import { INITIAL_OPPORTUNITIES, MY_PROJECTS_DATA, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS, EMPTY_LEAD, STAGES } from './screens/projects/data.js';
 import { INITIAL_POSTS, INITIAL_POLLS } from './screens/community/data.js';
 import { INITIAL_MEMBERS } from './screens/members/data.js';
 // Import dealer directory data from the screen-specific location
@@ -51,7 +51,7 @@ const ScreenRouter = ({ screenKey, projectsScreenRef, ...rest }) => {
     if (screenKey === 'resources/sample_discounts') return <SampleDiscountsScreen {...rest} />;
     if (screenKey === 'resources/loaner_pool') return <LoanerPoolScreen {...rest} />;
     if (screenKey === 'resources/install_instructions') return <InstallInstructionsScreen {...rest} />;
-    if (screenKey === 'resources/presentations') return <PresentationsScreen {...rest} />;
+    if (screenKey === 'resources/presentations' ) return <PresentationsScreen {...rest} />;
     if (screenKey === 'resources/request_field_visit') return <RequestFieldVisitScreen {...rest} />;
     if (screenKey === 'resources/dealer_registration') return <NewDealerSignUpScreen {...rest} />;
     if (screenKey === 'resources/social_media') return <SocialMediaScreen {...rest} />;
@@ -94,6 +94,7 @@ function App() {
 
     const [opportunities, setOpportunities] = useState(INITIAL_OPPORTUNITIES);
     const [myProjects, setMyProjects] = useState(MY_PROJECTS_DATA);
+    const [projectsTabOverride, setProjectsTabOverride] = useState(null); // 'pipeline' | 'my-projects'
     const [selectedProject, setSelectedProject] = useState(null);
     const [members, setMembers] = useState(INITIAL_MEMBERS);
     const [currentUserId, setCurrentUserId] = useState(1);
@@ -253,6 +254,37 @@ function App() {
         setNewLeadData((prev) => ({ ...prev, ...updates }));
     }, []);
 
+    // Add onSuccess handler for NewLeadScreen
+    const handleLeadSuccess = useCallback((lead) => {
+        const newOpp = {
+            id: Date.now(),
+            name: lead.project || 'Untitled Project',
+            stage: lead.projectStatus && STAGES.includes(lead.projectStatus) ? lead.projectStatus : STAGES[0],
+            discount: lead.discount || 'Undecided',
+            value: lead.estimatedList || '$0',
+            company: lead.designFirms?.[0] || lead.dealers?.[0] || 'Unknown',
+            contact: lead.contact || '',
+            poTimeframe: lead.poTimeframe || '',
+            // persist full lead data for rich detail editing
+            ...lead,
+        };
+        setOpportunities(prev => [newOpp, ...prev]);
+        setNewLeadData(EMPTY_LEAD);
+        handleNavigate('projects');
+        setProjectsTabOverride('pipeline');
+        setSuccessMessage('Lead Added');
+        setTimeout(() => setSuccessMessage(''), 1500);
+    }, [handleNavigate]);
+
+    const handleAddInstall = useCallback((install) => {
+        const enriched = { id: 'inst-' + Date.now(), photos: install.photos || [], standards: [], quotes: [], ...install };
+        setMyProjects(prev => [enriched, ...prev]);
+        handleNavigate('projects');
+        setProjectsTabOverride('my-projects');
+        setSuccessMessage('Install Added');
+        setTimeout(() => setSuccessMessage(''), 1500);
+    }, [handleNavigate]);
+
     const screenProps = {
         theme: currentTheme,
         onNavigate: handleNavigate,
@@ -302,6 +334,11 @@ function App() {
         // theming
         isDarkMode,
         onToggleTheme: () => setIsDarkMode((d) => !d),
+        // new lead success
+        onSuccess: handleLeadSuccess,
+        onAddInstall: handleAddInstall,
+        projectsInitialTab: projectsTabOverride,
+        clearProjectsInitialTab: () => setProjectsTabOverride(null)
     };
 
     return (

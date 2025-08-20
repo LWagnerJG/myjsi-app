@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { Modal } from '../../components/common/Modal.jsx';
 import { X, ImageIcon, ListChecks } from 'lucide-react';
 
@@ -10,19 +10,7 @@ export const CreateContentModal = ({ show, onClose, theme, onCreatePost }) => {
     const [showMoreOptions, setShowMoreOptions] = useState(false);
     const fileInputRef = useRef(null);
 
-    if (!show) return null;
-
-    const reset = () => {
-        setMode('post');
-        setContent('');
-        setFiles((prev) => {
-            prev.forEach((o) => URL.revokeObjectURL(o.url));
-            return [];
-        });
-        setOpts(['', '']);
-        setShowMoreOptions(false);
-    };
-
+    // Derived submit availability (must run every render to preserve hook order regardless of visibility)
     const canSubmit = useMemo(() => {
         if (mode === 'poll') {
             const a = opts[0]?.trim();
@@ -30,7 +18,30 @@ export const CreateContentModal = ({ show, onClose, theme, onCreatePost }) => {
             return !!content.trim() && !!a && !!b;
         }
         return !!content.trim() || files.length > 0;
-    }, [mode, content, opts, files.length]);
+    }, [mode, content, opts, files]);
+
+    // Cleanup created object URLs when modal is hidden or unmounts
+    useEffect(() => {
+        if (!show && files.length) {
+            files.forEach((o) => o.url && URL.revokeObjectURL(o.url));
+            // don't clear files so reopening still shows them unless we explicitly reset
+        }
+        return () => {
+            files.forEach((o) => o.url && URL.revokeObjectURL(o.url));
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [show]);
+
+    const reset = () => {
+        setMode('post');
+        setContent('');
+        setFiles((prev) => {
+            prev.forEach((o) => o.url && URL.revokeObjectURL(o.url));
+            return [];
+        });
+        setOpts(['', '']);
+        setShowMoreOptions(false);
+    };
 
     const handleFileChange = (e) => {
         if (!e.target.files) return;
@@ -50,9 +61,7 @@ export const CreateContentModal = ({ show, onClose, theme, onCreatePost }) => {
     const submit = (e) => {
         e.preventDefault();
         if (!canSubmit) return;
-
         const now = Date.now();
-
         if (mode === 'poll') {
             const optionTexts = [
                 ...opts,
@@ -61,7 +70,6 @@ export const CreateContentModal = ({ show, onClose, theme, onCreatePost }) => {
                 .map((t) => t?.trim())
                 .filter(Boolean)
                 .slice(0, 4);
-
             const payload = {
                 id: now,
                 type: 'poll',
@@ -71,13 +79,11 @@ export const CreateContentModal = ({ show, onClose, theme, onCreatePost }) => {
                 question: content.trim(),
                 options: optionTexts.map((text, i) => ({ id: `opt${i + 1}`, text, votes: 0 })),
             };
-
             onCreatePost?.(payload);
             reset();
             onClose?.();
             return;
         }
-
         const payload = {
             id: now,
             type: 'post',
@@ -90,11 +96,12 @@ export const CreateContentModal = ({ show, onClose, theme, onCreatePost }) => {
             likes: 0,
             comments: [],
         };
-
         onCreatePost?.(payload);
         reset();
         onClose?.();
     };
+
+    if (!show) return null; // safe now because all hooks already executed in stable order
 
     return (
         <Modal show={show} onClose={onClose} title="Create New Post" theme={theme}>
@@ -143,8 +150,8 @@ export const CreateContentModal = ({ show, onClose, theme, onCreatePost }) => {
                         <div className="space-y-2">
                             {[0, 1].map((i) => (
                                 <input
-                                    key={`opt-${i}`}
-                                    value={opts[i] ?? ''}
+                                    key={i}
+                                    value={opts[i] || ''}
                                     onChange={(e) => {
                                         const next = [...opts];
                                         next[i] = e.target.value;
@@ -156,9 +163,9 @@ export const CreateContentModal = ({ show, onClose, theme, onCreatePost }) => {
                                 />
                             ))}
                             {showMoreOptions && [2, 3].map((i) => (
-                                <div key={`opt-${i}`} className="flex items-center gap-2">
+                                <div key={i} className="flex items-center gap-2">
                                     <input
-                                        value={opts[i] ?? ''}
+                                        value={opts[i] || ''}
                                         onChange={(e) => {
                                             const next = [...opts];
                                             next[i] = e.target.value;
@@ -198,59 +205,28 @@ export const CreateContentModal = ({ show, onClose, theme, onCreatePost }) => {
                         )}
                     </>
                 ) : (
-                    <div>
-                        <label className="block text-sm font-medium mb-2" style={{ color: theme.colors.textSecondary }}>
-                            Images
-                        </label>
-                        {files.length > 0 && (
-                            <div className="grid grid-cols-3 gap-3 mb-3">
-                                {files.map((o, idx) => (
-                                    <div key={idx} className="relative aspect-square">
-                                        <img src={o.url} alt={`preview-${idx}`} className="w-full h-full object-cover rounded-[14px] shadow" />
-                                        <button
-                                            type="button"
-                                            onClick={() => removeImage(idx)}
-                                            className="absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full p-1"
-                                        >
-                                            <X className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                        <button
-                            type="button"
-                            onClick={() => fileInputRef.current?.click()}
-                            className="w-full flex items-center justify-center gap-2 py-3 rounded-[16px] border-2 border-dashed"
-                            style={{ borderColor: theme.colors.border, color: theme.colors.textSecondary, background: theme.colors.surface }}
-                        >
-                            <ImageIcon className="w-5 h-5" />
-                            <span className="font-semibold">Add Images</span>
-                        </button>
-                        <input ref={fileInputRef} type="file" multiple accept="image/*" className="hidden" onChange={handleFileChange} />
-                    </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2" style={{ color: theme.colors.textSecondary }}>Images</label>
+                    {files.length>0 && (
+                      <div className="grid grid-cols-3 gap-3 mb-3">
+                        {files.map((o,idx)=>(
+                          <div key={idx} className="relative aspect-square">
+                            <img src={o.url} alt={`preview-${idx}`} className="w-full h-full object-cover rounded-[14px] shadow" />
+                            <button type="button" onClick={()=>removeImage(idx)} className="absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full p-1"><X className="w-4 h-4" /></button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <button type="button" onClick={()=>fileInputRef.current?.click()} className="w-full flex items-center justify-center gap-2 py-3 rounded-[16px] border-2 border-dashed" style={{ borderColor: theme.colors.border, color: theme.colors.textSecondary, background: theme.colors.surface }}>
+                      <ImageIcon className="w-5 h-5" /><span className="font-semibold">Add Images</span>
+                    </button>
+                    <input ref={fileInputRef} type="file" multiple accept="image/*" className="hidden" onChange={handleFileChange} />
+                  </div>
                 )}
 
                 <div className="flex gap-3 pt-2">
-                    <button
-                        type="button"
-                        onClick={() => {
-                            reset();
-                            onClose?.();
-                        }}
-                        className="flex-1 py-3 rounded-full font-semibold"
-                        style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }}
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        type="submit"
-                        disabled={!canSubmit}
-                        className="flex-1 py-3 rounded-full font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                        style={{ backgroundColor: theme.colors.accent }}
-                    >
-                        {mode === 'poll' ? 'Create Poll' : 'Post'}
-                    </button>
+                  <button type="button" onClick={()=>{ reset(); onClose?.(); }} className="flex-1 py-3 rounded-full font-semibold" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }}>Cancel</button>
+                  <button type="submit" disabled={!canSubmit} className="flex-1 py-3 rounded-full font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed" style={{ backgroundColor: theme.colors.accent }}>{mode==='poll'?'Create Poll':'Post'}</button>
                 </div>
             </form>
         </Modal>

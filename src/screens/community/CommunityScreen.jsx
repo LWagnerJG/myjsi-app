@@ -1,274 +1,209 @@
-import React, { useState, useMemo, useCallback, useRef } from 'react';
-import { PageTitle } from '../../components/common/PageTitle.jsx';
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
-import { MessageSquare, Heart, MessageCircle, Share2, Plus, TrendingUp, Users, Send, ChevronDown } from 'lucide-react';
+import { MessageSquare, Heart, MessageCircle, Share2, Plus, Users, Send, Search } from 'lucide-react';
 
+// Community feed screen
 export const CommunityScreen = ({
-    theme,
-    posts,
-    polls,
-    likedPosts,
-    pollChoices,
-    onToggleLike,
-    onPollVote,
-    onAddComment,
-    openCreateContentModal,
+  theme,
+  posts = [],
+  polls = [],
+  likedPosts = {},
+  pollChoices = {},
+  onToggleLike,
+  onPollVote,
+  onAddComment,
+  openCreateContentModal,
+  onRefresh,
 }) => {
-    const [isScrolled, setIsScrolled] = useState(false);
-    const [expandedComments, setExpandedComments] = useState({});
-    const scrollRef = useRef(null);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [expandedComments, setExpandedComments] = useState({});
+  const [query, setQuery] = useState('');
+  const [refreshKey, setRefreshKey] = useState(0);
+  const scrollRef = useRef(null);
 
-    const handleScroll = useCallback(() => {
-        if (!scrollRef.current) return;
-        setIsScrolled(scrollRef.current.scrollTop > 6);
-    }, []);
+  // hide scrollbar helper style (injected once)
+  useEffect(() => {
+    if (document.getElementById('community-no-scrollbar-style')) return;
+    const style = document.createElement('style');
+    style.id = 'community-no-scrollbar-style';
+    style.innerHTML = `.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; } .no-scrollbar::-webkit-scrollbar { display: none; }`;
+    document.head.appendChild(style);
+  }, []);
 
-    const allContent = useMemo(() => {
-        const list = [...(posts || []), ...(polls || [])].map((x) => ({
-            ...x,
-            createdAt: typeof x.createdAt === 'number' ? x.createdAt : Date.now(),
-        }));
-        return list.sort((a, b) => b.createdAt - a.createdAt);
-    }, [posts, polls]);
+  const handleScroll = useCallback(() => {
+    if (!scrollRef.current) return; setIsScrolled(scrollRef.current.scrollTop > 6);
+  }, []);
 
-    const toggleComments = useCallback((postId) => {
-        setExpandedComments((p) => ({ ...p, [postId]: !p[postId] }));
-    }, []);
+  const timeSafe = (x) => (typeof x.createdAt === 'number' ? x.createdAt : Date.now());
 
-    const Avatar = ({ src, alt }) => (
-        <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center" style={{ backgroundColor: theme.colors.accent }}>
-            {src ? <img src={src} alt={alt} className="w-full h-full object-cover" /> : <Users className="w-5 h-5 text-white" />}
-        </div>
-    );
+  const allContent = useMemo(() => {
+    const list = [...posts, ...polls].map(x => ({ ...x, createdAt: timeSafe(x) }));
+    return list.sort((a,b) => b.createdAt - a.createdAt);
+  }, [posts, polls, refreshKey]);
 
-    const StatButton = ({ active, icon: Icon, count, onClick, ariaLabel }) => (
-        <button
-            onClick={onClick}
-            aria-label={ariaLabel}
-            className="flex items-center gap-1.5 text-sm px-2 py-1 rounded-full transition-all active:scale-95"
-            style={{
-                backgroundColor: active ? `${theme.colors.accent}0F` : theme.colors.subtle,
-                border: `1px solid ${active ? theme.colors.accent : theme.colors.border}`,
-                color: active ? theme.colors.accent : theme.colors.textSecondary,
-            }}
-        >
-            <Icon className="w-4 h-4" />
-            <span>{count}</span>
-        </button>
-    );
+  const filteredContent = useMemo(() => {
+    const q = query.trim().toLowerCase(); if (!q) return allContent;
+    return allContent.filter(item => {
+      const base = [item.type, item.user?.name, item.text, item.title, item.question].filter(Boolean).join(' ').toLowerCase();
+      const optionsText = (item.options || []).map(o => o.text).join(' ').toLowerCase();
+      return base.includes(q) || optionsText.includes(q);
+    });
+  }, [allContent, query]);
 
-    const PostCard = ({ post }) => {
-        const [draft, setDraft] = useState('');
-        const isLiked = !!likedPosts?.[post.id];
+  const toggleComments = useCallback(id => setExpandedComments(p => ({ ...p, [id]: !p[id] })), []);
 
-        const submitComment = (e) => {
-            e.preventDefault();
-            const text = draft.trim();
-            if (!text) return;
-            onAddComment?.(post.id, text);
-            setDraft('');
-            if (!expandedComments[post.id]) toggleComments(post.id);
-        };
+  const Avatar = ({ src, alt }) => (
+    <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center" style={{ backgroundColor: theme.colors.accent }}>
+      {src ? <img src={src} alt={alt} className="w-full h-full object-cover" /> : <Users className="w-5 h-5 text-white" />}
+    </div>
+  );
 
-        return (
-            <GlassCard theme={theme} className="p-4 rounded-[24px] shadow-sm space-y-3">
-                <div className="flex items-start gap-3">
-                    <Avatar src={post.user?.avatar} alt={post.user?.name} />
-                    <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                            <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>{post.user?.name || 'Anonymous'}</span>
-                            <span className="text-xs px-2 py-0.5 rounded-full" style={{ color: theme.colors.textSecondary, background: theme.colors.subtle }}>
-                                {post.timeAgo || 'now'}
-                            </span>
-                        </div>
-                        {post.text && (
-                            <p className="mt-2 text-[15px] leading-6" style={{ color: theme.colors.textPrimary }}>
-                                {post.text}
-                            </p>
-                        )}
-                    </div>
-                </div>
+  const StatButton = ({ active, icon: Icon, count, onClick, ariaLabel }) => (
+    <button
+      onClick={onClick}
+      aria-label={ariaLabel}
+      className="flex items-center gap-1.5 text-sm px-2 py-1 rounded-full transition-all active:scale-95"
+      style={{
+        backgroundColor: active ? `${theme.colors.accent}15` : theme.colors.subtle,
+        border: `1px solid ${active ? theme.colors.accent : theme.colors.border}`,
+        color: active ? theme.colors.accent : theme.colors.textSecondary,
+      }}
+    >
+      <Icon className="w-4 h-4" />
+      <span>{count}</span>
+    </button>
+  );
 
-                {post.image && (
-                    <div className="rounded-xl overflow-hidden">
-                        <img src={post.image} alt="" className="w-full h-52 object-cover select-none pointer-events-none" />
-                    </div>
-                )}
-
-                {post.images?.length > 0 && (
-                    <div className={`grid gap-2 ${post.images.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
-                        {post.images.map((src, i) => (
-                            <div key={i} className="rounded-xl overflow-hidden">
-                                <img src={src} alt="" className="w-full h-32 object-cover select-none pointer-events-none" />
-                            </div>
-                        ))}
-                    </div>
-                )}
-
-                <div className="flex items-center justify-between pt-2 border-t" style={{ borderColor: theme.colors.border }}>
-                    <div className="flex items-center gap-2">
-                        <StatButton
-                            active={isLiked}
-                            icon={Heart}
-                            count={post.likes ?? 0}
-                            onClick={() => onToggleLike?.(post.id)}
-                            ariaLabel="Like"
-                        />
-                        <StatButton
-                            active={!!expandedComments[post.id]}
-                            icon={MessageCircle}
-                            count={post.comments?.length || 0}
-                            onClick={() => toggleComments(post.id)}
-                            ariaLabel="Comments"
-                        />
-                    </div>
-                    <button className="px-2 py-1 rounded-full active:scale-95" aria-label="Share" style={{ color: theme.colors.textSecondary }}>
-                        <Share2 className="w-4 h-4" />
-                    </button>
-                </div>
-
-                {expandedComments[post.id] && (
-                    <div id={`comments-${post.id}`} className="pt-2 space-y-3">
-                        <div className="space-y-2">
-                            {(post.comments || []).map((c) => (
-                                <div key={c.id} className="flex items-start gap-2">
-                                    <div className="w-7 h-7 rounded-full" style={{ background: theme.colors.subtle }} />
-                                    <div className="flex-1 text-sm">
-                                        <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>{c.name || 'User'}</span>{' '}
-                                        <span style={{ color: theme.colors.textSecondary }}>{c.text}</span>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-
-                        <form onSubmit={submitComment} className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full" style={{ background: theme.colors.subtle }} />
-                            <input
-                                value={draft}
-                                onChange={(e) => setDraft(e.target.value)}
-                                placeholder="Add a comment…"
-                                className="flex-1 px-3 py-2 rounded-full text-sm outline-none"
-                                style={{
-                                    backgroundColor: theme.colors.subtle,
-                                    color: theme.colors.textPrimary,
-                                    border: `1px solid ${theme.colors.border}`,
-                                }}
-                            />
-                            <button
-                                type="submit"
-                                className="rounded-full px-3 py-2 text-sm font-semibold flex items-center gap-1 active:scale-95"
-                                style={{ backgroundColor: theme.colors.accent, color: 'white' }}
-                            >
-                                <Send className="w-4 h-4" /> Send
-                            </button>
-                        </form>
-                    </div>
-                )}
-            </GlassCard>
-        );
-    };
-
-    const PollCard = ({ poll }) => {
-        const total = poll.options?.reduce((s, o) => s + o.votes, 0) || 0;
-        return (
-            <GlassCard theme={theme} className="p-4 rounded-[24px] shadow-sm space-y-3">
-                <div className="flex items-start gap-3">
-                    <Avatar src={poll.user?.avatar} alt={poll.user?.name} />
-                    <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                            <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>{poll.user?.name || 'Anonymous'}</span>
-                            <span className="text-xs px-2 py-0.5 rounded-full" style={{ color: theme.colors.textSecondary, background: theme.colors.subtle }}>
-                                {poll.timeAgo}
-                            </span>
-                        </div>
-                        <p className="mt-2 font-semibold" style={{ color: theme.colors.textPrimary }}>{poll.question}</p>
-                    </div>
-                </div>
-
-                <div className="space-y-2">
-                    {poll.options?.map((o) => {
-                        const pct = total ? Math.round((o.votes / total) * 100) : 0;
-                        const isSelected = pollChoices?.[poll.id] === o.id;
-                        return (
-                            <button
-                                key={o.id}
-                                onClick={() => onPollVote?.(poll.id, o.id)}
-                                className={`w-full p-3 rounded-xl text-left relative overflow-hidden active:scale-[0.98] transition ${isSelected ? 'ring-2' : ''}`}
-                                style={{ backgroundColor: theme.colors.subtle, ringColor: isSelected ? theme.colors.accent : 'transparent' }}
-                            >
-                                <div className="absolute inset-y-0 left-0 opacity-15" style={{ backgroundColor: theme.colors.accent, width: `${pct}%` }} />
-                                <div className="relative flex items-center justify-between">
-                                    <span style={{ color: theme.colors.textPrimary }}>{o.text}</span>
-                                    <span className="text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>
-                                        {o.votes} ({pct}%)
-                                    </span>
-                                </div>
-                            </button>
-                        );
-                    })}
-                </div>
-            </GlassCard>
-        );
-    };
-
+  const PostCard = ({ post }) => {
+    const [draft, setDraft] = useState('');
+    const isLiked = !!likedPosts[post.id];
+    const submitComment = (e) => { e.preventDefault(); const text = draft.trim(); if (!text) return; onAddComment?.(post.id, text); setDraft(''); if (!expandedComments[post.id]) toggleComments(post.id); };
     return (
-        <div className="flex flex-col h-full">
-            <div
-                className={`sticky top-0 z-10 transition-shadow duration-200 ${isScrolled ? 'shadow-md' : ''}`}
-                style={{
-                    backgroundColor: `${theme.colors.background}e6`,
-                    backdropFilter: 'blur(10px)',
-                    WebkitBackdropFilter: 'blur(10px)',
-                    borderBottom: `1px solid ${isScrolled ? theme.colors.border + '40' : 'transparent'}`,
-                }}
-            >
-                <PageTitle title="Community" theme={theme}>
-                    <button
-                        onClick={openCreateContentModal}
-                        className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold active:scale-95 transition"
-                        style={{ backgroundColor: theme.colors.accent, color: 'white' }}
-                    >
-                        <Plus className="w-4 h-4" />
-                        <span>Post</span>
-                    </button>
-                </PageTitle>
+      <GlassCard theme={theme} className="p-4 rounded-[24px] shadow-sm space-y-3">
+        <div className="flex items-start gap-3">
+          <Avatar src={post.user?.avatar} alt={post.user?.name} />
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <p className="font-semibold text-sm" style={{ color: theme.colors.textPrimary }}>{post.user?.name}</p>
+              <span className="text-[11px] font-medium" style={{ color: theme.colors.textSecondary }}>{post.timeAgo}</span>
             </div>
-
-            <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto">
-                <div className="p-4 space-y-4">
-                    {allContent.length === 0 ? (
-                        <GlassCard theme={theme} className="p-8 text-center rounded-[24px]">
-                            <MessageSquare className="w-12 h-12 mx-auto mb-4" style={{ color: theme.colors.accent }} />
-                            <h3 className="font-bold text-lg mb-2" style={{ color: theme.colors.textPrimary }}>No Community Posts Yet</h3>
-                            <p className="text-sm mb-4" style={{ color: theme.colors.textSecondary }}>
-                                Be the first to share your projects and connect with the JSI community.
-                            </p>
-                            <button
-                                onClick={openCreateContentModal}
-                                className="px-6 py-3 rounded-full font-semibold active:scale-95 transition"
-                                style={{ backgroundColor: theme.colors.accent, color: 'white' }}
-                            >
-                                Create First Post
-                            </button>
-                        </GlassCard>
-                    ) : (
-                        allContent.map((item) =>
-                            item.type === 'poll' || item.question ? (
-                                <PollCard key={`poll-${item.id}`} poll={item} />
-                            ) : (
-                                <PostCard key={`post-${item.id}`} post={item} />
-                            ),
-                        )
-                    )}
-                </div>
-            </div>
-
-            <div className="pointer-events-none fixed bottom-2 left-0 right-0 flex justify-center">
-                <div className="px-3 py-1.5 rounded-full flex items-center gap-2 pointer-events-auto" style={{ background: theme.colors.surface, border: `1px solid ${theme.colors.border}` }}>
-                    <ChevronDown className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
-                    <span className="text-xs" style={{ color: theme.colors.textSecondary }}>Pull to refresh</span>
-                </div>
-            </div>
+            {post.title && <p className="font-bold text-sm mt-0.5" style={{ color: theme.colors.textPrimary }}>{post.title}</p>}
+            {post.text && <p className="text-sm mt-1 whitespace-pre-line" style={{ color: theme.colors.textSecondary }}>{post.text}</p>}
+            {post.image && (
+              <div className="mt-3 overflow-hidden rounded-xl">
+                <img src={post.image} alt="post" className="w-full h-auto object-cover" />
+              </div>
+            )}
+            {post.images && post.images.length > 0 && (
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                {post.images.map((img,i)=>(<img key={i} src={img} alt={post.title||'win'} className="rounded-lg object-cover w-full h-28" />))}
+              </div>
+            )}
+          </div>
         </div>
+        {/* Stats */}
+        <div className="flex items-center gap-2 pt-1">
+          <StatButton active={isLiked} icon={Heart} count={post.likes || 0} onClick={()=>onToggleLike?.(post.id)} ariaLabel="Like" />
+          <StatButton active={expandedComments[post.id]} icon={MessageCircle} count={(post.comments||[]).length} onClick={()=>toggleComments(post.id)} ariaLabel="Comments" />
+          <button onClick={()=>{ if(navigator.share){ navigator.share({ title: post.title || 'Post', text: post.text }); } }} className="flex items-center gap-1.5 text-sm px-4 py-1 rounded-full transition-all active:scale-95" style={{ backgroundColor: theme.colors.subtle, border:`1px solid ${theme.colors.border}`, color: theme.colors.textSecondary }}>
+            <Share2 className="w-4 h-4" /> <span>Share</span>
+          </button>
+        </div>
+        {/* Comments */}
+        {expandedComments[post.id] && (
+          <div className="pt-2 space-y-3">
+            <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+              {(post.comments||[]).map(c => (
+                <div key={c.id} className="flex items-start gap-2">
+                  <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textSecondary }}>{c.name?.[0] || '?'}</div>
+                  <div className="flex-1 rounded-xl px-3 py-2" style={{ backgroundColor: theme.colors.subtle }}>
+                    <p className="text-xs font-semibold" style={{ color: theme.colors.textPrimary }}>{c.name}</p>
+                    <p className="text-xs mt-0.5" style={{ color: theme.colors.textSecondary }}>{c.text}</p>
+                  </div>
+                </div>
+              ))}
+              {(post.comments||[]).length === 0 && (
+                <p className="text-xs" style={{ color: theme.colors.textSecondary }}>No comments yet.</p>
+              )}
+            </div>
+            <form onSubmit={submitComment} className="flex items-center gap-2">
+              <input value={draft} onChange={e=>setDraft(e.target.value)} placeholder="Add a comment" className="flex-1 text-sm px-3 py-2 rounded-full outline-none" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary, border:`1px solid ${theme.colors.border}` }} />
+              <button disabled={!draft.trim()} className="p-2 rounded-full disabled:opacity-40" style={{ backgroundColor: theme.colors.accent, color:'#fff' }}>
+                <Send className="w-4 h-4" />
+              </button>
+            </form>
+          </div>
+        )}
+      </GlassCard>
     );
+  };
+
+  const PollCard = ({ poll }) => {
+    const votedOption = pollChoices[poll.id];
+    const totalVotes = (poll.options||[]).reduce((s,o)=>s+(o.votes||0),0);
+    return (
+      <GlassCard theme={theme} className="p-4 rounded-[24px] shadow-sm space-y-3">
+        <div className="flex items-start gap-3">
+          <Avatar src={poll.user?.avatar} alt={poll.user?.name} />
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <p className="font-semibold text-sm" style={{ color: theme.colors.textPrimary }}>{poll.user?.name}</p>
+              <span className="text-[11px] font-medium" style={{ color: theme.colors.textSecondary }}>{poll.timeAgo}</span>
+            </div>
+            <p className="text-sm mt-1 font-medium" style={{ color: theme.colors.textPrimary }}>{poll.question}</p>
+            <div className="mt-3 space-y-2">
+              {poll.options.map(opt => {
+                const percent = totalVotes ? Math.round((opt.votes||0)/totalVotes*100) : 0;
+                const active = votedOption === opt.id;
+                return (
+                  <button key={opt.id} type="button" disabled={!!votedOption} onClick={()=>onPollVote?.(poll.id,opt.id)} className="w-full text-left px-3 py-2 rounded-xl border relative overflow-hidden group" style={{ borderColor: theme.colors.border, backgroundColor: active ? theme.colors.accent : theme.colors.surface, color: active ? theme.colors.surface : theme.colors.textPrimary }}>
+                    <span className="relative z-10 text-xs font-medium flex justify-between">
+                      <span>{opt.text}</span>
+                      {!!votedOption && <span>{percent}%</span>}
+                    </span>
+                    {votedOption && (
+                      <div className="absolute inset-0" style={{ background: `linear-gradient(90deg, ${theme.colors.accent}40 ${percent}%, transparent ${percent}%)` }} />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </GlassCard>
+    );
+  };
+
+  const doRefresh = () => { if (onRefresh) { onRefresh(); } else { setRefreshKey(k=>k+1); } };
+
+  return (
+    <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
+      {/* Header */}
+      <div className={`sticky top-0 z-10 transition-all ${isScrolled?'shadow-md':''}`} style={{ backgroundColor: isScrolled?`${theme.colors.background}e8`:theme.colors.background, backdropFilter:isScrolled?'blur(12px)':'none', borderBottom:`1px solid ${isScrolled?theme.colors.border+'40':'transparent'}` }}>
+        <div className="px-4 pt-6 pb-3 flex items-center gap-3">
+          <h1 className="text-lg font-bold mr-1" style={{ color: theme.colors.textPrimary }}>Community</h1>
+          <div className="flex-1 relative">
+            <input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search posts, polls, wins..." className="w-full text-sm pl-9 pr-3 py-2 rounded-full outline-none" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary, border:`1px solid ${theme.colors.border}` }} />
+            <Search className="w-4 h-4 absolute top-1/2 -translate-y-1/2 left-3" style={{ color: theme.colors.textSecondary }} />
+          </div>
+          <button onClick={openCreateContentModal} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold" style={{ backgroundColor: theme.colors.accent, color:'#fff' }}>
+            <Plus className="w-4 h-4" /> New
+          </button>
+        </div>
+      </div>
+      {/* Feed */}
+      <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto no-scrollbar px-4 pb-24 pt-4 space-y-4">
+        {!filteredContent.length && (
+          <div className="text-center text-sm pt-20" style={{ color: theme.colors.textSecondary }}>No content found.</div>
+        )}
+        {filteredContent.map(item => item.question ? <PollCard key={`poll-${item.id}`} poll={item} /> : <PostCard key={`post-${item.id}`} post={item} />)}
+        <div className="h-2" />
+      </div>
+      <div className="fixed bottom-4 right-4">
+        <button onClick={doRefresh} className="px-4 py-2 rounded-full text-xs font-semibold" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary, border:`1px solid ${theme.colors.border}` }}>Refresh</button>
+      </div>
+    </div>
+  );
 };
+
+export default CommunityScreen;
