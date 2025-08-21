@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react';
 import { Modal } from '../../components/common/Modal';
-import { ArrowUp, Plus, ArrowLeft, TrendingUp, Award, DollarSign, BarChart } from 'lucide-react';
+import { ArrowUp, Plus, ArrowLeft, TrendingUp, Award, DollarSign, BarChart, Info } from 'lucide-react';
 import { MONTHLY_SALES_DATA, SALES_VERTICALS_DATA } from './data.js';
 import { ORDER_DATA, STATUS_COLORS } from '../orders/data.js';
 
@@ -38,7 +38,8 @@ const TopTabs = ({ theme, active, onChange }) => {
     return (
         <div
             ref={wrapRef}
-            className="relative flex items-center gap-6 px-1 pt-1 pb-2"
+            className="relative flex items-center gap-3 px-0 pt-1 pb-1 flex-wrap"
+            style={{ maxWidth: '100%' }}
         >
             <div className="absolute left-0 right-0 bottom-0 h-px" style={{ background: theme.colors.border }} />
             <div
@@ -52,10 +53,10 @@ const TopTabs = ({ theme, active, onChange }) => {
                         key={t.key}
                         ref={el => (btnRefs.current[i] = el)}
                         onClick={() => onChange(t.key)}
-                        className="flex items-center gap-1.5 pb-1.5 text-sm font-semibold"
+                        className="flex items-center gap-1 pb-1 text-xs sm:text-sm font-semibold shrink-0"
                         style={{ color: selected ? theme.colors.accent : theme.colors.textSecondary }}
                     >
-                        <t.Icon className="w-4 h-4" style={{ color: selected ? theme.colors.accent : theme.colors.textSecondary }} />
+                        <t.Icon className="w-3.5 h-3.5" style={{ color: selected ? theme.colors.accent : theme.colors.textSecondary }} />
                         {t.label}
                     </button>
                 );
@@ -338,9 +339,22 @@ export const SalesScreen = ({ theme, onNavigate }) => {
     const [selectedMonth, setSelectedMonth] = useState(null);
     const [isScrolled, setIsScrolled] = useState(false);
     const [topTab, setTopTab] = useState(null);
+    const [showTrendInfo, setShowTrendInfo] = useState(false);
 
     const scrollContainerRef = useRef(null);
     const loadMoreRef = useRef(null);
+    const trendRef = useRef(null); // ref for delta chip + tooltip
+
+    useEffect(() => {
+        if (!showTrendInfo) return; // only bind when open
+        const handleClickOutside = (e) => {
+            if (trendRef.current && !trendRef.current.contains(e.target)) {
+                setShowTrendInfo(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [showTrendInfo]);
 
     const handleScroll = useCallback(() => {
         if (scrollContainerRef.current) setIsScrolled(scrollContainerRef.current.scrollTop > 10);
@@ -350,6 +364,19 @@ export const SalesScreen = ({ theme, onNavigate }) => {
         const bookings = MONTHLY_SALES_DATA.reduce((acc, m) => acc + m.bookings, 0);
         const sales = MONTHLY_SALES_DATA.reduce((acc, m) => acc + m.sales, 0);
         return { totalBookings: bookings, totalSales: sales };
+    }, []);
+
+    // Year progress calculations
+    const { yearProgressPercent, deltaVsLinear, deltaLabel } = useMemo(() => {
+        const now = new Date();
+        const startYear = new Date(now.getFullYear(), 0, 1);
+        const startNext = new Date(now.getFullYear() + 1, 0, 1);
+        const totalDays = (startNext - startYear) / 86400000;
+        const dayOfYear = Math.floor((now - startYear) / 86400000) + 1;
+        const yearPct = (dayOfYear / totalDays) * 100;
+        const goalPct = MONTHLY_SALES_DATA.reduce((acc, m) => acc + m.bookings, 0) / 7000000 * 100; // uses goal below
+        const delta = goalPct - yearPct; // positive = ahead
+        return { yearProgressPercent: yearPct, deltaVsLinear: delta, deltaLabel: `${delta >= 0 ? '+' : ''}${delta.toFixed(1)}%` };
     }, []);
 
     const salesByVertical = useMemo(() => {
@@ -407,37 +434,60 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                     borderBottom: `1px solid ${isScrolled ? theme.colors.border + '40' : 'transparent'}`
                 }}
             >
-                <div className="px-4 py-3">
-                    <div className="flex justify-between items-center w-full gap-2">
-                        <button
-                            onClick={() => onNavigate('new-lead')}
-                            className="flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold transition-all hover:scale-[1.02] active:scale-95 shadow-sm"
-                            style={{ backgroundColor: theme.colors.accent, color: '#fff' }}
-                        >
-                            <Plus className="w-4 h-4" />
-                            New Lead
-                        </button>
-
-                        <TopTabs theme={theme} active={topTab} onChange={handleTopTabChange} />
-                    </div>
+                <div className="px-4 py-2 flex items-center gap-4 flex-wrap">
+                    <button
+                        onClick={() => onNavigate('new-lead')}
+                        className="flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold transition-all hover:scale-[1.02] active:scale-95 shadow-sm"
+                        style={{ backgroundColor: theme.colors.accent, color: '#fff' }}
+                    >
+                        <Plus className="w-4 h-4" />
+                        New Lead
+                    </button>
+                    <TopTabs theme={theme} active={topTab} onChange={handleTopTabChange} />
                 </div>
             </div>
 
             <div ref={scrollContainerRef} onScroll={handleScroll} className="flex-1 overflow-y-auto scrollbar-hide">
                 <div className="px-4 space-y-4 pt-2 pb-4 max-w-6xl mx-auto">
-                    <div className="p-6 rounded-[2.5rem] shadow-sm border" style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.border }}>
-                        <div className="flex justify-between items-center mb-4">
+                    <div className="p-6 rounded-[2.5rem] shadow-sm border relative" style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.border }}>
+                        <div className="flex justify-between items-start mb-3 relative">
                             <h3 className="font-bold text-xl" style={{ color: theme.colors.textPrimary }}>Progress to Goal</h3>
-                            <div className="flex items-center space-x-1 px-3 py-1 rounded-full" style={{ backgroundColor: theme.colors.accent + '20', color: theme.colors.accent }}>
-                                <ArrowUp className="w-3 h-3" />
-                                <span className="text-xs font-bold">+3.1%</span>
+                            <div className="relative" ref={trendRef}>
+                                <div className="flex items-center space-x-1 px-3 py-1 rounded-full cursor-pointer select-none" onClick={() => setShowTrendInfo(s => !s)} style={{ backgroundColor: theme.colors.accent + '20', color: theme.colors.accent }}>
+                                    <ArrowUp className="w-3 h-3" />
+                                    <span className="text-xs font-bold">{deltaLabel}</span>
+                                </div>
+                                {showTrendInfo && (
+                                    <div className="absolute top-full right-0 mt-2 w-56 z-20 p-3 rounded-xl text-[11px] shadow-lg" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${theme.colors.border}` }}>
+                                        <p className="font-semibold mb-1" style={{ color: theme.colors.textPrimary }}>{deltaVsLinear >= 0 ? 'Ahead of pace' : 'Behind pace'} {deltaLabel}</p>
+                                        <p style={{ color: theme.colors.textSecondary, lineHeight: '1.25rem' }}>
+                                            Goal: {percentToGoal.toFixed(1)}%<br />
+                                            Year: {yearProgressPercent.toFixed(1)}%
+                                        </p>
+                                        <button onClick={() => setShowTrendInfo(false)} className="mt-1 text-[10px] font-semibold underline" style={{ color: theme.colors.accent }}>Close</button>
+                                    </div>
+                                )}
                             </div>
                         </div>
-                        <p className="text-5xl font-bold mb-2" style={{ color: theme.colors.accent }}>{percentToGoal.toFixed(1)}%</p>
-                        <p className="text-sm font-semibold mb-4" style={{ color: theme.colors.textPrimary }}>${formatMillion(totalBookings)} of ${formatMillion(goal)}</p>
-                        <div className="relative w-full h-3 rounded-full" style={{ backgroundColor: theme.colors.border }}>
-                            <div className="h-full rounded-full transition-all duration-500" style={{ width: `${percentToGoal}%`, backgroundColor: theme.colors.accent }} />
+                        <div className="flex items-end gap-3 mb-3">
+                            <p className="text-5xl leading-none font-bold" style={{ color: theme.colors.accent }}>{percentToGoal.toFixed(1)}%</p>
                         </div>
+                        <div className="relative w-full h-6 rounded-full mb-2" style={{ backgroundColor: theme.colors.border }}>
+                            <div className="h-full rounded-full transition-all duration-500" style={{ width: `${percentToGoal}%`, backgroundColor: theme.colors.accent }} />
+                            {(() => {
+                                const currentMillions = (totalBookings/1000000).toFixed(1);
+                                const goalMillions = (goal/1000000).toFixed(1);
+                                // position label just inside filled bar (shift left by its own width using translate)
+                                const safePct = Math.max(percentToGoal, 5); // ensure room
+                                return (
+                                    <>
+                                        <span className="absolute top-1/2 -translate-y-1/2 font-bold text-[10px] px-1" style={{ left: `${safePct}%`, transform: 'translate(-100%, -50%)', color: '#fff', whiteSpace: 'nowrap' }}>${currentMillions}M</span>
+                                        <span className="absolute top-1/2 -translate-y-1/2 right-1 font-medium text-[10px]" style={{ color: theme.colors.textSecondary }}>${goalMillions}M</span>
+                                    </>
+                                );
+                            })()}
+                        </div>
+                        <p className="text-[11px] font-medium" style={{ color: theme.colors.textSecondary }}>Year elapsed: {yearProgressPercent.toFixed(1)}%</p>
                     </div>
 
                     <div className="p-6 rounded-[2.5rem] shadow-sm border" style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.border }}>

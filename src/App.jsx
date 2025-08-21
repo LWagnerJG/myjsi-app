@@ -42,6 +42,10 @@ const ScreenRouter = ({ screenKey, projectsScreenRef, ...rest }) => {
 
     if (base === 'projects') return <ProjectsScreen ref={projectsScreenRef} {...rest} />;
 
+    // handle specific samples cart route BEFORE generic samples base
+    if (screenKey === 'samples/cart') return <SamplesScreen {...rest} initialCartOpen />;
+    if (base === 'samples') return <SamplesScreen {...rest} />;
+
     if (screenKey === 'resources/commission-rates') return <CommissionRatesScreen {...rest} />;
     if (screenKey === 'resources/lead-times') return <LeadTimesScreen {...rest} />;
     if (screenKey === 'resources/contracts') return <ContractsScreen {...rest} />;
@@ -59,8 +63,6 @@ const ScreenRouter = ({ screenKey, projectsScreenRef, ...rest }) => {
     if (screenKey === 'fabrics/search_form') return <SearchFabricsScreen {...rest} />;
     if (screenKey === 'fabrics/com_request') return <RequestComYardageScreen {...rest} />;
 
-    if (base === 'samples') return <SamplesScreen {...rest} />;
-    if (screenKey === 'samples/cart') return <SamplesScreen {...rest} initialCartOpen />;
     if (base === 'products' && parts[1] === 'category' && parts.length === 3) {
         return <ProductComparisonScreen {...rest} categoryId={parts[2]} />;
     }

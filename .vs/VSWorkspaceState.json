@@ -4,7 +4,10 @@
     "\\src",
     "\\src\\data",
     "\\src\\screens",
-    "\\src\\screens\\samples"
+    "\\src\\screens\\community",
+    "\\src\\screens\\projects",
+    "\\src\\screens\\resources\\lead-times"
   ],
+  "SelectedNode": "\\src\\screens\\community\\CommunityScreen.jsx",
   "PreviewInSolutionExplorer": false
 }
