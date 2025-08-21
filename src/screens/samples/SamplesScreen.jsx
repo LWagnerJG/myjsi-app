@@ -6,6 +6,8 @@ import {
     ChevronUp, ChevronDown, Users, X, Search
 } from 'lucide-react';
 import { SAMPLE_PRODUCTS, SAMPLE_CATEGORIES, FINISH_CATEGORIES, FINISH_SAMPLES } from './data.js';
+import { getSampleProduct } from './sampleIndex.js';
+import { useToasts } from '../../components/common/ToastHost.jsx';
 
 const idOf = (x) => String(x);
 
@@ -116,7 +118,7 @@ const DrawerItem = React.memo(({ item, onUpdateCart, theme, isLast = false }) =>
                     {item.isSet
                         ? <Package className="w-5 h-5" style={{ color: theme.colors.secondary }} />
                         : item.image
-                            ? <img src={item.image} alt={item.name} className="w-full h-full object-cover rounded-md" />
+                            ? <img loading="lazy" width="300" height="300" src={item.image} alt={item.name} className="w-full h-full object-cover rounded-md" />
                             : null}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -147,6 +149,7 @@ const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, designFi
     const [shipToName, setShipToName] = useState('');
     const [address1, setAddress1] = useState(userSettings?.homeAddress || '');
     const [address2, setAddress2] = useState('');
+    const toasts = useToasts();
 
     // helper to safely set values (avoid undefined which triggers uncontrolled warning)
     const safeSetShipTo = (v) => setShipToName(v ?? '');
@@ -166,7 +169,7 @@ const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, designFi
                         categoryId;
                     return { id, name: `Complete ${categoryName} Set`, quantity, isSet: true };
                 }
-                const product = SAMPLE_PRODUCTS.find((p) => idOf(p.id) === id);
+                const product = getSampleProduct(id); // O(1) lookup
                 return product ? { ...product, id, quantity, isSet: false } : null;
             })
             .filter(Boolean);
@@ -175,9 +178,12 @@ const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, designFi
     const totalCartItems = useMemo(() => Object.values(cart).reduce((s, q) => s + q, 0), [cart]);
 
     const submit = useCallback(() => {
-        if (!shipToName.trim() || !address1.trim() || cartItems.length === 0) return;
-        alert('Order submitted successfully!');
-    }, [shipToName, address1, cartItems.length]);
+        if (!shipToName.trim() || !address1.trim() || cartItems.length === 0) {
+            toasts.push('Please complete required fields before submitting', { type: 'error' });
+            return;
+        }
+        toasts.push('Sample request submitted');
+    }, [shipToName, address1, cartItems.length, toasts]);
 
     const canSubmit = totalCartItems > 0 && shipToName.trim() && address1.trim();
 
@@ -191,7 +197,8 @@ const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, designFi
                     backgroundColor: theme.colors.surface,
                     borderTopLeftRadius: '16px',
                     borderTopRightRadius: '16px',
-                    borderTop: `1px solid ${theme.colors.border}`,
+                    // borderTop removed to eliminate stray grey line
+                    boxShadow: '0 -2px 8px rgba(0,0,0,0.06)',
                     maxHeight: isExpanded ? '65vh' : '84px',
                     transform: isExpanded ? 'translateY(0)' : 'translateY(calc(100% - 84px))',
                 }}
@@ -375,16 +382,25 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
 
     return (
         <div className="flex flex-col h-full" style={{ paddingBottom: totalCartItems > 0 ? '88px' : '0' }}>
-            <div className="flex-1 overflow-y-auto scrollbar-hide">
-                {/* Category Tabs */}
-                <div className="px-4 pt-4 pb-2">
+            <div className="flex-1 overflow-y-auto scrollbar-hide" style={{ backgroundColor: theme.colors.background }}>
+                {/* Sticky Category + Set Buttons */}
+                <div
+                    className="sticky top-0 z-10 px-4 pt-4 pb-3 space-y-3"
+                    style={{
+                        background: theme.colors.background, // fully opaque to prevent bleed-through
+                        backdropFilter: 'none',
+                        WebkitBackdropFilter: 'none',
+                        borderBottom: `1px solid ${theme.colors.border}40`
+                    }}
+                >
                     <div className="relative flex overflow-x-auto scrollbar-hide whitespace-nowrap">
                         {allCategories.map((cat) => (
                             <button
                                 key={cat.id}
                                 onClick={() => setSelectedCategory(cat.id)}
-                                className="relative px-4 py-3 font-semibold text-sm"
-                                style={{ color: selectedCategory === cat.id ? theme.colors.accent : theme.colors.textSecondary }}
+                                className="relative px-4 py-3 font-semibold text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 rounded-full"
+                                style={{ color: selectedCategory === cat.id ? theme.colors.accent : theme.colors.textSecondary, outline: 'none' }}
+                                aria-pressed={selectedCategory === cat.id}
                             >
                                 {cat.name}
                                 {selectedCategory === cat.id && (
@@ -393,10 +409,6 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                             </button>
                         ))}
                     </div>
-                </div>
-
-                {/* Set Buttons */}
-                <div className="px-4 py-4">
                     <div className="flex gap-3">
                         <OrderFullSetButton onClick={addFull} theme={theme} inCart={fullSetInCart} />
                         <AddCompleteSetButton onClick={addSet} theme={theme} inCart={setInCartQuantity > 0} categoryName={currentCategoryName} />
@@ -404,7 +416,7 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                 </div>
 
                 {/* Product Grid */}
-                <div className="px-4 pb-4">
+                <div className="px-4 pb-4 pt-3">
                     {selectedCategory === 'tfl' && (
                         <div className="grid grid-cols-3 gap-3">
                             {filteredProducts.map(product => {
@@ -430,7 +442,7 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                                             }}
                                         >
                                             {hasImage && (
-                                                <img src={product.image} alt={product.name} className="w-full h-full object-cover select-none pointer-events-none" draggable={false} />
+                                                <img loading="lazy" width="300" height="300" src={product.image} alt={product.name} className="w-full h-full object-cover select-none pointer-events-none" draggable={false} />
                                             )}
 
                                             <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-24">
@@ -488,7 +500,7 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                                             }}
                                         >
                                             {hasImage && (
-                                                <img src={product.image} alt={product.name} className="w-full h-full object-cover select-none pointer-events-none" draggable={false} />
+                                                <img loading="lazy" width="300" height="300" src={product.image} alt={product.name} className="w-full h-full object-cover select-none pointer-events-none" draggable={false} />
                                             )}
 
                                             <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-24">

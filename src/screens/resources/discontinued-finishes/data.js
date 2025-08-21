@@ -7,7 +7,9 @@ export const DISCONTINUED_FINISHES = [
         category: 'Wood Veneer',
         veneer: 'VM-101',
         solid: 'SM-101',
-        newImage: '/jsi_finish_ALB_Alabaster_Laminate.jpg'
+        newImage: '/jsi_finish_ALB_Alabaster_Laminate.jpg',
+        width: 300,
+        height: 300
     },
     {
         id: 2,
@@ -16,7 +18,9 @@ export const DISCONTINUED_FINISHES = [
         category: 'Wood Veneer',
         veneer: 'VM-205',
         solid: 'SM-205',
-        newImage: '/jsi_finish_BBL_BridalBlanco_Laminate.jpg'
+        newImage: '/jsi_finish_BBL_BridalBlanco_Laminate.jpg',
+        width: 300,
+        height: 300
     },
     {
         id: 3,
@@ -25,7 +29,9 @@ export const DISCONTINUED_FINISHES = [
         category: 'Wood Veneer',
         veneer: 'VM-301',
         solid: 'SM-301',
-        newImage: '/jsi_finish_BEL_Belair_Laminate.jpg'
+        newImage: '/jsi_finish_BEL_Belair_Laminate.jpg',
+        width: 300,
+        height: 300
     },
     {
         id: 4,
@@ -34,7 +40,9 @@ export const DISCONTINUED_FINISHES = [
         category: 'Wood Veneer',
         veneer: 'VM-401',
         solid: 'SM-401',
-        newImage: '/jsi_finish_FLO_FlorenceWalnut_Laminate.jpg'
+        newImage: '/jsi_finish_FLO_FlorenceWalnut_Laminate.jpg',
+        width: 300,
+        height: 300
     },
     {
         id: 5,
@@ -43,7 +51,9 @@ export const DISCONTINUED_FINISHES = [
         category: 'Wood Veneer',
         veneer: 'VM-501',
         solid: 'SM-501',
-        newImage: '/jsi_finish_UMB_Umber_Laminate.jpg'
+        newImage: '/jsi_finish_UMB_Umber_Laminate.jpg',
+        width: 300,
+        height: 300
     },
     {
         id: 6,
@@ -52,7 +62,9 @@ export const DISCONTINUED_FINISHES = [
         category: 'Laminate',
         veneer: 'LM-101',
         solid: 'LM-101',
-        newImage: '/jsi_finish_DWH_DesignerWhite_Laminate.jpg'
+        newImage: '/jsi_finish_DWH_DesignerWhite_Laminate.jpg',
+        width: 300,
+        height: 300
     },
     {
         id: 7,
@@ -61,7 +73,9 @@ export const DISCONTINUED_FINISHES = [
         category: 'Laminate',
         veneer: 'LM-501',
         solid: 'LM-501',
-        newImage: '/jsi_finish_BLK_Black_Laminate.jpg'
+        newImage: '/jsi_finish_BLK_Black_Laminate.jpg',
+        width: 300,
+        height: 300
     },
     {
         id: 8,
@@ -70,7 +84,9 @@ export const DISCONTINUED_FINISHES = [
         category: 'Laminate',
         veneer: 'LM-301',
         solid: 'LM-301',
-        newImage: '/jsi_finish_SLG_SlateGrey_Laminate.jpg'
+        newImage: '/jsi_finish_SLG_SlateGrey_Laminate.jpg',
+        width: 300,
+        height: 300
     },
     {
         id: 9,
@@ -79,7 +95,9 @@ export const DISCONTINUED_FINISHES = [
         category: 'Wood Veneer',
         veneer: 'VM-601',
         solid: 'SM-601',
-        newImage: '/jsi_finish_WEA_WeatheredAsh_Laminate.jpg'
+        newImage: '/jsi_finish_WEA_WeatheredAsh_Laminate.jpg',
+        width: 300,
+        height: 300
     },
 ];
 

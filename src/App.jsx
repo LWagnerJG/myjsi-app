@@ -1,9 +1,8 @@
-﻿import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+﻿import React, { useState, useMemo, useCallback, useEffect, useRef, Suspense } from 'react';
 import { lightTheme, darkTheme } from './data/index.js';
 import { INITIAL_OPPORTUNITIES, MY_PROJECTS_DATA, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS, EMPTY_LEAD, STAGES } from './screens/projects/data.js';
 import { INITIAL_POSTS, INITIAL_POLLS } from './screens/community/data.js';
 import { INITIAL_MEMBERS } from './screens/members/data.js';
-// Import dealer directory data from the screen-specific location
 import { DEALER_DIRECTORY_DATA } from './screens/resources/dealer-directory/data.js';
 
 import { AppHeader, ProfileMenu, SCREEN_MAP, VoiceModal, SuccessToast } from './ui.jsx';
@@ -16,52 +15,57 @@ import { SamplesScreen } from './screens/samples/index.js';
 import { CreateContentModal } from './screens/community/CreateContentModal.jsx';
 import { AnimatedScreenWrapper } from './components/common/AnimatedScreenWrapper.jsx';
 import { ProjectsScreen } from './screens/projects/ProjectsScreen.jsx';
+import { usePersistentState } from './hooks/usePersistentState.js';
+import { ToastHost, useToasts } from './components/common/ToastHost.jsx';
 
-// resource feature screens (folder barrels)
-import CommissionRatesScreen from './screens/resources/commission-rates/index.js';
-import LeadTimesScreen from './screens/resources/lead-times/index.js';
-import ContractsScreen from './screens/resources/contracts/index.js';
-import DealerDirectoryScreen from './screens/resources/dealer-directory/index.js';
-import DiscontinuedFinishesScreen from './screens/resources/discontinued-finishes/index.js';
-import DesignDaysScreen from './screens/resources/design-days/index.js';
-import SampleDiscountsScreen from './screens/resources/sample-discounts/index.js';
-import LoanerPoolScreen from './screens/resources/loaner-pool/index.js';
-import InstallInstructionsScreen from './screens/resources/install-instructions/index.js';
-import NewDealerSignUpScreen from './screens/resources/new-dealer-signup/index.js';
-import PresentationsScreen from './screens/resources/presentations/index.js';
-import RequestFieldVisitScreen from './screens/resources/request-field-visit/index.js';
-import SearchFabricsScreen from './screens/resources/search-fabrics/index.js';
-import RequestComYardageScreen from './screens/resources/request-com-yardage/index.js';
-import SocialMediaScreen from './screens/resources/social-media/index.js';
+// Lazy load less-frequently visited resource feature screens for bundle splitting
+const CommissionRatesScreen = React.lazy(() => import('./screens/resources/commission-rates/index.js'));
+const LeadTimesScreen = React.lazy(() => import('./screens/resources/lead-times/index.js'));
+const ContractsScreen = React.lazy(() => import('./screens/resources/contracts/index.js'));
+const DealerDirectoryScreen = React.lazy(() => import('./screens/resources/dealer-directory/index.js'));
+const DiscontinuedFinishesScreen = React.lazy(() => import('./screens/resources/discontinued-finishes/index.js'));
+const DesignDaysScreen = React.lazy(() => import('./screens/resources/design-days/index.js'));
+const SampleDiscountsScreen = React.lazy(() => import('./screens/resources/sample-discounts/index.js'));
+const LoanerPoolScreen = React.lazy(() => import('./screens/resources/loaner-pool/index.js'));
+const InstallInstructionsScreen = React.lazy(() => import('./screens/resources/install-instructions/index.js'));
+const NewDealerSignUpScreen = React.lazy(() => import('./screens/resources/new-dealer-signup/index.js'));
+const PresentationsScreen = React.lazy(() => import('./screens/resources/presentations/index.js'));
+const RequestFieldVisitScreen = React.lazy(() => import('./screens/resources/request-field-visit/index.js'));
+const SearchFabricsScreen = React.lazy(() => import('./screens/resources/search-fabrics/index.js'));
+const RequestComYardageScreen = React.lazy(() => import('./screens/resources/request-com-yardage/index.js'));
+const SocialMediaScreen = React.lazy(() => import('./screens/resources/social-media/index.js'));
 
-const ScreenRouter = ({ screenKey, projectsScreenRef, ...rest }) => {
+const ScreenRouter = ({ screenKey, projectsScreenRef, SuspenseFallback, ...rest }) => {
     if (!screenKey) return null;
-
     const parts = screenKey.split('/');
     const base = parts[0];
 
     if (base === 'projects') return <ProjectsScreen ref={projectsScreenRef} {...rest} />;
 
-    // handle specific samples cart route BEFORE generic samples base
+    // Samples routes (cart first)
     if (screenKey === 'samples/cart') return <SamplesScreen {...rest} initialCartOpen />;
     if (base === 'samples') return <SamplesScreen {...rest} />;
 
-    if (screenKey === 'resources/commission-rates') return <CommissionRatesScreen {...rest} />;
-    if (screenKey === 'resources/lead-times') return <LeadTimesScreen {...rest} />;
-    if (screenKey === 'resources/contracts') return <ContractsScreen {...rest} />;
-    if (screenKey === 'resources/dealer-directory') return <DealerDirectoryScreen {...rest} />;
-    if (screenKey === 'resources/discontinued_finishes') return <DiscontinuedFinishesScreen {...rest} />;
-    if (screenKey === 'resources/design_days') return <DesignDaysScreen {...rest} />;
-    if (screenKey === 'resources/sample_discounts') return <SampleDiscountsScreen {...rest} />;
-    if (screenKey === 'resources/loaner_pool') return <LoanerPoolScreen {...rest} />;
-    if (screenKey === 'resources/install_instructions') return <InstallInstructionsScreen {...rest} />;
-    if (screenKey === 'resources/presentations' ) return <PresentationsScreen {...rest} />;
-    if (screenKey === 'resources/request_field_visit') return <RequestFieldVisitScreen {...rest} />;
-    if (screenKey === 'resources/dealer_registration') return <NewDealerSignUpScreen {...rest} />;
-    if (screenKey === 'resources/social_media') return <SocialMediaScreen {...rest} />;
+    // Feature screens (lazy) inside Suspense to isolate fallback flicker per screen
+    const lazyWrap = (Comp) => (
+        <Suspense fallback={SuspenseFallback}> <Comp {...rest} /> </Suspense>
+    );
 
-    if (screenKey === 'fabrics/search_form') return <SearchFabricsScreen {...rest} />;
-    if (screenKey === 'fabrics/com_request') return <RequestComYardageScreen {...rest} />;
+    if (screenKey === 'resources/commission-rates') return lazyWrap(CommissionRatesScreen);
+    if (screenKey === 'resources/lead-times') return lazyWrap(LeadTimesScreen);
+    if (screenKey === 'resources/contracts') return lazyWrap(ContractsScreen);
+    if (screenKey === 'resources/dealer-directory') return lazyWrap(DealerDirectoryScreen);
+    if (screenKey === 'resources/discontinued_finishes') return lazyWrap(DiscontinuedFinishesScreen);
+    if (screenKey === 'resources/design_days') return lazyWrap(DesignDaysScreen);
+    if (screenKey === 'resources/sample_discounts') return lazyWrap(SampleDiscountsScreen);
+    if (screenKey === 'resources/loaner_pool') return lazyWrap(LoanerPoolScreen);
+    if (screenKey === 'resources/install_instructions') return lazyWrap(InstallInstructionsScreen);
+    if (screenKey === 'resources/presentations') return lazyWrap(PresentationsScreen);
+    if (screenKey === 'resources/request_field_visit') return lazyWrap(RequestFieldVisitScreen);
+    if (screenKey === 'resources/dealer_registration') return lazyWrap(NewDealerSignUpScreen);
+    if (screenKey === 'resources/social_media') return lazyWrap(SocialMediaScreen);
+    if (screenKey === 'fabrics/search_form') return lazyWrap(SearchFabricsScreen);
+    if (screenKey === 'fabrics/com_request') return lazyWrap(RequestComYardageScreen);
 
     if (base === 'products' && parts[1] === 'category' && parts.length === 3) {
         return <ProductComparisonScreen {...rest} categoryId={parts[2]} />;
@@ -71,7 +75,6 @@ const ScreenRouter = ({ screenKey, projectsScreenRef, ...rest }) => {
     }
 
     if (base === 'orders' && parts.length > 1) return <OrderDetailScreen {...rest} />;
-
     if (base === 'resources' && parts.length > 1) return <ResourceDetailScreen {...rest} />;
 
     const ScreenComponent = SCREEN_MAP[base] || SalesScreen;
@@ -79,49 +82,48 @@ const ScreenRouter = ({ screenKey, projectsScreenRef, ...rest }) => {
 };
 
 function App() {
+    // Persistent preferences / cart
+    const [isDarkMode, setIsDarkMode] = usePersistentState('pref.darkMode', false);
+    const [cart, setCart] = usePersistentState('samples.cart', {});
+
+    // Navigation / UI state (not persisted yet)
     const [navigationHistory, setNavigationHistory] = useState(['home']);
     const [lastNavigationDirection, setLastNavigationDirection] = useState('forward');
-    const [isDarkMode, setIsDarkMode] = useState(false);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
-    const [userSettings, setUserSettings] = useState({
-        id: 1,
-        firstName: 'Luke',
-        lastName: 'Wagner',
-        homeAddress: '5445 N Deerwood Lake Rd, Jasper, IN 47546',
-    });
     const [voiceMessage, setVoiceMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
-    const [cart, setCart] = useState({});
     const [alertInfo, setAlertInfo] = useState({ show: false, message: '' });
 
+    // Domain state
+    const [userSettings, setUserSettings] = useState({ id: 1, firstName: 'Luke', lastName: 'Wagner', homeAddress: '5445 N Deerwood Lake Rd, Jasper, IN 47546' });
     const [opportunities, setOpportunities] = useState(INITIAL_OPPORTUNITIES);
     const [myProjects, setMyProjects] = useState(MY_PROJECTS_DATA);
-    const [projectsTabOverride, setProjectsTabOverride] = useState(null); // 'pipeline' | 'my-projects'
+    const [projectsTabOverride, setProjectsTabOverride] = useState(null);
     const [selectedProject, setSelectedProject] = useState(null);
     const [members, setMembers] = useState(INITIAL_MEMBERS);
-    const [currentUserId, setCurrentUserId] = useState(1);
+    const [currentUserId] = useState(1);
 
-    // Community state
+    // Community
     const [posts, setPosts] = useState(INITIAL_POSTS);
     const [polls, setPolls] = useState(INITIAL_POLLS);
     const [likedPosts, setLikedPosts] = useState({});
     const [pollChoices, setPollChoices] = useState({});
     const [showCreateContentModal, setShowCreateContentModal] = useState(false);
 
-    const [dealerDirectory, setDealerDirectory] = useState(DEALER_DIRECTORY_DATA);
+    // Directories / leads
+    const [dealerDirectory] = useState(DEALER_DIRECTORY_DATA);
     const [designFirms, setDesignFirms] = useState(INITIAL_DESIGN_FIRMS);
     const [dealers, setDealers] = useState(INITIAL_DEALERS);
-    const [newLeadData, setNewLeadData] = useState(EMPTY_LEAD);
+    const [newLeadData, setNewLeadData] = usePersistentState('draft.newLead', EMPTY_LEAD); // persisted lead draft
 
     const projectsScreenRef = useRef(null);
-
     const currentScreen = navigationHistory[navigationHistory.length - 1];
+
     const currentTheme = useMemo(() => (isDarkMode ? darkTheme : lightTheme), [isDarkMode]);
 
+    // Dynamic viewport height CSS var for mobile safe area usage
     useEffect(() => {
-        const setAppHeight = () => {
-            document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
-        };
+        const setAppHeight = () => document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
         setAppHeight();
         window.addEventListener('resize', setAppHeight);
         window.addEventListener('orientationchange', setAppHeight);
@@ -131,9 +133,7 @@ function App() {
         };
     }, []);
 
-    useEffect(() => {
-        document.body.style.backgroundColor = currentTheme.colors.background;
-    }, [currentTheme.colors.background]);
+    useEffect(() => { document.body.style.backgroundColor = currentTheme.colors.background; }, [currentTheme.colors.background]);
 
     const handleNavigate = useCallback((screen) => {
         setLastNavigationDirection('forward');
@@ -145,26 +145,14 @@ function App() {
             const handled = projectsScreenRef.current.clearSelection();
             if (handled) return;
         }
-        if (navigationHistory.length > 1) {
-            setLastNavigationDirection('backward');
-            setNavigationHistory((prev) => prev.slice(0, -1));
-        }
-    }, [navigationHistory.length, currentScreen]);
-
-    const handleHome = useCallback(() => {
+        setNavigationHistory((prev) => (prev.length > 1 ? prev.slice(0, -1) : prev));
         setLastNavigationDirection('backward');
-        setNavigationHistory(['home']);
-    }, []);
+    }, [currentScreen]);
 
-    const handleVoiceActivate = useCallback((message) => {
-        setVoiceMessage(message);
-        setTimeout(() => setVoiceMessage(''), 1500);
-    }, []);
+    const handleHome = useCallback(() => { setNavigationHistory(['home']); setLastNavigationDirection('backward'); }, []);
 
-    const handleAskAI = useCallback((query) => {
-        setVoiceMessage(`AI Search: ${query}`);
-        setTimeout(() => setVoiceMessage(''), 2500);
-    }, []);
+    const handleVoiceActivate = useCallback((message) => { setVoiceMessage(message); setTimeout(() => setVoiceMessage(''), 1500); }, []);
+    const handleAskAI = useCallback((query) => { setVoiceMessage(`AI Search: ${query}`); setTimeout(() => setVoiceMessage(''), 2500); }, []);
 
     const handleUpdateCart = useCallback((item, change) => {
         setCart((prev) => {
@@ -172,119 +160,51 @@ function App() {
             const id = String(item.id);
             const curr = next[id] || 0;
             const qty = curr + change;
-            if (qty > 0) next[id] = qty;
-            else delete next[id];
+            if (qty > 0) next[id] = qty; else delete next[id];
             return next;
         });
-    }, []);
+    }, [setCart]);
 
-    // ---- Community handlers (optimistic & synchronous) ----
+    // Community interactions (optimistic)
     const handleToggleLike = useCallback((postId) => {
         setLikedPosts((prev) => {
-            const isLiked = !!prev[postId];
+            const liked = !!prev[postId];
             const next = { ...prev };
-            if (isLiked) delete next[postId];
-            else next[postId] = true;
-
-            // update likes on the source posts array immediately
-            setPosts((prevPosts) =>
-                prevPosts.map((p) =>
-                    p.id === postId ? { ...p, likes: Math.max(0, (p.likes || 0) + (isLiked ? -1 : 1)) } : p,
-                ),
-            );
+            if (liked) delete next[postId]; else next[postId] = true;
+            setPosts((p) => p.map(post => post.id === postId ? { ...post, likes: Math.max(0, (post.likes || 0) + (liked ? -1 : 1)) } : post));
             return next;
         });
     }, []);
 
     const handleAddComment = useCallback((postId, text) => {
         const now = Date.now();
-        setPosts((prev) =>
-            prev.map((p) =>
-                p.id === postId
-                    ? {
-                        ...p,
-                        comments: [...(p.comments || []), { id: now, name: 'You', text }],
-                    }
-                    : p,
-            ),
-        );
+        setPosts((prev) => prev.map(p => p.id === postId ? { ...p, comments: [...(p.comments || []), { id: now, name: 'You', text }] } : p));
     }, []);
 
     const handlePollVote = useCallback((pollId, optionId) => {
         setPollChoices((prev) => ({ ...prev, [pollId]: optionId }));
-        // optional: update vote counts optimistically
-        setPolls((prev) =>
-            prev.map((pl) =>
-                pl.id !== pollId
-                    ? pl
-                    : {
-                        ...pl,
-                        options: pl.options.map((o) =>
-                            o.id === optionId ? { ...o, votes: (o.votes || 0) + 1 } : o,
-                        ),
-                    },
-            ),
-        );
+        setPolls((prev) => prev.map(pl => pl.id !== pollId ? pl : { ...pl, options: pl.options.map(o => o.id === optionId ? { ...o, votes: (o.votes || 0) + 1 } : o) }));
     }, []);
 
     const handleCreatePost = useCallback((payload) => {
-        if (payload.type === 'poll') {
-            setPolls((prev) => [payload, ...prev]);
-        } else {
-            // normalize to post
-            const post = {
-                id: payload.id,
-                type: 'post',
-                user: payload.user,
-                text: payload.text ?? payload.content ?? '',
-                image: payload.image || null,
-                images: payload.images || [],
-                likes: payload.likes ?? 0,
-                comments: payload.comments || [],
-                timeAgo: 'now',
-                createdAt: payload.createdAt || Date.now(),
-            };
+        if (payload.type === 'poll') setPolls((prev) => [payload, ...prev]); else {
+            const post = { id: payload.id, type: 'post', user: payload.user, text: payload.text ?? payload.content ?? '', image: payload.image || null, images: payload.images || [], likes: payload.likes ?? 0, comments: payload.comments || [], timeAgo: 'now', createdAt: payload.createdAt || Date.now() };
             setPosts((prev) => [post, ...prev]);
         }
-        setShowCreateContentModal(false);
-        setSuccessMessage('Posted!');
-        setTimeout(() => setSuccessMessage(''), 1500);
+        setShowCreateContentModal(false); setSuccessMessage('Posted!'); setTimeout(() => setSuccessMessage(''), 1500);
     }, []);
 
     const handleShowAlert = useCallback((message) => setAlertInfo({ show: true, message }), []);
-    const handleNewLeadChange = useCallback((updates) => {
-        setNewLeadData((prev) => ({ ...prev, ...updates }));
-    }, []);
+    const handleNewLeadChange = useCallback((updates) => setNewLeadData((prev) => ({ ...prev, ...updates })), []);
 
-    // Add onSuccess handler for NewLeadScreen
     const handleLeadSuccess = useCallback((lead) => {
-        const newOpp = {
-            id: Date.now(),
-            name: lead.project || 'Untitled Project',
-            stage: lead.projectStatus && STAGES.includes(lead.projectStatus) ? lead.projectStatus : STAGES[0],
-            discount: lead.discount || 'Undecided',
-            value: lead.estimatedList || '$0',
-            company: lead.designFirms?.[0] || lead.dealers?.[0] || 'Unknown',
-            contact: lead.contact || '',
-            poTimeframe: lead.poTimeframe || '',
-            // persist full lead data for rich detail editing
-            ...lead,
-        };
-        setOpportunities(prev => [newOpp, ...prev]);
-        setNewLeadData(EMPTY_LEAD);
-        handleNavigate('projects');
-        setProjectsTabOverride('pipeline');
-        setSuccessMessage('Lead Added');
-        setTimeout(() => setSuccessMessage(''), 1500);
-    }, [handleNavigate]);
+        const newOpp = { id: Date.now(), name: lead.project || 'Untitled Project', stage: lead.projectStatus && STAGES.includes(lead.projectStatus) ? lead.projectStatus : STAGES[0], discount: lead.discount || 'Undecided', value: lead.estimatedList || '$0', company: lead.designFirms?.[0] || lead.dealers?.[0] || 'Unknown', contact: lead.contact || '', poTimeframe: lead.poTimeframe || '', ...lead };
+        setOpportunities(prev => [newOpp, ...prev]); setNewLeadData(EMPTY_LEAD); handleNavigate('projects'); setProjectsTabOverride('pipeline'); setSuccessMessage('Lead Added'); setTimeout(() => setSuccessMessage(''), 1500);
+    }, [handleNavigate, setNewLeadData]);
 
     const handleAddInstall = useCallback((install) => {
         const enriched = { id: 'inst-' + Date.now(), photos: install.photos || [], standards: [], quotes: [], ...install };
-        setMyProjects(prev => [enriched, ...prev]);
-        handleNavigate('projects');
-        setProjectsTabOverride('my-projects');
-        setSuccessMessage('Install Added');
-        setTimeout(() => setSuccessMessage(''), 1500);
+        setMyProjects(prev => [enriched, ...prev]); handleNavigate('projects'); setProjectsTabOverride('my-projects'); setSuccessMessage('Install Added'); setTimeout(() => setSuccessMessage(''), 1500);
     }, [handleNavigate]);
 
     const screenProps = {
@@ -306,8 +226,6 @@ function App() {
         members,
         setMembers,
         currentUserId,
-
-        // community
         posts,
         polls,
         likedPosts,
@@ -316,76 +234,58 @@ function App() {
         onAddComment: handleAddComment,
         onPollVote: handlePollVote,
         openCreateContentModal: () => setShowCreateContentModal(true),
-
-        // samples/cart
         cart,
         setCart,
         onUpdateCart: handleUpdateCart,
-
-        // directories
         dealerDirectory,
         designFirms,
         setDesignFirms,
         dealers,
         setDealers,
-
-        // new lead
         newLeadData,
         onNewLeadChange: handleNewLeadChange,
-
-        // theming
         isDarkMode,
-        onToggleTheme: () => setIsDarkMode((d) => !d),
-        // new lead success
+        onToggleTheme: () => setIsDarkMode(d => !d),
         onSuccess: handleLeadSuccess,
         onAddInstall: handleAddInstall,
         projectsInitialTab: projectsTabOverride,
         clearProjectsInitialTab: () => setProjectsTabOverride(null)
     };
 
+    const suspenseFallback = (
+        <div className="flex items-center justify-center w-full h-full text-sm" style={{ color: currentTheme.colors.textSecondary }}>
+            Loading5
+        </div>
+    );
+
     return (
-        <div
-            className="h-screen-safe w-screen font-sans flex flex-col relative"
-            style={{ backgroundColor: currentTheme.colors.background, '--background-color': currentTheme.colors.background }}
-        >
+        <ToastHost theme={currentTheme}>
+        <div className="h-screen-safe w-screen font-sans flex flex-col relative" style={{ backgroundColor: currentTheme.colors.background }}>
             <AppHeader
                 theme={currentTheme}
                 userName={userSettings.firstName}
                 showBack={navigationHistory.length > 1}
                 handleBack={handleBack}
                 onHomeClick={handleHome}
-                onProfileClick={() => setShowProfileMenu((p) => !p)}
+                onProfileClick={() => setShowProfileMenu(p => !p)}
                 isDarkMode={isDarkMode}
             />
-
             <div className="flex-1 pt-[76px] overflow-hidden" style={{ backgroundColor: currentTheme.colors.background }}>
-                <AnimatedScreenWrapper
-                    screenKey={currentScreen}
-                    direction={lastNavigationDirection}
-                    onSwipeBack={navigationHistory.length > 1 ? handleBack : null}
-                >
-                    <ScreenRouter screenKey={currentScreen} projectsScreenRef={projectsScreenRef} {...screenProps} />
+                <AnimatedScreenWrapper screenKey={currentScreen} direction={lastNavigationDirection} onSwipeBack={navigationHistory.length > 1 ? handleBack : null}>
+                    <ScreenRouter screenKey={currentScreen} projectsScreenRef={projectsScreenRef} SuspenseFallback={suspenseFallback} {...screenProps} />
                 </AnimatedScreenWrapper>
             </div>
-
             {showProfileMenu && (
                 <ProfileMenu show={showProfileMenu} onClose={() => setShowProfileMenu(false)} onNavigate={handleNavigate} theme={currentTheme} />
             )}
             <VoiceModal message={voiceMessage} show={!!voiceMessage} theme={currentTheme} />
             <SuccessToast message={successMessage} show={!!successMessage} theme={currentTheme} />
-
-            {/* Composer modal */}
-            <CreateContentModal
-                show={showCreateContentModal}
-                onClose={() => setShowCreateContentModal(false)}
-                theme={currentTheme}
-                onCreatePost={handleCreatePost}
-            />
-
+            <CreateContentModal show={showCreateContentModal} onClose={() => setShowCreateContentModal(false)} theme={currentTheme} onCreatePost={handleCreatePost} />
             <Modal show={alertInfo.show} onClose={() => setAlertInfo({ show: false, message: '' })} title="Alert" theme={currentTheme}>
                 <p>{alertInfo.message}</p>
             </Modal>
         </div>
+        </ToastHost>
     );
 }
 

@@ -41,20 +41,16 @@ const CategoryCard = React.memo(({
                 <h2 className="text-2xl font-bold mb-2" style={{ color: theme.colors.textPrimary }}>
                     {category.name}
                 </h2>
-                <div className={`flex space-x-2 -mb-2 ${isBenches ? 'justify-start' : ''}`}>
+                <div className={`flex space-x-3 -mb-2 justify-end pr-2`}>
                     {category.images?.map((img, index) => (
-                        <img
-                            key={index}
-                            src={img}
-                            alt={`${category.name} example ${index + 1}`}
-                            className={`rounded-md object-cover transition-opacity ${isBenches
-                                ? 'w-20 h-20'
-                                : category.images.length === 1 && category.name !== 'Swivels'
-                                    ? 'w-2/3 h-32'
-                                    : 'w-16 h-16'
-                                }`}
-                            loading="lazy"
-                        />
+                        <div key={index} className="overflow-hidden rounded-md w-24 h-20 flex-shrink-0 bg-neutral-100">
+                            <img
+                                src={img}
+                                alt={`${category.name} example ${index + 1}`}
+                                className="w-full h-full object-cover object-center scale-[1.25] hover:scale-[1.35] transition-transform duration-500"
+                                loading="lazy"
+                            />
+                        </div>
                     ))}
                 </div>
             </GlassCard>

@@ -1,5 +1,8 @@
 // Products feature specific data (authoritative after migration)
 // NOTE: Root data/products.js has been migrated and can be removed.
+
+const localImage = (path) => path; // helper passthrough for public assets
+
 export const PRODUCT_DATA = {
     'benches': {
         name: 'Benches',
@@ -13,18 +16,18 @@ export const PRODUCT_DATA = {
     'casegoods': {
         name: 'Casegoods',
         products: [
-            { id: 'vision', name: 'Vision', price: 3200, image: 'https://via.placeholder.com/300x200/E3DBC8/2A2A2A?text=Vision+Casegoods' },
-            { id: 'brogan', name: 'Brogan', price: 2800, image: 'https://via.placeholder.com/300x200/D9CDBA/2A2A2A?text=Brogan+Casegoods' },
-            { id: 'finale', name: 'Finale', price: 3500, image: 'https://via.placeholder.com/300x200/C7AD8E/2A2A2A?text=Finale+Casegoods' },
+            { id: 'vision', name: 'Vision', price: 3200, image: localImage('/category-images/casegood-images/jsi_vision_config_000007.jpg') },
+            { id: 'brogan', name: 'Brogan', price: 2800, image: localImage('/category-images/casegood-images/jsi_vision_config_000008.jpg') },
+            { id: 'finale', name: 'Finale', price: 3500, image: localImage('/category-images/casegood-images/jsi_vision_config_000001_dkm0wsV.jpg') },
         ],
         competition: []
     },
     'conference-tables': {
         name: 'Conference Tables',
         products: [
-            { id: 'vision-table', name: 'Vision', price: 4500, image: 'https://via.placeholder.com/300x200/E3DBC8/2A2A2A?text=Vision+Table' },
-            { id: 'reef', name: 'Reef', price: 4200, image: 'https://via.placeholder.com/300x200/D9CDBA/2A2A2A?text=Reef+Table' },
-            { id: 'moto', name: 'Moto', price: 4000, image: 'https://via.placeholder.com/300x200/C7AD8E/2A2A2A?text=Moto+Table' },
+            { id: 'vision-table', name: 'Vision', price: 4500, image: localImage('/category-images/conference-images/jsi_anthology_comp_0003_NBW46kS.jpg') },
+            { id: 'reef', name: 'Reef', price: 4200, image: localImage('/category-images/conference-images/jsi_anthology_comp_0004_OlfZHks.jpg') },
+            { id: 'moto', name: 'Moto', price: 4000, image: localImage('/category-images/conference-images/jsi_anthology_comp_0006.jpg') },
         ],
         competition: []
     },
@@ -154,42 +157,70 @@ export const PRODUCTS_CATEGORIES_DATA = [
         name: 'Casegoods',
         description: 'Storage and workspace solutions',
         nav: 'products/category/casegoods',
-        images: ['https://via.placeholder.com/150x120/E3DBC8/2A2A2A?text=Vision', 'https://via.placeholder.com/150x120/D9CDBA/2A2A2A?text=Brogan']
+        images: [
+            '/category-images/casegood-images/jsi_vision_config_000007.jpg',
+            '/category-images/casegood-images/jsi_vision_config_000008.jpg',
+            '/category-images/casegood-images/jsi_vision_config_000001_dkm0wsV.jpg'
+        ].map(localImage)
     },
     {
         name: 'Conference Tables',
         description: 'Meeting and collaboration tables',
         nav: 'products/category/conference-tables',
-        images: ['https://via.placeholder.com/150x120/E3DBC8/2A2A2A?text=Vision+Table', 'https://via.placeholder.com/150x120/D9CDBA/2A2A2A?text=Reef+Table']
+        images: [
+            '/category-images/conference-images/jsi_anthology_comp_0003_NBW46kS.jpg',
+            '/category-images/conference-images/jsi_anthology_comp_0004_OlfZHks.jpg',
+            '/category-images/conference-images/jsi_anthology_comp_0006.jpg'
+        ].map(localImage)
     },
     {
         name: 'Guest',
         description: 'Visitor and side seating',
         nav: 'products/category/guest',
-        images: ['https://via.placeholder.com/150x120/E3DBC8/2A2A2A?text=Addison', 'https://via.placeholder.com/150x120/D9CDBA/2A2A2A?text=Americana']
+        images: [
+            '/category-images/guest-images/jsi_arwyn_comp_00032.jpg',
+            '/category-images/guest-images/jsi_bourne_comp_00002_k6eFRce.jpg',
+            '/category-images/guest-images/jsi_knox_comp_00020.jpg'
+        ].map(localImage)
     },
     {
         name: 'Lounge',
         description: 'Casual and soft seating',
         nav: 'products/category/lounge',
-        images: ['https://via.placeholder.com/150x120/E3DBC8/2A2A2A?text=Arwyn', 'https://via.placeholder.com/150x120/D9CDBA/2A2A2A?text=Caav']
+        images: [
+            '/category-images/lounge-images/jsi_arwyn_comp_00002.jpg',
+            '/category-images/lounge-images/jsi_indie_comp_00060.jpg',
+            '/category-images/lounge-images/jsi_poet_component_00001.jpg'
+        ].map(localImage)
     },
     {
         name: 'Swivels',
         description: 'Task and office chairs',
         nav: 'products/category/swivels',
-        images: ['https://via.placeholder.com/150x120/E3DBC8/2A2A2A?text=Arwyn+Swivel']
+        images: [
+            '/category-images/swivel-images/jsi_arwynconference_comp_hi.jpg',
+            '/category-images/swivel-images/jsi_cosgrove_comp_hi.jpg',
+            '/category-images/swivel-images/jsi_garvey5_comp_00001.jpg'
+        ].map(localImage)
     },
     {
         name: 'Training Tables',
         description: 'Flexible training furniture',
         nav: 'products/category/training-tables',
-        images: ['https://via.placeholder.com/150x120/E3DBC8/2A2A2A?text=Moto', 'https://via.placeholder.com/150x120/D9CDBA/2A2A2A?text=Connect']
+        images: [
+            '/category-images/training-images/jsi_lok_comp_00001.jpg',
+            '/category-images/training-images/jsi_moto_comp_00001.jpg',
+            '/category-images/training-images/jsi_synk_comp_00011.jpg'
+        ].map(localImage)
     },
     {
         name: 'Benches',
         description: 'Multi-seat solutions',
         nav: 'products/category/benches',
-        images: ['https://via.placeholder.com/150x120/E3DBC8/2A2A2A?text=Native', 'https://via.placeholder.com/150x120/D9CDBA/2A2A2A?text=Poet']
+        images: [
+            '/category-images/bench-images/jsi_indie_comp_00040.jpg',
+            '/category-images/bench-images/jsi_native_comp_00028.jpg',
+            '/category-images/bench-images/jsi_native_comp_00030.jpg'
+        ].map(localImage)
     }
 ];

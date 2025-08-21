@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react';
 import { Modal } from '../../components/common/Modal';
-import { ArrowUp, Plus, ArrowLeft, TrendingUp, Award, DollarSign, BarChart, Info } from 'lucide-react';
+import { ArrowUp, Plus, ArrowLeft, TrendingUp, Award, DollarSign, BarChart, Info, Table } from 'lucide-react';
 import { MONTHLY_SALES_DATA, SALES_VERTICALS_DATA } from './data.js';
 import { ORDER_DATA, STATUS_COLORS } from '../orders/data.js';
 
@@ -127,11 +127,16 @@ const MonthlyBarChart = ({ data, theme, onMonthSelect, dataType = 'bookings' }) 
         <div className="space-y-4">
             {data.map((item) => {
                 const value = dataType === 'bookings' ? item.bookings : item.sales;
+                const rawPct = ((value || 0) / maxValue) * 100;
+                const pct = Math.min(99.4, rawPct); // prevent full edge clipping / squared right radius
                 return (
                     <div key={item.month} className="grid grid-cols-[3rem,1fr,auto] items-center gap-x-4 text-sm">
                         <span className="font-semibold" style={{ color: theme.colors.textSecondary }}>{item.month}</span>
-                        <div className="h-3 rounded-full" style={{ backgroundColor: theme.colors.border }}>
-                            <div className="h-full rounded-full transition-all duration-300" style={{ width: `${((value || 0) / maxValue) * 100}%`, backgroundColor: theme.colors.accent }} />
+                        <div className="h-3 rounded-full relative overflow-hidden" style={{ backgroundColor: theme.colors.border, padding: 0 }}>
+                            <div
+                                className="absolute inset-y-0 left-0 rounded-full transition-all duration-300"
+                                style={{ width: `${pct}%`, backgroundColor: theme.colors.accent }}
+                            />
                         </div>
                         <button
                             onClick={() => onMonthSelect(item)}
@@ -147,85 +152,161 @@ const MonthlyBarChart = ({ data, theme, onMonthSelect, dataType = 'bookings' }) 
     );
 };
 
+// ================= Responsive Donut Chart with improved labeling ================
 const DonutChart = React.memo(({ data, theme }) => {
-    const chartData = useMemo(() => {
-        if (!data || !Array.isArray(data)) return [];
-        const colors = ['#8B5CF6', '#10B981', '#F59E0B', '#EF4444', '#6B7280', '#9CA3AF'];
-        return data.map((item, index) => ({
-            label: item.vertical || item.label || `Vertical ${index + 1}`,
-            value: item.value || item.sales || item.amount || 0,
-            color: colors[index % colors.length]
-        })).filter(item => item.value > 0);
-    }, [data]);
+    const wrapperRef = useRef(null);
+    const [containerWidth, setContainerWidth] = useState(360);
 
-    const total = chartData.reduce((acc, item) => acc + item.value, 0);
-    if (total === 0 || chartData.length === 0) {
-        return <div className="flex items-center justify-center h-40"><p className="text-sm" style={{ color: theme.colors.textSecondary }}>No sales data available</p></div>;
+    // Observe width for responsiveness
+    useEffect(() => {
+        if (!wrapperRef.current) return;
+        const ro = new ResizeObserver(entries => {
+            for (const entry of entries) {
+                setContainerWidth(Math.max(260, Math.min(560, entry.contentRect.width)));
+            }
+        });
+        ro.observe(wrapperRef.current);
+        return () => ro.disconnect();
+    }, []);
+
+    const palette = ['#8B5CF6','#10B981','#F59E0B','#EF4444','#6366F1','#0EA5E9','#D946EF','#84CC16','#F472B6','#64748B'];
+    const segments = useMemo(() => (Array.isArray(data)? data: []).map((d,i)=>({
+        label: d.vertical || d.label || `Seg ${i+1}`,
+        value: d.value || d.sales || d.amount || 0,
+        color: palette[i%palette.length]
+    })).filter(s=>s.value>0).sort((a,b)=>b.value-a.value), [data]);
+
+    const total = segments.reduce((s,d)=>s+d.value,0);
+    if(!total) return <div ref={wrapperRef} className="flex items-center justify-center h-40"><p className="text-sm" style={{color:theme.colors.textSecondary}}>No data</p></div>;
+
+    // Geometry
+    const size = containerWidth;
+    const strokeWidth = Math.min(44, Math.max(18, size * 0.16));
+    const radius = (size - strokeWidth)/2;
+    const center = size/2;
+    const TAU = Math.PI*2;
+    const polar = (r,a)=>[center + r*Math.cos(a), center + r*Math.sin(a)];
+
+    // Build arc paths
+    let start = -Math.PI/2; // 12 o'clock
+    const arcMeta = segments.map((seg, idx) => {
+        const sweep = (seg.value/total)*TAU;
+        const end = start + sweep;
+        const largeArc = sweep>Math.PI?1:0;
+        const [sx,sy] = polar(radius,start); const [ex,ey] = polar(radius,end);
+        const mid = start + sweep/2;
+        const pct = (seg.value/total)*100;
+        const pathId = `arc-path-${idx}`;
+        // path in forward direction (clockwise). For reversed text we will create an aux path.
+        const path = `M ${sx} ${sy} A ${radius} ${radius} 0 ${largeArc} 1 ${ex} ${ey}`;
+        start = end;
+        return { seg, sweep, startAngle: start - sweep, endAngle: end, mid, pct, pathId, path, largeArc };
+    });
+
+    // Determine labeling approach
+    const CURVE_PCT_THRESHOLD = 9; // label on arc if large enough
+    const MIN_PILL_PCT = 2; // otherwise aggregate into other or show pill if space
+
+    // Optionally aggregate extremely small slices into Other for clarity
+    const tinySlices = arcMeta.filter(m => m.pct < MIN_PILL_PCT);
+    if (tinySlices.length > 2) {
+        const othersValue = tinySlices.reduce((s,m)=>s+m.seg.value,0);
+        // remove them and append aggregated
+        for (const t of tinySlices) {
+            const idx = arcMeta.indexOf(t);
+            if (idx>=0) arcMeta.splice(idx,1);
+        }
+        // rebuild total for display percentages (keep original total for accurate pct)
+        const otherPct = (othersValue/total)*100;
+        arcMeta.push({
+            seg:{ label:'Other', value: othersValue, color: theme.colors.border },
+            sweep:(othersValue/total)*TAU,
+            startAngle:0, endAngle:0, mid:0, pct:otherPct, pathId:`arc-other`, path:'', largeArc:0, aggregated:true
+        });
+        // Recompute arcs from scratch to keep continuity
+        start = -Math.PI/2;
+        arcMeta.forEach(m => {
+            const sweep = (m.seg.value/total)*TAU;
+            const end = start + sweep; const largeArc = sweep>Math.PI?1:0; const [sx,sy]=polar(radius,start); const [ex,ey]=polar(radius,end);
+            m.path = `M ${sx} ${sy} A ${radius} ${radius} 0 ${largeArc} 1 ${ex} ${ey}`;
+            m.startAngle = start; m.endAngle=end; m.mid = start + sweep/2; m.sweep=sweep; m.largeArc=largeArc; start=end;
+        });
     }
 
-    let cumulative = 0;
-    const size = 160;
-    const strokeWidth = 24;
-    const radius = (size - strokeWidth) / 2;
-    const circumference = 2 * Math.PI * radius;
+    // Split label strategies
+    const arcLabels = arcMeta.filter(m => m.pct >= CURVE_PCT_THRESHOLD);
+    const pillLabels = arcMeta.filter(m => m.pct < CURVE_PCT_THRESHOLD);
+
+    // Build reversed text paths for left-side arcs (mid between 90 and 270 deg)
+    const textPaths = arcLabels.map((m,i) => {
+        const angleDeg = (m.mid*180/Math.PI + 360)%360;
+        const needsReverse = angleDeg>90 && angleDeg<270;
+        let textPathId = m.pathId + '-text';
+        let d = m.path;
+        if (needsReverse) {
+            // reverse path: swap start/end & sweep flag (use sweep=0 for reverse direction)
+            const [sx,sy] = polar(radius,m.endAngle); const [ex,ey] = polar(radius,m.startAngle);
+            d = `M ${sx} ${sy} A ${radius} ${radius} 0 ${m.largeArc} 0 ${ex} ${ey}`;
+        }
+        return { id:textPathId, d, needsReverse, meta:m };
+    });
+
+    // Outside pills for small segments (tethered) with collision management
+    const outerR = radius + strokeWidth/2 + 6;
+    const pillR = outerR + 22;
+    const pills = pillLabels.map((m,i)=>{
+        const [sx,sy] = polar(outerR,m.mid); const [lx,ly] = polar(pillR,m.mid);
+        return { meta:m, sx, sy, lx, ly, right: lx>center };
+    });
+    pills.sort((a,b)=>a.ly-b.ly); const GAP=18; for(let i=1;i<pills.length;i++){ if(pills[i].ly - pills[i-1].ly < GAP) pills[i].ly = pills[i-1].ly + GAP; }
+
+    const fmtTotal = v => v>=1e6? `$${(v/1e6).toFixed(1)}M` : v>=1e3? `$${(v/1e3).toFixed(1)}K` : `$${v}`;
 
     return (
-        <div className="flex flex-col sm:flex-row items-center gap-6">
-            <div className="relative flex-shrink-0" style={{ width: size, height: size }}>
-                <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-                    <g transform={`rotate(-90 ${size / 2} ${size / 2})`}>
-                        {chartData.map((item, index) => {
-                            const dasharray = (circumference * item.value) / total;
-                            const dashoffset = circumference * (1 - (cumulative / total));
-                            cumulative += item.value;
-                            return (
-                                <circle
-                                    key={index}
-                                    cx={size / 2}
-                                    cy={size / 2}
-                                    r={radius}
-                                    fill="none"
-                                    stroke={item.color}
-                                    strokeWidth={strokeWidth}
-                                    strokeDasharray={`${dasharray} ${circumference}`}
-                                    strokeDashoffset={-circumference + dashoffset}
-                                    className="transition-all duration-500"
-                                    strokeLinecap="round"
-                                />
-                            );
-                        })}
-                    </g>
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center">
-                        <div className="text-2xl font-bold" style={{ color: theme.colors.textPrimary }}>${(total / 1000000).toFixed(1)}M</div>
-                        <div className="text-sm" style={{ color: theme.colors.textSecondary }}>Total</div>
-                    </div>
-                </div>
-            </div>
-            <div className="w-full flex-1 min-w-0">
-                <div className="flex flex-col space-y-3">
-                    {chartData.map((item) => {
-                        const percentage = ((item.value / total) * 100).toFixed(1);
-                        return (
-                            <div key={item.label} className="flex items-center space-x-3">
-                                <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: item.color }} />
-                                <div className="flex-1 flex justify-between items-center min-w-0">
-                                    <p className="text-sm font-medium truncate" style={{ color: theme.colors.textPrimary }}>{item.label}</p>
-                                    <div className="text-right flex-shrink-0 ml-4">
-                                        <p className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>${item.value.toLocaleString()}</p>
-                                        <p className="text-xs" style={{ color: theme.colors.textSecondary }}>{percentage}%</p>
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-            </div>
+        <div ref={wrapperRef} className="relative w-full flex justify-center items-center" style={{minHeight:size}}>
+            <svg width={size} height={size}>
+                <defs>
+                    {textPaths.map(tp => <path key={tp.id} id={tp.id} d={tp.d} fill="none" />)}
+                </defs>
+                <circle cx={center} cy={center} r={radius} fill="none" stroke={theme.colors.subtle} strokeWidth={strokeWidth} />
+                {arcMeta.map(a => <path key={a.pathId} d={a.path} fill="none" stroke={a.seg.color} strokeWidth={strokeWidth} strokeLinecap="round" />)}
+                <circle cx={center} cy={center} r={radius - strokeWidth/2} fill={theme.colors.surface} />
+                <text x={center} y={center-6} textAnchor="middle" fontSize={11} fontWeight={600} fill={theme.colors.textSecondary}>Sales by Vertical</text>
+                <text x={center} y={center+16} textAnchor="middle" fontSize={size<340?20:24} fontWeight={700} fill={theme.colors.textPrimary}>{fmtTotal(total)}</text>
+
+                {textPaths.map(tp => {
+                    const { meta } = tp; const pctText = `${meta.seg.label} ${meta.pct.toFixed(1)}%`;
+                    // font size scaled by percentage (clamp 10-13)
+                    const fs = Math.max(10, Math.min(13, 10 + (meta.pct - CURVE_PCT_THRESHOLD) * 0.25));
+                    const textColor = '#fff'; // assume colored background; high contrast ring
+                    return (
+                        <text key={tp.id + '-label'} fontSize={fs} fontWeight={600} fill={textColor}>
+                            <textPath href={`#${tp.id}`} startOffset="50%" textAnchor="middle" alignmentBaseline="middle" dominantBaseline="middle">
+                                {pctText}
+                            </textPath>
+                        </text>
+                    );
+                })}
+
+                {pills.map(p => {
+                    const t = `${p.meta.seg.label} ${p.meta.pct.toFixed(1)}%`;
+                    const fs = Math.max(9, Math.min(11, 9 + (p.meta.pct/CURVE_PCT_THRESHOLD)*2));
+                    const pad=6; const h=22; const estW = t.length*5 + pad*2; const x = p.right? p.lx : p.lx - estW; const y = p.ly - h/2;
+                    return (
+                        <g key={'pill-'+p.meta.pathId}>
+                            <line x1={p.sx} y1={p.sy} x2={p.lx} y2={p.ly} stroke={p.meta.seg.color} strokeWidth={1.4} />
+                            <circle cx={p.sx} cy={p.sy} r={3} fill={p.meta.seg.color} />
+                            <rect x={x} y={y} width={estW} height={h} rx={h/2} ry={h/2} fill={theme.colors.surface} stroke={p.meta.seg.color} strokeWidth={1} />
+                            <text x={x + estW/2} y={y + h/2 + 3} fontSize={fs} fontWeight={600} textAnchor="middle" fill={theme.colors.textPrimary}>{t}</text>
+                        </g>
+                    );
+                })}
+            </svg>
         </div>
     );
 });
 
+// ================= End DonutChart =================
 const MonthlyTable = ({ data, theme, onMonthSelect }) => (
     <div className="text-sm" style={{ color: theme.colors.textPrimary }}>
         <div className="grid grid-cols-3 font-bold border-b" style={{ borderColor: theme.colors.border }}>
@@ -343,22 +424,16 @@ export const SalesScreen = ({ theme, onNavigate }) => {
 
     const scrollContainerRef = useRef(null);
     const loadMoreRef = useRef(null);
-    const trendRef = useRef(null); // ref for delta chip + tooltip
+    const trendRef = useRef(null);
 
     useEffect(() => {
-        if (!showTrendInfo) return; // only bind when open
-        const handleClickOutside = (e) => {
-            if (trendRef.current && !trendRef.current.contains(e.target)) {
-                setShowTrendInfo(false);
-            }
-        };
+        if (!showTrendInfo) return;
+        const handleClickOutside = (e) => { if (trendRef.current && !trendRef.current.contains(e.target)) setShowTrendInfo(false); };
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [showTrendInfo]);
 
-    const handleScroll = useCallback(() => {
-        if (scrollContainerRef.current) setIsScrolled(scrollContainerRef.current.scrollTop > 10);
-    }, []);
+    const handleScroll = useCallback(() => { if (scrollContainerRef.current) setIsScrolled(scrollContainerRef.current.scrollTop > 10); }, []);
 
     const { totalBookings, totalSales } = useMemo(() => {
         const bookings = MONTHLY_SALES_DATA.reduce((acc, m) => acc + m.bookings, 0);
@@ -366,7 +441,6 @@ export const SalesScreen = ({ theme, onNavigate }) => {
         return { totalBookings: bookings, totalSales: sales };
     }, []);
 
-    // Year progress calculations
     const { yearProgressPercent, deltaVsLinear, deltaLabel } = useMemo(() => {
         const now = new Date();
         const startYear = new Date(now.getFullYear(), 0, 1);
@@ -374,8 +448,8 @@ export const SalesScreen = ({ theme, onNavigate }) => {
         const totalDays = (startNext - startYear) / 86400000;
         const dayOfYear = Math.floor((now - startYear) / 86400000) + 1;
         const yearPct = (dayOfYear / totalDays) * 100;
-        const goalPct = MONTHLY_SALES_DATA.reduce((acc, m) => acc + m.bookings, 0) / 7000000 * 100; // uses goal below
-        const delta = goalPct - yearPct; // positive = ahead
+        const goalPct = MONTHLY_SALES_DATA.reduce((acc, m) => acc + m.bookings, 0) / 7000000 * 100;
+        const delta = goalPct - yearPct;
         return { yearProgressPercent: yearPct, deltaVsLinear: delta, deltaLabel: `${delta >= 0 ? '+' : ''}${delta.toFixed(1)}%` };
     }, []);
 
@@ -390,12 +464,8 @@ export const SalesScreen = ({ theme, onNavigate }) => {
     const displayedRecentOrders = useMemo(() => allRecentOrders.slice(0, numRecentOrders), [allRecentOrders, numRecentOrders]);
 
     useEffect(() => {
-        const io = new IntersectionObserver((entries) => {
-            if (entries[0].isIntersecting && numRecentOrders < allRecentOrders.length) setNumRecentOrders(p => p + 5);
-        }, { threshold: 1 });
-        const node = loadMoreRef.current;
-        if (node) io.observe(node);
-        return () => node && io.unobserve(node);
+        const io = new IntersectionObserver((entries) => { if (entries[0].isIntersecting && numRecentOrders < allRecentOrders.length) setNumRecentOrders(p => p + 5); }, { threshold: 1 });
+        const node = loadMoreRef.current; if (node) io.observe(node); return () => node && io.unobserve(node);
     }, [numRecentOrders, allRecentOrders.length]);
 
     const goal = 7000000;
@@ -412,27 +482,11 @@ export const SalesScreen = ({ theme, onNavigate }) => {
         if (key === 'comms') onNavigate('commissions');
     }, [onNavigate]);
 
-    // Toggle options
-    const viewToggleOptions = [
-        { key: 'chart', label: 'Chart', icon: BarChart },
-        { key: 'table', label: 'Table' }
-    ];
-
-    const dataToggleOptions = [
-        { key: 'bookings', label: 'Bookings' },
-        { key: 'sales', label: 'Sales' }
-    ];
-
     return (
         <div className="flex flex-col h-full">
             <div
                 className={`sticky top-0 z-10 transition-all duration-300 ${isScrolled ? 'shadow-md' : ''}`}
-                style={{
-                    backgroundColor: isScrolled ? `${theme.colors.background}e0` : 'transparent',
-                    backdropFilter: isScrolled ? 'blur(12px)' : 'none',
-                    WebkitBackdropFilter: isScrolled ? 'blur(12px)' : 'none',
-                    borderBottom: `1px solid ${isScrolled ? theme.colors.border + '40' : 'transparent'}`
-                }}
+                style={{ backgroundColor: isScrolled ? `${theme.colors.background}e0` : 'transparent', backdropFilter: isScrolled ? 'blur(12px)' : 'none', WebkitBackdropFilter: isScrolled ? 'blur(12px)' : 'none', borderBottom: `1px solid ${isScrolled ? theme.colors.border + '40' : 'transparent'}` }}
             >
                 <div className="px-4 py-2 flex items-center gap-4 flex-wrap">
                     <button
@@ -440,8 +494,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                         className="flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold transition-all hover:scale-[1.02] active:scale-95 shadow-sm"
                         style={{ backgroundColor: theme.colors.accent, color: '#fff' }}
                     >
-                        <Plus className="w-4 h-4" />
-                        New Lead
+                        <Plus className="w-4 h-4" /> New Lead
                     </button>
                     <TopTabs theme={theme} active={topTab} onChange={handleTopTabChange} />
                 </div>
@@ -460,10 +513,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                                 {showTrendInfo && (
                                     <div className="absolute top-full right-0 mt-2 w-56 z-20 p-3 rounded-xl text-[11px] shadow-lg" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${theme.colors.border}` }}>
                                         <p className="font-semibold mb-1" style={{ color: theme.colors.textPrimary }}>{deltaVsLinear >= 0 ? 'Ahead of pace' : 'Behind pace'} {deltaLabel}</p>
-                                        <p style={{ color: theme.colors.textSecondary, lineHeight: '1.25rem' }}>
-                                            Goal: {percentToGoal.toFixed(1)}%<br />
-                                            Year: {yearProgressPercent.toFixed(1)}%
-                                        </p>
+                                        <p style={{ color: theme.colors.textSecondary, lineHeight: '1.25rem' }}>Goal: {percentToGoal.toFixed(1)}%<br />Year: {yearProgressPercent.toFixed(1)}%</p>
                                         <button onClick={() => setShowTrendInfo(false)} className="mt-1 text-[10px] font-semibold underline" style={{ color: theme.colors.accent }}>Close</button>
                                     </div>
                                 )}
@@ -477,8 +527,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                             {(() => {
                                 const currentMillions = (totalBookings/1000000).toFixed(1);
                                 const goalMillions = (goal/1000000).toFixed(1);
-                                // position label just inside filled bar (shift left by its own width using translate)
-                                const safePct = Math.max(percentToGoal, 5); // ensure room
+                                const safePct = Math.max(percentToGoal, 5);
                                 return (
                                     <>
                                         <span className="absolute top-1/2 -translate-y-1/2 font-bold text-[10px] px-1" style={{ left: `${safePct}%`, transform: 'translate(-100%, -50%)', color: '#fff', whiteSpace: 'nowrap' }}>${currentMillions}M</span>
@@ -495,33 +544,21 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                             <CustomerMonthlyBreakdown monthData={selectedMonth} orders={ORDER_DATA} theme={theme} onBack={handleBackToMonthly} />
                         ) : (
                             <>
-                                <div className="flex justify-between items-start">
-                                    <div>
-                                        <h3 className="font-bold text-xl" style={{ color: theme.colors.textPrimary }}>
-                                            {chartDataType === 'bookings' ? 'Bookings' : 'Sales'}
-                                        </h3>
-                                        <p className="text-base font-semibold mt-1" style={{ color: theme.colors.textSecondary }}>
-                                            ${(chartDataType === 'bookings' ? totalBookings : totalSales).toLocaleString()}
-                                        </p>
+                                <div className="flex justify-between items-start gap-4 flex-wrap">
+                                    <div className="flex flex-col">
+                                        <div className="flex items-center bg-transparent rounded-full border overflow-hidden" style={{ borderColor: theme.colors.border }}>
+                                            <button onClick={() => setChartDataType('bookings')} className="px-4 py-2 text-sm font-semibold transition-colors" style={{ backgroundColor: chartDataType === 'bookings' ? theme.colors.accent : 'transparent', color: chartDataType === 'bookings' ? '#fff' : theme.colors.textSecondary }}>Bookings</button>
+                                            <button onClick={() => setChartDataType('sales')} className="px-4 py-2 text-sm font-semibold transition-colors" style={{ backgroundColor: chartDataType === 'sales' ? theme.colors.accent : 'transparent', color: chartDataType === 'sales' ? '#fff' : theme.colors.textSecondary }}>Sales</button>
+                                        </div>
+                                        <p className="text-base font-semibold mt-3" style={{ color: theme.colors.textSecondary }}>${(chartDataType === 'bookings' ? totalBookings : totalSales).toLocaleString()}</p>
                                     </div>
-                                    <div className="flex flex-col items-end gap-2">
-                                        <ToggleGroup 
-                                            theme={theme}
-                                            options={viewToggleOptions}
-                                            value={monthlyView}
-                                            onChange={setMonthlyView}
-                                        />
-                                        {monthlyView === 'chart' && (
-                                            <ToggleGroup 
-                                                theme={theme}
-                                                options={dataToggleOptions}
-                                                value={chartDataType}
-                                                onChange={setChartDataType}
-                                            />
-                                        )}
+                                    <div className="flex items-start gap-2">
+                                        <button onClick={() => setMonthlyView(v => v === 'chart' ? 'table' : 'chart')} className="p-3 rounded-full shadow-sm transition-colors active:scale-95" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary, border: `1px solid ${theme.colors.border}` }} aria-label={monthlyView === 'chart' ? 'Show table view' : 'Show chart view'}>
+                                            {monthlyView === 'chart' ? (<Table className="w-5 h-5" />) : (<BarChart className="w-5 h-5" />)}
+                                        </button>
                                     </div>
                                 </div>
-                                <div className="mt-4">
+                                <div className="mt-6">
                                     {monthlyView === 'chart' ? (
                                         <MonthlyBarChart data={MONTHLY_SALES_DATA} theme={theme} onMonthSelect={handleMonthSelect} dataType={chartDataType} />
                                     ) : (
@@ -541,21 +578,14 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                             <h3 className="font-bold text-xl mb-5" style={{ color: theme.colors.textPrimary }}>Recent Orders</h3>
                             <div className="rounded-3xl border overflow-hidden" style={{ borderColor: theme.colors.border }}>
                                 {displayedRecentOrders.map((order, index) => (
-                                    <div
-                                        key={order.orderNumber}
-                                        className={`p-4 transition-all cursor-pointer hover:bg-black/5 dark:hover:bg-white/10 ${index < displayedRecentOrders.length - 1 ? 'border-b' : ''}`}
-                                        style={{ borderColor: theme.colors.subtle }}
-                                        onClick={() => handleShowOrderDetails(order)}
-                                    >
+                                    <div key={order.orderNumber} className={`p-4 transition-all cursor-pointer hover:bg-black/5 dark:hover:bg-white/10 ${index < displayedRecentOrders.length - 1 ? 'border-b' : ''}`} style={{ borderColor: theme.colors.subtle }} onClick={() => handleShowOrderDetails(order)}>
                                         <div className="flex items-center justify-between mb-2">
                                             <span className="text-sm" style={{ color: theme.colors.textSecondary }}>{new Date(order.date).toLocaleDateString()}</span>
                                             <span className="text-lg font-bold" style={{ color: theme.colors.accent }}>${order.net.toLocaleString()}</span>
                                         </div>
                                         <p className="font-semibold mb-2 truncate" style={{ color: theme.colors.textPrimary }}>{formatCompanyName(order.company)}</p>
                                         <div>
-                                            <span className="px-2 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: (STATUS_COLORS[order.status] || theme.colors.secondary) + '20', color: STATUS_COLORS[order.status] || theme.colors.secondary }}>
-                                                {order.status}
-                                            </span>
+                                            <span className="px-2 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: (STATUS_COLORS[order.status] || theme.colors.secondary) + '20', color: STATUS_COLORS[order.status] || theme.colors.secondary }}>{order.status}</span>
                                         </div>
                                     </div>
                                 ))}
@@ -565,7 +595,6 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                     </div>
                 </div>
             </div>
-
             <OrderModal order={selectedOrder} onClose={handleCloseModal} theme={theme} />
         </div>
     );

@@ -57,7 +57,7 @@ export const FINISH_SAMPLES = [
     TFL('WEA','Weathered Ash','jsi_finish_WEA_WeatheredAsh_Laminate.jpg','woodgrain'),
     TFL('WLH','Walnut Heights','jsi_finish_WLH_WalnutHeights_Laminate.jpg','woodgrain'),
     TFL('ZEN','Zen Grey','jsi_finish_ZEN_ZenGrey_Laminate.jpg','solid'),
-];
+].map(s=>({ ...s, width:300, height:300, webp:s.image.replace(/\.jpg$/i,'.webp') }));
 
 // Legacy sample products (kept) + integrate finish samples
 export const SAMPLE_PRODUCTS = [

@@ -9,7 +9,12 @@
     <link rel="apple-touch-icon" href="/logo192.png" />
     <link rel="manifest" href="/manifest.json" />
     <title>MyJSI</title>
+    <!-- Preload primary UI font (if added later) and fallback to system fonts -->
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/Inter-Variable.woff2" crossorigin />
+    <!-- Potential future icon chunk hint (placeholder path) -->
+    <link rel="preload" as="script" href="/lucide-chunk.js" importance="low" />
     <style>
+        body { font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; }
         /* Splash screen */
         #splash {
             position: fixed;
