@@ -148,6 +148,11 @@ const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, designFi
     const [address1, setAddress1] = useState(userSettings?.homeAddress || '');
     const [address2, setAddress2] = useState('');
 
+    // helper to safely set values (avoid undefined which triggers uncontrolled warning)
+    const safeSetShipTo = (v) => setShipToName(v ?? '');
+    const safeSetAddress1 = (v) => setAddress1(v ?? '');
+    const safeSetAddress2 = (v) => setAddress2(v ?? '');
+
     const cartItems = useMemo(() => {
         return Object.entries(cart)
             .map(([rawId, quantity]) => {
@@ -213,73 +218,80 @@ const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, designFi
                 </div>
 
                 {isExpanded && (
-                    <div className="px-4 pb-4 max-h-[60vh] overflow-y-auto scrollbar-hide">
+                    <div className="px-4 pb-6 pt-2 max-h-[60vh] overflow-y-auto scrollbar-hide flex flex-col">
                         <div className="mb-4">
                             {cartItems.map((item, idx) => (
                                 <DrawerItem key={item.id} item={item} onUpdateCart={onUpdateCart} theme={theme} isLast={idx === 0} />
                             ))}
                         </div>
 
-                        <div className="space-y-2 mb-4">
-                            <div className="flex justify-between items-center">
+                        {/* Ship To Section */}
+                        <div className="mb-5">
+                            <div className="flex items-center justify-between mb-2">
                                 <h3 className="font-bold text-sm" style={{ color: theme.colors.textPrimary }}>Ship To</h3>
                                 <div className="flex items-center gap-2">
-                                    <button onClick={() => setShowDir(true)} className="flex items-center gap-1 text-xs font-semibold p-1.5 rounded-lg active:scale-95">
+                                    <button
+                                        onClick={() => setShowDir(true)}
+                                        className="flex items-center gap-1.5 text-xs font-semibold px-4 py-1.5 rounded-full active:scale-95 border transition-colors"
+                                        style={{ background: theme.colors.surface, borderColor: theme.colors.border, color: theme.colors.textPrimary }}
+                                    >
                                         <Users className="w-3.5 h-3.5" style={{ color: theme.colors.secondary }} />
-                                        <span>Directory</span>
+                                        Directory
                                     </button>
                                     <button
-                                        onClick={() => { setShipToName('Home'); setAddress1(userSettings?.homeAddress || ''); setAddress2(''); }}
-                                        className="flex items-center gap-1 text-xs font-semibold p-1.5 rounded-lg active:scale-95"
+                                        onClick={() => { safeSetShipTo('Home'); safeSetAddress1(userSettings?.homeAddress || ''); safeSetAddress2(''); }}
+                                        className="flex items-center gap-1.5 text-xs font-semibold px-4 py-1.5 rounded-full active:scale-95 border transition-colors"
+                                        style={{ background: theme.colors.surface, borderColor: theme.colors.border, color: theme.colors.textPrimary }}
                                     >
                                         <Home className="w-3.5 h-3.5" style={{ color: theme.colors.secondary }} />
-                                        <span>Use Home</span>
+                                        Use Home
                                     </button>
                                 </div>
                             </div>
-                            <div className="flex flex-col gap-1">
-                                <input
-                                    value={shipToName}
-                                    onChange={(e) => setShipToName(e.target.value)}
-                                    placeholder="Ship to name"
-                                    className="w-full rounded-xl pr-3 py-2 outline-none"
-                                    style={{ background: theme.colors.subtle, border: `1px solid ${theme.colors.border}`, color: theme.colors.textPrimary }}
-                                />
-                                <input
-                                    value={address1}
-                                    onChange={(e) => setAddress1(e.target.value)}
-                                    placeholder="Address line 1"
-                                    className="w-full rounded-xl pr-3 py-2 outline-none"
-                                    style={{ background: theme.colors.subtle, border: `1px solid ${theme.colors.border}`, color: theme.colors.textPrimary }}
-                                />
-                                <input
-                                    value={address2}
-                                    onChange={(e) => setAddress2(e.target.value)}
-                                    placeholder="Address line 2 (optional)"
-                                    className="w-full rounded-xl pr-3 py-2 outline-none"
-                                    style={{ background: theme.colors.subtle, border: `1px solid ${theme.colors.border}`, color: theme.colors.textPrimary }}
-                                />
+                            <div className="space-y-2">
+                                <div>
+                                    <input
+                                        value={shipToName || ''}
+                                        onChange={(e) => safeSetShipTo(e.target.value)}
+                                        placeholder="Recipient / Company"
+                                        className="w-full rounded-xl px-3 py-2 text-sm outline-none border"
+                                        style={{ background: theme.colors.subtle, borderColor: theme.colors.border, color: theme.colors.textPrimary }}
+                                    />
+                                </div>
+                                <div>
+                                    <input
+                                        value={address1 || ''}
+                                        onChange={(e) => safeSetAddress1(e.target.value)}
+                                        placeholder="Address line 1"
+                                        className="w-full rounded-xl px-3 py-2 text-sm outline-none border"
+                                        style={{ background: theme.colors.subtle, borderColor: theme.colors.border, color: theme.colors.textPrimary }}
+                                    />
+                                </div>
+                                <div>
+                                    <input
+                                        value={address2 || ''}
+                                        onChange={(e) => safeSetAddress2(e.target.value)}
+                                        placeholder="Address line 2 (optional)"
+                                        className="w-full rounded-xl px-3 py-2 text-sm outline-none border"
+                                        style={{ background: theme.colors.subtle, borderColor: theme.colors.border, color: theme.colors.textPrimary }}
+                                    />
+                                </div>
                             </div>
                         </div>
 
-                        <div className="flex justify-between items-center">
-                            <p className="text-xs" style={{ color: theme.colors.textSecondary }}>
-                                {`Subtotal (${totalCartItems} ${totalCartItems === 1 ? 'item' : 'items'}):`}
-                            </p>
-                            <p className="font-semibold text-sm" style={{ color: theme.colors.textPrimary }}>
-                                {`${Number(cartItems.reduce((s, i) => s + (i.isSet ? 0 : (i.price || 0) * i.quantity), 0))
-                                    .toLocaleString('en-US', { style: 'currency', currency: 'USD' })}`}
-                            </p>
-                        </div>
+                        {/* Spacer to ensure button visibility */}
+                        <div className="mt-auto pb-4" />
 
-                        <button
-                            disabled={!canSubmit}
-                            onClick={submit}
-                            className="w-full px-4 py-2 rounded-3xl text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2"
-                            style={{ backgroundColor: canSubmit ? theme.colors.accent : theme.colors.disabled, color: theme.colors.surface }}
-                        >
-                            <span>Submit Order</span>
-                        </button>
+                        <div className="sticky bottom-2 left-0 right-0">
+                            <button
+                                disabled={!canSubmit}
+                                onClick={submit}
+                                className="w-full px-5 py-3 rounded-full text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                                style={{ backgroundColor: canSubmit ? theme.colors.accent : theme.colors.disabled, color: theme.colors.surface }}
+                            >
+                                Submit Sample Request
+                            </button>
+                        </div>
                     </div>
                 )}
             </div>
@@ -288,7 +300,9 @@ const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, designFi
                 show={showDir}
                 onClose={() => setShowDir(false)}
                 onSelect={({ name, address1: addr1, address2: addr2 }) => {
-                    setShipToName(name); setAddress1(addr1); setAddress2(addr2);
+                    safeSetShipTo(name);
+                    safeSetAddress1(addr1);
+                    safeSetAddress2(addr2);
                 }}
                 theme={theme}
                 dealers={dealers}
@@ -392,68 +406,56 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                 {/* Product Grid */}
                 <div className="px-4 pb-4">
                     {selectedCategory === 'tfl' && (
-                        <div className="space-y-6">
-                            {['woodgrain', 'stone', 'metallic', 'solid'].map(group => {
-                                const groupItems = filteredProducts.filter(p => (p.finishType || 'solid') === group);
-                                if (groupItems.length === 0) return null;
-                                const titleMap = { woodgrain: 'Woodgrain TFL', stone: 'Stone / Mineral TFL', metallic: 'Metallic / Specialty TFL', solid: 'Solid Colors TFL' };
+                        <div className="grid grid-cols-3 gap-3">
+                            {filteredProducts.map(product => {
+                                const pid = idOf(product.id);
+                                const qty = cart[pid] || 0;
+                                const hasImage = !!product.image;
+                                const bg = hasImage ? theme.colors.subtle : product.color || '#E5E7EB';
+                                const addOne = (e) => { if (e) e.stopPropagation(); onUpdateCart({ ...product, id: pid }, 1); };
+                                const removeOne = (e) => { if (e) e.stopPropagation(); onUpdateCart({ ...product, id: pid }, -1); };
                                 return (
-                                    <div key={group}>
-                                        <h4 className="text-xs font-semibold mb-2 tracking-wide uppercase" style={{ color: theme.colors.textSecondary }}>{titleMap[group]}</h4>
-                                        <div className="grid grid-cols-3 gap-3">
-                                            {groupItems.map(product => {
-                                                const pid = idOf(product.id);
-                                                const qty = cart[pid] || 0;
-                                                const hasImage = !!product.image;
-                                                const bg = hasImage ? theme.colors.subtle : product.color || '#E5E7EB';
-                                                const addOne = (e) => { if (e) e.stopPropagation(); onUpdateCart({ ...product, id: pid }, 1); };
-                                                const removeOne = (e) => { if (e) e.stopPropagation(); onUpdateCart({ ...product, id: pid }, -1); };
-                                                return (
-                                                    <div key={pid} className="w-full">
-                                                        <div
-                                                            role="button"
-                                                            tabIndex={0}
-                                                            onClick={addOne}
-                                                            onKeyPress={e => { if (e.key === 'Enter') addOne(e); }}
-                                                            className="relative w-full aspect-square rounded-2xl overflow-hidden transition-all duration-200 cursor-pointer"
-                                                            style={{
-                                                                border: `2px solid ${qty > 0 ? theme.colors.accent : theme.colors.border}`,
-                                                                backgroundColor: bg,
-                                                                transform: qty > 0 ? 'scale(0.95)' : 'scale(1)',
-                                                                boxShadow: qty > 0 ? `0 0 15px ${theme.colors.accent}40` : 'none',
-                                                            }}
-                                                        >
-                                                            {hasImage && (
-                                                                <img src={product.image} alt={product.name} className="w-full h-full object-cover select-none pointer-events-none" draggable={false} />
-                                                            )}
+                                    <div key={pid} className="w-full">
+                                        <div
+                                            role="button"
+                                            tabIndex={0}
+                                            onClick={addOne}
+                                            onKeyPress={e => { if (e.key === 'Enter') addOne(e); }}
+                                            className="relative w-full aspect-square rounded-2xl overflow-hidden transition-all duration-200 cursor-pointer"
+                                            style={{
+                                                border: `2px solid ${qty > 0 ? theme.colors.accent : theme.colors.border}`,
+                                                backgroundColor: bg,
+                                                transform: qty > 0 ? 'scale(0.95)' : 'scale(1)',
+                                                boxShadow: qty > 0 ? `0 0 15px ${theme.colors.accent}40` : 'none',
+                                            }}
+                                        >
+                                            {hasImage && (
+                                                <img src={product.image} alt={product.name} className="w-full h-full object-cover select-none pointer-events-none" draggable={false} />
+                                            )}
 
-                                                            <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-24">
-                                                                <GlassCard theme={theme} className="p-0.5 flex items-center justify-between gap-1">
-                                                                    {qty === 0 ? (
-                                                                        <button type="button" onClick={addOne} className="w-full h-7 rounded-full flex items-center justify-center active:scale-95">
-                                                                            <Plus className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
-                                                                        </button>
-                                                                    ) : (
-                                                                        <>
-                                                                            <button type="button" onClick={removeOne} className="w-7 h-7 rounded-full flex items-center justify-center active:scale-95">
-                                                                                {qty === 1
-                                                                                    ? <Trash2 className="w-3.5 h-3.5 text-red-500" />
-                                                                                    : <Minus className="w-3.5 h-3.5" style={{ color: theme.colors.textSecondary }} />}
-                                                                            </button>
-                                                                            <span className="font-bold text-sm select-none" style={{ color: theme.colors.textPrimary }}>{qty}</span>
-                                                                            <button type="button" onClick={addOne} className="w-7 h-7 rounded-full flex items-center justify-center active:scale-95">
-                                                                                <Plus className="w-3.5 h-3.5" style={{ color: theme.colors.textSecondary }} />
-                                                                            </button>
-                                                                        </>
-                                                                    )}
-                                                                </GlassCard>
-                                                            </div>
-                                                        </div>
-                                                        <div className="mt-1 text-[10px] text-center text-gray-700 truncate select-none">{product.name}</div>
-                                                    </div>
-                                                );
-                                            })}
+                                            <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-24">
+                                                <GlassCard theme={theme} className="p-0.5 flex items-center justify-between gap-1">
+                                                    {qty === 0 ? (
+                                                        <button type="button" onClick={addOne} className="w-full h-7 rounded-full flex items-center justify-center active:scale-95">
+                                                            <Plus className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
+                                                        </button>
+                                                    ) : (
+                                                        <>
+                                                            <button type="button" onClick={removeOne} className="w-7 h-7 rounded-full flex items-center justify-center active:scale-95">
+                                                                {qty === 1
+                                                                    ? <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                                                                    : <Minus className="w-3.5 h-3.5" style={{ color: theme.colors.textSecondary }} />}
+                                                            </button>
+                                                            <span className="font-bold text-sm select-none" style={{ color: theme.colors.textPrimary }}>{qty}</span>
+                                                            <button type="button" onClick={addOne} className="w-7 h-7 rounded-full flex items-center justify-center active:scale-95">
+                                                                <Plus className="w-3.5 h-3.5" style={{ color: theme.colors.textSecondary }} />
+                                                            </button>
+                                                        </>
+                                                    )}
+                                                </GlassCard>
+                                            </div>
                                         </div>
+                                        <div className="mt-1 text-[10px] text-center text-gray-700 truncate select-none">{product.name}</div>
                                     </div>
                                 );
                             })}

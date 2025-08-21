@@ -315,6 +315,8 @@ export const NewLeadScreen = ({
                                     onChange={e => updateField('project', e.target.value)}
                                     placeholder="Required"
                                     theme={theme}
+                                    size="sm"
+                                    surfaceBg={true}
                                 />
                             </div>
                         </SettingsRow>

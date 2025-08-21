@@ -3,47 +3,47 @@ export const DISCONTINUED_FINISHES = [
     {
         id: 1,
         oldName: 'Honey Maple',
-        newName: 'Light Maple',
+        newName: 'Alabaster',
         category: 'Wood Veneer',
         veneer: 'VM-101',
         solid: 'SM-101',
-        newImage: '/finish-images/light-maple-veneer.jpg'
+        newImage: '/jsi_finish_ALB_Alabaster_Laminate.jpg'
     },
     {
         id: 2,
         oldName: 'Cherry Natural',
-        newName: 'American Cherry',
+        newName: 'Bridal Blanco',
         category: 'Wood Veneer',
         veneer: 'VM-205',
         solid: 'SM-205',
-        newImage: '/finish-images/american-cherry-veneer.jpg'
+        newImage: '/jsi_finish_BBL_BridalBlanco_Laminate.jpg'
     },
     {
         id: 3,
         oldName: 'Oak Golden',
-        newName: 'Natural Oak',
+        newName: 'Belair',
         category: 'Wood Veneer',
         veneer: 'VM-301',
         solid: 'SM-301',
-        newImage: '/finish-images/natural-oak-veneer.jpg'
+        newImage: '/jsi_finish_BEL_Belair_Laminate.jpg'
     },
     {
         id: 4,
         oldName: 'Walnut Classic',
-        newName: 'American Walnut',
+        newName: 'Florence Walnut',
         category: 'Wood Veneer',
         veneer: 'VM-401',
         solid: 'SM-401',
-        newImage: '/finish-images/american-walnut-veneer.jpg'
+        newImage: '/jsi_finish_FLO_FlorenceWalnut_Laminate.jpg'
     },
     {
         id: 5,
         oldName: 'Ebony Matte',
-        newName: 'Reconstituted Ebony',
+        newName: 'Umber',
         category: 'Wood Veneer',
         veneer: 'VM-501',
         solid: 'SM-501',
-        newImage: '/finish-images/reconstituted-ebony-veneer.jpg'
+        newImage: '/jsi_finish_UMB_Umber_Laminate.jpg'
     },
     {
         id: 6,
@@ -52,44 +52,35 @@ export const DISCONTINUED_FINISHES = [
         category: 'Laminate',
         veneer: 'LM-101',
         solid: 'LM-101',
-        newImage: '/finish-images/designer-white-laminate.jpg'
+        newImage: '/jsi_finish_DWH_DesignerWhite_Laminate.jpg'
     },
     {
         id: 7,
         oldName: 'Black Satin',
-        newName: 'Carbon Black',
+        newName: 'Black',
         category: 'Laminate',
         veneer: 'LM-501',
         solid: 'LM-501',
-        newImage: '/finish-images/carbon-black-laminate.jpg'
+        newImage: '/jsi_finish_BLK_Black_Laminate.jpg'
     },
     {
         id: 8,
         oldName: 'Gray Stone',
-        newName: 'Urban Concrete',
+        newName: 'Slate Grey',
         category: 'Laminate',
         veneer: 'LM-301',
         solid: 'LM-301',
-        newImage: '/finish-images/urban-concrete-laminate.jpg'
+        newImage: '/jsi_finish_SLG_SlateGrey_Laminate.jpg'
     },
     {
         id: 9,
         oldName: 'Beech Light',
-        newName: 'Nordic Beech',
+        newName: 'Weathered Ash',
         category: 'Wood Veneer',
         veneer: 'VM-601',
         solid: 'SM-601',
-        newImage: '/finish-images/nordic-beech-veneer.jpg'
+        newImage: '/jsi_finish_WEA_WeatheredAsh_Laminate.jpg'
     },
-    {
-        id: 10,
-        oldName: 'Mahogany Rich',
-        newName: 'Honduras Mahogany',
-        category: 'Wood Veneer',
-        veneer: 'VM-701',
-        solid: 'SM-701',
-        newImage: '/finish-images/honduras-mahogany-veneer.jpg'
-    }
 ];
 
 export const FINISH_CATEGORIES = [
