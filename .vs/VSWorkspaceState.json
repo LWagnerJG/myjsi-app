@@ -1,16 +1,16 @@
 {
   "ExpandedNodes": [
     "",
-    "\\public",
     "\\public\\category-images",
-    "\\public\\category-images\\bench-images",
-    "\\public\\category-images\\casegood-images",
-    "\\public\\category-images\\conference-images",
-    "\\public\\category-images\\guest-images",
     "\\public\\category-images\\lounge-images",
     "\\public\\category-images\\swivel-images",
-    "\\public\\category-images\\training-images"
+    "\\public\\category-images\\training-images",
+    "\\src",
+    "\\src\\screens",
+    "\\src\\screens\\resources",
+    "\\src\\screens\\resources\\discontinued-finishes",
+    "\\src\\screens\\resources\\lead-times"
   ],
-  "SelectedNode": "\\public\\category-images\\training-images",
+  "SelectedNode": "\\src\\screens\\resources\\discontinued-finishes\\DiscontinuedFinishesScreen.jsx",
   "PreviewInSolutionExplorer": false
 }

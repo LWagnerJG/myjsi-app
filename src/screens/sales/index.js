@@ -2,5 +2,6 @@
 export { SalesScreen } from './SalesScreen.jsx';
 export { IncentiveRewardsScreen } from './IncentiveRewardsScreen.jsx';
 export { CustomerRankingScreen } from './CustomerRankingScreen.jsx';
-export { CommissionsScreen } from './CommissionsScreen.jsx';
+export { CommissionsScreen } from './commissions/CommissionsScreen.jsx';
 export * from './data.js';
+export * from './commissions/data.js';

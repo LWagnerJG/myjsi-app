@@ -51,21 +51,41 @@ const ScreenRouter = ({ screenKey, projectsScreenRef, SuspenseFallback, ...rest 
         <Suspense fallback={SuspenseFallback}> <Comp {...rest} /> </Suspense>
     );
 
-    if (screenKey === 'resources/commission-rates') return lazyWrap(CommissionRatesScreen);
-    if (screenKey === 'resources/lead-times') return lazyWrap(LeadTimesScreen);
-    if (screenKey === 'resources/contracts') return lazyWrap(ContractsScreen);
-    if (screenKey === 'resources/dealer-directory') return lazyWrap(DealerDirectoryScreen);
-    if (screenKey === 'resources/discontinued_finishes') return lazyWrap(DiscontinuedFinishesScreen);
-    if (screenKey === 'resources/design_days') return lazyWrap(DesignDaysScreen);
-    if (screenKey === 'resources/sample_discounts') return lazyWrap(SampleDiscountsScreen);
-    if (screenKey === 'resources/loaner_pool') return lazyWrap(LoanerPoolScreen);
-    if (screenKey === 'resources/install_instructions') return lazyWrap(InstallInstructionsScreen);
-    if (screenKey === 'resources/presentations') return lazyWrap(PresentationsScreen);
-    if (screenKey === 'resources/request_field_visit') return lazyWrap(RequestFieldVisitScreen);
-    if (screenKey === 'resources/new-dealer-signup') return lazyWrap(NewDealerSignUpScreen);
-    if (screenKey === 'resources/social_media') return lazyWrap(SocialMediaScreen);
-    if (screenKey === 'resources/search-fabrics') return lazyWrap(SearchFabricsScreen);
-    if (screenKey === 'resources/request-com-yardage') return lazyWrap(RequestComYardageScreen);
+    // Resource route normalization (support legacy underscore routes)
+    if (base === 'resources') {
+        const slug = parts.slice(1).join('/');
+        // Map underscore legacy to hyphen
+        const normalized = slug
+            .replace('discontinued_finishes', 'discontinued-finishes')
+            .replace('design_days', 'design-days')
+            .replace('sample_discounts', 'sample-discounts')
+            .replace('loaner_pool', 'loaner-pool')
+            .replace('install_instructions', 'install-instructions')
+            .replace('request_field_visit', 'request-field-visit')
+            .replace('social_media', 'social-media')
+            .replace('dealer_directory', 'dealer-directory')
+            .replace('commission_rates', 'commission-rates')
+            .replace('new-dealer-signup', 'new-dealer-signup');
+
+        switch (normalized) {
+            case 'commission-rates': return lazyWrap(CommissionRatesScreen);
+            case 'lead-times': return lazyWrap(LeadTimesScreen);
+            case 'contracts': return lazyWrap(ContractsScreen);
+            case 'dealer-directory': return lazyWrap(DealerDirectoryScreen);
+            case 'discontinued-finishes': return lazyWrap(DiscontinuedFinishesScreen);
+            case 'design-days': return lazyWrap(DesignDaysScreen);
+            case 'sample-discounts': return lazyWrap(SampleDiscountsScreen);
+            case 'loaner-pool': return lazyWrap(LoanerPoolScreen);
+            case 'install-instructions': return lazyWrap(InstallInstructionsScreen);
+            case 'presentations': return lazyWrap(PresentationsScreen);
+            case 'request-field-visit': return lazyWrap(RequestFieldVisitScreen);
+            case 'new-dealer-signup': return lazyWrap(NewDealerSignUpScreen);
+            case 'social-media': return lazyWrap(SocialMediaScreen);
+            case 'search-fabrics': return lazyWrap(SearchFabricsScreen);
+            case 'request-com-yardage': return lazyWrap(RequestComYardageScreen);
+            default: break; // fall through to generic resource detail if not a feature screen
+        }
+    }
 
     if (base === 'products' && parts[1] === 'category' && parts.length === 3) {
         return <ProductComparisonScreen {...rest} categoryId={parts[2]} />;
