@@ -62,10 +62,10 @@ const ScreenRouter = ({ screenKey, projectsScreenRef, SuspenseFallback, ...rest 
     if (screenKey === 'resources/install_instructions') return lazyWrap(InstallInstructionsScreen);
     if (screenKey === 'resources/presentations') return lazyWrap(PresentationsScreen);
     if (screenKey === 'resources/request_field_visit') return lazyWrap(RequestFieldVisitScreen);
-    if (screenKey === 'resources/dealer_registration') return lazyWrap(NewDealerSignUpScreen);
+    if (screenKey === 'resources/new-dealer-signup') return lazyWrap(NewDealerSignUpScreen);
     if (screenKey === 'resources/social_media') return lazyWrap(SocialMediaScreen);
-    if (screenKey === 'fabrics/search_form') return lazyWrap(SearchFabricsScreen);
-    if (screenKey === 'fabrics/com_request') return lazyWrap(RequestComYardageScreen);
+    if (screenKey === 'resources/search-fabrics') return lazyWrap(SearchFabricsScreen);
+    if (screenKey === 'resources/request-com-yardage') return lazyWrap(RequestComYardageScreen);
 
     if (base === 'products' && parts[1] === 'category' && parts.length === 3) {
         return <ProductComparisonScreen {...rest} categoryId={parts[2]} />;
