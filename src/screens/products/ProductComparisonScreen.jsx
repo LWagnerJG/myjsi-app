@@ -1,198 +1,169 @@
-import React, { useState, useMemo, useCallback } from 'react';
-import { PageTitle } from '../../components/common/PageTitle.jsx';
+import React, { useState, useCallback, useMemo } from 'react';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
-import { Plus, ArrowRight, Package } from 'lucide-react';
+import { ArrowRight, Package } from 'lucide-react';
 import { PRODUCT_DATA } from './data.js';
 import { PRODUCT_COMPARISON_CONSTANTS } from './comparison-data.js';
 
-// Product selection tabs component - enhanced for better visual design
-const ProductTabs = React.memo(({ 
-    products, 
-    activeProduct, 
-    onProductSelect, 
-    theme,
-    categoryName
-}) => {
-    // Special sizing for Benches category
+// Product selection tabs (subtle active indication)
+const ProductTabs = React.memo(({ products, activeProduct, onProductSelect, theme, categoryName }) => {
     const isBenches = categoryName?.toLowerCase() === 'benches';
     const tabSize = isBenches ? PRODUCT_COMPARISON_CONSTANTS.TAB_SIZES.benches : PRODUCT_COMPARISON_CONSTANTS.TAB_SIZES.default;
-    
     return (
-        <GlassCard theme={theme} className="p-4">
-            <div className="flex space-x-3 overflow-x-auto scrollbar-hide">
-                {products.map(product => (
-                    <button
-                        key={product.id}
-                        onClick={() => onProductSelect(product)}
-                        className={`flex-shrink-0 ${tabSize} rounded-2xl border-2 transition-all duration-150 p-1 overflow-hidden transform active:scale-95 ${
-                            activeProduct.id === product.id 
-                                ? 'border-blue-500' 
-                                : 'border-transparent opacity-70'
-                        } hover:opacity-100`}
-                        style={{ backgroundColor: theme.colors.surface }}
-                    >
-                        <img 
-                            src={product.image} 
-                            alt={product.name} 
-                            className="w-full h-full object-cover rounded-xl scale-150" 
-                        />
-                    </button>
-                ))}
-
-                {/* Add New Product Button */}
-                <button className={`flex-shrink-0 ${tabSize} rounded-2xl border-2 transition-all duration-150 p-1 overflow-hidden transform active:scale-95`} style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border }}>
-                    <div className="w-full h-full flex flex-col items-center justify-center">
-                        <Plus className="w-6 h-6" style={{ color: theme.colors.accent }} />
-                        <span className="text-xs font-semibold" style={{ color: theme.colors.textPrimary }}>Add Product</span>
-                    </div>
-                </button>
+        <GlassCard theme={theme} className="pt-4 pb-2 px-4">
+            <div className="flex space-x-6 overflow-x-auto scrollbar-hide pb-1">
+                {products.map(p => {
+                    const active = activeProduct.id === p.id;
+                    const scale = p.thumbScale || 1.5;
+                    return (
+                        <div key={p.id} className="flex flex-col items-center min-w-[92px]">
+                            <button
+                                onClick={() => onProductSelect(p)}
+                                className={`flex-shrink-0 ${tabSize} relative rounded-2xl overflow-hidden transform active:scale-95 transition-all duration-150`}
+                                style={{ backgroundColor: active ? theme.colors.subtle : theme.colors.surface }}
+                            >
+                                <img src={p.image} alt={p.name} className="w-full h-full object-contain" style={{ transform: `scale(${scale})` }} />
+                                {active && (
+                                    <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-6 h-0.5 rounded-full" style={{ backgroundColor: theme.colors.accent }} />
+                                )}
+                            </button>
+                            <span className="mt-1.5 text-[11px] font-semibold tracking-wide px-1 text-center leading-tight" style={{ color: theme.colors.textPrimary }}>{p.name}</span>
+                        </div>
+                    );
+                })}
             </div>
         </GlassCard>
     );
 });
-
 ProductTabs.displayName = 'ProductTabs';
 
-// Enhanced product hero section with large product image and pricing table
-const ProductHero = React.memo(({ 
-    product, 
-    categoryData,
-    theme, 
-    categoryId, 
-    onNavigate 
-}) => {
-    const handleCompetitionClick = useCallback(() => {
-        onNavigate(`products/category/${categoryId}/competition`);
-    }, [categoryId, onNavigate]);
-
+// Hero
+const ProductHero = React.memo(({ product, theme, categoryId, onNavigate }) => {
+    const handleCompetitionClick = React.useCallback(() => { onNavigate(`products/category/${categoryId}/competition`); }, [categoryId, onNavigate]);
+    const isGuestCategory = categoryId === 'guest';
+    // For guest chairs default zoom a bit higher if heroScale not specified
+    const zoom = product.heroScale || (isGuestCategory ? 1.35 : 1.15);
     return (
-        <div className="space-y-4">
-            {/* Large product image */}
-            <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-lg group">
-                <img 
-                    src={product.image} 
-                    alt={product.name} 
-                    loading="lazy"
-                    className="absolute w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
-                />
-                {/* Product name overlay */}
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-6">
-                    <h2 className="text-3xl font-bold text-white mb-2">{product.name}</h2>
-                    <p className="text-xl font-semibold text-white">
-                        ${product.price?.toLocaleString() || 'TBD'}
-                    </p>
+        <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-lg group">
+            <img
+                src={product.image}
+                alt={product.name}
+                loading="lazy"
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.05]"
+                style={{ transform: `scale(${zoom})` }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/15 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 flex items-end justify-between px-6 pb-7 pt-10">
+                <div className="space-y-1 translate-y-1">
+                    <h2 className="text-3xl font-bold text-white drop-shadow-sm">{product.name}</h2>
+                    <p className="text-xl font-semibold text-white drop-shadow-sm">${product.price?.toLocaleString() || 'TBD'}</p>
+                </div>
+                <div className="absolute bottom-4 right-4">
                     <button
                         onClick={handleCompetitionClick}
-                        className="flex items-center space-x-2 mt-3 px-4 py-2 rounded-full font-semibold text-sm transition-all hover:scale-105 active:scale-100 bg-white/20 backdrop-blur-sm text-white border border-white/30"
+                        className="flex items-center space-x-2 px-5 py-2 rounded-full font-semibold text-sm transition-all hover:scale-105 active:scale-100 shadow-sm"
+                        style={{ backgroundColor: 'rgba(255,255,255,0.42)', color: theme.colors.textPrimary, backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.55)' }}
                     >
                         <span>Competition</span>
                         <ArrowRight className="w-4 h-4" />
                     </button>
                 </div>
             </div>
-
-            {/* JSI Products pricing table */}
-            <GlassCard theme={theme} className="px-6 py-4 space-y-1">
-                {/* Table Header */}
-                <div className="grid grid-cols-2 gap-4 pb-2 text-sm font-semibold border-b" style={{ borderColor: theme.colors.border }}>
-                    <div style={{ color: theme.colors.textSecondary }}>Series</div>
-                    <div className="text-right" style={{ color: theme.colors.textSecondary }}>List $</div>
-                </div>
-
-                {/* Main product row (highlighted) */}
-                <div className="grid grid-cols-2 gap-4 py-3 rounded-lg" style={{ backgroundColor: theme.colors.subtle }}>
-                    <div className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>
-                        {product.name}
-                    </div>
-                    <div className="font-bold text-lg text-right" style={{ color: theme.colors.accent }}>
-                        ${product.price?.toLocaleString() || 'TBD'}
-                    </div>
-                </div>
-
-                {/* Other products in category */}
-                {categoryData.products
-                    .filter(p => p.id !== product.id)
-                    .map(otherProduct => (
-                        <div key={otherProduct.id} className="grid grid-cols-2 gap-4 py-3 border-t" style={{ borderColor: theme.colors.border }}>
-                            <div className="font-medium" style={{ color: theme.colors.textSecondary }}>
-                                {otherProduct.name}
-                            </div>
-                            <div className="font-medium text-right" style={{ color: theme.colors.textSecondary }}>
-                                ${otherProduct.price?.toLocaleString() || 'TBD'}
-                            </div>
-                        </div>
-                    ))}
-            </GlassCard>
         </div>
     );
 });
-
 ProductHero.displayName = 'ProductHero';
 
-// Error boundary component
-const ErrorState = React.memo(({ 
-    title = "Not Found", 
-    message = "The requested item does not exist.", 
-    onBack, 
-    theme 
-}) => (
+// Pricing table
+const PricingTable = React.memo(({ products, activeProduct, onSelectProduct, theme, materialMode, onMaterialModeChange, categoryId }) => {
+    const sorted = useMemo(() => [...products].sort((a, b) => (a.price || 0) - (b.price || 0)), [products]);
+    const isGuest = categoryId === 'guest';
+    const isCasegoods = categoryId === 'casegoods';
+    const options = isGuest ? ['Wood', 'Metal'] : ['Laminate', 'Veneer'];
+    const activeIndex = options.findIndex(o => materialMode === o.toLowerCase());
+
+    const Toggle = () => (
+        <div className="relative flex rounded-full text-xs font-semibold overflow-hidden" style={{ backgroundColor: theme.colors.subtle, border: `1px solid ${theme.colors.border}` }}>
+            <div className="absolute top-0.5 bottom-0.5 left-0 w-1/2 rounded-full transition-transform duration-300 ease-out" style={{ backgroundColor: theme.colors.surface, boxShadow: `0 2px 6px ${theme.colors.shadow}`, transform: `translateX(${activeIndex * 100}%)` }} />
+            {options.map(opt => {
+                const active = materialMode === opt.toLowerCase();
+                return (
+                    <button key={opt} onClick={() => onMaterialModeChange(opt.toLowerCase())} className="relative z-10 flex-1 px-4 py-1.5 rounded-full transition-colors duration-300" style={{ color: active ? theme.colors.textPrimary : theme.colors.textSecondary }}>{opt}</button>
+                );
+            })}
+        </div>
+    );
+
+    return (
+        <GlassCard theme={theme} className="px-0 pb-3 pt-3 overflow-hidden">
+            <div className="px-6 pb-2 flex items-center justify-between">
+                {isCasegoods ? (
+                    <span className="text-[12px] font-bold tracking-wide px-3 py-1 rounded-full" style={{ backgroundColor: theme.colors.accent, color: '#FFFFFF' }}>Typical U-shape</span>
+                ) : <span />}
+                <Toggle />
+            </div>
+            <div className="mx-6 h-px" style={{ backgroundColor: theme.colors.border }} />
+            <div className="px-6 pt-2 pb-1 flex items-center justify-between text-[11px] font-semibold tracking-wide uppercase" style={{ color: theme.colors.textSecondary }}>
+                <span>Series</span>
+                <span>List $ {isGuest ? `(${materialMode === 'wood' ? 'Wood' : 'Metal'})` : `(${materialMode === 'laminate' ? 'Lam.' : 'Ven.'})`}</span>
+            </div>
+            <div className="mt-1">
+                {sorted.map(p => {
+                    const active = p.id === activeProduct.id;
+                    return (
+                        <button key={p.id} onClick={() => onSelectProduct(p)} className={`w-full group px-6 py-3 flex items-center justify-between text-sm transition-colors rounded-lg text-left ${active ? 'bg-transparent' : 'hover:bg-black/5'}`} style={{ cursor: active ? 'default' : 'pointer' }} disabled={active}>
+                            <span className="flex items-center">
+                                <span className="inline-block w-1.5 h-4 mr-3 rounded-full transition-colors" style={{ backgroundColor: active ? theme.colors.accent : theme.colors.border }} />
+                                <span className={`font-medium ${active ? 'tracking-wide' : ''}`} style={{ color: active ? theme.colors.textPrimary : theme.colors.textSecondary }}>{p.name}</span>
+                            </span>
+                            <span className="font-semibold" style={{ color: active ? theme.colors.accent : theme.colors.textSecondary }}>${p.price?.toLocaleString() || 'TBD'}</span>
+                        </button>
+                    );
+                })}
+            </div>
+        </GlassCard>
+    );
+});
+PricingTable.displayName = 'PricingTable';
+
+const ErrorState = React.memo(({ message = 'The requested item does not exist.', theme }) => (
     <div className="p-4">
-        <PageTitle title={title} theme={theme} onBack={onBack} />
         <GlassCard theme={theme} className="p-8 text-center">
             <Package className="w-12 h-12 mx-auto mb-4" style={{ color: theme.colors.textSecondary }} />
             <p style={{ color: theme.colors.textPrimary }}>{message}</p>
         </GlassCard>
     </div>
 ));
-
 ErrorState.displayName = 'ErrorState';
 
-// Main product comparison screen - enhanced to match reference design
 export const ProductComparisonScreen = ({ categoryId, onNavigate, theme }) => {
     const categoryData = PRODUCT_DATA?.[categoryId];
     const [activeProduct, setActiveProduct] = useState(categoryData?.products?.[0]);
+    const isGuest = categoryId === 'guest';
+    const [materialMode, setMaterialMode] = useState(isGuest ? 'wood' : 'laminate');
 
-    // Memoized handlers
-    const handleProductSelect = useCallback((product) => {
-        setActiveProduct(product);
-    }, []);
+    const handleProductSelect = useCallback((product) => setActiveProduct(product), []);
 
-    const handleBackToProducts = useCallback(() => {
-        onNavigate('products');
-    }, [onNavigate]);
+    if (!categoryData) return <ErrorState theme={theme} />;
 
-    // Early return for invalid data
-    if (!categoryData) {
-        return (
-            <ErrorState
-                title="Category Not Found"
-                message="The requested product category does not exist."
-                onBack={handleBackToProducts}
-                theme={theme}
-            />
-        );
-    }
+    const visibleProducts = useMemo(() => {
+        if (!isGuest) return categoryData.products;
+        return categoryData.products.filter(p => p.legType === (materialMode === 'wood' ? 'wood' : 'metal'));
+    }, [categoryData, isGuest, materialMode]);
+
+    React.useEffect(() => {
+        if (isGuest && activeProduct && !visibleProducts.includes(activeProduct)) {
+            const next = visibleProducts[0];
+            if (next) setActiveProduct(next);
+        }
+    }, [materialMode, isGuest, activeProduct, visibleProducts]);
 
     return (
         <div className="flex flex-col h-full">
-            <PageTitle title={categoryData.name} theme={theme} onBack={handleBackToProducts} />
             <div className="flex-1 overflow-y-auto scrollbar-hide">
-                <div className="p-4 space-y-4">
-                    <ProductTabs
-                        products={categoryData.products}
-                        activeProduct={activeProduct}
-                        onProductSelect={handleProductSelect}
-                        theme={theme}
-                        categoryName={categoryData.name}
-                    />
-
-                    <ProductHero
-                        product={activeProduct}
-                        categoryData={categoryData}
-                        theme={theme}
-                        categoryId={categoryId}
-                        onNavigate={onNavigate}
-                    />
+                <div className="p-4 space-y-5">
+                    <ProductTabs products={visibleProducts} activeProduct={activeProduct} onProductSelect={handleProductSelect} theme={theme} categoryName={categoryData.name} />
+                    <ProductHero product={activeProduct} theme={theme} categoryId={categoryId} onNavigate={onNavigate} />
+                    <PricingTable products={visibleProducts} activeProduct={activeProduct} onSelectProduct={handleProductSelect} theme={theme} materialMode={materialMode} onMaterialModeChange={setMaterialMode} categoryId={categoryId} />
                 </div>
             </div>
         </div>

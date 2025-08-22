@@ -17,8 +17,11 @@ export const PRODUCT_DATA = {
         name: 'Casegoods',
         products: [
             { id: 'vision', name: 'Vision', price: 3200, image: localImage('/category-images/casegood-images/jsi_vision_config_000007.jpg') },
-            { id: 'brogan', name: 'Brogan', price: 2800, image: localImage('/category-images/casegood-images/jsi_vision_config_000008.jpg') },
-            { id: 'finale', name: 'Finale', price: 3500, image: localImage('/category-images/casegood-images/jsi_vision_config_000001_dkm0wsV.jpg') },
+            { id: 'flux', name: 'Flux', price: 3700, image: localImage('/category-images/casegood-images/jsi_flux_config_00008.jpg') },
+            { id: 'brogan', name: 'Brogan', price: 4200, image: localImage('/category-images/casegood-images/jsi_brogan_config_0015.jpg') },
+            { id: 'finale', name: 'Finale', price: 4700, image: localImage('/category-images/casegood-images/jsi_finale_config_00013_UWjv5eM.jpg') },
+            { id: 'walden', name: 'Walden', price: 5200, image: localImage('/category-images/casegood-images/jsi_walden_config_00001.jpg') },
+            { id: 'wellington', name: 'Wellington', price: 5700, image: localImage('/category-images/casegood-images/jsi_wellington_config_00006.jpg') },
         ],
         competition: []
     },
@@ -34,9 +37,24 @@ export const PRODUCT_DATA = {
     'guest': {
         name: 'Guest',
         products: [
-            { id: 'addison', name: 'Addison', price: 600, image: 'https://via.placeholder.com/300x200/E3DBC8/2A2A2A?text=Addison+Guest' },
-            { id: 'americana', name: 'Americana', price: 650, image: 'https://via.placeholder.com/300x200/D9CDBA/2A2A2A?text=Americana+Guest' },
-            { id: 'boston', name: 'Boston', price: 700, image: 'https://via.placeholder.com/300x200/C7AD8E/2A2A2A?text=Boston+Guest' },
+            { id: 'arwyn-guest', name: 'Arwyn', price: 520, legType: 'wood', image: localImage('/category-images/guest-images/jsi_arwyn_comp_00032.jpg'), thumbScale: 1.4, heroScale: 1.2 },
+            { id: 'bourne', name: 'Bourne', price: 560, legType: 'wood', image: localImage('/category-images/guest-images/jsi_bourne_comp_00002_k6eFRce.jpg'), thumbScale: 1.3, heroScale: 1.15 },
+            { id: 'cosgrove', name: 'Cosgrove', price: 610, legType: 'metal', image: localImage('/category-images/guest-images/jsi_cosgrove_comp_guest_midback_arms_00004.jpg'), thumbScale: 1.5, heroScale: 1.25 },
+            { id: 'henley', name: 'Henley', price: 630, legType: 'wood', image: localImage('/category-images/guest-images/jsi_henley_comp_00001.jpg'), thumbScale: 1.5, heroScale: 1.25 },
+            { id: 'knox', name: 'Knox', price: 640, legType: 'metal', image: localImage('/category-images/guest-images/jsi_knox_comp_00020.jpg'), thumbScale: 1.8, heroScale: 1.35 },
+            { id: 'ramona', name: 'Ramona', price: 660, legType: 'wood', image: localImage('/category-images/guest-images/jsi_ramona_comp_rotation_ra2581f_00001.jpg'), thumbScale: 1.6, heroScale: 1.3 },
+            { id: 'ria', name: 'Ria', price: 680, legType: 'metal', image: localImage('/category-images/guest-images/jsi_ria_comp_00007.jpg'), thumbScale: 1.9, heroScale: 1.4 },
+            { id: 'satisse', name: 'Satisse', price: 705, legType: 'metal', image: localImage('/category-images/guest-images/jsi_satisse_comp_00001_LwTdLhw.jpg'), thumbScale: 2.0, heroScale: 1.5 },
+            { id: 'sosa', name: 'Sosa', price: 720, legType: 'metal', image: localImage('/category-images/guest-images/jsi_sosa_comp_00020.jpg'), thumbScale: 1.7, heroScale: 1.3 },
+            { id: 'wink', name: 'Wink', price: 740, legType: 'wood', image: localImage('/category-images/guest-images/jsi_wink_comp_00070.jpg'), thumbScale: 1.9, heroScale: 1.4 },
+            { id: 'avini', name: 'Avini', price: 760, legType: 'wood', image: localImage('/category-images/guest-images/jsi_avini_comp_00007.jpg'), thumbScale: 1.7, heroScale: 1.35 },
+            { id: 'boston', name: 'Boston', price: 780, legType: 'wood', image: localImage('/category-images/guest-images/jsi_boston_comp_0007_jBfEUNr.jpg'), thumbScale: 1.65, heroScale: 1.3 },
+            { id: 'collective-motion', name: 'Collective Motion', price: 800, legType: 'metal', image: localImage('/category-images/guest-images/jsi_collectivemotion_comp_00014.jpg'), thumbScale: 1.6, heroScale: 1.25 },
+            { id: 'madison', name: 'Madison', price: 820, legType: 'wood', image: localImage('/category-images/guest-images/jsi_madison_comp_00003.jpg'), thumbScale: 1.6, heroScale: 1.3 },
+            { id: 'millie', name: 'Millie', price: 840, legType: 'wood', image: localImage('/category-images/guest-images/jsi_millie_comp_00005_g77W9GX.jpg'), thumbScale: 1.75, heroScale: 1.35 },
+            { id: 'totem', name: 'Totem', price: 860, legType: 'wood', image: localImage('/category-images/guest-images/jsi_totem_comp_00003.jpg'), thumbScale: 1.5, heroScale: 1.2 },
+            { id: 'harbor', name: 'Harbor', price: 880, legType: 'wood', image: localImage('/category-images/guest-images/jsi_harbor_comp_00010_7pPSeR6.jpg'), thumbScale: 1.55, heroScale: 1.25 },
+            { id: 'bryn', name: 'Bryn', price: 900, legType: 'wood', image: localImage('/category-images/guest-images/jsi_bryn_comp_00023.jpg'), thumbScale: 1.6, heroScale: 1.3 }
         ],
         competition: []
     },
@@ -159,8 +177,8 @@ export const PRODUCTS_CATEGORIES_DATA = [
         nav: 'products/category/casegoods',
         images: [
             '/category-images/casegood-images/jsi_vision_config_000007.jpg',
-            '/category-images/casegood-images/jsi_vision_config_000008.jpg',
-            '/category-images/casegood-images/jsi_vision_config_000001_dkm0wsV.jpg'
+            '/category-images/casegood-images/jsi_flux_config_00008.jpg',
+            '/category-images/casegood-images/jsi_brogan_config_0015.jpg'
         ].map(localImage)
     },
     {

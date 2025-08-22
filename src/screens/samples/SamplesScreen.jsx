@@ -1,5 +1,5 @@
 // src/screens/samples/SamplesScreen.jsx
-import React, { useState, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import {
     Package, Plus, ShoppingCart, Trash2, Minus, CheckCircle, Home,
@@ -14,6 +14,7 @@ const idOf = (x) => String(x);
 /* ====================== Directory Modal ====================== */
 const DirectoryModal = ({ show, onClose, onSelect, theme, dealers = [], designFirms = [] }) => {
     const [q, setQ] = useState('');
+    const HEADER_OFFSET = 80; // keep app header visible / undimmed
     const items = React.useMemo(() => {
         if (!show) return [];
         const normalize = (x, idx) => ({
@@ -30,40 +31,45 @@ const DirectoryModal = ({ show, onClose, onSelect, theme, dealers = [], designFi
     if (!show) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
-            <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.3)' }} onClick={onClose} />
+        <div className="fixed inset-0 z-50 flex items-end sm:items-start justify-center pointer-events-none">
+            {/* Dim ONLY content below header */}
             <div
-                className="relative w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl p-4 space-y-3"
-                style={{ background: theme.colors.surface, boxShadow: '0 10px 30px rgba(0,0,0,0.15)' }}
+                className="absolute left-0 right-0 bottom-0 pointer-events-auto"
+                style={{ top: HEADER_OFFSET, background: 'rgba(0,0,0,0.32)' }}
+                onClick={onClose}
+            />
+            <div
+                className="relative w-full sm:max-w-md mt-auto sm:mt-[100px] rounded-t-2xl sm:rounded-2xl p-5 space-y-4 pointer-events-auto"
+                style={{ background: theme.colors.surface, boxShadow: '0 14px 40px rgba(0,0,0,0.22)' }}
             >
                 <div className="flex items-center justify-between">
-                    <h3 className="font-semibold" style={{ color: theme.colors.textPrimary }}>Select Company</h3>
-                    <button onClick={onClose} className="p-2 rounded-full"><X className="w-5 h-5" /></button>
+                    <h3 className="font-bold text-base tracking-tight" style={{ color: theme.colors.textPrimary }}>Select Company</h3>
+                    <button onClick={onClose} aria-label="Close" className="p-2 rounded-full hover:bg-black/5 active:scale-95 transition"><X className="w-5 h-5" style={{ color: theme.colors.textSecondary }} /></button>
                 </div>
                 <div className="relative">
                     <input
                         value={q}
                         onChange={(e) => setQ(e.target.value)}
-                        placeholder="Search companies…"
-                        className="w-full rounded-xl pl-9 pr-3 py-2 outline-none"
-                        style={{ background: theme.colors.subtle, border: `1px solid ${theme.colors.border}`, color: theme.colors.textPrimary }}
+                        placeholder="Search companies..."
+                        className="w-full rounded-xl pl-9 pr-3 py-2 text-sm outline-none transition focus:ring-2"
+                        style={{ background: theme.colors.subtle, border: `1px solid ${theme.colors.border}`, color: theme.colors.textPrimary, boxShadow: '0 0 0 transparent' }}
                     />
                     <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2" style={{ color: theme.colors.textSecondary }} />
                 </div>
-                <div className="max-h-72 overflow-y-auto space-y-2">
+                <div className="max-h-72 overflow-y-auto space-y-2 pr-1 scrollbar-hide">
                     {items.map((it) => (
                         <button
                             key={it.key}
                             onClick={() => { onSelect({ name: it.name, address1: it.address || '' }); onClose(); }}
-                            className="w-full text-left p-3 rounded-xl active:scale-[0.99] transition"
-                            style={{ background: theme.colors.subtle, border: `1px solid ${theme.colors.border}` }}
+                            className="w-full text-left px-4 py-3 rounded-xl group border transition-all hover:shadow-sm active:scale-[0.99]"
+                            style={{ background: theme.colors.surface, borderColor: theme.colors.border }}
                         >
-                            <div className="font-medium" style={{ color: theme.colors.textPrimary }}>{it.name}</div>
-                            {it.address && <div className="text-sm" style={{ color: theme.colors.textSecondary }}>{it.address}</div>}
+                            <div className="font-medium text-sm mb-0.5" style={{ color: theme.colors.textPrimary }}>{it.name}</div>
+                            {it.address && <div className="text-xs leading-snug" style={{ color: theme.colors.textSecondary }}>{it.address}</div>}
                         </button>
                     ))}
                     {items.length === 0 && (
-                        <div className="text-sm text-center py-6" style={{ color: theme.colors.textSecondary }}>No matches.</div>
+                        <div className="text-sm text-center py-6" style={{ color: theme.colors.textSecondary }}>No companies found.</div>
                     )}
                 </div>
             </div>
@@ -143,12 +149,13 @@ const DrawerItem = React.memo(({ item, onUpdateCart, theme, isLast = false }) =>
 DrawerItem.displayName = 'DrawerItem';
 
 /* ====================== Cart Drawer ====================== */
-const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, designFirms, initialOpen = false }) => {
+const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, designFirms, initialOpen = false, onNavigate }) => {
     const [isExpanded, setIsExpanded] = useState(initialOpen);
     const [showDir, setShowDir] = useState(false);
     const [shipToName, setShipToName] = useState('');
     const [address1, setAddress1] = useState(userSettings?.homeAddress || '');
     const [address2, setAddress2] = useState('');
+    const [justSubmitted, setJustSubmitted] = useState(false);
     const toasts = useToasts();
 
     // helper to safely set values (avoid undefined which triggers uncontrolled warning)
@@ -183,7 +190,12 @@ const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, designFi
             return;
         }
         toasts.push('Sample request submitted');
-    }, [shipToName, address1, cartItems.length, toasts]);
+        setJustSubmitted(true);
+        setTimeout(() => {
+            setJustSubmitted(false);
+            onNavigate && onNavigate('home');
+        }, 1500);
+    }, [shipToName, address1, cartItems.length, toasts, onNavigate]);
 
     const canSubmit = totalCartItems > 0 && shipToName.trim() && address1.trim();
 
@@ -315,6 +327,14 @@ const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, designFi
                 dealers={dealers}
                 designFirms={designFirms}
             />
+            {justSubmitted && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
+                    <div className="px-8 py-6 rounded-2xl text-center shadow-xl" style={{ background: theme.colors.surface, border: `1px solid ${theme.colors.border}` }}>
+                        <div className="text-lg font-bold mb-1" style={{ color: theme.colors.textPrimary }}>Sample Request Submitted</div>
+                        <div className="text-sm" style={{ color: theme.colors.textSecondary }}></div>
+                    </div>
+                </div>
+            )}
         </>
     );
 };
@@ -543,6 +563,7 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                 dealers={dealerDirectory}
                 designFirms={designFirms}
                 initialOpen={initialCartOpen}
+                onNavigate={onNavigate}
             />
         </div>
     );

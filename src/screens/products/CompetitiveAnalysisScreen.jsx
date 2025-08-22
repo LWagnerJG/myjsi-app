@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { PageTitle } from '../../components/common/PageTitle.jsx';
+// Removed PageTitle import to hide header/back
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { Plus, Package } from 'lucide-react';
 import { PRODUCT_DATA } from './data.js';
@@ -125,7 +125,6 @@ const ErrorState = React.memo(({
     theme 
 }) => (
     <div className="p-4">
-        <PageTitle title={title} theme={theme} onBack={onBack} />
         <GlassCard theme={theme} className="p-8 text-center">
             <Package className="w-12 h-12 mx-auto mb-4" style={{ color: theme.colors.textSecondary }} />
             <p style={{ color: theme.colors.textPrimary }}>{message}</p>
@@ -140,34 +139,24 @@ export const CompetitiveAnalysisScreen = ({ categoryId, onNavigate, theme }) => 
     const categoryData = PRODUCT_DATA?.[categoryId];
     const [activeProduct, setActiveProduct] = useState(categoryData?.products?.[0]);
 
-    // Memoized handlers
     const handleProductSelect = useCallback((product) => {
         setActiveProduct(product);
     }, []);
 
-    const handleBackToCategory = useCallback(() => {
-        onNavigate(`products/category/${categoryId}`);
-    }, [categoryId, onNavigate]);
-
-    // Early return for invalid data
     if (!categoryData) {
         return (
-            <ErrorState
-                title="No Competition Data"
-                message="No competitive analysis data available for this category."
-                onBack={handleBackToCategory}
-                theme={theme}
-            />
+            <div className="p-4">
+                <GlassCard theme={theme} className="p-8 text-center">
+                    <Package className="w-12 h-12 mx-auto mb-4" style={{ color: theme.colors.textSecondary }} />
+                    <p style={{ color: theme.colors.textPrimary }}>No Competition Data</p>
+                </GlassCard>
+            </div>
         );
     }
 
     return (
         <div className="flex flex-col h-full">
-            <PageTitle 
-                title={`${categoryData.name} Analysis`} 
-                theme={theme} 
-                onBack={handleBackToCategory} 
-            />
+            {/* Header intentionally removed (no back/title) */}
             <div className="flex-1 overflow-y-auto scrollbar-hide">
                 <div className="p-4 space-y-4">
                     <ProductTabs

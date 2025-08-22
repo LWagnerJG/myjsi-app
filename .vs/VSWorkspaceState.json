@@ -1,13 +1,16 @@
 {
   "ExpandedNodes": [
     "",
-    "\\src",
-    "\\src\\data",
-    "\\src\\screens",
-    "\\src\\screens\\community",
-    "\\src\\screens\\projects",
-    "\\src\\screens\\resources\\lead-times"
+    "\\public",
+    "\\public\\category-images",
+    "\\public\\category-images\\bench-images",
+    "\\public\\category-images\\casegood-images",
+    "\\public\\category-images\\conference-images",
+    "\\public\\category-images\\guest-images",
+    "\\public\\category-images\\lounge-images",
+    "\\public\\category-images\\swivel-images",
+    "\\public\\category-images\\training-images"
   ],
-  "SelectedNode": "\\src\\screens\\community\\CommunityScreen.jsx",
+  "SelectedNode": "\\public\\category-images\\training-images",
   "PreviewInSolutionExplorer": false
 }
