@@ -67,8 +67,8 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, onUpdateHomeA
   const removeApp = route => setSelected(prev => prev.filter(r => r !== route));
 
   // Reorder on drag over for immediacy
-  const handleDragStart = idx => e => { dragIndex.current = idx; e.dataTransfer.effectAllowed='move'; };
-  const handleDragOver = idx => e => { e.preventDefault(); const from = dragIndex.current; if (from == null || from === idx) return; setSelected(prev => { const next=[...prev]; const [it]=next.splice(from,1); next.splice(idx,0,it); dragIndex.current=idx; return next; }); };
+  const handleDragStart = idx => e => { dragIndex.current = idx; e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain', idx); };
+  const handleDragEnter = idx => e => { e.preventDefault(); const from = dragIndex.current; if (from == null || from === idx) return; setSelected(prev => { const next=[...prev]; const [it]=next.splice(from,1); next.splice(idx,0,it); dragIndex.current=idx; return next; }); };
   const handleDragEnd = () => { dragIndex.current=null; };
 
   // Build 8 slots (fill with null placeholders if not yet filled)
@@ -125,9 +125,9 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, onUpdateHomeA
                 return (
                   <button
                     key={route}
-                    draggable
+                    draggable="true"
                     onDragStart={handleDragStart(idx)}
-                    onDragOver={handleDragOver(idx)}
+                    onDragEnter={handleDragEnter(idx)}
                     onDragEnd={handleDragEnd}
                     onClick={()=>removeApp(route)}
                     className="relative group h-16 p-2 rounded-2xl flex flex-col items-start justify-between overflow-hidden select-none cursor-grab active:cursor-grabbing transition shadow-sm bg-white/80 hover:shadow-md"
