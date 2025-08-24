@@ -1,16 +1,12 @@
 {
   "ExpandedNodes": [
     "",
-    "\\public\\category-images",
-    "\\public\\category-images\\lounge-images",
-    "\\public\\category-images\\swivel-images",
-    "\\public\\category-images\\training-images",
     "\\src",
     "\\src\\screens",
     "\\src\\screens\\resources",
     "\\src\\screens\\resources\\discontinued-finishes",
-    "\\src\\screens\\resources\\lead-times"
+    "\\src\\screens\\resources\\lead-times",
+    "\\src\\screens\\sales"
   ],
-  "SelectedNode": "\\src\\screens\\resources\\discontinued-finishes\\DiscontinuedFinishesScreen.jsx",
   "PreviewInSolutionExplorer": false
 }

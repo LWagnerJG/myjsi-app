@@ -5,7 +5,7 @@ export const YTD_SALES_DATA = [
     { label: 'Health', current: 980000, previous: 850000, goal: 2000000 }
 ];
 
-export const MONTHLY_SALES_DATA = [
+export const MONTHLY_SALES_DATA = [ 
     { month: 'Jan', bookings: 1259493, sales: 506304 }, 
     { month: 'Feb', bookings: 497537, sales: 553922 }, 
     { month: 'Mar', bookings: 397684, sales: 365601 }, 

@@ -110,7 +110,7 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
             <div className="px-4 pt-3 pb-3 sticky top-0 z-10" style={{ backgroundColor: `${theme.colors.background}e0`, backdropFilter: 'blur(10px)' }}>
                 <SearchInput
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={(val) => setSearchTerm(val)}
                     placeholder="Search discontinued or replacement..."
                     theme={theme}
                 />

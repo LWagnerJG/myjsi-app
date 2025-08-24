@@ -34,6 +34,7 @@ const RequestFieldVisitScreen = React.lazy(() => import('./screens/resources/req
 const SearchFabricsScreen = React.lazy(() => import('./screens/resources/search-fabrics/index.js'));
 const RequestComYardageScreen = React.lazy(() => import('./screens/resources/request-com-yardage/index.js'));
 const SocialMediaScreen = React.lazy(() => import('./screens/resources/social-media/index.js'));
+const ComColRequest = React.lazy(() => import('./screens/resources/search-fabrics/ComColRequest.jsx').then(m => ({ default: m.ComColRequest })));
 
 const ScreenRouter = ({ screenKey, projectsScreenRef, SuspenseFallback, ...rest }) => {
     if (!screenKey) return null;
@@ -83,6 +84,7 @@ const ScreenRouter = ({ screenKey, projectsScreenRef, SuspenseFallback, ...rest 
             case 'social-media': return lazyWrap(SocialMediaScreen);
             case 'search-fabrics': return lazyWrap(SearchFabricsScreen);
             case 'request-com-yardage': return lazyWrap(RequestComYardageScreen);
+            case 'comcol-request': return lazyWrap(ComColRequest);
             default: break; // fall through to generic resource detail if not a feature screen
         }
     }
