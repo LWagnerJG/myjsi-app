@@ -43,7 +43,7 @@ export const MENU_ITEMS = [{ id: 'orders', icon: MousePointer, label: 'Orders' }
 
 export const allApps = [
     { name: 'Samples', route: 'samples', icon: Package },
-    { name: 'Request Replacement', route: 'replacements', icon: RotateCw },
+    { name: 'Replacements', route: 'replacements', icon: RotateCw },
     { name: 'Community', route: 'community', icon: MessageSquare },
     { name: 'Lead Times', route: 'resources/lead-times', icon: Hourglass },
     { name: 'Products', route: 'products', icon: Armchair },
@@ -72,6 +72,9 @@ export const allApps = [
     { name: 'Request Field Visit', route: 'resources/request_field_visit', icon: MapPin },
     { name: 'New Dealer Sign-Up', route: 'resources/dealer_registration', icon: UserPlus },
 ];
+
+// Default 8 home screen apps (expanded from 6)
+export const DEFAULT_HOME_APPS = ['orders','sales','products','resources','projects','community','samples','replacements'];
 
 export const RESOURCES_DATA = [
     {

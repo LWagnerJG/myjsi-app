@@ -1,5 +1,6 @@
 ﻿import React, { useState, useMemo, useCallback, useEffect, useRef, Suspense } from 'react';
 import { lightTheme, darkTheme } from './data/index.js';
+import { DEFAULT_HOME_APPS, allApps } from './data.jsx';
 import { INITIAL_OPPORTUNITIES, MY_PROJECTS_DATA, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS, EMPTY_LEAD, STAGES } from './screens/projects/data.js';
 import { INITIAL_POSTS, INITIAL_POLLS } from './screens/community/data.js';
 import { INITIAL_MEMBERS } from './screens/members/data.js';
@@ -16,7 +17,7 @@ import { CreateContentModal } from './screens/community/CreateContentModal.jsx';
 import { AnimatedScreenWrapper } from './components/common/AnimatedScreenWrapper.jsx';
 import { ProjectsScreen } from './screens/projects/ProjectsScreen.jsx';
 import { usePersistentState } from './hooks/usePersistentState.js';
-import { ToastHost, useToasts } from './components/common/ToastHost.jsx';
+import { ToastHost } from './components/common/ToastHost.jsx';
 
 // Lazy load less-frequently visited resource feature screens for bundle splitting
 const CommissionRatesScreen = React.lazy(() => import('./screens/resources/commission-rates/index.js'));
@@ -107,8 +108,17 @@ function App() {
     // Persistent preferences / cart
     const [isDarkMode, setIsDarkMode] = usePersistentState('pref.darkMode', false);
     const [cart, setCart] = usePersistentState('samples.cart', {});
+    const [homeApps, setHomeApps] = usePersistentState('pref.homeApps', DEFAULT_HOME_APPS);
 
-    // Navigation / UI state (not persisted yet)
+    // Migrate previously stored 6-app selection to new 8-app default
+    useEffect(() => {
+        if (!Array.isArray(homeApps) || homeApps.length !== 8) {
+            setHomeApps(DEFAULT_HOME_APPS);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // Navigation / UI state
     const [navigationHistory, setNavigationHistory] = useState(['home']);
     const [lastNavigationDirection, setLastNavigationDirection] = useState('forward');
     const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -136,14 +146,14 @@ function App() {
     const [dealerDirectory] = useState(DEALER_DIRECTORY_DATA);
     const [designFirms, setDesignFirms] = useState(INITIAL_DESIGN_FIRMS);
     const [dealers, setDealers] = useState(INITIAL_DEALERS);
-    const [newLeadData, setNewLeadData] = usePersistentState('draft.newLead', EMPTY_LEAD); // persisted lead draft
+    const [newLeadData, setNewLeadData] = usePersistentState('draft.newLead', EMPTY_LEAD);
 
     const projectsScreenRef = useRef(null);
     const currentScreen = navigationHistory[navigationHistory.length - 1];
 
     const currentTheme = useMemo(() => (isDarkMode ? darkTheme : lightTheme), [isDarkMode]);
 
-    // Dynamic viewport height CSS var for mobile safe area usage
+    // mobile vh fix
     useEffect(() => {
         const setAppHeight = () => document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
         setAppHeight();
@@ -187,7 +197,6 @@ function App() {
         });
     }, [setCart]);
 
-    // Community interactions (optimistic)
     const handleToggleLike = useCallback((postId) => {
         setLikedPosts((prev) => {
             const liked = !!prev[postId];
@@ -228,6 +237,12 @@ function App() {
         const enriched = { id: 'inst-' + Date.now(), photos: install.photos || [], standards: [], quotes: [], ...install };
         setMyProjects(prev => [enriched, ...prev]); handleNavigate('projects'); setProjectsTabOverride('my-projects'); setSuccessMessage('Install Added'); setTimeout(() => setSuccessMessage(''), 1500);
     }, [handleNavigate]);
+
+    const handleUpdateHomeApps = useCallback((apps) => {
+        if (!Array.isArray(apps)) return;
+        const filtered = apps.filter(r => allApps.some(a => a.route === r));
+        if (filtered.length === 8) setHomeApps(filtered);
+    }, [setHomeApps]);
 
     const screenProps = {
         theme: currentTheme,
@@ -271,12 +286,14 @@ function App() {
         onSuccess: handleLeadSuccess,
         onAddInstall: handleAddInstall,
         projectsInitialTab: projectsTabOverride,
-        clearProjectsInitialTab: () => setProjectsTabOverride(null)
+        clearProjectsInitialTab: () => setProjectsTabOverride(null),
+        homeApps,
+        onUpdateHomeApps: handleUpdateHomeApps
     };
 
     const suspenseFallback = (
         <div className="flex items-center justify-center w-full h-full text-sm" style={{ color: currentTheme.colors.textSecondary }}>
-            Loading5
+            Loading…
         </div>
     );
 
