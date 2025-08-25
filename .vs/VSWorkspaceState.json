@@ -6,7 +6,9 @@
     "\\src\\screens\\resources",
     "\\src\\screens\\resources\\discontinued-finishes",
     "\\src\\screens\\resources\\lead-times",
-    "\\src\\screens\\sales"
+    "\\src\\screens\\sales",
+    "\\src\\screens\\sales\\commissions"
   ],
+  "SelectedNode": "\\src\\screens\\sales\\data.js",
   "PreviewInSolutionExplorer": false
 }
