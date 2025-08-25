@@ -211,22 +211,10 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
 
     const underlineTransform = dateType === 'shipDate' ? 'translateX(0%)' : 'translateX(100%)';
 
-    // Pill style EXACT match to AppHeader
-    const headerPill = {
-        backgroundColor: theme.colors.surface,
-        border: `1px solid ${theme.colors.border}`,
-        boxShadow: `0 8px 24px ${theme.colors.shadow}`,
-        borderRadius: 9999,
-        height: 56,
-        paddingLeft: 20,
-        paddingRight: 20,
-        display: 'flex',
-        alignItems: 'center'
-    };
-
     return (
         <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
             {/* Top Controls */}
+
             <div
                 className={`sticky top-0 z-10 transition-all duration-300 ${isScrolled ? 'shadow-md' : ''}`}
                 style={{
@@ -237,19 +225,11 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                 }}
             >
                 <div className="px-4 pt-4 pb-2 flex flex-col gap-3">
-                    {/* Custom search pill matching AppHeader */}
-                    <div style={headerPill} className="w-full">
-                        <Search className="w-5 h-5 mr-3 flex-shrink-0" style={{ color: theme.colors.textSecondary, opacity: 0.75 }} />
-                        <input
-                            type="text"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            placeholder="Search Orders"
-                            className="flex-1 bg-transparent outline-none text-[15px] placeholder:opacity-60"
-                            style={{ height: '100%', lineHeight: '56px', color: theme.colors.textPrimary }}
-                            aria-label="Search Orders"
-                        />
+                    {/* Search Input Component */}
+                    <div style={{ height: 56 }} className="flex-grow">
+                        <SearchInput value={searchTerm} onChange={(e)=>setSearchTerm(e.target.value)} placeholder="Search Orders" theme={theme} variant="header" />
                     </div>
+
                     <div className="flex items-center gap-3">
                         {/* Underline selector */}
                         <div className="relative flex-grow max-w-md">

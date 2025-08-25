@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
-import { SearchInput } from '../../../components/common/SearchInput.jsx';
 import { Timer, ListOrdered } from 'lucide-react';
 import { LEAD_TIMES_DATA } from './data.js';
+import StandardSearchBar from '../../../components/common/StandardSearchBar.jsx';
 
 // Fallback colors if theme tokens missing
 const ensureTheme = (theme) => ({
@@ -114,8 +114,7 @@ export const LeadTimesScreen = ({ theme = {} }) => {
                 </div>
                 {/* Search + sort toggle */}
                 <div className="flex items-center gap-3">
-                    <SearchInput
-                        variant="header"
+                    <StandardSearchBar
                         className="flex-grow"
                         value={searchTerm}
                         onChange={setSearchTerm}

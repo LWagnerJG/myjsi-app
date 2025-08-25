@@ -1,189 +1,130 @@
-import React, { useState, useMemo, useCallback } from 'react';
-// Removed PageTitle import to hide header/back
+import React, { useState } from 'react';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
-import { Plus, Package } from 'lucide-react';
+import { Package, Plus, Info } from 'lucide-react';
 import { PRODUCT_DATA } from './data.js';
-import { PRODUCT_COMPARISON_CONSTANTS, COMPETITION_METRICS } from './comparison-data.js';
+import { COMPETITION_METRICS } from './comparison-data.js';
+import { Modal } from '../../components/common/Modal.jsx';
 
-// Product selection tabs component (reused from comparison screen)
-const ProductTabs = React.memo(({ 
-    products, 
-    activeProduct, 
-    onProductSelect, 
-    theme,
-    categoryName
-}) => {
-    const isBenches = categoryName?.toLowerCase() === 'benches';
-    const tabSize = isBenches ? PRODUCT_COMPARISON_CONSTANTS.TAB_SIZES.benches : PRODUCT_COMPARISON_CONSTANTS.TAB_SIZES.default;
-    
-    return (
-        <GlassCard theme={theme} className="p-4">
-            <div className="flex space-x-3 overflow-x-auto scrollbar-hide">
-                {products.map(product => (
-                    <button
-                        key={product.id}
-                        onClick={() => onProductSelect(product)}
-                        className={`flex-shrink-0 ${tabSize} rounded-2xl border-2 transition-all duration-150 p-1 overflow-hidden transform active:scale-95 ${
-                            activeProduct.id === product.id 
-                                ? 'border-blue-500' 
-                                : 'border-transparent opacity-70'
-                        } hover:opacity-100`}
-                        style={{ backgroundColor: theme.colors.surface }}
-                    >
-                        <img 
-                            src={product.image} 
-                            alt={product.name} 
-                            className="w-full h-full object-cover rounded-xl scale-150" 
-                        />
-                    </button>
-                ))}
+const AdvantageChip = ({ value, onClick }) => (
+    <button onClick={onClick} className={`min-w-[42px] inline-flex items-center justify-center px-2 py-1 text-[11px] font-semibold rounded-full focus:outline-none focus:ring-2 focus:ring-white/40 transition ${value > 0 ? COMPETITION_METRICS.displayFormat.advantage.positive : COMPETITION_METRICS.displayFormat.advantage.negative}`}>
+        {value > 0 ? `+${value}%` : `${value}%`}
+    </button>
+);
 
-                <button className={`flex-shrink-0 ${tabSize} rounded-2xl border-2 transition-all duration-150 p-1 overflow-hidden transform active:scale-95`} style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border }}>
-                    <div className="w-full h-full flex flex-col items-center justify-center">
-                        <Plus className="w-6 h-6" style={{ color: theme.colors.accent }} />
-                        <span className="text-xs font-semibold" style={{ color: theme.colors.textPrimary }}>Add Product</span>
-                    </div>
-                </button>
-            </div>
-        </GlassCard>
-    );
-});
+const VersusList = ({ jsiProduct, competitors = [], theme, title }) => {
+    const [openAdv, setOpenAdv] = useState(null); // competitor id for which explanation is open
+    const jsiPrice = jsiProduct.price || 0;
 
-ProductTabs.displayName = 'ProductTabs';
-
-// Competitive analysis metrics with advantage display
-const CompetitiveMetrics = React.memo(({ 
-    jsiProduct,
-    categoryData,
-    theme 
-}) => {
-    if (!categoryData.competition || categoryData.competition.length === 0) {
-        return (
-            <GlassCard theme={theme} className="p-8 text-center">
-                <p style={{ color: theme.colors.textSecondary }}>
-                    No competitive data available for this category.
-                </p>
-            </GlassCard>
-        );
-    }
-
-    const AdvantageChip = ({ value }) => (
-        <span className={`px-2.5 py-1 text-sm font-bold rounded-full ${
-            value > 0 
-                ? COMPETITION_METRICS.displayFormat.advantage.positive
-                : COMPETITION_METRICS.displayFormat.advantage.negative
-        }`}>
-            {value > 0 ? `+${value}%` : `${value}%`}
-        </span>
-    );
+    const getMessage = (val) => {
+        if (isNaN(val)) return '';
+        const abs = Math.abs(val);
+        if (val === 0) return 'Price parity with JSI.';
+        if (val < 0) return `Competitor is ${abs}% higher than JSI (JSI advantage).`;
+        return `Competitor is ${abs}% lower than JSI (Competitor advantage).`;
+    };
 
     return (
-        <GlassCard theme={theme} className="px-6 py-4 space-y-1">
-            {/* Table Header */}
-            <div className="grid grid-cols-3 gap-4 pb-2 text-sm font-semibold border-b" style={{ borderColor: theme.colors.border }}>
-                <div style={{ color: theme.colors.textSecondary }}>Series</div>
-                <div className="text-right" style={{ color: theme.colors.textSecondary }}>Laminate</div>
-                <div className="text-right" style={{ color: theme.colors.textSecondary }}>Adv.</div>
+        <GlassCard theme={theme} className="p-0 overflow-hidden">
+            <div className="px-6 pt-5 pb-3">
+                <h2 className="text-sm font-semibold tracking-wide" style={{ color: theme.colors.textPrimary }}>{title}</h2>
             </div>
-
-            {/* JSI Row (highlighted) */}
-            <div className="grid grid-cols-3 gap-4 py-3 rounded-lg" style={{ backgroundColor: theme.colors.subtle }}>
-                <div className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>
-                    {jsiProduct.name}
+            <div className="space-y-0.5 pb-4">
+                {/* JSI row */}
+                <div className="px-6 py-3 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <span className="inline-block w-2 h-2 rounded-full" style={{ background: theme.colors.accent }} />
+                        <p className="font-semibold" style={{ color: theme.colors.textPrimary }}>{jsiProduct.name}</p>
+                    </div>
+                    <p className="font-semibold tabular-nums" style={{ color: theme.colors.textPrimary }}>${jsiPrice.toLocaleString()}</p>
                 </div>
-                <div className="font-bold text-lg text-right" style={{ color: theme.colors.textPrimary }}>
-                    ${jsiProduct.price?.toLocaleString() || 'TBD'}
-                </div>
-                <div />
+                <div className="h-px mx-6" style={{ background: theme.colors.border }} />
+                {/* Competitor rows */}
+                {competitors.map(c => {
+                    const val = parseInt(c.adv?.replace(/[^-\d]/g,'') || 0);
+                    const open = openAdv === c.id;
+                    return (
+                        <div key={c.id} className="px-6 py-2.5">
+                            <div className="flex items-center justify-between gap-4">
+                                <p className="text-[13px] font-medium leading-snug" style={{ color: theme.colors.textSecondary }}>{c.name}</p>
+                                <div className="flex items-center gap-3">
+                                    <p className="text-[13px] font-semibold tabular-nums" style={{ color: theme.colors.textPrimary }}>{c.laminate}</p>
+                                    <AdvantageChip value={val} onClick={() => setOpenAdv(o => o === c.id ? null : c.id)} />
+                                </div>
+                            </div>
+                            {open && (
+                                <div className="mt-2 ml-1 mr-1 rounded-lg px-3 py-2 text-[11px] leading-relaxed flex items-start gap-2" style={{ background: theme.colors.subtle, color: theme.colors.textSecondary }}>
+                                    <Info className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                                    <span>{getMessage(val)}</span>
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
+                {!competitors.length && <p className="px-6 py-3 text-xs" style={{ color: theme.colors.textSecondary }}>No competitive data added yet.</p>}
             </div>
-
-            {/* Competitor Rows */}
-            {categoryData.competition.map(competitor => (
-                <div key={competitor.id} className="grid grid-cols-3 gap-4 py-3 border-t" style={{ borderColor: theme.colors.border }}>
-                    <div className="font-medium" style={{ color: theme.colors.textSecondary }}>
-                        {competitor.name}
-                    </div>
-                    <div className="font-medium text-right" style={{ color: theme.colors.textSecondary }}>
-                        {competitor.laminate}
-                    </div>
-                    <div className="text-right">
-                        <AdvantageChip value={parseInt(competitor.adv?.replace(/[^-\d]/g, '') || 0)} />
-                    </div>
-                </div>
-            ))}
         </GlassCard>
     );
-});
+};
 
-CompetitiveMetrics.displayName = 'CompetitiveMetrics';
-
-// Error state component
-const ErrorState = React.memo(({ 
-    title = "Not Found", 
-    message = "The requested item does not exist.", 
-    onBack, 
-    theme 
-}) => (
-    <div className="p-4">
-        <GlassCard theme={theme} className="p-8 text-center">
-            <Package className="w-12 h-12 mx-auto mb-4" style={{ color: theme.colors.textSecondary }} />
-            <p style={{ color: theme.colors.textPrimary }}>{message}</p>
-        </GlassCard>
-    </div>
-));
-
-ErrorState.displayName = 'ErrorState';
-
-// Enhanced competitive analysis screen
-export const CompetitiveAnalysisScreen = ({ categoryId, onNavigate, theme }) => {
+export const CompetitiveAnalysisScreen = ({ categoryId, productId, theme }) => {
     const categoryData = PRODUCT_DATA?.[categoryId];
-    const [activeProduct, setActiveProduct] = useState(categoryData?.products?.[0]);
+    if (!categoryData) return (
+        <div className="p-4"><GlassCard theme={theme} className="p-8 text-center"><Package className="w-12 h-12 mx-auto mb-4" style={{ color: theme.colors.textSecondary }} /><p style={{ color: theme.colors.textPrimary }}>Category Not Found</p></GlassCard></div>
+    );
 
-    const handleProductSelect = useCallback((product) => {
-        setActiveProduct(product);
-    }, []);
+    const product = categoryData.products?.find(p => p.id === productId) || categoryData.products?.[0];
+    const perProductList = categoryData.competitionByProduct?.[product?.id] || [];
+    const categoryCompetitors = categoryData.competition || [];
 
-    if (!categoryData) {
-        return (
-            <div className="p-4">
-                <GlassCard theme={theme} className="p-8 text-center">
-                    <Package className="w-12 h-12 mx-auto mb-4" style={{ color: theme.colors.textSecondary }} />
-                    <p style={{ color: theme.colors.textPrimary }}>No Competition Data</p>
-                </GlassCard>
-            </div>
-        );
-    }
+    const [showRequest, setShowRequest] = useState(false);
+    const [formState, setFormState] = useState({ manufacturer: '', series: '', notes: '' });
+    const [submitted, setSubmitted] = useState(false);
+
+    const handleChange = (e) => setFormState(s => ({ ...s, [e.target.name]: e.target.value }));
+    const canSubmit = formState.manufacturer.trim() && formState.series.trim();
+    const handleSubmit = (e) => { e.preventDefault(); if (!canSubmit) return; setSubmitted(true); setTimeout(()=>{ setShowRequest(false); setSubmitted(false); setFormState({ manufacturer:'', series:'', notes:''}); }, 1200); };
 
     return (
         <div className="flex flex-col h-full">
-            {/* Header intentionally removed (no back/title) */}
             <div className="flex-1 overflow-y-auto scrollbar-hide">
-                <div className="p-4 space-y-4">
-                    <ProductTabs
-                        products={categoryData.products}
-                        activeProduct={activeProduct}
-                        onProductSelect={handleProductSelect}
-                        theme={theme}
-                        categoryName={categoryData.name}
-                    />
-
-                    {/* Large product image */}
-                    <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-lg group">
-                        <img 
-                            src={activeProduct.image} 
-                            alt={activeProduct.name} 
-                            loading="lazy"
-                            className="absolute w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
-                        />
+                <div className="p-4 space-y-6 pb-32 max-w-3xl mx-auto">
+                    <div className="relative w-full aspect-[4/3] rounded-3xl overflow-hidden shadow-sm" style={{ background: theme.colors.surface }}>
+                        <img src={product.image} alt={product.name} className="absolute inset-0 w-full h-full object-contain" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/15 to-transparent" />
+                        <div className="absolute bottom-0 left-0 right-0 p-5">
+                            <h1 className="text-xl sm:text-2xl font-semibold text-white drop-shadow-sm tracking-tight">{product.name} Competitive Analysis</h1>
+                        </div>
                     </div>
-
-                    <CompetitiveMetrics
-                        jsiProduct={activeProduct}
-                        categoryData={categoryData}
-                        theme={theme}
-                    />
+                    <VersusList jsiProduct={product} competitors={perProductList.length ? perProductList : categoryCompetitors} theme={theme} title={perProductList.length ? 'Versus Competitors' : 'Versus Competitors (Category)'} />
                 </div>
             </div>
+            <div className="fixed bottom-0 left-0 right-0 px-4 pb-5 pt-2" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.12), rgba(0,0,0,0))' }}>
+                <button onClick={()=>setShowRequest(true)} className="w-full flex items-center justify-center gap-2 h-14 rounded-full font-semibold active:scale-95 transition-all shadow-lg" style={{ background: theme.colors.accent, color: '#fff', boxShadow: `0 6px 20px ${theme.colors.shadow}` }}>
+                    <Plus className="w-5 h-5" /> Request Competitor
+                </button>
+            </div>
+            <Modal show={showRequest} onClose={()=>setShowRequest(false)} title="Request Competitor" theme={theme}>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="space-y-1">
+                        <label className="text-xs font-medium" style={{ color: theme.colors.textSecondary }}>Manufacturer</label>
+                        <input name="manufacturer" value={formState.manufacturer} onChange={handleChange} placeholder="e.g. Kimball" className="w-full px-3 py-2 rounded-lg text-sm font-medium" style={{ background: theme.colors.subtle, color: theme.colors.textPrimary, border: `1px solid ${theme.colors.border}` }} />
+                    </div>
+                    <div className="space-y-1">
+                        <label className="text-xs font-medium" style={{ color: theme.colors.textSecondary }}>Series / Product</label>
+                        <input name="series" value={formState.series} onChange={handleChange} placeholder="e.g. Joya" className="w-full px-3 py-2 rounded-lg text-sm font-medium" style={{ background: theme.colors.subtle, color: theme.colors.textPrimary, border: `1px solid ${theme.colors.border}` }} />
+                    </div>
+                    <div className="space-y-1">
+                        <label className="text-xs font-medium" style={{ color: theme.colors.textSecondary }}>Notes (optional)</label>
+                        <textarea name="notes" value={formState.notes} onChange={handleChange} rows={3} placeholder="Any context or price info..." className="w-full px-3 py-2 rounded-lg text-sm font-medium resize-none" style={{ background: theme.colors.subtle, color: theme.colors.textPrimary, border: `1px solid ${theme.colors.border}` }} />
+                    </div>
+                    <div className="flex justify-end gap-3 pt-2">
+                        <button type="button" onClick={()=>setShowRequest(false)} className="px-5 h-10 rounded-full font-semibold" style={{ background: theme.colors.subtle, color: theme.colors.textPrimary, border: `1px solid ${theme.colors.border}` }}>Cancel</button>
+                        <button type="submit" disabled={!canSubmit || submitted} className="px-6 h-10 rounded-full font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed" style={{ background: theme.colors.accent }}>
+                            {submitted ? 'Sent!' : 'Submit'}
+                        </button>
+                    </div>
+                </form>
+            </Modal>
         </div>
     );
 };

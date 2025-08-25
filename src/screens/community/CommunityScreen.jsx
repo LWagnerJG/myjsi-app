@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
-import { Heart, MessageCircle, Share2, Plus, Users, Send, Search } from 'lucide-react';
+import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
+import { Heart, MessageCircle, Share2, Plus, Users, Send } from 'lucide-react';
 
 // Community feed screen
 export const CommunityScreen = ({
@@ -206,8 +207,7 @@ export const CommunityScreen = ({
         <div className="px-5 pt-3 pb-2 flex items-center gap-4">
           <h1 className="text-2xl font-bold mr-auto" style={{ color: theme.colors.textPrimary }}>Community</h1>
           <div className="relative w-60">
-            <input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search..." className="w-full text-sm pl-9 pr-3 py-2 rounded-full outline-none" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary, border:`1px solid ${theme.colors.border}` }} />
-            <Search className="w-4 h-4 absolute top-1/2 -translate-y-1/2 left-3" style={{ color: theme.colors.textSecondary }} />
+            <StandardSearchBar value={query} onChange={setQuery} placeholder="Search..." theme={theme} />
           </div>
           <button onClick={openCreateContentModal} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all active:scale-95" style={{ backgroundColor: theme.colors.accent, color:'#fff' }}>
             <Plus className="w-4 h-4" /> Post

@@ -93,8 +93,9 @@ const ScreenRouter = ({ screenKey, projectsScreenRef, SuspenseFallback, ...rest 
     if (base === 'products' && parts[1] === 'category' && parts.length === 3) {
         return <ProductComparisonScreen {...rest} categoryId={parts[2]} />;
     }
-    if (base === 'products' && parts[1] === 'category' && parts[3] === 'competition') {
-        return <CompetitiveAnalysisScreen {...rest} categoryId={parts[2]} />;
+    if (base === 'products' && parts[1] === 'category' && (parts[2] === 'competition' || parts[3] === 'competition')) {
+        const productId = parts[3] === 'competition' && parts[4] ? parts[4] : null;
+        return <CompetitiveAnalysisScreen {...rest} categoryId={parts[2]} productId={productId} />;
     }
 
     if (base === 'orders' && parts.length > 1) return <OrderDetailScreen {...rest} />;

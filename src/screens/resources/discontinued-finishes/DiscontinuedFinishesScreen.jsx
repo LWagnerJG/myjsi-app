@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 // Removed PageTitle import per requirement to hide header
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import { SearchInput } from '../../../components/common/SearchInput.jsx';
+import StandardSearchBar from '../../../components/common/StandardSearchBar.jsx';
 import { Modal } from '../../../components/common/Modal.jsx';
 import { ArrowRight, Hourglass } from 'lucide-react';
 import { DISCONTINUED_FINISHES } from './data.js';
@@ -108,7 +109,7 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
         <div className="h-full flex flex-col">
             {/* Header removed per request; keep search bar pinned */}
             <div className="px-4 pt-3 pb-3 sticky top-0 z-10" style={{ backgroundColor: `${theme.colors.background}e0`, backdropFilter: 'blur(10px)' }}>
-                <SearchInput
+                <StandardSearchBar
                     value={searchTerm}
                     onChange={(val) => setSearchTerm(val)}
                     placeholder="Search discontinued or replacement..."

@@ -2,7 +2,7 @@
 import { SalesScreen, CustomerRankingScreen, IncentiveRewardsScreen, CommissionsScreen } from '../screens/sales/index.js';
 import { OrdersScreen } from '../screens/orders/index.js';
 import { ProductsScreen, ProductComparisonScreen, CompetitiveAnalysisScreen } from '../screens/products/index.js';
-import { ResourcesScreen } from '../screens/resources/ResourcesScreen.jsx';
+import { ResourcesScreen } from '../screens/resources/ResourcesScreen.jsx'; // ResourcesScreen expects homeApps prop (forwarded from App screenProps) to render Core Apps section.
 import { ProjectsScreen, NewLeadScreen, AddNewInstallScreen } from '../screens/projects/index.js';
 import { CommunityScreen, CreateContentModal } from '../screens/community/index.js';
 import { ReplacementsScreen } from '../screens/replacements/ReplacementsScreen.jsx';

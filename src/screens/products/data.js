@@ -3,6 +3,9 @@
 
 const localImage = (path) => path; // helper passthrough for public assets
 
+// Helper to build competitor entry (placeholder illustrative only)
+const comp = (name, laminate, advantage) => ({ id: name.toLowerCase().replace(/[^a-z0-9]+/g,'-'), name, laminate, adv: advantage });
+
 export const PRODUCT_DATA = {
     'benches': {
         name: 'Benches',
@@ -11,7 +14,12 @@ export const PRODUCT_DATA = {
             { id: 'poet', name: 'Poet', price: 780, image: 'https://via.placeholder.com/300x200/D9CDBA/2A2A2A?text=Poet+Bench' },
             { id: 'indie', name: 'Indie', price: 920, image: 'https://via.placeholder.com/300x200/C7AD8E/2A2A2A?text=Indie+Bench' },
         ],
-        competition: []
+        competition: [],
+        competitionByProduct: {
+            'native': [comp('OFS Rowen Bench', '$1250', '-4%'), comp('Kimball EverySpace', '$1325', '-9%'), comp('Indiana Clutch', '$1180', '+2%')],
+            'poet': [comp('OFS Lite', '$790', '-1%'), comp('Kimball Pep Bench', '$770', '+1%'), comp('SitOnIt Nomad', '$730', '+6%')],
+            'indie': [comp('OFS Modern Amenity', '$950', '-3%'), comp('Kimball Alterna', '$935', '-2%'), comp('Global Duet', '$905', '+2%')]
+        }
     },
     'casegoods': {
         name: 'Casegoods',
@@ -23,7 +31,15 @@ export const PRODUCT_DATA = {
             { id: 'walden', name: 'Walden', price: 5200, image: localImage('/category-images/casegood-images/jsi_walden_config_00001.jpg') },
             { id: 'wellington', name: 'Wellington', price: 5700, image: localImage('/category-images/casegood-images/jsi_wellington_config_00006.jpg') },
         ],
-        competition: []
+        competition: [],
+        competitionByProduct: {
+            'vision': [comp('OFS Staks', '$3350', '-5%'), comp('Kimball Narrate', '$3425', '-7%'), comp('Indiana Canvas', '$3180', '+1%'), comp('Hon Abound', '$3050', '+5%')],
+            'flux': [comp('OFS ReframE', '$3825', '-3%'), comp('Kimball Alterna', '$3775', '-2%'), comp('Indiana Gesso', '$3650', '+1%')],
+            'brogan': [comp('Kimball Priority', '$4350', '-4%'), comp('OFS Aptos', '$4425', '-6%'), comp('Teknion Expansion', '$4185', '+0%')],
+            'finale': [comp('OFS Impulse', '$4850', '-3%'), comp('Kimball Xsede', '$4920', '-4%'), comp('Hon Accelerate', '$4600', '+2%')],
+            'walden': [comp('Kimball Hum', '$5350', '-3%'), comp('OFS Eleven', '$5480', '-5%'), comp('Indiana Compel', '$5120', '+2%')],
+            'wellington': [comp('Kimball Evoke', '$5850', '-3%'), comp('OFS Slate', '$5980', '-5%'), comp('Hon Coordinate', '$5520', '+3%')]
+        }
     },
     'conference-tables': {
         name: 'Conference Tables',
@@ -32,7 +48,12 @@ export const PRODUCT_DATA = {
             { id: 'reef', name: 'Reef', price: 4200, image: localImage('/category-images/conference-images/jsi_anthology_comp_0004_OlfZHks.jpg') },
             { id: 'moto', name: 'Moto', price: 4000, image: localImage('/category-images/conference-images/jsi_anthology_comp_0006.jpg') },
         ],
-        competition: []
+        competition: [],
+        competitionByProduct: {
+            'vision-table': [comp('OFS Eleven Table', '$4625', '-3%'), comp('Kimball Dock', '$4550', '-1%'), comp('Indiana Canvas Meet', '$4380', '+3%')],
+            'reef': [comp('Kimball KORE', '$4320', '-3%'), comp('OFS Applause', '$4210', '-0%'), comp('Hon Preside', '$4050', '+4%')],
+            'moto': [comp('OFS Thrive', '$4125', '-3%'), comp('Kimball Pairings Table', '$4080', '-2%'), comp('SitOnIt Amplify Table', '$3920', '+2%')]
+        }
     },
     'guest': {
         name: 'Guest',
@@ -56,7 +77,27 @@ export const PRODUCT_DATA = {
             { id: 'harbor', name: 'Harbor', price: 880, legType: 'wood', image: localImage('/category-images/guest-images/jsi_harbor_comp_00010_7pPSeR6.jpg'), thumbScale: 1.55, heroScale: 1.25 },
             { id: 'bryn', name: 'Bryn', price: 900, legType: 'wood', image: localImage('/category-images/guest-images/jsi_bryn_comp_00023.jpg'), thumbScale: 1.6, heroScale: 1.3 }
         ],
-        competition: []
+        competition: [],
+        competitionByProduct: {
+            'arwyn-guest': [comp('OFS Heya', '$550', '-5%'), comp('Kimball Joya', '$565', '-8%'), comp('Indiana Ovation', '$540', '-3%'), comp('SitOnIt Wit Guest', '$495', '+5%'), comp('Allsteel Aspect', '$590', '-11%')],
+            'bourne': [comp('OFS Rowen', '$575', '-3%'), comp('Kimball Pep', '$560', '0%'), comp('Indiana Strut', '$545', '+2%')],
+            'cosgrove': [comp('SitOnIt Cameo', '$640', '-5%'), comp('Kimball Kaia', '$655', '-7%'), comp('OFS Coact', '$625', '-2%')],
+            'henley': [comp('OFS Rowen Wood', '$650', '-3%'), comp('Kimball Nash', '$640', '-1%'), comp('Indiana Ovation Wood', '$630', '0%')],
+            'knox': [comp('SitOnIt Sona', '$660', '-3%'), comp('Kimball Kolo', '$675', '-5%'), comp('OFS Tandem', '$655', '-2%')],
+            'ramona': [comp('OFS Modern Amenity', '$685', '-4%'), comp('Kimball Villa', '$670', '-1%'), comp('Indiana Clutch', '$660', '0%')],
+            'ria': [comp('SitOnIt Rio', '$700', '-3%'), comp('Kimball Pep Metal', '$690', '-1%'), comp('OFS Lite Metal', '$680', '0%')],
+            'satisse': [comp('SitOnIt Amplify Guest', '$730', '-4%'), comp('Kimball Joya Metal', '$725', '-3%'), comp('OFS Eleven Metal', '$715', '-1%')],
+            'sosa': [comp('SitOnIt Movi', '$735', '-2%'), comp('Kimball Bloom', '$730', '-1%'), comp('OFS Rally', '$720', '0%')],
+            'wink': [comp('SitOnIt Wit Wood', '$760', '-3%'), comp('Kimball Nash Wood', '$755', '-2%'), comp('OFS Heya Wood', '$745', '-1%')],
+            'avini': [comp('SitOnIt Focus', '$780', '-3%'), comp('Kimball Villa Wood', '$775', '-2%'), comp('OFS Coact Wood', '$760', '0%')],
+            'boston': [comp('SitOnIt Relay', '$800', '-3%'), comp('Kimball Dock Guest', '$795', '-2%'), comp('OFS Lite Wood', '$782', '-0%')],
+            'collective-motion': [comp('SitOnIt Flex', '$820', '-2%'), comp('Kimball Alterna Motion', '$815', '-2%'), comp('OFS Motum', '$808', '-1%')],
+            'madison': [comp('SitOnIt InFlex', '$835', '-2%'), comp('Kimball Scenario', '$828', '-1%'), comp('OFS Rally Wood', '$820', '0%')],
+            'millie': [comp('SitOnIt Novo Guest', '$860', '-2%'), comp('Kimball Axiom', '$855', '-2%'), comp('OFS Eleven Wood', '$848', '-1%')],
+            'totem': [comp('SitOnIt Focus Wood', '$880', '-2%'), comp('Kimball EveryDay', '$875', '-2%'), comp('OFS Coact Low', '$865', '-1%')],
+            'harbor': [comp('SitOnIt ReAlign', '$900', '-2%'), comp('Kimball Stria', '$895', '-2%'), comp('OFS Modern Amenity High', '$885', '-1%')],
+            'bryn': [comp('SitOnIt Wit Plus', '$920', '-2%'), comp('Kimball Joya Plus', '$915', '-2%'), comp('OFS Coact Plus', '$905', '-1%')]
+        }
     },
     'lounge': {
         name: 'Lounge',
@@ -65,7 +106,12 @@ export const PRODUCT_DATA = {
             { id: 'caav', name: 'Cäav', price: 1800, image: 'https://via.placeholder.com/300x200/D9CDBA/2A2A2A?text=Caav+Lounge' },
             { id: 'finn', name: 'Finn', price: 1600, image: 'https://via.placeholder.com/300x200/C7AD8E/2A2A2A?text=Finn+Lounge' },
         ],
-        competition: []
+        competition: [],
+        competitionByProduct: {
+            'arwyn': [comp('OFS Heya Lounge', '$1580', '-5%'), comp('Kimball Villa Lounge', '$1625', '-7%'), comp('Indiana Ovation Lounge', '$1490', '+1%')],
+            'caav': [comp('OFS Eleven Lounge', '$1880', '-4%'), comp('Kimball Axiom Lounge', '$1850', '-3%'), comp('Allsteel Rise', '$1790', '+1%')],
+            'finn': [comp('OFS Coact Lounge', '$1650', '-3%'), comp('Kimball Joya Lounge', '$1620', '-1%'), comp('Indiana Comfort', '$1550', '+3%')]
+        }
     },
     'swivels': {
         name: 'Swivels',
@@ -74,7 +120,12 @@ export const PRODUCT_DATA = {
             { id: 'wink', name: 'Wink', price: 500, image: 'https://via.placeholder.com/300x200/D9CDBA/2A2A2A?text=Wink+Swivel' },
             { id: 'protocol', name: 'Protocol', price: 800, image: 'https://via.placeholder.com/300x200/C7AD8E/2A2A2A?text=Protocol+Swivel' },
         ],
-        competition: []
+        competition: [],
+        competitionByProduct: {
+            'arwyn-swivel': [comp('SitOnIt Focus Task', '$1350', '-4%'), comp('Kimball Joya Task', '$1365', '-5%'), comp('OFS Rally Task', '$1310', '-1%')],
+            'wink': [comp('SitOnIt Wit Task', '$520', '-4%'), comp('Kimball Pep Task', '$515', '-3%'), comp('OFS Lite Task', '$505', '-1%')],
+            'protocol': [comp('SitOnIt Amplify', '$835', '-4%'), comp('Kimball Task Pro', '$825', '-3%'), comp('OFS Rally Lite', '$810', '-1%')]
+        }
     },
     'training-tables': {
         name: 'Training Tables',
@@ -83,7 +134,12 @@ export const PRODUCT_DATA = {
             { id: 'connect', name: 'Connect', price: 850, image: 'https://via.placeholder.com/300x200/D9CDBA/2A2A2A?text=Connect+Training' },
             { id: 'bespace', name: 'BeSpace', price: 950, image: 'https://via.placeholder.com/300x200/C7AD8E/2A2A2A?text=BeSpace+Training' },
         ],
-        competition: []
+        competition: [],
+        competitionByProduct: {
+            'moto-training': [comp('SitOnIt Switch', '$930', '-3%'), comp('Kimball KORE Train', '$920', '-2%'), comp('OFS Applause Train', '$905', '-1%')],
+            'connect': [comp('SitOnIt Link', '$875', '-3%'), comp('Kimball Pairings Train', '$865', '-2%'), comp('OFS Motum Train', '$852', '-0%')],
+            'bespace': [comp('SitOnIt Flex Train', '$980', '-3%'), comp('Kimball Dock Train', '$970', '-2%'), comp('OFS Thrive Train', '$955', '-1%')]
+        }
     }
 };
 

@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { RESOURCES_DATA } from './data.js';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
+import { DEFAULT_HOME_APPS, allApps } from '../../data.jsx';
 
 const sublabelMap = {
     'Lead Times': 'Production estimates',
@@ -24,8 +25,35 @@ const sublabelMap = {
     'New Dealer Sign-Up': 'Sign up new dealers'
 };
 
-export const ResourcesScreen = ({ theme, onNavigate }) => {
-    const resourceCategories = useMemo(() => RESOURCES_DATA || [], []);
+const CORE_LABELS = {
+    orders: 'Orders',
+    sales: 'Sales',
+    products: 'Products',
+    projects: 'Projects',
+    community: 'Community',
+    samples: 'Samples',
+    replacements: 'Replacements'
+    // intentionally omit 'resources' to avoid recursion (cannot surface Resources inside itself if removed)
+};
+
+export const ResourcesScreen = ({ theme, onNavigate, homeApps }) => {
+    // Compute core app fallbacks (apps removed from home but part of default set, excluding 'resources')
+    const coreFallbackItems = useMemo(() => {
+        const currentSet = new Set(homeApps || []);
+        return DEFAULT_HOME_APPS
+            .filter(r => r !== 'resources' && !currentSet.has(r))
+            .map(route => ({ label: CORE_LABELS[route] || route, nav: route }))
+            .sort((a,b)=>a.label.localeCompare(b.label));
+    }, [homeApps]);
+
+    const resourceCategories = useMemo(() => {
+        const base = RESOURCES_DATA || [];
+        if (coreFallbackItems.length === 0) return base;
+        return [
+            ...base,
+            { category: 'Core Apps', items: coreFallbackItems }
+        ];
+    }, [coreFallbackItems]);
 
     useEffect(() => {
         if (document.getElementById('resources-no-scrollbar-style')) return;
@@ -49,12 +77,14 @@ export const ResourcesScreen = ({ theme, onNavigate }) => {
         if (label.includes('Presentations')) return MonitorPlay;
         if (label.includes('Install')) return Wrench;
         if (label.includes('Design Days')) return Calendar;
+        // Core app labels mapping fallback to Database icon
+        if (Object.values(CORE_LABELS).includes(label)) return Database;
         return Database;
     };
 
     const Row = ({ item, isFirst }) => {
         const Icon = getResourceIcon(item.label);
-        const sub = sublabelMap[item.label] || 'Tool';
+        const sub = sublabelMap[item.label] || (CORE_LABELS && Object.values(CORE_LABELS).includes(item.label) ? 'Main application' : 'Tool');
         const borderTop = isFirst ? 'transparent' : theme.colors.border;
         return (
             <li>
@@ -98,7 +128,7 @@ export const ResourcesScreen = ({ theme, onNavigate }) => {
                 </h3>
                 <ul className="pb-1">
                     {category.items?.map((item, idx) => (
-                        <Row key={item.nav} item={item} isFirst={idx === 0} />
+                        <Row key={item.nav+item.label} item={item} isFirst={idx === 0} />
                     ))}
                 </ul>
             </GlassCard>

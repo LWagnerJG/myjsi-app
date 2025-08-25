@@ -130,6 +130,7 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
                             const isAckStage = stage.name === 'Acknowledged';
                             const rawDate = stage.date && stage.date !== 'Current' ? new Date(stage.date) : null;
                             const dateStr = rawDate ? rawDate.toLocaleDateString('en-US',{month:'numeric',day:'numeric',year:'numeric'}) : (stage.name === 'Shipping' && stage.date ? new Date(stage.date).toLocaleDateString('en-US',{month:'numeric',day:'numeric',year:'numeric'}) : '');
+                            const isShippingStage = stage.name === 'Shipping';
                             return (
                                 <div key={stage.name} className="flex gap-4 relative">
                                     <div className="flex flex-col items-center">
@@ -142,11 +143,11 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
                                             <div className="flex-1 w-px mt-1 mb-0" style={{ background: isCompleted ? accent : theme.colors.border, opacity: isCompleted ? 0.5 : 0.25 }} />
                                         )}
                                     </div>
-                                    <div className="flex-1 pb-6 pt-0.5">
-                                        <div className="flex items-start justify-between">
-                                            <div>
+                                    <div className="flex-1 pb-6 pt-0.5 relative">
+                                        <div className={isShippingStage ? 'relative pr-16' : 'flex items-start justify-between'}>
+                                            <div className="relative w-full">
                                                 <div className="flex items-center gap-2">
-                                                    <p className={`font-medium tracking-wide ${isCurrent ? 'text-sm' : 'text-xs'}`} style={{ color: isCurrent ? theme.colors.textPrimary : theme.colors.textSecondary }}>{stage.name}</p>
+                                                    <p className={`font-semibold tracking-wide ${isCurrent ? 'text-base' : 'text-sm'}`} style={{ color: isCurrent ? theme.colors.textPrimary : theme.colors.textSecondary }}>{stage.name}</p>
                                                     {isCurrent && <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ backgroundColor: accent }} />}
                                                 </div>
                                                 {isAckStage && ackCompleted && ackUrl && (
@@ -159,19 +160,21 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
                                                         </button>
                                                     </div>
                                                 )}
-                                                {stage.name === 'Shipping' && order.shipTo && (
-                                                    <div className="mt-3">
-                                                        <div className="rounded-lg border text-xs px-3 py-3 w-full max-w-xs" style={{ borderColor: theme.colors.border, backgroundColor: theme.colors.subtle }}>
-                                                            <p className="text-[10px] font-semibold tracking-wide mb-1" style={{ color: theme.colors.textSecondary }}>SHIPPING TO</p>
-                                                            <div className="flex gap-2 items-start">
-                                                                <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: theme.colors.textSecondary }} />
-                                                                <span className="leading-relaxed whitespace-pre-line" style={{ color: theme.colors.textSecondary }}>{formatTitleCase(order.shipTo)}</span>
-                                                            </div>
+                                                {isShippingStage && order.shipTo && (
+                                                    <div className="mt-1">
+                                                        <div className="flex gap-2 items-start text-xs sm:text-sm leading-relaxed pr-12">
+                                                            <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: theme.colors.textSecondary }} />
+                                                            <span className="whitespace-pre-line" style={{ color: theme.colors.textPrimary }}>{formatTitleCase(order.shipTo)}</span>
                                                         </div>
                                                     </div>
                                                 )}
                                             </div>
-                                            <p className="text-[11px] font-medium mt-0.5" style={{ color: theme.colors.textSecondary }}>{dateStr}</p>
+                                            {!isShippingStage && (
+                                                <p className="text-[11px] font-medium mt-0.5" style={{ color: theme.colors.textSecondary }}>{dateStr}</p>
+                                            )}
+                                            {isShippingStage && (
+                                                <p className="text-[11px] font-medium mt-0.5 absolute top-0 right-0" style={{ color: theme.colors.textSecondary }}>{dateStr}</p>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -185,7 +188,7 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
                         <h3 className="font-bold" style={{ color: theme.colors.textPrimary }}>Line Items</h3>
                         <p className="text-xs font-medium" style={{ color: theme.colors.textSecondary }}>{order.lineItems.length} Items</p>
                     </div>
-                    <div className="border rounded-lg" style={{ borderColor: theme.colors.border }}>
+                    <div className="mt-3">
                         {order.lineItems.map((li, i) => (
                             <LineItemRow key={li.line} item={li} expanded={expanded===li.line} onToggle={()=>toggleRow(li.line)} theme={theme} formatTitleCase={formatTitleCase} isLast={i===order.lineItems.length-1} />
                         ))}

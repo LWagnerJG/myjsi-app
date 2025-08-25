@@ -3,6 +3,7 @@ import { PageTitle } from '../../../components/common/PageTitle.jsx';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import { Modal } from '../../../components/common/Modal.jsx';
 import { SearchInput } from '../../../components/common/SearchInput.jsx';
+import StandardSearchBar from '../../../components/common/StandardSearchBar.jsx';
 import { FormInput, PortalNativeSelect } from '../../../components/common/FormComponents.jsx';
 import { Search, MapPin, Phone, Mail, Building2, ExternalLink, Filter, MoreVertical, UserPlus, CheckCircle, Trash2 } from 'lucide-react';
 import { DEALER_DIRECTORY_DATA, DEALER_ROLES, DEALER_STATUS, ROLE_OPTIONS, DAILY_DISCOUNT_OPTIONS } from './data.js';
@@ -179,7 +180,7 @@ export const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage, dea
             <div className="sticky top-0 z-10" style={{ backgroundColor: `${theme.colors.background}e6`, backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }}>
                 <PageTitle title="Dealer Directory" theme={theme} />
                 <div className="px-4 pb-4 flex items-center space-x-2">
-                    <SearchInput className="flex-grow" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder="Search by name or city..." theme={theme} />
+                    <StandardSearchBar className="flex-grow" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder="Search by name or city..." theme={theme} />
                     <div className="relative">
                         <button onClick={() => setShowFilterMenu(f => !f)} className="p-3.5 rounded-full shadow-lg" style={{ backgroundColor: theme.colors.surface }}>
                             <Filter className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />

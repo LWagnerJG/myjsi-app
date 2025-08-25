@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { PageTitle } from '../../../components/common/PageTitle.jsx';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import { SearchInput } from '../../../components/common/SearchInput.jsx';
+import StandardSearchBar from '../../../components/common/StandardSearchBar.jsx';
 import { Play, FileText, ExternalLink, Download } from 'lucide-react';
 import { INSTALL_INSTRUCTIONS_DATA, INSTRUCTION_TYPES } from './data.js';
 
@@ -115,7 +116,7 @@ export const InstallInstructionsScreen = ({ theme }) => {
 
             <div className="px-4 pb-4 space-y-4">
                 {/* Search */}
-                <SearchInput
+                <StandardSearchBar
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder="Search by product name or type..."

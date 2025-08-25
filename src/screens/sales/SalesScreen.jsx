@@ -8,56 +8,61 @@ const formatMillion = (num) => `${(num / 1000000).toFixed(1)}M`;
 const formatCompanyName = (name) => name.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
 const monthNameToNumber = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
 
-const TopTabs = ({ theme, active, onChange }) => {
+// New accessible segmented tabs with sliding highlight
+const SegmentedTabs = ({ theme, active, onChange }) => {
     const tabs = useMemo(() => [
-        { key: 'rewards', label: 'Rewards', Icon: Award },
-        { key: 'ranking', label: 'Ranking', Icon: TrendingUp },
-        { key: 'comms', label: 'Comms', Icon: DollarSign },
+        { key: 'rewards', label: 'Rewards', Icon: Award, title: 'View incentive rewards' },
+        { key: 'ranking', label: 'Ranking', Icon: TrendingUp, title: 'Customer ranking performance' },
+        { key: 'comms', label: 'Comms', Icon: DollarSign, title: 'Commission details' },
     ], []);
     const wrapRef = useRef(null);
     const btnRefs = useRef([]);
-    const [u, setU] = useState({ left: 0, width: 0, opacity: 0 });
+    const [u, setU] = useState({ left: 0, width: 0, ready: false });
 
     const recalc = useCallback(() => {
         const i = tabs.findIndex(t => t.key === active);
-        if (i === -1) {
-            setU({ left: 0, width: 0, opacity: 0 });
-            return;
-        }
-        const el = btnRefs.current[i];
-        const wrap = wrapRef.current;
-        if (!el || !wrap) return;
+        if (i === -1) { setU({ left: 0, width: 0, ready: false }); return; }
+        const el = btnRefs.current[i]; const wrap = wrapRef.current; if (!el || !wrap) return;
         const { left: wl } = wrap.getBoundingClientRect();
         const { left, width } = el.getBoundingClientRect();
-        setU({ left: left - wl, width, opacity: 1 });
+        setU({ left: left - wl, width, ready: true });
     }, [active, tabs]);
 
     useEffect(() => { recalc(); }, [recalc]);
     useEffect(() => { const onR = () => recalc(); window.addEventListener('resize', onR); return () => window.removeEventListener('resize', onR); }, [recalc]);
 
+    const handleKey = (e) => {
+        if (!['ArrowLeft','ArrowRight'].includes(e.key)) return;
+        e.preventDefault();
+        const i = tabs.findIndex(t => t.key === active);
+        // If none selected start at first / last
+        const startIndex = i === -1 ? 0 : i;
+        const next = e.key === 'ArrowRight' ? (startIndex + 1) % tabs.length : (startIndex - 1 + tabs.length) % tabs.length;
+        onChange(tabs[next].key);
+        btnRefs.current[next]?.focus();
+    };
+
     return (
-        <div
-            ref={wrapRef}
-            className="relative flex items-center gap-3 px-0 pt-1 pb-1 flex-wrap"
-            style={{ maxWidth: '100%' }}
-        >
-            <div className="absolute left-0 right-0 bottom-0 h-px" style={{ background: theme.colors.border }} />
-            <div
-                className="absolute bottom-0 h-[2px] rounded transition-[transform,width,opacity] duration-300"
-                style={{ background: theme.colors.accent, transform: `translateX(${u.left}px)`, width: u.width, opacity: u.opacity }}
-            />
+        <div ref={wrapRef} role="tablist" aria-label="Sales navigation" onKeyDown={handleKey} className="select-none flex items-center relative" style={{ background: theme.colors.surface, border: `1px solid ${theme.colors.border}`, borderRadius: 9999, padding: '4px 6px', boxShadow: `0 4px 16px ${theme.colors.shadow}`, height: 44 }}>
+            {u.ready && (
+                <div className="absolute" style={{ top: 4, left: u.left + 6, height: 36, width: u.width - 12, borderRadius: 9999, background: theme.colors.subtle, transition: 'left 260ms cubic-bezier(.4,.2,.2,1), width 260ms cubic-bezier(.4,.2,.2,1)' }} />
+            )}
             {tabs.map((t, i) => {
-                const selected = active === t.key;
+                const selected = t.key === active;
                 return (
                     <button
                         key={t.key}
+                        role="tab"
+                        aria-selected={selected}
+                        tabIndex={selected || active === null ? 0 : -1}
                         ref={el => (btnRefs.current[i] = el)}
-                        onClick={() => onChange(t.key)}
-                        className="flex items-center gap-1 pb-1 text-xs sm:text-sm font-semibold shrink-0"
-                        style={{ color: selected ? theme.colors.accent : theme.colors.textSecondary }}
+                        onClick={() => onChange(selected ? null : t.key)}
+                        title={t.title}
+                        className="relative flex items-center gap-1.5 px-4 h-9 rounded-full font-semibold text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                        style={{ color: selected ? theme.colors.textPrimary : theme.colors.textSecondary, zIndex: 2 }}
                     >
-                        <t.Icon className="w-3.5 h-3.5" style={{ color: selected ? theme.colors.accent : theme.colors.textSecondary }} />
-                        {t.label}
+                        <t.Icon className="w-4 h-4" style={{ color: selected ? theme.colors.accent : theme.colors.textSecondary }} />
+                        <span style={{ letterSpacing: '.25px' }}>{t.label}</span>
                     </button>
                 );
             })}
@@ -482,21 +487,37 @@ export const SalesScreen = ({ theme, onNavigate }) => {
         if (key === 'comms') onNavigate('commissions');
     }, [onNavigate]);
 
+    // Gradient / visual helpers
+    const gradientAccent = `linear-gradient(135deg, ${theme.colors.accent} 0%, ${theme.colors.accent}cc 55%, ${theme.colors.accent} 100%)`;
+    const accentHover = theme.colors.accent;
+
     return (
         <div className="flex flex-col h-full">
             <div
                 className={`sticky top-0 z-10 transition-all duration-300 ${isScrolled ? 'shadow-md' : ''}`}
                 style={{ backgroundColor: isScrolled ? `${theme.colors.background}e0` : 'transparent', backdropFilter: isScrolled ? 'blur(12px)' : 'none', WebkitBackdropFilter: isScrolled ? 'blur(12px)' : 'none', borderBottom: `1px solid ${isScrolled ? theme.colors.border + '40' : 'transparent'}` }}
             >
-                <div className="px-4 py-2 flex items-center gap-4 flex-wrap">
+                <div className="px-4 py-3 flex flex-wrap items-center gap-4">
+                    {/* New Project primary button */}
                     <button
                         onClick={() => onNavigate('new-lead')}
-                        className="flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold transition-all hover:scale-[1.02] active:scale-95 shadow-sm"
-                        style={{ backgroundColor: theme.colors.accent, color: '#fff' }}
+                        className="flex items-center gap-2 px-5 h-11 rounded-full font-semibold text-sm tracking-wide shadow-sm active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 transition-all"
+                        style={{
+                            background: gradientAccent,
+                            color: '#fff',
+                            boxShadow: `0 4px 16px ${theme.colors.shadow}`,
+                            border: `1px solid ${theme.colors.accent}aa`
+                        }}
+                        onMouseEnter={e => (e.currentTarget.style.background = accentHover)}
+                        onMouseLeave={e => (e.currentTarget.style.background = gradientAccent)}
+                        aria-label="Create New Project"
                     >
-                        <Plus className="w-4 h-4" /> New Lead
+                        <Plus className="w-4 h-4" />
+                        <span>New Project</span>
                     </button>
-                    <TopTabs theme={theme} active={topTab} onChange={handleTopTabChange} />
+
+                    {/* Segmented navigation */}
+                    <SegmentedTabs theme={theme} active={topTab} onChange={handleTopTabChange} />
                 </div>
             </div>
 
@@ -506,7 +527,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                         <div className="flex justify-between items-start mb-3 relative">
                             <h3 className="font-bold text-xl" style={{ color: theme.colors.textPrimary }}>Progress to Goal</h3>
                             <div className="relative" ref={trendRef}>
-                                <div className="flex items-center space-x-1 px-3 py-1 rounded-full cursor-pointer select-none" onClick={() => setShowTrendInfo(s => !s)} style={{ backgroundColor: theme.colors.accent + '20', color: theme.colors.accent }}>
+                                <div className="flex items-center space-x-1 px-3 py-1 rounded-full cursor-pointer select-none" onClick={() => setShowTrendInfo(s => !s)} style={{ backgroundColor: theme.colors.subtle, color: theme.colors.accent }}>
                                     <ArrowUp className="w-3 h-3" />
                                     <span className="text-xs font-bold">{deltaLabel}</span>
                                 </div>

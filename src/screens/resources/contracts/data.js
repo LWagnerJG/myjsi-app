@@ -6,6 +6,8 @@ export const CONTRACTS_DATA = {
         id: 'omnia',
         name: 'Omnia Partners (TCPN)',
         documentUrl: 'https://webresources.jsifurniture.com/production/uploads/jsi_contracts_tcpn.pdf',
+        dealerDocumentUrl: 'https://webresources.jsifurniture.com/production/uploads/jsi_contracts_tcpn_dealer.pdf',
+        publicDocumentUrl: 'https://webresources.jsifurniture.com/production/uploads/jsi_contracts_tcpn_public.pdf',
         discounts: [
             {
                 label: 'Dock Delivery',
@@ -37,6 +39,8 @@ export const CONTRACTS_DATA = {
         id: 'tips',
         name: 'TIPS / TAPS',
         documentUrl: 'https://webresources.jsifurniture.com/production/uploads/jsi_contracts_tips_taps.pdf',
+        dealerDocumentUrl: 'https://webresources.jsifurniture.com/production/uploads/jsi_contracts_tips_taps_dealer.pdf',
+        publicDocumentUrl: 'https://webresources.jsifurniture.com/production/uploads/jsi_contracts_tips_taps_public.pdf',
         discounts: [
             {
                 label: 'Delivery & Installed',
@@ -58,6 +62,8 @@ export const CONTRACTS_DATA = {
         id: 'premier',
         name: 'Premier (Healthcare GPO)',
         documentUrl: 'https://webresources.jsifurniture.com/production/uploads/j_contracts_premier.pdf',
+        dealerDocumentUrl: 'https://webresources.jsifurniture.com/production/uploads/j_contracts_premier_dealer.pdf',
+        publicDocumentUrl: 'https://webresources.jsifurniture.com/production/uploads/j_contracts_premier_public.pdf',
         discounts: [
             {
                 label: 'Up to $500k list',
@@ -78,6 +84,36 @@ export const CONTRACTS_DATA = {
                 repCommission: '4.29%',
             },
         ],
+    },
+
+    gsa: {
+        id: 'gsa',
+        name: 'GSA (Federal Government)',
+        subtitle: 'Schedule 71 / 33721 (Placeholder)',
+        documentUrl: 'https://webresources.jsifurniture.com/production/uploads/jsi_contracts_gsa.pdf',
+        dealerDocumentUrl: 'https://webresources.jsifurniture.com/production/uploads/jsi_contracts_gsa_dealer.pdf',
+        publicDocumentUrl: 'https://webresources.jsifurniture.com/production/uploads/jsi_contracts_gsa_public.pdf',
+        discounts: [
+            {
+                label: 'Standard (Sub $250k)',
+                discount: '55%',
+                dealerCommission: '12%',
+                repCommission: '4.00%',
+            },
+            {
+                label: '$250k - $500k',
+                discount: '56%',
+                dealerCommission: '11%',
+                repCommission: '4.10%',
+            },
+            {
+                label: '$500k+',
+                discount: '57%',
+                dealerCommission: '10%',
+                repCommission: '4.20%',
+            },
+        ],
+        disclaimer: 'Always confirm SIN/category eligibility. Pricing subject to EPA and compliance review.',
     },
 };
 

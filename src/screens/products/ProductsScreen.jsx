@@ -8,6 +8,7 @@ import React, {
 } from 'react';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { SearchInput } from '../../components/common/SearchInput.jsx';
+import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
 import {
     List,
     Grid,
@@ -120,7 +121,7 @@ const StickyHeader = React.memo(({
         }}
     >
         <div className="flex items-center space-x-3">
-            <SearchInput
+            <StandardSearchBar
                 value={searchTerm}
                 onChange={onSearchChange}
                 placeholder="Search products..."
