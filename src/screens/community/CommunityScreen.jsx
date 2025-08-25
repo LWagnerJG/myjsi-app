@@ -15,6 +15,9 @@ export const CommunityScreen = ({
   onAddComment,
   openCreateContentModal,
   onRefresh,
+  // embed mode props (layout provides toggle + search)
+  embedMode = false,
+  externalQuery = ''
 }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [expandedComments, setExpandedComments] = useState({});
@@ -39,6 +42,9 @@ export const CommunityScreen = ({
     if (!scrollRef.current) return; setIsScrolled(scrollRef.current.scrollTop > 6);
   }, []);
 
+  const effectiveQuery = embedMode ? externalQuery : query;
+  const effectiveViewMode = embedMode ? 'feed' : viewMode;
+
   const timeSafe = (x) => (typeof x.createdAt === 'number' ? x.createdAt : Date.now());
 
   const allContent = useMemo(() => {
@@ -47,13 +53,13 @@ export const CommunityScreen = ({
   }, [posts, polls, refreshKey]);
 
   const filteredContent = useMemo(() => {
-    const q = query.trim().toLowerCase(); if (!q) return allContent;
+    const q = effectiveQuery.trim().toLowerCase(); if (!q) return allContent;
     return allContent.filter(item => {
       const base = [item.type, item.user?.name, item.text, item.title, item.question].filter(Boolean).join(' ').toLowerCase();
       const optionsText = (item.options || []).map(o => o.text).join(' ').toLowerCase();
       return base.includes(q) || optionsText.includes(q);
     });
-  }, [allContent, query]);
+  }, [allContent, effectiveQuery]);
 
   // Photo library (flatten all post images with searchable text meta)
   const photoLibrary = useMemo(() => {
@@ -62,13 +68,13 @@ export const CommunityScreen = ({
       if (p.image) rows.push({ id: `${p.id}-single`, src: p.image, post: p });
       if (Array.isArray(p.images)) p.images.forEach((img,i) => rows.push({ id: `${p.id}-multi-${i}` , src: img, post: p }));
     });
-    const q = query.trim().toLowerCase();
+    const q = effectiveQuery.trim().toLowerCase();
     if (!q) return rows;
     return rows.filter(r => {
       const text = [r.post.title, r.post.text, r.post.user?.name].filter(Boolean).join(' ').toLowerCase();
       return text.includes(q);
     });
-  }, [posts, query]);
+  }, [posts, effectiveQuery]);
 
   const toggleComments = useCallback(id => setExpandedComments(p => ({ ...p, [id]: !p[id] })), []);
 
@@ -98,12 +104,10 @@ export const CommunityScreen = ({
     const [draft, setDraft] = useState('');
     const isLiked = !!likedPosts[post.id];
 
-    // animated comments section measurement
     const commentWrapRef = useRef(null); // container whose height we animate
     const contentRef = useRef(null); // inner content for measuring scrollHeight
     const [measuredHeight, setMeasuredHeight] = useState(0);
 
-    // measure when expanded or comments change
     useEffect(() => {
       if (expandedComments[post.id] && contentRef.current) {
         const h = contentRef.current.scrollHeight;
@@ -140,7 +144,7 @@ export const CommunityScreen = ({
         <div className="flex items-center gap-2 pt-1">
           <StatButton active={isLiked} icon={Heart} count={post.likes || 0} onClick={()=>onToggleLike?.(post.id)} ariaLabel="Like" />
           <StatButton active={expandedComments[post.id]} icon={MessageCircle} count={(post.comments||[]).length} onClick={()=>toggleComments(post.id)} ariaLabel="Comments" />
-          <button onClick={()=>{ if(navigator.share){ navigator.share({ title: post.title || 'Post', text: post.text }); } }} className="flex items-center gap-1.5 text-sm px-4 py-1 rounded-full transition-all active:scale-95" style={{ backgroundColor: theme.colors.subtle, border:`1px solid ${theme.colors.border}`, color: theme.colors.textSecondary }}>
+          <button onClick={()=>{ if(navigator.share){ navigator.share({ title: post.title || 'Post', text: post.text }); } else { navigator.clipboard.writeText(post.text || window.location.href); } }} className="flex items-center gap-1.5 text-sm px-4 py-1 rounded-full transition-all active:scale-95" style={{ backgroundColor: theme.colors.subtle, border:`1px solid ${theme.colors.border}`, color: theme.colors.textSecondary }}>
             <Share2 className="w-4 h-4" /> <span>Share</span>
           </button>
         </div>
@@ -221,33 +225,36 @@ export const CommunityScreen = ({
 
   return (
     <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
-      {/* Header */}
-      <div className={`sticky top-0 z-10 transition-all ${isScrolled?'shadow-md':''}`} style={{ backgroundColor: isScrolled?`${theme.colors.background}e8`:theme.colors.background, backdropFilter:isScrolled?'blur(12px)':'none', borderBottom:`1px solid ${isScrolled?theme.colors.border+'40':'transparent'}` }}>
-        <div className="px-5 pt-3 pb-2 flex items-center gap-3 min-w-0">
-          <div className="flex-1 min-w-0">
-            <StandardSearchBar value={query} onChange={setQuery} placeholder={viewMode==='feed'?"Search...":"Search library"} theme={theme} />
+      {!embedMode && (
+        <div className={`sticky top-0 z-10 transition-all ${isScrolled?'shadow-md':''}`} style={{ backgroundColor: isScrolled?`${theme.colors.background}e8`:theme.colors.background, backdropFilter:isScrolled?'blur(12px)':'none', borderBottom:`1px solid ${isScrolled?theme.colors.border+'40':'transparent'}` }}>
+          <div className="px-5 pt-3 pb-2 flex items-center gap-3 min-w-0">
+            <div className="flex-1 min-w-0">
+              <StandardSearchBar value={query} onChange={setQuery} placeholder={viewMode==='feed'?"Search...":"Search library"} theme={theme} />
+            </div>
+            <button
+              onClick={()=>setViewMode(m=> m==='feed' ? 'library':'feed')}
+              className="community-toggle-btn flex items-center gap-2 px-6 h-14 rounded-full text-sm font-semibold whitespace-nowrap transition-all active:scale-95 flex-shrink-0"
+              style={{
+                backgroundColor: viewMode==='library'? theme.colors.surface : theme.colors.subtle,
+                color: theme.colors.textSecondary,
+                border: `1px solid ${viewMode==='library'? theme.colors.textPrimary : theme.colors.border}`,
+                boxShadow: viewMode==='library'? `0 0 0 3px ${theme.colors.surface}, 0 0 0 4px ${theme.colors.textPrimary}`:'none'
+              }}
+            >
+              <Images className="w-4 h-4" /> <span>Library</span>
+            </button>
+            <button onClick={openCreateContentModal} className="community-post-btn inline-flex items-center gap-2 px-7 h-14 rounded-full text-sm font-semibold whitespace-nowrap transition-all active:scale-95 flex-shrink-0" style={{ backgroundColor: theme.colors.accent, color:'#fff' }}>
+              <Plus className="w-4 h-4" /> <span>Post</span>
+            </button>
           </div>
-          {/* Library toggle pill */}
-          <button
-            onClick={()=>setViewMode(m=> m==='feed' ? 'library':'feed')}
-            className="community-toggle-btn flex items-center gap-2 px-6 h-14 rounded-full text-sm font-semibold whitespace-nowrap transition-all active:scale-95 flex-shrink-0"
-            style={{
-              backgroundColor: viewMode==='library'? theme.colors.surface : theme.colors.subtle,
-              color: theme.colors.textSecondary,
-              border: `1px solid ${viewMode==='library'? theme.colors.textPrimary : theme.colors.border}`,
-              boxShadow: viewMode==='library'? `0 0 0 3px ${theme.colors.surface}, 0 0 0 4px ${theme.colors.textPrimary}`:'none'
-            }}
-          >
-            <Images className="w-4 h-4" /> <span>Library</span>
-          </button>
-          <button onClick={openCreateContentModal} className="community-post-btn inline-flex items-center gap-2 px-7 h-14 rounded-full text-sm font-semibold whitespace-nowrap transition-all active:scale-95 flex-shrink-0" style={{ backgroundColor: theme.colors.accent, color:'#fff' }}>
-            <Plus className="w-4 h-4" /> <span>Post</span>
-          </button>
         </div>
-      </div>
-      {/* Feed / Library */}
+      )}
       <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto no-scrollbar px-4 pb-10 pt-4 space-y-4">
-        {viewMode==='library' && (
+        {effectiveViewMode==='feed' && !filteredContent.length && (
+          <div className="text-center text-sm pt-20" style={{ color: theme.colors.textSecondary }}>No content found.</div>
+        )}
+        {effectiveViewMode==='feed' && filteredContent.map(item => item.question ? <PollCard key={`poll-${item.id}`} poll={item} /> : <PostCard key={`post-${item.id}`} post={item} />)}
+        {effectiveViewMode==='library' && !embedMode && (
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {photoLibrary.map(photo => (
               <div key={photo.id} className="group relative rounded-xl overflow-hidden border" style={{ borderColor: theme.colors.border, backgroundColor: theme.colors.surface }}>
@@ -260,10 +267,6 @@ export const CommunityScreen = ({
             {!photoLibrary.length && <p className="col-span-full text-center text-sm" style={{ color: theme.colors.textSecondary }}>No photos found.</p>}
           </div>
         )}
-        {viewMode==='feed' && !filteredContent.length && (
-          <div className="text-center text-sm pt-20" style={{ color: theme.colors.textSecondary }}>No content found.</div>
-        )}
-        {viewMode==='feed' && filteredContent.map(item => item.question ? <PollCard key={`poll-${item.id}`} poll={item} /> : <PostCard key={`post-${item.id}`} post={item} />)}
         <div className="h-2" />
       </div>
     </div>

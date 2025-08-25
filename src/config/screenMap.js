@@ -13,6 +13,7 @@ import { LogoutScreen } from '../screens/logout/LogoutScreen.jsx';
 import { HomeScreen } from '../screens/home/HomeScreen.jsx';
 import { SettingsScreen } from '../screens/settings/index.js';
 import { ResourceDetailScreen } from '../screens/utility/UtilityScreens.jsx';
+import { CommunityLibraryLayout } from '../screens/home/CommunityLibraryLayout.jsx';
 
 // NOTE:
 // Feature resource detail routes (e.g. 'lead-times', 'commission-rates', etc.) are now handled lazily
@@ -26,7 +27,7 @@ export const SCREEN_MAP = {
   'products': ProductsScreen,
   'resources': ResourcesScreen,
   'projects': ProjectsScreen,
-  'community': CommunityScreen,
+  'community': CommunityLibraryLayout, // swapped to new layout providing Community + Library toggle
   'replacements': ReplacementsScreen,
   'incentive-rewards': IncentiveRewardsScreen,
   'customer-rank': CustomerRankingScreen,

@@ -46,7 +46,7 @@ export const FeedbackScreen = ({ theme }) => {
 
     return (
         <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
-            <PageTitle title="Give Feedback" theme={theme} />
+            <PageTitle title="" theme={theme} />
             <div className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-hide">
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <GlassCard theme={theme} className="p-4">
@@ -98,7 +98,7 @@ export const FeedbackScreen = ({ theme }) => {
                         <textarea
                             value={message}
                             onChange={(e) => setMessage(e.target.value)}
-                            placeholder="Share details, steps to reproduce, or ideas…"
+                            placeholder="Share details, steps to reproduce, or ideas..."
                             rows="6"
                             className="w-full p-3 rounded-2xl border outline-none resize-none transition-all"
                             style={{
