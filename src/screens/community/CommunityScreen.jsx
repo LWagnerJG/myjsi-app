@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
-import { Heart, MessageCircle, Share2, Plus, Users, Send } from 'lucide-react';
+import { Heart, MessageCircle, Share2, Plus, Users, Send, Images } from 'lucide-react';
 
 // Community feed screen
 export const CommunityScreen = ({
@@ -20,6 +20,7 @@ export const CommunityScreen = ({
   const [expandedComments, setExpandedComments] = useState({});
   const [query, setQuery] = useState('');
   const [refreshKey, setRefreshKey] = useState(0);
+  const [viewMode, setViewMode] = useState('feed'); // 'feed' | 'library'
   const scrollRef = useRef(null);
 
   // hide scrollbar helper style (injected once)
@@ -27,7 +28,10 @@ export const CommunityScreen = ({
     if (document.getElementById('community-no-scrollbar-style')) return;
     const style = document.createElement('style');
     style.id = 'community-no-scrollbar-style';
-    style.innerHTML = `.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; } .no-scrollbar::-webkit-scrollbar { display: none; }`;
+    style.innerHTML = `.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; } .no-scrollbar::-webkit-scrollbar { display: none; }
+    @media (max-width: 500px){ .community-post-btn span{ display:none } .community-post-btn{ padding-left:18px; padding-right:18px } }
+    @media (max-width: 420px){ .community-toggle-btn span{ display:none } .community-toggle-btn{ padding-left:18px; padding-right:18px } }
+    `;
     document.head.appendChild(style);
   }, []);
 
@@ -50,6 +54,21 @@ export const CommunityScreen = ({
       return base.includes(q) || optionsText.includes(q);
     });
   }, [allContent, query]);
+
+  // Photo library (flatten all post images with searchable text meta)
+  const photoLibrary = useMemo(() => {
+    const rows = [];
+    posts.forEach(p => {
+      if (p.image) rows.push({ id: `${p.id}-single`, src: p.image, post: p });
+      if (Array.isArray(p.images)) p.images.forEach((img,i) => rows.push({ id: `${p.id}-multi-${i}` , src: img, post: p }));
+    });
+    const q = query.trim().toLowerCase();
+    if (!q) return rows;
+    return rows.filter(r => {
+      const text = [r.post.title, r.post.text, r.post.user?.name].filter(Boolean).join(' ').toLowerCase();
+      return text.includes(q);
+    });
+  }, [posts, query]);
 
   const toggleComments = useCallback(id => setExpandedComments(p => ({ ...p, [id]: !p[id] })), []);
 
@@ -204,22 +223,47 @@ export const CommunityScreen = ({
     <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
       {/* Header */}
       <div className={`sticky top-0 z-10 transition-all ${isScrolled?'shadow-md':''}`} style={{ backgroundColor: isScrolled?`${theme.colors.background}e8`:theme.colors.background, backdropFilter:isScrolled?'blur(12px)':'none', borderBottom:`1px solid ${isScrolled?theme.colors.border+'40':'transparent'}` }}>
-        <div className="px-5 pt-3 pb-2 flex items-center gap-4">
-          <h1 className="text-2xl font-bold mr-auto" style={{ color: theme.colors.textPrimary }}>Community</h1>
-          <div className="relative w-60">
-            <StandardSearchBar value={query} onChange={setQuery} placeholder="Search..." theme={theme} />
+        <div className="px-5 pt-3 pb-2 flex items-center gap-3 min-w-0">
+          <div className="flex-1 min-w-0">
+            <StandardSearchBar value={query} onChange={setQuery} placeholder={viewMode==='feed'?"Search...":"Search library"} theme={theme} />
           </div>
-          <button onClick={openCreateContentModal} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all active:scale-95" style={{ backgroundColor: theme.colors.accent, color:'#fff' }}>
-            <Plus className="w-4 h-4" /> Post
+          {/* Library toggle pill */}
+          <button
+            onClick={()=>setViewMode(m=> m==='feed' ? 'library':'feed')}
+            className="community-toggle-btn flex items-center gap-2 px-6 h-14 rounded-full text-sm font-semibold whitespace-nowrap transition-all active:scale-95 flex-shrink-0"
+            style={{
+              backgroundColor: viewMode==='library'? theme.colors.surface : theme.colors.subtle,
+              color: theme.colors.textSecondary,
+              border: `1px solid ${viewMode==='library'? theme.colors.textPrimary : theme.colors.border}`,
+              boxShadow: viewMode==='library'? `0 0 0 3px ${theme.colors.surface}, 0 0 0 4px ${theme.colors.textPrimary}`:'none'
+            }}
+          >
+            <Images className="w-4 h-4" /> <span>Library</span>
+          </button>
+          <button onClick={openCreateContentModal} className="community-post-btn inline-flex items-center gap-2 px-7 h-14 rounded-full text-sm font-semibold whitespace-nowrap transition-all active:scale-95 flex-shrink-0" style={{ backgroundColor: theme.colors.accent, color:'#fff' }}>
+            <Plus className="w-4 h-4" /> <span>Post</span>
           </button>
         </div>
       </div>
-      {/* Feed */}
+      {/* Feed / Library */}
       <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto no-scrollbar px-4 pb-10 pt-4 space-y-4">
-        {!filteredContent.length && (
+        {viewMode==='library' && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {photoLibrary.map(photo => (
+              <div key={photo.id} className="group relative rounded-xl overflow-hidden border" style={{ borderColor: theme.colors.border, backgroundColor: theme.colors.surface }}>
+                <img src={photo.src} alt={photo.post.title||'post image'} className="w-full h-40 object-cover group-hover:scale-105 transition-transform" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2">
+                  <p className="text-[11px] leading-tight text-white line-clamp-2">{photo.post.title || photo.post.text || photo.post.user?.name}</p>
+                </div>
+              </div>
+            ))}
+            {!photoLibrary.length && <p className="col-span-full text-center text-sm" style={{ color: theme.colors.textSecondary }}>No photos found.</p>}
+          </div>
+        )}
+        {viewMode==='feed' && !filteredContent.length && (
           <div className="text-center text-sm pt-20" style={{ color: theme.colors.textSecondary }}>No content found.</div>
         )}
-        {filteredContent.map(item => item.question ? <PollCard key={`poll-${item.id}`} poll={item} /> : <PostCard key={`post-${item.id}`} post={item} />)}
+        {viewMode==='feed' && filteredContent.map(item => item.question ? <PollCard key={`poll-${item.id}`} poll={item} /> : <PostCard key={`post-${item.id}`} post={item} />)}
         <div className="h-2" />
       </div>
     </div>
