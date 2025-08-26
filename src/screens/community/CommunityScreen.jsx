@@ -227,25 +227,25 @@ export const CommunityScreen = ({
     <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
       {!embedMode && (
         <div className={`sticky top-0 z-10 transition-all ${isScrolled?'shadow-md':''}`} style={{ backgroundColor: isScrolled?`${theme.colors.background}e8`:theme.colors.background, backdropFilter:isScrolled?'blur(12px)':'none', borderBottom:`1px solid ${isScrolled?theme.colors.border+'40':'transparent'}` }}>
-          <div className="px-5 pt-3 pb-2 flex items-center gap-3 min-w-0">
-            <div className="flex-1 min-w-0">
-              <StandardSearchBar value={query} onChange={setQuery} placeholder={viewMode==='feed'?"Search...":"Search library"} theme={theme} />
+          {/* Top row: segmented toggle + post button mimicking Projects layout */}
+          <div className="px-4 pt-6 pb-2 w-full">
+            <div className="flex w-full gap-4 items-center">
+              <div className="flex flex-[3] rounded-full border overflow-hidden h-12 shadow-sm" style={{ borderColor: theme.colors.border }}>
+                <button onClick={()=>setViewMode('feed')} className="flex-1 h-full px-6 text-sm font-semibold flex items-center justify-center" style={{ backgroundColor: viewMode==='feed'? theme.colors.accent:'transparent', color: viewMode==='feed'? '#fff': theme.colors.textSecondary }}>
+                  Community
+                </button>
+                <button onClick={()=>setViewMode('library')} className="flex-1 h-full px-6 text-sm font-semibold flex items-center justify-center" style={{ backgroundColor: viewMode==='library'? theme.colors.accent:'transparent', color: viewMode==='library'? '#fff': theme.colors.textSecondary }}>
+                  Library
+                </button>
+              </div>
+              <button onClick={openCreateContentModal} className="flex-[1.2] h-12 inline-flex items-center justify-center gap-2 rounded-full text-sm font-semibold transition-all hover:-translate-y-0.5 active:translate-y-0 shadow-sm" style={{ backgroundColor: theme.colors.accent, color:'#fff', boxShadow:'0 4px 14px rgba(0,0,0,0.08)' }}>
+                <Plus className="w-4.5 h-4.5" /> <span className="truncate">Post</span>
+              </button>
             </div>
-            <button
-              onClick={()=>setViewMode(m=> m==='feed' ? 'library':'feed')}
-              className="community-toggle-btn flex items-center gap-2 px-6 h-14 rounded-full text-sm font-semibold whitespace-nowrap transition-all active:scale-95 flex-shrink-0"
-              style={{
-                backgroundColor: viewMode==='library'? theme.colors.surface : theme.colors.subtle,
-                color: theme.colors.textSecondary,
-                border: `1px solid ${viewMode==='library'? theme.colors.textPrimary : theme.colors.border}`,
-                boxShadow: viewMode==='library'? `0 0 0 3px ${theme.colors.surface}, 0 0 0 4px ${theme.colors.textPrimary}`:'none'
-              }}
-            >
-              <Images className="w-4 h-4" /> <span>Library</span>
-            </button>
-            <button onClick={openCreateContentModal} className="community-post-btn inline-flex items-center gap-2 px-7 h-14 rounded-full text-sm font-semibold whitespace-nowrap transition-all active:scale-95 flex-shrink-0" style={{ backgroundColor: theme.colors.accent, color:'#fff' }}>
-              <Plus className="w-4 h-4" /> <span>Post</span>
-            </button>
+          </div>
+          {/* Search bar below controls */}
+          <div className="px-4 pb-4">
+            <StandardSearchBar value={query} onChange={setQuery} placeholder={viewMode==='feed'? 'Search posts, people, tags':'Search library'} theme={theme} />
           </div>
         </div>
       )}

@@ -32,177 +32,81 @@ const ReadOnlyList = ({ items, theme }) => (
   </div>
 );
 
-// Rich editable opportunity detail (unchanged logic)
+// Redesigned consolidated opportunity detail view
 const OpportunityDetail = ({ opp, theme, onBack, onUpdate }) => {
   const [editMode, setEditMode] = useState(false);
   const [draft, setDraft] = useState(opp);
   const [activeField, setActiveField] = useState(null);
-  const [showQuotePreview, setShowQuotePreview] = useState(null);
-  useEffect(() => { setDraft(opp); }, [opp]);
-  const update = (k, v) => setDraft(p => ({ ...p, [k]: v }));
-  const toggleCompetitor = (c) => { const list = draft.competitors || []; const next = list.includes(c) ? list.filter(x => x !== c) : [...list, c]; update('competitors', next); };
-  const save = () => { onUpdate(draft); setEditMode(false); setActiveField(null); };
-  const cancel = () => { setDraft(opp); setEditMode(false); setActiveField(null); };
-  const quotes = draft.quotes || [ { id:'q1', name: 'Quote 100234 Rev A', url: 'https://webresources.jsifurniture.com/production/uploads/documents/JSI-BrandDoc-COMCOLOrderForm-0321.pdf' } ];
-  const EditorPanel = () => {
-    if (!activeField) return null;
-    const panelStyle = { backgroundColor: theme.colors.surface, border: `1px solid ${theme.colors.border}` };
-    return (
-      <div className="mt-4 p-4 rounded-2xl shadow-lg space-y-4" style={panelStyle}>
-        {activeField === 'estimatedList' && (
-          <FormInput label="Estimated List" type="currency" value={draft.estimatedList || ''} onChange={e => update('estimatedList', e.target.value)} theme={theme} />
-        )}
-        {activeField === 'stage' && (
-          <PortalNativeSelect label="Stage" value={draft.projectStatus || ''} onChange={e => update('projectStatus', e.target.value)} options={STAGES.map(s=>({label:s,value:s}))} theme={theme} />
-        )}
-        {activeField === 'discount' && (
-          <PortalNativeSelect label="Discount" value={draft.discount || ''} onChange={e => update('discount', e.target.value)} options={DISCOUNT_OPTIONS.map(d=>({label:d,value:d}))} theme={theme} />
-        )}
-        {activeField === 'winProbability' && (
-          <div>
-            <label className="text-sm font-semibold mb-2 block" style={{ color: theme.colors.textSecondary }}>Win Probability</label>
-            <ProbabilitySlider value={draft.winProbability || 50} onChange={v => update('winProbability', v)} theme={theme} />
-          </div>
-        )}
-        <div className="flex gap-2 pt-1">
-          <button type="button" onClick={()=>setActiveField(null)} className="px-4 py-2 rounded-full text-sm font-semibold" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary, border: `1px solid ${theme.colors.border}` }}>Close</button>
-        </div>
-      </div>
-    );
-  };
+  useEffect(()=>{ setDraft(opp); },[opp]);
+  const update=(k,v)=> setDraft(p=>({...p,[k]:v}));
+  const save=()=>{ onUpdate(draft); setEditMode(false); setActiveField(null); };
+  const cancel=()=>{ setDraft(opp); setEditMode(false); setActiveField(null); };
+  const toggleCompetitor=c=>{ const list=draft.competitors||[]; update('competitors', list.includes(c)? list.filter(x=>x!==c): [...list,c]); };
+
+  const infoChipStyle = { backgroundColor: theme.colors.surface, border: `1px solid ${theme.colors.border}`, color: theme.colors.textPrimary };
 
   return (
     <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
-      <div className="px-4 pt-6 pb-40 space-y-6 overflow-y-auto scrollbar-hide">
-        <GlassCard theme={theme} className="p-6 space-y-4 relative">
-          <button onClick={() => { if(editMode) save(); else setEditMode(true); }} className="absolute top-4 right-4 px-4 py-2 rounded-full text-xs font-semibold flex items-center gap-2" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary, border: `1px solid ${theme.colors.border}` }}>
-            {editMode ? <>Save</> : <>Edit</>}
-          </button>
-          <div className="space-y-1">
-            {editMode ? (
-              <FormInput label="Project Name" value={draft.project} onChange={e=>update('project', e.target.value)} theme={theme} />
-            ) : (
-              <h1 className="font-bold text-xl" style={{ color: theme.colors.textPrimary }}>{draft.project || draft.name}</h1>
+      <div className="px-4 pt-5 pb-40 overflow-y-auto scrollbar-hide">
+        <div className="relative rounded-3xl p-6 mb-5" style={{ backgroundColor: theme.colors.surface, border:`1px solid ${theme.colors.border}`, boxShadow:'0 4px 18px rgba(0,0,0,0.06)' }}>
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              {editMode ? (
+                <FormInput label="Project Name" value={draft.project||draft.name} onChange={e=>update('project',e.target.value)} theme={theme} />
+              ):(<h1 className="font-bold text-xl mb-1" style={{ color: theme.colors.textPrimary }}>{draft.project||draft.name}</h1>)}
+              {editMode ? (
+                <FormInput label="Company" value={draft.company} onChange={e=>update('company',e.target.value)} theme={theme} />
+              ):(<p className="text-sm font-medium" style={{ color: theme.colors.textSecondary }}>{draft.company}</p>)}
+            </div>
+            <div className="flex items-center gap-2">
+              <button onClick={()=> setEditMode(m=>!m)} className="px-3 py-1.5 rounded-full text-xs font-semibold" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary, border:`1px solid ${theme.colors.border}` }}>{ editMode? 'Cancel':'Edit' }</button>
+              {editMode && <button onClick={save} className="px-3 py-1.5 rounded-full text-xs font-semibold text-white" style={{ backgroundColor: theme.colors.accent }}>Save</button>}
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2 mt-4">
+            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold" style={infoChipStyle}><DollarSign className="w-3.5 h-3.5" style={{ color: theme.colors.accent }} /> {fmtCurrency(draft.estimatedList || draft.value)}</span>
+            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold" style={infoChipStyle}><Briefcase className="w-3.5 h-3.5" style={{ color: theme.colors.accent }} /> {draft.projectStatus || draft.stage}</span>
+            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold" style={infoChipStyle}><Percent className="w-3.5 h-3.5" style={{ color: theme.colors.accent }} /> {draft.discount}</span>
+            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold" style={infoChipStyle}><LineChart className="w-3.5 h-3.5" style={{ color: theme.colors.accent }} /> Win {draft.winProbability||50}%</span>
+          </div>
+        </div>
+
+        <div className="grid gap-5">
+          {/* Overview group */}
+          <div className="rounded-3xl p-6" style={{ backgroundColor: theme.colors.surface, border:`1px solid ${theme.colors.border}` }}>
+            <h2 className="text-xs font-semibold tracking-wider mb-4" style={{ color: theme.colors.textSecondary }}>OVERVIEW</h2>
+            <div className="grid grid-cols-2 gap-y-3 text-sm">
+              <span style={{ color: theme.colors.textSecondary }}>Vertical</span><span style={{ color: theme.colors.textPrimary }}>{draft.vertical||'-'}</span>
+              <span style={{ color: theme.colors.textSecondary }}>PO Timeframe</span><span style={{ color: theme.colors.textPrimary }}>{draft.poTimeframe||'-'}</span>
+              <span style={{ color: theme.colors.textSecondary }}>Contact</span><span style={{ color: theme.colors.textPrimary }}>{draft.contact||'-'}</span>
+              <span style={{ color: theme.colors.textSecondary }}>Products</span><span style={{ color: theme.colors.textPrimary }}>{(draft.products||[]).map(p=>p.series).join(', ')||'-'}</span>
+            </div>
+          </div>
+
+            {/* Competition & Stakeholders */}
+          <div className="rounded-3xl p-6" style={{ backgroundColor: theme.colors.surface, border:`1px solid ${theme.colors.border}` }}>
+            <h2 className="text-xs font-semibold tracking-wider mb-4" style={{ color: theme.colors.textSecondary }}>COMPETITION & STAKEHOLDERS</h2>
+            <div className="grid grid-cols-2 gap-y-3 text-sm">
+              <span style={{ color: theme.colors.textSecondary }}>Competition Present</span><span style={{ color: theme.colors.textPrimary }}>{draft.competitionPresent? 'Yes':'No'}</span>
+              <span style={{ color: theme.colors.textSecondary }}>Competitors</span><span style={{ color: theme.colors.textPrimary }}>{(draft.competitors||[]).join(', ')||'-'}</span>
+              <span style={{ color: theme.colors.textSecondary }}>Design Firms</span><span style={{ color: theme.colors.textPrimary }}>{(draft.designFirms||[]).join(', ')||'-'}</span>
+              <span style={{ color: theme.colors.textSecondary }}>Dealers</span><span style={{ color: theme.colors.textPrimary }}>{(draft.dealers||[]).join(', ')||'-'}</span>
+            </div>
+            {editMode && draft.competitionPresent && (
+              <div className="flex flex-wrap gap-2 mt-4">
+                {COMPETITORS.filter(c=>c!=='None').map(c=>{ const on=(draft.competitors||[]).includes(c); return <button key={c} type="button" onClick={()=>toggleCompetitor(c)} className="px-3 py-1.5 text-[11px] rounded-full font-medium transition-colors border" style={{ backgroundColor:on?theme.colors.accent:theme.colors.surface, color:on?theme.colors.surface:theme.colors.textPrimary, borderColor:on?theme.colors.accent:theme.colors.border }}>{c}</button>; })}
+              </div>
             )}
+          </div>
+
+          {/* Notes */}
+          <div className="rounded-3xl p-6" style={{ backgroundColor: theme.colors.surface, border:`1px solid ${theme.colors.border}` }}>
+            <h2 className="text-xs font-semibold tracking-wider mb-4" style={{ color: theme.colors.textSecondary }}>NOTES</h2>
             {editMode ? (
-              <FormInput label="Company" value={draft.company} onChange={e=>update('company', e.target.value)} theme={theme} />
-            ) : (
-              <p className="text-sm" style={{ color: theme.colors.textSecondary }}>{draft.company}</p>
-            )}
+              <FormInput label="" type="textarea" value={draft.notes||''} onChange={e=>update('notes', e.target.value)} theme={theme} />
+            ):(<p className="text-sm leading-relaxed" style={{ color: theme.colors.textPrimary }}>{draft.notes || 'No notes yet.'}</p>)}
           </div>
-          <div className="flex flex-wrap gap-2 pt-2">
-            <button type="button" disabled={!editMode} onClick={()=>setActiveField('estimatedList')} className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border ${editMode?'cursor-pointer':'cursor-default'}`} style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.border, color: theme.colors.textPrimary, opacity: editMode?1:1 }}>
-              <DollarSign className="w-3.5 h-3.5" style={{ color: theme.colors.accent }} /> {fmtCurrency(draft.estimatedList || draft.value)}
-            </button>
-            <button type="button" disabled={!editMode} onClick={()=>setActiveField('stage')} className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border ${editMode?'':'cursor-default'}`} style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.border, color: theme.colors.textPrimary }}>
-              <Briefcase className="w-3.5 h-3.5" style={{ color: theme.colors.accent }} /> {draft.projectStatus || draft.stage}
-            </button>
-            <button type="button" disabled={!editMode} onClick={()=>setActiveField('discount')} className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border ${editMode?'':'cursor-default'}`} style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.border, color: theme.colors.textPrimary }}>
-              <Percent className="w-3.5 h-3.5" style={{ color: theme.colors.accent }} /> {draft.discount || 'Discount'}
-            </button>
-            <button type="button" disabled={!editMode} onClick={()=>setActiveField('winProbability')} className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border ${editMode?'':'cursor-default'}`} style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.border, color: theme.colors.textPrimary }}>
-              <LineChart className="w-3.5 h-3.5" style={{ color: theme.colors.accent }} /> Win {(draft.winProbability || 50)}%
-            </button>
-          </div>
-          {editMode && <EditorPanel />}
-          {editMode && (
-            <div className="flex gap-3 pt-2">
-              <button type="button" onClick={cancel} className="flex-1 py-2 rounded-full text-sm font-semibold" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary, border:`1px solid ${theme.colors.border}` }}>Cancel</button>
-              <button type="button" onClick={save} className="flex-1 py-2 rounded-full text-sm font-semibold text-white" style={{ backgroundColor: theme.colors.accent }}>Save All</button>
-            </div>
-          )}
-        </GlassCard>
-
-        {/* Details Sections */}
-        <GlassCard theme={theme} className="p-5 space-y-5">
-          <SectionHeader title="Project Details" theme={theme} />
-          {editMode ? (
-            <div className="grid gap-4">
-              <PortalNativeSelect label="Vertical" value={draft.vertical || ''} onChange={e=>update('vertical', e.target.value)} options={VERTICALS.map(v=>({label:v,value:v}))} theme={theme} />
-              {draft.vertical === 'Other (Please specify)' && <FormInput label="Other Vertical" value={draft.otherVertical || ''} onChange={e=>update('otherVertical', e.target.value)} theme={theme} />}
-              <PortalNativeSelect label="PO Timeframe" value={draft.poTimeframe || ''} onChange={e=>update('poTimeframe', e.target.value)} options={PO_TIMEFRAMES.map(t=>({label:t,value:t}))} theme={theme} />
-            </div>
-          ) : (
-            <ReadOnlyList theme={theme} items={[[ 'Vertical', draft.vertical || '-' ], [ 'PO Timeframe', draft.poTimeframe || '-' ]]} />
-          )}
-        </GlassCard>
-
-        <GlassCard theme={theme} className="p-5 space-y-5">
-          <SectionHeader title="Competition" theme={theme} />
-          {editMode ? (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>Competition Present?</span>
-                <ToggleSwitch checked={!!draft.competitionPresent} onChange={e=>update('competitionPresent', e.target.checked)} theme={theme} />
-              </div>
-              {draft.competitionPresent && (
-                <div className="flex flex-wrap gap-2">
-                  {COMPETITORS.filter(c=>c!=='None').map(c=>{ const on=(draft.competitors||[]).includes(c); return <button key={c} type="button" onClick={()=>toggleCompetitor(c)} className="px-3 py-1.5 text-[12px] rounded-full font-medium transition-colors border" style={{ backgroundColor:on?theme.colors.accent:theme.colors.surface, color:on?theme.colors.surface:theme.colors.textPrimary, borderColor:on?theme.colors.accent:theme.colors.border }}>{c}</button>; })}
-                </div>
-              )}
-            </div>
-          ) : (
-            <ReadOnlyList theme={theme} items={[[ 'Competition Present', draft.competitionPresent ? 'Yes' : 'No' ], [ 'Competitors', (draft.competitors||[]).filter(c=>c!=='None').join(', ') || '-' ]]} />
-          )}
-        </GlassCard>
-
-        <GlassCard theme={theme} className="p-5 space-y-5">
-          <SectionHeader title="Stakeholders" theme={theme} />
-          {editMode ? (
-            <div className="space-y-4">
-              <FormInput label="Design Firms (comma separated)" value={(draft.designFirms||[]).join(', ')} onChange={e=>update('designFirms', e.target.value.split(',').map(v=>v.trim()).filter(Boolean))} theme={theme} />
-              <FormInput label="Dealers (comma separated)" value={(draft.dealers||[]).join(', ')} onChange={e=>update('dealers', e.target.value.split(',').map(v=>v.trim()).filter(Boolean))} theme={theme} />
-            </div>
-          ) : (
-            <ReadOnlyList theme={theme} items={[[ 'Design Firms', (draft.designFirms||[]).join(', ') || '-' ], [ 'Dealers', (draft.dealers||[]).join(', ') || '-' ]]} />
-          )}
-        </GlassCard>
-
-        <GlassCard theme={theme} className="p-5 space-y-5">
-          <SectionHeader title="Products" theme={theme} />
-          {editMode ? (
-            <FormInput label="Products (comma separated series)" value={(draft.products||[]).map(p=>p.series||p).join(', ')} onChange={e=>update('products', e.target.value.split(',').map(s=>({series:s.trim()})).filter(p=>p.series))} theme={theme} />
-          ) : (
-            <div className="flex flex-wrap gap-2">{(draft.products||[]).length ? draft.products.map((p,i)=>(<Chip key={i} label={p.series} theme={theme} />)) : <span className="text-sm" style={{ color: theme.colors.textSecondary }}>None</span>}</div>
-          )}
-        </GlassCard>
-
-        <GlassCard theme={theme} className="p-5 space-y-5">
-          <SectionHeader title="Notes" theme={theme} />
-          {editMode ? (
-            <FormInput label="Notes" type="textarea" value={draft.notes || ''} onChange={e=>update('notes', e.target.value)} theme={theme} />
-          ) : (
-            <ReadOnlyList theme={theme} items={[[ 'Notes', draft.notes || '-' ]]} />
-          )}
-        </GlassCard>
-
-        <GlassCard theme={theme} className="p-5 space-y-4">
-          <SectionHeader title="Quotes" theme={theme} />
-          <div className="space-y-2">
-            {quotes.map(q => (
-              <div key={q.id} className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border" style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.border }}>
-                <button type="button" onClick={()=>setShowQuotePreview(q)} className="flex items-center gap-2 font-semibold text-sm" style={{ color: theme.colors.textPrimary }}>
-                  <FileText className="w-4 h-4" style={{ color: theme.colors.accent }} /> {q.name}
-                </button>
-                <button type="button" onClick={()=>navigator.share && navigator.share({ title: q.name, url: q.url }).catch(()=>{})} className="p-2 rounded-full hover:opacity-80" style={{ backgroundColor: theme.colors.subtle }}>
-                  <Share2 className="w-4 h-4" style={{ color: theme.colors.textPrimary }} />
-                </button>
-              </div>
-            ))}
-          </div>
-          {showQuotePreview && (
-            <div className="fixed inset-0 z-40 flex items-center justify-center px-4">
-              <div className="absolute inset-0 bg-black/40" onClick={()=>setShowQuotePreview(null)} />
-              <div className="relative w-full max-w-md h-[70vh] rounded-2xl overflow-hidden shadow-2xl flex flex-col" style={{ backgroundColor: theme.colors.surface, border:`1px solid ${theme.colors.border}` }}>
-                <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: theme.colors.border }}>
-                  <h3 className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>{showQuotePreview.name}</h3>
-                  <button onClick={()=>setShowQuotePreview(null)} className="p-1 rounded-full hover:opacity-80" style={{ backgroundColor: theme.colors.subtle }}><X className="w-4 h-4" /></button>
-                </div>
-                <iframe title={showQuotePreview.name} src={showQuotePreview.url} className="flex-1 w-full" style={{ background:'#fff' }} />
-              </div>
-            </div>
-          )}
-        </GlassCard>
+        </div>
       </div>
     </div>
   );
@@ -211,13 +115,23 @@ const OpportunityDetail = ({ opp, theme, onBack, onUpdate }) => {
 // ProjectCard cleaned (no gradient, no duplicate % icon)
 const ProjectCard = ({ opp, theme, onClick }) => {
   const discountPct = typeof opp.discount === 'string' ? opp.discount : typeof opp.discount === 'number' ? `${opp.discount}%` : null;
+  // Normalize value: if value is string with $ keep, if number convert, if string digits convert
+  let displayValue = opp.value;
+  if (displayValue != null) {
+    if (typeof displayValue === 'number') {
+      displayValue = '$' + displayValue.toLocaleString();
+    } else if (typeof displayValue === 'string' && !displayValue.trim().startsWith('$')) {
+      const num = parseFloat(displayValue.replace(/[^0-9.]/g,''));
+      if (!isNaN(num)) displayValue = '$' + num.toLocaleString();
+    }
+  }
   return (
     <button onClick={onClick} className="w-full text-left group" style={{ WebkitTapHighlightColor: 'transparent' }}>
       <GlassCard theme={theme} className="p-5 transition-all duration-200 rounded-2xl hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${theme.colors.border}` }}>
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="font-semibold text-[15px] leading-snug truncate" style={{ color: theme.colors.textPrimary }}>{opp.name}</p>
-            <p className="mt-1 text-[13px] font-medium leading-tight truncate" style={{ color: theme.colors.textSecondary }}>{opp.company}</p>
+            <p className="mt-1 text-[13px] font-medium leading-tight truncate" style={{ color: theme.colors.textSecondary }}>{opp.company||'Unknown'}</p>
           </div>
           {discountPct && (
             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textSecondary, border: `1px solid ${theme.colors.border}` }}>
@@ -227,7 +141,7 @@ const ProjectCard = ({ opp, theme, onClick }) => {
         </div>
         <div className="mt-3 mb-3 h-px" style={{ backgroundColor: theme.colors.border }} />
         <div className="flex items-end justify-end">
-          <p className="font-extrabold text-2xl tracking-tight" style={{ color: theme.colors.accent }}>{fmtCurrency(opp.value)}</p>
+          <p className="font-extrabold text-2xl tracking-tight" style={{ color: theme.colors.accent }}>{displayValue}</p>
         </div>
       </GlassCard>
     </button>
@@ -324,35 +238,44 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
         <div className="h-full flex flex-col" style={{ backgroundColor: theme.colors.background }}>
             <div className={`sticky top-0 z-10 transition-all duration-300 ${isScrolled ? 'shadow-md' : ''}`} style={{ backgroundColor: isScrolled ? `${theme.colors.background}e0` : theme.colors.background, backdropFilter: isScrolled ? 'blur(12px)' : 'none', WebkitBackdropFilter: isScrolled ? 'blur(12px)' : 'none', borderBottom: `1px solid ${isScrolled ? theme.colors.border + '40' : 'transparent'}` }}>
                 <div className="px-4 pt-6 pb-3 flex items-center gap-4">
-                    <div className="flex-1">
-                        <div className="flex items-center gap-4">
-                          {/* Bubble toggle (stretched & height matched) */}
-                          <div className="flex rounded-full border overflow-hidden h-11" style={{ borderColor: theme.colors.border, minWidth: 320 }}>
-                            <button onClick={() => setProjectsTab('pipeline')} className="flex-1 h-full px-6 text-sm font-semibold flex items-center justify-center" style={{ backgroundColor: projectsTab==='pipeline'? theme.colors.accent:'transparent', color: projectsTab==='pipeline'? '#fff': theme.colors.textSecondary }}>
-                              Active Projects
+                    <div className="flex w-full gap-3">
+                        {/* Segmented control grows */}
+                        <div className="flex flex-[2] rounded-full border overflow-hidden h-12" style={{ borderColor: theme.colors.border }}>
+                            <button onClick={() => setProjectsTab('pipeline')} className="flex-1 h-full px-4 text-sm font-semibold flex flex-col items-center justify-center" style={{ backgroundColor: projectsTab==='pipeline'? theme.colors.accent:'transparent', color: projectsTab==='pipeline'? '#fff': theme.colors.textSecondary, lineHeight: '1.05' }}>
+                                <span className="leading-[1.05]">Active</span>
+                                <span className="leading-[1.05] -mt-px">Projects</span>
                             </button>
-                            <button onClick={() => setProjectsTab('my-projects')} className="flex-1 h-full px-6 text-sm font-semibold flex items-center justify-center" style={{ backgroundColor: projectsTab==='my-projects'? theme.colors.accent:'transparent', color: projectsTab==='my-projects'? '#fff': theme.colors.textSecondary }}>
-                              Installations
+                            <button onClick={() => setProjectsTab('my-projects')} className="flex-1 h-full px-4 text-sm font-semibold flex items-center justify-center" style={{ backgroundColor: projectsTab==='my-projects'? theme.colors.accent:'transparent', color: projectsTab==='my-projects'? '#fff': theme.colors.textSecondary }}>
+                                Installations
                             </button>
-                          </div>
                         </div>
+                        {/* Action button grows to occupy remaining space */}
+                        {projectsTab === 'pipeline' && (
+                          <button onClick={() => onNavigate('new-lead')} className="flex-[1] h-12 inline-flex items-center justify-center gap-2 rounded-full text-sm font-semibold transition-all hover:-translate-y-0.5 active:translate-y-0" style={{ backgroundColor: theme.colors.accent, color: '#fff', boxShadow: '0 4px 14px rgba(0,0,0,0.08)' }}>
+                            <Plus className="w-4.5 h-4.5" /> <span className="truncate">New Project</span>
+                          </button>
+                        )}
+                        {projectsTab === 'my-projects' && (
+                          <button onClick={() => onNavigate('add-new-install')} className="flex-[1] h-12 inline-flex items-center justify-center gap-2 rounded-full text-sm font-semibold transition-all hover:-translate-y-0.5 active:translate-y-0" style={{ backgroundColor: theme.colors.accent, color: '#fff', boxShadow: '0 4px 14px rgba(0,0,0,0.08)' }}>
+                            <Plus className="w-4.5 h-4.5" /> <span className="truncate">New Install</span>
+                          </button>
+                        )}
                     </div>
-                    {projectsTab === 'pipeline' && (
-                        <button onClick={() => onNavigate('new-lead')} className="inline-flex h-11 flex-shrink-0 items-center gap-2 px-5 rounded-full text-sm font-semibold transition-all hover:-translate-y-0.5 active:translate-y-0" style={{ backgroundColor: theme.colors.accent, color: '#fff', boxShadow: '0 4px 14px rgba(0,0,0,0.08)' }}><Plus className="w-4.5 h-4.5" /> <span>New Project</span></button>
-                    )}
-                    {projectsTab === 'my-projects' && (
-                        <button onClick={() => onNavigate('add-new-install')} className="inline-flex h-11 flex-shrink-0 items-center gap-2 px-5 rounded-full text-sm font-semibold transition-all hover:-translate-y-0.5 active:translate-y-0" style={{ backgroundColor: theme.colors.accent, color: '#fff', boxShadow: '0 4px 14px rgba(0,0,0,0.08)' }}><Plus className="w-4.5 h-4.5" /> <span>New Install</span></button>
-                    )}
                 </div>
                 {projectsTab === 'pipeline' && (
-                    <div className="px-4 pt-1 pb-3 relative">
+                    <div className="px-4 mt-3 pt-1 pb-3 relative">
                         <div ref={stagesScrollRef} onScroll={updateStageFade} className="relative overflow-x-auto scrollbar-hide">
                             <div className="relative flex items-center gap-4 pb-2 whitespace-nowrap pr-2">
                                 {STAGES.map((stage, i) => {
-                                    const active = selectedPipelineStage === stage; return (
+                                    const active = selectedPipelineStage === stage; 
+                                    const showIndex = stage !== 'Won' && stage !== 'Lost';
+                                    return (
                                       <React.Fragment key={stage}>
-                                        <button ref={el => (stageButtonRefs.current[i] = el)} onClick={() => setSelectedPipelineStage(stage)} className="text-sm font-medium transition-colors" style={{ color: active ? theme.colors.accent : theme.colors.textSecondary }}>{stage}</button>
-                                        {i < STAGES.length -1 && <ArrowRight className="w-3 h-3 opacity-50" style={{ color: theme.colors.textSecondary }} />}
+                                        <button ref={el => (stageButtonRefs.current[i] = el)} onClick={() => setSelectedPipelineStage(stage)} className="flex items-center gap-1 text-sm font-medium transition-colors" style={{ color: active ? theme.colors.accent : theme.colors.textSecondary }}>
+                                          {showIndex && <span className="text-[11px] font-normal opacity-55" style={{ color: active ? theme.colors.textSecondary : theme.colors.textSecondary }}>{i+1}.</span>}
+                                          <span>{stage}</span>
+                                        </button>
+                                        {i < STAGES.length -1 && <ArrowRight className="w-3 h-3 opacity-40" style={{ color: theme.colors.textSecondary }} />}
                                       </React.Fragment>
                                     );
                                 })}
@@ -411,10 +334,10 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
             </div>
             {projectsTab === 'pipeline' && (
                 <div className="fixed bottom-0 left-0 right-0 z-30" style={{ backgroundColor: theme.colors.surface, borderTop: `1px solid ${theme.colors.border}` }}>
-                    <div className="max-w-screen-md mx-auto px-4 py-7">
+                    <div className="max-w-screen-md mx-auto px-5 py-9">
                         <div className="flex items-center justify-between">
-                            <div className="inline-flex items-center gap-2 text-[15px] font-bold" style={{ color: theme.colors.textPrimary }}><span>Total:</span></div>
-                            <div className="text-2xl font-extrabold tracking-tight" style={{ color: theme.colors.accent }}>{fmtCurrency(stageTotals.totalValue)}</div>
+                            <div className="inline-flex items-center gap-2 text-[16px] font-bold" style={{ color: theme.colors.textPrimary }}><span>Total:</span></div>
+                            <div className="text-3xl font-extrabold tracking-tight" style={{ color: theme.colors.accent }}>{fmtCurrency(stageTotals.totalValue)}</div>
                         </div>
                     </div>
                 </div>

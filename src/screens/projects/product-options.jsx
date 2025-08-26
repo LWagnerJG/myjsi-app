@@ -43,8 +43,8 @@ export const VisionOptions = ({ theme, product, productIndex, onUpdate }) => {
     onUpdate(productIndex,'materials',next);
   };
   return (
-    <div className="space-y-4 mt-3 pt-3 border-t" style={{ borderColor: theme.colors.border }}>
-      <div className="flex items-center justify-between p-3 rounded-xl" style={{ backgroundColor: theme.colors.background }}>
+    <div className="space-y-4 mt-3 pt-4 border-t" style={{ borderColor: theme.colors.border }}>
+      <div className="flex items-center justify-between p-3 rounded-xl" style={{ backgroundColor: theme.colors.surface }}>
         <label className="font-semibold" style={{ color: theme.colors.textPrimary }}>Glass Doors?</label>
         <input type="checkbox" className="h-5 w-5 rounded-md border-2" style={{ accentColor: theme.colors.accent, borderColor: theme.colors.border }} checked={!!product.hasGlassDoors} onChange={(e)=>onUpdate(productIndex,'hasGlassDoors',e.target.checked)} />
       </div>

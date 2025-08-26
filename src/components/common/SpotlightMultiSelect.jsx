@@ -24,8 +24,8 @@ export function SpotlightMultiSelect({
     [options, selectedItems]
   );
   const filtered = useMemo(() => {
-    if (!q) return available.slice(0, 12);
-    return available.filter(o => norm(o).includes(norm(q))).slice(0, 12);
+    if (!q) return available; // show all (can scroll, hidden scrollbar handled globally if desired)
+    return available.filter(o => norm(o).includes(norm(q)));
   }, [available, q]);
 
   const exactExists = useMemo(() => available.some(o => norm(o) === norm(q)), [available, q]);
@@ -52,48 +52,29 @@ export function SpotlightMultiSelect({
       if (!anchorRef.current || !menuRef.current) return;
       if (!anchorRef.current.contains(e.target) && !menuRef.current.contains(e.target)) setOpen(false);
     };
-    document.addEventListener("mousedown", close);
-    document.addEventListener("scroll", () => open && setOpen(false), true);
-    window.addEventListener("resize", () => open && setOpen(false));
+    if (open) {
+      document.addEventListener("mousedown", close);
+      document.addEventListener("scroll", close, true);
+      window.addEventListener("resize", close);
+    }
     return () => {
       document.removeEventListener("mousedown", close);
-      document.removeEventListener("scroll", () => {}, true);
-      window.removeEventListener("resize", () => {});
+      document.removeEventListener("scroll", close, true);
+      window.removeEventListener("resize", close);
     };
   }, [open]);
 
-  const pick = (val) => {
-    if (!val) return;
-    onAddItem?.(val);
-    setQ("");
-    setOpen(false);
-  };
-
-  const create = () => {
-    const name = q.trim();
-    if (!name) return;
-    onAddNew?.(name);
-    onAddItem?.(name);
-    setQ("");
-    setOpen(false);
-  };
+  const pick = (val) => { if (!val) return; onAddItem?.(val); setQ(""); setOpen(false); };
+  const create = () => { const name = q.trim(); if (!name) return; onAddNew?.(name); onAddItem?.(name); setQ(""); setOpen(false); };
 
   const Menu = () =>
     createPortal(
       <div
         ref={menuRef}
-        className="fixed rounded-2xl overflow-hidden"
-        style={{
-          top: pos.top,
-          left: pos.left,
-          width: pos.width,
-          background: palette.bg,
-          border: `1px solid ${palette.border}`,
-          boxShadow: "0 18px 44px rgba(0,0,0,.14)",
-          zIndex: 9999,
-        }}
+        className="fixed rounded-2xl overflow-hidden shadow-2xl border custom-scroll-hide"
+        style={{ top: pos.top, left: pos.left, width: pos.width, background: palette.bg, border: `1px solid ${palette.border}`, zIndex: 9999, maxHeight: 360, overflowY: 'auto' }}
       >
-        <div className="max-h-72 overflow-auto py-1">
+        <div className="py-1">
           {filtered.map((opt) => (
             <button
               key={opt}
@@ -106,7 +87,7 @@ export function SpotlightMultiSelect({
           ))}
           {canCreate && (
             <>
-              {filtered.length > 0 && <div className="h-px my-1" style={{ background: palette.border }} />}
+              <div className="h-px my-1" style={{ background: palette.border }} />
               <button
                 className="w-full text-left px-3 py-2 text-sm font-semibold flex items-center gap-2 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                 style={{ color: palette.accent }}
@@ -134,16 +115,11 @@ export function SpotlightMultiSelect({
 
       <div
         ref={anchorRef}
-        className="flex items-center gap-2 px-3 cursor-text focus-ring"
-        style={{
-          height: 48,
-          borderRadius: 24, // Increased border radius for rounder shape
-          background: palette.field,
-          border: `1px solid ${palette.border}`,
-        }}
+        className="flex items-center gap-2 px-3 cursor-text"
+        style={{ height: 46, borderRadius: 24, background: palette.field, border: `1px solid ${palette.border}` }}
         onClick={() => setOpen(true)}
       >
-        <Search className="w-4.5 h-4.5" style={{ color: palette.hint }} />
+        <Search className="w-3.5 h-3.5" style={{ color: palette.hint }} />
         <input
           value={q}
           onChange={(e) => { setQ(e.target.value); setOpen(true); }}

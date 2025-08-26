@@ -298,3 +298,8 @@ export const PRODUCTS_CATEGORIES_DATA = [
         ].map(localImage)
     }
 ];
+
+// Unique JSI series list (derived from PRODUCT_DATA) for spotlight product search / selection
+export const JSI_SERIES = Array.from(new Set(
+    Object.values(PRODUCT_DATA).flatMap(cat => (cat.products || []).map(p => p.name))
+)).sort();
