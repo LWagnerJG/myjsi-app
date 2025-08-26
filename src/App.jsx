@@ -25,7 +25,7 @@ const LeadTimesScreen = React.lazy(() => import('./screens/resources/lead-times/
 const ContractsScreen = React.lazy(() => import('./screens/resources/contracts/index.js'));
 const DealerDirectoryScreen = React.lazy(() => import('./screens/resources/dealer-directory/index.js'));
 const DiscontinuedFinishesScreen = React.lazy(() => import('./screens/resources/discontinued-finishes/index.js'));
-const DesignDaysScreen = React.lazy(() => import('./screens/resources/design-days/index.js'));
+const TradeshowsScreen = React.lazy(() => import('./screens/resources/tradeshows/index.js'));
 const SampleDiscountsScreen = React.lazy(() => import('./screens/resources/sample-discounts/index.js'));
 const LoanerPoolScreen = React.lazy(() => import('./screens/resources/loaner-pool/index.js'));
 const InstallInstructionsScreen = React.lazy(() => import('./screens/resources/install-instructions/index.js'));
@@ -56,10 +56,11 @@ const ScreenRouter = ({ screenKey, projectsScreenRef, SuspenseFallback, ...rest 
     // Resource route normalization (support legacy underscore routes)
     if (base === 'resources') {
         const slug = parts.slice(1).join('/');
-        // Map underscore legacy to hyphen
+        // Map underscore legacy to hyphen / new routes, include old design-days -> tradeshows
         const normalized = slug
             .replace('discontinued_finishes', 'discontinued-finishes')
-            .replace('design_days', 'design-days')
+            .replace('design_days', 'tradeshows')
+            .replace('design-days', 'tradeshows')
             .replace('sample_discounts', 'sample-discounts')
             .replace('loaner_pool', 'loaner-pool')
             .replace('install_instructions', 'install-instructions')
@@ -75,7 +76,7 @@ const ScreenRouter = ({ screenKey, projectsScreenRef, SuspenseFallback, ...rest 
             case 'contracts': return lazyWrap(ContractsScreen);
             case 'dealer-directory': return lazyWrap(DealerDirectoryScreen);
             case 'discontinued-finishes': return lazyWrap(DiscontinuedFinishesScreen);
-            case 'design-days': return lazyWrap(DesignDaysScreen);
+            case 'tradeshows': return lazyWrap(TradeshowsScreen);
             case 'sample-discounts': return lazyWrap(SampleDiscountsScreen);
             case 'loaner-pool': return lazyWrap(LoanerPoolScreen);
             case 'install-instructions': return lazyWrap(InstallInstructionsScreen);
