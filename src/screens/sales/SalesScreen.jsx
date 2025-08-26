@@ -1,10 +1,12 @@
 import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Modal } from '../../components/common/Modal';
-import { ArrowUp, TrendingUp, Award, DollarSign, BarChart, Table } from 'lucide-react';
+import { ArrowUp, ArrowDown, TrendingUp, Award, DollarSign, BarChart, Table } from 'lucide-react';
 import { MONTHLY_SALES_DATA, SALES_VERTICALS_DATA } from './data.js';
 import { ORDER_DATA, STATUS_COLORS } from '../orders/data.js';
 import { SalesByVerticalBreakdown } from './components/SalesByVerticalBreakdown.jsx';
+import { CountUp } from '../../components/common/CountUp.jsx';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const formatCompanyName = (name) =>
     name
@@ -66,9 +68,11 @@ const SegmentedTabs = ({ theme, active, onChange }) => {
             style={{ borderBottom: `1px solid ${theme.colors.border}` }}
         >
             {u.ready && (
-                <div
-                    className="absolute bottom-0 h-[3px] rounded-full transition-all"
+                <motion.div
+                    layout
+                    className="absolute bottom-0 h-[3px] rounded-full"
                     style={{ left: u.left, width: u.width, background: theme.colors.accent }}
+                    transition={{ type: 'spring', stiffness: 220, damping: 30 }}
                 />
             )}
             {tabs.map((t, i) => {
@@ -97,7 +101,7 @@ const MonthlyBarChart = ({ data, theme, onMonthSelect, dataType = 'bookings' }) 
     const maxValue = Math.max(...data.map((d) => (dataType === 'bookings' ? d.bookings : d.sales)));
     return (
         <div className="space-y-4">
-            {data.map((item) => {
+            {data.map((item, idx) => {
                 const value = dataType === 'bookings' ? item.bookings : item.sales;
                 const pct = Math.min(99.4, ((value || 0) / maxValue) * 100);
                 return (
@@ -106,9 +110,12 @@ const MonthlyBarChart = ({ data, theme, onMonthSelect, dataType = 'bookings' }) 
                             {item.month}
                         </span>
                         <div className="h-3 rounded-full relative overflow-hidden" style={{ backgroundColor: theme.colors.border }}>
-                            <div
-                                className="absolute inset-y-0 left-0 rounded-full transition-all duration-300"
-                                style={{ width: `${pct}%`, backgroundColor: theme.colors.accent }}
+                            <motion.div
+                                className="absolute inset-y-0 left-0 rounded-full"
+                                initial={{ width: 0 }}
+                                animate={{ width: pct + '%' }}
+                                transition={{ duration: 0.5, delay: idx * 0.03, ease: [0.4, 0, 0.2, 1] }}
+                                style={{ backgroundColor: theme.colors.accent }}
                             />
                         </div>
                         <button
@@ -135,7 +142,7 @@ const MonthlyTable = ({ data, theme, onMonthSelect }) => (
         {data.map((m) => (
             <div
                 key={m.month}
-                className="grid grid-cols-3 border-b cursor-pointer hover:bg-black/5 dark:hover:bg-white/5"
+                className="grid grid-cols-3 border-b cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                 style={{ borderColor: theme.colors.subtle }}
                 onClick={() => onMonthSelect(m)}
             >
@@ -353,6 +360,8 @@ export const SalesScreen = ({ theme, onNavigate }) => {
         };
     }, [showTrendInfo]);
 
+    const prefersReduced = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
     return (
         <div className="flex flex-col h-full">
             <div
@@ -372,31 +381,43 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                 <div className="px-4 space-y-4 pt-2 pb-4 max-w-6xl mx-auto">
                     <div className="p-6 rounded-[2.5rem] shadow-sm border" style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.border }}>
                         <div className="flex justify-between items-start mb-3">
-                            <h3 className="font-bold text-xl" style={{ color: theme.colors.textPrimary }}>
-                                Progress to Goal
-                            </h3>
+                            <h3 className="font-bold text-xl" style={{ color: theme.colors.textPrimary }}>Progress to Goal</h3>
                             <div className="relative" ref={trendRef}>
                                 <div
                                     className="flex items-center space-x-1 px-3 py-1 rounded-full cursor-pointer select-none"
                                     onClick={() => (showTrendInfo ? setShowTrendInfo(false) : openTrend())}
-                                    style={{ backgroundColor: theme.colors.subtle, color: theme.colors.accent }}
+                                    style={deltaVsLinear < 0 ? {
+                                        backgroundColor: '#cf8492',
+                                        color: '#fff'
+                                    } : {
+                                        backgroundColor: theme.colors.subtle,
+                                        color: 'green'
+                                    }}
                                 >
-                                    <ArrowUp className="w-3 h-3" />
-                                    <span className="text-xs font-bold">{deltaLabel}</span>
+                                    {deltaVsLinear >= 0 ? (
+                                        <ArrowUp className="w-3 h-3" />
+                                    ) : (
+                                        <ArrowDown className="w-3 h-3" />
+                                    )}
+                                    <span className="text-xs font-bold">{Math.abs(deltaVsLinear).toFixed(1)}%</span>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Value headline */}
                         <div className="flex items-end gap-3 mb-3">
                             <p className="text-5xl leading-none font-bold" style={{ color: theme.colors.accent }}>
-                                {percentToGoal.toFixed(1)}%
+                                <CountUp value={percentToGoal} decimals={1} suffix="%" />
                             </p>
                         </div>
 
-                        {/* Single thin progress bar with larger labels */}
                         <div className="relative w-full h-6 rounded-full mb-2" style={{ backgroundColor: theme.colors.border }}>
-                            <div className="h-full rounded-full transition-all duration-500" style={{ width: `${percentToGoal}%`, backgroundColor: theme.colors.accent }} />
+                            <motion.div
+                                className="h-full rounded-full"
+                                initial={{ width: 0 }}
+                                animate={{ width: percentToGoal + '%' }}
+                                transition={prefersReduced ? { duration: 0 } : { type: 'spring', stiffness: 140, damping: 22 }}
+                                style={{ backgroundColor: theme.colors.accent }}
+                            />
                             {(() => {
                                 const current = (totalBookings / 1000000).toFixed(1);
                                 const goalM = (goal / 1000000).toFixed(1);
@@ -419,7 +440,6 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                                 );
                             })()}
                         </div>
-
 
                         <p className="text-[11px] font-medium" style={{ color: theme.colors.textSecondary }}>
                             Year elapsed: {yearProgressPercent.toFixed(1)}%
@@ -486,9 +506,12 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                             Recent Orders
                         </h3>
                         <div>
-                            {displayedRecent.map((order) => (
-                                <div
+                            {displayedRecent.map((order, i) => (
+                                <motion.div
                                     key={order.orderNumber}
+                                    initial={{ opacity: 0, y: 8 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.35, delay: i * 0.04, ease: [0.4, 0, 0.2, 1] }}
                                     className="py-4 border-b last:border-b-0 cursor-pointer hover:bg-black/5 dark:hover:bg-white/10 px-1 rounded-lg transition-colors"
                                     style={{ borderColor: theme.colors.subtle }}
                                     onClick={() => setSelectedOrder(order)}
@@ -513,7 +536,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                                     >
                                         {order.status}
                                     </span>
-                                </div>
+                                </motion.div>
                             ))}
                             {numRecentOrders < allRecentOrders.length && (
                                 <button onClick={showMoreOrders} className="w-full text-center text-xs font-semibold mt-2 py-3 hover:underline" style={{ color: theme.colors.accent }}>
@@ -539,11 +562,15 @@ export const SalesScreen = ({ theme, onNavigate }) => {
 
             <OrderModal order={selectedOrder} onClose={() => setSelectedOrder(null)} theme={theme} />
 
-            {/* Trend info popover rendered on top of everything via portal */}
-            {showTrendInfo &&
-                createPortal(
-                    <div
+            {/* Trend info popover rendered on top of everything via portal with animation */}
+            <AnimatePresence>
+                {showTrendInfo && createPortal(
+                    <motion.div
                         ref={popoverRef}
+                        initial={{ opacity: 0, scale: 0.96, y: 4 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.96, y: 4 }}
+                        transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
                         className="rounded-2xl shadow-xl text-[11px]"
                         style={{
                             position: 'fixed',
@@ -564,10 +591,10 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                             <br />
                             Year: {yearProgressPercent.toFixed(1)}%
                         </p>
-                        
-                    </div>,
+                    </motion.div>,
                     document.body
                 )}
+            </AnimatePresence>
         </div>
     );
 };

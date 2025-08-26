@@ -4,11 +4,8 @@
     "\\src",
     "\\src\\screens",
     "\\src\\screens\\resources",
-    "\\src\\screens\\resources\\discontinued-finishes",
-    "\\src\\screens\\resources\\lead-times",
-    "\\src\\screens\\sales",
-    "\\src\\screens\\sales\\commissions"
+    "\\src\\screens\\sales"
   ],
-  "SelectedNode": "\\src\\screens\\sales\\data.js",
+  "SelectedNode": "\\src\\screens\\sales\\SalesScreen.jsx",
   "PreviewInSolutionExplorer": false
 }
