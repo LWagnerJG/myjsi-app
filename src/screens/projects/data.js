@@ -6,9 +6,15 @@ export const MY_PROJECTS_DATA = [
   { id: 'proj4', name: 'Downtown Library', location: 'Indianapolis, IN', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_coldjet_install_00001.jpg' },
 ];
 
+// Use only valid discount option strings from DISCOUNT_OPTIONS list
 export const INITIAL_OPPORTUNITIES = [
-  { id: 1, name: 'New Office Furnishings', stage: 'Discovery', discount: '5%', value: '$50,000', company: 'ABC Corporation', contact: 'John Smith', poTimeframe: '30-60 days' },
-  { id: 2, name: 'Lobby Refresh', stage: 'Specifying', value: '$75,000', company: 'XYZ Industries', contact: 'Jane Doe', poTimeframe: '60-90 days' }
+  { id: 1, name: 'New Office Furnishings', stage: 'Discovery', discount: '50/20/5 (62.00%)', value: '$50,000', company: 'ABC Corporation', contact: 'John Smith', poTimeframe: '30-60 days' },
+  { id: 3, name: 'Corporate Expansion Towers', stage: 'Discovery', discount: '50/20/3 (61.20%)', value: '$180,000', company: 'GlobalTech', contact: 'Sara Lin', poTimeframe: '60-90 days' },
+  { id: 4, name: 'Medical Wing Remodel', stage: 'Discovery', discount: '50/20/2 (60.80%)', value: '$95,000', company: 'Midwest Health', contact: 'Alan Cooper', poTimeframe: '30-60 Days' },
+  { id: 5, name: 'University Commons Refresh', stage: 'Discovery', discount: '50/20 (60.00%)', value: '$120,000', company: 'State University', contact: 'Emily Raine', poTimeframe: '90+ Days' },
+  { id: 6, name: 'Hotel Lobby Seating', stage: 'Discovery', discount: '50/20/6 (62.40%)', value: '$70,000', company: 'Metro Hospitality', contact: 'Chris Dow', poTimeframe: '60-90 days' },
+  { id: 7, name: 'Startup Collaboration Space', stage: 'Discovery', discount: '50/20/4 (61.60%)', value: '$42,000', company: 'Innovate Labs', contact: 'Priya Patel', poTimeframe: 'Within 30 Days' },
+  { id: 2, name: 'Lobby Refresh', stage: 'Specifying', discount: '50/20/8 (63.20%)', value: '$75,000', company: 'XYZ Industries', contact: 'Jane Doe', poTimeframe: '60-90 days' }
 ];
 
 export const STAGES = ['Discovery', 'Specifying', 'Decision/Bidding', 'PO Expected', 'Won', 'Lost'];

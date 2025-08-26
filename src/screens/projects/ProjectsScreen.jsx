@@ -32,22 +32,18 @@ const ReadOnlyList = ({ items, theme }) => (
   </div>
 );
 
-// Rich editable opportunity detail (enhanced)
+// Rich editable opportunity detail (unchanged logic)
 const OpportunityDetail = ({ opp, theme, onBack, onUpdate }) => {
   const [editMode, setEditMode] = useState(false);
   const [draft, setDraft] = useState(opp);
-  const [activeField, setActiveField] = useState(null); // which chip is being edited
-  const [showQuotePreview, setShowQuotePreview] = useState(null); // quote object
+  const [activeField, setActiveField] = useState(null);
+  const [showQuotePreview, setShowQuotePreview] = useState(null);
   useEffect(() => { setDraft(opp); }, [opp]);
   const update = (k, v) => setDraft(p => ({ ...p, [k]: v }));
   const toggleCompetitor = (c) => { const list = draft.competitors || []; const next = list.includes(c) ? list.filter(x => x !== c) : [...list, c]; update('competitors', next); };
   const save = () => { onUpdate(draft); setEditMode(false); setActiveField(null); };
   const cancel = () => { setDraft(opp); setEditMode(false); setActiveField(null); };
-
-  // sample quotes placeholder
   const quotes = draft.quotes || [ { id:'q1', name: 'Quote 100234 Rev A', url: 'https://webresources.jsifurniture.com/production/uploads/documents/JSI-BrandDoc-COMCOLOrderForm-0321.pdf' } ];
-
-  // Inline editor panel
   const EditorPanel = () => {
     if (!activeField) return null;
     const panelStyle = { backgroundColor: theme.colors.surface, border: `1px solid ${theme.colors.border}` };
@@ -78,7 +74,6 @@ const OpportunityDetail = ({ opp, theme, onBack, onUpdate }) => {
   return (
     <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
       <div className="px-4 pt-6 pb-40 space-y-6 overflow-y-auto scrollbar-hide">
-        {/* Header Card */}
         <GlassCard theme={theme} className="p-6 space-y-4 relative">
           <button onClick={() => { if(editMode) save(); else setEditMode(true); }} className="absolute top-4 right-4 px-4 py-2 rounded-full text-xs font-semibold flex items-center gap-2" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary, border: `1px solid ${theme.colors.border}` }}>
             {editMode ? <>Save</> : <>Edit</>}
@@ -213,12 +208,12 @@ const OpportunityDetail = ({ opp, theme, onBack, onUpdate }) => {
   );
 };
 
-// Reintroduced ProjectCard component for pipeline opportunities
+// ProjectCard cleaned (no gradient, no duplicate % icon)
 const ProjectCard = ({ opp, theme, onClick }) => {
   const discountPct = typeof opp.discount === 'string' ? opp.discount : typeof opp.discount === 'number' ? `${opp.discount}%` : null;
   return (
     <button onClick={onClick} className="w-full text-left group" style={{ WebkitTapHighlightColor: 'transparent' }}>
-      <GlassCard theme={theme} className="p-5 transition-all duration-200 rounded-2xl hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0" style={{ background: `linear-gradient(140deg, ${theme.colors.surface} 0%, ${theme.colors.subtle} 70%, ${theme.colors.surface} 100%)`, border: `1px solid ${theme.colors.border}` }}>
+      <GlassCard theme={theme} className="p-5 transition-all duration-200 rounded-2xl hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${theme.colors.border}` }}>
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="font-semibold text-[15px] leading-snug truncate" style={{ color: theme.colors.textPrimary }}>{opp.name}</p>
@@ -226,7 +221,7 @@ const ProjectCard = ({ opp, theme, onClick }) => {
           </div>
           {discountPct && (
             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textSecondary, border: `1px solid ${theme.colors.border}` }}>
-              <Percent className="w-3.5 h-3.5 mr-1" /> {discountPct}
+              {discountPct}
             </span>
           )}
         </div>
@@ -239,7 +234,6 @@ const ProjectCard = ({ opp, theme, onClick }) => {
   );
 };
 
-// Extended project detail for installations (updated: no internal back button; add photo support)
 const InstallationDetail = ({ project, theme, onAddPhoto, onAddPhotoFiles }) => {
   const fileRef = React.useRef(null);
   return (
@@ -278,7 +272,6 @@ const InstallationDetail = ({ project, theme, onAddPhoto, onAddPhotoFiles }) => 
 };
 
 export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, setOpportunities, myProjects, setMyProjects, projectsInitialTab, clearProjectsInitialTab }, ref) => {
-    // override tab if provided once
     const initial = projectsInitialTab || 'pipeline';
     const [projectsTab, setProjectsTab] = useState(initial);
     useEffect(() => { if (projectsInitialTab) clearProjectsInitialTab && clearProjectsInitialTab(); }, [projectsInitialTab, clearProjectsInitialTab]);
@@ -301,15 +294,10 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
         const el = stagesScrollRef.current; if (!el) return; const { scrollLeft, scrollWidth, clientWidth } = el; setShowStageFadeLeft(scrollLeft > 4); setShowStageFadeRight(scrollLeft + clientWidth < scrollWidth - 4);
     }, []);
 
-    const [mainTabSlider, setMainTabSlider] = useState({ left: 0, width: 0, opacity: 0 });
     const [stageSlider, setStageSlider] = useState({ left: 0, width: 0, opacity: 0 });
-    const mainTabRefs = useRef([]); const stageButtonRefs = useRef([]);
-
-    useEffect(() => { const idx = projectsTab === 'pipeline' ? 0 : 1; const el = mainTabRefs.current[idx]; if (el) setMainTabSlider({ left: el.offsetLeft, width: el.offsetWidth, opacity: 1 }); }, [projectsTab]);
+    const stageButtonRefs = useRef([]);
     useEffect(() => { const idx = STAGES.findIndex(s => s === selectedPipelineStage); const el = stageButtonRefs.current[idx]; if (el) setStageSlider({ left: el.offsetLeft, width: el.offsetWidth, opacity: 1 }); }, [selectedPipelineStage]);
     useEffect(() => { updateStageFade(); }, [projectsTab, updateStageFade]);
-
-    const handleAddClick = () => { onNavigate('new-lead'); };
 
     const filteredOpportunities = useMemo(() => (opportunities || []).filter(o => o.stage === selectedPipelineStage), [selectedPipelineStage, opportunities]);
 
@@ -326,45 +314,46 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
     const addInstallPhotos = (files) => {
       if (!files || !selectedInstall) return; const arr = Array.from(files);
       setMyProjects(prev => prev.map(p => p.id === selectedInstall.id ? { ...p, photos: [...(p.photos||[]), ...arr] } : p));
-      // update local state
       setSelectedInstall(prev => prev ? { ...prev, photos: [...(prev.photos||[]), ...arr] } : prev);
     };
 
     if (selectedOpportunity) return <OpportunityDetail opp={selectedOpportunity} theme={theme} onBack={() => setSelectedOpportunity(null)} onUpdate={(u)=>{updateOpportunity(u); setSelectedOpportunity(u);}} />;
     if (selectedInstall) return <InstallationDetail project={selectedInstall} theme={theme} onAddPhotoFiles={addInstallPhotos} />;
 
-    // New button logic
-    const showAddProjectBtn = projectsTab === 'pipeline';
-    const showAddInstallBtn = projectsTab === 'my-projects';
-
     return (
         <div className="h-full flex flex-col" style={{ backgroundColor: theme.colors.background }}>
             <div className={`sticky top-0 z-10 transition-all duration-300 ${isScrolled ? 'shadow-md' : ''}`} style={{ backgroundColor: isScrolled ? `${theme.colors.background}e0` : theme.colors.background, backdropFilter: isScrolled ? 'blur(12px)' : 'none', WebkitBackdropFilter: isScrolled ? 'blur(12px)' : 'none', borderBottom: `1px solid ${isScrolled ? theme.colors.border + '40' : 'transparent'}` }}>
                 <div className="px-4 pt-6 pb-3 flex items-center gap-4">
                     <div className="flex-1">
-                        <div className="relative">
-                            <div className="flex gap-5 pb-2">
-                                <button ref={el => (mainTabRefs.current[0] = el)} onClick={() => setProjectsTab('pipeline')} className="text-[14px] md:text-[15px] font-semibold" style={{ color: projectsTab === 'pipeline' ? theme.colors.accent : theme.colors.textSecondary }}>Active Projects</button>
-                                <button ref={el => (mainTabRefs.current[1] = el)} onClick={() => setProjectsTab('my-projects')} className="text-[14px] md:text-[15px] font-semibold" style={{ color: projectsTab === 'my-projects' ? theme.colors.accent : theme.colors.textSecondary }}>Installations</button>
-                            </div>
-                            <div className="absolute left-0 right-0 bottom-0 h-px" style={{ backgroundColor: theme.colors.border }} />
-                            <div className="absolute bottom-0 h-[2px] rounded-full transition-all duration-300" style={{ left: mainTabSlider.left, width: mainTabSlider.width, backgroundColor: theme.colors.accent, opacity: mainTabSlider.opacity }} />
+                        <div className="flex items-center gap-4">
+                          {/* Bubble toggle (stretched & height matched) */}
+                          <div className="flex rounded-full border overflow-hidden h-11" style={{ borderColor: theme.colors.border, minWidth: 320 }}>
+                            <button onClick={() => setProjectsTab('pipeline')} className="flex-1 h-full px-6 text-sm font-semibold flex items-center justify-center" style={{ backgroundColor: projectsTab==='pipeline'? theme.colors.accent:'transparent', color: projectsTab==='pipeline'? '#fff': theme.colors.textSecondary }}>
+                              Active Projects
+                            </button>
+                            <button onClick={() => setProjectsTab('my-projects')} className="flex-1 h-full px-6 text-sm font-semibold flex items-center justify-center" style={{ backgroundColor: projectsTab==='my-projects'? theme.colors.accent:'transparent', color: projectsTab==='my-projects'? '#fff': theme.colors.textSecondary }}>
+                              Installations
+                            </button>
+                          </div>
                         </div>
                     </div>
                     {projectsTab === 'pipeline' && (
-                        <button onClick={() => onNavigate('new-lead')} className="inline-flex flex-shrink-0 items-center gap-2 px-6 py-2.5 rounded-full text-sm font-semibold transition-all hover:-translate-y-0.5 active:translate-y-0" style={{ backgroundColor: theme.colors.accent, color: '#fff', boxShadow: '0 4px 14px rgba(0,0,0,0.08)' }}><Plus className="w-4.5 h-4.5" /> <span>New Project</span></button>
+                        <button onClick={() => onNavigate('new-lead')} className="inline-flex h-11 flex-shrink-0 items-center gap-2 px-5 rounded-full text-sm font-semibold transition-all hover:-translate-y-0.5 active:translate-y-0" style={{ backgroundColor: theme.colors.accent, color: '#fff', boxShadow: '0 4px 14px rgba(0,0,0,0.08)' }}><Plus className="w-4.5 h-4.5" /> <span>New Project</span></button>
                     )}
                     {projectsTab === 'my-projects' && (
-                        <button onClick={() => onNavigate('add-new-install')} className="inline-flex flex-shrink-0 items-center gap-2 px-6 py-2.5 rounded-full text-sm font-semibold transition-all hover:-translate-y-0.5 active:translate-y-0" style={{ backgroundColor: theme.colors.accent, color: '#fff', boxShadow: '0 4px 14px rgba(0,0,0,0.08)' }}><Plus className="w-4.5 h-4.5" /> <span>New Install</span></button>
+                        <button onClick={() => onNavigate('add-new-install')} className="inline-flex h-11 flex-shrink-0 items-center gap-2 px-5 rounded-full text-sm font-semibold transition-all hover:-translate-y-0.5 active:translate-y-0" style={{ backgroundColor: theme.colors.accent, color: '#fff', boxShadow: '0 4px 14px rgba(0,0,0,0.08)' }}><Plus className="w-4.5 h-4.5" /> <span>New Install</span></button>
                     )}
                 </div>
                 {projectsTab === 'pipeline' && (
                     <div className="px-4 pt-1 pb-3 relative">
-                        <div ref={stagesScrollRef} onScroll={updateStageFade} className="relative overflow-x-auto scrollbar-hide" style={{ scrollSnapType: 'x proximity' }}>
-                            <div className="relative flex gap-7 pb-2 whitespace-nowrap pr-2">
+                        <div ref={stagesScrollRef} onScroll={updateStageFade} className="relative overflow-x-auto scrollbar-hide">
+                            <div className="relative flex items-center gap-4 pb-2 whitespace-nowrap pr-2">
                                 {STAGES.map((stage, i) => {
                                     const active = selectedPipelineStage === stage; return (
-                                        <button key={stage} ref={el => (stageButtonRefs.current[i] = el)} onClick={() => setSelectedPipelineStage(stage)} className={`flex items-center gap-1 text-sm font-medium transition-opacity ${active ? '' : 'opacity-80 hover:opacity-100'}`} style={{ color: active ? theme.colors.accent : theme.colors.textSecondary }}>{stage}{!active && <ArrowRight className="w-3 h-3 opacity-40" />}</button>
+                                      <React.Fragment key={stage}>
+                                        <button ref={el => (stageButtonRefs.current[i] = el)} onClick={() => setSelectedPipelineStage(stage)} className="text-sm font-medium transition-colors" style={{ color: active ? theme.colors.accent : theme.colors.textSecondary }}>{stage}</button>
+                                        {i < STAGES.length -1 && <ArrowRight className="w-3 h-3 opacity-50" style={{ color: theme.colors.textSecondary }} />}
+                                      </React.Fragment>
                                     );
                                 })}
                                 <div className="absolute left-0 right-0 bottom-0 h-px" style={{ backgroundColor: theme.colors.border }} />
@@ -377,7 +366,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
                 )}
             </div>
             <div ref={scrollContainerRef} onScroll={handleScroll} className="flex-1 overflow-y-auto scrollbar-hide">
-                <div className="px-4 pt-4 pb-32 space-y-3">
+                <div className="px-4 pt-4 pb-40 space-y-3">
                     {projectsTab === 'pipeline' && (
                         filteredOpportunities.length ? (
                             filteredOpportunities.map(opp => <ProjectCard key={opp.id} opp={opp} theme={theme} onClick={() => setSelectedOpportunity(opp)} />)
@@ -422,7 +411,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
             </div>
             {projectsTab === 'pipeline' && (
                 <div className="fixed bottom-0 left-0 right-0 z-30" style={{ backgroundColor: theme.colors.surface, borderTop: `1px solid ${theme.colors.border}` }}>
-                    <div className="max-w-screen-md mx-auto px-4 py-5">
+                    <div className="max-w-screen-md mx-auto px-4 py-7">
                         <div className="flex items-center justify-between">
                             <div className="inline-flex items-center gap-2 text-[15px] font-bold" style={{ color: theme.colors.textPrimary }}><span>Total:</span></div>
                             <div className="text-2xl font-extrabold tracking-tight" style={{ color: theme.colors.accent }}>{fmtCurrency(stageTotals.totalValue)}</div>
