@@ -405,7 +405,7 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
             <div className="flex-1 overflow-y-auto scrollbar-hide" style={{ backgroundColor: theme.colors.background }}>
                 {/* Sticky Category + Set Buttons */}
                 <div
-                    className="sticky top-0 z-10 px-4 pt-4 pb-3 space-y-3"
+                    className="sticky top-0 z-10 px-4 pt-2 pb-3 space-y-3"
                     style={{
                         background: theme.colors.background, // fully opaque to prevent bleed-through
                         backdropFilter: 'none',
