@@ -21,7 +21,7 @@ const sublabelMap = {
     'Request Field Visit': 'Onsite tech scheduling',
     'Social Media': 'Brand share kit',
     'Presentations': 'Slide deck library',
-    'Design Days': 'Event schedule and agenda',
+    'Tradeshows': 'Select and view show info',
     'New Dealer Sign-Up': 'Sign up new dealers'
 };
 
@@ -76,7 +76,8 @@ export const ResourcesScreen = ({ theme, onNavigate, homeApps }) => {
         if (label.includes('Field Visit')) return MapPin;
         if (label.includes('Presentations')) return MonitorPlay;
         if (label.includes('Install')) return Wrench;
-        if (label.includes('Design Days')) return Calendar;
+        if (label.includes('Tradeshow')) return Calendar;
+        if (label.includes('Tradeshows')) return Calendar;
         // Core app labels mapping fallback to Database icon
         if (Object.values(CORE_LABELS).includes(label)) return Database;
         return Database;

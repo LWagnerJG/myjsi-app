@@ -32,7 +32,7 @@ export const RESOURCES_DATA = [
         items: [
             { label: "Presentations", nav: "resources/presentations" },
             { label: "Social Media", nav: "resources/social-media" },
-            { label: "Design Days", nav: "resources/design-days" },
+            { label: "Tradeshows", nav: "resources/tradeshows" },
         ].sort((a, b) => a.label.localeCompare(b.label))
     }
 ];

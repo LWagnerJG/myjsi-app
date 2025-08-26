@@ -39,5 +39,5 @@ export const allApps = [
     { name: 'Settings', route: 'settings', icon: Settings },
     { name: 'Help', route: 'help', icon: HelpCircle },
     { name: 'Feedback', route: 'feedback', icon: Send },
-    { name: 'Design Days', route: 'resources/design_days', icon: Calendar },
+    { name: 'Tradeshows', route: 'resources/tradeshows', icon: Calendar },
 ];
