@@ -117,7 +117,7 @@ export const CommunityScreen = ({
 
     const submitComment = (e) => { e.preventDefault(); const text = draft.trim(); if (!text) return; onAddComment?.(post.id, text); setDraft(''); if (!expandedComments[post.id]) toggleComments(post.id); };
     return (
-      <GlassCard theme={theme} className="p-4 rounded-[24px] shadow-sm space-y-3">
+      <GlassCard theme={theme} className="p-4 rounded-[24px] shadow-sm space-y-3 w-full" >
         <div className="flex items-start gap-3">
           <Avatar src={post.user?.avatar} alt={post.user?.name} />
           <div className="flex-1 min-w-0">
@@ -249,7 +249,7 @@ export const CommunityScreen = ({
           </div>
         </div>
       )}
-      <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto no-scrollbar px-4 pb-10 pt-4 space-y-4">
+      <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto no-scrollbar pb-10 pt-2 space-y-4">
         {effectiveViewMode==='feed' && !filteredContent.length && (
           <div className="text-center text-sm pt-20" style={{ color: theme.colors.textSecondary }}>No content found.</div>
         )}
