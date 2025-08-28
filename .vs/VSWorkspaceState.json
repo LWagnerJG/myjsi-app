@@ -1,11 +1,15 @@
 {
   "ExpandedNodes": [
     "",
+    "\\public",
+    "\\public\\category-images",
+    "\\public\\category-images\\casegood-images",
+    "\\public\\social-media-images",
     "\\src",
     "\\src\\screens",
     "\\src\\screens\\resources",
-    "\\src\\screens\\sales"
+    "\\src\\screens\\resources\\lead-times"
   ],
-  "SelectedNode": "\\src\\screens\\sales\\SalesScreen.jsx",
+  "SelectedNode": "\\src\\screens\\resources\\lead-times\\data.js",
   "PreviewInSolutionExplorer": false
 }

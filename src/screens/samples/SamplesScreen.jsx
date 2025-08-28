@@ -7,7 +7,8 @@ import {
 } from 'lucide-react';
 import { SAMPLE_PRODUCTS, SAMPLE_CATEGORIES, FINISH_CATEGORIES, FINISH_SAMPLES } from './data.js';
 import { getSampleProduct } from './sampleIndex.js';
-import { useToasts } from '../../components/common/ToastHost.jsx';
+// Removed toast import since we no longer show bottom toast on submit
+// import { useToasts } from '../../components/common/ToastHost.jsx';
 
 const idOf = (x) => String(x);
 
@@ -156,9 +157,8 @@ const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, designFi
     const [address1, setAddress1] = useState(userSettings?.homeAddress || '');
     const [address2, setAddress2] = useState('');
     const [justSubmitted, setJustSubmitted] = useState(false);
-    const toasts = useToasts();
+    // const toasts = useToasts(); // no longer used (removed bottom toast)
 
-    // helper to safely set values (avoid undefined which triggers uncontrolled warning)
     const safeSetShipTo = (v) => setShipToName(v ?? '');
     const safeSetAddress1 = (v) => setAddress1(v ?? '');
     const safeSetAddress2 = (v) => setAddress2(v ?? '');
@@ -186,20 +186,24 @@ const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, designFi
 
     const submit = useCallback(() => {
         if (!shipToName.trim() || !address1.trim() || cartItems.length === 0) {
-            toasts.push('Please complete required fields before submitting', { type: 'error' });
+            // Previously showed toast; silently do nothing or could add inline validation later
             return;
         }
-        toasts.push('Sample request submitted');
         setJustSubmitted(true);
+        // Clear cart items
+        Object.entries(cart).forEach(([id, qty]) => {
+            if (qty > 0) onUpdateCart({ id }, -qty);
+        });
         setTimeout(() => {
             setJustSubmitted(false);
             onNavigate && onNavigate('home');
         }, 1500);
-    }, [shipToName, address1, cartItems.length, toasts, onNavigate]);
+    }, [shipToName, address1, cartItems.length, cart, onUpdateCart, onNavigate]);
 
     const canSubmit = totalCartItems > 0 && shipToName.trim() && address1.trim();
 
-    if (totalCartItems === 0) return null;
+    // Allow drawer to remain mounted while showing submission overlay, even if cart has been cleared
+    if (totalCartItems === 0 && !justSubmitted) return null;
 
     return (
         <>
@@ -209,7 +213,6 @@ const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, designFi
                     backgroundColor: theme.colors.surface,
                     borderTopLeftRadius: '16px',
                     borderTopRightRadius: '16px',
-                    // borderTop removed to eliminate stray grey line
                     boxShadow: '0 -2px 8px rgba(0,0,0,0.06)',
                     maxHeight: isExpanded ? '65vh' : '84px',
                     transform: isExpanded ? 'translateY(0)' : 'translateY(calc(100% - 84px))',
@@ -236,7 +239,7 @@ const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, designFi
                     </div>
                 </div>
 
-                {isExpanded && (
+                {isExpanded && !justSubmitted && (
                     <div className="px-4 pb-6 pt-2 max-h-[60vh] overflow-y-auto scrollbar-hide flex flex-col">
                         <div className="mb-4">
                             {cartItems.map((item, idx) => (
@@ -331,7 +334,6 @@ const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, designFi
                 <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
                     <div className="px-8 py-6 rounded-2xl text-center shadow-xl" style={{ background: theme.colors.surface, border: `1px solid ${theme.colors.border}` }}>
                         <div className="text-lg font-bold mb-1" style={{ color: theme.colors.textPrimary }}>Sample Request Submitted</div>
-                        <div className="text-sm" style={{ color: theme.colors.textSecondary }}></div>
                     </div>
                 </div>
             )}
@@ -340,7 +342,6 @@ const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, designFi
 };
 
 export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart: onUpdateCartProp, userSettings, dealerDirectory, designFirms, initialCartOpen = false }) => {
-    // allow external cart OR internal fallback (keeps old behavior)
     const [cartInternal, setCartInternal] = useState({});
     const cart = cartProp ?? cartInternal;
     const onUpdateCart = onUpdateCartProp ?? useCallback((item, delta) => {

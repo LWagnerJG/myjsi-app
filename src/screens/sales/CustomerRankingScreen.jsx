@@ -69,7 +69,8 @@ export const CustomerRankingScreen = ({ theme }) => {
 
     return (
         <div className="h-full flex flex-col" style={{ backgroundColor: theme.colors.background }}>
-            <div className="px-4 pt-3">
+            {/* Raised tabs (less top padding) */}
+            <div className="px-4 pt-2">
                 <div className="relative grid grid-cols-2">
                     <button
                         ref={(el) => (tabRefs.current[0] = el)}
@@ -95,7 +96,8 @@ export const CustomerRankingScreen = ({ theme }) => {
             </div>
 
             <div className="flex-1 overflow-y-auto scrollbar-hide">
-                <div className="px-4 pt-2 pb-8">
+                {/* Push card downward with extra top padding */}
+                <div className="px-4 pt-5 pb-8">
                     <GlassCard
                         theme={theme}
                         className="rounded-[22px] overflow-hidden"

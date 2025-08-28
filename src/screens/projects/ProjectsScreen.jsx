@@ -239,25 +239,25 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
             <div className={`sticky top-0 z-10 transition-all duration-300 ${isScrolled ? 'shadow-md' : ''}`} style={{ backgroundColor: isScrolled ? `${theme.colors.background}e0` : theme.colors.background, backdropFilter: isScrolled ? 'blur(12px)' : 'none', WebkitBackdropFilter: isScrolled ? 'blur(12px)' : 'none', borderBottom: `1px solid ${isScrolled ? theme.colors.border + '40' : 'transparent'}` }}>
                 <div className="px-4 pt-4 pb-2 flex items-center gap-4">
                     <div className="flex w-full gap-3">
-                        {/* Reverted classic segmented control */}
-                        <div className="flex flex-[2] rounded-full border overflow-hidden h-12" style={{ borderColor: theme.colors.border, minWidth: 260 }}>
-                            <button onClick={() => setProjectsTab('pipeline')} className="flex-1 h-full px-6 text-sm font-semibold flex flex-col items-center justify-center" style={{ backgroundColor: projectsTab==='pipeline'? theme.colors.accent:'transparent', color: projectsTab==='pipeline'? '#fff': theme.colors.textSecondary, lineHeight: '1.05' }}>
+                        {/* Segmented control styled like Community (active accent, inactive white) */}
+                        <div className="flex flex-[2] rounded-full border overflow-hidden h-12 shadow-sm" style={{ borderColor: theme.colors.border, background: '#fff', minWidth: 260 }}>
+                            <button onClick={() => setProjectsTab('pipeline')} className="flex-1 h-full px-6 text-sm font-semibold flex flex-col items-center justify-center transition-colors" style={{ backgroundColor: projectsTab==='pipeline'? theme.colors.accent:'#fff', color: projectsTab==='pipeline'? '#fff': theme.colors.textPrimary, lineHeight: '1.05' }}>
                               <span className="leading-[1.05]">Active</span>
                               <span className="leading-[1.05] -mt-[0px]">Projects</span>
                             </button>
-                            <button onClick={() => setProjectsTab('my-projects')} className="flex-1 h-full px-6 text-sm font-semibold flex items-center justify-center" style={{ backgroundColor: projectsTab==='my-projects'? theme.colors.accent:'transparent', color: projectsTab==='my-projects'? '#fff': theme.colors.textSecondary }}>
+                            <button onClick={() => setProjectsTab('my-projects')} className="flex-1 h-full px-6 text-sm font-semibold flex items-center justify-center transition-colors" style={{ backgroundColor: projectsTab==='my-projects'? theme.colors.accent:'#fff', color: projectsTab==='my-projects'? '#fff': theme.colors.textPrimary }}>
                               Installations
                             </button>
                         </div>
-                        {/* Action button with tighter spacing and word gap */}
+                        {/* Action button same size/color style as community Post button */}
                         {projectsTab === 'pipeline' && (
-                          <button onClick={() => onNavigate('new-lead')} className="flex-[1] h-12 inline-flex items-center justify-center gap-1 rounded-full text-sm font-semibold tracking-tight transition-all hover:-translate-y-0.5 active:translate-y-0" style={{ backgroundColor: theme.colors.accent, color: '#fff', boxShadow: '0 4px 14px rgba(0,0,0,0.08)', paddingLeft: '1.05rem', paddingRight: '1.15rem' }}>
-                            <Plus className="w-3.5 h-3.5" /> <span style={{ letterSpacing: '-0.25px' }}>New Project</span>
+                          <button onClick={() => onNavigate('new-lead')} className="flex-[1] h-12 inline-flex items-center justify-center gap-2 rounded-full text-sm font-semibold transition-all hover:-translate-y-0.5 active:translate-y-0 shadow-sm px-6" style={{ backgroundColor: theme.colors.accent, color: '#fff', boxShadow: '0 4px 14px rgba(0,0,0,0.08)' }}>
+                            + New Project
                           </button>
                         )}
                         {projectsTab === 'my-projects' && (
-                          <button onClick={() => onNavigate('add-new-install')} className="flex-[1] h-12 inline-flex items-center justify-center gap-1 rounded-full text-sm font-semibold tracking-tight transition-all hover:-translate-y-0.5 active:translate-y-0" style={{ backgroundColor: theme.colors.accent, color: '#fff', boxShadow: '0 4px 14px rgba(0,0,0,0.08)', paddingLeft: '1.05rem', paddingRight: '1.15rem' }}>
-                            <Plus className="w-3.5 h-3.5" /> <span style={{ letterSpacing: '-0.25px' }}>New Install</span>
+                          <button onClick={() => onNavigate('add-new-install')} className="flex-[1] h-12 inline-flex items-center justify-center gap-2 rounded-full text-sm font-semibold transition-all hover:-translate-y-0.5 active:translate-y-0 shadow-sm px-6" style={{ backgroundColor: theme.colors.accent, color: '#fff', boxShadow: '0 4px 14px rgba(0,0,0,0.08)' }}>
+                            + New Install
                           </button>
                         )}
                     </div>

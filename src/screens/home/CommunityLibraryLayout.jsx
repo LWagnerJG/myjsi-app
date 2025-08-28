@@ -1,9 +1,8 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { LibraryGrid } from '../library/LibraryGrid.jsx';
 import { CommunityScreen } from '../community/CommunityScreen.jsx';
-import { Search } from 'lucide-react';
+import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
 
-// Projects-style Community / Library layout with segmented toggle + CTA and search below
 export const CommunityLibraryLayout = ({
   theme,
   posts, polls, likedPosts, pollChoices,
@@ -37,34 +36,33 @@ export const CommunityLibraryLayout = ({
   return (
     <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
       <div ref={headerRef} className={`sticky top-0 z-10 transition-all ${isScrolled ? 'shadow-md':''}`} style={{ backgroundColor: isScrolled? `${theme.colors.background}e8`: theme.colors.background, backdropFilter: isScrolled? 'blur(12px)':'none', borderBottom:`1px solid ${isScrolled? theme.colors.border+'40':'transparent'}` }}>
-        {/* Segmented control + CTA (classic style) */}
-        <div className="px-4 pt-6 pb-2 w-full">
+        {/* Segmented toggle + Post CTA with adjusted spacing */}
+        <div className="px-4 pt-4 pb-1 w-full">
           <div className="flex w-full gap-4 items-center">
-            <div className="flex flex-[3] rounded-full border overflow-hidden h-12" style={{ borderColor: theme.colors.border }}>
-              <button onClick={()=>switchTab('community')} className="flex-1 h-full px-6 text-sm font-semibold flex items-center justify-center" style={{ backgroundColor: activeTab==='community'? theme.colors.accent:'transparent', color: activeTab==='community'? '#fff': theme.colors.textSecondary }}>
+            <div className="flex flex-[3] rounded-full border overflow-hidden h-12 shadow-sm" style={{ borderColor: theme.colors.border, background:'#fff' }}>
+              <button onClick={()=>switchTab('community')} className="flex-1 h-full px-6 text-sm font-semibold flex items-center justify-center" style={{ backgroundColor: activeTab==='community'? theme.colors.accent:'#fff', color: activeTab==='community'? '#fff': theme.colors.textPrimary }}>
                 Community
               </button>
-              <button onClick={()=>switchTab('library')} className="flex-1 h-full px-6 text-sm font-semibold flex items-center justify-center" style={{ backgroundColor: activeTab==='library'? theme.colors.accent:'transparent', color: activeTab==='library'? '#fff': theme.colors.textSecondary }}>
+              <button onClick={()=>switchTab('library')} className="flex-1 h-full px-6 text-sm font-semibold flex items-center justify-center" style={{ backgroundColor: activeTab==='library'? theme.colors.accent:'#fff', color: activeTab==='library'? '#fff': theme.colors.textPrimary }}>
                 Library
               </button>
             </div>
-            {activeTab === 'community' && (
-              <button onClick={openCreateContentModal} className="flex-[1.2] h-12 inline-flex items-center justify-center gap-2 rounded-full text-sm font-semibold transition-all hover:-translate-y-0.5 active:translate-y-0" style={{ backgroundColor: theme.colors.accent, color:'#fff', boxShadow:'0 4px 14px rgba(0,0,0,0.08)' }}>
-                <span className="truncate">+ Post</span>
-              </button>
-            )}
-            {activeTab === 'library' && <div className="flex-[1.2]" />}
+            <button onClick={openCreateContentModal} className="flex-[1.2] h-12 inline-flex items-center justify-center gap-2 rounded-full text-sm font-semibold transition-all hover:-translate-y-0.5 active:translate-y-0 shadow-sm" style={{ backgroundColor: theme.colors.accent, color:'#fff', boxShadow:'0 4px 14px rgba(0,0,0,0.08)' }}>
+              + Post
+            </button>
           </div>
         </div>
-        {/* Search bar with adjusted margins: more top buffer, less bottom */}
-        <div className="px-4 pt-3 pb-1">
-          <div className="flex items-center gap-3 px-5" style={{ height: 52, borderRadius: 9999, background: theme.colors.surface, border:`1px solid ${theme.colors.border}` }}>
-            <Search className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
-            <input id="community-main-search" value={query} onChange={e=>setQuery(e.target.value)} placeholder={activeTab==='community'? 'Search posts, people, tags...':'Search library'} className="flex-1 bg-transparent outline-none text-[14px] placeholder:opacity-70" style={{ color: theme.colors.textPrimary }} />
-          </div>
+        {/* Search bar with equalized vertical spacing (margin above & below) */}
+        <div className="px-4 mt-3 mb-3">
+          <StandardSearchBar
+            value={query}
+            onChange={setQuery}
+            placeholder={activeTab==='community'? 'Search posts, people, tags...':'Search library'}
+            theme={{...theme, colors:{...theme.colors, surface:'#ffffff'}}}
+          />
         </div>
       </div>
-      <div ref={containerRef} onScroll={handleScroll} className="flex-1 overflow-y-auto px-4 pb-10 pt-4 space-y-4 scrollbar-hide">
+      <div ref={containerRef} onScroll={handleScroll} className="flex-1 overflow-y-auto px-4 pb-10 pt-3 space-y-4 scrollbar-hide">
         <div className="mx-auto w-full" style={{ maxWidth: '100%' }}>
         {activeTab==='community' && (
           <CommunityScreen

@@ -224,16 +224,17 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                     borderBottom: `1px solid ${isScrolled ? theme.colors.border + '40' : 'transparent'}`
                 }}
             >
-                <div className="px-4 pt-4 pb-2 flex flex-col gap-3">
+                {/* Slightly reduced top padding to raise search bar */}
+                <div className="px-4 pt-3 pb-2 flex flex-col gap-2">
                     {/* Search Input Component */}
                     <div style={{ height: 56 }} className="flex-grow">
                         <SearchInput value={searchTerm} onChange={(e)=>setSearchTerm(e.target.value)} placeholder="Search Orders" theme={theme} variant="header" />
                     </div>
 
-                    <div className="flex items-center gap-3">
-                        {/* Underline selector */}
-                        <div className="relative flex-grow max-w-md">
-                            <div className="flex relative select-none">
+                    <div className="flex gap-3" /* removed items-center so we can control vertical alignment */>
+                        {/* Underline selector - give it fixed height matching icon circles and align underline bottom */}
+                        <div className="relative flex-grow max-w-md h-11 flex items-end">
+                            <div className="flex relative select-none w-full">
                                 {['shipDate', 'date'].map((t) => (
                                     <button
                                         key={t}
@@ -250,11 +251,11 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                         </div>
 
                         {/* Dealer filter */}
-                        <div ref={dealerRef} className="relative">
+                        <div ref={dealerRef} className="relative flex-shrink-0">
                             <button
                                 onClick={() => setDealerMenuOpen((o) => !o)}
                                 className="h-11 w-11 border rounded-full flex items-center justify-center active:scale-90 transition"
-                                style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border }}
+                                style={{ backgroundColor: '#ffffff', borderColor: theme.colors.border }}
                                 title={selectedDealer}
                             >
                                 <Building2 className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />
@@ -281,8 +282,8 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                         {/* View toggle */}
                         <button
                             onClick={() => setViewMode((v) => (v === 'list' ? 'calendar' : 'list'))}
-                            className="h-11 w-11 border rounded-full flex items-center justify-center active:scale-90 transition"
-                            style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border }}
+                            className="h-11 w-11 border rounded-full flex items-center justify-center active:scale-90 transition flex-shrink-0"
+                            style={{ backgroundColor: '#ffffff', borderColor: theme.colors.border }}
                             title={viewMode === 'list' ? 'Calendar View' : 'List View'}
                         >
                             {viewMode === 'list' ? <Calendar className="w-5 h-5" style={{ color: theme.colors.textPrimary }} /> : <List className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />}

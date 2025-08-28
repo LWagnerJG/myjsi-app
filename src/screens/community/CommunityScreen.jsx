@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
-import { Heart, MessageCircle, Share2, Plus, Users, Send, Images } from 'lucide-react';
+import { Heart, MessageCircle, Share2, Plus, Users, Send } from 'lucide-react';
 
 // Community feed screen
 export const CommunityScreen = ({
@@ -15,7 +15,6 @@ export const CommunityScreen = ({
   onAddComment,
   openCreateContentModal,
   onRefresh,
-  // embed mode props (layout provides toggle + search)
   embedMode = false,
   externalQuery = ''
 }) => {
@@ -26,21 +25,17 @@ export const CommunityScreen = ({
   const [viewMode, setViewMode] = useState('feed'); // 'feed' | 'library'
   const scrollRef = useRef(null);
 
-  // hide scrollbar helper style (injected once)
   useEffect(() => {
     if (document.getElementById('community-no-scrollbar-style')) return;
     const style = document.createElement('style');
     style.id = 'community-no-scrollbar-style';
     style.innerHTML = `.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; } .no-scrollbar::-webkit-scrollbar { display: none; }
     @media (max-width: 500px){ .community-post-btn span{ display:none } .community-post-btn{ padding-left:18px; padding-right:18px } }
-    @media (max-width: 420px){ .community-toggle-btn span{ display:none } .community-toggle-btn{ padding-left:18px; padding-right:18px } }
     `;
     document.head.appendChild(style);
   }, []);
 
-  const handleScroll = useCallback(() => {
-    if (!scrollRef.current) return; setIsScrolled(scrollRef.current.scrollTop > 6);
-  }, []);
+  const handleScroll = useCallback(() => { if (!scrollRef.current) return; setIsScrolled(scrollRef.current.scrollTop > 6); }, []);
 
   const effectiveQuery = embedMode ? externalQuery : query;
   const effectiveViewMode = embedMode ? 'feed' : viewMode;
@@ -61,7 +56,6 @@ export const CommunityScreen = ({
     });
   }, [allContent, effectiveQuery]);
 
-  // Photo library (flatten all post images with searchable text meta)
   const photoLibrary = useMemo(() => {
     const rows = [];
     posts.forEach(p => {
@@ -88,11 +82,12 @@ export const CommunityScreen = ({
     <button
       onClick={onClick}
       aria-label={ariaLabel}
-      className="flex items-center gap-1.5 text-sm px-2 py-1 rounded-full transition-all active:scale-95"
+      className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-full transition-all active:scale-95"
       style={{
-        backgroundColor: active ? `${theme.colors.accent}15` : theme.colors.subtle,
+        backgroundColor: '#ffffff',
         border: `1px solid ${active ? theme.colors.accent : theme.colors.border}`,
         color: active ? theme.colors.accent : theme.colors.textSecondary,
+        boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
       }}
     >
       <Icon className="w-4 h-4" />
@@ -103,21 +98,13 @@ export const CommunityScreen = ({
   const PostCard = ({ post }) => {
     const [draft, setDraft] = useState('');
     const isLiked = !!likedPosts[post.id];
-
-    const commentWrapRef = useRef(null); // container whose height we animate
-    const contentRef = useRef(null); // inner content for measuring scrollHeight
+    const commentWrapRef = useRef(null);
+    const contentRef = useRef(null);
     const [measuredHeight, setMeasuredHeight] = useState(0);
-
-    useEffect(() => {
-      if (expandedComments[post.id] && contentRef.current) {
-        const h = contentRef.current.scrollHeight;
-        setMeasuredHeight(h);
-      }
-    }, [expandedComments[post.id], post.comments]);
-
+    useEffect(() => { if (expandedComments[post.id] && contentRef.current) { setMeasuredHeight(contentRef.current.scrollHeight); } }, [expandedComments[post.id], post.comments]);
     const submitComment = (e) => { e.preventDefault(); const text = draft.trim(); if (!text) return; onAddComment?.(post.id, text); setDraft(''); if (!expandedComments[post.id]) toggleComments(post.id); };
     return (
-      <GlassCard theme={theme} className="p-4 rounded-[24px] shadow-sm space-y-3 w-full" >
+      <GlassCard theme={theme} className="p-4 rounded-[24px] shadow-sm space-y-3 w-full">
         <div className="flex items-start gap-3">
           <Avatar src={post.user?.avatar} alt={post.user?.name} />
           <div className="flex-1 min-w-0">
@@ -144,26 +131,21 @@ export const CommunityScreen = ({
         <div className="flex items-center gap-2 pt-1">
           <StatButton active={isLiked} icon={Heart} count={post.likes || 0} onClick={()=>onToggleLike?.(post.id)} ariaLabel="Like" />
           <StatButton active={expandedComments[post.id]} icon={MessageCircle} count={(post.comments||[]).length} onClick={()=>toggleComments(post.id)} ariaLabel="Comments" />
-          <button onClick={()=>{ if(navigator.share){ navigator.share({ title: post.title || 'Post', text: post.text }); } else { navigator.clipboard.writeText(post.text || window.location.href); } }} className="flex items-center gap-1.5 text-sm px-4 py-1 rounded-full transition-all active:scale-95" style={{ backgroundColor: theme.colors.subtle, border:`1px solid ${theme.colors.border}`, color: theme.colors.textSecondary }}>
+          <button onClick={()=>{ if(navigator.share){ navigator.share({ title: post.title || 'Post', text: post.text }); } else { navigator.clipboard.writeText(post.text || window.location.href); } }} className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-full transition-all active:scale-95" style={{ backgroundColor: '#ffffff', border:`1px solid ${theme.colors.border}`, color: theme.colors.textSecondary, boxShadow:'0 1px 2px rgba(0,0,0,0.04)' }}>
             <Share2 className="w-4 h-4" /> <span>Share</span>
           </button>
         </div>
         {/* Animated Comments */}
         <div
           ref={commentWrapRef}
-          style={{
-            maxHeight: expandedComments[post.id] ? measuredHeight : 0,
-            opacity: expandedComments[post.id] ? 1 : 0,
-            transition: 'max-height 300ms ease, opacity 250ms ease',
-            overflow: 'hidden'
-          }}
+          style={{ maxHeight: expandedComments[post.id] ? measuredHeight : 0, opacity: expandedComments[post.id] ? 1 : 0, transition: 'max-height 300ms ease, opacity 250ms ease', overflow: 'hidden' }}
         >
           <div ref={contentRef} className="pt-2 space-y-3">
             <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
               {(post.comments||[]).map(c => (
                 <div key={c.id} className="flex items-start gap-2">
-                  <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textSecondary }}>{c.name?.[0] || '?'}</div>
-                  <div className="flex-1 rounded-xl px-3 py-2" style={{ backgroundColor: theme.colors.subtle }}>
+                  <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ backgroundColor: '#ffffff', border:`1px solid ${theme.colors.border}`, color: theme.colors.textSecondary }}>{c.name?.[0] || '?'}</div>
+                  <div className="flex-1 rounded-xl px-3 py-2" style={{ backgroundColor: '#ffffff', border:`1px solid ${theme.colors.border}` }}>
                     <p className="text-xs font-semibold" style={{ color: theme.colors.textPrimary }}>{c.name}</p>
                     <p className="text-xs mt-0.5" style={{ color: theme.colors.textSecondary }}>{c.text}</p>
                   </div>
@@ -174,7 +156,7 @@ export const CommunityScreen = ({
               )}
             </div>
             <form onSubmit={submitComment} className="flex items-center gap-2">
-              <input value={draft} onChange={e=>setDraft(e.target.value)} placeholder="Add a comment" className="flex-1 text-sm px-3 py-2 rounded-full outline-none" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary, border:`1px solid ${theme.colors.border}` }} />
+              <input value={draft} onChange={e=>setDraft(e.target.value)} placeholder="Add a comment" className="flex-1 text-sm px-3 py-2 rounded-full outline-none" style={{ backgroundColor: '#ffffff', color: theme.colors.textPrimary, border:`1px solid ${theme.colors.border}` }} />
               <button disabled={!draft.trim()} className="p-2 rounded-full disabled:opacity-40" style={{ backgroundColor: theme.colors.accent, color:'#fff' }}>
                 <Send className="w-4 h-4" />
               </button>
@@ -203,13 +185,13 @@ export const CommunityScreen = ({
                 const percent = totalVotes ? Math.round((opt.votes||0)/totalVotes*100) : 0;
                 const active = votedOption === opt.id;
                 return (
-                  <button key={opt.id} type="button" disabled={!!votedOption} onClick={()=>onPollVote?.(poll.id,opt.id)} className="w-full text-left px-3 py-2 rounded-xl border relative overflow-hidden group whitespace-nowrap" style={{ borderColor: active ? theme.colors.accent : theme.colors.border, backgroundColor: theme.colors.surface, color: active ? theme.colors.accent : theme.colors.textPrimary }}>
+                  <button key={opt.id} type="button" disabled={!!votedOption} onClick={()=>onPollVote?.(poll.id,opt.id)} className="w-full text-left px-3 py-2 rounded-xl border relative overflow-hidden group whitespace-nowrap" style={{ borderColor: active ? theme.colors.accent : theme.colors.border, backgroundColor: '#ffffff', color: active ? theme.colors.accent : theme.colors.textPrimary }}>
                     <span className="relative z-10 text-xs font-medium flex justify-between">
                       <span>{opt.text}</span>
                       {!!votedOption && <span>{percent}%</span>}
                     </span>
                     {votedOption && (
-                      <div className="absolute inset-0" style={{ background: `linear-gradient(90deg, ${theme.colors.accent}40 ${percent}%, transparent ${percent}%)` }} />
+                      <div className="absolute inset-0" style={{ background: `linear-gradient(90deg, ${theme.colors.accent}30 ${percent}%, transparent ${percent}%)` }} />
                     )}
                   </button>
                 );
@@ -227,29 +209,31 @@ export const CommunityScreen = ({
     <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
       {!embedMode && (
         <div className={`sticky top-0 z-10 transition-all ${isScrolled?'shadow-md':''}`} style={{ backgroundColor: isScrolled?`${theme.colors.background}e8`:theme.colors.background, backdropFilter:isScrolled?'blur(12px)':'none', borderBottom:`1px solid ${isScrolled?theme.colors.border+'40':'transparent'}` }}>
-          {/* Top row: segmented toggle + post button mimicking Projects layout */}
-          <div className="px-4 pt-6 pb-2 w-full">
-            <div className="flex w-full gap-4 items-center">
-              <div className="flex flex-[3] rounded-full border overflow-hidden h-12 shadow-sm" style={{ borderColor: theme.colors.border }}>
-                <button onClick={()=>setViewMode('feed')} className="flex-1 h-full px-6 text-sm font-semibold flex items-center justify-center" style={{ backgroundColor: viewMode==='feed'? theme.colors.accent:'transparent', color: viewMode==='feed'? '#fff': theme.colors.textSecondary }}>
-                  Community
-                </button>
-                <button onClick={()=>setViewMode('library')} className="flex-1 h-full px-6 text-sm font-semibold flex items-center justify-center" style={{ backgroundColor: viewMode==='library'? theme.colors.accent:'transparent', color: viewMode==='library'? '#fff': theme.colors.textSecondary }}>
-                  Library
-                </button>
+          {/* Top controls raised */}
+          <div className="px-4 pt-3 pb-1 w-full">
+            <div className="flex w-full gap-3 items-center">
+              <div className="flex gap-2">
+                <button onClick={()=>setViewMode('feed')} className="h-11 px-6 text-sm font-semibold rounded-full transition-all" style={{ backgroundColor: viewMode==='feed'? theme.colors.accent:'#ffffff', color: viewMode==='feed'? '#fff': theme.colors.textPrimary, boxShadow:'0 2px 4px rgba(0,0,0,0.06)', border:`1px solid ${viewMode==='feed'? theme.colors.accent: theme.colors.border}` }}>Community</button>
+                <button onClick={()=>setViewMode('library')} className="h-11 px-6 text-sm font-semibold rounded-full transition-all" style={{ backgroundColor: viewMode==='library'? theme.colors.accent:'#ffffff', color: viewMode==='library'? '#fff': theme.colors.textPrimary, boxShadow:'0 2px 4px rgba(0,0,0,0.06)', border:`1px solid ${viewMode==='library'? theme.colors.accent: theme.colors.border}` }}>Library</button>
               </div>
-              <button onClick={openCreateContentModal} className="flex-[1.2] h-12 inline-flex items-center justify-center gap-2 rounded-full text-sm font-semibold transition-all hover:-translate-y-0.5 active:translate-y-0 shadow-sm" style={{ backgroundColor: theme.colors.accent, color:'#fff', boxShadow:'0 4px 14px rgba(0,0,0,0.08)' }}>
+              <button onClick={openCreateContentModal} className="community-post-btn h-11 ml-auto inline-flex items-center justify-center gap-2 rounded-full text-sm font-semibold transition-all hover:-translate-y-0.5 active:translate-y-0 shadow-sm px-6" style={{ backgroundColor: theme.colors.accent, color:'#fff', boxShadow:'0 4px 14px rgba(0,0,0,0.08)' }}>
                 <Plus className="w-4.5 h-4.5" /> <span className="truncate">Post</span>
               </button>
             </div>
           </div>
-          {/* Search bar below controls */}
-          <div className="px-4 pb-4">
-            <StandardSearchBar value={query} onChange={setQuery} placeholder={viewMode==='feed'? 'Search posts, people, tags':'Search library'} theme={theme} />
+          {/* Search bar (whiter & closer) */}
+          <div className="px-4 pb-1">
+            <StandardSearchBar
+              value={query}
+              onChange={setQuery}
+              placeholder={viewMode==='feed'? 'Search posts, people, tags':'Search library'}
+              theme={{...theme, colors:{...theme.colors, surface:'#ffffff'}}}
+              className="shadow-sm"
+            />
           </div>
         </div>
       )}
-      <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto no-scrollbar pb-10 pt-2 space-y-4">
+      <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto no-scrollbar pb-10 pt-1 -mt-1 space-y-4">
         {effectiveViewMode==='feed' && !filteredContent.length && (
           <div className="text-center text-sm pt-20" style={{ color: theme.colors.textSecondary }}>No content found.</div>
         )}
