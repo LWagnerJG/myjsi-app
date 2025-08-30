@@ -3,6 +3,7 @@
     "",
     "\\public",
     "\\public\\category-images",
+    "\\public\\category-images\\bench-images",
     "\\public\\category-images\\casegood-images",
     "\\public\\social-media-images",
     "\\src",
@@ -10,6 +11,6 @@
     "\\src\\screens\\resources",
     "\\src\\screens\\resources\\lead-times"
   ],
-  "SelectedNode": "\\src\\screens\\resources\\lead-times\\data.js",
+  "SelectedNode": "\\public\\category-images\\bench-images\\jsi_indie_comp_00040.jpg",
   "PreviewInSolutionExplorer": false
 }

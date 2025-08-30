@@ -90,20 +90,20 @@ export const LeadTimesScreen = ({ theme = {} }) => {
     return (
         <div className="flex flex-col h-full" style={{ backgroundColor: safeTheme.colors.background }}>
             {/* Top banner */}
-            <div className="px-4 pt-4 pb-3 flex flex-col gap-3">
-                {/* Category multi-select buttons */}
-                <div className="flex w-full gap-3">
+            <div className="px-4 pt-3 pb-2 flex flex-col gap-2">
+                {/* Category multi-select buttons (smaller) */}
+                <div className="flex w-full gap-2">
                     {CATEGORY_DEFS.map(def => {
                         const active = selectedCats.has(def.key);
                         return (
                             <button
                                 key={def.key}
                                 onClick={() => toggleCategory(def.key)}
-                                className={`flex-1 relative px-4 py-2 rounded-full text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${active ? 'shadow-sm' : ''}`}
+                                className={`flex-1 relative px-3 py-1.5 rounded-full text-[13px] font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${active ? 'shadow-sm' : ''}`}
                                 style={{
-                                    backgroundColor: active ? safeTheme.colors.accent : safeTheme.colors.surface,
+                                    backgroundColor: active ? safeTheme.colors.accent : '#ffffff',
                                     color: active ? '#FFFFFF' : safeTheme.colors.textPrimary,
-                                    border: `1px solid ${active ? safeTheme.colors.accent : safeTheme.colors.border}`
+                                    border: `1px solid ${active ? safeTheme.colors.accent : 'rgba(0,0,0,0.10)'}`
                                 }}
                                 aria-pressed={active}
                             >
@@ -113,7 +113,7 @@ export const LeadTimesScreen = ({ theme = {} }) => {
                     })}
                 </div>
                 {/* Search + sort toggle */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                     <StandardSearchBar
                         className="flex-grow"
                         value={searchTerm}
@@ -128,9 +128,9 @@ export const LeadTimesScreen = ({ theme = {} }) => {
                         aria-label={sortFastest ? 'Sort alphabetically' : 'Sort by fastest lead time'}
                         title={sortFastest ? 'Alphabetical order' : 'Fastest lead time'}
                         style={{
-                            backgroundColor: safeTheme.colors.surface,
+                            backgroundColor: '#ffffff',
                             color: sortFastest ? safeTheme.colors.accent : safeTheme.colors.textPrimary,
-                            borderColor: sortFastest ? safeTheme.colors.accent : safeTheme.colors.border
+                            borderColor: sortFastest ? safeTheme.colors.accent : 'rgba(0,0,0,0.10)'
                         }}
                     >
                         {sortFastest ? <ListOrdered className="w-5 h-5" /> : <Timer className="w-5 h-5" />}
@@ -138,10 +138,10 @@ export const LeadTimesScreen = ({ theme = {} }) => {
                 </div>
             </div>
 
-            {/* Vertical list of cards (original styling) */}
-            <div className="flex-1 overflow-y-auto px-4 pb-4 pt-2 space-y-2 scrollbar-hide">
+            {/* Vertical list of cards – pulled upward */}
+            <div className="flex-1 overflow-y-auto px-4 pb-4 pt-0 space-y-2 scrollbar-hide -mt-1">
                 {rows.map(({ series, types }, idx) => (
-                    <GlassCard key={series} theme={safeTheme} className={`px-5 py-3 flex items-center justify-between ${idx===0 ? 'mt-1' : ''}`}>
+                    <GlassCard key={series} theme={safeTheme} className={`px-5 py-3 flex items-center justify-between ${idx === 0 ? 'mt-1' : ''}`}>
                         <h3 className="text-xl font-bold tracking-tight" style={{ color: safeTheme.colors.textPrimary }}>
                             {series}
                         </h3>

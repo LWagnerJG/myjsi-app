@@ -36,14 +36,28 @@ export const CommunityLibraryLayout = ({
   return (
     <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
       <div ref={headerRef} className={`sticky top-0 z-10 transition-all ${isScrolled ? 'shadow-md':''}`} style={{ backgroundColor: isScrolled? `${theme.colors.background}e8`: theme.colors.background, backdropFilter: isScrolled? 'blur(12px)':'none', borderBottom:`1px solid ${isScrolled? theme.colors.border+'40':'transparent'}` }}>
-        {/* Segmented toggle + Post CTA with adjusted spacing */}
+        {/* Segmented toggle + Post CTA (original style; only change: inactive stays pure white) */}
         <div className="px-4 pt-4 pb-1 w-full">
           <div className="flex w-full gap-4 items-center">
-            <div className="flex flex-[3] rounded-full border overflow-hidden h-12 shadow-sm" style={{ borderColor: theme.colors.border, background:'#fff' }}>
-              <button onClick={()=>switchTab('community')} className="flex-1 h-full px-6 text-sm font-semibold flex items-center justify-center" style={{ backgroundColor: activeTab==='community'? theme.colors.accent:'#fff', color: activeTab==='community'? '#fff': theme.colors.textPrimary }}>
+            <div className="flex flex-[3] rounded-full border overflow-hidden h-12 shadow-sm" style={{ borderColor: theme.colors.border, background: '#ffffff' }}>
+              <button
+                onClick={()=>switchTab('community')}
+                className="flex-1 h-full px-6 text-sm font-semibold flex items-center justify-center"
+                style={{
+                  backgroundColor: activeTab==='community'? theme.colors.accent : '#ffffff',
+                  color: activeTab==='community'? '#ffffff' : theme.colors.textPrimary
+                }}
+              >
                 Community
               </button>
-              <button onClick={()=>switchTab('library')} className="flex-1 h-full px-6 text-sm font-semibold flex items-center justify-center" style={{ backgroundColor: activeTab==='library'? theme.colors.accent:'#fff', color: activeTab==='library'? '#fff': theme.colors.textPrimary }}>
+              <button
+                onClick={()=>switchTab('library')}
+                className="flex-1 h-full px-6 text-sm font-semibold flex items-center justify-center"
+                style={{
+                  backgroundColor: activeTab==='library'? theme.colors.accent : '#ffffff',
+                  color: activeTab==='library'? '#ffffff' : theme.colors.textPrimary
+                }}
+              >
                 Library
               </button>
             </div>
@@ -52,7 +66,7 @@ export const CommunityLibraryLayout = ({
             </button>
           </div>
         </div>
-        {/* Search bar with equalized vertical spacing (margin above & below) */}
+        {/* Search bar */}
         <div className="px-4 mt-3 mb-3">
           <StandardSearchBar
             value={query}
@@ -64,24 +78,24 @@ export const CommunityLibraryLayout = ({
       </div>
       <div ref={containerRef} onScroll={handleScroll} className="flex-1 overflow-y-auto px-4 pb-10 pt-3 space-y-4 scrollbar-hide">
         <div className="mx-auto w-full" style={{ maxWidth: '100%' }}>
-        {activeTab==='community' && (
-          <CommunityScreen
-            theme={theme}
-            posts={posts}
-            polls={polls}
-            likedPosts={likedPosts}
-            pollChoices={pollChoices}
-            onToggleLike={onToggleLike}
-            onPollVote={onPollVote}
-            onAddComment={onAddComment}
-            openCreateContentModal={openCreateContentModal}
-            embedMode
-            externalQuery={query}
-          />
-        )}
-        {activeTab==='library' && (
-          <LibraryGrid theme={theme} query={query} onQueryChange={setQuery} parentHeaderRef={headerRef} />
-        )}
+          {activeTab==='community' && (
+            <CommunityScreen
+              theme={theme}
+              posts={posts}
+              polls={polls}
+              likedPosts={likedPosts}
+              pollChoices={pollChoices}
+              onToggleLike={onToggleLike}
+              onPollVote={onPollVote}
+              onAddComment={onAddComment}
+              openCreateContentModal={openCreateContentModal}
+              embedMode
+              externalQuery={query}
+            />
+          )}
+          {activeTab==='library' && (
+            <LibraryGrid theme={theme} query={query} onQueryChange={setQuery} parentHeaderRef={headerRef} />
+          )}
         </div>
       </div>
     </div>

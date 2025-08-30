@@ -5,8 +5,8 @@ export const lightTheme = {
         primary: '#b3b3af',
         accent: '#AD8A77',
         secondary: '#414141',
-        textPrimary: '#111111',
-        textSecondary: '#555555',
+        textPrimary: '#1F1F1F', // softened from #111111
+        textSecondary: '#666666', // slightly lighter than previous #555555
         border: 'rgba(0,0,0,0.12)',
         shadow: 'rgba(0,0,0,0.15)',
         subtle: 'rgba(0,0,0,0.05)'
