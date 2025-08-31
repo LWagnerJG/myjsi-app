@@ -1,8 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { PageTitle } from '../../../components/common/PageTitle.jsx';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
-import { Percent, Clock, Package, CheckCircle, Copy, Hourglass } from 'lucide-react';
-import { SAMPLE_DISCOUNTS_DATA, DISCOUNT_CATEGORIES, SAMPLE_DISCOUNT_RANGES } from './data.js';
+import { Percent, Copy, Hourglass } from 'lucide-react';
+import { SAMPLE_DISCOUNTS_DATA, DISCOUNT_CATEGORIES } from './data.js';
 
 export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
     const [discounts, setDiscounts] = useState([]);
@@ -14,9 +13,7 @@ export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
     useEffect(() => {
         const fetchDiscounts = async () => {
             const powerAutomateURL = import.meta.env.VITE_SAMPLE_DISCOUNTS_URL;
-            console.log("Power Automate URL:", powerAutomateURL);
             if (!powerAutomateURL) {
-                console.error("Sample Discounts URL is not configured.");
                 setDiscounts(SAMPLE_DISCOUNTS_DATA || []);
                 setIsLoading(false);
                 return;
@@ -24,118 +21,50 @@ export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
             try {
                 let response;
                 try {
-                    response = await fetch(powerAutomateURL, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({})
-                    });
-                } catch (err) {
-                    console.log('First attempt failed, trying without body...');
-                    response = await fetch(powerAutomateURL, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        }
-                    });
+                    response = await fetch(powerAutomateURL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) });
+                } catch {
+                    response = await fetch(powerAutomateURL, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
                 }
-                console.log('Response status:', response.status);
-                if (response.status === 401) {
-                    throw new Error('Authentication failed. Please check API credentials.');
-                }
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error(`HTTP error! status: ${response.status} - ${response.statusText}`);
-                    throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
-                }
-                const responseText = await response.text();
-                console.log('Raw response:', responseText);
-                let data;
-                try {
-                    data = JSON.parse(responseText);
-                } catch (parseError) {
-                    console.error('Failed to parse JSON:', parseError);
-                    throw new Error('Invalid JSON response from server');
-                }
-                console.log("Parsed API Response:", data);
-                if (Array.isArray(data)) {
-                    setDiscounts(data);
-                } else if (data.value && Array.isArray(data.value)) {
-                    setDiscounts(data.value);
-                } else if (data.body && Array.isArray(data.body)) {
-                    setDiscounts(data.body);
-                } else if (data.d && Array.isArray(data.d)) {
-                    setDiscounts(data.d);
-                } else if (data.results && Array.isArray(data.results)) {
-                    setDiscounts(data.results);
-                } else {
-                    console.log("Unexpected response format:", data);
-                    setDiscounts(SAMPLE_DISCOUNTS_DATA || []);
-                }
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const txt = await response.text();
+                let data; try { data = JSON.parse(txt); } catch { throw new Error('Bad JSON'); }
+                if (Array.isArray(data)) setDiscounts(data);
+                else if (data.value && Array.isArray(data.value)) setDiscounts(data.value);
+                else if (data.body && Array.isArray(data.body)) setDiscounts(data.body);
+                else if (data.d && Array.isArray(data.d)) setDiscounts(data.d);
+                else if (data.results && Array.isArray(data.results)) setDiscounts(data.results);
+                else setDiscounts(SAMPLE_DISCOUNTS_DATA || []);
             } catch (e) {
-                console.error("Failed to fetch discounts:", e);
                 setDiscounts(SAMPLE_DISCOUNTS_DATA || []);
-                if (e.message.includes('Authentication failed')) {
-                    setError("Authentication error. Using local data.");
-                } else if (e.message.includes('Failed to fetch')) {
-                    setError("Network error. Using local data.");
-                } else {
-                    setError("Could not load API data. Using local data.");
-                }
-            } finally {
-                setIsLoading(false);
-            }
+                setError('Using local data');
+            } finally { setIsLoading(false); }
         };
         fetchDiscounts();
     }, []);
 
     const handleCopy = useCallback((textToCopy) => {
+        const doSet = (msg) => { setSuccessMessage(msg); setTimeout(() => setSuccessMessage(''), 1200); };
         if (!navigator.clipboard) {
-            const textArea = document.createElement('textarea');
-            textArea.value = textToCopy;
-            document.body.appendChild(textArea);
-            textArea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textArea);
-            setSuccessMessage("SSA# Copied!");
-            setTimeout(() => setSuccessMessage(""), 1200);
+            try { const ta = document.createElement('textarea'); ta.value = textToCopy; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); doSet('SSA# Copied!'); } catch { doSet('Copy failed'); }
             return;
         }
-        navigator.clipboard.writeText(textToCopy).then(() => {
-            setSuccessMessage("SSA# Copied!");
-            setTimeout(() => setSuccessMessage(""), 1200);
-        }).catch(err => {
-            console.error('Failed to copy text: ', err);
-            setSuccessMessage("Copy failed. Please try again.");
-            setTimeout(() => setSuccessMessage(""), 1200);
-        });
+        navigator.clipboard.writeText(textToCopy).then(() => doSet('SSA# Copied!')).catch(() => doSet('Copy failed'));
     }, [setSuccessMessage]);
 
-    const categories = useMemo(() => DISCOUNT_CATEGORIES, []);
+    const categories = useMemo(() => DISCOUNT_CATEGORIES, []); // placeholder retained if filters added later
 
     const filteredDiscounts = useMemo(() => {
         let filtered = discounts;
-        if (selectedCategory !== 'all') {
-            filtered = filtered.filter(item => item.category === selectedCategory);
-        }
-        if (searchTerm) {
-            const term = searchTerm.toLowerCase();
-            filtered = filtered.filter(item =>
-                (item.productLine || item.Title || '').toLowerCase().includes(term) ||
-                (item.category || '').toLowerCase().includes(term) ||
-                (item.description || '').toLowerCase().includes(term)
-            );
-        }
+        if (selectedCategory !== 'all') filtered = filtered.filter(i => i.category === selectedCategory);
+        if (searchTerm) { const term = searchTerm.toLowerCase(); filtered = filtered.filter(i => (i.productLine || i.Title || '').toLowerCase().includes(term)); }
         return filtered;
     }, [discounts, selectedCategory, searchTerm]);
 
     if (isLoading) {
         return (
             <div className="flex flex-col h-full">
-                <PageTitle title="Sample Discounts" theme={theme} />
-                <div className="text-center p-8">
-                    <Hourglass className="w-8 h-8 animate-spin mx-auto" style={{ color: theme.colors.accent }} />
+                <div className="flex-1 flex items-center justify-center">
+                    <Hourglass className="w-8 h-8 animate-spin" style={{ color: theme.colors.accent }} />
                 </div>
             </div>
         );
@@ -143,74 +72,56 @@ export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
 
     if (filteredDiscounts.length === 0) {
         return (
-            <div className="flex flex-col h-full">
-                <PageTitle title="Sample Discounts" theme={theme} />
-                <div className="px-4 pb-4 space-y-4">
-                    <GlassCard theme={theme} className="p-6 text-center">
-                        <Percent className="w-12 h-12 mx-auto mb-4" style={{ color: theme.colors.accent }} />
-                        <h3 className="font-bold text-lg mb-2" style={{ color: theme.colors.textPrimary }}>
-                            No Discounts Found
-                        </h3>
-                        <p className="text-sm" style={{ color: theme.colors.textSecondary }}>
-                            {searchTerm ? 'Try adjusting your search terms.' : 'No sample discounts available.'}
-                        </p>
-                        {error && (
-                            <p className="text-sm mt-2" style={{ color: '#dc2626' }}>
-                                {error}
-                            </p>
-                        )}
-                    </GlassCard>
-                </div>
+            <div className="flex flex-col h-full px-5 pt-4">
+                <GlassCard theme={theme} className="p-6 text-center">
+                    <Percent className="w-12 h-12 mx-auto mb-4" style={{ color: theme.colors.accent }} />
+                    <h3 className="font-bold text-lg mb-2" style={{ color: theme.colors.textPrimary }}>No Discounts Found</h3>
+                    <p className="text-sm" style={{ color: theme.colors.textSecondary }}>{searchTerm ? 'Try adjusting your search terms.' : 'No sample discounts available.'}</p>
+                    {error && <p className="text-sm mt-2" style={{ color: '#dc2626' }}>{error}</p>}
+                </GlassCard>
             </div>
         );
     }
 
     return (
         <div className="flex flex-col h-full">
-            <PageTitle title="Sample Discounts" theme={theme} />
-            <div className="flex-1 overflow-y-auto scrollbar-hide px-6 pt-6 pb-6">
-                <div className="space-y-6">
+            <div className="flex-1 overflow-y-auto scrollbar-hide px-5 pt-3 pb-6">
+                <div className="space-y-3">{/* tighter spacing */}
                     {filteredDiscounts.map((discount) => {
                         const discountPercent = discount.Discount || discount.sampleDiscount;
                         const title = discount.Title || discount.productLine;
                         const ssaNumber = discount.SSANumber || discount.id;
-                        const commissionInfo = discount.CommissionInfo ||
-                            `${discount.leadTime || 0} weeks lead time • Min qty: ${discount.minOrderQty || 1}`;
+                        const commissionInfoRaw = discount.CommissionInfo || discount.commissionInfo || '';
+                        const isNoCommission = /no commission/i.test(commissionInfoRaw) || commissionInfoRaw === '';
+                        const commissionDisplay = isNoCommission ? 'No commission' : commissionInfoRaw;
                         return (
-                            <GlassCard key={ssaNumber || discount.id} theme={theme} className="p-5 flex items-center space-x-5 rounded-2xl shadow-md">
-                                <div className="flex-shrink-0 w-20 text-center">
-                                    <p className="text-4xl font-bold" style={{ color: theme.colors.accent }}>
-                                        {discountPercent}%
-                                    </p>
-                                    <p className="text-xs font-medium" style={{ color: theme.colors.textSecondary }}>
-                                        Off List
-                                    </p>
+                            <GlassCard key={ssaNumber || discount.id} theme={theme} className="relative p-5 flex items-stretch gap-5 rounded-[24px]">
+                                {/* Copy button */}
+                                {ssaNumber && (
+                                    <button onClick={() => handleCopy(ssaNumber)} aria-label="Copy SSA" className="absolute top-2.5 right-2.5 p-2 rounded-full hover:scale-105 active:scale-95 transition bg-black/5 dark:bg-white/10">
+                                        <Copy className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
+                                    </button>
+                                )}
+                                {/* Discount block */}
+                                <div className="flex-shrink-0 w-24 text-center flex flex-col justify-center">
+                                    <p className="text-4xl font-extrabold tracking-tight leading-none" style={{ color: theme.colors.accent }}>{discountPercent}%</p>
+                                    <p className="text-[10px] mt-1 font-semibold uppercase tracking-wide" style={{ color: theme.colors.textSecondary }}>Off List</p>
                                 </div>
-                                <div className="flex-1 space-y-2 border-l pl-5" style={{ borderColor: theme.colors.subtle }}>
-                                    <h3 className="font-bold text-base text-center" style={{ color: theme.colors.textPrimary }}>
-                                        {title}
-                                    </h3>
-                                    {ssaNumber && (
-                                        <div className="flex items-center justify-between text-sm">
-                                            <span className="font-medium" style={{ color: theme.colors.textPrimary }}>
-                                                SSA: {ssaNumber}
+                                {/* Vertical divider (discrete) */}
+                                <div className="w-px my-1" style={{ background: theme.colors.border, opacity: .35 }} />
+                                {/* Details */}
+                                <div className="flex-1 min-w-0 space-y-2 self-center">
+                                    <h3 className="font-semibold text-[15px]" style={{ color: theme.colors.textPrimary }}>{title}</h3>
+                                    <div className="flex flex-wrap items-center gap-2 text-xs">
+                                        {ssaNumber && (
+                                            <span onClick={() => handleCopy(ssaNumber)} className="inline-flex items-center gap-1 px-2 py-1 rounded-full cursor-pointer select-none" style={{ background: theme.colors.subtle, color: theme.colors.textPrimary, border: `1px solid ${theme.colors.border}` }}>
+                                                SSA {ssaNumber}
                                             </span>
-                                            <button
-                                                onClick={() => handleCopy(ssaNumber)}
-                                                className="p-1.5 rounded-md hover:bg-black/10 dark:hover:bg-white/10 ml-2 transition-colors"
-                                                aria-label="Copy SSA Number"
-                                            >
-                                                <Copy className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
-                                            </button>
-                                        </div>
-                                    )}
-                                    <div className="text-sm text-center" style={{ color: theme.colors.textSecondary }}>
-                                        {commissionInfo}
+                                        )}
+                                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" style={{ background: theme.colors.accent + '14', color: theme.colors.textPrimary, border: `1px solid ${theme.colors.accent}33` }}>{commissionDisplay}</span>
                                     </div>
                                     {discount.description && (
-                                        <p className="text-sm" style={{ color: theme.colors.textSecondary }}>
-                                            {discount.description}
-                                        </p>
+                                        <p className="text-xs leading-snug" style={{ color: theme.colors.textSecondary }}>{discount.description}</p>
                                     )}
                                 </div>
                             </GlassCard>

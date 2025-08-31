@@ -30,6 +30,7 @@ export const NewDealerSignUpScreen = ({ theme, setSuccessMessage, onNavigate, ha
                                 onChange={(e) => handleInputChange('companyName', e.target.value)}
                                 theme={theme}
                                 required
+                                placeholder="Enter registered company name..."
                             />
                             <FormInput
                                 label="Admin Email"
@@ -38,6 +39,7 @@ export const NewDealerSignUpScreen = ({ theme, setSuccessMessage, onNavigate, ha
                                 onChange={(e) => handleInputChange('adminEmail', e.target.value)}
                                 theme={theme}
                                 required
+                                placeholder="Enter email for administration contact..."
                             />
                             <PortalNativeSelect
                                 label="Daily Discount"

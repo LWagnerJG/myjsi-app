@@ -104,12 +104,12 @@ export const PortalNativeSelect = ({
                 className="w-full appearance-none outline-none text-[14px] transition-colors"
                 style={{
                     height: H,
-                    padding: "0 44px 0 16px",
+                    padding: "0 40px 0 16px", // leave room for icon
                     borderRadius: R,
                     backgroundColor: theme.colors.subtle,
                     border: `1px solid ${theme.colors.border}`,
                     color: theme.colors.textPrimary,
-                    lineHeight: '1.2',
+                    lineHeight: `${H - 2}px`, // vertically center text
                     WebkitAppearance: 'none',
                     MozAppearance: 'none'
                 }}
@@ -118,10 +118,11 @@ export const PortalNativeSelect = ({
                 {placeholder ? <option value="" disabled>{placeholder}</option> : null}
                 {options.map(o => { const opt = typeof o === 'string' ? { value: o, label: o } : o; return <option key={opt.value} value={opt.value}>{opt.label}</option>; })}
             </select>
-            <ChevronDown
-                className="pointer-events-none absolute top-1/2 -translate-y-1/2"
-                style={{ right: 18, width: 18, height: 18, color: theme.colors.textSecondary }}
-            />
+            <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+                <ChevronDown
+                    style={{ width: 18, height: 18, color: theme.colors.textSecondary }}
+                />
+            </div>
         </div>
     );
 };
