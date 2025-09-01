@@ -11,7 +11,9 @@ export const MONTHLY_SALES_DATA = [
     { month: 'Mar', bookings: 397684, sales: 365601 }, 
     { month: 'Apr', bookings: 554318, sales: 696628 }, 
     { month: 'May', bookings: 840255, sales: 1340018 }, 
-    { month: 'Jun', bookings: 116846, sales: 36823 }
+    { month: 'Jun', bookings: 116846, sales: 36823 },
+    { month: 'Jul', bookings: 520000, sales: 785000 },
+    { month: 'Aug', bookings: 600000, sales: 825000 }
 ];
 
 export const SALES_VERTICALS_DATA = [

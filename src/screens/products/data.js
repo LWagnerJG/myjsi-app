@@ -264,7 +264,7 @@ export const PRODUCTS_CATEGORIES_DATA = [
         images: [
             '/category-images/lounge-images/jsi_arwyn_comp_00002.jpg',
             '/category-images/lounge-images/jsi_indie_comp_00060.jpg',
-            '/category-images/lounge-images/jsi_poet_component_00001.jpg'
+            '/category-images/lounge-images/jsi_poet_component_00008.jpg' // corrected poet image
         ].map(localImage)
     },
     {
@@ -272,9 +272,9 @@ export const PRODUCTS_CATEGORIES_DATA = [
         description: 'Task and office chairs',
         nav: 'products/category/swivels',
         images: [
-            '/category-images/swivel-images/jsi_arwynconference_comp_hi.jpg',
-            '/category-images/swivel-images/jsi_cosgrove_comp_hi.jpg',
-            '/category-images/swivel-images/jsi_garvey5_comp_00001.jpg'
+            '/category-images/swivel-images/jsi_arwynconference_comp_0001_7U1AfYF.jpg', // corrected filename
+            '/category-images/swivel-images/jsi_cosgrove_comp_highback_arms_00002_KAky10n.jpg', // corrected filename
+            '/category-images/swivel-images/jsi_garveyr5_comp_00002.jpg' // corrected garvey filename
         ].map(localImage)
     },
     {
@@ -282,9 +282,9 @@ export const PRODUCTS_CATEGORIES_DATA = [
         description: 'Flexible training furniture',
         nav: 'products/category/training-tables',
         images: [
+            '/category-images/training-images/jsi_lokquickship_comp_0004_scnOitC.jpg', // quickship hero
             '/category-images/training-images/jsi_lok_comp_00001.jpg',
-            '/category-images/training-images/jsi_moto_comp_00001.jpg',
-            '/category-images/training-images/jsi_synk_comp_00011.jpg'
+            '/category-images/training-images/jsi_nosh_comp_00011.jpg' // corrected nosh filename
         ].map(localImage)
     },
     {
@@ -294,7 +294,7 @@ export const PRODUCTS_CATEGORIES_DATA = [
         images: [
             '/category-images/bench-images/jsi_indie_comp_00040.jpg',
             '/category-images/bench-images/jsi_native_comp_00028.jpg',
-            '/category-images/bench-images/jsi_native_comp_00030.jpg'
+            '/category-images/bench-images/jsi_oxley_comp_00001_5ueHuWt.jpg' // corrected third image to existing oxley file
         ].map(localImage)
     }
 ];
