@@ -23,7 +23,7 @@ export const NewDealerSignUpScreen = ({ theme, setSuccessMessage, onNavigate, ha
             <div className="flex-1 overflow-y-auto px-4 pb-6 scrollbar-hide">
                 <form onSubmit={handleSubmit} className="max-w-xl mx-auto mt-2 space-y-6">
                     <GlassCard theme={theme} className="p-5 md:p-6 space-y-5">
-                        <div className="space-y-4">
+                        <div className="space-y-5">
                             <FormInput
                                 label="Company Name"
                                 value={formData.companyName}
@@ -31,6 +31,7 @@ export const NewDealerSignUpScreen = ({ theme, setSuccessMessage, onNavigate, ha
                                 theme={theme}
                                 required
                                 placeholder="Enter registered company name..."
+                                whiteBg
                             />
                             <FormInput
                                 label="Admin Email"
@@ -40,15 +41,17 @@ export const NewDealerSignUpScreen = ({ theme, setSuccessMessage, onNavigate, ha
                                 theme={theme}
                                 required
                                 placeholder="Enter email for administration contact..."
+                                whiteBg
                             />
                             <PortalNativeSelect
                                 label="Daily Discount"
                                 value={formData.dailyDiscount}
                                 onChange={(e) => handleInputChange('dailyDiscount', e.target.value)}
                                 options={DISCOUNT_OPTIONS.map(opt => ({ label: opt, value: opt }))}
-                                placeholder="Select a discount"
+                                placeholder="Select a discount..."
                                 theme={theme}
                                 required
+                                whiteBg
                             />
                         </div>
                         <div className="pt-2">

@@ -15,8 +15,17 @@ const Label = ({ children, theme, required }) => (
 );
 
 export const FormInput = ({
-    label, value, onChange, theme, type = "text", required = false, name, placeholder, ...props
-}) => (
+    label, value, onChange, theme, type = "text", required = false, name, placeholder, whiteBg = false, ...props
+}) => {
+    const baseBg = whiteBg ? '#fff' : theme.colors.subtle;
+    const baseBorder = `1px solid ${theme.colors.border}`;
+    const common = {
+        borderRadius: R,
+        backgroundColor: baseBg,
+        border: baseBorder,
+        color: theme.colors.textPrimary,
+    };
+    return (
     <div>
         {label ? (
             <label className="block text-sm font-medium mb-1 px-1" style={{ color: theme.colors.textSecondary }}>
@@ -31,15 +40,12 @@ export const FormInput = ({
                 onChange={onChange}
                 required={required}
                 placeholder={placeholder}
-                className="w-full focus-ring outline-none text-[14px]"
+                className="w-full focus-ring outline-none text-[14px] placeholder-opacity-70"
                 style={{
                     minHeight: 96,
                     resize: "none",
                     padding: "10px 14px",
-                    borderRadius: R,
-                    backgroundColor: theme.colors.subtle,
-                    border: `1px solid ${theme.colors.border}`,
-                    color: theme.colors.textPrimary
+                    ...common
                 }}
                 {...props}
             />
@@ -51,20 +57,17 @@ export const FormInput = ({
                 onChange={onChange}
                 required={required}
                 placeholder={placeholder}
-                className="w-full focus-ring outline-none text-[14px]"
+                className="w-full focus-ring outline-none text-[14px] placeholder-opacity-70"
                 style={{
                     height: H,
                     padding: "0 14px",
-                    borderRadius: R,
-                    backgroundColor: theme.colors.subtle,
-                    border: `1px solid ${theme.colors.border}`,
-                    color: theme.colors.textPrimary
+                    ...common
                 }}
                 {...props}
             />
         )}
-    </div>
-);
+    </div>);
+};
 
 export const PortalNativeSelect = ({
     label,
@@ -74,9 +77,12 @@ export const PortalNativeSelect = ({
     options = [],
     placeholder,
     required = false,
+    whiteBg = false,
     ...props
 }) => {
     const selectRef = React.useRef(null);
+    const baseBg = whiteBg ? '#fff' : theme.colors.subtle;
+    const placeholderColor = theme.colors.textSecondary;
 
     const handleFocus = () => {
         if (selectRef.current) {
@@ -104,12 +110,12 @@ export const PortalNativeSelect = ({
                 className="w-full appearance-none outline-none text-[14px] transition-colors"
                 style={{
                     height: H,
-                    padding: "0 40px 0 16px", // leave room for icon
+                    padding: "0 44px 0 16px",
                     borderRadius: R,
-                    backgroundColor: theme.colors.subtle,
+                    backgroundColor: baseBg,
                     border: `1px solid ${theme.colors.border}`,
-                    color: theme.colors.textPrimary,
-                    lineHeight: `${H - 2}px`, // vertically center text
+                    color: value ? theme.colors.textPrimary : placeholderColor,
+                    lineHeight: `${H - 2}px`,
                     WebkitAppearance: 'none',
                     MozAppearance: 'none'
                 }}
@@ -118,10 +124,8 @@ export const PortalNativeSelect = ({
                 {placeholder ? <option value="" disabled>{placeholder}</option> : null}
                 {options.map(o => { const opt = typeof o === 'string' ? { value: o, label: o } : o; return <option key={opt.value} value={opt.value}>{opt.label}</option>; })}
             </select>
-            <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
-                <ChevronDown
-                    style={{ width: 18, height: 18, color: theme.colors.textSecondary }}
-                />
+            <div className="pointer-events-none absolute top-0 bottom-0 right-3 flex items-center justify-center" style={{ width:28 }}>
+                <ChevronDown style={{ width: 18, height: 18, color: theme.colors.textSecondary }} />
             </div>
         </div>
     );
@@ -169,7 +173,7 @@ export const TagInput = ({
             {label ? <Label theme={theme}>{label}</Label> : null}
             <div
                 className="w-full flex flex-wrap items-center gap-2 focus-ring"
-                style={{ minHeight: H, padding: 8, borderRadius: R, backgroundColor: theme.colors.subtle, border: `1px solid ${theme.colors.border}` }}
+                style={{ minHeight: H, padding: 8, borderRadius: R, backgroundColor: whiteBg? '#fff': theme.colors.subtle, border: `1px solid ${theme.colors.border}` }}
                 onClick={() => setOpen(true)}
             >
                 {tags.map((t) => (
