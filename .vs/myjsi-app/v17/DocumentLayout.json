@@ -3,52 +3,12 @@
   "WorkspaceRootPath": "C:\\Users\\Luke Wagner\\myjsi-app\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\home\\CommunityLibraryLayout.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\home\\CommunityLibraryLayout.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\samples\\SamplesScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}|",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\samples\\SamplesScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}|"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\discontinued-finishes\\DiscontinuedFinishesScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\resources\\discontinued-finishes\\DiscontinuedFinishesScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\lead-times\\LeadTimesScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\resources\\lead-times\\LeadTimesScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\lead-times\\data.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\resources\\lead-times\\data.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\feedback\\FeedbackScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\feedback\\FeedbackScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\install-instructions\\InstallInstructionsScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\resources\\install-instructions\\InstallInstructionsScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\presentations\\PresentationsScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\resources\\presentations\\PresentationsScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\data\\theme\\themeData.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\data\\theme\\themeData.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\config\\screenMap.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\config\\screenMap.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\dealer-directory\\DealerDirectoryScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\resources\\dealer-directory\\DealerDirectoryScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\new-dealer-signup\\NewDealerSignUpScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\screens\\resources\\new-dealer-signup\\NewDealerSignUpScreen.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\components\\common\\FormComponents.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\components\\common\\FormComponents.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Luke Wagner\\myjsi-app\\src\\components\\common\\SearchInput.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\components\\common\\SearchInput.jsx||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     }
   ],
   "DocumentGroupContainers": [
@@ -58,7 +18,7 @@
       "DocumentGroups": [
         {
           "DockedHeight": 303,
-          "SelectedChildIndex": 3,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Bookmark",
@@ -69,72 +29,17 @@
               "Name": "ST:128:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
             },
             {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "CommunityLibraryLayout.jsx",
-              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\home\\CommunityLibraryLayout.jsx",
-              "RelativeDocumentMoniker": "src\\screens\\home\\CommunityLibraryLayout.jsx",
-              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\home\\CommunityLibraryLayout.jsx",
-              "RelativeToolTip": "src\\screens\\home\\CommunityLibraryLayout.jsx",
-              "ViewState": "AgIAAGUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
-              "WhenOpened": "2025-08-28T11:26:41.084Z",
-              "EditorCaption": ""
-            },
-            {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "DiscontinuedFinishesScreen.jsx",
-              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\discontinued-finishes\\DiscontinuedFinishesScreen.jsx",
-              "RelativeDocumentMoniker": "src\\screens\\resources\\discontinued-finishes\\DiscontinuedFinishesScreen.jsx",
-              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\discontinued-finishes\\DiscontinuedFinishesScreen.jsx",
-              "RelativeToolTip": "src\\screens\\resources\\discontinued-finishes\\DiscontinuedFinishesScreen.jsx",
-              "ViewState": "AgIAADMAAAAAAAAAAAAAAEMAAAAKAAAAAAAAAA==",
+              "Title": "SearchInput.jsx",
+              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\components\\common\\SearchInput.jsx",
+              "RelativeDocumentMoniker": "src\\components\\common\\SearchInput.jsx",
+              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\components\\common\\SearchInput.jsx",
+              "RelativeToolTip": "src\\components\\common\\SearchInput.jsx",
+              "ViewState": "AgIAAK4AAAAAAAAAAADgv8EAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
-              "WhenOpened": "2025-08-29T20:00:11.698Z",
+              "WhenOpened": "2025-09-01T15:19:04.374Z",
               "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "FeedbackScreen.jsx",
-              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\feedback\\FeedbackScreen.jsx",
-              "RelativeDocumentMoniker": "src\\screens\\feedback\\FeedbackScreen.jsx",
-              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\feedback\\FeedbackScreen.jsx",
-              "RelativeToolTip": "src\\screens\\feedback\\FeedbackScreen.jsx",
-              "ViewState": "AgIAAKIAAAAAAAAAAIBJwAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
-              "WhenOpened": "2025-08-28T12:55:55.775Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "LeadTimesScreen.jsx",
-              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\lead-times\\LeadTimesScreen.jsx",
-              "RelativeDocumentMoniker": "src\\screens\\resources\\lead-times\\LeadTimesScreen.jsx",
-              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\lead-times\\LeadTimesScreen.jsx",
-              "RelativeToolTip": "src\\screens\\resources\\lead-times\\LeadTimesScreen.jsx",
-              "ViewState": "AgIAAKcAAAAAAAAAAAAowAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
-              "WhenOpened": "2025-08-28T12:14:02.003Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "data.js",
-              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\lead-times\\data.js",
-              "RelativeDocumentMoniker": "src\\screens\\resources\\lead-times\\data.js",
-              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\lead-times\\data.js",
-              "RelativeToolTip": "src\\screens\\resources\\lead-times\\data.js",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAtAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2025-08-28T12:13:47.828Z"
             }
           ]
         },
@@ -148,98 +53,20 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "InstallInstructionsScreen.jsx",
-              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\install-instructions\\InstallInstructionsScreen.jsx",
-              "RelativeDocumentMoniker": "src\\screens\\resources\\install-instructions\\InstallInstructionsScreen.jsx",
-              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\install-instructions\\InstallInstructionsScreen.jsx",
-              "RelativeToolTip": "src\\screens\\resources\\install-instructions\\InstallInstructionsScreen.jsx",
-              "ViewState": "AgIAAIgAAAAAAAAAAIBJwAAAAAAAAAAAAAAAAA==",
+              "DocumentIndex": 0,
+              "Title": "SamplesScreen.jsx",
+              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\samples\\SamplesScreen.jsx",
+              "RelativeDocumentMoniker": "src\\screens\\samples\\SamplesScreen.jsx",
+              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\samples\\SamplesScreen.jsx",
+              "RelativeToolTip": "src\\screens\\samples\\SamplesScreen.jsx",
+              "ViewState": "AgIAACMBAAAAAAAAAAArwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
-              "WhenOpened": "2025-08-30T14:47:00.601Z",
+              "WhenOpened": "2025-09-01T15:41:12.017Z",
               "EditorCaption": ""
             },
             {
               "$type": "Bookmark",
               "Name": "ST:3:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 11,
-              "Title": "FormComponents.jsx",
-              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\components\\common\\FormComponents.jsx",
-              "RelativeDocumentMoniker": "src\\components\\common\\FormComponents.jsx",
-              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\components\\common\\FormComponents.jsx",
-              "RelativeToolTip": "src\\components\\common\\FormComponents.jsx",
-              "ViewState": "AgIAAMYAAAAAAAAAAEBVwAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
-              "WhenOpened": "2025-08-30T15:30:00.878Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 10,
-              "Title": "NewDealerSignUpScreen.jsx",
-              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\new-dealer-signup\\NewDealerSignUpScreen.jsx",
-              "RelativeDocumentMoniker": "src\\screens\\resources\\new-dealer-signup\\NewDealerSignUpScreen.jsx",
-              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\new-dealer-signup\\NewDealerSignUpScreen.jsx",
-              "RelativeToolTip": "src\\screens\\resources\\new-dealer-signup\\NewDealerSignUpScreen.jsx",
-              "ViewState": "AgIAAEAAAAAAAAAAAIBJwAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
-              "WhenOpened": "2025-08-30T15:27:17.538Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "DealerDirectoryScreen.jsx",
-              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\dealer-directory\\DealerDirectoryScreen.jsx",
-              "RelativeDocumentMoniker": "src\\screens\\resources\\dealer-directory\\DealerDirectoryScreen.jsx",
-              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\dealer-directory\\DealerDirectoryScreen.jsx",
-              "RelativeToolTip": "src\\screens\\resources\\dealer-directory\\DealerDirectoryScreen.jsx",
-              "ViewState": "AgIAAJgAAAAAAAAAAIBJwAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
-              "WhenOpened": "2025-08-30T15:24:32.985Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "screenMap.js",
-              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\config\\screenMap.js",
-              "RelativeDocumentMoniker": "src\\config\\screenMap.js",
-              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\config\\screenMap.js",
-              "RelativeToolTip": "src\\config\\screenMap.js",
-              "ViewState": "AgIAADwAAAAAAAAAAIBJwAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2025-08-30T15:23:30.392Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "themeData.js",
-              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\data\\theme\\themeData.js",
-              "RelativeDocumentMoniker": "src\\data\\theme\\themeData.js",
-              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\data\\theme\\themeData.js",
-              "RelativeToolTip": "src\\data\\theme\\themeData.js",
-              "ViewState": "AgIAAB4AAAAAAAAAAIBJwAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2025-08-30T15:10:08.798Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "PresentationsScreen.jsx",
-              "DocumentMoniker": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\presentations\\PresentationsScreen.jsx",
-              "RelativeDocumentMoniker": "src\\screens\\resources\\presentations\\PresentationsScreen.jsx",
-              "ToolTip": "C:\\Users\\Luke Wagner\\myjsi-app\\src\\screens\\resources\\presentations\\PresentationsScreen.jsx",
-              "RelativeToolTip": "src\\screens\\resources\\presentations\\PresentationsScreen.jsx",
-              "ViewState": "AgIAAIUAAAAAAAAAAABBwAEAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
-              "WhenOpened": "2025-08-30T14:55:29.348Z",
-              "EditorCaption": ""
             }
           ]
         }

@@ -141,6 +141,7 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
 
 // Standard search input with header variant EXACT match to AppHeader pill
 export const SearchInput = React.memo(function SearchInput({
+    id,
     value = '',
     onChange,
     placeholder,
@@ -160,20 +161,22 @@ export const SearchInput = React.memo(function SearchInput({
         boxShadow: `0 8px 24px ${theme?.colors?.shadow}`,
         borderRadius: 9999,
         paddingLeft: 18,
-        paddingRight: 18
+        paddingRight: 18,
+        transition: 'box-shadow 160ms ease, background-color 160ms ease'
     } : {
         height: 44,
         backgroundColor: theme?.colors?.surface,
         border: `1px solid ${theme?.colors?.border}`,
         borderRadius: 9999,
         paddingLeft: 16,
-        paddingRight: 16
+        paddingRight: 16,
+        transition: 'box-shadow 160ms ease, background-color 160ms ease'
     };
 
     const iconColor = theme?.colors?.textSecondary || '#666';
 
     return (
-        <div className={`flex items-center flex-1 ${isHeader ? 'gap-2' : 'gap-2'} ${className}`}
+        <div id={id} className={`flex items-center flex-1 ${isHeader ? 'gap-2' : 'gap-2'} ${className}`}
              style={{ ...pill, ...style }}>
             <Search className="w-5 h-5" style={{ color: iconColor }} />
             <input
