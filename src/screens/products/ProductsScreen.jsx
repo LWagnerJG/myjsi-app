@@ -85,10 +85,11 @@ CategoryCard.displayName = 'CategoryCard';
 const ViewModeToggle = React.memo(({ viewMode, onToggle, theme }) => (
     <button
         onClick={onToggle}
-        className="p-3.5 rounded-full shadow-sm transition-all duration-200 transform active:scale-90"
+        className="p-3.5 rounded-full transition-all duration-200 transform active:scale-90"
         style={{
             backgroundColor: theme.colors.surface,
-            border: `1px solid ${theme.colors.border}`
+            border: 'none',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04)'
         }}
         aria-label={`Switch to ${viewMode === 'grid' ? 'list' : 'grid'} view`}
     >

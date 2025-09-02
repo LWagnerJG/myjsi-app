@@ -112,19 +112,19 @@ const DirectoryModal = ({ show, onClose, onSelect, theme, dealers = [], designFi
 };
 
 /* ====================== Reusable Buttons ====================== */
-// Update buttons for whiter background + shadow
+// Update buttons for unified elevated style
 const OrderFullSetButton = ({ onClick, theme, inCart }) => (
     <button
         onClick={onClick}
-        className={`flex-1 px-3 py-2 rounded-3xl text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 ${inCart ? 'scale-[1.02]' : ''}`}
+        className={`flex-1 px-3 py-2 rounded-full text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 ${inCart ? 'scale-[1.02]' : ''}`}
         style={{
-            border: `1px solid ${inCart ? theme.colors.accent : theme.colors.border}`,
-            color: inCart ? theme.colors.accent : theme.colors.textPrimary,
-            background: '#FFFFFF',
-            boxShadow: '0 2px 6px rgba(0,0,0,0.08)'
+            background: theme.colors.surface,
+            border: 'none',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04)',
+            color: inCart ? theme.colors.accent : theme.colors.textPrimary
         }}
     >
-        {inCart && <CheckCircle className="w-3.5 h-3.5" />}
+        {inCart && <CheckCircle className="w-3.5 h-3.5" style={{ color: theme.colors.accent }} />}
         <span>Full JSI Set</span>
     </button>
 );
@@ -132,15 +132,15 @@ const OrderFullSetButton = ({ onClick, theme, inCart }) => (
 const AddCompleteSetButton = ({ onClick, theme, inCart, categoryName }) => (
     <button
         onClick={onClick}
-        className={`flex-1 px-3 py-2 rounded-3xl text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 ${inCart ? 'scale-[1.02]' : ''}`}
+        className={`flex-1 px-3 py-2 rounded-full text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 ${inCart ? 'scale-[1.02]' : ''}`}
         style={{
-            border: `1px solid ${inCart ? theme.colors.accent : theme.colors.border}`,
-            color: inCart ? theme.colors.accent : theme.colors.textPrimary,
-            background: '#FFFFFF',
-            boxShadow: '0 2px 6px rgba(0,0,0,0.08)'
+            background: theme.colors.surface,
+            border: 'none',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04)',
+            color: inCart ? theme.colors.accent : theme.colors.textPrimary
         }}
     >
-        {inCart && <CheckCircle className="w-3.5 h-3.5" />}
+        {inCart && <CheckCircle className="w-3.5 h-3.5" style={{ color: theme.colors.accent }} />}
         <span>Complete {categoryName} Set</span>
     </button>
 );
