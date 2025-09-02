@@ -15,10 +15,10 @@ export const SearchInput = React.memo(function SearchInput({
 
     const PILL = {
         backgroundColor: theme.colors.surface,
-        border: `1px solid ${theme.colors.border}`,
-        boxShadow: `0 8px 24px ${theme.colors.shadow}`,
+        border: 'none',
+        boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04)',
         borderRadius: 9999,
-        height: 56,            // <-- same as header
+        height: 56,
     };
 
     return (
@@ -38,7 +38,7 @@ export const SearchInput = React.memo(function SearchInput({
                 style={{
                     color: theme.colors.textPrimary,
                     height: 56,
-                    lineHeight: '56px', // perfect vertical centering
+                    lineHeight: '56px',
                 }}
             />
             {onVoiceClick && (

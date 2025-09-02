@@ -37,6 +37,47 @@ const RequestComYardageScreen = React.lazy(() => import('./screens/resources/req
 const SocialMediaScreen = React.lazy(() => import('./screens/resources/social-media/index.js'));
 const ComColRequest = React.lazy(() => import('./screens/resources/search-fabrics/ComColRequest.jsx').then(m => ({ default: m.ComColRequest })));
 
+// Centralized legacy -> canonical slug mapping for resource feature routes
+const RESOURCE_SLUG_ALIASES = {
+    'discontinued_finishes': 'discontinued-finishes',
+    'design_days': 'tradeshows',
+    'design-days': 'tradeshows', // keep supporting older hyphen variant
+    'sample_discounts': 'sample-discounts',
+    'loaner_pool': 'loaner-pool',
+    'install_instructions': 'install-instructions',
+    'request_field_visit': 'request-field-visit',
+    'social_media': 'social-media',
+    'dealer_directory': 'dealer-directory',
+    'commission_rates': 'commission-rates'
+    // 'new-dealer-signup' already canonical; no alias needed
+};
+
+function normalizeResourceSlug(raw) {
+    // Only transform single segment slugs (ignore nested paths like search-fabrics/...)
+    if (!raw || raw.includes('/')) return raw;
+    return RESOURCE_SLUG_ALIASES[raw] || raw;
+}
+
+// Map canonical resource feature slugs to their (lazy) components
+const RESOURCE_FEATURE_SCREENS = {
+    'commission-rates': CommissionRatesScreen,
+    'lead-times': LeadTimesScreen,
+    'contracts': ContractsScreen,
+    'dealer-directory': DealerDirectoryScreen,
+    'discontinued-finishes': DiscontinuedFinishesScreen,
+    'tradeshows': TradeshowsScreen,
+    'sample-discounts': SampleDiscountsScreen,
+    'loaner-pool': LoanerPoolScreen,
+    'install-instructions': InstallInstructionsScreen,
+    'presentations': PresentationsScreen,
+    'request-field-visit': RequestFieldVisitScreen,
+    'new-dealer-signup': NewDealerSignUpScreen,
+    'social-media': SocialMediaScreen,
+    'search-fabrics': SearchFabricsScreen,
+    'request-com-yardage': RequestComYardageScreen,
+    'comcol-request': ComColRequest
+};
+
 const ScreenRouter = ({ screenKey, projectsScreenRef, SuspenseFallback, ...rest }) => {
     if (!screenKey) return null;
     const parts = screenKey.split('/');
@@ -56,38 +97,13 @@ const ScreenRouter = ({ screenKey, projectsScreenRef, SuspenseFallback, ...rest 
     // Resource route normalization (support legacy underscore routes)
     if (base === 'resources') {
         const slug = parts.slice(1).join('/');
-        // Map underscore legacy to hyphen / new routes, include old design-days -> tradeshows
-        const normalized = slug
-            .replace('discontinued_finishes', 'discontinued-finishes')
-            .replace('design_days', 'tradeshows')
-            .replace('design-days', 'tradeshows')
-            .replace('sample_discounts', 'sample-discounts')
-            .replace('loaner_pool', 'loaner-pool')
-            .replace('install_instructions', 'install-instructions')
-            .replace('request_field_visit', 'request-field-visit')
-            .replace('social_media', 'social-media')
-            .replace('dealer_directory', 'dealer-directory')
-            .replace('commission_rates', 'commission-rates')
-            .replace('new-dealer-signup', 'new-dealer-signup');
+        const firstSegment = slug.split('/')[0];
+        const normalizedFirst = normalizeResourceSlug(firstSegment);
+        const normalized = [normalizedFirst, ...slug.split('/').slice(1)].join('/');
 
-        switch (normalized) {
-            case 'commission-rates': return lazyWrap(CommissionRatesScreen);
-            case 'lead-times': return lazyWrap(LeadTimesScreen);
-            case 'contracts': return lazyWrap(ContractsScreen);
-            case 'dealer-directory': return lazyWrap(DealerDirectoryScreen);
-            case 'discontinued-finishes': return lazyWrap(DiscontinuedFinishesScreen);
-            case 'tradeshows': return lazyWrap(TradeshowsScreen);
-            case 'sample-discounts': return lazyWrap(SampleDiscountsScreen);
-            case 'loaner-pool': return lazyWrap(LoanerPoolScreen);
-            case 'install-instructions': return lazyWrap(InstallInstructionsScreen);
-            case 'presentations': return lazyWrap(PresentationsScreen);
-            case 'request-field-visit': return lazyWrap(RequestFieldVisitScreen);
-            case 'new-dealer-signup': return lazyWrap(NewDealerSignUpScreen);
-            case 'social-media': return lazyWrap(SocialMediaScreen);
-            case 'search-fabrics': return lazyWrap(SearchFabricsScreen);
-            case 'request-com-yardage': return lazyWrap(RequestComYardageScreen);
-            case 'comcol-request': return lazyWrap(ComColRequest);
-            default: break; // fall through to generic resource detail if not a feature screen
+        // Direct feature screen match (single segment feature slugs only)
+        if (RESOURCE_FEATURE_SCREENS[normalized]) {
+            return lazyWrap(RESOURCE_FEATURE_SCREENS[normalized]);
         }
     }
 

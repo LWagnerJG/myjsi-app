@@ -2,8 +2,9 @@
   "ExpandedNodes": [
     "",
     "\\public",
-    "\\public\\category-images",
-    "\\public\\social-media-images",
+    "\\public\\category-images\\bench-images",
+    "\\public\\category-images\\swivel-images",
+    "\\public\\category-images\\training-images",
     "\\src",
     "\\src\\screens",
     "\\src\\screens\\resources",

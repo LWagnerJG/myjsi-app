@@ -13,7 +13,7 @@ const discountInt = (orderNumber) => { // deterministic 54..64
     let h = 0; for (let i = 0; i < orderNumber.length; i++) h = (h * 131 + orderNumber.charCodeAt(i)) >>> 0; return 54 + (h % 11);
 };
 const Pill = ({ children, theme }) => (
-    <span className="px-2 py-0.5 rounded-full text-[10px] font-medium tracking-wide" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textSecondary, border: `1px solid ${theme.colors.border}` }}>{children}</span>
+    <span className="px-2 py-0.5 rounded-full text-[10px] font-medium tracking-wide" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textSecondary }}>{children}</span>
 );
 
 /* ---------------------- Calendar View ---------------------- */
@@ -50,15 +50,15 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
 
     return (
         <div className="space-y-4">
-            <GlassCard theme={theme} className="p-4">
+            <GlassCard theme={theme} className="p-4" variant="elevated">
                 <div className="flex justify-between items-center mb-4">
-                    <button onClick={() => setCurrentDate(new Date(year, month - 1, 1))} className="p-2 rounded-full hover:bg-black/10 active:scale-90 transition">
+                    <button onClick={() => setCurrentDate(new Date(year, month - 1, 1))} className="p-2 rounded-full hover:bg-black/5 active:scale-95 transition">
                         <ChevronLeft style={{ color: theme.colors.textSecondary }} />
                     </button>
                     <h3 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>
                         {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
                     </h3>
-                    <button onClick={() => setCurrentDate(new Date(year, month + 1, 1))} className="p-2 rounded-full hover:bg-black/10 active:scale-90 transition">
+                    <button onClick={() => setCurrentDate(new Date(year, month + 1, 1))} className="p-2 rounded-full hover:bg-black/5 active:scale-95 transition">
                         <ChevronRight style={{ color: theme.colors.textSecondary }} />
                     </button>
                 </div>
@@ -94,7 +94,7 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
                         {selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </h3>
                     {selectedOrders.map((o) => (
-                        <GlassCard key={o.orderNumber} theme={theme} className="p-4 cursor-pointer hover:border-gray-400/50 flex items-center gap-4 active:scale-[0.99] transition" onClick={() => onOrderClick(o)}>
+                        <GlassCard key={o.orderNumber} theme={theme} className="p-4 cursor-pointer flex items-center gap-4 active:scale-[0.99] transition" variant="elevated" onClick={() => onOrderClick(o)}>
                             <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: STATUS_COLORS[o.status] || theme.colors.secondary }} />
                             <div className="flex-1 min-w-0">
                                 <p className="font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{o.details}</p>
@@ -120,8 +120,8 @@ const GroupTile = ({ theme, dateKey, group, onNavigate }) => {
     const label = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 
     return (
-        <GlassCard theme={theme} className="p-0 overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: `1px solid ${theme.colors.border}`, background: 'linear-gradient(180deg,rgba(0,0,0,0.04),rgba(0,0,0,0))' }}>
+        <GlassCard theme={theme} className="p-0 overflow-hidden" variant="elevated">
+            <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: `1px solid ${theme.colors.subtle}` }}>
                 <h2 className="font-semibold text-base" style={{ color: theme.colors.textPrimary }}>{label}</h2>
                 <p className="font-semibold text-base" style={{ color: theme.colors.textPrimary }}>{currency0(group.total)}</p>
             </div>
@@ -146,7 +146,7 @@ const GroupTile = ({ theme, dateKey, group, onNavigate }) => {
                                     <p className="font-semibold text-[15px] whitespace-nowrap" style={{ color: theme.colors.textPrimary }}>{currency0(o.net)}</p>
                                 </div>
                             </button>
-                            {showDivider && <div style={{ borderTop: `1px solid ${theme.colors.border}` }} className="mx-4" />}
+                            {showDivider && <div style={{ borderTop: `1px solid ${theme.colors.subtle}` }} className="mx-4" />}
                         </React.Fragment>
                     );
                 })}
@@ -246,7 +246,7 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                                     </button>
                                 ))}
                                 <span className="absolute bottom-0 left-0 h-[3px] w-1/2 rounded-full transition-transform duration-300" style={{ backgroundColor: theme.colors.accent, transform: underlineTransform }} />
-                                <span className="absolute bottom-0 left-0 w-full h-px" style={{ backgroundColor: theme.colors.border, opacity: 0.55 }} />
+                                <span className="absolute bottom-0 left-0 w-full h-px" style={{ backgroundColor: theme.colors.subtle }} />
                             </div>
                         </div>
 
@@ -254,14 +254,14 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                         <div ref={dealerRef} className="relative flex-shrink-0">
                             <button
                                 onClick={() => setDealerMenuOpen((o) => !o)}
-                                className="h-11 w-11 border rounded-full flex items-center justify-center active:scale-90 transition"
-                                style={{ backgroundColor: '#ffffff', borderColor: theme.colors.border }}
+                                className="h-11 w-11 rounded-full flex items-center justify-center active:scale-90 transition"
+                                style={{ backgroundColor: theme.colors.surface, boxShadow: '0 2px 8px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)' }}
                                 title={selectedDealer}
                             >
                                 <Building2 className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />
                             </button>
                             {dealerMenuOpen && (
-                                <GlassCard theme={theme} className="absolute right-0 mt-2 w-56 max-h-72 overflow-y-auto p-2 z-20 animate-fade-in">
+                                <GlassCard theme={theme} className="absolute right-0 mt-2 w-56 max-h-72 overflow-y-auto p-2 z-20 animate-fade-in" variant="elevated">
                                     {dealers.map((d) => {
                                         const active = d === selectedDealer;
                                         return (
@@ -282,8 +282,8 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                         {/* View toggle */}
                         <button
                             onClick={() => setViewMode((v) => (v === 'list' ? 'calendar' : 'list'))}
-                            className="h-11 w-11 border rounded-full flex items-center justify-center active:scale-90 transition flex-shrink-0"
-                            style={{ backgroundColor: '#ffffff', borderColor: theme.colors.border }}
+                            className="h-11 w-11 rounded-full flex items-center justify-center active:scale-90 transition flex-shrink-0"
+                            style={{ backgroundColor: theme.colors.surface, boxShadow: '0 2px 8px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)' }}
                             title={viewMode === 'list' ? 'Calendar View' : 'List View'}
                         >
                             {viewMode === 'list' ? <Calendar className="w-5 h-5" style={{ color: theme.colors.textPrimary }} /> : <List className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />}

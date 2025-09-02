@@ -157,8 +157,8 @@ export const SearchInput = React.memo(function SearchInput({
     const pill = isHeader ? {
         height: 56,
         backgroundColor: theme?.colors?.surface,
-        border: `1px solid ${theme?.colors?.border}`,
-        boxShadow: `0 8px 24px ${theme?.colors?.shadow}`,
+        border: 'none',
+        boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04)',
         borderRadius: 9999,
         paddingLeft: 18,
         paddingRight: 18,
@@ -166,7 +166,8 @@ export const SearchInput = React.memo(function SearchInput({
     } : {
         height: 44,
         backgroundColor: theme?.colors?.surface,
-        border: `1px solid ${theme?.colors?.border}`,
+        border: 'none',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)',
         borderRadius: 9999,
         paddingLeft: 16,
         paddingRight: 16,

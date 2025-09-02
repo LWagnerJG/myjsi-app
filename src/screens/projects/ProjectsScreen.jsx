@@ -58,7 +58,7 @@ const OpportunityDetail = ({ opp, theme, onBack, onUpdate }) => {
   return (
     <div className="flex flex-col h-full" style={{ background: theme.colors.background }}>
       <div className="px-4 pt-5 pb-40 overflow-y-auto scrollbar-hide">
-        <GlassCard theme={theme} className="p-6 rounded-3xl space-y-8" style={{ border:`1px solid ${theme.colors.border}` }}>
+        <GlassCard theme={theme} className="p-6 rounded-3xl space-y-8" variant="elevated">
           {/* Header */}
           <div className="space-y-1">
             <InlineTextInput value={draft.project||draft.name} onChange={v=>update('project',v)} theme={theme} className="text-[20px] leading-tight" />
@@ -191,7 +191,7 @@ const ProjectCard = ({ opp, theme, onClick }) => {
   }
   return (
     <button onClick={onClick} className="w-full text-left group" style={{ WebkitTapHighlightColor:'transparent' }}>
-      <GlassCard theme={theme} className="p-5 transition-all duration-200 rounded-2xl hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0" style={{ backgroundColor: theme.colors.surface, border:`1px solid ${theme.colors.border}` }}>
+      <GlassCard theme={theme} className="p-5 transition-all duration-200 rounded-2xl hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0" variant="elevated">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="font-semibold text-[15px] leading-snug truncate" style={{ color: theme.colors.textPrimary }}>{opp.name}</p>
@@ -199,7 +199,7 @@ const ProjectCard = ({ opp, theme, onClick }) => {
           </div>
           {discountPct && <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textSecondary, border:`1px solid ${theme.colors.border}` }}>{discountPct}</span>}
         </div>
-        <div className="mt-3 mb-3 h-px" style={{ backgroundColor: theme.colors.border }} />
+        <div className="mt-3 mb-3 h-px" style={{ backgroundColor: theme.colors.subtle }} />
         <div className="flex items-end justify-end">
           <p className="font-extrabold text-2xl tracking-tight" style={{ color: theme.colors.accent }}>{displayValue}</p>
         </div>
@@ -214,7 +214,7 @@ const InstallationDetail = ({ project, theme, onAddPhotoFiles }) => {
   return (
     <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
       <div className="px-4 pt-6 pb-32 space-y-4 overflow-y-auto scrollbar-hide">
-        <GlassCard theme={theme} className="p-5 space-y-4">
+        <GlassCard theme={theme} className="p-5 space-y-4" variant="elevated">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <p className="font-bold text-xl truncate" style={{ color: theme.colors.textPrimary }}>{project.name}</p>
@@ -304,7 +304,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
           )}
           {projectsTab==='my-projects' && (
             (myProjects||[]).length? (myProjects||[]).map(p=> (
-              <GlassCard key={p.id} theme={theme} className="p-0 overflow-hidden cursor-pointer group transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0" onClick={()=>setSelectedInstall(p)} style={{ border:`1px solid ${theme.colors.border}`, borderRadius:'16px' }}>
+              <GlassCard key={p.id} theme={theme} className="p-0 overflow-hidden cursor-pointer group transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0" variant="elevated" onClick={()=>setSelectedInstall(p)} style={{ borderRadius:'16px' }}>
                 <div className="relative aspect-video w/full">
                   <img src={p.image} alt={p.name} className="absolute h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />

@@ -7,6 +7,7 @@ import { ORDER_DATA, STATUS_COLORS } from '../orders/data.js';
 import { SalesByVerticalBreakdown } from './components/SalesByVerticalBreakdown.jsx';
 import { CountUp } from '../../components/common/CountUp.jsx';
 import { motion, AnimatePresence } from 'framer-motion';
+import { GlassCard } from '../../components/common/GlassCard.jsx';
 
 const formatCompanyName = (name='') => name.split(' ').map(w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase()).join(' ');
 const monthNameToNumber = { Jan:0, Feb:1, Mar:2, Apr:3, May:4, Jun:5, Jul:6, Aug:7, Sep:8, Oct:9, Nov:10, Dec:11 };
@@ -169,7 +170,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
 
       <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto scrollbar-hide">
         <div className="px-4 space-y-4 pt-0 pb-4 max-w-6xl mx-auto">
-          <div className="p-6 rounded-[2.5rem] shadow-sm border mt-5" style={{ backgroundColor:theme.colors.surface, borderColor:theme.colors.border }}>
+          <GlassCard theme={theme} className="p-6 mt-5" variant="elevated">
             <div className="flex justify-between items-start mb-3">
               <h3 className="font-bold text-xl" style={{ color:theme.colors.textPrimary }}>Progress to Goal</h3>
               <button ref={trendButtonRef} type="button" className="flex items-center gap-1 px-3 py-1 rounded-full cursor-pointer select-none font-semibold text-xs shadow-sm focus:outline-none focus:ring" onClick={e=> showTrendInfo? setShowTrendInfo(false): openTrend(e)} style={aheadOfPace? { background:'#34D399', color:'#064E3B' } : { background:'#F87171', color:'#7F1D1D' }}>
@@ -188,9 +189,9 @@ export const SalesScreen = ({ theme, onNavigate }) => {
               </>); })()}
             </div>
             <p className="text-[11px] font-medium" style={{ color:theme.colors.textSecondary }}>Year elapsed: {yearProgressPercent.toFixed(1)}%</p>
-          </div>
+          </GlassCard>
 
-          <div className="p-6 rounded-[2.5rem] shadow-sm border" style={{ backgroundColor:theme.colors.surface, borderColor:theme.colors.border }}>
+          <GlassCard theme={theme} className="p-6" variant="elevated">
             {selectedMonth? (
               <CustomerMonthlyBreakdown monthData={selectedMonth} orders={ORDER_DATA} theme={theme} onBack={()=>setSelectedMonth(null)} />
             ):(
@@ -216,9 +217,9 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                 </div>
               </>
             )}
-          </div>
+          </GlassCard>
 
-          <div className="p-6 rounded-[2.5rem] shadow-sm border space-y-4" style={{ backgroundColor:theme.colors.surface, borderColor:theme.colors.border }}>
+          <GlassCard theme={theme} className="p-6 space-y-4" variant="elevated">
             <h3 className="font-bold text-xl" style={{ color:theme.colors.textPrimary }}>Recent Orders</h3>
             <div>
               {displayedRecent.map((order,i)=>(
@@ -230,12 +231,12 @@ export const SalesScreen = ({ theme, onNavigate }) => {
               ))}
               {numRecentOrders < allRecentOrders.length && <button onClick={showMoreOrders} className="w-full text-center text-xs font-semibold mt-2 py-3 hover:underline" style={{ color:theme.colors.accent }}>Show 5 More</button>}
             </div>
-          </div>
+          </GlassCard>
 
-          <div className="p-6 rounded-[2.5rem] shadow-sm border" style={{ backgroundColor:theme.colors.surface, borderColor:theme.colors.border }}>
+          <GlassCard theme={theme} className="p-6" variant="elevated">
             <h3 className="font-bold text-xl mb-4" style={{ color:theme.colors.textPrimary }}>Sales by Vertical (YTD)</h3>
             <SalesByVerticalBreakdown data={salesByVertical} theme={theme} showOverview palette={['#55A868','#C44E52','#8172B2','#CCB04C','#4C72B0','#8C8C8C']} />
-          </div>
+          </GlassCard>
         </div>
       </div>
 

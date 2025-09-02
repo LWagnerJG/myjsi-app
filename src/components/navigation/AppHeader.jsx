@@ -14,11 +14,10 @@ export const AppHeader = React.memo(({
     const filterStyle = isDarkMode ? 'brightness(0) invert(1)' : 'none';
     const isHome = !showBack;
 
-    // Unified pill shell (matches search + feedback)
     const PILL = {
         backgroundColor: theme.colors.surface,
-        border: `1px solid ${theme.colors.border}`,
-        boxShadow: `0 8px 24px ${theme.colors.shadow}`,
+        border: 'none',
+        boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04)',
         borderRadius: 9999,
         height: 56
     };
@@ -60,8 +59,8 @@ export const AppHeader = React.memo(({
                     <button
                         aria-label="Open profile menu"
                         onClick={onProfileClick}
-                        className="w-9 h-9 rounded-full flex items-center justify-center border transition-colors hover:bg-black/5 dark:hover:bg:white/5"
-                        style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border }}
+                        className="w-9 h-9 rounded-full flex items-center justify-center transition-colors hover:bg-black/5 dark:hover:bg:white/5"
+                        style={{ backgroundColor: theme.colors.surface, boxShadow: '0 2px 8px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)' }}
                     >
                         <User className="w-5 h-5" style={{ color: theme.colors.secondary }} />
                     </button>

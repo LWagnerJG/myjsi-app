@@ -1,26 +1,11 @@
 import React, { useState } from 'react';
 import { Send, Paperclip, X } from 'lucide-react';
+import { GlassCard } from '../../components/common/GlassCard.jsx';
 
-// Shadow tokens
+// Shadow tokens (button interactions remain local)
 const BUTTON_SHADOW = '0 2px 4px rgba(0,0,0,0.06), 0 1px 1px rgba(0,0,0,0.04)';
 const BUTTON_SHADOW_HOVER = '0 3px 8px rgba(0,0,0,0.10), 0 2px 2px rgba(0,0,0,0.05)';
 const BUTTON_SHADOW_ACTIVE = '0 4px 14px rgba(0,0,0,0.18), 0 2px 4px rgba(0,0,0,0.10)';
-const CARD_SHADOW = '0 4px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.06)';
-
-// Local super-white card with elevated shadow
-const WhiteCard = ({ children, className = '', style = {} }) => (
-    <div
-        className={`rounded-[28px] border transition-shadow duration-200 ${className}`}
-        style={{
-            backgroundColor: '#ffffff',
-            borderColor: 'rgba(0,0,0,0.07)',
-            boxShadow: CARD_SHADOW,
-            ...style
-        }}
-    >
-        {children}
-    </div>
-);
 
 export const FeedbackScreen = ({ theme }) => {
     const [feedbackType, setFeedbackType] = useState('general');
@@ -35,8 +20,7 @@ export const FeedbackScreen = ({ theme }) => {
         { value: 'improvement', label: 'Improvement' }
     ];
 
-    const RADIUS_OUTER = 28;
-    const RADIUS_INNER = 20;
+    const RADIUS_INNER = 16;
 
     function onAttach(e) {
         const list = Array.from(e.target.files || []);
@@ -57,18 +41,17 @@ export const FeedbackScreen = ({ theme }) => {
     const innerBorder = 'rgba(0,0,0,0.06)';
 
     const inputBaseStyle = {
-        backgroundColor: '#ffffff',
+        backgroundColor: theme.colors.surface,
         border: `1px solid ${innerBorder}`,
         color: theme.colors.textPrimary,
         borderRadius: RADIUS_INNER,
-        boxShadow: '0 0 0 2px rgba(255,255,255,0.6) inset, 0 1px 2px rgba(0,0,0,0.04)'
+        boxShadow: '0 0 0 2px rgba(255,255,255,0.4) inset, 0 1px 2px rgba(0,0,0,0.04)'
     };
 
     return (
         <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
             <div className="flex-1 overflow-y-auto px-4 pb-10 scrollbar-hide">
                 <form onSubmit={handleSubmit} className="pt-3 max-w-2xl mx-auto space-y-7">
-                    {/* Feedback type selector */}
                     <div className="flex w-full items-center justify-between -mt-1 gap-2">
                         {feedbackTypes.map(t => {
                             const active = feedbackType === t.value;
@@ -79,11 +62,10 @@ export const FeedbackScreen = ({ theme }) => {
                                     onClick={() => setFeedbackType(t.value)}
                                     className="px-4 h-9 rounded-full text-sm font-medium whitespace-nowrap focus:outline-none focus:ring transition-all duration-150"
                                     style={{
-                                        backgroundColor: active ? theme.colors.accent : '#ffffff',
+                                        backgroundColor: active ? theme.colors.accent : theme.colors.surface,
                                         color: active ? '#ffffff' : theme.colors.textSecondary,
                                         border: `1px solid ${active ? theme.colors.accent : innerBorder}`,
-                                        boxShadow: active ? BUTTON_SHADOW_ACTIVE : BUTTON_SHADOW,
-                                        transform: active ? 'translateY(0)' : 'translateY(0)'
+                                        boxShadow: active ? BUTTON_SHADOW_ACTIVE : BUTTON_SHADOW
                                     }}
                                     onMouseEnter={e => { if (!active) e.currentTarget.style.boxShadow = BUTTON_SHADOW_HOVER; }}
                                     onMouseLeave={e => { if (!active) e.currentTarget.style.boxShadow = BUTTON_SHADOW; }}
@@ -94,8 +76,7 @@ export const FeedbackScreen = ({ theme }) => {
                         })}
                     </div>
 
-                    {/* Subject */}
-                    <WhiteCard className="p-5 md:p-6">
+                    <GlassCard theme={theme} className="p-5 md:p-6" variant="elevated">
                         <label className="block text-sm font-medium mb-3" style={{ color: theme.colors.textSecondary }}>Subject <span className="text-red-500">*</span></label>
                         <input
                             type="text"
@@ -106,10 +87,9 @@ export const FeedbackScreen = ({ theme }) => {
                             style={inputBaseStyle}
                             required
                         />
-                    </WhiteCard>
+                    </GlassCard>
 
-                    {/* Message */}
-                    <WhiteCard className="p-5 md:p-6">
+                    <GlassCard theme={theme} className="p-5 md:p-6" variant="elevated">
                         <label className="block text-sm font-medium mb-3" style={{ color: theme.colors.textSecondary }}>Message <span className="text-red-500">*</span></label>
                         <textarea
                             value={message}
@@ -120,13 +100,12 @@ export const FeedbackScreen = ({ theme }) => {
                             style={inputBaseStyle}
                             required
                         />
-                    </WhiteCard>
+                    </GlassCard>
 
-                    {/* Attachments */}
-                    <WhiteCard className="p-5 md:p-6">
+                    <GlassCard theme={theme} className="p-5 md:p-6" variant="elevated">
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                             <div className="text-sm font-medium" style={{ color: theme.colors.textSecondary }}>Attachments</div>
-                            <label className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium cursor-pointer transition-all" style={{ backgroundColor: '#ffffff', border: `1px solid ${innerBorder}`, color: theme.colors.textPrimary, boxShadow: BUTTON_SHADOW }}
+                            <label className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium cursor-pointer transition-all" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${innerBorder}`, color: theme.colors.textPrimary, boxShadow: BUTTON_SHADOW }}
                                 onMouseEnter={e => { e.currentTarget.style.boxShadow = BUTTON_SHADOW_HOVER; }}
                                 onMouseLeave={e => { e.currentTarget.style.boxShadow = BUTTON_SHADOW; }}
                             >
@@ -137,16 +116,15 @@ export const FeedbackScreen = ({ theme }) => {
                         {files.length > 0 && (
                             <ul className="mt-4 space-y-2">
                                 {files.map((f, i) => (
-                                    <li key={`${f.name}-${i}`} className="flex items-center justify-between px-4 py-2 border" style={{ backgroundColor: '#ffffff', border: `1px solid ${innerBorder}`, borderRadius: RADIUS_INNER, boxShadow: BUTTON_SHADOW }}>
+                                    <li key={`${f.name}-${i}`} className="flex items-center justify-between px-4 py-2 border" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${innerBorder}`, borderRadius: RADIUS_INNER, boxShadow: BUTTON_SHADOW }}>
                                         <div className="truncate text-sm" style={{ color: theme.colors.textPrimary }}>{f.name}</div>
                                         <button type="button" onClick={() => removeFile(i)} className="ml-3 p-1 rounded-full hover:bg-black/5"><X className="w-4 h-4" style={{ color: theme.colors.textSecondary }} /></button>
                                     </li>
                                 ))}
                             </ul>
                         )}
-                    </WhiteCard>
+                    </GlassCard>
 
-                    {/* Submit */}
                     <div className="pt-1">
                         <button
                             type="submit"

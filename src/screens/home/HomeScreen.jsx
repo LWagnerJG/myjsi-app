@@ -54,10 +54,7 @@ const SmartSearch = ({ theme, onNavigate, onAskAI, onVoiceActivate }) => {
 
     return (
         <div ref={anchorRef} className="relative">
-            <div
-                className="w-full flex items-center px-4 bg-white rounded-full border border-gray-200 shadow-lg"
-                style={{ height: 56 }}
-            >
+            <GlassCard theme={theme} variant="elevated" className="w-full px-4" style={{ borderRadius: 9999, paddingTop: 0, paddingBottom: 0 }}>
                 <HomeSearchInput
                     onSubmit={submit}
                     value={query}
@@ -68,12 +65,12 @@ const SmartSearch = ({ theme, onNavigate, onAskAI, onVoiceActivate }) => {
                     theme={theme}
                     className="w-full"
                 />
-            </div>
+            </GlassCard>
 
             {isFocused && filtered.length > 0 && (
                 <DropdownPortal>
                     <div className="absolute" style={{ top: pos.top, left: pos.left, width: pos.width, zIndex: 10000 }}>
-                        <GlassCard theme={theme} className="p-1">
+                        <GlassCard theme={theme} className="p-1" variant="elevated">
                             <ul className="max-h-64 overflow-y-auto scrollbar-hide">
                                 {filtered.map((app) => (
                                     <li
@@ -110,9 +107,6 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
         }).filter(Boolean);
     }, [homeApps]);
 
-    const SURFACE_TILE = useMemo(() => ({ backgroundColor: theme.colors.surface, border: `1px solid ${theme.colors.border}`, boxShadow: `0 8px 24px ${theme.colors.shadow}` }), [theme]);
-    const PILL = useMemo(() => ({ backgroundColor: theme.colors.surface, border: `1px solid ${theme.colors.border}`, boxShadow: `0 8px 24px ${theme.colors.shadow}`, borderRadius: 9999, height: 56 }), [theme]);
-
     return (
         <div className="flex flex-col h-full">
             <div className="px-4 pt-3 pb-4">
@@ -120,17 +114,17 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
             </div>
             <div className="flex-1 px-4 grid grid-cols-2 gap-3">
                 {tiles.map(item => (
-                    <button key={item.id} onClick={() => onNavigate(item.id)} className="p-4 rounded-[26px] flex flex-col items-start justify-between transition-all duration-200 hover:scale-[1.015] active:scale-[0.985]" style={SURFACE_TILE}>
+                    <GlassCard key={item.id} theme={theme} variant="elevated" interactive className="p-4 flex flex-col items-start justify-between" style={{ borderRadius: 26 }} onClick={() => onNavigate(item.id)}>
                         <item.icon className="w-[22px] h-[22px] mb-1" style={{ color: theme.colors.accent }} strokeWidth={1.6} />
                         <span className="text-[16px] font-semibold tracking-tight" style={{ color: theme.colors.textPrimary }}>{item.label}</span>
-                    </button>
+                    </GlassCard>
                 ))}
             </div>
             <div className="px-4 pt-3 pb-safe-bottom" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
-                <button onClick={() => onNavigate('feedback')} className="w-full flex items-center justify-center space-x-3 px-5" style={PILL}>
+                <GlassCard theme={theme} variant="elevated" interactive className="w-full flex items-center justify-center space-x-3 px-5" style={{ borderRadius: 9999, height:56 }} onClick={() => onNavigate('feedback')}>
                     {FeedbackIcon && <FeedbackIcon className="w-[18px] h-[18px]" style={{ color: theme.colors.accent }} />}
                     <span className="text-[15px] font-semibold" style={{ color: theme.colors.textPrimary }}>Give Feedback</span>
-                </button>
+                </GlassCard>
             </div>
         </div>
     );
