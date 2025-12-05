@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { GlassCard } from '../../../components/common/GlassCard';
-import { ChevronDown, TrendingUp } from 'lucide-react';
+import { ChevronDown, TrendingUp, Calendar, Building2 } from 'lucide-react';
 import { COMMISSIONS_DATA, COMMISSION_YEARS } from './data.js';
 
 // Money formatter - compact version for tight spaces
@@ -82,43 +82,68 @@ export const CommissionsScreen = ({ theme }) => {
               </button>
 
               {/* Detail */}
-              <div className={`transition-all duration-300 ease-out overflow-hidden ${isOpen ? 'max-h-[1500px] opacity-100' : 'max-h-0 opacity-0'}`}>
+              <div className={`transition-all duration-300 ease-out overflow-hidden ${isOpen ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'}`}>
                 <div className="px-4 pb-5 pt-1">
                   {/* AR Invoice date range note */}
-                  <div className="mb-4 text-[10px] font-medium px-3 py-2 rounded-xl inline-block" style={{backgroundColor: theme.colors.subtle, color: theme.colors.textSecondary}}>
+                  <div className="mb-4 text-[10px] font-medium px-3 py-2 rounded-xl inline-block" style={{backgroundColor: `${theme.colors.accent}08`, color: theme.colors.textSecondary, border: `1px solid ${theme.colors.border}`}}>
                     AR Invoices: {dateRange}
                   </div>
                   
                   {m.details?.[0]?.invoices && (
-                    <div className="space-y-2.5">
+                    <div className="space-y-3">
                       {m.details[0].invoices.map((inv,ii)=>{
                         const rateDisplay = inv.netAmount ? ((inv.commission / inv.netAmount)*100).toFixed(1) : inv.rate;
+                        const invDate = new Date(inv.invoiceDate);
                         return (
                           <div 
                             key={ii} 
-                            className="p-3.5 rounded-xl"
-                            style={{backgroundColor: theme.colors.subtle, border:`1px solid ${theme.colors.border}`}}
+                            className="p-4 rounded-2xl"
+                            style={{backgroundColor: `${theme.colors.subtle}60`, border:`1px solid ${theme.colors.border}`}}
                           >
-                            {/* Top row: SO and Rate */}
-                            <div className="flex items-center justify-between mb-3">
-                              <span className="font-bold text-sm" style={{color: theme.colors.textPrimary}}>{inv.so}</span>
-                              <span className="text-[10px] font-semibold px-2.5 py-1 rounded-full" style={{backgroundColor: theme.colors.surface, color: theme.colors.textSecondary, border:`1px solid ${theme.colors.border}`}}>
-                                {rateDisplay}% rate
-                              </span>
+                            {/* Header row: SO, Rate badge */}
+                            <div className="flex items-start justify-between gap-2 mb-3">
+                              <div className="flex-1 min-w-0">
+                                <div className="font-bold text-base mb-1" style={{color: theme.colors.textPrimary}}>{inv.so}</div>
+                                {/* Dealer name */}
+                                <div className="flex items-center gap-1.5 mb-1">
+                                  <Building2 className="w-3 h-3 flex-shrink-0" style={{color: theme.colors.textSecondary}} />
+                                  <span className="text-[11px] font-medium truncate" style={{color: theme.colors.textSecondary}}>{inv.dealer}</span>
+                                </div>
+                                {/* Project name */}
+                                <div className="text-[11px] font-medium truncate" style={{color: theme.colors.textSecondary}}>
+                                  {inv.project}
+                                </div>
+                              </div>
+                              <div className="flex flex-col items-end gap-1.5">
+                                <span className="text-[10px] font-bold px-2.5 py-1 rounded-full whitespace-nowrap" style={{backgroundColor: theme.colors.surface, color: theme.colors.accent, border:`1px solid ${theme.colors.accent}30`}}>
+                                  {rateDisplay}%
+                                </span>
+                                {/* Invoice date */}
+                                <div className="flex items-center gap-1">
+                                  <Calendar className="w-3 h-3" style={{color: theme.colors.textSecondary}} />
+                                  <span className="text-[10px] font-medium" style={{color: theme.colors.textSecondary}}>
+                                    {invDate.toLocaleDateString(undefined, {month:'short', day:'numeric'})}
+                                  </span>
+                                </div>
+                              </div>
                             </div>
-                            {/* Bottom row: Invoiced, Commissioned, Commission Earned - 3 columns */}
-                            <div className="flex items-end justify-between gap-2">
+                            
+                            {/* Divider */}
+                            <div className="h-px mb-3" style={{backgroundColor: theme.colors.border}} />
+                            
+                            {/* Numbers row: Invoiced, Commissioned, Earned */}
+                            <div className="flex items-end justify-between gap-3">
                               <div className="flex-1">
                                 <div className="text-[9px] font-semibold uppercase tracking-wider mb-1" style={{color: theme.colors.textSecondary}}>Invoiced</div>
-                                <div className="text-[13px] font-semibold tabular-nums" style={{color: theme.colors.textSecondary}}>{fmtMoney(inv.invoicedAmount)}</div>
+                                <div className="text-sm font-semibold tabular-nums" style={{color: theme.colors.textSecondary}}>{fmtMoney(inv.invoicedAmount)}</div>
                               </div>
                               <div className="flex-1 text-center">
                                 <div className="text-[9px] font-semibold uppercase tracking-wider mb-1" style={{color: theme.colors.textSecondary}}>Commissioned</div>
-                                <div className="text-[13px] font-bold tabular-nums" style={{color: theme.colors.textPrimary}}>{fmtMoney(inv.netAmount)}</div>
+                                <div className="text-base font-bold tabular-nums" style={{color: theme.colors.textPrimary}}>{fmtMoney(inv.netAmount)}</div>
                               </div>
                               <div className="flex-1 text-right">
                                 <div className="text-[9px] font-semibold uppercase tracking-wider mb-1" style={{color: theme.colors.accent}}>Earned</div>
-                                <div className="text-[14px] font-black tabular-nums" style={{color: theme.colors.accent}}>{fmtMoney(inv.commission)}</div>
+                                <div className="text-lg font-black tabular-nums" style={{color: theme.colors.accent}}>{fmtMoney(inv.commission)}</div>
                               </div>
                             </div>
                           </div>
@@ -129,19 +154,20 @@ export const CommissionsScreen = ({ theme }) => {
                   
                   {/* Summary totals - cleaner design */}
                   {m.details?.[1]?.brandTotal && (
-                    <div className="mt-5 p-4 rounded-xl" style={{backgroundColor: theme.colors.subtle, border:`1px solid ${theme.colors.border}`}}>
+                    <div className="mt-5 p-4 rounded-2xl" style={{backgroundColor: `${theme.colors.accent}08`, border:`1px solid ${theme.colors.accent}20`}}>
+                      <div className="text-[9px] font-bold uppercase tracking-wider mb-3 text-center" style={{color: theme.colors.textSecondary}}>Monthly Summary</div>
                       <div className="grid grid-cols-3 gap-3 text-center">
                         <div>
                           <div className="text-[9px] font-semibold uppercase tracking-wider mb-1" style={{color: theme.colors.textSecondary}}>Invoiced</div>
-                          <div className="text-sm font-bold tabular-nums" style={{color: theme.colors.textSecondary}}>{fmtMoney(m.details[1].listTotal)}</div>
+                          <div className="text-base font-bold tabular-nums" style={{color: theme.colors.textSecondary}}>{fmtMoney(m.details[1].listTotal)}</div>
                         </div>
                         <div>
                           <div className="text-[9px] font-semibold uppercase tracking-wider mb-1" style={{color: theme.colors.textSecondary}}>Commissioned</div>
-                          <div className="text-sm font-bold tabular-nums" style={{color: theme.colors.textPrimary}}>{fmtMoney(m.details[1].netTotal)}</div>
+                          <div className="text-base font-bold tabular-nums" style={{color: theme.colors.textPrimary}}>{fmtMoney(m.details[1].netTotal)}</div>
                         </div>
                         <div>
                           <div className="text-[9px] font-semibold uppercase tracking-wider mb-1" style={{color: theme.colors.accent}}>Earned</div>
-                          <div className="text-sm font-black tabular-nums" style={{color: theme.colors.accent}}>{fmtMoney(m.details[1].commissionTotal)}</div>
+                          <div className="text-lg font-black tabular-nums" style={{color: theme.colors.accent}}>{fmtMoney(m.details[1].commissionTotal)}</div>
                         </div>
                       </div>
                     </div>

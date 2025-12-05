@@ -11,6 +11,36 @@ const MAX = 55000;
 
 const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
+// Sample dealer names for realistic data
+const DEALER_NAMES = [
+  'Business Furniture LLC',
+  'Commercial Office Environments',
+  'Corporate Design Inc',
+  'Furn Solutions for the Workplace',
+  'Metro Office Interiors',
+  'Premier Workspace Solutions',
+  'Executive Office Group',
+  'Professional Environments',
+  'Workplace Innovations',
+  'Office Design Partners'
+];
+
+// Sample project names
+const PROJECT_NAMES = [
+  'St Francis in the Fields',
+  'Farm Bureau',
+  'MSD of Lawrence Township',
+  'Eli Lilly',
+  'Community Hospital South',
+  'One Main Financial',
+  'Vectren Plaza',
+  'Old National Bank',
+  'Aurora Material Solution',
+  'Owensboro Health',
+  'Stryker',
+  'Methodist Hospital'
+];
+
 // Build synthetic invoice breakdown so UX has expandable rich detail
 function buildInvoiceBreakdown(year, monthIndex, commissionTotal){
   // 2-4 invoices
@@ -35,9 +65,20 @@ function buildInvoiceBreakdown(year, monthIndex, commissionTotal){
     // invoicedAmount is the gross amount before shipping deduction (net is commission base)
     const shippingMultiplier = 1.08 + seeded(year * monthIndex * (i + 2)) * 0.07; // 8-15% shipping markup
     const invoicedAmount = Math.round(netAmount * shippingMultiplier);
+    
+    // Generate invoice date within the month
+    const invoiceDay = 1 + Math.floor(seeded(year * (monthIndex + 1) * (i + 5)) * 27); // day 1-28
+    const invoiceDate = new Date(year, monthIndex, invoiceDay);
+    
+    // Pick dealer and project names deterministically
+    const dealerIndex = Math.floor(seeded(year * (monthIndex + 2) * (i + 3)) * DEALER_NAMES.length);
+    const projectIndex = Math.floor(seeded(year * (monthIndex + 4) * (i + 1)) * PROJECT_NAMES.length);
+    
     invoices.push({
       so: `SO-${year}${String(monthIndex+1).padStart(2,'0')}${String(i+1).padStart(2,'0')}`,
-      project: `Project ${String.fromCharCode(65 + ((monthIndex + i) % 26))}`,
+      dealer: DEALER_NAMES[dealerIndex],
+      project: PROJECT_NAMES[projectIndex],
+      invoiceDate: invoiceDate.toISOString(),
       invoicedAmount,
       netAmount,
       commission: commissionSlice,
