@@ -32,20 +32,25 @@ function buildInvoiceBreakdown(year, monthIndex, commissionTotal){
     }
     remaining -= commissionSlice;
     const netAmount = Math.round(commissionSlice / rate);
+    // invoicedAmount is the gross amount before shipping deduction (net is commission base)
+    const shippingMultiplier = 1.08 + seeded(year * monthIndex * (i + 2)) * 0.07; // 8-15% shipping markup
+    const invoicedAmount = Math.round(netAmount * shippingMultiplier);
     invoices.push({
       so: `SO-${year}${String(monthIndex+1).padStart(2,'0')}${String(i+1).padStart(2,'0')}`,
       project: `Project ${String.fromCharCode(65 + ((monthIndex + i) % 26))}`,
+      invoicedAmount,
       netAmount,
       commission: commissionSlice,
       rate: (rate * 100).toFixed(2)
     });
   }
   const netTotal = invoices.reduce((s,i)=>s+i.netAmount,0);
+  const invoicedTotal = invoices.reduce((s,i)=>s+i.invoicedAmount,0);
   return {
     invoices,
     summary: {
       brandTotal: true,
-      listTotal: Math.round(netTotal * (1.05 + seeded(year * (monthIndex+11)) * 0.15)),
+      listTotal: invoicedTotal,
       netTotal,
       commissionTotal: commissionTotal
     }
