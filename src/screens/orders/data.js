@@ -1,4 +1,5 @@
 // Orders feature specific data
+// Sample ACK PDF should be placed in /public/JSI-ACK-sample.pdf
 export const ORDER_DATA = [
     {
         date: '2025-06-10T11:20:00Z',
@@ -12,7 +13,7 @@ export const ORDER_DATA = [
         shipTo: 'BUSINESS FURNISHINGS LLC\n4102 MEGHAN BEELER COURT\nSOUTH BEND, IN 46628',
         discount: '18.40%',
         ackDate: '2025-06-12T11:20:00Z',
-        ackUrl: 'https://webresources.jsifurniture.com/production/uploads/documents/JSI-BrandDoc-COMCOLOrderForm-0321.pdf',
+        ackUrl: '/JSI-ACK-sample.pdf',
         lineItems: [
             { line: '001', name: 'VISION CONFERENCE TABLE', model: 'VCT12048', quantity: 5, net: 8000.00, extNet: 40000.00, specs: [{ label: 'FINISH', value: 'MOCHA LAMINATE' }, { label: 'BASE', value: 'TRUSS LEG - BLACK' }] },
             { line: '002', name: 'ARWYN SWIVEL CHAIR', model: 'AW6007C', quantity: 40, net: 1800.00, extNet: 72000.00, specs: [{ label: 'UPHOLSTERY', value: 'MAHARAM, MODE, GLACIER' }] }
