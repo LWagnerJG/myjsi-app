@@ -1,4 +1,21 @@
 // Lead Times specific data
+// QuickShip series have a 12 business day program
+export const QUICKSHIP_SERIES = [
+    'Ansen',
+    'Bourne', 
+    'Cosgrove',
+    'Encore',
+    'Jude',
+    'Knox',
+    'Kyla',
+    'Mackey',
+    'Moto',
+    'Protocol',
+    'Satisse',
+    'Totem',
+    'Wink'
+];
+
 export const LEAD_TIMES_DATA = [
     { series: 'Addison', type: 'Wood Seating', weeks: 4, image: '/series-images/jsi_addison_comp_00015.jpg' },
     { series: 'Addison', type: 'Upholstery', weeks: 7, image: '/series-images/jsi_addison_comp_00014.jpg' },
