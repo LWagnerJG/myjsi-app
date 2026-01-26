@@ -1,43 +1,56 @@
 import React from 'react';
+import { DESIGN_TOKENS, JSI_COLORS, isDarkTheme } from '../../design-system/tokens.js';
 
-// Unified Card styling (borderless by default) for consistent tiles across apps
+// JSI Card Component
+// Clean white backgrounds with 24px corner radius and subtle drop shadows
+// Hover state reveals dark overlay with action buttons
 // Variants:
-//  - elevated: medium soft shadow, no border
-//  - minimal: lighter shadow, no border
-//  - interactive: same as elevated + hover/active effects
-//  - outlined: subtle border, no shadow (legacy fallback)
+//  - elevated: JSI signature soft shadow
+//  - minimal: lighter shadow
+//  - interactive: hover effects with overlay capability
+//  - outlined: subtle border, no shadow
 export const GlassCard = React.memo(
   React.forwardRef(function GlassCard(
-    { children, className = '', theme, variant = 'elevated', interactive = false, style = {}, as: Component = 'div', ...props },
+    {
+      children,
+      className = '',
+      theme,
+      variant = 'elevated',
+      interactive = false,
+      hoverOverlay = false,  // JSI: Enable dark overlay on hover
+      style = {},
+      as: Component = 'div',
+      ...props
+    },
     ref
   ) {
-    const isDark = (theme?.colors?.background || '').toLowerCase().startsWith('#0') || (theme?.colors?.background || '').toLowerCase().startsWith('#1');
+    const isDark = isDarkTheme(theme);
+    const shadows = isDark ? DESIGN_TOKENS.shadowsDark : DESIGN_TOKENS.shadows;
 
-    const shadowElevatedLight = '0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04)';
-    const shadowElevatedDark = '0 4px 16px rgba(0,0,0,0.55), 0 2px 4px rgba(0,0,0,0.4)';
-    const shadowMinimalLight = '0 2px 8px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)';
-    const shadowMinimalDark = '0 2px 8px rgba(0,0,0,0.5), 0 1px 2px rgba(0,0,0,0.35)';
+    let boxShadow = shadows.none;
+    if (variant === 'elevated' || variant === 'interactive') boxShadow = shadows.card;
+    else if (variant === 'minimal') boxShadow = shadows.md;
 
-    let boxShadow = 'none';
-    if (variant === 'elevated' || variant === 'interactive') boxShadow = isDark ? shadowElevatedDark : shadowElevatedLight;
-    else if (variant === 'minimal') boxShadow = isDark ? shadowMinimalDark : shadowMinimalLight;
+    const borderColor = theme?.colors?.border || JSI_COLORS.stone;
+    const radius = DESIGN_TOKENS.borderRadius.xl; // 24px for JSI
 
-    const borderColor = theme?.colors?.border || 'rgba(0,0,0,0.12)';
-    const radius = 24;
-
+    // Interactive classes with hover shadow lift
     const interactiveClasses = interactive || variant === 'interactive'
-      ? 'cursor-pointer transition-transform duration-150 hover:shadow-lg active:scale-[0.985] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black/10 dark:focus:ring-white/20'
+      ? 'cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 active:scale-[0.985] active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#353535]/10'
       : '';
 
-    const outlinedStyles = variant === 'outlined' ? { border: `1px solid ${borderColor}` } : { border: 'none' };
+    const outlinedStyles = variant === 'outlined'
+      ? { border: `1.5px solid ${borderColor}` }
+      : { border: 'none' };
 
     return (
       <Component
         ref={ref}
-        className={`rounded-[${radius}px] bg-clip-padding ${interactiveClasses} ${className}`}
+        className={`bg-clip-padding ${interactiveClasses} ${className}`}
         style={{
-          backgroundColor: theme?.colors?.surface || '#fff',
+          backgroundColor: theme?.colors?.surface || JSI_COLORS.white,
           boxShadow,
+          borderRadius: radius,
           ...outlinedStyles,
           ...style
         }}
@@ -45,6 +58,114 @@ export const GlassCard = React.memo(
       >
         {children}
       </Component>
+    );
+  })
+);
+
+// Product Card with JSI hover overlay
+export const ProductCard = React.memo(
+  React.forwardRef(function ProductCard(
+    {
+      children,
+      familyName,
+      subCategoryTitle,
+      image,
+      onLearnClick,
+      onProductsClick,
+      theme,
+      className = '',
+      style = {},
+      ...props
+    },
+    ref
+  ) {
+    const [isHovered, setIsHovered] = React.useState(false);
+
+    return (
+      <div
+        ref={ref}
+        className={`relative overflow-hidden cursor-pointer group ${className}`}
+        style={{
+          borderRadius: DESIGN_TOKENS.borderRadius.xl,
+          backgroundColor: theme?.colors?.surface || JSI_COLORS.white,
+          boxShadow: DESIGN_TOKENS.shadows.card,
+          ...style,
+        }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        {...props}
+      >
+        {/* Image */}
+        {image && (
+          <div className="aspect-[4/3] overflow-hidden">
+            <img
+              src={image}
+              alt={subCategoryTitle}
+              loading="lazy"
+              width="400"
+              height="300"
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+          </div>
+        )}
+
+        {/* Content - Family name small, SubCategory bold */}
+        <div className="p-4">
+          {familyName && (
+            <p
+              className="text-xs font-medium uppercase tracking-wider mb-1"
+              style={{ color: theme?.colors?.textSecondary || JSI_COLORS.charcoal }}
+            >
+              {familyName}
+            </p>
+          )}
+          {subCategoryTitle && (
+            <h3
+              className="text-lg font-bold"
+              style={{ color: theme?.colors?.textPrimary || JSI_COLORS.charcoal }}
+            >
+              {subCategoryTitle}
+            </h3>
+          )}
+          {children}
+        </div>
+
+        {/* JSI Dark Overlay on Hover */}
+        <div
+          className="absolute inset-0 flex items-center justify-center gap-3 transition-all duration-300"
+          style={{
+            backgroundColor: isHovered ? 'rgba(53,53,53,0.85)' : 'rgba(53,53,53,0)',
+            opacity: isHovered ? 1 : 0,
+            pointerEvents: isHovered ? 'auto' : 'none',
+          }}
+        >
+          {onLearnClick && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onLearnClick(); }}
+              className="px-5 py-2.5 rounded-full font-semibold text-sm transition-all hover:scale-105 active:scale-95"
+              style={{
+                backgroundColor: JSI_COLORS.white,
+                color: JSI_COLORS.charcoal,
+              }}
+            >
+              Learn
+            </button>
+          )}
+          {onProductsClick && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onProductsClick(); }}
+              className="px-5 py-2.5 rounded-full font-semibold text-sm transition-all hover:scale-105 active:scale-95"
+              style={{
+                backgroundColor: 'transparent',
+                color: JSI_COLORS.white,
+                border: `1.5px solid ${JSI_COLORS.white}`,
+              }}
+            >
+              Products
+            </button>
+          )}
+        </div>
+      </div>
     );
   })
 );
