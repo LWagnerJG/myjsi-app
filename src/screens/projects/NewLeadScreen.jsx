@@ -299,7 +299,30 @@ export const NewLeadScreen = ({
     
     return (
         <form onSubmit={handleSubmit} className="flex flex-col h-full overflow-y-auto scrollbar-hide" style={{ backgroundColor: theme.colors.background }}>
-            <div className="px-4 lg:px-6 pt-4 space-y-6 max-w-3xl mx-auto w-full">
+            <div className="px-4 lg:px-6 pt-6 space-y-6 max-w-4xl mx-auto w-full">
+                {/* Form Header */}
+                <div className="mb-2">
+                    <h2
+                        className="text-2xl font-bold mb-2"
+                        style={{
+                            color: theme.colors.textPrimary,
+                            fontFamily: 'Neue Haas Grotesk Display Pro, sans-serif',
+                            letterSpacing: '-0.02em'
+                        }}
+                    >
+                        New Project Lead
+                    </h2>
+                    <p
+                        className="text-sm"
+                        style={{
+                            color: theme.colors.textSecondary,
+                            fontFamily: 'Neue Haas Grotesk Display Pro, sans-serif'
+                        }}
+                    >
+                        Create a new opportunity and track it through your sales pipeline
+                    </p>
+                </div>
+
                 <FormSection title="Project Details" theme={theme}>
                     <div>
                         <SettingsRow label="Project Name" isFirst={true} theme={theme}>
@@ -317,57 +340,69 @@ export const NewLeadScreen = ({
                             </div>
                         </SettingsRow>
                         <SettingsRow label="Project Stage" theme={theme}>
-                            <div className="w-7/12">
-                                <PortalNativeSelect
-                                    label=""
-                                    required
-                                    value={newLeadData.projectStatus || ''}
-                                    onChange={e => updateField('projectStatus', e.target.value)}
-                                    options={STAGES.map(s => ({ label: s, value: s }))}
-                                    placeholder="Select..."
-                                    theme={theme}
-                                />
+                            <div className="w-full">
+                                <div className="grid grid-cols-3 gap-2.5">
+                                    {STAGES.map(stage => {
+                                        const isSelected = newLeadData.projectStatus === stage;
+                                        return (
+                                            <button
+                                                key={stage}
+                                                type="button"
+                                                onClick={() => updateField('projectStatus', stage)}
+                                                className="px-3 py-2.5 text-xs font-semibold rounded-full transition-all border text-center hover:scale-[1.02] active:scale-[0.98]"
+                                                style={{
+                                                    backgroundColor: isSelected ? theme.colors.accent : theme.colors.surface,
+                                                    color: isSelected ? '#FFFFFF' : theme.colors.textPrimary,
+                                                    borderColor: isSelected ? theme.colors.accent : theme.colors.border,
+                                                    boxShadow: isSelected ? `0 2px 8px ${theme.colors.accent}30` : 'none',
+                                                    fontFamily: 'Neue Haas Grotesk Display Pro, sans-serif'
+                                                }}
+                                            >
+                                                {stage}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
                             </div>
                         </SettingsRow>
                         <SettingsRow label="Vertical" theme={theme}>
-                            <div className="w-7/12 relative">
-                                {newLeadData.vertical === 'Other (Please specify)' ? (
-                                    <div className="flex items-center gap-3 transition-all duration-300 ease-in-out">
-                                        <button
-                                            type="button"
-                                            onClick={() => updateField('vertical', '')}
-                                            className="text-sm font-medium px-3 py-2 rounded-lg border transition-all duration-300 hover:bg-black/5"
-                                            style={{
-                                                backgroundColor: theme.colors.subtle,
-                                                borderColor: theme.colors.border,
-                                                color: theme.colors.textPrimary
-                                            }}
-                                        >
-                                            Other
-                                        </button>
-                                        <div className="flex-1 animate-fade-in">
-                                            <FormInput
-                                                label=""
-                                                required
-                                                value={newLeadData.otherVertical || ''}
-                                                onChange={e => updateField('otherVertical', e.target.value)}
-                                                placeholder="Specify other vertical..."
-                                                theme={theme}
-                                                size="sm"
-                                                surfaceBg={true}
-                                            />
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="transition-all duration-300 ease-in-out">
-                                        <PortalNativeSelect
+                            <div className="w-full">
+                                <div className="grid grid-cols-3 gap-2.5">
+                                    {VERTICALS.map(vertical => {
+                                        const isSelected = newLeadData.vertical === vertical;
+                                        const isOther = vertical === 'Other (Please specify)';
+                                        const displayText = isOther ? 'Other' : vertical;
+
+                                        return (
+                                            <button
+                                                key={vertical}
+                                                type="button"
+                                                onClick={() => updateField('vertical', vertical)}
+                                                className="px-3 py-2.5 text-xs font-semibold rounded-full transition-all border text-center hover:scale-[1.02] active:scale-[0.98]"
+                                                style={{
+                                                    backgroundColor: isSelected ? theme.colors.accent : theme.colors.surface,
+                                                    color: isSelected ? '#FFFFFF' : theme.colors.textPrimary,
+                                                    borderColor: isSelected ? theme.colors.accent : theme.colors.border,
+                                                    boxShadow: isSelected ? `0 2px 8px ${theme.colors.accent}30` : 'none',
+                                                    fontFamily: 'Neue Haas Grotesk Display Pro, sans-serif'
+                                                }}
+                                            >
+                                                {displayText}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                                {newLeadData.vertical === 'Other (Please specify)' && (
+                                    <div className="mt-3 animate-fade-in">
+                                        <FormInput
                                             label=""
                                             required
-                                            value={newLeadData.vertical || ''}
-                                            onChange={e => updateField('vertical', e.target.value)}
-                                            options={VERTICALS.map(v => ({ label: v, value: v }))}
-                                            placeholder="Select..."
+                                            value={newLeadData.otherVertical || ''}
+                                            onChange={e => updateField('otherVertical', e.target.value)}
+                                            placeholder="Specify other vertical..."
                                             theme={theme}
+                                            size="sm"
+                                            surfaceBg={true}
                                         />
                                     </div>
                                 )}
@@ -589,16 +624,29 @@ export const NewLeadScreen = ({
                             </div>
                         </SettingsRow>
                         <SettingsRow label="PO Timeframe" theme={theme}>
-                            <div className="w-7/12 relative">
-                                <PortalNativeSelect
-                                    label=""
-                                    required
-                                    value={newLeadData.poTimeframe || ''}
-                                    onChange={e => updateField('poTimeframe', e.target.value)}
-                                    options={PO_TIMEFRAMES.map(t => ({ label: t, value: t }))}
-                                    placeholder="Select..."
-                                    theme={theme}
-                                />
+                            <div className="w-full">
+                                <div className="grid grid-cols-2 gap-2.5">
+                                    {PO_TIMEFRAMES.map(timeframe => {
+                                        const isSelected = newLeadData.poTimeframe === timeframe;
+                                        return (
+                                            <button
+                                                key={timeframe}
+                                                type="button"
+                                                onClick={() => updateField('poTimeframe', timeframe)}
+                                                className="px-3 py-2.5 text-xs font-semibold rounded-full transition-all border text-center hover:scale-[1.02] active:scale-[0.98]"
+                                                style={{
+                                                    backgroundColor: isSelected ? theme.colors.accent : theme.colors.surface,
+                                                    color: isSelected ? '#FFFFFF' : theme.colors.textPrimary,
+                                                    borderColor: isSelected ? theme.colors.accent : theme.colors.border,
+                                                    boxShadow: isSelected ? `0 2px 8px ${theme.colors.accent}30` : 'none',
+                                                    fontFamily: 'Neue Haas Grotesk Display Pro, sans-serif'
+                                                }}
+                                            >
+                                                {timeframe}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
                             </div>
                         </SettingsRow>
                         <SettingsRow label="Contract?" theme={theme}>
@@ -636,17 +684,31 @@ export const NewLeadScreen = ({
                 </FormSection>
                 
                 {/* Submit Button - Inline at bottom of form */}
-                <div className="pt-4 pb-mobile-nav-safe lg:pb-8">
+                <div className="pt-6 pb-mobile-nav-safe lg:pb-12">
                     <button
                         type="submit"
-                        className="w-full text-white font-bold py-4 rounded-full transition-all hover:scale-[1.01] active:scale-[0.99]"
+                        className="w-full text-white font-bold text-base py-4 rounded-full transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
                         style={{
                             backgroundColor: theme.colors.accent,
-                            boxShadow: DESIGN_TOKENS.shadows.button
+                            boxShadow: DESIGN_TOKENS.shadows.button,
+                            fontFamily: 'Neue Haas Grotesk Display Pro, sans-serif',
+                            letterSpacing: '-0.01em'
                         }}
+                        disabled={!newLeadData.project || !newLeadData.projectStatus}
                     >
-                        Submit Lead
+                        Submit Lead →
                     </button>
+                    {(!newLeadData.project || !newLeadData.projectStatus) && (
+                        <p
+                            className="text-xs text-center mt-3"
+                            style={{
+                                color: theme.colors.textSecondary,
+                                fontFamily: 'Neue Haas Grotesk Display Pro, sans-serif'
+                            }}
+                        >
+                            Please fill in required fields to submit
+                        </p>
+                    )}
                 </div>
             </div>
         </form>
