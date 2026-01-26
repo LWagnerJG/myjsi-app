@@ -5,10 +5,10 @@ import { FormInput } from '../../components/forms/FormInput.jsx';
 import { PortalNativeSelect } from '../../components/forms/PortalNativeSelect.jsx';
 import { ToggleSwitch } from '../../components/forms/ToggleSwitch.jsx';
 import { ProbabilitySlider } from '../../components/forms/ProbabilitySlider.jsx';
-import { ToggleButtonGroup } from '../../components/common/ToggleButtonGroup.jsx';
 import { FormSection, SettingsRow } from '../../components/forms/FormSections.jsx';
 import { SpotlightMultiSelect } from '../../components/common/SpotlightMultiSelect.jsx';
 import { InfoTooltip } from '../../components/common/InfoTooltip.jsx';
+import { PillButton, PrimaryButton } from '../../components/common/JSIButtons.jsx';
 import { DESIGN_TOKENS } from '../../design-system/tokens.js';
 
 // Import data from proper feature-based sources
@@ -340,73 +340,51 @@ export const NewLeadScreen = ({
                             />
                         </SettingsRow>
                         <SettingsRow label="Project Stage" theme={theme}>
-                                <div className="grid grid-cols-3 gap-3">
-                                    {STAGES.map(stage => {
-                                        const isSelected = newLeadData.projectStatus === stage;
-                                        return (
-                                            <button
-                                                key={stage}
-                                                type="button"
-                                                onClick={() => updateField('projectStatus', stage)}
-                                                className="px-5 py-3.5 text-sm font-semibold rounded-full transition-all border-2 text-center hover:scale-[1.02] active:scale-[0.98] relative"
-                                                style={{
-                                                    backgroundColor: isSelected ? theme.colors.accent : theme.colors.surface,
-                                                    color: isSelected ? '#FFFFFF' : theme.colors.textPrimary,
-                                                    borderColor: isSelected ? theme.colors.accent : theme.colors.border,
-                                                    boxShadow: isSelected ? DESIGN_TOKENS.shadows.button : DESIGN_TOKENS.shadows.sm,
-                                                    fontFamily: 'Neue Haas Grotesk Display Pro, sans-serif',
-                                                    fontWeight: isSelected ? 600 : 500,
-                                                    letterSpacing: '-0.01em'
-                                                }}
-                                            >
-                                                {stage}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
+                            <div className="grid grid-cols-3 gap-3">
+                                {STAGES.map(stage => (
+                                    <PillButton
+                                        key={stage}
+                                        isSelected={newLeadData.projectStatus === stage}
+                                        onClick={() => updateField('projectStatus', stage)}
+                                        theme={theme}
+                                    >
+                                        {stage}
+                                    </PillButton>
+                                ))}
+                            </div>
                         </SettingsRow>
                         <SettingsRow label="Vertical" theme={theme}>
-                                <div className="grid grid-cols-3 gap-3">
-                                    {VERTICALS.map(vertical => {
-                                        const isSelected = newLeadData.vertical === vertical;
-                                        const isOther = vertical === 'Other (Please specify)';
-                                        const displayText = isOther ? 'Other' : vertical;
+                            <div className="grid grid-cols-3 gap-3">
+                                {VERTICALS.map(vertical => {
+                                    const isOther = vertical === 'Other (Please specify)';
+                                    const displayText = isOther ? 'Other' : vertical;
 
-                                        return (
-                                            <button
-                                                key={vertical}
-                                                type="button"
-                                                onClick={() => updateField('vertical', vertical)}
-                                                className="px-5 py-3.5 text-sm font-semibold rounded-full transition-all border-2 text-center hover:scale-[1.02] active:scale-[0.98]"
-                                                style={{
-                                                    backgroundColor: isSelected ? theme.colors.accent : theme.colors.surface,
-                                                    color: isSelected ? '#FFFFFF' : theme.colors.textPrimary,
-                                                    borderColor: isSelected ? theme.colors.accent : theme.colors.border,
-                                                    boxShadow: isSelected ? DESIGN_TOKENS.shadows.button : DESIGN_TOKENS.shadows.sm,
-                                                    fontFamily: 'Neue Haas Grotesk Display Pro, sans-serif',
-                                                    fontWeight: isSelected ? 600 : 500,
-                                                    letterSpacing: '-0.01em'
-                                                }}
-                                            >
-                                                {displayText}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                                {newLeadData.vertical === 'Other (Please specify)' && (
-                                    <div className="mt-4 animate-fade-in">
-                                        <FormInput
-                                            label=""
-                                            required
-                                            value={newLeadData.otherVertical || ''}
-                                            onChange={e => updateField('otherVertical', e.target.value)}
-                                            placeholder="Specify other vertical..."
+                                    return (
+                                        <PillButton
+                                            key={vertical}
+                                            isSelected={newLeadData.vertical === vertical}
+                                            onClick={() => updateField('vertical', vertical)}
                                             theme={theme}
-                                            size="sm"
-                                            surfaceBg={true}
-                                        />
-                                    </div>
-                                )}
+                                        >
+                                            {displayText}
+                                        </PillButton>
+                                    );
+                                })}
+                            </div>
+                            {newLeadData.vertical === 'Other (Please specify)' && (
+                                <div className="mt-4 animate-fade-in">
+                                    <FormInput
+                                        label=""
+                                        required
+                                        value={newLeadData.otherVertical || ''}
+                                        onChange={e => updateField('otherVertical', e.target.value)}
+                                        placeholder="Specify other vertical..."
+                                        theme={theme}
+                                        size="sm"
+                                        surfaceBg={true}
+                                    />
+                                </div>
+                            )}
                         </SettingsRow>
                         <SettingsRow label={
                             <div className="flex items-center gap-2">
@@ -490,28 +468,17 @@ export const NewLeadScreen = ({
                                     }}
                                 >
                                     <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))' }}>
-                                        {COMPETITORS.filter(c=>c!=='None').map(c=>{
-                                            const on=(newLeadData.competitors||[]).includes(c);
-                                            return (
-                                                <button
-                                                    key={c}
-                                                    type="button"
-                                                    onClick={()=>toggleCompetitor(c)}
-                                                    className="px-4 py-3 text-sm rounded-full font-semibold transition-all border-2 text-center whitespace-nowrap hover:scale-[1.02] active:scale-[0.98]"
-                                                    style={{
-                                                        backgroundColor: on ? theme.colors.accent : theme.colors.surface,
-                                                        color: on ? '#FFFFFF' : theme.colors.textPrimary,
-                                                        borderColor: on ? theme.colors.accent : theme.colors.border,
-                                                        boxShadow: on ? DESIGN_TOKENS.shadows.button : DESIGN_TOKENS.shadows.sm,
-                                                        fontFamily: 'Neue Haas Grotesk Display Pro, sans-serif',
-                                                        fontWeight: on ? 600 : 500,
-                                                        letterSpacing: '-0.01em'
-                                                    }}
-                                                >
-                                                    {c}
-                                                </button>
-                                            );
-                                        })}
+                                        {COMPETITORS.filter(c=>c!=='None').map(c => (
+                                            <PillButton
+                                                key={c}
+                                                isSelected={(newLeadData.competitors||[]).includes(c)}
+                                                onClick={() => toggleCompetitor(c)}
+                                                theme={theme}
+                                                className="whitespace-nowrap"
+                                            >
+                                                {c}
+                                            </PillButton>
+                                        ))}
                                     </div>
                                 </div>
                             </div>
@@ -609,29 +576,17 @@ export const NewLeadScreen = ({
                         </SettingsRow>
                         <SettingsRow label="PO Timeframe" theme={theme}>
                             <div className="grid grid-cols-2 gap-3">
-                                    {PO_TIMEFRAMES.map(timeframe => {
-                                        const isSelected = newLeadData.poTimeframe === timeframe;
-                                        return (
-                                            <button
-                                                key={timeframe}
-                                                type="button"
-                                                onClick={() => updateField('poTimeframe', timeframe)}
-                                                className="px-5 py-3.5 text-sm font-semibold rounded-full transition-all border-2 text-center hover:scale-[1.02] active:scale-[0.98]"
-                                                style={{
-                                                    backgroundColor: isSelected ? theme.colors.accent : theme.colors.surface,
-                                                    color: isSelected ? '#FFFFFF' : theme.colors.textPrimary,
-                                                    borderColor: isSelected ? theme.colors.accent : theme.colors.border,
-                                                    boxShadow: isSelected ? DESIGN_TOKENS.shadows.button : DESIGN_TOKENS.shadows.sm,
-                                                    fontFamily: 'Neue Haas Grotesk Display Pro, sans-serif',
-                                                    fontWeight: isSelected ? 600 : 500,
-                                                    letterSpacing: '-0.01em'
-                                                }}
-                                            >
-                                                {timeframe}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
+                                {PO_TIMEFRAMES.map(timeframe => (
+                                    <PillButton
+                                        key={timeframe}
+                                        isSelected={newLeadData.poTimeframe === timeframe}
+                                        onClick={() => updateField('poTimeframe', timeframe)}
+                                        theme={theme}
+                                    >
+                                        {timeframe}
+                                    </PillButton>
+                                ))}
+                            </div>
                         </SettingsRow>
                         <SettingsRow label="Contract?" theme={theme}>
                             <PortalNativeSelect
@@ -664,22 +619,17 @@ export const NewLeadScreen = ({
                     </div>
                 </FormSection>
                 
-                {/* Submit Button - Inline at bottom of form */}
+                {/* Submit Button */}
                 <div className="pt-8 pb-mobile-nav-safe lg:pb-12">
-                    <button
+                    <PrimaryButton
                         type="submit"
-                        className="w-full text-white font-bold text-lg py-5 rounded-full transition-all hover:scale-[1.01] hover:shadow-xl active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
-                        style={{
-                            backgroundColor: theme.colors.accent,
-                            boxShadow: DESIGN_TOKENS.shadows.button,
-                            fontFamily: 'Neue Haas Grotesk Display Pro, sans-serif',
-                            letterSpacing: '-0.01em',
-                            fontWeight: 600
-                        }}
+                        theme={theme}
+                        size="large"
+                        fullWidth
                         disabled={!newLeadData.project || !newLeadData.projectStatus}
                     >
                         Submit Lead →
-                    </button>
+                    </PrimaryButton>
                     {(!newLeadData.project || !newLeadData.projectStatus) && (
                         <p
                             className="text-sm text-center mt-4"

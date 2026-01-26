@@ -4,6 +4,7 @@ import { Plus, Briefcase, DollarSign, LineChart, Percent, ArrowRight, X } from '
 import { STAGES, VERTICALS, COMPETITORS, DISCOUNT_OPTIONS, PO_TIMEFRAMES, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS } from './data.js';
 import { ProbabilitySlider } from '../../components/forms/ProbabilitySlider.jsx';
 import { ToggleSwitch } from '../../components/forms/ToggleSwitch.jsx';
+import { PillButton } from '../../components/common/JSIButtons.jsx';
 import { JSI_SERIES } from '../products/data.js';
 
 // currency util
@@ -70,7 +71,17 @@ const OpportunityDetail = ({ opp, theme, onBack, onUpdate }) => {
             <div>
               <SoftLabel theme={theme}>Stage</SoftLabel>
               <div className="flex flex-wrap gap-2 mt-2">
-                {STAGES.map(s=>{ const active=s===draft.stage; return <button key={s} onClick={()=>update('stage',s)} className="px-3 h-8 rounded-full text-[11px] font-medium border transition-colors" style={{ backgroundColor: active? theme.colors.accent: theme.colors.surface, color: active? '#fff': theme.colors.textPrimary, borderColor: active? theme.colors.accent: theme.colors.border }}>{s}</button>; })}
+                {STAGES.map(s => (
+                  <PillButton
+                    key={s}
+                    isSelected={s === draft.stage}
+                    onClick={() => update('stage', s)}
+                    theme={theme}
+                    size="compact"
+                  >
+                    {s}
+                  </PillButton>
+                ))}
               </div>
             </div>
             <div className="flex flex-wrap items-end gap-8">
@@ -81,13 +92,33 @@ const OpportunityDetail = ({ opp, theme, onBack, onUpdate }) => {
               <div className="flex flex-col gap-2 min-w-[220px]">
                 <SoftLabel theme={theme}>Vertical</SoftLabel>
                 <div className="flex flex-wrap gap-2 max-w-[380px]">
-                  {VERTICALS.map(v=>{ const a=v===draft.vertical; return <button key={v} onClick={()=>update('vertical',v)} className="px-3 h-8 rounded-full text-[11px] font-medium border transition-colors" style={{ backgroundColor:a? theme.colors.accent:theme.colors.surface, color:a? '#fff': theme.colors.textPrimary, borderColor:a? theme.colors.accent: theme.colors.border }}>{v}</button>; })}
+                  {VERTICALS.map(v => (
+                    <PillButton
+                      key={v}
+                      isSelected={v === draft.vertical}
+                      onClick={() => update('vertical', v)}
+                      theme={theme}
+                      size="compact"
+                    >
+                      {v}
+                    </PillButton>
+                  ))}
                 </div>
               </div>
               <div className="flex flex-col gap-2">
                 <SoftLabel theme={theme}>PO Timeframe</SoftLabel>
                 <div className="flex flex-wrap gap-2 max-w-[360px]">
-                  {PO_TIMEFRAMES.map(t=>{ const a=t===draft.poTimeframe; return <button key={t} onClick={()=>update('poTimeFrame',t)} className="px-3 h-8 rounded-full text-[11px] font-medium border transition-colors" style={{ backgroundColor:a? theme.colors.accent:theme.colors.surface, color:a? '#fff': theme.colors.textPrimary, borderColor:a? theme.colors.accent: theme.colors.border }}>{t}</button>; })}
+                  {PO_TIMEFRAMES.map(t => (
+                    <PillButton
+                      key={t}
+                      isSelected={t === draft.poTimeframe}
+                      onClick={() => update('poTimeFrame', t)}
+                      theme={theme}
+                      size="compact"
+                    >
+                      {t}
+                    </PillButton>
+                  ))}
                 </div>
               </div>
             </div>
@@ -115,9 +146,23 @@ const OpportunityDetail = ({ opp, theme, onBack, onUpdate }) => {
                 <div className="pt-2">
                   <SoftLabel theme={theme}>Competitors</SoftLabel>
                   <div className="flex flex-wrap gap-2 mt-2">
-                    {COMPETITORS.filter(c=>c!=='None').map(c=>{ const on=(draft.competitors||[]).includes(c); return (
-                      <button key={c} onClick={()=>{ const list=draft.competitors||[]; update('competitors', on? list.filter(x=>x!==c): [...list,c]); }} className="px-3 h-8 rounded-full text-[11px] font-medium border transition-colors" style={{ backgroundColor:on? theme.colors.accent: theme.colors.surface, color:on? '#fff': theme.colors.textPrimary, borderColor:on? theme.colors.accent: theme.colors.border }}>{c}</button>
-                    );})}
+                    {COMPETITORS.filter(c => c !== 'None').map(c => {
+                      const on = (draft.competitors || []).includes(c);
+                      return (
+                        <PillButton
+                          key={c}
+                          isSelected={on}
+                          onClick={() => {
+                            const list = draft.competitors || [];
+                            update('competitors', on ? list.filter(x => x !== c) : [...list, c]);
+                          }}
+                          theme={theme}
+                          size="compact"
+                        >
+                          {c}
+                        </PillButton>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -130,7 +175,7 @@ const OpportunityDetail = ({ opp, theme, onBack, onUpdate }) => {
               <div>
                 <SoftLabel theme={theme}>Products</SoftLabel>
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {(draft.products||[]).map(p=> <button key={p.series} onClick={()=>removeProductSeries(p.series)} className="px-3 h-8 rounded-full text-[11px] font-medium flex items-center gap-1 border" style={{ background: theme.colors.subtle, borderColor: theme.colors.border, color: theme.colors.textPrimary }}>{p.series}<span className="opacity-60">×</span></button>)}
+                  {(draft.products||[]).map(p=> <button key={p.series} onClick={()=>removeProductSeries(p.series)} className="px-3 h-8 rounded-full text-[11px] font-medium flex items-center gap-1 border" style={{ background: theme.colors.subtle, borderColor: theme.colors.border, color: theme.colors.textPrimary }}>{p.series}<span className="opacity-60">ï¿½</span></button>)}
                   <SuggestInputPill placeholder="Add series" suggestions={JSI_SERIES} onAdd={addProductSeries} theme={theme} />
                 </div>
               </div>
@@ -138,14 +183,14 @@ const OpportunityDetail = ({ opp, theme, onBack, onUpdate }) => {
                 <div>
                   <SoftLabel theme={theme}>Design Firms</SoftLabel>
                   <div className="flex flex-wrap gap-2 mt-2">
-                    {(draft.designFirms||[]).map(f=> <button key={f} onClick={()=>removeFrom('designFirms',f)} className="px-3 h-8 rounded-full text-[11px] font-medium flex items-center gap-1 border" style={{ background: theme.colors.subtle, borderColor: theme.colors.border, color: theme.colors.textPrimary }}>{f}<span className="opacity-60">×</span></button>)}
+                    {(draft.designFirms||[]).map(f=> <button key={f} onClick={()=>removeFrom('designFirms',f)} className="px-3 h-8 rounded-full text-[11px] font-medium flex items-center gap-1 border" style={{ background: theme.colors.subtle, borderColor: theme.colors.border, color: theme.colors.textPrimary }}>{f}<span className="opacity-60">ï¿½</span></button>)}
                     <SuggestInputPill placeholder="Add firm" suggestions={INITIAL_DESIGN_FIRMS} onAdd={v=>addUnique('designFirms',v)} theme={theme} />
                   </div>
                 </div>
                 <div>
                   <SoftLabel theme={theme}>Dealers</SoftLabel>
                   <div className="flex flex-wrap gap-2 mt-2">
-                    {(draft.dealers||[]).map(f=> <button key={f} onClick={()=>removeFrom('dealers',f)} className="px-3 h-8 rounded-full text-[11px] font-medium flex items-center gap-1 border" style={{ background: theme.colors.subtle, borderColor: theme.colors.border, color: theme.colors.textPrimary }}>{f}<span className="opacity-60">×</span></button>)}
+                    {(draft.dealers||[]).map(f=> <button key={f} onClick={()=>removeFrom('dealers',f)} className="px-3 h-8 rounded-full text-[11px] font-medium flex items-center gap-1 border" style={{ background: theme.colors.subtle, borderColor: theme.colors.border, color: theme.colors.textPrimary }}>{f}<span className="opacity-60">ï¿½</span></button>)}
                     <SuggestInputPill placeholder="Add dealer" suggestions={INITIAL_DEALERS} onAdd={v=>addUnique('dealers',v)} theme={theme} />
                   </div>
                 </div>
