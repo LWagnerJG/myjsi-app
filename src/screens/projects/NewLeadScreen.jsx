@@ -9,6 +9,7 @@ import { ToggleButtonGroup } from '../../components/common/ToggleButtonGroup.jsx
 import { FormSection, SettingsRow } from '../../components/forms/FormSections.jsx';
 import { SpotlightMultiSelect } from '../../components/common/SpotlightMultiSelect.jsx';
 import { InfoTooltip } from '../../components/common/InfoTooltip.jsx';
+import { DESIGN_TOKENS } from '../../design-system/tokens.js';
 
 // Import data from proper feature-based sources
 import { 
@@ -170,7 +171,7 @@ const ProductSpotlight = ({ selectedSeries, onAdd, available, theme }) => {
             maxHeight: 360,
             background: theme.colors.surface,
             borderColor: theme.colors.border,
-            zIndex: 100000,
+            zIndex: DESIGN_TOKENS.zIndex.popover,
             opacity: pos.ready ? 1 : 0
           }}
         >
@@ -331,19 +332,19 @@ export const NewLeadScreen = ({
                         <SettingsRow label="Vertical" theme={theme}>
                             <div className="w-7/12 relative">
                                 {newLeadData.vertical === 'Other (Please specify)' ? (
-                                    <div className="flex items-center space-x-3 transition-all duration-300 ease-in-out">
-                                        <div className="flex items-center space-x-2 animate-slide-in-left">
-                                            <span
-                                                className="text-sm font-medium px-3 py-2 rounded-lg border transition-all duration-300"
-                                                style={{
-                                                    backgroundColor: theme.colors.subtle,
-                                                    borderColor: theme.colors.border,
-                                                    color: theme.colors.textPrimary
-                                                }}
-                                            >
-                                                Other
-                                            </span>
-                                        </div>
+                                    <div className="flex items-center gap-3 transition-all duration-300 ease-in-out">
+                                        <button
+                                            type="button"
+                                            onClick={() => updateField('vertical', '')}
+                                            className="text-sm font-medium px-3 py-2 rounded-lg border transition-all duration-300 hover:bg-black/5"
+                                            style={{
+                                                backgroundColor: theme.colors.subtle,
+                                                borderColor: theme.colors.border,
+                                                color: theme.colors.textPrimary
+                                            }}
+                                        >
+                                            Other
+                                        </button>
                                         <div className="flex-1 animate-fade-in">
                                             <FormInput
                                                 label=""
@@ -352,6 +353,8 @@ export const NewLeadScreen = ({
                                                 onChange={e => updateField('otherVertical', e.target.value)}
                                                 placeholder="Specify other vertical..."
                                                 theme={theme}
+                                                size="sm"
+                                                surfaceBg={true}
                                             />
                                         </div>
                                     </div>
@@ -451,11 +454,37 @@ export const NewLeadScreen = ({
 
                         <div className="-mx-4">
                             <div className="px-4">
-                                <div className={`rounded-2xl transition-all duration-400 ease-out overflow-hidden ${newLeadData.competitionPresent? 'p-3 opacity-100 max-h-[600px] translate-y-0':'p-0 opacity-0 max-h-0 -translate-y-1 pointer-events-none'}`} style={{ backgroundColor: theme.colors.subtle }}>
-                                    <div className="grid gap-2" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(132px, 1fr))' }}>
-                                        {COMPETITORS.filter(c=>c!=='None').map(c=>{ const on=(newLeadData.competitors||[]).includes(c); return (
-                                            <button key={c} type="button" onClick={()=>toggleCompetitor(c)} className="px-3 py-1.5 text-[13px] rounded-full font-medium transition-colors border text-center whitespace-nowrap" style={{ backgroundColor: on? theme.colors.accent: theme.colors.surface, color: on? theme.colors.surface: theme.colors.textPrimary, borderColor: on? theme.colors.accent: theme.colors.border }}>{c}</button>
-                                        );})}
+                                <div
+                                    className={`rounded-2xl transition-all duration-400 ease-out overflow-hidden ${
+                                        newLeadData.competitionPresent
+                                            ? 'p-4 opacity-100 max-h-[600px] translate-y-0'
+                                            : 'p-0 opacity-0 max-h-0 -translate-y-1 pointer-events-none'
+                                    }`}
+                                    style={{
+                                        backgroundColor: theme.colors.subtle,
+                                        border: `1px solid ${theme.colors.border}`
+                                    }}
+                                >
+                                    <div className="grid gap-2.5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))' }}>
+                                        {COMPETITORS.filter(c=>c!=='None').map(c=>{
+                                            const on=(newLeadData.competitors||[]).includes(c);
+                                            return (
+                                                <button
+                                                    key={c}
+                                                    type="button"
+                                                    onClick={()=>toggleCompetitor(c)}
+                                                    className="px-3 py-2 text-xs rounded-full font-semibold transition-all border text-center whitespace-nowrap hover:scale-[1.02] active:scale-[0.98]"
+                                                    style={{
+                                                        backgroundColor: on ? theme.colors.accent : theme.colors.surface,
+                                                        color: on ? '#FFFFFF' : theme.colors.textPrimary,
+                                                        borderColor: on ? theme.colors.accent : theme.colors.border,
+                                                        boxShadow: on ? `0 2px 8px ${theme.colors.accent}30` : 'none'
+                                                    }}
+                                                >
+                                                    {c}
+                                                </button>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             </div>
@@ -476,17 +505,38 @@ export const NewLeadScreen = ({
                         <div className="space-y-3 pt-2">
                             {(newLeadData.products || []).map((p, idx) => {
                                 const hasOptions = ['Vision', 'Knox', 'Wink', 'Hoopz'].includes(p.series);
-                                const itemStyle = hasOptions ? 'p-3 border rounded-2xl' : 'p-2 pl-4 border rounded-full';
                                 return (
-                                    <div key={idx} className={`${itemStyle} space-y-2`} style={{ borderColor: theme.colors.border, backgroundColor: theme.colors.surface }}>
+                                    <div
+                                        key={idx}
+                                        className={`${hasOptions ? 'p-4 rounded-2xl' : 'p-3 rounded-full'} space-y-3 border`}
+                                        style={{
+                                            borderColor: theme.colors.border,
+                                            backgroundColor: theme.colors.surface,
+                                            boxShadow: '0 1px 3px rgba(53,53,53,0.04)'
+                                        }}
+                                    >
                                         <div className="flex items-center justify-between">
-                                            <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>{p.series}</span>
-                                            <button type="button" onClick={()=>removeProduct(idx)} className="flex items-center gap-1 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-colors hover:bg-red-500/10 border" style={{ borderColor: theme.colors.border, color:'#dc2626' }}>
-                                                <X className="w-4 h-4" /> Remove
+                                            <span
+                                                className="font-semibold text-sm"
+                                                style={{ color: theme.colors.textPrimary }}
+                                            >
+                                                {p.series}
+                                            </span>
+                                            <button
+                                                type="button"
+                                                onClick={()=>removeProduct(idx)}
+                                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all hover:bg-red-500/10 border"
+                                                style={{
+                                                    borderColor: theme.colors.border,
+                                                    color:'#dc2626'
+                                                }}
+                                            >
+                                                <X className="w-3.5 h-3.5" />
+                                                Remove
                                             </button>
                                         </div>
                                         {hasOptions && (
-                                            <div className="animate-fade-in pr-2">
+                                            <div className="animate-fade-in">
                                                 {p.series === 'Vision' && (<VisionOptions theme={theme} product={p} productIndex={idx} onUpdate={updateProductOption} />)}
                                                 {p.series === 'Knox' && (<KnoxOptions theme={theme} product={p} productIndex={idx} onUpdate={updateProductOption} />)}
                                                 {(p.series === 'Wink' || p.series === 'Hoopz') && (<WinkHoopzOptions theme={theme} product={p} productIndex={idx} onUpdate={updateProductOption} />)}
@@ -589,8 +639,11 @@ export const NewLeadScreen = ({
                 <div className="pt-4 pb-mobile-nav-safe lg:pb-8">
                     <button
                         type="submit"
-                        className="w-full text-white font-bold py-3.5 rounded-full shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.98]"
-                        style={{ backgroundColor: theme.colors.accent }}
+                        className="w-full text-white font-bold py-4 rounded-full transition-all hover:scale-[1.01] active:scale-[0.99]"
+                        style={{
+                            backgroundColor: theme.colors.accent,
+                            boxShadow: DESIGN_TOKENS.shadows.button
+                        }}
                     >
                         Submit Lead
                     </button>
