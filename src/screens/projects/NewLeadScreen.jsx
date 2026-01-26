@@ -1,6 +1,6 @@
-﻿import React, { useState, useMemo, useRef, useEffect } from 'react';
+﻿import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Search } from 'lucide-react';
+import { X, Search, Check, Plus } from 'lucide-react';
 import { FormInput } from '../../components/forms/FormInput.jsx';
 import { PortalNativeSelect } from '../../components/forms/PortalNativeSelect.jsx';
 import { ToggleSwitch } from '../../components/forms/ToggleSwitch.jsx';
@@ -24,26 +24,197 @@ import { FINISH_SAMPLES } from '../samples'; // re-exported by screens/samples/i
 import { CONTRACTS_DATA } from '../resources/contracts/data.js';
 import { VisionOptions, KnoxOptions, WinkHoopzOptions } from './product-options.jsx';
 
+// Enhanced Product Spotlight with debounced typeahead search and keyboard navigation
 const ProductSpotlight = ({ selectedSeries, onAdd, available, theme }) => {
-  const [open,setOpen]=useState(false); const [q,setQ]=useState(''); const anchorRef=useRef(null); const menuRef=useRef(null); const [pos,setPos]=useState({top:0,left:0,width:0,ready:false});
-  const norm=s=>s.toLowerCase();
-  const filtered = useMemo(()=> available.filter(s=> norm(s).includes(norm(q))).slice(0,30),[available,q]);
-  const computePos=()=>{ if(anchorRef.current){ const r=anchorRef.current.getBoundingClientRect(); setPos({ top:r.bottom+window.scrollY+8, left:r.left+window.scrollX, width:r.width, ready:true }); } };
-  const openMenu=()=>{ computePos(); setOpen(true); };
-  useEffect(()=>{ if(open) computePos(); },[open]);
-  useEffect(()=>{ const close=e=>{ if(!anchorRef.current||!menuRef.current) return; if(!anchorRef.current.contains(e.target)&&!menuRef.current.contains(e.target)) setOpen(false); }; if(open){ document.addEventListener('mousedown',close); document.addEventListener('scroll',close,true); window.addEventListener('resize',close);} return ()=>{ document.removeEventListener('mousedown',close); document.removeEventListener('scroll',close,true); window.removeEventListener('resize',close); }; },[open]);
-  return <div className="w-full" ref={anchorRef}>
-    <div onMouseDown={(e)=>{ e.preventDefault(); openMenu(); }} onClick={openMenu} className="flex items-center gap-2 px-4 cursor-text" style={{height:46,borderRadius:24, background:theme.colors.surface, border:`1px solid ${theme.colors.border}`}}>
-      <Search className="w-3.5 h-3.5" style={{ color: theme.colors.textSecondary }} />
-      <input value={q} onChange={e=>{ setQ(e.target.value); if(!open) openMenu(); }} onFocus={openMenu} placeholder="Search..." className="flex-1 bg-transparent outline-none text-[14px]" style={{ color: theme.colors.textPrimary }} />
-    </div>
-    {open && createPortal(<div ref={menuRef} className="fixed rounded-2xl border shadow-2xl overflow-y-auto custom-scroll-hide" style={{ top:pos.top, left:pos.left, width:pos.width, maxHeight:360, background:theme.colors.surface, borderColor:theme.colors.border, zIndex:100000, opacity: pos.ready?1:0 }}>
-      <div className="py-1">
-        {filtered.map(s=> <button key={s} type="button" onMouseDown={e=>{ e.preventDefault(); onAdd(s); setQ(''); setOpen(false); }} className="w-full text-left px-3 py-2 text-sm hover:bg-black/5 rounded-lg" style={{ color: theme.colors.textPrimary }}>{s}</button>)}
-        {!filtered.length && <div className="px-3 py-3 text-sm" style={{ color: theme.colors.textSecondary }}>No matches</div>}
+  const [open, setOpen] = useState(false);
+  const [q, setQ] = useState('');
+  const [highlightIdx, setHighlightIdx] = useState(0);
+  const anchorRef = useRef(null);
+  const menuRef = useRef(null);
+  const inputRef = useRef(null);
+  const [pos, setPos] = useState({ top: 0, left: 0, width: 0, ready: false });
+  const [debouncedQ, setDebouncedQ] = useState('');
+
+  // Debounce search query for better performance
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedQ(q), 150);
+    return () => clearTimeout(timer);
+  }, [q]);
+
+  const norm = s => s.toLowerCase();
+
+  // Filter with fuzzy matching and highlight
+  const filtered = useMemo(() => {
+    if (!debouncedQ.trim()) return available.slice(0, 30);
+    const searchTerm = norm(debouncedQ);
+    return available
+      .filter(s => norm(s).includes(searchTerm))
+      .slice(0, 30);
+  }, [available, debouncedQ]);
+
+  // Reset highlight when results change
+  useEffect(() => {
+    setHighlightIdx(0);
+  }, [filtered.length]);
+
+  const computePos = useCallback(() => {
+    if (anchorRef.current) {
+      const r = anchorRef.current.getBoundingClientRect();
+      setPos({ top: r.bottom + window.scrollY + 8, left: r.left + window.scrollX, width: r.width, ready: true });
+    }
+  }, []);
+
+  const openMenu = useCallback(() => {
+    computePos();
+    setOpen(true);
+    setHighlightIdx(0);
+  }, [computePos]);
+
+  useEffect(() => {
+    if (open) computePos();
+  }, [open, computePos]);
+
+  // Close on outside click/scroll
+  useEffect(() => {
+    const close = e => {
+      if (!anchorRef.current || !menuRef.current) return;
+      if (!anchorRef.current.contains(e.target) && !menuRef.current.contains(e.target)) setOpen(false);
+    };
+    if (open) {
+      document.addEventListener('mousedown', close);
+      document.addEventListener('scroll', close, true);
+      window.addEventListener('resize', close);
+    }
+    return () => {
+      document.removeEventListener('mousedown', close);
+      document.removeEventListener('scroll', close, true);
+      window.removeEventListener('resize', close);
+    };
+  }, [open]);
+
+  // Keyboard navigation
+  const handleKeyDown = useCallback((e) => {
+    if (!open) {
+      if (e.key === 'ArrowDown' || e.key === 'Enter') {
+        e.preventDefault();
+        openMenu();
+      }
+      return;
+    }
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setHighlightIdx(i => Math.min(i + 1, filtered.length - 1));
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setHighlightIdx(i => Math.max(i - 1, 0));
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (filtered[highlightIdx] && !selectedSeries.includes(filtered[highlightIdx])) {
+          onAdd(filtered[highlightIdx]);
+          setQ('');
+          setOpen(false);
+        }
+        break;
+      case 'Escape':
+        e.preventDefault();
+        setOpen(false);
+        break;
+    }
+  }, [open, filtered, highlightIdx, onAdd, openMenu, selectedSeries]);
+
+  // Highlight matched substring
+  const highlightMatch = (text, query) => {
+    if (!query.trim()) return text;
+    const idx = text.toLowerCase().indexOf(query.toLowerCase());
+    if (idx === -1) return text;
+    return (
+      <>
+        {text.slice(0, idx)}
+        <span className="font-bold" style={{ color: theme.colors.accent }}>{text.slice(idx, idx + query.length)}</span>
+        {text.slice(idx + query.length)}
+      </>
+    );
+  };
+
+  return (
+    <div className="w-full" ref={anchorRef}>
+      <div
+        onClick={openMenu}
+        className="flex items-center gap-2 px-4 cursor-text"
+        style={{ height: 46, borderRadius: 24, background: theme.colors.surface, border: `1px solid ${theme.colors.border}` }}
+      >
+        <Search className="w-3.5 h-3.5" style={{ color: theme.colors.textSecondary }} />
+        <input
+          ref={inputRef}
+          value={q}
+          onChange={e => { setQ(e.target.value); if (!open) openMenu(); }}
+          onFocus={openMenu}
+          onKeyDown={handleKeyDown}
+          placeholder="Search products..."
+          className="flex-1 bg-transparent outline-none text-[14px]"
+          style={{ color: theme.colors.textPrimary }}
+        />
       </div>
-    </div>, document.body)}
-  </div>;
+      {open && createPortal(
+        <div
+          ref={menuRef}
+          className="fixed rounded-2xl border shadow-2xl overflow-hidden"
+          style={{
+            top: pos.top,
+            left: pos.left,
+            width: pos.width,
+            maxHeight: 360,
+            background: theme.colors.surface,
+            borderColor: theme.colors.border,
+            zIndex: 100000,
+            opacity: pos.ready ? 1 : 0
+          }}
+        >
+          <div className="overflow-y-auto scrollbar-hide" style={{ maxHeight: 360 }}>
+            {filtered.length > 0 ? (
+              filtered.map((s, idx) => {
+                const isSelected = selectedSeries.includes(s);
+                const isHighlighted = idx === highlightIdx;
+                return (
+                  <button
+                    key={s}
+                    type="button"
+                    onMouseDown={e => {
+                      e.preventDefault();
+                      if (!isSelected) {
+                        onAdd(s);
+                        setQ('');
+                        setOpen(false);
+                      }
+                    }}
+                    onMouseEnter={() => setHighlightIdx(idx)}
+                    className={`w-full text-left px-3 py-2.5 text-sm flex items-center justify-between transition-colors ${isHighlighted ? 'bg-black/5' : ''}`}
+                    style={{
+                      color: isSelected ? theme.colors.textSecondary : theme.colors.textPrimary,
+                      opacity: isSelected ? 0.6 : 1
+                    }}
+                    disabled={isSelected}
+                  >
+                    <span>{highlightMatch(s, debouncedQ)}</span>
+                    {isSelected && <Check className="w-4 h-4" style={{ color: theme.colors.accent }} />}
+                  </button>
+                );
+              })
+            ) : (
+              <div className="px-3 py-4 text-sm text-center" style={{ color: theme.colors.textSecondary }}>
+                No products found matching "{q}"
+              </div>
+            )}
+          </div>
+        </div>,
+        document.body
+      )}
+    </div>
+  );
 };
 
 // Add global style for hidden scrollbar once
@@ -126,8 +297,8 @@ export const NewLeadScreen = ({
     };
     
     return (
-        <form onSubmit={handleSubmit} className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
-            <div className="flex-1 overflow-y-auto px-4 pt-4 pb-4 space-y-6 scrollbar-hide">
+        <form onSubmit={handleSubmit} className="flex flex-col h-full overflow-y-auto scrollbar-hide" style={{ backgroundColor: theme.colors.background }}>
+            <div className="px-4 lg:px-6 pt-4 space-y-6 max-w-3xl mx-auto w-full">
                 <FormSection title="Project Details" theme={theme}>
                     <div>
                         <SettingsRow label="Project Name" isFirst={true} theme={theme}>
@@ -414,10 +585,11 @@ export const NewLeadScreen = ({
                     </div>
                 </FormSection>
                 
-                <div className="pt-2 pb-4">
+                {/* Submit Button - Inline at bottom of form */}
+                <div className="pt-4 pb-mobile-nav-safe lg:pb-8">
                     <button
                         type="submit"
-                        className="w-full text-white font-bold py-3.5 rounded-full shadow-lg transition-transform hover:scale-105 active:scale-95"
+                        className="w-full text-white font-bold py-3.5 rounded-full shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.98]"
                         style={{ backgroundColor: theme.colors.accent }}
                     >
                         Submit Lead
