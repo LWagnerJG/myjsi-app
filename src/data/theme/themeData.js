@@ -1,12 +1,16 @@
+// JSI Digital Brand Themes
+// Aligned with JSI Digital Style Guide 1.0
+// Primary accent: JSI Charcoal (#353535)
+
 export const lightTheme = {
     colors: {
         background: '#f8f8f8',
-        surface: '#FFFFFF', // Changed from '#FEFEFE' to '#FFFFFF'
+        surface: '#FFFFFF',
         primary: '#b3b3af',
-        accent: '#AD8A77',
+        accent: '#353535',        // JSI Charcoal - primary brand action color
         secondary: '#414141',
-        textPrimary: '#1F1F1F', // softened from #111111
-        textSecondary: '#666666', // slightly lighter than previous #555555
+        textPrimary: '#1F1F1F',
+        textSecondary: '#666666',
         border: 'rgba(0,0,0,0.12)',
         shadow: 'rgba(0,0,0,0.15)',
         subtle: 'rgba(0,0,0,0.05)'
@@ -19,7 +23,7 @@ export const darkTheme = {
         background: '#1E1E1E',
         surface: '#2A2A2A',
         primary: '#BBBBBB',
-        accent: '#BBBBBB',
+        accent: '#E3E0D8',        // JSI Stone - softer contrast for dark mode
         secondary: '#999999',
         textPrimary: '#F5F5F5',
         textSecondary: '#CCCCCC',

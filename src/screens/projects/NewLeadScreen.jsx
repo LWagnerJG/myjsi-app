@@ -301,22 +301,24 @@ export const NewLeadScreen = ({
         <form onSubmit={handleSubmit} className="flex flex-col h-full overflow-y-auto scrollbar-hide" style={{ backgroundColor: theme.colors.background }}>
             <div className="px-4 lg:px-6 pt-6 space-y-6 max-w-4xl mx-auto w-full">
                 {/* Form Header */}
-                <div className="mb-2">
-                    <h2
-                        className="text-2xl font-bold mb-2"
+                <div className="mb-6">
+                    <h1
+                        className="text-3xl lg:text-4xl font-bold mb-3"
                         style={{
                             color: theme.colors.textPrimary,
                             fontFamily: 'Neue Haas Grotesk Display Pro, sans-serif',
-                            letterSpacing: '-0.02em'
+                            letterSpacing: '-0.02em',
+                            lineHeight: 1.1
                         }}
                     >
                         New Project Lead
-                    </h2>
+                    </h1>
                     <p
-                        className="text-sm"
+                        className="text-base"
                         style={{
                             color: theme.colors.textSecondary,
-                            fontFamily: 'Neue Haas Grotesk Display Pro, sans-serif'
+                            fontFamily: 'Neue Haas Grotesk Display Pro, sans-serif',
+                            lineHeight: 1.5
                         }}
                     >
                         Create a new opportunity and track it through your sales pipeline
@@ -326,22 +328,19 @@ export const NewLeadScreen = ({
                 <FormSection title="Project Details" theme={theme}>
                     <div>
                         <SettingsRow label="Project Name" isFirst={true} theme={theme}>
-                            <div className="w-7/12">
-                                <FormInput
-                                    label=""
-                                    required
-                                    value={newLeadData.project || ''}
-                                    onChange={e => updateField('project', e.target.value)}
-                                    placeholder="Required"
-                                    theme={theme}
-                                    size="sm"
-                                    surfaceBg={true}
-                                />
-                            </div>
+                            <FormInput
+                                label=""
+                                required
+                                value={newLeadData.project || ''}
+                                onChange={e => updateField('project', e.target.value)}
+                                placeholder="Required"
+                                theme={theme}
+                                size="sm"
+                                surfaceBg={true}
+                            />
                         </SettingsRow>
                         <SettingsRow label="Project Stage" theme={theme}>
-                            <div className="w-full">
-                                <div className="grid grid-cols-3 gap-2.5">
+                                <div className="grid grid-cols-3 gap-3">
                                     {STAGES.map(stage => {
                                         const isSelected = newLeadData.projectStatus === stage;
                                         return (
@@ -349,13 +348,15 @@ export const NewLeadScreen = ({
                                                 key={stage}
                                                 type="button"
                                                 onClick={() => updateField('projectStatus', stage)}
-                                                className="px-3 py-2.5 text-xs font-semibold rounded-full transition-all border text-center hover:scale-[1.02] active:scale-[0.98]"
+                                                className="px-5 py-3.5 text-sm font-semibold rounded-full transition-all border-2 text-center hover:scale-[1.02] active:scale-[0.98] relative"
                                                 style={{
                                                     backgroundColor: isSelected ? theme.colors.accent : theme.colors.surface,
                                                     color: isSelected ? '#FFFFFF' : theme.colors.textPrimary,
                                                     borderColor: isSelected ? theme.colors.accent : theme.colors.border,
-                                                    boxShadow: isSelected ? `0 2px 8px ${theme.colors.accent}30` : 'none',
-                                                    fontFamily: 'Neue Haas Grotesk Display Pro, sans-serif'
+                                                    boxShadow: isSelected ? DESIGN_TOKENS.shadows.button : DESIGN_TOKENS.shadows.sm,
+                                                    fontFamily: 'Neue Haas Grotesk Display Pro, sans-serif',
+                                                    fontWeight: isSelected ? 600 : 500,
+                                                    letterSpacing: '-0.01em'
                                                 }}
                                             >
                                                 {stage}
@@ -363,11 +364,9 @@ export const NewLeadScreen = ({
                                         );
                                     })}
                                 </div>
-                            </div>
                         </SettingsRow>
                         <SettingsRow label="Vertical" theme={theme}>
-                            <div className="w-full">
-                                <div className="grid grid-cols-3 gap-2.5">
+                                <div className="grid grid-cols-3 gap-3">
                                     {VERTICALS.map(vertical => {
                                         const isSelected = newLeadData.vertical === vertical;
                                         const isOther = vertical === 'Other (Please specify)';
@@ -378,13 +377,15 @@ export const NewLeadScreen = ({
                                                 key={vertical}
                                                 type="button"
                                                 onClick={() => updateField('vertical', vertical)}
-                                                className="px-3 py-2.5 text-xs font-semibold rounded-full transition-all border text-center hover:scale-[1.02] active:scale-[0.98]"
+                                                className="px-5 py-3.5 text-sm font-semibold rounded-full transition-all border-2 text-center hover:scale-[1.02] active:scale-[0.98]"
                                                 style={{
                                                     backgroundColor: isSelected ? theme.colors.accent : theme.colors.surface,
                                                     color: isSelected ? '#FFFFFF' : theme.colors.textPrimary,
                                                     borderColor: isSelected ? theme.colors.accent : theme.colors.border,
-                                                    boxShadow: isSelected ? `0 2px 8px ${theme.colors.accent}30` : 'none',
-                                                    fontFamily: 'Neue Haas Grotesk Display Pro, sans-serif'
+                                                    boxShadow: isSelected ? DESIGN_TOKENS.shadows.button : DESIGN_TOKENS.shadows.sm,
+                                                    fontFamily: 'Neue Haas Grotesk Display Pro, sans-serif',
+                                                    fontWeight: isSelected ? 600 : 500,
+                                                    letterSpacing: '-0.01em'
                                                 }}
                                             >
                                                 {displayText}
@@ -393,7 +394,7 @@ export const NewLeadScreen = ({
                                     })}
                                 </div>
                                 {newLeadData.vertical === 'Other (Please specify)' && (
-                                    <div className="mt-3 animate-fade-in">
+                                    <div className="mt-4 animate-fade-in">
                                         <FormInput
                                             label=""
                                             required
@@ -406,7 +407,6 @@ export const NewLeadScreen = ({
                                         />
                                     </div>
                                 )}
-                            </div>
                         </SettingsRow>
                         <SettingsRow label={
                             <div className="flex items-center gap-2">
@@ -419,17 +419,15 @@ export const NewLeadScreen = ({
                                 />
                             </div>
                         } theme={theme}>
-                            <div className="w-7/12">
-                                <FormInput
-                                    label=""
-                                    value={newLeadData.installationLocation || ''}
-                                    onChange={e => updateField('installationLocation', e.target.value)}
-                                    placeholder="Optional"
-                                    theme={theme}
-                                    size="sm"
-                                    surfaceBg={true}
-                                />
-                            </div>
+                            <FormInput
+                                label=""
+                                value={newLeadData.installationLocation || ''}
+                                onChange={e => updateField('installationLocation', e.target.value)}
+                                placeholder="Optional"
+                                theme={theme}
+                                size="sm"
+                                surfaceBg={true}
+                            />
                         </SettingsRow>
                     </div>
                 </FormSection>
@@ -437,30 +435,26 @@ export const NewLeadScreen = ({
                 <FormSection title="Stakeholders" theme={theme}>
                     <div>
                         <SettingsRow label="A&D Firm" isFirst={true} theme={theme}>
-                            <div className="w-7/12">
-                                <SpotlightMultiSelect
-                                    selectedItems={newLeadData.designFirms || []}
-                                    onAddItem={addDesignFirm}
-                                    onRemoveItem={removeDesignFirm}
-                                    options={designFirms || []}
-                                    onAddNew={(f) => setDesignFirms((p) => [...new Set([f, ...p])])}
-                                    placeholder="Search..."
-                                    theme={theme}
-                                />
-                            </div>
+                            <SpotlightMultiSelect
+                                selectedItems={newLeadData.designFirms || []}
+                                onAddItem={addDesignFirm}
+                                onRemoveItem={removeDesignFirm}
+                                options={designFirms || []}
+                                onAddNew={(f) => setDesignFirms((p) => [...new Set([f, ...p])])}
+                                placeholder="Search..."
+                                theme={theme}
+                            />
                         </SettingsRow>
                         <SettingsRow label="Dealer" theme={theme}>
-                            <div className="w-7/12">
-                                <SpotlightMultiSelect
-                                    selectedItems={newLeadData.dealers || []}
-                                    onAddItem={addDealer}
-                                    onRemoveItem={removeDealer}
-                                    options={dealers || []}
-                                    onAddNew={(d) => setDealers((p) => [...new Set([d, ...p])])}
-                                    placeholder="Search..."
-                                    theme={theme}
-                                />
-                            </div>
+                            <SpotlightMultiSelect
+                                selectedItems={newLeadData.dealers || []}
+                                onAddItem={addDealer}
+                                onRemoveItem={removeDealer}
+                                options={dealers || []}
+                                onAddNew={(d) => setDealers((p) => [...new Set([d, ...p])])}
+                                placeholder="Search..."
+                                theme={theme}
+                            />
                         </SettingsRow>
                     </div>
                 </FormSection>
@@ -474,17 +468,12 @@ export const NewLeadScreen = ({
                                 theme={theme}
                             />
                         </SettingsRow>
-                        {/* Row 1: label (left) + toggle (right) */}
                         <SettingsRow label="Competition?" theme={theme}>
-                            <div className="w-full flex justify-end">
-                                <div className="w-7/12 h-10 flex items-center justify-end">
-                                    <ToggleSwitch
-                                        checked={!!newLeadData.competitionPresent}
-                                        onChange={(e) => updateField('competitionPresent', e.target.checked)}
-                                        theme={theme}
-                                    />
-                                </div>
-                            </div>
+                            <ToggleSwitch
+                                checked={!!newLeadData.competitionPresent}
+                                onChange={(e) => updateField('competitionPresent', e.target.checked)}
+                                theme={theme}
+                            />
                         </SettingsRow>
 
                         <div className="-mx-4">
@@ -492,15 +481,15 @@ export const NewLeadScreen = ({
                                 <div
                                     className={`rounded-2xl transition-all duration-400 ease-out overflow-hidden ${
                                         newLeadData.competitionPresent
-                                            ? 'p-4 opacity-100 max-h-[600px] translate-y-0'
+                                            ? 'p-5 opacity-100 max-h-[600px] translate-y-0'
                                             : 'p-0 opacity-0 max-h-0 -translate-y-1 pointer-events-none'
                                     }`}
                                     style={{
                                         backgroundColor: theme.colors.subtle,
-                                        border: `1px solid ${theme.colors.border}`
+                                        border: `1.5px solid ${theme.colors.border}`
                                     }}
                                 >
-                                    <div className="grid gap-2.5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))' }}>
+                                    <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))' }}>
                                         {COMPETITORS.filter(c=>c!=='None').map(c=>{
                                             const on=(newLeadData.competitors||[]).includes(c);
                                             return (
@@ -508,12 +497,15 @@ export const NewLeadScreen = ({
                                                     key={c}
                                                     type="button"
                                                     onClick={()=>toggleCompetitor(c)}
-                                                    className="px-3 py-2 text-xs rounded-full font-semibold transition-all border text-center whitespace-nowrap hover:scale-[1.02] active:scale-[0.98]"
+                                                    className="px-4 py-3 text-sm rounded-full font-semibold transition-all border-2 text-center whitespace-nowrap hover:scale-[1.02] active:scale-[0.98]"
                                                     style={{
                                                         backgroundColor: on ? theme.colors.accent : theme.colors.surface,
                                                         color: on ? '#FFFFFF' : theme.colors.textPrimary,
                                                         borderColor: on ? theme.colors.accent : theme.colors.border,
-                                                        boxShadow: on ? `0 2px 8px ${theme.colors.accent}30` : 'none'
+                                                        boxShadow: on ? DESIGN_TOKENS.shadows.button : DESIGN_TOKENS.shadows.sm,
+                                                        fontFamily: 'Neue Haas Grotesk Display Pro, sans-serif',
+                                                        fontWeight: on ? 600 : 500,
+                                                        letterSpacing: '-0.01em'
                                                     }}
                                                 >
                                                     {c}
@@ -527,14 +519,12 @@ export const NewLeadScreen = ({
                     </div>
                     <div className="mt-6" />
                     <SettingsRow label="Products" theme={theme}>
-                        <div className="w-7/12">
-                            <ProductSpotlight
-                              selectedSeries={(newLeadData.products||[]).map(p=>p.series)}
-                              onAdd={addProduct}
-                              available={JSI_SERIES}
-                              theme={theme}
-                            />
-                        </div>
+                        <ProductSpotlight
+                          selectedSeries={(newLeadData.products||[]).map(p=>p.series)}
+                          onAdd={addProduct}
+                          available={JSI_SERIES}
+                          theme={theme}
+                        />
                     </SettingsRow>
                     {(newLeadData.products || []).length > 0 && (
                         <div className="space-y-3 pt-2">
@@ -587,45 +577,38 @@ export const NewLeadScreen = ({
                 <FormSection title="Financials & Timeline" theme={theme}>
                     <div>
                         <SettingsRow label="Estimated List" isFirst={true} theme={theme}>
-                            <div className="w-7/12">
-                                <FormInput
-                                    label=""
-                                    required
-                                    type="currency"
-                                    surfaceBg={true}
-                                    value={newLeadData.estimatedList || ''}
-                                    onChange={e => updateField('estimatedList', e.target.value)}
-                                    placeholder="$0"
-                                    theme={theme}
-                                />
-                            </div>
+                            <FormInput
+                                label=""
+                                required
+                                type="currency"
+                                surfaceBg={true}
+                                value={newLeadData.estimatedList || ''}
+                                onChange={e => updateField('estimatedList', e.target.value)}
+                                placeholder="$0"
+                                theme={theme}
+                            />
                         </SettingsRow>
                         <SettingsRow label="Win Probability" theme={theme}>
-                            <div className="w-7/12">
-                                <ProbabilitySlider
-                                    showLabel={false}
-                                    value={newLeadData.winProbability || 50}
-                                    onChange={v => updateField('winProbability', v)}
-                                    theme={theme}
-                                />
-                            </div>
+                            <ProbabilitySlider
+                                showLabel={false}
+                                value={newLeadData.winProbability || 50}
+                                onChange={v => updateField('winProbability', v)}
+                                theme={theme}
+                            />
                         </SettingsRow>
                         <SettingsRow label="Discount" theme={theme}>
-                            <div className="w-7/12">
-                                <PortalNativeSelect
-                                    label=""
-                                    value={newLeadData.discount || ''}
-                                    onChange={e => updateField('discount', e.target.value)}
-                                    options={DISCOUNT_OPTIONS.map(d => ({ label: d, value: d }))}
-                                    placeholder="Select..."
-                                    theme={theme}
-                                    mutedValues={["Undecided"]}
-                                />
-                            </div>
+                            <PortalNativeSelect
+                                label=""
+                                value={newLeadData.discount || ''}
+                                onChange={e => updateField('discount', e.target.value)}
+                                options={DISCOUNT_OPTIONS.map(d => ({ label: d, value: d }))}
+                                placeholder="Select..."
+                                theme={theme}
+                                mutedValues={["Undecided"]}
+                            />
                         </SettingsRow>
                         <SettingsRow label="PO Timeframe" theme={theme}>
-                            <div className="w-full">
-                                <div className="grid grid-cols-2 gap-2.5">
+                            <div className="grid grid-cols-2 gap-3">
                                     {PO_TIMEFRAMES.map(timeframe => {
                                         const isSelected = newLeadData.poTimeframe === timeframe;
                                         return (
@@ -633,13 +616,15 @@ export const NewLeadScreen = ({
                                                 key={timeframe}
                                                 type="button"
                                                 onClick={() => updateField('poTimeframe', timeframe)}
-                                                className="px-3 py-2.5 text-xs font-semibold rounded-full transition-all border text-center hover:scale-[1.02] active:scale-[0.98]"
+                                                className="px-5 py-3.5 text-sm font-semibold rounded-full transition-all border-2 text-center hover:scale-[1.02] active:scale-[0.98]"
                                                 style={{
                                                     backgroundColor: isSelected ? theme.colors.accent : theme.colors.surface,
                                                     color: isSelected ? '#FFFFFF' : theme.colors.textPrimary,
                                                     borderColor: isSelected ? theme.colors.accent : theme.colors.border,
-                                                    boxShadow: isSelected ? `0 2px 8px ${theme.colors.accent}30` : 'none',
-                                                    fontFamily: 'Neue Haas Grotesk Display Pro, sans-serif'
+                                                    boxShadow: isSelected ? DESIGN_TOKENS.shadows.button : DESIGN_TOKENS.shadows.sm,
+                                                    fontFamily: 'Neue Haas Grotesk Display Pro, sans-serif',
+                                                    fontWeight: isSelected ? 600 : 500,
+                                                    letterSpacing: '-0.01em'
                                                 }}
                                             >
                                                 {timeframe}
@@ -647,24 +632,20 @@ export const NewLeadScreen = ({
                                         );
                                     })}
                                 </div>
-                            </div>
                         </SettingsRow>
                         <SettingsRow label="Contract?" theme={theme}>
-                            <div className="w-7/12 relative">
-                                <PortalNativeSelect
-                                    label=""
-                                    value={newLeadData.contractType || ''}
-                                    onChange={e => updateField('contractType', e.target.value)}
-                                    options={[
-
-                                        { label: 'None', value: '' },
-                                        ...Object.keys(CONTRACTS_DATA).map(key => ({ label: CONTRACTS_DATA[key].name, value: key }))
-                                    ]}
-                                    placeholder="Select..."
-                                    theme={theme}
-                                    mutedValues={["", "None"]}
-                                />
-                            </div>
+                            <PortalNativeSelect
+                                label=""
+                                value={newLeadData.contractType || ''}
+                                onChange={e => updateField('contractType', e.target.value)}
+                                options={[
+                                    { label: 'None', value: '' },
+                                    ...Object.keys(CONTRACTS_DATA).map(key => ({ label: CONTRACTS_DATA[key].name, value: key }))
+                                ]}
+                                placeholder="Select..."
+                                theme={theme}
+                                mutedValues={["", "None"]}
+                            />
                         </SettingsRow>
                     </div>
                 </FormSection>
@@ -684,15 +665,16 @@ export const NewLeadScreen = ({
                 </FormSection>
                 
                 {/* Submit Button - Inline at bottom of form */}
-                <div className="pt-6 pb-mobile-nav-safe lg:pb-12">
+                <div className="pt-8 pb-mobile-nav-safe lg:pb-12">
                     <button
                         type="submit"
-                        className="w-full text-white font-bold text-base py-4 rounded-full transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full text-white font-bold text-lg py-5 rounded-full transition-all hover:scale-[1.01] hover:shadow-xl active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
                         style={{
                             backgroundColor: theme.colors.accent,
                             boxShadow: DESIGN_TOKENS.shadows.button,
                             fontFamily: 'Neue Haas Grotesk Display Pro, sans-serif',
-                            letterSpacing: '-0.01em'
+                            letterSpacing: '-0.01em',
+                            fontWeight: 600
                         }}
                         disabled={!newLeadData.project || !newLeadData.projectStatus}
                     >
@@ -700,7 +682,7 @@ export const NewLeadScreen = ({
                     </button>
                     {(!newLeadData.project || !newLeadData.projectStatus) && (
                         <p
-                            className="text-xs text-center mt-3"
+                            className="text-sm text-center mt-4"
                             style={{
                                 color: theme.colors.textSecondary,
                                 fontFamily: 'Neue Haas Grotesk Display Pro, sans-serif'
