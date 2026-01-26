@@ -1,16 +1,25 @@
-﻿// HomeScreen supports dynamic 8 (or legacy) home apps
+// Enhanced HomeScreen with improved dashboard design
 import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { MENU_ITEMS, allApps, DEFAULT_HOME_APPS } from '../../data.jsx';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { HomeSearchInput } from '../../components/common/SearchInput.jsx';
 import { DropdownPortal } from '../../DropdownPortal.jsx';
+import { DESIGN_TOKENS, JSI_TYPOGRAPHY } from '../../design-system/tokens.js';
 
-const SmartSearch = ({ theme, onNavigate, onAskAI, onVoiceActivate }) => {
+// Smart Search Component - Memoized for performance
+const SmartSearch = React.memo(({ theme, onNavigate, onAskAI, onVoiceActivate }) => {
     const [query, setQuery] = useState('');
     const [isFocused, setIsFocused] = useState(false);
-    const [filtered, setFiltered] = useState([]);
     const anchorRef = useRef(null);
     const [pos, setPos] = useState({ top: 0, left: 0, width: 0 });
+
+    const filtered = useMemo(() => {
+        if (!query.trim()) return [];
+        const q = query.toLowerCase();
+        return allApps
+            .filter(app => app.name.toLowerCase().includes(q) || (app.keywords || []).some(k => k.toLowerCase().includes(q)))
+            .slice(0, 6);
+    }, [query]);
 
     const updatePos = useCallback(() => {
         if (!anchorRef.current) return;
@@ -27,15 +36,6 @@ const SmartSearch = ({ theme, onNavigate, onAskAI, onVoiceActivate }) => {
     }, [isFocused, updatePos]);
 
     useEffect(() => {
-        const term = query.trim().toLowerCase();
-        setFiltered(
-            isFocused && term
-                ? allApps.filter(a => a.name.toLowerCase().includes(term)).sort((a, b) => a.name.localeCompare(b.name))
-                : []
-        );
-    }, [query, isFocused]);
-
-    useEffect(() => {
         const close = (e) => {
             if (anchorRef.current && !anchorRef.current.contains(e.target)) setIsFocused(false);
         };
@@ -43,18 +43,37 @@ const SmartSearch = ({ theme, onNavigate, onAskAI, onVoiceActivate }) => {
         return () => document.removeEventListener('mousedown', close);
     }, []);
 
-    const submit = (e) => {
+    const submit = useCallback((e) => {
         e.preventDefault();
         if (query.trim() && filtered.length === 0) {
             onAskAI(query);
             setQuery('');
             setIsFocused(false);
         }
-    };
+    }, [query, filtered, onAskAI]);
+
+    const handleNavigate = useCallback((route) => {
+        onNavigate(route);
+        setQuery('');
+        setIsFocused(false);
+    }, [onNavigate]);
 
     return (
-        <div ref={anchorRef} className="relative">
-            <GlassCard theme={theme} variant="elevated" className="w-full px-4" style={{ borderRadius: 9999, paddingTop: 0, paddingBottom: 0 }}>
+        <div ref={anchorRef} className="relative mb-6">
+            <GlassCard
+                theme={theme}
+                variant="elevated"
+                className="w-full px-5"
+                style={{
+                    borderRadius: 9999,
+                    paddingTop: 0,
+                    paddingBottom: 0,
+                    height: 56,
+                    backgroundColor: theme.colors.surface,
+                    boxShadow: DESIGN_TOKENS.shadows.md,
+                    border: `1px solid ${theme.colors.border}`
+                }}
+            >
                 <HomeSearchInput
                     onSubmit={submit}
                     value={query}
@@ -75,16 +94,12 @@ const SmartSearch = ({ theme, onNavigate, onAskAI, onVoiceActivate }) => {
                                 {filtered.map((app) => (
                                     <li
                                         key={app.route}
-                                        onMouseDown={() => {
-                                            onNavigate(app.route);
-                                            setQuery('');
-                                            setIsFocused(false);
-                                        }}
+                                        onMouseDown={() => handleNavigate(app.route)}
                                         className="flex items-center gap-3 px-3 py-2 rounded-xl cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-all active:scale-[0.99]"
                                         style={{ color: theme.colors.textPrimary }}
                                     >
-                                        <app.icon className="w-[18px] h-[18px]" style={{ color: theme.colors.textSecondary }} />
-                                        <span className="text-[15px]">{app.name}</span>
+                                        <app.icon className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
+                                        <span className="text-sm">{app.name}</span>
                                     </li>
                                 ))}
                             </ul>
@@ -94,7 +109,53 @@ const SmartSearch = ({ theme, onNavigate, onAskAI, onVoiceActivate }) => {
             )}
         </div>
     );
-};
+}, (prevProps, nextProps) => {
+    return prevProps.theme === nextProps.theme;
+});
+SmartSearch.displayName = 'SmartSearch';
+
+// Enhanced Home Grid with consistent styling
+const HomeGrid = React.memo(({ theme, tiles, onNavigate }) => {
+    return (
+        <div className="grid grid-cols-2 gap-3 lg:gap-4 mb-6">
+            {tiles.map(item => (
+                <button
+                    key={item.id}
+                    onClick={() => onNavigate(item.id)}
+                    className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl transition-all hover:scale-[1.02] active:scale-[0.98] relative group"
+                    style={{
+                        backgroundColor: theme.colors.surface,
+                        boxShadow: `0 2px 8px ${theme.colors.shadow}`,
+                        border: `1px solid ${theme.colors.border}`,
+                        minHeight: '110px'
+                    }}
+                >
+                    {/* Centered icon */}
+                    <div
+                        className="w-11 h-11 rounded-xl flex items-center justify-center"
+                        style={{ backgroundColor: `${theme.colors.accent}12` }}
+                    >
+                        <item.icon className="w-5 h-5" style={{ color: theme.colors.accent }} />
+                    </div>
+
+                    {/* App name */}
+                    <span
+                        className="text-xs font-medium text-center leading-tight line-clamp-1"
+                        style={{ color: theme.colors.textPrimary }}
+                    >
+                        {item.label}
+                    </span>
+                </button>
+            ))}
+        </div>
+    );
+}, (prevProps, nextProps) => {
+    return (
+        prevProps.tiles === nextProps.tiles &&
+        prevProps.theme === nextProps.theme
+    );
+});
+HomeGrid.displayName = 'HomeGrid';
 
 export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeApps }) => {
     const FeedbackIcon = allApps.find(a => a.route === 'feedback')?.icon;
@@ -103,27 +164,53 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
         let selection = Array.isArray(homeApps) ? homeApps : DEFAULT_HOME_APPS;
         if (selection.length !== 8) selection = DEFAULT_HOME_APPS;
         return selection.map(route => {
-            const app = allApps.find(a => a.route === route); if (!app) return null; return { id: route, label: app.name, icon: app.icon };
+            const app = allApps.find(a => a.route === route);
+            if (!app) return null;
+            return { id: route, label: app.name, icon: app.icon };
         }).filter(Boolean);
     }, [homeApps]);
 
     return (
-        <div className="flex flex-col h-full">
-            <div className="px-4 pt-3 pb-4">
-                <SmartSearch theme={theme} onNavigate={onNavigate} onAskAI={onAskAI} onVoiceActivate={onVoiceActivate} />
-            </div>
-            <div className="flex-1 px-4 grid grid-cols-2 gap-3">
-                {tiles.map(item => (
-                    <GlassCard key={item.id} theme={theme} variant="elevated" interactive className="p-4 flex flex-col items-start justify-between" style={{ borderRadius: 26 }} onClick={() => onNavigate(item.id)}>
-                        <item.icon className="w-[22px] h-[22px] mb-1" style={{ color: theme.colors.accent }} strokeWidth={1.6} />
-                        <span className="text-[16px] font-semibold tracking-tight" style={{ color: theme.colors.textPrimary }}>{item.label}</span>
-                    </GlassCard>
-                ))}
-            </div>
-            <div className="px-4 pt-3 pb-safe-bottom" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
-                <GlassCard theme={theme} variant="elevated" interactive className="w-full flex items-center justify-center space-x-3 px-5" style={{ borderRadius: 9999, height:56 }} onClick={() => onNavigate('feedback')}>
+        <div className="flex flex-col h-full px-4 pt-3" style={{ paddingBottom: 'max(5rem, env(safe-area-inset-bottom))' }}>
+            <SmartSearch
+                theme={theme}
+                onNavigate={onNavigate}
+                onAskAI={onAskAI}
+                onVoiceActivate={onVoiceActivate}
+            />
+
+            <HomeGrid
+                theme={theme}
+                tiles={tiles}
+                onNavigate={onNavigate}
+            />
+
+            <div className="mt-auto">
+                <GlassCard
+                    theme={theme}
+                    variant="elevated"
+                    interactive
+                    className="w-full flex items-center justify-center gap-3 px-5"
+                    style={{
+                        borderRadius: DESIGN_TOKENS.borderRadius.pill,
+                        height: 56,
+                        backgroundColor: theme.colors.surface,
+                        boxShadow: DESIGN_TOKENS.shadows.md,
+                        border: `1px solid ${theme.colors.border}`
+                    }}
+                    onClick={() => onNavigate('feedback')}
+                >
                     {FeedbackIcon && <FeedbackIcon className="w-[18px] h-[18px]" style={{ color: theme.colors.accent }} />}
-                    <span className="text-[15px] font-semibold" style={{ color: theme.colors.textPrimary }}>Give Feedback</span>
+                    <span
+                        className="text-[15px] font-semibold"
+                        style={{
+                            color: theme.colors.textPrimary,
+                            fontFamily: JSI_TYPOGRAPHY.fontFamily,
+                            fontWeight: JSI_TYPOGRAPHY.weights.semibold
+                        }}
+                    >
+                        Give Feedback
+                    </span>
                 </GlassCard>
             </div>
         </div>
