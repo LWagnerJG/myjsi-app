@@ -8,6 +8,7 @@ import { ProbabilitySlider } from '../../components/forms/ProbabilitySlider.jsx'
 import { ToggleButtonGroup } from '../../components/common/ToggleButtonGroup.jsx';
 import { FormSection, SettingsRow } from '../../components/forms/FormSections.jsx';
 import { SpotlightMultiSelect } from '../../components/common/SpotlightMultiSelect.jsx';
+import { InfoTooltip } from '../../components/common/InfoTooltip.jsx';
 
 // Import data from proper feature-based sources
 import { 
@@ -198,9 +199,32 @@ export const NewLeadScreen = ({
                                 )}
                             </div>
                         </SettingsRow>
+                        <SettingsRow label={
+                            <div className="flex items-center gap-2">
+                                <span>Installation Location</span>
+                                <InfoTooltip
+                                    content="When a product is specified in one territory but ordered from another, we associate 70% of the credit to the specifying territory and 30% to the ordering territory."
+                                    theme={theme}
+                                    position="right"
+                                    size="sm"
+                                />
+                            </div>
+                        } theme={theme}>
+                            <div className="w-7/12">
+                                <FormInput
+                                    label=""
+                                    value={newLeadData.installationLocation || ''}
+                                    onChange={e => updateField('installationLocation', e.target.value)}
+                                    placeholder="Optional"
+                                    theme={theme}
+                                    size="sm"
+                                    surfaceBg={true}
+                                />
+                            </div>
+                        </SettingsRow>
                     </div>
                 </FormSection>
-                
+
                 <FormSection title="Stakeholders" theme={theme}>
                     <div>
                         <SettingsRow label="A&D Firm" isFirst={true} theme={theme}>
