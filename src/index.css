@@ -1,9 +1,9 @@
+/* JSI Digital Brand - Neue Haas Grotesk Display Pro */
+@import url('https://fonts.cdnfonts.com/css/neue-haas-grotesk-display-pro');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* JSI Digital Brand - Neue Haas Grotesk Display Pro */
-@import url('https://fonts.cdnfonts.com/css/neue-haas-grotesk-display-pro');
 
 :root {
     --app-height: 100vh;
@@ -23,13 +23,13 @@
     --jsi-warning: #C4956A;
     --jsi-error: #B85C5C;
     --jsi-info: #5B7B8C;
-    
+
     --jsi-font-family: 'Neue Haas Grotesk Display Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
-    
+
     --jsi-radius-pill: 9999px;
     --jsi-radius-card: 24px;
     --jsi-radius-input: 24px;
-    
+
     --jsi-blur-light: blur(24px);
     --jsi-blur-medium: blur(34px);
     --jsi-blur-heavy: blur(44px);
@@ -40,53 +40,113 @@
 }
 
 @supports(height:100dvh) {
-    :root { --app-height: 100dvh; }
+    :root {
+        --app-height: 100dvh;
+    }
 }
 
-html, body { 
-    height: var(--app-height); 
-    margin:0; 
-    padding:0; 
-    overflow:hidden; 
-    font-family: var(--jsi-font-family); 
-    -webkit-text-size-adjust:100%; 
-    -webkit-font-smoothing:antialiased; 
-    -moz-osx-font-smoothing:grayscale; 
-    background-color: var(--jsi-warm-beige); 
+html,
+body {
+    height: var(--app-height);
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: var(--jsi-font-family);
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: var(--jsi-warm-beige);
     color: var(--jsi-charcoal);
 }
 
-#root { 
-    height: var(--app-height); 
-    width:100%; 
-    overflow:hidden; 
-    background-color:inherit; 
+#root {
+    height: var(--app-height);
+    width: 100%;
+    overflow: hidden;
+    background-color: inherit;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
     font-family: var(--jsi-font-family);
     color: var(--jsi-charcoal);
     letter-spacing: -0.02em;
 }
 
-h1 { font-weight: 700; font-size: 4.5rem; line-height: 1.05; }
-h2 { font-weight: 700; font-size: 3.25rem; line-height: 1.1; }
-h3 { font-weight: 600; font-size: 2.75rem; line-height: 1.15; }
-h4 { font-weight: 600; font-size: 2rem; line-height: 1.2; }
-h5 { font-weight: 600; font-size: 1.625rem; line-height: 1.25; }
-h6 { font-weight: 600; font-size: 1.375rem; line-height: 1.3; }
-
-@media (max-width: 1023px) {
-    h1 { font-size: 2.5rem; }
-    h2 { font-size: 2rem; }
-    h3 { font-size: 1.75rem; }
-    h4 { font-size: 1.5rem; }
-    h5 { font-size: 1.25rem; }
-    h6 { font-size: 1.125rem; }
+h1 {
+    font-weight: 700;
+    font-size: 4.5rem;
+    line-height: 1.05;
 }
 
-.scrollbar-hide { -ms-overflow-style:none; scrollbar-width:none; }
-.scrollbar-hide::-webkit-scrollbar { display:none; }
+h2 {
+    font-weight: 700;
+    font-size: 3.25rem;
+    line-height: 1.1;
+}
+
+h3 {
+    font-weight: 600;
+    font-size: 2.75rem;
+    line-height: 1.15;
+}
+
+h4 {
+    font-weight: 600;
+    font-size: 2rem;
+    line-height: 1.2;
+}
+
+h5 {
+    font-weight: 600;
+    font-size: 1.625rem;
+    line-height: 1.25;
+}
+
+h6 {
+    font-weight: 600;
+    font-size: 1.375rem;
+    line-height: 1.3;
+}
+
+@media (max-width: 1023px) {
+    h1 {
+        font-size: 2.5rem;
+    }
+
+    h2 {
+        font-size: 2rem;
+    }
+
+    h3 {
+        font-size: 1.75rem;
+    }
+
+    h4 {
+        font-size: 1.5rem;
+    }
+
+    h5 {
+        font-size: 1.25rem;
+    }
+
+    h6 {
+        font-size: 1.125rem;
+    }
+}
+
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
 
 .screen-content {
     padding-left: 1rem;
@@ -114,28 +174,117 @@ h6 { font-weight: 600; font-size: 1.375rem; line-height: 1.3; }
     box-shadow: 0 8px 24px rgba(53, 53, 53, 0.1);
 }
 
-.section-spacing { margin-bottom: 2rem; }
-.item-spacing { margin-bottom: 1.5rem; }
-.gap-standard { gap: 1.5rem; }
+.section-spacing {
+    margin-bottom: 2rem;
+}
+
+.item-spacing {
+    margin-bottom: 1.5rem;
+}
+
+.gap-standard {
+    gap: 1.5rem;
+}
 
 /* Animations */
-.animate-fade-in { animation: fadeIn .2s ease-out forwards; }
-@keyframes fadeIn { from { opacity:0; transform: translateY(-8px) } to { opacity:1; transform: translateY(0) } }
+.animate-fade-in {
+    animation: fadeIn .2s ease-out forwards;
+}
 
-@keyframes slideUp { from { transform:translateY(100%); opacity:0 } to { transform:translateY(0); opacity:1 } }
-@keyframes slideDown { from { transform:translateY(0); opacity:1 } to { transform:translateY(100%); opacity:0 } }
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px)
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0)
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+        opacity: 0
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1
+    }
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(0);
+        opacity: 1
+    }
+
+    to {
+        transform: translateY(100%);
+        opacity: 0
+    }
+}
 
 /* Success toast animations */
-@keyframes toastIn { 0% { opacity:0; transform: translate(-50%, -8px) scale(.95); } 60% { opacity:1; transform: translate(-50%, 2px) scale(1.02); } 100% { opacity:1; transform: translate(-50%, 0) scale(1); } }
-@keyframes toastOut { 0% { opacity:1; transform: translate(-50%,0) scale(1); } 100% { opacity:0; transform: translate(-50%,-6px) scale(.92); } }
-.success-toast-enter { animation: toastIn .26s cubic-bezier(.34,1.56,.64,1); }
-.success-toast-exit { animation: toastOut .24s ease forwards; }
+@keyframes toastIn {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -8px) scale(.95);
+    }
+
+    60% {
+        opacity: 1;
+        transform: translate(-50%, 2px) scale(1.02);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translate(-50%, 0) scale(1);
+    }
+}
+
+@keyframes toastOut {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, 0) scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -6px) scale(.92);
+    }
+}
+
+.success-toast-enter {
+    animation: toastIn .26s cubic-bezier(.34, 1.56, .64, 1);
+}
+
+.success-toast-exit {
+    animation: toastOut .24s ease forwards;
+}
 
 /* Existing UX helpers */
-.animated-screen-container { overscroll-behavior:contain; touch-action:pan-y; }
-.gesture-lock { touch-action:none; overscroll-behavior:none; }
-.animated-screen-container [data-screen="current"] { will-change:transform; transform:translate3d(0,0,0); }
-.animated-screen-container [data-screen="previous"] { pointer-events:none; transform:translate3d(0,0,0); }
+.animated-screen-container {
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+}
+
+.gesture-lock {
+    touch-action: none;
+    overscroll-behavior: none;
+}
+
+.animated-screen-container [data-screen="current"] {
+    will-change: transform;
+    transform: translate3d(0, 0, 0);
+}
+
+.animated-screen-container [data-screen="previous"] {
+    pointer-events: none;
+    transform: translate3d(0, 0, 0);
+}
 
 /* JSI Button Styles */
 .jsi-button {
@@ -182,4 +331,3 @@ h6 { font-weight: 600; font-size: 1.375rem; line-height: 1.3; }
     opacity: 1;
     pointer-events: auto;
 }
-
