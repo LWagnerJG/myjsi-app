@@ -336,10 +336,16 @@ function App() {
                         right: 0,
                         bottom: 0,
                         overflow: 'auto',
-                        backgroundColor: currentTheme.colors.background
+                        backgroundColor: '#ff0000',
+                        padding: 20
                     }}
                 >
-                    <ScreenRouter screenKey={currentScreen} projectsScreenRef={projectsScreenRef} SuspenseFallback={suspenseFallback} {...screenProps} />
+                    <div style={{ backgroundColor: '#ffffff', padding: 40, fontSize: 24, fontWeight: 'bold' }}>
+                        TEST - IF YOU SEE THIS THE CONTAINER WORKS
+                    </div>
+                    <div style={{ marginTop: 20, color: '#000' }}>
+                        Current screen: {currentScreen}
+                    </div>
                 </main>
                 {showProfileMenu && (
                     <ProfileMenu show={showProfileMenu} onClose={() => setShowProfileMenu(false)} onNavigate={handleNavigate} theme={currentTheme} />
