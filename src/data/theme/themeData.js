@@ -4,34 +4,35 @@
 
 export const lightTheme = {
     colors: {
-        background: '#f8f8f8',
+        background: '#F0EDE8', // jsi-warm-beige
         surface: '#FFFFFF',
-        primary: '#b3b3af',
-        accent: '#353535',        // JSI Charcoal - primary brand action color
-        secondary: '#414141',
-        textPrimary: '#1F1F1F',
-        textSecondary: '#666666',
-        border: 'rgba(0,0,0,0.12)',
-        shadow: 'rgba(0,0,0,0.15)',
-        subtle: 'rgba(0,0,0,0.05)'
+        primary: '#353535', // jsi-charcoal
+        accent: '#353535',
+        secondary: '#353535',
+        textPrimary: '#353535',
+        textSecondary: '#5B7B8C', // jsi-info for secondary text
+        border: '#E3E0D8', // jsi-stone
+        shadow: 'rgba(53, 53, 53, 0.1)',
+        subtle: '#DFE2DD' // jsi-sage-grey
     },
-    backdropFilter: 'blur(8px)'
+    backdropFilter: 'blur(24px)'
 };
 
 export const darkTheme = {
     colors: {
-        background: '#1E1E1E',
-        surface: '#2A2A2A',
-        primary: '#BBBBBB',
-        accent: '#E3E0D8',        // JSI Stone - softer contrast for dark mode
-        secondary: '#999999',
-        textPrimary: '#F5F5F5',
-        textSecondary: '#CCCCCC',
-        border: 'rgba(255,255,255,0.12)',
-        shadow: 'rgba(0,0,0,0.25)',
-        subtle: 'rgba(255,255,255,0.05)'
+        background: '#1A1A1A',
+        surface: 'rgba(40, 40, 40, 0.9)',
+        primary: '#FFFFFF',
+        accent: '#FFFFFF',
+        secondary: '#BBBBBB',
+        textPrimary: '#FFFFFF',
+        textSecondary: '#AAAAAA',
+        border: 'rgba(255, 255, 255, 0.1)',
+        shadow: 'rgba(0, 0, 0, 0.4)',
+        subtle: 'rgba(255, 255, 255, 0.05)'
     },
-    backdropFilter: 'blur(8px)'
+    backdropFilter: 'blur(24px)'
 };
+
 
 export const logoLight = 'https://i.imgur.com/qskYhB0.png';

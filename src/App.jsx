@@ -259,8 +259,9 @@ function App() {
     const handleUpdateHomeApps = useCallback((apps) => {
         if (!Array.isArray(apps)) return;
         const filtered = apps.filter(r => allApps.some(a => a.route === r));
-        if (filtered.length === 8) setHomeApps(filtered);
+        setHomeApps(filtered);
     }, [setHomeApps]);
+
 
     const screenProps = {
         theme: currentTheme,
@@ -317,31 +318,31 @@ function App() {
 
     return (
         <ToastHost theme={currentTheme}>
-        <div className="h-screen-safe w-screen font-sans flex flex-col relative" style={{ backgroundColor: currentTheme.colors.background }}>
-            <AppHeader
-                theme={currentTheme}
-                userName={userSettings.firstName}
-                showBack={navigationHistory.length > 1}
-                handleBack={handleBack}
-                onHomeClick={handleHome}
-                onProfileClick={() => setShowProfileMenu(p => !p)}
-                isDarkMode={isDarkMode}
-            />
-            <div className="flex-1 pt-[76px] overflow-hidden" style={{ backgroundColor: currentTheme.colors.background }}>
-                <AnimatedScreenWrapper screenKey={currentScreen} direction={lastNavigationDirection} onSwipeBack={navigationHistory.length > 1 ? handleBack : null}>
-                    <ScreenRouter screenKey={currentScreen} projectsScreenRef={projectsScreenRef} SuspenseFallback={suspenseFallback} {...screenProps} />
-                </AnimatedScreenWrapper>
+            <div className="h-screen-safe w-screen font-sans flex flex-col relative" style={{ backgroundColor: currentTheme.colors.background }}>
+                <AppHeader
+                    theme={currentTheme}
+                    userName={userSettings.firstName}
+                    showBack={navigationHistory.length > 1}
+                    handleBack={handleBack}
+                    onHomeClick={handleHome}
+                    onProfileClick={() => setShowProfileMenu(p => !p)}
+                    isDarkMode={isDarkMode}
+                />
+                <div className="flex-1 pt-[76px] overflow-hidden" style={{ backgroundColor: currentTheme.colors.background }}>
+                    <AnimatedScreenWrapper screenKey={currentScreen} direction={lastNavigationDirection} onSwipeBack={navigationHistory.length > 1 ? handleBack : null}>
+                        <ScreenRouter screenKey={currentScreen} projectsScreenRef={projectsScreenRef} SuspenseFallback={suspenseFallback} {...screenProps} />
+                    </AnimatedScreenWrapper>
+                </div>
+                {showProfileMenu && (
+                    <ProfileMenu show={showProfileMenu} onClose={() => setShowProfileMenu(false)} onNavigate={handleNavigate} theme={currentTheme} />
+                )}
+                <VoiceModal message={voiceMessage} show={!!voiceMessage} theme={currentTheme} />
+                <SuccessToast message={successMessage} show={!!successMessage} theme={currentTheme} />
+                <CreateContentModal show={showCreateContentModal} onClose={() => setShowCreateContentModal(false)} theme={currentTheme} onCreatePost={handleCreatePost} />
+                <Modal show={alertInfo.show} onClose={() => setAlertInfo({ show: false, message: '' })} title="Alert" theme={currentTheme}>
+                    <p>{alertInfo.message}</p>
+                </Modal>
             </div>
-            {showProfileMenu && (
-                <ProfileMenu show={showProfileMenu} onClose={() => setShowProfileMenu(false)} onNavigate={handleNavigate} theme={currentTheme} />
-            )}
-            <VoiceModal message={voiceMessage} show={!!voiceMessage} theme={currentTheme} />
-            <SuccessToast message={successMessage} show={!!successMessage} theme={currentTheme} />
-            <CreateContentModal show={showCreateContentModal} onClose={() => setShowCreateContentModal(false)} theme={currentTheme} onCreatePost={handleCreatePost} />
-            <Modal show={alertInfo.show} onClose={() => setAlertInfo({ show: false, message: '' })} title="Alert" theme={currentTheme}>
-                <p>{alertInfo.message}</p>
-            </Modal>
-        </div>
         </ToastHost>
     );
 }

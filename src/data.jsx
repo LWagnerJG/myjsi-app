@@ -7,35 +7,36 @@
 
 export const lightTheme = {
     colors: {
-        background: '#f8f8f8',
+        background: '#F0EDE8', // jsi-warm-beige
         surface: '#FFFFFF',
-        primary: '#b3b3af',
-        accent: '#AD8A77',
-        secondary: '#414141',
-        textPrimary: '#111111',
-        textSecondary: '#555555',
-        border: 'rgba(0,0,0,0.08)',
-        shadow: 'rgba(0,0,0,0.10)',
-        subtle: 'rgba(0,0,0,0.05)'
+        primary: '#353535', // jsi-charcoal
+        accent: '#353535', // jsi-charcoal (formerly AD8A77)
+        secondary: '#353535',
+        textPrimary: '#353535',
+        textSecondary: '#5B7B8C', // jsi-info for secondary text
+        border: '#E3E0D8', // jsi-stone
+        shadow: 'rgba(53, 53, 53, 0.1)',
+        subtle: '#DFE2DD' // jsi-sage-grey
     },
-    backdropFilter: 'blur(8px)'
+    backdropFilter: 'blur(24px)'
 };
 
 export const darkTheme = {
     colors: {
-        background: '#1E1E1E',
-        surface: 'rgba(40,40,40,0.85)',
-        primary: '#BBBBBB',
-        accent: '#BBBBBB',
-        secondary: '#999999',
-        textPrimary: '#F5F5F5',
-        textSecondary: '#CCCCCC',
-        border: 'rgba(255,255,255,0.08)',
-        shadow: 'rgba(0,0,0,0.25)',
-        subtle: 'rgba(255,255,255,0.05)'
+        background: '#1A1A1A',
+        surface: 'rgba(40, 40, 40, 0.9)',
+        primary: '#FFFFFF',
+        accent: '#FFFFFF',
+        secondary: '#BBBBBB',
+        textPrimary: '#FFFFFF',
+        textSecondary: '#AAAAAA',
+        border: 'rgba(255, 255, 255, 0.1)',
+        shadow: 'rgba(0, 0, 0, 0.4)',
+        subtle: 'rgba(255, 255, 255, 0.05)'
     },
-    backdropFilter: 'blur(8px)'
+    backdropFilter: 'blur(24px)'
 };
+
 
 export const logoLight = 'https://i.imgur.com/qskYhB0.png';
 
@@ -74,7 +75,7 @@ export const allApps = [
 ];
 
 // Default 8 home screen apps (expanded from 6)
-export const DEFAULT_HOME_APPS = ['orders','sales','products','resources','projects','community','samples','replacements'];
+export const DEFAULT_HOME_APPS = ['orders', 'sales', 'products', 'resources', 'projects', 'community', 'samples', 'replacements'];
 
 export const RESOURCES_DATA = [
     {
