@@ -318,7 +318,13 @@ function App() {
 
     return (
         <ToastHost theme={currentTheme}>
-            <div className="h-screen-safe w-screen font-sans flex flex-col relative" style={{ backgroundColor: currentTheme.colors.background }}>
+            <div style={{
+                minHeight: '100vh',
+                width: '100vw',
+                display: 'flex',
+                flexDirection: 'column',
+                backgroundColor: currentTheme.colors.background
+            }}>
                 <AppHeader
                     theme={currentTheme}
                     userName={userSettings.firstName}
@@ -328,18 +334,13 @@ function App() {
                     onProfileClick={() => setShowProfileMenu(p => !p)}
                     isDarkMode={isDarkMode}
                 />
-                <main
-                    style={{
-                        position: 'absolute',
-                        top: 76,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        overflow: 'auto',
-                        backgroundColor: '#ff0000',
-                        padding: 20
-                    }}
-                >
+                <main style={{
+                    flex: 1,
+                    marginTop: 76,
+                    overflow: 'auto',
+                    backgroundColor: '#ff0000',
+                    padding: 20
+                }}>
                     <div style={{ backgroundColor: '#ffffff', padding: 40, fontSize: 24, fontWeight: 'bold' }}>
                         TEST - IF YOU SEE THIS THE CONTAINER WORKS
                     </div>
