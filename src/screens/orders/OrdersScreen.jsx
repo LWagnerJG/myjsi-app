@@ -2,6 +2,7 @@ import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react'
 import { Calendar, List, Building2, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { SearchInput } from '../../components/common/SearchInput.jsx';
+import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 // Force local data import
 import { ORDER_DATA, STATUS_COLORS } from './data.js';
 
@@ -209,7 +210,10 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
 
     const groupKeys = useMemo(() => Object.keys(grouped).sort((a, b) => new Date(b) - new Date(a)), [grouped]);
 
-    const underlineTransform = dateType === 'shipDate' ? 'translateX(0%)' : 'translateX(100%)';
+    const dateTypeOptions = [
+        { value: 'shipDate', label: 'Ship Date' },
+        { value: 'date', label: 'PO Date' }
+    ];
 
     return (
         <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
@@ -231,23 +235,16 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                         <SearchInput value={searchTerm} onChange={(e)=>setSearchTerm(e.target.value)} placeholder="Search Orders" theme={theme} variant="header" />
                     </div>
 
-                    <div className="flex gap-3" /* removed items-center so we can control vertical alignment */>
-                        {/* Underline selector - give it fixed height matching icon circles and align underline bottom */}
-                        <div className="relative flex-grow max-w-md h-11 flex items-end">
-                            <div className="flex relative select-none w-full">
-                                {['shipDate', 'date'].map((t) => (
-                                    <button
-                                        key={t}
-                                        onClick={() => setDateType(t)}
-                                        className="flex-1 pb-2 text-sm font-medium"
-                                        style={{ color: t === dateType ? theme.colors.textPrimary : theme.colors.textSecondary, transition: 'color .25s' }}
-                                    >
-                                        {t === 'shipDate' ? 'Ship Date' : 'PO Date'}
-                                    </button>
-                                ))}
-                                <span className="absolute bottom-0 left-0 h-[3px] w-1/2 rounded-full transition-transform duration-300" style={{ backgroundColor: theme.colors.accent, transform: underlineTransform }} />
-                                <span className="absolute bottom-0 left-0 w-full h-px" style={{ backgroundColor: theme.colors.subtle }} />
-                            </div>
+                    <div className="flex gap-3 items-center">
+                        {/* Date type toggle */}
+                        <div className="flex-grow max-w-[220px]">
+                            <SegmentedToggle
+                                value={dateType}
+                                onChange={setDateType}
+                                options={dateTypeOptions}
+                                theme={theme}
+                                size="sm"
+                            />
                         </div>
 
                         {/* Dealer filter */}

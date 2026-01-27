@@ -1,8 +1,13 @@
 import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import { GlassCard } from '../../components/common/GlassCard';
 import { Modal } from '../../components/common/Modal';
-import { PillButton } from '../../components/common/JSIButtons';
+import { SegmentedToggle } from '../../components/common/GroupedToggle';
 import { CUSTOMER_RANK_DATA } from './data.js';
+
+const RANKING_TAB_OPTIONS = [
+    { value: 'sales', label: 'Sales' },
+    { value: 'bookings', label: 'Bookings' }
+];
 
 export const CustomerRankingScreen = ({ theme }) => {
     const [tab, setTab] = useState('sales');
@@ -17,8 +22,6 @@ export const CustomerRankingScreen = ({ theme }) => {
 
     const open = useCallback((c) => setModalData(c), []);
     const close = useCallback(() => setModalData(null), []);
-
-    const tabRefs = useRef([]);
 
     const medalStyle = (rank) => {
         const map = {
@@ -63,30 +66,15 @@ export const CustomerRankingScreen = ({ theme }) => {
 
     return (
         <div className="h-full flex flex-col" style={{ backgroundColor: theme.colors.background }}>
-            {/* Raised tabs using PillButton components */}
-            <div className="px-4 pt-2">
-                <div className="relative grid grid-cols-2 gap-3">
-                    <PillButton
-                        ref={(el) => (tabRefs.current[0] = el)}
-                        isSelected={tab === 'sales'}
-                        onClick={() => setTab('sales')}
-                        theme={theme}
-                        size="default"
-                        className="text-center"
-                    >
-                        Sales
-                    </PillButton>
-                    <PillButton
-                        ref={(el) => (tabRefs.current[1] = el)}
-                        isSelected={tab === 'bookings'}
-                        onClick={() => setTab('bookings')}
-                        theme={theme}
-                        size="default"
-                        className="text-center"
-                    >
-                        Bookings
-                    </PillButton>
-                </div>
+            {/* Tab Toggle */}
+            <div className="px-4 pt-4 pb-2 max-w-2xl mx-auto w-full">
+                <SegmentedToggle
+                    value={tab}
+                    onChange={setTab}
+                    options={RANKING_TAB_OPTIONS}
+                    theme={theme}
+                    size="sm"
+                />
             </div>
 
             <div className="flex-1 overflow-y-auto scrollbar-hide">

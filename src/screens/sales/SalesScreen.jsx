@@ -9,43 +9,17 @@ import { CountUp } from '../../components/common/CountUp.jsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { PillButton } from '../../components/common/JSIButtons.jsx';
+import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 
 const formatCompanyName = (name = '') => name.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
 const monthNameToNumber = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
 
-const SegmentedTabs = ({ theme, active, onChange }) => {
-  const tabs = useMemo(() => [
-    { key: 'rewards', label: 'Rewards', Icon: Award },
-    { key: 'ranking', label: 'Ranking', Icon: TrendingUp },
-    { key: 'comms', label: 'Commissions', Icon: DollarSign },
-  ], []);
-  const wrapRef = useRef(null);
-  const btnRefs = useRef([]);
-  const [u, setU] = useState({ left: 0, width: 0, ready: false });
-
-  const recalc = useCallback(() => {
-    const i = tabs.findIndex(t => t.key === active); if (i === -1) { setU(o => ({ ...o, ready: false })); return; }
-    const el = btnRefs.current[i]; const wrap = wrapRef.current; if (!el || !wrap) return;
-    const wl = wrap.getBoundingClientRect().left; const { left, width } = el.getBoundingClientRect();
-    setU({ left: left - wl, width, ready: true });
-  }, [active, tabs]);
-
-  useEffect(() => { recalc(); }, [recalc]);
-  useEffect(() => { const r = () => recalc(); window.addEventListener('resize', r); return () => window.removeEventListener('resize', r); }, [recalc]);
-
-  return (
-    <div ref={wrapRef} className="relative w-full flex bg-white/50 backdrop-blur-lg rounded-full p-1 border border-black/[0.03]">
-      {u.ready && <motion.div layout className="absolute inset-y-1 rounded-full bg-white shadow-sm" style={{ left: u.left, width: u.width, zIndex: 0 }} transition={{ type: 'spring', stiffness: 220, damping: 30 }} />}
-      {tabs.map((t, i) => {
-        const selected = t.key === active; return (
-          <button key={t.key} ref={el => btnRefs.current[i] = el} onClick={() => onChange(selected ? null : t.key)} className={`relative z-10 flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-bold transition-colors ${selected ? 'text-black' : 'text-black/40 hover:text-black/60'}`}>
-            <t.Icon className="w-3.5 h-3.5" />{t.label}
-          </button>
-        );
-      })}
-    </div>
-  );
-};
+// Sales tab options for SegmentedToggle
+const SALES_TAB_OPTIONS = [
+  { value: 'rewards', label: 'Rewards', icon: Award },
+  { value: 'ranking', label: 'Ranking', icon: TrendingUp },
+  { value: 'comms', label: 'Commissions', icon: DollarSign },
+];
 
 const OrderModal = ({ order, onClose, theme }) => {
   if (!order) return null;
@@ -125,9 +99,13 @@ export const SalesScreen = ({ theme, onNavigate }) => {
       <div className="px-6 py-6 space-y-6 max-w-2xl mx-auto w-full pb-24">
 
         {/* Navigation Tabs */}
-        <div className="max-w-md">
-          <SegmentedTabs theme={theme} active={topTab} onChange={k => { setTopTab(k); if (k) onNavigate(`customer-${k}`); }} />
-        </div>
+        <SegmentedToggle
+          value={topTab}
+          onChange={k => { setTopTab(k === topTab ? null : k); if (k && k !== topTab) onNavigate(`customer-${k}`); }}
+          options={SALES_TAB_OPTIONS}
+          theme={theme}
+          size="sm"
+        />
 
         {/* Hero Section - Progress to Goal */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

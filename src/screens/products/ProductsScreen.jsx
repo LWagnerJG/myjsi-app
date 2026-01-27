@@ -9,6 +9,7 @@ import React, {
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { SearchInput } from '../../components/common/SearchInput.jsx';
 import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
+import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 import {
     List,
     Grid,
@@ -155,8 +156,14 @@ EmptyState.displayName = 'EmptyState';
 export const ProductsScreen = ({ theme, onNavigate }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [viewMode, setViewMode] = useState('grid');
+    const [productView, setProductView] = useState('categories'); // 'categories' | 'families'
     const [isScrolled, setIsScrolled] = useState(false);
     const scrollContainerRef = useRef(null);
+
+    const productViewOptions = [
+        { value: 'categories', label: 'Categories' },
+        { value: 'families', label: 'Our Families' }
+    ];
 
     const handleScroll = useCallback(() => {
         if (scrollContainerRef.current) {
@@ -199,6 +206,16 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
                     searchTerm={searchTerm}
                     onSearchChange={handleSearchChange}
                 />
+                {/* Categories / Families Toggle */}
+                <div className="px-4 pb-4">
+                    <SegmentedToggle
+                        value={productView}
+                        onChange={setProductView}
+                        options={productViewOptions}
+                        theme={theme}
+                        size="md"
+                    />
+                </div>
             </div>
             <div
                 ref={scrollContainerRef}

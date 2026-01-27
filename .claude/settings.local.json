@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cmd /c \"npm run dev\")",
+      "Bash(powershell -Command \"Start-Process cmd -ArgumentList ''/c npm run dev'' -NoNewWindow\")",
+      "Bash(npm run build:*)",
+      "Bash(powershell -Command \"cd ''''C:\\Users\\lwagner\\.claude-worktrees\\myjsi-app\\interesting-wu''''; npm run build 2>&1\")",
+      "Bash(where.exe npm)",
+      "Bash(powershell -Command \"Start-Process -FilePath ''cmd.exe'' -ArgumentList ''/c cd /d C:\\Users\\lwagner\\.claude-worktrees\\myjsi-app\\interesting-wu && npm run dev'' -NoNewWindow -PassThru\")",
+      "Bash(npm.cmd run dev:*)",
+      "Bash(cmd /c \"cd /d C:\\Users\\lwagner\\.claude-worktrees\\myjsi-app\\interesting-wu && npm run dev\")",
+      "Bash(powershell -Command \"Start-Process cmd -ArgumentList ''/c cd /d C:\\Users\\lwagner\\.claude-worktrees\\myjsi-app\\interesting-wu && npm run dev'' -NoNewWindow -PassThru\")",
+      "Bash(powershell -Command \"where.exe npm\")",
+      "Bash(powershell -Command \"Get-Command npm -ErrorAction SilentlyContinue | Select-Object Source\")",
+      "Bash(powershell -Command \"Test-Path ''C:\\Program Files\\nodejs\\npm.cmd''\")",
+      "Bash(powershell -Command \"Set-Location ''C:\\Users\\lwagner\\.claude-worktrees\\myjsi-app\\interesting-wu''; & ''C:\\Program Files\\nodejs\\npm.cmd'' run dev\")",
+      "Bash(powershell -Command \"Set-Location ''C:\\Users\\lwagner\\.claude-worktrees\\myjsi-app\\interesting-wu''; & ''C:\\Program Files\\nodejs\\npm.cmd'' install\")",
+      "Bash(powershell -Command \"$env:PATH = ''C:\\Program Files\\nodejs;'' + $env:PATH; Set-Location ''C:\\Users\\lwagner\\.claude-worktrees\\myjsi-app\\interesting-wu''; npm run dev\")",
+      "Bash(powershell -Command \"$env:PATH = \"\"C:\\Program Files\\nodejs;$env:PATH\"\"; Set-Location ''C:\\Users\\lwagner\\.claude-worktrees\\myjsi-app\\interesting-wu''; npm run dev\")",
+      "Bash(cmd /c \"set PATH=C:\\Program Files\\nodejs;%PATH% && cd /d C:\\Users\\lwagner\\.claude-worktrees\\myjsi-app\\interesting-wu && npm run dev\")",
+      "Bash(powershell -Command:*)",
+      "Bash(powershell -NoProfile -Command \"& { [Environment]::SetEnvironmentVariable(''PATH'', ''C:\\Program Files\\nodejs;'' + [Environment]::GetEnvironmentVariable(''PATH'')); Set-Location ''C:\\Users\\lwagner\\.claude-worktrees\\myjsi-app\\interesting-wu''; & ''C:\\Program Files\\nodejs\\npm.cmd'' install 2>&1 }\")",
+      "Bash(powershell -NoProfile -Command \"& { [Environment]::SetEnvironmentVariable(''PATH'', ''C:\\Program Files\\nodejs;'' + [Environment]::GetEnvironmentVariable(''PATH'')); Set-Location ''C:\\Users\\lwagner\\.claude-worktrees\\myjsi-app\\interesting-wu''; & ''C:\\Program Files\\nodejs\\npm.cmd'' run dev 2>&1 }\")"
+    ]
+  }
+}

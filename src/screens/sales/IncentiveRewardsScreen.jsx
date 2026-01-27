@@ -1,7 +1,14 @@
 import { useMemo, useState, useCallback } from 'react';
 import { GlassCard } from '../../components/common/GlassCard';
 import { PortalNativeSelect } from '../../components/forms/PortalNativeSelect';
+import { SegmentedToggle } from '../../components/common/GroupedToggle';
 import { INCENTIVE_REWARDS_DATA } from './data.js';
+
+const VIEW_FILTER_OPTIONS = [
+    { value: 'all', label: 'All' },
+    { value: 'sales', label: 'Sales' },
+    { value: 'designers', label: 'Designers' }
+];
 
 export const IncentiveRewardsScreen = ({ theme }) => {
     const generateTimePeriods = useCallback(() => {
@@ -58,41 +65,9 @@ export const IncentiveRewardsScreen = ({ theme }) => {
     const sortedSales = useMemo(() => [...(rewardsData.sales || [])].sort((a, b) => b.amount - a.amount), [rewardsData.sales]);
     const sortedDesigners = useMemo(() => [...(rewardsData.designers || [])].sort((a, b) => b.amount - a.amount), [rewardsData.designers]);
 
-    const FilterToggle = () => (
-        <div className="flex items-center rounded-full border p-1" style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.border }}>
-            <button
-                onClick={() => setViewFilter('all')}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${viewFilter === 'all' ? '' : 'hover:bg-black/5'}`}
-                style={{
-                    backgroundColor: viewFilter === 'all' ? theme.colors.accent : 'transparent',
-                    color: viewFilter === 'all' ? 'white' : theme.colors.textSecondary
-                }}>
-                All
-            </button>
-            <button
-                onClick={() => setViewFilter('sales')}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${viewFilter === 'sales' ? '' : 'hover:bg-black/5'}`}
-                style={{
-                    backgroundColor: viewFilter === 'sales' ? theme.colors.accent : 'transparent',
-                    color: viewFilter === 'sales' ? 'white' : theme.colors.textSecondary
-                }}>
-                Sales
-            </button>
-            <button
-                onClick={() => setViewFilter('designers')}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${viewFilter === 'designers' ? '' : 'hover:bg-black/5'}`}
-                style={{
-                    backgroundColor: viewFilter === 'designers' ? theme.colors.accent : 'transparent',
-                    color: viewFilter === 'designers' ? 'white' : theme.colors.textSecondary
-                }}>
-                Designers
-            </button>
-        </div>
-    );
-
     return (
         <>
-            <div className="p-4 flex flex-wrap justify-between items-center gap-4">
+            <div className="p-4 flex flex-wrap justify-between items-center gap-4 max-w-2xl mx-auto w-full">
                 <div className="w-40">
                     <PortalNativeSelect
                         value={selectedPeriod}
@@ -101,9 +76,17 @@ export const IncentiveRewardsScreen = ({ theme }) => {
                         theme={theme}
                     />
                 </div>
-                <FilterToggle />
+                <div className="flex-1 max-w-xs">
+                    <SegmentedToggle
+                        value={viewFilter}
+                        onChange={setViewFilter}
+                        options={VIEW_FILTER_OPTIONS}
+                        theme={theme}
+                        size="sm"
+                    />
+                </div>
             </div>
-            <div className="px-4 space-y-4 pb-4">
+            <div className="px-4 space-y-4 pb-4 max-w-2xl mx-auto w-full">
                 {(viewFilter === 'all' || viewFilter === 'sales') && (
                     <GlassCard theme={theme} className="p-4">
                         <h3 className="font-bold text-xl mb-2" style={{ color: theme.colors.textPrimary }}>Sales</h3>
