@@ -216,7 +216,7 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
             {/* Top Controls */}
 
             <div
-                className={`sticky top-0 z-10 transition-all duration-300 ${isScrolled ? 'shadow-md' : ''}`}
+                className={`sticky top-0 z-10 transition-all duration-300 max-w-2xl mx-auto w-full ${isScrolled ? 'shadow-md' : ''}`}
                 style={{
                     backgroundColor: isScrolled ? `${theme.colors.background}e0` : 'transparent',
                     backdropFilter: isScrolled ? 'blur(12px)' : 'none',
@@ -294,7 +294,7 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
 
             {/* Content */}
             <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto scrollbar-hide">
-                <div className="px-4 pt-4 pb-24 space-y-4">
+                <div className="px-4 pt-4 pb-24 space-y-4 max-w-2xl mx-auto w-full">
                     {viewMode === 'list' ? (
                         groupKeys.length ? (
                             <div className="space-y-4">

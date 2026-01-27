@@ -122,7 +122,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
 
   return (
     <div className="flex flex-col h-full overflow-y-auto scrollbar-hide" style={{ backgroundColor: colors.background }}>
-      <div className="px-6 py-6 space-y-6 max-w-5xl mx-auto w-full pb-24">
+      <div className="px-6 py-6 space-y-6 max-w-2xl mx-auto w-full pb-24">
 
         {/* Navigation Tabs */}
         <div className="max-w-md">

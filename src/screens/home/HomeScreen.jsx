@@ -4,26 +4,13 @@ import { allApps, DEFAULT_HOME_APPS } from '../../data.jsx';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { HomeSearchInput } from '../../components/common/SearchInput.jsx';
 import { DESIGN_TOKENS, JSI_COLORS } from '../../design-system/tokens.js';
-import { LayoutGrid, Check, Plus, X, ArrowUpRight, Layout, Settings as SettingsIcon } from 'lucide-react';
+import { Check, Plus, X, Settings as SettingsIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const SummaryCard = ({ title, value, subValue, icon: Icon, theme }) => {
-    const accentColor = theme?.colors?.accent || '#353535';
-    return (
-        <GlassCard theme={theme} className="flex-1 p-5 min-w-[160px]" variant="elevated">
-            <div className="flex justify-between items-start mb-2">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${accentColor}10` }}>
-                    <Icon className="w-5 h-5" style={{ color: accentColor }} />
-                </div>
-                <ArrowUpRight className="w-4 h-4 opacity-40" />
-            </div>
-            <div className="space-y-0.5">
-                <p className="text-xs font-medium uppercase tracking-wider opacity-60">{title}</p>
-                <h4 className="text-2xl font-bold">{value}</h4>
-                {subValue && <p className="text-xs font-semibold text-green-600">{subValue}</p>}
-            </div>
-        </GlassCard>
-    );
+// Badge data for specific app routes
+const APP_BADGES = {
+    'sales': { value: '$1.2M', label: 'YTD', color: '#4A7C59' },
+    'projects': { value: '24', label: 'Open', color: '#5B7B8C' }
 };
 
 export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeApps, onUpdateHomeApps, userSettings }) => {
@@ -81,19 +68,12 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
 
     return (
         <div className="flex flex-col h-full overflow-y-auto scrollbar-hide" style={{ backgroundColor: colors.background }}>
-            <div className="px-6 py-6 space-y-8 max-w-5xl mx-auto w-full pb-24">
+            <div className="px-6 py-6 space-y-6 max-w-2xl mx-auto w-full pb-24">
 
-                {/* Header Section */}
-                <div className="space-y-1">
+                {/* Header Section - hidden on mobile */}
+                <div className="space-y-1 hidden sm:block">
                     <p className="text-sm font-semibold uppercase tracking-widest opacity-60" style={{ color: colors.textSecondary }}>{getTimeGreeting()}</p>
                     <h2 className="text-4xl font-bold" style={{ color: colors.textPrimary }}>Welcome, {userSettings?.firstName || 'Luke'}</h2>
-                </div>
-
-                {/* Dashboard Summary row */}
-                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-                    <SummaryCard title="Sales YTD" value="$1.2M" subValue="+12.5%" icon={LayoutGrid} theme={theme} />
-                    <SummaryCard title="Open Projects" value="24" subValue="3 New" icon={Layout} theme={theme} />
-                    <SummaryCard title="Rewards" value="1,450" subValue="Gold Status" icon={SettingsIcon} theme={theme} />
                 </div>
 
                 {/* Search / Spotlight */}
@@ -133,9 +113,11 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                         )}
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 gap-4">
                         <AnimatePresence mode="popLayout">
-                            {currentApps.map((app) => (
+                            {currentApps.map((app) => {
+                                const badge = APP_BADGES[app.route];
+                                return (
                                 <motion.button
                                     layout
                                     initial={{ opacity: 0, scale: 0.8 }}
@@ -155,6 +137,16 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                                         <app.icon className="w-6 h-6" style={{ color: colors.accent }} />
                                     </div>
                                     <span className="text-sm font-bold tracking-tight text-center" style={{ color: colors.textPrimary }}>{app.name}</span>
+                                    
+                                    {/* Badge for Sales/Projects */}
+                                    {badge && !isEditMode && (
+                                        <div 
+                                            className="absolute top-3 right-3 px-2 py-0.5 rounded-full text-xs font-bold"
+                                            style={{ backgroundColor: badge.color, color: '#FFFFFF' }}
+                                        >
+                                            {badge.value}
+                                        </div>
+                                    )}
 
                                     {isEditMode && (
                                         <button
@@ -165,7 +157,8 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                                         </button>
                                     )}
                                 </motion.button>
-                            ))}
+                                );
+                            })}
                             {isEditMode && availableApps.map((app) => (
                                 <motion.button
                                     layout

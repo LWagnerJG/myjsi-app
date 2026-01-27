@@ -190,35 +190,39 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
 
     return (
         <div className="flex flex-col h-full">
-            <StickyHeader
-                isScrolled={isScrolled}
-                theme={theme}
-                viewMode={viewMode}
-                onToggleViewMode={toggleViewMode}
-                searchTerm={searchTerm}
-                onSearchChange={handleSearchChange}
-            />
+            <div className="max-w-2xl mx-auto w-full">
+                <StickyHeader
+                    isScrolled={isScrolled}
+                    theme={theme}
+                    viewMode={viewMode}
+                    onToggleViewMode={toggleViewMode}
+                    searchTerm={searchTerm}
+                    onSearchChange={handleSearchChange}
+                />
+            </div>
             <div
                 ref={scrollContainerRef}
                 onScroll={handleScroll}
                 className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-hide"
             >
-                {filteredCategories.length === 0 ? (
-                    <EmptyState searchTerm={searchTerm} theme={theme} />
-                ) : (
-                    <div className={viewMode === 'grid' ? 'space-y-6' : 'space-y-2'} style={{ paddingTop: '8px' }}>
-                        {filteredCategories.map(category => (
-                            <CategoryCard
-                                key={category.name}
-                                category={category}
-                                theme={theme}
-                                viewMode={viewMode}
-                                onClick={handleCategoryClick}
-                                className={category.name === 'Benches' ? 'mt-4' : ''}
-                            />
-                        ))}
-                    </div>
-                )}
+                <div className="max-w-2xl mx-auto w-full">
+                    {filteredCategories.length === 0 ? (
+                        <EmptyState searchTerm={searchTerm} theme={theme} />
+                    ) : (
+                        <div className={viewMode === 'grid' ? 'space-y-6' : 'space-y-2'} style={{ paddingTop: '8px' }}>
+                            {filteredCategories.map(category => (
+                                <CategoryCard
+                                    key={category.name}
+                                    category={category}
+                                    theme={theme}
+                                    viewMode={viewMode}
+                                    onClick={handleCategoryClick}
+                                    className={category.name === 'Benches' ? 'mt-4' : ''}
+                                />
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
