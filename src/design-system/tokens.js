@@ -194,11 +194,18 @@ export const DESIGN_TOKENS = {
     desktopSidebarWidth: '96px',    // lg:pl-24 = 6rem = 96px
   },
 
-  // Blur effects for overlays (JSI brand)
+  // Blur effects for overlays (JSI brand - Style Guide Page 17)
   blur: {
-    light: 'blur(24px)',
-    medium: 'blur(34px)',
-    heavy: 'blur(44px)',
+    light: 'blur(24px)',      // Background Blur 24
+    medium: 'blur(34px)',     // Background Blur 34
+    heavy: 'blur(44px)',      // Background Blur 44
+  },
+
+  // Backdrop filter values (glassmorphism)
+  backdropBlur: {
+    frost24: '24px',
+    frost34: '34px',
+    frost44: '44px',
   },
 };
 
