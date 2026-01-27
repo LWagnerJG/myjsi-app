@@ -7,25 +7,38 @@ import { DESIGN_TOKENS, JSI_COLORS } from '../../design-system/tokens.js';
 import { LayoutGrid, Check, Plus, X, ArrowUpRight, Layout, Settings as SettingsIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const SummaryCard = ({ title, value, subValue, icon: Icon, theme }) => (
-    <GlassCard theme={theme} className="flex-1 p-5 min-w-[160px]" variant="elevated">
-        <div className="flex justify-between items-start mb-2">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${theme.colors.accent}10` }}>
-                <Icon className="w-5 h-5" style={{ color: theme.colors.accent }} />
+const SummaryCard = ({ title, value, subValue, icon: Icon, theme }) => {
+    const accentColor = theme?.colors?.accent || '#353535';
+    return (
+        <GlassCard theme={theme} className="flex-1 p-5 min-w-[160px]" variant="elevated">
+            <div className="flex justify-between items-start mb-2">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${accentColor}10` }}>
+                    <Icon className="w-5 h-5" style={{ color: accentColor }} />
+                </div>
+                <ArrowUpRight className="w-4 h-4 opacity-40" />
             </div>
-            <ArrowUpRight className="w-4 h-4 opacity-40" />
-        </div>
-        <div className="space-y-0.5">
-            <p className="text-xs font-medium uppercase tracking-wider opacity-60">{title}</p>
-            <h4 className="text-2xl font-bold">{value}</h4>
-            {subValue && <p className="text-xs font-semibold text-green-600">{subValue}</p>}
-        </div>
-    </GlassCard>
-);
+            <div className="space-y-0.5">
+                <p className="text-xs font-medium uppercase tracking-wider opacity-60">{title}</p>
+                <h4 className="text-2xl font-bold">{value}</h4>
+                {subValue && <p className="text-xs font-semibold text-green-600">{subValue}</p>}
+            </div>
+        </GlassCard>
+    );
+};
 
 export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeApps, onUpdateHomeApps, userSettings }) => {
     const [isEditMode, setIsEditMode] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+
+    // Safe theme color extraction with fallbacks
+    const colors = useMemo(() => ({
+        background: theme?.colors?.background || '#F0EDE8',
+        surface: theme?.colors?.surface || '#FFFFFF',
+        accent: theme?.colors?.accent || '#353535',
+        textPrimary: theme?.colors?.textPrimary || '#353535',
+        textSecondary: theme?.colors?.textSecondary || '#666666',
+        border: theme?.colors?.border || '#E3E0D8'
+    }), [theme]);
 
     // Ensure homeApps is always a valid array
     const safeHomeApps = useMemo(() => {
@@ -67,13 +80,13 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
     }, [onAskAI]);
 
     return (
-        <div className="flex flex-col h-full overflow-y-auto scrollbar-hide" style={{ backgroundColor: theme.colors.background }}>
+        <div className="flex flex-col h-full overflow-y-auto scrollbar-hide" style={{ backgroundColor: colors.background }}>
             <div className="px-6 py-6 space-y-8 max-w-5xl mx-auto w-full pb-24">
 
                 {/* Header Section */}
                 <div className="space-y-1">
-                    <p className="text-sm font-semibold uppercase tracking-widest opacity-60" style={{ color: theme.colors.textSecondary }}>{getTimeGreeting()}</p>
-                    <h2 className="text-4xl font-bold" style={{ color: theme.colors.textPrimary }}>Welcome, {userSettings?.firstName || 'Luke'}</h2>
+                    <p className="text-sm font-semibold uppercase tracking-widest opacity-60" style={{ color: colors.textSecondary }}>{getTimeGreeting()}</p>
+                    <h2 className="text-4xl font-bold" style={{ color: colors.textPrimary }}>Welcome, {userSettings?.firstName || 'Luke'}</h2>
                 </div>
 
                 {/* Dashboard Summary row */}
@@ -101,7 +114,7 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                 {/* Reconfigurable Apps section */}
                 <div className="space-y-4">
                     <div className="flex justify-between items-center px-1">
-                        <h3 className="text-xl font-bold" style={{ color: theme.colors.textPrimary }}>
+                        <h3 className="text-xl font-bold" style={{ color: colors.textPrimary }}>
                             Core Dashboard
                         </h3>
                         {onUpdateHomeApps && (
@@ -109,9 +122,9 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                                 onClick={() => setIsEditMode(!isEditMode)}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all`}
                                 style={{
-                                    backgroundColor: isEditMode ? theme.colors.accent : theme.colors.surface,
-                                    color: isEditMode ? '#FFFFFF' : theme.colors.textPrimary,
-                                    border: isEditMode ? 'none' : `1px solid ${theme.colors.border}`,
+                                    backgroundColor: isEditMode ? colors.accent : colors.surface,
+                                    color: isEditMode ? '#FFFFFF' : colors.textPrimary,
+                                    border: isEditMode ? 'none' : `1px solid ${colors.border}`,
                                     boxShadow: isEditMode ? 'none' : DESIGN_TOKENS.shadows.sm
                                 }}
                             >
@@ -133,15 +146,15 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                                     className="relative flex flex-col items-center justify-center gap-3 p-6 rounded-3xl transition-all active:scale-95 group"
                                     style={{
                                         minHeight: 140,
-                                        backgroundColor: theme.colors.surface,
-                                        border: `1px solid ${theme.colors.border}`,
+                                        backgroundColor: colors.surface,
+                                        border: `1px solid ${colors.border}`,
                                         boxShadow: DESIGN_TOKENS.shadows.card
                                     }}
                                 >
-                                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110" style={{ backgroundColor: `${theme.colors.accent}12` }}>
-                                        <app.icon className="w-6 h-6" style={{ color: theme.colors.accent }} />
+                                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110" style={{ backgroundColor: `${colors.accent}12` }}>
+                                        <app.icon className="w-6 h-6" style={{ color: colors.accent }} />
                                     </div>
-                                    <span className="text-sm font-bold tracking-tight text-center" style={{ color: theme.colors.textPrimary }}>{app.name}</span>
+                                    <span className="text-sm font-bold tracking-tight text-center" style={{ color: colors.textPrimary }}>{app.name}</span>
 
                                     {isEditMode && (
                                         <button
@@ -163,14 +176,14 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                                     className="flex flex-col items-center justify-center gap-3 p-6 rounded-3xl border border-dashed hover:opacity-100 transition-all active:scale-95 group"
                                     style={{
                                         minHeight: 140,
-                                        backgroundColor: `${theme.colors.surface}80`,
-                                        borderColor: theme.colors.border
+                                        backgroundColor: `${colors.surface}80`,
+                                        borderColor: colors.border
                                     }}
                                 >
-                                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center border border-dashed" style={{ borderColor: theme.colors.border }}>
-                                        <Plus className="w-6 h-6 opacity-40" style={{ color: theme.colors.textSecondary }} />
+                                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center border border-dashed" style={{ borderColor: colors.border }}>
+                                        <Plus className="w-6 h-6 opacity-40" style={{ color: colors.textSecondary }} />
                                     </div>
-                                    <span className="text-sm font-bold opacity-40" style={{ color: theme.colors.textSecondary }}>{app.name}</span>
+                                    <span className="text-sm font-bold opacity-40" style={{ color: colors.textSecondary }}>{app.name}</span>
                                 </motion.button>
                             ))}
                         </AnimatePresence>
@@ -182,7 +195,7 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                     <GlassCard
                         theme={theme}
                         className="p-6 flex items-center justify-between"
-                        style={{ borderRadius: 24, backgroundColor: theme.colors.accent }}
+                        style={{ borderRadius: 24, backgroundColor: colors.accent }}
                     >
                         <div className="space-y-1">
                             <h4 className="text-lg font-bold" style={{ color: '#FFFFFF' }}>Need Support?</h4>
@@ -191,7 +204,7 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                         <button
                             onClick={() => onNavigate('help')}
                             className="px-6 py-3 rounded-full font-bold text-sm hover:scale-105 active:scale-95 transition-transform"
-                            style={{ backgroundColor: '#FFFFFF', color: theme.colors.accent }}
+                            style={{ backgroundColor: '#FFFFFF', color: colors.accent }}
                         >
                             Get Help
                         </button>
