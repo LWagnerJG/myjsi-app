@@ -3,7 +3,10 @@ import { motion } from 'framer-motion';
 
 /**
  * JSI-style Segmented Toggle
- * Matches the design from JSI website - pill container with sliding white indicator
+ * Matches the exact design from JSI website (ui-containerapp-prod-ncus)
+ * - Subtle warm cream background (nearly borderless)
+ * - White sliding pill indicator with soft shadow
+ * - Clean typography with proper weight contrast
  * 
  * @param {string} value - Current selected value
  * @param {function} onChange - Callback when selection changes
@@ -17,9 +20,9 @@ export const SegmentedToggle = ({ value, onChange, options, theme, size = 'md' }
   const [indicator, setIndicator] = useState({ left: 0, width: 0, ready: false });
 
   const sizes = {
-    sm: { py: 'py-2', text: 'text-xs', iconSize: 'w-3 h-3', gap: 'gap-1.5' },
-    md: { py: 'py-2.5', text: 'text-sm', iconSize: 'w-4 h-4', gap: 'gap-2' },
-    lg: { py: 'py-3', text: 'text-base', iconSize: 'w-5 h-5', gap: 'gap-2' }
+    sm: { height: 'h-10', py: 'py-2', text: 'text-[13px]', iconSize: 'w-3.5 h-3.5', gap: 'gap-1.5', padding: 'p-[3px]' },
+    md: { height: 'h-11', py: 'py-2.5', text: 'text-sm', iconSize: 'w-4 h-4', gap: 'gap-2', padding: 'p-1' },
+    lg: { height: 'h-12', py: 'py-3', text: 'text-base', iconSize: 'w-5 h-5', gap: 'gap-2', padding: 'p-1' }
   };
   const s = sizes[size] || sizes.md;
 
@@ -52,29 +55,31 @@ export const SegmentedToggle = ({ value, onChange, options, theme, size = 'md' }
     return () => window.removeEventListener('resize', handleResize);
   }, [updateIndicator]);
 
-  // JSI brand colors
-  const bgColor = theme?.colors?.subtle || '#E3E0D8';
-  const textPrimary = theme?.colors?.textPrimary || '#353535';
-  const textMuted = theme?.colors?.textSecondary || '#666666';
+  // JSI exact brand colors - warm cream background, charcoal text
+  const bgColor = '#EBE8E3'; // Slightly warmer/lighter than stone
+  const textSelected = '#353535'; // JSI Charcoal
+  const textUnselected = '#9A9590'; // Warm gray for unselected
 
   return (
     <div
       ref={containerRef}
-      className="relative w-full flex rounded-full p-1"
+      className={`relative w-full flex rounded-full ${s.padding} ${s.height}`}
       style={{ backgroundColor: bgColor }}
     >
-      {/* Sliding indicator */}
+      {/* Sliding white indicator pill */}
       {indicator.ready && (
         <motion.div
           layout
-          className="absolute inset-y-1 rounded-full bg-white"
+          className="absolute rounded-full bg-white"
           style={{
             left: indicator.left,
             width: indicator.width,
-            boxShadow: '0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06)',
+            top: 3,
+            bottom: 3,
+            boxShadow: '0 1px 2px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06)',
             zIndex: 0
           }}
-          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 35 }}
         />
       )}
 
@@ -88,12 +93,13 @@ export const SegmentedToggle = ({ value, onChange, options, theme, size = 'md' }
             key={opt.value}
             ref={el => buttonRefs.current[index] = el}
             onClick={() => onChange(opt.value)}
-            className={`relative z-10 flex-1 flex items-center justify-center ${s.gap} ${s.py} px-4 ${s.text} font-semibold rounded-full transition-colors duration-200`}
+            className={`relative z-10 flex-1 flex items-center justify-center ${s.gap} ${s.text} rounded-full transition-colors duration-200`}
             style={{
-              color: isSelected ? textPrimary : textMuted
+              color: isSelected ? textSelected : textUnselected,
+              fontWeight: isSelected ? 600 : 500
             }}
           >
-            {Icon && <Icon className={s.iconSize} />}
+            {Icon && <Icon className={s.iconSize} style={{ strokeWidth: isSelected ? 2.5 : 2 }} />}
             {opt.label}
           </button>
         );
@@ -104,3 +110,4 @@ export const SegmentedToggle = ({ value, onChange, options, theme, size = 'md' }
 
 // Backward compatible export
 export const GroupedToggle = SegmentedToggle;
+

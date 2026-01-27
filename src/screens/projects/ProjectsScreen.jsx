@@ -5,7 +5,14 @@ import { STAGES, VERTICALS, COMPETITORS, DISCOUNT_OPTIONS, PO_TIMEFRAMES, INITIA
 import { ProbabilitySlider } from '../../components/forms/ProbabilitySlider.jsx';
 import { ToggleSwitch } from '../../components/forms/ToggleSwitch.jsx';
 import { PillButton } from '../../components/common/JSIButtons.jsx';
+import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 import { JSI_SERIES } from '../products/data.js';
+
+// Tab options for projects
+const PROJECTS_TAB_OPTIONS = [
+  { value: 'pipeline', label: 'Active Projects' },
+  { value: 'my-projects', label: 'Installations' }
+];
 
 // currency util
 const fmtCurrency = (v) => typeof v === 'string' ? (v.startsWith('$')? v : '$'+v) : (v ?? 0).toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0});
@@ -308,17 +315,19 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
   return (
     <div className="h-full flex flex-col" style={{ backgroundColor: theme.colors.background }}>
       <div className={`sticky top-0 z-10 transition-all duration-300 ${isScrolled?'shadow-md':''}`} style={{ backgroundColor: isScrolled? `${theme.colors.background}e0`: theme.colors.background, backdropFilter: isScrolled? 'blur(12px)': 'none', WebkitBackdropFilter: isScrolled? 'blur(12px)': 'none', borderBottom:`1px solid ${isScrolled? theme.colors.border+'40':'transparent'}` }}>
-        <div className="px-4 pt-4 pb-2 flex items-center gap-4">
-          <div className="flex w-full gap-3">
-            <div className="flex flex-[2] rounded-full border overflow-hidden h-12 shadow-sm" style={{ borderColor: theme.colors.border, background:'#fff', minWidth:260 }}>
-              <button onClick={()=>setProjectsTab('pipeline')} className="flex-1 h-full px-6 text-sm font-semibold flex flex-col items-center justify-center transition-colors" style={{ backgroundColor: projectsTab==='pipeline'? theme.colors.accent:'#fff', color: projectsTab==='pipeline'? '#fff': theme.colors.textPrimary }}>
-                <span>Active</span><span className="-mt-[0px]">Projects</span>
-              </button>
-              <button onClick={()=>setProjectsTab('my-projects')} className="flex-1 h-full px-6 text-sm font-semibold flex items-center justify-center transition-colors" style={{ backgroundColor: projectsTab==='my-projects'? theme.colors.accent:'#fff', color: projectsTab==='my-projects'? '#fff': theme.colors.textPrimary }}>Installations</button>
-            </div>
-            {projectsTab==='pipeline' && <button onClick={()=>onNavigate('new-lead')} className="flex-[1] h-12 inline-flex items-center justify-center gap-2 rounded-full text-sm font-semibold transition-all shadow-sm px-6" style={{ backgroundColor: theme.colors.accent, color:'#fff' }}>+ New Project</button>}
-            {projectsTab==='my-projects' && <button onClick={()=>onNavigate('add-new-install')} className="flex-[1] h-12 inline-flex items-center justify-center gap-2 rounded-full text-sm font-semibold transition-all shadow-sm px-6" style={{ backgroundColor: theme.colors.accent, color:'#fff' }}>+ New Install</button>}
+        <div className="px-4 pt-4 pb-2 flex items-center gap-3 max-w-2xl mx-auto w-full">
+          {/* Segmented Toggle for tabs */}
+          <div className="flex-[2] min-w-0">
+            <SegmentedToggle
+              value={projectsTab}
+              onChange={setProjectsTab}
+              options={PROJECTS_TAB_OPTIONS}
+              size="md"
+            />
           </div>
+          {/* New Project/Install button */}
+          {projectsTab==='pipeline' && <button onClick={()=>onNavigate('new-lead')} className="h-11 inline-flex items-center justify-center gap-1.5 rounded-full text-sm font-semibold transition-all px-5 whitespace-nowrap" style={{ backgroundColor: theme.colors.accent, color:'#fff' }}>+ New Project</button>}
+          {projectsTab==='my-projects' && <button onClick={()=>onNavigate('add-new-install')} className="h-11 inline-flex items-center justify-center gap-1.5 rounded-full text-sm font-semibold transition-all px-5 whitespace-nowrap" style={{ backgroundColor: theme.colors.accent, color:'#fff' }}>+ New Install</button>}
         </div>
         {projectsTab==='pipeline' && (
           <div className="px-4 mt-3 pt-1 pb-3 relative">
