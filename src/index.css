@@ -66,6 +66,12 @@ body {
     background-color: inherit;
 }
 
+/* Safe height class for full viewport height (used by App.jsx) */
+.h-screen-safe {
+    height: var(--app-height) !important;
+    min-height: var(--app-height) !important;
+}
+
 h1,
 h2,
 h3,
