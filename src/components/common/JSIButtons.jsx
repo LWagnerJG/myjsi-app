@@ -31,6 +31,9 @@ export const PillButton = ({
         large: 'px-6 py-4 text-base'
     };
 
+    const selectedShadow = '0 2px 8px rgba(53,53,53,0.10), 0 1px 3px rgba(53,53,53,0.06)';
+    const unselectedShadow = '0 1px 3px rgba(53,53,53,0.04)';
+
     return (
         <button
             type={type}
@@ -38,10 +41,10 @@ export const PillButton = ({
             disabled={disabled}
             className={`${sizeClasses[size]} font-semibold rounded-full transition-all border-2 text-center hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed ${className}`}
             style={{
-                backgroundColor: isSelected ? theme.colors.accent : theme.colors.surface,
+                backgroundColor: isSelected ? theme.colors.accent : '#FFFFFF',
                 color: isSelected ? '#FFFFFF' : theme.colors.textPrimary,
                 borderColor: isSelected ? theme.colors.accent : theme.colors.border,
-                boxShadow: isSelected ? DESIGN_TOKENS.shadows.button : DESIGN_TOKENS.shadows.sm,
+                boxShadow: isSelected ? selectedShadow : unselectedShadow,
                 fontFamily: 'Neue Haas Grotesk Display Pro, sans-serif',
                 fontWeight: isSelected ? 600 : 500,
                 letterSpacing: '-0.01em'
