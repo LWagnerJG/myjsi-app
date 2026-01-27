@@ -27,26 +27,31 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
     const [isEditMode, setIsEditMode] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
 
-    const currentApps = useMemo(() => {
-        const selection = Array.isArray(homeApps) ? homeApps : DEFAULT_HOME_APPS;
-        return selection.map(route => allApps.find(a => a.route === route)).filter(Boolean);
+    // Ensure homeApps is always a valid array
+    const safeHomeApps = useMemo(() => {
+        return Array.isArray(homeApps) && homeApps.length > 0 ? homeApps : DEFAULT_HOME_APPS;
     }, [homeApps]);
+
+    const currentApps = useMemo(() => {
+        return safeHomeApps.map(route => allApps.find(a => a.route === route)).filter(Boolean);
+    }, [safeHomeApps]);
 
     const availableApps = useMemo(() => {
-        return allApps.filter(app => !homeApps.includes(app.route));
-    }, [homeApps]);
+        return allApps.filter(app => !safeHomeApps.includes(app.route));
+    }, [safeHomeApps]);
 
     const toggleApp = useCallback((route) => {
-        if (homeApps.includes(route)) {
-            if (homeApps.length > 4) {
-                onUpdateHomeApps(homeApps.filter(r => r !== route));
+        if (!onUpdateHomeApps) return; // Guard against missing prop
+        if (safeHomeApps.includes(route)) {
+            if (safeHomeApps.length > 4) {
+                onUpdateHomeApps(safeHomeApps.filter(r => r !== route));
             }
         } else {
-            if (homeApps.length < 12) {
-                onUpdateHomeApps([...homeApps, route]);
+            if (safeHomeApps.length < 12) {
+                onUpdateHomeApps([...safeHomeApps, route]);
             }
         }
-    }, [homeApps, onUpdateHomeApps]);
+    }, [safeHomeApps, onUpdateHomeApps]);
 
     const getTimeGreeting = () => {
         const hour = new Date().getHours();
@@ -55,14 +60,20 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
         return 'Good Evening';
     };
 
+    const handleSearchSubmit = useCallback((val) => {
+        if (onAskAI && val && val.trim()) {
+            onAskAI(val);
+        }
+    }, [onAskAI]);
+
     return (
-        <div className="flex flex-col h-full overflow-y-auto scrollbar-hide bg-[#F0EDE8]">
+        <div className="flex flex-col h-full overflow-y-auto scrollbar-hide" style={{ backgroundColor: theme.colors.background }}>
             <div className="px-6 py-6 space-y-8 max-w-5xl mx-auto w-full pb-24">
 
                 {/* Header Section */}
                 <div className="space-y-1">
-                    <p className="text-sm font-semibold uppercase tracking-widest opacity-60">{getTimeGreeting()}</p>
-                    <h2 className="text-4xl font-bold">Welcome, {userSettings?.firstName || 'Luke'}</h2>
+                    <p className="text-sm font-semibold uppercase tracking-widest opacity-60" style={{ color: theme.colors.textSecondary }}>{getTimeGreeting()}</p>
+                    <h2 className="text-4xl font-bold" style={{ color: theme.colors.textPrimary }}>Welcome, {userSettings?.firstName || 'Luke'}</h2>
                 </div>
 
                 {/* Dashboard Summary row */}
@@ -75,15 +86,14 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                 {/* Search / Spotlight */}
                 <div className="relative group">
                     <div className="absolute inset-0 bg-black/5 blur-xl group-focus-within:bg-black/10 transition-colors rounded-full" />
-                    <GlassCard theme={theme} className="relative z-10 px-6 h-16 flex items-center bg-white border-0 shadow-lg" style={{ borderRadius: 9999 }}>
+                    <GlassCard theme={theme} className="relative z-10 px-5" style={{ borderRadius: 9999, height: 56, paddingTop: 0, paddingBottom: 0 }}>
                         <HomeSearchInput
                             value={searchQuery}
                             onChange={setSearchQuery}
-                            onSubmit={(e) => { e.preventDefault(); onAskAI(searchQuery); }}
-                            onVoiceClick={() => onVoiceActivate('Voice search active')}
+                            onSubmit={handleSearchSubmit}
+                            onVoiceClick={() => onVoiceActivate && onVoiceActivate('Voice search active')}
                             theme={theme}
-                            placeholder="Search projects, dealers or resources..."
-                            className="w-full bg-transparent border-none focus:ring-0 text-lg"
+                            className="w-full"
                         />
                     </GlassCard>
                 </div>
@@ -91,15 +101,23 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                 {/* Reconfigurable Apps section */}
                 <div className="space-y-4">
                     <div className="flex justify-between items-center px-1">
-                        <h3 className="text-xl font-bold flex items-center gap-2">
+                        <h3 className="text-xl font-bold" style={{ color: theme.colors.textPrimary }}>
                             Core Dashboard
                         </h3>
-                        <button
-                            onClick={() => setIsEditMode(!isEditMode)}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all ${isEditMode ? 'bg-black text-white' : 'bg-white text-black shadow-sm border border-black/5'}`}
-                        >
-                            {isEditMode ? <><Check className="w-4 h-4" /> Done</> : <><SettingsIcon className="w-4 h-4" /> Reconfigure</>}
-                        </button>
+                        {onUpdateHomeApps && (
+                            <button
+                                onClick={() => setIsEditMode(!isEditMode)}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all`}
+                                style={{
+                                    backgroundColor: isEditMode ? theme.colors.accent : theme.colors.surface,
+                                    color: isEditMode ? '#FFFFFF' : theme.colors.textPrimary,
+                                    border: isEditMode ? 'none' : `1px solid ${theme.colors.border}`,
+                                    boxShadow: isEditMode ? 'none' : DESIGN_TOKENS.shadows.sm
+                                }}
+                            >
+                                {isEditMode ? <><Check className="w-4 h-4" /> Done</> : <><SettingsIcon className="w-4 h-4" /> Reconfigure</>}
+                            </button>
+                        )}
                     </div>
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -112,13 +130,18 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                                     exit={{ opacity: 0, scale: 0.8 }}
                                     key={app.route}
                                     onClick={() => isEditMode ? null : onNavigate(app.route)}
-                                    className="relative flex flex-col items-center justify-center gap-3 p-6 rounded-3xl bg-white border border-black/[0.03] shadow-sm hover:shadow-md transition-all active:scale-95 group"
-                                    style={{ minHeight: 140 }}
+                                    className="relative flex flex-col items-center justify-center gap-3 p-6 rounded-3xl transition-all active:scale-95 group"
+                                    style={{
+                                        minHeight: 140,
+                                        backgroundColor: theme.colors.surface,
+                                        border: `1px solid ${theme.colors.border}`,
+                                        boxShadow: DESIGN_TOKENS.shadows.card
+                                    }}
                                 >
-                                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110" style={{ backgroundColor: `${theme.colors.accent}08` }}>
+                                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110" style={{ backgroundColor: `${theme.colors.accent}12` }}>
                                         <app.icon className="w-6 h-6" style={{ color: theme.colors.accent }} />
                                     </div>
-                                    <span className="text-sm font-bold tracking-tight text-center">{app.name}</span>
+                                    <span className="text-sm font-bold tracking-tight text-center" style={{ color: theme.colors.textPrimary }}>{app.name}</span>
 
                                     {isEditMode && (
                                         <button
@@ -137,13 +160,17 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                                     animate={{ opacity: 0.6, scale: 1 }}
                                     key={app.route}
                                     onClick={() => toggleApp(app.route)}
-                                    className="flex flex-col items-center justify-center gap-3 p-6 rounded-3xl bg-white/50 border border-dashed border-black/10 hover:bg-white hover:opacity-100 transition-all active:scale-95 group"
-                                    style={{ minHeight: 140 }}
+                                    className="flex flex-col items-center justify-center gap-3 p-6 rounded-3xl border border-dashed hover:opacity-100 transition-all active:scale-95 group"
+                                    style={{
+                                        minHeight: 140,
+                                        backgroundColor: `${theme.colors.surface}80`,
+                                        borderColor: theme.colors.border
+                                    }}
                                 >
-                                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center border border-dashed border-black/10">
-                                        <Plus className="w-6 h-6 opacity-40" />
+                                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center border border-dashed" style={{ borderColor: theme.colors.border }}>
+                                        <Plus className="w-6 h-6 opacity-40" style={{ color: theme.colors.textSecondary }} />
                                     </div>
-                                    <span className="text-sm font-bold opacity-40">{app.name}</span>
+                                    <span className="text-sm font-bold opacity-40" style={{ color: theme.colors.textSecondary }}>{app.name}</span>
                                 </motion.button>
                             ))}
                         </AnimatePresence>
@@ -154,16 +181,17 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                 <div className="mt-8">
                     <GlassCard
                         theme={theme}
-                        className="p-6 bg-black text-white border-0 flex items-center justify-between"
-                        style={{ borderRadius: 24 }}
+                        className="p-6 flex items-center justify-between"
+                        style={{ borderRadius: 24, backgroundColor: theme.colors.accent }}
                     >
                         <div className="space-y-1">
-                            <h4 className="text-lg font-bold text-white">Need Support?</h4>
-                            <p className="text-sm opacity-60">Reach out to your territory manager</p>
+                            <h4 className="text-lg font-bold" style={{ color: '#FFFFFF' }}>Need Support?</h4>
+                            <p className="text-sm opacity-60" style={{ color: '#FFFFFF' }}>Reach out to your territory manager</p>
                         </div>
                         <button
                             onClick={() => onNavigate('help')}
-                            className="bg-white text-black px-6 py-3 rounded-full font-bold text-sm hover:scale-105 active:scale-95 transition-transform"
+                            className="px-6 py-3 rounded-full font-bold text-sm hover:scale-105 active:scale-95 transition-transform"
+                            style={{ backgroundColor: '#FFFFFF', color: theme.colors.accent }}
                         >
                             Get Help
                         </button>
@@ -173,4 +201,5 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
         </div>
     );
 };
+
 
