@@ -68,7 +68,7 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
 
     return (
         <div className="flex flex-col h-full overflow-y-auto scrollbar-hide" style={{ backgroundColor: colors.background }}>
-            <div className="px-6 py-6 space-y-6 max-w-2xl mx-auto w-full pb-24">
+            <div className="px-6 pt-4 pb-24 space-y-5 max-w-2xl mx-auto w-full">
 
                 {/* Header Section - hidden on mobile */}
                 <div className="space-y-1 hidden sm:block">
@@ -93,19 +93,16 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
 
                 {/* Reconfigurable Apps section */}
                 <div className="space-y-4">
-                    <div className="flex justify-between items-center px-1">
-                        <h3 className="text-xl font-bold" style={{ color: colors.textPrimary }}>
-                            Core Dashboard
-                        </h3>
+                    <div className="flex justify-end items-center px-1">
                         {onUpdateHomeApps && (
                             <button
                                 onClick={() => setIsEditMode(!isEditMode)}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all`}
+                                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold transition-all`}
                                 style={{
-                                    backgroundColor: isEditMode ? colors.accent : colors.surface,
-                                    color: isEditMode ? '#FFFFFF' : colors.textPrimary,
-                                    border: isEditMode ? 'none' : `1px solid ${colors.border}`,
-                                    boxShadow: isEditMode ? 'none' : DESIGN_TOKENS.shadows.sm
+                                    backgroundColor: isEditMode ? colors.accent : 'transparent',
+                                    color: isEditMode ? '#FFFFFF' : colors.textSecondary,
+                                    border: isEditMode ? '1px solid transparent' : `1px solid ${colors.border}`,
+                                    boxShadow: 'none'
                                 }}
                             >
                                 {isEditMode ? <><Check className="w-4 h-4" /> Done</> : <><SettingsIcon className="w-4 h-4" /> Reconfigure</>}
