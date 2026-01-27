@@ -318,13 +318,7 @@ function App() {
 
     return (
         <ToastHost theme={currentTheme}>
-            <div style={{
-                minHeight: '100vh',
-                width: '100vw',
-                display: 'flex',
-                flexDirection: 'column',
-                backgroundColor: currentTheme.colors.background
-            }}>
+            <div className="h-screen-safe w-screen font-sans flex flex-col relative" style={{ backgroundColor: currentTheme.colors.background }}>
                 <AppHeader
                     theme={currentTheme}
                     userName={userSettings.firstName}
@@ -334,20 +328,11 @@ function App() {
                     onProfileClick={() => setShowProfileMenu(p => !p)}
                     isDarkMode={isDarkMode}
                 />
-                <main style={{
-                    flex: 1,
-                    marginTop: 76,
-                    overflow: 'auto',
-                    backgroundColor: '#ff0000',
-                    padding: 20
-                }}>
-                    <div style={{ backgroundColor: '#ffffff', padding: 40, fontSize: 24, fontWeight: 'bold' }}>
-                        TEST - IF YOU SEE THIS THE CONTAINER WORKS
-                    </div>
-                    <div style={{ marginTop: 20, color: '#000' }}>
-                        Current screen: {currentScreen}
-                    </div>
-                </main>
+                <div className="flex-1 pt-[76px] overflow-hidden" style={{ backgroundColor: currentTheme.colors.background }}>
+                    <AnimatedScreenWrapper screenKey={currentScreen} direction={lastNavigationDirection} onSwipeBack={navigationHistory.length > 1 ? handleBack : null}>
+                        <ScreenRouter screenKey={currentScreen} projectsScreenRef={projectsScreenRef} SuspenseFallback={suspenseFallback} {...screenProps} />
+                    </AnimatedScreenWrapper>
+                </div>
                 {showProfileMenu && (
                     <ProfileMenu show={showProfileMenu} onClose={() => setShowProfileMenu(false)} onNavigate={handleNavigate} theme={currentTheme} />
                 )}
