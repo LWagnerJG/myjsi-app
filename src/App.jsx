@@ -328,17 +328,19 @@ function App() {
                     onProfileClick={() => setShowProfileMenu(p => !p)}
                     isDarkMode={isDarkMode}
                 />
-                <div
-                    className="absolute left-0 right-0 bottom-0 overflow-hidden"
+                <main
                     style={{
+                        position: 'absolute',
                         top: 76,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        overflow: 'auto',
                         backgroundColor: currentTheme.colors.background
                     }}
                 >
-                    <AnimatedScreenWrapper screenKey={currentScreen} direction={lastNavigationDirection} onSwipeBack={navigationHistory.length > 1 ? handleBack : null}>
-                        <ScreenRouter screenKey={currentScreen} projectsScreenRef={projectsScreenRef} SuspenseFallback={suspenseFallback} {...screenProps} />
-                    </AnimatedScreenWrapper>
-                </div>
+                    <ScreenRouter screenKey={currentScreen} projectsScreenRef={projectsScreenRef} SuspenseFallback={suspenseFallback} {...screenProps} />
+                </main>
                 {showProfileMenu && (
                     <ProfileMenu show={showProfileMenu} onClose={() => setShowProfileMenu(false)} onNavigate={handleNavigate} theme={currentTheme} />
                 )}
