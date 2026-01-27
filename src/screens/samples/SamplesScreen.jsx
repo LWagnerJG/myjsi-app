@@ -281,7 +281,10 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
     const cleanName = (name) => String(name || '').split('|')[0].trim();
 
     const renderProductGrid = (products) => (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4 pb-12">
+        <div
+            className="grid gap-4 pb-12"
+            style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}
+        >
             {products.map(product => {
                 const pid = idOf(product.id);
                 const qty = cart[pid] || 0;
@@ -291,7 +294,7 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                 const removeOne = (e) => { if (e) e.stopPropagation(); onUpdateCart({ ...product, id: pid }, -1); };
 
                 return (
-                    <div key={pid} className="group relative rounded-lg overflow-hidden transition-all duration-300" style={{ backgroundColor: theme.colors.surface, boxShadow: '0 1px 6px rgba(0,0,0,0.06)' }}>
+                    <div key={pid} className="group relative rounded-2xl overflow-hidden transition-all duration-300" style={{ backgroundColor: theme.colors.surface, boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
                         <div
                             role="button"
                             tabIndex={0}
@@ -311,28 +314,18 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                                     draggable={false}
                                 />
                             )}
-                            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-24">
-                                <GlassCard theme={theme} className="p-0.5 flex items-center justify-between gap-1" style={{ borderRadius: 9999 }}>
-                                    {qty === 0 ? (
-                                        <button type="button" onClick={addOne} className="w-full h-7 rounded-full flex items-center justify-center active:scale-95">
-                                            <Plus className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
-                                        </button>
-                                    ) : (
-                                        <>
-                                            <button type="button" onClick={removeOne} className="w-7 h-7 rounded-full flex items-center justify-center active:scale-95">
-                                                {qty === 1 ? <Trash2 className="w-3.5 h-3.5 text-red-500" /> : <Minus className="w-3.5 h-3.5" style={{ color: theme.colors.textSecondary }} />}
-                                            </button>
-                                            <span className="font-bold text-sm select-none" style={{ color: theme.colors.textPrimary }}>{qty}</span>
-                                            <button type="button" onClick={addOne} className="w-7 h-7 rounded-full flex items-center justify-center active:scale-95">
-                                                <Plus className="w-3.5 h-3.5" style={{ color: theme.colors.textSecondary }} />
-                                            </button>
-                                        </>
-                                    )}
-                                </GlassCard>
-                            </div>
                         </div>
-                        <div className="p-3" style={{ backgroundColor: theme.colors.surface }}>
+                        <div className="px-3 py-2 flex items-center justify-between gap-2" style={{ backgroundColor: theme.colors.surface }}>
                             <p className="text-sm truncate" style={{ color: theme.colors.textPrimary }}>{cleanName(product.name)}</p>
+                            <button
+                                type="button"
+                                onClick={addOne}
+                                className="w-8 h-8 rounded-full flex items-center justify-center active:scale-95 border"
+                                style={{ borderColor: theme.colors.border, backgroundColor: '#FFFFFF' }}
+                                aria-label={`Add ${product.name}`}
+                            >
+                                <Plus className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
+                            </button>
                         </div>
                     </div>
                 );
