@@ -49,14 +49,20 @@ const SegmentedTabs = ({ theme, active, onChange }) => {
 
 const OrderModal = ({ order, onClose, theme }) => {
   if (!order) return null;
+  const colors = {
+    primary: theme?.colors?.textPrimary || '#353535',
+    accent: theme?.colors?.accent || '#353535',
+    secondary: theme?.colors?.secondary || '#666666'
+  };
+
   return (
     <Modal show={!!order} onClose={onClose} title={`PO #${order.po}`} theme={theme}>
-      <div className="space-y-6 text-sm" style={{ color: theme.colors.textPrimary }}>
+      <div className="space-y-6 text-sm" style={{ color: colors.primary }}>
         <div className="flex justify-between items-start">
           <div><h3 className="text-xl font-bold">{formatCompanyName(order.company)}</h3><p className="opacity-60">{order.details}</p></div>
           <div className="text-right">
-            <p className="text-2xl font-black" style={{ color: theme.colors.accent }}>${order.net.toLocaleString()}</p>
-            <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full" style={{ backgroundColor: (STATUS_COLORS[order.status] || theme.colors.secondary) + '20', color: STATUS_COLORS[order.status] || theme.colors.secondary }}>{order.status}</span>
+            <p className="text-2xl font-black" style={{ color: colors.accent }}>${order.net.toLocaleString()}</p>
+            <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full" style={{ backgroundColor: (STATUS_COLORS[order.status] || colors.secondary) + '20', color: STATUS_COLORS[order.status] || colors.secondary }}>{order.status}</span>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-6 p-4 rounded-2xl bg-black/[0.02]">
@@ -88,6 +94,16 @@ export const SalesScreen = ({ theme, onNavigate }) => {
   const [selectedMonth, setSelectedMonth] = useState(null);
   const [topTab, setTopTab] = useState(null);
 
+  // Safe color extraction
+  const colors = useMemo(() => ({
+    background: theme?.colors?.background || '#F0EDE8',
+    surface: theme?.colors?.surface || '#FFFFFF',
+    accent: theme?.colors?.accent || '#353535',
+    textPrimary: theme?.colors?.textPrimary || '#353535',
+    textSecondary: theme?.colors?.textSecondary || '#666666',
+    border: theme?.colors?.border || '#E3E0D8'
+  }), [theme]);
+
   const { totalBookings, totalSales } = useMemo(() => ({
     totalBookings: MONTHLY_SALES_DATA.reduce((a, m) => a + m.bookings, 0),
     totalSales: MONTHLY_SALES_DATA.reduce((a, m) => a + m.sales, 0)
@@ -105,7 +121,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
   const recentOrders = useMemo(() => ORDER_DATA.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, numRecentOrders), [numRecentOrders]);
 
   return (
-    <div className="flex flex-col h-full bg-[#F0EDE8] overflow-y-auto scrollbar-hide">
+    <div className="flex flex-col h-full overflow-y-auto scrollbar-hide" style={{ backgroundColor: colors.background }}>
       <div className="px-6 py-6 space-y-6 max-w-5xl mx-auto w-full pb-24">
 
         {/* Navigation Tabs */}
