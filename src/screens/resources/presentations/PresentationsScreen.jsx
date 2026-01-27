@@ -1,12 +1,11 @@
 import React, { useState, useRef, useEffect, useMemo, useLayoutEffect } from 'react';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import StandardSearchBar from '../../../components/common/StandardSearchBar.jsx';
+import { PillButton } from '../../../components/common/JSIButtons.jsx';
 import { Download, Share2, ChevronLeft, ChevronRight, Layers } from 'lucide-react';
 import { PRESENTATIONS_DATA, PRESENTATION_CATEGORIES, MOCK_PRESENTATION_PDF_BASE64 } from './data.js';
 
-// Revised shadow tokens (remove heavy base shadow to avoid dark banding under pills)
-const BTN_INACTIVE_SHADOW = '0 0 0 1px rgba(0,0,0,0.06)'; // ring only
-const BTN_ACTIVE_SHADOW = '0 2px 6px rgba(0,0,0,0.16), 0 0 0 1px rgba(0,0,0,0.08)';
+// Card shadow token
 const CARD_SHADOW = '0 4px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.06)';
 
 const WhiteCard = ({ children, className='', style={} }) => (
@@ -36,7 +35,7 @@ export const PresentationsScreen = ({ theme }) => {
   const filtered = useMemo(()=> presentations.filter(p => { const catOk = selectedCategory==='all'|| p.category===selectedCategory; if(!catOk) return false; if(!search.trim()) return true; const t=search.toLowerCase(); return p.title.toLowerCase().includes(t)|| p.description.toLowerCase().includes(t)|| p.category.toLowerCase().includes(t); }), [presentations, selectedCategory, search]);
 
   const downloadMock = (p) => { const a=document.createElement('a'); a.href=MOCK_PRESENTATION_PDF_BASE64; a.download=p.title.replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'.pdf'; document.body.appendChild(a); a.click(); a.remove(); };
-  const sharePresentation = async (p) => { const text=`${p.title} – ${p.description}`; if(navigator.share){ try { await navigator.share({ title:p.title, text }); } catch(_){} } else { navigator.clipboard.writeText(text); alert('Link copied'); } };
+  const sharePresentation = async (p) => { const text=`${p.title} ï¿½ ${p.description}`; if(navigator.share){ try { await navigator.share({ title:p.title, text }); } catch(_){} } else { navigator.clipboard.writeText(text); alert('Link copied'); } };
 
   const SlideCarousel = ({ pres }) => { const [idx,setIdx] = useState(0); const slides = pres.slides || []; if(!slides.length) return null; const next = () => setIdx(i=>(i+1)%slides.length); const prev = () => setIdx(i=>(i-1+slides.length)%slides.length); const current = slides[idx]; return (
     <div className="relative group" aria-label={`${pres.title} slide preview`}>
@@ -63,18 +62,18 @@ export const PresentationsScreen = ({ theme }) => {
         <h3 className="font-semibold text-base" style={{ color: theme.colors.textPrimary }}>{p.title}</h3>
         <div className="flex flex-wrap items-center gap-2 text-[11px] font-medium">
           <span className="px-2 py-1 rounded-full" style={{ background: theme.colors.accent+'22', color: theme.colors.accent }}>{p.category}</span>
-          <span style={{ color: theme.colors.textSecondary }}>{p.type} • {p.size}</span>
+          <span style={{ color: theme.colors.textSecondary }}>{p.type} ï¿½ {p.size}</span>
           <span style={{ color: theme.colors.textSecondary }}>Updated {new Date(p.lastUpdated).toLocaleDateString()}</span>
         </div>
         <p className="text-sm leading-snug" style={{ color: theme.colors.textSecondary }}>{p.description}</p>
       </div>
       <div className="flex gap-2">
-        <button onClick={()=>downloadMock(p)} className="flex-1 h-10 inline-flex items-center justify-center gap-2 rounded-full text-sm font-semibold text-white transition-all" style={{ background: theme.colors.accent, boxShadow: BTN_INACTIVE_SHADOW }}>
-          Download
-        </button>
-        <button onClick={()=>sharePresentation(p)} className="h-10 px-5 rounded-full inline-flex items-center gap-2 text-sm font-semibold transition-all" style={{ background:'#ffffff', color: theme.colors.textPrimary, border:'1px solid rgba(0,0,0,0.08)', boxShadow: BTN_INACTIVE_SHADOW }}>
+        <PillButton onClick={()=>downloadMock(p)} isSelected={true} theme={theme} className="flex-1 inline-flex items-center justify-center gap-2">
+          <Download className="w-4 h-4" /> Download
+        </PillButton>
+        <PillButton onClick={()=>sharePresentation(p)} isSelected={false} theme={theme} className="inline-flex items-center gap-2">
           <Share2 className="w-4 h-4" /> Share
-        </button>
+        </PillButton>
       </div>
     </WhiteCard>
   );
@@ -93,7 +92,7 @@ export const PresentationsScreen = ({ theme }) => {
         </div>
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1 -mt-2">
           {categories.map(cat => { const active=selectedCategory===cat; return (
-            <button key={cat} onClick={()=>setSelectedCategory(cat)} className="px-4 h-9 rounded-full text-sm font-medium whitespace-nowrap focus:outline-none focus:ring transition-colors flex-shrink-0" style={{ background: active? theme.colors.accent:'#ffffff', color: active? '#ffffff': theme.colors.textSecondary, border:`1px solid ${active? theme.colors.accent:'rgba(0,0,0,0.07)'}`, boxShadow: active? BTN_ACTIVE_SHADOW: BTN_INACTIVE_SHADOW }}>{cat==='all'?'All':cat}</button>
+            <PillButton key={cat} onClick={()=>setSelectedCategory(cat)} isSelected={active} size="compact" theme={theme} className="whitespace-nowrap flex-shrink-0">{cat==='all'?'All':cat}</PillButton>
           ); })}
         </div>
       </div>
@@ -112,7 +111,7 @@ export const PresentationsScreen = ({ theme }) => {
             <WhiteCard className="p-5 space-y-4">
               <div className="flex justify-between items-center">
                 <h2 className="font-semibold text-lg" style={{ color: theme.colors.textPrimary }}>{preview.pres.title}</h2>
-                <button onClick={()=>setPreview(null)} className="px-3 py-1.5 rounded-full text-xs font-semibold" style={{ background:'#ffffff', border:'1px solid rgba(0,0,0,0.08)', color: theme.colors.textSecondary, boxShadow: BTN_INACTIVE_SHADOW }}>Close</button>
+                <PillButton onClick={()=>setPreview(null)} isSelected={false} size="compact" theme={theme}>Close</PillButton>
               </div>
               <div className="grid md:grid-cols-3 gap-3 max-h-[60vh] overflow-y-auto pr-1">
                 {preview.pres.slides.map(s => (
@@ -123,8 +122,8 @@ export const PresentationsScreen = ({ theme }) => {
                 ))}
               </div>
               <div className="flex gap-2 pt-2">
-                <button onClick={()=>downloadMock(preview.pres)} className="flex-1 h-10 inline-flex items-center justify-center gap-2 rounded-full text-sm font-semibold text-white" style={{ background: theme.colors.accent, boxShadow: BTN_INACTIVE_SHADOW }}>Download PDF</button>
-                <button onClick={()=>sharePresentation(preview.pres)} className="h-10 px-6 rounded-full inline-flex items-center gap-2 text-sm font-semibold" style={{ background:'#ffffff', color: theme.colors.textPrimary, border:'1px solid rgba(0,0,0,0.08)', boxShadow: BTN_INACTIVE_SHADOW }}><Share2 className="w-4 h-4" /> Share</button>
+                <PillButton onClick={()=>downloadMock(preview.pres)} isSelected={true} theme={theme} className="flex-1 inline-flex items-center justify-center gap-2"><Download className="w-4 h-4" /> Download PDF</PillButton>
+                <PillButton onClick={()=>sharePresentation(preview.pres)} isSelected={false} theme={theme} className="inline-flex items-center gap-2"><Share2 className="w-4 h-4" /> Share</PillButton>
               </div>
             </WhiteCard>
           </div>

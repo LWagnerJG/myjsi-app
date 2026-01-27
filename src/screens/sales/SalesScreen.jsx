@@ -8,6 +8,7 @@ import { SalesByVerticalBreakdown } from './components/SalesByVerticalBreakdown.
 import { CountUp } from '../../components/common/CountUp.jsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
+import { PillButton } from '../../components/common/JSIButtons.jsx';
 
 const formatCompanyName = (name='') => name.split(' ').map(w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase()).join(' ');
 const monthNameToNumber = { Jan:0, Feb:1, Mar:2, Apr:3, May:4, Jun:5, Jul:6, Aug:7, Sep:8, Oct:9, Nov:10, Dec:11 };
@@ -33,9 +34,11 @@ const SegmentedTabs = ({ theme, active, onChange }) => {
     <div ref={wrapRef} className="relative w-full flex" style={{ borderBottom:`1px solid ${theme.colors.border}` }}>
       {u.ready && <motion.div layout className="absolute bottom-0 h-[3px] rounded-full" style={{ left:u.left, width:u.width, background:theme.colors.accent }} transition={{ type:'spring', stiffness:220, damping:30 }} />}
       {tabs.map((t,i)=>{const selected=t.key===active;return(
-        <button key={t.key} ref={el=>btnRefs.current[i]=el} onClick={()=>onChange(selected?null:t.key)} className="flex-1 flex items-center justify-center gap-2 h-12 font-semibold text-sm tracking-wide" style={{ color:selected?theme.colors.textPrimary:theme.colors.textSecondary }}>
-          <t.Icon className="w-4 h-4" style={{ color:selected?theme.colors.accent:theme.colors.textSecondary }} />{t.label}
-        </button>
+        <div key={t.key} ref={el=>btnRefs.current[i]=el} className="flex-1 flex items-center justify-center">
+          <PillButton theme={theme} isSelected={selected} onClick={()=>onChange(selected?null:t.key)} size="compact" className="flex items-center gap-2">
+            <t.Icon className="w-4 h-4" />{t.label}
+          </PillButton>
+        </div>
       );})}
     </div>
   );
@@ -78,7 +81,7 @@ const CustomerMonthlyBreakdown = ({ monthData, orders, theme, onBack }) => {
   const customerData = useMemo(()=>{ const map={}; monthlyOrders.forEach(o=>{ if(!map[o.company]) map[o.company]={ company:o.company, bookings:0 }; map[o.company].bookings+=o.net;}); return Object.values(map).sort((a,b)=>b.bookings-a.bookings); },[monthlyOrders]);
   return (
     <div>
-      <button onClick={onBack} className="flex items-center space-x-2 text-sm font-semibold mb-4" style={{ color:theme.colors.textSecondary }}>Back to Monthly Overview</button>
+      <PillButton theme={theme} onClick={onBack} size="compact" className="mb-4">Back to Monthly Overview</PillButton>
       <div className="text-sm" style={{ color:theme.colors.textPrimary }}>
         <div className="grid grid-cols-2 font-bold border-b" style={{ borderColor:theme.colors.border }}><div className="p-2">Customer</div><div className="p-2 text-right">Bookings</div></div>
         {customerData.map(c=> (
@@ -197,9 +200,9 @@ export const SalesScreen = ({ theme, onNavigate }) => {
             ):(
               <>
                 <div className="flex justify-between items-start gap-4 flex-wrap">
-                  <div className="flex items-center bg-transparent rounded-full border overflow-hidden" style={{ borderColor:theme.colors.border }}>
-                    <button onClick={()=>setChartDataType('bookings')} className="px-4 py-2 text-sm font-semibold" style={{ backgroundColor:chartDataType==='bookings'?theme.colors.accent:'transparent', color:chartDataType==='bookings'?'#fff':theme.colors.textSecondary }}>Bookings</button>
-                    <button onClick={()=>setChartDataType('sales')} className="px-4 py-2 text-sm font-semibold" style={{ backgroundColor:chartDataType==='sales'?theme.colors.accent:'transparent', color:chartDataType==='sales'?'#fff':theme.colors.textSecondary }}>Sales</button>
+                  <div className="flex items-center gap-2">
+                    <PillButton theme={theme} isSelected={chartDataType==='bookings'} onClick={()=>setChartDataType('bookings')} size="compact">Bookings</PillButton>
+                    <PillButton theme={theme} isSelected={chartDataType==='sales'} onClick={()=>setChartDataType('sales')} size="compact">Sales</PillButton>
                   </div>
                   <div className="flex items-start gap-2">
                     <button onClick={()=>setMonthlyView(v=>v==='chart'?'table':'chart')} className="p-3 rounded-full shadow-sm" style={{ backgroundColor:theme.colors.subtle, color:theme.colors.textPrimary, border:`1px solid ${theme.colors.border}` }} aria-label={monthlyView==='chart'?'Show table view':'Show chart view'}>
@@ -229,7 +232,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                   <span className="px-2 py-1 rounded-full text-[10px] font-medium" style={{ backgroundColor:(STATUS_COLORS[order.status]||theme.colors.secondary)+'20', color:STATUS_COLORS[order.status]||theme.colors.secondary }}>{order.status}</span>
                 </motion.div>
               ))}
-              {numRecentOrders < allRecentOrders.length && <button onClick={showMoreOrders} className="w-full text-center text-xs font-semibold mt-2 py-3 hover:underline" style={{ color:theme.colors.accent }}>Show 5 More</button>}
+              {numRecentOrders < allRecentOrders.length && <div className="flex justify-center mt-4"><PillButton theme={theme} onClick={showMoreOrders} size="compact">Show 5 More</PillButton></div>}
             </div>
           </GlassCard>
 

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
+import { PillButton } from '../../../components/common/JSIButtons.jsx';
 import { Instagram, Linkedin, Copy, Info, ChevronDown, ChevronUp } from 'lucide-react';
 import { SOCIAL_MEDIA_POSTS } from './data.js';
 
@@ -15,7 +16,7 @@ const formatDate = (dStr) => {
   return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 };
 
-// Attempt Web Share API (with file) – some mobile OS + browsers allow selecting Instagram from sheet.
+// Attempt Web Share API (with file) ï¿½ some mobile OS + browsers allow selecting Instagram from sheet.
 async function tryNativeShare(post) {
   try {
     if (!navigator.canShare) return false;
@@ -90,15 +91,15 @@ export const SocialMediaScreen = ({ theme }) => {
       <ImageBlock post={post} />
       <p className="text-sm leading-snug whitespace-pre-line" style={{ color: theme.colors.textPrimary }}>{post.caption}</p>
       <div className="flex flex-wrap gap-2 pt-1">
-        <button onClick={()=>shareInstagram(post)} className="flex items-center gap-2 px-3 py-2 rounded-full text-xs font-semibold" style={{ background: theme.colors.accent, color:'#fff' }}>
+        <PillButton theme={theme} isSelected onClick={()=>shareInstagram(post)} size="compact" className="flex items-center gap-2">
           <Instagram className="w-4 h-4" /> Instagram
-        </button>
-        <button onClick={()=>shareLinkedIn(post)} className="flex items-center gap-2 px-3 py-2 rounded-full text-xs font-semibold" style={{ background: theme.colors.surface, border:`1px solid ${theme.colors.border}`, color: theme.colors.textPrimary }}>
+        </PillButton>
+        <PillButton theme={theme} onClick={()=>shareLinkedIn(post)} size="compact" className="flex items-center gap-2">
           <Linkedin className="w-4 h-4" /> LinkedIn
-        </button>
-        <button onClick={()=>copyCaption(post)} className="flex items-center gap-2 px-3 py-2 rounded-full text-xs font-semibold" style={{ background: theme.colors.subtle, color: theme.colors.textSecondary }}>
+        </PillButton>
+        <PillButton theme={theme} onClick={()=>copyCaption(post)} size="compact" className="flex items-center gap-2">
           <Copy className="w-4 h-4" /> Copy
-        </button>
+        </PillButton>
       </div>
     </GlassCard>
   );
@@ -107,9 +108,9 @@ export const SocialMediaScreen = ({ theme }) => {
     <div className="flex flex-col h-full" style={{ background: theme.colors.background }}>
       {/* Help bar */}
       <div className="px-4 pt-3 pb-1">
-        <button onClick={()=>setShowHelp(h=>!h)} className="flex items-center gap-1.5 px-3 py-2 rounded-full text-[11px] font-semibold" style={{ background: theme.colors.surface, border:`1px solid ${theme.colors.border}`, color: theme.colors.textSecondary }}>
+        <PillButton theme={theme} onClick={()=>setShowHelp(h=>!h)} size="compact" className="flex items-center gap-1.5 text-[11px]">
           <Info className="w-3.5 h-3.5" /> How to use {showHelp ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-        </button>
+        </PillButton>
         {showHelp && (
           <div className="mt-2">
             <GlassCard theme={theme} className="p-3 text-[11px] leading-relaxed">
@@ -136,10 +137,18 @@ export const SocialMediaScreen = ({ theme }) => {
             <GlassCard theme={theme} className="p-4 space-y-3">
               <p className="text-sm" style={{ color: theme.colors.textPrimary }}>{preview.caption}</p>
               <div className="flex flex-wrap gap-2 pt-1">
-                <button onClick={()=>shareInstagram(preview)} className="flex items-center gap-2 px-3 py-2 rounded-full text-xs font-semibold" style={{ background: theme.colors.accent, color:'#fff' }}><Instagram className="w-4 h-4" /> Instagram</button>
-                <button onClick={()=>shareLinkedIn(preview)} className="flex items-center gap-2 px-3 py-2 rounded-full text-xs font-semibold" style={{ background: theme.colors.surface, border:`1px solid ${theme.colors.border}`, color: theme.colors.textPrimary }}><Linkedin className="w-4 h-4" /> LinkedIn</button>
-                <button onClick={()=>copyCaption(preview)} className="flex items-center gap-2 px-3 py-2 rounded-full text-xs font-semibold" style={{ background: theme.colors.subtle, color: theme.colors.textSecondary }}><Copy className="w-4 h-4" /> Copy</button>
-                <button onClick={()=>setPreview(null)} className="ml-auto px-3 py-2 rounded-full text-xs font-semibold" style={{ background: theme.colors.subtle, color: theme.colors.textPrimary }}>Close</button>
+                <PillButton theme={theme} isSelected onClick={()=>shareInstagram(preview)} size="compact" className="flex items-center gap-2">
+                  <Instagram className="w-4 h-4" /> Instagram
+                </PillButton>
+                <PillButton theme={theme} onClick={()=>shareLinkedIn(preview)} size="compact" className="flex items-center gap-2">
+                  <Linkedin className="w-4 h-4" /> LinkedIn
+                </PillButton>
+                <PillButton theme={theme} onClick={()=>copyCaption(preview)} size="compact" className="flex items-center gap-2">
+                  <Copy className="w-4 h-4" /> Copy
+                </PillButton>
+                <PillButton theme={theme} onClick={()=>setPreview(null)} size="compact" className="ml-auto">
+                  Close
+                </PillButton>
               </div>
             </GlassCard>
           </div>

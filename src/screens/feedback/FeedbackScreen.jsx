@@ -1,11 +1,7 @@
 import React, { useState } from 'react';
 import { Send, Paperclip, X } from 'lucide-react';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
-
-// Shadow tokens (button interactions remain local)
-const BUTTON_SHADOW = '0 2px 4px rgba(0,0,0,0.06), 0 1px 1px rgba(0,0,0,0.04)';
-const BUTTON_SHADOW_HOVER = '0 3px 8px rgba(0,0,0,0.10), 0 2px 2px rgba(0,0,0,0.05)';
-const BUTTON_SHADOW_ACTIVE = '0 4px 14px rgba(0,0,0,0.18), 0 2px 4px rgba(0,0,0,0.10)';
+import { PillButton, PrimaryButton } from '../../components/common/JSIButtons.jsx';
 
 export const FeedbackScreen = ({ theme }) => {
     const [feedbackType, setFeedbackType] = useState('general');
@@ -56,22 +52,16 @@ export const FeedbackScreen = ({ theme }) => {
                         {feedbackTypes.map(t => {
                             const active = feedbackType === t.value;
                             return (
-                                <button
+                                <PillButton
                                     key={t.value}
-                                    type="button"
+                                    isSelected={active}
                                     onClick={() => setFeedbackType(t.value)}
-                                    className="px-4 h-9 rounded-full text-sm font-medium whitespace-nowrap focus:outline-none focus:ring transition-all duration-150"
-                                    style={{
-                                        backgroundColor: active ? theme.colors.accent : theme.colors.surface,
-                                        color: active ? '#ffffff' : theme.colors.textSecondary,
-                                        border: `1px solid ${active ? theme.colors.accent : innerBorder}`,
-                                        boxShadow: active ? BUTTON_SHADOW_ACTIVE : BUTTON_SHADOW
-                                    }}
-                                    onMouseEnter={e => { if (!active) e.currentTarget.style.boxShadow = BUTTON_SHADOW_HOVER; }}
-                                    onMouseLeave={e => { if (!active) e.currentTarget.style.boxShadow = BUTTON_SHADOW; }}
+                                    theme={theme}
+                                    size="default"
+                                    className="flex-1"
                                 >
                                     {t.label}
-                                </button>
+                                </PillButton>
                             );
                         })}
                     </div>
@@ -105,10 +95,7 @@ export const FeedbackScreen = ({ theme }) => {
                     <GlassCard theme={theme} className="p-5 md:p-6" variant="elevated">
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                             <div className="text-sm font-medium" style={{ color: theme.colors.textSecondary }}>Attachments</div>
-                            <label className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium cursor-pointer transition-all" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${innerBorder}`, color: theme.colors.textPrimary, boxShadow: BUTTON_SHADOW }}
-                                onMouseEnter={e => { e.currentTarget.style.boxShadow = BUTTON_SHADOW_HOVER; }}
-                                onMouseLeave={e => { e.currentTarget.style.boxShadow = BUTTON_SHADOW; }}
-                            >
+                            <label className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium cursor-pointer transition-all" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${innerBorder}`, color: theme.colors.textPrimary }}>
                                 <Paperclip className="w-4 h-4" /> Add files
                                 <input type="file" multiple className="hidden" onChange={onAttach} />
                             </label>
@@ -116,7 +103,7 @@ export const FeedbackScreen = ({ theme }) => {
                         {files.length > 0 && (
                             <ul className="mt-4 space-y-2">
                                 {files.map((f, i) => (
-                                    <li key={`${f.name}-${i}`} className="flex items-center justify-between px-4 py-2 border" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${innerBorder}`, borderRadius: RADIUS_INNER, boxShadow: BUTTON_SHADOW }}>
+                                    <li key={`${f.name}-${i}`} className="flex items-center justify-between px-4 py-2 border" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${innerBorder}`, borderRadius: RADIUS_INNER }}>
                                         <div className="truncate text-sm" style={{ color: theme.colors.textPrimary }}>{f.name}</div>
                                         <button type="button" onClick={() => removeFile(i)} className="ml-3 p-1 rounded-full hover:bg-black/5"><X className="w-4 h-4" style={{ color: theme.colors.textSecondary }} /></button>
                                     </li>
@@ -126,14 +113,16 @@ export const FeedbackScreen = ({ theme }) => {
                     </GlassCard>
 
                     <div className="pt-1">
-                        <button
+                        <PrimaryButton
                             type="submit"
                             disabled={!subject.trim() || !message.trim()}
-                            className="w-full flex items-center justify-center gap-2 font-bold py-4 px-6 rounded-full text-white transition-all disabled:opacity-50 focus:outline-none focus:ring-2"
-                            style={{ backgroundColor: theme.colors.accent, boxShadow: BUTTON_SHADOW_ACTIVE }}
+                            theme={theme}
+                            size="default"
+                            fullWidth
+                            icon={<Send className="w-5 h-5" />}
                         >
-                            <Send className="w-5 h-5" /> Submit Feedback
-                        </button>
+                            Submit Feedback
+                        </PrimaryButton>
                     </div>
                 </form>
             </div>

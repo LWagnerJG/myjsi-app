@@ -2,6 +2,7 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { StyledSelect } from '../../components/forms/StyledSelect.jsx';
+import { PillButton, PrimaryButton, SecondaryButton } from '../../components/common/JSIButtons.jsx';
 import {
     Mail,
     Phone,
@@ -63,12 +64,13 @@ class MembersErrorBoundary extends React.Component {
                     <p className="text-sm text-gray-600 mb-4">
                         There was an error loading the members screen.
                     </p>
-                    <button
+                    <PrimaryButton
+                        theme={{ colors: { accent: '#353535' } }}
                         onClick={() => this.setState({ hasError: false, error: null })}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg"
+                        size="default"
                     >
                         Try Again
-                    </button>
+                    </PrimaryButton>
                 </div>
             );
         }
@@ -202,19 +204,21 @@ const MemberRow = ({
                     )}
 
                     <div className="pt-1">
-                        <button
-                            type="button"
+                        <PillButton
+                            theme={theme}
+                            isSelected={false}
+                            size="compact"
                             onClick={() => {
                                 if (window.confirm(`Delete ${user.firstName} ${user.lastName}? This cannot be undone.`)) {
                                     onDelete();
                                 }
                             }}
-                            className="inline-flex items-center gap-2 px-4 py-2 rounded-full font-semibold text-sm"
-                            style={{ backgroundColor: '#fee2e2', color: '#b91c1c' }}
+                            className="inline-flex items-center gap-2"
+                            style={{ backgroundColor: '#fee2e2', color: '#b91c1c', borderColor: '#fecaca' }}
                         >
                             <Trash2 className="w-4 h-4" />
                             Delete User
-                        </button>
+                        </PillButton>
                     </div>
                 </div>
             )}
@@ -368,26 +372,20 @@ const MembersScreenContent = ({ theme }) => {
                     }}
                 >
                     <div className="max-w-screen-md mx-auto flex items-center gap-2">
-                        <button
-                            type="button"
+                        <SecondaryButton
+                            theme={theme}
                             onClick={cancelAll}
-                            className="px-4 py-2 rounded-full font-semibold text-sm"
-                            style={{
-                                backgroundColor: theme.colors.subtle,
-                                color: theme.colors.textPrimary,
-                                border: `1px solid ${theme.colors.border}`,
-                            }}
+                            size="default"
                         >
                             Cancel
-                        </button>
-                        <button
-                            type="button"
+                        </SecondaryButton>
+                        <PrimaryButton
+                            theme={theme}
                             onClick={saveAll}
-                            className="px-5 py-2 rounded-full font-semibold text-sm text-white"
-                            style={{ backgroundColor: theme.colors.accent }}
+                            size="default"
                         >
                             Save changes
-                        </button>
+                        </PrimaryButton>
                     </div>
                 </div>
             )}

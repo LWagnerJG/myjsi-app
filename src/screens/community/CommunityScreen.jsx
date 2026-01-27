@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
+import { PillButton } from '../../components/common/JSIButtons.jsx';
 import { Heart, MessageCircle, Share2, Plus, Users, Send } from 'lucide-react';
 
 // Community feed screen
@@ -213,12 +214,12 @@ export const CommunityScreen = ({
           <div className="px-4 pt-3 pb-1 w-full">
             <div className="flex w-full gap-3 items-center">
               <div className="flex gap-2">
-                <button onClick={()=>setViewMode('feed')} className="h-11 px-6 text-sm font-semibold rounded-full transition-all" style={{ backgroundColor: viewMode==='feed'? theme.colors.accent:'#ffffff', color: viewMode==='feed'? '#fff': theme.colors.textPrimary, boxShadow:'0 2px 4px rgba(0,0,0,0.06)', border:`1px solid ${viewMode==='feed'? theme.colors.accent: theme.colors.border}` }}>Community</button>
-                <button onClick={()=>setViewMode('library')} className="h-11 px-6 text-sm font-semibold rounded-full transition-all" style={{ backgroundColor: viewMode==='library'? theme.colors.accent:'#ffffff', color: viewMode==='library'? '#fff': theme.colors.textPrimary, boxShadow:'0 2px 4px rgba(0,0,0,0.06)', border:`1px solid ${viewMode==='library'? theme.colors.accent: theme.colors.border}` }}>Library</button>
+                <PillButton isSelected={viewMode==='feed'} onClick={()=>setViewMode('feed')} theme={theme} size="default">Community</PillButton>
+                <PillButton isSelected={viewMode==='library'} onClick={()=>setViewMode('library')} theme={theme} size="default">Library</PillButton>
               </div>
-              <button onClick={openCreateContentModal} className="community-post-btn h-11 ml-auto inline-flex items-center justify-center gap-2 rounded-full text-sm font-semibold transition-all hover:-translate-y-0.5 active:translate-y-0 shadow-sm px-6" style={{ backgroundColor: theme.colors.accent, color:'#fff', boxShadow:'0 4px 14px rgba(0,0,0,0.08)' }}>
-                <Plus className="w-4.5 h-4.5" /> <span className="truncate">Post</span>
-              </button>
+              <PillButton onClick={openCreateContentModal} theme={theme} isSelected={true} size="default" className="community-post-btn ml-auto inline-flex items-center justify-center gap-2">
+                <Plus className="w-4 h-4" /> <span className="truncate">Post</span>
+              </PillButton>
             </div>
           </div>
           {/* Search bar (whiter & closer) */}

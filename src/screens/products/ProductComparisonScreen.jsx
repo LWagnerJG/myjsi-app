@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
+import { PillButton, SecondaryButton } from '../../components/common/JSIButtons.jsx';
 import { ArrowRight, Package } from 'lucide-react';
 import { PRODUCT_DATA } from './data.js';
 
@@ -108,7 +109,7 @@ const PricingTable = React.memo(({ products, activeProduct, onSelectProduct, the
       {pills.length>0 && (
         <div className="px-6 pt-4 flex gap-2 overflow-x-auto scrollbar-hide">
           {pills.map(pill=>{ const active = (isCasegoods && pill===typicalLayout) || (isConference && pill===conferenceSize) || (isLounge && pill===loungeConfig) || (isGuest && pill.toLowerCase()===guestLegType); return (
-            <button key={pill} onClick={()=>handlePillClick(pill)} className={`px-4 h-9 rounded-full text-[12px] font-medium whitespace-nowrap transition-colors flex items-center shadow-sm border ${active? 'font-semibold':''}`} style={{ backgroundColor: active? theme.colors.accent: theme.colors.surface, color: active? '#FFFFFF': theme.colors.textPrimary, borderColor: active? theme.colors.accent: theme.colors.border }}>{pill}</button>
+            <PillButton key={pill} onClick={()=>handlePillClick(pill)} isSelected={active} theme={theme} size="compact">{pill}</PillButton>
           );})}
         </div>
       )}

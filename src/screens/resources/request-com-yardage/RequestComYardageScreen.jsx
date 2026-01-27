@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import { SearchableSelect } from '../../../components/forms/SearchableSelect.jsx';
 import { Modal } from '../../../components/common/Modal.jsx';
+import { PrimaryButton } from '../../../components/common/JSIButtons.jsx';
 import { Trash2 } from 'lucide-react';
 import { FABRICS_DATA, JSI_MODELS } from '../../products/data.js';
 
@@ -121,21 +122,22 @@ export const RequestComYardageScreen = ({ theme, showAlert, onNavigate, userSett
                     ))}
                 </div>
 
-                <button
+                <PrimaryButton
                     onClick={handleSubmit}
                     disabled={selectedItems.length === 0 || selectedItems.some(i => !i.modelId || !i.fabric)}
-                    className="w-full font-bold py-4 rounded-full text-white disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-                    style={{ backgroundColor: theme.colors.accent }}
+                    theme={theme}
+                    size="large"
+                    fullWidth
                 >
                     Submit Request
-                </button>
+                </PrimaryButton>
             </div>
 
             <Modal show={showConfirm} onClose={() => setShowConfirm(false)} title="Confirm Submission" theme={theme}>
                 <div>
                     <p className="text-sm mb-2" style={{ color: theme.colors.textSecondary }}>The following request will be sent:</p>
                     <pre className="text-sm whitespace-pre-wrap p-3 rounded-xl mb-4" style={{ background: theme.colors.subtle, color: theme.colors.textPrimary, border: `1px solid ${theme.colors.border}` }}>{summary}</pre>
-                    <button onClick={handleFinalSubmit} disabled={isSubmitting} className="w-full py-3 rounded-full text-white font-semibold disabled:opacity-70" style={{ backgroundColor: theme.colors.accent }}>{isSubmitting ? 'Submitting...' : 'Confirm and Send'}</button>
+                    <PrimaryButton onClick={handleFinalSubmit} disabled={isSubmitting} theme={theme} fullWidth>{isSubmitting ? 'Submitting...' : 'Confirm and Send'}</PrimaryButton>
                 </div>
             </Modal>
         </div>

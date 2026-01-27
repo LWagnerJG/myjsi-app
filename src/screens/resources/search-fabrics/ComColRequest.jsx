@@ -1,9 +1,10 @@
 import React, { useState, useCallback } from 'react';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
+import { PillButton, PrimaryButton } from '../../../components/common/JSIButtons.jsx';
 import { ExternalLink, CheckCircle } from 'lucide-react';
 
 /* COM / COL Pattern Submission Form
-   Lightweight in–app version of the PDF. Captures core details needed to start an evaluation.
+   Lightweight inï¿½app version of the PDF. Captures core details needed to start an evaluation.
 */
 export const ComColRequest = ({ theme, onBack, showAlert }) => {
   const [form, setForm] = useState({
@@ -66,7 +67,7 @@ export const ComColRequest = ({ theme, onBack, showAlert }) => {
               <h2 className="text-xl font-bold leading-tight" style={{ color: theme.colors.textPrimary }}>COM / COL Pattern Submission</h2>
               <p className="text-sm leading-relaxed" style={{ color: theme.colors.textSecondary }}>
                 Use this form to submit a Customer&apos;s Own Material / Leather pattern for testing and approval.
-                Provide as much detail as possible. After submission you will receive next–step instructions
+                Provide as much detail as possible. After submission you will receive nextï¿½step instructions
                 (ship sample memo, performance requirements, fire code, etc.). Fields marked * are required.
               </p>
             </div>
@@ -127,9 +128,15 @@ export const ComColRequest = ({ theme, onBack, showAlert }) => {
                     const labels = { up: 'Up the Roll', railroad: 'Railroad', custom: 'Custom / Other' };
                     const active = form.application === opt;
                     return (
-                      <button key={opt} type="button" onClick={() => update('application', opt)} className="px-4 py-2 rounded-full text-xs font-semibold transition border" style={{ backgroundColor: active ? theme.colors.accent : theme.colors.surface, color: active ? theme.colors.surface : theme.colors.textPrimary, borderColor: active ? theme.colors.accent : theme.colors.border }}>
+                      <PillButton
+                        key={opt}
+                        isSelected={active}
+                        onClick={() => update('application', opt)}
+                        theme={theme}
+                        size="compact"
+                      >
                         {labels[opt]}
-                      </button>
+                      </PillButton>
                     );
                   })}
                 </div>
@@ -139,9 +146,15 @@ export const ComColRequest = ({ theme, onBack, showAlert }) => {
                 <textarea value={form.notes} onChange={e => update('notes', e.target.value)} placeholder="Fire code requirements, backing, finish treatments, testing needs, etc." rows={3} className={inputBase} style={inputStyle} />
               </div>
               <div className="pt-2">
-                <button type="submit" disabled={!canSubmit || submitting} className="w-full rounded-full py-4 font-bold text-white shadow-sm disabled:opacity-50 disabled:cursor-not-allowed" style={{ backgroundColor: theme.colors.accent }}>
+                <PrimaryButton
+                  type="submit"
+                  disabled={!canSubmit || submitting}
+                  theme={theme}
+                  size="large"
+                  fullWidth
+                >
                   {submitting ? 'Submitting...' : 'Submit COM / COL Pattern'}
-                </button>
+                </PrimaryButton>
                 {submitted && (
                   <div className="flex items-center gap-2 mt-3 text-sm font-medium" style={{ color: theme.colors.accent }}>
                     <CheckCircle className="w-4 h-4" /> Submitted!

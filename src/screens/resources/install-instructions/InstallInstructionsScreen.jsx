@@ -1,13 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import StandardSearchBar from '../../../components/common/StandardSearchBar.jsx';
+import { PillButton } from '../../../components/common/JSIButtons.jsx';
 import { Play, FileText } from 'lucide-react';
 import { INSTALL_INSTRUCTIONS_DATA } from './data.js';
 
-// Reuse styling concept from feedback screen (white pill buttons with elevation)
-const BUTTON_SHADOW = '0 2px 4px rgba(0,0,0,0.06), 0 1px 1px rgba(0,0,0,0.04)';
-const BUTTON_SHADOW_HOVER = '0 3px 8px rgba(0,0,0,0.10), 0 2px 2px rgba(0,0,0,0.05)';
-const BUTTON_SHADOW_ACTIVE = '0 4px 14px rgba(0,0,0,0.18), 0 2px 4px rgba(0,0,0,0.10)';
 const CARD_SHADOW = '0 4px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.06)';
 
 const WhiteCard = ({ children, className='', style={} }) => (
@@ -42,21 +39,16 @@ export const InstallInstructionsScreen = ({ theme }) => {
       {types.map(type => {
         const active = selectedType === type;
         return (
-          <button
+          <PillButton
             key={type}
+            isSelected={active}
             onClick={()=>setSelectedType(type)}
-            className="px-4 h-9 rounded-full text-sm font-medium whitespace-nowrap focus:outline-none focus:ring transition-all duration-150"
-            style={{
-              backgroundColor: active ? theme.colors.accent : '#ffffff',
-              color: active ? '#ffffff' : theme.colors.textSecondary,
-              border: `1px solid ${active ? theme.colors.accent : 'rgba(0,0,0,0.06)'}`,
-              boxShadow: active ? BUTTON_SHADOW_ACTIVE : BUTTON_SHADOW
-            }}
-            onMouseEnter={e=>{ if(!active) e.currentTarget.style.boxShadow = BUTTON_SHADOW_HOVER; }}
-            onMouseLeave={e=>{ if(!active) e.currentTarget.style.boxShadow = BUTTON_SHADOW; }}
+            theme={theme}
+            size="compact"
+            className="whitespace-nowrap"
           >
             {type === 'all' ? 'All Types' : type}
-          </button>
+          </PillButton>
         );
       })}
     </div>
@@ -84,26 +76,26 @@ export const InstallInstructionsScreen = ({ theme }) => {
             <span className="px-2 py-0.5 rounded-full text-[11px] font-medium" style={{ backgroundColor: theme.colors.accent+'20', color: theme.colors.accent }}>{instruction.type}</span>
           </div>
           <div className="flex flex-wrap gap-2">
-            <button
+            <PillButton
               onClick={()=>handleVideoPlay(instruction)}
-              className="flex items-center gap-1.5 px-3 h-9 rounded-full text-sm font-medium text-white transition-colors"
-              style={{ backgroundColor: theme.colors.accent, boxShadow: BUTTON_SHADOW }}
-              onMouseEnter={e=>{ e.currentTarget.style.boxShadow = BUTTON_SHADOW_HOVER; }}
-              onMouseLeave={e=>{ e.currentTarget.style.boxShadow = BUTTON_SHADOW; }}
+              isSelected={true}
+              theme={theme}
+              size="compact"
+              className="flex items-center justify-center gap-1.5"
             >
               <Play className="w-4 h-4" />
               Watch Video
-            </button>
-            <button
+            </PillButton>
+            <PillButton
               onClick={()=>handlePdfDownload(instruction)}
-              className="flex items-center gap-1.5 px-3 h-9 rounded-full text-sm font-medium transition-colors"
-              style={{ backgroundColor:'#ffffff', color: theme.colors.textPrimary, border:'1px solid rgba(0,0,0,0.08)', boxShadow: BUTTON_SHADOW }}
-              onMouseEnter={e=>{ e.currentTarget.style.boxShadow = BUTTON_SHADOW_HOVER; }}
-              onMouseLeave={e=>{ e.currentTarget.style.boxShadow = BUTTON_SHADOW; }}
+              isSelected={false}
+              theme={theme}
+              size="compact"
+              className="flex items-center justify-center gap-1.5"
             >
               <FileText className="w-4 h-4" />
               PDF Guide
-            </button>
+            </PillButton>
           </div>
         </div>
       </div>

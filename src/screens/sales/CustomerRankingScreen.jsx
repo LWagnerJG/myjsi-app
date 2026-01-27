@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import { GlassCard } from '../../components/common/GlassCard';
 import { Modal } from '../../components/common/Modal';
+import { PillButton } from '../../components/common/JSIButtons';
 import { CUSTOMER_RANK_DATA } from './data.js';
 
 export const CustomerRankingScreen = ({ theme }) => {
@@ -18,13 +19,6 @@ export const CustomerRankingScreen = ({ theme }) => {
     const close = useCallback(() => setModalData(null), []);
 
     const tabRefs = useRef([]);
-    const [underline, setUnderline] = useState({ left: 0, width: 0, opacity: 0 });
-
-    useEffect(() => {
-        const idx = tab === 'sales' ? 0 : 1;
-        const el = tabRefs.current[idx];
-        if (el) setUnderline({ left: el.offsetLeft, width: el.offsetWidth, opacity: 1 });
-    }, [tab]);
 
     const medalStyle = (rank) => {
         const map = {
@@ -69,29 +63,29 @@ export const CustomerRankingScreen = ({ theme }) => {
 
     return (
         <div className="h-full flex flex-col" style={{ backgroundColor: theme.colors.background }}>
-            {/* Raised tabs (less top padding) */}
+            {/* Raised tabs using PillButton components */}
             <div className="px-4 pt-2">
-                <div className="relative grid grid-cols-2">
-                    <button
+                <div className="relative grid grid-cols-2 gap-3">
+                    <PillButton
                         ref={(el) => (tabRefs.current[0] = el)}
+                        isSelected={tab === 'sales'}
                         onClick={() => setTab('sales')}
-                        className="py-3 text-center text-[17px] font-semibold"
-                        style={{ color: tab === 'sales' ? theme.colors.textPrimary : theme.colors.textSecondary }}
+                        theme={theme}
+                        size="default"
+                        className="text-center"
                     >
                         Sales
-                    </button>
-                    <button
+                    </PillButton>
+                    <PillButton
                         ref={(el) => (tabRefs.current[1] = el)}
+                        isSelected={tab === 'bookings'}
                         onClick={() => setTab('bookings')}
-                        className="py-3 text-center text-[17px] font-semibold"
-                        style={{ color: tab === 'bookings' ? theme.colors.textPrimary : theme.colors.textSecondary }}
+                        theme={theme}
+                        size="default"
+                        className="text-center"
                     >
                         Bookings
-                    </button>
-                    <span
-                        className="absolute bottom-0 h-[2px] rounded-full transition-all duration-300"
-                        style={{ left: underline.left, width: underline.width, opacity: underline.opacity, backgroundColor: theme.colors.accent }}
-                    />
+                    </PillButton>
                 </div>
             </div>
 

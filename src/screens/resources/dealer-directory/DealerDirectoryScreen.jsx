@@ -4,6 +4,7 @@ import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import { Modal } from '../../../components/common/Modal.jsx';
 import StandardSearchBar from '../../../components/common/StandardSearchBar.jsx';
 import { FormInput, PortalNativeSelect } from '../../../components/common/FormComponents.jsx';
+import { PillButton, PrimaryButton, SecondaryButton } from '../../../components/common/JSIButtons.jsx';
 import { Filter, MoreVertical, UserPlus, CheckCircle, Trash2, Plus } from 'lucide-react';
 import { DEALER_DIRECTORY_DATA, ROLE_OPTIONS, DAILY_DISCOUNT_OPTIONS } from './data.js';
 
@@ -72,21 +73,27 @@ export const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage, dea
             <div className="sticky top-0 z-10" style={{ backgroundColor: `${theme.colors.background}e6`, backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }}>
                 <div className="flex items-center justify-between pr-4">
                     <PageTitle title="Dealer Directory" theme={theme} />
-                    <button onClick={() => onNavigate && onNavigate('new-dealer-signup')} className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold shadow-sm" style={{ background:'#ffffff', border:'1px solid rgba(0,0,0,0.1)', color: primarySoft }}>
-                        <Plus className="w-4 h-4" /> Add Dealer
-                    </button>
+                    <PillButton onClick={() => onNavigate && onNavigate('new-dealer-signup')} theme={theme} size="compact">
+                        <Plus className="w-4 h-4 mr-1" /> Add Dealer
+                    </PillButton>
                 </div>
                 <div className="px-4 pb-4 flex items-center space-x-2">
                     <StandardSearchBar className="flex-grow" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder="Search by name or city..." theme={theme} />
                     <div className="relative">
-                        <button onClick={() => setShowFilterMenu(f => !f)} className="p-3.5 rounded-full shadow" style={{ backgroundColor: '#ffffff', border:'1px solid rgba(0,0,0,0.08)' }}>
-                            <Filter className="w-5 h-5" style={{ color: primarySoft }} />
-                        </button>
+                        <PillButton onClick={() => setShowFilterMenu(f => !f)} theme={theme} size="compact">
+                            <Filter className="w-5 h-5" />
+                        </PillButton>
                         {showFilterMenu && (
-                            <GlassCard ref={filterMenuRef} theme={theme} className="absolute top-14 right-0 z-20 w-40 p-2">
-                                <button onClick={() => handleSort('name')} className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${sortConfig.key === 'name' ? 'font-bold' : ''}`} style={{ color: primarySoft, backgroundColor: sortConfig.key === 'name' ? theme.colors.subtle : 'transparent' }}> A-Z </button>
-                                <button onClick={() => handleSort('sales')} className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${sortConfig.key === 'sales' ? 'font-bold' : ''}`} style={{ color: primarySoft, backgroundColor: sortConfig.key === 'sales' ? theme.colors.subtle : 'transparent' }}> By Sales </button>
-                                <button onClick={() => handleSort('bookings')} className={`w-full text-left px-2 py-1.5 text-sm rounded-md ${sortConfig.key === 'bookings' ? 'font-bold' : ''}`} style={{ color: primarySoft, backgroundColor: sortConfig.key === 'bookings' ? theme.colors.subtle : 'transparent' }}> By Bookings </button>
+                            <GlassCard ref={filterMenuRef} theme={theme} className="absolute top-14 right-0 z-20 w-48 p-2 space-y-2">
+                                <PillButton onClick={() => handleSort('name')} theme={theme} size="compact" isSelected={sortConfig.key === 'name'} className="w-full text-center">
+                                    A-Z
+                                </PillButton>
+                                <PillButton onClick={() => handleSort('sales')} theme={theme} size="compact" isSelected={sortConfig.key === 'sales'} className="w-full text-center">
+                                    By Sales
+                                </PillButton>
+                                <PillButton onClick={() => handleSort('bookings')} theme={theme} size="compact" isSelected={sortConfig.key === 'bookings'} className="w-full text-center">
+                                    By Bookings
+                                </PillButton>
                             </GlassCard>
                         )}
                     </div>
@@ -139,7 +146,14 @@ export const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage, dea
             </Modal>
             <Modal show={!!pendingDiscountChange} onClose={() => setPendingDiscountChange(null)} title="Confirm Change" theme={theme}>
                 <p style={{ color: primarySoft }}>Change daily discount to <span className="font-bold">{pendingDiscountChange?.newDiscount}</span>?</p>
-                <div className="flex justify-end space-x-3 pt-4"><button onClick={() => setPendingDiscountChange(null)} className="font-bold py-2 px-5 rounded-lg" style={{ backgroundColor: theme.colors.subtle, color: primarySoft }}>Cancel</button><button onClick={confirmDiscountChange} className="font-bold py-2 px-5 rounded-lg text-white" style={{ backgroundColor: theme.colors.accent }}>Save</button></div>
+                <div className="flex justify-end gap-3 pt-4">
+                    <SecondaryButton onClick={() => setPendingDiscountChange(null)} theme={theme} size="default">
+                        Cancel
+                    </SecondaryButton>
+                    <PrimaryButton onClick={confirmDiscountChange} theme={theme} size="default">
+                        Save
+                    </PrimaryButton>
+                </div>
             </Modal>
             <Modal show={showAddPersonModal} onClose={() => setShowAddPersonModal(false)} title="Add New Person" theme={theme}>
                 <form onSubmit={handleAddPerson} className="space-y-4">
@@ -147,7 +161,7 @@ export const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage, dea
                     <FormInput label="Last Name" value={newPerson.lastName} onChange={e => setNewPerson(p => ({ ...p, lastName: e.target.value }))} theme={theme} required />
                     <FormInput label="Email" type="email" value={newPerson.email} onChange={e => setNewPerson(p => ({ ...p, email: e.target.value }))} theme={theme} required />
                     <PortalNativeSelect label="Role" value={newPerson.role} onChange={e => setNewPerson(p => ({ ...p, role: e.target.value }))} theme={theme} options={roleOptions} />
-                    <div className="pt-2 text-center"><p className="text-xs mb-2" style={{ color: theme.colors.textSecondary }}>Invitation email will be sent.</p><button type="submit" className="w-full font-bold py-3 px-6 rounded-full text-white" style={{ backgroundColor: theme.colors.accent }}>Send Invite</button></div>
+                    <div className="pt-2 text-center"><p className="text-xs mb-2" style={{ color: theme.colors.textSecondary }}>Invitation email will be sent.</p><PrimaryButton type="submit" theme={theme} size="default" fullWidth>Send Invite</PrimaryButton></div>
                 </form>
             </Modal>
         </div>

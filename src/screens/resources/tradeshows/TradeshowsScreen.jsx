@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
+import { PillButton } from '../../../components/common/JSIButtons.jsx';
 import { Calendar, MapPin, ExternalLink } from 'lucide-react';
 import { TRADESHOWS, findTradeshow } from './data.js';
 
@@ -91,14 +92,16 @@ export const TradeshowsScreen = ({ theme, handleBack, onNavigate }) => {
       )}
 
       {active && (
-        <button
-          onClick={() => setSelectedId(null)}
-          className="fixed bottom-4 right-4 px-4 py-2 rounded-full text-sm font-medium shadow"
-          style={{ background: theme.colors.surface, color: accent, border: `1px solid ${theme.colors.border}` }}
-          aria-label="Back to all shows"
-        >
-          Back
-        </button>
+        <div className="fixed bottom-4 right-4">
+          <PillButton
+            onClick={() => setSelectedId(null)}
+            theme={theme}
+            size="default"
+            aria-label="Back to all shows"
+          >
+            Back
+          </PillButton>
+        </div>
       )}
     </div>
   );

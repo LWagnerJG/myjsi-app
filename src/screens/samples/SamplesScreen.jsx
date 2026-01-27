@@ -1,6 +1,7 @@
 // src/screens/samples/SamplesScreen.jsx
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
+import { PillButton } from '../../components/common/JSIButtons.jsx';
 import {
     Package, Plus, ShoppingCart, Trash2, Minus, CheckCircle, Home,
     ChevronUp, ChevronDown, Users, X, Search
@@ -282,9 +283,17 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
         <div className="flex flex-col h-full" style={{ paddingBottom: totalCartItems > 0 ? `${COLLAPSED_HEIGHT + 4}px` : '0' }}>
             <div className="flex-1 overflow-y-auto scrollbar-hide" style={{ backgroundColor: theme.colors.background }}>
                 <div className="sticky top-0 z-10 px-4 pt-2 pb-3 space-y-3" style={{ background: theme.colors.background, borderBottom: `1px solid ${theme.colors.border}40` }}>
-                    <div className="relative flex overflow-x-auto scrollbar-hide whitespace-nowrap">
+                    <div className="relative flex overflow-x-auto scrollbar-hide whitespace-nowrap gap-2">
                         {allCategories.map((cat) => (
-                            <button key={cat.id} onClick={() => setSelectedCategory(cat.id)} className="relative px-4 py-3 font-semibold text-sm rounded-full" style={{ color: selectedCategory === cat.id ? theme.colors.accent : theme.colors.textSecondary }} aria-pressed={selectedCategory === cat.id}>{cat.name}{selectedCategory === cat.id && (<div className="absolute bottom-0 left-0 right-0 h-0.5" style={{ backgroundColor: theme.colors.accent }} />)}</button>
+                            <PillButton
+                                key={cat.id}
+                                isSelected={selectedCategory === cat.id}
+                                onClick={() => setSelectedCategory(cat.id)}
+                                theme={theme}
+                                size="compact"
+                            >
+                                {cat.name}
+                            </PillButton>
                         ))}
                     </div>
                     <div className="flex gap-3"><OrderFullSetButton onClick={addFull} theme={theme} inCart={fullSetInCart} /><AddCompleteSetButton onClick={addSet} theme={theme} inCart={setInCartQuantity > 0} categoryName={currentCategoryName} /></div>

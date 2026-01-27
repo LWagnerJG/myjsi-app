@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
+import { PillButton } from '../../components/common/JSIButtons.jsx';
 import { ChevronDown, ChevronUp, Mail, Phone, Info } from 'lucide-react';
 
 const Pill = ({ children, theme }) => (
@@ -108,31 +109,25 @@ export const HelpScreen = ({ theme, showAlert }) => {
                                 Weekdays 8:00 AM - 5:00 PM (ET)
                             </p>
                             <div className="mt-3 flex flex-wrap gap-2">
-                                <a
-                                    href="mailto:support@jsi.example.com?subject=MyJSI%20Support"
-                                    className="px-3 py-2 rounded-full text-sm font-semibold transition-colors hover:bg-black/5 dark:hover:bg-white/5"
-                                    style={{
-                                        border: `1px solid ${theme.colors.border}`,
-                                        backgroundColor: theme.colors.surface,
-                                        color: theme.colors.accent,
-                                    }}
+                                <PillButton
+                                    type="button"
+                                    size="compact"
+                                    theme={theme}
+                                    onClick={() => window.location.href = 'mailto:support@jsi.example.com?subject=MyJSI%20Support'}
                                 >
                                     <Mail className="inline w-4 h-4 mr-1" />
                                     Email support@jsi.example.com
-                                </a>
-                                
-                                <a
-                                    href="tel:+18005551234"
-                                    className="px-3 py-2 rounded-full text-sm font-semibold transition-colors hover:bg-black/5 dark:hover:bg-white/5"
-                                    style={{
-                                        border: `1px solid ${theme.colors.border}`,
-                                        backgroundColor: theme.colors.surface,
-                                        color: theme.colors.accent,
-                                    }}
+                                </PillButton>
+
+                                <PillButton
+                                    type="button"
+                                    size="compact"
+                                    theme={theme}
+                                    onClick={() => window.location.href = 'tel:+18005551234'}
                                 >
                                     <Phone className="inline w-4 h-4 mr-1" />
                                     Call (800) 555-1234
-                                </a>
+                                </PillButton>
                             </div>
                         </div>
                     </div>

@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
+import { PrimaryButton, PillButton } from '../../../components/common/JSIButtons.jsx';
 import { ExternalLink, Percent, Copy, Share2 } from 'lucide-react';
 import { CONTRACTS_DATA } from './data.js';
 
@@ -109,17 +110,15 @@ const ContractCard = ({ contract, theme, setSuccessMessage }) => {
 
             {contract.documentUrl && (
                 <div className="pt-2">
-                    <a
-                        href={contract.documentUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="w-full inline-flex items-center justify-center gap-2 font-semibold py-3 px-5 rounded-full
-                       transition-transform hover:scale-[1.02] active:scale-[0.98]"
-                        style={{ backgroundColor: theme.colors.accent, color: '#fff' }}
+                    <PrimaryButton
+                        onClick={() => window.open(contract.documentUrl, '_blank')}
+                        theme={theme}
+                        fullWidth
+                        size="default"
+                        icon={<ExternalLink className="w-4 h-4" />}
                     >
                         View Contract PDF
-                        <ExternalLink className="w-4 h-4" />
-                    </a>
+                    </PrimaryButton>
                 </div>
             )}
         </GlassCard>
@@ -127,17 +126,14 @@ const ContractCard = ({ contract, theme, setSuccessMessage }) => {
 };
 
 const ActionLink = ({ onClick, label, Icon, theme }) => (
-    <button
+    <PillButton
         onClick={onClick}
-        className="inline-flex items-center gap-2 px-4 h-9 rounded-full text-xs font-semibold tracking-wide transition-colors active:scale-95"
-        style={{
-            background: theme.colors.subtle,
-            color: theme.colors.textPrimary,
-            border: `1px solid ${theme.colors.border}`
-        }}
+        theme={theme}
+        size="compact"
+        className="inline-flex items-center gap-2"
     >
         <Icon className="w-4 h-4" /> {label}
-    </button>
+    </PillButton>
 );
 
 const RowCard = ({ row, theme }) => (
