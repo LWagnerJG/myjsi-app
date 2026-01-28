@@ -163,7 +163,7 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
     }, []);
 
     return (
-        <div className="flex flex-col h-full overflow-y-auto scrollbar-hide pt-[56px]" style={{ backgroundColor: colors.background }}>
+        <div className="flex flex-col h-full overflow-y-auto scrollbar-hide pt-[48px]" style={{ backgroundColor: colors.background }}>
             <div className="px-4 sm:px-6 lg:px-8 pt-1 sm:pt-2 pb-24 space-y-6 lg:space-y-8 max-w-2xl lg:max-w-5xl 2xl:max-w-6xl mx-auto w-full">
 
                 {/* Header Section */}

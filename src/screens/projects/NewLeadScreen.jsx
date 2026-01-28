@@ -344,7 +344,7 @@ export const NewLeadScreen = ({
     };
     
     return (
-        <form onSubmit={handleSubmit} className="lead-form-inline flex flex-col h-full overflow-y-auto scrollbar-hide pt-[56px]" style={{ backgroundColor: theme.colors.background }}>
+        <form onSubmit={handleSubmit} className="lead-form-inline flex flex-col h-full overflow-y-auto scrollbar-hide pt-[48px]" style={{ backgroundColor: theme.colors.background }}>
             <div className="px-4 lg:px-6 pt-4 max-w-5xl mx-auto w-full">
                 <div className="grid gap-6 lg:grid-cols-2">
                 <FormSection title="Project Details" theme={theme} className="pt-5 lg:pt-6">
