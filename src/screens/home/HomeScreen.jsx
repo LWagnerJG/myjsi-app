@@ -115,7 +115,7 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
     }, [safeHomeApps]);
 
     const availableApps = useMemo(() => {
-        const excludedRoutes = new Set(['settings', 'feedback', 'help', 'contracts', 'members']);
+        const excludedRoutes = new Set(['settings', 'feedback', 'help', 'contracts', 'members', 'resources/dealer_registration']);
         return allApps.filter(app => !safeHomeApps.includes(app.route) && !excludedRoutes.has(app.route));
     }, [safeHomeApps]);
 
