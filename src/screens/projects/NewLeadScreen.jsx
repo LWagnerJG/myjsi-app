@@ -144,8 +144,8 @@ const ProductSpotlight = ({ selectedSeries, onAdd, available, theme }) => {
     <div className="w-full" ref={anchorRef}>
       <div
         onClick={openMenu}
-        className="flex items-center gap-2 px-4 cursor-text"
-        style={{ height: 46, borderRadius: 24, background: theme.colors.surface, border: `1px solid ${theme.colors.border}` }}
+                className="flex items-center gap-2 px-4 cursor-text"
+                style={{ height: 48, borderRadius: 9999, background: theme.colors.surface, border: `1px solid ${theme.colors.border}` }}
       >
         <Search className="w-3.5 h-3.5" style={{ color: theme.colors.textSecondary }} />
         <input
@@ -236,7 +236,7 @@ export const NewLeadScreen = ({
     const timeframeOptions = useMemo(() => {
         const nextYear = new Date().getFullYear() + 1;
         const yearPlusTwo = nextYear + 1;
-        return ['Within 30 Days', '30-60 Days', '90-180 Days', String(nextYear), String(yearPlusTwo)];
+        return ['Within 30 Days', '30-60 Days', '90-180 Days', 'Unknown', String(nextYear), String(yearPlusTwo)];
     }, []);
 
     useEffect(() => {
@@ -477,7 +477,7 @@ export const NewLeadScreen = ({
                                     className="px-3 py-1.5 rounded-full text-xs font-semibold border transition-all"
                                     style={{
                                         backgroundColor: newLeadData.isBid === true ? theme.colors.textPrimary : theme.colors.surface,
-                                        color: newLeadData.isBid === true ? '#FFFFFF' : theme.colors.textSecondary,
+                                        color: newLeadData.isBid === true ? '#FFFFFF' : theme.colors.textPrimary,
                                         borderColor: newLeadData.isBid === true ? theme.colors.textPrimary : theme.colors.border
                                     }}
                                 >
@@ -489,7 +489,7 @@ export const NewLeadScreen = ({
                                     className="px-3 py-1.5 rounded-full text-xs font-semibold border transition-all"
                                     style={{
                                         backgroundColor: newLeadData.isBid !== true ? theme.colors.textPrimary : theme.colors.surface,
-                                        color: newLeadData.isBid !== true ? '#FFFFFF' : theme.colors.textSecondary,
+                                        color: newLeadData.isBid !== true ? '#FFFFFF' : theme.colors.textPrimary,
                                         borderColor: newLeadData.isBid !== true ? theme.colors.textPrimary : theme.colors.border
                                     }}
                                 >
@@ -505,7 +505,7 @@ export const NewLeadScreen = ({
                                     className="px-3 py-1.5 rounded-full text-xs font-semibold border transition-all"
                                     style={{
                                         backgroundColor: newLeadData.competitionPresent === true ? theme.colors.textPrimary : theme.colors.surface,
-                                        color: newLeadData.competitionPresent === true ? '#FFFFFF' : theme.colors.textSecondary,
+                                        color: newLeadData.competitionPresent === true ? '#FFFFFF' : theme.colors.textPrimary,
                                         borderColor: newLeadData.competitionPresent === true ? theme.colors.textPrimary : theme.colors.border
                                     }}
                                 >
@@ -517,7 +517,7 @@ export const NewLeadScreen = ({
                                     className="px-3 py-1.5 rounded-full text-xs font-semibold border transition-all"
                                     style={{
                                         backgroundColor: newLeadData.competitionPresent !== true ? theme.colors.textPrimary : theme.colors.surface,
-                                        color: newLeadData.competitionPresent !== true ? '#FFFFFF' : theme.colors.textSecondary,
+                                        color: newLeadData.competitionPresent !== true ? '#FFFFFF' : theme.colors.textPrimary,
                                         borderColor: newLeadData.competitionPresent !== true ? theme.colors.textPrimary : theme.colors.border
                                     }}
                                 >
@@ -650,7 +650,7 @@ export const NewLeadScreen = ({
                         <SettingsRow label="Rewards" theme={theme}>
                             <div className="grid grid-cols-2 gap-2">
                                 <PillButton
-                                    size="compact"
+                                    size="xs"
                                     isSelected={newLeadData.salesReward !== false}
                                     onClick={() => updateField('salesReward', !(newLeadData.salesReward !== false))}
                                     theme={theme}
@@ -663,7 +663,7 @@ export const NewLeadScreen = ({
                                     Sales Reward
                                 </PillButton>
                                 <PillButton
-                                    size="compact"
+                                    size="xs"
                                     isSelected={newLeadData.designerReward !== false}
                                     onClick={() => updateField('designerReward', !(newLeadData.designerReward !== false))}
                                     theme={theme}

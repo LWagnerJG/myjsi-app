@@ -19,7 +19,7 @@ export const PillButton = ({
     isSelected = false,
     onClick,
     theme,
-    size = 'default', // 'default' | 'compact' | 'large'
+    size = 'default', // 'default' | 'compact' | 'large' | 'xs'
     className = '',
     type = 'button',
     disabled = false,
@@ -31,6 +31,7 @@ export const PillButton = ({
     ...props
 }) => {
     const sizeClasses = {
+        xs: 'px-3 py-2 text-[11px]',
         compact: 'px-4 py-2.5 text-xs',
         default: 'px-5 py-3.5 text-sm',
         large: 'px-6 py-4 text-base'

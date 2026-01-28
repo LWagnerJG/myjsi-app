@@ -115,8 +115,8 @@ export function SpotlightMultiSelect({
 
       <div
         ref={anchorRef}
-        className="flex items-center gap-2 px-3 cursor-text"
-        style={{ height: 46, borderRadius: 24, background: palette.field, border: `1px solid ${palette.border}` }}
+        className="flex items-center gap-2 px-4 cursor-text"
+        style={{ height: 48, borderRadius: 9999, background: palette.field, border: `1px solid ${palette.border}` }}
         onClick={() => setOpen(true)}
       >
         <Search className="w-3.5 h-3.5" style={{ color: palette.hint }} />

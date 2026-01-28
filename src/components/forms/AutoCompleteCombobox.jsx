@@ -173,7 +173,7 @@ export const AutoCompleteCombobox = React.memo(({
                     onFocus={handleInputFocus}
                     onChange={handleInputChange}
                     placeholder={placeholder}
-                    className="w-full pl-12 pr-4 py-3 border rounded-2xl text-base transition-all duration-200 focus:outline-none focus:ring"
+                    className="w-full pl-12 pr-4 py-3 border rounded-full text-base transition-all duration-200 focus:outline-none focus:ring"
                     style={{ 
                         backgroundColor: dropdownStyles.backgroundColor,
                         borderColor: dropdownStyles.borderColor, 
