@@ -216,7 +216,7 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                             onDragEnd={handleReorder}
                         >
                             <SortableContext items={safeHomeApps} strategy={rectSortingStrategy}>
-                                <div className="grid gap-2 sm:gap-3" style={{ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' }}>
+                                <div className="grid gap-2" style={{ gridTemplateColumns: 'repeat(3, minmax(86px, 1fr))' }}>
                                     {currentApps.map((app) => (
                                         <SortableAppTile
                                             key={app.route}
@@ -230,16 +230,16 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                             </SortableContext>
                         </DndContext>
                     ) : (
-                        <div className="grid gap-2 sm:gap-4" style={{ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' }}>
+                        <div className="grid gap-2" style={{ gridTemplateColumns: 'repeat(3, minmax(86px, 1fr))' }}>
                             {currentApps.map((app) => {
                                 const badge = APP_BADGES[app.route];
                                 return (
                                     <motion.button
                                         key={app.route}
                                         onClick={() => onNavigate(app.route)}
-                                        className="relative flex flex-col items-center justify-center rounded-3xl transition-all active:scale-95 group gap-1.5 p-3 sm:p-5 hover:shadow-xl"
+                                        className="relative flex flex-col items-center justify-center rounded-2xl transition-all active:scale-95 group gap-1 p-2.5 hover:shadow-xl"
                                         style={{
-                                            minHeight: 108,
+                                            minHeight: 96,
                                             backgroundColor: colors.surface,
                                             border: `1px solid ${colors.border}`,
                                             boxShadow: DESIGN_TOKENS.shadows.card,
@@ -248,12 +248,12 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                                         }}
                                     >
                                         <div
-                                            className="rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 w-9 h-9 sm:w-12 sm:h-12"
+                                            className="rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 w-8 h-8"
                                             style={{ backgroundColor: `${colors.accent}12` }}
                                         >
-                                            <app.icon className="w-4 h-4 sm:w-6 sm:h-6" style={{ color: colors.accent }} />
+                                            <app.icon className="w-4 h-4" style={{ color: colors.accent }} />
                                         </div>
-                                        <span className="text-[11px] sm:text-sm font-bold tracking-tight text-center" style={{ color: colors.textPrimary }}>
+                                        <span className="text-[10px] font-bold tracking-tight text-center" style={{ color: colors.textPrimary }}>
                                             {app.name}
                                         </span>
                                         {badge && (
@@ -273,13 +273,13 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                     {isEditMode && (
                         <div className="space-y-2">
                             <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: colors.textSecondary }}>Add Apps</div>
-                            <div className="grid gap-2" style={{ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' }}>
+                            <div className="grid gap-2" style={{ gridTemplateColumns: 'repeat(3, minmax(86px, 1fr))' }}>
                                 {availableApps.map((app) => (
                                     <motion.button
                                         layout
                                         key={app.route}
                                         onClick={() => toggleApp(app.route)}
-                                        className="flex flex-col items-center justify-center gap-1 px-2 py-2 rounded-xl border border-dashed hover:bg-black/[0.02] transition-all active:scale-95"
+                                        className="flex flex-col items-center justify-center gap-1 px-2 py-1.5 rounded-xl border border-dashed hover:bg-black/[0.02] transition-all active:scale-95"
                                         style={{
                                             backgroundColor: colors.surface,
                                             borderColor: colors.border,
@@ -287,10 +287,10 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                                             minWidth: 0
                                         }}
                                     >
-                                        <div className="w-7 h-7 rounded-lg flex items-center justify-center border border-dashed" style={{ borderColor: colors.border }}>
-                                            <Plus className="w-3.5 h-3.5 opacity-40" style={{ color: colors.textSecondary }} />
+                                        <div className="w-6 h-6 rounded-lg flex items-center justify-center border border-dashed" style={{ borderColor: colors.border }}>
+                                            <Plus className="w-3 h-3 opacity-40" style={{ color: colors.textSecondary }} />
                                         </div>
-                                        <span className="text-[10px] font-semibold" style={{ color: colors.textSecondary }}>{app.name}</span>
+                                        <span className="text-[9px] font-semibold" style={{ color: colors.textSecondary }}>{app.name}</span>
                                     </motion.button>
                                 ))}
                             </div>
