@@ -23,7 +23,17 @@ export const AppHeader = React.memo(({
 
     return (
         <div className="px-5 pt-4 pb-1 fixed top-0 left-0 right-0 z-30 pointer-events-none">
-            <div className="max-w-5xl mx-auto w-full flex items-center justify-between px-5 h-16 bg-white/80 backdrop-blur-xl border border-black/[0.03] shadow-lg pointer-events-auto" style={{ borderRadius: 9999 }}>
+            <div
+                className="max-w-5xl mx-auto w-full flex items-center justify-between px-5 h-16 border pointer-events-auto"
+                style={{
+                    borderRadius: 9999,
+                    background: 'rgba(255, 255, 255, 0.72)',
+                    borderColor: 'rgba(0, 0, 0, 0.08)',
+                    boxShadow: '0 18px 40px rgba(0,0,0,0.12), 0 6px 16px rgba(0,0,0,0.08)',
+                    backdropFilter: 'blur(22px)',
+                    WebkitBackdropFilter: 'blur(22px)'
+                }}
+            >
                 <div className="flex items-center">
                     <button
                         aria-label="Go back"
