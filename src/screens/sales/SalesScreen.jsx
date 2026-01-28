@@ -2,7 +2,7 @@ import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom';
 import { Modal } from '../../components/common/Modal';
 import { ArrowUp, ArrowDown, TrendingUp, Award, DollarSign, BarChart, Table, ChevronRight } from 'lucide-react';
-import { MONTHLY_SALES_DATA, SALES_VERTICALS_DATA, CUSTOMER_RANK_DATA } from './data.js';
+import { MONTHLY_SALES_DATA, SALES_VERTICALS_DATA, CUSTOMER_RANK_DATA, INCENTIVE_REWARDS_DATA } from './data.js';
 import { ORDER_DATA, STATUS_COLORS } from '../orders/data.js';
 import { SalesByVerticalBreakdown } from './components/SalesByVerticalBreakdown.jsx';
 import { CountUp } from '../../components/common/CountUp.jsx';
@@ -93,10 +93,28 @@ export const SalesScreen = ({ theme, onNavigate }) => {
   const topLeaders = useMemo(() => [...CUSTOMER_RANK_DATA].sort((a, b) => (b.bookings || 0) - (a.bookings || 0)).slice(0, 3), []);
   const activeTotal = chartDataType === 'bookings' ? totalBookings : totalSales;
   const progressPct = Math.min(100, (activeTotal / 7000000) * 100);
+  const rewardsSnapshot = useMemo(() => {
+    const entries = Object.entries(INCENTIVE_REWARDS_DATA || {});
+    if (!entries.length) return null;
+    const parseKey = (key = '') => {
+      const [y, q] = key.split('-Q');
+      return { y: parseInt(y, 10) || 0, q: parseInt(q, 10) || 0 };
+    };
+    entries.sort((a, b) => {
+      const pa = parseKey(a[0]);
+      const pb = parseKey(b[0]);
+      return pa.y === pb.y ? pa.q - pb.q : pa.y - pb.y;
+    });
+    const [key, data] = entries[entries.length - 1];
+    const sales = data?.sales || [];
+    const top = [...sales].sort((a, b) => (b.amount || 0) - (a.amount || 0))[0];
+    const total = sales.reduce((s, r) => s + (r.amount || 0), 0);
+    return { key, top, total };
+  }, []);
 
   return (
-    <div className="flex flex-col h-full overflow-y-auto scrollbar-hide" style={{ backgroundColor: colors.background }}>
-      <div className="px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-8 lg:space-y-10 max-w-2xl lg:max-w-5xl 2xl:max-w-6xl mx-auto w-full pb-20">
+    <div className="flex flex-col h-full overflow-y-auto scrollbar-hide" style={{ backgroundColor: colors.background, scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+      <div className="px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-8 lg:space-y-10 max-w-2xl lg:max-w-5xl 2xl:max-w-6xl mx-auto w-full pb-20 lg:pb-12">
 
         {/* Navigation Buttons */}
         <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide pb-1">
@@ -216,6 +234,33 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                 ))}
               </div>
             </GlassCard>
+
+            <GlassCard theme={theme} className="p-6 space-y-3" variant="elevated">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm font-semibold">
+                  <Award className="w-4 h-4" /> Dealer Rewards Snapshot
+                </div>
+                <button onClick={() => onNavigate('incentive-rewards')} className="px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest bg-black text-white">View</button>
+              </div>
+              {rewardsSnapshot ? (
+                <div className="space-y-2 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold">{rewardsSnapshot.key}</span>
+                    <span className="font-semibold tabular-nums" style={{ color: colors.textSecondary }}>{formatCurrency(rewardsSnapshot.total)}</span>
+                  </div>
+                  {rewardsSnapshot.top ? (
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold truncate">Top: {rewardsSnapshot.top.name}</span>
+                      <span className="font-semibold tabular-nums">{formatCurrency(rewardsSnapshot.top.amount)}</span>
+                    </div>
+                  ) : (
+                    <span style={{ color: colors.textSecondary }}>No rewards data yet.</span>
+                  )}
+                </div>
+              ) : (
+                <span className="text-xs" style={{ color: colors.textSecondary }}>No rewards data yet.</span>
+              )}
+            </GlassCard>
           </div>
         </div>
 
@@ -298,14 +343,14 @@ export const SalesScreen = ({ theme, onNavigate }) => {
           </div>
 
           {monthlyView === 'chart' ? (
-            <div className="h-64 flex items-end gap-2 overflow-hidden px-2">
+            <div className="min-h-[220px] flex items-end gap-2 overflow-hidden px-2 pb-1">
               {MONTHLY_SALES_DATA.map((m) => {
                 const val = chartDataType === 'bookings' ? m.bookings : m.sales;
                 const max = Math.max(...MONTHLY_SALES_DATA.map(d => chartDataType === 'bookings' ? d.bookings : d.sales));
                 const pct = (val / max) * 100;
                 return (
                   <div key={m.month} className="flex-1 flex flex-col items-center gap-3 group px-0.5">
-                    <div className="w-full relative flex items-end justify-center">
+                    <div className="w-full h-40 sm:h-44 relative flex items-end justify-center">
                       <motion.div
                         initial={{ height: 0 }}
                         animate={{ height: `${Math.max(6, pct)}%` }}
