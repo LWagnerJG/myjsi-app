@@ -299,31 +299,7 @@ export const NewLeadScreen = ({
     
     return (
         <form onSubmit={handleSubmit} className="flex flex-col h-full overflow-y-auto scrollbar-hide" style={{ backgroundColor: theme.colors.background }}>
-            <div className="px-4 lg:px-6 pt-6 space-y-6 max-w-4xl mx-auto w-full">
-                {/* Form Header */}
-                <div className="mb-6">
-                    <h1
-                        className="text-3xl lg:text-4xl font-bold mb-3"
-                        style={{
-                            color: theme.colors.textPrimary,
-                            fontFamily: 'Neue Haas Grotesk Display Pro, sans-serif',
-                            letterSpacing: '-0.02em',
-                            lineHeight: 1.1
-                        }}
-                    >
-                        New Project Lead
-                    </h1>
-                    <p
-                        className="text-base"
-                        style={{
-                            color: theme.colors.textSecondary,
-                            fontFamily: 'Neue Haas Grotesk Display Pro, sans-serif',
-                            lineHeight: 1.5
-                        }}
-                    >
-                        Create a new opportunity and track it through your sales pipeline
-                    </p>
-                </div>
+            <div className="px-4 lg:px-6 pt-4 space-y-6 max-w-4xl mx-auto w-full">
 
                 <FormSection title="Project Details" theme={theme}>
                     <div>
