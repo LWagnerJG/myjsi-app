@@ -347,9 +347,9 @@ export const NewLeadScreen = ({
         <form onSubmit={handleSubmit} className="lead-form-inline flex flex-col h-full overflow-y-auto scrollbar-hide" style={{ backgroundColor: theme.colors.background }}>
             <div className="px-4 lg:px-6 pt-4 max-w-5xl mx-auto w-full">
                 <div className="grid gap-6 lg:grid-cols-2">
-                <FormSection title="Project Details" theme={theme}>
+                <FormSection title="Project Details" theme={theme} className="pt-5 lg:pt-6">
                     <div>
-                        <SettingsRow label={null} isFirst={true} theme={theme} className="no-label">
+                        <SettingsRow label={null} isFirst={true} theme={theme} className="no-label compact">
                             <FormInput
                                 label=""
                                 required
@@ -433,7 +433,7 @@ export const NewLeadScreen = ({
                                 onChange={(val) => updateField('installationLocation', val)}
                                 onSelect={(val) => updateField('installationLocation', val)}
                                 options={CITY_OPTIONS}
-                                placeholder="City, State"
+                                placeholder="Install City, State"
                                 theme={theme}
                                 resetOnSelect={false}
                             />
