@@ -59,6 +59,28 @@ body {
     color: var(--jsi-charcoal);
 }
 
+/* New Lead form: inline label/control rows for compact layout */
+.lead-form-inline .settings-row {
+    display: grid;
+    grid-template-columns: 130px minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+}
+
+.lead-form-inline .settings-row > label {
+    margin: 0;
+}
+
+.lead-form-inline .settings-row > *:not(label) {
+    width: 100%;
+}
+
+@media (max-width: 420px) {
+    .lead-form-inline .settings-row {
+        grid-template-columns: 110px minmax(0, 1fr);
+    }
+}
+
 #root {
     height: var(--app-height);
     width: 100%;

@@ -20,9 +20,9 @@ export const FormSection = ({ title, children, theme }) => (
     </GlassCard>
 );
 
-export const SettingsRow = ({ label, children, isFirst = false, theme }) => (
+export const SettingsRow = ({ label, children, isFirst = false, theme, className = '' }) => (
     <div
-        className={`flex flex-col gap-3 py-5 ${!isFirst ? 'border-t' : ''}`}
+        className={`settings-row flex flex-col gap-3 py-5 ${!isFirst ? 'border-t' : ''} ${className}`}
         style={{ borderColor: theme.colors.border }}
     >
         <label

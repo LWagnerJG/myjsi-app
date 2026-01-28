@@ -320,7 +320,7 @@ export const NewLeadScreen = ({
     };
     
     return (
-        <form onSubmit={handleSubmit} className="flex flex-col h-full overflow-y-auto scrollbar-hide" style={{ backgroundColor: theme.colors.background }}>
+        <form onSubmit={handleSubmit} className="lead-form-inline flex flex-col h-full overflow-y-auto scrollbar-hide" style={{ backgroundColor: theme.colors.background }}>
             <div className="px-4 lg:px-6 pt-4 space-y-6 max-w-4xl mx-auto w-full">
 
                 <FormSection title="Project Details" theme={theme}>
@@ -573,38 +573,27 @@ export const NewLeadScreen = ({
                             />
                         </SettingsRow>
                         <SettingsRow label="Rewards" theme={theme}>
-                            <div className="grid gap-3 sm:grid-cols-2">
-                                <div
-                                    className="flex items-center justify-between rounded-2xl border px-4 py-3"
-                                    style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.border }}
+                            <div className="grid grid-cols-2 gap-2">
+                                <PillButton
+                                    size="compact"
+                                    isSelected={newLeadData.salesReward !== false}
+                                    onClick={() => updateField('salesReward', !(newLeadData.salesReward !== false))}
+                                    theme={theme}
+                                    className="flex items-center justify-center gap-2"
                                 >
-                                    <div className="min-w-0">
-                                        <div className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>Sales Reward</div>
-                                        <div className="text-xs opacity-60" style={{ color: theme.colors.textSecondary }}>Dealer sales incentive</div>
-                                    </div>
-                                    <ToggleSwitch
-                                        checked={newLeadData.salesReward !== false}
-                                        onChange={(e) => updateField('salesReward', e.target.checked)}
-                                        theme={theme}
-                                    />
-                                </div>
-                                <div
-                                    className="flex items-center justify-between rounded-2xl border px-4 py-3"
-                                    style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.border }}
+                                    {newLeadData.salesReward !== false && <Check className="w-3.5 h-3.5" />}
+                                    Sales Reward
+                                </PillButton>
+                                <PillButton
+                                    size="compact"
+                                    isSelected={newLeadData.designerReward !== false}
+                                    onClick={() => updateField('designerReward', !(newLeadData.designerReward !== false))}
+                                    theme={theme}
+                                    className="flex items-center justify-center gap-2"
                                 >
-                                    <div className="min-w-0">
-                                        <div className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>Designer Reward</div>
-                                        <div className="text-xs opacity-60" style={{ color: theme.colors.textSecondary }}>Dealer designer incentive</div>
-                                    </div>
-                                    <ToggleSwitch
-                                        checked={newLeadData.designerReward !== false}
-                                        onChange={(e) => updateField('designerReward', e.target.checked)}
-                                        theme={theme}
-                                    />
-                                </div>
-                            </div>
-                            <div className="text-xs mt-2" style={{ color: theme.colors.textSecondary }}>
-                                Projects under $250k list default rewards off. You can toggle them back on if needed.
+                                    {newLeadData.designerReward !== false && <Check className="w-3.5 h-3.5" />}
+                                    Designer Reward
+                                </PillButton>
                             </div>
                         </SettingsRow>
                         <SettingsRow label="PO Timeframe" theme={theme}>
