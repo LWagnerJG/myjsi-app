@@ -64,7 +64,7 @@ const OpportunityDetail = ({ opp, theme, onBack, onUpdate }) => {
   const removeProductSeries = (series)=> update('products',(draft.products||[]).filter(p=>p.series!==series));
 
   return (
-    <div className="flex flex-col h-full pt-[48px]" style={{ background: theme.colors.background }}>
+    <div className="flex flex-col h-full app-header-offset" style={{ background: theme.colors.background }}>
       <div className="px-4 pt-5 pb-40 overflow-y-auto scrollbar-hide">
         <GlassCard theme={theme} className="p-6 rounded-3xl space-y-8" variant="elevated">
           {/* Header */}
@@ -264,7 +264,7 @@ const ProjectCard = ({ opp, theme, onClick }) => {
 const InstallationDetail = ({ project, theme, onAddPhotoFiles }) => {
   const fileRef = useRef(null);
   return (
-    <div className="flex flex-col h-full pt-[48px]" style={{ backgroundColor: theme.colors.background }}>
+    <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
       <div className="px-4 pt-6 pb-32 space-y-4 overflow-y-auto scrollbar-hide">
         <GlassCard theme={theme} className="p-5 space-y-4" variant="elevated">
           <div className="flex items-start justify-between gap-3">
@@ -313,7 +313,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
   if(selectedOpportunity) return <OpportunityDetail opp={selectedOpportunity} theme={theme} onBack={()=>setSelectedOpportunity(null)} onUpdate={u=>{ updateOpportunity(u); setSelectedOpportunity(u); }} />;
   if(selectedInstall) return <InstallationDetail project={selectedInstall} theme={theme} onAddPhotoFiles={addInstallPhotos} />;
   return (
-    <div className="h-full flex flex-col pt-[48px]" style={{ backgroundColor: theme.colors.background }}>
+    <div className="h-full flex flex-col app-header-offset" style={{ backgroundColor: theme.colors.background }}>
       <div className={`sticky top-0 z-10 transition-all duration-300 ${isScrolled?'shadow-md':''}`} style={{ backgroundColor: isScrolled? `${theme.colors.background}e0`: theme.colors.background, backdropFilter: isScrolled? 'blur(12px)': 'none', WebkitBackdropFilter: isScrolled? 'blur(12px)': 'none', borderBottom:`1px solid ${isScrolled? theme.colors.border+'40':'transparent'}` }}>
         <div className="px-4 pt-4 pb-2 flex items-center gap-3 max-w-2xl mx-auto w-full">
           {/* Segmented Toggle for tabs */}
