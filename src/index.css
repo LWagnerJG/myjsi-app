@@ -46,6 +46,12 @@
     }
 }
 
+@media (min-width: 1024px) {
+    :root {
+        --app-header-offset: 72px;
+    }
+}
+
 html,
 body {
     height: var(--app-height);
