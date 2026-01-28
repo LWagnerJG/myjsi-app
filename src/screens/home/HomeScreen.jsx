@@ -96,7 +96,8 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
     }, [safeHomeApps]);
 
     const availableApps = useMemo(() => {
-        return allApps.filter(app => !safeHomeApps.includes(app.route));
+        const excludedRoutes = new Set(['settings', 'feedback', 'help', 'contracts', 'members']);
+        return allApps.filter(app => !safeHomeApps.includes(app.route) && !excludedRoutes.has(app.route));
     }, [safeHomeApps]);
 
     const toggleApp = useCallback((route) => {
@@ -185,21 +186,21 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                     <div className="flex items-center justify-between">
                         <h3 className="text-sm font-semibold uppercase tracking-widest" style={{ color: colors.textSecondary }}>Quick Access</h3>
                         {onUpdateHomeApps && (
-                            <button
-                                onClick={() => setIsEditMode(!isEditMode)}
-                                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold transition-all`}
-                                style={{
-                                    backgroundColor: isEditMode ? colors.accent : 'transparent',
-                                    color: isEditMode ? '#FFFFFF' : colors.textSecondary,
-                                    border: isEditMode ? '1px solid transparent' : `1px solid ${colors.border}`,
-                                    boxShadow: 'none'
-                                }}
+                            <div
+                                ref={setNodeRef}
+                                style={style}
+                                className="flex items-center justify-between gap-2 px-3 py-2 rounded-2xl border cursor-grab active:cursor-grabbing"
+                                {...attributes}
+                                {...listeners}
                             >
-                                {isEditMode ? <><Check className="w-4 h-4" /> Done</> : <><SettingsIcon className="w-4 h-4" /> Reconfigure</>}
-                            </button>
-                        )}
+                                    color: isEditMode ? '#FFFFFF' : colors.textSecondary,
+                                    <div
+                                        className="w-8 h-8 rounded-full flex items-center justify-center"
+                                        style={{ color: colors.textSecondary }}
+                                        aria-hidden="true"
+                                    >
                     </div>
-
+                                    </div>
                     {isEditMode && (
                         <div className="text-xs font-medium" style={{ color: colors.textSecondary }}>
                             Drag to reorder. Keep at least 4 apps pinned.
@@ -213,7 +214,7 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                             onDragEnd={handleReorder}
                         >
                             <SortableContext items={safeHomeApps} strategy={rectSortingStrategy}>
-                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                <div className="grid grid-cols-3 gap-3">
                                     {currentApps.map((app) => (
                                         <SortableAppTile
                                             key={app.route}
@@ -227,70 +228,63 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                             </SortableContext>
                         </DndContext>
                     ) : (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                            <AnimatePresence mode="sync" initial={false}>
-                                {currentApps.map((app) => {
-                                    const badge = APP_BADGES[app.route];
-                                    return (
-                                        <motion.button
-                                            layout
-                                            transition={{ type: 'spring', stiffness: 420, damping: 30 }}
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: 1 }}
-                                            exit={{ opacity: 0 }}
-                                            key={app.route}
-                                            onClick={() => onNavigate(app.route)}
-                                            className="relative flex flex-col items-center justify-center rounded-3xl transition-all active:scale-95 group gap-3 p-6 hover:shadow-xl"
-                                            style={{
-                                                minHeight: 140,
-                                                backgroundColor: colors.surface,
-                                                border: `1px solid ${colors.border}`,
-                                                boxShadow: DESIGN_TOKENS.shadows.card
-                                            }}
+                        <div className="grid grid-cols-3 gap-4">
+                            {currentApps.map((app) => {
+                                const badge = APP_BADGES[app.route];
+                                return (
+                                    <motion.button
+                                        key={app.route}
+                                        onClick={() => onNavigate(app.route)}
+                                        className="relative flex flex-col items-center justify-center rounded-3xl transition-all active:scale-95 group gap-3 p-6 hover:shadow-xl"
+                                        style={{
+                                            minHeight: 140,
+                                            backgroundColor: colors.surface,
+                                            border: `1px solid ${colors.border}`,
+                                            boxShadow: DESIGN_TOKENS.shadows.card
+                                        }}
+                                    >
+                                        <div
+                                            className="rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 w-12 h-12"
+                                            style={{ backgroundColor: `${colors.accent}12` }}
                                         >
-                                            <div
-                                                className="rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 w-12 h-12"
-                                                style={{ backgroundColor: `${colors.accent}12` }}
+                                            <app.icon className="w-6 h-6" style={{ color: colors.accent }} />
+                                        </div>
+                                        <span className="text-sm font-bold tracking-tight text-center" style={{ color: colors.textPrimary }}>
+                                            {app.name}
+                                        </span>
+                                        {badge && (
+                                            <div 
+                                                className="absolute top-3 right-3 px-2 py-0.5 rounded-full text-xs font-bold"
+                                                style={{ backgroundColor: badge.color, color: '#FFFFFF' }}
                                             >
-                                                <app.icon className="w-6 h-6" style={{ color: colors.accent }} />
+                                                {badge.value}
                                             </div>
-                                            <span className="text-sm font-bold tracking-tight text-center" style={{ color: colors.textPrimary }}>
-                                                {app.name}
-                                            </span>
-                                            {badge && (
-                                                <div 
-                                                    className="absolute top-3 right-3 px-2 py-0.5 rounded-full text-xs font-bold"
-                                                    style={{ backgroundColor: badge.color, color: '#FFFFFF' }}
-                                                >
-                                                    {badge.value}
-                                                </div>
-                                            )}
-                                        </motion.button>
-                                    );
-                                })}
-                            </AnimatePresence>
+                                        )}
+                                    </motion.button>
+                                );
+                            })}
                         </div>
                     )}
 
                     {isEditMode && (
                         <div className="space-y-2">
                             <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: colors.textSecondary }}>Add Apps</div>
-                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            <div className="grid grid-cols-3 gap-2">
                                 {availableApps.map((app) => (
                                     <motion.button
                                         layout
                                         key={app.route}
                                         onClick={() => toggleApp(app.route)}
-                                        className="flex flex-col items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-dashed hover:bg-black/[0.02] transition-all active:scale-95"
+                                        className="flex flex-col items-center justify-center gap-1 px-2 py-2 rounded-xl border border-dashed hover:bg-black/[0.02] transition-all active:scale-95"
                                         style={{
                                             backgroundColor: colors.surface,
                                             borderColor: colors.border
                                         }}
                                     >
-                                        <div className="w-8 h-8 rounded-xl flex items-center justify-center border border-dashed" style={{ borderColor: colors.border }}>
-                                            <Plus className="w-4 h-4 opacity-40" style={{ color: colors.textSecondary }} />
+                                        <div className="w-7 h-7 rounded-lg flex items-center justify-center border border-dashed" style={{ borderColor: colors.border }}>
+                                            <Plus className="w-3.5 h-3.5 opacity-40" style={{ color: colors.textSecondary }} />
                                         </div>
-                                        <span className="text-[11px] font-semibold" style={{ color: colors.textSecondary }}>{app.name}</span>
+                                        <span className="text-[10px] font-semibold" style={{ color: colors.textSecondary }}>{app.name}</span>
                                     </motion.button>
                                 ))}
                             </div>
