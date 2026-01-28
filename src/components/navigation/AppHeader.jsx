@@ -21,8 +21,20 @@ export const AppHeader = React.memo(({
         return 'Good Evening';
     };
 
+    const headerFade = isDarkMode
+        ? 'linear-gradient(180deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0) 100%)'
+        : 'linear-gradient(180deg, rgba(240,237,232,0.65) 0%, rgba(240,237,232,0) 100%)';
+
     return (
-        <div className="px-4 sm:px-5 pt-3 pb-1 fixed top-0 left-0 right-0 z-30 pointer-events-none bg-transparent">
+        <div className="relative px-4 sm:px-5 pt-3 pb-1 fixed top-0 left-0 right-0 z-30 pointer-events-none bg-transparent">
+            <div
+                className="absolute inset-x-0 top-0 h-16 sm:h-20 pointer-events-none"
+                style={{
+                    backdropFilter: 'blur(10px)',
+                    WebkitBackdropFilter: 'blur(10px)',
+                    background: headerFade
+                }}
+            />
             <div
                 className="max-w-5xl mx-auto w-full flex items-center justify-between px-4 sm:px-5 h-14 pointer-events-auto transition-all duration-300 overflow-hidden"
                 style={{
