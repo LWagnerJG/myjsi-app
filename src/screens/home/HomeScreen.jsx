@@ -6,12 +6,70 @@ import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { HomeSearchInput } from '../../components/common/SearchInput.jsx';
 import { DESIGN_TOKENS, JSI_COLORS } from '../../design-system/tokens.js';
 import { Check, Plus, X, Settings as SettingsIcon, GripVertical } from 'lucide-react';
-import { motion, AnimatePresence, Reorder } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+    DndContext,
+    PointerSensor,
+    closestCenter,
+    useSensor,
+    useSensors
+} from '@dnd-kit/core';
+import {
+    SortableContext,
+    rectSortingStrategy,
+    useSortable,
+    arrayMove
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 // Badge data for specific app routes
 const APP_BADGES = {
     'sales': { value: '$1.2M', label: 'YTD', color: '#4A7C59' },
     'projects': { value: '24', label: 'Open', color: '#5B7B8C' }
+};
+
+const SortableAppTile = ({ id, app, colors, onRemove }) => {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        backgroundColor: `${colors.surface}F7`,
+        borderColor: colors.border,
+        boxShadow: DESIGN_TOKENS.shadows.card,
+        opacity: isDragging ? 0.85 : 1,
+        zIndex: isDragging ? 10 : 'auto'
+    };
+
+    return (
+        <div
+            ref={setNodeRef}
+            style={style}
+            className="flex items-center justify-between gap-2 px-3 py-2 rounded-2xl border"
+        >
+            <div className="flex items-center gap-3 min-w-0">
+                <button
+                    className="w-8 h-8 rounded-full flex items-center justify-center"
+                    style={{ color: colors.textSecondary }}
+                    aria-label="Drag to reorder"
+                    {...attributes}
+                    {...listeners}
+                >
+                    <GripVertical className="w-4 h-4" />
+                </button>
+                <div className="w-9 h-9 rounded-2xl flex items-center justify-center" style={{ backgroundColor: `${colors.accent}12` }}>
+                    <app.icon className="w-4 h-4" style={{ color: colors.accent }} />
+                </div>
+                <span className="text-sm font-semibold truncate" style={{ color: colors.textPrimary }}>{app.name}</span>
+            </div>
+            <button
+                onClick={() => onRemove(app.route)}
+                className="w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center shadow hover:scale-105 active:scale-90 transition-transform"
+                aria-label="Remove"
+            >
+                <X className="w-3.5 h-3.5" />
+            </button>
+        </div>
+    );
 };
 
 export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeApps, onUpdateHomeApps, userSettings }) => {
@@ -60,6 +118,20 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
             onAskAI(val);
         }
     }, [onAskAI]);
+
+    const sensors = useSensors(
+        useSensor(PointerSensor, { activationConstraint: { distance: 6 } })
+    );
+
+    const handleReorder = useCallback((event) => {
+        const { active, over } = event;
+        if (!over || active.id === over.id) return;
+        if (!onUpdateHomeApps) return;
+        const oldIndex = safeHomeApps.indexOf(active.id);
+        const newIndex = safeHomeApps.indexOf(over.id);
+        if (oldIndex === -1 || newIndex === -1) return;
+        onUpdateHomeApps(arrayMove(safeHomeApps, oldIndex, newIndex));
+    }, [onUpdateHomeApps, safeHomeApps]);
 
     const todayLabel = useMemo(() => {
         const now = new Date();
@@ -135,48 +207,25 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                     )}
 
                     {isEditMode ? (
-                        <Reorder.Group
-                            axis="y"
-                            values={safeHomeApps}
-                            onReorder={onUpdateHomeApps}
-                            className="grid grid-cols-2 sm:grid-cols-3 gap-3"
+                        <DndContext
+                            sensors={sensors}
+                            collisionDetection={closestCenter}
+                            onDragEnd={handleReorder}
                         >
-                            {currentApps.map((app) => (
-                                <Reorder.Item
-                                    key={app.route}
-                                    value={app.route}
-                                    className="list-none"
-                                >
-                                    <motion.div
-                                        layout
-                                        transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-                                        className="flex items-center justify-between gap-2 px-3 py-2 rounded-2xl border"
-                                        style={{ backgroundColor: `${colors.surface}F7`, borderColor: colors.border, boxShadow: DESIGN_TOKENS.shadows.card }}
-                                    >
-                                        <div className="flex items-center gap-3 min-w-0">
-                                            <button
-                                                className="w-8 h-8 rounded-full flex items-center justify-center"
-                                                style={{ color: colors.textSecondary }}
-                                                aria-label="Drag to reorder"
-                                            >
-                                                <GripVertical className="w-4 h-4" />
-                                            </button>
-                                            <div className="w-9 h-9 rounded-2xl flex items-center justify-center" style={{ backgroundColor: `${colors.accent}12` }}>
-                                                <app.icon className="w-4 h-4" style={{ color: colors.accent }} />
-                                            </div>
-                                            <span className="text-sm font-semibold truncate" style={{ color: colors.textPrimary }}>{app.name}</span>
-                                        </div>
-                                        <button
-                                            onClick={() => toggleApp(app.route)}
-                                            className="w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center shadow hover:scale-105 active:scale-90 transition-transform"
-                                            aria-label="Remove"
-                                        >
-                                            <X className="w-3.5 h-3.5" />
-                                        </button>
-                                    </motion.div>
-                                </Reorder.Item>
-                            ))}
-                        </Reorder.Group>
+                            <SortableContext items={safeHomeApps} strategy={rectSortingStrategy}>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                    {currentApps.map((app) => (
+                                        <SortableAppTile
+                                            key={app.route}
+                                            id={app.route}
+                                            app={app}
+                                            colors={colors}
+                                            onRemove={toggleApp}
+                                        />
+                                    ))}
+                                </div>
+                            </SortableContext>
+                        </DndContext>
                     ) : (
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                             <AnimatePresence mode="sync" initial={false}>
@@ -226,22 +275,22 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                     {isEditMode && (
                         <div className="space-y-2">
                             <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: colors.textSecondary }}>Add Apps</div>
-                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                                 {availableApps.map((app) => (
                                     <motion.button
                                         layout
                                         key={app.route}
                                         onClick={() => toggleApp(app.route)}
-                                        className="flex flex-col items-center justify-center gap-2 px-4 py-3 rounded-2xl border border-dashed hover:bg-black/[0.02] transition-all active:scale-95"
+                                        className="flex flex-col items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-dashed hover:bg-black/[0.02] transition-all active:scale-95"
                                         style={{
                                             backgroundColor: colors.surface,
                                             borderColor: colors.border
                                         }}
                                     >
-                                        <div className="w-9 h-9 rounded-2xl flex items-center justify-center border border-dashed" style={{ borderColor: colors.border }}>
-                                            <Plus className="w-5 h-5 opacity-40" style={{ color: colors.textSecondary }} />
+                                        <div className="w-8 h-8 rounded-xl flex items-center justify-center border border-dashed" style={{ borderColor: colors.border }}>
+                                            <Plus className="w-4 h-4 opacity-40" style={{ color: colors.textSecondary }} />
                                         </div>
-                                        <span className="text-xs font-semibold" style={{ color: colors.textSecondary }}>{app.name}</span>
+                                        <span className="text-[11px] font-semibold" style={{ color: colors.textSecondary }}>{app.name}</span>
                                     </motion.button>
                                 ))}
                             </div>
