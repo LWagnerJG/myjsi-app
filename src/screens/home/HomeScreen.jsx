@@ -30,46 +30,63 @@ const APP_BADGES = {
 
 const SortableAppTile = ({ id, app, colors, onRemove }) => {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+    
     const style = {
         transform: CSS.Transform.toString(transform),
         transition,
-        backgroundColor: `${colors.surface}F7`,
-        borderColor: colors.border,
-        boxShadow: DESIGN_TOKENS.shadows.card,
-        opacity: isDragging ? 0.85 : 1,
-        zIndex: isDragging ? 10 : 'auto',
+        backgroundColor: `${colors.surface}`,
+        borderColor: isDragging ? colors.accent : colors.border,
+        boxShadow: isDragging ? '0 8px 16px rgba(0,0,0,0.1)' : DESIGN_TOKENS.shadows.card,
+        opacity: isDragging ? 0.9 : 1,
+        zIndex: isDragging ? 20 : 'auto',
+        touchAction: 'none', // Critical for pointer interactions
         width: '100%',
-        minWidth: 0
+        minWidth: 0,
+        minHeight: 96
     };
 
     return (
         <div
             ref={setNodeRef}
             style={style}
-            className="flex items-center justify-between gap-2 px-3 py-2 rounded-2xl border"
+            {...attributes}
+            {...listeners}
+            className="relative flex flex-col items-center justify-center gap-1 p-2.5 rounded-2xl border cursor-grab active:cursor-grabbing"
         >
-            <div className="flex items-center gap-3 min-w-0">
-                <button
-                    className="w-8 h-8 rounded-full flex items-center justify-center"
-                    style={{ color: colors.textSecondary }}
-                    aria-label="Drag to reorder"
-                    {...attributes}
-                    {...listeners}
-                >
-                    <GripVertical className="w-4 h-4" />
-                </button>
-                <div className="w-9 h-9 rounded-2xl flex items-center justify-center" style={{ backgroundColor: `${colors.accent}12` }}>
-                    <app.icon className="w-4 h-4" style={{ color: colors.accent }} />
-                </div>
-                <span className="text-sm font-semibold truncate" style={{ color: colors.textPrimary, minWidth: 0 }}>{app.name}</span>
+            {/* Draggable Indicator (Subtle) */}
+            <div className="absolute top-2 left-2 opacity-30">
+                <GripVertical className="w-3 h-3" style={{ color: colors.textSecondary }} />
             </div>
+
+            {/* Remove Button */}
             <button
-                onClick={() => onRemove(app.route)}
-                className="w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center shadow hover:scale-105 active:scale-90 transition-transform"
-                aria-label="Remove"
+                // Stop propagation so clicking X doesn't start a drag
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onRemove(app.route);
+                }}
+                className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center shadow-md z-10 hover:bg-red-600 hover:scale-110 transition-all"
+                aria-label="Remove app"
             >
                 <X className="w-3.5 h-3.5" />
             </button>
+
+            {/* App Icon */}
+            <div 
+                className="w-8 h-8 rounded-xl flex items-center justify-center mb-0.5" 
+                style={{ backgroundColor: `${colors.accent}12` }}
+            >
+                <app.icon className="w-4 h-4" style={{ color: colors.accent }} />
+            </div>
+
+            {/* App Name */}
+            <span 
+                className="text-[10px] font-bold tracking-tight text-center leading-3 line-clamp-2 w-full px-1" 
+                style={{ color: colors.textPrimary }}
+            >
+                {app.name}
+            </span>
         </div>
     );
 };
