@@ -37,7 +37,9 @@ const SortableAppTile = ({ id, app, colors, onRemove }) => {
         borderColor: colors.border,
         boxShadow: DESIGN_TOKENS.shadows.card,
         opacity: isDragging ? 0.85 : 1,
-        zIndex: isDragging ? 10 : 'auto'
+        zIndex: isDragging ? 10 : 'auto',
+        width: '100%',
+        minWidth: 0
     };
 
     return (
@@ -59,7 +61,7 @@ const SortableAppTile = ({ id, app, colors, onRemove }) => {
                 <div className="w-9 h-9 rounded-2xl flex items-center justify-center" style={{ backgroundColor: `${colors.accent}12` }}>
                     <app.icon className="w-4 h-4" style={{ color: colors.accent }} />
                 </div>
-                <span className="text-sm font-semibold truncate" style={{ color: colors.textPrimary }}>{app.name}</span>
+                <span className="text-sm font-semibold truncate" style={{ color: colors.textPrimary, minWidth: 0 }}>{app.name}</span>
             </div>
             <button
                 onClick={() => onRemove(app.route)}
@@ -228,28 +230,30 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                             </SortableContext>
                         </DndContext>
                     ) : (
-                        <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' }}>
+                        <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' }}>
                             {currentApps.map((app) => {
                                 const badge = APP_BADGES[app.route];
                                 return (
                                     <motion.button
                                         key={app.route}
                                         onClick={() => onNavigate(app.route)}
-                                        className="relative flex flex-col items-center justify-center rounded-3xl transition-all active:scale-95 group gap-3 p-6 hover:shadow-xl"
+                                        className="relative flex flex-col items-center justify-center rounded-3xl transition-all active:scale-95 group gap-2 p-4 sm:p-5 hover:shadow-xl"
                                         style={{
-                                            minHeight: 140,
+                                            minHeight: 120,
                                             backgroundColor: colors.surface,
                                             border: `1px solid ${colors.border}`,
-                                            boxShadow: DESIGN_TOKENS.shadows.card
+                                            boxShadow: DESIGN_TOKENS.shadows.card,
+                                            width: '100%',
+                                            minWidth: 0
                                         }}
                                     >
                                         <div
-                                            className="rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 w-12 h-12"
+                                            className="rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 w-10 h-10 sm:w-12 sm:h-12"
                                             style={{ backgroundColor: `${colors.accent}12` }}
                                         >
-                                            <app.icon className="w-6 h-6" style={{ color: colors.accent }} />
+                                            <app.icon className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: colors.accent }} />
                                         </div>
-                                        <span className="text-sm font-bold tracking-tight text-center" style={{ color: colors.textPrimary }}>
+                                        <span className="text-xs sm:text-sm font-bold tracking-tight text-center" style={{ color: colors.textPrimary }}>
                                             {app.name}
                                         </span>
                                         {badge && (
@@ -278,7 +282,9 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                                         className="flex flex-col items-center justify-center gap-1 px-2 py-2 rounded-xl border border-dashed hover:bg-black/[0.02] transition-all active:scale-95"
                                         style={{
                                             backgroundColor: colors.surface,
-                                            borderColor: colors.border
+                                            borderColor: colors.border,
+                                            width: '100%',
+                                            minWidth: 0
                                         }}
                                     >
                                         <div className="w-7 h-7 rounded-lg flex items-center justify-center border border-dashed" style={{ borderColor: colors.border }}>
