@@ -22,7 +22,7 @@ export const FormSection = ({ title, children, theme }) => (
 
 export const SettingsRow = ({ label, children, isFirst = false, theme, className = '' }) => (
     <div
-        className={`settings-row flex flex-col gap-3 py-5 ${!isFirst ? 'border-t' : ''} ${className}`}
+        className={`settings-row flex flex-col gap-3 py-4 ${!isFirst ? 'border-t border-solid' : ''} ${className}`}
         style={{ borderColor: theme.colors.border }}
     >
         <label

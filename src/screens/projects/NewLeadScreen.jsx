@@ -4,6 +4,7 @@ import { X, Search, Check, Plus } from 'lucide-react';
 import { FormInput } from '../../components/forms/FormInput.jsx';
 import { PortalNativeSelect } from '../../components/forms/PortalNativeSelect.jsx';
 import { AutoCompleteCombobox } from '../../components/forms/AutoCompleteCombobox.jsx';
+import { ToggleSwitch } from '../../components/forms/ToggleSwitch.jsx';
 import { ProbabilitySlider } from '../../components/forms/ProbabilitySlider.jsx';
 import { FormSection, SettingsRow } from '../../components/forms/FormSections.jsx';
 import { SpotlightMultiSelect } from '../../components/common/SpotlightMultiSelect.jsx';
@@ -453,7 +454,7 @@ export const NewLeadScreen = ({
                                 theme={theme}
                             />
                         </SettingsRow>
-                        <SettingsRow label="Dealer" theme={theme}>
+                        <SettingsRow label="Dealer(s)" theme={theme}>
                             <SpotlightMultiSelect
                                 selectedItems={newLeadData.dealers || []}
                                 onAddItem={addDealer}
@@ -470,59 +471,21 @@ export const NewLeadScreen = ({
                 <FormSection title="Competition & Products" theme={theme}>
                     <div>
                         <SettingsRow label="Bid?" isFirst={true} theme={theme}>
-                            <div className="flex justify-end gap-2">
-                                <button
-                                    type="button"
-                                    onClick={() => updateField('isBid', true)}
-                                    className="px-3 py-1.5 rounded-full text-xs font-semibold border transition-all"
-                                    style={{
-                                        backgroundColor: newLeadData.isBid === true ? theme.colors.textPrimary : theme.colors.surface,
-                                        color: newLeadData.isBid === true ? '#FFFFFF' : theme.colors.textPrimary,
-                                        borderColor: newLeadData.isBid === true ? theme.colors.textPrimary : theme.colors.border
-                                    }}
-                                >
-                                    Yes
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => updateField('isBid', false)}
-                                    className="px-3 py-1.5 rounded-full text-xs font-semibold border transition-all"
-                                    style={{
-                                        backgroundColor: newLeadData.isBid !== true ? theme.colors.textPrimary : theme.colors.surface,
-                                        color: newLeadData.isBid !== true ? '#FFFFFF' : theme.colors.textPrimary,
-                                        borderColor: newLeadData.isBid !== true ? theme.colors.textPrimary : theme.colors.border
-                                    }}
-                                >
-                                    No
-                                </button>
+                            <div className="flex justify-end">
+                                <ToggleSwitch
+                                    checked={!!newLeadData.isBid}
+                                    onChange={(e) => updateField('isBid', e.target.checked)}
+                                    theme={theme}
+                                />
                             </div>
                         </SettingsRow>
                         <SettingsRow label="Competition?" theme={theme}>
-                            <div className="flex justify-end gap-2">
-                                <button
-                                    type="button"
-                                    onClick={() => updateField('competitionPresent', true)}
-                                    className="px-3 py-1.5 rounded-full text-xs font-semibold border transition-all"
-                                    style={{
-                                        backgroundColor: newLeadData.competitionPresent === true ? theme.colors.textPrimary : theme.colors.surface,
-                                        color: newLeadData.competitionPresent === true ? '#FFFFFF' : theme.colors.textPrimary,
-                                        borderColor: newLeadData.competitionPresent === true ? theme.colors.textPrimary : theme.colors.border
-                                    }}
-                                >
-                                    Yes
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => updateField('competitionPresent', false)}
-                                    className="px-3 py-1.5 rounded-full text-xs font-semibold border transition-all"
-                                    style={{
-                                        backgroundColor: newLeadData.competitionPresent !== true ? theme.colors.textPrimary : theme.colors.surface,
-                                        color: newLeadData.competitionPresent !== true ? '#FFFFFF' : theme.colors.textPrimary,
-                                        borderColor: newLeadData.competitionPresent !== true ? theme.colors.textPrimary : theme.colors.border
-                                    }}
-                                >
-                                    No
-                                </button>
+                            <div className="flex justify-end">
+                                <ToggleSwitch
+                                    checked={!!newLeadData.competitionPresent}
+                                    onChange={(e) => updateField('competitionPresent', e.target.checked)}
+                                    theme={theme}
+                                />
                             </div>
                         </SettingsRow>
 
@@ -654,7 +617,7 @@ export const NewLeadScreen = ({
                                     isSelected={newLeadData.salesReward !== false}
                                     onClick={() => updateField('salesReward', !(newLeadData.salesReward !== false))}
                                     theme={theme}
-                                    className="flex items-center justify-center gap-2"
+                                    className="flex items-center justify-center gap-2 min-w-[140px]"
                                     unselectedBg={theme.colors.subtle}
                                     unselectedBorder={theme.colors.border}
                                     unselectedText={theme.colors.textPrimary}
@@ -667,7 +630,7 @@ export const NewLeadScreen = ({
                                     isSelected={newLeadData.designerReward !== false}
                                     onClick={() => updateField('designerReward', !(newLeadData.designerReward !== false))}
                                     theme={theme}
-                                    className="flex items-center justify-center gap-2"
+                                    className="flex items-center justify-center gap-2 min-w-[140px]"
                                     unselectedBg={theme.colors.subtle}
                                     unselectedBorder={theme.colors.border}
                                     unselectedText={theme.colors.textPrimary}
