@@ -27,10 +27,11 @@ export const AppHeader = React.memo(({
                 className="max-w-5xl mx-auto w-full flex items-center justify-between px-4 sm:px-5 h-14 pointer-events-auto transition-all duration-300 overflow-hidden"
                 style={{
                     borderRadius: 9999,
-                    background: 'linear-gradient(180deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.01) 100%)',
-                    boxShadow: 'none',
-                    backdropFilter: 'blur(18px) saturate(135%)',
-                    WebkitBackdropFilter: 'blur(18px) saturate(135%)',
+                    backgroundColor: 'rgba(255,255,255,0.78)',
+                    backgroundImage: 'linear-gradient(180deg, rgba(255,255,255,0.86) 0%, rgba(255,255,255,0.72) 100%)',
+                    boxShadow: '0 4px 20px rgba(53,53,53,0.06)',
+                    backdropFilter: 'blur(22px) saturate(140%)',
+                    WebkitBackdropFilter: 'blur(22px) saturate(140%)',
                     border: 'none'
                 }}
             >
