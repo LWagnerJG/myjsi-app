@@ -131,7 +131,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="space-y-1 min-w-0">
                   <p className="text-xs font-bold uppercase tracking-widest opacity-60">
-                    {chartDataType === 'bookings' ? 'Total Ordered' : 'Total Invoiced'}
+                    {chartDataType === 'bookings' ? 'Total Bookings' : 'Total Sales'}
                   </p>
                   <div className="text-4xl font-black tracking-tight">
                     {formatCurrency(activeTotal)}
@@ -146,7 +146,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                       color: chartDataType === 'bookings' ? colors.textPrimary : colors.textSecondary
                     }}
                   >
-                    Ordered
+                    Bookings
                   </button>
                   <button
                     onClick={() => setChartDataType('sales')}
@@ -156,7 +156,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                       color: chartDataType === 'sales' ? colors.textPrimary : colors.textSecondary
                     }}
                   >
-                    Invoiced
+                    Sales
                   </button>
                 </div>
               </div>
@@ -268,7 +268,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
         </div>
 
         {/* Monthly Chart */}
-        <GlassCard theme={theme} className="p-7 sm:p-8 space-y-6" variant="elevated">
+        <GlassCard theme={theme} className="p-7 sm:p-8 space-y-6 hidden sm:block" variant="elevated">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="inline-flex items-center gap-1.5 rounded-full p-[3px]" style={{ backgroundColor: colors.border }}>
               <button
@@ -279,7 +279,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                   color: chartDataType === 'bookings' ? colors.textPrimary : colors.textSecondary
                 }}
               >
-                Ordered
+                Bookings
               </button>
               <button
                 onClick={() => setChartDataType('sales')}
@@ -289,7 +289,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                   color: chartDataType === 'sales' ? colors.textPrimary : colors.textSecondary
                 }}
               >
-                Invoiced
+                Sales
               </button>
             </div>
             <button onClick={() => setMonthlyView(v => v === 'chart' ? 'table' : 'chart')} className="p-2 rounded-lg bg-black/5 hover:bg-black/10 transition-colors">
