@@ -138,23 +138,21 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                                                     animate={{ opacity: 1 }}
                                                     exit={{ opacity: 0 }}
                                                     onClick={(e) => { e.preventDefault(); }}
-                                                    className={`relative flex flex-col items-center justify-center rounded-2xl transition-all group cursor-grab active:cursor-grabbing ${isEditMode ? 'gap-1.5 p-2.5' : 'gap-3 p-6'}`}
+                                                    className={`relative flex flex-col items-center justify-center rounded-3xl transition-all group cursor-grab active:cursor-grabbing ${isEditMode ? 'gap-2 p-3' : 'gap-3 p-6'}`}
                                                     style={{
-                                                        minHeight: isEditMode ? 84 : 140,
-                                                        backgroundColor: `${colors.surface}F2`,
+                                                        minHeight: isEditMode ? 92 : 140,
+                                                        backgroundColor: colors.surface,
                                                         border: `1px solid ${colors.border}`,
-                                                        boxShadow: DESIGN_TOKENS.shadows.card,
-                                                        backdropFilter: 'blur(12px)',
-                                                        WebkitBackdropFilter: 'blur(12px)'
+                                                        boxShadow: DESIGN_TOKENS.shadows.card
                                                     }}
                                                 >
                                                     <div
-                                                        className={`rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 ${isEditMode ? 'w-7 h-7' : 'w-12 h-12'}`}
+                                                        className={`rounded-2xl flex items-center justify-center transition-transform group-hover:scale-105 ${isEditMode ? 'w-8 h-8' : 'w-12 h-12'}`}
                                                         style={{ backgroundColor: `${colors.accent}12` }}
                                                     >
-                                                        <app.icon className={`${isEditMode ? 'w-3.5 h-3.5' : 'w-6 h-6'}`} style={{ color: colors.accent }} />
+                                                        <app.icon className={`${isEditMode ? 'w-4 h-4' : 'w-6 h-6'}`} style={{ color: colors.accent }} />
                                                     </div>
-                                                    <span className={`${isEditMode ? 'text-[11px] font-semibold leading-tight' : 'text-sm font-bold'} tracking-tight text-center`} style={{ color: colors.textPrimary }}>
+                                                    <span className={`${isEditMode ? 'text-xs font-semibold' : 'text-sm font-bold'} tracking-tight text-center`} style={{ color: colors.textPrimary }}>
                                                         {app.name}
                                                     </span>
                                                     {badge && !isEditMode && (
@@ -237,17 +235,17 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                                         layout
                                         key={app.route}
                                         onClick={() => toggleApp(app.route)}
-                                        className="flex-shrink-0 flex flex-col items-center justify-center gap-2 px-4 py-3 rounded-2xl border border-dashed hover:opacity-100 transition-all active:scale-95"
+                                        className="flex-shrink-0 flex flex-col items-center justify-center gap-2 px-4 py-3 rounded-2xl border border-dashed hover:bg-black/[0.02] transition-all active:scale-95"
                                         style={{
                                             minWidth: 120,
-                                            backgroundColor: `${colors.surface}80`,
+                                            backgroundColor: colors.surface,
                                             borderColor: colors.border
                                         }}
                                     >
-                                        <div className="w-9 h-9 rounded-xl flex items-center justify-center border border-dashed" style={{ borderColor: colors.border }}>
+                                        <div className="w-9 h-9 rounded-2xl flex items-center justify-center border border-dashed" style={{ borderColor: colors.border }}>
                                             <Plus className="w-5 h-5 opacity-40" style={{ color: colors.textSecondary }} />
                                         </div>
-                                        <span className="text-xs font-semibold opacity-60" style={{ color: colors.textSecondary }}>{app.name}</span>
+                                        <span className="text-xs font-semibold" style={{ color: colors.textSecondary }}>{app.name}</span>
                                     </motion.button>
                                 ))}
                             </div>
