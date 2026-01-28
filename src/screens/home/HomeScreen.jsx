@@ -140,13 +140,19 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                         )}
                     </div>
 
+                    {isEditMode && (
+                        <div className="text-xs font-medium" style={{ color: colors.textSecondary }}>
+                            Reorder with arrows. Keep at least 4 apps pinned.
+                        </div>
+                    )}
+
                     {isEditMode ? (
                         <div className="space-y-2">
                             {currentApps.map((app, index) => (
                                 <div
                                     key={app.route}
                                     className="flex items-center justify-between gap-3 px-3 py-2 rounded-2xl border"
-                                    style={{ backgroundColor: colors.surface, borderColor: colors.border, boxShadow: DESIGN_TOKENS.shadows.card }}
+                                    style={{ backgroundColor: `${colors.surface}F7`, borderColor: colors.border, boxShadow: DESIGN_TOKENS.shadows.card }}
                                 >
                                     <div className="flex items-center gap-3 min-w-0">
                                         <div className="w-9 h-9 rounded-2xl flex items-center justify-center" style={{ backgroundColor: `${colors.accent}12` }}>
@@ -157,7 +163,7 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                                     <div className="flex items-center gap-2">
                                         <button
                                             onClick={() => moveApp(app.route, 'up')}
-                                            className="w-8 h-8 rounded-full flex items-center justify-center border hover:bg-black/[0.04] active:scale-95"
+                                            className={`w-8 h-8 rounded-full flex items-center justify-center border transition-all ${index === 0 ? 'opacity-40 cursor-not-allowed' : 'hover:bg-black/[0.04] active:scale-95'}`}
                                             style={{ borderColor: colors.border, color: colors.textSecondary }}
                                             aria-label="Move up"
                                             disabled={index === 0}
@@ -166,7 +172,7 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                                         </button>
                                         <button
                                             onClick={() => moveApp(app.route, 'down')}
-                                            className="w-8 h-8 rounded-full flex items-center justify-center border hover:bg-black/[0.04] active:scale-95"
+                                            className={`w-8 h-8 rounded-full flex items-center justify-center border transition-all ${index === currentApps.length - 1 ? 'opacity-40 cursor-not-allowed' : 'hover:bg-black/[0.04] active:scale-95'}`}
                                             style={{ borderColor: colors.border, color: colors.textSecondary }}
                                             aria-label="Move down"
                                             disabled={index === currentApps.length - 1}
@@ -198,7 +204,7 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                                             exit={{ opacity: 0 }}
                                             key={app.route}
                                             onClick={() => onNavigate(app.route)}
-                                            className="relative flex flex-col items-center justify-center rounded-3xl transition-all active:scale-95 group gap-3 p-6"
+                                            className="relative flex flex-col items-center justify-center rounded-3xl transition-all active:scale-95 group gap-3 p-6 hover:shadow-xl"
                                             style={{
                                                 minHeight: 140,
                                                 backgroundColor: colors.surface,
