@@ -4,6 +4,7 @@ import { X, Search, Check, Plus } from 'lucide-react';
 import { FormInput } from '../../components/forms/FormInput.jsx';
 import { PortalNativeSelect } from '../../components/forms/PortalNativeSelect.jsx';
 import { ToggleSwitch } from '../../components/forms/ToggleSwitch.jsx';
+import { AutoCompleteCombobox } from '../../components/forms/AutoCompleteCombobox.jsx';
 import { ProbabilitySlider } from '../../components/forms/ProbabilitySlider.jsx';
 import { FormSection, SettingsRow } from '../../components/forms/FormSections.jsx';
 import { SpotlightMultiSelect } from '../../components/common/SpotlightMultiSelect.jsx';
@@ -233,6 +234,17 @@ export const NewLeadScreen = ({
 }) => {
     const REWARD_THRESHOLD = 250000;
 
+    const CITY_OPTIONS = useMemo(() => ([
+        'Indianapolis, IN', 'Jasper, IN', 'Evansville, IN', 'Bloomington, IN', 'Fort Wayne, IN',
+        'Cincinnati, OH', 'Louisville, KY', 'Nashville, TN', 'Chicago, IL', 'St. Louis, MO',
+        'Columbus, OH', 'Cleveland, OH', 'Detroit, MI', 'Milwaukee, WI', 'Minneapolis, MN',
+        'Atlanta, GA', 'Charlotte, NC', 'Raleigh, NC', 'Pittsburgh, PA', 'Philadelphia, PA',
+        'New York, NY', 'Boston, MA', 'Washington, DC', 'Baltimore, MD', 'Richmond, VA',
+        'Dallas, TX', 'Austin, TX', 'Houston, TX', 'San Antonio, TX', 'Denver, CO',
+        'Phoenix, AZ', 'Las Vegas, NV', 'Los Angeles, CA', 'San Diego, CA', 'San Francisco, CA',
+        'Seattle, WA', 'Portland, OR', 'Salt Lake City, UT', 'Kansas City, MO', 'Omaha, NE'
+    ]), []);
+
     const updateField = (field, value) => {
         // Clear otherVertical when vertical changes away from "Other"
         if (field === 'vertical' && value !== 'Other (Please specify)') {
@@ -379,6 +391,19 @@ export const NewLeadScreen = ({
                                     );
                                 })}
                             </div>
+                            {newLeadData.vertical === 'Other (Please specify)' && (
+                                <div className="pt-2">
+                                    <FormInput
+                                        label=""
+                                        value={newLeadData.otherVertical || ''}
+                                        onChange={e => updateField('otherVertical', e.target.value)}
+                                        placeholder="Enter vertical"
+                                        theme={theme}
+                                        size="sm"
+                                        surfaceBg={true}
+                                    />
+                                </div>
+                            )}
                         </SettingsRow>
                         <SettingsRow label={
                             <div className="flex items-center gap-2">
@@ -391,14 +416,15 @@ export const NewLeadScreen = ({
                                 />
                             </div>
                         } theme={theme}>
-                            <FormInput
-                                label=""
+                            <AutoCompleteCombobox
                                 value={newLeadData.installationLocation || ''}
-                                onChange={e => updateField('installationLocation', e.target.value)}
-                                placeholder="Optional"
+                                onChange={(val) => updateField('installationLocation', val)}
+                                onSelect={(val) => updateField('installationLocation', val)}
+                                options={CITY_OPTIONS}
+                                placeholder="City, State"
                                 theme={theme}
-                                size="sm"
-                                surfaceBg={true}
+                                onAddNew={(val) => updateField('installationLocation', val)}
+                                resetOnSelect={false}
                             />
                         </SettingsRow>
                     </div>
