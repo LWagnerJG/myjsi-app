@@ -24,11 +24,14 @@ export const AppHeader = React.memo(({
     return (
         <div className="px-4 sm:px-5 pt-3 pb-1 fixed top-0 left-0 right-0 z-30 pointer-events-none bg-transparent">
             <div
-                className="max-w-5xl mx-auto w-full flex items-center justify-between px-4 sm:px-5 h-14 pointer-events-auto transition-all duration-300 shadow-none overflow-hidden"
+                className="max-w-5xl mx-auto w-full flex items-center justify-between px-4 sm:px-5 h-14 pointer-events-auto transition-all duration-300 overflow-hidden"
                 style={{
                     borderRadius: 9999,
-                    background: 'rgba(255, 255, 255, 0.75)',
-                    border: '1px solid rgba(255, 255, 255, 0.7)'
+                    background: 'linear-gradient(180deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.18) 100%)',
+                    boxShadow: '0 10px 24px rgba(0,0,0,0.08), 0 2px 10px rgba(0,0,0,0.05)',
+                    backdropFilter: 'blur(22px) saturate(140%)',
+                    WebkitBackdropFilter: 'blur(22px) saturate(140%)',
+                    border: '1px solid rgba(255,255,255,0.35)'
                 }}
             >
                 <div className="flex items-center">
