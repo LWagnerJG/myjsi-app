@@ -9,16 +9,14 @@ import { CountUp } from '../../components/common/CountUp.jsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { PillButton } from '../../components/common/JSIButtons.jsx';
-import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 
 const formatCompanyName = (name = '') => name.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
 const monthNameToNumber = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
 
-// Sales tab options for SegmentedToggle
 const SALES_TAB_OPTIONS = [
-  { value: 'rewards', label: 'Rewards', icon: Award },
-  { value: 'ranking', label: 'Ranking', icon: TrendingUp },
-  { value: 'comms', label: 'Commissions', icon: DollarSign },
+  { value: 'rewards', label: 'Rewards', icon: Award, route: 'incentive-rewards' },
+  { value: 'ranking', label: 'Ranking', icon: TrendingUp, route: 'customer-rank' },
+  { value: 'comms', label: 'Commissions', icon: DollarSign, route: 'commissions' },
 ];
 
 const OrderModal = ({ order, onClose, theme }) => {
@@ -98,14 +96,31 @@ export const SalesScreen = ({ theme, onNavigate }) => {
     <div className="flex flex-col h-full overflow-y-auto scrollbar-hide" style={{ backgroundColor: colors.background }}>
       <div className="px-6 py-6 space-y-6 max-w-2xl mx-auto w-full pb-24">
 
-        {/* Navigation Tabs */}
-        <SegmentedToggle
-          value={topTab}
-          onChange={k => { setTopTab(k === topTab ? null : k); if (k && k !== topTab) onNavigate(`customer-${k}`); }}
-          options={SALES_TAB_OPTIONS}
-          theme={theme}
-          size="sm"
-        />
+        {/* Navigation Buttons */}
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+          {SALES_TAB_OPTIONS.map((opt) => {
+            const isActive = topTab === opt.value;
+            return (
+              <button
+                key={opt.value}
+                onClick={() => {
+                  setTopTab(opt.value);
+                  onNavigate(opt.route);
+                }}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-full text-[13px] font-medium whitespace-nowrap transition-all border"
+                style={{
+                  backgroundColor: isActive ? colors.accent : colors.surface,
+                  color: isActive ? colors.surface : colors.textSecondary,
+                  borderColor: colors.border,
+                  boxShadow: isActive ? '0 8px 18px rgba(0,0,0,0.10)' : 'none'
+                }}
+              >
+                <opt.icon className="w-4 h-4" />
+                {opt.label}
+              </button>
+            );
+          })}
+        </div>
 
         {/* Hero Section - Progress to Goal */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
