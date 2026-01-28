@@ -45,10 +45,10 @@ export const AppHeader = React.memo(({
 
                 <div className="flex items-center gap-3">
                     <div
-                        className={`transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden ${isHome ? 'max-w-[220px] opacity-100 mr-2' : 'max-w-0 opacity-0'}`}
+                        className={`transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden ${isHome ? 'max-w-[240px] opacity-100 mr-2' : 'max-w-0 opacity-0'}`}
                         style={{ color: theme.colors.textPrimary }}
                     >
-                        <span className="text-[10px] font-semibold uppercase tracking-widest opacity-60 mr-2">{getTimeGreeting()}</span>
+                        <span className="text-xs font-semibold tracking-tight opacity-60 mr-2">{getTimeGreeting()}</span>
                         <span className="text-sm font-bold tracking-tight">{userName}</span>
                     </div>
 

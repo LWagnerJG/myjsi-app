@@ -74,7 +74,7 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
             <div className="px-4 sm:px-6 lg:px-8 pt-4 pb-24 space-y-6 lg:space-y-8 max-w-2xl lg:max-w-5xl 2xl:max-w-6xl mx-auto w-full">
 
                 {/* Header Section */}
-                <div className="space-y-1">
+                <div className="space-y-1 hidden sm:block">
                     <h2 className="text-4xl font-bold" style={{ color: colors.textPrimary }}>Dashboard</h2>
                     <div className="text-sm" style={{ color: colors.textSecondary }}>{todayLabel}</div>
                 </div>
@@ -101,7 +101,7 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                         {onUpdateHomeApps && (
                             <button
                                 onClick={() => setIsEditMode(!isEditMode)}
-                                className={`hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold transition-all`}
+                                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold transition-all`}
                                 style={{
                                     backgroundColor: isEditMode ? colors.accent : 'transparent',
                                     color: isEditMode ? '#FFFFFF' : colors.textSecondary,
@@ -114,7 +114,7 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                         )}
                     </div>
 
-                    <div className={`grid ${isEditMode ? 'grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-3' : 'grid-cols-2 sm:grid-cols-3 gap-4'}`}>
+                    <div className={`grid ${isEditMode ? 'grid-cols-4 sm:grid-cols-5 lg:grid-cols-6 gap-3' : 'grid-cols-2 sm:grid-cols-3 gap-4'}`}>
                         <AnimatePresence mode="sync" initial={false}>
                             {isEditMode && onUpdateHomeApps ? (
                                 <Reorder.Group
@@ -138,19 +138,21 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                                                     animate={{ opacity: 1 }}
                                                     exit={{ opacity: 0 }}
                                                     onClick={(e) => { e.preventDefault(); }}
-                                                    className={`relative flex flex-col items-center justify-center rounded-2xl transition-all group cursor-grab active:cursor-grabbing ${isEditMode ? 'gap-1.5 p-3' : 'gap-3 p-6'}`}
+                                                    className={`relative flex flex-col items-center justify-center rounded-2xl transition-all group cursor-grab active:cursor-grabbing ${isEditMode ? 'gap-1.5 p-2.5' : 'gap-3 p-6'}`}
                                                     style={{
-                                                        minHeight: isEditMode ? 96 : 140,
-                                                        backgroundColor: colors.surface,
+                                                        minHeight: isEditMode ? 84 : 140,
+                                                        backgroundColor: `${colors.surface}F2`,
                                                         border: `1px solid ${colors.border}`,
-                                                        boxShadow: DESIGN_TOKENS.shadows.card
+                                                        boxShadow: DESIGN_TOKENS.shadows.card,
+                                                        backdropFilter: 'blur(12px)',
+                                                        WebkitBackdropFilter: 'blur(12px)'
                                                     }}
                                                 >
                                                     <div
-                                                        className={`rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 ${isEditMode ? 'w-8 h-8' : 'w-12 h-12'}`}
+                                                        className={`rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 ${isEditMode ? 'w-7 h-7' : 'w-12 h-12'}`}
                                                         style={{ backgroundColor: `${colors.accent}12` }}
                                                     >
-                                                        <app.icon className={`${isEditMode ? 'w-4 h-4' : 'w-6 h-6'}`} style={{ color: colors.accent }} />
+                                                        <app.icon className={`${isEditMode ? 'w-3.5 h-3.5' : 'w-6 h-6'}`} style={{ color: colors.accent }} />
                                                     </div>
                                                     <span className={`${isEditMode ? 'text-[11px] font-semibold leading-tight' : 'text-sm font-bold'} tracking-tight text-center`} style={{ color: colors.textPrimary }}>
                                                         {app.name}
@@ -165,9 +167,9 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                                                     )}
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); toggleApp(app.route); }}
-                                                        className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-red-500 text-white flex items-center justify-center shadow-lg hover:scale-105 active:scale-90 transition-transform"
+                                                        className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center shadow-lg hover:scale-105 active:scale-90 transition-transform"
                                                     >
-                                                        <X className="w-3.5 h-3.5" />
+                                                        <X className="w-3 h-3" />
                                                     </button>
                                                 </motion.button>
                                             </Reorder.Item>
@@ -289,7 +291,7 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                     <GlassCard
                         theme={theme}
                         className="px-4 py-3 flex items-center justify-between"
-                        style={{ borderRadius: 20, backgroundColor: `${colors.accent}12`, border: `1px solid ${colors.border}` }}
+                        style={{ borderRadius: 20, backgroundColor: `${colors.surface}E6`, border: `1px solid ${colors.border}`, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
                     >
                         <div className="space-y-0.5">
                             <h4 className="text-sm font-semibold" style={{ color: colors.textPrimary }}>Feedback</h4>
