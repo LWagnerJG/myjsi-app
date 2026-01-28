@@ -1,6 +1,7 @@
 // Enhanced HomeScreen with Dealer Dashboard design and reconfiguration functionality
 import React, { useState, useCallback, useMemo } from 'react';
 import { allApps, DEFAULT_HOME_APPS } from '../../data.jsx';
+import { ORDER_DATA } from '../orders/data.js';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { HomeSearchInput } from '../../components/common/SearchInput.jsx';
 import { DESIGN_TOKENS, JSI_COLORS } from '../../design-system/tokens.js';
@@ -66,14 +67,24 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
         }
     }, [onAskAI]);
 
+    const todayLabel = useMemo(() => {
+        const now = new Date();
+        return now.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+    }, []);
+
+    const recentOrders = useMemo(() => {
+        return [...ORDER_DATA].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 3);
+    }, []);
+
     return (
         <div className="flex flex-col h-full overflow-y-auto scrollbar-hide" style={{ backgroundColor: colors.background }}>
-            <div className="px-6 pt-4 pb-24 space-y-5 max-w-2xl mx-auto w-full">
+            <div className="px-4 sm:px-6 lg:px-8 pt-4 pb-24 space-y-6 lg:space-y-8 max-w-2xl lg:max-w-5xl 2xl:max-w-6xl mx-auto w-full">
 
-                {/* Header Section - hidden on mobile */}
-                <div className="space-y-1 hidden sm:block">
+                {/* Header Section */}
+                <div className="space-y-1">
                     <p className="text-sm font-semibold uppercase tracking-widest opacity-60" style={{ color: colors.textSecondary }}>{getTimeGreeting()}</p>
-                    <h2 className="text-4xl font-bold" style={{ color: colors.textPrimary }}>Welcome, {userSettings?.firstName || 'Luke'}</h2>
+                    <h2 className="text-4xl font-bold" style={{ color: colors.textPrimary }}>Dashboard</h2>
+                    <div className="text-sm" style={{ color: colors.textSecondary }}>{todayLabel}</div>
                 </div>
 
                 {/* Search / Spotlight */}
@@ -93,7 +104,8 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
 
                 {/* Reconfigurable Apps section */}
                 <div className="space-y-4">
-                    <div className="flex justify-end items-center px-1">
+                    <div className="flex items-center justify-between">
+                        <h3 className="text-sm font-semibold uppercase tracking-widest" style={{ color: colors.textSecondary }}>Quick Access</h3>
                         {onUpdateHomeApps && (
                             <button
                                 onClick={() => setIsEditMode(!isEditMode)}
@@ -110,7 +122,7 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                         )}
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                         <AnimatePresence mode="popLayout">
                             {currentApps.map((app) => {
                                 const badge = APP_BADGES[app.route];
@@ -200,6 +212,37 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                         </button>
                     </GlassCard>
                 </div>
+
+                {/* Recent Activity */}
+                <GlassCard theme={theme} className="p-6" style={{ borderRadius: 24 }}>
+                    <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-lg font-bold" style={{ color: colors.textPrimary }}>Recent Activity</h4>
+                        <button onClick={() => onNavigate('orders')} className="text-xs font-bold uppercase tracking-widest opacity-50 hover:opacity-100 transition-opacity">View All</button>
+                    </div>
+                    <div className="space-y-3">
+                        {recentOrders.map((order) => (
+                            <button
+                                key={order.orderNumber}
+                                onClick={() => onNavigate('orders')}
+                                className="w-full flex items-center justify-between p-3 rounded-2xl hover:bg-black/[0.03] transition-colors"
+                            >
+                                <div className="flex items-center gap-3 min-w-0">
+                                    <div className="w-9 h-9 rounded-xl bg-black/5 flex items-center justify-center text-[10px] font-bold">PO</div>
+                                    <div className="text-left min-w-0">
+                                        <div className="text-sm font-semibold truncate" style={{ color: colors.textPrimary }}>{order.company}</div>
+                                        <div className="text-[10px] uppercase tracking-widest opacity-50" style={{ color: colors.textSecondary }}>
+                                            {new Date(order.date).toLocaleDateString()}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <div className="text-sm font-bold" style={{ color: colors.textPrimary }}>${order.net.toLocaleString()}</div>
+                                    <div className="text-[10px] uppercase tracking-widest opacity-50" style={{ color: colors.textSecondary }}>{order.status}</div>
+                                </div>
+                            </button>
+                        ))}
+                    </div>
+                </GlassCard>
             </div>
         </div>
     );
