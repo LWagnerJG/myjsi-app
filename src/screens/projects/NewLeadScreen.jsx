@@ -351,38 +351,49 @@ export const NewLeadScreen = ({
                                 ))}
                             </div>
                         </SettingsRow>
-                        <SettingsRow label="Vertical" theme={theme}>
-                            <div className="grid grid-cols-3 gap-3">
+                        <SettingsRow label="Project Stage" theme={theme} className="stack">
+                            <div className="space-y-3">
+                                <input
+                                    type="range"
+                                    min={0}
+                                    max={STAGES.length - 1}
+                                    step={1}
+                                    value={Math.max(0, STAGES.indexOf(newLeadData.projectStatus))}
+                                    onChange={(e) => updateField('projectStatus', STAGES[Number(e.target.value)])}
+                                    className="w-full accent-black"
+                                />
+                                <div className="flex items-center justify-between text-xs" style={{ color: theme.colors.textSecondary }}>
+                                    {STAGES.map((stage, idx) => (
+                                        <span
+                                            key={stage}
+                                            className={idx === Math.max(0, STAGES.indexOf(newLeadData.projectStatus)) ? 'font-semibold' : 'opacity-60'}
+                                        >
+                                            {stage.replace('Decision/Bidding', 'Decision')}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        </SettingsRow>
+                        <SettingsRow label="Vertical" theme={theme} className="stack">
+                            <div className="grid grid-cols-3 gap-2">
                                 {VERTICALS.map(vertical => {
                                     const isOther = vertical === 'Other (Please specify)';
                                     const displayText = isOther ? 'Other' : vertical;
-
                                     return (
                                         <PillButton
                                             key={vertical}
+                                            size="compact"
                                             isSelected={newLeadData.vertical === vertical}
                                             onClick={() => updateField('vertical', vertical)}
                                             theme={theme}
+                                            className="min-w-[96px] justify-center"
                                         >
                                             {displayText}
                                         </PillButton>
                                     );
                                 })}
                             </div>
-                            {newLeadData.vertical === 'Other (Please specify)' && (
-                                <div className="mt-4 animate-fade-in">
-                                    <FormInput
-                                        label=""
-                                        required
-                                        value={newLeadData.otherVertical || ''}
-                                        onChange={e => updateField('otherVertical', e.target.value)}
-                                        placeholder="Specify other vertical..."
-                                        theme={theme}
-                                        size="sm"
-                                        surfaceBg={true}
-                                    />
-                                </div>
-                            )}
+                        </SettingsRow>
                         </SettingsRow>
                         <SettingsRow label={
                             <div className="flex items-center gap-2">
@@ -437,19 +448,45 @@ export const NewLeadScreen = ({
                 
                 <FormSection title="Competition & Products" theme={theme}>
                     <div>
-                        <SettingsRow label="Bid?" isFirst={true} theme={theme}>
-                            <ToggleSwitch
-                                checked={!!newLeadData.isBid}
-                                onChange={e => updateField('isBid', e.target.checked)}
-                                theme={theme}
-                            />
+                        <SettingsRow label="Bid?" isFirst={true} theme={theme} className="stack">
+                            <div className="grid grid-cols-2 gap-2">
+                                <PillButton
+                                    size="compact"
+                                    isSelected={newLeadData.isBid === true}
+                                    onClick={() => updateField('isBid', true)}
+                                    theme={theme}
+                                >
+                                    Yes
+                                </PillButton>
+                                <PillButton
+                                    size="compact"
+                                    isSelected={newLeadData.isBid !== true}
+                                    onClick={() => updateField('isBid', false)}
+                                    theme={theme}
+                                >
+                                    No
+                                </PillButton>
+                            </div>
                         </SettingsRow>
-                        <SettingsRow label="Competition?" theme={theme}>
-                            <ToggleSwitch
-                                checked={!!newLeadData.competitionPresent}
-                                onChange={(e) => updateField('competitionPresent', e.target.checked)}
-                                theme={theme}
-                            />
+                        <SettingsRow label="Competition?" theme={theme} className="stack">
+                            <div className="grid grid-cols-2 gap-2">
+                                <PillButton
+                                    size="compact"
+                                    isSelected={newLeadData.competitionPresent === true}
+                                    onClick={() => updateField('competitionPresent', true)}
+                                    theme={theme}
+                                >
+                                    Yes
+                                </PillButton>
+                                <PillButton
+                                    size="compact"
+                                    isSelected={newLeadData.competitionPresent !== true}
+                                    onClick={() => updateField('competitionPresent', false)}
+                                    theme={theme}
+                                >
+                                    No
+                                </PillButton>
+                            </div>
                         </SettingsRow>
 
                         <div className="-mx-4">
@@ -596,11 +633,12 @@ export const NewLeadScreen = ({
                                 </PillButton>
                             </div>
                         </SettingsRow>
-                        <SettingsRow label="PO Timeframe" theme={theme}>
+                        <SettingsRow label="PO Timeframe" theme={theme} className="stack">
                             <div className="grid grid-cols-2 gap-3">
                                 {PO_TIMEFRAMES.map(timeframe => (
                                     <PillButton
                                         key={timeframe}
+                                        size="compact"
                                         isSelected={newLeadData.poTimeframe === timeframe}
                                         onClick={() => updateField('poTimeframe', timeframe)}
                                         theme={theme}
