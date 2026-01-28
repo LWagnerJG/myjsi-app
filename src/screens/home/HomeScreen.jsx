@@ -139,7 +139,7 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                             axis="y"
                             values={safeHomeApps}
                             onReorder={onUpdateHomeApps}
-                            className="space-y-2"
+                            className="grid grid-cols-2 sm:grid-cols-3 gap-3"
                         >
                             {currentApps.map((app) => (
                                 <Reorder.Item
@@ -150,7 +150,7 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                                     <motion.div
                                         layout
                                         transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-                                        className="flex items-center justify-between gap-3 px-3 py-2 rounded-2xl border"
+                                        className="flex items-center justify-between gap-2 px-3 py-2 rounded-2xl border"
                                         style={{ backgroundColor: `${colors.surface}F7`, borderColor: colors.border, boxShadow: DESIGN_TOKENS.shadows.card }}
                                     >
                                         <div className="flex items-center gap-3 min-w-0">
