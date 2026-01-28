@@ -24,7 +24,7 @@ export const AppHeader = React.memo(({
     return (
         <div className="px-4 sm:px-5 pt-3 pb-1 fixed top-0 left-0 right-0 z-30 pointer-events-none bg-transparent">
             <div
-                className="max-w-5xl mx-auto w-full flex items-center justify-between px-4 sm:px-5 h-14 pointer-events-auto transition-all duration-300 shadow-none border border-white/30"
+                className="max-w-5xl mx-auto w-full flex items-center justify-between px-4 sm:px-5 h-14 pointer-events-auto transition-all duration-300 shadow-none overflow-hidden isolate"
                 style={{
                     borderRadius: 9999,
                     background: 'rgba(255, 255, 255, 0.4)',
