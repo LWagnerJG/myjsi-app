@@ -216,7 +216,7 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                             onDragEnd={handleReorder}
                         >
                             <SortableContext items={safeHomeApps} strategy={rectSortingStrategy}>
-                                <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' }}>
+                                <div className="grid gap-2 sm:gap-3" style={{ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' }}>
                                     {currentApps.map((app) => (
                                         <SortableAppTile
                                             key={app.route}
@@ -230,16 +230,16 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                             </SortableContext>
                         </DndContext>
                     ) : (
-                        <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' }}>
+                        <div className="grid gap-2 sm:gap-4" style={{ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' }}>
                             {currentApps.map((app) => {
                                 const badge = APP_BADGES[app.route];
                                 return (
                                     <motion.button
                                         key={app.route}
                                         onClick={() => onNavigate(app.route)}
-                                        className="relative flex flex-col items-center justify-center rounded-3xl transition-all active:scale-95 group gap-2 p-4 sm:p-5 hover:shadow-xl"
+                                        className="relative flex flex-col items-center justify-center rounded-3xl transition-all active:scale-95 group gap-1.5 p-3 sm:p-5 hover:shadow-xl"
                                         style={{
-                                            minHeight: 120,
+                                            minHeight: 108,
                                             backgroundColor: colors.surface,
                                             border: `1px solid ${colors.border}`,
                                             boxShadow: DESIGN_TOKENS.shadows.card,
@@ -248,12 +248,12 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                                         }}
                                     >
                                         <div
-                                            className="rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 w-10 h-10 sm:w-12 sm:h-12"
+                                            className="rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 w-9 h-9 sm:w-12 sm:h-12"
                                             style={{ backgroundColor: `${colors.accent}12` }}
                                         >
-                                            <app.icon className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: colors.accent }} />
+                                            <app.icon className="w-4 h-4 sm:w-6 sm:h-6" style={{ color: colors.accent }} />
                                         </div>
-                                        <span className="text-xs sm:text-sm font-bold tracking-tight text-center" style={{ color: colors.textPrimary }}>
+                                        <span className="text-[11px] sm:text-sm font-bold tracking-tight text-center" style={{ color: colors.textPrimary }}>
                                             {app.name}
                                         </span>
                                         {badge && (
