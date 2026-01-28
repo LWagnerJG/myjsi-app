@@ -14,6 +14,13 @@ export const AppHeader = React.memo(({
     const filterStyle = isDarkMode ? 'brightness(0) invert(1)' : 'none';
     const isHome = !showBack;
 
+    const getTimeGreeting = () => {
+        const hour = new Date().getHours();
+        if (hour < 12) return 'Good Morning';
+        if (hour < 17) return 'Good Afternoon';
+        return 'Good Evening';
+    };
+
     return (
         <div className="px-5 pt-4 pb-1 fixed top-0 left-0 right-0 z-30 pointer-events-none">
             <div className="max-w-5xl mx-auto w-full flex items-center justify-between px-5 h-16 bg-white/80 backdrop-blur-xl border border-black/[0.03] shadow-lg pointer-events-auto" style={{ borderRadius: 9999 }}>
@@ -38,10 +45,11 @@ export const AppHeader = React.memo(({
 
                 <div className="flex items-center gap-3">
                     <div
-                        className={`transition-all duration-300 ease-in-out text-sm font-bold tracking-tight whitespace-nowrap overflow-hidden ${isHome ? 'max-w-[170px] opacity-100 mr-2' : 'max-w-0 opacity-0'}`}
+                        className={`transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden ${isHome ? 'max-w-[220px] opacity-100 mr-2' : 'max-w-0 opacity-0'}`}
                         style={{ color: theme.colors.textPrimary }}
                     >
-                        {userName}
+                        <span className="text-[10px] font-semibold uppercase tracking-widest opacity-60 mr-2">{getTimeGreeting()}</span>
+                        <span className="text-sm font-bold tracking-tight">{userName}</span>
                     </div>
 
                     <button
