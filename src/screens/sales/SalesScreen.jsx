@@ -2,7 +2,7 @@ import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom';
 import { Modal } from '../../components/common/Modal';
 import { ArrowUp, ArrowDown, TrendingUp, Award, DollarSign, BarChart, Table, MoreHorizontal, ChevronRight } from 'lucide-react';
-import { MONTHLY_SALES_DATA, SALES_VERTICALS_DATA } from './data.js';
+import { MONTHLY_SALES_DATA, SALES_VERTICALS_DATA, CUSTOMER_RANK_DATA } from './data.js';
 import { ORDER_DATA, STATUS_COLORS } from '../orders/data.js';
 import { SalesByVerticalBreakdown } from './components/SalesByVerticalBreakdown.jsx';
 import { CountUp } from '../../components/common/CountUp.jsx';
@@ -65,6 +65,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
   const [numRecentOrders, setNumRecentOrders] = useState(4);
   const [selectedMonth, setSelectedMonth] = useState(null);
   const [topTab, setTopTab] = useState(null);
+  const formatCurrency = useCallback((n) => `$${Number(n || 0).toLocaleString()}`, []);
 
   // Safe color extraction
   const colors = useMemo(() => ({
@@ -91,6 +92,9 @@ export const SalesScreen = ({ theme, onNavigate }) => {
   }, []);
 
   const recentOrders = useMemo(() => ORDER_DATA.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, numRecentOrders), [numRecentOrders]);
+  const topLeaders = useMemo(() => [...CUSTOMER_RANK_DATA].sort((a, b) => (b.bookings || 0) - (a.bookings || 0)).slice(0, 3), []);
+  const activeTotal = chartDataType === 'bookings' ? totalBookings : totalSales;
+  const progressPct = Math.min(100, (activeTotal / 7000000) * 100);
 
   return (
     <div className="flex flex-col h-full overflow-y-auto scrollbar-hide" style={{ backgroundColor: colors.background }}>
@@ -122,47 +126,115 @@ export const SalesScreen = ({ theme, onNavigate }) => {
           })}
         </div>
 
-        {/* Hero Section - Progress to Goal */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <GlassCard theme={theme} className="md:col-span-2 p-8 overflow-hidden relative" variant="elevated">
-            <div className="relative z-10 flex flex-col h-full justify-between">
-              <div className="flex justify-between items-start">
+        {/* Hero Section - Total Ordered/Invoiced + Progress */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-6">
+          <GlassCard theme={theme} className="p-8 overflow-hidden relative" variant="elevated">
+            <div className="relative z-10 space-y-6">
+              <div className="flex items-start justify-between gap-4">
                 <div className="space-y-1">
-                  <h3 className="text-3xl font-black">Performance</h3>
-                  <p className="text-sm font-semibold opacity-60">Year-to-date Progress</p>
+                  <p className="text-xs font-bold uppercase tracking-widest opacity-60">
+                    {chartDataType === 'bookings' ? 'Total Ordered' : 'Total Invoiced'}
+                  </p>
+                  <div className="text-4xl font-black tracking-tight">
+                    {formatCurrency(activeTotal)}
+                  </div>
                 </div>
-                <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${aheadOfPace ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                  {aheadOfPace ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
-                  {deltaLabel} {aheadOfPace ? 'Ahead' : 'Behind'}
+                <div className="flex items-center gap-1.5 bg-black/5 rounded-full p-1">
+                  <button
+                    onClick={() => setChartDataType('bookings')}
+                    className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest transition-colors ${chartDataType === 'bookings' ? 'bg-black text-white' : 'opacity-50 hover:opacity-80'}`}
+                  >
+                    Ordered
+                  </button>
+                  <button
+                    onClick={() => setChartDataType('sales')}
+                    className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest transition-colors ${chartDataType === 'sales' ? 'bg-black text-white' : 'opacity-50 hover:opacity-80'}`}
+                  >
+                    Invoiced
+                  </button>
                 </div>
               </div>
 
-              <div className="mt-12 space-y-4">
-                <div className="flex justify-between items-end">
-                  <span className="text-5xl font-black tracking-tighter">${(totalBookings / 1000000).toFixed(1)}M<span className="text-lg opacity-20 ml-2">/ $7M Goal</span></span>
-                  <span className="text-2xl font-bold opacity-40">{percentToGoal.toFixed(0)}%</span>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm font-semibold opacity-70">Progress to Goal</div>
+                  <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${aheadOfPace ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                    {aheadOfPace ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
+                    {deltaLabel} {aheadOfPace ? 'Ahead' : 'Behind'}
+                  </div>
                 </div>
-                <div className="h-4 w-full bg-black/5 rounded-full overflow-hidden">
-                  <motion.div initial={{ width: 0 }} animate={{ width: `${percentToGoal}%` }} className="h-full bg-black rounded-full shadow-[0_0_20px_rgba(0,0,0,0.2)]" />
+                <div className="h-3 w-full bg-black/5 rounded-full overflow-hidden">
+                  <motion.div initial={{ width: 0 }} animate={{ width: `${progressPct}%` }} className="h-full bg-black rounded-full shadow-[0_0_20px_rgba(0,0,0,0.2)]" />
+                </div>
+                <div className="text-xs font-semibold opacity-50">{progressPct.toFixed(1)}% of $7M goal</div>
+              </div>
+
+              <div className="pt-2">
+                <div className="h-20 flex items-end gap-2">
+                  {MONTHLY_SALES_DATA.map((m) => {
+                    const val = chartDataType === 'bookings' ? m.bookings : m.sales;
+                    const max = Math.max(...MONTHLY_SALES_DATA.map(d => chartDataType === 'bookings' ? d.bookings : d.sales));
+                    const pct = (val / max) * 100;
+                    return (
+                      <div key={m.month} className="flex-1 flex flex-col items-center gap-2">
+                        <div className="w-full bg-black/5 rounded-md overflow-hidden">
+                          <div className="w-full" style={{ height: `${Math.max(8, (pct / 100) * 64)}px`, background: colors.accent, opacity: 0.2 }} />
+                        </div>
+                        <span className="text-[9px] font-bold opacity-40">{m.month}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
-            {/* Decorative background element */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-black/5 rounded-full -mr-32 -mt-32 blur-3xl" />
           </GlassCard>
 
-          <GlassCard theme={theme} className="p-8 flex flex-col justify-between bg-black text-white border-0" variant="elevated">
-            <div className="space-y-1">
-              <Award className="w-8 h-8 mb-4 text-white" />
-              <h4 className="text-xl font-bold text-white leading-tight">Elite Circle Rewards</h4>
-              <p className="text-sm opacity-60">You're 12k away from Platinum status.</p>
-            </div>
-            <button onClick={() => onNavigate('incentive-rewards')} className="w-full bg-white text-black py-4 rounded-full font-bold text-sm hover:scale-[1.02] active:scale-95 transition-transform">View Rewards</button>
-          </GlassCard>
+          <div className="grid grid-cols-1 gap-4">
+            <GlassCard theme={theme} className="p-6 flex items-center justify-between" variant="elevated">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 text-sm font-semibold">
+                  <Award className="w-4 h-4" /> Rewards
+                </div>
+                <p className="text-xs opacity-60">Elite Circle status and bonuses.</p>
+              </div>
+              <button onClick={() => onNavigate('incentive-rewards')} className="px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest bg-black text-white">View</button>
+            </GlassCard>
+
+            <GlassCard theme={theme} className="p-6 space-y-3" variant="elevated">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm font-semibold">
+                  <TrendingUp className="w-4 h-4" /> Leaderboard
+                </div>
+                <button onClick={() => onNavigate('customer-rank')} className="px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest bg-black text-white">View</button>
+              </div>
+              <div className="space-y-2">
+                {topLeaders.map((leader, idx) => (
+                  <div key={leader.id} className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="w-5 h-5 rounded-full bg-black/5 flex items-center justify-center text-[10px] font-bold">{idx + 1}</span>
+                      <span className="font-semibold truncate">{leader.name}</span>
+                    </div>
+                    <span className="font-semibold tabular-nums">{formatCurrency(leader.bookings)}</span>
+                  </div>
+                ))}
+              </div>
+            </GlassCard>
+
+            <GlassCard theme={theme} className="p-6 flex items-center justify-between" variant="elevated">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 text-sm font-semibold">
+                  <DollarSign className="w-4 h-4" /> Commissions
+                </div>
+                <p className="text-xs opacity-60">Payouts and monthly statements.</p>
+              </div>
+              <button onClick={() => onNavigate('commissions')} className="px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest bg-black text-white">View</button>
+            </GlassCard>
+          </div>
         </div>
 
         {/* Data Sections */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-6">
 
           {/* Recent Orders */}
           <GlassCard theme={theme} className="p-8 space-y-6" variant="elevated">
@@ -196,36 +268,48 @@ export const SalesScreen = ({ theme, onNavigate }) => {
             </div>
           </GlassCard>
 
-          {/* Sales Chart */}
-          <GlassCard theme={theme} className="p-8 space-y-6" variant="elevated">
+          {/* Invoiced by Vertical */}
+          <GlassCard theme={theme} className="p-8 space-y-4" variant="elevated">
             <div className="flex justify-between items-center">
-              <div className="flex gap-2">
-                <button onClick={() => setChartDataType('bookings')} className={`text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full transition-colors ${chartDataType === 'bookings' ? 'bg-black text-white' : 'opacity-40 hover:opacity-60'}`}>Bookings</button>
-                <button onClick={() => setChartDataType('sales')} className={`text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full transition-colors ${chartDataType === 'sales' ? 'bg-black text-white' : 'opacity-40 hover:opacity-60'}`}>Sales</button>
-              </div>
-              <button onClick={() => setMonthlyView(v => v === 'chart' ? 'table' : 'chart')} className="p-2 rounded-lg bg-black/5 hover:bg-black/10 transition-colors">
-                {monthlyView === 'chart' ? <Table className="w-4 h-4" /> : <BarChart className="w-4 h-4" />}
-              </button>
+              <h3 className="text-xl font-bold">Invoiced by Vertical</h3>
+              <span className="text-[10px] font-bold uppercase tracking-widest opacity-40">YTD</span>
             </div>
-
-            <div className="h-64 flex items-end gap-2 overflow-hidden px-2">
-              {MONTHLY_SALES_DATA.map((m, i) => {
-                const val = chartDataType === 'bookings' ? m.bookings : m.sales;
-                const max = Math.max(...MONTHLY_SALES_DATA.map(d => chartDataType === 'bookings' ? d.bookings : d.sales));
-                const pct = (val / max) * 100;
-                return (
-                  <div key={m.month} className="flex-1 flex flex-col items-center gap-3 group px-0.5">
-                    <div className="w-full relative flex items-end justify-center">
-                      <motion.div initial={{ height: 0 }} animate={{ height: `${pct}%` }} className="w-full bg-black/5 group-hover:bg-black rounded-t-lg transition-colors relative" />
-                      <div className="absolute -top-6 opacity-0 group-hover:opacity-100 transition-opacity text-[10px] font-black">${(val / 1000).toFixed(0)}k</div>
-                    </div>
-                    <span className="text-[10px] font-bold opacity-30 group-hover:opacity-100 transition-opacity">{m.month}</span>
-                  </div>
-                );
-              })}
-            </div>
+            <SalesByVerticalBreakdown
+              theme={theme}
+              data={SALES_VERTICALS_DATA.map(v => ({ name: v.label, value: v.value, color: v.color }))}
+            />
           </GlassCard>
         </div>
+
+        {/* Monthly Chart */}
+        <GlassCard theme={theme} className="p-8 space-y-6" variant="elevated">
+          <div className="flex justify-between items-center">
+            <div className="flex gap-2">
+              <button onClick={() => setChartDataType('bookings')} className={`text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full transition-colors ${chartDataType === 'bookings' ? 'bg-black text-white' : 'opacity-40 hover:opacity-60'}`}>Ordered</button>
+              <button onClick={() => setChartDataType('sales')} className={`text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full transition-colors ${chartDataType === 'sales' ? 'bg-black text-white' : 'opacity-40 hover:opacity-60'}`}>Invoiced</button>
+            </div>
+            <button onClick={() => setMonthlyView(v => v === 'chart' ? 'table' : 'chart')} className="p-2 rounded-lg bg-black/5 hover:bg-black/10 transition-colors">
+              {monthlyView === 'chart' ? <Table className="w-4 h-4" /> : <BarChart className="w-4 h-4" />}
+            </button>
+          </div>
+
+          <div className="h-64 flex items-end gap-2 overflow-hidden px-2">
+            {MONTHLY_SALES_DATA.map((m) => {
+              const val = chartDataType === 'bookings' ? m.bookings : m.sales;
+              const max = Math.max(...MONTHLY_SALES_DATA.map(d => chartDataType === 'bookings' ? d.bookings : d.sales));
+              const pct = (val / max) * 100;
+              return (
+                <div key={m.month} className="flex-1 flex flex-col items-center gap-3 group px-0.5">
+                  <div className="w-full relative flex items-end justify-center">
+                    <motion.div initial={{ height: 0 }} animate={{ height: `${pct}%` }} className="w-full bg-black/5 group-hover:bg-black rounded-t-lg transition-colors relative" />
+                    <div className="absolute -top-6 opacity-0 group-hover:opacity-100 transition-opacity text-[10px] font-black">${(val / 1000).toFixed(0)}k</div>
+                  </div>
+                  <span className="text-[10px] font-bold opacity-30 group-hover:opacity-100 transition-opacity">{m.month}</span>
+                </div>
+              );
+            })}
+          </div>
+        </GlassCard>
 
         {/* Footer info or quick action */}
         <div className="flex justify-center mt-4">
