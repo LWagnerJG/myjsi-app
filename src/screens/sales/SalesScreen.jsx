@@ -96,10 +96,10 @@ export const SalesScreen = ({ theme, onNavigate }) => {
 
   return (
     <div className="flex flex-col h-full overflow-y-auto scrollbar-hide" style={{ backgroundColor: colors.background }}>
-      <div className="px-5 sm:px-6 py-5 sm:py-6 space-y-8 max-w-2xl mx-auto w-full pb-20">
+      <div className="px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-8 lg:space-y-10 max-w-2xl lg:max-w-5xl 2xl:max-w-6xl mx-auto w-full pb-20">
 
         {/* Navigation Buttons */}
-        <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide">
+        <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide pb-1">
           {SALES_TOP_ACTIONS.map((opt) => {
             const isActive = topTab === opt.value;
             return (
@@ -125,11 +125,11 @@ export const SalesScreen = ({ theme, onNavigate }) => {
         </div>
 
         {/* Hero Section - Total Ordered/Invoiced + Progress */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-5">
-          <GlassCard theme={theme} className="p-8 overflow-hidden relative" variant="elevated">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.65fr_1fr] xl:grid-cols-[1.8fr_1fr] gap-6 lg:gap-8 items-start">
+          <GlassCard theme={theme} className="p-7 sm:p-8 overflow-hidden relative" variant="elevated">
             <div className="relative z-10 space-y-6">
-              <div className="flex items-start justify-between gap-4">
-                <div className="space-y-1">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="space-y-1 min-w-0">
                   <p className="text-xs font-bold uppercase tracking-widest opacity-60">
                     {chartDataType === 'bookings' ? 'Total Ordered' : 'Total Invoiced'}
                   </p>
@@ -137,7 +137,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                     {formatCurrency(activeTotal)}
                   </div>
                 </div>
-                <div className="inline-flex items-center gap-1.5 rounded-full p-[3px]" style={{ backgroundColor: colors.border }}>
+                <div className="inline-flex items-center gap-1.5 rounded-full p-[3px] shrink-0" style={{ backgroundColor: colors.border }}>
                   <button
                     onClick={() => setChartDataType('bookings')}
                     className={`rounded-full px-4 py-1.5 text-[11px] font-semibold uppercase tracking-widest transition-all ${chartDataType === 'bookings' ? 'shadow-sm' : ''}`}
@@ -196,7 +196,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
             <div className="absolute top-0 right-0 w-64 h-64 bg-black/5 rounded-full -mr-32 -mt-32 blur-3xl" />
           </GlassCard>
 
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-1 gap-4 min-w-[260px]">
             <GlassCard theme={theme} className="p-6 space-y-3" variant="elevated">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sm font-semibold">
@@ -220,10 +220,10 @@ export const SalesScreen = ({ theme, onNavigate }) => {
         </div>
 
         {/* Data Sections */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-6 lg:gap-8">
 
           {/* Recent Orders */}
-          <GlassCard theme={theme} className="p-8 space-y-6" variant="elevated">
+          <GlassCard theme={theme} className="p-7 sm:p-8 space-y-6" variant="elevated">
             <div className="flex justify-between items-center">
               <h3 className="text-xl font-bold">Recent Activity</h3>
               <button onClick={() => onNavigate('orders')} className="text-xs font-bold uppercase tracking-widest opacity-40 hover:opacity-100 flex items-center gap-1">All Orders <ChevronRight className="w-3 h-3" /></button>
@@ -255,7 +255,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
           </GlassCard>
 
           {/* Invoiced by Vertical */}
-          <GlassCard theme={theme} className="p-8 space-y-4" variant="elevated">
+          <GlassCard theme={theme} className="p-7 sm:p-8 space-y-4" variant="elevated">
             <div className="flex justify-between items-center">
               <h3 className="text-xl font-bold">Invoiced by Vertical</h3>
               <span className="text-[10px] font-bold uppercase tracking-widest opacity-40">YTD</span>
@@ -268,8 +268,8 @@ export const SalesScreen = ({ theme, onNavigate }) => {
         </div>
 
         {/* Monthly Chart */}
-        <GlassCard theme={theme} className="p-8 space-y-6" variant="elevated">
-          <div className="flex justify-between items-center">
+        <GlassCard theme={theme} className="p-7 sm:p-8 space-y-6" variant="elevated">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="inline-flex items-center gap-1.5 rounded-full p-[3px]" style={{ backgroundColor: colors.border }}>
               <button
                 onClick={() => setChartDataType('bookings')}
