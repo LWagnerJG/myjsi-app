@@ -459,7 +459,7 @@ export const NewLeadScreen = ({
                                 selectedItems={newLeadData.dealers || []}
                                 onAddItem={addDealer}
                                 onRemoveItem={removeDealer}
-                                options={dealers || []}
+                                options={(newLeadData.dealers || []).length > 0 ? (dealers || []).filter(d => d !== 'Undecided') : (dealers || [])}
                                 onAddNew={(d) => setDealers((p) => [...new Set([d, ...p])])}
                                 placeholder="Dealer(s)"
                                 theme={theme}
@@ -605,7 +605,7 @@ export const NewLeadScreen = ({
                                 value={newLeadData.discount || ''}
                                 onChange={e => updateField('discount', e.target.value)}
                                 options={DISCOUNT_OPTIONS.map(d => ({ label: d, value: d }))}
-                                placeholder="Select..."
+                                placeholder="Select Discount"
                                 theme={theme}
                                 mutedValues={["Undecided"]}
                             />
@@ -663,7 +663,7 @@ export const NewLeadScreen = ({
                                     { label: 'None', value: '' },
                                     ...Object.keys(CONTRACTS_DATA).map(key => ({ label: CONTRACTS_DATA[key].name, value: key }))
                                 ]}
-                                placeholder="Select..."
+                                placeholder="Select Contract"
                                 theme={theme}
                                 mutedValues={["", "None"]}
                             />
