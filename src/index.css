@@ -72,6 +72,15 @@ body {
     align-items: start;
 }
 
+.lead-form-inline .settings-row.no-label {
+    grid-template-columns: 1fr;
+}
+
+.lead-form-inline .settings-row.compact {
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
 .lead-form-inline .settings-row.stack > label {
     margin-bottom: 6px;
 }

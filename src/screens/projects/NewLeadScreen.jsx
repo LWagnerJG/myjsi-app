@@ -345,17 +345,17 @@ export const NewLeadScreen = ({
     
     return (
         <form onSubmit={handleSubmit} className="lead-form-inline flex flex-col h-full overflow-y-auto scrollbar-hide" style={{ backgroundColor: theme.colors.background }}>
-            <div className="px-4 lg:px-6 pt-4 space-y-6 max-w-4xl mx-auto w-full">
-
+            <div className="px-4 lg:px-6 pt-4 max-w-5xl mx-auto w-full">
+                <div className="grid gap-6 lg:grid-cols-2">
                 <FormSection title="Project Details" theme={theme}>
                     <div>
-                        <SettingsRow label="Project Name" isFirst={true} theme={theme}>
+                        <SettingsRow label={null} isFirst={true} theme={theme} className="no-label">
                             <FormInput
                                 label=""
                                 required
                                 value={newLeadData.project || ''}
                                 onChange={e => updateField('project', e.target.value)}
-                                placeholder="Required"
+                                placeholder="Project Name"
                                 theme={theme}
                                 size="sm"
                                 surfaceBg={true}
@@ -443,25 +443,25 @@ export const NewLeadScreen = ({
 
                 <FormSection title="Stakeholders" theme={theme}>
                     <div>
-                        <SettingsRow label="A&D Firm" isFirst={true} theme={theme}>
+                        <SettingsRow label={null} isFirst={true} theme={theme} className="compact no-label">
                             <SpotlightMultiSelect
                                 selectedItems={newLeadData.designFirms || []}
                                 onAddItem={addDesignFirm}
                                 onRemoveItem={removeDesignFirm}
                                 options={designFirms || []}
                                 onAddNew={(f) => setDesignFirms((p) => [...new Set([f, ...p])])}
-                                placeholder="Search..."
+                                placeholder="A&D Firm"
                                 theme={theme}
                             />
                         </SettingsRow>
-                        <SettingsRow label="Dealer(s)" theme={theme}>
+                        <SettingsRow label={null} theme={theme} className="compact no-label">
                             <SpotlightMultiSelect
                                 selectedItems={newLeadData.dealers || []}
                                 onAddItem={addDealer}
                                 onRemoveItem={removeDealer}
                                 options={dealers || []}
                                 onAddNew={(d) => setDealers((p) => [...new Set([d, ...p])])}
-                                placeholder="Search..."
+                                placeholder="Dealer(s)"
                                 theme={theme}
                             />
                         </SettingsRow>
@@ -576,7 +576,7 @@ export const NewLeadScreen = ({
                         </div>
                     )}
                 </FormSection>
-                
+
                 <FormSection title="Financials & Timeline" theme={theme}>
                     <div>
                         <SettingsRow label="Estimated List" isFirst={true} theme={theme}>
@@ -672,7 +672,7 @@ export const NewLeadScreen = ({
                     </div>
                 </FormSection>
 
-                <FormSection title="Notes" theme={theme}>
+                <FormSection title="Notes" theme={theme} className="lg:col-span-2">
                     <div className="pt-2">
                         <FormInput
                             label=""
@@ -687,7 +687,7 @@ export const NewLeadScreen = ({
                 </FormSection>
                 
                 {/* Submit Button */}
-                <div className="pt-8 pb-mobile-nav-safe lg:pb-12">
+                <div className="pt-8 pb-mobile-nav-safe lg:pb-12 lg:col-span-2">
                     <PrimaryButton
                         type="submit"
                         theme={theme}
@@ -708,6 +708,7 @@ export const NewLeadScreen = ({
                             Please fill in required fields to submit
                         </p>
                     )}
+                </div>
                 </div>
             </div>
         </form>
