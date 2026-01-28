@@ -297,22 +297,41 @@ export const SalesScreen = ({ theme, onNavigate }) => {
             </button>
           </div>
 
-          <div className="h-64 flex items-end gap-2 overflow-hidden px-2">
-            {MONTHLY_SALES_DATA.map((m) => {
-              const val = chartDataType === 'bookings' ? m.bookings : m.sales;
-              const max = Math.max(...MONTHLY_SALES_DATA.map(d => chartDataType === 'bookings' ? d.bookings : d.sales));
-              const pct = (val / max) * 100;
-              return (
-                <div key={m.month} className="flex-1 flex flex-col items-center gap-3 group px-0.5">
-                  <div className="w-full relative flex items-end justify-center">
-                    <motion.div initial={{ height: 0 }} animate={{ height: `${pct}%` }} className="w-full bg-black/5 group-hover:bg-black rounded-t-lg transition-colors relative" />
-                    <div className="absolute -top-6 opacity-0 group-hover:opacity-100 transition-opacity text-[10px] font-black">${(val / 1000).toFixed(0)}k</div>
+          {monthlyView === 'chart' ? (
+            <div className="h-64 flex items-end gap-2 overflow-hidden px-2">
+              {MONTHLY_SALES_DATA.map((m) => {
+                const val = chartDataType === 'bookings' ? m.bookings : m.sales;
+                const max = Math.max(...MONTHLY_SALES_DATA.map(d => chartDataType === 'bookings' ? d.bookings : d.sales));
+                const pct = (val / max) * 100;
+                return (
+                  <div key={m.month} className="flex-1 flex flex-col items-center gap-3 group px-0.5">
+                    <div className="w-full relative flex items-end justify-center">
+                      <motion.div
+                        initial={{ height: 0 }}
+                        animate={{ height: `${Math.max(6, pct)}%` }}
+                        className="w-full rounded-t-lg transition-colors relative"
+                        style={{ backgroundColor: colors.accent, opacity: 0.18 }}
+                      />
+                      <div className="absolute -top-6 opacity-0 group-hover:opacity-100 transition-opacity text-[10px] font-black">${(val / 1000).toFixed(0)}k</div>
+                    </div>
+                    <span className="text-[10px] font-bold opacity-30 group-hover:opacity-100 transition-opacity">{m.month}</span>
                   </div>
-                  <span className="text-[10px] font-bold opacity-30 group-hover:opacity-100 transition-opacity">{m.month}</span>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="divide-y" style={{ borderColor: colors.border }}>
+              {MONTHLY_SALES_DATA.map((m) => {
+                const val = chartDataType === 'bookings' ? m.bookings : m.sales;
+                return (
+                  <div key={m.month} className="flex items-center justify-between py-3 text-sm">
+                    <span className="font-semibold" style={{ color: colors.textPrimary }}>{m.month}</span>
+                    <span className="font-semibold tabular-nums" style={{ color: colors.textSecondary }}>{formatCurrency(val)}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </GlassCard>
 
       </div>

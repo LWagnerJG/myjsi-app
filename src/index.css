@@ -154,6 +154,15 @@ h6 {
     display: none;
 }
 
+.panel-content {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.panel-content::-webkit-scrollbar {
+    display: none;
+}
+
 .screen-content {
     padding-left: 1rem;
     padding-right: 1rem;
