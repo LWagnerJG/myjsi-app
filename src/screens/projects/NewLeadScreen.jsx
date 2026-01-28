@@ -503,7 +503,7 @@ export const NewLeadScreen = ({
                                     }}
                                 >
                                     <div className="grid gap-2" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))' }}>
-                                        {COMPETITORS.filter(c=>c!=='None').map(c => (
+                                        {[...COMPETITORS.filter(c=>c!=='None'), 'Other'].map(c => (
                                             <PillButton
                                                 key={c}
                                                 size="compact"
@@ -516,12 +516,25 @@ export const NewLeadScreen = ({
                                             </PillButton>
                                         ))}
                                     </div>
+                                    {(newLeadData.competitors || []).includes('Other') && (
+                                        <div className="pt-3">
+                                            <FormInput
+                                                label=""
+                                                value={newLeadData.otherCompetitor || ''}
+                                                onChange={e => updateField('otherCompetitor', e.target.value)}
+                                                placeholder="Other competitor"
+                                                theme={theme}
+                                                size="sm"
+                                                surfaceBg={true}
+                                            />
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div className="mt-6" />
-                    <SettingsRow label="Products" theme={theme}>
+                                        </div>
+                                        <div className="mt-6" />
+                                        <SettingsRow label="Products" theme={theme}>
                         <ProductSpotlight
                           selectedSeries={(newLeadData.products||[]).map(p=>p.series)}
                           onAdd={addProduct}
@@ -575,6 +588,30 @@ export const NewLeadScreen = ({
                             })}
                         </div>
                     )}
+
+                    <div className="mt-6" />
+                    <SettingsRow label="Existing JSI Quote?" theme={theme}>
+                        <div className="flex justify-end">
+                            <ToggleSwitch
+                                checked={!!newLeadData.jsiQuoteExists}
+                                onChange={(e) => updateField('jsiQuoteExists', e.target.checked)}
+                                theme={theme}
+                            />
+                        </div>
+                    </SettingsRow>
+                    {newLeadData.jsiQuoteExists && (
+                        <SettingsRow label={null} theme={theme} className="compact no-label">
+                            <FormInput
+                                label=""
+                                value={newLeadData.jsiQuoteNumber || ''}
+                                onChange={e => updateField('jsiQuoteNumber', e.target.value)}
+                                placeholder="JSI Quote #"
+                                theme={theme}
+                                size="sm"
+                                surfaceBg={true}
+                            />
+                        </SettingsRow>
+                    )}
                 </FormSection>
 
                 <FormSection title="Financials & Timeline" theme={theme}>
@@ -612,13 +649,13 @@ export const NewLeadScreen = ({
                         </SettingsRow>
                         <SettingsRow label="Rewards" theme={theme}>
                             <div
-                                className="flex items-center gap-1 rounded-full p-1 border"
+                                className="grid grid-cols-2 gap-1 rounded-full p-1 border"
                                 style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border }}
                             >
                                 <button
                                     type="button"
                                     onClick={() => updateField('salesReward', !(newLeadData.salesReward !== false))}
-                                    className="flex-1 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all"
+                                    className="w-full px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all"
                                     style={{
                                         backgroundColor: newLeadData.salesReward !== false ? theme.colors.textPrimary : 'transparent',
                                         color: newLeadData.salesReward !== false ? '#FFFFFF' : theme.colors.textPrimary
@@ -629,7 +666,7 @@ export const NewLeadScreen = ({
                                 <button
                                     type="button"
                                     onClick={() => updateField('designerReward', !(newLeadData.designerReward !== false))}
-                                    className="flex-1 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all"
+                                    className="w-full px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all"
                                     style={{
                                         backgroundColor: newLeadData.designerReward !== false ? theme.colors.textPrimary : 'transparent',
                                         color: newLeadData.designerReward !== false ? '#FFFFFF' : theme.colors.textPrimary
@@ -660,12 +697,12 @@ export const NewLeadScreen = ({
                                 value={newLeadData.contractType || ''}
                                 onChange={e => updateField('contractType', e.target.value)}
                                 options={[
-                                    { label: 'None', value: '' },
+                                    { label: 'None', value: 'none' },
                                     ...Object.keys(CONTRACTS_DATA).map(key => ({ label: CONTRACTS_DATA[key].name, value: key }))
                                 ]}
                                 placeholder="Select Contract"
                                 theme={theme}
-                                mutedValues={["", "None"]}
+                                mutedValues={["none", "None"]}
                             />
                         </SettingsRow>
                     </div>
@@ -685,32 +722,6 @@ export const NewLeadScreen = ({
                     </div>
                 </FormSection>
 
-                <FormSection title="Quote" theme={theme} className="lg:col-span-2">
-                    <div>
-                        <SettingsRow label="Existing JSI Quote?" isFirst={true} theme={theme}>
-                            <div className="flex justify-end">
-                                <ToggleSwitch
-                                    checked={!!newLeadData.jsiQuoteExists}
-                                    onChange={(e) => updateField('jsiQuoteExists', e.target.checked)}
-                                    theme={theme}
-                                />
-                            </div>
-                        </SettingsRow>
-                        {newLeadData.jsiQuoteExists && (
-                            <SettingsRow label={null} theme={theme} className="compact no-label">
-                                <FormInput
-                                    label=""
-                                    value={newLeadData.jsiQuoteNumber || ''}
-                                    onChange={e => updateField('jsiQuoteNumber', e.target.value)}
-                                    placeholder="JSI Quote #"
-                                    theme={theme}
-                                    size="sm"
-                                    surfaceBg={true}
-                                />
-                            </SettingsRow>
-                        )}
-                    </div>
-                </FormSection>
                 
                 {/* Submit Button */}
                 <div className="pt-8 pb-mobile-nav-safe lg:pb-12 lg:col-span-2">
