@@ -22,16 +22,16 @@ export const AppHeader = React.memo(({
     };
 
     return (
-        <div className="px-5 pt-4 pb-1 fixed top-0 left-0 right-0 z-30 pointer-events-none">
+        <div className="px-4 sm:px-5 pt-3 pb-1 fixed top-0 left-0 right-0 z-30 pointer-events-none">
             <div
-                className="max-w-5xl mx-auto w-full flex items-center justify-between px-5 h-16 border pointer-events-auto"
+                className="max-w-5xl mx-auto w-full flex items-center justify-between px-4 sm:px-5 h-14 border pointer-events-auto"
                 style={{
                     borderRadius: 9999,
-                    background: 'rgba(255, 255, 255, 0.72)',
-                    borderColor: 'rgba(0, 0, 0, 0.08)',
-                    boxShadow: '0 18px 40px rgba(0,0,0,0.12), 0 6px 16px rgba(0,0,0,0.08)',
-                    backdropFilter: 'blur(22px)',
-                    WebkitBackdropFilter: 'blur(22px)'
+                    background: 'linear-gradient(180deg, rgba(255,255,255,0.32) 0%, rgba(255,255,255,0.18) 100%)',
+                    borderColor: 'rgba(0, 0, 0, 0.05)',
+                    boxShadow: '0 8px 20px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.05)',
+                    backdropFilter: 'blur(24px) saturate(120%)',
+                    WebkitBackdropFilter: 'blur(24px) saturate(120%)'
                 }}
             >
                 <div className="flex items-center">
@@ -53,19 +53,20 @@ export const AppHeader = React.memo(({
                     </button>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3">
                     <div
-                        className={`transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden ${isHome ? 'max-w-[240px] opacity-100 mr-2' : 'max-w-0 opacity-0'}`}
+                        className={`transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden ${isHome ? 'max-w-[220px] opacity-100 mr-1.5' : 'max-w-0 opacity-0'}`}
                         style={{ color: theme.colors.textPrimary }}
                     >
-                        <span className="text-xs font-semibold tracking-tight opacity-60 mr-2">{getTimeGreeting()}</span>
+                        <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.18em] opacity-60 mr-2">{getTimeGreeting()}</span>
                         <span className="text-sm font-bold tracking-tight">{userName}</span>
                     </div>
 
                     <button
                         aria-label="Open profile menu"
                         onClick={onProfileClick}
-                        className="w-10 h-10 rounded-full flex items-center justify-center transition-all bg-black/[0.03] hover:bg-black/10 active:scale-90"
+                        className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all border bg-white/40 hover:bg-white/60 active:scale-90"
+                        style={{ borderColor: 'rgba(0,0,0,0.06)' }}
                     >
                         <User className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />
                     </button>
