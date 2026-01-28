@@ -1,21 +1,19 @@
 import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Modal } from '../../components/common/Modal';
-import { ArrowUp, ArrowDown, TrendingUp, Award, DollarSign, BarChart, Table, MoreHorizontal, ChevronRight } from 'lucide-react';
+import { ArrowUp, ArrowDown, TrendingUp, Award, DollarSign, BarChart, Table, ChevronRight } from 'lucide-react';
 import { MONTHLY_SALES_DATA, SALES_VERTICALS_DATA, CUSTOMER_RANK_DATA } from './data.js';
 import { ORDER_DATA, STATUS_COLORS } from '../orders/data.js';
 import { SalesByVerticalBreakdown } from './components/SalesByVerticalBreakdown.jsx';
 import { CountUp } from '../../components/common/CountUp.jsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
-import { PillButton } from '../../components/common/JSIButtons.jsx';
 
 const formatCompanyName = (name = '') => name.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
 const monthNameToNumber = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
 
-const SALES_TAB_OPTIONS = [
-  { value: 'rewards', label: 'Rewards', icon: Award, route: 'incentive-rewards' },
-  { value: 'ranking', label: 'Ranking', icon: TrendingUp, route: 'customer-rank' },
+const SALES_TOP_ACTIONS = [
+  { value: 'rewards', label: 'Dealer Rewards', icon: Award, route: 'incentive-rewards' },
   { value: 'comms', label: 'Commissions', icon: DollarSign, route: 'commissions' },
 ];
 
@@ -98,11 +96,11 @@ export const SalesScreen = ({ theme, onNavigate }) => {
 
   return (
     <div className="flex flex-col h-full overflow-y-auto scrollbar-hide" style={{ backgroundColor: colors.background }}>
-      <div className="px-6 py-6 space-y-6 max-w-2xl mx-auto w-full pb-24">
+      <div className="px-5 sm:px-6 py-5 sm:py-6 space-y-8 max-w-2xl mx-auto w-full pb-20">
 
         {/* Navigation Buttons */}
-        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
-          {SALES_TAB_OPTIONS.map((opt) => {
+        <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide">
+          {SALES_TOP_ACTIONS.map((opt) => {
             const isActive = topTab === opt.value;
             return (
               <button
@@ -127,7 +125,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
         </div>
 
         {/* Hero Section - Total Ordered/Invoiced + Progress */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-5">
           <GlassCard theme={theme} className="p-8 overflow-hidden relative" variant="elevated">
             <div className="relative z-10 space-y-6">
               <div className="flex items-start justify-between gap-4">
@@ -139,16 +137,24 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                     {formatCurrency(activeTotal)}
                   </div>
                 </div>
-                <div className="flex items-center gap-1.5 bg-black/5 rounded-full p-1">
+                <div className="inline-flex items-center gap-1.5 rounded-full p-[3px]" style={{ backgroundColor: colors.border }}>
                   <button
                     onClick={() => setChartDataType('bookings')}
-                    className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest transition-colors ${chartDataType === 'bookings' ? 'bg-black text-white' : 'opacity-50 hover:opacity-80'}`}
+                    className={`rounded-full px-4 py-1.5 text-[11px] font-semibold uppercase tracking-widest transition-all ${chartDataType === 'bookings' ? 'shadow-sm' : ''}`}
+                    style={{
+                      backgroundColor: chartDataType === 'bookings' ? colors.surface : 'transparent',
+                      color: chartDataType === 'bookings' ? colors.textPrimary : colors.textSecondary
+                    }}
                   >
                     Ordered
                   </button>
                   <button
                     onClick={() => setChartDataType('sales')}
-                    className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest transition-colors ${chartDataType === 'sales' ? 'bg-black text-white' : 'opacity-50 hover:opacity-80'}`}
+                    className={`rounded-full px-4 py-1.5 text-[11px] font-semibold uppercase tracking-widest transition-all ${chartDataType === 'sales' ? 'shadow-sm' : ''}`}
+                    style={{
+                      backgroundColor: chartDataType === 'sales' ? colors.surface : 'transparent',
+                      color: chartDataType === 'sales' ? colors.textPrimary : colors.textSecondary
+                    }}
                   >
                     Invoiced
                   </button>
@@ -191,16 +197,6 @@ export const SalesScreen = ({ theme, onNavigate }) => {
           </GlassCard>
 
           <div className="grid grid-cols-1 gap-4">
-            <GlassCard theme={theme} className="p-6 flex items-center justify-between" variant="elevated">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 text-sm font-semibold">
-                  <Award className="w-4 h-4" /> Rewards
-                </div>
-                <p className="text-xs opacity-60">Elite Circle status and bonuses.</p>
-              </div>
-              <button onClick={() => onNavigate('incentive-rewards')} className="px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest bg-black text-white">View</button>
-            </GlassCard>
-
             <GlassCard theme={theme} className="p-6 space-y-3" variant="elevated">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sm font-semibold">
@@ -219,16 +215,6 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                   </div>
                 ))}
               </div>
-            </GlassCard>
-
-            <GlassCard theme={theme} className="p-6 flex items-center justify-between" variant="elevated">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 text-sm font-semibold">
-                  <DollarSign className="w-4 h-4" /> Commissions
-                </div>
-                <p className="text-xs opacity-60">Payouts and monthly statements.</p>
-              </div>
-              <button onClick={() => onNavigate('commissions')} className="px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest bg-black text-white">View</button>
             </GlassCard>
           </div>
         </div>
@@ -284,9 +270,27 @@ export const SalesScreen = ({ theme, onNavigate }) => {
         {/* Monthly Chart */}
         <GlassCard theme={theme} className="p-8 space-y-6" variant="elevated">
           <div className="flex justify-between items-center">
-            <div className="flex gap-2">
-              <button onClick={() => setChartDataType('bookings')} className={`text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full transition-colors ${chartDataType === 'bookings' ? 'bg-black text-white' : 'opacity-40 hover:opacity-60'}`}>Ordered</button>
-              <button onClick={() => setChartDataType('sales')} className={`text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full transition-colors ${chartDataType === 'sales' ? 'bg-black text-white' : 'opacity-40 hover:opacity-60'}`}>Invoiced</button>
+            <div className="inline-flex items-center gap-1.5 rounded-full p-[3px]" style={{ backgroundColor: colors.border }}>
+              <button
+                onClick={() => setChartDataType('bookings')}
+                className={`rounded-full px-4 py-1.5 text-[11px] font-semibold uppercase tracking-widest transition-all ${chartDataType === 'bookings' ? 'shadow-sm' : ''}`}
+                style={{
+                  backgroundColor: chartDataType === 'bookings' ? colors.surface : 'transparent',
+                  color: chartDataType === 'bookings' ? colors.textPrimary : colors.textSecondary
+                }}
+              >
+                Ordered
+              </button>
+              <button
+                onClick={() => setChartDataType('sales')}
+                className={`rounded-full px-4 py-1.5 text-[11px] font-semibold uppercase tracking-widest transition-all ${chartDataType === 'sales' ? 'shadow-sm' : ''}`}
+                style={{
+                  backgroundColor: chartDataType === 'sales' ? colors.surface : 'transparent',
+                  color: chartDataType === 'sales' ? colors.textPrimary : colors.textSecondary
+                }}
+              >
+                Invoiced
+              </button>
             </div>
             <button onClick={() => setMonthlyView(v => v === 'chart' ? 'table' : 'chart')} className="p-2 rounded-lg bg-black/5 hover:bg-black/10 transition-colors">
               {monthlyView === 'chart' ? <Table className="w-4 h-4" /> : <BarChart className="w-4 h-4" />}
@@ -311,13 +315,6 @@ export const SalesScreen = ({ theme, onNavigate }) => {
           </div>
         </GlassCard>
 
-        {/* Footer info or quick action */}
-        <div className="flex justify-center mt-4">
-          <button className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest opacity-40 hover:opacity-100 transition-opacity">
-            <MoreHorizontal className="w-4 h-4" />
-            Configure Dashboard Layout
-          </button>
-        </div>
       </div>
 
       <OrderModal order={selectedOrder} onClose={() => setSelectedOrder(null)} theme={theme} />
