@@ -188,21 +188,29 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                     <div className="flex items-center justify-between">
                         <h3 className="text-sm font-semibold uppercase tracking-widest" style={{ color: colors.textSecondary }}>Quick Access</h3>
                         {onUpdateHomeApps && (
-                            <div
-                                ref={setNodeRef}
-                                style={style}
-                                className="flex items-center justify-between gap-2 px-3 py-2 rounded-2xl border cursor-grab active:cursor-grabbing"
-                                {...attributes}
-                                {...listeners}
-                            >
+                            <button
+                                onClick={() => setIsEditMode(!isEditMode)}
+                                className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all active:scale-95"
+                                style={{
+                                    backgroundColor: isEditMode ? colors.textPrimary : 'transparent',
                                     color: isEditMode ? '#FFFFFF' : colors.textSecondary,
-                                    <div
-                                        className="w-8 h-8 rounded-full flex items-center justify-center"
-                                        style={{ color: colors.textSecondary }}
-                                        aria-hidden="true"
-                                    >
+                                    border: `1px solid ${isEditMode ? colors.textPrimary : colors.border}`
+                                }}
+                            >
+                                {isEditMode ? (
+                                    <>
+                                        <Check className="w-3.5 h-3.5" />
+                                        <span>Done</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <SettingsIcon className="w-3.5 h-3.5" />
+                                        <span>Customize</span>
+                                    </>
+                                )}
+                            </button>
+                        )}
                     </div>
-                                    </div>
                     {isEditMode && (
                         <div className="text-xs font-medium" style={{ color: colors.textSecondary }}>
                             Drag to reorder. Keep at least 4 apps pinned.
@@ -216,13 +224,7 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                             onDragEnd={handleReorder}
                         >
                             <SortableContext items={safeHomeApps} strategy={rectSortingStrategy}>
-                                <div
-                                    style={{
-                                        display: 'grid',
-                                        gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-                                        gap: '0.5rem'
-                                    }}
-                                >
+                                <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2">
                                     {currentApps.map((app) => (
                                         <SortableAppTile
                                             key={app.route}
@@ -236,13 +238,7 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                             </SortableContext>
                         </DndContext>
                     ) : (
-                        <div
-                            style={{
-                                display: 'grid',
-                                gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-                                gap: '0.5rem'
-                            }}
-                        >
+                        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2">
                             {currentApps.map((app) => {
                                 const badge = APP_BADGES[app.route];
                                 return (
@@ -285,13 +281,7 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                     {isEditMode && (
                         <div className="space-y-2">
                             <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: colors.textSecondary }}>Add Apps</div>
-                            <div
-                                style={{
-                                    display: 'grid',
-                                    gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-                                    gap: '0.5rem'
-                                }}
-                            >
+                            <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2">
                                 {availableApps.map((app) => (
                                     <motion.button
                                         layout
