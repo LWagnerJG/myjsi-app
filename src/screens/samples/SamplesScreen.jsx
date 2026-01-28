@@ -206,15 +206,24 @@ const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, designFi
     const canSubmit = totalCartItems > 0 && shipToName.trim() && address1.trim();
     if (totalCartItems === 0 && !justSubmitted) return null;
 
-    const collapsedShadow = '0 -6px 14px -2px rgba(0,0,0,0.18), 0 -1px 0 rgba(0,0,0,0.08)';
+    const collapsedShadow = '0 -6px 18px -4px rgba(0,0,0,0.14), 0 -1px 0 rgba(0,0,0,0.06)';
 
     return (
         <>
-            <div className={`fixed bottom-0 left-0 right-0 transition-all duration-300 ${isExpanded ? 'z-30' : 'z-10'}`}
-                 style={{ backgroundColor: '#FFFFFF', borderTopLeftRadius: '16px', borderTopRightRadius: '16px', boxShadow: isExpanded ? '0 -6px 22px -4px rgba(0,0,0,0.25)' : collapsedShadow, maxHeight: isExpanded ? '65vh' : `${COLLAPSED_HEIGHT}px`, transform: isExpanded ? 'translateY(0)' : `translateY(calc(100% - ${COLLAPSED_HEIGHT}px))`, overflow:'hidden' }}>
-                {/* Filler to extend white to very bottom when collapsed (covers underlying page bg) */}
-                {!isExpanded && <div style={{ position:'absolute', left:0, right:0, bottom:-40, height:40, background:'#FFFFFF' }} />}
-                <div className="flex items-center justify-between p-4 cursor-pointer relative z-10" onClick={() => setIsExpanded(!isExpanded)} style={{ backgroundColor:'#FFFFFF', borderTopLeftRadius:'16px', borderTopRightRadius:'16px' }}>
+            <div
+                className={`fixed bottom-0 left-0 right-0 transition-all duration-300 ${isExpanded ? 'z-30' : 'z-10'}`}
+                style={{
+                    backgroundColor: '#FFFFFF',
+                    borderTopLeftRadius: '20px',
+                    borderTopRightRadius: '20px',
+                    boxShadow: isExpanded ? '0 -10px 28px -6px rgba(0,0,0,0.22)' : collapsedShadow,
+                    maxHeight: isExpanded ? '65vh' : `${COLLAPSED_HEIGHT}px`,
+                    transform: isExpanded ? 'translateY(0)' : `translateY(calc(100% - ${COLLAPSED_HEIGHT}px))`,
+                    overflow: 'hidden'
+                }}
+            >
+                <div className="flex items-center justify-between px-4 py-3 cursor-pointer relative z-10" onClick={() => setIsExpanded(!isExpanded)} style={{ backgroundColor:'#FFFFFF', borderTopLeftRadius:'20px', borderTopRightRadius:'20px' }}>
+                    <div className="absolute top-2 left-1/2 -translate-x-1/2 w-10 h-1 rounded-full" style={{ backgroundColor: theme.colors.border }} />
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: theme.colors.accent }}>
                             <ShoppingCart className="w-5 h-5 text-white" />
@@ -294,7 +303,23 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                 const removeOne = (e) => { if (e) e.stopPropagation(); onUpdateCart({ ...product, id: pid }, -1); };
 
                 return (
-                    <div key={pid} className="group relative rounded-2xl overflow-hidden transition-all duration-300" style={{ backgroundColor: theme.colors.surface, boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
+                    <div
+                        key={pid}
+                        className="group relative rounded-2xl overflow-hidden transition-all duration-300"
+                        style={{
+                            backgroundColor: theme.colors.surface,
+                            boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
+                            border: qty > 0 ? `2px solid ${theme.colors.accent}` : `1px solid ${theme.colors.border}`
+                        }}
+                    >
+                        {qty > 0 && (
+                            <div
+                                className="absolute top-2 left-2 z-10 px-2 py-0.5 rounded-full text-[11px] font-bold"
+                                style={{ backgroundColor: theme.colors.accent, color: '#FFFFFF' }}
+                            >
+                                {qty} added
+                            </div>
+                        )}
                         <div
                             role="button"
                             tabIndex={0}
