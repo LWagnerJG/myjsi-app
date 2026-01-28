@@ -192,27 +192,6 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                     </div>
                 </div>
 
-                {/* Secondary Actions Row */}
-                <div className="mt-8">
-                    <GlassCard
-                        theme={theme}
-                        className="p-6 flex items-center justify-between"
-                        style={{ borderRadius: 24, backgroundColor: colors.accent }}
-                    >
-                        <div className="space-y-1">
-                            <h4 className="text-lg font-bold" style={{ color: '#FFFFFF' }}>Need Support?</h4>
-                            <p className="text-sm opacity-60" style={{ color: '#FFFFFF' }}>Reach out to your territory manager</p>
-                        </div>
-                        <button
-                            onClick={() => onNavigate('help')}
-                            className="px-6 py-3 rounded-full font-bold text-sm hover:scale-105 active:scale-95 transition-transform"
-                            style={{ backgroundColor: '#FFFFFF', color: colors.accent }}
-                        >
-                            Get Help
-                        </button>
-                    </GlassCard>
-                </div>
-
                 {/* Recent Activity */}
                 <GlassCard theme={theme} className="p-6" style={{ borderRadius: 24 }}>
                     <div className="flex items-center justify-between mb-4">
@@ -243,6 +222,27 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                         ))}
                     </div>
                 </GlassCard>
+
+                {/* Feedback CTA (sticky bottom) */}
+                <div className="mt-6 lg:mt-8 sticky bottom-4">
+                    <GlassCard
+                        theme={theme}
+                        className="p-6 flex items-center justify-between"
+                        style={{ borderRadius: 24, backgroundColor: colors.accent }}
+                    >
+                        <div className="space-y-1">
+                            <h4 className="text-lg font-bold" style={{ color: '#FFFFFF' }}>Feedback?</h4>
+                            <p className="text-sm opacity-60" style={{ color: '#FFFFFF' }}>Help us improve your dashboard.</p>
+                        </div>
+                        <button
+                            onClick={() => onNavigate('feedback')}
+                            className="px-6 py-3 rounded-full font-bold text-sm hover:scale-105 active:scale-95 transition-transform"
+                            style={{ backgroundColor: '#FFFFFF', color: colors.accent }}
+                        >
+                            Send Feedback
+                        </button>
+                    </GlassCard>
+                </div>
             </div>
         </div>
     );
