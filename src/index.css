@@ -48,7 +48,7 @@
 
 @media (min-width: 1024px) {
     :root {
-        --app-header-offset: 72px;
+        --app-header-offset: 80px;
     }
 }
 
