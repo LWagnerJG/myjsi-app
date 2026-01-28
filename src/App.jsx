@@ -328,7 +328,7 @@ function App() {
                     onProfileClick={() => setShowProfileMenu(p => !p)}
                     isDarkMode={isDarkMode}
                 />
-                <div className="flex-1 pt-[64px] overflow-hidden" style={{ backgroundColor: currentTheme.colors.background }}>
+                <div className="flex-1 overflow-hidden" style={{ backgroundColor: currentTheme.colors.background }}>
                     <AnimatedScreenWrapper screenKey={currentScreen} direction={lastNavigationDirection} onSwipeBack={navigationHistory.length > 1 ? handleBack : null}>
                         <ScreenRouter screenKey={currentScreen} projectsScreenRef={projectsScreenRef} SuspenseFallback={suspenseFallback} {...screenProps} />
                     </AnimatedScreenWrapper>
