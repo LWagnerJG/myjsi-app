@@ -57,7 +57,7 @@ export const AppHeader = React.memo(({
                         className={`transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden ${isHome ? 'max-w-[220px] opacity-100 mr-1.5' : 'max-w-0 opacity-0'}`}
                         style={{ color: theme.colors.textPrimary }}
                     >
-                        <span className="text-xs font-semibold tracking-tight opacity-55 mr-2">{getTimeGreeting()}</span>
+                        <span className="text-[11px] font-medium tracking-tight opacity-55 mr-2">{getTimeGreeting()}</span>
                         <span className="text-sm font-bold tracking-tight">{userName}</span>
                     </div>
 
