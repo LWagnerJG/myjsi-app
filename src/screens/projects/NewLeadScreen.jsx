@@ -337,20 +337,6 @@ export const NewLeadScreen = ({
                                 surfaceBg={true}
                             />
                         </SettingsRow>
-                        <SettingsRow label="Project Stage" theme={theme}>
-                            <div className="grid grid-cols-3 gap-3">
-                                {STAGES.map(stage => (
-                                    <PillButton
-                                        key={stage}
-                                        isSelected={newLeadData.projectStatus === stage}
-                                        onClick={() => updateField('projectStatus', stage)}
-                                        theme={theme}
-                                    >
-                                        {stage}
-                                    </PillButton>
-                                ))}
-                            </div>
-                        </SettingsRow>
                         <SettingsRow label="Project Stage" theme={theme} className="stack">
                             <div className="space-y-3">
                                 <input
@@ -393,7 +379,6 @@ export const NewLeadScreen = ({
                                     );
                                 })}
                             </div>
-                        </SettingsRow>
                         </SettingsRow>
                         <SettingsRow label={
                             <div className="flex items-center gap-2">
@@ -502,14 +487,15 @@ export const NewLeadScreen = ({
                                         border: `1.5px solid ${theme.colors.border}`
                                     }}
                                 >
-                                    <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))' }}>
+                                    <div className="grid gap-2" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))' }}>
                                         {COMPETITORS.filter(c=>c!=='None').map(c => (
                                             <PillButton
                                                 key={c}
+                                                size="compact"
                                                 isSelected={(newLeadData.competitors||[]).includes(c)}
                                                 onClick={() => toggleCompetitor(c)}
                                                 theme={theme}
-                                                className="whitespace-nowrap"
+                                                className="whitespace-nowrap min-w-[96px] justify-center"
                                             >
                                                 {c}
                                             </PillButton>
