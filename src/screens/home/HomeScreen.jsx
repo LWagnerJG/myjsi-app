@@ -123,27 +123,31 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                     </div>
 
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                        <AnimatePresence mode="popLayout">
+                        <AnimatePresence mode="popLayout" initial={false}>
                             {currentApps.map((app) => {
                                 const badge = APP_BADGES[app.route];
                                 return (
                                 <motion.button
                                     layout
-                                    initial={{ opacity: 0, scale: 0.8 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    exit={{ opacity: 0, scale: 0.8 }}
+                                    transition={{ type: 'spring', stiffness: 420, damping: 30 }}
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
                                     key={app.route}
                                     onClick={() => isEditMode ? null : onNavigate(app.route)}
-                                    className="relative flex flex-col items-center justify-center gap-3 p-6 rounded-3xl transition-all active:scale-95 group"
+                                    className={`relative flex flex-col items-center justify-center rounded-3xl transition-all active:scale-95 group ${isEditMode ? 'gap-2 p-4 sm:p-5' : 'gap-3 p-6'}`}
                                     style={{
-                                        minHeight: 140,
+                                        minHeight: isEditMode ? 112 : 140,
                                         backgroundColor: colors.surface,
                                         border: `1px solid ${colors.border}`,
                                         boxShadow: DESIGN_TOKENS.shadows.card
                                     }}
                                 >
-                                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110" style={{ backgroundColor: `${colors.accent}12` }}>
-                                        <app.icon className="w-6 h-6" style={{ color: colors.accent }} />
+                                    <div
+                                        className={`rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110 ${isEditMode ? 'w-10 h-10' : 'w-12 h-12'}`}
+                                        style={{ backgroundColor: `${colors.accent}12` }}
+                                    >
+                                        <app.icon className={`${isEditMode ? 'w-5 h-5' : 'w-6 h-6'}`} style={{ color: colors.accent }} />
                                     </div>
                                     <span className="text-sm font-bold tracking-tight text-center" style={{ color: colors.textPrimary }}>{app.name}</span>
                                     
@@ -168,28 +172,34 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                                 </motion.button>
                                 );
                             })}
-                            {isEditMode && availableApps.map((app) => (
-                                <motion.button
-                                    layout
-                                    initial={{ opacity: 0, scale: 0.8 }}
-                                    animate={{ opacity: 0.6, scale: 1 }}
-                                    key={app.route}
-                                    onClick={() => toggleApp(app.route)}
-                                    className="flex flex-col items-center justify-center gap-3 p-6 rounded-3xl border border-dashed hover:opacity-100 transition-all active:scale-95 group"
-                                    style={{
-                                        minHeight: 140,
-                                        backgroundColor: `${colors.surface}80`,
-                                        borderColor: colors.border
-                                    }}
-                                >
-                                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center border border-dashed" style={{ borderColor: colors.border }}>
-                                        <Plus className="w-6 h-6 opacity-40" style={{ color: colors.textSecondary }} />
-                                    </div>
-                                    <span className="text-sm font-bold opacity-40" style={{ color: colors.textSecondary }}>{app.name}</span>
-                                </motion.button>
-                            ))}
                         </AnimatePresence>
                     </div>
+
+                    {isEditMode && (
+                        <div className="space-y-2">
+                            <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: colors.textSecondary }}>Add Apps</div>
+                            <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
+                                {availableApps.map((app) => (
+                                    <motion.button
+                                        layout
+                                        key={app.route}
+                                        onClick={() => toggleApp(app.route)}
+                                        className="flex-shrink-0 flex flex-col items-center justify-center gap-2 px-4 py-3 rounded-2xl border border-dashed hover:opacity-100 transition-all active:scale-95"
+                                        style={{
+                                            minWidth: 120,
+                                            backgroundColor: `${colors.surface}80`,
+                                            borderColor: colors.border
+                                        }}
+                                    >
+                                        <div className="w-9 h-9 rounded-xl flex items-center justify-center border border-dashed" style={{ borderColor: colors.border }}>
+                                            <Plus className="w-5 h-5 opacity-40" style={{ color: colors.textSecondary }} />
+                                        </div>
+                                        <span className="text-xs font-semibold opacity-60" style={{ color: colors.textSecondary }}>{app.name}</span>
+                                    </motion.button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Recent Activity */}
