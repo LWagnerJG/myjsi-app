@@ -23,6 +23,11 @@ export const PillButton = ({
     className = '',
     type = 'button',
     disabled = false,
+    selectedBg,
+    selectedText,
+    unselectedBg,
+    unselectedText,
+    unselectedBorder,
     ...props
 }) => {
     const sizeClasses = {
@@ -33,10 +38,11 @@ export const PillButton = ({
 
     const selectedShadow = '0 2px 8px rgba(53,53,53,0.10), 0 1px 3px rgba(53,53,53,0.06)';
     const unselectedShadow = '0 1px 3px rgba(53,53,53,0.04)';
-    const selectedBg = '#353535';
-    const unselectedBg = '#FFFFFF';
-    const unselectedBorder = '#E3E0D8';
-    const unselectedText = '#353535';
+    const resolvedSelectedBg = selectedBg || '#353535';
+    const resolvedSelectedText = selectedText || '#FFFFFF';
+    const resolvedUnselectedBg = unselectedBg || '#FFFFFF';
+    const resolvedUnselectedBorder = unselectedBorder || '#E3E0D8';
+    const resolvedUnselectedText = unselectedText || '#353535';
 
     return (
         <button
@@ -45,9 +51,9 @@ export const PillButton = ({
             disabled={disabled}
             className={`${sizeClasses[size]} font-semibold rounded-full transition-all border-2 text-center hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed ${className}`}
             style={{
-                backgroundColor: isSelected ? selectedBg : unselectedBg,
-                color: isSelected ? '#FFFFFF' : unselectedText,
-                borderColor: isSelected ? selectedBg : unselectedBorder,
+                backgroundColor: isSelected ? resolvedSelectedBg : resolvedUnselectedBg,
+                color: isSelected ? resolvedSelectedText : resolvedUnselectedText,
+                borderColor: isSelected ? resolvedSelectedBg : resolvedUnselectedBorder,
                 boxShadow: isSelected ? selectedShadow : unselectedShadow,
                 fontFamily: 'Neue Haas Grotesk Display Pro, sans-serif',
                 fontWeight: isSelected ? 600 : 500,

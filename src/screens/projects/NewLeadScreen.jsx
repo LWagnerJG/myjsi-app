@@ -3,7 +3,6 @@ import { createPortal } from 'react-dom';
 import { X, Search, Check, Plus } from 'lucide-react';
 import { FormInput } from '../../components/forms/FormInput.jsx';
 import { PortalNativeSelect } from '../../components/forms/PortalNativeSelect.jsx';
-import { ToggleSwitch } from '../../components/forms/ToggleSwitch.jsx';
 import { AutoCompleteCombobox } from '../../components/forms/AutoCompleteCombobox.jsx';
 import { ProbabilitySlider } from '../../components/forms/ProbabilitySlider.jsx';
 import { FormSection, SettingsRow } from '../../components/forms/FormSections.jsx';
@@ -17,8 +16,7 @@ import {
     STAGES, 
     VERTICALS, 
     COMPETITORS, 
-    DISCOUNT_OPTIONS, 
-    PO_TIMEFRAMES 
+    DISCOUNT_OPTIONS 
 } from './data.js';
 import { LEAD_TIMES_DATA } from '../resources/lead-times/data.js';
 import { JSI_LAMINATES, JSI_VENEERS, JSI_SERIES } from '../products/data.js';
@@ -234,6 +232,19 @@ export const NewLeadScreen = ({
 }) => {
     const REWARD_THRESHOLD = 250000;
 
+    const stageOptions = useMemo(() => STAGES.filter(stage => stage !== 'Won' && stage !== 'Lost'), []);
+    const timeframeOptions = useMemo(() => {
+        const nextYear = new Date().getFullYear() + 1;
+        const yearPlusTwo = nextYear + 1;
+        return ['Within 30 Days', '30-60 Days', '90-180 Days', String(nextYear), String(yearPlusTwo)];
+    }, []);
+
+    useEffect(() => {
+        if (newLeadData.projectStatus && !stageOptions.includes(newLeadData.projectStatus)) {
+            onNewLeadChange({ projectStatus: stageOptions[0] });
+        }
+    }, [newLeadData.projectStatus, stageOptions, onNewLeadChange]);
+
     const CITY_OPTIONS = useMemo(() => ([
         'Indianapolis, IN', 'Jasper, IN', 'Evansville, IN', 'Bloomington, IN', 'Fort Wayne, IN',
         'Cincinnati, OH', 'Louisville, KY', 'Nashville, TN', 'Chicago, IL', 'St. Louis, MO',
@@ -354,17 +365,17 @@ export const NewLeadScreen = ({
                                 <input
                                     type="range"
                                     min={0}
-                                    max={STAGES.length - 1}
+                                    max={stageOptions.length - 1}
                                     step={1}
-                                    value={Math.max(0, STAGES.indexOf(newLeadData.projectStatus))}
-                                    onChange={(e) => updateField('projectStatus', STAGES[Number(e.target.value)])}
+                                    value={Math.max(0, stageOptions.indexOf(newLeadData.projectStatus))}
+                                    onChange={(e) => updateField('projectStatus', stageOptions[Number(e.target.value)])}
                                     className="w-full accent-black"
                                 />
                                 <div className="flex items-center justify-between text-xs" style={{ color: theme.colors.textSecondary }}>
-                                    {STAGES.map((stage, idx) => (
+                                    {stageOptions.map((stage, idx) => (
                                         <span
                                             key={stage}
-                                            className={idx === Math.max(0, STAGES.indexOf(newLeadData.projectStatus)) ? 'font-semibold' : 'opacity-60'}
+                                            className={idx === Math.max(0, stageOptions.indexOf(newLeadData.projectStatus)) ? 'font-semibold' : 'opacity-60'}
                                         >
                                             {stage.replace('Decision/Bidding', 'Decision')}
                                         </span>
@@ -423,7 +434,6 @@ export const NewLeadScreen = ({
                                 options={CITY_OPTIONS}
                                 placeholder="City, State"
                                 theme={theme}
-                                onAddNew={(val) => updateField('installationLocation', val)}
                                 resetOnSelect={false}
                             />
                         </SettingsRow>
@@ -459,44 +469,60 @@ export const NewLeadScreen = ({
                 
                 <FormSection title="Competition & Products" theme={theme}>
                     <div>
-                        <SettingsRow label="Bid?" isFirst={true} theme={theme} className="stack">
-                            <div className="grid grid-cols-2 gap-2">
-                                <PillButton
-                                    size="compact"
-                                    isSelected={newLeadData.isBid === true}
+                        <SettingsRow label="Bid?" isFirst={true} theme={theme}>
+                            <div className="flex justify-end gap-2">
+                                <button
+                                    type="button"
                                     onClick={() => updateField('isBid', true)}
-                                    theme={theme}
+                                    className="px-3 py-1.5 rounded-full text-xs font-semibold border transition-all"
+                                    style={{
+                                        backgroundColor: newLeadData.isBid === true ? theme.colors.textPrimary : theme.colors.surface,
+                                        color: newLeadData.isBid === true ? '#FFFFFF' : theme.colors.textSecondary,
+                                        borderColor: newLeadData.isBid === true ? theme.colors.textPrimary : theme.colors.border
+                                    }}
                                 >
                                     Yes
-                                </PillButton>
-                                <PillButton
-                                    size="compact"
-                                    isSelected={newLeadData.isBid !== true}
+                                </button>
+                                <button
+                                    type="button"
                                     onClick={() => updateField('isBid', false)}
-                                    theme={theme}
+                                    className="px-3 py-1.5 rounded-full text-xs font-semibold border transition-all"
+                                    style={{
+                                        backgroundColor: newLeadData.isBid !== true ? theme.colors.textPrimary : theme.colors.surface,
+                                        color: newLeadData.isBid !== true ? '#FFFFFF' : theme.colors.textSecondary,
+                                        borderColor: newLeadData.isBid !== true ? theme.colors.textPrimary : theme.colors.border
+                                    }}
                                 >
                                     No
-                                </PillButton>
+                                </button>
                             </div>
                         </SettingsRow>
-                        <SettingsRow label="Competition?" theme={theme} className="stack">
-                            <div className="grid grid-cols-2 gap-2">
-                                <PillButton
-                                    size="compact"
-                                    isSelected={newLeadData.competitionPresent === true}
+                        <SettingsRow label="Competition?" theme={theme}>
+                            <div className="flex justify-end gap-2">
+                                <button
+                                    type="button"
                                     onClick={() => updateField('competitionPresent', true)}
-                                    theme={theme}
+                                    className="px-3 py-1.5 rounded-full text-xs font-semibold border transition-all"
+                                    style={{
+                                        backgroundColor: newLeadData.competitionPresent === true ? theme.colors.textPrimary : theme.colors.surface,
+                                        color: newLeadData.competitionPresent === true ? '#FFFFFF' : theme.colors.textSecondary,
+                                        borderColor: newLeadData.competitionPresent === true ? theme.colors.textPrimary : theme.colors.border
+                                    }}
                                 >
                                     Yes
-                                </PillButton>
-                                <PillButton
-                                    size="compact"
-                                    isSelected={newLeadData.competitionPresent !== true}
+                                </button>
+                                <button
+                                    type="button"
                                     onClick={() => updateField('competitionPresent', false)}
-                                    theme={theme}
+                                    className="px-3 py-1.5 rounded-full text-xs font-semibold border transition-all"
+                                    style={{
+                                        backgroundColor: newLeadData.competitionPresent !== true ? theme.colors.textPrimary : theme.colors.surface,
+                                        color: newLeadData.competitionPresent !== true ? '#FFFFFF' : theme.colors.textSecondary,
+                                        borderColor: newLeadData.competitionPresent !== true ? theme.colors.textPrimary : theme.colors.border
+                                    }}
                                 >
                                     No
-                                </PillButton>
+                                </button>
                             </div>
                         </SettingsRow>
 
@@ -629,6 +655,9 @@ export const NewLeadScreen = ({
                                     onClick={() => updateField('salesReward', !(newLeadData.salesReward !== false))}
                                     theme={theme}
                                     className="flex items-center justify-center gap-2"
+                                    unselectedBg={theme.colors.subtle}
+                                    unselectedBorder={theme.colors.border}
+                                    unselectedText={theme.colors.textPrimary}
                                 >
                                     {newLeadData.salesReward !== false && <Check className="w-3.5 h-3.5" />}
                                     Sales Reward
@@ -639,6 +668,9 @@ export const NewLeadScreen = ({
                                     onClick={() => updateField('designerReward', !(newLeadData.designerReward !== false))}
                                     theme={theme}
                                     className="flex items-center justify-center gap-2"
+                                    unselectedBg={theme.colors.subtle}
+                                    unselectedBorder={theme.colors.border}
+                                    unselectedText={theme.colors.textPrimary}
                                 >
                                     {newLeadData.designerReward !== false && <Check className="w-3.5 h-3.5" />}
                                     Designer Reward
@@ -647,7 +679,7 @@ export const NewLeadScreen = ({
                         </SettingsRow>
                         <SettingsRow label="PO Timeframe" theme={theme} className="stack">
                             <div className="grid grid-cols-2 gap-3">
-                                {PO_TIMEFRAMES.map(timeframe => (
+                                {timeframeOptions.map(timeframe => (
                                     <PillButton
                                         key={timeframe}
                                         size="compact"
