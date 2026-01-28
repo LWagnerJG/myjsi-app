@@ -5,8 +5,8 @@ import { ORDER_DATA } from '../orders/data.js';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { HomeSearchInput } from '../../components/common/SearchInput.jsx';
 import { DESIGN_TOKENS, JSI_COLORS } from '../../design-system/tokens.js';
-import { Check, Plus, X, Settings as SettingsIcon, ChevronUp, ChevronDown } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Check, Plus, X, Settings as SettingsIcon, GripVertical } from 'lucide-react';
+import { motion, AnimatePresence, Reorder } from 'framer-motion';
 
 // Badge data for specific app routes
 const APP_BADGES = {
@@ -54,18 +54,6 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
         }
     }, [safeHomeApps, onUpdateHomeApps]);
 
-    const moveApp = useCallback((route, direction) => {
-        if (!onUpdateHomeApps) return;
-        const index = safeHomeApps.indexOf(route);
-        if (index === -1) return;
-        const nextIndex = direction === 'up' ? index - 1 : index + 1;
-        if (nextIndex < 0 || nextIndex >= safeHomeApps.length) return;
-        const next = [...safeHomeApps];
-        const temp = next[index];
-        next[index] = next[nextIndex];
-        next[nextIndex] = temp;
-        onUpdateHomeApps(next);
-    }, [safeHomeApps, onUpdateHomeApps]);
 
     const handleSearchSubmit = useCallback((val) => {
         if (onAskAI && val && val.trim()) {
@@ -142,43 +130,42 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
 
                     {isEditMode && (
                         <div className="text-xs font-medium" style={{ color: colors.textSecondary }}>
-                            Reorder with arrows. Keep at least 4 apps pinned.
+                            Drag to reorder. Keep at least 4 apps pinned.
                         </div>
                     )}
 
                     {isEditMode ? (
-                        <div className="space-y-2">
-                            {currentApps.map((app, index) => (
-                                <div
+                        <Reorder.Group
+                            axis="y"
+                            values={safeHomeApps}
+                            onReorder={onUpdateHomeApps}
+                            className="space-y-2"
+                        >
+                            {currentApps.map((app) => (
+                                <Reorder.Item
                                     key={app.route}
-                                    className="flex items-center justify-between gap-3 px-3 py-2 rounded-2xl border"
-                                    style={{ backgroundColor: `${colors.surface}F7`, borderColor: colors.border, boxShadow: DESIGN_TOKENS.shadows.card }}
+                                    value={app.route}
+                                    className="list-none"
                                 >
-                                    <div className="flex items-center gap-3 min-w-0">
-                                        <div className="w-9 h-9 rounded-2xl flex items-center justify-center" style={{ backgroundColor: `${colors.accent}12` }}>
-                                            <app.icon className="w-4 h-4" style={{ color: colors.accent }} />
+                                    <motion.div
+                                        layout
+                                        transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                                        className="flex items-center justify-between gap-3 px-3 py-2 rounded-2xl border"
+                                        style={{ backgroundColor: `${colors.surface}F7`, borderColor: colors.border, boxShadow: DESIGN_TOKENS.shadows.card }}
+                                    >
+                                        <div className="flex items-center gap-3 min-w-0">
+                                            <button
+                                                className="w-8 h-8 rounded-full flex items-center justify-center"
+                                                style={{ color: colors.textSecondary }}
+                                                aria-label="Drag to reorder"
+                                            >
+                                                <GripVertical className="w-4 h-4" />
+                                            </button>
+                                            <div className="w-9 h-9 rounded-2xl flex items-center justify-center" style={{ backgroundColor: `${colors.accent}12` }}>
+                                                <app.icon className="w-4 h-4" style={{ color: colors.accent }} />
+                                            </div>
+                                            <span className="text-sm font-semibold truncate" style={{ color: colors.textPrimary }}>{app.name}</span>
                                         </div>
-                                        <span className="text-sm font-semibold truncate" style={{ color: colors.textPrimary }}>{app.name}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <button
-                                            onClick={() => moveApp(app.route, 'up')}
-                                            className={`w-8 h-8 rounded-full flex items-center justify-center border transition-all ${index === 0 ? 'opacity-40 cursor-not-allowed' : 'hover:bg-black/[0.04] active:scale-95'}`}
-                                            style={{ borderColor: colors.border, color: colors.textSecondary }}
-                                            aria-label="Move up"
-                                            disabled={index === 0}
-                                        >
-                                            <ChevronUp className="w-4 h-4" />
-                                        </button>
-                                        <button
-                                            onClick={() => moveApp(app.route, 'down')}
-                                            className={`w-8 h-8 rounded-full flex items-center justify-center border transition-all ${index === currentApps.length - 1 ? 'opacity-40 cursor-not-allowed' : 'hover:bg-black/[0.04] active:scale-95'}`}
-                                            style={{ borderColor: colors.border, color: colors.textSecondary }}
-                                            aria-label="Move down"
-                                            disabled={index === currentApps.length - 1}
-                                        >
-                                            <ChevronDown className="w-4 h-4" />
-                                        </button>
                                         <button
                                             onClick={() => toggleApp(app.route)}
                                             className="w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center shadow hover:scale-105 active:scale-90 transition-transform"
@@ -186,10 +173,10 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                                         >
                                             <X className="w-3.5 h-3.5" />
                                         </button>
-                                    </div>
-                                </div>
+                                    </motion.div>
+                                </Reorder.Item>
                             ))}
-                        </div>
+                        </Reorder.Group>
                     ) : (
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                             <AnimatePresence mode="sync" initial={false}>
@@ -239,15 +226,14 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                     {isEditMode && (
                         <div className="space-y-2">
                             <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: colors.textSecondary }}>Add Apps</div>
-                            <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                                 {availableApps.map((app) => (
                                     <motion.button
                                         layout
                                         key={app.route}
                                         onClick={() => toggleApp(app.route)}
-                                        className="flex-shrink-0 flex flex-col items-center justify-center gap-2 px-4 py-3 rounded-2xl border border-dashed hover:bg-black/[0.02] transition-all active:scale-95"
+                                        className="flex flex-col items-center justify-center gap-2 px-4 py-3 rounded-2xl border border-dashed hover:bg-black/[0.02] transition-all active:scale-95"
                                         style={{
-                                            minWidth: 120,
                                             backgroundColor: colors.surface,
                                             borderColor: colors.border
                                         }}
