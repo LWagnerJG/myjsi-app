@@ -233,6 +233,8 @@ export const EMPTY_LEAD = {
     quoteType: 'New Quote',
     pastProjectRef: '',
     discount: 'Undecided',
+    salesReward: true,
+    designerReward: true,
     products: [],
     notes: '',
     jsiQuoteNumber: '',

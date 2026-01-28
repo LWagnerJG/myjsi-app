@@ -231,6 +231,8 @@ export const NewLeadScreen = ({
     newLeadData = {},
     onNewLeadChange,
 }) => {
+    const REWARD_THRESHOLD = 250000;
+
     const updateField = (field, value) => {
         // Clear otherVertical when vertical changes away from "Other"
         if (field === 'vertical' && value !== 'Other (Please specify)') {
@@ -239,6 +241,26 @@ export const NewLeadScreen = ({
             onNewLeadChange({ [field]: value });
         }
     };
+
+    const parseCurrencyValue = (raw) => {
+        if (raw === null || raw === undefined) return null;
+        const numeric = Number(String(raw).replace(/[^0-9.]/g, ''));
+        return Number.isFinite(numeric) ? numeric : null;
+    };
+
+    const lastEstimatedRef = useRef(null);
+
+    useEffect(() => {
+        const amount = parseCurrencyValue(newLeadData.estimatedList);
+        const prevAmount = lastEstimatedRef.current;
+        const shouldAutoDisable = amount !== null && amount > 0 && amount < REWARD_THRESHOLD && (prevAmount === null || prevAmount >= REWARD_THRESHOLD);
+
+        if (shouldAutoDisable && (newLeadData.salesReward !== false || newLeadData.designerReward !== false)) {
+            onNewLeadChange({ salesReward: false, designerReward: false });
+        }
+
+        lastEstimatedRef.current = amount;
+    }, [newLeadData.estimatedList, newLeadData.salesReward, newLeadData.designerReward, onNewLeadChange]);
     
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -549,6 +571,41 @@ export const NewLeadScreen = ({
                                 theme={theme}
                                 mutedValues={["Undecided"]}
                             />
+                        </SettingsRow>
+                        <SettingsRow label="Rewards" theme={theme}>
+                            <div className="grid gap-3 sm:grid-cols-2">
+                                <div
+                                    className="flex items-center justify-between rounded-2xl border px-4 py-3"
+                                    style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.border }}
+                                >
+                                    <div className="min-w-0">
+                                        <div className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>Sales Reward</div>
+                                        <div className="text-xs opacity-60" style={{ color: theme.colors.textSecondary }}>Dealer sales incentive</div>
+                                    </div>
+                                    <ToggleSwitch
+                                        checked={newLeadData.salesReward !== false}
+                                        onChange={(e) => updateField('salesReward', e.target.checked)}
+                                        theme={theme}
+                                    />
+                                </div>
+                                <div
+                                    className="flex items-center justify-between rounded-2xl border px-4 py-3"
+                                    style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.border }}
+                                >
+                                    <div className="min-w-0">
+                                        <div className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>Designer Reward</div>
+                                        <div className="text-xs opacity-60" style={{ color: theme.colors.textSecondary }}>Dealer designer incentive</div>
+                                    </div>
+                                    <ToggleSwitch
+                                        checked={newLeadData.designerReward !== false}
+                                        onChange={(e) => updateField('designerReward', e.target.checked)}
+                                        theme={theme}
+                                    />
+                                </div>
+                            </div>
+                            <div className="text-xs mt-2" style={{ color: theme.colors.textSecondary }}>
+                                Projects under $250k list default rewards off. You can toggle them back on if needed.
+                            </div>
                         </SettingsRow>
                         <SettingsRow label="PO Timeframe" theme={theme}>
                             <div className="grid grid-cols-2 gap-3">
