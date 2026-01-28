@@ -164,7 +164,7 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
 
     return (
         <div className="flex flex-col h-full overflow-y-auto scrollbar-hide" style={{ backgroundColor: colors.background }}>
-            <div className="px-4 sm:px-6 lg:px-8 pt-2 sm:pt-4 pb-24 space-y-6 lg:space-y-8 max-w-2xl lg:max-w-5xl 2xl:max-w-6xl mx-auto w-full">
+            <div className="px-4 sm:px-6 lg:px-8 pt-1 sm:pt-2 pb-24 space-y-6 lg:space-y-8 max-w-2xl lg:max-w-5xl 2xl:max-w-6xl mx-auto w-full">
 
                 {/* Header Section */}
                 <div className="space-y-1 hidden sm:block">
@@ -174,19 +174,18 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
 
                 {/* Search / Spotlight */}
                 <div className="relative group">
-                    <div className="absolute inset-0 bg-white/40 blur-2xl group-focus-within:bg-white/60 transition-colors rounded-full" />
+                    <div className="absolute inset-0 bg-transparent rounded-full" />
                     <GlassCard
                         theme={theme}
                         className="relative z-10 px-5"
                         style={{
                             borderRadius: 9999,
-                            height: 54,
+                            height: 56,
                             paddingTop: 0,
                             paddingBottom: 0,
-                            background: 'linear-gradient(180deg, rgba(255,255,255,0.30) 0%, rgba(255,255,255,0.14) 100%)',
-                            boxShadow: '0 10px 24px rgba(0,0,0,0.08), 0 2px 10px rgba(0,0,0,0.05)',
-                            backdropFilter: 'blur(22px) saturate(120%)',
-                            WebkitBackdropFilter: 'blur(22px) saturate(120%)'
+                            background: 'rgba(255, 255, 255, 0.75)',
+                            border: '1px solid rgba(255, 255, 255, 0.7)',
+                            boxShadow: 'none'
                         }}
                     >
                         <HomeSearchInput
