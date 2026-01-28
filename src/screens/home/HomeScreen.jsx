@@ -283,8 +283,12 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                                         </span>
                                         {badge && (
                                             <div 
-                                                className="absolute top-3 right-3 px-2 py-0.5 rounded-full text-xs font-bold"
-                                                style={{ backgroundColor: badge.color, color: '#FFFFFF' }}
+                                                className="absolute top-2 right-2 px-1.5 py-[1px] rounded-full text-[9px] font-bold border"
+                                                style={{ 
+                                                    backgroundColor: `${badge.color}15`, // Very subtle transparent background 
+                                                    color: badge.color,
+                                                    borderColor: `${badge.color}30`
+                                                }}
                                             >
                                                 {badge.value}
                                             </div>
