@@ -94,8 +94,21 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
 
                 {/* Search / Spotlight */}
                 <div className="relative group">
-                    <div className="absolute inset-0 bg-black/5 blur-xl group-focus-within:bg-black/10 transition-colors rounded-full" />
-                    <GlassCard theme={theme} className="relative z-10 px-5" style={{ borderRadius: 9999, height: 56, paddingTop: 0, paddingBottom: 0 }}>
+                    <div className="absolute inset-0 bg-white/40 blur-2xl group-focus-within:bg-white/60 transition-colors rounded-full" />
+                    <GlassCard
+                        theme={theme}
+                        className="relative z-10 px-5"
+                        style={{
+                            borderRadius: 9999,
+                            height: 54,
+                            paddingTop: 0,
+                            paddingBottom: 0,
+                            background: 'linear-gradient(180deg, rgba(255,255,255,0.30) 0%, rgba(255,255,255,0.14) 100%)',
+                            boxShadow: '0 10px 24px rgba(0,0,0,0.08), 0 2px 10px rgba(0,0,0,0.05)',
+                            backdropFilter: 'blur(22px) saturate(120%)',
+                            WebkitBackdropFilter: 'blur(22px) saturate(120%)'
+                        }}
+                    >
                         <HomeSearchInput
                             value={searchQuery}
                             onChange={setSearchQuery}
