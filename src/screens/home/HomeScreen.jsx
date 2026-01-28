@@ -216,7 +216,13 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                             onDragEnd={handleReorder}
                         >
                             <SortableContext items={safeHomeApps} strategy={rectSortingStrategy}>
-                                <div className="grid gap-2" style={{ gridTemplateColumns: 'repeat(3, minmax(86px, 1fr))' }}>
+                                <div
+                                    style={{
+                                        display: 'grid',
+                                        gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                                        gap: '0.5rem'
+                                    }}
+                                >
                                     {currentApps.map((app) => (
                                         <SortableAppTile
                                             key={app.route}
@@ -230,7 +236,13 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                             </SortableContext>
                         </DndContext>
                     ) : (
-                        <div className="grid gap-2" style={{ gridTemplateColumns: 'repeat(3, minmax(86px, 1fr))' }}>
+                        <div
+                            style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                                gap: '0.5rem'
+                            }}
+                        >
                             {currentApps.map((app) => {
                                 const badge = APP_BADGES[app.route];
                                 return (
@@ -273,7 +285,13 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                     {isEditMode && (
                         <div className="space-y-2">
                             <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: colors.textSecondary }}>Add Apps</div>
-                            <div className="grid gap-2" style={{ gridTemplateColumns: 'repeat(3, minmax(86px, 1fr))' }}>
+                            <div
+                                style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                                    gap: '0.5rem'
+                                }}
+                            >
                                 {availableApps.map((app) => (
                                     <motion.button
                                         layout
