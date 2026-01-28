@@ -611,33 +611,32 @@ export const NewLeadScreen = ({
                             />
                         </SettingsRow>
                         <SettingsRow label="Rewards" theme={theme}>
-                            <div className="grid grid-cols-2 gap-2">
-                                <PillButton
-                                    size="xs"
-                                    isSelected={newLeadData.salesReward !== false}
+                            <div
+                                className="flex items-center gap-1 rounded-full p-1 border"
+                                style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border }}
+                            >
+                                <button
+                                    type="button"
                                     onClick={() => updateField('salesReward', !(newLeadData.salesReward !== false))}
-                                    theme={theme}
-                                    className="flex items-center justify-center gap-2 min-w-[140px]"
-                                    unselectedBg={theme.colors.subtle}
-                                    unselectedBorder={theme.colors.border}
-                                    unselectedText={theme.colors.textPrimary}
+                                    className="flex-1 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all"
+                                    style={{
+                                        backgroundColor: newLeadData.salesReward !== false ? theme.colors.textPrimary : 'transparent',
+                                        color: newLeadData.salesReward !== false ? '#FFFFFF' : theme.colors.textPrimary
+                                    }}
                                 >
-                                    {newLeadData.salesReward !== false && <Check className="w-3.5 h-3.5" />}
-                                    Sales Reward
-                                </PillButton>
-                                <PillButton
-                                    size="xs"
-                                    isSelected={newLeadData.designerReward !== false}
+                                    {newLeadData.salesReward !== false ? '✓ ' : ''}Sales Reward
+                                </button>
+                                <button
+                                    type="button"
                                     onClick={() => updateField('designerReward', !(newLeadData.designerReward !== false))}
-                                    theme={theme}
-                                    className="flex items-center justify-center gap-2 min-w-[140px]"
-                                    unselectedBg={theme.colors.subtle}
-                                    unselectedBorder={theme.colors.border}
-                                    unselectedText={theme.colors.textPrimary}
+                                    className="flex-1 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all"
+                                    style={{
+                                        backgroundColor: newLeadData.designerReward !== false ? theme.colors.textPrimary : 'transparent',
+                                        color: newLeadData.designerReward !== false ? '#FFFFFF' : theme.colors.textPrimary
+                                    }}
                                 >
-                                    {newLeadData.designerReward !== false && <Check className="w-3.5 h-3.5" />}
-                                    Designer Reward
-                                </PillButton>
+                                    {newLeadData.designerReward !== false ? '✓ ' : ''}Designer Reward
+                                </button>
                             </div>
                         </SettingsRow>
                         <SettingsRow label="PO Timeframe" theme={theme} className="stack">
@@ -683,6 +682,33 @@ export const NewLeadScreen = ({
                             placeholder="Enter any further details..."
                             theme={theme}
                         />
+                    </div>
+                </FormSection>
+
+                <FormSection title="Quote" theme={theme} className="lg:col-span-2">
+                    <div>
+                        <SettingsRow label="Existing JSI Quote?" isFirst={true} theme={theme}>
+                            <div className="flex justify-end">
+                                <ToggleSwitch
+                                    checked={!!newLeadData.jsiQuoteExists}
+                                    onChange={(e) => updateField('jsiQuoteExists', e.target.checked)}
+                                    theme={theme}
+                                />
+                            </div>
+                        </SettingsRow>
+                        {newLeadData.jsiQuoteExists && (
+                            <SettingsRow label={null} theme={theme} className="compact no-label">
+                                <FormInput
+                                    label=""
+                                    value={newLeadData.jsiQuoteNumber || ''}
+                                    onChange={e => updateField('jsiQuoteNumber', e.target.value)}
+                                    placeholder="JSI Quote #"
+                                    theme={theme}
+                                    size="sm"
+                                    surfaceBg={true}
+                                />
+                            </SettingsRow>
+                        )}
                     </div>
                 </FormSection>
                 

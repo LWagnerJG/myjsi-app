@@ -237,6 +237,7 @@ export const EMPTY_LEAD = {
     designerReward: true,
     products: [],
     notes: '',
+    jsiQuoteExists: false,
     jsiQuoteNumber: '',
     isContract: false,
     contractType: ''
