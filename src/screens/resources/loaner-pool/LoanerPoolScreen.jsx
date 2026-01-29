@@ -213,7 +213,7 @@ const RequestDrawer = ({
                                     ref={inputRef}
                                     value={requestForm.projectName}
                                     onChange={(e) => setRequestForm(prev => ({ ...prev, projectName: e.target.value }))}
-                                    placeholder="Search or create a project…"
+                                    placeholder="Search or create a projectï¿½"
                                     className="w-full px-3 py-2 rounded-lg border text-sm"
                                     style={{
                                         backgroundColor: theme.colors.surface,
@@ -471,7 +471,7 @@ export const LoanerPoolScreen = ({ theme, setSuccessMessage, userSettings, myPro
     );
 
     return (
-        <div className="flex flex-col h-full" style={{ paddingBottom: totalRequestItems > 0 ? '88px' : '0' }}>
+        <div className="flex flex-col h-full app-header-offset" style={{ paddingBottom: totalRequestItems > 0 ? '88px' : '0' }}>
             <div className="flex-1 overflow-y-auto scrollbar-hide">
                 <div className="p-4 flex items-center gap-4">
                     <div className="relative flex-1">

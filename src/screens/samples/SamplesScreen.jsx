@@ -359,26 +359,30 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
     );
 
     return (
-        <div className="flex flex-col h-full" style={{ paddingBottom: totalCartItems > 0 ? `${COLLAPSED_HEIGHT + 4}px` : '0' }}>
-            <div className="flex-1 overflow-y-auto scrollbar-hide" style={{ backgroundColor: theme.colors.background }}>
-                <div className="sticky top-0 z-10 px-4 pt-2 pb-3 space-y-3" style={{ background: theme.colors.background, borderBottom: `1px solid ${theme.colors.border}40` }}>
-                    <div className="relative flex overflow-x-auto scrollbar-hide whitespace-nowrap gap-2">
-                        {allCategories.map((cat) => (
-                            <PillButton
-                                key={cat.id}
-                                isSelected={selectedCategory === cat.id}
-                                onClick={() => setSelectedCategory(cat.id)}
-                                theme={theme}
-                                size="compact"
-                            >
-                                {cat.name}
-                            </PillButton>
-                        ))}
-                    </div>
-                    <div className="flex gap-3"><OrderFullSetButton onClick={addFull} theme={theme} inCart={fullSetInCart} /><AddCompleteSetButton onClick={addSet} theme={theme} inCart={setInCartQuantity > 0} categoryName={currentCategoryName} /></div>
+        <div className="flex flex-col h-full app-header-offset" style={{ paddingBottom: totalCartItems > 0 ? `${COLLAPSED_HEIGHT + 4}px` : '0' }}>
+            {/* Category tabs - fixed below app header */}
+            <div className="flex-shrink-0 px-4 pt-1 pb-3 space-y-3" style={{ background: theme.colors.background, borderBottom: `1px solid ${theme.colors.border}40` }}>
+                <div className="relative flex overflow-x-auto scrollbar-hide whitespace-nowrap gap-2">
+                    {allCategories.map((cat) => (
+                        <PillButton
+                            key={cat.id}
+                            isSelected={selectedCategory === cat.id}
+                            onClick={() => setSelectedCategory(cat.id)}
+                            theme={theme}
+                            size="compact"
+                        >
+                            {cat.name}
+                        </PillButton>
+                    ))}
                 </div>
-                <div className="px-4 pb-4 pt-3">
-                    {renderProductGrid(filteredProducts)}
+                <div className="flex gap-3"><OrderFullSetButton onClick={addFull} theme={theme} inCart={fullSetInCart} /><AddCompleteSetButton onClick={addSet} theme={theme} inCart={setInCartQuantity > 0} categoryName={currentCategoryName} /></div>
+            </div>
+            {/* Scrollable product grid */}
+            <div className="flex-1 overflow-y-auto scrollbar-hide" style={{ backgroundColor: theme.colors.background }}>
+                <div className="px-4 sm:px-6 lg:px-8 pb-4 pt-3">
+                    <div className="max-w-5xl mx-auto w-full">
+                        {renderProductGrid(filteredProducts)}
+                    </div>
                 </div>
             </div>
             <CartDrawer cart={cart} onUpdateCart={onUpdateCart} theme={theme} userSettings={userSettings} dealers={dealerDirectory} designFirms={designFirms} initialOpen={initialCartOpen} onNavigate={onNavigate} />

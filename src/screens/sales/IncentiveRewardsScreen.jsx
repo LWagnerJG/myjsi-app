@@ -67,7 +67,7 @@ export const IncentiveRewardsScreen = ({ theme }) => {
 
     return (
         <>
-            <div className="p-4 flex flex-wrap justify-between items-center gap-4 max-w-2xl mx-auto w-full">
+            <div className="p-4 sm:px-6 lg:px-8 flex flex-wrap justify-between items-center gap-4 max-w-5xl mx-auto w-full">
                 <div className="w-40">
                     <PortalNativeSelect
                         value={selectedPeriod}
@@ -86,7 +86,7 @@ export const IncentiveRewardsScreen = ({ theme }) => {
                     />
                 </div>
             </div>
-            <div className="px-4 space-y-4 pb-4 max-w-2xl mx-auto w-full">
+            <div className="px-4 sm:px-6 lg:px-8 space-y-4 pb-4 max-w-5xl mx-auto w-full">
                 {(viewFilter === 'all' || viewFilter === 'sales') && (
                     <GlassCard theme={theme} className="p-4">
                         <h3 className="font-bold text-xl mb-2" style={{ color: theme.colors.textPrimary }}>Sales</h3>

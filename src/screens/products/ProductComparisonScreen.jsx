@@ -176,12 +176,14 @@ export const ProductComparisonScreen = ({ categoryId, onNavigate, theme }) => {
   useEffect(()=>{ if(isGuest && activeProduct && !visibleProducts.includes(activeProduct)){ const next=visibleProducts[0]; if(next) setActiveProduct(next);} },[isGuest,activeProduct,visibleProducts]);
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full app-header-offset">
       <div className="flex-1 overflow-y-auto scrollbar-hide">
-        <div className="p-4 space-y-5">
+        <div className="px-4 sm:px-6 lg:px-8 py-4 space-y-5">
+          <div className="max-w-5xl mx-auto w-full space-y-5">
           <ProductTabs products={visibleProducts} activeProduct={activeProduct} onProductSelect={handleProductSelect} theme={theme} categoryName={categoryData.name} />
           <ProductHero product={activeProduct} theme={theme} categoryId={categoryId} onNavigate={onNavigate} categoryName={categoryData.name} />
           <PricingTable products={visibleProducts} activeProduct={activeProduct} onSelectProduct={handleProductSelect} theme={theme} categoryId={categoryId} typicalLayout={typicalLayout} onTypicalLayoutChange={setTypicalLayout} conferenceSize={conferenceSize} onConferenceSizeChange={setConferenceSize} loungeConfig={loungeConfig} onLoungeConfigChange={setLoungeConfig} guestLegType={guestLegType} onGuestLegTypeChange={setGuestLegType} materialMode={materialMode} onMaterialModeChange={setMaterialMode} />
+          </div>
         </div>
       </div>
     </div>

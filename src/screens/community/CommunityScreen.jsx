@@ -207,11 +207,11 @@ export const CommunityScreen = ({
   const doRefresh = () => { if (onRefresh) { onRefresh(); } else { setRefreshKey(k=>k+1); } };
 
   return (
-    <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
+    <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
       {!embedMode && (
-        <div className={`sticky top-0 z-10 transition-all ${isScrolled?'shadow-md':''}`} style={{ backgroundColor: isScrolled?`${theme.colors.background}e8`:theme.colors.background, backdropFilter:isScrolled?'blur(12px)':'none', borderBottom:`1px solid ${isScrolled?theme.colors.border+'40':'transparent'}` }}>
-          {/* Top controls raised */}
-          <div className="px-4 pt-3 pb-1 w-full">
+        <div className="flex-shrink-0">
+          {/* Top controls */}
+          <div className="px-4 pt-1 pb-1 w-full">
             <div className="flex w-full gap-3 items-center">
               <div className="flex gap-2">
                 <PillButton isSelected={viewMode==='feed'} onClick={()=>setViewMode('feed')} theme={theme} size="default">Community</PillButton>
@@ -222,8 +222,8 @@ export const CommunityScreen = ({
               </PillButton>
             </div>
           </div>
-          {/* Search bar (whiter & closer) */}
-          <div className="px-4 pb-1">
+          {/* Search bar */}
+          <div className="px-4 pb-2">
             <StandardSearchBar
               value={query}
               onChange={setQuery}
@@ -234,13 +234,19 @@ export const CommunityScreen = ({
           </div>
         </div>
       )}
-      <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto no-scrollbar pb-10 pt-1 -mt-1 space-y-4">
+      <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto no-scrollbar pb-10 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-5xl mx-auto w-full">
         {effectiveViewMode==='feed' && !filteredContent.length && (
           <div className="text-center text-sm pt-20" style={{ color: theme.colors.textSecondary }}>No content found.</div>
         )}
-        {effectiveViewMode==='feed' && filteredContent.map(item => item.question ? <PollCard key={`poll-${item.id}`} poll={item} /> : <PostCard key={`post-${item.id}`} post={item} />)}
+        {/* Responsive grid: 1 column on mobile, 2 columns on desktop */}
+        {effectiveViewMode==='feed' && filteredContent.length > 0 && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+            {filteredContent.map(item => item.question ? <PollCard key={`poll-${item.id}`} poll={item} /> : <PostCard key={`post-${item.id}`} post={item} />)}
+          </div>
+        )}
         {effectiveViewMode==='library' && !embedMode && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             {photoLibrary.map(photo => (
               <div key={photo.id} className="group relative rounded-xl overflow-hidden border" style={{ borderColor: theme.colors.border, backgroundColor: theme.colors.surface }}>
                 <img src={photo.src} alt={photo.post.title||'post image'} className="w-full h-40 object-cover group-hover:scale-105 transition-transform" />
@@ -253,6 +259,7 @@ export const CommunityScreen = ({
           </div>
         )}
         <div className="h-2" />
+        </div>
       </div>
     </div>
   );

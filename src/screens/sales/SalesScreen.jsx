@@ -113,8 +113,8 @@ export const SalesScreen = ({ theme, onNavigate }) => {
   }, []);
 
   return (
-    <div className="flex flex-col h-full overflow-y-auto scrollbar-hide" style={{ backgroundColor: colors.background, scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-      <div className="px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-8 lg:space-y-10 max-w-2xl lg:max-w-5xl 2xl:max-w-6xl mx-auto w-full pb-20 lg:pb-12">
+    <div className="flex flex-col h-full overflow-y-auto scrollbar-hide app-header-offset" style={{ backgroundColor: colors.background, scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+      <div className="px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-8 lg:space-y-10 max-w-5xl mx-auto w-full pb-20 lg:pb-12">
 
         {/* Navigation Buttons */}
         <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide pb-1">

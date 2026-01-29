@@ -62,7 +62,7 @@ export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
 
     if (isLoading) {
         return (
-            <div className="flex flex-col h-full">
+            <div className="flex flex-col h-full app-header-offset">
                 <div className="flex-1 flex items-center justify-center">
                     <Hourglass className="w-8 h-8 animate-spin" style={{ color: theme.colors.accent }} />
                 </div>
@@ -72,7 +72,7 @@ export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
 
     if (filteredDiscounts.length === 0) {
         return (
-            <div className="flex flex-col h-full px-5 pt-4">
+            <div className="flex flex-col h-full px-5 app-header-offset">
                 <GlassCard theme={theme} className="p-6 text-center">
                     <Percent className="w-12 h-12 mx-auto mb-4" style={{ color: theme.colors.accent }} />
                     <h3 className="font-bold text-lg mb-2" style={{ color: theme.colors.textPrimary }}>No Discounts Found</h3>
@@ -84,8 +84,8 @@ export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
     }
 
     return (
-        <div className="flex flex-col h-full">
-            <div className="flex-1 overflow-y-auto scrollbar-hide px-5 pt-3 pb-6">
+        <div className="flex flex-col h-full app-header-offset">
+            <div className="flex-1 overflow-y-auto scrollbar-hide px-5 pb-6">
                 <div className="space-y-3">{/* tighter spacing */}
                     {filteredDiscounts.map((discount) => {
                         const discountPercent = discount.Discount || discount.sampleDiscount;

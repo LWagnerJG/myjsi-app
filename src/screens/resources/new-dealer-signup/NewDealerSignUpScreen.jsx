@@ -18,7 +18,7 @@ export const NewDealerSignUpScreen = ({ theme, setSuccessMessage, onNavigate, ha
     };
 
     return (
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full app-header-offset">
             <PageTitle title="New Dealer Sign-Up" theme={theme} />
             <div className="flex-1 overflow-y-auto px-4 pb-6 scrollbar-hide">
                 <form onSubmit={handleSubmit} className="max-w-xl mx-auto mt-2 space-y-6">

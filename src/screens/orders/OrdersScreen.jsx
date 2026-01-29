@@ -216,20 +216,10 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
     ];
 
     return (
-        <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
-            {/* Top Controls */}
-
-            <div
-                className={`sticky top-0 z-10 transition-all duration-300 max-w-2xl mx-auto w-full ${isScrolled ? 'shadow-md' : ''}`}
-                style={{
-                    backgroundColor: isScrolled ? `${theme.colors.background}e0` : 'transparent',
-                    backdropFilter: isScrolled ? 'blur(12px)' : 'none',
-                    WebkitBackdropFilter: isScrolled ? 'blur(12px)' : 'none',
-                    borderBottom: `1px solid ${isScrolled ? theme.colors.border + '40' : 'transparent'}`
-                }}
-            >
-                {/* Slightly reduced top padding to raise search bar */}
-                <div className="px-4 pt-3 pb-2 flex flex-col gap-2">
+        <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
+            {/* Top Controls - fixed below app header */}
+            <div className="flex-shrink-0 max-w-5xl mx-auto w-full">
+                <div className="px-4 sm:px-6 lg:px-8 pt-1 pb-2 flex flex-col gap-2">
                     {/* Search Input Component */}
                     <div style={{ height: 56 }} className="flex-grow">
                         <SearchInput value={searchTerm} onChange={(e)=>setSearchTerm(e.target.value)} placeholder="Search Orders" theme={theme} variant="header" />
@@ -291,7 +281,7 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
 
             {/* Content */}
             <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto scrollbar-hide">
-                <div className="px-4 pt-4 pb-24 space-y-4 max-w-2xl mx-auto w-full">
+                <div className="px-4 sm:px-6 lg:px-8 pt-4 pb-24 space-y-4 max-w-5xl mx-auto w-full">
                     {viewMode === 'list' ? (
                         groupKeys.length ? (
                             <div className="space-y-4">

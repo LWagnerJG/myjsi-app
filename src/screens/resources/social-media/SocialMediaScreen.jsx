@@ -105,9 +105,9 @@ export const SocialMediaScreen = ({ theme }) => {
   );
 
   return (
-    <div className="flex flex-col h-full" style={{ background: theme.colors.background }}>
+    <div className="flex flex-col h-full app-header-offset" style={{ background: theme.colors.background }}>
       {/* Help bar */}
-      <div className="px-4 pt-3 pb-1">
+      <div className="px-4 pb-1">
         <PillButton theme={theme} onClick={()=>setShowHelp(h=>!h)} size="compact" className="flex items-center gap-1.5 text-[11px]">
           <Info className="w-3.5 h-3.5" /> How to use {showHelp ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
         </PillButton>

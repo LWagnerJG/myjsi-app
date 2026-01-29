@@ -67,7 +67,7 @@ export const CustomerRankingScreen = ({ theme }) => {
     return (
         <div className="h-full flex flex-col" style={{ backgroundColor: theme.colors.background }}>
             {/* Tab Toggle */}
-            <div className="px-4 pt-4 pb-2 max-w-2xl mx-auto w-full">
+            <div className="px-4 sm:px-6 lg:px-8 pt-4 pb-2 max-w-5xl mx-auto w-full">
                 <SegmentedToggle
                     value={tab}
                     onChange={setTab}

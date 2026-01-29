@@ -12,7 +12,6 @@ export const CommunityLibraryLayout = ({
   const [query, setQuery] = useState('');
   const scrollPositions = useRef({ community: 0, library: 0 });
   const containerRef = useRef(null);
-  const headerRef = useRef(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -38,11 +37,12 @@ export const CommunityLibraryLayout = ({
   const paneTransition = prefersReducedMotion ? 'none' : 'opacity 240ms ease, transform 240ms ease';
 
   return (
-    <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
-      <div ref={headerRef} className={`sticky top-0 z-10 transition-all ${isScrolled ? 'shadow-md':''}`} style={{ backgroundColor: isScrolled? `${theme.colors.background}e8`: theme.colors.background, backdropFilter: isScrolled? 'blur(12px)':'none', borderBottom:`1px solid ${isScrolled? theme.colors.border+'40':'transparent'}`, WebkitBackdropFilter: isScrolled? 'blur(12px)':'none' }}>
+    <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
+      {/* Header controls - fixed below app header */}
+      <div className="flex-shrink-0" style={{ backgroundColor: theme.colors.background }}>
         {/* Segmented toggle + Post CTA */}
-        <div className="px-4 pt-4 pb-1 w-full">
-          <div className="flex w-full gap-4 items-center">
+        <div className="px-4 sm:px-6 lg:px-8 pt-1 pb-1 w-full">
+          <div className="max-w-5xl mx-auto w-full flex gap-4 items-center">
             <div className="relative flex flex-[3] rounded-full border overflow-hidden h-12 shadow-sm" style={{ borderColor: theme.colors.border, background: '#ffffff' }}>
               {/* animated background indicator */}
               <div aria-hidden="true" style={{ position:'absolute', top:4, bottom:4, left: activeTab==='community'?4:'50%', width:'calc(50% - 8px)', borderRadius:9999, background: theme.colors.accent, transition: prefersReducedMotion? 'none':'left 240ms cubic-bezier(.3,1,.3,1)' }} />
@@ -69,7 +69,8 @@ export const CommunityLibraryLayout = ({
           </div>
         </div>
         {/* Search bar */}
-        <div className="px-4 mt-3 mb-3">
+        <div className="px-4 sm:px-6 lg:px-8 mt-2 mb-2">
+          <div className="max-w-5xl mx-auto w-full">
           <StandardSearchBar
             id="community-main-search"
             value={query}
@@ -77,10 +78,11 @@ export const CommunityLibraryLayout = ({
             placeholder={activeTab==='community'? 'Search posts, people, tags...':'Search library'}
             theme={{...theme, colors:{...theme.colors, surface:'#ffffff'}}}
           />
+          </div>
         </div>
       </div>
-      <div ref={containerRef} onScroll={handleScroll} className="flex-1 overflow-y-auto px-4 pb-10 pt-3 space-y-4 scrollbar-hide">
-        <div className="mx-auto w-full" style={{ maxWidth: '100%', position:'relative' }}>
+      <div ref={containerRef} onScroll={handleScroll} className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pb-10 space-y-4 scrollbar-hide">
+        <div className="mx-auto w-full max-w-5xl" style={{ position:'relative' }}>
           {/* Active pane remains in normal flow so container height = active content height. Inactive pane is absolutely positioned overlay to allow animation without cutting off scroll height. */}
           <div style={{ position:'relative' }}>
             {/* Community Pane */}
@@ -125,7 +127,7 @@ export const CommunityLibraryLayout = ({
                 transition:paneTransition,
                 pointerEvents:'none'
               }}>
-              <LibraryGrid theme={theme} query={query} onQueryChange={setQuery} parentHeaderRef={headerRef} />
+              <LibraryGrid theme={theme} query={query} onQueryChange={setQuery} />
             </div>
           </div>
         </div>

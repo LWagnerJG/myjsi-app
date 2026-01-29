@@ -45,7 +45,8 @@ function ReplacementForm({
     openPhotoPicker,
 }) {
     return (
-        <div className="space-y-4 px-4 pt-8 pb-6">
+        <div className="px-4 sm:px-6 lg:px-8 pt-8 pb-6">
+            <div className="max-w-5xl mx-auto w-full space-y-4">
             <GlassCard theme={theme} className="p-4 space-y-4" variant="minimal">
                 <div>
                     <label className="block text-sm mb-1" style={{ color: theme.colors.textSecondary }}>
@@ -150,6 +151,7 @@ function ReplacementForm({
                     Submit Replacement
                 </button>
             </div>
+            </div>
         </div>
     );
 }
@@ -183,10 +185,11 @@ export const ReplacementsScreen = ({ theme }) => {
 
     /* -------------------------------- UI ---------------------------------- */
     return (
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full app-header-offset">
             <div className="flex-1 overflow-y-auto scrollbar-hide">
                 {view === 'list' ? (
-                    <div className="px-4 pt-4 pb-6 space-y-6">
+                    <div className="px-4 sm:px-6 lg:px-8 pt-4 pb-6 space-y-6">
+                        <div className="max-w-5xl mx-auto w-full space-y-6">
                         <GlassCard theme={theme} className="p-4" variant="minimal">
                             <div className="grid grid-cols-1 gap-4">
                                 <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: theme.colors.surface }}>
@@ -259,6 +262,7 @@ export const ReplacementsScreen = ({ theme }) => {
                                     </GlassCard>
                                 )}
                             </div>
+                        </div>
                         </div>
                     </div>
                 ) : (

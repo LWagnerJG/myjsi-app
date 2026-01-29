@@ -4,8 +4,8 @@ import * as Data from './data.js';
 
 export const CommissionRatesScreen = ({ theme }) => {
     return (
-        <div className="h-full flex flex-col" style={{ backgroundColor: theme.colors.background }}>
-            <div className="flex-1 overflow-y-auto px-4 pb-6 mt-6">
+        <div className="h-full flex flex-col app-header-offset" style={{ backgroundColor: theme.colors.background }}>
+            <div className="flex-1 overflow-y-auto px-4 pb-6">
                 <GlassCard theme={theme} className="p-6 rounded-2xl shadow-lg">
                     <table className="w-full text-left border-collapse">
                         <thead>

@@ -18,7 +18,7 @@ import { FABRICS_DATA } from '../../products/data.js';
 const LocalSearchSelect = ({
   theme,
   label,
-  placeholder = 'Select…',
+  placeholder = 'Selectï¿½',
   options = [],
   value = '',
   onChange,
@@ -91,7 +91,7 @@ const LocalSearchSelect = ({
             autoFocus
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Type to filter…"
+            placeholder="Type to filterï¿½"
             className="w-full bg-transparent outline-none text-sm"
             style={{ color: theme.colors.textPrimary }}
           />
@@ -185,7 +185,7 @@ export const SearchFabricsScreen = ({ theme, onNavigate, onUpdateCart }) => {
   const [results, setResults] = useState(null);
   const [error, setError] = useState('');
 
-  // "Any …" toggle state (controls hiding/showing the other chips)
+  // "Any ï¿½" toggle state (controls hiding/showing the other chips)
   const [anyGrade, setAnyGrade] = useState(false);
   const [anyFabric, setAnyFabric] = useState(false);
   const [anyTack, setAnyTack] = useState(false);
@@ -205,7 +205,7 @@ export const SearchFabricsScreen = ({ theme, onNavigate, onUpdateCart }) => {
     if (field === 'tackable') setAnyTack(false);
   }, []);
 
-  // Click "Any …" again to unselect it and reveal options (with none selected)
+  // Click "Any ï¿½" again to unselect it and reveal options (with none selected)
   const pressAny = useCallback((field) => {
     if (field === 'grade') {
       setAnyGrade(prev => !prev);
@@ -281,8 +281,8 @@ export const SearchFabricsScreen = ({ theme, onNavigate, onUpdateCart }) => {
   const chipBase = "px-4 py-2 rounded-3xl font-medium transition-all border";
 
   return (
-    <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
-      <div className="flex-1 overflow-y-auto px-4 pt-4 pb-4">
+    <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
+      <div className="flex-1 overflow-y-auto px-4 pb-4">
         {!results ? (
           <div className="space-y-6">
             <GlassCard theme={theme} className="rounded-3xl">

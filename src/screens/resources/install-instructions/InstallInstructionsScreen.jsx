@@ -103,9 +103,9 @@ export const InstallInstructionsScreen = ({ theme }) => {
   );
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full app-header-offset">
       {/* Removed PageTitle per request */}
-      <div className="px-4 pt-3 space-y-4 pb-4">
+      <div className="px-4 space-y-4 pb-4">
         <StandardSearchBar
           value={searchTerm}
           onChange={(e)=>setSearchTerm(e.target.value)}

@@ -90,8 +90,8 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, onUpdateHomeA
   const slots = useMemo(()=>{ const arr=[...selected]; while(arr.length<8) arr.push(null); return arr; },[selected]);
 
   return (
-    <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
-      <div className="flex-1 overflow-y-auto px-4 pb-16 space-y-6 pt-4 scrollbar-hide">
+    <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
+      <div className="flex-1 overflow-y-auto px-4 pb-16 space-y-6 scrollbar-hide">
         <GlassCard theme={theme} className="p-0">
           <div className="p-4 border-b" style={{ borderColor: theme.colors.subtle }}><div className="flex items-center gap-2"><User className="w-5 h-5" style={{ color: theme.colors.accent }} /><h2 className="font-bold" style={{ color: theme.colors.textPrimary }}>Account</h2></div></div>
           <div className="p-4 grid grid-cols-1 gap-3">
@@ -114,7 +114,7 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, onUpdateHomeA
             </div>
             <div className="space-y-3">
               <h3 className="text-xs font-semibold" style={{ color: theme.colors.textSecondary }}>Available Apps</h3>
-              <div className="flex flex-wrap gap-2">{availableApps.map(app => (<button key={app.route} onClick={()=>addApp(app.route)} disabled={selected.length>=8} className={`flex items-center gap-1 pl-2 pr-3 py-1.5 rounded-full text-[11px] font-medium border transition ${selected.length>=8?'opacity-40 cursor-not-allowed':'hover:bg-white hover:shadow-sm active:scale-[0.97]'} focus:outline-none`} style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border, color: theme.colors.textPrimary }}><app.icon className="w-3 h-3" style={{ color: theme.colors.textSecondary }} /><span>{cleanLabel(app.name).length>18?cleanLabel(app.name).slice(0,17)+'…':cleanLabel(app.name)}</span>{selected.length<8 && <Plus className="w-3 h-3" />}</button>))}</div>
+              <div className="flex flex-wrap gap-2">{availableApps.map(app => (<button key={app.route} onClick={()=>addApp(app.route)} disabled={selected.length>=8} className={`flex items-center gap-1 pl-2 pr-3 py-1.5 rounded-full text-[11px] font-medium border transition ${selected.length>=8?'opacity-40 cursor-not-allowed':'hover:bg-white hover:shadow-sm active:scale-[0.97]'} focus:outline-none`} style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border, color: theme.colors.textPrimary }}><app.icon className="w-3 h-3" style={{ color: theme.colors.textSecondary }} /><span>{cleanLabel(app.name).length>18?cleanLabel(app.name).slice(0,17)+'ï¿½':cleanLabel(app.name)}</span>{selected.length<8 && <Plus className="w-3 h-3" />}</button>))}</div>
               <div className="text-[11px] flex justify-between px-1" style={{ color: theme.colors.textSecondary }}><span>{selected.length<8 ? `Select ${8-selected.length} more` : 'All 8 selected'}</span><span>Auto-saved</span></div>
             </div>
           </div>

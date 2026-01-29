@@ -112,14 +112,10 @@ const StickyHeader = React.memo(({
     onSearchChange
 }) => (
     <div
-        className={`sticky top-0 z-10 transition-all duration-300 ${isScrolled ? 'shadow-md' : ''
-            }`}
+        className="flex-shrink-0"
         style={{
-            backgroundColor: isScrolled ? `${theme.colors.background}e0` : 'transparent',
-            backdropFilter: isScrolled ? 'blur(12px)' : 'none',
-            WebkitBackdropFilter: isScrolled ? 'blur(12px)' : 'none',
-            borderBottom: `1px solid ${isScrolled ? theme.colors.border + '40' : 'transparent'}`,
-            padding: '16px'
+            backgroundColor: theme.colors.background,
+            padding: '8px 16px 16px 16px'
         }}
     >
         <div className="flex items-center space-x-3">
@@ -196,8 +192,8 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
     }, []);
 
     return (
-        <div className="flex flex-col h-full">
-            <div className="max-w-2xl mx-auto w-full">
+        <div className="flex flex-col h-full app-header-offset">
+            <div className="max-w-5xl mx-auto w-full">
                 <StickyHeader
                     isScrolled={isScrolled}
                     theme={theme}
@@ -220,9 +216,9 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
             <div
                 ref={scrollContainerRef}
                 onScroll={handleScroll}
-                className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-hide"
+                className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pb-4 scrollbar-hide"
             >
-                <div className="max-w-2xl mx-auto w-full">
+                <div className="max-w-5xl mx-auto w-full">
                     {filteredCategories.length === 0 ? (
                         <EmptyState searchTerm={searchTerm} theme={theme} />
                     ) : (

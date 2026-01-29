@@ -160,7 +160,7 @@ export const LeadTimesScreen = ({ theme = {} }) => {
     );
 
     return (
-    <div className="flex flex-col h-full" style={{ backgroundColor: safeTheme.colors.background }}>
+    <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: safeTheme.colors.background }}>
         {/* Top banner - Search and sort only */}
         <div className="px-4 pt-3 pb-2">
             <div className="flex items-center gap-2">

@@ -59,8 +59,8 @@ export const ComColRequest = ({ theme, onBack, showAlert }) => {
   };
 
   return (
-    <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
-      <div className="flex-1 overflow-y-auto px-4 pt-4 pb-6 space-y-5">
+    <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
+      <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-5">
         <GlassCard theme={theme} className="rounded-3xl">
           <div className="p-6 space-y-6">
             <div className="space-y-2">

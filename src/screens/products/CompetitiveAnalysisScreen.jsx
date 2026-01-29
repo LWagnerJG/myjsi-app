@@ -85,9 +85,9 @@ export const CompetitiveAnalysisScreen = ({ categoryId, productId, theme }) => {
     const handleSubmit = (e) => { e.preventDefault(); if (!canSubmit) return; setSubmitted(true); setTimeout(()=>{ setShowRequest(false); setSubmitted(false); setFormState({ manufacturer:'', series:'', notes:''}); }, 1200); };
 
     return (
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full app-header-offset">
             <div className="flex-1 overflow-y-auto scrollbar-hide">
-                <div className="p-4 space-y-6 pb-32 max-w-3xl mx-auto">
+                <div className="px-4 sm:px-6 lg:px-8 py-4 space-y-6 pb-32 max-w-5xl mx-auto">
                     <div className="relative w-full aspect-[4/3] rounded-3xl overflow-hidden shadow-sm" style={{ background: theme.colors.surface }}>
                         <img src={product.image} alt={product.name} className="absolute inset-0 w-full h-full object-contain" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/15 to-transparent" />

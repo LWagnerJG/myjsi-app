@@ -19,8 +19,8 @@ export const ContractsScreen = ({ theme, setSuccessMessage }) => {
     );
 
     return (
-        <div className="flex h-full flex-col">
-            <div className="px-4 pt-4">
+        <div className="flex h-full flex-col app-header-offset">
+            <div className="px-4">
                 <TabBar tabs={TABS} value={active} onChange={setActive} theme={theme} />
             </div>
             <div className="flex-1 overflow-y-auto px-4 py-4 scrollbar-hide">

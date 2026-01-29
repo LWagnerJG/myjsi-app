@@ -137,8 +137,8 @@ export const ResourcesScreen = ({ theme, onNavigate, homeApps }) => {
     );
 
     return (
-        <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
-            <div className="flex-1 overflow-y-auto no-scrollbar px-6 pt-2 pb-6">
+        <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
+            <div className="flex-1 overflow-y-auto no-scrollbar px-6 pb-6">
                 <div className="max-w-2xl mx-auto w-full">
                     {resourceCategories.map((cat, i) => (
                         <CategoryCard key={cat.category} category={cat} isFirst={i === 0} />

@@ -106,9 +106,9 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
     };
 
     return (
-        <div className="h-full flex flex-col">
-            {/* Header removed per request; keep search bar pinned */}
-            <div className="px-4 pt-3 pb-3 sticky top-0 z-10" style={{ backgroundColor: `${theme.colors.background}e0`, backdropFilter: 'blur(10px)' }}>
+        <div className="h-full flex flex-col app-header-offset">
+            {/* Search bar - fixed below app header */}
+            <div className="flex-shrink-0 px-4 pt-1 pb-3" style={{ backgroundColor: theme.colors.background }}>
                 <StandardSearchBar
                     value={searchTerm}
                     onChange={(val) => setSearchTerm(val)}

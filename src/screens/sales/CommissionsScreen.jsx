@@ -82,7 +82,8 @@ export const CommissionsScreen = ({ theme }) => {
 
     return (
         <div className="h-full flex flex-col">
-            <div className="px-4 pb-3">
+            <div className="px-4 sm:px-6 lg:px-8 pb-3">
+                <div className="max-w-5xl mx-auto w-full">
                 <PageTitle title="Commissions" theme={theme}>
                     <div className="w-36">
                         <PortalNativeSelect

@@ -1,15 +1,20 @@
 // Enhanced HomeScreen with Dealer Dashboard design and reconfiguration functionality
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { allApps, DEFAULT_HOME_APPS } from '../../data.jsx';
 import { ORDER_DATA } from '../orders/data.js';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { HomeSearchInput } from '../../components/common/SearchInput.jsx';
-import { DESIGN_TOKENS, JSI_COLORS } from '../../design-system/tokens.js';
-import { Check, Plus, X, Settings as SettingsIcon, GripVertical } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { QuickActionDropdown } from '../../components/common/QuickActionDropdown.jsx';
+import { RequestQuoteModal } from '../../components/common/RequestQuoteModal.jsx';
+import { DESIGN_TOKENS } from '../../design-system/tokens.js';
+import { Check, Plus, X, Settings as SettingsIcon, GripVertical, Lock } from 'lucide-react';
+import { motion } from 'framer-motion';
 import {
     DndContext,
+    DragOverlay,
     PointerSensor,
+    KeyboardSensor,
+    MeasuringStrategy,
     closestCenter,
     useSensor,
     useSensors
@@ -18,7 +23,9 @@ import {
     SortableContext,
     rectSortingStrategy,
     useSortable,
-    arrayMove
+    arrayMove,
+    sortableKeyboardCoordinates,
+    defaultAnimateLayoutChanges
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -28,15 +35,38 @@ const APP_BADGES = {
     'projects': { value: '24', label: 'Open', color: '#5B7B8C' }
 };
 
-const SortableAppTile = ({ id, app, colors, onRemove }) => {
-    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+const MIN_PINNED_APPS = 3;
+const MAX_PINNED_APPS = 12;
+const NON_REMOVABLE_APPS = new Set(['resources']);
+const EXCLUDED_ROUTES = new Set(['settings', 'feedback', 'help', 'contracts', 'members', 'resources/dealer_registration']);
+
+const areArraysEqual = (a, b) => {
+    if (a === b) return true;
+    if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i += 1) {
+        if (a[i] !== b[i]) return false;
+    }
+    return true;
+};
+
+const SortableAppTile = ({ id, app, colors, onRemove, isRemoveDisabled = false, isRemoveLocked = false, isOverlay = false }) => {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+        id,
+        animateLayoutChanges: (args) => {
+            if (isOverlay) return false;
+            return defaultAnimateLayoutChanges({
+                ...args,
+                isSorting: true
+            });
+        }
+    });
     
     const style = {
         transform: CSS.Transform.toString(transform),
-        transition,
+        transition: isDragging ? undefined : transition,
         backgroundColor: `${colors.surface}`,
         borderColor: isDragging ? colors.accent : colors.border,
-        boxShadow: isDragging ? '0 8px 16px rgba(0,0,0,0.1)' : DESIGN_TOKENS.shadows.card,
+        boxShadow: isOverlay ? '0 18px 32px rgba(0,0,0,0.16)' : (isDragging ? '0 8px 16px rgba(0,0,0,0.1)' : DESIGN_TOKENS.shadows.card),
         opacity: isDragging ? 0.9 : 1,
         zIndex: isDragging ? 20 : 'auto',
         touchAction: 'none', // Critical for pointer interactions
@@ -59,18 +89,30 @@ const SortableAppTile = ({ id, app, colors, onRemove }) => {
             </div>
 
             {/* Remove Button */}
-            <button
-                // Stop propagation so clicking X doesn't start a drag
-                onPointerDown={(e) => e.stopPropagation()}
-                onClick={(e) => {
-                    e.stopPropagation();
-                    onRemove(app.route);
-                }}
-                className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center shadow-md z-10 hover:bg-red-600 hover:scale-110 transition-all"
-                aria-label="Remove app"
-            >
-                <X className="w-3.5 h-3.5" />
-            </button>
+            {!isOverlay && !isRemoveLocked && (
+                <button
+                    // Stop propagation so clicking X doesn't start a drag
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        if (!isRemoveDisabled) onRemove(app.route);
+                    }}
+                    className={`absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full text-white flex items-center justify-center shadow-md z-10 transition-all ${isRemoveDisabled ? 'bg-gray-300 cursor-not-allowed' : 'bg-red-500 hover:bg-red-600 hover:scale-110'}`}
+                    aria-label="Remove app"
+                    aria-disabled={isRemoveDisabled}
+                >
+                    <X className="w-3.5 h-3.5" />
+                </button>
+            )}
+
+            {!isOverlay && isRemoveLocked && (
+                <div
+                    className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center shadow-md z-10"
+                    aria-label="Pinned app"
+                >
+                    <Lock className="w-3.5 h-3.5" />
+                </div>
+            )}
 
             {/* App Icon */}
             <div 
@@ -94,6 +136,30 @@ const SortableAppTile = ({ id, app, colors, onRemove }) => {
 export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeApps, onUpdateHomeApps, userSettings }) => {
     const [isEditMode, setIsEditMode] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [activeDragId, setActiveDragId] = useState(null);
+    const [showQuoteModal, setShowQuoteModal] = useState(false);
+
+    // Handle quick action selection from dropdown
+    const handleQuickAction = useCallback((actionId) => {
+        switch (actionId) {
+            case 'quote':
+                setShowQuoteModal(true);
+                break;
+            case 'upload':
+                // Could trigger a file upload modal or navigate
+                console.log('Upload action');
+                break;
+            case 'spec':
+                // Navigate to spec check or open modal
+                onNavigate?.('resources');
+                break;
+            case 'feedback':
+                onNavigate?.('feedback');
+                break;
+            default:
+                break;
+        }
+    }, [onNavigate]);
 
     // Safe theme color extraction with fallbacks
     const colors = useMemo(() => ({
@@ -105,28 +171,47 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
         border: theme?.colors?.border || '#E3E0D8'
     }), [theme]);
 
+    const allAppRoutes = useMemo(() => new Set(allApps.map(app => app.route)), []);
+
+    const normalizeHomeApps = useCallback((list) => {
+        const baseList = Array.isArray(list) ? list : [];
+        const unique = baseList.filter((route, index) => baseList.indexOf(route) === index);
+        const known = unique.filter(route => allAppRoutes.has(route));
+        const withResources = known.includes('resources') ? known : ['resources', ...known];
+        return withResources.length ? withResources : DEFAULT_HOME_APPS;
+    }, [allAppRoutes]);
+
     // Ensure homeApps is always a valid array
     const safeHomeApps = useMemo(() => {
-        return Array.isArray(homeApps) && homeApps.length > 0 ? homeApps : DEFAULT_HOME_APPS;
-    }, [homeApps]);
+        return normalizeHomeApps(homeApps);
+    }, [homeApps, normalizeHomeApps]);
+
+    useEffect(() => {
+        if (!onUpdateHomeApps) return;
+        if (!Array.isArray(homeApps)) return;
+        const normalized = normalizeHomeApps(homeApps);
+        if (!areArraysEqual(homeApps, normalized)) {
+            onUpdateHomeApps(normalized);
+        }
+    }, [homeApps, normalizeHomeApps, onUpdateHomeApps]);
 
     const currentApps = useMemo(() => {
         return safeHomeApps.map(route => allApps.find(a => a.route === route)).filter(Boolean);
     }, [safeHomeApps]);
 
     const availableApps = useMemo(() => {
-        const excludedRoutes = new Set(['settings', 'feedback', 'help', 'contracts', 'members', 'resources/dealer_registration']);
-        return allApps.filter(app => !safeHomeApps.includes(app.route) && !excludedRoutes.has(app.route));
+        return allApps.filter(app => !safeHomeApps.includes(app.route) && !EXCLUDED_ROUTES.has(app.route));
     }, [safeHomeApps]);
 
     const toggleApp = useCallback((route) => {
         if (!onUpdateHomeApps) return; // Guard against missing prop
+        if (NON_REMOVABLE_APPS.has(route)) return; // Resources is always pinned
         if (safeHomeApps.includes(route)) {
-            if (safeHomeApps.length > 4) {
+            if (safeHomeApps.length > MIN_PINNED_APPS) {
                 onUpdateHomeApps(safeHomeApps.filter(r => r !== route));
             }
         } else {
-            if (safeHomeApps.length < 12) {
+            if (safeHomeApps.length < MAX_PINNED_APPS) {
                 onUpdateHomeApps([...safeHomeApps, route]);
             }
         }
@@ -140,7 +225,8 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
     }, [onAskAI]);
 
     const sensors = useSensors(
-        useSensor(PointerSensor, { activationConstraint: { distance: 6 } })
+        useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+        useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
     );
 
     const handleReorder = useCallback((event) => {
@@ -149,9 +235,13 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
         if (!onUpdateHomeApps) return;
         const oldIndex = safeHomeApps.indexOf(active.id);
         const newIndex = safeHomeApps.indexOf(over.id);
-        if (oldIndex === -1 || newIndex === -1) return;
+        if (oldIndex === -1 || newIndex === -1 || oldIndex === newIndex) return;
         onUpdateHomeApps(arrayMove(safeHomeApps, oldIndex, newIndex));
     }, [onUpdateHomeApps, safeHomeApps]);
+
+    const activeApp = useMemo(() => {
+        return allApps.find(app => app.route === activeDragId) || null;
+    }, [activeDragId]);
 
     const todayLabel = useMemo(() => {
         const now = new Date();
@@ -164,12 +254,12 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
 
     return (
         <div className="flex flex-col h-full overflow-y-auto scrollbar-hide app-header-offset" style={{ backgroundColor: colors.background }}>
-            <div className="px-4 sm:px-6 lg:px-8 pt-1 sm:pt-2 pb-24 space-y-6 lg:space-y-8 max-w-2xl lg:max-w-5xl 2xl:max-w-6xl mx-auto w-full">
+            <div className="px-4 sm:px-6 lg:px-8 pt-1 sm:pt-2 pb-24 space-y-6 lg:space-y-8 max-w-5xl mx-auto w-full">
 
                 {/* Header Section */}
                 <div className="space-y-1 hidden sm:block">
-                    <h2 className="text-4xl font-bold" style={{ color: colors.textPrimary }}>Dashboard</h2>
-                    <div className="text-sm" style={{ color: colors.textSecondary }}>{todayLabel}</div>
+                    <h2 className="text-4xl font-light tracking-tight" style={{ color: colors.textPrimary }}>Dashboard</h2>
+                    <div className="text-sm font-normal" style={{ color: colors.textSecondary }}>{todayLabel}</div>
                 </div>
 
                 {/* Search / Spotlight */}
@@ -177,7 +267,7 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                     <div className="absolute inset-0 bg-transparent rounded-full" />
                     <GlassCard
                         theme={theme}
-                        className="relative z-10 px-5"
+                        className="relative z-10 px-5 flex items-center"
                         style={{
                             borderRadius: 9999,
                             height: 56,
@@ -196,6 +286,12 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                             theme={theme}
                             className="w-full"
                         />
+                        {/* Quick Actions Dropdown (Plus button) */}
+                        <QuickActionDropdown 
+                            theme={theme}
+                            onActionSelect={handleQuickAction}
+                            className="ml-2"
+                        />
                     </GlassCard>
                 </div>
 
@@ -206,11 +302,13 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                         {onUpdateHomeApps && (
                             <button
                                 onClick={() => setIsEditMode(!isEditMode)}
-                                className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all active:scale-95"
+                                title={isEditMode ? 'Exit edit mode' : 'Customize home apps'}
+                                aria-label={isEditMode ? 'Exit edit mode' : 'Customize home apps'}
+                                className="flex items-center gap-2 px-2.5 py-1 rounded-full text-[11px] font-semibold transition-all active:scale-95"
                                 style={{
-                                    backgroundColor: isEditMode ? colors.textPrimary : 'transparent',
+                                    backgroundColor: isEditMode ? colors.textPrimary : `${colors.surface}80`,
                                     color: isEditMode ? '#FFFFFF' : colors.textSecondary,
-                                    border: `1px solid ${isEditMode ? colors.textPrimary : colors.border}`
+                                    border: `1px solid ${isEditMode ? colors.textPrimary : `${colors.border}B3`}`
                                 }}
                             >
                                 {isEditMode ? (
@@ -220,16 +318,20 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                                     </>
                                 ) : (
                                     <>
-                                        <SettingsIcon className="w-3.5 h-3.5" />
-                                        <span>Customize</span>
+                                        <GripVertical className="w-3.5 h-3.5" />
+                                        <span>Reorder</span>
                                     </>
                                 )}
                             </button>
                         )}
                     </div>
                     {isEditMode && (
-                        <div className="text-xs font-medium" style={{ color: colors.textSecondary }}>
-                            Drag to reorder. Keep at least 4 apps pinned.
+                        <div
+                            className="text-[10px] font-medium px-2.5 py-1 rounded-full border inline-flex items-center gap-2"
+                            style={{ color: colors.textSecondary, borderColor: `${colors.border}B3`, backgroundColor: `${colors.surface}A6` }}
+                        >
+                            <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ backgroundColor: colors.textSecondary }} />
+                            Drag to reorder. Keep at least 3 apps pinned. Resources stays pinned.
                         </div>
                     )}
 
@@ -237,7 +339,13 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                         <DndContext
                             sensors={sensors}
                             collisionDetection={closestCenter}
-                            onDragEnd={handleReorder}
+                            measuring={{ droppable: { strategy: MeasuringStrategy.WhileDragging } }}
+                            onDragStart={(event) => setActiveDragId(event.active?.id || null)}
+                            onDragEnd={(event) => {
+                                handleReorder(event);
+                                setActiveDragId(null);
+                            }}
+                            onDragCancel={() => setActiveDragId(null)}
                         >
                             <SortableContext items={safeHomeApps} strategy={rectSortingStrategy}>
                                 <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2">
@@ -248,10 +356,42 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                                             app={app}
                                             colors={colors}
                                             onRemove={toggleApp}
+                                            isRemoveDisabled={safeHomeApps.length <= MIN_PINNED_APPS}
+                                            isRemoveLocked={NON_REMOVABLE_APPS.has(app.route)}
                                         />
                                     ))}
                                 </div>
                             </SortableContext>
+                            <DragOverlay>
+                                {activeApp ? (
+                                    <div className="w-[96px] sm:w-[104px] lg:w-[112px]">
+                                        <div
+                                            className="relative flex flex-col items-center justify-center gap-1 p-2.5 rounded-2xl border"
+                                            style={{
+                                                backgroundColor: colors.surface,
+                                                borderColor: colors.accent,
+                                                boxShadow: '0 18px 32px rgba(0,0,0,0.16)',
+                                                width: '100%',
+                                                minWidth: 0,
+                                                minHeight: 96
+                                            }}
+                                        >
+                                            <div
+                                                className="w-8 h-8 rounded-xl flex items-center justify-center mb-0.5"
+                                                style={{ backgroundColor: `${colors.accent}12` }}
+                                            >
+                                                <activeApp.icon className="w-4 h-4" style={{ color: colors.accent }} />
+                                            </div>
+                                            <span
+                                                className="text-[10px] font-bold tracking-tight text-center leading-3 line-clamp-2 w-full px-1"
+                                                style={{ color: colors.textPrimary }}
+                                            >
+                                                {activeApp.name}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ) : null}
+                            </DragOverlay>
                         </DndContext>
                     ) : (
                         <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2">
@@ -378,6 +518,17 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                     </GlassCard>
                 </div>
             </div>
+
+            {/* Request Quote Modal */}
+            <RequestQuoteModal
+                show={showQuoteModal}
+                onClose={() => setShowQuoteModal(false)}
+                theme={theme}
+                onSubmit={(data) => {
+                    console.log('Quote request submitted:', data);
+                    // Handle quote submission - could send to API
+                }}
+            />
         </div>
     );
 };

@@ -79,8 +79,8 @@ export const PresentationsScreen = ({ theme }) => {
   );
 
   return (
-    <div className="flex flex-col h-full" style={{ background: theme.colors.background }}>
-      <div className="px-4 pt-3 pb-1 space-y-3">
+    <div className="flex flex-col h-full app-header-offset" style={{ background: theme.colors.background }}>
+      <div className="px-4 pb-1 space-y-3">
         <StandardSearchBar value={search} onChange={setSearch} placeholder="Search product series..." theme={theme} />
         <div ref={infoRef} className={`overflow-hidden transition-all duration-500 ease-out ${infoHidden?'pointer-events-none':''}`} style={{ maxHeight: showInfo? infoHeight:0, opacity: showInfo?1:0, transform: showInfo? 'translateY(0)': 'translateY(-6px)' }}>
           {!infoHidden && (

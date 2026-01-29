@@ -136,15 +136,15 @@ export const RequestFieldVisitScreen = ({ theme, setSuccessMessage, onNavigate }
                 
                 {/* Legend */}
                 <div className="mt-4 text-xs" style={{ color: theme.colors.textSecondary }}>
-                    <p>• Available dates are at least {FIELD_VISIT_REQUIREMENTS.minAdvanceWeeks} weeks out and on weekdays</p>
-                    <p>• Green dot indicates available dates</p>
+                    <p>ï¿½ Available dates are at least {FIELD_VISIT_REQUIREMENTS.minAdvanceWeeks} weeks out and on weekdays</p>
+                    <p>ï¿½ Green dot indicates available dates</p>
                 </div>
             </GlassCard>
         );
     };
 
     return (
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full app-header-offset">
             <PageTitle title="Request Field Visit" theme={theme} />
 
             <div className="flex-1 overflow-y-auto scrollbar-hide">

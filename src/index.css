@@ -7,11 +7,17 @@
 
 :root {
     --app-height: 100vh;
-    --app-header-offset: 60px;
+    --app-header-offset: 72px;
     --safe-area-inset-top: env(safe-area-inset-top);
     --safe-area-inset-right: env(safe-area-inset-right);
     --safe-area-inset-bottom: env(safe-area-inset-bottom);
     --safe-area-inset-left: env(safe-area-inset-left);
+
+    /* Content width system - matches header max-w-5xl (1024px) */
+    --content-max-width: 1024px;
+    --content-padding-mobile: 1rem;      /* 16px - px-4 */
+    --content-padding-tablet: 1.5rem;    /* 24px - px-6 */
+    --content-padding-desktop: 2rem;     /* 32px - px-8 */
 
     /* JSI Dealer Brand Tokens */
     --jsi-charcoal: #353535;
@@ -48,7 +54,7 @@
 
 @media (min-width: 1024px) {
     :root {
-        --app-header-offset: 80px;
+        --app-header-offset: 76px;
     }
 }
 
@@ -203,6 +209,156 @@ h6 {
 
 .app-header-offset {
     padding-top: calc(var(--app-header-offset) + var(--safe-area-inset-top));
+}
+
+/* ============================================================
+   RESPONSIVE CONTENT LAYOUT SYSTEM
+   
+   Provides consistent content width across all screens that
+   matches the header width (max-w-5xl / 1024px).
+   
+   Usage:
+   - .screen-container: Root wrapper for screens (flex column, full height)
+   - .content-container: Centers content with max-width matching header
+   - .content-padding: Responsive horizontal padding
+   - .content-grid: Responsive grid that tiles on desktop, stacks on mobile
+   ============================================================ */
+
+/* Base screen container - use at the root of each screen */
+.screen-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+}
+
+/* Content wrapper that matches header max-width */
+.content-container {
+    width: 100%;
+    max-width: var(--content-max-width);
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Responsive horizontal padding - matches header padding progression */
+.content-padding {
+    padding-left: var(--content-padding-mobile);
+    padding-right: var(--content-padding-mobile);
+}
+
+@media (min-width: 640px) {
+    .content-padding {
+        padding-left: var(--content-padding-tablet);
+        padding-right: var(--content-padding-tablet);
+    }
+}
+
+@media (min-width: 1024px) {
+    .content-padding {
+        padding-left: var(--content-padding-desktop);
+        padding-right: var(--content-padding-desktop);
+    }
+}
+
+/* Standard bottom padding accounting for bottom nav/safe area */
+.content-bottom-padding {
+    padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 1024px) {
+    .content-bottom-padding {
+        padding-bottom: 2rem;
+    }
+}
+
+/* Responsive grid - single column on mobile, multi-column on larger screens */
+.content-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+@media (min-width: 640px) {
+    .content-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.25rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .content-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+    }
+}
+
+/* Two-column variant for settings/forms */
+.content-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+@media (min-width: 768px) {
+    .content-grid-2 {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+}
+
+/* Full-width grid item that spans all columns */
+.content-grid-full {
+    grid-column: 1 / -1;
+}
+
+/* Scrollable content area that fills remaining height */
+.content-scroll {
+    flex: 1;
+    overflow-y: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.content-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+/* Combined utility: scrollable content with standard padding and max-width */
+.screen-content-area {
+    flex: 1;
+    overflow-y: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    padding-left: var(--content-padding-mobile);
+    padding-right: var(--content-padding-mobile);
+    padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px));
+}
+
+.screen-content-area::-webkit-scrollbar {
+    display: none;
+}
+
+@media (min-width: 640px) {
+    .screen-content-area {
+        padding-left: var(--content-padding-tablet);
+        padding-right: var(--content-padding-tablet);
+    }
+}
+
+@media (min-width: 1024px) {
+    .screen-content-area {
+        padding-left: var(--content-padding-desktop);
+        padding-right: var(--content-padding-desktop);
+        padding-bottom: 2rem;
+    }
+}
+
+/* Inner content wrapper for centering within scroll area */
+.screen-content-inner {
+    width: 100%;
+    max-width: var(--content-max-width);
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .panel-content {

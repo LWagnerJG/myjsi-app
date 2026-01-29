@@ -101,8 +101,9 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
     const shareAck = () => { if (navigator.share) navigator.share({ title: `Acknowledgment ${order.orderNumber}`, url: ackUrl }).catch(()=>{}); else window.open(ackUrl,'_blank','noopener'); };
 
     return (
-        <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
-            <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-4 scrollbar-hide pt-6">
+        <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
+            <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pb-6 scrollbar-hide">
+                <div className="max-w-5xl mx-auto w-full space-y-4">
                 <GlassCard theme={theme} className="p-5" style={{ backgroundColor: theme.colors.surface }}>
                     <div className="text-center mb-4">
                         <h1 className="text-2xl font-bold leading-tight" style={{ color: theme.colors.textPrimary }}>{formatTitleCase(order.details)}</h1>
@@ -194,6 +195,7 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
                         ))}
                     </div>
                 </GlassCard>
+                </div>
             </div>
 
             {showAck && (
@@ -201,7 +203,7 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
                     <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={()=>setShowAck(false)} />
                     <div className="relative w-full max-w-2xl h-[70vh] rounded-2xl overflow-hidden shadow-2xl flex flex-col" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${theme.colors.border}` }}>
                         <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: theme.colors.border }}>
-                            <h3 className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>Acknowledgment – {order.orderNumber}</h3>
+                            <h3 className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>Acknowledgment ï¿½ {order.orderNumber}</h3>
                             <div className="flex items-center gap-2">
                                 <button onClick={shareAck} className="p-2 rounded-full" style={{ backgroundColor: theme.colors.subtle }} title="Share"><Share2 className="w-4 h-4" style={{ color: theme.colors.textPrimary }} /></button>
                                 <button onClick={()=>setShowAck(false)} className="p-2 rounded-full" style={{ backgroundColor: theme.colors.subtle }} title="Close"><X className="w-4 h-4" style={{ color: theme.colors.textPrimary }} /></button>

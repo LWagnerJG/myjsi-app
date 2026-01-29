@@ -53,8 +53,8 @@ export const RequestComYardageScreen = ({ theme, showAlert, onNavigate, userSett
     };
 
     return (
-        <div className="flex flex-col h-full" style={{ background: theme.colors.background }}>
-            <div className="flex-1 overflow-y-auto px-4 pt-5 pb-6 space-y-6">
+        <div className="flex flex-col h-full app-header-offset" style={{ background: theme.colors.background }}>
+            <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-6">
                 {/* Fabric add pill */}
                 <div>
                     <SearchableSelect

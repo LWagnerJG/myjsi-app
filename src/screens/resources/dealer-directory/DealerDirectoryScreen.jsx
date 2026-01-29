@@ -69,15 +69,16 @@ export const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage, dea
     );
 
     return (
-        <div className="flex flex-col h-full">
-            <div className="sticky top-0 z-10" style={{ backgroundColor: `${theme.colors.background}e6`, backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }}>
+        <div className="flex flex-col h-full app-header-offset">
+            {/* Header controls - fixed below app header */}
+            <div className="flex-shrink-0" style={{ backgroundColor: theme.colors.background }}>
                 <div className="flex items-center justify-between pr-4">
                     <PageTitle title="Dealer Directory" theme={theme} />
                     <PillButton onClick={() => onNavigate && onNavigate('new-dealer-signup')} theme={theme} size="compact">
                         <Plus className="w-4 h-4 mr-1" /> Add Dealer
                     </PillButton>
                 </div>
-                <div className="px-4 pb-4 flex items-center space-x-2">
+                <div className="px-4 pb-3 flex items-center space-x-2">
                     <StandardSearchBar className="flex-grow" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder="Search by name or city..." theme={theme} />
                     <div className="relative">
                         <PillButton onClick={() => setShowFilterMenu(f => !f)} theme={theme} size="compact">
@@ -100,7 +101,7 @@ export const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage, dea
                 </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-4 pt-4 space-y-3 pb-4">
+            <div className="flex-1 overflow-y-auto px-4 space-y-3 pb-4">
                 {sortedAndFilteredDealers.map(dealer => (
                     <GlassCard key={dealer.id} theme={theme} className="p-4 cursor-pointer hover:shadow-md transition-shadow" onClick={() => { setSelectedDealer(dealer); }}>
                         <div className="flex justify-between items-start">

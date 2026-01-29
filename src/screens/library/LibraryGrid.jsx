@@ -31,7 +31,7 @@ export const LibraryGrid = ({ theme, query, onQueryChange, parentHeaderRef }) =>
 
   // Masonry-ish responsive columns (2-3) letting images keep natural aspect ratio for better preview
   return (
-    <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
+    <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
       <div className="flex-1 overflow-y-auto px-4 pb-10">
         <div className="columns-2 md:columns-3 gap-3 space-y-3">
           {filtered.map(a => (

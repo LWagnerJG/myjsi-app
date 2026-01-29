@@ -292,7 +292,7 @@ const MembersScreenContent = ({ theme }) => {
     ];
 
     return (
-        <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
+        <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
             <div className="relative">
                 <button
                     onClick={() => setShowDropdown((prev) => !prev)}
