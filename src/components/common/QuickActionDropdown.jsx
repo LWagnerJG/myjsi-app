@@ -113,7 +113,7 @@ export const QuickActionDropdown = ({ theme, onActionSelect, className = '' }) =
 
                     {/* Actions List */}
                     <div className="py-2">
-                        {QUICK_ACTIONS.map((action, index) => (
+                        {QUICK_ACTIONS.map((action) => (
                             <button
                                 key={action.id}
                                 onClick={() => handleActionClick(action.id)}

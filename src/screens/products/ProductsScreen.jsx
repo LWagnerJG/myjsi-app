@@ -2,9 +2,7 @@ import React, {
     useState,
     useMemo,
     useCallback,
-    useRef,
-    useEffect,
-    useLayoutEffect
+    useRef
 } from 'react';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { SearchInput } from '../../components/common/SearchInput.jsx';
@@ -30,8 +28,6 @@ const CategoryCard = React.memo(({
     const handleClick = useCallback(() => {
         onClick(category);
     }, [category, onClick]);
-
-    const isBenches = category.name === 'Benches';
 
     if (viewMode === 'grid') {
         return (
@@ -104,7 +100,6 @@ const ViewModeToggle = React.memo(({ viewMode, onToggle, theme }) => (
 ViewModeToggle.displayName = 'ViewModeToggle';
 
 const StickyHeader = React.memo(({
-    isScrolled,
     theme,
     viewMode,
     onToggleViewMode,
@@ -153,19 +148,12 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [viewMode, setViewMode] = useState('grid');
     const [productView, setProductView] = useState('categories'); // 'categories' | 'families'
-    const [isScrolled, setIsScrolled] = useState(false);
     const scrollContainerRef = useRef(null);
 
     const productViewOptions = [
         { value: 'categories', label: 'Categories' },
         { value: 'families', label: 'Our Families' }
     ];
-
-    const handleScroll = useCallback(() => {
-        if (scrollContainerRef.current) {
-            setIsScrolled(scrollContainerRef.current.scrollTop > 10);
-        }
-    }, []);
 
     const filteredCategories = useMemo(() => {
         if (!searchTerm.trim()) return PRODUCTS_CATEGORIES_DATA || [];
@@ -195,7 +183,6 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
         <div className="flex flex-col h-full app-header-offset">
             <div className="max-w-5xl mx-auto w-full">
                 <StickyHeader
-                    isScrolled={isScrolled}
                     theme={theme}
                     viewMode={viewMode}
                     onToggleViewMode={toggleViewMode}
@@ -215,7 +202,6 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
             </div>
             <div
                 ref={scrollContainerRef}
-                onScroll={handleScroll}
                 className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pb-4 scrollbar-hide"
             >
                 <div className="max-w-5xl mx-auto w-full">

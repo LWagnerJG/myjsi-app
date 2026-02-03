@@ -17,7 +17,6 @@ export const GlassCard = React.memo(
       theme,
       variant = 'elevated',
       interactive = false,
-      hoverOverlay = false,  // JSI: Enable dark overlay on hover
       style = {},
       as: Component = 'div',
       ...props

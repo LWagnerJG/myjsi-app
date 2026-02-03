@@ -17,7 +17,7 @@ export const InstallInstructionsScreen = ({ theme }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState('all');
 
-  const instructions = INSTALL_INSTRUCTIONS_DATA || [];
+  const instructions = useMemo(() => INSTALL_INSTRUCTIONS_DATA || [], []);
 
   const types = useMemo(() => [ 'all', ...new Set(instructions.map(i => i.type)) ], [instructions]);
 

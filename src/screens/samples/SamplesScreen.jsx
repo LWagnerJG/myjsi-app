@@ -1,5 +1,5 @@
 // src/screens/samples/SamplesScreen.jsx
-import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { PillButton } from '../../components/common/JSIButtons.jsx';
 import {
@@ -274,7 +274,17 @@ const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, designFi
 export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart: onUpdateCartProp, userSettings, dealerDirectory, designFirms, initialCartOpen = false }) => {
     const [cartInternal, setCartInternal] = useState({});
     const cart = cartProp ?? cartInternal;
-    const onUpdateCart = onUpdateCartProp ?? useCallback((item, delta) => { setCartInternal((prev) => { const id = idOf(item.id); const current = prev[id] || 0; const quantity = Math.max(0, current + delta); const next = { ...prev }; if (quantity === 0) delete next[id]; else next[id] = quantity; return next; }); }, []);
+    const fallbackUpdateCart = useCallback((item, delta) => {
+        setCartInternal((prev) => {
+            const id = idOf(item.id);
+            const current = prev[id] || 0;
+            const quantity = Math.max(0, current + delta);
+            const next = { ...prev };
+            if (quantity === 0) delete next[id]; else next[id] = quantity;
+            return next;
+        });
+    }, []);
+    const onUpdateCart = onUpdateCartProp ?? fallbackUpdateCart;
     const [selectedCategory, setSelectedCategory] = useState('tfl');
     const totalCartItems = useMemo(() => Object.values(cart).reduce((s, q) => s + q, 0), [cart]);
 
@@ -300,7 +310,6 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                 const hasImage = !!product.image;
                 const bg = hasImage ? theme.colors.subtle : (product.color || '#E5E7EB');
                 const addOne = (e) => { if (e) e.stopPropagation(); onUpdateCart({ ...product, id: pid }, 1); };
-                const removeOne = (e) => { if (e) e.stopPropagation(); onUpdateCart({ ...product, id: pid }, -1); };
 
                 return (
                     <div

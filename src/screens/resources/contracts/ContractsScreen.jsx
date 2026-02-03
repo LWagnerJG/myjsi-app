@@ -59,14 +59,14 @@ const ContractCard = ({ contract, theme, setSuccessMessage }) => {
 
     const feedback = (msg) => { setSuccessMessage?.(msg); if (msg) setTimeout(()=>setSuccessMessage?.(''),1400); };
 
-    const copyPdf = async () => { try { await navigator.clipboard.writeText(contract.documentUrl || ''); feedback('PDF link copied'); } catch {} };
+    const copyPdf = async () => { try { await navigator.clipboard.writeText(contract.documentUrl || ''); feedback('PDF link copied'); } catch { /* no-op */ } };
     const shareDealer = async () => {
         const url = contract.dealerDocumentUrl || contract.documentUrl;
-        if (navigator.share) { try { await navigator.share({ title: `${contract.name} Dealer Version`, url }); } catch {} } else { await navigator.clipboard.writeText(url || ''); feedback('Dealer link copied'); }
+        if (navigator.share) { try { await navigator.share({ title: `${contract.name} Dealer Version`, url }); } catch { /* no-op */ } } else { await navigator.clipboard.writeText(url || ''); feedback('Dealer link copied'); }
     };
     const sharePublic = async () => {
         const url = contract.publicDocumentUrl || contract.documentUrl;
-        if (navigator.share) { try { await navigator.share({ title: `${contract.name} Public Version`, url }); } catch {} } else { await navigator.clipboard.writeText(url || ''); feedback('Public link copied'); }
+        if (navigator.share) { try { await navigator.share({ title: `${contract.name} Public Version`, url }); } catch { /* no-op */ } } else { await navigator.clipboard.writeText(url || ''); feedback('Public link copied'); }
     };
 
     return (

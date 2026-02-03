@@ -29,7 +29,11 @@ export const AnimatedNumber = ({
   const startValueRef = useRef(0);
 
   useEffect(() => {
-    const startValue = displayValue;
+    startValueRef.current = displayValue;
+  }, [displayValue]);
+
+  useEffect(() => {
+    const startValue = startValueRef.current;
     startValueRef.current = startValue;
     startTimeRef.current = null;
 

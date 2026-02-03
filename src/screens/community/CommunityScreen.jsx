@@ -15,14 +15,12 @@ export const CommunityScreen = ({
   onPollVote,
   onAddComment,
   openCreateContentModal,
-  onRefresh,
   embedMode = false,
-  externalQuery = ''
+  externalQuery = '',
+  focusPostId
 }) => {
-  const [isScrolled, setIsScrolled] = useState(false);
   const [expandedComments, setExpandedComments] = useState({});
   const [query, setQuery] = useState('');
-  const [refreshKey, setRefreshKey] = useState(0);
   const [viewMode, setViewMode] = useState('feed'); // 'feed' | 'library'
   const scrollRef = useRef(null);
 
@@ -36,8 +34,6 @@ export const CommunityScreen = ({
     document.head.appendChild(style);
   }, []);
 
-  const handleScroll = useCallback(() => { if (!scrollRef.current) return; setIsScrolled(scrollRef.current.scrollTop > 6); }, []);
-
   const effectiveQuery = embedMode ? externalQuery : query;
   const effectiveViewMode = embedMode ? 'feed' : viewMode;
 
@@ -46,7 +42,12 @@ export const CommunityScreen = ({
   const allContent = useMemo(() => {
     const list = [...posts, ...polls].map(x => ({ ...x, createdAt: timeSafe(x) }));
     return list.sort((a,b) => b.createdAt - a.createdAt);
-  }, [posts, polls, refreshKey]);
+  }, [posts, polls]);
+
+  const focusedPost = useMemo(() => {
+    if (!focusPostId) return null;
+    return posts.find(p => String(p.id) === String(focusPostId)) || null;
+  }, [focusPostId, posts]);
 
   const filteredContent = useMemo(() => {
     const q = effectiveQuery.trim().toLowerCase(); if (!q) return allContent;
@@ -102,7 +103,13 @@ export const CommunityScreen = ({
     const commentWrapRef = useRef(null);
     const contentRef = useRef(null);
     const [measuredHeight, setMeasuredHeight] = useState(0);
-    useEffect(() => { if (expandedComments[post.id] && contentRef.current) { setMeasuredHeight(contentRef.current.scrollHeight); } }, [expandedComments[post.id], post.comments]);
+    const postId = post.id;
+    const isExpanded = !!expandedComments[postId];
+    useEffect(() => {
+      if (isExpanded && contentRef.current) {
+        setMeasuredHeight(contentRef.current.scrollHeight);
+      }
+    }, [isExpanded, post.comments]);
     const submitComment = (e) => { e.preventDefault(); const text = draft.trim(); if (!text) return; onAddComment?.(post.id, text); setDraft(''); if (!expandedComments[post.id]) toggleComments(post.id); };
     return (
       <GlassCard theme={theme} className="p-4 rounded-[24px] shadow-sm space-y-3 w-full">
@@ -204,8 +211,6 @@ export const CommunityScreen = ({
     );
   };
 
-  const doRefresh = () => { if (onRefresh) { onRefresh(); } else { setRefreshKey(k=>k+1); } };
-
   return (
     <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
       {!embedMode && (
@@ -234,15 +239,15 @@ export const CommunityScreen = ({
           </div>
         </div>
       )}
-      <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto no-scrollbar pb-10 px-4 sm:px-6 lg:px-8">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto no-scrollbar pb-10 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto w-full">
-        {effectiveViewMode==='feed' && !filteredContent.length && (
+        {effectiveViewMode==='feed' && !filteredContent.length && !focusedPost && (
           <div className="text-center text-sm pt-20" style={{ color: theme.colors.textSecondary }}>No content found.</div>
         )}
         {/* Responsive grid: 1 column on mobile, 2 columns on desktop */}
-        {effectiveViewMode==='feed' && filteredContent.length > 0 && (
+        {effectiveViewMode==='feed' && (focusedPost || filteredContent.length > 0) && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
-            {filteredContent.map(item => item.question ? <PollCard key={`poll-${item.id}`} poll={item} /> : <PostCard key={`post-${item.id}`} post={item} />)}
+            {(focusedPost ? [focusedPost] : filteredContent).map(item => item.question ? <PollCard key={`poll-${item.id}`} poll={item} /> : <PostCard key={`post-${item.id}`} post={item} />)}
           </div>
         )}
         {effectiveViewMode==='library' && !embedMode && (

@@ -1,8 +1,6 @@
-import React, { createContext, useContext, useCallback, useState, useRef, useEffect } from 'react';
+import React, { createContext, useCallback, useState, useRef, useEffect } from 'react';
 
 const ToastContext = createContext(null);
-
-export const useToasts = () => useContext(ToastContext);
 
 let idCounter = 0;
 

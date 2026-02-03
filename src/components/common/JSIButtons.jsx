@@ -18,7 +18,6 @@ export const PillButton = ({
     children,
     isSelected = false,
     onClick,
-    theme,
     size = 'default', // 'default' | 'compact' | 'large' | 'xs'
     className = '',
     type = 'button',

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { Info } from 'lucide-react';
 import { DESIGN_TOKENS, JSI_COLORS } from '../../design-system/tokens.js';
@@ -32,7 +32,7 @@ export const InfoTooltip = ({
     lg: { button: '32px', icon: 18 },
   };
 
-  const computePosition = () => {
+  const computePosition = useCallback(() => {
     if (!triggerRef.current || !tooltipRef.current) return;
 
     const triggerRect = triggerRef.current.getBoundingClientRect();
@@ -70,14 +70,14 @@ export const InfoTooltip = ({
     }
 
     setTooltipPos({ top, left, ready: true });
-  };
+  }, [position]);
 
   useEffect(() => {
     if (show) {
       // Compute position after tooltip is rendered
       requestAnimationFrame(computePosition);
     }
-  }, [show]);
+  }, [show, computePosition]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -97,7 +97,7 @@ export const InfoTooltip = ({
       window.removeEventListener('scroll', handleScroll, true);
       window.removeEventListener('resize', handleResize);
     };
-  }, [show]);
+  }, [show, computePosition]);
 
   return (
     <>

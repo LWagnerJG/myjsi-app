@@ -56,11 +56,11 @@ export const AppHeader = React.memo(({
 
                 <div className="flex items-center gap-2 sm:gap-3">
                     <div
-                        className={`flex items-center justify-end transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden ${isHome ? 'max-w-[250px] opacity-100 mr-1' : 'max-w-0 opacity-0'}`}
+                        className={`flex items-baseline justify-end transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden ${isHome ? 'max-w-[250px] opacity-100 mr-1' : 'max-w-0 opacity-0'}`}
                         style={{ color: theme.colors.textPrimary }}
                     >
-                        <span className="text-sm font-medium opacity-60 transform translate-y-[0.5px]">{getTimeGreeting()},</span>
-                        <span className="text-sm font-bold ml-1 md:ml-1.5">{userName}</span>
+                        <span className="text-sm font-medium">{getTimeGreeting()},</span>
+                        <span className="text-sm font-medium ml-1 md:ml-1.5">{userName}</span>
                     </div>
 
                     <button

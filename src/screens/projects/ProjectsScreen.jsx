@@ -46,9 +46,9 @@ const CurrencyInput = ({ value, onChange, theme }) => {
 };
 
 // ================= Opportunity Detail (clean UI) =================
-const OpportunityDetail = ({ opp, theme, onBack, onUpdate }) => {
+const OpportunityDetail = ({ opp, theme, onUpdate }) => {
   const [draft,setDraft]=useState(opp); const dirty=useRef(false); const saveRef=useRef(null);
-  useEffect(()=>{ setDraft(opp); },[opp.id]);
+  useEffect(()=>{ setDraft(opp); },[opp]);
   const update=(k,v)=> setDraft(p=>{ const n={...p,[k]:v}; dirty.current= true; return n; });
   useEffect(()=>{ if(!dirty.current) return; clearTimeout(saveRef.current); saveRef.current=setTimeout(()=>{ onUpdate(draft); dirty.current=false; },500); return ()=>clearTimeout(saveRef.current); },[draft,onUpdate]);
 
@@ -312,14 +312,12 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
   const [selectedOpportunity,setSelectedOpportunity] = useState(null);
   const [selectedInstall,setSelectedInstall] = useState(null);
   const scrollContainerRef = useRef(null);
-  const [isScrolled,setIsScrolled]=useState(false);
   const stagesScrollRef = useRef(null);
   const [stageSlider,setStageSlider]=useState({left:0,width:0,opacity:0});
   const stageButtonRefs = useRef([]);
   const [showStageFadeLeft,setShowStageFadeLeft]=useState(false);
   const [showStageFadeRight,setShowStageFadeRight]=useState(false);
   useImperativeHandle(ref,()=>({ clearSelection:()=>{ let cleared=false; if(selectedOpportunity){ setSelectedOpportunity(null); cleared=true;} if(selectedInstall){ setSelectedInstall(null); cleared=true;} return cleared; } }));
-  const handleScroll = useCallback(()=>{ if(scrollContainerRef.current) setIsScrolled(scrollContainerRef.current.scrollTop>10); },[]);
   const updateStageFade = useCallback(()=>{ const el=stagesScrollRef.current; if(!el) return; const {scrollLeft,scrollWidth,clientWidth}=el; setShowStageFadeLeft(scrollLeft>4); setShowStageFadeRight(scrollLeft+clientWidth<scrollWidth-4); },[]);
   useEffect(()=>{ const idx=STAGES.findIndex(s=>s===selectedPipelineStage); const el=stageButtonRefs.current[idx]; if(el) setStageSlider({ left:el.offsetLeft, width:el.offsetWidth, opacity:1 }); },[selectedPipelineStage]);
   useEffect(()=>{ updateStageFade(); },[projectsTab, updateStageFade]);
@@ -327,7 +325,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
   const stageTotals = useMemo(()=>{ const totalValue = filteredOpportunities.reduce((sum,o)=>{ const raw= typeof o.value==='string'? o.value.replace(/[^0-9.]/g,''): o.value; const num=parseFloat(raw)||0; return sum+num; },0); return { totalValue }; },[filteredOpportunities]);
   const updateOpportunity = updated => setOpportunities(prev=> prev.map(o=> o.id===updated.id? updated:o));
   const addInstallPhotos = files => { if(!files||!selectedInstall) return; const arr=Array.from(files); setMyProjects(prev=> prev.map(p=> p.id===selectedInstall.id? {...p, photos:[...(p.photos||[]), ...arr]}:p)); setSelectedInstall(prev=> prev? {...prev, photos:[...(prev.photos||[]), ...arr]}: prev); };
-  if(selectedOpportunity) return <OpportunityDetail opp={selectedOpportunity} theme={theme} onBack={()=>setSelectedOpportunity(null)} onUpdate={u=>{ updateOpportunity(u); setSelectedOpportunity(u); }} />;
+  if(selectedOpportunity) return <OpportunityDetail opp={selectedOpportunity} theme={theme} onUpdate={u=>{ updateOpportunity(u); setSelectedOpportunity(u); }} />;
   if(selectedInstall) return <InstallationDetail project={selectedInstall} theme={theme} onAddPhotoFiles={addInstallPhotos} />;
   return (
     <div className="h-full flex flex-col app-header-offset" style={{ backgroundColor: theme.colors.background }}>
@@ -402,7 +400,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
           </div>
         )}
       </div>
-      <div ref={scrollContainerRef} onScroll={handleScroll} className="flex-1 overflow-y-auto scrollbar-hide">
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto scrollbar-hide">
         <div className="px-4 sm:px-6 lg:px-8 pt-4 pb-40 space-y-4 max-w-5xl mx-auto w-full">
           {projectsTab==='pipeline' && (
             filteredOpportunities.length? filteredOpportunities.map(opp=> <ProjectCard key={opp.id} opp={opp} theme={theme} onClick={()=>setSelectedOpportunity(opp)} />):

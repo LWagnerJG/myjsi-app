@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { User, Bell, Palette, Grid, Plus, GripVertical } from 'lucide-react';
 import { allApps, DEFAULT_HOME_APPS } from '../../data.jsx';
+import { LEAD_TIMES_DATA } from '../resources/lead-times/data.js';
 
 // Safe normalization helper
 const cleanLabel = (s='') => Array.from(s).filter(ch => { const c=ch.charCodeAt(0); return c!==0xFFFD && c>=32; }).join('');
@@ -66,7 +67,7 @@ const Select = ({ value, onChange, options, theme }) => {
   );
 };
 
-const loadHomeApps = () => { try { const raw = localStorage.getItem('homeApps'); if (raw) { const p = JSON.parse(raw); if (Array.isArray(p) && p.length === 8) return p; } } catch {}; return [...DEFAULT_HOME_APPS]; };
+const loadHomeApps = () => { try { const raw = localStorage.getItem('homeApps'); if (raw) { const p = JSON.parse(raw); if (Array.isArray(p) && p.length === 8) return p; } } catch { /* no-op */ } return [...DEFAULT_HOME_APPS]; };
 
 export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, onUpdateHomeApps }) => {
   const [firstName, setFirstName] = useState('Luke');
@@ -74,9 +75,25 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, onUpdateHomeA
   const [shirtSize, setShirtSize] = useState('L');
   const [notif, setNotif] = useState({ newOrder: true, samplesShipped: true, leadTimeChange: true, communityPost: false, replacementApproved: true, commissionPosted: true, orderUpdate: true });
   const notifLabels = { newOrder:'New order placed', orderUpdate:'Order status update', samplesShipped:'Samples shipped', leadTimeChange:'Lead time change', replacementApproved:'Replacement approved', commissionPosted:'Commission posted', communityPost:'New JSI community post' }; const notifKeys = Object.keys(notif);
+  const [leadTimeFavorites, setLeadTimeFavorites] = useState(() => {
+    try {
+      const raw = localStorage.getItem('leadTimeFavorites');
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  });
   const [selected, setSelected] = useState(loadHomeApps);
-  useEffect(()=>{ if (selected.length === 8) { try { localStorage.setItem('homeApps', JSON.stringify(selected)); } catch {}; onUpdateHomeApps && onUpdateHomeApps(selected); } }, [selected, onUpdateHomeApps]);
+  useEffect(()=>{ if (selected.length === 8) { try { localStorage.setItem('homeApps', JSON.stringify(selected)); } catch { /* no-op */ } onUpdateHomeApps && onUpdateHomeApps(selected); } }, [selected, onUpdateHomeApps]);
+  useEffect(() => {
+    try { localStorage.setItem('leadTimeFavorites', JSON.stringify(leadTimeFavorites)); } catch { /* no-op */ }
+  }, [leadTimeFavorites]);
   const availableApps = useMemo(()=> allApps.filter(a => !selected.includes(a.route) && !a.route.startsWith('settings')).sort((a,b)=>a.name.localeCompare(b.name)), [selected]);
+  const leadTimeOptions = useMemo(() => {
+    const unique = Array.from(new Set(LEAD_TIMES_DATA.map(item => item.series))).sort();
+    return unique.slice(0, 24);
+  }, []);
   const addApp = route => setSelected(prev => prev.length < 8 && !prev.includes(route) ? [...prev, route] : prev);
   const removeApp = route => setSelected(prev => prev.filter(r => r !== route));
 
@@ -84,7 +101,7 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, onUpdateHomeA
   const gridRef = useRef(null); const [dragInfo,setDragInfo]=useState(null); const tileSizeRef = useRef({ w:0, h:0, gap:12 });
   useEffect(()=>{ if(gridRef.current){ const first=gridRef.current.querySelector('[data-tile]'); if(first){ const r=first.getBoundingClientRect(); tileSizeRef.current={ w:r.width, h:r.height, gap:12 }; } } },[selected]);
   const pointerDown = idx => e => { if(selected[idx]==null) return; const now={ index:idx,startX:e.clientX,startY:e.clientY,lastX:e.clientX,lastY:e.clientY,moved:false,pointerId:e.pointerId }; setDragInfo(now); e.currentTarget.setPointerCapture(e.pointerId); };
-  const pointerMove = idx => e => { if(!dragInfo || dragInfo.pointerId!==e.pointerId) return; const dx=Math.abs(e.clientX-dragInfo.startX); const dy=Math.abs(e.clientY-dragInfo.startY); const moved = dragInfo.moved || dx>4 || dy>4; if(!moved){ setDragInfo(di=>({...di,lastX:e.clientX,lastY:e.clientY})); return; } const gridRect=gridRef.current.getBoundingClientRect(); const relX=e.clientX-gridRect.left; const relY=e.clientY-gridRect.top; const {w,h,gap}=tileSizeRef.current; const col=Math.min(1,Math.max(0,Math.floor(relX/(w+gap)))); const row=Math.min(3,Math.max(0,Math.floor(relY/(h+gap)))); const target=row*2+col; if(target!==dragInfo.index && target < selected.length){ setSelected(prev=>{ const next=[...prev]; const [it]=next.splice(dragInfo.index,1); next.splice(target,0,it); return next; }); setDragInfo(di=>({...di,index:target,moved:true,lastX:e.clientX,lastY:e.clientY})); } else if(!dragInfo.moved){ setDragInfo(di=>({...di,moved:true,lastX:e.clientX,lastY:e.clientY})); } else { setDragInfo(di=>({...di,lastX:e.clientX,lastY:e.clientY})); } };
+  const pointerMove = e => { if(!dragInfo || dragInfo.pointerId!==e.pointerId) return; const dx=Math.abs(e.clientX-dragInfo.startX); const dy=Math.abs(e.clientY-dragInfo.startY); const moved = dragInfo.moved || dx>4 || dy>4; if(!moved){ setDragInfo(di=>({...di,lastX:e.clientX,lastY:e.clientY})); return; } const gridRect=gridRef.current.getBoundingClientRect(); const relX=e.clientX-gridRect.left; const relY=e.clientY-gridRect.top; const {w,h,gap}=tileSizeRef.current; const col=Math.min(1,Math.max(0,Math.floor(relX/(w+gap)))); const row=Math.min(3,Math.max(0,Math.floor(relY/(h+gap)))); const target=row*2+col; if(target!==dragInfo.index && target < selected.length){ setSelected(prev=>{ const next=[...prev]; const [it]=next.splice(dragInfo.index,1); next.splice(target,0,it); return next; }); setDragInfo(di=>({...di,index:target,moved:true,lastX:e.clientX,lastY:e.clientY})); } else if(!dragInfo.moved){ setDragInfo(di=>({...di,moved:true,lastX:e.clientX,lastY:e.clientY})); } else { setDragInfo(di=>({...di,lastX:e.clientX,lastY:e.clientY})); } };
   const pointerUp = idx => () => { if(!dragInfo) return; const wasClick = !dragInfo.moved && dragInfo.index===idx; setDragInfo(null); if(wasClick) removeApp(selected[idx]); };
 
   const slots = useMemo(()=>{ const arr=[...selected]; while(arr.length<8) arr.push(null); return arr; },[selected]);
@@ -102,15 +119,58 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, onUpdateHomeA
         </GlassCard>
 
         <GlassCard theme={theme} className="p-0">
-          <div className="p-4 border-b" style={{ borderColor: theme.colors.subtle }}><div className="flex items-center gap-2"><Bell className="w-5 h-5" style={{ color: theme.colors.accent }} /><h2 className="font-bold" style={{ color: theme.colors.textPrimary }}>Push Notifications</h2></div></div>
-          <div className="p-2">{notifKeys.map((k,i)=>(<div key={k} className={`flex items-center justify-between px-2 py-3 ${i<notifKeys.length-1?'border-b':''}`} style={{ borderColor: theme.colors.subtle }}><span className="text-sm" style={{ color: theme.colors.textPrimary }}>{notifLabels[k]}</span><Toggle checked={!!notif[k]} onChange={v=>setNotif(p=>({...p,[k]:v}))} theme={theme} /></div>))}</div>
+          <div className="p-4 border-b" style={{ borderColor: theme.colors.subtle }}>
+            <div className="flex items-center gap-2">
+              <Bell className="w-5 h-5" style={{ color: theme.colors.accent }} />
+              <h2 className="font-bold" style={{ color: theme.colors.textPrimary }}>Push Notifications</h2>
+            </div>
+            <p className="text-xs mt-1" style={{ color: theme.colors.textSecondary }}>Choose which alerts you want to receive.</p>
+          </div>
+          <div className="p-2 space-y-2">
+            {notifKeys.map((k,i)=>(
+              <div key={k} className="rounded-2xl px-3 py-3" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${theme.colors.border}` }}>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm" style={{ color: theme.colors.textPrimary }}>{notifLabels[k]}</span>
+                  <Toggle checked={!!notif[k]} onChange={v=>setNotif(p=>({...p,[k]:v}))} theme={theme} />
+                </div>
+                {k === 'leadTimeChange' && notif.leadTimeChange && (
+                  <div className="mt-3">
+                    <div className="text-[11px] font-semibold mb-2" style={{ color: theme.colors.textSecondary }}>Favorite lead time series</div>
+                    <div className="flex flex-wrap gap-2">
+                      {leadTimeOptions.map((series) => {
+                        const active = leadTimeFavorites.includes(series);
+                        return (
+                          <button
+                            key={series}
+                            type="button"
+                            onClick={() => setLeadTimeFavorites(prev => active ? prev.filter(s => s !== series) : [...prev, series])}
+                            className="px-2.5 py-1 rounded-full text-[11px] font-semibold transition-all"
+                            style={{
+                              backgroundColor: active ? theme.colors.textPrimary : theme.colors.subtle,
+                              color: active ? '#FFFFFF' : theme.colors.textSecondary,
+                              border: `1px solid ${active ? theme.colors.textPrimary : theme.colors.border}`
+                            }}
+                          >
+                            {series}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <div className="text-[10px] mt-2" style={{ color: theme.colors.textSecondary }}>
+                      Selected: {leadTimeFavorites.length}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </GlassCard>
 
         <GlassCard theme={theme} className="p-0">
           <div className="p-4 border-b" style={{ borderColor: theme.colors.subtle }}><div className="flex items-center gap-2"><Grid className="w-5 h-5" style={{ color: theme.colors.accent }} /><h2 className="font-bold" style={{ color: theme.colors.textPrimary }}>Homepage Apps</h2></div><p className="mt-1 text-xs" style={{ color: theme.colors.textSecondary }}>Press & drag the below apps to reorder. Tap the apps to remove. Add more below.</p></div>
           <div className="p-4 space-y-6">
             <div ref={gridRef} className="grid grid-cols-2 gap-3 select-none">
-              {slots.map((route, idx)=> route===null ? <div key={idx} data-tile className="h-16 rounded-2xl flex items-center justify-center text-[11px] font-medium border border-dashed" style={{ borderColor:theme.colors.border, color:theme.colors.textSecondary }}>Empty</div> : (()=>{ const app=allApps.find(a=>a.route===route); if(!app) return null; const dragging=dragInfo && dragInfo.index===idx; return (<div key={route} data-tile className="h-16 relative"><button onPointerDown={pointerDown(idx)} onPointerMove={pointerMove(idx)} onPointerUp={pointerUp(idx)} onPointerCancel={()=>setDragInfo(null)} className={`absolute inset-0 group p-2 rounded-2xl flex flex-col items-start justify-between overflow-hidden transition shadow-sm bg-white/80 hover:shadow-md ${dragging?'ring-2 ring-offset-0':''}`} style={{ border:`1px solid ${theme.colors.border}`, backgroundColor:theme.colors.surface, touchAction:'none', transform: dragging? 'scale(1.04)' : 'scale(1)', zIndex: dragging?50:1, boxShadow: dragging? '0 6px 24px rgba(0,0,0,0.18)':'0 4px 12px rgba(0,0,0,0.06)' }}><div className="flex items-center w-full justify-between"><app.icon className="w-[18px] h-[18px]" style={{ color: theme.colors.accent }} /><GripVertical className="w-3 h-3 opacity-40 group-hover:opacity-70" style={{ color: theme.colors.textSecondary }} /></div><span className="text-[12px] font-semibold tracking-tight text-left leading-tight" style={{ color: theme.colors.textPrimary }}>{cleanLabel(app.name)}</span><span className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 flex items-center justify-center text-[11px] font-medium" style={{ background:'rgba(0,0,0,0.05)', color: theme.colors.textSecondary }}>Tap to remove</span></button></div>); })())}
+              {slots.map((route, idx)=> route===null ? <div key={idx} data-tile className="h-16 rounded-2xl flex items-center justify-center text-[11px] font-medium border border-dashed" style={{ borderColor:theme.colors.border, color:theme.colors.textSecondary }}>Empty</div> : (()=>{ const app=allApps.find(a=>a.route===route); if(!app) return null; const dragging=dragInfo && dragInfo.index===idx; return (<div key={route} data-tile className="h-16 relative"><button onPointerDown={pointerDown(idx)} onPointerMove={pointerMove} onPointerUp={pointerUp(idx)} onPointerCancel={()=>setDragInfo(null)} className={`absolute inset-0 group p-2 rounded-2xl flex flex-col items-start justify-between overflow-hidden transition shadow-sm bg-white/80 hover:shadow-md ${dragging?'ring-2 ring-offset-0':''}`} style={{ border:`1px solid ${theme.colors.border}`, backgroundColor:theme.colors.surface, touchAction:'none', transform: dragging? 'scale(1.04)' : 'scale(1)', zIndex: dragging?50:1, boxShadow: dragging? '0 6px 24px rgba(0,0,0,0.18)':'0 4px 12px rgba(0,0,0,0.06)' }}><div className="flex items-center w-full justify-between"><app.icon className="w-[18px] h-[18px]" style={{ color: theme.colors.accent }} /><GripVertical className="w-3 h-3 opacity-40 group-hover:opacity-70" style={{ color: theme.colors.textSecondary }} /></div><span className="text-[12px] font-semibold tracking-tight text-left leading-tight" style={{ color: theme.colors.textPrimary }}>{cleanLabel(app.name)}</span><span className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 flex items-center justify-center text-[11px] font-medium" style={{ background:'rgba(0,0,0,0.05)', color: theme.colors.textSecondary }}>Tap to remove</span></button></div>); })())}
             </div>
             <div className="space-y-3">
               <h3 className="text-xs font-semibold" style={{ color: theme.colors.textSecondary }}>Available Apps</h3>

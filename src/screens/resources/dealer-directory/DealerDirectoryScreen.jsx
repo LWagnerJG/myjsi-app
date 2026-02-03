@@ -8,8 +8,8 @@ import { PillButton, PrimaryButton, SecondaryButton } from '../../../components/
 import { Filter, MoreVertical, UserPlus, CheckCircle, Trash2, Plus } from 'lucide-react';
 import { DEALER_DIRECTORY_DATA, ROLE_OPTIONS, DAILY_DISCOUNT_OPTIONS } from './data.js';
 
-export const DealerDirectoryScreen = ({ theme, showAlert, setSuccessMessage, dealerDirectory, onNavigate }) => {
-    const dealers = dealerDirectory || DEALER_DIRECTORY_DATA || [];
+export const DealerDirectoryScreen = ({ theme, setSuccessMessage, dealerDirectory, onNavigate }) => {
+    const dealers = useMemo(() => dealerDirectory || DEALER_DIRECTORY_DATA || [], [dealerDirectory]);
     const [localDealers, setLocalDealers] = useState(dealers);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedDealer, setSelectedDealer] = useState(null);

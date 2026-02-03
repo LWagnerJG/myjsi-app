@@ -19,7 +19,7 @@ export const CommissionsScreen = ({ theme }) => {
   const [year, setYear] = useState(COMMISSION_YEARS[0]);
   const [openId, setOpenId] = useState(null);
 
-  const data = COMMISSIONS_DATA[year] || [];
+  const data = useMemo(() => COMMISSIONS_DATA[year] || [], [year]);
   const total = useMemo(()=>data.reduce((s,m)=>s+m.amount,0),[data]);
   const toggle = useCallback((id)=> setOpenId(p => p === id ? null : id),[]);
 

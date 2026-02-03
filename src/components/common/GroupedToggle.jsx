@@ -8,7 +8,7 @@ import { motion } from 'framer-motion';
  * - White selected pill
  * - Dark text on selected, muted on unselected
  */
-export const SegmentedToggle = ({ value, onChange, options, theme, size = 'md' }) => {
+export const SegmentedToggle = ({ value, onChange, options, size = 'md' }) => {
   const id = useId();
   const sizes = {
     sm: { text: 'text-[13px]', px: 'px-4', py: 'py-1.5', gap: 'gap-1.5' },

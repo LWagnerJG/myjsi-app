@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { Search, Mic } from 'lucide-react';
 
 // HomeSearchInput (unchanged)
@@ -16,26 +16,22 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
     const [tick, setTick] = useState(0);
     const [prevText, setPrevText] = useState(null);
     const phrases = useMemo(() => [
-        'Ask me anything...',
-        'Find install guides...',
-        'Compare product specs...',
-        'Start sample order...',
-        'Check lead times...',
-        'Create social posts...',
-        'Show commission rates...',
-        'Price out package...',
-        'Search dealer directory...',
-        'Summarize a contract...',
-        'Suggest finish pairings...',
-        'Write customer email...',
-        'Draft install checklist...',
-        'Analyze win chances...',
-        'Plan design days...',
+        'Ask JSI anything...',
+        'What are lead times for Motif?',
+        'Compare Jasper vs Motif specs',
+        'Help me start a sample order',
+        'Show commission rates',
+        'Write an email to my customer',
+        'What finishes pair with Slate?',
+        'Draft an install checklist',
+        'Find dealers near Indianapolis',
+        'Summarize this contract',
+        'Chat with your AI assistant...',
     ], []);
     const DISPLAY_MS = 8200;
     const FADE_MS = 1500;
     const FADE_IN_DELAY = 360;
-    const phraseFor = (i) => phrases[i % phrases.length];
+    const phraseFor = useCallback((i) => phrases[i % phrases.length], [phrases]);
     useEffect(() => {
         const id = setInterval(() => setTick(p => p + 1), DISPLAY_MS);
         return () => clearInterval(id);
@@ -45,7 +41,7 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
         setPrevText(phraseFor(tick - 1));
         const t = setTimeout(() => setPrevText(null), FADE_MS + 120);
         return () => clearTimeout(t);
-    }, [tick]);
+    }, [tick, phraseFor]);
     const currentText = phraseFor(tick);
     const isAskCycle = currentText === 'Ask me anything...';
     const shouldPulse = isAskCycle && tick !== 0;

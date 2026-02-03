@@ -136,7 +136,8 @@ export const TagInput = ({
     tags,
     onTagsChange,
     theme,
-    suggestions = []
+    suggestions = [],
+    whiteBg = false
 }) => {
     const [inputValue, setInputValue] = React.useState("");
     const [open, setOpen] = React.useState(false);

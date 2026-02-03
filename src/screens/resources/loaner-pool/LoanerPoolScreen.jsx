@@ -87,7 +87,7 @@ const RequestDrawer = ({
         try {
             window.dispatchEvent(new CustomEvent('myjsi:create-project', { detail: newProject }));
             localStorage.setItem('myjsi:lastNewProject', JSON.stringify(newProject));
-        } catch (_) { }
+        } catch (_) { /* no-op */ }
 
         return newProject;
     }, [myProjects, setMyProjects]);

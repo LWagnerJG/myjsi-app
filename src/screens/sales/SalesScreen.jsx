@@ -1,16 +1,14 @@
-import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react';
-import { createPortal } from 'react-dom';
+import React, { useMemo, useState, useCallback } from 'react';
 import { Modal } from '../../components/common/Modal';
 import { ArrowUp, ArrowDown, TrendingUp, Award, DollarSign, BarChart, Table, ChevronRight } from 'lucide-react';
 import { MONTHLY_SALES_DATA, SALES_VERTICALS_DATA, CUSTOMER_RANK_DATA, INCENTIVE_REWARDS_DATA } from './data.js';
 import { ORDER_DATA, STATUS_COLORS } from '../orders/data.js';
 import { SalesByVerticalBreakdown } from './components/SalesByVerticalBreakdown.jsx';
 import { CountUp } from '../../components/common/CountUp.jsx';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 
 const formatCompanyName = (name = '') => name.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
-const monthNameToNumber = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
 
 const SALES_TOP_ACTIONS = [
   { value: 'rewards', label: 'Dealer Rewards', icon: Award, route: 'incentive-rewards' },
@@ -60,8 +58,6 @@ export const SalesScreen = ({ theme, onNavigate }) => {
   const [monthlyView, setMonthlyView] = useState('chart');
   const [chartDataType, setChartDataType] = useState('bookings');
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [numRecentOrders, setNumRecentOrders] = useState(4);
-  const [selectedMonth, setSelectedMonth] = useState(null);
   const [topTab, setTopTab] = useState(null);
   const formatCurrency = useCallback((n) => `$${Number(n || 0).toLocaleString()}`, []);
 
@@ -80,16 +76,16 @@ export const SalesScreen = ({ theme, onNavigate }) => {
     totalSales: MONTHLY_SALES_DATA.reduce((a, m) => a + m.sales, 0)
   }), []);
 
-  const { percentToGoal, aheadOfPace, deltaLabel } = useMemo(() => {
+  const { aheadOfPace, deltaLabel } = useMemo(() => {
     const now = new Date();
     const start = new Date(now.getFullYear(), 0, 1); const next = new Date(now.getFullYear() + 1, 0, 1);
     const totalDays = (next - start) / 86400000; const dayOfYear = Math.floor((now - start) / 86400000) + 1;
     const yearPct = (dayOfYear / totalDays) * 100;
     const goalPct = (MONTHLY_SALES_DATA.reduce((a, m) => a + m.bookings, 0) / 7000000) * 100;
-    return { percentToGoal: goalPct, aheadOfPace: (goalPct - yearPct) >= 0, deltaLabel: `${Math.abs(goalPct - yearPct).toFixed(1)}%` };
+    return { aheadOfPace: (goalPct - yearPct) >= 0, deltaLabel: `${Math.abs(goalPct - yearPct).toFixed(1)}%` };
   }, []);
 
-  const recentOrders = useMemo(() => ORDER_DATA.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, numRecentOrders), [numRecentOrders]);
+  const recentOrders = useMemo(() => ORDER_DATA.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 4), []);
   const topLeaders = useMemo(() => [...CUSTOMER_RANK_DATA].sort((a, b) => (b.bookings || 0) - (a.bookings || 0)).slice(0, 3), []);
   const activeTotal = chartDataType === 'bookings' ? totalBookings : totalSales;
   const progressPct = Math.min(100, (activeTotal / 7000000) * 100);

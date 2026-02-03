@@ -6,7 +6,7 @@ import { ExternalLink, CheckCircle } from 'lucide-react';
 /* COM / COL Pattern Submission Form
    Lightweight in�app version of the PDF. Captures core details needed to start an evaluation.
 */
-export const ComColRequest = ({ theme, onBack, showAlert }) => {
+export const ComColRequest = ({ theme, showAlert }) => {
   const [form, setForm] = useState({
     customer: '',
     dealerProject: '',

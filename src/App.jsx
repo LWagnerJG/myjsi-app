@@ -18,6 +18,7 @@ import { AnimatedScreenWrapper } from './components/common/AnimatedScreenWrapper
 import { ProjectsScreen } from './screens/projects/ProjectsScreen.jsx';
 import { usePersistentState } from './hooks/usePersistentState.js';
 import { ToastHost } from './components/common/ToastHost.jsx';
+import { ErrorBoundary } from './components/common/ErrorBoundary.jsx';
 
 // Lazy load less-frequently visited resource feature screens for bundle splitting
 const CommissionRatesScreen = React.lazy(() => import('./screens/resources/commission-rates/index.js'));
@@ -78,6 +79,16 @@ const RESOURCE_FEATURE_SCREENS = {
     'comcol-request': ComColRequest
 };
 
+const screenToPath = (screen) => {
+    if (!screen || screen === 'home') return '/';
+    return `/${encodeURI(screen)}`;
+};
+
+const pathToScreen = (pathname) => {
+    const trimmed = pathname.replace(/^\/+|\/+$/g, '');
+    return trimmed ? decodeURI(trimmed) : 'home';
+};
+
 const ScreenRouter = ({ screenKey, projectsScreenRef, SuspenseFallback, ...rest }) => {
     if (!screenKey) return null;
     const parts = screenKey.split('/');
@@ -91,7 +102,9 @@ const ScreenRouter = ({ screenKey, projectsScreenRef, SuspenseFallback, ...rest 
 
     // Feature screens (lazy) inside Suspense to isolate fallback flicker per screen
     const lazyWrap = (Comp) => (
-        <Suspense fallback={SuspenseFallback}> <Comp {...rest} /> </Suspense>
+        <Suspense fallback={SuspenseFallback}>
+            {React.createElement(Comp, { ...rest })}
+        </Suspense>
     );
 
     // Resource route normalization (support legacy underscore routes)
@@ -105,6 +118,11 @@ const ScreenRouter = ({ screenKey, projectsScreenRef, SuspenseFallback, ...rest 
         if (RESOURCE_FEATURE_SCREENS[normalized]) {
             return lazyWrap(RESOURCE_FEATURE_SCREENS[normalized]);
         }
+    }
+
+    if (base === 'community' && parts[1] === 'post' && parts[2]) {
+        const ScreenComponent = SCREEN_MAP[base] || SalesScreen;
+        return <ScreenComponent {...rest} focusPostId={parts[2]} />;
     }
 
     if (base === 'products' && parts[1] === 'category' && parts.length === 3) {
@@ -137,19 +155,20 @@ function App() {
     }, []);
 
     // Navigation / UI state
-    const [navigationHistory, setNavigationHistory] = useState(['home']);
+    const [navigationHistory, setNavigationHistory] = useState(() => [pathToScreen(window.location.pathname)]);
     const [lastNavigationDirection, setLastNavigationDirection] = useState('forward');
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [voiceMessage, setVoiceMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const [alertInfo, setAlertInfo] = useState({ show: false, message: '' });
+    const [homeResetKey, setHomeResetKey] = useState(0);
 
     // Domain state
     const [userSettings, setUserSettings] = useState({ id: 1, firstName: 'Luke', lastName: 'Wagner', homeAddress: '5445 N Deerwood Lake Rd, Jasper, IN 47546' });
     const [opportunities, setOpportunities] = useState(INITIAL_OPPORTUNITIES);
     const [myProjects, setMyProjects] = useState(MY_PROJECTS_DATA);
     const [projectsTabOverride, setProjectsTabOverride] = useState(null);
-    const [selectedProject, setSelectedProject] = useState(null);
+    const [, setSelectedProject] = useState(null);
     const [members, setMembers] = useState(INITIAL_MEMBERS);
     const [currentUserId] = useState(1);
 
@@ -183,11 +202,39 @@ function App() {
         };
     }, []);
 
+    useEffect(() => {
+        const initialScreen = pathToScreen(window.location.pathname);
+        const initialStack = Array.isArray(window.history.state?.stack) && window.history.state.stack.length
+            ? window.history.state.stack
+            : [initialScreen];
+
+        if (!Array.isArray(window.history.state?.stack)) {
+            window.history.replaceState({ stack: initialStack }, '', screenToPath(initialScreen));
+        }
+
+        setNavigationHistory(initialStack);
+
+        const handlePopState = (event) => {
+            const stack = Array.isArray(event.state?.stack) && event.state.stack.length
+                ? event.state.stack
+                : [pathToScreen(window.location.pathname)];
+            setNavigationHistory(stack);
+            setLastNavigationDirection('backward');
+        };
+
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, []);
+
     useEffect(() => { document.body.style.backgroundColor = currentTheme.colors.background; }, [currentTheme.colors.background]);
 
     const handleNavigate = useCallback((screen) => {
         setLastNavigationDirection('forward');
-        setNavigationHistory((prev) => [...prev, screen]);
+        setNavigationHistory((prev) => {
+            const next = [...prev, screen];
+            window.history.pushState({ stack: next }, '', screenToPath(screen));
+            return next;
+        });
     }, []);
 
     const handleBack = useCallback(() => {
@@ -195,11 +242,19 @@ function App() {
             const handled = projectsScreenRef.current.clearSelection();
             if (handled) return;
         }
-        setNavigationHistory((prev) => (prev.length > 1 ? prev.slice(0, -1) : prev));
-        setLastNavigationDirection('backward');
-    }, [currentScreen]);
+        if (navigationHistory.length > 1) {
+            setLastNavigationDirection('backward');
+            window.history.back();
+        }
+    }, [currentScreen, navigationHistory.length]);
 
-    const handleHome = useCallback(() => { setNavigationHistory(['home']); setLastNavigationDirection('backward'); }, []);
+    const handleHome = useCallback(() => {
+        const next = ['home'];
+        setNavigationHistory(next);
+        setLastNavigationDirection('backward');
+        window.history.pushState({ stack: next }, '', '/');
+        setHomeResetKey((prev) => prev + 1);
+    }, []);
 
     const handleVoiceActivate = useCallback((message) => { setVoiceMessage(message); setTimeout(() => setVoiceMessage(''), 1500); }, []);
     const handleAskAI = useCallback((query) => { setVoiceMessage(`AI Search: ${query}`); setTimeout(() => setVoiceMessage(''), 2500); }, []);
@@ -244,7 +299,7 @@ function App() {
     }, []);
 
     const handleShowAlert = useCallback((message) => setAlertInfo({ show: true, message }), []);
-    const handleNewLeadChange = useCallback((updates) => setNewLeadData((prev) => ({ ...prev, ...updates })), []);
+    const handleNewLeadChange = useCallback((updates) => setNewLeadData((prev) => ({ ...prev, ...updates })), [setNewLeadData]);
 
     const handleLeadSuccess = useCallback((lead) => {
         const newOpp = { id: Date.now(), name: lead.project || 'Untitled Project', stage: lead.projectStatus && STAGES.includes(lead.projectStatus) ? lead.projectStatus : STAGES[0], discount: lead.discount || 'Undecided', value: lead.estimatedList || '$0', company: lead.designFirms?.[0] || lead.dealers?.[0] || 'Unknown', contact: lead.contact || '', poTimeframe: lead.poTimeframe || '', ...lead };
@@ -307,7 +362,8 @@ function App() {
         projectsInitialTab: projectsTabOverride,
         clearProjectsInitialTab: () => setProjectsTabOverride(null),
         homeApps,
-        onUpdateHomeApps: handleUpdateHomeApps
+        onUpdateHomeApps: handleUpdateHomeApps,
+        homeResetKey
     };
 
     const suspenseFallback = (
@@ -329,9 +385,11 @@ function App() {
                     isDarkMode={isDarkMode}
                 />
                 <div className="flex-1 overflow-hidden" style={{ backgroundColor: currentTheme.colors.background }}>
-                    <AnimatedScreenWrapper screenKey={currentScreen} direction={lastNavigationDirection} onSwipeBack={navigationHistory.length > 1 ? handleBack : null}>
-                        <ScreenRouter screenKey={currentScreen} projectsScreenRef={projectsScreenRef} SuspenseFallback={suspenseFallback} {...screenProps} />
-                    </AnimatedScreenWrapper>
+                    <ErrorBoundary theme={currentTheme}>
+                        <AnimatedScreenWrapper screenKey={currentScreen} direction={lastNavigationDirection} onSwipeBack={navigationHistory.length > 1 ? handleBack : null}>
+                            <ScreenRouter screenKey={currentScreen} projectsScreenRef={projectsScreenRef} SuspenseFallback={suspenseFallback} {...screenProps} />
+                        </AnimatedScreenWrapper>
+                    </ErrorBoundary>
                 </div>
                 {showProfileMenu && (
                     <ProfileMenu show={showProfileMenu} onClose={() => setShowProfileMenu(false)} onNavigate={handleNavigate} theme={currentTheme} />

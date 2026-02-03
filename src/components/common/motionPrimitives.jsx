@@ -2,7 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Central motion tokens
-export const motionTokens = {
+const motionTokens = {
   dur: { fast: 0.12, base: 0.20, slow: 0.32 },
   ease: [0.4, 0, 0.2, 1],
   spring: { type: 'spring', stiffness: 140, damping: 22, mass: 0.8 }
@@ -42,4 +42,3 @@ export const PopoverMotion = ({ show, children, ...rest }) => (
   <AnimatePresence>{show && <ScaleFade {...rest}>{children}</ScaleFade>}</AnimatePresence>
 );
 
-export { motion, AnimatePresence };

@@ -1,6 +1,6 @@
 import React from 'react';
 import { CheckCircle, AlertCircle, XCircle, Info, Clock } from 'lucide-react';
-import { STATUS_STYLES, radius, isDarkTheme } from '../../design-system/tokens.js';
+import { STATUS_STYLES, isDarkTheme } from '../../design-system/tokens.js';
 
 const STATUS_ICONS = {
   success: CheckCircle,

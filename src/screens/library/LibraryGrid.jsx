@@ -3,7 +3,7 @@ import { INITIAL_ASSETS } from './data.js';
 import { X, Download, Share2, Copy } from 'lucide-react';
 
 // Simple in-memory library grid with mock data
-export const LibraryGrid = ({ theme, query, onQueryChange, parentHeaderRef }) => {
+export const LibraryGrid = ({ theme, query, parentHeaderRef }) => {
   const [selected, setSelected] = useState(null); // asset
   const [assets] = useState(INITIAL_ASSETS);
 

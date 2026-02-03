@@ -230,7 +230,7 @@ export const AutoCompleteCombobox = React.memo(({
                                 border: `1px solid ${dropdownStyles.borderColor} !important`
                             }}
                         >
-                            {filtered.map((opt, index) => (
+                            {filtered.map((opt) => (
                                 <button 
                                     key={opt} 
                                     type="button" 

@@ -148,12 +148,9 @@ const ErrorState = ({ theme, message='The requested item does not exist.' }) => 
 
 export const ProductComparisonScreen = ({ categoryId, onNavigate, theme }) => {
   const categoryData = PRODUCT_DATA?.[categoryId];
-  const [activeProduct,setActiveProduct]=useState(categoryData?.products?.[0]);
   const isGuest = categoryId==='guest';
-  const isCasegoods = categoryId==='casegoods';
-  const isConference = categoryId==='conference-tables';
-  const isLounge = categoryId==='lounge';
-  const isTraining = categoryId==='training-tables';
+
+  const [activeProduct,setActiveProduct]=useState(categoryData?.products?.[0]);
 
   // States for configurations
   const [materialMode,setMaterialMode]=useState(isGuest?'wood':'laminate'); // wood/metal only used for guest filtering; laminate default for others
@@ -163,10 +160,10 @@ export const ProductComparisonScreen = ({ categoryId, onNavigate, theme }) => {
   const [guestLegType,setGuestLegType]=useState('wood');
 
   const handleProductSelect = useCallback(p=>setActiveProduct(p),[]);
-  if(!categoryData) return <ErrorState theme={theme} />;
 
   // Visible products filtering for guest
   const visibleProducts = useMemo(()=>{
+    if (!categoryData) return [];
     if(isGuest){
       return categoryData.products.filter(p => p.legType === guestLegType);
     }
@@ -174,6 +171,8 @@ export const ProductComparisonScreen = ({ categoryId, onNavigate, theme }) => {
   },[categoryData,isGuest,guestLegType]);
 
   useEffect(()=>{ if(isGuest && activeProduct && !visibleProducts.includes(activeProduct)){ const next=visibleProducts[0]; if(next) setActiveProduct(next);} },[isGuest,activeProduct,visibleProducts]);
+
+  if(!categoryData) return <ErrorState theme={theme} />;
 
   return (
     <div className="flex flex-col h-full app-header-offset">

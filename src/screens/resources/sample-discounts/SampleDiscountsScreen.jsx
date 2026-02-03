@@ -1,14 +1,14 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import { Percent, Copy, Hourglass } from 'lucide-react';
-import { SAMPLE_DISCOUNTS_DATA, DISCOUNT_CATEGORIES } from './data.js';
+import { SAMPLE_DISCOUNTS_DATA } from './data.js';
 
 export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
     const [discounts, setDiscounts] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState('all');
+    const searchTerm = '';
+    const selectedCategory = 'all';
 
     useEffect(() => {
         const fetchDiscounts = async () => {
@@ -50,8 +50,6 @@ export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
         }
         navigator.clipboard.writeText(textToCopy).then(() => doSet('SSA# Copied!')).catch(() => doSet('Copy failed'));
     }, [setSuccessMessage]);
-
-    const categories = useMemo(() => DISCOUNT_CATEGORIES, []); // placeholder retained if filters added later
 
     const filteredDiscounts = useMemo(() => {
         let filtered = discounts;

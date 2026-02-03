@@ -1,5 +1,5 @@
 // screens/members/MembersScreen.jsx
-import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { StyledSelect } from '../../components/forms/StyledSelect.jsx';
 import { PillButton, PrimaryButton, SecondaryButton } from '../../components/common/JSIButtons.jsx';

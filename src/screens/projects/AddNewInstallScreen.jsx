@@ -5,7 +5,7 @@ import { FormInput } from '../../components/common/FormComponents.jsx';
 import { X, ImageIcon } from 'lucide-react';
 import { INSTALLATION_CONSTANTS, FORM_VALIDATION } from './installation-data.js';
 
-export const AddNewInstallScreen = ({ theme, setSuccessMessage, onAddInstall, onBack }) => {
+export const AddNewInstallScreen = ({ theme, onAddInstall }) => {
     const [projectName, setProjectName] = useState('');
     const [location, setLocation] = useState('');
     const [photos, setPhotos] = useState([]);

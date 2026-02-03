@@ -48,7 +48,7 @@ const QAItem = ({ q, a, theme, defaultOpen = false }) => {
     );
 };
 
-export const HelpScreen = ({ theme, showAlert }) => {
+export const HelpScreen = ({ theme }) => {
     const faqs = [
         {
             q: 'How do I create a new lead or project?',
@@ -75,15 +75,6 @@ export const HelpScreen = ({ theme, showAlert }) => {
             a: 'Check your connection and try again. If the issue continues, clear the cart from the drawer and re-add items. You can also contact support below.',
         },
     ];
-
-    const copyEmail = async () => {
-        try {
-            await navigator.clipboard?.writeText('support@jsi.example.com');
-            showAlert?.('Support email copied to clipboard.');
-        } catch {
-            showAlert?.('Could not copy email. You can type it manually: support@jsi.example.com');
-        }
-    };
 
     return (
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>

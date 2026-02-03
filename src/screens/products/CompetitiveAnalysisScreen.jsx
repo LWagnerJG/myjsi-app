@@ -67,6 +67,10 @@ const VersusList = ({ jsiProduct, competitors = [], theme, title }) => {
 };
 
 export const CompetitiveAnalysisScreen = ({ categoryId, productId, theme }) => {
+    const [showRequest, setShowRequest] = useState(false);
+    const [formState, setFormState] = useState({ manufacturer: '', series: '', notes: '' });
+    const [submitted, setSubmitted] = useState(false);
+
     const categoryData = PRODUCT_DATA?.[categoryId];
     if (!categoryData) return (
         <div className="p-4"><GlassCard theme={theme} className="p-8 text-center"><Package className="w-12 h-12 mx-auto mb-4" style={{ color: theme.colors.textSecondary }} /><p style={{ color: theme.colors.textPrimary }}>Category Not Found</p></GlassCard></div>
@@ -75,10 +79,6 @@ export const CompetitiveAnalysisScreen = ({ categoryId, productId, theme }) => {
     const product = categoryData.products?.find(p => p.id === productId) || categoryData.products?.[0];
     const perProductList = categoryData.competitionByProduct?.[product?.id] || [];
     const categoryCompetitors = categoryData.competition || [];
-
-    const [showRequest, setShowRequest] = useState(false);
-    const [formState, setFormState] = useState({ manufacturer: '', series: '', notes: '' });
-    const [submitted, setSubmitted] = useState(false);
 
     const handleChange = (e) => setFormState(s => ({ ...s, [e.target.name]: e.target.value }));
     const canSubmit = formState.manufacturer.trim() && formState.series.trim();

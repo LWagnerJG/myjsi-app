@@ -12,10 +12,7 @@ export const CommunityLibraryLayout = ({
   const [query, setQuery] = useState('');
   const scrollPositions = useRef({ community: 0, library: 0 });
   const containerRef = useRef(null);
-  const [isScrolled, setIsScrolled] = useState(false);
   const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  const handleScroll = useCallback(() => { if (containerRef.current) setIsScrolled(containerRef.current.scrollTop > 10); }, []);
 
   const switchTab = useCallback((tab) => {
     if (tab === activeTab) return;
@@ -81,7 +78,7 @@ export const CommunityLibraryLayout = ({
           </div>
         </div>
       </div>
-      <div ref={containerRef} onScroll={handleScroll} className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pb-10 space-y-4 scrollbar-hide">
+      <div ref={containerRef} className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pb-10 space-y-4 scrollbar-hide">
         <div className="mx-auto w-full max-w-5xl" style={{ position:'relative' }}>
           {/* Active pane remains in normal flow so container height = active content height. Inactive pane is absolutely positioned overlay to allow animation without cutting off scroll height. */}
           <div style={{ position:'relative' }}>

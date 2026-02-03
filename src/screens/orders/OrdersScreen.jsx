@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { Calendar, List, Building2, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { SearchInput } from '../../components/common/SearchInput.jsx';
@@ -163,16 +163,10 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
     const [viewMode, setViewMode] = useState('list');
     const [dealerMenuOpen, setDealerMenuOpen] = useState(false);
     const [selectedDealer, setSelectedDealer] = useState('All Dealers');
-    const [isScrolled, setIsScrolled] = useState(false);
-
     const scrollRef = useRef(null);
     const dealerRef = useRef(null);
 
     const dealers = useMemo(() => ['All Dealers', ...Array.from(new Set(ORDER_DATA.map((o) => o.company))).sort((a, b) => a.localeCompare(b))], []);
-
-    const handleScroll = useCallback(() => {
-        if (scrollRef.current) setIsScrolled(scrollRef.current.scrollTop > 10);
-    }, []);
 
     useEffect(() => {
         const click = (e) => {
@@ -280,7 +274,7 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
             </div>
 
             {/* Content */}
-            <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto scrollbar-hide">
+            <div ref={scrollRef} className="flex-1 overflow-y-auto scrollbar-hide">
                 <div className="px-4 sm:px-6 lg:px-8 pt-4 pb-24 space-y-4 max-w-5xl mx-auto w-full">
                     {viewMode === 'list' ? (
                         groupKeys.length ? (

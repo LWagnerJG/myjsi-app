@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { GlassCard } from '../../components/common/GlassCard';
 import { Modal } from '../../components/common/Modal';
 import { SegmentedToggle } from '../../components/common/GroupedToggle';

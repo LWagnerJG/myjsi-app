@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const TerritoryData = {
+const TerritoryData = {
     'North America': ['USA', 'Canada', 'Mexico'],
     'Europe': ['Germany', 'France', 'United Kingdom', 'Spain', 'Italy', 'Netherlands', 'Sweden'],
     'Asia Pacific': ['Japan', 'Australia', 'China', 'South Korea', 'Singapore', 'India'],

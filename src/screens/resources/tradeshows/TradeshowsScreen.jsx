@@ -5,7 +5,7 @@ import { Calendar, MapPin, ExternalLink } from 'lucide-react';
 import { TRADESHOWS, findTradeshow } from './data.js';
 
 // Landing + detail in one screen
-export const TradeshowsScreen = ({ theme, handleBack, onNavigate }) => {
+export const TradeshowsScreen = ({ theme }) => {
   const [selectedId, setSelectedId] = useState(null);
   const active = selectedId ? findTradeshow(selectedId) : null;
 

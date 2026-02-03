@@ -1,5 +1,5 @@
 // Enhanced HomeScreen with Dealer Dashboard design and reconfiguration functionality
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { allApps, DEFAULT_HOME_APPS } from '../../data.jsx';
 import { ORDER_DATA } from '../orders/data.js';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
@@ -7,7 +7,8 @@ import { HomeSearchInput } from '../../components/common/SearchInput.jsx';
 import { QuickActionDropdown } from '../../components/common/QuickActionDropdown.jsx';
 import { RequestQuoteModal } from '../../components/common/RequestQuoteModal.jsx';
 import { DESIGN_TOKENS } from '../../design-system/tokens.js';
-import { Check, Plus, X, Settings as SettingsIcon, GripVertical, Lock } from 'lucide-react';
+import { Check, Plus, X, Settings as SettingsIcon, GripVertical, Lock, Paperclip, MessageCircle } from 'lucide-react';
+import { LEAD_TIMES_DATA } from '../resources/lead-times/data.js';
 import { motion } from 'framer-motion';
 import {
     DndContext,
@@ -47,6 +48,27 @@ const areArraysEqual = (a, b) => {
         if (a[i] !== b[i]) return false;
     }
     return true;
+};
+
+const getCommunityAuthorSafe = (post) => {
+    if (!post) return 'Community';
+    if (typeof post.user === 'string') return post.user;
+    if (typeof post.name === 'string') return post.name;
+    if (typeof post.author === 'string') return post.author;
+    if (post.user?.name) return post.user.name;
+    if (post.user?.firstName || post.user?.lastName) {
+        return `${post.user?.firstName || ''} ${post.user?.lastName || ''}`.trim();
+    }
+    return 'Community';
+};
+
+const getCommunityTextSafe = (post) => {
+    if (!post) return 'New update available';
+    if (typeof post.text === 'string') return post.text;
+    if (typeof post.content === 'string') return post.content;
+    if (typeof post.message === 'string') return post.message;
+    if (typeof post.title === 'string') return post.title;
+    return 'New update available';
 };
 
 const SortableAppTile = ({ id, app, colors, onRemove, isRemoveDisabled = false, isRemoveLocked = false, isOverlay = false }) => {
@@ -133,11 +155,22 @@ const SortableAppTile = ({ id, app, colors, onRemove, isRemoveDisabled = false, 
     );
 };
 
-export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeApps, onUpdateHomeApps, userSettings }) => {
+export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpdateHomeApps, homeResetKey, posts }) => {
     const [isEditMode, setIsEditMode] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [activeDragId, setActiveDragId] = useState(null);
     const [showQuoteModal, setShowQuoteModal] = useState(false);
+    const [isChatOpen, setIsChatOpen] = useState(false);
+    const [chatMessages, setChatMessages] = useState([]);
+    const [chatInput, setChatInput] = useState('');
+    const [chatAttachments, setChatAttachments] = useState([]);
+    const [isBotThinking, setIsBotThinking] = useState(false);
+    const chatFileInputRef = useRef(null);
+    const botReplyTimeoutRef = useRef(null);
+    const [homeFeatureMode, setHomeFeatureMode] = useState('activity');
+    const [secondaryFeatureMode, setSecondaryFeatureMode] = useState('community');
+    const [leadTimeFavorites, setLeadTimeFavorites] = useState([]);
+    const prevHomeResetKeyRef = useRef(homeResetKey);
 
     // Handle quick action selection from dropdown
     const handleQuickAction = useCallback((actionId) => {
@@ -195,6 +228,28 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
         }
     }, [homeApps, normalizeHomeApps, onUpdateHomeApps]);
 
+    useEffect(() => {
+        try {
+            const raw = localStorage.getItem('leadTimeFavorites');
+            const parsed = raw ? JSON.parse(raw) : [];
+            setLeadTimeFavorites(Array.isArray(parsed) ? parsed : []);
+        } catch {
+            setLeadTimeFavorites([]);
+        }
+    }, []);
+
+    // Close chat only when homeResetKey actually changes (e.g., clicking MyJSI logo)
+    useEffect(() => {
+        if (prevHomeResetKeyRef.current !== homeResetKey) {
+            prevHomeResetKeyRef.current = homeResetKey;
+            if (isChatOpen) {
+                setIsChatOpen(false);
+                setSearchQuery('');
+                setChatMessages([]);
+            }
+        }
+    }, [homeResetKey, isChatOpen]);
+
     const currentApps = useMemo(() => {
         return safeHomeApps.map(route => allApps.find(a => a.route === route)).filter(Boolean);
     }, [safeHomeApps]);
@@ -202,6 +257,18 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
     const availableApps = useMemo(() => {
         return allApps.filter(app => !safeHomeApps.includes(app.route) && !EXCLUDED_ROUTES.has(app.route));
     }, [safeHomeApps]);
+
+    const spotlightResults = useMemo(() => {
+        const query = searchQuery.trim().toLowerCase();
+        if (!query) return [];
+        return allApps
+            .filter(app => {
+                const name = app.name?.toLowerCase() || '';
+                const route = app.route?.toLowerCase() || '';
+                return name.includes(query) || route.includes(query);
+            })
+            .slice(0, 6);
+    }, [searchQuery]);
 
     const toggleApp = useCallback((route) => {
         if (!onUpdateHomeApps) return; // Guard against missing prop
@@ -218,11 +285,84 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
     }, [safeHomeApps, onUpdateHomeApps]);
 
 
-    const handleSearchSubmit = useCallback((val) => {
-        if (onAskAI && val && val.trim()) {
-            onAskAI(val);
+    const appendChatTurn = useCallback((text, attachments = []) => {
+        const trimmed = text?.trim();
+        if (!trimmed) return;
+        const now = Date.now();
+        setChatMessages((prev) => ([
+            ...prev,
+            { id: `u-${now}`, role: 'user', text: trimmed, attachments }
+        ]));
+        if (botReplyTimeoutRef.current) {
+            clearTimeout(botReplyTimeoutRef.current);
         }
-    }, [onAskAI]);
+        setIsBotThinking(true);
+        botReplyTimeoutRef.current = setTimeout(() => {
+            setChatMessages((prev) => ([
+                ...prev,
+                { id: `a-${now}`, role: 'assistant', text: 'Test received.' }
+            ]));
+            setIsBotThinking(false);
+        }, 700);
+    }, []);
+
+    useEffect(() => {
+        return () => {
+            if (botReplyTimeoutRef.current) {
+                clearTimeout(botReplyTimeoutRef.current);
+            }
+        };
+    }, []);
+
+    const openChatFromQuery = useCallback((query) => {
+        const trimmed = query?.trim();
+        if (!trimmed) return;
+        setIsChatOpen(true);
+        appendChatTurn(trimmed.replace(/^\?\s*/, ''), []);
+        setSearchQuery('');
+    }, [appendChatTurn]);
+
+    const handleSearchSubmit = useCallback((val) => {
+        const trimmed = val?.trim();
+        if (!trimmed) return;
+        const isChatIntent = trimmed.startsWith('?') || trimmed.toLowerCase().startsWith('ask ');
+        if (isChatIntent || spotlightResults.length === 0) {
+            openChatFromQuery(trimmed);
+        } else {
+            onNavigate?.(spotlightResults[0].route);
+        }
+        setSearchQuery('');
+    }, [onNavigate, openChatFromQuery, spotlightResults]);
+
+    const handleChatSubmit = useCallback((e) => {
+        e.preventDefault();
+        if (!chatInput.trim()) return;
+        appendChatTurn(chatInput, chatAttachments);
+        setChatInput('');
+        setChatAttachments([]);
+        if (chatFileInputRef.current) {
+            chatFileInputRef.current.value = '';
+        }
+    }, [appendChatTurn, chatAttachments, chatInput]);
+
+    const handleChatFilePick = useCallback(() => {
+        chatFileInputRef.current?.click();
+    }, []);
+
+    const handleChatFilesSelected = useCallback((event) => {
+        const files = Array.from(event.target.files || []);
+        if (!files.length) return;
+        const mapped = files.map((file) => ({
+            id: `${file.name}-${file.size}-${file.lastModified}`,
+            name: file.name,
+            size: file.size
+        }));
+        setChatAttachments((prev) => ([...prev, ...mapped]));
+    }, []);
+
+    const handleRemoveAttachment = useCallback((id) => {
+        setChatAttachments((prev) => prev.filter((file) => file.id !== id));
+    }, []);
 
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -248,13 +388,159 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
         return now.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
     }, []);
 
+    const latestCommunityPost = useMemo(() => {
+        if (!Array.isArray(posts) || posts.length === 0) return null;
+        return posts[0];
+    }, [posts]);
+
+
+    const homeFeatureOptions = useMemo(() => ([
+        { id: 'activity', label: 'Recent Activity' },
+        { id: 'community', label: 'Community' },
+        { id: 'lead-times', label: 'Lead Times' },
+        { id: 'announcements', label: 'Announcements' },
+        { id: 'products', label: 'Products' },
+        { id: 'projects', label: 'Projects' }
+    ]), []);
+
+    const leadTimeFavoritesData = useMemo(() => {
+        if (!leadTimeFavorites.length) return [];
+        return LEAD_TIMES_DATA.filter(item => leadTimeFavorites.includes(item.series))
+            .slice(0, 6);
+    }, [leadTimeFavorites]);
+
     const recentOrders = useMemo(() => {
         return [...ORDER_DATA].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 3);
     }, []);
 
+    const renderHomeFeatureContent = useCallback((mode) => {
+        if (mode === 'community') {
+            return (
+                <div className="space-y-3">
+                    {latestCommunityPost ? (
+                        <button
+                            onClick={() => {
+                                onNavigate('community');
+                                onNavigate(`community/post/${latestCommunityPost.id}`);
+                            }}
+                            className="w-full p-4 rounded-2xl text-left hover:bg-black/[0.03] transition-colors"
+                            style={{ border: `1px solid ${colors.border}` }}
+                        >
+                            {(() => {
+                                const image = latestCommunityPost.image || (Array.isArray(latestCommunityPost.images) ? latestCommunityPost.images[0] : null);
+                                return image ? (
+                                    <div className="mb-3 rounded-xl overflow-hidden">
+                                        <img src={image} alt="Community" className="w-full h-40 object-cover" />
+                                    </div>
+                                ) : null;
+                            })()}
+                            <div className="text-sm font-semibold" style={{ color: colors.textPrimary }}>
+                                {getCommunityAuthorSafe(latestCommunityPost)}
+                            </div>
+                            <div className="text-xs" style={{ color: colors.textSecondary }}>
+                                {getCommunityTextSafe(latestCommunityPost)}
+                            </div>
+                        </button>
+                    ) : (
+                        <div className="text-sm" style={{ color: colors.textSecondary }}>
+                            No community posts yet.
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        if (mode === 'lead-times') {
+            return (
+                <div className="space-y-3">
+                    {leadTimeFavoritesData.length > 0 ? (
+                        leadTimeFavoritesData.map((item) => (
+                            <button
+                                key={`${item.series}-${item.type}`}
+                                onClick={() => onNavigate('resources/lead-times')}
+                                className="w-full flex items-center justify-between p-3 rounded-2xl hover:bg-black/[0.03] transition-colors"
+                            >
+                                <div className="text-left">
+                                    <div className="text-sm font-semibold" style={{ color: colors.textPrimary }}>{item.series}</div>
+                                    <div className="text-[10px] uppercase tracking-widest opacity-60" style={{ color: colors.textSecondary }}>{item.type}</div>
+                                </div>
+                                <div className="text-sm font-bold" style={{ color: colors.textPrimary }}>{item.weeks} wks</div>
+                            </button>
+                        ))
+                    ) : (
+                        <div className="text-sm" style={{ color: colors.textSecondary }}>
+                            Select lead time favorites in Settings to see them here.
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        if (mode === 'announcements') {
+            return (
+                <div className="space-y-3">
+                    <div className="p-4 rounded-2xl" style={{ border: `1px solid ${colors.border}` }}>
+                        <div className="text-sm font-semibold" style={{ color: colors.textPrimary }}>JSI Updates</div>
+                        <div className="text-xs" style={{ color: colors.textSecondary }}>
+                            New announcements and updates will appear here.
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        if (mode === 'products') {
+            return (
+                <div className="space-y-3">
+                    <button onClick={() => onNavigate('products')} className="w-full p-4 rounded-2xl text-left hover:bg-black/[0.03] transition-colors" style={{ border: `1px solid ${colors.border}` }}>
+                        <div className="text-sm font-semibold" style={{ color: colors.textPrimary }}>Browse Products</div>
+                        <div className="text-xs" style={{ color: colors.textSecondary }}>Explore finishes and specs</div>
+                    </button>
+                </div>
+            );
+        }
+
+        if (mode === 'projects') {
+            return (
+                <div className="space-y-3">
+                    <button onClick={() => onNavigate('projects')} className="w-full p-4 rounded-2xl text-left hover:bg-black/[0.03] transition-colors" style={{ border: `1px solid ${colors.border}` }}>
+                        <div className="text-sm font-semibold" style={{ color: colors.textPrimary }}>Project Pipeline</div>
+                        <div className="text-xs" style={{ color: colors.textSecondary }}>View leads and installs</div>
+                    </button>
+                </div>
+            );
+        }
+
+        return (
+            <div className="space-y-3">
+                {recentOrders.map((order) => (
+                    <button
+                        key={order.orderNumber}
+                        onClick={() => onNavigate('orders')}
+                        className="w-full flex items-center justify-between p-3 rounded-2xl hover:bg-black/[0.03] transition-colors"
+                    >
+                        <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-9 h-9 rounded-xl bg-black/5 flex items-center justify-center text-[10px] font-bold">PO</div>
+                            <div className="text-left min-w-0">
+                                <div className="text-sm font-semibold truncate" style={{ color: colors.textPrimary }}>{order.company}</div>
+                                <div className="text-[10px] uppercase tracking-widest opacity-50" style={{ color: colors.textSecondary }}>
+                                    {new Date(order.date).toLocaleDateString()}
+                                </div>
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <div className="text-sm font-bold" style={{ color: colors.textPrimary }}>${order.net.toLocaleString()}</div>
+                            <div className="text-[10px] uppercase tracking-widest opacity-50" style={{ color: colors.textSecondary }}>{order.status}</div>
+                        </div>
+                    </button>
+                ))}
+            </div>
+        );
+    }, [colors, leadTimeFavoritesData, latestCommunityPost, onNavigate, recentOrders]);
+
     return (
         <div className="flex flex-col h-full overflow-y-auto scrollbar-hide app-header-offset" style={{ backgroundColor: colors.background }}>
-            <div className="px-4 sm:px-6 lg:px-8 pt-1 sm:pt-2 pb-24 space-y-6 lg:space-y-8 max-w-5xl mx-auto w-full">
+            <div className="px-4 sm:px-6 lg:px-8 pt-0 sm:pt-1 pb-20 space-y-4 lg:space-y-6 max-w-5xl mx-auto w-full">
 
                 {/* Header Section */}
                 <div className="space-y-1 hidden sm:block">
@@ -273,8 +559,9 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                             height: 56,
                             paddingTop: 0,
                             paddingBottom: 0,
-                            background: 'rgba(255, 255, 255, 0.75)',
-                            border: '1px solid rgba(255, 255, 255, 0.7)',
+                            backgroundColor: 'rgba(255,255,255,0.78)',
+                            backgroundImage: 'linear-gradient(180deg, rgba(255,255,255,0.86) 0%, rgba(255,255,255,0.72) 100%)',
+                            border: 'none',
                             boxShadow: 'none'
                         }}
                     >
@@ -293,18 +580,64 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                             className="ml-2"
                         />
                     </GlassCard>
+
+                    {searchQuery.trim() && (
+                        <div className="absolute left-0 right-0 top-full mt-2 z-20">
+                            <GlassCard theme={theme} className="p-2" style={{ borderRadius: 20 }}>
+                                <div className="space-y-1">
+                                    {spotlightResults.map((app) => (
+                                        <button
+                                            key={app.route}
+                                            onMouseDown={(e) => {
+                                                e.preventDefault();
+                                                onNavigate?.(app.route);
+                                                setSearchQuery('');
+                                            }}
+                                            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-black/[0.03] transition-colors"
+                                        >
+                                            <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: `${colors.accent}12` }}>
+                                                <app.icon className="w-4 h-4" style={{ color: colors.accent }} />
+                                            </div>
+                                            <div className="text-left">
+                                                <div className="text-sm font-semibold" style={{ color: colors.textPrimary }}>{app.name}</div>
+                                                <div className="text-[11px]" style={{ color: colors.textSecondary }}>{app.route}</div>
+                                            </div>
+                                        </button>
+                                    ))}
+
+                                    <button
+                                        onMouseDown={(event) => {
+                                            event.preventDefault();
+                                            event.stopPropagation();
+                                            openChatFromQuery(searchQuery);
+                                        }}
+                                        className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-black/[0.03] transition-colors"
+                                    >
+                                        <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: `${colors.accent}12` }}>
+                                            <MessageCircle className="w-4 h-4" style={{ color: colors.accent }} />
+                                        </div>
+                                        <div className="text-left">
+                                            <div className="text-sm font-semibold" style={{ color: colors.textPrimary }}>Ask Elliott Bot</div>
+                                            <div className="text-[11px]" style={{ color: colors.textSecondary }}>
+                                                {searchQuery.trim()}
+                                            </div>
+                                        </div>
+                                    </button>
+                                </div>
+                            </GlassCard>
+                        </div>
+                    )}
                 </div>
 
                 {/* Reconfigurable Apps section */}
-                <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-semibold uppercase tracking-widest" style={{ color: colors.textSecondary }}>Quick Access</h3>
+                <div className="space-y-2">
+                    <div className="flex items-center justify-end">
                         {onUpdateHomeApps && (
                             <button
                                 onClick={() => setIsEditMode(!isEditMode)}
                                 title={isEditMode ? 'Exit edit mode' : 'Customize home apps'}
                                 aria-label={isEditMode ? 'Exit edit mode' : 'Customize home apps'}
-                                className="flex items-center gap-2 px-2.5 py-1 rounded-full text-[11px] font-semibold transition-all active:scale-95"
+                                className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold transition-all active:scale-95"
                                 style={{
                                     backgroundColor: isEditMode ? colors.textPrimary : `${colors.surface}80`,
                                     color: isEditMode ? '#FFFFFF' : colors.textSecondary,
@@ -313,13 +646,13 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                             >
                                 {isEditMode ? (
                                     <>
-                                        <Check className="w-3.5 h-3.5" />
+                                        <Check className="w-3 h-3" />
                                         <span>Done</span>
                                     </>
                                 ) : (
                                     <>
-                                        <GripVertical className="w-3.5 h-3.5" />
-                                        <span>Reorder</span>
+                                        <GripVertical className="w-3 h-3" />
+                                        <span>Edit</span>
                                     </>
                                 )}
                             </button>
@@ -466,39 +799,87 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                     )}
                 </div>
 
-                {/* Recent Activity */}
-                <GlassCard theme={theme} className="p-6" style={{ borderRadius: 24 }}>
-                    <div className="flex items-center justify-between mb-4">
-                        <h4 className="text-lg font-bold" style={{ color: colors.textPrimary }}>Recent Activity</h4>
-                        <button onClick={() => onNavigate('orders')} className="text-xs font-bold uppercase tracking-widest opacity-50 hover:opacity-100 transition-opacity">View All</button>
-                    </div>
-                    <div className="space-y-3">
-                        {recentOrders.map((order) => (
-                            <button
-                                key={order.orderNumber}
-                                onClick={() => onNavigate('orders')}
-                                className="w-full flex items-center justify-between p-3 rounded-2xl hover:bg-black/[0.03] transition-colors"
-                            >
-                                <div className="flex items-center gap-3 min-w-0">
-                                    <div className="w-9 h-9 rounded-xl bg-black/5 flex items-center justify-center text-[10px] font-bold">PO</div>
-                                    <div className="text-left min-w-0">
-                                        <div className="text-sm font-semibold truncate" style={{ color: colors.textPrimary }}>{order.company}</div>
-                                        <div className="text-[10px] uppercase tracking-widest opacity-50" style={{ color: colors.textSecondary }}>
-                                            {new Date(order.date).toLocaleDateString()}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="text-right">
-                                    <div className="text-sm font-bold" style={{ color: colors.textPrimary }}>${order.net.toLocaleString()}</div>
-                                    <div className="text-[10px] uppercase tracking-widest opacity-50" style={{ color: colors.textSecondary }}>{order.status}</div>
-                                </div>
-                            </button>
-                        ))}
-                    </div>
-                </GlassCard>
+                {/* Home feature card(s) */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <GlassCard theme={theme} className="p-6" style={{ borderRadius: 24 }}>
+                        <div className="flex items-center justify-between mb-4">
+                            <h4 className="text-lg font-bold" style={{ color: colors.textPrimary }}>
+                                {homeFeatureOptions.find(o => o.id === homeFeatureMode)?.label || 'Recent Activity'}
+                            </h4>
+                            {isEditMode ? (
+                                <select
+                                    value={homeFeatureMode}
+                                    onChange={(e) => setHomeFeatureMode(e.target.value)}
+                                    className="text-[11px] font-semibold rounded-full px-3 py-1"
+                                    style={{
+                                        backgroundColor: `${colors.surface}CC`,
+                                        color: colors.textSecondary,
+                                        border: `1px solid ${colors.border}`
+                                    }}
+                                >
+                                    {homeFeatureOptions.map(option => (
+                                        <option key={option.id} value={option.id}>{option.label}</option>
+                                    ))}
+                                </select>
+                            ) : (
+                                <button
+                                    onClick={() => {
+                                        if (homeFeatureMode === 'community') onNavigate('community');
+                                        else if (homeFeatureMode === 'lead-times') onNavigate('resources/lead-times');
+                                        else if (homeFeatureMode === 'products') onNavigate('products');
+                                        else if (homeFeatureMode === 'projects') onNavigate('projects');
+                                        else onNavigate('orders');
+                                    }}
+                                    className="text-xs font-bold uppercase tracking-widest opacity-50 hover:opacity-100 transition-opacity"
+                                >
+                                    Open
+                                </button>
+                            )}
+                        </div>
+                        {renderHomeFeatureContent(homeFeatureMode)}
+                    </GlassCard>
+
+                    <GlassCard theme={theme} className="p-6 hidden lg:block" style={{ borderRadius: 24 }}>
+                        <div className="flex items-center justify-between mb-4">
+                            <h4 className="text-lg font-bold" style={{ color: colors.textPrimary }}>
+                                {homeFeatureOptions.find(o => o.id === secondaryFeatureMode)?.label || 'Community'}
+                            </h4>
+                            {isEditMode ? (
+                                <select
+                                    value={secondaryFeatureMode}
+                                    onChange={(e) => setSecondaryFeatureMode(e.target.value)}
+                                    className="text-[11px] font-semibold rounded-full px-3 py-1"
+                                    style={{
+                                        backgroundColor: `${colors.surface}CC`,
+                                        color: colors.textSecondary,
+                                        border: `1px solid ${colors.border}`
+                                    }}
+                                >
+                                    {homeFeatureOptions.map(option => (
+                                        <option key={option.id} value={option.id}>{option.label}</option>
+                                    ))}
+                                </select>
+                            ) : (
+                                <button
+                                    onClick={() => {
+                                        if (secondaryFeatureMode === 'community') onNavigate('community');
+                                        else if (secondaryFeatureMode === 'lead-times') onNavigate('resources/lead-times');
+                                        else if (secondaryFeatureMode === 'products') onNavigate('products');
+                                        else if (secondaryFeatureMode === 'projects') onNavigate('projects');
+                                        else onNavigate('orders');
+                                    }}
+                                    className="text-xs font-bold uppercase tracking-widest opacity-50 hover:opacity-100 transition-opacity"
+                                >
+                                    Open
+                                </button>
+                            )}
+                        </div>
+                        {renderHomeFeatureContent(secondaryFeatureMode)}
+                    </GlassCard>
+                </div>
 
                 {/* Feedback CTA (sticky bottom) */}
-                <div className="mt-5 lg:mt-6 sticky bottom-4">
+                <div className="mt-4 lg:mt-5 sticky bottom-4">
                     <GlassCard
                         theme={theme}
                         className="px-4 py-3 flex items-center justify-between"
@@ -506,7 +887,7 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                     >
                         <div className="space-y-0.5">
                             <h4 className="text-sm font-semibold" style={{ color: colors.textPrimary }}>Feedback</h4>
-                            <p className="text-xs opacity-70" style={{ color: colors.textSecondary }}>Help us improve your dashboard.</p>
+                            <p className="text-xs opacity-70" style={{ color: colors.textSecondary }}>Improve the MyJSI app experience.</p>
                         </div>
                         <button
                             onClick={() => onNavigate('feedback')}
@@ -529,6 +910,181 @@ export const HomeScreen = ({ theme, onNavigate, onAskAI, onVoiceActivate, homeAp
                     // Handle quote submission - could send to API
                 }}
             />
+
+            {isChatOpen && (
+                <div
+                    className="fixed inset-0 z-[999] flex items-center justify-center"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="Elliott Bot"
+                >
+                    <div
+                        className="w-full h-full flex flex-col"
+                        style={{ backgroundColor: colors.background }}
+                    >
+                        <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b" style={{ borderColor: colors.border }}>
+                            <div className="flex items-center gap-3">
+                                <div
+                                    className="w-12 h-12 rounded-full flex items-center justify-center"
+                                    style={{
+                                        background: 'linear-gradient(135deg, #E8D1C2, #D3A891)',
+                                        border: `1px solid ${colors.border}`
+                                    }}
+                                    aria-hidden="true"
+                                >
+                                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M6 9.2c0-3.1 2.7-5.6 6-5.6s6 2.5 6 5.6v2.6c0 3.1-2.7 5.6-6 5.6s-6-2.5-6-5.6V9.2z" fill="#F4E1D3" />
+                                        <path d="M6.2 9.2c1.2-2.6 3.6-4.1 5.8-4.1 2.2 0 4.6 1.5 5.8 4.1" stroke="#B6B0A8" strokeWidth="1.6" strokeLinecap="round" />
+                                        <circle cx="9.3" cy="10.3" r="0.8" fill="#6B4B3E" />
+                                        <circle cx="14.7" cy="10.3" r="0.8" fill="#6B4B3E" />
+                                        <path d="M8.2 12.6c1.4 1.2 6.2 1.2 7.6 0" stroke="#6B4B3E" strokeWidth="1.1" strokeLinecap="round" />
+                                        <path d="M7.6 10.1h3.6" stroke="#6B4B3E" strokeWidth="0.9" strokeLinecap="round" />
+                                        <path d="M12.8 10.1h3.6" stroke="#6B4B3E" strokeWidth="0.9" strokeLinecap="round" />
+                                        <circle cx="12" cy="10.1" r="0.5" fill="#6B4B3E" />
+                                        <path d="M6.4 17.2l3.4-2.3 2.2 1.5-2.2 1.5-3.4-2.3z" fill="#2E6BE6" />
+                                        <path d="M17.6 17.2l-3.4-2.3-2.2 1.5 2.2 1.5 3.4-2.3z" fill="#E64A8B" />
+                                        <circle cx="12" cy="16.6" r="0.9" fill="#FFD166" />
+                                    </svg>
+                                </div>
+                                <div className="leading-tight">
+                                    <div className="text-lg font-semibold" style={{ color: colors.textPrimary }}>Elliott Bot</div>
+                                    <div className="text-xs" style={{ color: colors.textSecondary }}>Helpful assistant</div>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setIsChatOpen(false)}
+                                className="p-2 rounded-full transition-colors hover:bg-black/10"
+                                aria-label="Close chat"
+                            >
+                                <X className="w-5 h-5" style={{ color: colors.textSecondary }} />
+                            </button>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto px-5 py-6 space-y-4">
+                            {chatMessages.length === 0 ? (
+                                <div className="text-sm" style={{ color: colors.textSecondary }}>
+                                    Ask Elliott Bot a question to start the conversation.
+                                </div>
+                            ) : (
+                                chatMessages.map((msg) => (
+                                    <div
+                                        key={msg.id}
+                                        className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                                    >
+                                        <div
+                                            className="px-4 py-3 rounded-2xl text-sm max-w-[75%] space-y-2"
+                                            style={{
+                                                backgroundColor: msg.role === 'user' ? colors.textPrimary : colors.surface,
+                                                color: msg.role === 'user' ? '#FFFFFF' : colors.textPrimary,
+                                                border: msg.role === 'user' ? 'none' : `1px solid ${colors.border}`
+                                            }}
+                                        >
+                                            <div>{msg.text}</div>
+                                            {Array.isArray(msg.attachments) && msg.attachments.length > 0 && (
+                                                <div className="flex flex-wrap gap-1">
+                                                    {msg.attachments.map((file) => (
+                                                        <span
+                                                            key={file.id}
+                                                            className="text-[10px] px-2 py-1 rounded-full"
+                                                            style={{
+                                                                backgroundColor: msg.role === 'user' ? 'rgba(255,255,255,0.2)' : `${colors.border}66`,
+                                                                color: msg.role === 'user' ? '#FFFFFF' : colors.textSecondary
+                                                            }}
+                                                        >
+                                                            {file.name}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                            {isBotThinking && (
+                                <div className="flex justify-start">
+                                    <div
+                                        className="px-4 py-3 rounded-2xl text-sm"
+                                        style={{
+                                            backgroundColor: colors.surface,
+                                            color: colors.textSecondary,
+                                            border: `1px solid ${colors.border}`
+                                        }}
+                                    >
+                                        <span className="inline-flex items-center gap-1">
+                                            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: colors.textSecondary }} />
+                                            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: colors.textSecondary }} />
+                                            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: colors.textSecondary }} />
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="border-t px-5 py-4" style={{ borderColor: colors.border }}>
+                            {chatAttachments.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mb-3">
+                                    {chatAttachments.map((file) => (
+                                        <div
+                                            key={file.id}
+                                            className="flex items-center gap-2 px-2.5 py-1 rounded-full text-[11px]"
+                                            style={{ backgroundColor: `${colors.surface}CC`, border: `1px solid ${colors.border}`, color: colors.textSecondary }}
+                                        >
+                                            <span className="truncate max-w-[200px]">{file.name}</span>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRemoveAttachment(file.id)}
+                                                className="hover:opacity-80"
+                                                aria-label="Remove attachment"
+                                            >
+                                                <X className="w-3 h-3" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            <form onSubmit={handleChatSubmit} className="flex items-center gap-2">
+                                <input
+                                    value={chatInput}
+                                    onChange={(e) => setChatInput(e.target.value)}
+                                    placeholder="Type a message..."
+                                    className="flex-1 px-4 py-3 rounded-full text-sm outline-none"
+                                    style={{
+                                        backgroundColor: colors.surface,
+                                        color: colors.textPrimary,
+                                        border: `1px solid ${colors.border}`
+                                    }}
+                                    aria-label="Chat message"
+                                />
+                                <input
+                                    ref={chatFileInputRef}
+                                    type="file"
+                                    multiple
+                                    className="hidden"
+                                    onChange={handleChatFilesSelected}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={handleChatFilePick}
+                                    className="w-11 h-11 rounded-full flex items-center justify-center"
+                                    style={{ backgroundColor: `${colors.surface}CC`, border: `1px solid ${colors.border}`, color: colors.textSecondary }}
+                                    aria-label="Add attachment"
+                                >
+                                    <Paperclip className="w-4 h-4" />
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="px-5 py-3 rounded-full text-sm font-semibold transition-all active:scale-95"
+                                    style={{ backgroundColor: colors.textPrimary, color: '#FFFFFF' }}
+                                >
+                                    Send
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            )}
+
         </div>
     );
 };

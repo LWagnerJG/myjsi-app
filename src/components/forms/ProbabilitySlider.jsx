@@ -1,10 +1,10 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 
 export const ProbabilitySlider = ({ value, onChange, theme, showLabel = true }) => {
     const [isDragging, setIsDragging] = useState(false);
     const sliderRef = useRef(null);
 
-    const updateFromClientX = (clientX) => {
+    const updateFromClientX = useCallback((clientX) => {
         if (!sliderRef.current) return;
         const rect = sliderRef.current.getBoundingClientRect();
         const overshoot = 12; // allow dragging past left edge
@@ -15,15 +15,15 @@ export const ProbabilitySlider = ({ value, onChange, theme, showLabel = true }) 
         // Enforce 5% min for UX (never display 0%)
         if (snapped < 5) snapped = 5;
         onChange(snapped);
-    };
+    }, [onChange]);
 
-    const pointerDown = (clientX) => { setIsDragging(true); updateFromClientX(clientX); };
-    const onMouseDown = (e) => pointerDown(e.clientX);
-    const onTouchStart = (e) => pointerDown(e.touches[0].clientX);
-    const onMove = (clientX) => { if (isDragging) updateFromClientX(clientX); };
-    const onMouseMove = (e) => onMove(e.clientX);
-    const onTouchMove = (e) => onMove(e.touches[0].clientX);
-    const endDrag = () => setIsDragging(false);
+    const pointerDown = useCallback((clientX) => { setIsDragging(true); updateFromClientX(clientX); }, [updateFromClientX]);
+    const onMouseDown = useCallback((e) => pointerDown(e.clientX), [pointerDown]);
+    const onTouchStart = useCallback((e) => pointerDown(e.touches[0].clientX), [pointerDown]);
+    const onMove = useCallback((clientX) => { if (isDragging) updateFromClientX(clientX); }, [isDragging, updateFromClientX]);
+    const onMouseMove = useCallback((e) => onMove(e.clientX), [onMove]);
+    const onTouchMove = useCallback((e) => onMove(e.touches[0].clientX), [onMove]);
+    const endDrag = useCallback(() => setIsDragging(false), []);
 
     useEffect(() => {
         if (!isDragging) return;
@@ -37,7 +37,7 @@ export const ProbabilitySlider = ({ value, onChange, theme, showLabel = true }) 
             window.removeEventListener('touchmove', onTouchMove);
             window.removeEventListener('touchend', endDrag);
         };
-    }, [isDragging]);
+    }, [isDragging, onMouseMove, onTouchMove, endDrag]);
 
     const safeValue = typeof value === 'number' ? Math.max(5, Math.min(100, value)) : 50;
 

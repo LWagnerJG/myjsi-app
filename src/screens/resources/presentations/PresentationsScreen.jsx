@@ -25,7 +25,7 @@ export const PresentationsScreen = ({ theme }) => {
   const presentations = PRESENTATIONS_DATA;
   const categories = useMemo(()=>['all', ...PRESENTATION_CATEGORIES], []);
 
-  useLayoutEffect(()=>{ if(infoRef.current) setInfoHeight(infoRef.current.scrollHeight); }, [infoRef.current]);
+  useLayoutEffect(()=>{ if(infoRef.current) setInfoHeight(infoRef.current.scrollHeight); }, []);
 
   useEffect(()=>{ const el = listRef.current; if(!el) return; const onScroll=()=> setShowInfo(el.scrollTop < 40); el.addEventListener('scroll', onScroll); return ()=> el.removeEventListener('scroll', onScroll); },[]);
 
@@ -35,7 +35,7 @@ export const PresentationsScreen = ({ theme }) => {
   const filtered = useMemo(()=> presentations.filter(p => { const catOk = selectedCategory==='all'|| p.category===selectedCategory; if(!catOk) return false; if(!search.trim()) return true; const t=search.toLowerCase(); return p.title.toLowerCase().includes(t)|| p.description.toLowerCase().includes(t)|| p.category.toLowerCase().includes(t); }), [presentations, selectedCategory, search]);
 
   const downloadMock = (p) => { const a=document.createElement('a'); a.href=MOCK_PRESENTATION_PDF_BASE64; a.download=p.title.replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'.pdf'; document.body.appendChild(a); a.click(); a.remove(); };
-  const sharePresentation = async (p) => { const text=`${p.title} � ${p.description}`; if(navigator.share){ try { await navigator.share({ title:p.title, text }); } catch(_){} } else { navigator.clipboard.writeText(text); alert('Link copied'); } };
+  const sharePresentation = async (p) => { const text=`${p.title} � ${p.description}`; if(navigator.share){ try { await navigator.share({ title:p.title, text }); } catch(_) { /* no-op */ } } else { navigator.clipboard.writeText(text); alert('Link copied'); } };
 
   const SlideCarousel = ({ pres }) => { const [idx,setIdx] = useState(0); const slides = pres.slides || []; if(!slides.length) return null; const next = () => setIdx(i=>(i+1)%slides.length); const prev = () => setIdx(i=>(i-1+slides.length)%slides.length); const current = slides[idx]; return (
     <div className="relative group" aria-label={`${pres.title} slide preview`}>

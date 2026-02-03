@@ -1,11 +1,11 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { useDropdownPosition } from '../../ui';
 
 export function CustomSelect({ label, value, onChange, options, placeholder, theme, onOpen }) {
     const [isOpen, setIsOpen] = useState(false);
     const wrapperRef = React.useRef(null);
-    const [dropDirection, checkPosition] = useDropdownPosition(wrapperRef);
+    const [, checkPosition] = useDropdownPosition(wrapperRef);
 
     // close on outside click
     React.useEffect(() => {

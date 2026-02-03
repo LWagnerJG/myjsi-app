@@ -14,7 +14,6 @@ import { HomeScreen } from '../screens/home/HomeScreen.jsx';
 import { SettingsScreen } from '../screens/settings/index.js';
 import { ResourceDetailScreen } from '../screens/utility/UtilityScreens.jsx';
 import { CommunityLibraryLayout } from '../screens/home/CommunityLibraryLayout.jsx';
-import { NewDealerSignUpScreen } from '../screens/resources/new-dealer-signup/index.js';
 
 // NOTE:
 // Feature resource detail routes (e.g. 'lead-times', 'commission-rates', etc.) are now handled lazily
@@ -42,7 +41,7 @@ export const SCREEN_MAP = {
   'add-new-install': AddNewInstallScreen,
   'product-comparison': ProductComparisonScreen,
   'competitive-analysis': CompetitiveAnalysisScreen,
-  'new-dealer-signup': NewDealerSignUpScreen,
+  // 'new-dealer-signup' is lazy-loaded in App.jsx
 };
 
 export {
@@ -59,5 +58,4 @@ export {
   CommissionsScreen,
   CommunityScreen,
   CreateContentModal,
-  NewDealerSignUpScreen,
 };

@@ -119,8 +119,9 @@ export const CommissionsScreen = ({ theme }) => {
                     </div>
                 </GlassCard>
             </div>
+        </div>
 
-            <div className="flex-1 overflow-y-auto scrollbar-hide">
+        <div className="flex-1 overflow-y-auto scrollbar-hide">
                 <div className="px-4 pb-6 space-y-3">
                     {monthlyData.map((check) => {
                         const isOpen = expanded === check.id;
