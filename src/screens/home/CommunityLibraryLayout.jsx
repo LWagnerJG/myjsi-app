@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { LibraryGrid } from '../library/LibraryGrid.jsx';
 import { CommunityScreen } from '../community/CommunityScreen.jsx';
 import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
+import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 
 export const CommunityLibraryLayout = ({
   theme,
@@ -33,6 +34,11 @@ export const CommunityLibraryLayout = ({
   // Animation helper styles
   const paneTransition = prefersReducedMotion ? 'none' : 'opacity 240ms ease, transform 240ms ease';
 
+  const tabOptions = [
+    { value: 'community', label: 'Community' },
+    { value: 'library', label: 'Library' }
+  ];
+
   return (
     <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
       {/* Header controls - fixed below app header */}
@@ -40,25 +46,14 @@ export const CommunityLibraryLayout = ({
         {/* Segmented toggle + Post CTA */}
         <div className="px-4 sm:px-6 lg:px-8 pt-1 pb-1 w-full">
           <div className="max-w-5xl mx-auto w-full flex gap-4 items-center">
-            <div className="relative flex flex-[3] rounded-full border overflow-hidden h-12 shadow-sm" style={{ borderColor: theme.colors.border, background: '#ffffff' }}>
-              {/* animated background indicator */}
-              <div aria-hidden="true" style={{ position:'absolute', top:4, bottom:4, left: activeTab==='community'?4:'50%', width:'calc(50% - 8px)', borderRadius:9999, background: theme.colors.accent, transition: prefersReducedMotion? 'none':'left 240ms cubic-bezier(.3,1,.3,1)' }} />
-              <button
-                onClick={()=>switchTab('community')}
-                className="flex-1 h-full px-6 text-sm font-semibold flex items-center justify-center relative"
-                style={{ color: activeTab==='community'? '#ffffff' : theme.colors.textPrimary, transition:'color 160ms ease' }}
-                aria-pressed={activeTab==='community'}
-              >
-                Community
-              </button>
-              <button
-                onClick={()=>switchTab('library')}
-                className="flex-1 h-full px-6 text-sm font-semibold flex items-center justify-center relative"
-                style={{ color: activeTab==='library'? '#ffffff' : theme.colors.textPrimary, transition:'color 160ms ease' }}
-                aria-pressed={activeTab==='library'}
-              >
-                Library
-              </button>
+            <div className="flex-[3]">
+              <SegmentedToggle
+                value={activeTab}
+                onChange={switchTab}
+                options={tabOptions}
+                size="lg"
+                fullWidth
+              />
             </div>
             <button onClick={openCreateContentModal} className="flex-[1.2] h-12 inline-flex items-center justify-center gap-2 rounded-full text-sm font-semibold transition-all hover:-translate-y-0.5 active:translate-y-0 shadow-sm" style={{ backgroundColor: theme.colors.accent, color:'#fff', boxShadow:'0 4px 14px rgba(0,0,0,0.08)' }}>
               + Post

@@ -207,6 +207,22 @@ export const DESIGN_TOKENS = {
     frost34: '34px',
     frost44: '44px',
   },
+
+  // Frost glass button presets
+  frost: {
+    dark: {
+      background: 'rgba(53, 53, 53, 0.65)',
+      color: '#FFFFFF',
+      backdropFilter: 'blur(34px) saturate(180%)',
+      boxShadow: '0 8px 32px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.08) inset',
+    },
+    light: {
+      background: 'rgba(255, 255, 255, 0.75)',
+      color: '#353535',
+      backdropFilter: 'blur(34px) saturate(180%)',
+      boxShadow: '0 8px 32px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,255,255,0.5) inset',
+    },
+  },
 };
 
 // ============================================

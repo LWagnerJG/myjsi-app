@@ -21,6 +21,7 @@ export const FloatingActionButton = ({
   onClick,
   position = 'bottom-right',
   theme,
+  variant = 'solid', // 'solid' | 'frost'
   className = ''
 }) => {
   const positionClasses = {
@@ -28,6 +29,20 @@ export const FloatingActionButton = ({
     'bottom-left': 'fixed bottom-20 left-4 lg:bottom-8 lg:left-8',
     'bottom-center': 'fixed bottom-20 left-1/2 -translate-x-1/2 lg:bottom-8',
     'top-right': 'fixed top-20 right-4 lg:top-8 lg:right-8'
+  };
+
+  const solidStyle = {
+    backgroundColor: theme?.colors?.accent || JSI_COLORS.charcoal,
+    color: JSI_COLORS.white,
+    boxShadow: DESIGN_TOKENS.shadows['2xl'],
+  };
+
+  const frostStyle = {
+    backgroundColor: 'rgba(53, 53, 53, 0.65)',
+    color: JSI_COLORS.white,
+    boxShadow: '0 8px 32px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.08) inset',
+    backdropFilter: 'blur(34px) saturate(180%)',
+    WebkitBackdropFilter: 'blur(34px) saturate(180%)',
   };
 
   return (
@@ -43,11 +58,9 @@ export const FloatingActionButton = ({
         damping: 20
       }}
       onClick={onClick}
-      className={`w-14 h-14 rounded-full flex items-center justify-center shadow-2xl focus:outline-none focus:ring-4 focus:ring-offset-2 ${positionClasses[position]} ${className}`}
+      className={`w-14 h-14 rounded-full flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-offset-2 ${positionClasses[position]} ${className}`}
       style={{
-        backgroundColor: theme?.colors?.accent || JSI_COLORS.charcoal,
-        color: JSI_COLORS.white,
-        boxShadow: DESIGN_TOKENS.shadows['2xl'],
+        ...(variant === 'frost' ? frostStyle : solidStyle),
         zIndex: DESIGN_TOKENS.zIndex.toast,
         focusRingColor: `${theme?.colors?.accent || JSI_COLORS.charcoal}40`
       }}

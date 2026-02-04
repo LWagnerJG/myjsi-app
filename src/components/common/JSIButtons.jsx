@@ -2,6 +2,68 @@ import React from 'react';
 import { DESIGN_TOKENS } from '../../design-system/tokens.js';
 
 /**
+ * JSI Frost Button - Frosted glass CTA button
+ * Used for: Floating actions, prominent CTAs, overlay buttons
+ *
+ * Design Specs (JSI Style Guide):
+ * - Backdrop blur: 34px with saturation boost
+ * - Semi-transparent background (65% opacity)
+ * - Subtle inner glow border
+ * - Pill shape with generous padding
+ */
+export const FrostButton = ({
+    children,
+    onClick,
+    className = '',
+    type = 'button',
+    disabled = false,
+    variant = 'dark', // 'dark' | 'light'
+    size = 'default', // 'default' | 'compact' | 'large'
+    icon = null,
+    ...props
+}) => {
+    const sizeClasses = {
+        compact: 'px-4 py-2.5 text-xs gap-2',
+        default: 'px-5 py-3 text-sm gap-2.5',
+        large: 'px-6 py-4 text-base gap-3'
+    };
+
+    const darkStyle = {
+        backgroundColor: 'rgba(53, 53, 53, 0.65)',
+        color: '#FFFFFF',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.08) inset'
+    };
+
+    const lightStyle = {
+        backgroundColor: 'rgba(255, 255, 255, 0.75)',
+        color: '#353535',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,255,255,0.5) inset'
+    };
+
+    const variantStyle = variant === 'dark' ? darkStyle : lightStyle;
+
+    return (
+        <button
+            type={type}
+            onClick={onClick}
+            disabled={disabled}
+            className={`${sizeClasses[size]} font-semibold rounded-full transition-all duration-200 flex items-center justify-center hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed ${className}`}
+            style={{
+                ...variantStyle,
+                backdropFilter: 'blur(34px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(34px) saturate(180%)',
+                fontFamily: 'Neue Haas Grotesk Display Pro, sans-serif',
+                letterSpacing: '-0.01em'
+            }}
+            {...props}
+        >
+            {icon && <span className="inline-flex">{icon}</span>}
+            {children}
+        </button>
+    );
+};
+
+/**
  * JSI Pill Button - Selection button with pill shape
  * Used for: Stage selection, Vertical selection, Timeframe selection, Competitor selection
  *
