@@ -1,7 +1,6 @@
 // src/screens/samples/SamplesScreen.jsx
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
-import { PillButton } from '../../components/common/JSIButtons.jsx';
 import {
     Package, Plus, ShoppingCart, Trash2, Minus, CheckCircle, Home,
     ChevronUp, ChevronDown, Users, X, Search
@@ -111,40 +110,6 @@ const DirectoryModal = ({ show, onClose, onSelect, theme, dealers = [], designFi
         </div>
     );
 };
-
-/* ====================== Reusable Buttons ====================== */
-// Update buttons for unified elevated style
-const OrderFullSetButton = ({ onClick, theme, inCart }) => (
-    <button
-        onClick={onClick}
-        className={`flex-1 px-3 py-2.5 rounded-full text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 ${inCart ? 'scale-[1.02]' : ''}`}
-        style={{
-            background: inCart ? theme.colors.accent : theme.colors.surface,
-            border: 'none',
-            boxShadow: inCart ? '0 4px 16px rgba(53,53,53,0.25)' : '0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04)',
-            color: inCart ? '#FFFFFF' : theme.colors.textPrimary
-        }}
-    >
-        {inCart && <CheckCircle className="w-3.5 h-3.5" />}
-        <span>Full JSI Set</span>
-    </button>
-);
-
-const AddCompleteSetButton = ({ onClick, theme, inCart, categoryName }) => (
-    <button
-        onClick={onClick}
-        className={`flex-1 px-3 py-2.5 rounded-full text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 ${inCart ? 'scale-[1.02]' : ''}`}
-        style={{
-            background: inCart ? theme.colors.accent : theme.colors.surface,
-            border: 'none',
-            boxShadow: inCart ? '0 4px 16px rgba(53,53,53,0.25)' : '0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04)',
-            color: inCart ? '#FFFFFF' : theme.colors.textPrimary
-        }}
-    >
-        {inCart && <CheckCircle className="w-3.5 h-3.5" />}
-        <span>Complete {categoryName} Set</span>
-    </button>
-);
 
 /* ====================== Drawer Line Item ====================== */
 const DrawerItem = React.memo(({ item, onUpdateCart, theme, isLast = false }) => {
@@ -316,11 +281,64 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
     const allCategories = [...FINISH_CATEGORIES, ...SAMPLE_CATEGORIES.filter((cat) => cat.id !== 'finishes')];
     const cleanName = (name) => String(name || '').split('|')[0].trim();
 
-    const renderProductGrid = (products) => (
+    const renderProductGrid = (products) => {
+        const setId = idOf(`set-${selectedCategory}`);
+        const setQty = cart[setId] || 0;
+        const fullId = idOf('full-jsi-set');
+        const fullQty = cart[fullId] || 0;
+
+        const toggleSet = () => onUpdateCart({ id: setId, name: `Complete ${currentCategoryName} Set`, isSet: true }, setQty > 0 ? -setQty : 1);
+        const toggleFull = () => onUpdateCart({ id: fullId, name: 'Full JSI Sample Set', isSet: true }, fullQty > 0 ? -fullQty : 1);
+
+        return (
         <div
             className="grid gap-3 pb-4"
             style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))' }}
         >
+            {/* Complete Category Set Tile */}
+            <div
+                onClick={toggleSet}
+                className="group relative rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer"
+                style={{
+                    backgroundColor: setQty > 0 ? theme.colors.accent : theme.colors.surface,
+                    boxShadow: setQty > 0 ? '0 4px 16px rgba(0,0,0,0.15)' : '0 2px 10px rgba(0,0,0,0.06)',
+                    border: setQty > 0 ? `2px solid ${theme.colors.accent}` : `1px solid ${theme.colors.border}`,
+                }}
+            >
+                <div className="aspect-[4/3] flex flex-col items-center justify-center gap-2 p-3" style={{ backgroundColor: setQty > 0 ? theme.colors.accent : theme.colors.subtle }}>
+                    <Package className="w-8 h-8" style={{ color: setQty > 0 ? '#FFFFFF' : theme.colors.textSecondary }} />
+                    {setQty > 0 && <CheckCircle className="w-5 h-5" style={{ color: '#FFFFFF' }} />}
+                </div>
+                <div className="px-3 py-2 text-center" style={{ backgroundColor: setQty > 0 ? theme.colors.accent : theme.colors.surface }}>
+                    <p className="text-xs font-semibold" style={{ color: setQty > 0 ? '#FFFFFF' : theme.colors.textPrimary }}>All {currentCategoryName}</p>
+                    <p className="text-[10px] mt-0.5" style={{ color: setQty > 0 ? 'rgba(255,255,255,0.8)' : theme.colors.textSecondary }}>{products.length} finishes</p>
+                </div>
+            </div>
+
+            {/* Full JSI Set Tile */}
+            <div
+                onClick={toggleFull}
+                className="group relative rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer"
+                style={{
+                    backgroundColor: fullQty > 0 ? theme.colors.accent : theme.colors.surface,
+                    boxShadow: fullQty > 0 ? '0 4px 16px rgba(0,0,0,0.15)' : '0 2px 10px rgba(0,0,0,0.06)',
+                    border: fullQty > 0 ? `2px solid ${theme.colors.accent}` : `1px solid ${theme.colors.border}`,
+                }}
+            >
+                <div className="aspect-[4/3] flex flex-col items-center justify-center gap-2 p-3" style={{ backgroundColor: fullQty > 0 ? theme.colors.accent : theme.colors.subtle }}>
+                    <div className="flex -space-x-1">
+                        <Package className="w-6 h-6" style={{ color: fullQty > 0 ? '#FFFFFF' : theme.colors.textSecondary }} />
+                        <Package className="w-6 h-6" style={{ color: fullQty > 0 ? '#FFFFFF' : theme.colors.textSecondary }} />
+                        <Package className="w-6 h-6" style={{ color: fullQty > 0 ? '#FFFFFF' : theme.colors.textSecondary }} />
+                    </div>
+                    {fullQty > 0 && <CheckCircle className="w-5 h-5" style={{ color: '#FFFFFF' }} />}
+                </div>
+                <div className="px-3 py-2 text-center" style={{ backgroundColor: fullQty > 0 ? theme.colors.accent : theme.colors.surface }}>
+                    <p className="text-xs font-semibold" style={{ color: fullQty > 0 ? '#FFFFFF' : theme.colors.textPrimary }}>Full JSI Set</p>
+                    <p className="text-[10px] mt-0.5" style={{ color: fullQty > 0 ? 'rgba(255,255,255,0.8)' : theme.colors.textSecondary }}>All categories</p>
+                </div>
+            </div>
+
             {products.map(product => {
                 const pid = idOf(product.id);
                 const qty = cart[pid] || 0;
@@ -407,31 +425,42 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                 );
             })}
         </div>
-    );
+        );
+    };
 
     return (
         <div className="flex flex-col h-full app-header-offset">
-            {/* Category tabs - compact header */}
-            <div className="flex-shrink-0 px-4 pt-1 pb-2 space-y-2" style={{ background: theme.colors.background }}>
+            {/* Category tabs - underline style */}
+            <div className="flex-shrink-0 px-4 pt-2 pb-0" style={{ background: theme.colors.background }}>
                 <div className="max-w-5xl mx-auto w-full">
                     <div className="relative">
-                        <div className="flex overflow-x-auto scrollbar-hide whitespace-nowrap gap-2 px-1">
-                            {allCategories.map((cat) => (
-                                <PillButton
-                                    key={cat.id}
-                                    isSelected={selectedCategory === cat.id}
-                                    onClick={() => setSelectedCategory(cat.id)}
-                                    theme={theme}
-                                    size="compact"
-                                >
-                                    {cat.name}
-                                </PillButton>
-                            ))}
+                        <div className="flex overflow-x-auto scrollbar-hide whitespace-nowrap gap-1 border-b" style={{ borderColor: theme.colors.border }}>
+                            {allCategories.map((cat) => {
+                                const isActive = selectedCategory === cat.id;
+                                return (
+                                    <button
+                                        key={cat.id}
+                                        onClick={() => setSelectedCategory(cat.id)}
+                                        className="relative px-4 py-2.5 text-sm font-medium transition-all"
+                                        style={{
+                                            color: isActive ? theme.colors.accent : theme.colors.textSecondary,
+                                            background: 'transparent'
+                                        }}
+                                    >
+                                        {cat.name}
+                                        {isActive && (
+                                            <span
+                                                className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full"
+                                                style={{ backgroundColor: theme.colors.accent }}
+                                            />
+                                        )}
+                                    </button>
+                                );
+                            })}
                         </div>
                         {/* Right edge fade */}
-                        <div className="absolute right-0 top-0 bottom-0 w-12 pointer-events-none" style={{ background: `linear-gradient(to left, ${theme.colors.background}, transparent)` }} />
+                        <div className="absolute right-0 top-0 bottom-0 w-16 pointer-events-none" style={{ background: `linear-gradient(to left, ${theme.colors.background}, transparent)` }} />
                     </div>
-                    <div className="flex gap-2 mt-2"><OrderFullSetButton onClick={addFull} theme={theme} inCart={fullSetInCart} /><AddCompleteSetButton onClick={addSet} theme={theme} inCart={setInCartQuantity > 0} categoryName={currentCategoryName} /></div>
                 </div>
             </div>
             {/* Scrollable product grid */}
