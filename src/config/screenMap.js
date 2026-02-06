@@ -1,19 +1,30 @@
-// Core screen component imports (eager)
-import { SalesScreen, CustomerRankingScreen, IncentiveRewardsScreen, CommissionsScreen } from '../screens/sales/index.js';
-import { OrdersScreen } from '../screens/orders/index.js';
-import { ProductsScreen, ProductComparisonScreen, CompetitiveAnalysisScreen } from '../screens/products/index.js';
-import { ResourcesScreen } from '../screens/resources/ResourcesScreen.jsx'; // ResourcesScreen expects homeApps prop (forwarded from App screenProps) to render Core Apps section.
-import { ProjectsScreen, NewLeadScreen, AddNewInstallScreen } from '../screens/projects/index.js';
-import { CommunityScreen, CreateContentModal } from '../screens/community/index.js';
-import { ReplacementsScreen } from '../screens/replacements/ReplacementsScreen.jsx';
-import { FeedbackScreen } from '../screens/feedback/index.js';
-import { MembersScreen } from '../screens/members/index.js';
-import { HelpScreen } from '../screens/help/HelpScreen.jsx';
-import { LogoutScreen } from '../screens/logout/LogoutScreen.jsx';
+import React from 'react';
+
+// Core screen component imports (eager - always needed)
 import { HomeScreen } from '../screens/home/HomeScreen.jsx';
-import { SettingsScreen } from '../screens/settings/index.js';
+import { ResourcesScreen } from '../screens/resources/ResourcesScreen.jsx';
+import { ProjectsScreen, NewLeadScreen, AddNewInstallScreen } from '../screens/projects/index.js';
 import { ResourceDetailScreen } from '../screens/utility/UtilityScreens.jsx';
-import { CommunityLibraryLayout } from '../screens/home/CommunityLibraryLayout.jsx';
+
+// Lazy-loaded primary screens for better code splitting
+const SalesScreen = React.lazy(() => import('../screens/sales/index.js').then(m => ({ default: m.SalesScreen })));
+const CustomerRankingScreen = React.lazy(() => import('../screens/sales/index.js').then(m => ({ default: m.CustomerRankingScreen })));
+const IncentiveRewardsScreen = React.lazy(() => import('../screens/sales/index.js').then(m => ({ default: m.IncentiveRewardsScreen })));
+const CommissionsScreen = React.lazy(() => import('../screens/sales/index.js').then(m => ({ default: m.CommissionsScreen })));
+const OrdersScreen = React.lazy(() => import('../screens/orders/index.js').then(m => ({ default: m.OrdersScreen })));
+const ProductsScreen = React.lazy(() => import('../screens/products/index.js').then(m => ({ default: m.ProductsScreen })));
+const ProductComparisonScreen = React.lazy(() => import('../screens/products/index.js').then(m => ({ default: m.ProductComparisonScreen })));
+const CompetitiveAnalysisScreen = React.lazy(() => import('../screens/products/index.js').then(m => ({ default: m.CompetitiveAnalysisScreen })));
+const CommunityScreen = React.lazy(() => import('../screens/community/index.js').then(m => ({ default: m.CommunityScreen })));
+const CreateContentModal = React.lazy(() => import('../screens/community/index.js').then(m => ({ default: m.CreateContentModal })));
+const CommunityLibraryLayout = React.lazy(() => import('../screens/home/CommunityLibraryLayout.jsx').then(m => ({ default: m.CommunityLibraryLayout })));
+const ReplacementsScreen = React.lazy(() => import('../screens/replacements/ReplacementsScreen.jsx').then(m => ({ default: m.ReplacementsScreen })));
+const FeedbackScreen = React.lazy(() => import('../screens/feedback/index.js').then(m => ({ default: m.FeedbackScreen })));
+const MembersScreen = React.lazy(() => import('../screens/members/index.js').then(m => ({ default: m.MembersScreen })));
+const HelpScreen = React.lazy(() => import('../screens/help/HelpScreen.jsx').then(m => ({ default: m.HelpScreen })));
+const LogoutScreen = React.lazy(() => import('../screens/logout/LogoutScreen.jsx').then(m => ({ default: m.LogoutScreen })));
+const SettingsScreen = React.lazy(() => import('../screens/settings/index.js').then(m => ({ default: m.SettingsScreen })));
+const SamplesScreen = React.lazy(() => import('../screens/samples/index.js').then(m => ({ default: m.SamplesScreen })));
 
 // NOTE:
 // Feature resource detail routes (e.g. 'lead-times', 'commission-rates', etc.) are now handled lazily
@@ -58,4 +69,5 @@ export {
   CommissionsScreen,
   CommunityScreen,
   CreateContentModal,
+  SamplesScreen,
 };

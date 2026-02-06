@@ -141,7 +141,7 @@ export const CreateContentModal = ({ show, onClose, theme, onCreatePost }) => {
                             color: theme.colors.textPrimary,
                             border: `1px solid ${theme.colors.border}`,
                         }}
-                        placeholder={mode === 'poll' ? 'Which finish do you spec most?' : 'Share an update, install, or photo…'}
+                        placeholder={mode === 'poll' ? 'Which finish do you spec most?' : 'Share an update, install, or photoï¿½'}
                     />
                 </div>
 
@@ -212,7 +212,7 @@ export const CreateContentModal = ({ show, onClose, theme, onCreatePost }) => {
                         {files.map((o,idx)=>(
                           <div key={idx} className="relative aspect-square">
                             <img src={o.url} alt={`preview-${idx}`} className="w-full h-full object-cover rounded-[14px] shadow" />
-                            <button type="button" onClick={()=>removeImage(idx)} className="absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full p-1"><X className="w-4 h-4" /></button>
+                            <button type="button" onClick={()=>removeImage(idx)} className="absolute -top-1.5 -right-1.5 rounded-full p-1" style={{ backgroundColor: '#B85C5C', color: 'white' }}><X className="w-4 h-4" /></button>
                           </div>
                         ))}
                       </div>

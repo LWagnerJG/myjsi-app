@@ -70,7 +70,7 @@ const QuickShipModal = ({ isOpen, onClose, seriesName, theme }) => {
                 <button
                     onClick={handleLearnMore}
                     className="w-full py-3 px-4 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
-                    style={{ backgroundColor: '#D4AF37', color: '#FFFFFF' }}
+                    style={{ backgroundColor: theme.colors.quickShip, color: theme.colors.accentText }}
                 >
                     <span>View QuickShip Details</span>
                     <ExternalLink className="w-4 h-4" />

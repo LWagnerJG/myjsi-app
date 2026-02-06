@@ -1,6 +1,7 @@
 // src/screens/samples/SamplesScreen.jsx
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
+import { isDarkTheme } from '../../design-system/tokens.js';
 import {
     Package, Plus, ShoppingCart, Trash2, Minus, CheckCircle, Home,
     ChevronUp, ChevronDown, Users, X, Search
@@ -77,7 +78,7 @@ const DirectoryModal = ({ show, onClose, onSelect, theme, dealers = [], designFi
                 <div className="p-5 space-y-4" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
                     <div className="flex items-center justify-between">
                         <h3 className="font-bold text-base tracking-tight" style={{ color: theme.colors.textPrimary }}>Select Company</h3>
-                        <button onClick={onClose} aria-label="Close" className="p-2 rounded-full hover:bg-black/5 active:scale-95 transition"><X className="w-5 h-5" style={{ color: theme.colors.textSecondary }} /></button>
+                        <button onClick={onClose} aria-label="Close" className="p-2 rounded-full active:scale-95 transition" onMouseEnter={e => e.currentTarget.style.backgroundColor = theme.colors.hoverLight || 'rgba(0,0,0,0.05)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}><X className="w-5 h-5" style={{ color: theme.colors.textSecondary }} /></button>
                     </div>
                     <div className="relative">
                         <input
@@ -85,7 +86,7 @@ const DirectoryModal = ({ show, onClose, onSelect, theme, dealers = [], designFi
                             onChange={(e) => setQ(e.target.value)}
                             placeholder="Search companies..."
                             className="w-full rounded-2xl pl-10 pr-4 py-3 text-sm outline-none border transition focus:ring-2"
-                            style={{ background: '#fff', border: `1px solid ${theme.colors.border}`, color: theme.colors.textPrimary }}
+                            style={{ background: theme.colors.inputBackground, border: `1px solid ${theme.colors.border}`, color: theme.colors.textPrimary }}
                         />
                         <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2" style={{ color: theme.colors.textSecondary }} />
                     </div>
@@ -127,9 +128,9 @@ const DrawerItem = React.memo(({ item, onUpdateCart, theme, isLast = false }) =>
                     {item.code && <p className="text-xs opacity-70" style={{ color: theme.colors.textSecondary }}>{item.code}</p>}
                 </div>
                 <div className="flex items-center gap-1">
-                    <button onClick={dec} className="w-6 h-6 flex items-center justify-center rounded-full active:scale-90">{item.quantity === 1 ? <Trash2 className="w-3 h-3 text-red-500" /> : <Minus className="w-3 h-3" style={{ color: theme.colors.textSecondary }} />}</button>
+                    <button onClick={dec} aria-label={item.quantity === 1 ? 'Remove item' : 'Decrease quantity'} className="w-6 h-6 flex items-center justify-center rounded-full active:scale-90">{item.quantity === 1 ? <Trash2 className="w-3 h-3" style={{ color: '#B85C5C' }} /> : <Minus className="w-3 h-3" style={{ color: theme.colors.textSecondary }} />}</button>
                     <span className="font-bold w-4 text-center text-xs">{item.quantity}</span>
-                    <button onClick={inc} className="w-6 h-6 flex items-center justify-center rounded-full active:scale-90"><Plus className="w-3 h-3" style={{ color: theme.colors.secondary }} /></button>
+                    <button onClick={inc} aria-label="Increase quantity" className="w-6 h-6 flex items-center justify-center rounded-full active:scale-90"><Plus className="w-3 h-3" style={{ color: theme.colors.secondary }} /></button>
                 </div>
             </div>
         </>
@@ -179,7 +180,7 @@ const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, designFi
                     onClick={() => setIsExpanded(true)}
                     className="fixed bottom-6 left-1/2 -translate-x-1/2 z-10 flex items-center gap-3 pl-4 pr-5 py-3 rounded-full shadow-xl transition-all duration-200 active:scale-95"
                     style={{
-                        backgroundColor: 'rgba(53, 53, 53, 0.65)',
+                        backgroundColor: isDarkTheme(theme) ? 'rgba(255, 255, 255, 0.12)' : 'rgba(53, 53, 53, 0.65)',
                         backdropFilter: 'blur(40px) saturate(180%)',
                         WebkitBackdropFilter: 'blur(40px) saturate(180%)',
                         boxShadow: '0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.08) inset'
@@ -225,17 +226,17 @@ const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, designFi
                                 <div className="flex items-center justify-between mb-3">
                                     <h3 className="font-bold text-[13px] tracking-wide" style={{ color: theme.colors.textPrimary, letterSpacing: '.5px' }}>Ship To</h3>
                                     <div className="flex items-center gap-2">
-                                        <button onClick={() => setShowDir(true)} className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full active:scale-95 border transition-all" style={{ background:'#FFFFFF', borderColor: theme.colors.border, color: theme.colors.textPrimary }}><Users className="w-3.5 h-3.5" style={{ color: theme.colors.secondary }} />Directory</button>
-                                        <button onClick={() => { safeSetShipTo('Home'); safeSetAddress1(userSettings?.homeAddress || ''); safeSetAddress2(''); }} className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full active:scale-95 border transition-all" style={{ background:'#FFFFFF', borderColor: theme.colors.border, color: theme.colors.textPrimary }}><Home className="w-3.5 h-3.5" style={{ color: theme.colors.secondary }} />Home</button>
+                                        <button onClick={() => setShowDir(true)} className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full active:scale-95 border transition-all" style={{ background: theme.colors.inputBackground, borderColor: theme.colors.border, color: theme.colors.textPrimary }}><Users className="w-3.5 h-3.5" style={{ color: theme.colors.secondary }} />Directory</button>
+                                        <button onClick={() => { safeSetShipTo('Home'); safeSetAddress1(userSettings?.homeAddress || ''); safeSetAddress2(''); }} className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full active:scale-95 border transition-all" style={{ background: theme.colors.inputBackground, borderColor: theme.colors.border, color: theme.colors.textPrimary }}><Home className="w-3.5 h-3.5" style={{ color: theme.colors.secondary }} />Home</button>
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <input value={shipToName || ''} onChange={(e) => safeSetShipTo(e.target.value)} placeholder="Recipient / Company" className="w-full rounded-2xl px-4 py-3 text-sm outline-none border" style={{ background: '#FFFFFF', borderColor: theme.colors.border, color: theme.colors.textPrimary }} />
-                                    <input value={address1 || ''} onChange={(e) => safeSetAddress1(e.target.value)} placeholder="Address line 1" className="w-full rounded-2xl px-4 py-3 text-sm outline-none border" style={{ background: '#FFFFFF', borderColor: theme.colors.border, color: theme.colors.textPrimary }} />
-                                    <input value={address2 || ''} onChange={(e) => safeSetAddress2(e.target.value)} placeholder="Address line 2 (optional)" className="w-full rounded-2xl px-4 py-3 text-sm outline-none border" style={{ background: '#FFFFFF', borderColor: theme.colors.border, color: theme.colors.textPrimary }} />
+                                    <input value={shipToName || ''} onChange={(e) => safeSetShipTo(e.target.value)} placeholder="Recipient / Company" className="w-full rounded-2xl px-4 py-3 text-sm outline-none border" style={{ background: theme.colors.inputBackground, borderColor: theme.colors.border, color: theme.colors.textPrimary }} />
+                                    <input value={address1 || ''} onChange={(e) => safeSetAddress1(e.target.value)} placeholder="Address line 1" className="w-full rounded-2xl px-4 py-3 text-sm outline-none border" style={{ background: theme.colors.inputBackground, borderColor: theme.colors.border, color: theme.colors.textPrimary }} />
+                                    <input value={address2 || ''} onChange={(e) => safeSetAddress2(e.target.value)} placeholder="Address line 2 (optional)" className="w-full rounded-2xl px-4 py-3 text-sm outline-none border" style={{ background: theme.colors.inputBackground, borderColor: theme.colors.border, color: theme.colors.textPrimary }} />
                                 </div>
                             </div>
-                            <button disabled={!canSubmit} onClick={submit} className="w-full px-5 py-4 rounded-full text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 shadow-md disabled:opacity-50 disabled:cursor-not-allowed" style={{ backgroundColor: canSubmit ? theme.colors.accent : theme.colors.border, color: canSubmit ? '#fff' : theme.colors.textSecondary }}>Submit Sample Request</button>
+                            <button disabled={!canSubmit} onClick={submit} className="w-full px-5 py-4 rounded-full text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 shadow-md disabled:opacity-50 disabled:cursor-not-allowed" style={{ backgroundColor: canSubmit ? theme.colors.accent : theme.colors.border, color: canSubmit ? theme.colors.accentText : theme.colors.textSecondary }}>Submit Sample Request</button>
                         </div>
                     </div>
                 </div>
@@ -270,13 +271,8 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
     const [selectedCategory, setSelectedCategory] = useState('tfl');
     const totalCartItems = useMemo(() => Object.values(cart).reduce((s, q) => s + q, 0), [cart]);
 
-    const addSet = useCallback(() => { const cat = FINISH_CATEGORIES.find((c) => c.id === selectedCategory) || SAMPLE_CATEGORIES.find((c) => c.id === selectedCategory); const categoryName = cat?.name || 'Unknown'; const key = `set-${selectedCategory}`; const id = idOf(key); const currentQty = cart[id] || 0; onUpdateCart({ id, name: `Complete ${categoryName} Set` }, currentQty > 0 ? -currentQty : 1); }, [selectedCategory, onUpdateCart, cart]);
-    const addFull = useCallback(() => { const id = idOf('full-jsi-set'); const currentQty = cart[id] || 0; onUpdateCart({ id, name: 'Full JSI Sample Set' }, currentQty > 0 ? -currentQty : 1); }, [onUpdateCart, cart]);
-
     const filteredProducts = useMemo(() => { const isFinish = FINISH_CATEGORIES.some((cat) => cat.id === selectedCategory); const base = isFinish ? FINISH_SAMPLES.filter((s) => s.category === selectedCategory) : SAMPLE_PRODUCTS.filter((p) => p.category === selectedCategory && !p.subcategory); if (selectedCategory === 'tfl') { const order = ['woodgrain', 'stone', 'metallic', 'solid']; return base.sort((a, b) => (order.indexOf(a.finishType || 'solid') - order.indexOf(b.finishType || 'solid')) || a.name.localeCompare(b.name)); } return base; }, [selectedCategory]);
 
-    const setInCartQuantity = cart[idOf(`set-${selectedCategory}`)] || 0;
-    const fullSetInCart = (cart[idOf('full-jsi-set')] || 0) > 0;
     const currentCategoryName = FINISH_CATEGORIES.find((c) => c.id === selectedCategory)?.name || SAMPLE_CATEGORIES.find((c) => c.id === selectedCategory)?.name || 'Unknown';
     const allCategories = [...FINISH_CATEGORIES, ...SAMPLE_CATEGORIES.filter((cat) => cat.id !== 'finishes')];
     const cleanName = (name) => String(name || '').split('|')[0].trim();
@@ -306,11 +302,11 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                 }}
             >
                 <div className="aspect-[4/3] flex flex-col items-center justify-center gap-2 p-3" style={{ backgroundColor: setQty > 0 ? theme.colors.accent : theme.colors.subtle }}>
-                    <Package className="w-8 h-8" style={{ color: setQty > 0 ? '#FFFFFF' : theme.colors.textSecondary }} />
-                    {setQty > 0 && <CheckCircle className="w-5 h-5" style={{ color: '#FFFFFF' }} />}
+                    <Package className="w-8 h-8" style={{ color: setQty > 0 ? theme.colors.accentText : theme.colors.textSecondary }} />
+                    {setQty > 0 && <CheckCircle className="w-5 h-5" style={{ color: theme.colors.accentText }} />}
                 </div>
                 <div className="px-3 py-2 text-center" style={{ backgroundColor: setQty > 0 ? theme.colors.accent : theme.colors.surface }}>
-                    <p className="text-xs font-semibold" style={{ color: setQty > 0 ? '#FFFFFF' : theme.colors.textPrimary }}>All {currentCategoryName}</p>
+                    <p className="text-xs font-semibold" style={{ color: setQty > 0 ? theme.colors.accentText : theme.colors.textPrimary }}>All {currentCategoryName}</p>
                     <p className="text-[10px] mt-0.5" style={{ color: setQty > 0 ? 'rgba(255,255,255,0.8)' : theme.colors.textSecondary }}>{products.length} finishes</p>
                 </div>
             </div>
@@ -327,14 +323,14 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
             >
                 <div className="aspect-[4/3] flex flex-col items-center justify-center gap-2 p-3" style={{ backgroundColor: fullQty > 0 ? theme.colors.accent : theme.colors.subtle }}>
                     <div className="flex -space-x-1">
-                        <Package className="w-6 h-6" style={{ color: fullQty > 0 ? '#FFFFFF' : theme.colors.textSecondary }} />
-                        <Package className="w-6 h-6" style={{ color: fullQty > 0 ? '#FFFFFF' : theme.colors.textSecondary }} />
-                        <Package className="w-6 h-6" style={{ color: fullQty > 0 ? '#FFFFFF' : theme.colors.textSecondary }} />
+                        <Package className="w-6 h-6" style={{ color: fullQty > 0 ? theme.colors.accentText : theme.colors.textSecondary }} />
+                        <Package className="w-6 h-6" style={{ color: fullQty > 0 ? theme.colors.accentText : theme.colors.textSecondary }} />
+                        <Package className="w-6 h-6" style={{ color: fullQty > 0 ? theme.colors.accentText : theme.colors.textSecondary }} />
                     </div>
-                    {fullQty > 0 && <CheckCircle className="w-5 h-5" style={{ color: '#FFFFFF' }} />}
+                    {fullQty > 0 && <CheckCircle className="w-5 h-5" style={{ color: theme.colors.accentText }} />}
                 </div>
                 <div className="px-3 py-2 text-center" style={{ backgroundColor: fullQty > 0 ? theme.colors.accent : theme.colors.surface }}>
-                    <p className="text-xs font-semibold" style={{ color: fullQty > 0 ? '#FFFFFF' : theme.colors.textPrimary }}>Full JSI Set</p>
+                    <p className="text-xs font-semibold" style={{ color: fullQty > 0 ? theme.colors.accentText : theme.colors.textPrimary }}>Full JSI Set</p>
                     <p className="text-[10px] mt-0.5" style={{ color: fullQty > 0 ? 'rgba(255,255,255,0.8)' : theme.colors.textSecondary }}>All categories</p>
                 </div>
             </div>
@@ -343,7 +339,7 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                 const pid = idOf(product.id);
                 const qty = cart[pid] || 0;
                 const hasImage = !!product.image;
-                const bg = hasImage ? theme.colors.subtle : (product.color || '#E5E7EB');
+                const bg = hasImage ? theme.colors.subtle : (product.color || theme.colors.subtle);
                 const addOne = (e) => { if (e) e.stopPropagation(); onUpdateCart({ ...product, id: pid }, 1); };
                 const removeOne = (e) => { if (e) e.stopPropagation(); onUpdateCart({ ...product, id: pid }, -1); };
 
@@ -362,7 +358,7 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                         {qty > 0 && (
                             <div
                                 className="absolute top-2 left-2 z-10 min-w-[28px] h-7 px-2 rounded-full text-sm font-bold flex items-center justify-center shadow-md"
-                                style={{ backgroundColor: theme.colors.accent, color: '#FFFFFF' }}
+                                style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
                             >
                                 {qty}
                             </div>
@@ -396,14 +392,14 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                                         type="button"
                                         onClick={removeOne}
                                         className="w-8 h-8 rounded-full flex items-center justify-center active:scale-90 transition-all"
-                                        style={{ 
-                                            backgroundColor: qty === 1 ? '#FEE2E2' : '#F3F4F6',
-                                            border: qty === 1 ? '1px solid #FECACA' : `1px solid ${theme.colors.border}`
+                                        style={{
+                                            backgroundColor: qty === 1 ? theme.colors.destructiveLight : theme.colors.subtle,
+                                            border: qty === 1 ? `1px solid ${theme.colors.destructiveBorder}` : `1px solid ${theme.colors.border}`
                                         }}
                                         aria-label={qty === 1 ? `Remove ${product.name}` : `Decrease ${product.name} quantity`}
                                     >
                                         {qty === 1 ? (
-                                            <Trash2 className="w-4 h-4 text-red-500" />
+                                            <Trash2 className="w-4 h-4" style={{ color: '#B85C5C' }} />
                                         ) : (
                                             <Minus className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
                                         )}
@@ -414,7 +410,7 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                                     type="button"
                                     onClick={addOne}
                                     className="w-8 h-8 rounded-full flex items-center justify-center active:scale-95 border"
-                                    style={{ borderColor: theme.colors.border, backgroundColor: '#FFFFFF' }}
+                                    style={{ borderColor: theme.colors.border, backgroundColor: theme.colors.inputBackground }}
                                     aria-label={`Add ${product.name}`}
                                 >
                                     <Plus className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />

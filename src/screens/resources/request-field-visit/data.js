@@ -10,8 +10,8 @@ export const VISIT_TYPES = [
 
 export const URGENCY_LEVELS = [
     { value: 'low', label: 'Low - General support', color: '#10B981' },
-    { value: 'medium', label: 'Medium - Issue affecting use', color: '#F59E0B' },
-    { value: 'high', label: 'High - Critical issue', color: '#EF4444' }
+    { value: 'medium', label: 'Medium - Issue affecting use', color: '#C4956A' },
+    { value: 'high', label: 'High - Critical issue', color: '#B85C5C' }
 ];
 
 export const FIELD_VISIT_REQUIREMENTS = {
@@ -47,9 +47,9 @@ export const SAMPLE_VISIT_DATA = [
 ];
 
 export const VISIT_STATUS_COLORS = {
-    'Scheduled': '#3B82F6',
-    'In Progress': '#F59E0B', 
+    'Scheduled': '#5B7B8C',
+    'In Progress': '#C4956A', 
     'Completed': '#10B981',
-    'Cancelled': '#EF4444',
-    'Rescheduled': '#8B5CF6'
+    'Cancelled': '#B85C5C',
+    'Rescheduled': '#5B7B8C'
 };

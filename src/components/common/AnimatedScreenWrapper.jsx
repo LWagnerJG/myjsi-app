@@ -144,10 +144,26 @@ export const AnimatedScreenWrapper = ({
         };
     }, [onTouchStart, onTouchMove, onTouchEnd, onSwipeBack]);
 
+    // Focus management for screen reader accessibility
+    useEffect(() => {
+        if (animating) return;
+        // After transition completes, move focus to the new screen content
+        const root = containerRef.current;
+        const content = root?.querySelector('[data-role="current"] .panel-content');
+        if (content) {
+            // Find the first heading or focusable element within the new screen
+            const focusTarget = content.querySelector('h1, h2, h3, h4, [data-autofocus], [tabindex="-1"]');
+            if (focusTarget) {
+                focusTarget.setAttribute('tabindex', '-1');
+                focusTarget.focus({ preventScroll: true });
+            }
+        }
+    }, [animating, currentKey]);
+
     return (
-        <div ref={containerRef} className="animated-screen-container">
+        <div ref={containerRef} className="animated-screen-container" role="main" aria-live="polite">
             {prevNode && (
-                <div data-role="previous" className="panel">
+                <div data-role="previous" className="panel" aria-hidden="true">
                     {prevNode}
                 </div>
             )}

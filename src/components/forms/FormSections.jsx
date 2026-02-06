@@ -9,7 +9,6 @@ export const FormSection = ({ title, children, theme, className = '' }) => (
             style={{
                 color: theme.colors.textPrimary,
                 borderColor: theme.colors.border,
-                fontFamily: 'Neue Haas Grotesk Display Pro, sans-serif',
                 letterSpacing: '-0.02em',
                 lineHeight: 1.2
             }}
@@ -30,7 +29,6 @@ export const SettingsRow = ({ label, children, isFirst = false, theme, className
                 className="font-semibold text-base"
                 style={{
                     color: theme.colors.textPrimary,
-                    fontFamily: 'Neue Haas Grotesk Display Pro, sans-serif',
                     letterSpacing: '-0.01em'
                 }}
             >

@@ -6,9 +6,10 @@ import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { HomeSearchInput } from '../../components/common/SearchInput.jsx';
 import { QuickActionDropdown } from '../../components/common/QuickActionDropdown.jsx';
 import { RequestQuoteModal } from '../../components/common/RequestQuoteModal.jsx';
-import { DESIGN_TOKENS } from '../../design-system/tokens.js';
-import { Check, Plus, X, Settings as SettingsIcon, GripVertical, Lock, Paperclip, MessageCircle } from 'lucide-react';
+import { DESIGN_TOKENS, isDarkTheme } from '../../design-system/tokens.js';
+import { Check, Plus, X, Settings as SettingsIcon, GripVertical, Lock, Paperclip, MessageCircle, Megaphone, Package, Calendar, DollarSign, Zap, ChevronRight } from 'lucide-react';
 import { LEAD_TIMES_DATA } from '../resources/lead-times/data.js';
+import { ANNOUNCEMENTS } from '../community/data.js';
 import { motion } from 'framer-motion';
 import {
     DndContext,
@@ -71,7 +72,7 @@ const getCommunityTextSafe = (post) => {
     return 'New update available';
 };
 
-const SortableAppTile = ({ id, app, colors, onRemove, isRemoveDisabled = false, isRemoveLocked = false, isOverlay = false }) => {
+const SortableAppTile = React.memo(({ id, app, colors, onRemove, isRemoveDisabled = false, isRemoveLocked = false, isOverlay = false }) => {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
         id,
         animateLayoutChanges: (args) => {
@@ -119,7 +120,8 @@ const SortableAppTile = ({ id, app, colors, onRemove, isRemoveDisabled = false, 
                         e.stopPropagation();
                         if (!isRemoveDisabled) onRemove(app.route);
                     }}
-                    className={`absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full text-white flex items-center justify-center shadow-md z-10 transition-all ${isRemoveDisabled ? 'bg-gray-300 cursor-not-allowed' : 'bg-red-500 hover:bg-red-600 hover:scale-110'}`}
+                    className={`absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full text-white flex items-center justify-center shadow-md z-10 transition-all ${isRemoveDisabled ? 'bg-gray-300 cursor-not-allowed' : 'hover:scale-110'}`}
+                    style={!isRemoveDisabled ? { backgroundColor: '#B85C5C' } : undefined}
                     aria-label="Remove app"
                     aria-disabled={isRemoveDisabled}
                 >
@@ -153,7 +155,7 @@ const SortableAppTile = ({ id, app, colors, onRemove, isRemoveDisabled = false, 
             </span>
         </div>
     );
-};
+});
 
 export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpdateHomeApps, homeResetKey, posts }) => {
     const [isEditMode, setIsEditMode] = useState(false);
@@ -195,6 +197,7 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
     }, [onNavigate]);
 
     // Safe theme color extraction with fallbacks
+    const isDark = isDarkTheme(theme);
     const colors = useMemo(() => ({
         background: theme?.colors?.background || '#F0EDE8',
         surface: theme?.colors?.surface || '#FFFFFF',
@@ -297,10 +300,34 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
             clearTimeout(botReplyTimeoutRef.current);
         }
         setIsBotThinking(true);
+
+        // Generate contextual reply based on query content
+        const lower = trimmed.toLowerCase();
+        let reply = '';
+        if (lower.includes('lead time') || lower.includes('leadtime')) {
+            reply = 'You can check current lead times under Resources → Lead Times. Most standard series ship in 4-6 weeks, and Quick Ship items are available in 10 business days.';
+        } else if (lower.includes('order') || lower.includes('po ')) {
+            reply = 'You can track all your orders from the Orders screen. Use the search bar to find a specific PO number, or filter by status.';
+        } else if (lower.includes('sample')) {
+            reply = 'Head to the Samples screen to browse and request product samples. You can add items to your cart and submit a request.';
+        } else if (lower.includes('commission') || lower.includes('rate')) {
+            reply = 'Commission rate information is available under Resources → Commission Rates. Rates vary by product category and dealer tier.';
+        } else if (lower.includes('product') || lower.includes('finish') || lower.includes('fabric')) {
+            reply = 'Check out the Products screen to browse all JSI product lines, finishes, and fabrics. You can compare products side-by-side too.';
+        } else if (lower.includes('project') || lower.includes('lead') || lower.includes('pipeline')) {
+            reply = 'Your project pipeline is in the Projects screen. You can add new leads, track existing projects, and manage installs there.';
+        } else if (lower.includes('help') || lower.includes('support')) {
+            reply = 'For support, visit the Help screen or submit feedback through the Feedback form. You can also contact your JSI rep directly.';
+        } else if (lower.includes('hello') || lower.includes('hi') || lower.includes('hey')) {
+            reply = 'Hello! I\'m Elliott, your JSI assistant. How can I help you today? I can help with orders, lead times, products, samples, and more.';
+        } else {
+            reply = `I can help with that! Here are some things I can assist with:\n\n• **Orders** — Track POs and shipments\n• **Lead Times** — Check current production schedules\n• **Products** — Browse finishes, fabrics, and specs\n• **Samples** — Request product samples\n• **Projects** — Manage your pipeline\n\nTry asking me about any of these topics!`;
+        }
+
         botReplyTimeoutRef.current = setTimeout(() => {
             setChatMessages((prev) => ([
                 ...prev,
-                { id: `a-${now}`, role: 'assistant', text: 'Test received.' }
+                { id: `a-${now}`, role: 'assistant', text: reply }
             ]));
             setIsBotThinking(false);
         }, 700);
@@ -313,6 +340,16 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
             }
         };
     }, []);
+
+    // Escape key to close chat
+    useEffect(() => {
+        if (!isChatOpen) return;
+        const handleEscape = (e) => {
+            if (e.key === 'Escape') setIsChatOpen(false);
+        };
+        document.addEventListener('keydown', handleEscape);
+        return () => document.removeEventListener('keydown', handleEscape);
+    }, [isChatOpen]);
 
     const openChatFromQuery = useCallback((query) => {
         const trimmed = query?.trim();
@@ -388,10 +425,12 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
         return now.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
     }, []);
 
-    const latestCommunityPost = useMemo(() => {
-        if (!Array.isArray(posts) || posts.length === 0) return null;
-        return posts[0];
+    const communityPosts = useMemo(() => {
+        if (!Array.isArray(posts) || posts.length === 0) return [];
+        return posts.slice(0, 3);
     }, [posts]);
+
+    const latestCommunityPost = communityPosts[0] || null;
 
 
     const homeFeatureOptions = useMemo(() => ([
@@ -417,30 +456,41 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
         if (mode === 'community') {
             return (
                 <div className="space-y-3">
-                    {latestCommunityPost ? (
-                        <button
-                            onClick={() => {
-                                onNavigate('community');
-                                onNavigate(`community/post/${latestCommunityPost.id}`);
-                            }}
-                            className="w-full p-4 rounded-2xl text-left hover:bg-black/[0.03] transition-colors"
-                            style={{ border: `1px solid ${colors.border}` }}
-                        >
-                            {(() => {
-                                const image = latestCommunityPost.image || (Array.isArray(latestCommunityPost.images) ? latestCommunityPost.images[0] : null);
-                                return image ? (
-                                    <div className="mb-3 rounded-xl overflow-hidden">
-                                        <img src={image} alt="Community" className="w-full h-40 object-cover" />
+                    {communityPosts.length > 0 ? (
+                        communityPosts.map((post) => (
+                            <button
+                                key={post.id}
+                                onClick={() => {
+                                    onNavigate(`community/post/${post.id}`);
+                                }}
+                                className={`w-full p-3 rounded-2xl text-left ${hoverBg} transition-colors`}
+                                style={{ border: `1px solid ${colors.border}` }}
+                            >
+                                <div className="flex items-start gap-3">
+                                    {(() => {
+                                        const image = post.image || (Array.isArray(post.images) ? post.images[0] : null);
+                                        return image ? (
+                                            <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0">
+                                                <img src={image} alt="Community" className="w-full h-full object-cover" />
+                                            </div>
+                                        ) : null;
+                                    })()}
+                                    <div className="flex-1 min-w-0">
+                                        <div className="text-sm font-semibold" style={{ color: colors.textPrimary }}>
+                                            {getCommunityAuthorSafe(post)}
+                                        </div>
+                                        <div className="text-xs line-clamp-2 mt-0.5" style={{ color: colors.textSecondary }}>
+                                            {getCommunityTextSafe(post)}
+                                        </div>
+                                        {post.timeAgo && (
+                                            <div className="text-[10px] mt-1 opacity-50" style={{ color: colors.textSecondary }}>
+                                                {post.timeAgo}
+                                            </div>
+                                        )}
                                     </div>
-                                ) : null;
-                            })()}
-                            <div className="text-sm font-semibold" style={{ color: colors.textPrimary }}>
-                                {getCommunityAuthorSafe(latestCommunityPost)}
-                            </div>
-                            <div className="text-xs" style={{ color: colors.textSecondary }}>
-                                {getCommunityTextSafe(latestCommunityPost)}
-                            </div>
-                        </button>
+                                </div>
+                            </button>
+                        ))
                     ) : (
                         <div className="text-sm" style={{ color: colors.textSecondary }}>
                             No community posts yet.
@@ -458,7 +508,7 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                             <button
                                 key={`${item.series}-${item.type}`}
                                 onClick={() => onNavigate('resources/lead-times')}
-                                className="w-full flex items-center justify-between p-3 rounded-2xl hover:bg-black/[0.03] transition-colors"
+                                className={`w-full flex items-center justify-between p-3 rounded-2xl ${hoverBg} transition-colors`}
                             >
                                 <div className="text-left">
                                     <div className="text-sm font-semibold" style={{ color: colors.textPrimary }}>{item.series}</div>
@@ -477,14 +527,31 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
         }
 
         if (mode === 'announcements') {
+            const ANN_ICONS = { 'product-launch': Package, 'pricing': DollarSign, 'event': Calendar, 'operations': Zap };
+            const ANN_COLORS = { 'product-launch': '#4A7C59', 'pricing': '#5B7B8C', 'event': '#C4956A', 'operations': '#353535' };
             return (
-                <div className="space-y-3">
-                    <div className="p-4 rounded-2xl" style={{ border: `1px solid ${colors.border}` }}>
-                        <div className="text-sm font-semibold" style={{ color: colors.textPrimary }}>JSI Updates</div>
-                        <div className="text-xs" style={{ color: colors.textSecondary }}>
-                            New announcements and updates will appear here.
-                        </div>
-                    </div>
+                <div className="space-y-2">
+                    {ANNOUNCEMENTS.slice(0, 3).map((ann) => {
+                        const Icon = ANN_ICONS[ann.category] || Megaphone;
+                        const accentColor = ANN_COLORS[ann.category] || '#353535';
+                        return (
+                            <button
+                                key={ann.id}
+                                onClick={() => ann.actionRoute ? onNavigate(ann.actionRoute) : onNavigate('community')}
+                                className={`w-full flex items-start gap-3 p-3 rounded-2xl text-left ${hoverBg} transition-colors`}
+                                style={{ border: `1px solid ${colors.border}`, borderLeft: `3px solid ${accentColor}` }}
+                            >
+                                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${accentColor}15`, color: accentColor }}>
+                                    <Icon className="w-3.5 h-3.5" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <div className="text-sm font-semibold truncate" style={{ color: colors.textPrimary }}>{ann.title}</div>
+                                    <div className="text-[10px] mt-0.5 line-clamp-1" style={{ color: colors.textSecondary }}>{ann.subtitle || ann.text}</div>
+                                </div>
+                                <ChevronRight className="w-3.5 h-3.5 mt-1 flex-shrink-0 opacity-30" style={{ color: colors.textSecondary }} />
+                            </button>
+                        );
+                    })}
                 </div>
             );
         }
@@ -492,7 +559,7 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
         if (mode === 'products') {
             return (
                 <div className="space-y-3">
-                    <button onClick={() => onNavigate('products')} className="w-full p-4 rounded-2xl text-left hover:bg-black/[0.03] transition-colors" style={{ border: `1px solid ${colors.border}` }}>
+                    <button onClick={() => onNavigate('products')} className={`w-full p-4 rounded-2xl text-left ${hoverBg} transition-colors`} style={{ border: `1px solid ${colors.border}` }}>
                         <div className="text-sm font-semibold" style={{ color: colors.textPrimary }}>Browse Products</div>
                         <div className="text-xs" style={{ color: colors.textSecondary }}>Explore finishes and specs</div>
                     </button>
@@ -503,7 +570,7 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
         if (mode === 'projects') {
             return (
                 <div className="space-y-3">
-                    <button onClick={() => onNavigate('projects')} className="w-full p-4 rounded-2xl text-left hover:bg-black/[0.03] transition-colors" style={{ border: `1px solid ${colors.border}` }}>
+                    <button onClick={() => onNavigate('projects')} className={`w-full p-4 rounded-2xl text-left ${hoverBg} transition-colors`} style={{ border: `1px solid ${colors.border}` }}>
                         <div className="text-sm font-semibold" style={{ color: colors.textPrimary }}>Project Pipeline</div>
                         <div className="text-xs" style={{ color: colors.textSecondary }}>View leads and installs</div>
                     </button>
@@ -517,10 +584,10 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                     <button
                         key={order.orderNumber}
                         onClick={() => onNavigate('orders')}
-                        className="w-full flex items-center justify-between p-3 rounded-2xl hover:bg-black/[0.03] transition-colors"
+                        className={`w-full flex items-center justify-between p-3 rounded-2xl ${hoverBg} transition-colors`}
                     >
                         <div className="flex items-center gap-3 min-w-0">
-                            <div className="w-9 h-9 rounded-xl bg-black/5 flex items-center justify-center text-[10px] font-bold">PO</div>
+                            <div className={`w-9 h-9 rounded-xl ${subtleBg} flex items-center justify-center text-[10px] font-bold`} style={{ color: colors.textPrimary }}>PO</div>
                             <div className="text-left min-w-0">
                                 <div className="text-sm font-semibold truncate" style={{ color: colors.textPrimary }}>{order.company}</div>
                                 <div className="text-[10px] uppercase tracking-widest opacity-50" style={{ color: colors.textSecondary }}>
@@ -536,16 +603,19 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                 ))}
             </div>
         );
-    }, [colors, leadTimeFavoritesData, latestCommunityPost, onNavigate, recentOrders]);
+    }, [colors, isDark, leadTimeFavoritesData, communityPosts, onNavigate, recentOrders]);
+
+    const hoverBg = isDark ? 'hover:bg-white/[0.06]' : 'hover:bg-black/[0.03]';
+    const subtleBg = isDark ? 'bg-white/[0.08]' : 'bg-black/5';
 
     return (
         <div className="flex flex-col h-full overflow-y-auto scrollbar-hide app-header-offset" style={{ backgroundColor: colors.background }}>
             <div className="px-4 sm:px-6 lg:px-8 pt-0 sm:pt-1 pb-20 space-y-4 lg:space-y-6 max-w-5xl mx-auto w-full">
 
                 {/* Header Section */}
-                <div className="space-y-1 hidden sm:block">
-                    <h2 className="text-4xl font-light tracking-tight" style={{ color: colors.textPrimary }}>Dashboard</h2>
-                    <div className="text-sm font-normal" style={{ color: colors.textSecondary }}>{todayLabel}</div>
+                <div className="space-y-0.5 hidden sm:block">
+                    <h2 className="text-3xl font-semibold tracking-tight" style={{ color: colors.textPrimary }}>Dashboard</h2>
+                    <div className="text-[13px] font-medium" style={{ color: colors.textSecondary }}>{todayLabel}</div>
                 </div>
 
                 {/* Search / Spotlight */}
@@ -559,9 +629,11 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                             height: 56,
                             paddingTop: 0,
                             paddingBottom: 0,
-                            backgroundColor: 'rgba(255,255,255,0.78)',
-                            backgroundImage: 'linear-gradient(180deg, rgba(255,255,255,0.86) 0%, rgba(255,255,255,0.72) 100%)',
-                            border: 'none',
+                            backgroundColor: isDark ? 'rgba(26,26,26,0.78)' : 'rgba(255,255,255,0.78)',
+                            backgroundImage: isDark
+                                ? 'linear-gradient(180deg, rgba(30,30,30,0.86) 0%, rgba(22,22,22,0.72) 100%)'
+                                : 'linear-gradient(180deg, rgba(255,255,255,0.86) 0%, rgba(255,255,255,0.72) 100%)',
+                            border: isDark ? `1px solid rgba(255,255,255,0.08)` : 'none',
                             boxShadow: 'none'
                         }}
                     >
@@ -593,7 +665,7 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                                                 onNavigate?.(app.route);
                                                 setSearchQuery('');
                                             }}
-                                            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-black/[0.03] transition-colors"
+                                            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl ${hoverBg} transition-colors`}
                                         >
                                             <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: `${colors.accent}12` }}>
                                                 <app.icon className="w-4 h-4" style={{ color: colors.accent }} />
@@ -611,7 +683,7 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                                             event.stopPropagation();
                                             openChatFromQuery(searchQuery);
                                         }}
-                                        className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-black/[0.03] transition-colors"
+                                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl ${hoverBg} transition-colors`}
                                     >
                                         <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: `${colors.accent}12` }}>
                                             <MessageCircle className="w-4 h-4" style={{ color: colors.accent }} />
@@ -734,6 +806,7 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                                     <motion.button
                                         key={app.route}
                                         onClick={() => onNavigate(app.route)}
+                                        aria-label={`Open ${app.name}`}
                                         className="relative flex flex-col items-center justify-center rounded-2xl transition-all active:scale-95 group gap-1 p-2.5 hover:shadow-xl"
                                         style={{
                                             minHeight: 96,
@@ -780,7 +853,7 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                                         layout
                                         key={app.route}
                                         onClick={() => toggleApp(app.route)}
-                                        className="flex flex-col items-center justify-center gap-1 px-2 py-1.5 rounded-xl border border-dashed hover:bg-black/[0.02] transition-all active:scale-95"
+                                        className={`flex flex-col items-center justify-center gap-1 px-2 py-1.5 rounded-xl border border-dashed ${isDark ? 'hover:bg-white/[0.04]' : 'hover:bg-black/[0.02]'} transition-all active:scale-95`}
                                         style={{
                                             backgroundColor: colors.surface,
                                             borderColor: colors.border,
@@ -801,7 +874,19 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
 
                 {/* Home feature card(s) */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    <GlassCard theme={theme} className="p-6" style={{ borderRadius: 24 }}>
+                    <GlassCard
+                        theme={theme}
+                        className="p-6 cursor-pointer hover:shadow-lg transition-shadow"
+                        style={{ borderRadius: 24 }}
+                        onClick={(e) => {
+                            if (e.target.closest('button, a, select')) return;
+                            if (homeFeatureMode === 'community') onNavigate('community');
+                            else if (homeFeatureMode === 'lead-times') onNavigate('resources/lead-times');
+                            else if (homeFeatureMode === 'products') onNavigate('products');
+                            else if (homeFeatureMode === 'projects') onNavigate('projects');
+                            else onNavigate('orders');
+                        }}
+                    >
                         <div className="flex items-center justify-between mb-4">
                             <h4 className="text-lg font-bold" style={{ color: colors.textPrimary }}>
                                 {homeFeatureOptions.find(o => o.id === homeFeatureMode)?.label || 'Recent Activity'}
@@ -830,16 +915,30 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                                         else if (homeFeatureMode === 'projects') onNavigate('projects');
                                         else onNavigate('orders');
                                     }}
-                                    className="text-xs font-bold uppercase tracking-widest opacity-50 hover:opacity-100 transition-opacity"
+                                    className="text-[11px] font-semibold uppercase tracking-widest transition-opacity flex items-center gap-1"
+                                    style={{ color: colors.textSecondary }}
                                 >
                                     Open
+                                    <ChevronRight className="w-3 h-3" />
                                 </button>
                             )}
                         </div>
                         {renderHomeFeatureContent(homeFeatureMode)}
                     </GlassCard>
 
-                    <GlassCard theme={theme} className="p-6 hidden lg:block" style={{ borderRadius: 24 }}>
+                    <GlassCard
+                        theme={theme}
+                        className="p-6 hidden lg:block cursor-pointer hover:shadow-lg transition-shadow"
+                        style={{ borderRadius: 24 }}
+                        onClick={(e) => {
+                            if (e.target.closest('button, a, select')) return;
+                            if (secondaryFeatureMode === 'community') onNavigate('community');
+                            else if (secondaryFeatureMode === 'lead-times') onNavigate('resources/lead-times');
+                            else if (secondaryFeatureMode === 'products') onNavigate('products');
+                            else if (secondaryFeatureMode === 'projects') onNavigate('projects');
+                            else onNavigate('orders');
+                        }}
+                    >
                         <div className="flex items-center justify-between mb-4">
                             <h4 className="text-lg font-bold" style={{ color: colors.textPrimary }}>
                                 {homeFeatureOptions.find(o => o.id === secondaryFeatureMode)?.label || 'Community'}
@@ -868,9 +967,11 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                                         else if (secondaryFeatureMode === 'projects') onNavigate('projects');
                                         else onNavigate('orders');
                                     }}
-                                    className="text-xs font-bold uppercase tracking-widest opacity-50 hover:opacity-100 transition-opacity"
+                                    className="text-[11px] font-semibold uppercase tracking-widest transition-opacity flex items-center gap-1"
+                                    style={{ color: colors.textSecondary }}
                                 >
                                     Open
+                                    <ChevronRight className="w-3 h-3" />
                                 </button>
                             )}
                         </div>
@@ -878,25 +979,33 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                     </GlassCard>
                 </div>
 
-                {/* Feedback CTA (sticky bottom) */}
-                <div className="mt-4 lg:mt-5 sticky bottom-4">
-                    <GlassCard
-                        theme={theme}
-                        className="px-4 py-3 flex items-center justify-between"
-                        style={{ borderRadius: 20, backgroundColor: `${colors.surface}E6`, border: `1px solid ${colors.border}`, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
+                {/* Feedback CTA */}
+                <div className="mt-4 lg:mt-5">
+                    <button
+                        onClick={() => onNavigate('feedback')}
+                        className="w-full px-5 py-4 flex items-center justify-between rounded-2xl transition-all hover:scale-[1.01] active:scale-[0.99]"
+                        style={{
+                            backgroundColor: isDark ? 'rgba(40,40,40,0.72)' : 'rgba(255,255,255,0.72)',
+                            backdropFilter: 'blur(20px) saturate(150%)',
+                            WebkitBackdropFilter: 'blur(20px) saturate(150%)',
+                            border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'}`,
+                            boxShadow: isDark ? '0 2px 12px rgba(0,0,0,0.2)' : '0 2px 12px rgba(0,0,0,0.04)'
+                        }}
                     >
-                        <div className="space-y-0.5">
+                        <div className="space-y-0.5 text-left">
                             <h4 className="text-sm font-semibold" style={{ color: colors.textPrimary }}>Feedback</h4>
-                            <p className="text-xs opacity-70" style={{ color: colors.textSecondary }}>Improve the MyJSI app experience.</p>
+                            <p className="text-xs" style={{ color: colors.textSecondary }}>Improve the MyJSI app experience.</p>
                         </div>
-                        <button
-                            onClick={() => onNavigate('feedback')}
-                            className="px-4 py-2 rounded-full font-semibold text-xs hover:scale-105 active:scale-95 transition-transform"
-                            style={{ backgroundColor: colors.textPrimary, color: '#FFFFFF' }}
+                        <div
+                            className="px-4 py-2 rounded-full text-xs font-semibold flex-shrink-0"
+                            style={{
+                                backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(53,53,53,0.06)',
+                                color: colors.textPrimary
+                            }}
                         >
                             Send
-                        </button>
-                    </GlassCard>
+                        </div>
+                    </button>
                 </div>
             </div>
 
@@ -953,17 +1062,31 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                             </div>
                             <button
                                 onClick={() => setIsChatOpen(false)}
-                                className="p-2 rounded-full transition-colors hover:bg-black/10"
+                                className={`p-2 rounded-full transition-colors ${isDark ? 'hover:bg-white/10' : 'hover:bg-black/10'}`}
                                 aria-label="Close chat"
                             >
                                 <X className="w-5 h-5" style={{ color: colors.textSecondary }} />
                             </button>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto px-5 py-6 space-y-4">
+                        <div className="flex-1 overflow-y-auto px-5 py-6 space-y-4" ref={(el) => { if (el) el.scrollTop = el.scrollHeight; }}>
                             {chatMessages.length === 0 ? (
-                                <div className="text-sm" style={{ color: colors.textSecondary }}>
-                                    Ask Elliott Bot a question to start the conversation.
+                                <div className="flex flex-col items-center justify-center h-full text-center px-8">
+                                    <div
+                                        className="w-16 h-16 rounded-full flex items-center justify-center mb-4"
+                                        style={{
+                                            background: 'linear-gradient(135deg, #E8D1C2, #D3A891)',
+                                            border: `1px solid ${colors.border}`
+                                        }}
+                                    >
+                                        <MessageCircle className="w-7 h-7" style={{ color: '#6B4B3E' }} />
+                                    </div>
+                                    <p className="text-sm font-semibold mb-1" style={{ color: colors.textPrimary }}>
+                                        Hi, I'm Elliott!
+                                    </p>
+                                    <p className="text-xs" style={{ color: colors.textSecondary }}>
+                                        Ask me about orders, lead times, products, samples, or anything else about JSI.
+                                    </p>
                                 </div>
                             ) : (
                                 chatMessages.map((msg) => (
@@ -979,7 +1102,9 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                                                 border: msg.role === 'user' ? 'none' : `1px solid ${colors.border}`
                                             }}
                                         >
-                                            <div>{msg.text}</div>
+                                            <div className="whitespace-pre-wrap" dangerouslySetInnerHTML={{
+                                                __html: msg.text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                                            }} />
                                             {Array.isArray(msg.attachments) && msg.attachments.length > 0 && (
                                                 <div className="flex flex-wrap gap-1">
                                                     {msg.attachments.map((file) => (
@@ -1075,7 +1200,7 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                                 <button
                                     type="submit"
                                     className="px-5 py-3 rounded-full text-sm font-semibold transition-all active:scale-95"
-                                    style={{ backgroundColor: colors.textPrimary, color: '#FFFFFF' }}
+                                    style={{ backgroundColor: colors.textPrimary, color: colors.accentText }}
                                 >
                                     Send
                                 </button>

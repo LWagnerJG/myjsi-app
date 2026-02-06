@@ -114,7 +114,7 @@ const LocalSearchSelect = ({
                   type="button"
                   onClick={emptyCta.onClick}
                   className="w-full mt-1 px-4 py-3 rounded-xl font-semibold flex items-center justify-center gap-2"
-                  style={{ backgroundColor: '#ef4444', color: 'white' }}
+                  style={{ backgroundColor: '#B85C5C', color: 'white' }}
                 >
                   <ExternalLink className="w-4 h-4" />
                   {emptyCta.label}
@@ -302,7 +302,7 @@ export const SearchFabricsScreen = ({ theme, onNavigate, onUpdateCart }) => {
                 <form onSubmit={handleSubmit} className="space-y-6">
                   {error && (
                     <div className="p-4 rounded-3xl border" style={{ backgroundColor: '#fee2e2', borderColor: '#fecaca' }}>
-                      <p className="text-sm font-medium" style={{ color: '#dc2626' }}>{error}</p>
+                      <p className="text-sm font-medium" style={{ color: '#B85C5C' }}>{error}</p>
                     </div>
                   )}
 

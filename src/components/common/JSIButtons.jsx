@@ -52,7 +52,6 @@ export const FrostButton = ({
                 ...variantStyle,
                 backdropFilter: 'blur(34px) saturate(180%)',
                 WebkitBackdropFilter: 'blur(34px) saturate(180%)',
-                fontFamily: 'Neue Haas Grotesk Display Pro, sans-serif',
                 letterSpacing: '-0.01em'
             }}
             {...props}
@@ -117,7 +116,6 @@ export const PillButton = ({
                 color: isSelected ? resolvedSelectedText : resolvedUnselectedText,
                 borderColor: isSelected ? resolvedSelectedBg : resolvedUnselectedBorder,
                 boxShadow: isSelected ? selectedShadow : unselectedShadow,
-                fontFamily: 'Neue Haas Grotesk Display Pro, sans-serif',
                 fontWeight: isSelected ? 600 : 500,
                 letterSpacing: '-0.01em'
             }}
@@ -167,7 +165,6 @@ export const PrimaryButton = ({
                 backgroundColor: theme.colors.accent,
                 color: '#FFFFFF',
                 boxShadow: DESIGN_TOKENS.shadows.button,
-                fontFamily: 'Neue Haas Grotesk Display Pro, sans-serif',
                 letterSpacing: '-0.01em',
                 fontWeight: 600
             }}
@@ -215,7 +212,6 @@ export const SecondaryButton = ({
                 backgroundColor: 'transparent',
                 color: theme.colors.accent,
                 borderColor: theme.colors.accent,
-                fontFamily: 'Neue Haas Grotesk Display Pro, sans-serif',
                 letterSpacing: '-0.01em',
                 fontWeight: 600
             }}

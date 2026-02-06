@@ -31,8 +31,10 @@ const DropdownMenu = ({ options, onSelect, theme }) => {
                 <button
                     key={option.label}
                     onClick={() => onSelect(option.value)}
-                    className="w-full text-left flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-black/10 dark:hover:bg-white/10"
+                    className="w-full text-left flex items-center px-3 py-2 rounded-lg transition-colors"
                     style={{ color: theme.colors.textPrimary }}
+                    onMouseEnter={e => e.currentTarget.style.backgroundColor = theme.colors.hoverLight || 'rgba(0,0,0,0.05)'}
+                    onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
                     <option.icon className="w-4 h-4 mr-3" style={{ color: theme.colors.secondary }} />
                     {option.label}
@@ -296,8 +298,10 @@ const MembersScreenContent = ({ theme }) => {
             <div className="relative">
                 <button
                     onClick={() => setShowDropdown((prev) => !prev)}
-                    className="absolute top-4 right-4 w-9 h-9 rounded-full flex items-center justify-center border transition-colors hover:bg-black/5 dark:hover:bg:white/5"
+                    className="absolute top-4 right-4 w-9 h-9 rounded-full flex items-center justify-center border transition-colors"
                     style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border }}
+                    onMouseEnter={e => e.currentTarget.style.backgroundColor = theme.colors.hoverLight || 'rgba(0,0,0,0.05)'}
+                    onMouseLeave={e => e.currentTarget.style.backgroundColor = theme.colors.subtle}
                 >
                     <UserIcon className="w-5 h-5" style={{ color: theme.colors.secondary }} />
                 </button>
@@ -364,8 +368,9 @@ const MembersScreenContent = ({ theme }) => {
 
             {dirty && (
                 <div
-                    className="fixed bottom-0 left-0 right-0 z-20 px-4 py-3"
+                    className="fixed left-0 right-0 z-20 px-4 py-3"
                     style={{
+                        bottom: '96px',
                         backgroundColor: theme.colors.surface,
                         borderTop: `1px solid ${theme.colors.border}`,
                         backdropFilter: 'blur(8px)',

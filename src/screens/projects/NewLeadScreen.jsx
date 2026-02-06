@@ -566,10 +566,10 @@ export const NewLeadScreen = ({
                                             <button
                                                 type="button"
                                                 onClick={()=>removeProduct(idx)}
-                                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all hover:bg-red-500/10 border"
+                                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all border"
                                                 style={{
                                                     borderColor: theme.colors.border,
-                                                    color:'#dc2626'
+                                                    color:'#B85C5C'
                                                 }}
                                             >
                                                 <X className="w-3.5 h-3.5" />
@@ -738,8 +738,7 @@ export const NewLeadScreen = ({
                         <p
                             className="text-sm text-center mt-4"
                             style={{
-                                color: theme.colors.textSecondary,
-                                fontFamily: 'Neue Haas Grotesk Display Pro, sans-serif'
+                                color: theme.colors.textSecondary
                             }}
                         >
                             Please fill in required fields to submit

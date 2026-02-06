@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowLeft, User, Search } from 'lucide-react';
 import { logoLight } from '../../data.jsx';
+import { isDarkTheme } from '../../design-system/tokens.js';
 
 export const AppHeader = React.memo(({
     onHomeClick,
@@ -9,10 +10,22 @@ export const AppHeader = React.memo(({
     onProfileClick,
     handleBack,
     showBack,
-    userName
+    userName,
+    profileBtnRef
 }) => {
     const filterStyle = isDarkMode ? 'brightness(0) invert(1)' : 'none';
     const isHome = !showBack;
+    const dark = isDarkMode || isDarkTheme(theme);
+
+    const glassBg = dark
+        ? 'rgba(26,26,26,0.78)'
+        : 'rgba(255,255,255,0.78)';
+    const glassGradient = dark
+        ? 'linear-gradient(180deg, rgba(30,30,30,0.86) 0%, rgba(22,22,22,0.72) 100%)'
+        : 'linear-gradient(180deg, rgba(255,255,255,0.86) 0%, rgba(255,255,255,0.72) 100%)';
+    const glassShadow = dark
+        ? '0 4px 20px rgba(0,0,0,0.3)'
+        : '0 4px 20px rgba(53,53,53,0.06)';
 
     const getTimeGreeting = () => {
         const hour = new Date().getHours();
@@ -27,20 +40,22 @@ export const AppHeader = React.memo(({
                 className="max-w-5xl mx-auto w-full flex items-center justify-between px-4 sm:px-5 h-14 pointer-events-auto transition-all duration-300 overflow-hidden"
                 style={{
                     borderRadius: 9999,
-                    backgroundColor: 'rgba(255,255,255,0.78)',
-                    backgroundImage: 'linear-gradient(180deg, rgba(255,255,255,0.86) 0%, rgba(255,255,255,0.72) 100%)',
-                    boxShadow: '0 4px 20px rgba(53,53,53,0.06)',
+                    backgroundColor: glassBg,
+                    backgroundImage: glassGradient,
+                    boxShadow: glassShadow,
                     backdropFilter: 'blur(22px) saturate(140%)',
                     WebkitBackdropFilter: 'blur(22px) saturate(140%)',
-                    border: 'none'
+                    border: dark ? '1px solid rgba(255,255,255,0.08)' : 'none'
                 }}
             >
                 <div className="flex items-center">
                     <button
                         aria-label="Go back"
+                        aria-hidden={!showBack}
                         onClick={handleBack}
-                        className={`transition-all duration-300 overflow-hidden flex items-center justify-center rounded-full hover:bg-black/5 active:scale-90 ${showBack ? 'w-10 h-10 -ml-2 mr-2 opacity-100' : 'w-0 h-10 ml-0 mr-0 opacity-0'}`}
+                        className={`transition-all duration-300 overflow-hidden flex items-center justify-center rounded-full ${dark ? 'hover:bg-white/10' : 'hover:bg-black/5'} active:scale-90 ${showBack ? 'w-10 h-10 -ml-2 mr-2 opacity-100' : 'w-0 h-10 ml-0 mr-0 opacity-0 pointer-events-none'}`}
                         disabled={!showBack}
+                        tabIndex={showBack ? 0 : -1}
                     >
                         <ArrowLeft className="w-5 h-5 flex-shrink-0" style={{ color: theme.colors.textPrimary }} />
                     </button>
@@ -64,9 +79,10 @@ export const AppHeader = React.memo(({
                     </div>
 
                     <button
+                        ref={profileBtnRef}
                         aria-label="Open profile menu"
                         onClick={onProfileClick}
-                        className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all bg-white/30 hover:bg-white/50 active:scale-90"
+                        className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all active:scale-90 ${dark ? 'bg-white/10 hover:bg-white/20' : 'bg-white/30 hover:bg-white/50'}`}
                     >
                         <User className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />
                     </button>

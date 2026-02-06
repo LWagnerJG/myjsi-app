@@ -2,23 +2,22 @@
 import { lightTheme, darkTheme } from './data/index.js';
 import { DEFAULT_HOME_APPS, allApps } from './data.jsx';
 import { INITIAL_OPPORTUNITIES, MY_PROJECTS_DATA, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS, EMPTY_LEAD, STAGES } from './screens/projects/data.js';
-import { INITIAL_POSTS, INITIAL_POLLS } from './screens/community/data.js';
+import { INITIAL_POSTS, INITIAL_POLLS, INITIAL_WINS } from './screens/community/data.js';
 import { INITIAL_MEMBERS } from './screens/members/data.js';
 import { DEALER_DIRECTORY_DATA } from './screens/resources/dealer-directory/data.js';
 
 import { AppHeader, ProfileMenu, SCREEN_MAP, VoiceModal, SuccessToast } from './ui.jsx';
 import { OrderDetailScreen } from './screens/orders/index.js';
-import { SalesScreen } from './screens/sales/SalesScreen.jsx';
 import { Modal } from './components/common/Modal.jsx';
 import { ResourceDetailScreen } from './screens/utility/UtilityScreens.jsx';
-import { ProductComparisonScreen, CompetitiveAnalysisScreen } from './screens/products/index.js';
-import { SamplesScreen } from './screens/samples/index.js';
+import { ProductComparisonScreen, CompetitiveAnalysisScreen, SalesScreen, SamplesScreen } from './config/screenMap.js';
 import { CreateContentModal } from './screens/community/CreateContentModal.jsx';
 import { AnimatedScreenWrapper } from './components/common/AnimatedScreenWrapper.jsx';
 import { ProjectsScreen } from './screens/projects/ProjectsScreen.jsx';
 import { usePersistentState } from './hooks/usePersistentState.js';
 import { ToastHost } from './components/common/ToastHost.jsx';
 import { ErrorBoundary } from './components/common/ErrorBoundary.jsx';
+import { ScreenSkeleton } from './components/common/ScreenSkeleton.jsx';
 
 // Lazy load less-frequently visited resource feature screens for bundle splitting
 const CommissionRatesScreen = React.lazy(() => import('./screens/resources/commission-rates/index.js'));
@@ -96,16 +95,16 @@ const ScreenRouter = ({ screenKey, projectsScreenRef, SuspenseFallback, ...rest 
 
     if (base === 'projects') return <ProjectsScreen ref={projectsScreenRef} {...rest} />;
 
-    // Samples routes (cart first)
-    if (screenKey === 'samples/cart') return <SamplesScreen {...rest} initialCartOpen />;
-    if (base === 'samples') return <SamplesScreen {...rest} />;
-
     // Feature screens (lazy) inside Suspense to isolate fallback flicker per screen
-    const lazyWrap = (Comp) => (
+    const lazyWrap = (Comp, extraProps) => (
         <Suspense fallback={SuspenseFallback}>
-            {React.createElement(Comp, { ...rest })}
+            {React.createElement(Comp, { ...rest, ...extraProps })}
         </Suspense>
     );
+
+    // Samples routes (cart first)
+    if (screenKey === 'samples/cart') return lazyWrap(SamplesScreen, { initialCartOpen: true });
+    if (base === 'samples') return lazyWrap(SamplesScreen);
 
     // Resource route normalization (support legacy underscore routes)
     if (base === 'resources') {
@@ -122,22 +121,35 @@ const ScreenRouter = ({ screenKey, projectsScreenRef, SuspenseFallback, ...rest 
 
     if (base === 'community' && parts[1] === 'post' && parts[2]) {
         const ScreenComponent = SCREEN_MAP[base] || SalesScreen;
-        return <ScreenComponent {...rest} focusPostId={parts[2]} />;
+        return (
+            <Suspense fallback={SuspenseFallback}>
+                <ScreenComponent {...rest} focusPostId={parts[2]} />
+            </Suspense>
+        );
     }
 
     if (base === 'products' && parts[1] === 'category' && parts.length === 3) {
-        return <ProductComparisonScreen {...rest} categoryId={parts[2]} />;
+        return lazyWrap(ProductComparisonScreen, { categoryId: parts[2] });
     }
     if (base === 'products' && parts[1] === 'category' && (parts[2] === 'competition' || parts[3] === 'competition')) {
         const productId = parts[3] === 'competition' && parts[4] ? parts[4] : null;
-        return <CompetitiveAnalysisScreen {...rest} categoryId={parts[2]} productId={productId} />;
+        return (
+            <Suspense fallback={SuspenseFallback}>
+                <CompetitiveAnalysisScreen {...rest} categoryId={parts[2]} productId={productId} />
+            </Suspense>
+        );
     }
 
     if (base === 'orders' && parts.length > 1) return <OrderDetailScreen {...rest} />;
     if (base === 'resources' && parts.length > 1) return <ResourceDetailScreen {...rest} />;
 
+    // All SCREEN_MAP components may be lazy - wrap in Suspense
     const ScreenComponent = SCREEN_MAP[base] || SalesScreen;
-    return <ScreenComponent {...rest} />;
+    return (
+        <Suspense fallback={SuspenseFallback}>
+            <ScreenComponent {...rest} />
+        </Suspense>
+    );
 };
 
 function App() {
@@ -158,6 +170,7 @@ function App() {
     const [navigationHistory, setNavigationHistory] = useState(() => [pathToScreen(window.location.pathname)]);
     const [lastNavigationDirection, setLastNavigationDirection] = useState('forward');
     const [showProfileMenu, setShowProfileMenu] = useState(false);
+    const profileBtnRef = useRef(null);
     const [voiceMessage, setVoiceMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const [alertInfo, setAlertInfo] = useState({ show: false, message: '' });
@@ -173,7 +186,7 @@ function App() {
     const [currentUserId] = useState(1);
 
     // Community
-    const [posts, setPosts] = useState(INITIAL_POSTS);
+    const [posts, setPosts] = useState([...INITIAL_POSTS, ...INITIAL_WINS]);
     const [polls, setPolls] = useState(INITIAL_POLLS);
     const [likedPosts, setLikedPosts] = useState({});
     const [pollChoices, setPollChoices] = useState({});
@@ -367,9 +380,7 @@ function App() {
     };
 
     const suspenseFallback = (
-        <div className="flex items-center justify-center w-full h-full text-sm" style={{ color: currentTheme.colors.textSecondary }}>
-            Loading…
-        </div>
+        <ScreenSkeleton theme={currentTheme} />
     );
 
     return (
@@ -383,16 +394,17 @@ function App() {
                     onHomeClick={handleHome}
                     onProfileClick={() => setShowProfileMenu(p => !p)}
                     isDarkMode={isDarkMode}
+                    profileBtnRef={profileBtnRef}
                 />
                 <div className="flex-1 overflow-hidden" style={{ backgroundColor: currentTheme.colors.background }}>
-                    <ErrorBoundary theme={currentTheme}>
+                    <ErrorBoundary key={currentScreen} theme={currentTheme}>
                         <AnimatedScreenWrapper screenKey={currentScreen} direction={lastNavigationDirection} onSwipeBack={navigationHistory.length > 1 ? handleBack : null}>
                             <ScreenRouter screenKey={currentScreen} projectsScreenRef={projectsScreenRef} SuspenseFallback={suspenseFallback} {...screenProps} />
                         </AnimatedScreenWrapper>
                     </ErrorBoundary>
                 </div>
                 {showProfileMenu && (
-                    <ProfileMenu show={showProfileMenu} onClose={() => setShowProfileMenu(false)} onNavigate={handleNavigate} theme={currentTheme} />
+                    <ProfileMenu show={showProfileMenu} onClose={() => setShowProfileMenu(false)} onNavigate={handleNavigate} theme={currentTheme} anchorRef={profileBtnRef} />
                 )}
                 <VoiceModal message={voiceMessage} show={!!voiceMessage} theme={currentTheme} />
                 <SuccessToast message={successMessage} show={!!successMessage} theme={currentTheme} />

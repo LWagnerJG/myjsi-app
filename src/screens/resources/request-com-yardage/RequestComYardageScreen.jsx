@@ -98,11 +98,11 @@ export const RequestComYardageScreen = ({ theme, showAlert, onNavigate, userSett
                                 <div className="flex items-end gap-3">
                                     <button
                                         onClick={() => removeItem(item.key)}
-                                        className="w-10 h-10 flex items-center justify-center rounded-full border flex-shrink-0 hover:bg-red-500/10 active:scale-95 transition"
+                                        className="w-10 h-10 flex items-center justify-center rounded-full border flex-shrink-0 active:scale-95 transition"
                                         style={{ borderColor: theme.colors.border }}
                                         aria-label="Remove line"
                                     >
-                                        <Trash2 className="w-4 h-4 text-red-500" />
+                                        <Trash2 className="w-4 h-4" style={{ color: '#B85C5C' }} />
                                     </button>
                                     <div className="w-24">
                                         <label className="text-[11px] font-medium tracking-wide mb-1 block" style={{ color: theme.colors.textSecondary }}>Quantity</label>

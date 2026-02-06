@@ -68,7 +68,7 @@ export const LibraryGrid = ({ theme, query, parentHeaderRef }) => {
                 <div className="flex flex-wrap gap-3 pt-1">
                   <button onClick={()=>{ const link = window.location.origin + '/library#'+selected.id; navigator.clipboard.writeText(link); }} className="flex items-center gap-2 px-5 h-11 rounded-full text-sm font-medium" style={{ background: theme.colors.subtle, color: theme.colors.textPrimary, border:`1px solid ${theme.colors.border}` }}><Share2 className="w-4 h-4" /> Share</button>
                   <button onClick={()=>{ navigator.clipboard.writeText(selected.src); }} className="flex items-center gap-2 px-5 h-11 rounded-full text-sm font-medium" style={{ background: theme.colors.subtle, color: theme.colors.textPrimary, border:`1px solid ${theme.colors.border}` }}><Copy className="w-4 h-4" /> Copy Image URL</button>
-                  <a href={selected.src} download target="_blank" rel="noreferrer" className="flex items-center gap-2 px-5 h-11 rounded-full text-sm font-medium" style={{ background: theme.colors.accent, color:'#fff' }}><Download className="w-4 h-4" /> Download</a>
+                  <a href={selected.src} download target="_blank" rel="noreferrer" className="flex items-center gap-2 px-5 h-11 rounded-full text-sm font-medium" style={{ background: theme.colors.accent, color: theme.colors.accentText }}><Download className="w-4 h-4" /> Download</a>
                 </div>
               </div>
             </div>

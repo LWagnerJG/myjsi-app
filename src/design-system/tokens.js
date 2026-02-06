@@ -33,7 +33,7 @@ export const JSI_COLORS = {
 // H4 Grotesk 72, H5 Grotesk 58, H6 Grotesk 44, H7 Grotesk 26, H8 Grotesk 18/16
 // Converting design system scale to responsive rem units
 export const JSI_TYPOGRAPHY = {
-  fontFamily: '"Neue Haas Grotesk Display Pro", "Helvetica Neue", Helvetica, Arial, sans-serif',
+  fontFamily: '"Neue Haas Grotesk Display Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
 
   // Primary Heading Levels from Style Guide (H1-H8)
   // Style guide scale: H1=185, H2=132, H3=110, H4=72, H5=58, H6=44, H7=26, H8=18/16

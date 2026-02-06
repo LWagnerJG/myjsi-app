@@ -205,8 +205,8 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
                         <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: theme.colors.border }}>
                             <h3 className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>Acknowledgment � {order.orderNumber}</h3>
                             <div className="flex items-center gap-2">
-                                <button onClick={shareAck} className="p-2 rounded-full" style={{ backgroundColor: theme.colors.subtle }} title="Share"><Share2 className="w-4 h-4" style={{ color: theme.colors.textPrimary }} /></button>
-                                <button onClick={()=>setShowAck(false)} className="p-2 rounded-full" style={{ backgroundColor: theme.colors.subtle }} title="Close"><X className="w-4 h-4" style={{ color: theme.colors.textPrimary }} /></button>
+                                <button onClick={shareAck} className="p-2 rounded-full" style={{ backgroundColor: theme.colors.subtle }} aria-label="Share acknowledgment"><Share2 className="w-4 h-4" style={{ color: theme.colors.textPrimary }} /></button>
+                                <button onClick={()=>setShowAck(false)} className="p-2 rounded-full" style={{ backgroundColor: theme.colors.subtle }} aria-label="Close"><X className="w-4 h-4" style={{ color: theme.colors.textPrimary }} /></button>
                             </div>
                         </div>
                         <iframe title="Acknowledgment PDF" src={ackUrl} className="flex-1 w-full" style={{ background: '#fff' }} />

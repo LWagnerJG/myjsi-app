@@ -7,6 +7,7 @@ import { ToggleSwitch } from '../../components/forms/ToggleSwitch.jsx';
 import { PillButton } from '../../components/common/JSIButtons.jsx';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 import { JSI_SERIES } from '../products/data.js';
+import { isDarkTheme, DESIGN_TOKENS } from '../../design-system/tokens.js';
 
 // Tab options for projects
 const PROJECTS_TAB_OPTIONS = [
@@ -28,7 +29,7 @@ const SuggestInputPill = ({ placeholder, suggestions, onAdd, theme }) => {
     {open && filtered.length>0 && (
       <div ref={menu} className="absolute z-50 mt-1 rounded-xl border shadow-lg overflow-hidden" style={{ background: theme.colors.surface, borderColor: theme.colors.border, maxHeight:220, width:'100%' }}>
         <div className="overflow-y-auto" style={{ maxHeight:220 }}>
-          {filtered.map(s=> <button key={s} onClick={()=>commit(s)} className="w-full text-left px-3 py-2 text-xs hover:bg-black/5" style={{ color: theme.colors.textPrimary }}>{s}</button>)}
+          {filtered.map(s=> <button key={s} onClick={()=>commit(s)} className="w-full text-left px-3 py-2 text-xs transition-colors" style={{ color: theme.colors.textPrimary }} onMouseEnter={e => e.currentTarget.style.backgroundColor = theme.colors.subtle} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>{s}</button>)}
         </div>
       </div>
     )}
@@ -183,7 +184,7 @@ const OpportunityDetail = ({ opp, theme, onUpdate }) => {
               <div>
                 <SoftLabel theme={theme}>Products</SoftLabel>
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {(draft.products||[]).map(p=> <button key={p.series} onClick={()=>removeProductSeries(p.series)} className="px-3 h-8 rounded-full text-[11px] font-medium flex items-center gap-1 border" style={{ background: theme.colors.subtle, borderColor: theme.colors.border, color: theme.colors.textPrimary }}>{p.series}<span className="opacity-60">�</span></button>)}
+                  {(draft.products||[]).map(p=> <button key={p.series} onClick={()=>removeProductSeries(p.series)} className="px-3 h-8 rounded-full text-[11px] font-medium flex items-center gap-1 border" style={{ background: theme.colors.subtle, borderColor: theme.colors.border, color: theme.colors.textPrimary }}>{p.series}<span className="opacity-60">×</span></button>)}
                   <SuggestInputPill placeholder="Add series" suggestions={JSI_SERIES} onAdd={addProductSeries} theme={theme} />
                 </div>
               </div>
@@ -191,14 +192,14 @@ const OpportunityDetail = ({ opp, theme, onUpdate }) => {
                 <div>
                   <SoftLabel theme={theme}>Design Firms</SoftLabel>
                   <div className="flex flex-wrap gap-2 mt-2">
-                    {(draft.designFirms||[]).map(f=> <button key={f} onClick={()=>removeFrom('designFirms',f)} className="px-3 h-8 rounded-full text-[11px] font-medium flex items-center gap-1 border" style={{ background: theme.colors.subtle, borderColor: theme.colors.border, color: theme.colors.textPrimary }}>{f}<span className="opacity-60">�</span></button>)}
+                    {(draft.designFirms||[]).map(f=> <button key={f} onClick={()=>removeFrom('designFirms',f)} className="px-3 h-8 rounded-full text-[11px] font-medium flex items-center gap-1 border" style={{ background: theme.colors.subtle, borderColor: theme.colors.border, color: theme.colors.textPrimary }}>{f}<span className="opacity-60">×</span></button>)}
                     <SuggestInputPill placeholder="Add firm" suggestions={INITIAL_DESIGN_FIRMS} onAdd={v=>addUnique('designFirms',v)} theme={theme} />
                   </div>
                 </div>
                 <div>
                   <SoftLabel theme={theme}>Dealers</SoftLabel>
                   <div className="flex flex-wrap gap-2 mt-2">
-                    {(draft.dealers||[]).map(f=> <button key={f} onClick={()=>removeFrom('dealers',f)} className="px-3 h-8 rounded-full text-[11px] font-medium flex items-center gap-1 border" style={{ background: theme.colors.subtle, borderColor: theme.colors.border, color: theme.colors.textPrimary }}>{f}<span className="opacity-60">�</span></button>)}
+                    {(draft.dealers||[]).map(f=> <button key={f} onClick={()=>removeFrom('dealers',f)} className="px-3 h-8 rounded-full text-[11px] font-medium flex items-center gap-1 border" style={{ background: theme.colors.subtle, borderColor: theme.colors.border, color: theme.colors.textPrimary }}>{f}<span className="opacity-60">×</span></button>)}
                     <SuggestInputPill placeholder="Add dealer" suggestions={INITIAL_DEALERS} onAdd={v=>addUnique('dealers',v)} theme={theme} />
                   </div>
                 </div>
@@ -213,7 +214,7 @@ const OpportunityDetail = ({ opp, theme, onUpdate }) => {
               <div className="mt-4 space-y-2">
                 <SoftLabel theme={theme}>Quotes</SoftLabel>
                 <div className="flex flex-col gap-2">
-                  {draft.quotes.map(q=> <a key={q.id} href={q.url} target="_blank" rel="noopener noreferrer" className="px-3 py-2 rounded-lg text-xs font-medium border hover:bg-black/5 transition-colors" style={{ color: theme.colors.textPrimary, borderColor: theme.colors.border }}>{q.fileName}</a>)}
+                  {draft.quotes.map(q=> <a key={q.id} href={q.url} target="_blank" rel="noopener noreferrer" className="px-3 py-2 rounded-lg text-xs font-medium border transition-colors" style={{ color: theme.colors.textPrimary, borderColor: theme.colors.border }} onMouseEnter={e => e.currentTarget.style.backgroundColor = theme.colors.subtle} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>{q.fileName}</a>)}
                 </div>
               </div>
             )}
@@ -223,9 +224,9 @@ const OpportunityDetail = ({ opp, theme, onUpdate }) => {
         </div>
       </div>
       {discountOpen && (
-        <div ref={discMenu} className="fixed z-[9999] rounded-2xl border shadow-2xl overflow-hidden" style={{ top:discPos.top, left:discPos.left, width:discPos.width, background:theme.colors.surface, borderColor:theme.colors.border }}>
+        <div ref={discMenu} className="fixed rounded-2xl border shadow-2xl overflow-hidden" style={{ top:discPos.top, left:discPos.left, width:discPos.width, background:theme.colors.surface, borderColor:theme.colors.border, zIndex: DESIGN_TOKENS.zIndex.popover }}>
           <div className="max-h-[360px] overflow-y-auto custom-scroll-hide py-1">
-            {DISCOUNT_OPTIONS.map(opt=> <button key={opt} onClick={()=>{ update('discount',opt); setDiscountOpen(false); }} className={`w-full text-left px-3 py-2 text-xs hover:bg-black/5 ${opt===draft.discount?'font-semibold':''}`} style={{ color: theme.colors.textPrimary }}>{opt}</button>)}
+            {DISCOUNT_OPTIONS.map(opt=> <button key={opt} onClick={()=>{ update('discount',opt); setDiscountOpen(false); }} className={`w-full text-left px-3 py-2 text-xs transition-colors ${opt===draft.discount?'font-semibold':''}`} style={{ color: theme.colors.textPrimary }} onMouseEnter={e => e.currentTarget.style.backgroundColor = theme.colors.subtle} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>{opt}</button>)}
           </div>
         </div>
       )}
@@ -288,7 +289,7 @@ const InstallationDetail = ({ project, theme, onAddPhotoFiles }) => {
               <p className="font-bold text-xl truncate" style={{ color: theme.colors.textPrimary }}>{project.name}</p>
               <p className="text-sm truncate" style={{ color: theme.colors.textSecondary }}>{project.location}</p>
             </div>
-            <button type="button" onClick={()=>fileRef.current?.click()} className="px-4 py-2 rounded-full text-xs font-semibold" style={{ backgroundColor: theme.colors.accent, color:'#fff' }}>Add Photos</button>
+            <button type="button" onClick={()=>fileRef.current?.click()} className="px-4 py-2 rounded-full text-xs font-semibold" style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}>Add Photos</button>
             <input ref={fileRef} type="file" multiple accept="image/*" className="hidden" onChange={e=>onAddPhotoFiles(e.target.files)} />
           </div>
           <div className="grid grid-cols-3 gap-2">
@@ -350,7 +351,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
               <button
                 onClick={()=>onNavigate('new-lead')}
                 className="h-8 inline-flex items-center justify-center gap-1.5 rounded-full text-[11px] font-semibold transition-all px-3 whitespace-nowrap"
-                style={{ backgroundColor: theme.colors.accent, color:'#fff', boxShadow:'0 8px 14px rgba(0,0,0,0.12)' }}
+                style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText, boxShadow:'0 8px 14px rgba(0,0,0,0.12)' }}
               >
                 + New Project
               </button>
@@ -359,7 +360,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
               <button
                 onClick={()=>onNavigate('add-new-install')}
                 className="h-8 inline-flex items-center justify-center gap-1.5 rounded-full text-[11px] font-semibold transition-all px-3 whitespace-nowrap"
-                style={{ backgroundColor: theme.colors.accent, color:'#fff', boxShadow:'0 8px 14px rgba(0,0,0,0.12)' }}
+                style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText, boxShadow:'0 8px 14px rgba(0,0,0,0.12)' }}
               >
                 + New Install
               </button>

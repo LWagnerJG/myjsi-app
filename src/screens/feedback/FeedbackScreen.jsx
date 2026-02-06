@@ -85,7 +85,7 @@ export const FeedbackScreen = ({ theme }) => {
                     </div>
 
                     <GlassCard theme={theme} className="p-5 md:p-6" variant="elevated">
-                        <label className="block text-sm font-medium mb-2" style={{ color: theme.colors.textSecondary }}>Subject <span className="text-red-500">*</span></label>
+                        <label className="block text-sm font-medium mb-2" style={{ color: theme.colors.textSecondary }}>Subject <span style={{ color: '#B85C5C' }}>*</span></label>
                         <input
                             type="text"
                             value={subject}
@@ -100,7 +100,7 @@ export const FeedbackScreen = ({ theme }) => {
 
                     <GlassCard theme={theme} className="p-5 md:p-6" variant="elevated">
                         <div className="flex items-center justify-between mb-2">
-                            <label className="text-sm font-medium" style={{ color: theme.colors.textSecondary }}>Message <span className="text-red-500">*</span></label>
+                            <label className="text-sm font-medium" style={{ color: theme.colors.textSecondary }}>Message <span style={{ color: '#B85C5C' }}>*</span></label>
                             <span className="text-[11px]" style={{ color: theme.colors.textSecondary }}>{message.length} chars</span>
                         </div>
                         <textarea

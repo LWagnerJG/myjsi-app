@@ -55,13 +55,7 @@ export const ResourcesScreen = ({ theme, onNavigate, homeApps }) => {
         ];
     }, [coreFallbackItems]);
 
-    useEffect(() => {
-        if (document.getElementById('resources-no-scrollbar-style')) return;
-        const style = document.createElement('style');
-        style.id = 'resources-no-scrollbar-style';
-        style.innerHTML = `.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; } .no-scrollbar::-webkit-scrollbar { display: none; }`;
-        document.head.appendChild(style);
-    }, []);
+    // scrollbar hiding is handled by the 'scrollbar-hide' Tailwind utility class
 
     const getResourceIcon = (label) => {
         if (label.includes('Lead Times')) return Clock;
@@ -138,7 +132,7 @@ export const ResourcesScreen = ({ theme, onNavigate, homeApps }) => {
 
     return (
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
-            <div className="flex-1 overflow-y-auto no-scrollbar px-6 pb-6">
+            <div className="flex-1 overflow-y-auto scrollbar-hide px-6 pb-6">
                 <div className="max-w-2xl mx-auto w-full">
                     {resourceCategories.map((cat, i) => (
                         <CategoryCard key={cat.category} category={cat} isFirst={i === 0} />

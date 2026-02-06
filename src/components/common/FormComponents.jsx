@@ -10,7 +10,7 @@ const Label = ({ children, theme, required }) => (
         className="block text-sm font-medium mb-1 px-1"
         style={{ color: theme.colors.textSecondary }}
     >
-        {children} {required ? <span className="text-red-500">*</span> : null}
+        {children} {required ? <span style={{ color: '#B85C5C' }}>*</span> : null}
     </label>
 );
 
@@ -29,7 +29,7 @@ export const FormInput = ({
     <div>
         {label ? (
             <label className="block text-sm font-medium mb-1 px-1" style={{ color: theme.colors.textSecondary }}>
-                {label} {required ? <span className="text-red-500">*</span> : null}
+                {label} {required ? <span style={{ color: '#B85C5C' }}>*</span> : null}
             </label>
         ) : null}
 

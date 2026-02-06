@@ -173,9 +173,9 @@ export const USER_STATUS = {
 
 export const STATUS_COLORS = {
     active: '#10B981',
-    pending: '#F59E0B', 
+    pending: '#C4956A', 
     inactive: '#6B7280',
-    suspended: '#EF4444'
+    suspended: '#B85C5C'
 };
 
 export const EMPTY_USER = { 

@@ -1,14 +1,14 @@
 import React from 'react';
 import { DESIGN_TOKENS, JSI_COLORS, isDarkTheme } from '../../design-system/tokens.js';
 
-// JSI Card Component
-// Clean white backgrounds with 24px corner radius and subtle drop shadows
-// Hover state reveals dark overlay with action buttons
+// JSI GlassCard Component
+// Frosted-glass cards with subtle transparency, backdrop blur, and refined shadows
+// Uses DESIGN_TOKENS.frost presets for consistent glassmorphism across the app
 // Variants:
-//  - elevated: JSI signature soft shadow
-//  - minimal: lighter shadow
-//  - interactive: hover effects with overlay capability
-//  - outlined: subtle border, no shadow
+//  - elevated: Frosted glass with blur + soft shadow (default)
+//  - minimal: Lighter frost, subtler shadow
+//  - interactive: hover effects with lift + enhanced frost
+//  - outlined: Subtle border + light frost, no shadow
 export const GlassCard = React.memo(
   React.forwardRef(function GlassCard(
     {
@@ -33,24 +33,36 @@ export const GlassCard = React.memo(
     const borderColor = theme?.colors?.border || JSI_COLORS.stone;
     const radius = DESIGN_TOKENS.borderRadius.xl; // 24px for JSI
 
+    // Frosted glass backgrounds — semi-transparent for depth
+    const glassBg = isDark
+      ? 'rgba(40, 40, 40, 0.72)'
+      : 'rgba(255, 255, 255, 0.72)';
+
+    // Subtle inner glow border for glass edge definition
+    const glassBorder = isDark
+      ? '1px solid rgba(255, 255, 255, 0.08)'
+      : '1px solid rgba(255, 255, 255, 0.6)';
+
     // Interactive classes with hover shadow lift
     const interactiveClasses = interactive || variant === 'interactive'
       ? 'cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 active:scale-[0.985] active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#353535]/10'
       : '';
 
-    const outlinedStyles = variant === 'outlined'
-      ? { border: `1.5px solid ${borderColor}` }
-      : { border: 'none' };
+    const outlinedBorder = variant === 'outlined'
+      ? `1.5px solid ${borderColor}`
+      : glassBorder;
 
     return (
       <Component
         ref={ref}
         className={`bg-clip-padding ${interactiveClasses} ${className}`}
         style={{
-          backgroundColor: theme?.colors?.surface || JSI_COLORS.white,
+          backgroundColor: glassBg,
+          backdropFilter: 'blur(20px) saturate(150%)',
+          WebkitBackdropFilter: 'blur(20px) saturate(150%)',
           boxShadow,
           borderRadius: radius,
-          ...outlinedStyles,
+          border: outlinedBorder,
           ...style
         }}
         {...props}

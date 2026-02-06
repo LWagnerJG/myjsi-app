@@ -170,8 +170,8 @@ export const ReplacementsScreen = ({ theme }) => {
     const onChange = useCallback((k,v)=> setFormData(p => (p[k]===v? p : { ...p, [k]:v })), []);
     const submit = useCallback(()=> { setReplacementRequests(p => [{ name: `${formData.salesOrder} - ${formData.lineItem}`, dealer: formData.dealer?.trim() || 'Unknown Dealer', date: new Date().toISOString().split('T')[0], status: 'Pending', photos: formData.photos.slice() }, ...p]); setFormData({ salesOrder: '', lineItem: '', dealer: '', notes: '', photos: [] }); setView('list'); inFormRef.current=false; }, [formData]);
 
-    const getStatusColor = s => ({ Pending: theme.colors.accent + '22', Approved: '#22c55e22', Rejected: '#ef444422' }[s] || theme.colors.subtle);
-    const getStatusText = s => ({ Pending: theme.colors.accent, Approved: '#16a34a', Rejected: '#dc2626' }[s] || theme.colors.textSecondary);
+    const getStatusColor = s => ({ Pending: theme.colors.accent + '22', Approved: 'rgba(74,124,89,0.13)', Rejected: 'rgba(184,92,92,0.13)' }[s] || theme.colors.subtle);
+    const getStatusText = s => ({ Pending: theme.colors.accent, Approved: '#4A7C59', Rejected: '#B85C5C' }[s] || theme.colors.textSecondary);
     const getIcon = s => s==='Pending'? <Clock className="w-4 h-4" /> : s==='Approved'? <CheckCircle className="w-4 h-4" /> : s==='Rejected'? <XCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />;
 
     const stopScanning = useCallback(()=> { setIsScanning(false); setCameraError(null); if(streamRef.current){ streamRef.current.getTracks().forEach(t=>t.stop()); streamRef.current=null; } if(videoRef.current) videoRef.current.srcObject=null; if(intervalRef.current){ clearInterval(intervalRef.current); intervalRef.current=null; } }, []);
@@ -209,10 +209,10 @@ export const ReplacementsScreen = ({ theme }) => {
                                         )}
                                         {isScanning && (
                                             <>
-                                                <div className="absolute top-2 left-2 text-xs px-2 py-1 rounded-full" style={{ backgroundColor: '#0009', color: '#fff' }}>
+                                                <div className="absolute top-2 left-2 text-xs px-2 py-1 rounded-full" style={{ backgroundColor: theme.colors.overlayDark, color: theme.colors.accentText }}>
                                                     Scanning…
                                                 </div>
-                                                <button onClick={stopScanning} className="absolute bottom-3 right-3 px-3 py-1.5 rounded-full text-sm font-semibold text-white active:scale-95" style={{ backgroundColor: '#ef4444' }}>
+                                                <button onClick={stopScanning} className="absolute bottom-3 right-3 px-3 py-1.5 rounded-full text-sm font-semibold text-white active:scale-95" style={{ backgroundColor: theme.colors.destructive }}>
                                                     Cancel
                                                 </button>
                                                 <canvas ref={canvasRef} className="hidden" />

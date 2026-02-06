@@ -155,7 +155,7 @@ export const AddNewInstallScreen = ({ theme, onAddInstall }) => {
                     {/* Photo Upload Section */}
                     <div className="space-y-3">
                         <label className="block text-sm font-medium" style={{ color: theme.colors.textSecondary }}>
-                            Photos <span className="text-red-500">*</span>
+                            Photos <span style={{ color: '#B85C5C' }}>*</span>
                             <span className="text-xs ml-2">
                                 ({photos.length}/{INSTALLATION_CONSTANTS.PHOTO_REQUIREMENTS.maxPhotos})
                             </span>
@@ -171,7 +171,8 @@ export const AddNewInstallScreen = ({ theme, onAddInstall }) => {
                                     <button 
                                         type="button" 
                                         onClick={() => removePhoto(idx)} 
-                                        className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5 transition-all duration-200 transform active:scale-90"
+                                        className="absolute -top-1 -right-1 rounded-full p-0.5 transition-all duration-200 transform active:scale-90"
+                                        style={{ backgroundColor: '#B85C5C', color: 'white' }}
                                     >
                                         <X className="w-4 h-4" />
                                     </button>

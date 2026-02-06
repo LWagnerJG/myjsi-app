@@ -44,8 +44,8 @@ export const EditablePersonRow = ({ person, theme, onUpdateRole, onRemovePerson 
                         theme={theme}
                         placeholder="Change Role"
                     />
-                    <button onClick={(e) => { e.stopPropagation(); onRemovePerson(person.name); }} className="p-2 rounded-full hover:bg-red-500/10">
-                        <Trash2 className="w-4 h-4 text-red-500" />
+                    <button onClick={(e) => { e.stopPropagation(); onRemovePerson(person.name); }} className="p-2 rounded-full" style={{ color: '#B85C5C' }}>
+                        <Trash2 className="w-4 h-4" />
                     </button>
                 </div>
             )}

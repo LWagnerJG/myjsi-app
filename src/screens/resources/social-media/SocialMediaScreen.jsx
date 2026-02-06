@@ -156,7 +156,7 @@ export const SocialMediaScreen = ({ theme }) => {
       )}
 
       {toast && (
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full text-xs font-semibold" style={{ background: theme.colors.accent, color:'#fff', boxShadow:'0 4px 16px rgba(0,0,0,0.25)' }}>{toast}</div>
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full text-xs font-semibold" style={{ background: theme.colors.accent, color: theme.colors.accentText, boxShadow:'0 4px 16px rgba(0,0,0,0.25)' }}>{toast}</div>
       )}
     </div>
   );

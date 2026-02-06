@@ -97,7 +97,7 @@ export const PortalNativeSelect = ({
 
     return (
         <div className="relative w-full" ref={selectRef}>
-            {label && <label className="block text-sm font-medium mb-1 px-1" style={{ color: theme.colors.textSecondary }}>{label} {required && <span className="text-red-500">*</span>}</label>}
+            {label && <label className="block text-sm font-medium mb-1 px-1" style={{ color: theme.colors.textSecondary }}>{label} {required && <span style={{ color: '#B85C5C' }}>*</span>}</label>}
             <button type="button" onClick={openMenu} onMouseDown={(e) => e.stopPropagation()} className="w-full px-4 py-3 rounded-full border text-sm text-left flex items-center justify-between transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/5" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${theme.colors.border}`, color: (!value || isMuted) ? theme.colors.textSecondary : theme.colors.textPrimary }}>
                 <span className="truncate pr-2">{displayText}</span>
                 <ChevronDown className={`w-4 h-4 transition-transform duration-200 flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`} style={{ color: theme.colors.textSecondary }} />

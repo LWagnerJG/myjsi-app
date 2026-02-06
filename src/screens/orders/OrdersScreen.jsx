@@ -3,6 +3,7 @@ import { Calendar, List, Building2, ChevronLeft, ChevronRight, Search } from 'lu
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { SearchInput } from '../../components/common/SearchInput.jsx';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
+import { isDarkTheme } from '../../design-system/tokens.js';
 // Force local data import
 import { ORDER_DATA, STATUS_COLORS } from './data.js';
 
@@ -21,6 +22,7 @@ const Pill = ({ children, theme }) => (
 export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState(null);
+    const isDark = isDarkTheme(theme);
 
     const ordersByDate = useMemo(() => {
         const m = new Map();
@@ -53,13 +55,13 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
         <div className="space-y-4">
             <GlassCard theme={theme} className="p-4" variant="elevated">
                 <div className="flex justify-between items-center mb-4">
-                    <button onClick={() => setCurrentDate(new Date(year, month - 1, 1))} className="p-2 rounded-full hover:bg-black/5 active:scale-95 transition">
+                    <button onClick={() => setCurrentDate(new Date(year, month - 1, 1))} className="p-2 rounded-full active:scale-95 transition" style={{ ':hover': {} }} onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
                         <ChevronLeft style={{ color: theme.colors.textSecondary }} />
                     </button>
                     <h3 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>
                         {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
                     </h3>
-                    <button onClick={() => setCurrentDate(new Date(year, month + 1, 1))} className="p-2 rounded-full hover:bg-black/5 active:scale-95 transition">
+                    <button onClick={() => setCurrentDate(new Date(year, month + 1, 1))} className="p-2 rounded-full active:scale-95 transition" style={{ ':hover': {} }} onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
                         <ChevronRight style={{ color: theme.colors.textSecondary }} />
                     </button>
                 </div>
@@ -78,8 +80,12 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
                             <button
                                 key={day}
                                 onClick={() => setSelectedDate(date)}
-                                className={`h-12 rounded-xl flex flex-col items-center justify-center transition active:scale-95 ${isSelected ? 'ring-2 ring-offset-2' : 'hover:bg-black/5'}`}
-                                style={{ ringColor: theme.colors.accent }}
+                                className={`h-12 rounded-xl flex flex-col items-center justify-center transition active:scale-95 ${isSelected ? 'ring-2 ring-offset-2' : ''}`}
+                                style={{
+                                    ...(isSelected ? { boxShadow: `0 0 0 2px ${theme.colors.accent}` } : {}),
+                                }}
+                                onMouseEnter={e => { if (!isSelected) e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'; }}
+                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; }}
                             >
                                 <span className="text-sm" style={{ color: theme.colors.textPrimary }}>{day}</span>
                                 {has && <span className="text-[10px]" style={{ color: theme.colors.textSecondary }}>{currency0(total)}</span>}
@@ -131,7 +137,7 @@ const GroupTile = ({ theme, dateKey, group, onNavigate }) => {
                     const showDivider = idx < group.orders.length - 1;
                     return (
                         <React.Fragment key={o.orderNumber}>
-                            <button onClick={() => onNavigate(`orders/${o.orderNumber}`)} className="w-full text-left p-3 rounded-xl hover:bg-black/5 active:scale-[0.99] transition">
+                            <button onClick={() => onNavigate(`orders/${o.orderNumber}`)} className="w-full text-left p-3 rounded-xl active:scale-[0.99] transition" onMouseEnter={e => e.currentTarget.style.backgroundColor = isDarkTheme(theme) ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
                                 <div className="flex items-center justify-between gap-4">
                                     <div className="flex items-center gap-3 flex-1 min-w-0">
                                         <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: STATUS_COLORS[o.status] || theme.colors.secondary }} />
@@ -249,8 +255,10 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                                             <button
                                                 key={d}
                                                 onClick={() => { setSelectedDealer(d); setDealerMenuOpen(false); }}
-                                                className={`w-full text-left px-3 py-2 rounded-md text-sm transition hover:bg-black/5 active:scale-95 ${active ? 'font-semibold' : ''}`}
+                                                className={`w-full text-left px-3 py-2 rounded-md text-sm transition active:scale-95 ${active ? 'font-semibold' : ''}`}
                                                 style={{ backgroundColor: active ? theme.colors.subtle : 'transparent', color: theme.colors.textPrimary }}
+                                                onMouseEnter={e => { if (!active) e.currentTarget.style.backgroundColor = isDarkTheme(theme) ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'; }}
+                                                onMouseLeave={e => { if (!active) e.currentTarget.style.backgroundColor = 'transparent'; }}
                                             >
                                                 {d}
                                             </button>

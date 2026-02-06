@@ -60,7 +60,7 @@ const CustomSelect = ({ label, value, onChange, options, theme, placeholder, req
         <div className={`relative ${isOpen ? 'z-20' : ''}`} ref={buttonRef}>
             {label && (
                 <label className="block text-sm font-medium mb-1 px-1" style={{ color: theme.colors.textSecondary }}>
-                    {label} {required && <span className="text-red-500">*</span>}
+                    {label} {required && <span style={{ color: '#B85C5C' }}>*</span>}
                 </label>
             )}
             <button

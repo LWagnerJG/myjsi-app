@@ -8,16 +8,17 @@ export default defineConfig({
         strictPort: true
     },
     build: {
-        // Increase warning threshold to reduce noise for now
         chunkSizeWarningLimit: 1000,
+        target: 'es2020',
+        sourcemap: false,
+        cssMinify: true,
         rollupOptions: {
             output: {
-                // Manual chunking for better code splitting
                 manualChunks: {
-                    // Vendor chunks
                     'vendor-react': ['react', 'react-dom'],
                     'vendor-ui': ['lucide-react', 'framer-motion'],
-                    // Feature chunks (lazy loaded screens can stay in separate chunks)
+                    'vendor-charts': ['recharts'],
+                    'vendor-dnd': ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'],
                 }
             }
         }

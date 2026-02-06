@@ -75,7 +75,7 @@ export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
                     <Percent className="w-12 h-12 mx-auto mb-4" style={{ color: theme.colors.accent }} />
                     <h3 className="font-bold text-lg mb-2" style={{ color: theme.colors.textPrimary }}>No Discounts Found</h3>
                     <p className="text-sm" style={{ color: theme.colors.textSecondary }}>{searchTerm ? 'Try adjusting your search terms.' : 'No sample discounts available.'}</p>
-                    {error && <p className="text-sm mt-2" style={{ color: '#dc2626' }}>{error}</p>}
+                    {error && <p className="text-sm mt-2" style={{ color: '#B85C5C' }}>{error}</p>}
                 </GlassCard>
             </div>
         );

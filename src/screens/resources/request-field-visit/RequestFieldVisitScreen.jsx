@@ -274,7 +274,7 @@ export const RequestFieldVisitScreen = ({ theme, setSuccessMessage, onNavigate }
                                 <button
                                     onClick={handleSubmit}
                                     className="w-full font-bold py-3 px-6 rounded-lg transition-colors"
-                                    style={{ backgroundColor: theme.colors.accent, color: '#FFFFFF' }}
+                                    style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
                                 >
                                     Submit Field Visit Request
                                 </button>

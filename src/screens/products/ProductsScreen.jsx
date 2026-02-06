@@ -5,100 +5,161 @@ import React, {
     useRef
 } from 'react';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
-import { SearchInput } from '../../components/common/SearchInput.jsx';
 import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
+import { isDarkTheme } from '../../design-system/tokens.js';
 import {
     List,
     Grid,
     ArrowRight,
     Package,
-    Armchair,
-    Filter
+    ChevronRight
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { PRODUCTS_CATEGORIES_DATA, PRODUCT_DATA, FABRICS_DATA, JSI_MODELS } from './data.js';
 
+// ─── Glass helpers ───────────────────────────────────────────────────────────
+const glassStyle = (theme, dark) => ({
+    backgroundColor: dark ? 'rgba(30,30,30,0.72)' : 'rgba(255,255,255,0.72)',
+    backdropFilter: 'blur(24px) saturate(140%)',
+    WebkitBackdropFilter: 'blur(24px) saturate(140%)',
+    border: dark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(255,255,255,0.65)',
+    boxShadow: dark
+        ? '0 4px 24px rgba(0,0,0,0.35), 0 0 0 0.5px rgba(255,255,255,0.06) inset'
+        : '0 4px 24px rgba(53,53,53,0.07), 0 0 0 0.5px rgba(255,255,255,0.8) inset',
+});
+
+// ─── Category Card — glass surface ──────────────────────────────────────────
 const CategoryCard = React.memo(({
     category,
     theme,
     viewMode,
     onClick,
+    index = 0,
     className = ''
 }) => {
-    const handleClick = useCallback(() => {
-        onClick(category);
-    }, [category, onClick]);
+    const dark = isDarkTheme(theme);
+    const handleClick = useCallback(() => onClick(category), [category, onClick]);
 
     if (viewMode === 'grid') {
         return (
-            <GlassCard
-                theme={theme}
-                className={`p-4 overflow-hidden cursor-pointer transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] ${className}`}
+            <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.06, duration: 0.45, ease: [0.22, 0.8, 0.12, 0.99] }}
                 onClick={handleClick}
+                className={`rounded-[24px] overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.015] active:scale-[0.985] ${className}`}
+                style={{
+                    ...glassStyle(theme, dark),
+                    padding: 0,
+                }}
             >
-                <h2 className="text-2xl font-bold mb-2" style={{ color: theme.colors.textPrimary }}>
-                    {category.name}
-                </h2>
-                <div className={`flex space-x-3 -mb-2 justify-end pr-2`}>
-                    {category.images?.map((img, index) => (
-                        <div key={index} className="overflow-hidden rounded-md w-24 h-20 flex-shrink-0 bg-neutral-100">
-                            <img
-                                src={img}
-                                alt={`${category.name} example ${index + 1}`}
-                                className="w-full h-full object-cover object-center scale-[1.25] hover:scale-[1.35] transition-transform duration-500"
-                                loading="lazy"
-                            />
-                        </div>
-                    ))}
+                <div className="p-5 pb-3">
+                    <div className="flex items-center justify-between mb-3">
+                        <h2 className="text-xl font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>
+                            {category.name}
+                        </h2>
+                        <ChevronRight className="w-5 h-5 opacity-40" style={{ color: theme.colors.textSecondary }} />
+                    </div>
+                    <div className="flex gap-3 overflow-x-auto scrollbar-hide -mr-2">
+                        {category.images?.map((img, i) => (
+                            <div
+                                key={i}
+                                className="flex-shrink-0 w-[100px] h-[80px] rounded-2xl overflow-hidden"
+                                style={{
+                                    backgroundColor: dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
+                                }}
+                            >
+                                <img
+                                    src={img}
+                                    alt={`${category.name} ${i + 1}`}
+                                    className="w-full h-full object-cover object-center scale-[1.2] hover:scale-[1.3] transition-transform duration-500"
+                                    loading="lazy"
+                                />
+                            </div>
+                        ))}
+                    </div>
                 </div>
-            </GlassCard>
+                {category.description && (
+                    <div
+                        className="px-5 py-2.5 text-[12px] font-medium"
+                        style={{
+                            color: theme.colors.textSecondary,
+                            borderTop: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.05)',
+                        }}
+                    >
+                        {category.description}
+                    </div>
+                )}
+            </motion.div>
         );
     }
+
+    // List view
     return (
-        <GlassCard
-            theme={theme}
-            className={`p-3 cursor-pointer transform transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] ${className}`}
+        <motion.div
+            initial={{ opacity: 0, x: -8 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: index * 0.04, duration: 0.35 }}
             onClick={handleClick}
+            className={`rounded-2xl overflow-hidden cursor-pointer transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] ${className}`}
+            style={{ ...glassStyle(theme, dark) }}
         >
-            <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                    <img
-                        src={category.images?.[0]}
-                        alt={category.name}
-                        className="w-12 h-12 rounded-md object-cover"
-                        loading="lazy"
-                    />
-                    <h3 className="font-semibold text-lg" style={{ color: theme.colors.textPrimary }}>
-                        {category.name}
-                    </h3>
+            <div className="p-3.5 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <div
+                        className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0"
+                        style={{ backgroundColor: dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)' }}
+                    >
+                        <img
+                            src={category.images?.[0]}
+                            alt={category.name}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                        />
+                    </div>
+                    <div>
+                        <h3 className="font-semibold text-[15px]" style={{ color: theme.colors.textPrimary }}>
+                            {category.name}
+                        </h3>
+                        {category.description && (
+                            <p className="text-[11px] mt-0.5" style={{ color: theme.colors.textSecondary }}>
+                                {category.description}
+                            </p>
+                        )}
+                    </div>
                 </div>
-                <ArrowRight className="w-5 h-5" style={{ color: theme.colors.secondary }} />
+                <ChevronRight className="w-4 h-4 flex-shrink-0 opacity-40" style={{ color: theme.colors.textSecondary }} />
             </div>
-        </GlassCard>
+        </motion.div>
     );
 });
 CategoryCard.displayName = 'CategoryCard';
 
-const ViewModeToggle = React.memo(({ viewMode, onToggle, theme }) => (
-    <button
-        onClick={onToggle}
-        className="p-3.5 rounded-full transition-all duration-200 transform active:scale-90"
-        style={{
-            backgroundColor: theme.colors.surface,
-            border: 'none',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04)'
-        }}
-        aria-label={`Switch to ${viewMode === 'grid' ? 'list' : 'grid'} view`}
-    >
-        {viewMode === 'grid' ? (
-            <List className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />
-        ) : (
-            <Grid className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />
-        )}
-    </button>
-));
+// ─── View mode toggle — glass button ─────────────────────────────────────────
+const ViewModeToggle = React.memo(({ viewMode, onToggle, theme }) => {
+    const dark = isDarkTheme(theme);
+    return (
+        <button
+            onClick={onToggle}
+            className="p-3 rounded-full transition-all duration-200 active:scale-90 hover:scale-105"
+            style={{
+                ...glassStyle(theme, dark),
+                padding: '12px',
+            }}
+            aria-label={`Switch to ${viewMode === 'grid' ? 'list' : 'grid'} view`}
+        >
+            {viewMode === 'grid' ? (
+                <List className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />
+            ) : (
+                <Grid className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />
+            )}
+        </button>
+    );
+});
 ViewModeToggle.displayName = 'ViewModeToggle';
 
+// ─── Search header ──────────────────────────────────────────────────────────
 const StickyHeader = React.memo(({
     theme,
     viewMode,
@@ -107,13 +168,10 @@ const StickyHeader = React.memo(({
     onSearchChange
 }) => (
     <div
-        className="flex-shrink-0"
-        style={{
-            backgroundColor: theme.colors.background,
-            padding: '8px 16px 16px 16px'
-        }}
+        className="flex-shrink-0 px-4 sm:px-5 pt-2 pb-3"
+        style={{ backgroundColor: theme.colors.background }}
     >
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center gap-3">
             <StandardSearchBar
                 value={searchTerm}
                 onChange={onSearchChange}
@@ -131,23 +189,28 @@ const StickyHeader = React.memo(({
 ));
 StickyHeader.displayName = 'StickyHeader';
 
-const EmptyState = React.memo(({ searchTerm, theme }) => (
-    <GlassCard theme={theme} className="p-8 text-center">
-        <Package className="w-12 h-12 mx-auto mb-4" style={{ color: theme.colors.textSecondary }} />
-        <p className="font-semibold text-lg mb-2" style={{ color: theme.colors.textPrimary }}>
-            No Products Found
-        </p>
-        <p style={{ color: theme.colors.textSecondary }}>
-            No products match your search for "{searchTerm}"
-        </p>
-    </GlassCard>
-));
+// ─── Empty state ────────────────────────────────────────────────────────────
+const EmptyState = React.memo(({ searchTerm, theme }) => {
+    const dark = isDarkTheme(theme);
+    return (
+        <div className="rounded-[24px] p-10 text-center" style={{ ...glassStyle(theme, dark) }}>
+            <Package className="w-12 h-12 mx-auto mb-4" style={{ color: theme.colors.textSecondary }} />
+            <p className="font-semibold text-lg mb-2" style={{ color: theme.colors.textPrimary }}>
+                No Products Found
+            </p>
+            <p className="text-sm" style={{ color: theme.colors.textSecondary }}>
+                No products match "{searchTerm}"
+            </p>
+        </div>
+    );
+});
 EmptyState.displayName = 'EmptyState';
 
+// ─── Main screen ────────────────────────────────────────────────────────────
 export const ProductsScreen = ({ theme, onNavigate }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [viewMode, setViewMode] = useState('grid');
-    const [productView, setProductView] = useState('categories'); // 'categories' | 'families'
+    const [productView, setProductView] = useState('categories');
     const scrollContainerRef = useRef(null);
 
     const productViewOptions = [
@@ -157,7 +220,6 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
 
     const filteredCategories = useMemo(() => {
         if (!searchTerm.trim()) return PRODUCTS_CATEGORIES_DATA || [];
-
         const lowerSearch = searchTerm.toLowerCase();
         return PRODUCTS_CATEGORIES_DATA.filter(category =>
             category.name.toLowerCase().includes(lowerSearch) ||
@@ -166,9 +228,7 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
     }, [searchTerm]);
 
     const handleCategoryClick = useCallback((category) => {
-        if (category.nav) {
-            onNavigate(category.nav);
-        }
+        if (category.nav) onNavigate(category.nav);
     }, [onNavigate]);
 
     const toggleViewMode = useCallback(() => {
@@ -189,8 +249,7 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
                     searchTerm={searchTerm}
                     onSearchChange={handleSearchChange}
                 />
-                {/* Categories / Families Toggle */}
-                <div className="px-4 pb-4">
+                <div className="px-4 sm:px-5 pb-3">
                     <SegmentedToggle
                         value={productView}
                         onChange={setProductView}
@@ -202,21 +261,21 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
             </div>
             <div
                 ref={scrollContainerRef}
-                className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pb-4 scrollbar-hide"
+                className="flex-1 overflow-y-auto px-4 sm:px-5 lg:px-8 pb-8 scrollbar-hide"
             >
                 <div className="max-w-5xl mx-auto w-full">
                     {filteredCategories.length === 0 ? (
                         <EmptyState searchTerm={searchTerm} theme={theme} />
                     ) : (
-                        <div className={viewMode === 'grid' ? 'space-y-6' : 'space-y-2'} style={{ paddingTop: '8px' }}>
-                            {filteredCategories.map(category => (
+                        <div className={viewMode === 'grid' ? 'space-y-4' : 'space-y-2'} style={{ paddingTop: 4 }}>
+                            {filteredCategories.map((category, i) => (
                                 <CategoryCard
                                     key={category.name}
                                     category={category}
                                     theme={theme}
                                     viewMode={viewMode}
                                     onClick={handleCategoryClick}
-                                    className={category.name === 'Benches' ? 'mt-4' : ''}
+                                    index={i}
                                 />
                             ))}
                         </div>

@@ -8,7 +8,8 @@ let state = {
 
 export const getState = () => state;
 
-export const setState = (partial) => {
+export const setState = (partialOrFn) => {
+  const partial = typeof partialOrFn === 'function' ? partialOrFn(state) : partialOrFn;
   state = { ...state, ...partial };
   listeners.forEach((l) => l(state));
 };

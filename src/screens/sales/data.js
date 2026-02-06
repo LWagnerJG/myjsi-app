@@ -17,12 +17,12 @@ export const MONTHLY_SALES_DATA = [
 ];
 
 export const SALES_VERTICALS_DATA = [
-    { label: 'Healthcare', value: 2900104, color: '#c5e1a5' },
-    { label: 'Education', value: 1045589, color: '#ef9a9a' },
-    { label: 'Hospitality', value: 1045589, color: '#b39ddb' },
-    { label: 'Corporate', value: 1045589, color: '#C7AD8E' },
-    { label: 'Government', value: 1045589, color: '#ffe082' },
-    { label: 'Other', value: 500000, color: '#c1c1c1' }
+    { label: 'Healthcare', value: 2900104, color: '#4A7C59' },
+    { label: 'Education', value: 1045589, color: '#5B7B8C' },
+    { label: 'Hospitality', value: 1045589, color: '#C4956A' },
+    { label: 'Corporate', value: 1045589, color: '#8B7355' },
+    { label: 'Government', value: 1045589, color: '#7A8B6F' },
+    { label: 'Other', value: 500000, color: '#A09890' }
 ];
 
 export const CUSTOMER_RANK_DATA = [
