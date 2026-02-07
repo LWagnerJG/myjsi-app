@@ -681,9 +681,8 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                     style={{ transformOrigin: '78% 0%' }}
                 >
                     {/*
-                        Classic empire/cone lampshade:
-                        Narrow at top, wide at bottom, straight tapered sides.
-                        viewBox 120x160, rendered 44x58.
+                        Custom shade: left/upward tilt, asymmetric cone, matches reference photo.
+                        viewBox 120x130, rendered 44x46.
                     */}
                     <svg width="44" height="46" viewBox="0 0 120 130" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <defs>
@@ -756,19 +755,18 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                             fill={isDark ? 'rgba(255,235,190,0.1)' : 'rgba(255,240,200,0.12)'}
                         />
 
-                        {/* ─── CONE SHADE (off) ─── */}
-                        {/* Empire shape: narrow top, wide bottom, shorter */}
+                        {/* ─── CONE SHADE (off, asymmetric, tilted) ─── */}
                         <path
-                            d="M36,30 L84,30 L110,110 L10,110 Z"
+                            d="M44,24 C60,18 82,28 92,38 L112,112 Q108,120 18,112 Q8,108 28,38 Z"
                             fill="url(#shOff)"
                             stroke={isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.05)'}
                             strokeWidth="0.5"
                             strokeLinejoin="round"
                         />
 
-                        {/* ─── CONE SHADE (on – fades in) ─── */}
+                        {/* ─── CONE SHADE (on – fades in, asymmetric, tilted) ─── */}
                         <motion.path
-                            d="M36,30 L84,30 L110,110 L10,110 Z"
+                            d="M44,24 C60,18 82,28 92,38 L112,112 Q108,120 18,112 Q8,108 28,38 Z"
                             fill="url(#shOn)"
                             strokeWidth="0.5"
                             strokeLinejoin="round"
@@ -778,12 +776,12 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                             transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
                         />
 
-                        {/* 3D cone depth */}
-                        <path d="M36,30 L84,30 L110,110 L10,110 Z" fill="url(#shCone)" />
+                        {/* 3D cone depth (asymmetric, tilted) */}
+                        <path d="M44,24 C60,18 82,28 92,38 L112,112 Q108,120 18,112 Q8,108 28,38 Z" fill="url(#shCone)" />
 
-                        {/* Bulb glow through fabric */}
+                        {/* Bulb glow through fabric (asymmetric, tilted) */}
                         <motion.path
-                            d="M36,30 L84,30 L110,110 L10,110 Z"
+                            d="M44,24 C60,18 82,28 92,38 L112,112 Q108,120 18,112 Q8,108 28,38 Z"
                             fill="url(#bulbG)"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: lampOn ? 1 : 0 }}
