@@ -203,17 +203,25 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
     const lampAnim = useAnimation();
     const hasEnteredRef = useRef(false);
 
-    // Entrance: drop from above, hook on, then auto-on
+    // Entrance: drop from above, hook on with realistic pendulum physics
     useEffect(() => {
+        // Phase 1: drop down
         lampAnim.start(
-            { y: 0, opacity: 1, rotate: [0, 3, -2, 1, 0] },
+            { y: 0, opacity: 1 },
             {
-                y: { duration: 1.2, ease: [0.22, 0.68, 0.35, 1] },
-                opacity: { duration: 0.5, ease: 'easeOut' },
-                rotate: { duration: 1.6, delay: 1.0, ease: [0.25, 0.1, 0.25, 1], times: [0, 0.25, 0.55, 0.8, 1] },
+                y: { duration: 0.9, ease: [0.22, 0.68, 0.35, 1] },
+                opacity: { duration: 0.4, ease: 'easeOut' },
             }
-        ).then(() => { hasEnteredRef.current = true; });
-        const t = setTimeout(() => setLampOn(true), 2800);
+        ).then(() => {
+            // Phase 2: realistic pendulum sway (wider, damped)
+            return lampAnim.start(
+                { rotate: [0, 8, -5.5, 3.2, -1.8, 0.9, -0.4, 0] },
+                {
+                    rotate: { duration: 2.4, ease: [0.25, 0.1, 0.25, 1], times: [0, 0.12, 0.26, 0.40, 0.55, 0.70, 0.85, 1] },
+                }
+            );
+        }).then(() => { hasEnteredRef.current = true; });
+        const t = setTimeout(() => setLampOn(true), 3600);
         return () => clearTimeout(t);
     }, []);
 
@@ -664,10 +672,15 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                 onClick={(e) => { e.stopPropagation(); e.preventDefault(); setLampOn(prev => !prev); }}
                 title={lampOn ? 'Turn light off' : 'Turn light on'}
             >
+                {/* Perspective wrapper — rotates shade left & slightly upward for 3D look */}
+                <div style={{ perspective: '400px' }}>
                 <motion.div
-                    initial={{ y: -80, opacity: 0, rotate: 0 }}
+                    initial={{ y: -90, opacity: 0, rotate: 0 }}
                     animate={lampAnim}
-                    style={{ transformOrigin: '78% 0%', transform: 'rotateY(25deg)' }}
+                    style={{
+                        transformOrigin: '78% 0%',
+                        transform: 'rotateY(35deg) rotateX(-6deg)',
+                    }}
                 >
                     {/*
                         Classic empire/cone lampshade:
@@ -828,6 +841,7 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                         />
                     </svg>
                 </motion.div>
+                </div>
 
                 {/* ══ LIGHT EFFECTS ══ */}
 
