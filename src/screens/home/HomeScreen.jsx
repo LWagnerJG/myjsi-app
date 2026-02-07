@@ -672,15 +672,13 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                 onClick={(e) => { e.stopPropagation(); e.preventDefault(); setLampOn(prev => !prev); }}
                 title={lampOn ? 'Turn light off' : 'Turn light on'}
             >
-                {/* Perspective wrapper — rotates shade left & slightly upward for 3D look */}
-                <div style={{ perspective: '400px' }}>
+                {/* Perspective wrapper + 3D rotation (separate from framer-motion) */}
+                <div style={{ perspective: '500px' }}>
+                <div style={{ transform: 'rotateY(38deg) rotateX(-8deg)', transformStyle: 'preserve-3d' }}>
                 <motion.div
                     initial={{ y: -90, opacity: 0, rotate: 0 }}
                     animate={lampAnim}
-                    style={{
-                        transformOrigin: '78% 0%',
-                        transform: 'rotateY(35deg) rotateX(-6deg)',
-                    }}
+                    style={{ transformOrigin: '78% 0%' }}
                 >
                     {/*
                         Classic empire/cone lampshade:
@@ -794,15 +792,17 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
 
                         {/* Top rim */}
                         <motion.ellipse cx="60" cy="30" rx="26" ry="5"
+                            initial={{ fill: isDark ? '#8A8884' : '#DDDBD7' }}
                             animate={{ fill: lampOn ? (isDark ? '#FFF5E6' : '#FAF7F2') : (isDark ? '#8A8884' : '#DDDBD7') }}
-                            transition={{ duration: 0.6 }}
+                            transition={{ duration: 2, ease: [0.16, 1, 0.3, 1] }}
                             stroke={isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)'}
                             strokeWidth="0.5"
                         />
                         {/* Inner opening */}
                         <motion.ellipse cx="60" cy="30" rx="22" ry="3"
+                            initial={{ fill: isDark ? '#5A5855' : '#CCC9C4' }}
                             animate={{ fill: lampOn ? (isDark ? '#FFE8C4' : '#F0E8DA') : (isDark ? '#5A5855' : '#CCC9C4') }}
-                            transition={{ duration: 0.6 }}
+                            transition={{ duration: 2, ease: [0.16, 1, 0.3, 1] }}
                         />
                         {/* Bulb visible through top */}
                         <motion.ellipse cx="60" cy="31" rx="12" ry="1.5"
@@ -841,6 +841,7 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                         />
                     </svg>
                 </motion.div>
+                </div>
                 </div>
 
                 {/* ══ LIGHT EFFECTS ══ */}
@@ -910,6 +911,7 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                 {/* Layer 4 — Far ambient halo (dark mode) */}
                 {isDark && (
                     <motion.div
+                        initial={{ opacity: 0 }}
                         animate={{ opacity: lampOn ? 1 : 0 }}
                         transition={{ duration: 4, ease: [0.16, 1, 0.3, 1] }}
                         style={{
@@ -929,6 +931,7 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                 {/* Layer 5 — Upward ceiling bounce */}
                 {isDark && (
                     <motion.div
+                        initial={{ opacity: 0 }}
                         animate={{ opacity: lampOn ? 0.7 : 0 }}
                         transition={{ duration: 2.5, ease: [0.16, 1, 0.3, 1] }}
                         style={{
