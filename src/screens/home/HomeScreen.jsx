@@ -1,5 +1,6 @@
 // Enhanced HomeScreen with Dealer Dashboard design and reconfiguration functionality
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import ReactDOM from 'react-dom';
 import { allApps, DEFAULT_HOME_APPS } from '../../data.jsx';
 import { ORDER_DATA } from '../orders/data.js';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
@@ -10,7 +11,7 @@ import { DESIGN_TOKENS, isDarkTheme } from '../../design-system/tokens.js';
 import { Check, Plus, X, Settings as SettingsIcon, GripVertical, Lock, Paperclip, MessageCircle, Megaphone, Package, Calendar, DollarSign, Zap, ChevronRight } from 'lucide-react';
 import { LEAD_TIMES_DATA } from '../resources/lead-times/data.js';
 import { ANNOUNCEMENTS } from '../community/data.js';
-import { motion } from 'framer-motion';
+import { motion, useAnimation } from 'framer-motion';
 import {
     DndContext,
     DragOverlay,
@@ -157,7 +158,7 @@ const SortableAppTile = React.memo(({ id, app, colors, onRemove, isRemoveDisable
     );
 });
 
-export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpdateHomeApps, homeResetKey, posts }) => {
+export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpdateHomeApps, homeResetKey, posts, isDarkMode, onToggleTheme }) => {
     const [isEditMode, setIsEditMode] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [activeDragId, setActiveDragId] = useState(null);
@@ -198,6 +199,41 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
 
     // Safe theme color extraction with fallbacks
     const isDark = isDarkTheme(theme);
+    const [lampOn, setLampOn] = useState(false);
+    const lampAnim = useAnimation();
+    const hasEnteredRef = useRef(false);
+
+    // Entrance: drop from above, hook on, then auto-on
+    useEffect(() => {
+        lampAnim.start(
+            { y: 0, opacity: 1, rotate: [0, 3, -2, 1, 0] },
+            {
+                y: { duration: 1.2, ease: [0.22, 0.68, 0.35, 1] },
+                opacity: { duration: 0.5, ease: 'easeOut' },
+                rotate: { duration: 1.6, delay: 1.0, ease: [0.25, 0.1, 0.25, 1], times: [0, 0.25, 0.55, 0.8, 1] },
+            }
+        ).then(() => { hasEnteredRef.current = true; });
+        const t = setTimeout(() => setLampOn(true), 2800);
+        return () => clearTimeout(t);
+    }, []);
+
+    // Toggle: slide up to hide / slide down to show + switch theme
+    useEffect(() => {
+        if (!hasEnteredRef.current) return;
+        if (lampOn) {
+            // Turn on: switch to dark mode, then slide shade down
+            if (!isDarkMode && onToggleTheme) onToggleTheme();
+            lampAnim.start({ y: 0, opacity: 1, rotate: 0 }, { type: 'spring', stiffness: 120, damping: 18, mass: 0.6 });
+        } else {
+            // Turn off: quick smooth slide up, then switch to light mode
+            lampAnim.start(
+                { y: -60, opacity: 0 },
+                { duration: 0.28, ease: [0.5, 0, 0.84, 0] }
+            ).then(() => {
+                if (isDarkMode && onToggleTheme) onToggleTheme();
+            });
+        }
+    }, [lampOn]);
     const colors = useMemo(() => ({
         background: theme?.colors?.background || '#F0EDE8',
         surface: theme?.colors?.surface || '#FFFFFF',
@@ -609,8 +645,297 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
     const subtleBg = isDark ? 'bg-white/[0.08]' : 'bg-black/5';
 
     return (
-        <div className="flex flex-col h-full overflow-y-auto scrollbar-hide app-header-offset" style={{ backgroundColor: colors.background }}>
-            <div className="px-4 sm:px-6 lg:px-8 pt-0 sm:pt-1 pb-20 space-y-4 lg:space-y-6 max-w-5xl mx-auto w-full">
+        <div className="flex flex-col h-full overflow-y-auto scrollbar-hide app-header-offset" style={{ backgroundColor: colors.background, position: 'relative', overflowX: 'hidden' }}>
+
+            {/* ── Lampshade – portalled to body ── */}
+            {ReactDOM.createPortal(
+            <div
+                className="select-none"
+                style={{
+                    position: 'fixed',
+                    top: 3,
+                    right: '30%',
+                    zIndex: 35,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    cursor: 'pointer',
+                }}
+                onClick={(e) => { e.stopPropagation(); e.preventDefault(); setLampOn(prev => !prev); }}
+                title={lampOn ? 'Turn light off' : 'Turn light on'}
+            >
+                <motion.div
+                    initial={{ y: -80, opacity: 0, rotate: 0 }}
+                    animate={lampAnim}
+                    style={{ transformOrigin: '78% 0%', transform: 'rotateY(25deg)' }}
+                >
+                    {/*
+                        Classic empire/cone lampshade:
+                        Narrow at top, wide at bottom, straight tapered sides.
+                        viewBox 120x160, rendered 44x58.
+                    */}
+                    <svg width="44" height="46" viewBox="0 0 120 130" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            {/* Off: muted unlit fabric */}
+                            <linearGradient id="shOff" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor={isDark ? '#9A9894' : '#E4E2DE'} />
+                                <stop offset="100%" stopColor={isDark ? '#807E7C' : '#D4D2CE'} />
+                            </linearGradient>
+                            {/* On: warm backlit fabric */}
+                            <linearGradient id="shOn" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor={isDark ? '#FFF8EE' : '#FEFCF8'} />
+                                <stop offset="25%" stopColor={isDark ? '#FFF4E2' : '#FDFAF2'} />
+                                <stop offset="60%" stopColor={isDark ? '#FCECD0' : '#F8F2E8'} />
+                                <stop offset="100%" stopColor={isDark ? '#EDD9B5' : '#F0EAE0'} />
+                            </linearGradient>
+                            {/* Left-to-right shading for 3D cone form */}
+                            <linearGradient id="shCone" x1="0" y1="0" x2="1" y2="0">
+                                <stop offset="0%" stopColor="rgba(0,0,0,0.08)" />
+                                <stop offset="15%" stopColor="rgba(0,0,0,0.02)" />
+                                <stop offset="40%" stopColor="rgba(255,255,255,0.03)" />
+                                <stop offset="60%" stopColor="rgba(255,255,255,0.01)" />
+                                <stop offset="85%" stopColor="rgba(0,0,0,0.06)" />
+                                <stop offset="100%" stopColor="rgba(0,0,0,0.14)" />
+                            </linearGradient>
+                            {/* Hotspot glow – concentrated near bulb center */}
+                            <radialGradient id="bulbG" cx="0.5" cy="0.35" r="0.45">
+                                <stop offset="0%" stopColor={isDark ? 'rgba(255,240,200,0.55)' : 'rgba(255,245,215,0.22)'} />
+                                <stop offset="30%" stopColor={isDark ? 'rgba(255,225,170,0.3)' : 'rgba(255,235,190,0.1)'} />
+                                <stop offset="65%" stopColor={isDark ? 'rgba(255,215,150,0.08)' : 'rgba(255,225,175,0.03)'} />
+                                <stop offset="100%" stopColor="rgba(255,215,150,0)" />
+                            </radialGradient>
+                            {/* Bottom light pool – warm ellipse beneath shade */}
+                            <radialGradient id="btmPool" cx="0.5" cy="0" r="1">
+                                <stop offset="0%" stopColor={isDark ? 'rgba(255,220,160,0.55)' : 'rgba(255,225,170,0.22)'} />
+                                <stop offset="35%" stopColor={isDark ? 'rgba(255,205,140,0.2)' : 'rgba(255,215,155,0.08)'} />
+                                <stop offset="70%" stopColor={isDark ? 'rgba(255,195,125,0.06)' : 'rgba(255,210,150,0.02)'} />
+                                <stop offset="100%" stopColor="rgba(255,200,130,0)" />
+                            </radialGradient>
+                            {/* Warm inner rim glow */}
+                            <radialGradient id="rimGlow" cx="0.5" cy="1" r="0.8">
+                                <stop offset="0%" stopColor={isDark ? 'rgba(255,225,170,0.35)' : 'rgba(255,230,180,0.12)'} />
+                                <stop offset="100%" stopColor="rgba(255,210,150,0)" />
+                            </radialGradient>
+                        </defs>
+
+                        {/* ─── Brass mount hook (wider) ─── */}
+                        <rect x="87" y="4" width="12" height="11" rx="2"
+                            fill={isDark ? '#D9C484' : '#D4BE7A'}
+                        />
+                        {/* Hook highlight */}
+                        <rect x="89" y="5" width="4" height="9" rx="1"
+                            fill={isDark ? 'rgba(255,240,200,0.15)' : 'rgba(255,245,220,0.2)'}
+                        />
+
+                        {/* ─── Brass arm (wider) ─── */}
+                        <rect x="89" y="13" width="7" height="107" rx="1.5"
+                            fill={isDark ? '#CEAE6A' : '#C9A960'}
+                        />
+                        {/* Arm center highlight */}
+                        <rect x="91" y="15" width="2.5" height="103" rx="0.5"
+                            fill={isDark ? 'rgba(255,235,190,0.12)' : 'rgba(255,240,200,0.15)'}
+                        />
+
+                        {/* ─── Brass bracket (wider) ─── */}
+                        <rect x="50" y="27" width="43" height="4" rx="1.5"
+                            fill={isDark ? '#CEAE6A' : '#C9A960'}
+                        />
+                        {/* Bracket highlight */}
+                        <rect x="52" y="28" width="39" height="1.5" rx="0.5"
+                            fill={isDark ? 'rgba(255,235,190,0.1)' : 'rgba(255,240,200,0.12)'}
+                        />
+
+                        {/* ─── CONE SHADE (off) ─── */}
+                        {/* Empire shape: narrow top, wide bottom, shorter */}
+                        <path
+                            d="M36,30 L84,30 L110,110 L10,110 Z"
+                            fill="url(#shOff)"
+                            stroke={isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.05)'}
+                            strokeWidth="0.5"
+                            strokeLinejoin="round"
+                        />
+
+                        {/* ─── CONE SHADE (on – fades in) ─── */}
+                        <motion.path
+                            d="M36,30 L84,30 L110,110 L10,110 Z"
+                            fill="url(#shOn)"
+                            strokeWidth="0.5"
+                            strokeLinejoin="round"
+                            stroke={isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.03)'}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: lampOn ? 1 : 0 }}
+                            transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+                        />
+
+                        {/* 3D cone depth */}
+                        <path d="M36,30 L84,30 L110,110 L10,110 Z" fill="url(#shCone)" />
+
+                        {/* Bulb glow through fabric */}
+                        <motion.path
+                            d="M36,30 L84,30 L110,110 L10,110 Z"
+                            fill="url(#bulbG)"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: lampOn ? 1 : 0 }}
+                            transition={{ duration: 2, ease: [0.16, 1, 0.3, 1] }}
+                        />
+
+                        {/* Top rim */}
+                        <motion.ellipse cx="60" cy="30" rx="26" ry="5"
+                            animate={{ fill: lampOn ? (isDark ? '#FFF5E6' : '#FAF7F2') : (isDark ? '#8A8884' : '#DDDBD7') }}
+                            transition={{ duration: 0.6 }}
+                            stroke={isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)'}
+                            strokeWidth="0.5"
+                        />
+                        {/* Inner opening */}
+                        <motion.ellipse cx="60" cy="30" rx="22" ry="3"
+                            animate={{ fill: lampOn ? (isDark ? '#FFE8C4' : '#F0E8DA') : (isDark ? '#5A5855' : '#CCC9C4') }}
+                            transition={{ duration: 0.6 }}
+                        />
+                        {/* Bulb visible through top */}
+                        <motion.ellipse cx="60" cy="31" rx="12" ry="1.5"
+                            fill={isDark ? 'rgba(255,235,190,0.6)' : 'rgba(255,240,200,0.3)'}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: lampOn ? 1 : 0 }}
+                            transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+                        />
+
+                        {/* Bottom rim */}
+                        <ellipse cx="60" cy="110" rx="52" ry="4"
+                            fill={isDark ? '#E2DED8' : '#EDEBE7'}
+                            stroke={isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'}
+                            strokeWidth="0.5"
+                        />
+                        {/* Bottom band */}
+                        <rect x="12" y="107" width="96" height="4" rx="0"
+                            fill={isDark ? '#E8E5E0' : '#F0EEED'}
+                            opacity="0.6"
+                        />
+
+                        {/* Bottom light pool */}
+                        <motion.ellipse cx="60" cy="118" rx="44" ry="9"
+                            fill="url(#btmPool)"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: lampOn ? 1 : 0 }}
+                            transition={{ duration: 2, ease: [0.16, 1, 0.3, 1] }}
+                        />
+
+                        {/* Inner rim warm glow – visible when on */}
+                        <motion.ellipse cx="60" cy="110" rx="48" ry="6"
+                            fill="url(#rimGlow)"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: lampOn ? 1 : 0 }}
+                            transition={{ duration: 1.8, ease: [0.16, 1, 0.3, 1] }}
+                        />
+                    </svg>
+                </motion.div>
+
+                {/* ══ LIGHT EFFECTS ══ */}
+
+                {/* Layer 1 — Core beam: tight warm column directly under shade opening */}
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: lampOn ? 1 : 0 }}
+                    transition={{ duration: 2.5, ease: [0.16, 1, 0.3, 1] }}
+                    style={{
+                        position: 'absolute',
+                        top: 44,
+                        left: '44%',
+                        transform: 'translateX(-50%)',
+                        width: 100,
+                        height: 600,
+                        background: isDark
+                            ? 'radial-gradient(ellipse 38% 42% at 50% 0%, rgba(255,228,178,0.22) 0%, rgba(255,215,160,0.09) 25%, rgba(255,205,148,0.03) 50%, rgba(255,200,140,0.008) 70%, transparent 88%)'
+                            : 'radial-gradient(ellipse 38% 42% at 50% 0%, rgba(255,232,188,0.09) 0%, rgba(255,222,170,0.035) 28%, rgba(255,215,158,0.01) 52%, transparent 75%)',
+                        pointerEvents: 'none',
+                        filter: 'blur(3px)',
+                    }}
+                />
+
+                {/* Layer 2 — Primary cone: visible V-beam, wider spread */}
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: lampOn ? 1 : 0 }}
+                    transition={{ duration: 3, ease: [0.16, 1, 0.3, 1] }}
+                    style={{
+                        position: 'absolute',
+                        top: 44,
+                        left: '44%',
+                        transform: 'translateX(-50%)',
+                        width: 200,
+                        height: 550,
+                        background: isDark
+                            ? 'conic-gradient(from 180deg at 50% 0%, transparent 31%, rgba(255,218,162,0.06) 40%, rgba(255,222,170,0.12) 47%, rgba(255,225,175,0.14) 50%, rgba(255,222,170,0.12) 53%, rgba(255,218,162,0.06) 60%, transparent 69%)'
+                            : 'conic-gradient(from 180deg at 50% 0%, transparent 33%, rgba(255,224,175,0.035) 42%, rgba(255,228,180,0.06) 50%, rgba(255,224,175,0.035) 58%, transparent 67%)',
+                        pointerEvents: 'none',
+                        maskImage: 'linear-gradient(to bottom, white 0%, white 50%, transparent 95%)',
+                        WebkitMaskImage: 'linear-gradient(to bottom, white 0%, white 50%, transparent 95%)',
+                        filter: 'blur(6px)',
+                    }}
+                />
+
+                {/* Layer 3 — Ambient wash: very soft wide glow */}
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: lampOn ? 1 : 0 }}
+                    transition={{ duration: 3.5, ease: [0.16, 1, 0.3, 1] }}
+                    style={{
+                        position: 'absolute',
+                        top: 40,
+                        left: '44%',
+                        transform: 'translateX(-50%)',
+                        width: 340,
+                        height: 480,
+                        background: isDark
+                            ? 'radial-gradient(ellipse 58% 45% at 50% 8%, rgba(255,215,158,0.07) 0%, rgba(255,205,142,0.025) 35%, rgba(255,200,135,0.008) 60%, transparent 80%)'
+                            : 'radial-gradient(ellipse 58% 45% at 50% 8%, rgba(255,225,172,0.03) 0%, rgba(255,218,160,0.01) 38%, transparent 68%)',
+                        pointerEvents: 'none',
+                        filter: 'blur(10px)',
+                    }}
+                />
+
+                {/* Layer 4 — Far ambient halo (dark mode) */}
+                {isDark && (
+                    <motion.div
+                        animate={{ opacity: lampOn ? 1 : 0 }}
+                        transition={{ duration: 4, ease: [0.16, 1, 0.3, 1] }}
+                        style={{
+                            position: 'absolute',
+                            top: 20,
+                            left: '44%',
+                            transform: 'translateX(-50%)',
+                            width: 500,
+                            height: 400,
+                            background: 'radial-gradient(ellipse 50% 40% at 50% 18%, rgba(255,218,162,0.035) 0%, rgba(255,210,150,0.012) 40%, rgba(255,205,142,0.004) 60%, transparent 80%)',
+                            pointerEvents: 'none',
+                            filter: 'blur(14px)',
+                        }}
+                    />
+                )}
+
+                {/* Layer 5 — Upward ceiling bounce */}
+                {isDark && (
+                    <motion.div
+                        animate={{ opacity: lampOn ? 0.7 : 0 }}
+                        transition={{ duration: 2.5, ease: [0.16, 1, 0.3, 1] }}
+                        style={{
+                            position: 'absolute',
+                            top: -12,
+                            left: '44%',
+                            transform: 'translateX(-50%)',
+                            width: 100,
+                            height: 28,
+                            borderRadius: '50%',
+                            background: 'radial-gradient(ellipse at 50% 100%, rgba(255,230,185,0.12) 0%, rgba(255,220,168,0.04) 45%, transparent 70%)',
+                            pointerEvents: 'none',
+                            filter: 'blur(4px)',
+                        }}
+                    />
+                )}
+            </div>,
+            document.body
+            )}
+
+            <div className="px-4 sm:px-6 lg:px-8 pt-0 sm:pt-1 pb-20 space-y-4 lg:space-y-6 max-w-5xl mx-auto w-full" style={{ position: 'relative', zIndex: 2 }}>
 
                 {/* Header Section */}
                 <div className="space-y-0.5 hidden sm:block">
