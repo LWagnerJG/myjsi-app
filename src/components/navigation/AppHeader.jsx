@@ -71,6 +71,7 @@ export const AppHeader = React.memo(({
 
                 <div className="flex items-center gap-2 sm:gap-3">
                     <div
+                        data-greeting-anchor
                         className={`flex items-baseline justify-end transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden ${isHome ? 'max-w-[250px] opacity-100 mr-1' : 'max-w-0 opacity-0'}`}
                         style={{ color: theme.colors.textPrimary }}
                     >

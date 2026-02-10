@@ -154,7 +154,7 @@ const ScreenRouter = ({ screenKey, projectsScreenRef, SuspenseFallback, ...rest 
 
 function App() {
     // Persistent preferences / cart
-    const [isDarkMode, setIsDarkMode] = usePersistentState('pref.darkMode', false);
+    const [isDarkMode, setIsDarkMode] = useState(false);
     const [cart, setCart] = usePersistentState('samples.cart', {});
     const [homeApps, setHomeApps] = usePersistentState('pref.homeApps', DEFAULT_HOME_APPS);
 
