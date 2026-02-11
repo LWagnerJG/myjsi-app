@@ -13,11 +13,8 @@ export const FABRIC_PATTERNS = [
     'Coastal', 'Maritime', 'Modern', 'Classic', 'Elegance', 'Sophisticate'
 ];
 
-export const JSI_SERIES_OPTIONS = [
-    'Alden', 'Allied', 'Anthology', 'Aria', 'Cincture',
-    'Convert', 'Midwest', 'Momentum', 'Proton', 'Reveal',
-    'Symmetry', 'Vision', 'Wink'
-];
+// JSI series list — imported from the single source of truth
+export { JSI_SERIES as JSI_SERIES_OPTIONS } from '../../../data/jsiSeries.js';
 
 export const FABRIC_GRADES = [
     'A', 'B', 'C', 'COL', 'COM', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'L1', 'L2'

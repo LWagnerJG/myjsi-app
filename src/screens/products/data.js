@@ -103,7 +103,7 @@ export const PRODUCT_DATA = {
         name: 'Lounge',
         products: [
             { id: 'arwyn', name: 'Arwyn', price: 1500, image: 'https://via.placeholder.com/300x200/E3DBC8/2A2A2A?text=Arwyn+Lounge' },
-            { id: 'caav', name: 'Cäav', price: 1800, image: 'https://via.placeholder.com/300x200/D9CDBA/2A2A2A?text=Caav+Lounge' },
+            { id: 'caav', name: 'Caav', price: 1800, image: 'https://via.placeholder.com/300x200/D9CDBA/2A2A2A?text=Caav+Lounge' },
             { id: 'finn', name: 'Finn', price: 1600, image: 'https://via.placeholder.com/300x200/C7AD8E/2A2A2A?text=Finn+Lounge' },
         ],
         competition: [],
@@ -299,7 +299,5 @@ export const PRODUCTS_CATEGORIES_DATA = [
     }
 ];
 
-// Unique JSI series list (derived from PRODUCT_DATA) for spotlight product search / selection
-export const JSI_SERIES = Array.from(new Set(
-    Object.values(PRODUCT_DATA).flatMap(cat => (cat.products || []).map(p => p.name))
-)).sort();
+// Re-export the single-source-of-truth series list so existing imports keep working
+export { JSI_SERIES } from '../../data/jsiSeries.js';
