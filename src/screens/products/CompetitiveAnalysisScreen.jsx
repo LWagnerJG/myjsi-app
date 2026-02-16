@@ -99,7 +99,7 @@ export const CompetitiveAnalysisScreen = ({ categoryId, productId, theme }) => {
                 </div>
             </div>
             <div className="fixed bottom-0 left-0 right-0 px-4 pb-5 pt-2" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.12), rgba(0,0,0,0))' }}>
-                <button onClick={()=>setShowRequest(true)} className="w-full flex items-center justify-center gap-2 h-14 rounded-full font-semibold active:scale-95 transition-all shadow-lg" style={{ background: theme.colors.accent, color: theme.colors.accentText, boxShadow: `0 6px 20px ${theme.colors.shadow}` }}>
+                <button onClick={()=>setShowRequest(true)} className="w-full flex items-center justify-center gap-2 h-14 rounded-full font-semibold active:scale-95 transition-all shadow-lg" style={{ background: theme.colors.accent, color: theme.colors.accentText, boxShadow: `0 4px 12px ${theme.colors.shadow}` }}>
                     <Plus className="w-5 h-5" /> Request Competitor
                 </button>
             </div>

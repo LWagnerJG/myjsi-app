@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Settings, User, HelpCircle, LogOut } from 'lucide-react';
 import { isDarkTheme, DESIGN_TOKENS } from '../../design-system/tokens.js';
@@ -38,9 +38,7 @@ export const ProfileMenu = ({ show, onClose, onNavigate, theme, anchorRef }) => 
                 style={{
                     top: pos.top,
                     right: pos.right,
-                    backgroundColor: isDark ? 'rgba(40,40,40,0.88)' : 'rgba(255,255,255,0.92)',
-                    backdropFilter: 'blur(24px) saturate(150%)',
-                    WebkitBackdropFilter: 'blur(24px) saturate(150%)',
+                    backgroundColor: isDark ? '#282828' : '#FFFFFF',
                     border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.06)',
                     boxShadow: DESIGN_TOKENS.shadows.modal
                 }}

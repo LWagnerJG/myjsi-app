@@ -43,14 +43,13 @@ export const lightTheme = {
         quickShip: '#D4AF37', // Gold for QuickShip badges
         overlayDark: 'rgba(0, 0, 0, 0.6)', // Dark scrim for overlays on images
     },
-    backdropFilter: 'blur(24px)'
 };
 
 export const darkTheme = {
     colors: {
         // Core colors
         background: '#1A1A1A',
-        surface: 'rgba(40, 40, 40, 0.9)',
+        surface: '#282828',
         primary: '#FFFFFF',
         accent: '#FFFFFF',
         secondary: '#BBBBBB',
@@ -87,7 +86,6 @@ export const darkTheme = {
         quickShip: '#D4AF37', // Gold for QuickShip badges
         overlayDark: 'rgba(0, 0, 0, 0.7)', // Dark scrim for overlays on images
     },
-    backdropFilter: 'blur(24px)'
 };
 
 

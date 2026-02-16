@@ -89,7 +89,7 @@ export const QuickActionDropdown = ({ theme, onActionSelect, className = '' }) =
                         top: position.top,
                         left: position.left,
                         backgroundColor: colors.surface,
-                        boxShadow: '0 20px 50px rgba(0,0,0,0.15), 0 10px 20px rgba(0,0,0,0.08)',
+                        boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
                         border: `1px solid ${colors.border}`,
                     }}
                 >

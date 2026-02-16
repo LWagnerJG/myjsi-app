@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import {
     Database, Search, Share2, FileText, DollarSign, Calendar, Percent,
     Palette, Package, Users, MapPin, MonitorPlay, Wrench, Clock, ChevronRight

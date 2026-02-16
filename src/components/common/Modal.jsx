@@ -43,9 +43,7 @@ export const Modal = ({ show, onClose, title, children, theme, maxWidth = 'max-w
                         onClick={e => e.stopPropagation()}
                         className={`w-full ${maxWidth} rounded-3xl flex flex-col relative`}
                         style={{
-                            backgroundColor: isDark ? 'rgba(40, 40, 40, 0.85)' : 'rgba(255, 255, 255, 0.85)',
-                            backdropFilter: 'blur(24px) saturate(160%)',
-                            WebkitBackdropFilter: 'blur(24px) saturate(160%)',
+                            backgroundColor: isDark ? '#282828' : '#FFFFFF',
                             border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(255,255,255,0.6)',
                             boxShadow: DESIGN_TOKENS.shadows.modal,
                             maxHeight: '85vh',

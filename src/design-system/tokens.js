@@ -113,36 +113,36 @@ export const DESIGN_TOKENS = {
     micro: { size: '0.625rem', weight: 500, lineHeight: 1.3 },
   },
 
-  // Shadows - softer, more refined for JSI aesthetic
+  // Shadows - minimal, clean
   shadows: {
     none: 'none',
-    sm: '0 1px 3px rgba(53,53,53,0.04)',
-    md: '0 2px 8px rgba(53,53,53,0.06), 0 1px 3px rgba(53,53,53,0.04)',
-    lg: '0 4px 16px rgba(53,53,53,0.08), 0 2px 6px rgba(53,53,53,0.04)',
-    xl: '0 8px 28px rgba(53,53,53,0.1), 0 4px 10px rgba(53,53,53,0.06)',
-    '2xl': '0 16px 48px rgba(53,53,53,0.12), 0 8px 16px rgba(53,53,53,0.06)',
-    card: '0 4px 20px rgba(53,53,53,0.07), 0 2px 6px rgba(53,53,53,0.03)',
-    cardHover: '0 8px 32px rgba(53,53,53,0.12), 0 4px 12px rgba(53,53,53,0.06)',
-    button: '0 2px 8px rgba(53,53,53,0.1), 0 1px 3px rgba(53,53,53,0.06)',
-    buttonHover: '0 4px 12px rgba(53,53,53,0.15), 0 2px 4px rgba(53,53,53,0.08)',
-    modal: '0 24px 64px rgba(53,53,53,0.18), 0 12px 28px rgba(53,53,53,0.1)',
-    drawer: '0 -8px 32px rgba(53,53,53,0.12), 0 -2px 8px rgba(53,53,53,0.06)',
+    sm: '0 1px 2px rgba(0,0,0,0.04)',
+    md: '0 1px 4px rgba(0,0,0,0.05)',
+    lg: '0 2px 8px rgba(0,0,0,0.06)',
+    xl: '0 4px 16px rgba(0,0,0,0.08)',
+    '2xl': '0 8px 32px rgba(0,0,0,0.1)',
+    card: 'none',
+    cardHover: '0 4px 16px rgba(0,0,0,0.08)',
+    button: 'none',
+    buttonHover: '0 2px 8px rgba(0,0,0,0.08)',
+    modal: '0 16px 48px rgba(0,0,0,0.12)',
+    drawer: '0 -4px 16px rgba(0,0,0,0.08)',
   },
 
-  // Dark mode shadows (adjusted for JSI)
+  // Dark mode shadows - lighter than before
   shadowsDark: {
     none: 'none',
-    sm: '0 1px 3px rgba(0,0,0,0.2)',
-    md: '0 2px 8px rgba(0,0,0,0.3), 0 1px 3px rgba(0,0,0,0.2)',
-    lg: '0 4px 16px rgba(0,0,0,0.35), 0 2px 6px rgba(0,0,0,0.25)',
-    xl: '0 8px 28px rgba(0,0,0,0.4), 0 4px 10px rgba(0,0,0,0.3)',
-    '2xl': '0 16px 48px rgba(0,0,0,0.45), 0 8px 16px rgba(0,0,0,0.35)',
-    card: '0 4px 20px rgba(0,0,0,0.4), 0 2px 6px rgba(0,0,0,0.3)',
-    cardHover: '0 8px 32px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.35)',
-    button: '0 2px 8px rgba(0,0,0,0.35), 0 1px 3px rgba(0,0,0,0.25)',
-    buttonHover: '0 4px 12px rgba(0,0,0,0.45), 0 2px 4px rgba(0,0,0,0.3)',
-    modal: '0 24px 64px rgba(0,0,0,0.55), 0 12px 28px rgba(0,0,0,0.4)',
-    drawer: '0 -8px 32px rgba(0,0,0,0.45), 0 -2px 8px rgba(0,0,0,0.35)',
+    sm: '0 1px 2px rgba(0,0,0,0.15)',
+    md: '0 1px 4px rgba(0,0,0,0.2)',
+    lg: '0 2px 8px rgba(0,0,0,0.25)',
+    xl: '0 4px 16px rgba(0,0,0,0.3)',
+    '2xl': '0 8px 32px rgba(0,0,0,0.35)',
+    card: 'none',
+    cardHover: '0 4px 16px rgba(0,0,0,0.25)',
+    button: 'none',
+    buttonHover: '0 2px 8px rgba(0,0,0,0.2)',
+    modal: '0 16px 48px rgba(0,0,0,0.4)',
+    drawer: '0 -4px 16px rgba(0,0,0,0.25)',
   },
 
   // Transitions - smooth, confident
@@ -208,19 +208,19 @@ export const DESIGN_TOKENS = {
     frost44: '44px',
   },
 
-  // Frost glass button presets
+  // Frost glass button presets (simplified)
   frost: {
     dark: {
-      background: 'rgba(53, 53, 53, 0.65)',
+      background: '#2A2A2A',
       color: '#FFFFFF',
-      backdropFilter: 'blur(34px) saturate(180%)',
-      boxShadow: '0 8px 32px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.08) inset',
+      backdropFilter: 'none',
+      boxShadow: 'none',
     },
     light: {
-      background: 'rgba(255, 255, 255, 0.75)',
+      background: '#FFFFFF',
       color: '#353535',
-      backdropFilter: 'blur(34px) saturate(180%)',
-      boxShadow: '0 8px 32px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,255,255,0.5) inset',
+      backdropFilter: 'none',
+      boxShadow: 'none',
     },
   },
 };

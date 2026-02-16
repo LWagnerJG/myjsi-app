@@ -195,7 +195,7 @@ export const TagInput = ({
                 />
             </div>
             {open && filtered.length > 0 && (
-                <div className="absolute z-10 w-full mt-2 rounded-2xl overflow-hidden" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${theme.colors.border}`, boxShadow: '0 18px 40px rgba(0,0,0,.12)' }}>
+                <div className="absolute z-10 w-full mt-2 rounded-2xl overflow-hidden" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${theme.colors.border}`, boxShadow: '0 8px 24px rgba(0,0,0,.1)' }}>
                     {filtered.map((s) => (
                         <button key={s} type="button" onMouseDown={(e) => { e.preventDefault(); add(s); }} className="w-full text-left px-3 py-2 text-sm hover:bg-black/5" style={{ color: theme.colors.textPrimary }}>
                             {s}

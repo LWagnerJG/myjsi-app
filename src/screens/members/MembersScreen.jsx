@@ -373,7 +373,6 @@ const MembersScreenContent = ({ theme }) => {
                         bottom: '96px',
                         backgroundColor: theme.colors.surface,
                         borderTop: `1px solid ${theme.colors.border}`,
-                        backdropFilter: 'blur(8px)',
                     }}
                 >
                     <div className="max-w-screen-md mx-auto flex items-center gap-2">

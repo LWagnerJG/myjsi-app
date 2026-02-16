@@ -54,7 +54,7 @@ const DirectoryModal = ({ show, onClose, onSelect, theme, dealers = [], designFi
                     opacity: visible ? 1 : 0,
                     transition: prefersReduced ? 'none' : 'transform 300ms cubic-bezier(.3,1,.3,1), opacity 260ms ease',
                     background: theme.colors.surface,
-                    boxShadow: '0 18px 48px -8px rgba(0,0,0,0.25)',
+                    boxShadow: '0 8px 24px -4px rgba(0,0,0,0.12)',
                     borderRadius: 24,
                     maxWidth: 480,
                     width: 'calc(100% - 32px)',
@@ -207,9 +207,7 @@ const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, designFi
                     className="fixed bottom-6 left-1/2 -translate-x-1/2 z-10 flex items-center gap-3 pl-4 pr-5 py-3 rounded-full shadow-xl transition-all duration-200 active:scale-95"
                     style={{
                         backgroundColor: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(53, 53, 53, 0.65)',
-                        backdropFilter: 'blur(40px) saturate(180%)',
-                        WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-                        boxShadow: '0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.08) inset'
+                        boxShadow: '0 4px 16px rgba(0,0,0,0.15)'
                     }}
                 >
                     <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(255,255,255,0.12)' }}>
@@ -225,7 +223,7 @@ const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, designFi
                     <div className="absolute inset-0 bg-black/30" />
                     <div
                         className="absolute bottom-4 left-4 right-4 max-w-md mx-auto rounded-3xl overflow-hidden"
-                        style={{ backgroundColor: theme.colors.surface, boxShadow: '0 8px 40px rgba(0,0,0,0.2)', maxHeight: '75vh' }}
+                        style={{ backgroundColor: theme.colors.surface, boxShadow: '0 4px 20px rgba(0,0,0,0.1)', maxHeight: '75vh' }}
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Header */}
@@ -305,7 +303,7 @@ const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, designFi
                                 style={{
                                     backgroundColor: canSubmit ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.06)' : theme.colors.border),
                                     color: canSubmit ? theme.colors.accentText : theme.colors.textSecondary,
-                                    boxShadow: canSubmit ? '0 2px 12px rgba(53,53,53,0.12)' : 'none',
+                                    boxShadow: 'none',
                                 }}
                             >
                                 <Send className="w-4 h-4" />
@@ -319,7 +317,7 @@ const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, designFi
             {justSubmitted && (
                 <div className="fixed inset-0 z-[1200] flex items-center justify-center pointer-events-none">
                     <div className="absolute inset-0" style={{ background: overlayPhase==='enter' ? 'rgba(0,0,0,0.35)' : 'rgba(0,0,0,0)', transition: prefersReduced ? 'none' : 'background 320ms ease' }} />
-                    <div className="relative px-10 py-8 rounded-3xl text-center" style={{ background: theme.colors.surface, color: theme.colors.textPrimary, border: `1px solid ${theme.colors.border}`, transform: overlayPhase==='enter' ? 'scale(1)' : 'scale(.9)', opacity: overlayPhase==='enter' ? 1 : 0.9, transition: prefersReduced ? 'none' : 'transform 480ms cubic-bezier(.3,1,.3,1), opacity 360ms ease', boxShadow:'0 12px 48px -6px rgba(0,0,0,0.25)' }}>
+                    <div className="relative px-10 py-8 rounded-3xl text-center" style={{ background: theme.colors.surface, color: theme.colors.textPrimary, border: `1px solid ${theme.colors.border}`, transform: overlayPhase==='enter' ? 'scale(1)' : 'scale(.9)', opacity: overlayPhase==='enter' ? 1 : 0.9, transition: prefersReduced ? 'none' : 'transform 480ms cubic-bezier(.3,1,.3,1), opacity 360ms ease', boxShadow:'0 6px 24px -4px rgba(0,0,0,0.12)' }}>
                         <CheckCircle className="w-10 h-10 mx-auto mb-3" style={{ color: '#4A7C59' }} />
                         <p className="font-bold text-[15px]">Sample Request Submitted</p>
                         <p className="text-[12px] mt-1" style={{ color: theme.colors.textSecondary }}>You'll receive a confirmation email shortly.</p>
@@ -382,7 +380,7 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                     className="group relative rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer"
                     style={{
                         backgroundColor: setQty > 0 ? theme.colors.accent : theme.colors.surface,
-                        boxShadow: setQty > 0 ? '0 4px 16px rgba(0,0,0,0.15)' : '0 2px 10px rgba(0,0,0,0.06)',
+                        boxShadow: setQty > 0 ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
                         border: setQty > 0 ? `2px solid ${theme.colors.accent}` : `1px solid ${theme.colors.border}`,
                     }}
                 >
@@ -411,7 +409,7 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                             className="group relative rounded-2xl overflow-hidden transition-all duration-300"
                             style={{
                                 backgroundColor: theme.colors.surface,
-                                boxShadow: qty > 0 ? '0 4px 16px rgba(0,0,0,0.12)' : '0 2px 10px rgba(0,0,0,0.06)',
+                                boxShadow: qty > 0 ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
                                 border: qty > 0 ? `2px solid ${theme.colors.accent}` : `1px solid ${theme.colors.border}`,
                                 transform: qty > 0 ? 'scale(1.02)' : 'scale(1)'
                             }}
@@ -481,7 +479,7 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                             style={{
                                 backgroundColor: fullQty > 0 ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.04)' : theme.colors.surface),
                                 border: fullQty > 0 ? `2px solid ${theme.colors.accent}` : `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : theme.colors.border}`,
-                                boxShadow: fullQty > 0 ? '0 4px 16px rgba(0,0,0,0.12)' : '0 1px 6px rgba(0,0,0,0.04)',
+                                boxShadow: fullQty > 0 ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
                             }}
                         >
                             <div className="flex items-center gap-4 px-4 py-3.5">

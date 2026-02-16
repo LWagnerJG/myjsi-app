@@ -5,9 +5,6 @@ import { User, Bell, Palette, ChevronDown } from 'lucide-react';
 import { LEAD_TIMES_DATA } from '../resources/lead-times/data.js';
 import { isDarkTheme, DESIGN_TOKENS } from '../../design-system/tokens.js';
 
-// Safe normalization helper
-const cleanLabel = (s='') => Array.from(s).filter(ch => { const c=ch.charCodeAt(0); return c!==0xFFFD && c>=32; }).join('');
-
 const Toggle = ({ checked, onChange, theme }) => {
   const isDark = isDarkTheme(theme);
   return (
@@ -57,9 +54,7 @@ const Select = ({ value, onChange, options, theme }) => {
       {open && rect && createPortal(
         <div ref={portalRef} style={{ position: 'fixed', top: rect.bottom + 6, left: rect.left, width: rect.width, zIndex: DESIGN_TOKENS.zIndex.popover }}>
           <div className="py-1.5 rounded-2xl overflow-hidden" style={{
-            backgroundColor: isDark ? 'rgba(40,40,40,0.88)' : 'rgba(255,255,255,0.92)',
-            backdropFilter: 'blur(24px) saturate(150%)',
-            WebkitBackdropFilter: 'blur(24px) saturate(150%)',
+            backgroundColor: isDark ? '#282828' : '#FFFFFF',
             border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.06)',
             boxShadow: DESIGN_TOKENS.shadows.modal
           }}>
@@ -104,7 +99,13 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme }) => {
   const [leadTimeFavorites, setLeadTimeFavorites] = useState(() => {
     try { const raw = localStorage.getItem('leadTimeFavorites'); const parsed = raw ? JSON.parse(raw) : []; return Array.isArray(parsed) ? parsed : []; } catch { return []; }
   });
-  useEffect(() => { try { localStorage.setItem('leadTimeFavorites', JSON.stringify(leadTimeFavorites)); } catch {} }, [leadTimeFavorites]);
+  useEffect(() => {
+    try {
+      localStorage.setItem('leadTimeFavorites', JSON.stringify(leadTimeFavorites));
+    } catch (_storageError) {
+      return;
+    }
+  }, [leadTimeFavorites]);
   const leadTimeOptions = useMemo(() => {
     const unique = Array.from(new Set(LEAD_TIMES_DATA.map(item => item.series))).sort();
     return unique.slice(0, 24);

@@ -17,15 +17,8 @@ export const AppHeader = React.memo(({
     const isHome = !showBack;
     const dark = isDarkMode || isDarkTheme(theme);
 
-    const glassBg = dark
-        ? 'rgba(26,26,26,0.78)'
-        : 'rgba(255,255,255,0.78)';
-    const glassGradient = dark
-        ? 'linear-gradient(180deg, rgba(30,30,30,0.86) 0%, rgba(22,22,22,0.72) 100%)'
-        : 'linear-gradient(180deg, rgba(255,255,255,0.86) 0%, rgba(255,255,255,0.72) 100%)';
-    const glassShadow = dark
-        ? '0 4px 20px rgba(0,0,0,0.3)'
-        : '0 4px 20px rgba(53,53,53,0.06)';
+    const glassBg = dark ? '#2A2A2A' : '#FFFFFF';
+    const glassShadow = 'none';
 
     const getTimeGreeting = () => {
         const hour = new Date().getHours();
@@ -41,11 +34,8 @@ export const AppHeader = React.memo(({
                 style={{
                     borderRadius: 9999,
                     backgroundColor: glassBg,
-                    backgroundImage: glassGradient,
                     boxShadow: glassShadow,
-                    backdropFilter: 'blur(22px) saturate(140%)',
-                    WebkitBackdropFilter: 'blur(22px) saturate(140%)',
-                    border: dark ? '1px solid rgba(255,255,255,0.08)' : 'none'
+                    border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)'
                 }}
             >
                 <div className="flex items-center">

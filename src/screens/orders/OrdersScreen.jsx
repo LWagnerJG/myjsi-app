@@ -164,6 +164,7 @@ const GroupTile = ({ theme, dateKey, group, onNavigate }) => {
 
 /* --------------------------- Main Screen --------------------------- */
 export const OrdersScreen = ({ theme, onNavigate }) => {
+    const dark = isDarkTheme(theme);
     const [searchTerm, setSearchTerm] = useState('');
     const [dateType, setDateType] = useState('shipDate');
     const [viewMode, setViewMode] = useState('list');
@@ -219,15 +220,15 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
             {/* Top Controls - fixed below app header */}
             <div className="flex-shrink-0 max-w-5xl mx-auto w-full">
-                <div className="px-4 sm:px-6 lg:px-8 pt-1 pb-2 flex flex-col gap-2">
+                <div className="px-4 sm:px-6 lg:px-8 pt-2 pb-3 flex flex-col gap-2.5">
                     {/* Search Input Component */}
-                    <div style={{ height: 56 }} className="flex-grow">
-                        <SearchInput value={searchTerm} onChange={(e)=>setSearchTerm(e.target.value)} placeholder="Search Orders" theme={theme} variant="header" />
+                    <div style={{ height: 56 }}>
+                        <SearchInput value={searchTerm} onChange={setSearchTerm} placeholder="Search Orders" theme={theme} variant="header" />
                     </div>
 
-                    <div className="flex gap-3 items-center">
+                    <div className="flex items-center gap-3">
                         {/* Date type toggle */}
-                        <div className="flex-grow max-w-[220px]">
+                        <div className="min-w-0 flex-1 max-w-[220px]">
                             <SegmentedToggle
                                 value={dateType}
                                 onChange={setDateType}
@@ -237,46 +238,56 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                             />
                         </div>
 
-                        {/* Dealer filter */}
-                        <div ref={dealerRef} className="relative flex-shrink-0">
-                            <button
-                                onClick={() => setDealerMenuOpen((o) => !o)}
-                                className="h-11 w-11 rounded-full flex items-center justify-center active:scale-90 transition"
-                                style={{ backgroundColor: theme.colors.surface, boxShadow: '0 2px 8px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)' }}
-                                title={selectedDealer}
-                            >
-                                <Building2 className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />
-                            </button>
-                            {dealerMenuOpen && (
-                                <GlassCard theme={theme} className="absolute right-0 mt-2 w-56 max-h-72 overflow-y-auto p-2 z-20 animate-fade-in" variant="elevated">
-                                    {dealers.map((d) => {
-                                        const active = d === selectedDealer;
-                                        return (
-                                            <button
-                                                key={d}
-                                                onClick={() => { setSelectedDealer(d); setDealerMenuOpen(false); }}
-                                                className={`w-full text-left px-3 py-2 rounded-md text-sm transition active:scale-95 ${active ? 'font-semibold' : ''}`}
-                                                style={{ backgroundColor: active ? theme.colors.subtle : 'transparent', color: theme.colors.textPrimary }}
-                                                onMouseEnter={e => { if (!active) e.currentTarget.style.backgroundColor = isDarkTheme(theme) ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'; }}
-                                                onMouseLeave={e => { if (!active) e.currentTarget.style.backgroundColor = 'transparent'; }}
-                                            >
-                                                {d}
-                                            </button>
-                                        );
-                                    })}
-                                </GlassCard>
-                            )}
-                        </div>
+                        <div className="ml-auto flex items-center gap-2">
+                            {/* Dealer filter */}
+                            <div ref={dealerRef} className="relative flex-shrink-0">
+                                <button
+                                    onClick={() => setDealerMenuOpen((o) => !o)}
+                                    className="h-10 w-10 rounded-full flex items-center justify-center active:scale-90 transition border"
+                                    style={{
+                                        backgroundColor: dark ? 'rgba(255,255,255,0.06)' : theme.colors.surface,
+                                        borderColor: dark ? 'rgba(255,255,255,0.12)' : theme.colors.border,
+                                        boxShadow: 'none'
+                                    }}
+                                    title={selectedDealer}
+                                >
+                                    <Building2 className="w-[18px] h-[18px]" style={{ color: theme.colors.textPrimary }} />
+                                </button>
+                                {dealerMenuOpen && (
+                                    <GlassCard theme={theme} className="absolute right-0 mt-2 w-56 max-h-72 overflow-y-auto p-2 z-20 animate-fade-in" variant="elevated">
+                                        {dealers.map((d) => {
+                                            const active = d === selectedDealer;
+                                            return (
+                                                <button
+                                                    key={d}
+                                                    onClick={() => { setSelectedDealer(d); setDealerMenuOpen(false); }}
+                                                    className={`w-full text-left px-3 py-2 rounded-md text-sm transition active:scale-95 ${active ? 'font-semibold' : ''}`}
+                                                    style={{ backgroundColor: active ? theme.colors.subtle : 'transparent', color: theme.colors.textPrimary }}
+                                                    onMouseEnter={e => { if (!active) e.currentTarget.style.backgroundColor = isDarkTheme(theme) ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'; }}
+                                                    onMouseLeave={e => { if (!active) e.currentTarget.style.backgroundColor = 'transparent'; }}
+                                                >
+                                                    {d}
+                                                </button>
+                                            );
+                                        })}
+                                    </GlassCard>
+                                )}
+                            </div>
 
-                        {/* View toggle */}
-                        <button
-                            onClick={() => setViewMode((v) => (v === 'list' ? 'calendar' : 'list'))}
-                            className="h-11 w-11 rounded-full flex items-center justify-center active:scale-90 transition flex-shrink-0"
-                            style={{ backgroundColor: theme.colors.surface, boxShadow: '0 2px 8px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)' }}
-                            title={viewMode === 'list' ? 'Calendar View' : 'List View'}
-                        >
-                            {viewMode === 'list' ? <Calendar className="w-5 h-5" style={{ color: theme.colors.textPrimary }} /> : <List className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />}
-                        </button>
+                            {/* View toggle */}
+                            <button
+                                onClick={() => setViewMode((v) => (v === 'list' ? 'calendar' : 'list'))}
+                                className="h-10 w-10 rounded-full flex items-center justify-center active:scale-90 transition flex-shrink-0 border"
+                                style={{
+                                    backgroundColor: dark ? 'rgba(255,255,255,0.06)' : theme.colors.surface,
+                                    borderColor: dark ? 'rgba(255,255,255,0.12)' : theme.colors.border,
+                                    boxShadow: 'none'
+                                }}
+                                title={viewMode === 'list' ? 'Calendar View' : 'List View'}
+                            >
+                                {viewMode === 'list' ? <Calendar className="w-[18px] h-[18px]" style={{ color: theme.colors.textPrimary }} /> : <List className="w-[18px] h-[18px]" style={{ color: theme.colors.textPrimary }} />}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

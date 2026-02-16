@@ -47,7 +47,7 @@ export const FeedbackScreen = ({ theme }) => {
         border: `1px solid ${innerBorder}`,
         color: theme.colors.textPrimary,
         borderRadius: RADIUS_INNER,
-        boxShadow: '0 0 0 2px rgba(255,255,255,0.4) inset, 0 1px 2px rgba(0,0,0,0.04)'
+        boxShadow: 'none'
     };
 
     return (

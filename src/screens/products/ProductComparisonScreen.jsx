@@ -12,15 +12,11 @@ const LOUNGE_SEATING_OPTIONS = ['Single Seater','Two Seater','Three Seater','Ott
 const MATERIAL_UPCHARGE = { laminate: 1, veneer: 1.12 };
 const TYPICAL_MULTIPLIERS = { 'U-Shape': 1, 'L-Shape': 0.92, 'Single Ped Desk': 0.85, 'Adjustable Ht Desk': 1.05 };
 
-// ─── Glass helpers (consistent frosted surfaces) ─────────────────────────────
+// ─── Clean card helpers (consistent surfaces) ───────────────────────────────
 const glassStyle = (theme, dark) => ({
-  backgroundColor: dark ? 'rgba(30,30,30,0.72)' : 'rgba(255,255,255,0.72)',
-  backdropFilter: 'blur(24px) saturate(140%)',
-  WebkitBackdropFilter: 'blur(24px) saturate(140%)',
-  border: dark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(255,255,255,0.65)',
-  boxShadow: dark
-    ? '0 4px 24px rgba(0,0,0,0.35), 0 0 0 0.5px rgba(255,255,255,0.06) inset'
-    : '0 4px 24px rgba(53,53,53,0.07), 0 0 0 0.5px rgba(255,255,255,0.8) inset',
+  backgroundColor: dark ? '#2A2A2A' : '#FFFFFF',
+  border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
+  boxShadow: 'none',
 });
 
 // ─── Product thumbnail strip ─────────────────────────────────────────────────
@@ -115,10 +111,10 @@ const ProductHero = React.memo(({ product, theme, categoryId, onNavigate, catego
     <motion.div
       className={`relative w-full ${aspectClass} rounded-[28px] overflow-hidden group`}
       style={{
-        backgroundColor: dark ? 'rgba(30,30,30,0.6)' : 'rgba(240,237,232,0.6)',
+        backgroundColor: dark ? '#1E1E1E' : '#F0EDE8',
         boxShadow: dark
-          ? '0 8px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05) inset'
-          : '0 8px 40px rgba(53,53,53,0.12), 0 0 0 1px rgba(255,255,255,0.7) inset',
+          ? '0 4px 12px rgba(0,0,0,0.2)'
+          : '0 2px 8px rgba(53,53,53,0.08)',
       }}
       initial={{ opacity: 0, scale: 0.97 }}
       animate={{ opacity: 1, scale: 1 }}
@@ -183,10 +179,8 @@ const ProductHero = React.memo(({ product, theme, categoryId, onNavigate, catego
           style={{
             backgroundColor: dark ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.6)',
             color: dark ? '#fff' : theme.colors.textPrimary,
-            backdropFilter: 'blur(20px) saturate(150%)',
-            WebkitBackdropFilter: 'blur(20px) saturate(150%)',
             border: dark ? '1px solid rgba(255,255,255,0.15)' : '1px solid rgba(255,255,255,0.7)',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
           }}
         >
           Competition
@@ -428,7 +422,6 @@ const ErrorState = ({ theme, message = 'The requested item does not exist.' }) =
 // ─── Main Screen ─────────────────────────────────────────────────────────────
 export const ProductComparisonScreen = ({ categoryId, onNavigate, theme }) => {
   const categoryData = PRODUCT_DATA?.[categoryId];
-  const dark = isDarkTheme(theme);
   const isGuest = categoryId === 'guest';
 
   const [activeProduct, setActiveProduct] = useState(categoryData?.products?.[0]);

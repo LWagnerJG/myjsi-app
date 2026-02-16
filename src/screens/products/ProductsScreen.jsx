@@ -18,15 +18,11 @@ import {
 import { motion } from 'framer-motion';
 import { PRODUCTS_CATEGORIES_DATA, PRODUCT_DATA, FABRICS_DATA, JSI_MODELS } from './data.js';
 
-// ─── Glass helpers ───────────────────────────────────────────────────────────
-const glassStyle = (theme, dark) => ({
-    backgroundColor: dark ? 'rgba(30,30,30,0.72)' : 'rgba(255,255,255,0.72)',
-    backdropFilter: 'blur(24px) saturate(140%)',
-    WebkitBackdropFilter: 'blur(24px) saturate(140%)',
-    border: dark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(255,255,255,0.65)',
-    boxShadow: dark
-        ? '0 4px 24px rgba(0,0,0,0.35), 0 0 0 0.5px rgba(255,255,255,0.06) inset'
-        : '0 4px 24px rgba(53,53,53,0.07), 0 0 0 0.5px rgba(255,255,255,0.8) inset',
+// ─── Clean card helpers ───────────────────────────────────────────────────────────────
+const cardStyle = (dark) => ({
+    backgroundColor: dark ? '#2A2A2A' : '#FFFFFF',
+    border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
+    boxShadow: 'none',
 });
 
 // ─── Category Card — glass surface ──────────────────────────────────────────
@@ -50,7 +46,7 @@ const CategoryCard = React.memo(({
                 onClick={handleClick}
                 className={`rounded-[24px] overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.015] active:scale-[0.985] ${className}`}
                 style={{
-                    ...glassStyle(theme, dark),
+                    ...cardStyle(dark),
                     padding: 0,
                 }}
             >
@@ -103,7 +99,7 @@ const CategoryCard = React.memo(({
             transition={{ delay: index * 0.04, duration: 0.35 }}
             onClick={handleClick}
             className={`rounded-2xl overflow-hidden cursor-pointer transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] ${className}`}
-            style={{ ...glassStyle(theme, dark) }}
+            style={{ ...cardStyle(dark) }}
         >
             <div className="p-3.5 flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -144,7 +140,7 @@ const ViewModeToggle = React.memo(({ viewMode, onToggle, theme }) => {
             onClick={onToggle}
             className="p-3 rounded-full transition-all duration-200 active:scale-90 hover:scale-105"
             style={{
-                ...glassStyle(theme, dark),
+                ...cardStyle(dark),
                 padding: '12px',
             }}
             aria-label={`Switch to ${viewMode === 'grid' ? 'list' : 'grid'} view`}
@@ -193,7 +189,7 @@ StickyHeader.displayName = 'StickyHeader';
 const EmptyState = React.memo(({ searchTerm, theme }) => {
     const dark = isDarkTheme(theme);
     return (
-        <div className="rounded-[24px] p-10 text-center" style={{ ...glassStyle(theme, dark) }}>
+        <div className="rounded-[24px] p-10 text-center" style={{ ...cardStyle(dark) }}>
             <Package className="w-12 h-12 mx-auto mb-4" style={{ color: theme.colors.textSecondary }} />
             <p className="font-semibold text-lg mb-2" style={{ color: theme.colors.textPrimary }}>
                 No Products Found

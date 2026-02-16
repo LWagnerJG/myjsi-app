@@ -29,15 +29,15 @@ export const FrostButton = ({
     };
 
     const darkStyle = {
-        backgroundColor: 'rgba(53, 53, 53, 0.65)',
+        backgroundColor: '#353535',
         color: '#FFFFFF',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.08) inset'
+        boxShadow: 'none'
     };
 
     const lightStyle = {
-        backgroundColor: 'rgba(255, 255, 255, 0.75)',
+        backgroundColor: '#FFFFFF',
         color: '#353535',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,255,255,0.5) inset'
+        boxShadow: 'none'
     };
 
     const variantStyle = variant === 'dark' ? darkStyle : lightStyle;
@@ -50,8 +50,6 @@ export const FrostButton = ({
             className={`${sizeClasses[size]} font-semibold rounded-full transition-all duration-200 flex items-center justify-center hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed ${className}`}
             style={{
                 ...variantStyle,
-                backdropFilter: 'blur(34px) saturate(180%)',
-                WebkitBackdropFilter: 'blur(34px) saturate(180%)',
                 letterSpacing: '-0.01em'
             }}
             {...props}

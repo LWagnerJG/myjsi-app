@@ -341,7 +341,7 @@ const IncomingTransferCard = ({ request, products, theme, onApprove, onDecline }
                             <button
                                 onClick={() => onApprove(request.id)}
                                 className="flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-full font-semibold text-sm transition-all active:scale-95"
-                                style={{ backgroundColor: '#10B981', color: 'white' }}
+                                style={{ backgroundColor: theme.colors.success, color: theme.colors.accentText }}
                             >
                                 <Check className="w-4 h-4" />
                                 Approve
@@ -349,7 +349,7 @@ const IncomingTransferCard = ({ request, products, theme, onApprove, onDecline }
                             <button
                                 onClick={() => setShowDeclineInput(true)}
                                 className="flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-full font-semibold text-sm transition-all active:scale-95"
-                                style={{ backgroundColor: '#B85C5C', color: 'white' }}
+                                style={{ backgroundColor: theme.colors.error, color: theme.colors.accentText }}
                             >
                                 <X className="w-4 h-4" />
                                 Decline
@@ -377,7 +377,7 @@ const IncomingTransferCard = ({ request, products, theme, onApprove, onDecline }
                                         setShowDeclineInput(false);
                                     }}
                                     className="flex-1 py-2 px-4 rounded-full font-semibold text-sm"
-                                    style={{ backgroundColor: '#B85C5C', color: 'white' }}
+                                    style={{ backgroundColor: theme.colors.error, color: theme.colors.accentText }}
                                 >
                                     Confirm Decline
                                 </button>
@@ -402,7 +402,7 @@ const IncomingTransferCard = ({ request, products, theme, onApprove, onDecline }
                 <button
                     onClick={() => onApprove(request.id, true)} // true = complete
                     className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-full font-semibold text-sm transition-all active:scale-95"
-                    style={{ backgroundColor: theme.colors.accent, color: 'white' }}
+                    style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
                 >
                     <UserCheck className="w-4 h-4" />
                     {isOutgoing ? 'Mark as Handed Off' : 'Confirm Received'}
@@ -411,8 +411,8 @@ const IncomingTransferCard = ({ request, products, theme, onApprove, onDecline }
 
             {/* Show decline reason if declined */}
             {request.status === TRANSFER_STATUS.DECLINED && request.decisionReason && (
-                <div className="p-2 rounded-lg" style={{ backgroundColor: '#FEE2E2' }}>
-                    <p className="text-sm text-red-700">
+                <div className="p-2 rounded-lg" style={{ backgroundColor: `${theme.colors.error}1F` }}>
+                    <p className="text-sm" style={{ color: theme.colors.error }}>
                         <span className="font-medium">Reason:</span> {request.decisionReason}
                     </p>
                 </div>
@@ -879,7 +879,7 @@ const ProductCard = React.memo(({ product, theme, isInRequest, onView, onTransfe
                             <button
                                 onClick={(e) => { e.stopPropagation(); onTransfer(product); }}
                                 className="w-full flex items-center justify-center gap-2 px-3 py-1.5 rounded-full font-semibold text-xs transition-all active:scale-95"
-                                style={{ backgroundColor: '#5B7B8C', color: 'white' }}
+                                style={{ backgroundColor: theme.colors.info, color: theme.colors.accentText }}
                             >
                                 <ArrowRightLeft className="w-4 h-4" />
                                 Request Transfer
@@ -893,7 +893,10 @@ const ProductCard = React.memo(({ product, theme, isInRequest, onView, onTransfe
                             }}
                             disabled={!isAvailable && !isInRequest}
                             className="w-full flex items-center justify-center px-3 py-1.5 rounded-full font-semibold text-xs transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                            style={{ backgroundColor: isInRequest ? '#10b981' : (isAvailable ? theme.colors.accent : '#6b7280'), color: 'white' }}
+                            style={{
+                                backgroundColor: isInRequest ? theme.colors.success : (isAvailable ? theme.colors.accent : theme.colors.subtle),
+                                color: isInRequest || isAvailable ? theme.colors.accentText : theme.colors.textSecondary
+                            }}
                         >
                             {isInRequest ? (<><CheckCircle className="w-4 h-4 mr-1" />Added</>) :
                                 isAvailable ? (<><PlusCircle className="w-4 h-4 mr-1" />Add to Request</>) :
@@ -981,7 +984,7 @@ const ProductDetailModal = React.memo(({ product, theme, onClose, onTransfer }) 
                         <button
                             onClick={() => { onClose(); onTransfer(product); }}
                             className="w-full mt-4 flex items-center justify-center gap-2 py-3 px-4 rounded-full font-bold transition-all active:scale-95"
-                            style={{ backgroundColor: '#5B7B8C', color: 'white' }}
+                            style={{ backgroundColor: theme.colors.info, color: theme.colors.accentText }}
                         >
                             <ArrowRightLeft className="w-5 h-5" />
                             Request Transfer from {currentHolder?.name?.split(' ')[0]}
@@ -1186,10 +1189,10 @@ export const LoanerPoolScreen = ({ theme, setSuccessMessage, userSettings, myPro
                         </div>
 
                         {/* Info banner about transfers */}
-                        <div className="mx-4 mb-4 p-3 rounded-xl flex items-start gap-3" style={{ backgroundColor: 'rgba(91,123,140,0.13)' }}>
-                            <ArrowRightLeft className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: '#5B7B8C' }} />
+                        <div className="mx-4 mb-4 p-3 rounded-xl flex items-start gap-3" style={{ backgroundColor: `${theme.colors.info}20` }}>
+                            <ArrowRightLeft className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: theme.colors.info }} />
                             <div>
-                                <p className="text-sm font-medium" style={{ color: '#5B7B8C' }}>
+                                <p className="text-sm font-medium" style={{ color: theme.colors.info }}>
                                     Intra-Rep Transfers Now Available
                                 </p>
                                 <p className="text-xs mt-0.5" style={{ color: theme.colors.textSecondary }}>

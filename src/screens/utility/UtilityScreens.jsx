@@ -83,7 +83,7 @@ const CustomSelect = ({ label, value, onChange, options, theme, placeholder, req
                         backgroundColor: theme.colors.surface, 
                         borderColor: theme.colors.border,
                         transformOrigin: 'top center',
-                        boxShadow: `0 4px 30px ${theme.colors.shadow || 'rgba(0, 0, 0, 0.1)'}`,
+                        boxShadow: `0 4px 12px ${theme.colors.shadow || 'rgba(0, 0, 0, 0.08)'}`,
                         // Explicitly remove backdrop filters for solid appearance
                         backdropFilter: 'none',
                         WebkitBackdropFilter: 'none',

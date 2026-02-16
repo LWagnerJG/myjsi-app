@@ -24,43 +24,34 @@ export const GlassCard = React.memo(
     ref
   ) {
     const isDark = isDarkTheme(theme);
-    const shadows = isDark ? DESIGN_TOKENS.shadowsDark : DESIGN_TOKENS.shadows;
-
-    let boxShadow = shadows.none;
-    if (variant === 'elevated' || variant === 'interactive') boxShadow = shadows.card;
-    else if (variant === 'minimal') boxShadow = shadows.md;
-
-    const borderColor = theme?.colors?.border || JSI_COLORS.stone;
     const radius = DESIGN_TOKENS.borderRadius.xl; // 24px for JSI
 
-    // Frosted glass backgrounds — semi-transparent for depth
-    const glassBg = isDark
-      ? 'rgba(40, 40, 40, 0.72)'
-      : 'rgba(255, 255, 255, 0.72)';
+    // Opaque backgrounds — clean and simple
+    const cardBg = isDark ? '#2A2A2A' : '#FFFFFF';
 
-    // Subtle inner glow border for glass edge definition
-    const glassBorder = isDark
-      ? '1px solid rgba(255, 255, 255, 0.08)'
-      : '1px solid rgba(255, 255, 255, 0.6)';
+    // Subtle border for edge definition
+    const cardBorder = isDark
+      ? '1px solid rgba(255, 255, 255, 0.06)'
+      : '1px solid rgba(0, 0, 0, 0.06)';
 
-    // Interactive classes with hover shadow lift
+    const borderColor = theme?.colors?.border || JSI_COLORS.stone;
+
+    // Interactive classes
     const interactiveClasses = interactive || variant === 'interactive'
-      ? 'cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 active:scale-[0.985] active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#353535]/10'
+      ? 'cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.985] active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#353535]/10'
       : '';
 
     const outlinedBorder = variant === 'outlined'
       ? `1.5px solid ${borderColor}`
-      : glassBorder;
+      : cardBorder;
 
     return (
       <Component
         ref={ref}
-        className={`bg-clip-padding ${interactiveClasses} ${className}`}
+        className={`${interactiveClasses} ${className}`}
         style={{
-          backgroundColor: glassBg,
-          backdropFilter: 'blur(20px) saturate(150%)',
-          WebkitBackdropFilter: 'blur(20px) saturate(150%)',
-          boxShadow,
+          backgroundColor: cardBg,
+          boxShadow: 'none',
           borderRadius: radius,
           border: outlinedBorder,
           ...style

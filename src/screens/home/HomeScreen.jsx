@@ -88,9 +88,8 @@ const SortableAppTile = React.memo(({ id, app, colors, onRemove, isRemoveDisable
     const style = {
         transform: CSS.Transform.toString(transform),
         transition: isDragging ? undefined : transition,
-        backgroundColor: `${colors.surface}`,
-        borderColor: isDragging ? colors.accent : colors.border,
-        boxShadow: isOverlay ? '0 18px 32px rgba(0,0,0,0.16)' : (isDragging ? '0 8px 16px rgba(0,0,0,0.1)' : DESIGN_TOKENS.shadows.card),
+        backgroundColor: `${colors.tileSurface || colors.surface}`,
+        boxShadow: isOverlay ? '0 8px 24px rgba(0,0,0,0.1)' : (isDragging ? '0 4px 12px rgba(0,0,0,0.08)' : 'none'),
         opacity: isDragging ? 0.9 : 1,
         zIndex: isDragging ? 20 : 'auto',
         touchAction: 'none', // Critical for pointer interactions
@@ -105,7 +104,7 @@ const SortableAppTile = React.memo(({ id, app, colors, onRemove, isRemoveDisable
             style={style}
             {...attributes}
             {...listeners}
-            className="relative flex flex-col items-center justify-center gap-1 p-2.5 rounded-2xl border cursor-grab active:cursor-grabbing"
+            className="relative flex flex-col items-center justify-center gap-1 p-2.5 rounded-2xl cursor-grab active:cursor-grabbing"
         >
             {/* Draggable Indicator (Subtle) */}
             <div className="absolute top-2 left-2 opacity-30">
@@ -200,6 +199,7 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
     // Safe theme color extraction with fallbacks
     const isDark = isDarkTheme(theme);
     const [lampOn, setLampOn] = useState(isDarkMode);
+    const [lampLightReady, setLampLightReady] = useState(false);
     const lampAnim = useAnimation();
     const hasEnteredRef = useRef(false);
     const [lampRight, setLampRight] = useState('30%');
@@ -207,27 +207,35 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
     // Sync lampOn when isDarkMode changes externally (e.g. from settings)
     useEffect(() => {
         setLampOn(isDarkMode);
+        if (!isDarkMode) {
+            setLampLightReady(false);
+            hasEnteredRef.current = false;
+        }
     }, [isDarkMode]);
 
     // Entrance animation when dark mode activates
     useEffect(() => {
         if (isDarkMode) {
             hasEnteredRef.current = false;
+            setLampLightReady(false);
             lampAnim.set({ y: -90, opacity: 0, rotate: 0 });
             lampAnim.start(
                 { y: 0, opacity: 1 },
                 {
-                    y: { duration: 0.9, ease: [0.22, 0.68, 0.35, 1] },
+                    y: { duration: 0.78, ease: [0.22, 0.68, 0.35, 1] },
                     opacity: { duration: 0.4, ease: 'easeOut' },
                 }
             ).then(() => {
                 return lampAnim.start(
-                    { rotate: [0, 6, -4, 2.2, -1.2, 0.5, 0] },
-                    { rotate: { duration: 2, ease: [0.25, 0.1, 0.25, 1], times: [0, 0.14, 0.30, 0.46, 0.62, 0.80, 1] } }
+                    { rotate: [0, 2.8, -2.1, 1.35, -0.75, 0.3, 0] },
+                    { rotate: { duration: 1.25, ease: [0.28, 0.11, 0.32, 1], times: [0, 0.16, 0.34, 0.52, 0.7, 0.86, 1] } }
                 );
-            }).then(() => { hasEnteredRef.current = true; });
+            }).then(() => {
+                hasEnteredRef.current = true;
+                setLampLightReady(true);
+            });
         }
-    }, [isDarkMode]);
+    }, [isDarkMode, lampAnim]);
 
     // Dynamically position lamp to the left of the greeting message
     useEffect(() => {
@@ -262,6 +270,7 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
         e.preventDefault();
         if (!hasEnteredRef.current) return;
         // Only allow turning OFF (clicking switches to light mode)
+        setLampLightReady(false);
         lampAnim.start(
             { y: -60, opacity: 0 },
             { duration: 0.28, ease: [0.5, 0, 0.84, 0] }
@@ -273,11 +282,13 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
     const colors = useMemo(() => ({
         background: theme?.colors?.background || '#F0EDE8',
         surface: theme?.colors?.surface || '#FFFFFF',
+        tileSurface: isDark ? '#2A2A2A' : (theme?.colors?.surface || '#FFFFFF'),
+        tileShadow: 'none',
         accent: theme?.colors?.accent || '#353535',
         textPrimary: theme?.colors?.textPrimary || '#353535',
         textSecondary: theme?.colors?.textSecondary || '#666666',
         border: theme?.colors?.border || '#E3E0D8'
-    }), [theme]);
+    }), [theme, isDark]);
 
     const allAppRoutes = useMemo(() => new Set(allApps.map(app => app.route)), []);
 
@@ -502,9 +513,6 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
         return posts.slice(0, 3);
     }, [posts]);
 
-    const latestCommunityPost = communityPosts[0] || null;
-
-
     const homeFeatureOptions = useMemo(() => ([
         { id: 'activity', label: 'Recent Activity' },
         { id: 'community', label: 'Community' },
@@ -523,6 +531,9 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
     const recentOrders = useMemo(() => {
         return [...ORDER_DATA].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 3);
     }, []);
+
+    const hoverBg = isDark ? 'hover:bg-white/[0.06]' : 'hover:bg-black/[0.03]';
+    const subtleBg = isDark ? 'bg-white/[0.08]' : 'bg-black/5';
 
     const renderHomeFeatureContent = useCallback((mode) => {
         if (mode === 'community') {
@@ -675,10 +686,7 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                 ))}
             </div>
         );
-    }, [colors, isDark, leadTimeFavoritesData, communityPosts, onNavigate, recentOrders]);
-
-    const hoverBg = isDark ? 'hover:bg-white/[0.06]' : 'hover:bg-black/[0.03]';
-    const subtleBg = isDark ? 'bg-white/[0.08]' : 'bg-black/5';
+    }, [colors, leadTimeFavoritesData, communityPosts, onNavigate, recentOrders, hoverBg, subtleBg]);
 
     return (
         <div className="flex flex-col h-full overflow-y-auto scrollbar-hide app-header-offset" style={{ backgroundColor: colors.background, position: 'relative', overflowX: 'hidden' }}>
@@ -708,146 +716,68 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                     animate={lampAnim}
                     style={{ transformOrigin: '80% 0%' }}
                 >
-                    {/* JSI Indie wall sconce — Airbnb-style realistic icon */}
-                    <svg width="48" height="58" viewBox="0 0 120 145" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <svg width="54" height="64" viewBox="0 0 140 170" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <defs>
-                            {/* Clean white fabric: pure white → light warm cream */}
-                            <linearGradient id="jsiIndFab" x1="0.5" y1="0" x2="0.5" y2="1">
-                                <stop offset="0%" stopColor="#FFFFFF"/>
-                                <stop offset="35%" stopColor="#FEFCF8"/>
-                                <stop offset="100%" stopColor="#F2ECE2"/>
+                            <linearGradient id="shadeFabric" x1="0" y1="0" x2="0.4" y2="1">
+                                <stop offset="0%" stopColor="#D5D0CA"/>
+                                <stop offset="50%" stopColor="#C9C4BD"/>
+                                <stop offset="100%" stopColor="#BAB5AE"/>
                             </linearGradient>
-                            {/* Left/right edge shadows for cylindrical depth */}
-                            <linearGradient id="jsiIndSide" x1="0" y1="0.5" x2="1" y2="0.5">
-                                <stop offset="0%" stopColor="rgba(90,72,45,0.14)"/>
-                                <stop offset="16%" stopColor="rgba(90,72,45,0.02)"/>
-                                <stop offset="50%" stopColor="rgba(255,255,255,0.03)"/>
-                                <stop offset="84%" stopColor="rgba(90,72,45,0.02)"/>
-                                <stop offset="100%" stopColor="rgba(90,72,45,0.16)"/>
+                            <linearGradient id="shadeHighlight" x1="0.3" y1="0" x2="0.7" y2="1">
+                                <stop offset="0%" stopColor="rgba(255,255,255,0.28)"/>
+                                <stop offset="100%" stopColor="rgba(0,0,0,0.05)"/>
                             </linearGradient>
-                            {/* Warm bulb glow radiating through fabric */}
-                            <radialGradient id="jsiIndGlow" cx="0.5" cy="0.28" r="0.52">
-                                <stop offset="0%" stopColor="rgba(255,244,218,0.44)"/>
-                                <stop offset="55%" stopColor="rgba(255,235,200,0.12)"/>
-                                <stop offset="100%" stopColor="rgba(255,230,190,0)"/>
-                            </radialGradient>
-                            {/* Wood grain for backplate */}
-                            <linearGradient id="jsiIndWood" x1="0.2" y1="0" x2="0.8" y2="1">
-                                <stop offset="0%" stopColor="#A88B58"/>
-                                <stop offset="45%" stopColor="#8F7648"/>
-                                <stop offset="100%" stopColor="#7A6640"/>
+                            <linearGradient id="woodMount" x1="0.5" y1="0" x2="0.5" y2="1">
+                                <stop offset="0%" stopColor="#D7C49A"/>
+                                <stop offset="60%" stopColor="#C9B68A"/>
+                                <stop offset="100%" stopColor="#BCA277"/>
                             </linearGradient>
-                            {/* Brass metal finish */}
-                            <linearGradient id="jsiIndBrass" x1="0.3" y1="0" x2="0.7" y2="1">
-                                <stop offset="0%" stopColor="#DABE72"/>
-                                <stop offset="50%" stopColor="#C8A960"/>
-                                <stop offset="100%" stopColor="#B69850"/>
-                            </linearGradient>
-                            {/* Airbnb-style soft drop shadow */}
-                            <filter id="jsiIndShadow" x="-8%" y="-4%" width="116%" height="112%">
-                                <feDropShadow dx="1" dy="2" stdDeviation="3" floodColor="rgba(0,0,0,0.10)"/>
+                            <filter id="lampShadow" x="-20%" y="-10%" width="140%" height="130%">
+                                <feDropShadow dx="0" dy="2" stdDeviation="1.5" floodColor="rgba(0,0,0,0.15)"/>
                             </filter>
-                            {/* Warm light spill from bottom rim */}
-                            <radialGradient id="jsiIndRim" cx="0.5" cy="0" r="0.7">
-                                <stop offset="0%" stopColor="rgba(255,228,175,0.55)"/>
-                                <stop offset="45%" stopColor="rgba(255,215,155,0.18)"/>
-                                <stop offset="100%" stopColor="rgba(255,205,145,0)"/>
-                            </radialGradient>
-                            {/* Subtle highlight strip for brass */}
-                            <linearGradient id="jsiIndBrassHL" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="rgba(255,248,220,0.22)"/>
-                                <stop offset="100%" stopColor="rgba(255,248,220,0)"/>
-                            </linearGradient>
                         </defs>
 
-                        {/* ── BACK LAYER: Wood backplate (tall rectangle, wall mount) ── */}
-                        <rect x="95" y="2" width="15" height="28" rx="2.5"
-                            fill="url(#jsiIndWood)"/>
-                        <rect x="96.5" y="3" width="5" height="26" rx="1"
-                            fill="rgba(255,232,195,0.10)"/>
-                        <rect x="95" y="2" width="15" height="28" rx="2.5"
-                            stroke="rgba(60,45,20,0.12)" strokeWidth="0.5" fill="none"/>
+                        {/* Wood mount plate */}
+                        <rect x="106" y="0" width="16" height="28" rx="3.5" fill="url(#woodMount)"/>
+                        <line x1="111" y1="3" x2="111" y2="25" stroke="rgba(160,130,90,0.2)" strokeWidth="0.6"/>
+                        <line x1="117" y1="2" x2="117" y2="26" stroke="rgba(160,130,90,0.15)" strokeWidth="0.5"/>
 
-                        {/* ── Horizontal brass arm (extends from wall, behind shade) ── */}
-                        <rect x="52" y="22" width="46" height="4.5" rx="1.5"
-                            fill="url(#jsiIndBrass)"/>
-                        <rect x="54" y="23" width="42" height="1.8" rx="0.6"
-                            fill="url(#jsiIndBrassHL)"/>
+                        {/* Curved hook arm */}
+                        <path d="M114 28 C114 44 112 54 104 62 C96 70 84 72 76 72" stroke="#3C3E42" strokeWidth="4.5" strokeLinecap="round" fill="none"/>
+                        <circle cx="76" cy="72" r="2.5" fill="#3C3E42"/>
 
-                        {/* ── EMPIRE SHADE: wide top → narrower bottom ── */}
-                        <g filter="url(#jsiIndShadow)">
-                            <path d="M5,52 Q7,45 55,44 Q103,45 105,52 L95,118 Q92,124 55,125 Q18,124 15,118 Z"
-                                fill="url(#jsiIndFab)"/>
+                        {/* Fabric drum shade */}
+                        <g filter="url(#lampShadow)">
+                            <path d="M50 78 L102 78 L110 140 L42 140 Z" fill="url(#shadeFabric)"/>
+                            <path d="M54 82 L98 82 L105 136 L46 136 Z" fill="url(#shadeHighlight)" opacity="0.35"/>
+                            <path d="M50 78 L102 78 L110 140 L42 140 Z" stroke="rgba(140,135,128,0.25)" strokeWidth="0.8" fill="none"/>
+                            <line x1="49" y1="98" x2="107" y2="98" stroke="rgba(160,155,148,0.1)" strokeWidth="0.5"/>
+                            <line x1="48" y1="118" x2="109" y2="118" stroke="rgba(160,155,148,0.08)" strokeWidth="0.5"/>
                         </g>
-                        {/* Side depth */}
-                        <path d="M5,52 Q7,45 55,44 Q103,45 105,52 L95,118 Q92,124 55,125 Q18,124 15,118 Z"
-                            fill="url(#jsiIndSide)"/>
-                        {/* Inner bulb glow */}
-                        <path d="M5,52 Q7,45 55,44 Q103,45 105,52 L95,118 Q92,124 55,125 Q18,124 15,118 Z"
-                            fill="url(#jsiIndGlow)"/>
 
-                        {/* Fabric fold lines (subtle vertical pleats) */}
-                        <line x1="32" y1="50" x2="25" y2="121" stroke="rgba(75,58,30,0.035)" strokeWidth="0.6"/>
-                        <line x1="45" y1="47" x2="41" y2="123" stroke="rgba(75,58,30,0.022)" strokeWidth="0.5"/>
-                        <line x1="65" y1="47" x2="69" y2="123" stroke="rgba(75,58,30,0.022)" strokeWidth="0.5"/>
-                        <line x1="78" y1="50" x2="85" y2="121" stroke="rgba(75,58,30,0.035)" strokeWidth="0.6"/>
+                        {/* Bottom rim */}
+                        <ellipse cx="76" cy="140" rx="34" ry="3" fill="rgba(185,180,172,0.4)"/>
 
-                        {/* Ultra-subtle outline for form definition */}
-                        <path d="M5,52 Q7,45 55,44 Q103,45 105,52 L95,118 Q92,124 55,125 Q18,124 15,118 Z"
-                            stroke="rgba(0,0,0,0.04)" strokeWidth="0.4" fill="none"/>
-
-                        {/* ── Wire harp (thin brass U-shape above shade) ── */}
-                        <path d="M48,46 L48,13 Q48,5 55,5 Q62,5 62,13 L62,46"
-                            stroke="#C8A960" strokeWidth="1.8" fill="none" strokeLinecap="round"/>
-
-                        {/* ── Brass finial (small cap where harp meets shade crown) ── */}
-                        <circle cx="55" cy="45" r="3.2" fill="url(#jsiIndBrass)"/>
-                        <circle cx="55" cy="44.2" r="1.3" fill="rgba(255,248,225,0.32)"/>
-
-                        {/* Top rim (wide ellipse at shade opening) */}
-                        <ellipse cx="55" cy="49" rx="51" ry="5.5" fill="#FFFFFF" opacity="0.82"/>
-                        <ellipse cx="55" cy="49.5" rx="43" ry="3" fill="rgba(255,250,238,0.45)"/>
-
-                        {/* Bottom rim + warm light spill */}
-                        <ellipse cx="55" cy="122" rx="41" ry="3.5" fill="#EDE7DD"/>
-                        <ellipse cx="55" cy="128" rx="35" ry="8" fill="url(#jsiIndRim)"/>
+                        {/* Hanging cord */}
+                        <path d="M76 144 C76 152 75.5 160 75 170" stroke="#2F3136" strokeWidth="2.2" strokeLinecap="round" fill="none"/>
                     </svg>
                 </motion.div>
                 </div>
                 </div>
 
                 {/* Light effects */}
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: lampOn ? 1 : 0 }}
-                    transition={{ duration: 2.5, ease: [0.16, 1, 0.3, 1] }}
-                    style={{ position: 'absolute', top: 56, left: '42%', transform: 'translateX(-50%)',
-                        width: 90, height: 500,
-                        background: 'radial-gradient(ellipse 38% 42% at 50% 0%, rgba(255,228,178,0.22) 0%, rgba(255,215,160,0.09) 25%, rgba(255,205,148,0.03) 50%, rgba(255,200,140,0.008) 70%, transparent 88%)',
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: lampLightReady && lampOn ? 1 : 0 }}
+                    transition={{ duration: 1.8, ease: [0.2, 0.9, 0.3, 1] }}
+                    style={{ position: 'absolute', top: 54, left: '45%', transform: 'translateX(-50%)',
+                        width: 88, height: 430,
+                        background: 'radial-gradient(ellipse 34% 48% at 50% 0%, rgba(255,228,178,0.16) 0%, rgba(255,214,160,0.06) 38%, rgba(255,204,150,0.015) 62%, transparent 85%)',
+                        pointerEvents: 'none', filter: 'blur(2.5px)' }} />
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: lampLightReady && lampOn ? 0.55 : 0 }}
+                    transition={{ duration: 1.6, ease: [0.2, 0.9, 0.3, 1] }}
+                    style={{ position: 'absolute', top: 42, left: '45%', transform: 'translateX(-50%)',
+                        width: 62, height: 14, borderRadius: '50%',
+                        background: 'radial-gradient(ellipse at 50% 100%, rgba(255,230,185,0.18) 0%, rgba(255,220,168,0.05) 48%, transparent 72%)',
                         pointerEvents: 'none', filter: 'blur(3px)' }} />
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: lampOn ? 1 : 0 }}
-                    transition={{ duration: 3, ease: [0.16, 1, 0.3, 1] }}
-                    style={{ position: 'absolute', top: 56, left: '42%', transform: 'translateX(-50%)',
-                        width: 180, height: 450,
-                        background: 'conic-gradient(from 180deg at 50% 0%, transparent 31%, rgba(255,218,162,0.06) 40%, rgba(255,222,170,0.12) 47%, rgba(255,225,175,0.14) 50%, rgba(255,222,170,0.12) 53%, rgba(255,218,162,0.06) 60%, transparent 69%)',
-                        pointerEvents: 'none', maskImage: 'linear-gradient(to bottom, white 0%, white 50%, transparent 95%)',
-                        WebkitMaskImage: 'linear-gradient(to bottom, white 0%, white 50%, transparent 95%)', filter: 'blur(6px)' }} />
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: lampOn ? 1 : 0 }}
-                    transition={{ duration: 3.5, ease: [0.16, 1, 0.3, 1] }}
-                    style={{ position: 'absolute', top: 48, left: '42%', transform: 'translateX(-50%)',
-                        width: 300, height: 400,
-                        background: 'radial-gradient(ellipse 58% 45% at 50% 8%, rgba(255,215,158,0.07) 0%, rgba(255,205,142,0.025) 35%, rgba(255,200,135,0.008) 60%, transparent 80%)',
-                        pointerEvents: 'none', filter: 'blur(10px)' }} />
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: lampOn ? 1 : 0 }}
-                    transition={{ duration: 4, ease: [0.16, 1, 0.3, 1] }}
-                    style={{ position: 'absolute', top: 20, left: '42%', transform: 'translateX(-50%)',
-                        width: 420, height: 350,
-                        background: 'radial-gradient(ellipse 50% 40% at 50% 18%, rgba(255,218,162,0.035) 0%, rgba(255,210,150,0.012) 40%, rgba(255,205,142,0.004) 60%, transparent 80%)',
-                        pointerEvents: 'none', filter: 'blur(14px)' }} />
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: lampOn ? 0.7 : 0 }}
-                    transition={{ duration: 2.5, ease: [0.16, 1, 0.3, 1] }}
-                    style={{ position: 'absolute', top: -10, left: '42%', transform: 'translateX(-50%)',
-                        width: 80, height: 24, borderRadius: '50%',
-                        background: 'radial-gradient(ellipse at 50% 100%, rgba(255,230,185,0.12) 0%, rgba(255,220,168,0.04) 45%, transparent 70%)',
-                        pointerEvents: 'none', filter: 'blur(4px)' }} />
             </div>,
             document.body
             )}
@@ -871,12 +801,9 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                             height: 56,
                             paddingTop: 0,
                             paddingBottom: 0,
-                            backgroundColor: isDark ? 'rgba(26,26,26,0.78)' : 'rgba(255,255,255,0.78)',
-                            backgroundImage: isDark
-                                ? 'linear-gradient(180deg, rgba(30,30,30,0.86) 0%, rgba(22,22,22,0.72) 100%)'
-                                : 'linear-gradient(180deg, rgba(255,255,255,0.86) 0%, rgba(255,255,255,0.72) 100%)',
-                            border: isDark ? `1px solid rgba(255,255,255,0.08)` : 'none',
-                            boxShadow: 'none'
+                            backgroundColor: colors.tileSurface,
+                            border: 'none',
+                            boxShadow: colors.tileShadow
                         }}
                     >
                         <HomeSearchInput
@@ -897,7 +824,7 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
 
                     {searchQuery.trim() && (
                         <div className="absolute left-0 right-0 top-full mt-2 z-20">
-                            <GlassCard theme={theme} className="p-2" style={{ borderRadius: 20 }}>
+                            <GlassCard theme={theme} className="p-2" style={{ borderRadius: 20, backgroundColor: colors.tileSurface, border: 'none', boxShadow: colors.tileShadow }}>
                                 <div className="space-y-1">
                                     {spotlightResults.map((app) => (
                                         <button
@@ -945,17 +872,20 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
 
                 {/* Reconfigurable Apps section */}
                 <div className="space-y-2">
-                    <div className="flex items-center justify-end">
+                    <div className="flex items-center justify-between px-0.5">
+                        <div className="text-[13px] font-medium tracking-tight" style={{ color: colors.textSecondary }}>
+                            Core Apps
+                        </div>
                         {onUpdateHomeApps && (
                             <button
                                 onClick={() => setIsEditMode(!isEditMode)}
                                 title={isEditMode ? 'Exit edit mode' : 'Customize home apps'}
                                 aria-label={isEditMode ? 'Exit edit mode' : 'Customize home apps'}
-                                className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold transition-all active:scale-95"
+                                className="flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-semibold transition-all active:scale-95"
                                 style={{
-                                    backgroundColor: isEditMode ? colors.textPrimary : `${colors.surface}80`,
+                                    backgroundColor: isEditMode ? colors.textPrimary : `${colors.tileSurface}CC`,
                                     color: isEditMode ? '#FFFFFF' : colors.textSecondary,
-                                    border: `1px solid ${isEditMode ? colors.textPrimary : `${colors.border}B3`}`
+                                    border: 'none'
                                 }}
                             >
                                 {isEditMode ? (
@@ -966,7 +896,7 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                                 ) : (
                                     <>
                                         <GripVertical className="w-3 h-3" />
-                                        <span>Edit</span>
+                                        <span>Edit Layout</span>
                                     </>
                                 )}
                             </button>
@@ -974,8 +904,8 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                     </div>
                     {isEditMode && (
                         <div
-                            className="text-[10px] font-medium px-2.5 py-1 rounded-full border inline-flex items-center gap-2"
-                            style={{ color: colors.textSecondary, borderColor: `${colors.border}B3`, backgroundColor: `${colors.surface}A6` }}
+                            className="text-[10px] font-medium px-2.5 py-1 rounded-full inline-flex items-center gap-2"
+                            style={{ color: colors.textSecondary, backgroundColor: `${colors.tileSurface}` }}
                         >
                             <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ backgroundColor: colors.textSecondary }} />
                             Drag to reorder. Keep at least 3 apps pinned. Resources stays pinned.
@@ -1013,11 +943,10 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                                 {activeApp ? (
                                     <div className="w-[96px] sm:w-[104px] lg:w-[112px]">
                                         <div
-                                            className="relative flex flex-col items-center justify-center gap-1 p-2.5 rounded-2xl border"
+                                            className="relative flex flex-col items-center justify-center gap-1 p-2.5 rounded-2xl"
                                             style={{
-                                                backgroundColor: colors.surface,
-                                                borderColor: colors.accent,
-                                                boxShadow: '0 18px 32px rgba(0,0,0,0.16)',
+                                                backgroundColor: colors.tileSurface,
+                                                boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
                                                 width: '100%',
                                                 minWidth: 0,
                                                 minHeight: 96
@@ -1049,12 +978,12 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                                         key={app.route}
                                         onClick={() => onNavigate(app.route)}
                                         aria-label={`Open ${app.name}`}
-                                        className="relative flex flex-col items-center justify-center rounded-2xl transition-all active:scale-95 group gap-1 p-2.5 hover:shadow-xl"
+                                        className="relative flex flex-col items-center justify-center rounded-2xl transition-all active:scale-95 group gap-1 p-2.5"
                                         style={{
                                             minHeight: 96,
-                                            backgroundColor: colors.surface,
-                                            border: `1px solid ${colors.border}`,
-                                            boxShadow: DESIGN_TOKENS.shadows.card,
+                                            backgroundColor: colors.tileSurface,
+                                            border: 'none',
+                                            boxShadow: colors.tileShadow,
                                             width: '100%',
                                             minWidth: 0
                                         }}
@@ -1097,13 +1026,13 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                                         onClick={() => toggleApp(app.route)}
                                         className={`flex flex-col items-center justify-center gap-1 px-2 py-1.5 rounded-xl border border-dashed ${isDark ? 'hover:bg-white/[0.04]' : 'hover:bg-black/[0.02]'} transition-all active:scale-95`}
                                         style={{
-                                            backgroundColor: colors.surface,
-                                            borderColor: colors.border,
+                                            backgroundColor: colors.tileSurface,
+                                            borderColor: 'transparent',
                                             width: '100%',
                                             minWidth: 0
                                         }}
                                     >
-                                        <div className="w-6 h-6 rounded-lg flex items-center justify-center border border-dashed" style={{ borderColor: colors.border }}>
+                                        <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${colors.accent}10` }}>
                                             <Plus className="w-3 h-3 opacity-40" style={{ color: colors.textSecondary }} />
                                         </div>
                                         <span className="text-[9px] font-semibold" style={{ color: colors.textSecondary }}>{app.name}</span>
@@ -1118,8 +1047,8 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     <GlassCard
                         theme={theme}
-                        className="p-6 cursor-pointer hover:shadow-lg transition-shadow"
-                        style={{ borderRadius: 24 }}
+                        className="p-6 cursor-pointer transition-shadow"
+                        style={{ borderRadius: 24, backgroundColor: colors.tileSurface, border: 'none', boxShadow: colors.tileShadow }}
                         onClick={(e) => {
                             if (e.target.closest('button, a, select')) return;
                             if (homeFeatureMode === 'community') onNavigate('community');
@@ -1170,8 +1099,8 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
 
                     <GlassCard
                         theme={theme}
-                        className="p-6 hidden lg:block cursor-pointer hover:shadow-lg transition-shadow"
-                        style={{ borderRadius: 24 }}
+                        className="p-6 hidden lg:block cursor-pointer transition-shadow"
+                        style={{ borderRadius: 24, backgroundColor: colors.tileSurface, border: 'none', boxShadow: colors.tileShadow }}
                         onClick={(e) => {
                             if (e.target.closest('button, a, select')) return;
                             if (secondaryFeatureMode === 'community') onNavigate('community');
@@ -1227,11 +1156,10 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                         onClick={() => onNavigate('feedback')}
                         className="w-full px-5 py-4 flex items-center justify-between rounded-2xl transition-all hover:scale-[1.01] active:scale-[0.99]"
                         style={{
-                            backgroundColor: isDark ? 'rgba(40,40,40,0.72)' : 'rgba(255,255,255,0.72)',
-                            backdropFilter: 'blur(20px) saturate(150%)',
-                            WebkitBackdropFilter: 'blur(20px) saturate(150%)',
-                            border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'}`,
-                            boxShadow: isDark ? '0 2px 12px rgba(0,0,0,0.2)' : '0 2px 12px rgba(0,0,0,0.04)'
+                            backgroundColor: colors.tileSurface,
+                            backgroundColor: colors.tileSurface,
+                            border: 'none',
+                            boxShadow: colors.tileShadow
                         }}
                     >
                         <div className="space-y-0.5 text-left">

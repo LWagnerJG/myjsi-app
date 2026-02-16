@@ -7,7 +7,7 @@ import { ToggleSwitch } from '../../components/forms/ToggleSwitch.jsx';
 import { PillButton } from '../../components/common/JSIButtons.jsx';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 import { JSI_SERIES } from '../products/data.js';
-import { isDarkTheme, DESIGN_TOKENS } from '../../design-system/tokens.js';
+import { DESIGN_TOKENS } from '../../design-system/tokens.js';
 
 // Tab options for projects
 const PROJECTS_TAB_OPTIONS = [
@@ -425,7 +425,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
           <div className="max-w-screen-md mx-auto px-5">
             <div
               className="ml-auto inline-flex items-center gap-3 px-4 py-2 rounded-full border shadow-lg pointer-events-auto"
-              style={{ backgroundColor: `${theme.colors.surface}E6`, borderColor: theme.colors.border, backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)' }}
+              style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.border }}
             >
               <span className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: theme.colors.textSecondary }}>Stage Total</span>
               <span className="text-lg font-extrabold tracking-tight" style={{ color: theme.colors.accent }}>{fmtCurrency(stageTotals.totalValue)}</span>

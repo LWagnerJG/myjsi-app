@@ -13,10 +13,11 @@ import {
   SEARCH_FORM_INITIAL
 } from './data.js';
 import { FABRICS_DATA } from '../../products/data.js';
+import { isDarkTheme } from '../../../design-system/tokens.js';
 
 /* ── Required label helper ── */
-const FieldLabel = ({ children, required }) => (
-  <label className="text-xs font-semibold tracking-wide mb-1.5 block" style={{ color: '#353535' }}>
+const FieldLabel = ({ children, required, theme }) => (
+  <label className="text-xs font-semibold tracking-wide mb-1.5 block" style={{ color: theme.colors.textPrimary }}>
     {children}
     {required && <span className="text-red-500 ml-0.5">*</span>}
   </label>
@@ -91,7 +92,7 @@ const LocalSearchSelect = ({
     >
       <div
         className="rounded-2xl shadow-2xl overflow-hidden"
-        style={{ backgroundColor: theme.colors.surface, border, backdropFilter: 'blur(8px)' }}
+        style={{ backgroundColor: theme.colors.surface, border }}
       >
         <div className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: `1px solid ${theme.colors.border}` }}>
           <Search className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
@@ -120,7 +121,7 @@ const LocalSearchSelect = ({
                   type="button"
                   onClick={emptyCta.onClick}
                   className="w-full mt-1 px-4 py-3 rounded-xl font-semibold flex items-center justify-center gap-2"
-                  style={{ backgroundColor: '#B85C5C', color: 'white' }}
+                  style={{ backgroundColor: theme.colors.error, color: theme.colors.accentText }}
                 >
                   <ExternalLink className="w-4 h-4" />
                   {emptyCta.label}
@@ -154,7 +155,7 @@ const LocalSearchSelect = ({
 
   return (
     <div className={`w-full relative ${className}`}>
-      {label && <FieldLabel required={required}>{label}</FieldLabel>}
+      {label && <FieldLabel required={required} theme={theme}>{label}</FieldLabel>}
       <button
         ref={fieldRef}
         type="button"
@@ -186,7 +187,7 @@ const Chip = ({ label, active, onClick, theme }) => (
     className="px-4 py-2 rounded-full text-xs font-semibold transition-all active:scale-95"
     style={{
       backgroundColor: active ? theme.colors.accent : theme.colors.surface,
-      color: active ? '#fff' : theme.colors.textPrimary,
+      color: active ? theme.colors.accentText : theme.colors.textPrimary,
       border: `1px solid ${active ? theme.colors.accent : theme.colors.border}`,
     }}
   >
@@ -196,6 +197,7 @@ const Chip = ({ label, active, onClick, theme }) => (
 
 /* ── Screen ── */
 export const SearchFabricsScreen = ({ theme, onNavigate, onUpdateCart }) => {
+  const isDark = isDarkTheme(theme);
   const [form, setForm] = useState(SEARCH_FORM_INITIAL);
   const [results, setResults] = useState(null);
   const [error, setError] = useState('');
@@ -315,7 +317,7 @@ export const SearchFabricsScreen = ({ theme, onNavigate, onUpdateCart }) => {
                     {/* Top row: pattern name + order button */}
                     <div className="flex items-center justify-between gap-3 mb-3">
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <CheckCircle className="w-4 h-4 flex-shrink-0" style={{ color: '#4A7C59' }} />
+                        <CheckCircle className="w-4 h-4 flex-shrink-0" style={{ color: theme.colors.success }} />
                         <p className="text-sm font-semibold truncate" style={{ color: theme.colors.textPrimary }}>
                           {r.pattern}
                           <span className="font-normal ml-1.5" style={{ color: theme.colors.textSecondary }}>by {r.supplier}</span>
@@ -324,7 +326,7 @@ export const SearchFabricsScreen = ({ theme, onNavigate, onUpdateCart }) => {
                       <button
                         onClick={() => handleOrderSample(r)}
                         className="px-4 py-2 rounded-full text-xs font-semibold flex items-center gap-1.5 flex-shrink-0 active:scale-95 transition-all"
-                        style={{ backgroundColor: theme.colors.accent, color: '#fff' }}
+                        style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
                       >
                         <Package className="w-3.5 h-3.5" />
                         Sample
@@ -366,8 +368,8 @@ export const SearchFabricsScreen = ({ theme, onNavigate, onUpdateCart }) => {
           <form onSubmit={handleSubmit}>
             {/* Error */}
             {error && (
-              <div className="mb-4 px-4 py-3 rounded-card" style={{ backgroundColor: '#fee2e2', border: '1px solid #fecaca' }}>
-                <p className="text-xs font-medium" style={{ color: '#B85C5C' }}>{error}</p>
+              <div className="mb-4 px-4 py-3 rounded-card" style={{ backgroundColor: `${theme.colors.error}20`, border: `1px solid ${theme.colors.error}55` }}>
+                <p className="text-xs font-medium" style={{ color: theme.colors.error }}>{error}</p>
               </div>
             )}
 
@@ -409,7 +411,7 @@ export const SearchFabricsScreen = ({ theme, onNavigate, onUpdateCart }) => {
             <div className="space-y-5">
               {/* Grade */}
               <div>
-                <FieldLabel>Grade</FieldLabel>
+                <FieldLabel theme={theme}>Grade</FieldLabel>
                 <div className="flex flex-wrap gap-2 mt-1">
                   <Chip label="Any" active={anyGrade} onClick={() => pressAny('grade')} theme={theme} />
                   {!anyGrade && FABRIC_GRADES.map(g => (
@@ -420,7 +422,7 @@ export const SearchFabricsScreen = ({ theme, onNavigate, onUpdateCart }) => {
 
               {/* Fabric Type */}
               <div>
-                <FieldLabel>Fabric Type</FieldLabel>
+                <FieldLabel theme={theme}>Fabric Type</FieldLabel>
                 <div className="flex flex-wrap gap-2 mt-1">
                   <Chip label="Any" active={anyFabric} onClick={() => pressAny('fabricType')} theme={theme} />
                   {!anyFabric && FABRIC_TYPES.map(t => (
@@ -431,7 +433,7 @@ export const SearchFabricsScreen = ({ theme, onNavigate, onUpdateCart }) => {
 
               {/* Tackable */}
               <div>
-                <FieldLabel>Tackable</FieldLabel>
+                <FieldLabel theme={theme}>Tackable</FieldLabel>
                 <div className="flex flex-wrap gap-2 mt-1">
                   <Chip label="Any" active={anyTack} onClick={() => pressAny('tackable')} theme={theme} />
                   {!anyTack && TACKABLE_OPTIONS.map(t => (
@@ -447,7 +449,11 @@ export const SearchFabricsScreen = ({ theme, onNavigate, onUpdateCart }) => {
       {/* Sticky frost submit */}
       <div
         className="flex-shrink-0 px-4 sm:px-6 pb-5 pt-3"
-        style={{ background: 'linear-gradient(to top, rgba(240,237,232,1) 60%, rgba(240,237,232,0))' }}
+        style={{
+          background: isDark
+            ? `linear-gradient(to top, ${theme.colors.background} 60%, transparent)`
+            : 'linear-gradient(to top, rgba(240,237,232,1) 60%, rgba(240,237,232,0))'
+        }}
       >
         <div className="max-w-2xl mx-auto">
           <FrostButton

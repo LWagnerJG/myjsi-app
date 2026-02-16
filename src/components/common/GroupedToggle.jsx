@@ -1,5 +1,6 @@
 import React, { useId } from 'react';
 import { motion } from 'framer-motion';
+import { isDarkTheme } from '../../design-system/tokens.js';
 
 /**
  * JSI-style Segmented Toggle
@@ -25,9 +26,11 @@ export const SegmentedToggle = ({
   options, 
   size = 'md',
   fullWidth = false,
+  theme,
   className = ''
 }) => {
   const id = useId();
+  const dark = theme ? isDarkTheme(theme) : false;
   
   const sizes = {
     sm: { 
@@ -57,7 +60,11 @@ export const SegmentedToggle = ({
   };
   
   const s = sizes[size] || sizes.md;
-  const containerBg = '#E3E0D8';
+  const containerBg = theme?.colors?.subtle || '#E3E0D8';
+  const selectedBg = dark ? 'rgba(255,255,255,0.14)' : '#FFFFFF';
+  const selectedText = theme?.colors?.textPrimary || '#1a1a1a';
+  const unselectedText = dark ? 'rgba(240,240,240,0.78)' : '#6A6762';
+  const selectedShadow = dark ? '0 1px 2px rgba(0,0,0,0.45)' : '0 1px 2px rgba(0,0,0,0.08)';
 
   return (
     <div 
@@ -75,7 +82,7 @@ export const SegmentedToggle = ({
             onClick={() => onChange(opt.value)}
             className={`relative rounded-full ${s.px} ${s.py} ${s.text} transition-all whitespace-nowrap ${fullWidth ? 'flex-1' : ''}`}
             style={{
-              color: isSelected ? '#1a1a1a' : '#6A6762',
+              color: isSelected ? selectedText : unselectedText,
               fontWeight: isSelected ? 600 : 500
             }}
             aria-pressed={isSelected}
@@ -83,8 +90,8 @@ export const SegmentedToggle = ({
             {isSelected && (
               <motion.span
                 layoutId={`toggle-pill-${id}`}
-                className="absolute inset-0 bg-white rounded-full"
-                style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.08)' }}
+                className="absolute inset-0 rounded-full"
+                style={{ backgroundColor: selectedBg, boxShadow: selectedShadow }}
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
               />
             )}

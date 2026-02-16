@@ -2,6 +2,7 @@ import React, { useState, useRef, useMemo, useCallback, useLayoutEffect, useEffe
 import { Search } from 'lucide-react';
 import { DropdownPortal } from '../../DropdownPortal.jsx';
 import { DROPDOWN_MIN_WIDTH, DROPDOWN_SIDE_PADDING, DROPDOWN_GAP } from '../../constants/dropdown.js';
+import { isDarkTheme } from '../../design-system/tokens.js';
 
 export const AutoCompleteCombobox = React.memo(({
     label,
@@ -19,6 +20,7 @@ export const AutoCompleteCombobox = React.memo(({
     const [pos, setPos] = useState({ top: 0, left: 0, width: 0, height: 'auto' });
     const inputWrapperRef = useRef(null);
     const dropRef = useRef(null);
+    const dark = isDarkTheme(theme);
 
     const filtered = useMemo(() => {
         const q = (value || '').toLowerCase();
@@ -30,27 +32,22 @@ export const AutoCompleteCombobox = React.memo(({
         return onAddNew && value && value.trim() && !options.some(o => o.toLowerCase() === value.toLowerCase());
     }, [onAddNew, value, options]);
 
-    // Force solid background colors - more aggressive detection
+    // Use centralized theme detection to keep dark/light behavior consistent across screens
     const getDropdownStyles = () => {
-        const isDarkTheme = theme.colors.background?.includes('#1E') || 
-                           theme.colors.background?.includes('#2') || 
-                           theme.colors.surface?.includes('#2') ||
-                           theme.colors.textPrimary?.includes('#F');
-        
-        if (isDarkTheme) {
+        if (dark) {
             return {
-                backgroundColor: '#2A2A2A',
-                color: '#F5F5F5',
+                backgroundColor: theme.colors.surface,
+                color: theme.colors.textPrimary,
                 borderColor: 'rgba(255,255,255,0.12)',
-                '--dropdown-bg': '#2A2A2A',
+                '--dropdown-bg': theme.colors.surface,
                 '--dropdown-border': 'rgba(255,255,255,0.12)'
             };
         } else {
             return {
-                backgroundColor: '#FFFFFF',
-                color: '#111111',
+                backgroundColor: theme.colors.surface,
+                color: theme.colors.textPrimary,
                 borderColor: 'rgba(0,0,0,0.12)',
-                '--dropdown-bg': '#FFFFFF',
+                '--dropdown-bg': theme.colors.surface,
                 '--dropdown-border': 'rgba(0,0,0,0.12)'
             };
         }
@@ -220,7 +217,7 @@ export const AutoCompleteCombobox = React.memo(({
                                 backgroundColor: `${dropdownStyles.backgroundColor} !important`,
                                 borderColor: dropdownStyles.borderColor,
                                 color: dropdownStyles.color,
-                                boxShadow: '0 10px 40px rgba(0, 0, 0, 0.15), 0 4px 20px rgba(0, 0, 0, 0.1)',
+                                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.12)',
                                 backdropFilter: 'none !important',
                                 WebkitBackdropFilter: 'none !important',
                                 willChange: 'transform, opacity',

@@ -149,25 +149,25 @@ export const SearchInput = React.memo(function SearchInput({
 }) {
     const isHeader = variant === 'header';
 
-    // Pill style pulled from AppHeader (keep in sync)
+    // Pill style — lightweight border, no heavy shadow or beige bg
     const pill = isHeader ? {
-        height: 56,
-        backgroundColor: theme?.colors?.surface,
-        border: 'none',
-        boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04)',
-        borderRadius: 9999,
-        paddingLeft: 18,
-        paddingRight: 18,
-        transition: 'box-shadow 160ms ease, background-color 160ms ease'
-    } : {
-        height: 44,
-        backgroundColor: theme?.colors?.surface,
-        border: 'none',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)',
+        height: 48,
+        backgroundColor: theme?.colors?.surface === 'transparent' ? 'transparent' : (theme?.colors?.surface || 'transparent'),
+        border: theme?.colors?.surface === 'transparent' ? 'none' : `1px solid ${theme?.colors?.border || 'rgba(0,0,0,0.08)'}`,
+        boxShadow: 'none',
         borderRadius: 9999,
         paddingLeft: 16,
         paddingRight: 16,
-        transition: 'box-shadow 160ms ease, background-color 160ms ease'
+        transition: 'border-color 160ms ease'
+    } : {
+        height: 40,
+        backgroundColor: theme?.colors?.surface === 'transparent' ? 'transparent' : (theme?.colors?.surface || 'transparent'),
+        border: theme?.colors?.surface === 'transparent' ? 'none' : `1px solid ${theme?.colors?.border || 'rgba(0,0,0,0.08)'}`,
+        boxShadow: 'none',
+        borderRadius: 9999,
+        paddingLeft: 14,
+        paddingRight: 14,
+        transition: 'border-color 160ms ease'
     };
 
     const iconColor = theme?.colors?.textSecondary || '#666';

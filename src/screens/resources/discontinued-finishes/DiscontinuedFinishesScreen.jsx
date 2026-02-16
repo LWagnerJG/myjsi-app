@@ -78,9 +78,9 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
                 height: size,
                 border: `1.5px solid ${isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)'}`,
                 boxShadow: isDark
-                    ? 'inset 0 1px 3px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.25)'
-                    : 'inset 0 1px 2px rgba(0,0,0,0.06), 0 1px 4px rgba(53,53,53,0.08)',
-                backgroundColor: isDark ? 'rgba(60,60,60,0.5)' : theme.colors.subtle,
+                    ? '0 1px 3px rgba(0,0,0,0.15)'
+                    : '0 1px 3px rgba(53,53,53,0.06)',
+                backgroundColor: isDark ? '#3C3C3C' : theme.colors.subtle,
             }}
         >
             {image ? (
@@ -311,7 +311,7 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
                                 style={{
                                     backgroundColor: theme.colors.accent,
                                     color: '#FFFFFF',
-                                    boxShadow: '0 2px 8px rgba(53,53,53,0.1), 0 1px 3px rgba(53,53,53,0.06)',
+                                    boxShadow: 'none',
                                 }}
                                 onMouseEnter={e => { e.currentTarget.style.opacity = '0.9'; }}
                                 onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
