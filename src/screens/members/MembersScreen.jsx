@@ -148,8 +148,8 @@ const ConfirmModal = ({ open, title, message, confirmLabel, onConfirm, onCancel,
                         Cancel
                     </button>
                     <button onClick={onConfirm}
-                        className="px-4 py-1.5 rounded-full text-xs font-semibold text-white transition-opacity hover:opacity-90"
-                        style={{ backgroundColor: '#B85C5C' }}>
+                        className="px-4 py-1.5 rounded-full text-xs font-semibold transition-opacity hover:opacity-90"
+                        style={{ backgroundColor: '#B85C5C', color: '#fff' }}>
                         {confirmLabel || 'Remove'}
                     </button>
                 </div>
@@ -272,7 +272,7 @@ const InviteModal = ({ open, onClose, onInvite, theme, roles }) => {
                                         className="px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-150"
                                         style={{
                                             backgroundColor: role === r.value ? theme.colors.accent : 'transparent',
-                                            color: role === r.value ? '#fff' : theme.colors.textSecondary,
+                                            color: role === r.value ? theme.colors.accentText : theme.colors.textSecondary,
                                             border: `1.5px solid ${role === r.value ? theme.colors.accent : theme.colors.border}`,
                                         }}>
                                         {r.label}
@@ -292,8 +292,8 @@ const InviteModal = ({ open, onClose, onInvite, theme, roles }) => {
                             Cancel
                         </button>
                         <button onClick={handleSend}
-                            className={`flex items-center gap-1.5 px-5 py-1.5 rounded-full text-xs font-semibold text-white transition-all duration-150 ${valid ? 'opacity-100' : 'opacity-40 cursor-not-allowed'}`}
-                            style={{ backgroundColor: theme.colors.accent }}
+                            className={`flex items-center gap-1.5 px-5 py-1.5 rounded-full text-xs font-semibold transition-all duration-150 ${valid ? 'opacity-100' : 'opacity-40 cursor-not-allowed'}`}
+                            style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
                             disabled={!valid}>
                             <Send className="w-3 h-3" /> Send Invite
                         </button>
@@ -397,7 +397,7 @@ const PermToggle = ({ permKey, label, enabled, onToggle, theme, disabled }) => (
         className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-150 ${disabled ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'}`}
         style={{
             backgroundColor: enabled ? theme.colors.accent : 'transparent',
-            color: enabled ? '#fff' : theme.colors.textSecondary,
+            color: enabled ? theme.colors.accentText : theme.colors.textSecondary,
             border: `1.5px solid ${enabled ? theme.colors.accent : theme.colors.border}`,
         }}
         title={PERMISSION_DESCRIPTIONS?.[permKey] || ''}
@@ -441,11 +441,11 @@ const MemberCard = ({ theme, user, expanded, onToggle, onChangeRole, onTogglePer
                             <button
                                 type="button"
                                 onClick={(e) => { e.stopPropagation(); onRequestDelete(); }}
-                                className="w-7 h-7 rounded-full flex items-center justify-center transition-opacity hover:opacity-70"
+                                className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-opacity hover:opacity-70"
                                 style={{ color: '#B85C5C' }}
                                 title="Remove user"
                             >
-                                <Trash2 className="w-3.5 h-3.5" />
+                                <Trash2 className="w-3 h-3" /> Remove
                             </button>
                         )}
                         <ChevronDown className="w-4 h-4 transition-transform duration-200"
@@ -496,8 +496,8 @@ const MemberCard = ({ theme, user, expanded, onToggle, onChangeRole, onTogglePer
                         {isDirty && (
                             <div className="flex justify-end pt-2">
                                 <button onClick={onSave}
-                                    className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold text-white transition-all duration-150 active:scale-95"
-                                    style={{ backgroundColor: theme.colors.accent }}>
+                                    className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-150 active:scale-95"
+                                    style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}>
                                     <Check className="w-3 h-3" /> Save Changes
                                 </button>
                             </div>
@@ -694,7 +694,7 @@ const MembersScreenContent = ({ theme, onNavigate }) => {
                             {tab === 'team' && (
                                 <button onClick={() => setShowInvite(true)}
                                     className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold transition-transform duration-100 active:scale-95"
-                                    style={{ backgroundColor: theme.colors.accent, color: '#fff' }}>
+                                    style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}>
                                     <UserPlus className="w-3.5 h-3.5" />
                                     <span className="hidden sm:inline">Invite</span>
                                 </button>
