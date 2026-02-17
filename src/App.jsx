@@ -191,6 +191,7 @@ function App() {
     const [likedPosts, setLikedPosts] = useState({});
     const [pollChoices, setPollChoices] = useState({});
     const [showCreateContentModal, setShowCreateContentModal] = useState(false);
+    const [savedImageIds, setSavedImageIds] = usePersistentState('library.saved', []);
 
     // Directories / leads
     const [dealerDirectory] = useState(DEALER_DIRECTORY_DATA);
@@ -298,6 +299,14 @@ function App() {
         setPosts((prev) => prev.map(p => p.id === postId ? { ...p, comments: [...(p.comments || []), { id: now, name: 'You', text }] } : p));
     }, []);
 
+    const handleToggleSaveImage = useCallback((assetId) => {
+        setSavedImageIds(prev => {
+            const set = new Set(Array.isArray(prev) ? prev : []);
+            if (set.has(assetId)) set.delete(assetId); else set.add(assetId);
+            return [...set];
+        });
+    }, [setSavedImageIds]);
+
     const handlePollVote = useCallback((pollId, optionId) => {
         setPollChoices((prev) => ({ ...prev, [pollId]: optionId }));
         setPolls((prev) => prev.map(pl => pl.id !== pollId ? pl : { ...pl, options: pl.options.map(o => o.id === optionId ? { ...o, votes: (o.votes || 0) + 1 } : o) }));
@@ -358,6 +367,8 @@ function App() {
         onAddComment: handleAddComment,
         onPollVote: handlePollVote,
         openCreateContentModal: () => setShowCreateContentModal(true),
+        savedImageIds,
+        onToggleSaveImage: handleToggleSaveImage,
         cart,
         setCart,
         onUpdateCart: handleUpdateCart,

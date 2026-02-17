@@ -1,18 +1,18 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { INITIAL_ASSETS } from './data.js';
-import { X, Download, Share2, Copy } from 'lucide-react';
+import { X, Download, Share2, Copy, Heart } from 'lucide-react';
 
 // Simple in-memory library grid with mock data
-export const LibraryGrid = ({ theme, query, parentHeaderRef }) => {
+export const LibraryGrid = ({ theme, query, parentHeaderRef, savedImageIds = [], onToggleSaveImage, assetsOverride }) => {
   const [selected, setSelected] = useState(null); // asset
-  const [assets] = useState(INITIAL_ASSETS);
+  const allAssets = assetsOverride ?? INITIAL_ASSETS;
 
   const filtered = useMemo(() => {
     const q = (query||'').trim().toLowerCase();
-    if(!q) return assets;
-    return assets.filter(a => [a.title, a.series, a.finish, a.location, (a.tags||[]).join(' ')].filter(Boolean).join(' ').toLowerCase().includes(q));
-  }, [assets, query]);
+    if(!q) return allAssets;
+    return allAssets.filter(a => [a.title, a.series, a.finish, a.location, (a.tags||[]).join(' ')].filter(Boolean).join(' ').toLowerCase().includes(q));
+  }, [allAssets, query]);
 
   const openDetail = useCallback((asset)=> setSelected(asset), []);
   const closeDetail = useCallback(()=> setSelected(null), []);
@@ -35,16 +35,30 @@ export const LibraryGrid = ({ theme, query, parentHeaderRef }) => {
     <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
       <div className="flex-1 overflow-y-auto pb-10">
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 px-4 pt-2">
-          {filtered.map(a => (
-            <button key={a.id} onClick={()=>openDetail(a)} className="group relative w-full rounded-2xl overflow-hidden border focus:outline-none focus-visible:ring-2" style={{ borderColor: theme.colors.border, backgroundColor: theme.colors.surface }}>
-              <div className="aspect-square overflow-hidden">
-                <img src={a.src} alt={a.alt || a.title || a.series} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" loading="lazy" />
-              </div>
-              <div className="absolute inset-x-0 bottom-0 p-2 pt-8 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                <p className="text-[11px] leading-tight text-white line-clamp-2">{a.title || `${a.series||''} ${a.finish||''}`}</p>
-              </div>
-            </button>
-          ))}
+          {filtered.map(a => {
+            const isSaved = savedImageIds.includes(a.id);
+            return (
+              <button key={a.id} onClick={()=>openDetail(a)} className="group relative w-full rounded-2xl overflow-hidden border focus:outline-none focus-visible:ring-2" style={{ borderColor: theme.colors.border, backgroundColor: theme.colors.surface }}>
+                <div className="aspect-square overflow-hidden">
+                  <img src={a.src} alt={a.alt || a.title || a.series} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" loading="lazy" />
+                </div>
+                {/* Save / Heart button */}
+                {onToggleSaveImage && (
+                  <button
+                    onClick={e => { e.stopPropagation(); onToggleSaveImage(a.id); }}
+                    aria-label={isSaved ? 'Unsave' : 'Save'}
+                    className="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center transition-all"
+                    style={{ background: 'rgba(0,0,0,0.35)' }}
+                  >
+                    <Heart className="w-4 h-4" fill={isSaved ? '#f87171' : 'none'} stroke={isSaved ? '#f87171' : 'white'} />
+                  </button>
+                )}
+                <div className="absolute inset-x-0 bottom-0 p-2 pt-8 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                  <p className="text-[11px] leading-tight text-white line-clamp-2">{a.title || `${a.series||''} ${a.finish||''}`}</p>
+                </div>
+              </button>
+            );
+          })}
           {!filtered.length && (
             <div className="col-span-2 sm:col-span-3 text-center text-sm pt-20" style={{ color: theme.colors.textSecondary }}>No images match your filters.</div>
           )}
@@ -102,6 +116,19 @@ export const LibraryGrid = ({ theme, query, parentHeaderRef }) => {
 
                 {/* Actions */}
                 <div className="flex flex-wrap gap-2 pb-2">
+                  {onToggleSaveImage && (() => {
+                    const isSaved = savedImageIds.includes(selected.id);
+                    return (
+                      <button
+                        onClick={() => onToggleSaveImage(selected.id)}
+                        className="flex items-center gap-2 px-4 h-10 rounded-full text-[13px] font-medium"
+                        style={{ background: isSaved ? '#fee2e2' : theme.colors.subtle, color: isSaved ? '#dc2626' : theme.colors.textPrimary, border: `1px solid ${isSaved ? '#fca5a5' : theme.colors.border}` }}
+                      >
+                        <Heart className="w-3.5 h-3.5" fill={isSaved ? '#dc2626' : 'none'} />
+                        {isSaved ? 'Saved' : 'Save'}
+                      </button>
+                    );
+                  })()}
                   <button
                     onClick={() => { navigator.clipboard.writeText(window.location.origin + '/library#' + selected.id); }}
                     className="flex items-center gap-2 px-4 h-10 rounded-full text-[13px] font-medium"
