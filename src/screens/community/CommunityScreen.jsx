@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
 import { isDarkTheme } from '../../design-system/tokens.js';
 import { ANNOUNCEMENTS, STORIES } from './data.js';
@@ -105,7 +106,7 @@ const AnnouncementDetailModal = ({ announcement, theme, dark, onClose, onNavigat
     } catch (e) { /* */ }
   };
 
-  return (
+  return createPortal(
     <AnimatePresence>
       <motion.div
         initial={{ opacity: 0 }}
@@ -115,7 +116,7 @@ const AnnouncementDetailModal = ({ announcement, theme, dark, onClose, onNavigat
         onClick={onClose}
       >
         {/* Backdrop */}
-        <div className="absolute inset-0" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} />
+        <div className="absolute inset-0" style={{ backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }} />
 
         {/* Modal */}
         <motion.div
@@ -125,7 +126,7 @@ const AnnouncementDetailModal = ({ announcement, theme, dark, onClose, onNavigat
           transition={{ type: 'spring', stiffness: 380, damping: 34 }}
           onClick={e => e.stopPropagation()}
           className="relative w-full max-w-md mx-4 sm:mx-auto rounded-2xl overflow-hidden"
-          style={{ backgroundColor: dark ? '#282828' : '#FFFFFF' }}
+          style={{ backgroundColor: dark ? '#282828' : '#FFFFFF', boxShadow: '0 24px 64px rgba(0,0,0,0.22)' }}
         >
           {/* Header band */}
           <div className="px-5 pt-5 pb-3">
@@ -205,7 +206,8 @@ const AnnouncementDetailModal = ({ announcement, theme, dark, onClose, onNavigat
           </div>
         </motion.div>
       </motion.div>
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 };
 
@@ -231,10 +233,11 @@ const AnnouncementsRow = ({ announcements, theme, dark, onNavigate }) => {
                 onClick={() => setSelectedAnnouncement(a)}
                 className="flex-shrink-0 flex items-center gap-2 pl-2.5 pr-3 py-2 rounded-xl transition-all active:scale-[0.97]"
                 style={{
-                  backgroundColor: 'transparent',
-                  border: `1px solid ${dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)'}`,
+                  backgroundColor: dark ? 'rgba(255,255,255,0.05)' : theme.colors.surface,
+                  border: `1px solid ${dark ? 'rgba(255,255,255,0.1)' : theme.colors.border}`,
                   minWidth: 180,
                   maxWidth: 240,
+                  boxShadow: dark ? 'none' : '0 1px 4px rgba(0,0,0,0.06)',
                 }}
               >
                 <div
@@ -594,7 +597,7 @@ export const CommunityScreen = ({
                 value={query}
                 onChange={setQuery}
                 placeholder={viewMode === 'feed' ? 'Search posts, people, tags...' : 'Search library'}
-                theme={{ ...theme, colors: { ...theme.colors, surface: 'transparent' } }}
+                theme={theme}
               />
             </div>
             {openCreateContentModal && (

@@ -3,7 +3,6 @@ import { LibraryGrid } from '../library/LibraryGrid.jsx';
 import { CommunityScreen } from '../community/CommunityScreen.jsx';
 import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
 import { isDarkTheme } from '../../design-system/tokens.js';
-import { Search } from 'lucide-react';
 
 export const CommunityLibraryLayout = ({
   theme,
@@ -35,9 +34,9 @@ export const CommunityLibraryLayout = ({
   const paneTransition = prefersReducedMotion ? 'none' : 'opacity 240ms ease, transform 240ms ease';
 
   const tabStyle = (isActive) => ({
-    color: isActive ? theme.colors.textPrimary : (dark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.35)'),
+    color: isActive ? theme.colors.textPrimary : (dark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.4)'),
     fontWeight: isActive ? 700 : 500,
-    borderBottom: isActive ? `2px solid ${theme.colors.textPrimary}` : '2px solid transparent',
+    borderBottom: isActive ? `2px solid ${theme.colors.accent}` : '2px solid transparent',
   });
 
   return (
@@ -66,13 +65,13 @@ export const CommunityLibraryLayout = ({
             </button>
           </div>
           {/* Row 2: Search */}
-          <div className="mt-1.5 mb-1.5">
+          <div className="mt-2 mb-2">
             <StandardSearchBar
               id="community-main-search"
               value={query}
               onChange={setQuery}
               placeholder={activeTab === 'community' ? 'Search posts, people, tags...' : 'Search library'}
-              theme={{ ...theme, colors: { ...theme.colors, surface: 'transparent', border: dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)' } }}
+              theme={theme}
             />
           </div>
         </div>
