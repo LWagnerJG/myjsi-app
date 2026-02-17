@@ -211,47 +211,98 @@ const AnnouncementDetailModal = ({ announcement, theme, dark, onClose, onNavigat
   );
 };
 
-/* ── Compact Announcements — single horizontal scroll row ── */
-const AnnouncementsRow = ({ announcements, theme, dark, onNavigate }) => {
+/* ── Compact Announcements — horizontal drag-scroll row ── */
+const AnnouncementsRow = ({ announcements, theme, dark, onNavigate, onDismiss }) => {
   const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
+  const rowRef = useRef(null);
+  const drag = useRef({ active: false, startX: 0, scrollLeft: 0, moved: false });
+
+  const onPointerDown = useCallback((e) => {
+    const el = rowRef.current;
+    if (!el) return;
+    drag.current = { active: true, startX: e.clientX, scrollLeft: el.scrollLeft, moved: false };
+    el.setPointerCapture(e.pointerId);
+  }, []);
+
+  const onPointerMove = useCallback((e) => {
+    if (!drag.current.active) return;
+    const dx = e.clientX - drag.current.startX;
+    if (Math.abs(dx) > 4) drag.current.moved = true;
+    rowRef.current.scrollLeft = drag.current.scrollLeft - dx;
+  }, []);
+
+  const onPointerUp = useCallback(() => {
+    drag.current.active = false;
+  }, []);
+
+  const handlePillClick = useCallback((a) => {
+    if (!drag.current.moved) setSelectedAnnouncement(a);
+  }, []);
+
   if (!announcements.length) return null;
+
   return (
-    <>
-      <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-1 px-1 py-0.5">
+    <div className="px-4">
+      <div
+        ref={rowRef}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerLeave={onPointerUp}
+        className="flex gap-2 overflow-x-auto no-scrollbar py-0.5 select-none"
+        style={{ cursor: 'grab', WebkitOverflowScrolling: 'touch' }}
+      >
         <AnimatePresence>
           {announcements.map((a, i) => {
             const color = ANNOUNCEMENT_COLORS[a.category] || ANNOUNCEMENT_COLORS['operations'];
             const Icon = ANNOUNCEMENT_ICONS[a.category] || Megaphone;
             return (
-              <motion.button
+              <motion.div
                 key={a.id}
                 layout
                 initial={{ opacity: 0, x: 16 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.15 } }}
                 transition={{ delay: i * 0.04 }}
-                onClick={() => setSelectedAnnouncement(a)}
-                className="flex-shrink-0 flex items-center gap-2 pl-2.5 pr-3 py-2 rounded-xl transition-all active:scale-[0.97]"
+                className="relative flex-shrink-0 rounded-xl"
                 style={{
                   backgroundColor: dark ? 'rgba(255,255,255,0.05)' : theme.colors.surface,
                   border: `1px solid ${dark ? 'rgba(255,255,255,0.1)' : theme.colors.border}`,
-                  minWidth: 180,
-                  maxWidth: 240,
+                  minWidth: 172,
+                  maxWidth: 232,
                   boxShadow: dark ? 'none' : '0 1px 4px rgba(0,0,0,0.06)',
                 }}
               >
-                <div
-                  className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-                  style={{ backgroundColor: `${color}18`, color }}
+                {/* Tappable body */}
+                <button
+                  onClick={() => handlePillClick(a)}
+                  className="w-full flex items-center gap-2 pl-2.5 pr-6 py-2 rounded-xl text-left transition-all active:scale-[0.97]"
                 >
-                  <Icon className="w-3.5 h-3.5" />
-                </div>
-                <div className="text-left min-w-0 flex-1">
-                  <p className="text-[11px] font-semibold leading-tight truncate" style={{ color: theme.colors.textPrimary }}>{a.title}</p>
-                  <p className="text-[10px] leading-tight truncate mt-0.5" style={{ color: theme.colors.textSecondary }}>{a.subtitle}</p>
-                </div>
-                <ChevronRight className="w-3 h-3 flex-shrink-0 opacity-30" style={{ color: theme.colors.textSecondary }} />
-              </motion.button>
+                  <div
+                    className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                    style={{ backgroundColor: `${color}18`, color }}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                  </div>
+                  <div className="text-left min-w-0 flex-1">
+                    <p className="text-[11px] font-semibold leading-tight truncate" style={{ color: theme.colors.textPrimary }}>{a.title}</p>
+                    <p className="text-[10px] leading-tight truncate mt-0.5" style={{ color: theme.colors.textSecondary }}>{a.subtitle}</p>
+                  </div>
+                </button>
+
+                {/* Discrete dismiss X */}
+                {onDismiss && (
+                  <button
+                    onPointerDown={e => e.stopPropagation()}
+                    onClick={e => { e.stopPropagation(); onDismiss(a.id); }}
+                    className="absolute top-1 right-1 w-4 h-4 rounded-full flex items-center justify-center transition-opacity opacity-30 hover:opacity-70 active:scale-90"
+                    style={{ backgroundColor: dark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.08)' }}
+                    aria-label="Dismiss"
+                  >
+                    <X className="w-2.5 h-2.5" style={{ color: theme.colors.textSecondary }} />
+                  </button>
+                )}
+              </motion.div>
             );
           })}
         </AnimatePresence>
@@ -267,9 +318,218 @@ const AnnouncementsRow = ({ announcements, theme, dark, onNavigate }) => {
           onNavigate={onNavigate}
         />
       )}
-    </>
+    </div>
   );
 };
+
+/* ── Shared micro-components (stable references — defined outside CommunityScreen) ── */
+
+const Avatar = React.memo(({ src, alt, size = 36, dark, theme }) => (
+  <div
+    className="rounded-full overflow-hidden flex items-center justify-center flex-shrink-0"
+    style={{ width: size, height: size, backgroundColor: dark ? '#444' : '#E3E0D8' }}
+  >
+    {src
+      ? <img src={src} alt={alt} className="w-full h-full object-cover" />
+      : <Users className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />}
+  </div>
+));
+Avatar.displayName = 'Avatar';
+
+const ActionBtn = React.memo(({ active, icon: Icon, count, onClick, label, theme, dark }) => (
+  <button
+    onClick={onClick}
+    aria-label={label}
+    className="flex items-center gap-1 text-[11px] font-medium px-2.5 py-1.5 rounded-full transition-all active:scale-95"
+    style={{
+      color: active ? theme.colors.accent : theme.colors.textSecondary,
+      backgroundColor: active
+        ? (dark ? 'rgba(255,255,255,0.08)' : `${theme.colors.accent}10`)
+        : 'transparent',
+    }}
+  >
+    <Icon className="w-3.5 h-3.5" style={active ? { fill: theme.colors.accent } : undefined} />
+    {count > 0 && <span>{count}</span>}
+  </button>
+));
+ActionBtn.displayName = 'ActionBtn';
+
+const PostCard = React.memo(({ post, index, theme, dark, isLiked, isExpanded, onToggleLike, onAddComment, onToggleComments }) => {
+  const [draft, setDraft] = useState('');
+  const contentRef = useRef(null);
+  const [measuredHeight, setMeasuredHeight] = useState(0);
+
+  useEffect(() => {
+    if (isExpanded && contentRef.current) setMeasuredHeight(contentRef.current.scrollHeight);
+  }, [isExpanded, post.comments]);
+
+  const submitComment = useCallback((e) => {
+    e.preventDefault();
+    const text = draft.trim();
+    if (!text) return;
+    onAddComment?.(post.id, text);
+    setDraft('');
+    if (!isExpanded) onToggleComments(post.id);
+  }, [draft, post.id, onAddComment, isExpanded, onToggleComments]);
+
+  return (
+    <div
+      className="rounded-2xl overflow-hidden"
+      style={{ backgroundColor: cardBg(dark) }}
+    >
+      {/* Header + text */}
+      <div className="p-3.5 pb-2">
+        <div className="flex items-center gap-2.5">
+          <Avatar src={post.user?.avatar} alt={post.user?.name} dark={dark} theme={theme} />
+          <div className="flex-1 min-w-0">
+            <span className="text-[13px] font-semibold" style={{ color: theme.colors.textPrimary }}>{post.user?.name}</span>
+            <span className="text-[11px] font-medium ml-2" style={{ color: theme.colors.textSecondary }}>{post.timeAgo}</span>
+          </div>
+        </div>
+        {post.title && <p className="text-[13px] font-bold mt-2" style={{ color: theme.colors.textPrimary }}>{post.title}</p>}
+        {post.text && <p className="text-[13px] mt-1 whitespace-pre-line leading-relaxed" style={{ color: theme.colors.textSecondary }}>{post.text}</p>}
+      </div>
+
+      {/* Images */}
+      {post.image && (
+        <div className="mx-3 mb-1.5 rounded-xl overflow-hidden">
+          <img src={post.image} alt="post" className="w-full h-auto object-cover" />
+        </div>
+      )}
+      {post.images && post.images.length > 0 && (
+        <div className="mx-3 mb-1.5 grid grid-cols-2 gap-1.5">
+          {post.images.map((img, i) => (
+            <img key={i} src={img} alt="" className="rounded-lg object-cover w-full h-32" />
+          ))}
+        </div>
+      )}
+
+      {/* Action bar */}
+      <div className="px-2 py-1.5 flex items-center gap-0.5 border-t" style={{ borderColor: subtleBorder(dark) }}>
+        <ActionBtn active={isLiked} icon={Heart} count={post.likes || 0} onClick={() => onToggleLike?.(post.id)} label="Like" theme={theme} dark={dark} />
+        <ActionBtn active={isExpanded} icon={MessageCircle} count={(post.comments || []).length} onClick={() => onToggleComments(post.id)} label="Comments" theme={theme} dark={dark} />
+        <button
+          onClick={() => {
+            if (navigator.share) navigator.share({ title: post.title || 'Post', text: post.text });
+            else navigator.clipboard.writeText(post.text || window.location.href);
+          }}
+          className="flex items-center gap-1 text-[11px] font-medium px-2.5 py-1.5 rounded-full active:scale-95"
+          style={{ color: theme.colors.textSecondary }}
+        >
+          <Share2 className="w-3.5 h-3.5" />
+        </button>
+      </div>
+
+      {/* Comments collapse */}
+      <div style={{
+        maxHeight: isExpanded ? measuredHeight : 0,
+        opacity: isExpanded ? 1 : 0,
+        transition: 'max-height 280ms ease, opacity 220ms ease',
+        overflow: 'hidden',
+      }}>
+        <div ref={contentRef} className="px-3.5 pb-3 space-y-2">
+          <div className="space-y-2 max-h-48 overflow-y-auto">
+            {(post.comments || []).map(c => (
+              <div key={c.id} className="flex items-start gap-2">
+                <div
+                  className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0"
+                  style={{ backgroundColor: dark ? '#333' : '#EDEAE4', color: theme.colors.textSecondary }}
+                >
+                  {c.name?.[0] || '?'}
+                </div>
+                <div className="flex-1 rounded-xl px-2.5 py-1.5" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }}>
+                  <p className="text-[11px] font-semibold" style={{ color: theme.colors.textPrimary }}>{c.name}</p>
+                  <p className="text-[11px] mt-0.5" style={{ color: theme.colors.textSecondary }}>{c.text}</p>
+                </div>
+              </div>
+            ))}
+            {(post.comments || []).length === 0 && (
+              <p className="text-[11px]" style={{ color: theme.colors.textSecondary }}>No comments yet.</p>
+            )}
+          </div>
+          <form onSubmit={submitComment} className="flex items-center gap-2">
+            <input
+              value={draft}
+              onChange={e => setDraft(e.target.value)}
+              placeholder="Add a comment..."
+              className="flex-1 text-[12px] px-3 py-1.5 rounded-full outline-none"
+              style={{ backgroundColor: dark ? '#333' : '#F0EDE8', color: theme.colors.textPrimary }}
+            />
+            <button disabled={!draft.trim()} className="p-1.5 rounded-full disabled:opacity-30" style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}>
+              <Send className="w-3.5 h-3.5" />
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+});
+PostCard.displayName = 'PostCard';
+
+const PollCard = React.memo(({ poll, index, theme, dark, votedOption, onPollVote }) => {
+  const totalVotes = (poll.options || []).reduce((s, o) => s + (o.votes || 0), 0);
+  return (
+    <div className="rounded-2xl overflow-hidden p-3.5 space-y-2.5" style={{ backgroundColor: cardBg(dark) }}>
+      <div className="flex items-center gap-1.5">
+        <BarChart3 className="w-3 h-3" style={{ color: theme.colors.textSecondary }} />
+        <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: theme.colors.textSecondary }}>Poll</span>
+      </div>
+      <div className="flex items-start gap-2.5">
+        <Avatar src={poll.user?.avatar} alt={poll.user?.name} dark={dark} theme={theme} />
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="text-[13px] font-semibold" style={{ color: theme.colors.textPrimary }}>{poll.user?.name}</span>
+            <span className="text-[11px]" style={{ color: theme.colors.textSecondary }}>{poll.timeAgo}</span>
+          </div>
+          <p className="text-[13px] mt-1 font-semibold" style={{ color: theme.colors.textPrimary }}>{poll.question}</p>
+          <div className="mt-2 space-y-1.5">
+            {poll.options.map(opt => {
+              const percent = totalVotes ? Math.round((opt.votes || 0) / totalVotes * 100) : 0;
+              const active = votedOption === opt.id;
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  disabled={!!votedOption}
+                  onClick={() => onPollVote?.(poll.id, opt.id)}
+                  className="w-full text-left px-3 py-2 rounded-xl relative overflow-hidden transition-all active:scale-[0.98]"
+                  style={{
+                    backgroundColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)',
+                    border: active ? `1px solid ${theme.colors.accent}` : '1px solid transparent',
+                    color: active ? theme.colors.accent : theme.colors.textPrimary,
+                  }}
+                >
+                  <span className="relative z-10 text-[12px] font-medium flex justify-between">
+                    <span>{opt.text}</span>
+                    {!!votedOption && <span className="font-bold">{percent}%</span>}
+                  </span>
+                  {votedOption && (
+                    <motion.div
+                      className="absolute inset-0"
+                      initial={{ scaleX: 0 }}
+                      animate={{ scaleX: 1 }}
+                      transition={{ duration: 0.5, ease: 'easeOut' }}
+                      style={{
+                        transformOrigin: 'left',
+                        background: `linear-gradient(90deg, ${theme.colors.accent}20 ${percent}%, transparent ${percent}%)`,
+                      }}
+                    />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          {totalVotes > 0 && (
+            <p className="text-[10px] mt-1.5 font-medium" style={{ color: theme.colors.textSecondary }}>
+              {totalVotes} vote{totalVotes !== 1 ? 's' : ''}
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+});
+PollCard.displayName = 'PollCard';
 
 /* ── Community Screen ── */
 export const CommunityScreen = ({
@@ -347,223 +607,6 @@ export const CommunityScreen = ({
   const toggleComments = useCallback(id => setExpandedComments(p => ({ ...p, [id]: !p[id] })), []);
   const dismissAnnouncement = useCallback(id => setDismissedAnnouncements(prev => new Set([...prev, id])), []);
 
-  /* ── Sub-components ── */
-  const Avatar = ({ src, alt, size = 36 }) => (
-    <div
-      className="rounded-full overflow-hidden flex items-center justify-center flex-shrink-0"
-      style={{ width: size, height: size, backgroundColor: dark ? '#444' : '#E3E0D8' }}
-    >
-      {src ? <img src={src} alt={alt} className="w-full h-full object-cover" /> : <Users className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />}
-    </div>
-  );
-
-  const ActionBtn = ({ active, icon: Icon, count, onClick, label }) => (
-    <button
-      onClick={onClick}
-      aria-label={label}
-      className="flex items-center gap-1 text-[11px] font-medium px-2.5 py-1.5 rounded-full transition-all active:scale-95"
-      style={{
-        color: active ? theme.colors.accent : theme.colors.textSecondary,
-        backgroundColor: active
-          ? (dark ? 'rgba(255,255,255,0.08)' : `${theme.colors.accent}10`)
-          : 'transparent',
-      }}
-    >
-      <Icon className="w-3.5 h-3.5" style={active ? { fill: theme.colors.accent } : undefined} />
-      {count > 0 && <span>{count}</span>}
-    </button>
-  );
-
-  const PostCard = ({ post, index }) => {
-    const [draft, setDraft] = useState('');
-    const isLiked = !!likedPosts[post.id];
-    const contentRef = useRef(null);
-    const [measuredHeight, setMeasuredHeight] = useState(0);
-    const isExpanded = !!expandedComments[post.id];
-
-    useEffect(() => {
-      if (isExpanded && contentRef.current) setMeasuredHeight(contentRef.current.scrollHeight);
-    }, [isExpanded, post.comments]);
-
-    const submitComment = (e) => {
-      e.preventDefault();
-      const text = draft.trim();
-      if (!text) return;
-      onAddComment?.(post.id, text);
-      setDraft('');
-      if (!expandedComments[post.id]) toggleComments(post.id);
-    };
-
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: Math.min(index * 0.05, 0.25), duration: 0.3 }}
-      >
-        <div
-          className="rounded-2xl overflow-hidden"
-          style={{ backgroundColor: cardBg(dark) }}
-        >
-          {/* Header + text */}
-          <div className="p-3.5 pb-2">
-            <div className="flex items-center gap-2.5">
-              <Avatar src={post.user?.avatar} alt={post.user?.name} />
-              <div className="flex-1 min-w-0">
-                <span className="text-[13px] font-semibold" style={{ color: theme.colors.textPrimary }}>{post.user?.name}</span>
-                <span className="text-[11px] font-medium ml-2" style={{ color: theme.colors.textSecondary }}>{post.timeAgo}</span>
-              </div>
-            </div>
-            {post.title && <p className="text-[13px] font-bold mt-2" style={{ color: theme.colors.textPrimary }}>{post.title}</p>}
-            {post.text && <p className="text-[13px] mt-1 whitespace-pre-line leading-relaxed" style={{ color: theme.colors.textSecondary }}>{post.text}</p>}
-          </div>
-
-          {/* Images */}
-          {post.image && (
-            <div className="mx-3 mb-1.5 rounded-xl overflow-hidden">
-              <img src={post.image} alt="post" className="w-full h-auto object-cover" />
-            </div>
-          )}
-          {post.images && post.images.length > 0 && (
-            <div className="mx-3 mb-1.5 grid grid-cols-2 gap-1.5">
-              {post.images.map((img, i) => (
-                <img key={i} src={img} alt="" className="rounded-lg object-cover w-full h-32" />
-              ))}
-            </div>
-          )}
-
-          {/* Action bar */}
-          <div className="px-2 py-1.5 flex items-center gap-0.5 border-t" style={{ borderColor: subtleBorder(dark) }}>
-            <ActionBtn active={isLiked} icon={Heart} count={post.likes || 0} onClick={() => onToggleLike?.(post.id)} label="Like" />
-            <ActionBtn active={isExpanded} icon={MessageCircle} count={(post.comments || []).length} onClick={() => toggleComments(post.id)} label="Comments" />
-            <button
-              onClick={() => {
-                if (navigator.share) navigator.share({ title: post.title || 'Post', text: post.text });
-                else navigator.clipboard.writeText(post.text || window.location.href);
-              }}
-              className="flex items-center gap-1 text-[11px] font-medium px-2.5 py-1.5 rounded-full active:scale-95"
-              style={{ color: theme.colors.textSecondary }}
-            >
-              <Share2 className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          {/* Comments collapse */}
-          <div style={{
-            maxHeight: isExpanded ? measuredHeight : 0,
-            opacity: isExpanded ? 1 : 0,
-            transition: 'max-height 280ms ease, opacity 220ms ease',
-            overflow: 'hidden',
-          }}>
-            <div ref={contentRef} className="px-3.5 pb-3 space-y-2">
-              <div className="space-y-2 max-h-48 overflow-y-auto">
-                {(post.comments || []).map(c => (
-                  <div key={c.id} className="flex items-start gap-2">
-                    <div
-                      className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0"
-                      style={{ backgroundColor: dark ? '#333' : '#EDEAE4', color: theme.colors.textSecondary }}
-                    >
-                      {c.name?.[0] || '?'}
-                    </div>
-                    <div className="flex-1 rounded-xl px-2.5 py-1.5" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }}>
-                      <p className="text-[11px] font-semibold" style={{ color: theme.colors.textPrimary }}>{c.name}</p>
-                      <p className="text-[11px] mt-0.5" style={{ color: theme.colors.textSecondary }}>{c.text}</p>
-                    </div>
-                  </div>
-                ))}
-                {(post.comments || []).length === 0 && (
-                  <p className="text-[11px]" style={{ color: theme.colors.textSecondary }}>No comments yet.</p>
-                )}
-              </div>
-              <form onSubmit={submitComment} className="flex items-center gap-2">
-                <input
-                  value={draft}
-                  onChange={e => setDraft(e.target.value)}
-                  placeholder="Add a comment..."
-                  className="flex-1 text-[12px] px-3 py-1.5 rounded-full outline-none"
-                  style={{ backgroundColor: dark ? '#333' : '#F0EDE8', color: theme.colors.textPrimary }}
-                />
-                <button disabled={!draft.trim()} className="p-1.5 rounded-full disabled:opacity-30" style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}>
-                  <Send className="w-3.5 h-3.5" />
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-    );
-  };
-
-  const PollCard = ({ poll, index }) => {
-    const votedOption = pollChoices[poll.id];
-    const totalVotes = (poll.options || []).reduce((s, o) => s + (o.votes || 0), 0);
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: Math.min(index * 0.05, 0.25), duration: 0.3 }}
-      >
-        <div className="rounded-2xl overflow-hidden p-3.5 space-y-2.5" style={{ backgroundColor: cardBg(dark) }}>
-          <div className="flex items-center gap-1.5">
-            <BarChart3 className="w-3 h-3" style={{ color: theme.colors.textSecondary }} />
-            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: theme.colors.textSecondary }}>Poll</span>
-          </div>
-          <div className="flex items-start gap-2.5">
-            <Avatar src={poll.user?.avatar} alt={poll.user?.name} />
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <span className="text-[13px] font-semibold" style={{ color: theme.colors.textPrimary }}>{poll.user?.name}</span>
-                <span className="text-[11px]" style={{ color: theme.colors.textSecondary }}>{poll.timeAgo}</span>
-              </div>
-              <p className="text-[13px] mt-1 font-semibold" style={{ color: theme.colors.textPrimary }}>{poll.question}</p>
-              <div className="mt-2 space-y-1.5">
-                {poll.options.map(opt => {
-                  const percent = totalVotes ? Math.round((opt.votes || 0) / totalVotes * 100) : 0;
-                  const active = votedOption === opt.id;
-                  return (
-                    <button
-                      key={opt.id}
-                      type="button"
-                      disabled={!!votedOption}
-                      onClick={() => onPollVote?.(poll.id, opt.id)}
-                      className="w-full text-left px-3 py-2 rounded-xl relative overflow-hidden transition-all active:scale-[0.98]"
-                      style={{
-                        backgroundColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)',
-                        border: active ? `1px solid ${theme.colors.accent}` : '1px solid transparent',
-                        color: active ? theme.colors.accent : theme.colors.textPrimary,
-                      }}
-                    >
-                      <span className="relative z-10 text-[12px] font-medium flex justify-between">
-                        <span>{opt.text}</span>
-                        {!!votedOption && <span className="font-bold">{percent}%</span>}
-                      </span>
-                      {votedOption && (
-                        <motion.div
-                          className="absolute inset-0"
-                          initial={{ scaleX: 0 }}
-                          animate={{ scaleX: 1 }}
-                          transition={{ duration: 0.5, ease: 'easeOut' }}
-                          style={{
-                            transformOrigin: 'left',
-                            background: `linear-gradient(90deg, ${theme.colors.accent}20 ${percent}%, transparent ${percent}%)`,
-                          }}
-                        />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-              {totalVotes > 0 && (
-                <p className="text-[10px] mt-1.5 font-medium" style={{ color: theme.colors.textSecondary }}>
-                  {totalVotes} vote{totalVotes !== 1 ? 's' : ''}
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-      </motion.div>
-    );
-  };
-
   /* ── Layout ── */
   return (
     <div className="flex flex-col h-full" style={{ backgroundColor: 'transparent' }}>
@@ -613,7 +656,7 @@ export const CommunityScreen = ({
         </div>
       )}
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto no-scrollbar pb-6">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto overflow-x-hidden no-scrollbar pb-6">
         <div className="w-full space-y-3">
 
           {/* Stories — feed mode, not focused */}
@@ -623,7 +666,7 @@ export const CommunityScreen = ({
             </div>
           )}
 
-          {/* Announcements — compact row */}
+          {/* Announcements — compact drag-scroll row */}
           {effectiveViewMode === 'feed' && !focusPostId && visibleAnnouncements.length > 0 && (
             <AnnouncementsRow
               announcements={visibleAnnouncements}
@@ -640,11 +683,32 @@ export const CommunityScreen = ({
           )}
 
           {effectiveViewMode === 'feed' && (focusedPost || filteredContent.length > 0) && (
-            <div className="space-y-3">
+            <div className="px-4 space-y-3">
               {(focusedPost ? [focusedPost] : filteredContent).map((item, i) =>
-                item.question
-                  ? <PollCard key={`poll-${item.id}`} poll={item} index={i} />
-                  : <PostCard key={`post-${item.id}`} post={item} index={i} />
+                item.question ? (
+                  <PollCard
+                    key={`poll-${item.id}`}
+                    poll={item}
+                    index={i}
+                    theme={theme}
+                    dark={dark}
+                    votedOption={pollChoices[item.id]}
+                    onPollVote={onPollVote}
+                  />
+                ) : (
+                  <PostCard
+                    key={`post-${item.id}`}
+                    post={item}
+                    index={i}
+                    theme={theme}
+                    dark={dark}
+                    isLiked={!!likedPosts[item.id]}
+                    isExpanded={!!expandedComments[item.id]}
+                    onToggleLike={onToggleLike}
+                    onAddComment={onAddComment}
+                    onToggleComments={toggleComments}
+                  />
+                )
               )}
             </div>
           )}
