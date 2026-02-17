@@ -167,13 +167,14 @@ const InviteModal = ({ open, onClose, onInvite, theme, roles }) => {
     const [email, setEmail] = useState('');
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
+    const [phone, setPhone] = useState('');
     const [role, setRole] = useState(roles[roles.length - 1]?.value || 'rep_user');
     const [sent, setSent] = useState(false);
     const emailRef = useRef(null);
 
     useEffect(() => {
         if (open) {
-            setEmail(''); setFirstName(''); setLastName(''); setRole(roles[roles.length - 1]?.value || 'rep_user'); setSent(false);
+            setEmail(''); setFirstName(''); setLastName(''); setPhone(''); setRole(roles[roles.length - 1]?.value || 'rep_user'); setSent(false);
             setTimeout(() => emailRef.current?.focus(), 100);
         }
     }, [open, roles]);
@@ -184,7 +185,7 @@ const InviteModal = ({ open, onClose, onInvite, theme, roles }) => {
 
     const handleSend = () => {
         if (!valid) return;
-        onInvite({ email: email.trim(), firstName: firstName.trim(), lastName: lastName.trim(), role });
+        onInvite({ email: email.trim(), firstName: firstName.trim(), lastName: lastName.trim(), phone: phone.trim(), role });
         setSent(true);
         setTimeout(() => { setSent(false); onClose(); }, 1400);
     };
@@ -250,6 +251,17 @@ const InviteModal = ({ open, onClose, onInvite, theme, roles }) => {
                                 onFocus={e => e.target.style.borderColor = theme.colors.accent}
                                 onBlur={e => e.target.style.borderColor = theme.colors.border}
                                 onKeyDown={e => { if (e.key === 'Enter') handleSend(); }} />
+                        </div>
+
+                        {/* Phone (optional) */}
+                        <div>
+                            <label className="text-[11px] font-semibold uppercase tracking-wider block mb-1" style={{ color: theme.colors.textSecondary }}>
+                                Phone <span className="normal-case tracking-normal font-normal" style={{ color: theme.colors.textSecondary }}>— optional</span>
+                            </label>
+                            <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="555-123-4567"
+                                className="w-full px-3 py-2 rounded-xl text-sm outline-none" style={fieldStyle}
+                                onFocus={e => e.target.style.borderColor = theme.colors.accent}
+                                onBlur={e => e.target.style.borderColor = theme.colors.border} />
                         </div>
 
                         {/* Role */}
@@ -426,6 +438,15 @@ const MemberCard = ({ theme, user, expanded, onToggle, onChangeRole, onTogglePer
                                 {roleLabel}
                             </span>
                         )}
+                        <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); onRequestDelete(); }}
+                            className="w-7 h-7 rounded-full flex items-center justify-center transition-opacity hover:opacity-70"
+                            style={{ color: '#B85C5C' }}
+                            title="Remove user"
+                        >
+                            <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                         <ChevronDown className="w-4 h-4 transition-transform duration-200"
                             style={{ color: theme.colors.textSecondary, transform: expanded ? 'rotate(180deg)' : 'rotate(0)' }} />
                     </div>
@@ -470,14 +491,6 @@ const MemberCard = ({ theme, user, expanded, onToggle, onChangeRole, onTogglePer
                                 Full access to all features.
                             </p>
                         )}
-
-                        <div className="flex justify-end pt-1">
-                            <button onClick={onRequestDelete}
-                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs transition-opacity hover:opacity-80"
-                                style={{ color: '#B85C5C' }}>
-                                <Trash2 className="w-3 h-3" /> Remove
-                            </button>
-                        </div>
                     </div>
                 </div>
             )}
@@ -611,7 +624,7 @@ const MembersScreenContent = ({ theme, onNavigate }) => {
             firstName: invitee.firstName,
             lastName: invitee.lastName,
             email: invitee.email,
-            phone: '',
+            phone: invitee.phone || '',
             role: invitee.role,
             permissions: isAdminRole(invitee.role)
                 ? Object.fromEntries(Object.keys(PERMISSION_LABELS).map(k => [k, true]))

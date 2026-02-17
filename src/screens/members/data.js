@@ -195,27 +195,3 @@ export const INITIAL_DEALER_COMPANIES = [
         ],
     },
 ];
-
-export const EMPTY_USER = {
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    role: 'rep-user',
-    permissions: {
-        salesData: true, commissions: false, projects: true,
-        customerRanking: true, dealerRewards: true, submittingReplacements: true,
-    },
-};
-
-// Legacy exports for backward compat
-export const USER_TITLES = [];
-export const USER_ROLES = ['Admin', 'User'];
-export const STATUS_COLORS = {
-    active: '#10B981',
-    pending: '#C4956A',
-    inactive: '#6B7280',
-    suspended: '#B85C5C',
-};
-export const DOMAINS = { rep: 'rep', dealer: 'dealer' };
-export const getRolesForDomain = (domain) => domain === 'dealer' ? DEALER_ROLES : REP_ROLES;
