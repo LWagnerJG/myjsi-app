@@ -19,6 +19,7 @@ import {
     MapPin,
     Calendar,
     AlertTriangle,
+    Send,
 } from 'lucide-react';
 
 import {
@@ -153,6 +154,140 @@ const ConfirmModal = ({ open, title, message, confirmLabel, onConfirm, onCancel,
                         {confirmLabel || 'Remove'}
                     </button>
                 </div>
+            </div>
+        </div>,
+        document.body
+    );
+};
+
+/* =======================
+   Invite modal
+   ======================= */
+const InviteModal = ({ open, onClose, onInvite, theme, roles }) => {
+    const [email, setEmail] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [role, setRole] = useState(roles[roles.length - 1]?.value || 'rep_user');
+    const [sent, setSent] = useState(false);
+    const emailRef = useRef(null);
+
+    useEffect(() => {
+        if (open) {
+            setEmail(''); setFirstName(''); setLastName(''); setRole(roles[roles.length - 1]?.value || 'rep_user'); setSent(false);
+            setTimeout(() => emailRef.current?.focus(), 100);
+        }
+    }, [open, roles]);
+
+    if (!open) return null;
+
+    const valid = email.trim() && email.includes('@') && firstName.trim() && lastName.trim();
+
+    const handleSend = () => {
+        if (!valid) return;
+        onInvite({ email: email.trim(), firstName: firstName.trim(), lastName: lastName.trim(), role });
+        setSent(true);
+        setTimeout(() => { setSent(false); onClose(); }, 1400);
+    };
+
+    const fieldStyle = {
+        backgroundColor: theme.colors.subtle,
+        color: theme.colors.textPrimary,
+        border: `1.5px solid ${theme.colors.border}`,
+    };
+
+    return createPortal(
+        <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/25 backdrop-blur-sm" onClick={onClose} />
+            <div className="relative w-full max-w-md rounded-2xl p-0 overflow-hidden"
+                style={{ backgroundColor: theme.colors.surface, boxShadow: '0 20px 60px rgba(0,0,0,0.18)', border: `1px solid ${theme.colors.border}` }}>
+
+                {/* Header */}
+                <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: `1px solid ${theme.colors.border}` }}>
+                    <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: `${theme.colors.accent}10` }}>
+                            <UserPlus className="w-4 h-4" style={{ color: theme.colors.accent }} />
+                        </div>
+                        <h3 className="text-base font-semibold" style={{ color: theme.colors.textPrimary }}>Invite Team Member</h3>
+                    </div>
+                    <button onClick={onClose} className="w-7 h-7 rounded-full flex items-center justify-center hover:opacity-70" style={{ backgroundColor: theme.colors.subtle }}>
+                        <X className="w-3.5 h-3.5" style={{ color: theme.colors.textSecondary }} />
+                    </button>
+                </div>
+
+                {sent ? (
+                    <div className="py-12 text-center">
+                        <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3" style={{ backgroundColor: '#4A7C5915' }}>
+                            <Check className="w-6 h-6" style={{ color: '#4A7C59' }} />
+                        </div>
+                        <p className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>Invite sent!</p>
+                        <p className="text-xs mt-1" style={{ color: theme.colors.textSecondary }}>{email}</p>
+                    </div>
+                ) : (
+                    <div className="px-5 py-4 space-y-3">
+                        {/* Name row */}
+                        <div className="grid grid-cols-2 gap-3">
+                            <div>
+                                <label className="text-[11px] font-semibold uppercase tracking-wider block mb-1" style={{ color: theme.colors.textSecondary }}>First Name</label>
+                                <input type="text" value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Jane"
+                                    className="w-full px-3 py-2 rounded-xl text-sm outline-none" style={fieldStyle}
+                                    onFocus={e => e.target.style.borderColor = theme.colors.accent}
+                                    onBlur={e => e.target.style.borderColor = theme.colors.border} />
+                            </div>
+                            <div>
+                                <label className="text-[11px] font-semibold uppercase tracking-wider block mb-1" style={{ color: theme.colors.textSecondary }}>Last Name</label>
+                                <input type="text" value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Smith"
+                                    className="w-full px-3 py-2 rounded-xl text-sm outline-none" style={fieldStyle}
+                                    onFocus={e => e.target.style.borderColor = theme.colors.accent}
+                                    onBlur={e => e.target.style.borderColor = theme.colors.border} />
+                            </div>
+                        </div>
+
+                        {/* Email */}
+                        <div>
+                            <label className="text-[11px] font-semibold uppercase tracking-wider block mb-1" style={{ color: theme.colors.textSecondary }}>Email</label>
+                            <input ref={emailRef} type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="jane@example.com"
+                                className="w-full px-3 py-2 rounded-xl text-sm outline-none" style={fieldStyle}
+                                onFocus={e => e.target.style.borderColor = theme.colors.accent}
+                                onBlur={e => e.target.style.borderColor = theme.colors.border}
+                                onKeyDown={e => { if (e.key === 'Enter') handleSend(); }} />
+                        </div>
+
+                        {/* Role */}
+                        <div>
+                            <label className="text-[11px] font-semibold uppercase tracking-wider block mb-1.5" style={{ color: theme.colors.textSecondary }}>Role</label>
+                            <div className="flex flex-wrap gap-1.5">
+                                {roles.map(r => (
+                                    <button key={r.value} onClick={() => setRole(r.value)}
+                                        className="px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-150"
+                                        style={{
+                                            backgroundColor: role === r.value ? theme.colors.accent : 'transparent',
+                                            color: role === r.value ? '#fff' : theme.colors.textSecondary,
+                                            border: `1.5px solid ${role === r.value ? theme.colors.accent : theme.colors.border}`,
+                                        }}>
+                                        {r.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Footer */}
+                {!sent && (
+                    <div className="px-5 py-3.5 flex justify-end gap-2" style={{ borderTop: `1px solid ${theme.colors.border}` }}>
+                        <button onClick={onClose}
+                            className="px-4 py-1.5 rounded-full text-xs font-medium transition-opacity hover:opacity-80"
+                            style={{ color: theme.colors.textSecondary, border: `1.5px solid ${theme.colors.border}` }}>
+                            Cancel
+                        </button>
+                        <button onClick={handleSend}
+                            className={`flex items-center gap-1.5 px-5 py-1.5 rounded-full text-xs font-semibold text-white transition-all duration-150 ${valid ? 'opacity-100' : 'opacity-40 cursor-not-allowed'}`}
+                            style={{ backgroundColor: theme.colors.accent }}
+                            disabled={!valid}>
+                            <Send className="w-3 h-3" /> Send Invite
+                        </button>
+                    </div>
+                )}
             </div>
         </div>,
         document.body
@@ -426,7 +561,8 @@ const MembersScreenContent = ({ theme, onNavigate }) => {
     const [expandedId, setExpandedId] = useState(null);
     const [dirty, setDirty] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const [confirmDelete, setConfirmDelete] = useState(null); // { id, name }
+    const [confirmDelete, setConfirmDelete] = useState(null);
+    const [showInvite, setShowInvite] = useState(false);
     const isDesktop = useMediaQuery('(min-width: 1024px)');
 
     const toggle = useCallback((id) => setExpandedId(prev => prev === id ? null : id), []);
@@ -471,6 +607,22 @@ const MembersScreenContent = ({ theme, onNavigate }) => {
         setConfirmDelete(null);
     }, [confirmDelete]);
 
+    const handleInvite = useCallback((invitee) => {
+        const newUser = {
+            id: `user-${Date.now()}`,
+            firstName: invitee.firstName,
+            lastName: invitee.lastName,
+            email: invitee.email,
+            phone: '',
+            role: invitee.role,
+            permissions: isAdminRole(invitee.role)
+                ? Object.fromEntries(Object.keys(PERMISSION_LABELS).map(k => [k, true]))
+                : { salesData: false, commissions: false, dealerRewards: false, customerRanking: false, priceVisibility: true, orderEntry: true },
+        };
+        setMembers(prev => [...prev, newUser]);
+        setDirty(true);
+    }, []);
+
     const saveAll = useCallback(() => {
         console.log('Saved members:', members);
         setOriginal(members);
@@ -508,7 +660,7 @@ const MembersScreenContent = ({ theme, onNavigate }) => {
     return (
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
             <div className="flex-1 overflow-y-auto scrollbar-hide">
-                <div className="px-4 sm:px-6 lg:px-8 pb-24 lg:pb-12 max-w-2xl mx-auto w-full">
+                <div className="px-4 sm:px-6 lg:px-8 pb-24 lg:pb-12 max-w-2xl lg:max-w-5xl mx-auto w-full">
 
                     {/* Header */}
                     <div className="pt-6 pb-3 sm:pt-8">
@@ -517,7 +669,7 @@ const MembersScreenContent = ({ theme, onNavigate }) => {
                                 App Users
                             </h1>
                             {tab === 'team' && (
-                                <button onClick={() => console.log('Invite user')}
+                                <button onClick={() => setShowInvite(true)}
                                     className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold transition-transform duration-100 active:scale-95"
                                     style={{ backgroundColor: theme.colors.accent, color: '#fff' }}>
                                     <UserPlus className="w-3.5 h-3.5" />
@@ -575,7 +727,7 @@ const MembersScreenContent = ({ theme, onNavigate }) => {
                     {/* Tab content */}
                     {tab === 'team' ? (
                         members.length > 0 ? (
-                            <div className="space-y-2">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
                                 {members.map(u => (
                                     <MemberCard key={u.id} theme={theme} user={u}
                                         expanded={expandedId === u.id}
@@ -594,7 +746,7 @@ const MembersScreenContent = ({ theme, onNavigate }) => {
                         )
                     ) : (
                         filteredDealers.length > 0 ? (
-                            <div className="space-y-2">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
                                 {filteredDealers.map(d => (
                                     <DealerCompanyCard key={d.id} company={d}
                                         expanded={expandedId === d.id}
@@ -648,6 +800,15 @@ const MembersScreenContent = ({ theme, onNavigate }) => {
                 onConfirm={executeDelete}
                 onCancel={() => setConfirmDelete(null)}
                 theme={theme}
+            />
+
+            {/* Invite modal */}
+            <InviteModal
+                open={showInvite}
+                onClose={() => setShowInvite(false)}
+                onInvite={handleInvite}
+                theme={theme}
+                roles={REP_ROLES}
             />
         </div>
     );
