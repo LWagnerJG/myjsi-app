@@ -3,7 +3,6 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
-import { isDarkTheme } from '../../design-system/tokens.js';
 import {
     Mail,
     Phone,
@@ -411,7 +410,7 @@ const PermToggle = ({ permKey, label, enabled, onToggle, theme, disabled }) => (
 /* =================
    Member card (rep team)
    ================= */
-const MemberCard = ({ theme, user, expanded, onToggle, onChangeRole, onTogglePerm, onRequestDelete, isDesktop }) => {
+const MemberCard = ({ theme, user, expanded, onToggle, onChangeRole, onTogglePerm, onRequestDelete, isDesktop, isDirty, onSave }) => {
     if (!user || !user.permissions) return null;
     const admin = isAdminRole(user.role);
     const roleLabel = getRoleLabel(user.role);
@@ -438,15 +437,17 @@ const MemberCard = ({ theme, user, expanded, onToggle, onChangeRole, onTogglePer
                                 {roleLabel}
                             </span>
                         )}
-                        <button
-                            type="button"
-                            onClick={(e) => { e.stopPropagation(); onRequestDelete(); }}
-                            className="w-7 h-7 rounded-full flex items-center justify-center transition-opacity hover:opacity-70"
-                            style={{ color: '#B85C5C' }}
-                            title="Remove user"
-                        >
-                            <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                        {expanded && (
+                            <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); onRequestDelete(); }}
+                                className="w-7 h-7 rounded-full flex items-center justify-center transition-opacity hover:opacity-70"
+                                style={{ color: '#B85C5C' }}
+                                title="Remove user"
+                            >
+                                <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                        )}
                         <ChevronDown className="w-4 h-4 transition-transform duration-200"
                             style={{ color: theme.colors.textSecondary, transform: expanded ? 'rotate(180deg)' : 'rotate(0)' }} />
                     </div>
@@ -490,6 +491,16 @@ const MemberCard = ({ theme, user, expanded, onToggle, onChangeRole, onTogglePer
                                 <Shield className="w-3.5 h-3.5" style={{ color: theme.colors.accent }} />
                                 Full access to all features.
                             </p>
+                        )}
+
+                        {isDirty && (
+                            <div className="flex justify-end pt-2">
+                                <button onClick={onSave}
+                                    className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold text-white transition-all duration-150 active:scale-95"
+                                    style={{ backgroundColor: theme.colors.accent }}>
+                                    <Check className="w-3 h-3" /> Save Changes
+                                </button>
+                            </div>
                         )}
                     </div>
                 </div>
@@ -575,7 +586,6 @@ const MembersScreenContent = ({ theme, onNavigate }) => {
     const [original, setOriginal] = useState(INITIAL_MEMBERS);
     const [members, setMembers] = useState(INITIAL_MEMBERS);
     const [expandedId, setExpandedId] = useState(null);
-    const [dirty, setDirty] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [confirmDelete, setConfirmDelete] = useState(null);
     const [showInvite, setShowInvite] = useState(false);
@@ -583,9 +593,23 @@ const MembersScreenContent = ({ theme, onNavigate }) => {
 
     const toggle = useCallback((id) => setExpandedId(prev => prev === id ? null : id), []);
 
+    const isUserDirty = useCallback((user) => {
+        const orig = original.find(o => o.id === user.id);
+        if (!orig) return true; // newly invited user
+        return user.role !== orig.role || JSON.stringify(user.permissions) !== JSON.stringify(orig.permissions);
+    }, [original]);
+
+    const saveUser = useCallback((id) => {
+        const user = members.find(m => m.id === id);
+        if (!user) return;
+        setOriginal(prev => {
+            const exists = prev.find(o => o.id === id);
+            return exists ? prev.map(o => o.id === id ? { ...user } : o) : [...prev, { ...user }];
+        });
+    }, [members]);
+
     const updateUser = useCallback((id, updater) => {
         setMembers(prev => prev.map(m => m.id === id ? (typeof updater === 'function' ? updater(m) : { ...m, ...updater }) : m));
-        setDirty(true);
     }, []);
 
     const onChangeRole = useCallback((id, role) => {
@@ -613,8 +637,8 @@ const MembersScreenContent = ({ theme, onNavigate }) => {
     const executeDelete = useCallback(() => {
         if (!confirmDelete) return;
         setMembers(prev => prev.filter(m => m.id !== confirmDelete.id));
+        setOriginal(prev => prev.filter(o => o.id !== confirmDelete.id));
         setExpandedId(prev => prev === confirmDelete.id ? null : prev);
-        setDirty(true);
         setConfirmDelete(null);
     }, [confirmDelete]);
 
@@ -631,20 +655,8 @@ const MembersScreenContent = ({ theme, onNavigate }) => {
                 : Object.fromEntries(Object.keys(PERMISSION_LABELS).map(k => [k, false])),
         };
         setMembers(prev => [...prev, newUser]);
-        setDirty(true);
+        setOriginal(prev => [...prev, { ...newUser }]);
     }, []);
-
-    const saveAll = useCallback(() => {
-        console.log('Saved members:', members);
-        setOriginal(members);
-        setDirty(false);
-    }, [members]);
-
-    const cancelAll = useCallback(() => {
-        setMembers(original);
-        setDirty(false);
-        setExpandedId(null);
-    }, [original]);
 
     const switchTab = useCallback((t) => {
         setTab(t);
@@ -746,7 +758,9 @@ const MembersScreenContent = ({ theme, onNavigate }) => {
                                         onChangeRole={(role) => onChangeRole(u.id, role)}
                                         onTogglePerm={(key) => onTogglePerm(u.id, key)}
                                         onRequestDelete={() => requestDelete(u)}
-                                        isDesktop={isDesktop} />
+                                        isDesktop={isDesktop}
+                                        isDirty={isUserDirty(u)}
+                                        onSave={() => saveUser(u.id)} />
                                 ))}
                             </div>
                         ) : (
@@ -773,30 +787,7 @@ const MembersScreenContent = ({ theme, onNavigate }) => {
                         )
                     )}
 
-                    {/* Save / discard — inline at the bottom of content */}
-                    {dirty && (
-                        <div className="mt-6 mb-2 flex justify-center">
-                            <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full backdrop-blur-xl"
-                                style={{
-                                    backgroundColor: isDarkTheme(theme) ? 'rgba(40,40,40,0.88)' : 'rgba(255,255,255,0.82)',
-                                    border: `1px solid ${isDarkTheme(theme) ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}`,
-                                    boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-                                }}>
-                                <span className="text-xs font-medium" style={{ color: theme.colors.textSecondary }}>Unsaved changes</span>
-                                <div className="w-px h-4" style={{ backgroundColor: theme.colors.border }} />
-                                <button onClick={cancelAll}
-                                    className="text-xs font-medium px-3 py-1 rounded-full transition-opacity hover:opacity-70"
-                                    style={{ color: theme.colors.textSecondary }}>
-                                    Discard
-                                </button>
-                                <button onClick={saveAll}
-                                    className="text-xs font-semibold text-white px-4 py-1.5 rounded-full transition-opacity hover:opacity-90"
-                                    style={{ backgroundColor: theme.colors.accent }}>
-                                    Save
-                                </button>
-                            </div>
-                        </div>
-                    )}
+
                 </div>
             </div>
 
