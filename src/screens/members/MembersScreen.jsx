@@ -300,12 +300,15 @@ const InviteModal = ({ open, onClose, onInvite, theme, roles }) => {
 const RoleDropdown = ({ value, roles, onChange, theme }) => {
     const [open, setOpen] = useState(false);
     const btnRef = useRef(null);
+    const menuRef = useRef(null);
     const [pos, setPos] = useState({ top: 0, left: 0 });
 
     useEffect(() => {
         if (!open) return;
         const handler = (e) => {
-            if (btnRef.current && !btnRef.current.contains(e.target)) setOpen(false);
+            const inBtn = btnRef.current?.contains(e.target);
+            const inMenu = menuRef.current?.contains(e.target);
+            if (!inBtn && !inMenu) setOpen(false);
         };
         document.addEventListener('mousedown', handler);
         return () => document.removeEventListener('mousedown', handler);
@@ -341,6 +344,7 @@ const RoleDropdown = ({ value, roles, onChange, theme }) => {
                 <>
                     <div className="fixed inset-0 z-[70]" onClick={() => setOpen(false)} />
                     <div
+                        ref={menuRef}
                         className="fixed z-[71] py-1 rounded-xl min-w-[200px]"
                         style={{
                             top: pos.top,
@@ -453,10 +457,9 @@ const MemberCard = ({ theme, user, expanded, onToggle, onChangeRole, onTogglePer
                             <div className="space-y-1.5">
                                 <div className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: theme.colors.textSecondary }}>Permissions</div>
                                 <div className="flex flex-wrap gap-1.5">
-                                    {Object.entries(PERMISSION_LABELS).map(([key, label]) => {
-                                        const locked = !user.permissions.salesData && ['commissions', 'dealerRewards', 'customerRanking'].includes(key);
-                                        return <PermToggle key={key} permKey={key} label={label} enabled={!!user.permissions[key]} disabled={locked} onToggle={() => onTogglePerm(key)} theme={theme} />;
-                                    })}
+                                    {Object.entries(PERMISSION_LABELS).map(([key, label]) => (
+                                        <PermToggle key={key} permKey={key} label={label} enabled={!!user.permissions[key]} onToggle={() => onTogglePerm(key)} theme={theme} />
+                                    ))}
                                 </div>
                             </div>
                         )}
@@ -586,11 +589,6 @@ const MembersScreenContent = ({ theme, onNavigate }) => {
     const onTogglePerm = useCallback((id, key) => {
         updateUser(id, (m) => {
             const next = { ...m.permissions, [key]: !m.permissions[key] };
-            if (key === 'salesData' && !next.salesData) {
-                next.commissions = false;
-                next.dealerRewards = false;
-                next.customerRanking = false;
-            }
             return { ...m, permissions: next };
         });
     }, [updateUser]);
@@ -617,7 +615,7 @@ const MembersScreenContent = ({ theme, onNavigate }) => {
             role: invitee.role,
             permissions: isAdminRole(invitee.role)
                 ? Object.fromEntries(Object.keys(PERMISSION_LABELS).map(k => [k, true]))
-                : { salesData: false, commissions: false, dealerRewards: false, customerRanking: false, priceVisibility: true, orderEntry: true },
+                : Object.fromEntries(Object.keys(PERMISSION_LABELS).map(k => [k, false])),
         };
         setMembers(prev => [...prev, newUser]);
         setDirty(true);
@@ -761,35 +759,33 @@ const MembersScreenContent = ({ theme, onNavigate }) => {
                             </div>
                         )
                     )}
+
+                    {/* Save / discard — inline at the bottom of content */}
+                    {dirty && (
+                        <div className="mt-6 mb-2 flex justify-center">
+                            <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full backdrop-blur-xl"
+                                style={{
+                                    backgroundColor: isDarkTheme(theme) ? 'rgba(40,40,40,0.88)' : 'rgba(255,255,255,0.82)',
+                                    border: `1px solid ${isDarkTheme(theme) ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}`,
+                                    boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+                                }}>
+                                <span className="text-xs font-medium" style={{ color: theme.colors.textSecondary }}>Unsaved changes</span>
+                                <div className="w-px h-4" style={{ backgroundColor: theme.colors.border }} />
+                                <button onClick={cancelAll}
+                                    className="text-xs font-medium px-3 py-1 rounded-full transition-opacity hover:opacity-70"
+                                    style={{ color: theme.colors.textSecondary }}>
+                                    Discard
+                                </button>
+                                <button onClick={saveAll}
+                                    className="text-xs font-semibold text-white px-4 py-1.5 rounded-full transition-opacity hover:opacity-90"
+                                    style={{ backgroundColor: theme.colors.accent }}>
+                                    Save
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
-
-            {/* Inline save toast — glass pill pinned to bottom */}
-            {dirty && createPortal(
-                <div className="fixed z-[60] flex justify-center pointer-events-none"
-                    style={{ bottom: isDesktop ? '24px' : '108px', left: 0, right: 0 }}>
-                    <div className="pointer-events-auto inline-flex items-center gap-3 px-5 py-2.5 rounded-full backdrop-blur-xl"
-                        style={{
-                            backgroundColor: isDarkTheme(theme) ? 'rgba(40,40,40,0.88)' : 'rgba(255,255,255,0.82)',
-                            border: `1px solid ${isDarkTheme(theme) ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}`,
-                            boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-                        }}>
-                        <span className="text-xs font-medium" style={{ color: theme.colors.textSecondary }}>Unsaved changes</span>
-                        <div className="w-px h-4" style={{ backgroundColor: theme.colors.border }} />
-                        <button onClick={cancelAll}
-                            className="text-xs font-medium px-3 py-1 rounded-full transition-opacity hover:opacity-70"
-                            style={{ color: theme.colors.textSecondary }}>
-                            Discard
-                        </button>
-                        <button onClick={saveAll}
-                            className="text-xs font-semibold text-white px-4 py-1.5 rounded-full transition-opacity hover:opacity-90"
-                            style={{ backgroundColor: theme.colors.accent }}>
-                            Save
-                        </button>
-                    </div>
-                </div>,
-                document.body
-            )}
 
             {/* Remove confirmation modal */}
             <ConfirmModal

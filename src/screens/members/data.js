@@ -35,20 +35,20 @@ export const getRoleLabel = (roleValue) => {
 // ----- Permission system -----
 export const PERMISSION_LABELS = {
     salesData: 'Sales Data',
-    customerRanking: 'Customer Ranking',
-    projects: 'Projects',
+    projectsData: 'Projects Data',
+    orderData: 'Order Data',
+    replacements: 'Replacements',
+    sampleOrdering: 'Sample Ordering',
     commissions: 'Commissions',
-    dealerRewards: 'Dealer Rewards',
-    submittingReplacements: 'Replacements',
 };
 
 export const PERMISSION_DESCRIPTIONS = {
-    salesData: 'Access to sales reports, customer data, and revenue metrics',
-    customerRanking: 'View and manage customer ranking and performance data',
-    projects: 'Create, edit, and manage project opportunities and leads',
+    salesData: 'Access to sales reports, customer data, revenue metrics, dealer rewards, and customer ranking',
+    projectsData: 'Create, edit, and manage project opportunities and leads',
+    orderData: 'View and manage orders, order history, and order entry',
+    replacements: 'Submit and track replacement part requests',
+    sampleOrdering: 'Order product samples and track sample requests',
     commissions: 'View commission reports and earning statements',
-    dealerRewards: 'Access dealer incentive programs and reward tracking',
-    submittingReplacements: 'Submit and track replacement part requests',
 };
 
 // ----- Rep team members (your firm) -----
@@ -61,8 +61,8 @@ export const INITIAL_MEMBERS = [
         phone: '555-1234',
         role: 'rep-admin',
         permissions: {
-            salesData: true, commissions: true, projects: true,
-            customerRanking: true, dealerRewards: true, submittingReplacements: true,
+            salesData: true, projectsData: true, orderData: true,
+            replacements: true, sampleOrdering: true, commissions: true,
         },
     },
     {
@@ -73,8 +73,8 @@ export const INITIAL_MEMBERS = [
         phone: '555-4321',
         role: 'rep-principal',
         permissions: {
-            salesData: true, commissions: true, projects: true,
-            customerRanking: true, dealerRewards: true, submittingReplacements: true,
+            salesData: true, projectsData: true, orderData: true,
+            replacements: true, sampleOrdering: true, commissions: true,
         },
     },
     {
@@ -85,8 +85,8 @@ export const INITIAL_MEMBERS = [
         phone: '555-5678',
         role: 'rep-user',
         permissions: {
-            salesData: true, commissions: false, projects: true,
-            customerRanking: true, dealerRewards: false, submittingReplacements: true,
+            salesData: true, projectsData: true, orderData: true,
+            replacements: true, sampleOrdering: true, commissions: false,
         },
     },
     {
@@ -97,8 +97,8 @@ export const INITIAL_MEMBERS = [
         phone: '555-8765',
         role: 'rep-user',
         permissions: {
-            salesData: true, commissions: true, projects: true,
-            customerRanking: true, dealerRewards: true, submittingReplacements: true,
+            salesData: true, projectsData: true, orderData: true,
+            replacements: true, sampleOrdering: true, commissions: true,
         },
     },
     {
@@ -109,8 +109,8 @@ export const INITIAL_MEMBERS = [
         phone: '555-2468',
         role: 'rep-user',
         permissions: {
-            salesData: false, commissions: false, projects: true,
-            customerRanking: false, dealerRewards: false, submittingReplacements: true,
+            salesData: false, projectsData: true, orderData: true,
+            replacements: true, sampleOrdering: true, commissions: false,
         },
     },
     {
@@ -121,8 +121,8 @@ export const INITIAL_MEMBERS = [
         phone: '555-1357',
         role: 'rep-user',
         permissions: {
-            salesData: true, commissions: false, projects: true,
-            customerRanking: true, dealerRewards: true, submittingReplacements: true,
+            salesData: true, projectsData: true, orderData: true,
+            replacements: true, sampleOrdering: false, commissions: false,
         },
     },
     {
@@ -133,8 +133,8 @@ export const INITIAL_MEMBERS = [
         phone: '555-9753',
         role: 'rep-user',
         permissions: {
-            salesData: false, commissions: false, projects: true,
-            customerRanking: false, dealerRewards: false, submittingReplacements: true,
+            salesData: false, projectsData: true, orderData: true,
+            replacements: true, sampleOrdering: true, commissions: false,
         },
     },
 ];
