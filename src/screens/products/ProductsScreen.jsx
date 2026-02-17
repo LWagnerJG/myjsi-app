@@ -16,7 +16,7 @@ import {
     ChevronRight
 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { PRODUCTS_CATEGORIES_DATA, PRODUCT_DATA, FABRICS_DATA, JSI_MODELS } from './data.js';
+import { PRODUCTS_CATEGORIES_DATA, PRODUCT_DATA, FABRICS_DATA, JSI_MODELS, JSI_SERIES } from './data.js';
 
 // ─── Clean card helpers ───────────────────────────────────────────────────────────────
 const cardStyle = (dark) => ({
@@ -161,7 +161,9 @@ const StickyHeader = React.memo(({
     viewMode,
     onToggleViewMode,
     searchTerm,
-    onSearchChange
+    onSearchChange,
+    placeholder,
+    showViewToggle,
 }) => (
     <div
         className="flex-shrink-0 px-4 sm:px-5 pt-2 pb-3"
@@ -171,15 +173,17 @@ const StickyHeader = React.memo(({
             <StandardSearchBar
                 value={searchTerm}
                 onChange={onSearchChange}
-                placeholder="Search products..."
+                placeholder={placeholder}
                 theme={theme}
                 className="flex-grow"
             />
-            <ViewModeToggle
-                viewMode={viewMode}
-                onToggle={onToggleViewMode}
-                theme={theme}
-            />
+            {showViewToggle && (
+                <ViewModeToggle
+                    viewMode={viewMode}
+                    onToggle={onToggleViewMode}
+                    theme={theme}
+                />
+            )}
         </div>
     </div>
 ));
@@ -202,6 +206,84 @@ const EmptyState = React.memo(({ searchTerm, theme }) => {
 });
 EmptyState.displayName = 'EmptyState';
 
+// ─── Series Row ─────────────────────────────────────────────────────────────
+const SeriesRow = React.memo(({ series, theme, dark, isLast, onClick }) => (
+    <button
+        onClick={() => onClick(series)}
+        className="w-full flex items-center justify-between px-4 py-3.5 text-left transition-colors hover:opacity-80 active:opacity-60"
+        style={{
+            backgroundColor: 'transparent',
+            borderBottom: isLast ? 'none' : `1px solid ${theme.colors.border}`,
+        }}
+    >
+        <span className="font-medium text-[15px]" style={{ color: theme.colors.textPrimary }}>
+            {series}
+        </span>
+        <ChevronRight className="w-4 h-4 flex-shrink-0" style={{ color: theme.colors.textSecondary }} />
+    </button>
+));
+SeriesRow.displayName = 'SeriesRow';
+
+// ─── Families (series) view ──────────────────────────────────────────────────
+const FamiliesView = React.memo(({ groupedSeries, theme, onSeriesClick, searchTerm }) => {
+    const dark = isDarkTheme(theme);
+
+    if (groupedSeries.length === 0) {
+        return (
+            <div className="rounded-[24px] p-10 text-center" style={{ ...cardStyle(dark) }}>
+                <Package className="w-12 h-12 mx-auto mb-4" style={{ color: theme.colors.textSecondary }} />
+                <p className="font-semibold text-lg mb-2" style={{ color: theme.colors.textPrimary }}>
+                    No Series Found
+                </p>
+                <p className="text-sm" style={{ color: theme.colors.textSecondary }}>
+                    No series match "{searchTerm}"
+                </p>
+            </div>
+        );
+    }
+
+    return (
+        <div
+            className="rounded-[20px] overflow-hidden"
+            style={{
+                backgroundColor: theme.colors.surface,
+                border: `1px solid ${theme.colors.border}`,
+            }}
+        >
+            {groupedSeries.map(([letter, seriesList], gi) => (
+                <div key={letter}>
+                    {/* Letter section header */}
+                    <div
+                        className="px-4 py-1.5"
+                        style={{
+                            backgroundColor: dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
+                            borderBottom: `1px solid ${theme.colors.border}`,
+                        }}
+                    >
+                        <span
+                            className="text-xs font-bold tracking-widest uppercase"
+                            style={{ color: theme.colors.accent }}
+                        >
+                            {letter}
+                        </span>
+                    </div>
+                    {seriesList.map((s, si) => (
+                        <SeriesRow
+                            key={s}
+                            series={s}
+                            theme={theme}
+                            dark={dark}
+                            onClick={onSeriesClick}
+                            isLast={si === seriesList.length - 1 && gi === groupedSeries.length - 1}
+                        />
+                    ))}
+                </div>
+            ))}
+        </div>
+    );
+});
+FamiliesView.displayName = 'FamiliesView';
+
 // ─── Main screen ────────────────────────────────────────────────────────────
 export const ProductsScreen = ({ theme, onNavigate }) => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -223,12 +305,36 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
         );
     }, [searchTerm]);
 
+    const groupedSeries = useMemo(() => {
+        const lowerSearch = searchTerm.toLowerCase().trim();
+        const filtered = lowerSearch
+            ? JSI_SERIES.filter(s => s.toLowerCase().includes(lowerSearch))
+            : JSI_SERIES;
+        const groups = {};
+        filtered.forEach(series => {
+            const letter = series[0].toUpperCase();
+            if (!groups[letter]) groups[letter] = [];
+            groups[letter].push(series);
+        });
+        return Object.entries(groups).sort(([a], [b]) => a.localeCompare(b));
+    }, [searchTerm]);
+
     const handleCategoryClick = useCallback((category) => {
         if (category.nav) onNavigate(category.nav);
     }, [onNavigate]);
 
+    const handleSeriesClick = useCallback((series) => {
+        const slug = series.toLowerCase().replace(/\s+/g, '-');
+        onNavigate(`products/series/${slug}`);
+    }, [onNavigate]);
+
     const toggleViewMode = useCallback(() => {
         setViewMode(prev => prev === 'grid' ? 'list' : 'grid');
+    }, []);
+
+    const handleViewChange = useCallback((v) => {
+        setProductView(v);
+        setSearchTerm('');
     }, []);
 
     const handleSearchChange = useCallback((e) => {
@@ -244,11 +350,13 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
                     onToggleViewMode={toggleViewMode}
                     searchTerm={searchTerm}
                     onSearchChange={handleSearchChange}
+                    placeholder={productView === 'families' ? 'Search series...' : 'Search products...'}
+                    showViewToggle={productView !== 'families'}
                 />
                 <div className="px-4 sm:px-5 pb-3">
                     <SegmentedToggle
                         value={productView}
-                        onChange={setProductView}
+                        onChange={handleViewChange}
                         options={productViewOptions}
                         theme={theme}
                         size="md"
@@ -260,7 +368,14 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
                 className="flex-1 overflow-y-auto px-4 sm:px-5 lg:px-8 pb-8 scrollbar-hide"
             >
                 <div className="max-w-5xl mx-auto w-full">
-                    {filteredCategories.length === 0 ? (
+                    {productView === 'families' ? (
+                        <FamiliesView
+                            groupedSeries={groupedSeries}
+                            theme={theme}
+                            onSeriesClick={handleSeriesClick}
+                            searchTerm={searchTerm}
+                        />
+                    ) : filteredCategories.length === 0 ? (
                         <EmptyState searchTerm={searchTerm} theme={theme} />
                     ) : (
                         <div className={viewMode === 'grid' ? 'space-y-4' : 'space-y-2'} style={{ paddingTop: 4 }}>
