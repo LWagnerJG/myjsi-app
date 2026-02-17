@@ -1,214 +1,221 @@
 // Members and user management data
-export const INITIAL_MEMBERS = [
-    { 
-        id: 1, 
-        firstName: 'Luke', 
-        lastName: 'Wagner', 
-        email: 'luke.wagner@jsi.com', 
-        phone: '555-1234', 
-        title: 'Sales Manager',
-        role: 'Admin',
-        status: 'active',
-        lastLogin: '2025-01-15T10:30:00Z',
-        permissions: { 
-            salesData: true, 
-            commissions: true, 
-            projects: true, 
-            customerRanking: true, 
-            dealerRewards: true, 
-            submittingReplacements: true 
-        },
-        avatar: '/avatars/luke-wagner.jpg'
-    },
-    { 
-        id: 2, 
-        firstName: 'Sarah', 
-        lastName: 'Johnson', 
-        email: 'sarah.johnson@jsi.com', 
-        phone: '555-5678', 
-        title: 'Senior Designer',
-        role: 'User',
-        status: 'active',
-        lastLogin: '2025-01-15T09:15:00Z',
-        permissions: { 
-            salesData: true, 
-            commissions: false, 
-            projects: true, 
-            customerRanking: true, 
-            dealerRewards: false, 
-            submittingReplacements: true 
-        },
-        avatar: '/avatars/sarah-johnson.jpg'
-    },
-    { 
-        id: 3, 
-        firstName: 'Michael', 
-        lastName: 'Chen', 
-        email: 'michael.chen@jsi.com', 
-        phone: '555-8765', 
-        title: 'Regional Sales Rep',
-        role: 'User',
-        status: 'active',
-        lastLogin: '2025-01-14T16:45:00Z',
-        permissions: { 
-            salesData: true, 
-            commissions: true, 
-            projects: true, 
-            customerRanking: true, 
-            dealerRewards: true, 
-            submittingReplacements: true 
-        },
-        avatar: '/avatars/michael-chen.jpg'
-    },
-    { 
-        id: 4, 
-        firstName: 'Jessica', 
-        lastName: 'Rodriguez', 
-        email: 'jessica.rodriguez@jsi.com', 
-        phone: '555-4321', 
-        title: 'Admin Support',
-        role: 'Admin',
-        status: 'active',
-        lastLogin: '2025-01-15T08:00:00Z',
-        permissions: { 
-            salesData: true, 
-            commissions: true, 
-            projects: true, 
-            customerRanking: true, 
-            dealerRewards: true, 
-            submittingReplacements: true 
-        },
-        avatar: '/avatars/jessica-rodriguez.jpg'
-    },
-    { 
-        id: 5, 
-        firstName: 'David', 
-        lastName: 'Thompson', 
-        email: 'david.thompson@jsi.com', 
-        phone: '555-2468', 
-        title: 'Field Installer',
-        role: 'User',
-        status: 'pending',
-        lastLogin: null,
-        permissions: { 
-            salesData: false, 
-            commissions: false, 
-            projects: true, 
-            customerRanking: false, 
-            dealerRewards: false, 
-            submittingReplacements: true 
-        },
-        avatar: '/avatars/david-thompson.jpg'
-    },
-    { 
-        id: 6, 
-        firstName: 'Emily', 
-        lastName: 'Davis', 
-        email: 'emily.davis@jsi.com', 
-        phone: '555-1357', 
-        title: 'Sales/Designer',
-        role: 'User',
-        status: 'active',
-        lastLogin: '2025-01-15T11:20:00Z',
-        permissions: { 
-            salesData: true, 
-            commissions: false, 
-            projects: true, 
-            customerRanking: true, 
-            dealerRewards: true, 
-            submittingReplacements: true 
-        },
-        avatar: '/avatars/emily-davis.jpg'
-    },
-    { 
-        id: 7, 
-        firstName: 'Robert', 
-        lastName: 'Wilson', 
-        email: 'robert.wilson@jsi.com', 
-        phone: '555-9753', 
-        title: 'Designer',
-        role: 'User',
-        status: 'active',
-        lastLogin: '2025-01-14T14:30:00Z',
-        permissions: { 
-            salesData: false, 
-            commissions: false, 
-            projects: true, 
-            customerRanking: false, 
-            dealerRewards: false, 
-            submittingReplacements: true 
-        },
-        avatar: '/avatars/robert-wilson.jpg'
-    }
+// ============================================
+// Role system
+// Rep users: your team members in the rep firm
+// Dealer view: shows dealer companies signed up and their people
+// ============================================
+
+// Rep roles
+export const REP_ROLES = [
+    { value: 'rep-admin', label: 'Rep Admin' },
+    { value: 'rep-principal', label: 'Rep Principal' },
+    { value: 'rep-user', label: 'Rep User' },
 ];
 
+// Dealer roles (for dealer users within a dealer company)
+export const DEALER_ROLES = [
+    { value: 'dealer-principal', label: 'Dealer Principal' },
+    { value: 'dealer-admin-support', label: 'Dealer Admin Support' },
+    { value: 'dealer-sales-rep', label: 'Dealer Sales Rep' },
+    { value: 'dealer-designer', label: 'Dealer Designer' },
+    { value: 'dealer-sales-and-design', label: 'Dealer Sales & Design' },
+    { value: 'dealer-installer', label: 'Dealer Installer' },
+];
+
+// Admin-level roles (full access)
+export const ADMIN_ROLES = ['rep-admin', 'rep-principal', 'dealer-principal', 'dealer-admin-support'];
+
+export const isAdminRole = (role) => ADMIN_ROLES.includes(role);
+
+export const getRoleLabel = (roleValue) => {
+    const all = [...REP_ROLES, ...DEALER_ROLES];
+    return all.find(r => r.value === roleValue)?.label || roleValue;
+};
+
+// ----- Permission system -----
 export const PERMISSION_LABELS = {
-    salesData: "Sales Data",
-    customerRanking: "Customer Ranking",
-    projects: "Projects",
-    commissions: "Commissions",
-    dealerRewards: "Dealer Rewards",
-    submittingReplacements: "Submitting Replacements"
-};
-
-export const USER_TITLES = [
-    "Sales", 
-    "Designer", 
-    "Sales/Designer", 
-    "Admin Support",
-    "Sales Manager",
-    "Regional Sales Rep",
-    "Senior Designer",
-    "Field Installer"
-];
-
-export const USER_ROLES = ["Admin", "User"];
-
-export const USER_STATUS = {
-    ACTIVE: 'active',
-    PENDING: 'pending',
-    INACTIVE: 'inactive',
-    SUSPENDED: 'suspended'
-};
-
-export const STATUS_COLORS = {
-    active: '#10B981',
-    pending: '#C4956A', 
-    inactive: '#6B7280',
-    suspended: '#B85C5C'
-};
-
-export const EMPTY_USER = { 
-    firstName: '', 
-    lastName: '', 
-    email: '', 
-    phone: '',
-    title: 'Sales', 
-    role: 'User',
-    status: 'pending',
-    permissions: { 
-        salesData: true, 
-        commissions: false, 
-        projects: true, 
-        customerRanking: true, 
-        dealerRewards: true, 
-        submittingReplacements: true 
-    } 
-};
-
-export const MEMBER_STATS = {
-    totalUsers: 7,
-    activeUsers: 6,
-    pendingUsers: 1,
-    adminUsers: 2,
-    standardUsers: 5
+    salesData: 'Sales Data',
+    customerRanking: 'Customer Ranking',
+    projects: 'Projects',
+    commissions: 'Commissions',
+    dealerRewards: 'Dealer Rewards',
+    submittingReplacements: 'Replacements',
 };
 
 export const PERMISSION_DESCRIPTIONS = {
-    salesData: "Access to sales reports, customer data, and revenue metrics",
-    customerRanking: "View and manage customer ranking and performance data",
-    projects: "Create, edit, and manage project opportunities and leads", 
-    commissions: "View commission reports and earning statements",
-    dealerRewards: "Access dealer incentive programs and reward tracking",
-    submittingReplacements: "Submit and track replacement part requests"
+    salesData: 'Access to sales reports, customer data, and revenue metrics',
+    customerRanking: 'View and manage customer ranking and performance data',
+    projects: 'Create, edit, and manage project opportunities and leads',
+    commissions: 'View commission reports and earning statements',
+    dealerRewards: 'Access dealer incentive programs and reward tracking',
+    submittingReplacements: 'Submit and track replacement part requests',
 };
+
+// ----- Rep team members (your firm) -----
+export const INITIAL_MEMBERS = [
+    {
+        id: 1,
+        firstName: 'Luke',
+        lastName: 'Wagner',
+        email: 'luke.wagner@jsi.com',
+        phone: '555-1234',
+        role: 'rep-admin',
+        permissions: {
+            salesData: true, commissions: true, projects: true,
+            customerRanking: true, dealerRewards: true, submittingReplacements: true,
+        },
+    },
+    {
+        id: 2,
+        firstName: 'Jessica',
+        lastName: 'Rodriguez',
+        email: 'jessica.rodriguez@jsi.com',
+        phone: '555-4321',
+        role: 'rep-principal',
+        permissions: {
+            salesData: true, commissions: true, projects: true,
+            customerRanking: true, dealerRewards: true, submittingReplacements: true,
+        },
+    },
+    {
+        id: 3,
+        firstName: 'Sarah',
+        lastName: 'Johnson',
+        email: 'sarah.johnson@jsi.com',
+        phone: '555-5678',
+        role: 'rep-user',
+        permissions: {
+            salesData: true, commissions: false, projects: true,
+            customerRanking: true, dealerRewards: false, submittingReplacements: true,
+        },
+    },
+    {
+        id: 4,
+        firstName: 'Michael',
+        lastName: 'Chen',
+        email: 'michael.chen@jsi.com',
+        phone: '555-8765',
+        role: 'rep-user',
+        permissions: {
+            salesData: true, commissions: true, projects: true,
+            customerRanking: true, dealerRewards: true, submittingReplacements: true,
+        },
+    },
+    {
+        id: 5,
+        firstName: 'David',
+        lastName: 'Thompson',
+        email: 'david.thompson@jsi.com',
+        phone: '555-2468',
+        role: 'rep-user',
+        permissions: {
+            salesData: false, commissions: false, projects: true,
+            customerRanking: false, dealerRewards: false, submittingReplacements: true,
+        },
+    },
+    {
+        id: 6,
+        firstName: 'Emily',
+        lastName: 'Davis',
+        email: 'emily.davis@jsi.com',
+        phone: '555-1357',
+        role: 'rep-user',
+        permissions: {
+            salesData: true, commissions: false, projects: true,
+            customerRanking: true, dealerRewards: true, submittingReplacements: true,
+        },
+    },
+    {
+        id: 7,
+        firstName: 'Robert',
+        lastName: 'Wilson',
+        email: 'robert.wilson@jsi.com',
+        phone: '555-9753',
+        role: 'rep-user',
+        permissions: {
+            salesData: false, commissions: false, projects: true,
+            customerRanking: false, dealerRewards: false, submittingReplacements: true,
+        },
+    },
+];
+
+// ----- Dealer companies & their users -----
+export const INITIAL_DEALER_COMPANIES = [
+    {
+        id: 'd1',
+        name: 'Office Interiors Group',
+        city: 'Indianapolis, IN',
+        signedUp: '2024-08-12',
+        users: [
+            { id: 'd1u1', firstName: 'Karen', lastName: 'Mitchell', email: 'karen@oig.com', role: 'dealer-principal' },
+            { id: 'd1u2', firstName: 'Tom', lastName: 'Bradley', email: 'tom@oig.com', role: 'dealer-sales-rep' },
+            { id: 'd1u3', firstName: 'Lisa', lastName: 'Nguyen', email: 'lisa@oig.com', role: 'dealer-designer' },
+        ],
+    },
+    {
+        id: 'd2',
+        name: 'Pinnacle Workspace Solutions',
+        city: 'Louisville, KY',
+        signedUp: '2024-10-03',
+        users: [
+            { id: 'd2u1', firstName: 'James', lastName: 'Foster', email: 'james@pinnacle-ws.com', role: 'dealer-principal' },
+            { id: 'd2u2', firstName: 'Amanda', lastName: 'Cole', email: 'amanda@pinnacle-ws.com', role: 'dealer-admin-support' },
+            { id: 'd2u3', firstName: 'Ryan', lastName: 'Patel', email: 'ryan@pinnacle-ws.com', role: 'dealer-sales-and-design' },
+            { id: 'd2u4', firstName: 'Megan', lastName: 'Brooks', email: 'megan@pinnacle-ws.com', role: 'dealer-sales-rep' },
+        ],
+    },
+    {
+        id: 'd3',
+        name: 'Metro Contract Furnishings',
+        city: 'Cincinnati, OH',
+        signedUp: '2025-01-18',
+        users: [
+            { id: 'd3u1', firstName: 'Steve', lastName: 'Harrison', email: 'steve@metrocf.com', role: 'dealer-principal' },
+            { id: 'd3u2', firstName: 'Diane', lastName: 'Reeves', email: 'diane@metrocf.com', role: 'dealer-designer' },
+        ],
+    },
+    {
+        id: 'd4',
+        name: 'Heartland Office Products',
+        city: 'Evansville, IN',
+        signedUp: '2025-03-22',
+        users: [
+            { id: 'd4u1', firstName: 'Chris', lastName: 'Walker', email: 'chris@heartlandop.com', role: 'dealer-admin-support' },
+            { id: 'd4u2', firstName: 'Natalie', lastName: 'Kim', email: 'natalie@heartlandop.com', role: 'dealer-sales-rep' },
+            { id: 'd4u3', firstName: 'Derek', lastName: 'Simmons', email: 'derek@heartlandop.com', role: 'dealer-installer' },
+        ],
+    },
+    {
+        id: 'd5',
+        name: 'Great Lakes Furnishings',
+        city: 'Fort Wayne, IN',
+        signedUp: '2025-06-10',
+        users: [
+            { id: 'd5u1', firstName: 'Jennifer', lastName: 'Owens', email: 'jen@greatlakesf.com', role: 'dealer-principal' },
+        ],
+    },
+];
+
+export const EMPTY_USER = {
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    role: 'rep-user',
+    permissions: {
+        salesData: true, commissions: false, projects: true,
+        customerRanking: true, dealerRewards: true, submittingReplacements: true,
+    },
+};
+
+// Legacy exports for backward compat
+export const USER_TITLES = [];
+export const USER_ROLES = ['Admin', 'User'];
+export const STATUS_COLORS = {
+    active: '#10B981',
+    pending: '#C4956A',
+    inactive: '#6B7280',
+    suspended: '#B85C5C',
+};
+export const DOMAINS = { rep: 'rep', dealer: 'dealer' };
+export const getRolesForDomain = (domain) => domain === 'dealer' ? DEALER_ROLES : REP_ROLES;
