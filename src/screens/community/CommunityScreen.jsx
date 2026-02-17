@@ -220,8 +220,8 @@ const AnnouncementsRow = ({ announcements, theme, dark, onNavigate, onDismiss })
   const onPointerDown = useCallback((e) => {
     const el = rowRef.current;
     if (!el) return;
+    // Do NOT call setPointerCapture — it intercepts child button clicks
     drag.current = { active: true, startX: e.clientX, scrollLeft: el.scrollLeft, moved: false };
-    el.setPointerCapture(e.pointerId);
   }, []);
 
   const onPointerMove = useCallback((e) => {
@@ -490,13 +490,14 @@ const PollCard = React.memo(({ poll, index, theme, dark, votedOption, onPollVote
                 <button
                   key={opt.id}
                   type="button"
-                  disabled={!!votedOption}
-                  onClick={() => onPollVote?.(poll.id, opt.id)}
+                  onClick={() => { if (!votedOption) onPollVote?.(poll.id, opt.id); }}
                   className="w-full text-left px-3 py-2 rounded-xl relative overflow-hidden transition-all active:scale-[0.98]"
                   style={{
                     backgroundColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)',
-                    border: active ? `1px solid ${theme.colors.accent}` : '1px solid transparent',
-                    color: active ? theme.colors.accent : theme.colors.textPrimary,
+                    border: active ? `1px solid ${theme.colors.accent}` : `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+                    color: active ? theme.colors.accent : votedOption ? theme.colors.textSecondary : theme.colors.textPrimary,
+                    cursor: votedOption ? 'default' : 'pointer',
+                    opacity: votedOption && !active ? 0.65 : 1,
                   }}
                 >
                   <span className="relative z-10 text-[12px] font-medium flex justify-between">

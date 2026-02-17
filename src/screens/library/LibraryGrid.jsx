@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { INITIAL_ASSETS } from './data.js';
 import { X, Download, Share2, Copy } from 'lucide-react';
 
@@ -29,51 +30,108 @@ export const LibraryGrid = ({ theme, query, parentHeaderRef }) => {
     else { parentHeaderRef.current.style.filter = ''; parentHeaderRef.current.style.opacity = '1'; }
   }, [selected, parentHeaderRef]);
 
-  // Masonry-ish responsive columns (2-3) letting images keep natural aspect ratio for better preview
+  // Proper 2-column grid (masonry-style with auto rows)
   return (
-    <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
-      <div className="flex-1 overflow-y-auto px-4 pb-10">
-        <div className="columns-2 md:columns-3 gap-3 space-y-3">
+    <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
+      <div className="flex-1 overflow-y-auto pb-10">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 px-4 pt-2">
           {filtered.map(a => (
             <button key={a.id} onClick={()=>openDetail(a)} className="group relative w-full rounded-2xl overflow-hidden border focus:outline-none focus-visible:ring-2" style={{ borderColor: theme.colors.border, backgroundColor: theme.colors.surface }}>
-              <img src={a.src} alt={a.alt || a.title || a.series} className="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-[1.03]" loading="lazy" />
-              <div className="absolute inset-x-0 bottom-0 p-2 pt-10 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="aspect-square overflow-hidden">
+                <img src={a.src} alt={a.alt || a.title || a.series} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" loading="lazy" />
+              </div>
+              <div className="absolute inset-x-0 bottom-0 p-2 pt-8 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
                 <p className="text-[11px] leading-tight text-white line-clamp-2">{a.title || `${a.series||''} ${a.finish||''}`}</p>
               </div>
             </button>
           ))}
           {!filtered.length && (
-            <div className="text-center text-sm pt-20" style={{ color: theme.colors.textSecondary }}>No images match your filters. Try clearing search or filters.</div>
+            <div className="col-span-2 sm:col-span-3 text-center text-sm pt-20" style={{ color: theme.colors.textSecondary }}>No images match your filters.</div>
           )}
         </div>
       </div>
-      {selected && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6" style={{ background:'rgba(0,0,0,0.55)' }} onMouseDown={(e)=>{ if(e.target===e.currentTarget) closeDetail(); }}>
-          <div className="relative w-full max-w-5xl max-h-full overflow-auto rounded-3xl shadow-xl" style={{ background: theme.colors.surface, border:`1px solid ${theme.colors.border}` }}>
-            <button onClick={closeDetail} className="absolute top-3 right-3 w-10 h-10 rounded-full flex items-center justify-center" style={{ background: theme.colors.subtle }} aria-label="Close detail"><X className="w-5 h-5" /></button>
-            <div className="grid md:grid-cols-2 gap-0">
-              <div className="p-4 md:p-6 flex items-center justify-center bg-black/5">
-                <img src={selected.src} alt={selected.alt || selected.title} className="max-h-[70vh] w-auto rounded-xl object-contain" />
+
+      {/* Detail modal via portal so it's never clipped by overflow containers */}
+      {selected && createPortal(
+        <div
+          className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center"
+          style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(6px)' }}
+          onMouseDown={(e) => { if (e.target === e.currentTarget) closeDetail(); }}
+        >
+          <div
+            className="relative w-full max-w-2xl sm:mx-4 rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden"
+            style={{ background: theme.colors.surface, border: `1px solid ${theme.colors.border}`, maxHeight: '92dvh' }}
+          >
+            {/* Close */}
+            <button
+              onClick={closeDetail}
+              aria-label="Close"
+              className="absolute top-3 right-3 z-10 w-9 h-9 rounded-full flex items-center justify-center"
+              style={{ background: 'rgba(0,0,0,0.35)' }}
+            >
+              <X className="w-4 h-4 text-white" />
+            </button>
+
+            {/* Scrollable content */}
+            <div className="overflow-y-auto" style={{ maxHeight: '92dvh' }}>
+              {/* Hero image */}
+              <div className="w-full bg-black/10 flex items-center justify-center" style={{ maxHeight: '55vw' }}>
+                <img
+                  src={selected.src}
+                  alt={selected.alt || selected.title}
+                  className="w-full object-contain"
+                  style={{ maxHeight: '55vw' }}
+                />
               </div>
-              <div className="p-6 space-y-5">
+
+              {/* Info */}
+              <div className="p-5 space-y-4">
                 <div>
-                  <h2 className="text-lg font-semibold" style={{ color: theme.colors.textPrimary }}>{selected.title || selected.series}</h2>
-                  <p className="text-xs mt-1" style={{ color: theme.colors.textSecondary }}>{selected.location || selected.finish}</p>
+                  <h2 className="text-[17px] font-bold leading-snug" style={{ color: theme.colors.textPrimary }}>{selected.title || selected.series}</h2>
+                  {(selected.location || selected.finish) && (
+                    <p className="text-[12px] mt-0.5" style={{ color: theme.colors.textSecondary }}>{selected.location || selected.finish}</p>
+                  )}
                 </div>
-                <div className="flex flex-wrap gap-2">
+
+                {/* Tags */}
+                <div className="flex flex-wrap gap-1.5">
                   {selected.series && <span className="px-3 py-1 rounded-full text-[11px] font-medium" style={{ background: theme.colors.subtle, color: theme.colors.textSecondary }}>{selected.series}</span>}
                   {selected.finish && <span className="px-3 py-1 rounded-full text-[11px] font-medium" style={{ background: theme.colors.subtle, color: theme.colors.textSecondary }}>{selected.finish}</span>}
                   {(selected.tags||[]).map(t => <span key={t} className="px-3 py-1 rounded-full text-[11px]" style={{ background: theme.colors.subtle, color: theme.colors.textSecondary }}>{t}</span>)}
                 </div>
-                <div className="flex flex-wrap gap-3 pt-1">
-                  <button onClick={()=>{ const link = window.location.origin + '/library#'+selected.id; navigator.clipboard.writeText(link); }} className="flex items-center gap-2 px-5 h-11 rounded-full text-sm font-medium" style={{ background: theme.colors.subtle, color: theme.colors.textPrimary, border:`1px solid ${theme.colors.border}` }}><Share2 className="w-4 h-4" /> Share</button>
-                  <button onClick={()=>{ navigator.clipboard.writeText(selected.src); }} className="flex items-center gap-2 px-5 h-11 rounded-full text-sm font-medium" style={{ background: theme.colors.subtle, color: theme.colors.textPrimary, border:`1px solid ${theme.colors.border}` }}><Copy className="w-4 h-4" /> Copy Image URL</button>
-                  <a href={selected.src} download target="_blank" rel="noreferrer" className="flex items-center gap-2 px-5 h-11 rounded-full text-sm font-medium" style={{ background: theme.colors.accent, color: theme.colors.accentText }}><Download className="w-4 h-4" /> Download</a>
+
+                {/* Actions */}
+                <div className="flex flex-wrap gap-2 pb-2">
+                  <button
+                    onClick={() => { navigator.clipboard.writeText(window.location.origin + '/library#' + selected.id); }}
+                    className="flex items-center gap-2 px-4 h-10 rounded-full text-[13px] font-medium"
+                    style={{ background: theme.colors.subtle, color: theme.colors.textPrimary, border: `1px solid ${theme.colors.border}` }}
+                  >
+                    <Share2 className="w-3.5 h-3.5" /> Share
+                  </button>
+                  <button
+                    onClick={() => { navigator.clipboard.writeText(selected.src); }}
+                    className="flex items-center gap-2 px-4 h-10 rounded-full text-[13px] font-medium"
+                    style={{ background: theme.colors.subtle, color: theme.colors.textPrimary, border: `1px solid ${theme.colors.border}` }}
+                  >
+                    <Copy className="w-3.5 h-3.5" /> Copy URL
+                  </button>
+                  <a
+                    href={selected.src}
+                    download
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-2 px-4 h-10 rounded-full text-[13px] font-semibold"
+                    style={{ background: theme.colors.accent, color: theme.colors.accentText }}
+                  >
+                    <Download className="w-3.5 h-3.5" /> Download
+                  </a>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
