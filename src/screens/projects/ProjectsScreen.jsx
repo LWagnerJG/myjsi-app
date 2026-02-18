@@ -6,7 +6,7 @@ import { STAGES, VERTICALS, COMPETITORS, DISCOUNT_OPTIONS, PO_TIMEFRAMES, INITIA
 import { ProbabilitySlider } from '../../components/forms/ProbabilitySlider.jsx';
 import { PillButton } from '../../components/common/JSIButtons.jsx';
 import { JSI_SERIES } from '../products/data.js';
-import { DESIGN_TOKENS } from '../../design-system/tokens.js';
+import { DESIGN_TOKENS, isDarkTheme } from '../../design-system/tokens.js';
 
 // Tab options for projects
 const PROJECTS_TAB_OPTIONS = [
@@ -68,7 +68,7 @@ const ContactSearchSelector = ({ value, onChange, dealers, theme }) => {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const ref = useRef(null);
-  const isDark = theme.name === 'dark';
+  const isDark = isDarkTheme(theme);
   const contacts = useMemo(() => {
     const all = [];
     (dealers || []).forEach(d => {
@@ -147,7 +147,7 @@ const CurrencyInput = ({ value, onChange, theme }) => {
 
 // ================= Opportunity Detail (clean UI) =================
 const OpportunityDetail = ({ opp, theme, onUpdate }) => {
-  const isDark = theme.name === 'dark';
+  const isDark = isDarkTheme(theme);
   const [draft,setDraft]=useState(opp); const dirty=useRef(false); const saveRef=useRef(null);
   useEffect(()=>{ setDraft(opp); },[opp]);
   const update=(k,v)=> setDraft(p=>{ const n={...p,[k]:v}; dirty.current= true; return n; });
@@ -571,7 +571,7 @@ const ProjectCard = ({ opp, theme, onClick }) => {
       const num = parseFloat(displayValue.replace(/[^0-9.]/g,'')); if(!isNaN(num)) displayValue = '$'+num.toLocaleString();
     }
   }
-  const isDark = theme.name === 'dark';
+  const isDark = isDarkTheme(theme);
   return (
     <button onClick={onClick} className="w-full text-left group" style={{ WebkitTapHighlightColor:'transparent' }}>
       <div
@@ -625,7 +625,7 @@ const InstallationDetail = ({ project, theme, onAddPhotoFiles }) => {
 
 // Exported main ProjectsScreen (restored)
 export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, setOpportunities, myProjects, setMyProjects, projectsInitialTab, clearProjectsInitialTab }, ref) => {
-  const isDark = theme.name === 'dark';
+  const isDark = isDarkTheme(theme);
   const initial = projectsInitialTab || 'pipeline';
   const [projectsTab, setProjectsTab] = useState(initial);
   useEffect(()=>{ if(projectsInitialTab) clearProjectsInitialTab && clearProjectsInitialTab(); },[projectsInitialTab, clearProjectsInitialTab]);
