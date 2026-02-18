@@ -255,16 +255,12 @@ function App() {
     }, []);
 
     const handleBack = useCallback(() => {
-        if (currentScreen === 'projects' && projectsScreenRef.current?.clearSelection) {
-            const handled = projectsScreenRef.current.clearSelection();
-            if (handled) return;
-        }
         if (navigationHistory.length > 1) {
             setLastNavigationDirection('backward');
             setScreenParams({});
             window.history.back();
         }
-    }, [currentScreen, navigationHistory.length]);
+    }, [navigationHistory.length]);
 
     const handleHome = useCallback(() => {
         const next = ['home'];
