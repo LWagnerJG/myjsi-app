@@ -514,7 +514,7 @@ export const NewLeadScreen = ({
             transition: 'grid-template-rows .3s ease, opacity .25s ease',
           }}>
             <div style={{ overflow: 'hidden' }}>
-              <div className="py-2.5">
+              <Row label="Competitors" theme={theme} inline noSep>
                 <div className="flex flex-wrap gap-1.5">
                   {[...COMPETITORS.filter(c => c !== 'None'), 'Other'].map(comp => (
                     <PillButton key={comp} size="xs" isSelected={(newLeadData.competitors || []).includes(comp)}
@@ -527,7 +527,7 @@ export const NewLeadScreen = ({
                       placeholder="Other competitor" theme={theme} size="sm" surfaceBg />
                   </div>
                 )}
-              </div>
+              </Row>
             </div>
           </div>
 
