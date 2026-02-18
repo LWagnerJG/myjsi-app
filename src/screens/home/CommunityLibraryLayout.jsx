@@ -345,15 +345,15 @@ const CommunitiesSheet = ({ theme, dark, onSelect, onClose, activeSubredditId })
     >
       <div
         className="relative w-full max-w-lg rounded-t-3xl overflow-hidden"
-        style={{ background: dark ? '#1c1c1c' : '#fff', maxHeight: '82dvh', display: 'flex', flexDirection: 'column' }}
+        style={{ background: dark ? '#1c1c1c' : '#fafafa', maxHeight: '82dvh', display: 'flex', flexDirection: 'column' }}
       >
         {/* Drag handle */}
         <div className="absolute top-2.5 left-1/2 -translate-x-1/2 w-10 h-1 rounded-full" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)' }} />
 
         {/* Header */}
-        <div className="flex items-center justify-between px-5 pt-5 pb-1 flex-shrink-0">
+        <div className="flex items-center justify-between px-5 pt-5 pb-3 flex-shrink-0" style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}` }}>
           <div>
-            <p className="text-[15px] font-bold" style={{ color: theme.colors.textPrimary }}>Communities</p>
+            <p className="text-[16px] font-bold" style={{ color: theme.colors.textPrimary }}>Communities</p>
             <p className="text-[11px] mt-0.5" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>
               Role-gated in production &middot; all visible in this preview
             </p>
@@ -363,33 +363,32 @@ const CommunitiesSheet = ({ theme, dark, onSelect, onClose, activeSubredditId })
           </button>
         </div>
 
-        {/* Subreddit list */}
-        <div className="flex-1 overflow-y-auto pb-10 mt-3">
+        {/* Subreddit list — no visible scrollbar */}
+        <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', paddingBottom: '2.5rem' }}>
           {SUBREDDITS.map((sub) => {
             const Icon = sub.icon;
             return (
               <button
                 key={sub.id}
                 onClick={() => onSelect(sub)}
-                className="w-full flex items-center gap-3.5 px-5 py-3.5 text-left transition-colors active:opacity-60"
-                style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}`, opacity: 1 }}
+                className="w-full flex items-center gap-3.5 px-5 py-3.5 text-left active:opacity-60"
+                style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}` }}
               >
                 <div
                   className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ backgroundColor: sub.id === activeSubredditId ? (dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)') : (dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.04)') }}
+                  style={{ backgroundColor: sub.id === activeSubredditId ? (dark ? 'rgba(255,255,255,0.14)' : 'rgba(0,0,0,0.09)') : (dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)') }}
                 >
-                  <Icon className="w-4 h-4" style={{ color: sub.id === activeSubredditId ? theme.colors.textPrimary : theme.colors.textSecondary, opacity: sub.id === activeSubredditId ? 1 : 0.65 }} />
+                  <Icon className="w-4 h-4" style={{ color: theme.colors.textPrimary, opacity: sub.id === activeSubredditId ? 0.9 : 0.45 }} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-semibold" style={{ color: sub.id === activeSubredditId ? theme.colors.textPrimary : theme.colors.textPrimary, opacity: sub.id === activeSubredditId ? 1 : 0.8 }}>{sub.name}</p>
-                  <p className="text-[11px] mt-0.5 line-clamp-1" style={{ color: theme.colors.textSecondary, opacity: 0.55 }}>{sub.description}</p>
+                  <p className="text-[13px] font-semibold" style={{ color: theme.colors.textPrimary }}>{sub.name}</p>
+                  <p className="text-[11.5px] mt-0.5 line-clamp-2 leading-snug" style={{ color: theme.colors.textSecondary }}>{sub.description}</p>
                 </div>
-                <div className="flex items-center gap-1.5 flex-shrink-0">
+                <div className="flex items-center gap-1.5 flex-shrink-0 ml-3">
                   {sub.id === activeSubredditId && (
-                    <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: theme.colors.accent }} />
+                    <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: theme.colors.accent }} />
                   )}
-                  <span className="text-[10px]" style={{ color: theme.colors.textSecondary, opacity: 0.38 }}>{sub.members}</span>
-                  <Users className="w-2.5 h-2.5" style={{ color: theme.colors.textSecondary, opacity: 0.3 }} />
+                  <span className="text-[11px]" style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>{sub.members}</span>
                 </div>
               </button>
             );

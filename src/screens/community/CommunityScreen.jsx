@@ -743,8 +743,8 @@ export const CommunityScreen = ({
             </div>
           )}
 
-          {/* Announcements — compact drag-scroll row */}
-          {effectiveViewMode === 'feed' && !focusPostId && visibleAnnouncements.length > 0 && (
+          {/* Announcements — compact drag-scroll row, not shown in embed (parent handles it) */}
+          {!embedMode && effectiveViewMode === 'feed' && !focusPostId && visibleAnnouncements.length > 0 && (
             <AnnouncementsRow
               announcements={visibleAnnouncements}
               theme={theme}
