@@ -1,8 +1,9 @@
 ﻿import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { LibraryGrid } from '../library/LibraryGrid.jsx';
-import { CommunityScreen } from '../community/CommunityScreen.jsx';
+import { CommunityScreen, AnnouncementsRow } from '../community/CommunityScreen.jsx';
 import { INITIAL_ASSETS } from '../library/data.js';
+import { ANNOUNCEMENTS } from '../community/data.js';
 import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
 import { isDarkTheme } from '../../design-system/tokens.js';
 import {
@@ -329,7 +330,7 @@ const SubredditPostCard = ({ post, idx, isTop, dark, theme, isLiked, isUpvoted, 
 );
 
 // ─── CommunitiesSheet ─────────────────────────────────────────────────────────
-const CommunitiesSheet = ({ theme, dark, onSelect, onClose }) => {
+const CommunitiesSheet = ({ theme, dark, onSelect, onClose, activeSubredditId }) => {
   useEffect(() => {
     const h = (e) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', h);
@@ -371,21 +372,24 @@ const CommunitiesSheet = ({ theme, dark, onSelect, onClose }) => {
                 key={sub.id}
                 onClick={() => onSelect(sub)}
                 className="w-full flex items-center gap-3.5 px-5 py-3.5 text-left transition-colors active:opacity-60"
-                style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}` }}
+                style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}`, opacity: 1 }}
               >
                 <div
                   className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ backgroundColor: dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.04)' }}
+                  style={{ backgroundColor: sub.id === activeSubredditId ? (dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)') : (dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.04)') }}
                 >
-                  <Icon className="w-4 h-4" style={{ color: theme.colors.textSecondary, opacity: 0.7 }} />
+                  <Icon className="w-4 h-4" style={{ color: sub.id === activeSubredditId ? theme.colors.textPrimary : theme.colors.textSecondary, opacity: sub.id === activeSubredditId ? 1 : 0.65 }} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-semibold" style={{ color: theme.colors.textPrimary }}>{sub.name}</p>
-                  <p className="text-[11px] mt-0.5 line-clamp-1" style={{ color: theme.colors.textSecondary, opacity: 0.6 }}>{sub.description}</p>
+                  <p className="text-[13px] font-semibold" style={{ color: sub.id === activeSubredditId ? theme.colors.textPrimary : theme.colors.textPrimary, opacity: sub.id === activeSubredditId ? 1 : 0.8 }}>{sub.name}</p>
+                  <p className="text-[11px] mt-0.5 line-clamp-1" style={{ color: theme.colors.textSecondary, opacity: 0.55 }}>{sub.description}</p>
                 </div>
-                <div className="flex items-center gap-1 flex-shrink-0">
-                  <span className="text-[10px]" style={{ color: theme.colors.textSecondary, opacity: 0.4 }}>{sub.members}</span>
-                  <Users className="w-2.5 h-2.5" style={{ color: theme.colors.textSecondary, opacity: 0.35 }} />
+                <div className="flex items-center gap-1.5 flex-shrink-0">
+                  {sub.id === activeSubredditId && (
+                    <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: theme.colors.accent }} />
+                  )}
+                  <span className="text-[10px]" style={{ color: theme.colors.textSecondary, opacity: 0.38 }}>{sub.members}</span>
+                  <Users className="w-2.5 h-2.5" style={{ color: theme.colors.textSecondary, opacity: 0.3 }} />
                 </div>
               </button>
             );
@@ -405,34 +409,56 @@ const ChannelAwareFeed = ({
   const [activeSubreddit, setActiveSubreddit] = useState(null);
   const [showCommunitiesSheet, setShowCommunitiesSheet] = useState(false);
   const [trendingDetail, setTrendingDetail] = useState(null);
+  const [dismissedAnnouncements, setDismissedAnnouncements] = useState(new Set());
+  const dismissAnnouncement = useCallback(id => setDismissedAnnouncements(prev => new Set([...prev, id])), []);
 
-  // Top 3 trending: highest hotScore across ALL posts w/ >=1 upvote (any subreddit)
   const topTrending = useMemo(() => {
     const allP = (posts || []).filter(p => (p.upvotes || 0) > 0);
     return [...allP].sort((a, b) => hotScore(b) - hotScore(a)).slice(0, 3);
   }, [posts]);
-
   const trendingIds = useMemo(() => new Set(topTrending.map(p => p.id)), [topTrending]);
-
-  // Latest: general-feed posts not in trending, newest first
   const latestPosts = useMemo(() =>
     (posts || []).filter(p => !p.subreddit && !trendingIds.has(p.id))
       .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)),
     [posts, trendingIds]
   );
+  const visibleAnnouncements = useMemo(() =>
+    ANNOUNCEMENTS.filter(a => !dismissedAnnouncements.has(a.id)),
+    [dismissedAnnouncements]
+  );
 
-  // Subreddit view
-  if (activeSubreddit) {
-    return (
-      <div>
+  return (
+    <>
+      {/* ── Persistent nav strip: left = back/location, right = Communities ── */}
+      <div className="flex items-center justify-between mb-3">
+        {activeSubreddit ? (
+          <button
+            onClick={() => setActiveSubreddit(null)}
+            className="flex items-center gap-1 text-[12px] font-semibold transition-opacity active:opacity-50 min-w-0 max-w-[60%]"
+            style={{ color: theme.colors.textPrimary }}
+          >
+            <ChevronRight
+              className="w-3.5 h-3.5 flex-shrink-0"
+              style={{ transform: 'rotate(180deg)', color: theme.colors.textSecondary }}
+            />
+            <span className="truncate">{activeSubreddit.name}</span>
+          </button>
+        ) : <div />}
         <button
-          onClick={() => setActiveSubreddit(null)}
-          className="flex items-center gap-1 mb-4 text-[12px] font-semibold transition-opacity active:opacity-60"
-          style={{ color: theme.colors.textSecondary }}
+          onClick={() => setShowCommunitiesSheet(true)}
+          className="flex items-center gap-1 text-[11.5px] font-semibold px-3 py-1.5 rounded-full flex-shrink-0 transition-all active:scale-95"
+          style={{
+            backgroundColor: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.055)',
+            color: activeSubreddit ? theme.colors.textSecondary : theme.colors.textPrimary,
+          }}
         >
-          <ChevronRight className="w-3.5 h-3.5 rotate-180" />
-          All Posts
+          {activeSubreddit ? 'Switch' : 'Communities'}
+          <ChevronRight className="w-3 h-3" />
         </button>
+      </div>
+
+      {/* ── Content ── */}
+      {activeSubreddit ? (
         <SubredditFeed
           subreddit={activeSubreddit}
           allPosts={posts}
@@ -444,93 +470,81 @@ const ChannelAwareFeed = ({
           onUpvote={onUpvote}
           onAddComment={onAddComment}
         />
-      </div>
-    );
-  }
-
-  // All view
-  return (
-    <>
-      {/* Header row */}
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-[10px] font-bold uppercase tracking-[0.1em]" style={{ color: theme.colors.textSecondary, opacity: 0.4 }}>All Posts</span>
-        <button
-          onClick={() => setShowCommunitiesSheet(true)}
-          className="flex items-center gap-1 text-[11.5px] font-semibold px-3 py-1.5 rounded-full transition-all active:scale-95"
-          style={{ backgroundColor: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.055)', color: theme.colors.textSecondary }}
-        >
-          Communities
-          <ChevronRight className="w-3 h-3" />
-        </button>
-      </div>
-
-      {/* Trending top 3 */}
-      {topTrending.length > 0 && (
+      ) : (
         <>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-[9px] font-bold uppercase tracking-[0.14em]" style={{ color: theme.colors.textSecondary, opacity: 0.4 }}>Trending</span>
-            <div className="flex-1 h-px" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }} />
-          </div>
-          <div className="space-y-3">
-            {topTrending.map((post, idx) => (
-              <SubredditPostCard
-                key={post.id}
-                post={post}
-                idx={idx}
-                isTop
-                dark={dark}
+          {/* Announcements */}
+          {visibleAnnouncements.length > 0 && (
+            <div className="-mx-4 mb-3">
+              <AnnouncementsRow
+                announcements={visibleAnnouncements}
                 theme={theme}
-                isLiked={!!likedPosts?.[post.id]}
-                isUpvoted={!!postUpvotes?.[post.id]}
-                onOpen={() => setTrendingDetail(post)}
-                onUpvote={onUpvote}
-                onToggleLike={onToggleLike}
+                dark={dark}
+                onDismiss={dismissAnnouncement}
               />
-            ))}
-          </div>
+            </div>
+          )}
+
+          {/* Trending top 3 */}
+          {topTrending.length > 0 && (
+            <>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-[9px] font-bold uppercase tracking-[0.14em]" style={{ color: theme.colors.textSecondary, opacity: 0.4 }}>Trending</span>
+                <div className="flex-1 h-px" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }} />
+              </div>
+              <div className="space-y-3">
+                {topTrending.map((post, idx) => (
+                  <SubredditPostCard
+                    key={post.id} post={post} idx={idx} isTop
+                    dark={dark} theme={theme}
+                    isLiked={!!likedPosts?.[post.id]}
+                    isUpvoted={!!postUpvotes?.[post.id]}
+                    onOpen={() => setTrendingDetail(post)}
+                    onUpvote={onUpvote}
+                    onToggleLike={onToggleLike}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* Latest: chronological general posts + polls */}
+          {(latestPosts.length > 0 || (polls || []).length > 0) && (
+            <>
+              <FeedDivider label="Latest" dark={dark} theme={theme} />
+              <CommunityScreen
+                theme={theme}
+                posts={latestPosts}
+                polls={polls}
+                likedPosts={likedPosts}
+                pollChoices={pollChoices}
+                postUpvotes={postUpvotes}
+                onToggleLike={onToggleLike}
+                onUpvote={onUpvote}
+                onPollVote={onPollVote}
+                onAddComment={onAddComment}
+                openCreateContentModal={openCreateContentModal}
+                embedMode
+                externalQuery={query}
+              />
+            </>
+          )}
         </>
       )}
 
-      {/* Latest: chronological general posts + polls */}
-      {(latestPosts.length > 0 || (polls || []).length > 0) && (
-        <>
-          <FeedDivider label="Latest" dark={dark} theme={theme} />
-          <CommunityScreen
-            theme={theme}
-            posts={latestPosts}
-            polls={polls}
-            likedPosts={likedPosts}
-            pollChoices={pollChoices}
-            postUpvotes={postUpvotes}
-            onToggleLike={onToggleLike}
-            onUpvote={onUpvote}
-            onPollVote={onPollVote}
-            onAddComment={onAddComment}
-            openCreateContentModal={openCreateContentModal}
-            embedMode
-            externalQuery={query}
-          />
-        </>
-      )}
-
-      {/* PostDetailSheet for trending cards */}
       {trendingDetail && (
         <PostDetailSheet
-          post={trendingDetail}
-          theme={theme}
-          dark={dark}
+          post={trendingDetail} theme={theme} dark={dark}
           isLiked={!!likedPosts?.[trendingDetail.id]}
           isUpvoted={!!postUpvotes?.[trendingDetail.id]}
-          onToggleLike={onToggleLike}
-          onUpvote={onUpvote}
-          onAddComment={onAddComment}
-          onClose={() => setTrendingDetail(null)}
+          onToggleLike={onToggleLike} onUpvote={onUpvote}
+          onAddComment={onAddComment} onClose={() => setTrendingDetail(null)}
         />
       )}
 
       {showCommunitiesSheet && (
         <CommunitiesSheet
           theme={theme} dark={dark}
+          activeSubredditId={activeSubreddit?.id}
           onSelect={(sub) => { setActiveSubreddit(sub); setShowCommunitiesSheet(false); }}
           onClose={() => setShowCommunitiesSheet(false)}
         />

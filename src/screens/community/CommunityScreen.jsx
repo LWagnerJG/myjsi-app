@@ -234,7 +234,7 @@ const AnnouncementDetailModal = ({ announcement, theme, dark, onClose, onNavigat
 };
 
 /* ── Compact Announcements — horizontal drag-scroll row ── */
-const AnnouncementsRow = ({ announcements, theme, dark, onNavigate, onDismiss }) => {
+export const AnnouncementsRow = ({ announcements, theme, dark, onNavigate, onDismiss }) => {
   const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
   const rowRef = useRef(null);
   const drag = useRef({ active: false, startX: 0, scrollLeft: 0, moved: false });
