@@ -413,21 +413,40 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
         )}
       </div>
       <div ref={scrollContainerRef} className="flex-1 overflow-y-auto scrollbar-hide">
-        <div className="px-4 sm:px-6 lg:px-8 pt-3 pb-40 space-y-3 max-w-5xl mx-auto w-full">
+        <div className="px-4 sm:px-6 lg:px-8 pt-3 pb-40 max-w-5xl mx-auto w-full">
           {projectsTab==='pipeline' && (
-            filteredOpportunities.length? filteredOpportunities.map(opp=> <ProjectCard key={opp.id} opp={opp} theme={theme} onClick={()=>setSelectedOpportunity(opp)} />):
+            filteredOpportunities.length ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {filteredOpportunities.map(opp=> <ProjectCard key={opp.id} opp={opp} theme={theme} onClick={()=>setSelectedOpportunity(opp)} />)}
+              </div>
+            ) :
             <div className="flex flex-col items-center justify-center py-12"><Briefcase className="w-12 h-12 mb-4" style={{ color: theme.colors.textSecondary }} /><p className="text-center text-sm font-medium" style={{ color: theme.colors.textSecondary }}>No projects in {selectedPipelineStage}</p><p className="text-center text-xs mt-1" style={{ color: theme.colors.textSecondary }}>Add a new project to get started</p></div>
           )}
           {projectsTab==='my-projects' && (
-            (myProjects||[]).length? (myProjects||[]).map(p=> (
-              <GlassCard key={p.id} theme={theme} className="p-0 overflow-hidden cursor-pointer group transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0" variant="elevated" onClick={()=>setSelectedInstall(p)} style={{ borderRadius:'18px' }}>
-                <div className="relative aspect-video w-full">
-                  <img src={p.image} alt={p.name} className="absolute h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                  <div className="absolute bottom-0 left-0 p-4"><h3 className="text-xl font-bold text-white tracking-tight mb-1">{p.name}</h3><p className="text-white/90 font-medium text-sm">{p.location}</p></div>
-                </div>
-              </GlassCard>
-            )): <div className="flex flex-col items-center justify-center py-12"><Briefcase className="w-12 h-12 mb-4" style={{ color: theme.colors.textSecondary }} /><p className="text-center text-sm font-medium" style={{ color: theme.colors.textSecondary }}>No installations recorded yet</p><p className="text-center text-xs mt-1" style={{ color: theme.colors.textSecondary }}>Add install photos and details to build your portfolio</p></div>
+            (myProjects||[]).length ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {(myProjects||[]).map(p=> (
+                  <button key={p.id} onClick={()=>setSelectedInstall(p)} className="w-full text-left group" style={{ WebkitTapHighlightColor:'transparent' }}>
+                    <div
+                      className="overflow-hidden transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
+                      style={{
+                        borderRadius: 18,
+                        border: isDark ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(0,0,0,0.06)',
+                      }}
+                    >
+                      <div className="relative aspect-[4/3] w-full">
+                        <img src={p.image} alt={p.name} className="absolute h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+                        <div className="absolute bottom-0 left-0 p-3.5">
+                          <h3 className="text-[15px] font-bold text-white tracking-tight leading-snug">{p.name}</h3>
+                          <p className="text-white/80 font-medium text-[11px] mt-0.5">{p.location}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            ) : <div className="flex flex-col items-center justify-center py-12"><Briefcase className="w-12 h-12 mb-4" style={{ color: theme.colors.textSecondary }} /><p className="text-center text-sm font-medium" style={{ color: theme.colors.textSecondary }}>No installations recorded yet</p><p className="text-center text-xs mt-1" style={{ color: theme.colors.textSecondary }}>Add install photos and details to build your portfolio</p></div>
           )}
         </div>
       </div>
