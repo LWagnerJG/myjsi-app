@@ -8,7 +8,7 @@ import {
     MousePointer, BarChart2, Users, PieChart, Armchair,
     Database, Briefcase, MessageSquare, Package, RotateCw, Search, Paperclip,
     DollarSign, UserPlus, MapPin, Percent, FileText, Calendar, Palette,
-    Wrench, MonitorPlay, Share2, Hourglass, Settings, HelpCircle, Send, Gift
+    Wrench, MonitorPlay, Share2, Hourglass, Settings, HelpCircle, Send, Gift, FilePlus
 } from 'lucide-react';
 
 // Re-export theme data from centralized location
@@ -24,6 +24,7 @@ export const allApps = [
     { name: 'Orders', route: 'orders', icon: MousePointer },
     { name: 'Sales', route: 'sales', icon: PieChart },
     { name: 'Projects', route: 'projects', icon: Briefcase },
+    { name: 'Add New Project', route: 'new-lead', icon: FilePlus },
     { name: 'Resources', route: 'resources', icon: Database },
     { name: 'Dealer Directory', route: 'resources/dealer-directory', icon: Users },
     { name: 'Commission Rates', route: 'resources/commission-rates', icon: DollarSign },
@@ -55,6 +56,7 @@ export const DEFAULT_HOME_APPS = [
     'products',
     'resources',
     'projects',
+    'new-lead',
     'community',
     'samples',
     'replacements'
