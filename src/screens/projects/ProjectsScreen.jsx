@@ -79,70 +79,82 @@ const OpportunityDetail = ({ opp, theme, onUpdate }) => {
         <div className="px-4 sm:px-6 lg:px-8 pt-4 pb-32 max-w-3xl mx-auto w-full space-y-4">
 
           {/* Hero header */}
-          <div className="pt-1 pb-2">
+          <div className="pt-2 pb-1">
             <input
               value={draft.project||draft.name||''}
               onChange={e=>update('project',e.target.value)}
-              className="w-full bg-transparent outline-none text-[22px] font-semibold tracking-tight"
+              className="w-full bg-transparent outline-none text-[26px] font-bold tracking-tight leading-tight"
               style={{ color: theme.colors.textPrimary }}
               placeholder="Project name"
             />
             <input
               value={draft.company||''}
               onChange={e=>update('company',e.target.value)}
-              className="w-full bg-transparent outline-none text-[13px] font-medium mt-0.5"
-              style={{ color: theme.colors.accent, opacity: 0.8 }}
+              className="w-full bg-transparent outline-none text-[14px] font-medium mt-1"
+              style={{ color: theme.colors.accent, opacity: 0.7 }}
               placeholder="Company"
             />
           </div>
 
-          {/* Key metrics row */}
-          <div className="grid grid-cols-3 gap-3">
-            <div style={sectionCard} className="flex flex-col items-center justify-center py-4">
-              <span className="text-[10px] font-semibold uppercase tracking-widest mb-1" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Value</span>
-              <CurrencyInput value={draft.value} onChange={v=>update('value',v)} theme={theme} />
+          {/* Value & Discount bar */}
+          <div style={sectionCard} className="flex items-stretch">
+            <div className="flex-1 flex flex-col justify-center py-2 pr-4">
+              <span className="text-[10px] font-semibold uppercase tracking-widest mb-1.5" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Project Value</span>
+              <div className="flex items-baseline gap-1">
+                <span className="text-[13px] font-semibold" style={{ color: theme.colors.textSecondary, opacity: 0.4 }}>$</span>
+                <input
+                  inputMode="numeric"
+                  value={(() => { const raw = (''+(draft.value||'')).replace(/[^0-9]/g,''); return raw ? parseInt(raw,10).toLocaleString() : ''; })()}
+                  onChange={e=>{ const val=e.target.value.replace(/[^0-9]/g,''); update('value', val? ('$'+parseInt(val,10).toLocaleString()):''); }}
+                  className="bg-transparent outline-none text-[28px] font-bold tracking-tight w-full"
+                  style={{ color: theme.colors.textPrimary }}
+                  placeholder="0"
+                />
+              </div>
             </div>
-            <div style={sectionCard} className="flex flex-col items-center justify-center py-4">
-              <span className="text-[10px] font-semibold uppercase tracking-widest mb-1" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Win %</span>
-              <span className="text-[18px] font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>{draft.winProbability||0}%</span>
-            </div>
-            <div style={sectionCard} className="flex flex-col items-center justify-center py-4 cursor-pointer" onClick={()=>discountOpen? setDiscountOpen(false):openDiscount()} ref={discBtn}>
-              <span className="text-[10px] font-semibold uppercase tracking-widest mb-1" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Discount</span>
-              <div className="flex items-center gap-1">
-                <span className="text-[14px] font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>{draft.discount || '—'}</span>
-                <ChevronDown className="w-3 h-3" style={{ color: theme.colors.textSecondary, opacity: 0.5 }} />
+            <div className="w-px self-stretch my-2" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)' }} />
+            <div
+              className="flex flex-col justify-center py-2 pl-4 cursor-pointer min-w-[140px]"
+              onClick={()=>discountOpen? setDiscountOpen(false):openDiscount()}
+              ref={discBtn}
+            >
+              <span className="text-[10px] font-semibold uppercase tracking-widest mb-1.5" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Discount</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[16px] font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>{draft.discount || '—'}</span>
+                <ChevronDown className="w-3.5 h-3.5" style={{ color: theme.colors.textSecondary, opacity: 0.4 }} />
               </div>
             </div>
           </div>
 
-          {/* Stage */}
-          <div style={sectionCard}>
-            <span className="text-[10px] font-semibold uppercase tracking-widest block mb-3" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Pipeline Stage</span>
-            <div className="flex flex-wrap gap-1.5">
-              {STAGES.map(s => {
-                const active = s === draft.stage;
-                return (
-                  <button
-                    key={s}
-                    onClick={() => update('stage', s)}
-                    className="px-3.5 py-1.5 rounded-full text-[11px] font-semibold transition-all"
-                    style={{
-                      backgroundColor: active ? theme.colors.textPrimary : 'transparent',
-                      color: active ? (isDark ? '#1a1a1a' : '#fff') : theme.colors.textSecondary,
-                      border: active ? 'none' : fieldBorder,
-                    }}
-                  >
-                    {s}
-                  </button>
-                );
-              })}
+          {/* Pipeline & Win */}
+          <div style={sectionCard} className="space-y-5">
+            <div>
+              <span className="text-[10px] font-semibold uppercase tracking-widest block mb-3" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Pipeline Stage</span>
+              <div className="flex flex-wrap gap-1.5">
+                {STAGES.map(s => {
+                  const active = s === draft.stage;
+                  return (
+                    <button
+                      key={s}
+                      onClick={() => update('stage', s)}
+                      className="px-3.5 py-1.5 rounded-full text-[11px] font-semibold transition-all"
+                      style={{
+                        backgroundColor: active ? theme.colors.textPrimary : 'transparent',
+                        color: active ? (isDark ? '#1a1a1a' : '#fff') : theme.colors.textSecondary,
+                        border: active ? 'none' : fieldBorder,
+                      }}
+                    >
+                      {s}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-
-          {/* Win Probability */}
-          <div style={sectionCard}>
-            <span className="text-[10px] font-semibold uppercase tracking-widest block mb-3" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Win Probability</span>
-            <ProbabilitySlider value={draft.winProbability||0} onChange={v=>update('winProbability',v)} theme={theme} />
+            <div className="w-full h-px" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }} />
+            <div>
+              <span className="text-[10px] font-semibold uppercase tracking-widest block mb-3" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Win Probability</span>
+              <ProbabilitySlider value={draft.winProbability||0} onChange={v=>update('winProbability',v)} theme={theme} />
+            </div>
           </div>
 
           {/* Details grid */}
@@ -179,8 +191,8 @@ const OpportunityDetail = ({ opp, theme, onUpdate }) => {
             <input
               value={draft.contact||''}
               onChange={e=>update('contact',e.target.value)}
-              className="w-full bg-transparent outline-none text-[14px] font-medium py-1"
-              style={{ color: theme.colors.textPrimary, borderBottom: fieldBorder }}
+              className="w-full outline-none text-[15px] font-medium py-2 px-3.5 rounded-xl"
+              style={{ color: theme.colors.textPrimary, background: fieldBg, border: fieldBorder }}
               placeholder="Contact name"
             />
           </div>
@@ -356,7 +368,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
   const [showStageFadeRight,setShowStageFadeRight]=useState(false);
   useImperativeHandle(ref,()=>({ clearSelection:()=>{ let cleared=false; if(selectedOpportunity){ setSelectedOpportunity(null); cleared=true;} if(selectedInstall){ setSelectedInstall(null); cleared=true;} return cleared; } }));
   const updateStageFade = useCallback(()=>{ const el=stagesScrollRef.current; if(!el) return; const {scrollLeft,scrollWidth,clientWidth}=el; setShowStageFadeLeft(scrollLeft>4); setShowStageFadeRight(scrollLeft+clientWidth<scrollWidth-4); },[]);
-  useEffect(()=>{ updateStageFade(); },[projectsTab, updateStageFade]);
+  useEffect(()=>{ updateStageFade(); const onResize=()=>updateStageFade(); window.addEventListener('resize',onResize); const ro=typeof ResizeObserver!=='undefined'&&stagesScrollRef.current? new ResizeObserver(onResize):null; if(ro&&stagesScrollRef.current) ro.observe(stagesScrollRef.current); return ()=>{ window.removeEventListener('resize',onResize); if(ro) ro.disconnect(); }; },[projectsTab, updateStageFade]);
   const filteredOpportunities = useMemo(()=> (opportunities||[]).filter(o=>o.stage===selectedPipelineStage),[selectedPipelineStage, opportunities]);
   const stageTotals = useMemo(()=>{ const totalValue = filteredOpportunities.reduce((sum,o)=>{ const raw= typeof o.value==='string'? o.value.replace(/[^0-9.]/g,''): o.value; const num=parseFloat(raw)||0; return sum+num; },0); return { totalValue }; },[filteredOpportunities]);
   const updateOpportunity = updated => setOpportunities(prev=> prev.map(o=> o.id===updated.id? updated:o));
