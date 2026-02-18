@@ -56,14 +56,15 @@ const END_USER_OPTIONS = [
 /* — section card — */
 const Section = ({ title, children, theme, className = '' }) => {
   const dark = isDarkTheme(theme);
+  const divider = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
   return (
     <div className={`rounded-2xl ${className}`} style={{
       padding: '20px', backgroundColor: dark ? theme.colors.surface : '#fff',
-      border: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+      border: `1px solid ${divider}`,
     }}>
       {title && (
         <h3 className="text-[15px] font-bold mb-3 pb-2.5" style={{
-          color: theme.colors.textPrimary, borderBottom: `1px solid ${theme.colors.border}80`,
+          color: theme.colors.textPrimary, borderBottom: `1px solid ${divider}`,
         }}>{title}</h3>
       )}
       {children}
@@ -73,9 +74,11 @@ const Section = ({ title, children, theme, className = '' }) => {
 
 /* — compact field row — supports inline (label left, field right) — */
 const LABEL_W = 'w-[110px]';          // fixed label column for consistent alignment
-const Row = ({ label, children, theme, tip, noSep, inline }) => (
+const Row = ({ label, children, theme, tip, noSep, inline }) => {
+  const divider = isDarkTheme(theme) ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+  return (
   <div className={`${inline ? 'flex items-center gap-3' : ''} py-2.5 ${noSep ? '' : 'border-t'}`}
-    style={{ borderColor: noSep ? undefined : `${theme.colors.border}80` }}>
+    style={{ borderColor: noSep ? undefined : divider }}>
     {label && (
       <div className={`flex items-center gap-1.5 ${inline ? `flex-shrink-0 ${LABEL_W}` : 'mb-1.5'}`}>
         <label className={`text-[13px] font-semibold ${inline ? 'whitespace-nowrap' : ''}`}
@@ -85,7 +88,8 @@ const Row = ({ label, children, theme, tip, noSep, inline }) => (
     )}
     {inline ? <div className="flex-1 min-w-0 overflow-hidden">{children}</div> : children}
   </div>
-);
+  );
+};
 
 /* — animated reveal wrapper — uses CSS grid-row trick for smooth height — */
 const Reveal = ({ show, children }) => (
@@ -473,7 +477,7 @@ export const NewLeadScreen = ({
             <span className="text-[13px] font-semibold" style={{ color: c.textPrimary }}>Bid?</span>
             <ToggleSwitch checked={!!newLeadData.isBid} onChange={e => upd('isBid', e.target.checked)} theme={theme} />
           </div>
-          <div className="flex items-center justify-between py-2.5 border-t" style={{ borderColor: `${c.border}80` }}>
+          <div className="flex items-center justify-between py-2.5 border-t" style={{ borderColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }}>
             <span className="text-[13px] font-semibold" style={{ color: c.textPrimary }}>Competition?</span>
             <ToggleSwitch checked={!!newLeadData.competitionPresent} onChange={e => upd('competitionPresent', e.target.checked)} theme={theme} />
           </div>
