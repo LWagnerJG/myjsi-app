@@ -897,18 +897,18 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                             </filter>
                         </defs>
 
-                        {/* Wooden dowel — wider, visible above & below shade */}
-                        <rect x="99" y="18" width="6.5" height="134" rx="3.25" fill="url(#woodMount)"/>
-                        <rect x="99" y="18" width="6.5" height="134" rx="3.25" fill="none" stroke="rgba(140,120,75,0.15)" strokeWidth="0.5"/>
-                        <line x1="102.25" y1="20" x2="102.25" y2="150" stroke="rgba(185,160,115,0.08)" strokeWidth="0.4"/>
+                        {/* Wooden dowel — thick, visible above & below shade */}
+                        <rect x="97.5" y="12" width="9" height="140" rx="4.5" fill="url(#woodMount)"/>
+                        <rect x="97.5" y="12" width="9" height="140" rx="4.5" fill="none" stroke="rgba(140,120,75,0.18)" strokeWidth="0.6"/>
+                        <line x1="102" y1="14" x2="102" y2="150" stroke="rgba(185,160,115,0.08)" strokeWidth="0.5"/>
 
-                        {/* Dark metal J-hook — taller arc, thicker, prominent shepherd's crook */}
-                        <path d="M102.25 20 L102.25 4 C102.25 -8 116 -12 127 -8 C138 -4 140 8 136 20"
-                              stroke="#484C52" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                        {/* Small metal hook — compact curve tucked against top edge */}
+                        <path d="M102 14 L102 5 C102 0 108 -2 114 -1 C118 0 119 4 117 8"
+                              stroke="#505660" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
 
                         {/* Metal ferrule collar at hook-dowel junction */}
-                        <ellipse cx="102.25" cy="20" rx="5.5" ry="2" fill="#4A4E54"/>
-                        <ellipse cx="102.25" cy="20" rx="5.5" ry="2" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="0.4"/>
+                        <ellipse cx="102" cy="14" rx="6.5" ry="2.2" fill="#4A4E54"/>
+                        <ellipse cx="102" cy="14" rx="6.5" ry="2.2" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="0.4"/>
 
                         {/* Shade — straight-sided trapezoid, tilted slightly */}
                         <g transform="rotate(-4, 76, 96)">
