@@ -1230,23 +1230,31 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
             {/* Sticky glassy feedback bar — above bottom nav */}
             <div
                 className="fixed inset-x-0 z-[28] px-5 sm:px-7 lg:px-10 pointer-events-none"
-                style={{ bottom: 78 }}
+                style={{ bottom: 82 }}
             >
                 <div className="max-w-5xl mx-auto pointer-events-auto">
                     <button
                         onClick={() => onNavigate('feedback')}
-                        className="w-full px-4 py-2.5 flex items-center justify-between transition-all active:scale-[0.98]"
+                        className="w-full px-5 py-3 flex items-center justify-between transition-all active:scale-[0.98]"
                         style={{
-                            backdropFilter: 'blur(40px)',
-                            WebkitBackdropFilter: 'blur(40px)',
-                            backgroundColor: isDark ? 'rgba(20,20,20,0.55)' : 'rgba(245,242,238,0.58)',
+                            backdropFilter: 'blur(32px)',
+                            WebkitBackdropFilter: 'blur(32px)',
+                            backgroundColor: isDark ? 'rgba(20,20,20,0.38)' : 'rgba(248,245,241,0.38)',
                             border: 'none',
-                            borderRadius: 14,
+                            borderRadius: 16,
                             boxShadow: 'none',
                         }}
                     >
-                        <div className="space-y-0 text-left">
-                            <h4 className="text-[12px] font-medium opacity-60" style={{ color: colors.textPrimary }}>Share Feedback</h4>
+                        <div className="text-left">
+                            <span
+                                className="text-[10px] font-semibold uppercase tracking-widest opacity-40"
+                                style={{ color: colors.textPrimary }}
+                            >
+                                Share Feedback
+                            </span>
+                            <p className="text-[11px] opacity-50 mt-0.5" style={{ color: colors.textSecondary }}>
+                                Help us improve MyJSI
+                            </p>
                         </div>
                         <ChevronRight className="w-3.5 h-3.5 flex-shrink-0 opacity-20" style={{ color: colors.textSecondary }} />
                     </button>
