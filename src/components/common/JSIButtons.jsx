@@ -98,11 +98,14 @@ export const PillButton = ({
     const borderClass = size === 'xs' ? 'border' : 'border-2';
     const selectedShadow = '0 2px 8px rgba(53,53,53,0.10), 0 1px 3px rgba(53,53,53,0.06)';
     const unselectedShadow = 'none';
-    const resolvedSelectedBg = selectedBg || '#353535';
-    const resolvedSelectedText = selectedText || '#FFFFFF';
-    const resolvedUnselectedBg = unselectedBg || '#FFFFFF';
-    const resolvedUnselectedBorder = unselectedBorder || '#E3E0D8';
-    const resolvedUnselectedText = unselectedText || '#353535';
+
+    // Theme-aware defaults: use theme colors when available, fall back to light-mode defaults
+    const t = props.theme?.colors;
+    const resolvedSelectedBg = selectedBg || (t?.accent || '#353535');
+    const resolvedSelectedText = selectedText || (t?.accentText || '#FFFFFF');
+    const resolvedUnselectedBg = unselectedBg || (t?.surface || '#FFFFFF');
+    const resolvedUnselectedBorder = unselectedBorder || (t?.border || '#E3E0D8');
+    const resolvedUnselectedText = unselectedText || (t?.textPrimary || '#353535');
 
     return (
         <button

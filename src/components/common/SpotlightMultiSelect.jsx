@@ -131,14 +131,14 @@ export function SpotlightMultiSelect({
         />
         {/* compact: render chips inside the search bar */}
         {compact && selectedItems.length > 0 && (
-          <div className="flex items-center gap-1 flex-shrink-0 overflow-hidden max-w-[55%]">
+          <div className="flex items-center gap-1 flex-shrink-0 overflow-x-auto max-w-[60%] scrollbar-hide">
             {selectedItems.map((s) => (
               <span
                 key={s}
                 className="inline-flex items-center gap-1 pl-2 pr-1 py-0.5 rounded-full text-[11px] font-medium border flex-shrink-0"
                 style={{ background: palette.chipBg, borderColor: palette.border, color: palette.text }}
               >
-                <span className="truncate max-w-[80px]">{s}</span>
+                <span className="truncate max-w-[120px]">{s}</span>
                 <button
                   onClick={(e) => { e.stopPropagation(); onRemoveItem?.(s); }}
                   className="w-4 h-4 flex items-center justify-center rounded-full"

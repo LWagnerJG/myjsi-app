@@ -49,15 +49,15 @@ export const darkTheme = {
     colors: {
         // Core colors
         background: '#1A1A1A',
-        surface: '#282828',
-        primary: '#FFFFFF',
-        accent: '#FFFFFF',
-        secondary: '#BBBBBB',
-        textPrimary: '#FFFFFF',
-        textSecondary: '#AAAAAA',
-        border: 'rgba(255, 255, 255, 0.1)',
-        shadow: 'rgba(0, 0, 0, 0.4)',
-        subtle: 'rgba(255, 255, 255, 0.05)',
+        surface: '#262626',
+        primary: '#F5F0EB',
+        accent: '#F5F0EB',
+        secondary: '#C0B9B0',
+        textPrimary: '#EDE8E3',
+        textSecondary: '#958E85',
+        border: 'rgba(255, 255, 255, 0.12)',
+        shadow: 'rgba(0, 0, 0, 0.5)',
+        subtle: 'rgba(255, 255, 255, 0.07)',
 
         // Semantic colors - for consistent usage across components
         accentText: '#1A1A1A', // Text on accent/primary buttons (dark on light)

@@ -30,15 +30,16 @@ export const FormInput = React.memo(({
         ...(size === 'sm' ? { height: 40 } : {}),
     };
 
-    // inject placeholder color class once (theme dependent best-effort)
+    // inject placeholder color — update when theme changes
     useEffect(() => {
         const id = 'form-input-placeholder-style';
-        if (!document.getElementById(id)) {
-            const style = document.createElement('style');
+        let style = document.getElementById(id);
+        if (!style) {
+            style = document.createElement('style');
             style.id = id;
-            style.innerHTML = `.placeholder-theme-secondary::placeholder{color:${theme.colors.textSecondary}!important;opacity:1;}`;
             document.head.appendChild(style);
         }
+        style.innerHTML = `.placeholder-theme-secondary::placeholder{color:${theme.colors.textSecondary}!important;opacity:1;}`;
     }, [theme.colors.textSecondary]);
 
     const formatCurrency = (val) => {

@@ -58,8 +58,8 @@ const Section = ({ title, children, theme, className = '' }) => {
   const dark = isDarkTheme(theme);
   return (
     <div className={`rounded-2xl ${className}`} style={{
-      padding: '20px', backgroundColor: dark ? '#2A2A2A' : '#fff',
-      border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
+      padding: '20px', backgroundColor: dark ? theme.colors.surface : '#fff',
+      border: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
     }}>
       {title && (
         <h3 className="text-[15px] font-bold mb-3 pb-2.5" style={{
@@ -584,7 +584,8 @@ export const NewLeadScreen = ({
                       {file.size < 1024 ? `${file.size} B` : file.size < 1048576 ? `${(file.size / 1024).toFixed(0)} KB` : `${(file.size / 1048576).toFixed(1)} MB`}
                     </span>
                     <button type="button" onClick={() => upd('attachments', (newLeadData.attachments || []).filter((_, j) => j !== i))}
-                      className="flex-shrink-0 p-0.5 rounded-full transition-colors hover:bg-black/5">
+                      className="flex-shrink-0 p-0.5 rounded-full transition-colors"
+                      style={{ color: c.textSecondary }}>
                       <X className="w-3 h-3" style={{ color: c.textSecondary }} />
                     </button>
                   </div>
@@ -592,8 +593,8 @@ export const NewLeadScreen = ({
               </div>
             )}
             <label
-              className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl border border-dashed cursor-pointer transition-colors hover:bg-black/[0.02]"
-              style={{ borderColor: c.border }}>
+              className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl border border-dashed cursor-pointer transition-colors"
+              style={{ borderColor: c.border, backgroundColor: dark ? 'rgba(255,255,255,0.03)' : 'transparent' }}>
               <Paperclip className="w-3.5 h-3.5" style={{ color: c.textSecondary }} />
               <span className="text-[12px] font-medium" style={{ color: c.textSecondary }}>Attach files</span>
               <input type="file" multiple className="hidden"
