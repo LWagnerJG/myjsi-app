@@ -40,7 +40,7 @@ const CITY_OPTIONS = [
   'Seattle, WA', 'Portland, OR', 'Salt Lake City, UT', 'Kansas City, MO', 'Omaha, NE',
 ];
 
-const PO_OPTIONS = ['Unknown', 'Within 30 Days', '30\u201360 Days', '60\u2013180 Days', '180+ Days', 'Next Year'];
+const PO_OPTIONS = ['Unknown', '<30 Days', '30\u201360 Days', '60\u2013180 Days', '180+ Days', 'Next Year'];
 const WIN_PCT_OPTIONS = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
 const REWARD_THRESHOLD = 250000;
 
