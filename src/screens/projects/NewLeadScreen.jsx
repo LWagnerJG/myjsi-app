@@ -322,7 +322,7 @@ export const NewLeadScreen = ({
                 </button>
               </div>
             ) : (
-              <div className="flex flex-wrap gap-1.5 justify-end">
+              <div className="flex flex-wrap gap-1.5">
                 {VERTICALS.map(v => {
                   const lbl = v === 'Other (Please specify)' ? 'Other' : v;
                   return (
@@ -418,7 +418,7 @@ export const NewLeadScreen = ({
           </Row>
 
           <Row label="Rewards" theme={theme} inline>
-            <div className="flex flex-wrap gap-1.5 justify-end">
+            <div className="flex flex-wrap gap-1.5">
               {[['salesReward', 'Sales Reward'], ['designerReward', 'Designer Reward']].map(([key, lbl]) => {
                 const on = newLeadData[key] !== false;
                 return (
@@ -430,7 +430,7 @@ export const NewLeadScreen = ({
           </Row>
 
           <Row label="PO Timeframe" theme={theme} inline>
-            <div className="flex flex-wrap gap-1.5 justify-end">
+            <div className="flex flex-wrap gap-1.5">
               {PO_OPTIONS.map(t => (
                 <PillButton key={t} size="xs"
                   isSelected={newLeadData.poTimeframe === t}
@@ -469,7 +469,7 @@ export const NewLeadScreen = ({
             transition: 'grid-template-rows .3s ease, opacity .25s ease',
           }}>
             <div style={{ overflow: 'hidden' }}>
-              <div className="pt-3 pb-1">
+              <div className="py-2.5">
                 <div className="flex flex-wrap gap-1.5">
                   {[...COMPETITORS.filter(c => c !== 'None'), 'Other'].map(comp => (
                     <PillButton key={comp} size="xs" isSelected={(newLeadData.competitors || []).includes(comp)}
@@ -502,7 +502,7 @@ export const NewLeadScreen = ({
                 </button>
               </div>
             ) : (
-              <div className="flex flex-wrap gap-1.5 justify-end">
+              <div className="flex flex-wrap gap-1.5">
                 <PillButton size="xs" isSelected={false}
                   onClick={() => setQuoteMode('existing')} theme={theme}>Existing Quote</PillButton>
                 <PillButton size="xs" isSelected={quoteMode === 'needed'}

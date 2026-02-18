@@ -109,7 +109,7 @@ export const PillButton = ({
             type={type}
             onClick={onClick}
             disabled={disabled}
-            className={`${sizeClasses[size]} font-semibold rounded-full transition-all ${borderClass} text-center hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed ${className}`}
+            className={`${sizeClasses[size]} font-semibold rounded-full transition-all ${borderClass} text-center whitespace-nowrap hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed ${className}`}
             style={{
                 backgroundColor: isSelected ? resolvedSelectedBg : resolvedUnselectedBg,
                 color: isSelected ? resolvedSelectedText : resolvedUnselectedText,
