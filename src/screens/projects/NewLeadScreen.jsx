@@ -307,9 +307,8 @@ export const NewLeadScreen = ({
   const c = theme.colors;
   const dark = isDarkTheme(theme);
   const rangeStyle = {
-    '--range-track': dark ? 'rgba(255,255,255,0.15)' : 'rgba(53,53,53,0.12)',
+    '--range-track': dark ? 'rgba(255,255,255,0.13)' : 'rgba(53,53,53,0.12)',
     '--range-thumb': dark ? '#EDE8E3' : '#353535',
-    '--range-thumb-ring': dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)',
   };
 
   return (
@@ -327,55 +326,26 @@ export const NewLeadScreen = ({
           <Reveal show={!!(newLeadData.project && newLeadData.project.trim())}>
           <Row label="Stage" theme={theme} inline noSep>
             <div>
-              <div className="flex items-center" style={{ height: 36 }}>
-                <div className="relative w-full" style={{ height: 6, borderRadius: 9999, background: dark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.08)' }}>
-                  {/* filled portion */}
-                  <div style={{
-                    position: 'absolute', top: 0, left: 0, height: '100%', borderRadius: 9999,
-                    width: `${(Math.max(0, stageOptions.indexOf(newLeadData.projectStatus)) / (stageOptions.length - 1)) * 100}%`,
-                    background: dark ? 'rgba(237,232,227,0.35)' : 'rgba(53,53,53,0.25)',
-                    transition: 'width 0.2s ease',
-                  }} />
-                  {/* dots */}
-                  {stageOptions.map((s, i) => {
-                    const active = i === stageOptions.indexOf(newLeadData.projectStatus);
-                    const past = i <= stageOptions.indexOf(newLeadData.projectStatus);
-                    return (
-                      <button type="button" key={s}
-                        onClick={() => upd('projectStatus', s)}
-                        className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full transition-all duration-200"
-                        style={{
-                          top: '50%',
-                          left: `${(i / (stageOptions.length - 1)) * 100}%`,
-                          width: active ? 20 : 10,
-                          height: active ? 20 : 10,
-                          background: active
-                            ? (dark ? '#EDE8E3' : '#353535')
-                            : past
-                              ? (dark ? 'rgba(237,232,227,0.5)' : 'rgba(53,53,53,0.35)')
-                              : (dark ? 'rgba(255,255,255,0.18)' : 'rgba(53,53,53,0.15)'),
-                          boxShadow: active ? `0 1px 4px ${dark ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.15)'}` : 'none',
-                        }}
-                      />
-                    );
-                  })}
-                </div>
-              </div>
-              <div className="flex justify-between mt-1.5">
+              <input type="range" min={0} max={stageOptions.length - 1} step={1}
+                value={Math.max(0, stageOptions.indexOf(newLeadData.projectStatus))}
+                onChange={e => upd('projectStatus', stageOptions[+e.target.value])}
+                className="w-full jsi-range" style={rangeStyle} />
+              <div className="flex justify-between mt-1" style={{ padding: '0 2px' }}>
                 {stageOptions.map((s, i) => {
                   const active = i === stageOptions.indexOf(newLeadData.projectStatus);
                   return (
-                    <button type="button" key={s}
+                    <span key={s}
                       onClick={() => upd('projectStatus', s)}
-                      className="text-[10px] leading-tight transition-colors duration-150"
+                      className="text-[10px] cursor-pointer select-none text-center transition-all duration-150"
                       style={{
                         color: active ? c.textPrimary : c.textSecondary,
                         fontWeight: active ? 700 : 400,
-                        opacity: active ? 1 : 0.6,
-                        background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+                        opacity: active ? 1 : 0.55,
+                        flex: i === 0 || i === stageOptions.length - 1 ? 'none' : '1',
+                        width: i === 0 || i === stageOptions.length - 1 ? 'auto' : undefined,
                       }}>
                       {s.replace('Decision/Bidding', 'Decision')}
-                    </button>
+                    </span>
                   );
                 })}
               </div>
