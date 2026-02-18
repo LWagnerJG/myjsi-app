@@ -15,6 +15,7 @@ export const AutoCompleteCombobox = React.memo(({
     theme,
     dropdownClassName = '',
     resetOnSelect = false,
+    compact = false,
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [pos, setPos] = useState({ top: 0, left: 0, width: 0, height: 'auto' });
@@ -163,19 +164,20 @@ export const AutoCompleteCombobox = React.memo(({
                 </label>
             )}
             <div className="relative" ref={inputWrapperRef}>
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none" style={{ color: theme.colors.textSecondary }} />
+                <Search className={`absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none ${compact ? 'w-3.5 h-3.5' : 'w-5 h-5'}`} style={{ color: theme.colors.textSecondary }} />
                 <input
                     type="text"
                     value={value || ''}
                     onFocus={handleInputFocus}
                     onChange={handleInputChange}
                     placeholder={placeholder}
-                    className="w-full pl-12 pr-4 py-3 border rounded-full text-base transition-all duration-200 focus:outline-none focus:ring"
+                    className={`w-full border rounded-full transition-all duration-200 focus:outline-none focus:ring ${compact ? 'pl-10 pr-4 text-[13px]' : 'pl-12 pr-4 py-3 text-base'}`}
                     style={{ 
                         backgroundColor: dropdownStyles.backgroundColor,
                         borderColor: dropdownStyles.borderColor, 
                         color: dropdownStyles.color,
-                        borderWidth: '1px'
+                        borderWidth: '1px',
+                        ...(compact ? { height: 40 } : {})
                     }}
                 />
             </div>

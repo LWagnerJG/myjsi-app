@@ -294,8 +294,8 @@ export const NewLeadScreen = ({
               placeholder="Project Name *" theme={theme} size="sm" surfaceBg required />
           </Row>
 
-          <Row label="Project Stage" theme={theme}>
-            <div className="space-y-2">
+          <Row label="Stage" theme={theme} inline>
+            <div className="space-y-1">
               <input type="range" min={0} max={stageOptions.length - 1} step={1}
                 value={Math.max(0, stageOptions.indexOf(newLeadData.projectStatus))}
                 onChange={e => upd('projectStatus', stageOptions[+e.target.value])}
@@ -349,6 +349,7 @@ export const NewLeadScreen = ({
               options={CITY_OPTIONS}
               placeholder="City, State"
               theme={theme}
+              compact
               resetOnSelect={false} />
           </Row>
         </Section>
@@ -383,8 +384,9 @@ export const NewLeadScreen = ({
               onChange={val => upd('endUser', val)}
               onSelect={val => upd('endUser', val)}
               options={END_USER_OPTIONS}
-              placeholder="Company or contact"
+              placeholder="Search"
               theme={theme}
+              compact
               resetOnSelect={false} />
           </Row>
         </Section>
