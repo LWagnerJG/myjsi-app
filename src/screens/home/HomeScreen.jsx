@@ -865,7 +865,7 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                     animate={lampAnim}
                     style={{ transformOrigin: '80% 0%' }}
                 >
-                    <svg width="46" height="50" viewBox="0 0 150 165" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <svg width="40" height="42" viewBox="0 0 150 128" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <defs>
                             <linearGradient id="shadeFabric" x1="0.05" y1="0" x2="0.95" y2="1">
                                 <stop offset="0%" stopColor="#DDDAD6"/>
@@ -897,10 +897,10 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                             </filter>
                         </defs>
 
-                        {/* Wooden dowel — thick, visible above & below shade */}
-                        <rect x="78" y="6" width="9" height="155" rx="4.5" fill="url(#woodMount)"/>
-                        <rect x="78" y="6" width="9" height="155" rx="4.5" fill="none" stroke="rgba(140,120,75,0.18)" strokeWidth="0.6"/>
-                        <line x1="82.5" y1="8" x2="82.5" y2="158" stroke="rgba(185,160,115,0.08)" strokeWidth="0.5"/>
+                        {/* Wooden dowel — just past shade bottom */}
+                        <rect x="78" y="6" width="9" height="112" rx="4.5" fill="url(#woodMount)"/>
+                        <rect x="78" y="6" width="9" height="112" rx="4.5" fill="none" stroke="rgba(140,120,75,0.18)" strokeWidth="0.6"/>
+                        <line x1="82.5" y1="8" x2="82.5" y2="116" stroke="rgba(185,160,115,0.08)" strokeWidth="0.5"/>
 
                         {/* Small metal hook — compact curve tucked against top edge */}
                         <path d="M82.5 8 L82.5 0 C82.5 -4 88 -6 94 -5 C98 -4 99 0 97 4"
