@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, Paperclip, X } from 'lucide-react';
+import { Send, Paperclip, X, MessageSquare, Bug, Lightbulb, Sparkles, CheckCircle2 } from 'lucide-react';
 import { isDarkTheme } from '../../design-system/tokens.js';
 
 export const FeedbackScreen = ({ theme }) => {
@@ -12,10 +12,10 @@ export const FeedbackScreen = ({ theme }) => {
     const colors = theme.colors;
 
     const feedbackTypes = [
-        { value: 'general', label: 'General' },
-        { value: 'bug', label: 'Bug Report' },
-        { value: 'feature', label: 'Feature Request' },
-        { value: 'improvement', label: 'Improvement' },
+        { value: 'general', label: 'General', icon: MessageSquare },
+        { value: 'bug', label: 'Bug Report', icon: Bug },
+        { value: 'feature', label: 'Feature', icon: Lightbulb },
+        { value: 'improvement', label: 'Improvement', icon: Sparkles },
     ];
 
     const formatFileSize = (bytes = 0) => {
@@ -39,33 +39,25 @@ export const FeedbackScreen = ({ theme }) => {
         setSubmitted(true);
     }
 
-    const cardStyle = {
-        backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.72)',
-        border: isDark ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(0,0,0,0.06)',
-        borderRadius: 20,
-    };
-
-    const inputStyle = {
-        backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
-        border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.07)',
-        color: colors.textPrimary,
-        borderRadius: 14,
-        outline: 'none',
-        width: '100%',
-    };
+    const cardBg = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.72)';
+    const cardBorder = isDark ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(0,0,0,0.06)';
+    const subtleBg = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.025)';
+    const subtleBorder = isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)';
 
     if (submitted) {
         return (
             <div className="flex flex-col h-full app-header-offset items-center justify-center px-6" style={{ backgroundColor: colors.background }}>
-                <div className="text-center space-y-3 max-w-xs">
+                <div className="text-center space-y-4 max-w-xs">
                     <div
-                        className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-2"
-                        style={{ backgroundColor: isDark ? 'rgba(74,124,89,0.15)' : 'rgba(74,124,89,0.10)', border: '1px solid rgba(74,124,89,0.2)' }}
+                        className="w-16 h-16 rounded-full flex items-center justify-center mx-auto"
+                        style={{ backgroundColor: isDark ? 'rgba(74,124,89,0.15)' : 'rgba(74,124,89,0.08)' }}
                     >
-                        <Send className="w-6 h-6" style={{ color: '#4A7C59' }} />
+                        <CheckCircle2 className="w-7 h-7" style={{ color: '#4A7C59' }} />
                     </div>
-                    <h2 className="text-xl font-semibold" style={{ color: colors.textPrimary }}>Thanks for the feedback</h2>
-                    <p className="text-sm leading-relaxed" style={{ color: colors.textSecondary }}>We review every submission and use it to improve MyJSI.</p>
+                    <div className="space-y-1.5">
+                        <h2 className="text-xl font-semibold tracking-tight" style={{ color: colors.textPrimary }}>Thank you</h2>
+                        <p className="text-[13px] leading-relaxed" style={{ color: colors.textSecondary }}>Your feedback has been submitted. We read every message and use it to improve MyJSI.</p>
+                    </div>
                 </div>
             </div>
         );
@@ -75,66 +67,82 @@ export const FeedbackScreen = ({ theme }) => {
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: colors.background }}>
             <div className="flex-1 overflow-y-auto scrollbar-hide">
                 <form onSubmit={handleSubmit}>
-                    <div className="px-4 sm:px-6 pb-10 max-w-2xl mx-auto space-y-3 pt-2">
+                    <div className="px-4 sm:px-6 pb-10 max-w-2xl mx-auto pt-2">
 
                         {/* Header */}
-                        <div className="pt-2 pb-3">
-                            <h1 className="text-2xl font-semibold tracking-tight" style={{ color: colors.textPrimary }}>Share Feedback</h1>
-                            <p className="text-sm mt-1" style={{ color: colors.textSecondary }}>We read every submission. Help shape what's next.</p>
+                        <div className="pt-2 pb-5">
+                            <h1 className="text-[22px] font-semibold tracking-tight" style={{ color: colors.textPrimary }}>Share Feedback</h1>
+                            <p className="text-[13px] mt-1" style={{ color: colors.textSecondary, opacity: 0.7 }}>Help us build a better MyJSI — we read every message.</p>
                         </div>
 
-                        {/* Type selector */}
-                        <div className="flex gap-2 p-1.5 overflow-x-auto scrollbar-hide" style={cardStyle}>
-                            {feedbackTypes.map(t => {
-                                const active = feedbackType === t.value;
-                                return (
-                                    <button
-                                        key={t.value}
-                                        type="button"
-                                        onClick={() => setFeedbackType(t.value)}
-                                        className="flex-shrink-0 px-3.5 py-1.5 rounded-xl text-[12px] font-semibold transition-all"
-                                        style={{
-                                            backgroundColor: active
-                                                ? (isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.07)')
-                                                : 'transparent',
-                                            color: active ? colors.textPrimary : colors.textSecondary,
-                                        }}
-                                    >
-                                        {t.label}
-                                    </button>
-                                );
-                            })}
+                        {/* Type selector — grid of equal-width tiles */}
+                        <div className="mb-4">
+                            <span className="text-[11px] font-semibold uppercase tracking-widest mb-2.5 block" style={{ color: colors.textSecondary, opacity: 0.6 }}>Category</span>
+                            <div className="grid grid-cols-4 gap-2">
+                                {feedbackTypes.map(t => {
+                                    const active = feedbackType === t.value;
+                                    const Icon = t.icon;
+                                    return (
+                                        <button
+                                            key={t.value}
+                                            type="button"
+                                            onClick={() => setFeedbackType(t.value)}
+                                            className="flex flex-col items-center justify-center gap-1.5 py-3 rounded-2xl text-[11px] font-semibold transition-all"
+                                            style={{
+                                                backgroundColor: active
+                                                    ? (isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)')
+                                                    : cardBg,
+                                                border: active
+                                                    ? (isDark ? '1px solid rgba(255,255,255,0.14)' : '1px solid rgba(0,0,0,0.10)')
+                                                    : cardBorder,
+                                                color: active ? colors.textPrimary : colors.textSecondary,
+                                                borderRadius: 16,
+                                            }}
+                                        >
+                                            <Icon className="w-4 h-4" style={{ opacity: active ? 1 : 0.5 }} />
+                                            {t.label}
+                                        </button>
+                                    );
+                                })}
+                            </div>
                         </div>
 
                         {/* Message */}
-                        <div style={cardStyle} className="p-4">
-                            <div className="flex items-center justify-between mb-3">
-                                <span className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: colors.textSecondary }}>Message</span>
+                        <div className="mb-4">
+                            <div className="flex items-center justify-between mb-2.5">
+                                <span className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: colors.textSecondary, opacity: 0.6 }}>Message</span>
                                 {message.length > 0 && (
-                                    <span className="text-[10px]" style={{ color: colors.textSecondary, opacity: 0.5 }}>{message.length}</span>
+                                    <span className="text-[10px] tabular-nums" style={{ color: colors.textSecondary, opacity: 0.35 }}>{message.length}</span>
                                 )}
                             </div>
-                            <textarea
-                                value={message}
-                                onChange={(e) => setMessage(e.target.value)}
-                                placeholder="Tell us what's on your mind — bugs, ideas, anything..."
-                                rows={6}
-                                className="resize-none text-sm leading-relaxed"
-                                style={{ ...inputStyle, padding: '12px 14px' }}
-                                required
-                            />
+                            <div style={{ backgroundColor: cardBg, border: cardBorder, borderRadius: 20 }} className="p-1">
+                                <textarea
+                                    value={message}
+                                    onChange={(e) => setMessage(e.target.value)}
+                                    placeholder="What's on your mind — bugs, ideas, anything..."
+                                    rows={5}
+                                    className="resize-none text-[13px] leading-relaxed w-full rounded-2xl px-4 py-3"
+                                    style={{
+                                        backgroundColor: subtleBg,
+                                        border: 'none',
+                                        color: colors.textPrimary,
+                                        outline: 'none',
+                                    }}
+                                    required
+                                />
+                            </div>
                         </div>
 
                         {/* Attachments */}
-                        <div style={cardStyle} className="p-4">
-                            <div className="flex items-center justify-between">
-                                <span className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: colors.textSecondary }}>Attachments</span>
+                        <div className="mb-6">
+                            <div className="flex items-center justify-between mb-2.5">
+                                <span className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: colors.textSecondary, opacity: 0.6 }}>Attachments</span>
                                 <label
-                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium cursor-pointer transition-all"
+                                    className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium cursor-pointer transition-all active:scale-95"
                                     style={{
-                                        backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)',
+                                        backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
                                         color: colors.textSecondary,
-                                        border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)',
+                                        border: subtleBorder,
                                     }}
                                 >
                                     <Paperclip className="w-3 h-3" />
@@ -143,23 +151,25 @@ export const FeedbackScreen = ({ theme }) => {
                                 </label>
                             </div>
                             {files.length > 0 && (
-                                <ul className="mt-3 space-y-1.5">
-                                    {files.map((f, i) => (
-                                        <li
-                                            key={`${f.name}-${i}`}
-                                            className="flex items-center justify-between px-3 py-2 rounded-xl"
-                                            style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }}
-                                        >
-                                            <div className="min-w-0">
-                                                <div className="truncate text-[12px] font-medium" style={{ color: colors.textPrimary }}>{f.name}</div>
-                                                <div className="text-[10px] opacity-50" style={{ color: colors.textSecondary }}>{formatFileSize(f.size)}</div>
-                                            </div>
-                                            <button type="button" onClick={() => removeFile(i)} className="ml-3 p-1 rounded-full transition-opacity hover:opacity-60">
-                                                <X className="w-3.5 h-3.5" style={{ color: colors.textSecondary }} />
-                                            </button>
-                                        </li>
-                                    ))}
-                                </ul>
+                                <div style={{ backgroundColor: cardBg, border: cardBorder, borderRadius: 16 }} className="p-2">
+                                    <ul className="space-y-1">
+                                        {files.map((f, i) => (
+                                            <li
+                                                key={`${f.name}-${i}`}
+                                                className="flex items-center justify-between px-3 py-2 rounded-xl"
+                                                style={{ backgroundColor: subtleBg }}
+                                            >
+                                                <div className="min-w-0">
+                                                    <div className="truncate text-[12px] font-medium" style={{ color: colors.textPrimary }}>{f.name}</div>
+                                                    <div className="text-[10px]" style={{ color: colors.textSecondary, opacity: 0.45 }}>{formatFileSize(f.size)}</div>
+                                                </div>
+                                                <button type="button" onClick={() => removeFile(i)} className="ml-3 p-1 rounded-full transition-opacity hover:opacity-60">
+                                                    <X className="w-3.5 h-3.5" style={{ color: colors.textSecondary }} />
+                                                </button>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
                             )}
                         </div>
 
@@ -167,7 +177,7 @@ export const FeedbackScreen = ({ theme }) => {
                         <button
                             type="submit"
                             disabled={!message.trim()}
-                            className="w-full flex items-center justify-center gap-2 py-3.5 text-sm font-semibold rounded-2xl transition-all active:scale-[0.98] disabled:opacity-30"
+                            className="w-full flex items-center justify-center gap-2 py-3.5 text-[13px] font-semibold rounded-2xl transition-all active:scale-[0.98] disabled:opacity-25"
                             style={{
                                 backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : colors.textPrimary,
                                 color: isDark ? colors.textPrimary : '#fff',
