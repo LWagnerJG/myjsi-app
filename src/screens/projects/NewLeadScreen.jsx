@@ -63,18 +63,22 @@ const Section = ({ title, titleRight, children, theme, className = '' }) => {
       border: `1px solid ${divider}`,
     }}>
       {title && !titleRight && (
-        <h3 className="text-[15px] font-bold mb-3 pb-2.5" style={{
-          color: theme.colors.textPrimary, borderBottom: `1px solid ${divider}`,
-        }}>{title}</h3>
-      )}
-      {title && titleRight && (
-        <div className="flex items-center gap-4 mb-3 pb-2.5" style={{
-          borderBottom: `1px solid ${divider}`,
-        }}>
-          <h3 className="text-[15px] font-bold flex-shrink-0" style={{
+        <div className="mb-3">
+          <h3 className="text-[15px] font-bold pb-2.5" style={{
             color: theme.colors.textPrimary,
           }}>{title}</h3>
-          <div className="ml-auto min-w-0" style={{ width: '55%' }}>{titleRight}</div>
+          <div style={{ width: '45%', borderBottom: `1px solid ${divider}` }} />
+        </div>
+      )}
+      {title && titleRight && (
+        <div className="mb-3">
+          <div className="flex items-center gap-4">
+            <h3 className="text-[15px] font-bold flex-shrink-0" style={{
+              color: theme.colors.textPrimary,
+            }}>{title}</h3>
+            <div className="ml-auto min-w-0" style={{ width: '55%' }}>{titleRight}</div>
+          </div>
+          <div style={{ width: '45%', borderBottom: `1px solid ${divider}`, marginTop: 6 }} />
         </div>
       )}
       {children}
