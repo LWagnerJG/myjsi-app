@@ -1,6 +1,6 @@
 ﻿import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Search, Check, Upload } from 'lucide-react';
+import { X, Search, Check, Upload, Paperclip, FileText, Trash2 } from 'lucide-react';
 import { FormInput } from '../../components/forms/FormInput.jsx';
 import { PortalNativeSelect } from '../../components/forms/PortalNativeSelect.jsx';
 import { AutoCompleteCombobox } from '../../components/forms/AutoCompleteCombobox.jsx';
@@ -560,12 +560,50 @@ export const NewLeadScreen = ({
           )}
         </Section>
 
-        {/* ── 5. Notes ── */}
-        <Section theme={theme} className="mb-6">
-          <FormInput type="textarea" value={newLeadData.notes || ''}
+        {/* ── 5. Notes & Attachments ── */}
+        <Section title="Notes & Attachments" theme={theme} className="mb-6">
+          <textarea
+            value={newLeadData.notes || ''}
             onChange={e => upd('notes', e.target.value)}
-            placeholder="Notes or additional details..."
-            theme={theme} size="sm" surfaceBg />
+            placeholder="Add notes, context, or special instructions..."
+            rows="3"
+            className="w-full px-4 py-3 text-[13px] rounded-2xl border focus:outline-none focus:ring-0 resize-none placeholder-theme-secondary"
+            style={{ backgroundColor: c.surface, borderColor: c.border, color: c.textPrimary }}
+          />
+
+          {/* Attachments */}
+          <div className="mt-3">
+            {(newLeadData.attachments || []).length > 0 && (
+              <div className="space-y-1.5 mb-3">
+                {(newLeadData.attachments || []).map((file, i) => (
+                  <div key={i} className="flex items-center gap-2.5 px-3 py-2 rounded-xl border"
+                    style={{ backgroundColor: c.surface, borderColor: c.border }}>
+                    <FileText className="w-3.5 h-3.5 flex-shrink-0" style={{ color: c.textSecondary }} />
+                    <span className="flex-1 text-[12px] font-medium truncate" style={{ color: c.textPrimary }}>{file.name}</span>
+                    <span className="text-[11px] flex-shrink-0" style={{ color: c.textSecondary }}>
+                      {file.size < 1024 ? `${file.size} B` : file.size < 1048576 ? `${(file.size / 1024).toFixed(0)} KB` : `${(file.size / 1048576).toFixed(1)} MB`}
+                    </span>
+                    <button type="button" onClick={() => upd('attachments', (newLeadData.attachments || []).filter((_, j) => j !== i))}
+                      className="flex-shrink-0 p-0.5 rounded-full transition-colors hover:bg-black/5">
+                      <X className="w-3 h-3" style={{ color: c.textSecondary }} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <label
+              className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl border border-dashed cursor-pointer transition-colors hover:bg-black/[0.02]"
+              style={{ borderColor: c.border }}>
+              <Paperclip className="w-3.5 h-3.5" style={{ color: c.textSecondary }} />
+              <span className="text-[12px] font-medium" style={{ color: c.textSecondary }}>Attach files</span>
+              <input type="file" multiple className="hidden"
+                onChange={e => {
+                  const files = Array.from(e.target.files || []).map(f => ({ name: f.name, size: f.size, type: f.type }));
+                  upd('attachments', [...(newLeadData.attachments || []), ...files]);
+                  e.target.value = '';
+                }} />
+            </label>
+          </div>
         </Section>
 
         {/* ── Submit ── */}
