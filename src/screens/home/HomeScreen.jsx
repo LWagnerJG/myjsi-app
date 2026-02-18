@@ -899,10 +899,8 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                         <rect x="97" y="42" width="5.5" height="132" rx="2.75" fill="url(#woodMount)"/>
                         <line x1="99" y1="44" x2="99" y2="170" stroke="rgba(185,160,115,0.12)" strokeWidth="0.4"/>
 
-                        {/* Dark metal hook arm — goes up from dowel, curves right, hooks right-and-down */}
-                        <path d="M100 42 L100 22 C100 10 109 4 118 4" stroke="#3A3D41" strokeWidth="3.8" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-                        {/* Hook curl — curls to the right and downward like a shepherd's crook */}
-                        <path d="M118 4 C128 4 134 10 134 18 C134 26 129 30 124 30" stroke="#3A3D41" strokeWidth="3.8" strokeLinecap="round" fill="none"/>
+                        {/* Dark metal bracket — straight vertical up, 90° turn right, short downward hook */}
+                        <path d="M100 42 L100 8 L130 8 L130 22" stroke="#3A3D41" strokeWidth="3.5" strokeLinecap="square" strokeLinejoin="miter" fill="none"/>
 
                         {/* Tapered fabric shade — narrower top, wider bottom, near-straight sides with very subtle curve */}
                         <g filter="url(#lampShadow)">
@@ -933,28 +931,28 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                 </div>
 
                 {/* Light effects — warm layered glow beneath shade */}
-                {/* Primary light cone — triangular spread from shade bottom */}
+                {/* Primary light cone — soft triangular spread */}
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: lampLightReady && lampOn ? 1 : 0 }}
                     transition={{ duration: 2.2, ease: [0.15, 0.85, 0.3, 1] }}
                     style={{ position: 'absolute', top: 55, left: '50%', transform: 'translateX(-50%)',
                         width: 0, height: 0,
-                        borderLeft: '60px solid transparent', borderRight: '60px solid transparent',
-                        borderTop: '420px solid rgba(255,225,170,0.07)',
-                        pointerEvents: 'none', filter: 'blur(18px)' }} />
-                {/* Warm inner glow — tighter, brighter cone */}
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: lampLightReady && lampOn ? 1 : 0 }}
+                        borderLeft: '45px solid transparent', borderRight: '45px solid transparent',
+                        borderTop: '350px solid rgba(255,225,170,0.045)',
+                        pointerEvents: 'none', filter: 'blur(16px)' }} />
+                {/* Warm inner glow — tighter cone */}
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: lampLightReady && lampOn ? 0.8 : 0 }}
                     transition={{ duration: 1.8, ease: [0.15, 0.85, 0.3, 1], delay: 0.15 }}
                     style={{ position: 'absolute', top: 56, left: '50%', transform: 'translateX(-50%)',
                         width: 0, height: 0,
-                        borderLeft: '32px solid transparent', borderRight: '32px solid transparent',
-                        borderTop: '300px solid rgba(255,218,165,0.10)',
+                        borderLeft: '24px solid transparent', borderRight: '24px solid transparent',
+                        borderTop: '240px solid rgba(255,218,165,0.055)',
                         pointerEvents: 'none', filter: 'blur(10px)' }} />
                 {/* Hot spot glow right at shade opening */}
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: lampLightReady && lampOn ? 0.85 : 0 }}
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: lampLightReady && lampOn ? 0.6 : 0 }}
                     transition={{ duration: 2.0, ease: [0.15, 0.85, 0.3, 1], delay: 0.3 }}
                     style={{ position: 'absolute', top: 50, left: '50%', transform: 'translateX(-50%)',
-                        width: 56, height: 14, borderRadius: '50%',
-                        background: 'radial-gradient(ellipse at 50% 80%, rgba(255,232,195,0.22) 0%, rgba(255,218,165,0.06) 50%, transparent 80%)',
+                        width: 44, height: 10, borderRadius: '50%',
+                        background: 'radial-gradient(ellipse at 50% 80%, rgba(255,232,195,0.14) 0%, rgba(255,218,165,0.04) 50%, transparent 80%)',
                         pointerEvents: 'none', filter: 'blur(3px)' }} />
                 {/* Subtle ambient halo */}
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: lampLightReady && lampOn ? 0.4 : 0 }}
