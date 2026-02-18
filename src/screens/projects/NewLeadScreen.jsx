@@ -514,10 +514,10 @@ export const NewLeadScreen = ({
           }}>
             <div style={{ overflow: 'hidden' }}>
               <Row label="Competitors" theme={theme} inline noSep>
-                <div className="flex flex-wrap gap-1.5">
+                <div className="grid grid-cols-3 gap-1.5">
                   {[...COMPETITORS.filter(c => c !== 'None'), 'Other'].map(comp => (
                     <PillButton key={comp} size="xs" isSelected={(newLeadData.competitors || []).includes(comp)}
-                      onClick={() => toggleCompetitor(comp)} theme={theme}>{comp}</PillButton>
+                      onClick={() => toggleCompetitor(comp)} theme={theme} className="w-full">{comp}</PillButton>
                   ))}
                 </div>
                 {(newLeadData.competitors || []).includes('Other') && (
