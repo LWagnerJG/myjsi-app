@@ -335,7 +335,7 @@ export const NewLeadScreen = ({
                 value={Math.max(0, stageOptions.indexOf(newLeadData.projectStatus))}
                 onChange={e => upd('projectStatus', stageOptions[+e.target.value])}
                 className="w-full jsi-range" style={rangeStyle} />
-              <div className="flex justify-between mt-1" style={{ padding: '0 2px' }}>
+              <div className="flex justify-between -mt-0.5" style={{ padding: '0 2px' }}>
                 {stageOptions.map((s, i) => {
                   const active = i === stageOptions.indexOf(newLeadData.projectStatus);
                   return (
@@ -549,11 +549,11 @@ export const NewLeadScreen = ({
                 </button>
               </div>
             ) : (
-              <div className="flex gap-1.5">
+              <div className="grid grid-cols-2 gap-1.5">
                 <PillButton size="xs" isSelected={false}
-                  onClick={() => setQuoteMode('existing')} theme={theme}>Existing Quote</PillButton>
+                  onClick={() => setQuoteMode('existing')} theme={theme} className="w-full">Existing Quote</PillButton>
                 <PillButton size="xs" isSelected={quoteMode === 'needed'}
-                  onClick={() => setQuoteMode(quoteMode === 'needed' ? null : 'needed')} theme={theme}>Quote Needed</PillButton>
+                  onClick={() => setQuoteMode(quoteMode === 'needed' ? null : 'needed')} theme={theme} className="w-full">Quote Needed</PillButton>
               </div>
             )}
           </Row>
