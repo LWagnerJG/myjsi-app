@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import {
     Database, Search, Share2, FileText, DollarSign, Calendar, Percent,
     Palette, Package, Users, MapPin, MonitorPlay, Wrench, Clock, ChevronRight, Gift
@@ -117,28 +117,52 @@ export const ResourcesScreen = ({ theme, onNavigate, homeApps }) => {
         );
     };
 
-    const CategoryCard = ({ category, isFirst }) => (
-        <section className={isFirst ? 'mt-6' : 'pt-8'}>
-            <GlassCard theme={theme} className="px-6 py-4">
-                <h3 className="text-lg font-semibold text-center mb-3" style={{ color: theme.colors.textPrimary }}>
-                    {category.category}
-                </h3>
-                <ul className="pb-1">
-                    {category.items?.map((item, idx) => (
-                        <Row key={item.nav+item.label} item={item} isFirst={idx === 0} />
-                    ))}
-                </ul>
-            </GlassCard>
-        </section>
+    const CategoryCard = ({ category }) => (
+        <GlassCard theme={theme} className="px-6 py-4">
+            <h3 className="text-lg font-semibold text-center mb-3" style={{ color: theme.colors.textPrimary }}>
+                {category.category}
+            </h3>
+            <ul className="pb-1">
+                {category.items?.map((item, idx) => (
+                    <Row key={item.nav+item.label} item={item} isFirst={idx === 0} />
+                ))}
+            </ul>
+        </GlassCard>
     );
+
+    /* ---------- responsive 2-col when wide enough ---------- */
+    const containerRef = useRef(null);
+    const [wide, setWide] = useState(false);
+
+    const measure = useCallback(() => {
+        if (!containerRef.current) return;
+        setWide(containerRef.current.offsetWidth >= 640);
+    }, []);
+
+    useEffect(() => {
+        measure();
+        const ro = new ResizeObserver(measure);
+        if (containerRef.current) ro.observe(containerRef.current);
+        return () => ro.disconnect();
+    }, [measure]);
 
     return (
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
             <div className="flex-1 overflow-y-auto scrollbar-hide px-6 pb-6">
-                <div className="max-w-2xl mx-auto w-full">
-                    {resourceCategories.map((cat, i) => (
-                        <CategoryCard key={cat.category} category={cat} isFirst={i === 0} />
-                    ))}
+                <div ref={containerRef} className="max-w-4xl mx-auto w-full">
+                    <div
+                        className="mt-6"
+                        style={{
+                            display: 'grid',
+                            gridTemplateColumns: wide ? '1fr 1fr' : '1fr',
+                            gap: wide ? '20px' : '24px',
+                            alignItems: 'start'
+                        }}
+                    >
+                        {resourceCategories.map((cat) => (
+                            <CategoryCard key={cat.category} category={cat} />
+                        ))}
+                    </div>
                 </div>
             </div>
         </div>

@@ -1,21 +1,21 @@
 // Resources feature specific data (migrated from root data folder)
 export const RESOURCES_DATA = [
     {
-        category: "Product & Finish Resources",
-        items: [
-            { label: "Lead Times", nav: "resources/lead-times" },
-            { label: "Search Fabrics", nav: "resources/search-fabrics" },
-            { label: "Request COM Yardage", nav: "resources/request-com-yardage" },
-            { label: "Discontinued Finishes Database", nav: "resources/discontinued-finishes" },
-        ].sort((a, b) => a.label.localeCompare(b.label))
-    },
-    {
         category: "Sales & Rep Tools",
         items: [
             { label: "Dealer Directory", nav: "resources/dealer-directory" },
             { label: "Commission Rates", nav: "resources/commission-rates" },
             { label: "Sample Discounts", nav: "resources/sample-discounts" },
             { label: "Contracts", nav: "resources/contracts" },
+        ].sort((a, b) => a.label.localeCompare(b.label))
+    },
+    {
+        category: "Product & Finish Resources",
+        items: [
+            { label: "Lead Times", nav: "resources/lead-times" },
+            { label: "Search Fabrics", nav: "resources/search-fabrics" },
+            { label: "Request COM Yardage", nav: "resources/request-com-yardage" },
+            { label: "Discontinued Finishes Database", nav: "resources/discontinued-finishes" },
         ].sort((a, b) => a.label.localeCompare(b.label))
     },
     {
