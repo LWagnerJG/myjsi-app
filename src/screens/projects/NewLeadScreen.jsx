@@ -160,7 +160,7 @@ const ProductSpotlight = ({ selectedSeries, onAdd, available, theme }) => {
 
   const pick = useCallback((s) => {
     if (!selectedSeries.includes(s)) onAdd(s);
-    setQ(''); setOpen(false);
+    setQ(''); setOpen(false); inputRef.current?.blur();
   }, [selectedSeries, onAdd]);
 
   const onKey = useCallback((e) => {
@@ -175,7 +175,7 @@ const ProductSpotlight = ({ selectedSeries, onAdd, available, theme }) => {
     <div ref={anchorRef}>
       <div onClick={doOpen}
         className="flex items-center gap-2 px-3.5 cursor-text"
-        style={{ height: 44, borderRadius: 9999, background: theme.colors.surface, border: `1px solid ${theme.colors.border}` }}>
+        style={{ height: 40, borderRadius: 9999, background: theme.colors.surface, border: `1px solid ${theme.colors.border}` }}>
         <Search className="w-3.5 h-3.5 flex-shrink-0" style={{ color: theme.colors.textSecondary }} />
         <input ref={inputRef} value={q}
           onChange={e => { setQ(e.target.value); if (!open) doOpen(); }}
@@ -501,15 +501,13 @@ export const NewLeadScreen = ({
 
         {/* ── 4. Competition & Products ── */}
         <Section title="Competition & Products" theme={theme} className="mb-4">
-          {/* bid + competition toggles, inline */}
-          <div className="flex items-center justify-between py-2.5">
-            <span className="text-[13px] font-semibold" style={{ color: c.textPrimary }}>Bid?</span>
-            <ToggleSwitch checked={!!newLeadData.isBid} onChange={e => upd('isBid', e.target.checked)} theme={theme} />
-          </div>
-          <div className="flex items-center justify-between py-2.5 border-t" style={{ borderColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }}>
-            <span className="text-[13px] font-semibold" style={{ color: c.textPrimary }}>Competition?</span>
-            <ToggleSwitch checked={!!newLeadData.competitionPresent} onChange={e => upd('competitionPresent', e.target.checked)} theme={theme} />
-          </div>
+          {/* bid + competition toggles */}
+          <Row label="Bid?" theme={theme} inline noSep>
+            <div className="flex justify-end"><ToggleSwitch checked={!!newLeadData.isBid} onChange={e => upd('isBid', e.target.checked)} theme={theme} /></div>
+          </Row>
+          <Row label="Competition?" theme={theme} inline>
+            <div className="flex justify-end"><ToggleSwitch checked={!!newLeadData.competitionPresent} onChange={e => upd('competitionPresent', e.target.checked)} theme={theme} /></div>
+          </Row>
 
           {/* competitor chips — animate in */}
           <div style={{
@@ -551,11 +549,11 @@ export const NewLeadScreen = ({
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-1.5">
+              <div className="flex gap-1.5">
                 <PillButton size="xs" isSelected={false}
-                  onClick={() => setQuoteMode('existing')} theme={theme} className="w-full">Existing Quote</PillButton>
+                  onClick={() => setQuoteMode('existing')} theme={theme}>Existing Quote</PillButton>
                 <PillButton size="xs" isSelected={quoteMode === 'needed'}
-                  onClick={() => setQuoteMode(quoteMode === 'needed' ? null : 'needed')} theme={theme} className="w-full">Quote Needed</PillButton>
+                  onClick={() => setQuoteMode(quoteMode === 'needed' ? null : 'needed')} theme={theme}>Quote Needed</PillButton>
               </div>
             )}
           </Row>
@@ -626,7 +624,7 @@ export const NewLeadScreen = ({
               </div>
             )}
             <label
-              className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl border border-dashed cursor-pointer transition-colors"
+              className="flex items-center gap-2 px-3.5 py-2.5 rounded-2xl border border-dashed cursor-pointer transition-colors"
               style={{ borderColor: c.border, backgroundColor: dark ? 'rgba(255,255,255,0.03)' : 'transparent' }}>
               <Paperclip className="w-3.5 h-3.5" style={{ color: c.textSecondary }} />
               <span className="text-[12px] font-medium" style={{ color: c.textSecondary }}>Attach files</span>
@@ -641,13 +639,13 @@ export const NewLeadScreen = ({
         </Section>
 
         {/* ── Submit ── */}
-        <div className="pb-8">
+        <div className="pb-6">
           <PrimaryButton type="submit" theme={theme} size="large" fullWidth
             disabled={!newLeadData.project || !newLeadData.projectStatus}>
             Submit Lead →
           </PrimaryButton>
           {(!newLeadData.project || !newLeadData.projectStatus) && (
-            <p className="text-[12px] text-center mt-3" style={{ color: c.textSecondary }}>
+            <p className="text-[12px] text-center mt-2" style={{ color: c.textSecondary }}>
               Please fill in required fields to submit
             </p>
           )}

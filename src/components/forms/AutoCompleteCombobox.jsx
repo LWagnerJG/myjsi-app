@@ -21,6 +21,7 @@ export const AutoCompleteCombobox = React.memo(({
     const [pos, setPos] = useState({ top: 0, left: 0, width: 0, height: 'auto' });
     const inputWrapperRef = useRef(null);
     const dropRef = useRef(null);
+    const inputRef = useRef(null);
     const dark = isDarkTheme(theme);
 
     const filtered = useMemo(() => {
@@ -130,6 +131,7 @@ export const AutoCompleteCombobox = React.memo(({
     const handleSelectOption = (opt) => {
         onSelect?.(opt);
         setIsOpen(false);
+        inputRef.current?.blur();
         if (resetOnSelect) {
             onChange('');
         } else {
@@ -143,6 +145,7 @@ export const AutoCompleteCombobox = React.memo(({
         onSelect?.(value);
         onChange(value);
         setIsOpen(false);
+        inputRef.current?.blur();
     };
 
     const handleInputFocus = () => {
@@ -166,6 +169,7 @@ export const AutoCompleteCombobox = React.memo(({
             <div className="relative" ref={inputWrapperRef}>
                 <Search className={`absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none ${compact ? 'w-3.5 h-3.5' : 'w-5 h-5'}`} style={{ color: theme.colors.textSecondary }} />
                 <input
+                    ref={inputRef}
                     type="text"
                     value={value || ''}
                     onFocus={handleInputFocus}

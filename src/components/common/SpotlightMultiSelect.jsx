@@ -18,6 +18,7 @@ export function SpotlightMultiSelect({
   const [pos, setPos] = useState({ top: 0, left: 0, width: 0 });
   const anchorRef = useRef(null);
   const menuRef = useRef(null);
+  const inputRef = useRef(null);
 
   const norm = (s) => (s || "").trim().toLowerCase();
   const available = useMemo(
@@ -65,8 +66,8 @@ export function SpotlightMultiSelect({
     };
   }, [open]);
 
-  const pick = (val) => { if (!val) return; onAddItem?.(val); setQ(""); setOpen(false); };
-  const create = () => { const name = q.trim(); if (!name) return; onAddNew?.(name); onAddItem?.(name); setQ(""); setOpen(false); };
+  const pick = (val) => { if (!val) return; onAddItem?.(val); setQ(""); setOpen(false); inputRef.current?.blur(); };
+  const create = () => { const name = q.trim(); if (!name) return; onAddNew?.(name); onAddItem?.(name); setQ(""); setOpen(false); inputRef.current?.blur(); };
 
   const Menu = () =>
     createPortal(
@@ -122,6 +123,7 @@ export function SpotlightMultiSelect({
       >
         <Search className="w-3.5 h-3.5 flex-shrink-0" style={{ color: palette.hint }} />
         <input
+          ref={inputRef}
           value={q}
           onChange={(e) => { setQ(e.target.value); setOpen(true); }}
           onFocus={() => setOpen(true)}
