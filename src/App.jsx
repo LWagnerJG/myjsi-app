@@ -2,7 +2,7 @@
 import { lightTheme, darkTheme } from './data/index.js';
 import { DEFAULT_HOME_APPS, allApps } from './data.jsx';
 import { INITIAL_OPPORTUNITIES, MY_PROJECTS_DATA, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS, EMPTY_LEAD, STAGES } from './screens/projects/data.js';
-import { INITIAL_POSTS, INITIAL_POLLS, INITIAL_WINS } from './screens/community/data.js';
+import { INITIAL_POSTS, INITIAL_POLLS, INITIAL_WINS, SUBREDDIT_POSTS } from './screens/community/data.js';
 import { INITIAL_MEMBERS } from './screens/members/data.js';
 import { DEALER_DIRECTORY_DATA } from './screens/resources/dealer-directory/data.js';
 
@@ -186,12 +186,13 @@ function App() {
     const [currentUserId] = useState(1);
 
     // Community
-    const [posts, setPosts] = useState([...INITIAL_POSTS, ...INITIAL_WINS]);
+    const [posts, setPosts] = useState([...INITIAL_POSTS, ...INITIAL_WINS, ...SUBREDDIT_POSTS]);
     const [polls, setPolls] = useState(INITIAL_POLLS);
     const [likedPosts, setLikedPosts] = useState({});
     const [pollChoices, setPollChoices] = useState({});
     const [showCreateContentModal, setShowCreateContentModal] = useState(false);
     const [savedImageIds, setSavedImageIds] = usePersistentState('library.saved', []);
+    const [postUpvotes, setPostUpvotes] = useState({});
 
     // Directories / leads
     const [dealerDirectory] = useState(DEALER_DIRECTORY_DATA);
@@ -299,6 +300,16 @@ function App() {
         setPosts((prev) => prev.map(p => p.id === postId ? { ...p, comments: [...(p.comments || []), { id: now, name: 'You', text }] } : p));
     }, []);
 
+    const handleUpvote = useCallback((postId) => {
+        setPostUpvotes((prev) => {
+            const isUp = !!prev[postId];
+            const next = { ...prev };
+            if (isUp) delete next[postId]; else next[postId] = true;
+            setPosts((p) => p.map(post => post.id === postId ? { ...post, upvotes: Math.max(0, (post.upvotes || 0) + (isUp ? -1 : 1)) } : post));
+            return next;
+        });
+    }, []);
+
     const handleToggleSaveImage = useCallback((assetId) => {
         setSavedImageIds(prev => {
             const set = new Set(Array.isArray(prev) ? prev : []);
@@ -369,6 +380,8 @@ function App() {
         openCreateContentModal: () => setShowCreateContentModal(true),
         savedImageIds,
         onToggleSaveImage: handleToggleSaveImage,
+        postUpvotes,
+        onUpvote: handleUpvote,
         cart,
         setCart,
         onUpdateCart: handleUpdateCart,

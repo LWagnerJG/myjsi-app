@@ -7,12 +7,34 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Heart, MessageCircle, Share2, Plus, Users, Send, ExternalLink,
   Megaphone, ChevronRight, Sparkles, Image, BarChart3, X, Package, Calendar, DollarSign, Zap,
-  Copy, CheckCircle2, Link2
+  Copy, CheckCircle2, Link2, ChevronUp
 } from 'lucide-react';
 
 /* ── helpers ── */
 const cardBg = (dark) => dark ? '#2A2A2A' : '#FFFFFF';
 const subtleBorder = (dark) => dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)';
+
+const formatTimestamp = (ts) => {
+  if (!ts) return '';
+  const d = new Date(typeof ts === 'number' ? ts : Date.parse(ts));
+  const now = Date.now();
+  const diff = now - d.getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 7) return `${days}d ago`;
+  const thisYear = new Date().getFullYear();
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', ...(d.getFullYear() !== thisYear ? { year: 'numeric' } : {}) });
+};
+
+const formatExactTimestamp = (ts) => {
+  if (!ts) return '';
+  const d = new Date(typeof ts === 'number' ? ts : Date.parse(ts));
+  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }) + ' · ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+};
 
 const ANNOUNCEMENT_ICONS = {
   'product-launch': Package,
@@ -354,7 +376,7 @@ const ActionBtn = React.memo(({ active, icon: Icon, count, onClick, label, theme
 ));
 ActionBtn.displayName = 'ActionBtn';
 
-const PostCard = React.memo(({ post, index, theme, dark, isLiked, isExpanded, onToggleLike, onAddComment, onToggleComments }) => {
+const PostCard = React.memo(({ post, index, theme, dark, isLiked, isUpvoted, isExpanded, onToggleLike, onUpvote, onAddComment, onToggleComments }) => {
   const [draft, setDraft] = useState('');
   const contentRef = useRef(null);
   const [measuredHeight, setMeasuredHeight] = useState(0);
@@ -383,7 +405,13 @@ const PostCard = React.memo(({ post, index, theme, dark, isLiked, isExpanded, on
           <Avatar src={post.user?.avatar} alt={post.user?.name} dark={dark} theme={theme} />
           <div className="flex-1 min-w-0">
             <span className="text-[13px] font-semibold" style={{ color: theme.colors.textPrimary }}>{post.user?.name}</span>
-            <span className="text-[11px] font-medium ml-2" style={{ color: theme.colors.textSecondary }}>{post.timeAgo}</span>
+            <span
+              className="text-[11px] font-medium ml-2 cursor-default"
+              title={formatExactTimestamp(post.createdAt)}
+              style={{ color: theme.colors.textSecondary }}
+            >
+              {formatTimestamp(post.createdAt)}
+            </span>
           </div>
         </div>
         {post.title && <p className="text-[13px] font-bold mt-2" style={{ color: theme.colors.textPrimary }}>{post.title}</p>}
@@ -406,6 +434,19 @@ const PostCard = React.memo(({ post, index, theme, dark, isLiked, isExpanded, on
 
       {/* Action bar */}
       <div className="px-2 py-1.5 flex items-center gap-0.5 border-t" style={{ borderColor: subtleBorder(dark) }}>
+        {/* Upvote */}
+        <button
+          onClick={() => onUpvote?.(post.id)}
+          aria-label="Upvote"
+          className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1.5 rounded-full transition-all active:scale-95"
+          style={{
+            color: isUpvoted ? '#f97316' : theme.colors.textSecondary,
+            backgroundColor: isUpvoted ? (dark ? 'rgba(249,115,22,0.12)' : 'rgba(249,115,22,0.08)') : 'transparent',
+          }}
+        >
+          <ChevronUp className="w-3.5 h-3.5" style={isUpvoted ? { strokeWidth: 2.5 } : undefined} />
+          {(post.upvotes || 0) > 0 && <span>{post.upvotes}</span>}
+        </button>
         <ActionBtn active={isLiked} icon={Heart} count={post.likes || 0} onClick={() => onToggleLike?.(post.id)} label="Like" theme={theme} dark={dark} />
         <ActionBtn active={isExpanded} icon={MessageCircle} count={(post.comments || []).length} onClick={() => onToggleComments(post.id)} label="Comments" theme={theme} dark={dark} />
         <button
@@ -539,7 +580,9 @@ export const CommunityScreen = ({
   polls = [],
   likedPosts = {},
   pollChoices = {},
+  postUpvotes = {},
   onToggleLike,
+  onUpvote,
   onPollVote,
   onAddComment,
   openCreateContentModal,
@@ -704,8 +747,10 @@ export const CommunityScreen = ({
                     theme={theme}
                     dark={dark}
                     isLiked={!!likedPosts[item.id]}
+                    isUpvoted={!!postUpvotes[item.id]}
                     isExpanded={!!expandedComments[item.id]}
                     onToggleLike={onToggleLike}
+                    onUpvote={onUpvote}
                     onAddComment={onAddComment}
                     onToggleComments={toggleComments}
                   />
