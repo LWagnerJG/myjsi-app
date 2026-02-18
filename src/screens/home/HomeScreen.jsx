@@ -857,17 +857,16 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                 onClick={handleLampClick}
                 title="Turn light off"
             >
-                {/* Perspective wrapper — gentle 3D tilt */}
+                {/* Perspective wrapper — subtle 3D depth */}
                 <div style={{ perspective: '800px' }}>
-                <div style={{ transform: 'rotateY(18deg) rotateX(-3deg)', transformStyle: 'preserve-3d' }}>
+                <div style={{ transform: 'rotateY(8deg) rotateX(-2deg)', transformStyle: 'preserve-3d' }}>
                 <motion.div
                     initial={{ y: -70, opacity: 0, rotate: 0 }}
                     animate={lampAnim}
-                    style={{ transformOrigin: '75% 0%' }}
+                    style={{ transformOrigin: '80% 0%' }}
                 >
-                    <svg width="58" height="62" viewBox="0 0 150 168" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <svg width="56" height="58" viewBox="0 0 150 155" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <defs>
-                            {/* Fabric shade gradient - light grey linen, light from upper-left */}
                             <linearGradient id="shadeFabric" x1="0.05" y1="0" x2="0.95" y2="1">
                                 <stop offset="0%" stopColor="#DDDAD6"/>
                                 <stop offset="25%" stopColor="#D4D1CC"/>
@@ -893,35 +892,28 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                             </filter>
                         </defs>
 
-                        {/* Compact wall bracket — small vertical plate + short arm */}
-                        <rect x="110" y="6" width="6" height="20" rx="1" fill="#3A3D41"/>
-                        <path d="M113 26 L100 26" stroke="#3A3D41" strokeWidth="3.2" strokeLinecap="square" fill="none"/>
+                        {/* Wooden dowel — runs through shade, visible above & below */}
+                        <rect x="100" y="22" width="5" height="128" rx="2.5" fill="url(#woodMount)"/>
+                        <line x1="102.5" y1="24" x2="102.5" y2="148" stroke="rgba(185,160,115,0.10)" strokeWidth="0.4"/>
 
-                        {/* Wooden dowel — from bracket arm down through shade */}
-                        <rect x="97" y="26" width="5.5" height="125" rx="2.75" fill="url(#woodMount)"/>
-                        <line x1="99.5" y1="28" x2="99.5" y2="148" stroke="rgba(185,160,115,0.12)" strokeWidth="0.4"/>
+                        {/* Dark metal J-hook — rises from dowel top, arcs right, curls down */}
+                        <path d="M102.5 24 L102.5 10 C102.5 1 113 -2 122 0 C131 2 133 10 131 18"
+                              stroke="#3A3D41" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
 
-                        {/* Shade group — tilted slightly upward */}
-                        <g transform="rotate(-3, 82, 100)">
+                        {/* Shade — tilted slightly upward on left */}
+                        <g transform="rotate(-4, 76, 96)">
                             <g filter="url(#lampShadow)">
-                                {/* Main shade body — fatter, shorter */}
-                                <path d="M52 62 L110 62 C113 78 118 100 124 128 L28 128 C34 100 39 78 52 62 Z" fill="url(#shadeFabric)"/>
-                                <path d="M52 62 L110 62 C113 78 118 100 124 128 L28 128 C34 100 39 78 52 62 Z" fill="url(#shadeShadow)"/>
-                                <path d="M52 62 L110 62 C113 78 118 100 124 128 L28 128 C34 100 39 78 52 62 Z" stroke="rgba(160,155,148,0.22)" strokeWidth="0.6" fill="none"/>
-                                {/* Fabric weave texture */}
-                                <line x1="50" y1="76" x2="113" y2="76" stroke="rgba(160,155,148,0.05)" strokeWidth="0.4"/>
-                                <line x1="44" y1="90" x2="118" y2="90" stroke="rgba(160,155,148,0.05)" strokeWidth="0.4"/>
-                                <line x1="38" y1="104" x2="122" y2="104" stroke="rgba(160,155,148,0.04)" strokeWidth="0.4"/>
-                                <line x1="33" y1="118" x2="125" y2="118" stroke="rgba(160,155,148,0.03)" strokeWidth="0.4"/>
+                                <path d="M48 55 L112 55 C116 70 122 94 128 124 L20 124 C26 94 32 70 48 55 Z" fill="url(#shadeFabric)"/>
+                                <path d="M48 55 L112 55 C116 70 122 94 128 124 L20 124 C26 94 32 70 48 55 Z" fill="url(#shadeShadow)"/>
+                                <path d="M48 55 L112 55 C116 70 122 94 128 124 L20 124 C26 94 32 70 48 55 Z" stroke="rgba(160,155,148,0.22)" strokeWidth="0.6" fill="none"/>
+                                <line x1="46" y1="70" x2="115" y2="70" stroke="rgba(160,155,148,0.05)" strokeWidth="0.4"/>
+                                <line x1="38" y1="84" x2="122" y2="84" stroke="rgba(160,155,148,0.05)" strokeWidth="0.4"/>
+                                <line x1="30" y1="98" x2="126" y2="98" stroke="rgba(160,155,148,0.04)" strokeWidth="0.4"/>
+                                <line x1="24" y1="112" x2="128" y2="112" stroke="rgba(160,155,148,0.03)" strokeWidth="0.4"/>
                             </g>
-                            {/* Top rim */}
-                            <ellipse cx="81" cy="62" rx="29" ry="2" fill="rgba(205,200,194,0.35)"/>
-                            {/* Bottom rim */}
-                            <ellipse cx="76" cy="128" rx="48" ry="2.8" fill="rgba(185,180,172,0.25)"/>
+                            <ellipse cx="80" cy="55" rx="32" ry="2.2" fill="rgba(205,200,194,0.35)"/>
+                            <ellipse cx="74" cy="124" rx="54" ry="3" fill="rgba(185,180,172,0.25)"/>
                         </g>
-
-                        {/* Hanging cord */}
-                        <path d="M76 132 C76 142 75.5 152 75 165" stroke="#2F3136" strokeWidth="1.6" strokeLinecap="round" fill="none"/>
                     </svg>
                 </motion.div>
                 </div>
