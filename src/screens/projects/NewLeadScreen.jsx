@@ -180,7 +180,7 @@ const ProductSpotlight = ({ selectedSeries, onAdd, available, theme }) => {
         <input ref={inputRef} value={q}
           onChange={e => { setQ(e.target.value); if (!open) doOpen(); }}
           onFocus={doOpen} onKeyDown={onKey}
-          placeholder="Search products..."
+          placeholder="Search..."
           className="flex-1 bg-transparent outline-none text-[13px]"
           style={{ color: theme.colors.textPrimary }} />
       </div>
@@ -410,8 +410,8 @@ export const NewLeadScreen = ({
         }>
 
           <Reveal show={!!(newLeadData.estimatedList && String(newLeadData.estimatedList).replace(/[^0-9]/g, '').length > 0)}>
-          <Row label="Win Probability" theme={theme} inline>
-            <div className="flex items-center gap-2.5 flex-1 min-w-0" style={{ minHeight: 40 }}>
+          <Row label="Win Probability" theme={theme} inline noSep>
+            <div className="flex items-center gap-2.5 flex-1 min-w-0">
               <input type="range" min={10} max={100} step={10}
                 value={newLeadData.winProbability || 50}
                 onChange={e => upd('winProbability', Number(e.target.value))}
@@ -560,7 +560,7 @@ export const NewLeadScreen = ({
             )}
           </Row>
           {quoteMode === 'needed' && (
-            <div className="pb-2">
+            <div className="pb-1">
               <div className="rounded-2xl p-3 flex items-start gap-2.5" style={{ backgroundColor: c.subtle }}>
                 <Upload className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: c.textSecondary }} />
                 <div>
@@ -605,7 +605,7 @@ export const NewLeadScreen = ({
           />
 
           {/* Attachments */}
-          <div className="mt-3">
+          <div className="mt-2">
             {(newLeadData.attachments || []).length > 0 && (
               <div className="space-y-1.5 mb-3">
                 {(newLeadData.attachments || []).map((file, i) => (
