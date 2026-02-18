@@ -577,10 +577,10 @@ const ProjectCard = ({ opp, theme, onClick }) => {
       <div
         className="p-4 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
         style={{
-          backgroundColor: isDark ? '#2F2F2F' : 'rgba(255,255,255,0.85)',
-          border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)',
+          backgroundColor: isDark ? theme.colors.surface : 'rgba(255,255,255,0.85)',
+          border: isDark ? `1px solid ${theme.colors.border}` : '1px solid rgba(0,0,0,0.06)',
           borderRadius: 18,
-          boxShadow: isDark ? '0 2px 8px rgba(0,0,0,0.3)' : '0 1px 4px rgba(0,0,0,0.06)',
+          boxShadow: isDark ? '0 2px 12px rgba(0,0,0,0.35)' : '0 1px 4px rgba(0,0,0,0.06)',
         }}
       >
         <div className="mb-2">
@@ -652,7 +652,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
         <div className="px-4 sm:px-6 lg:px-8 pt-2 pb-2 max-w-5xl mx-auto w-full">
           {/* Tab row: two tab pills + action button */}
           <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-1 p-1 rounded-2xl" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)' }}>
+            <div className="flex items-center gap-1 p-1 rounded-2xl" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.04)' }}>
               {PROJECTS_TAB_OPTIONS.map(tab => {
                 const active = projectsTab === tab.value;
                 return (
@@ -662,7 +662,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
                     className="px-4 py-1.5 rounded-xl text-[12px] font-semibold transition-all"
                     style={{
                       backgroundColor: active
-                        ? (isDark ? 'rgba(255,255,255,0.10)' : '#fff')
+                        ? (isDark ? 'rgba(255,255,255,0.14)' : '#fff')
                         : 'transparent',
                       color: active ? theme.colors.textPrimary : theme.colors.textSecondary,
                       boxShadow: active ? '0 1px 3px rgba(0,0,0,0.06)' : 'none',
@@ -703,7 +703,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
                       onClick={()=>setSelectedPipelineStage(stage)}
                       className="text-[11px] font-semibold transition-all px-3 py-1.5 rounded-full"
                       style={{
-                        color: active ? (isDark ? '#fff' : '#fff') : theme.colors.textSecondary,
+                      color: active ? theme.colors.accentText : theme.colors.textSecondary,
                         backgroundColor: active ? theme.colors.textPrimary : 'transparent',
                         opacity: active ? 1 : 0.7,
                       }}
@@ -736,8 +736,8 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
                   <div
                     className="inline-flex items-center gap-2 px-5 py-2 rounded-full"
                     style={{
-                      backgroundColor: isDark ? '#2F2F2F' : 'rgba(0,0,0,0.03)',
-                      border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.05)',
+                      backgroundColor: isDark ? theme.colors.surface : 'rgba(0,0,0,0.03)',
+                      border: isDark ? `1px solid ${theme.colors.border}` : '1px solid rgba(0,0,0,0.05)',
                     }}
                   >
                     <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>{selectedPipelineStage} Total</span>

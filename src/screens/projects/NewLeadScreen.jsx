@@ -74,7 +74,7 @@ const Section = ({ title, titleRight, children, theme, className = '' }) => {
             borderBottom: `1px solid ${divider}`,
             paddingBottom: 6,
           }}>{title}</h3>
-          <div className="flex-1 min-w-0">{titleRight}</div>
+          <div className="ml-auto min-w-0" style={{ width: '55%' }}>{titleRight}</div>
         </div>
       )}
       {children}
