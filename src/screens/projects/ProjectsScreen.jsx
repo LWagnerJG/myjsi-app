@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
-import { Briefcase, ChevronRight, ChevronDown, DollarSign, Percent, Building2, Users, Package, FileText, Upload, Plus, Eye, Send, Paperclip } from 'lucide-react';
+import { Briefcase, ChevronRight, ChevronDown, DollarSign, Percent, Building2, Users, Package, FileText, Upload, Plus, Eye, Send, Paperclip, Search, UserPlus } from 'lucide-react';
+import { RequestQuoteModal } from '../../components/common/RequestQuoteModal.jsx';
 import { STAGES, VERTICALS, COMPETITORS, DISCOUNT_OPTIONS, PO_TIMEFRAMES, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS } from './data.js';
 import { ProbabilitySlider } from '../../components/forms/ProbabilitySlider.jsx';
 import { PillButton } from '../../components/common/JSIButtons.jsx';
@@ -12,6 +13,31 @@ const PROJECTS_TAB_OPTIONS = [
   { value: 'pipeline', label: 'Active Projects' },
   { value: 'my-projects', label: 'Installations' }
 ];
+
+// Dealer → Contact mapping (mock data)
+const DEALER_CONTACTS = {
+  'Business Furniture': [
+    { name: 'Mike Johnson', title: 'Account Manager' },
+    { name: 'Sarah Palmer', title: 'Design Consultant' },
+    { name: 'Tom Bradley', title: 'Regional Director' },
+  ],
+  'COE': [
+    { name: 'Emily Raine', title: 'Project Manager' },
+    { name: 'David Chen', title: 'Sales Representative' },
+    { name: 'Lisa Park', title: 'Account Executive' },
+    { name: 'Tom Hardy', title: 'Operations Manager' },
+  ],
+  'OfficeWorks': [
+    { name: 'Alan Cooper', title: 'Senior Designer' },
+    { name: 'Rachel Green', title: 'Account Manager' },
+    { name: 'Mark Wilson', title: 'Sales Lead' },
+  ],
+  'RJE': [
+    { name: 'Sara Lin', title: 'Regional Manager' },
+    { name: 'Priya Patel', title: 'Design Specialist' },
+    { name: 'James Foster', title: 'Account Executive' },
+  ],
+};
 
 // currency util
 const fmtCurrency = (v) => typeof v === 'string' ? (v.startsWith('$')? v : '$'+v) : (v ?? 0).toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0});
@@ -36,6 +62,81 @@ const SuggestInputPill = ({ placeholder, suggestions, onAdd, theme }) => {
 
 // Helper label / inputs (restored)
 const SoftLabel = ({ children, theme }) => <span className="text-[11px] uppercase tracking-wide font-semibold" style={{ color: theme.colors.textSecondary }}>{children}</span>;
+
+// Contact search selector — pulls contacts from associated dealers
+const ContactSearchSelector = ({ value, onChange, dealers, theme }) => {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const ref = useRef(null);
+  const isDark = theme.name === 'dark';
+  const contacts = useMemo(() => {
+    const all = [];
+    (dealers || []).forEach(d => {
+      const dc = DEALER_CONTACTS[d];
+      if (dc) dc.forEach(c => { if (!all.some(x => x.name === c.name)) all.push({ ...c, dealer: d }); });
+    });
+    return all;
+  }, [dealers]);
+  const filtered = useMemo(() => !query ? contacts : contacts.filter(c => c.name.toLowerCase().includes(query.toLowerCase()) || c.title.toLowerCase().includes(query.toLowerCase())), [contacts, query]);
+  useEffect(() => { if (!open) return; const close = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); }; window.addEventListener('mousedown', close); return () => window.removeEventListener('mousedown', close); }, [open]);
+  const fieldBg = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.025)';
+  const fieldBorder = isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)';
+  return (
+    <div className="relative" ref={ref}>
+      {value ? (
+        <div className="flex items-center gap-2.5 py-2 px-3.5 rounded-xl" style={{ background: fieldBg, border: fieldBorder }}>
+          <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0" style={{ backgroundColor: theme.colors.accent + '18', color: theme.colors.accent }}>
+            {value.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
+          </div>
+          <span className="flex-1 text-[14px] font-medium truncate" style={{ color: theme.colors.textPrimary }}>{value}</span>
+          <button onClick={() => { onChange(''); setQuery(''); }} className="p-0.5 rounded-full opacity-40 hover:opacity-100 transition-opacity">
+            <span className="text-[14px] leading-none" style={{ color: theme.colors.textSecondary }}>×</span>
+          </button>
+        </div>
+      ) : (
+        <div className="flex items-center gap-2.5 py-2 px-3.5 rounded-xl" style={{ background: fieldBg, border: fieldBorder }}>
+          <Search size={14} style={{ color: theme.colors.textSecondary, opacity: 0.4, flexShrink: 0 }} />
+          <input
+            value={query}
+            onChange={e => { setQuery(e.target.value); setOpen(true); }}
+            onFocus={() => setOpen(true)}
+            onKeyDown={e => { if (e.key === 'Enter' && query.trim()) { onChange(query.trim()); setQuery(''); setOpen(false); } if (e.key === 'Escape') setOpen(false); }}
+            className="flex-1 bg-transparent outline-none text-[14px] font-medium"
+            style={{ color: theme.colors.textPrimary }}
+            placeholder="Search contacts..."
+          />
+        </div>
+      )}
+      {open && !value && (
+        <div className="absolute z-50 mt-1.5 left-0 right-0 rounded-2xl overflow-hidden shadow-xl" style={{ backgroundColor: isDark ? '#2a2a2a' : '#fff', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.08)' }}>
+          <div className="max-h-[200px] overflow-y-auto scrollbar-hide py-1">
+            {filtered.length > 0 ? filtered.map(c => (
+              <button key={c.name} onClick={() => { onChange(c.name); setQuery(''); setOpen(false); }} className="w-full text-left px-3 py-2.5 flex items-center gap-2.5 transition-colors" onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0" style={{ backgroundColor: theme.colors.accent + '18', color: theme.colors.accent }}>
+                  {c.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
+                </div>
+                <div className="min-w-0">
+                  <div className="text-[13px] font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{c.name}</div>
+                  <div className="text-[10px] truncate" style={{ color: theme.colors.textSecondary, opacity: 0.6 }}>{c.title} · {c.dealer}</div>
+                </div>
+              </button>
+            )) : (
+              <div className="px-3 py-3 text-center text-[12px]" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>
+                {contacts.length === 0 ? 'Add a dealer to see contacts' : 'No matching contacts'}
+              </div>
+            )}
+          </div>
+          {query.trim() && !contacts.some(c => c.name.toLowerCase() === query.toLowerCase()) && (
+            <button onClick={() => { onChange(query.trim()); setQuery(''); setOpen(false); }} className="w-full text-left px-3 py-2.5 flex items-center gap-2 border-t transition-colors" style={{ borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }} onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+              <UserPlus size={14} style={{ color: theme.colors.accent }} />
+              <span className="text-[12px] font-semibold" style={{ color: theme.colors.accent }}>Add "{query.trim()}"</span>
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
 const InlineTextInput = ({ value, onChange, theme, placeholder, className='' }) => (
   <input value={value||''} onChange={e=>onChange(e.target.value)} placeholder={placeholder} className={`bg-transparent outline-none border-b border-transparent focus:border-[currentColor] transition-colors ${className}`} style={{ color: theme.colors.textPrimary }} />
 );
@@ -98,6 +199,15 @@ const OpportunityDetail = ({ opp, theme, onUpdate }) => {
   const stageIdx = STAGES.indexOf(draft.stage);
   const stagePct = (stageIdx / Math.max(STAGES.length - 1, 1)) * 100;
 
+  // Net value computation
+  const rawNumeric = parseInt(('' + (draft.value || '')).replace(/[^0-9]/g, ''), 10) || 0;
+  const discountMatch = (draft.discount || '').match(/\(([\d.]+)%\)/);
+  const discountPct = discountMatch ? parseFloat(discountMatch[1]) / 100 : 0;
+  const netValue = discountPct > 0 ? Math.round(rawNumeric * (1 - discountPct)) : rawNumeric;
+
+  // Quote modal
+  const [quoteModalOpen, setQuoteModalOpen] = useState(false);
+
   return (
     <div className="flex flex-col h-full app-header-offset" style={{ background: theme.colors.background }}>
       <div className="flex-1 overflow-y-auto scrollbar-hide">
@@ -112,26 +222,29 @@ const OpportunityDetail = ({ opp, theme, onUpdate }) => {
               style={{ color: theme.colors.textPrimary }}
               placeholder="Project name"
             />
-            <input
-              value={draft.company||''}
-              onChange={e=>update('company',e.target.value)}
-              className="w-full bg-transparent outline-none text-[14px] font-medium mt-1"
-              style={{ color: theme.colors.accent, opacity: 0.7 }}
-              placeholder="Company"
-            />
+            <div className="flex items-center gap-2 mt-1.5">
+              <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: theme.colors.accent, opacity: 0.6 }} />
+              <input
+                value={draft.company||''}
+                onChange={e=>update('company',e.target.value)}
+                className="bg-transparent outline-none text-[13px] font-semibold flex-1"
+                style={{ color: theme.colors.accent, opacity: 0.7 }}
+                placeholder="Company"
+              />
+            </div>
           </div>
 
-          {/* Value & Discount bar */}
+          {/* Value · Discount · Net bar */}
           <div style={sectionCard} className="flex items-stretch">
             <div className="flex-1 flex flex-col justify-center py-2 pr-4">
-              <span className="text-[10px] font-semibold uppercase tracking-widest mb-1.5" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Project Value</span>
-              <div className="flex items-baseline gap-0">
-                <span className="text-[26px] font-bold tracking-tight" style={{ color: theme.colors.textSecondary, opacity: 0.35 }}>$</span>
+              <span className="text-[10px] font-semibold uppercase tracking-widest mb-1.5" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>List Value</span>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-[22px] font-bold tracking-tight leading-none" style={{ color: theme.colors.textSecondary, opacity: 0.3 }}>$</span>
                 <input
                   inputMode="numeric"
                   value={(() => { const raw = (''+(draft.value||'')).replace(/[^0-9]/g,''); return raw ? parseInt(raw,10).toLocaleString() : ''; })()}
                   onChange={e=>{ const val=e.target.value.replace(/[^0-9]/g,''); update('value', val? ('$'+parseInt(val,10).toLocaleString()):''); }}
-                  className="bg-transparent outline-none text-[28px] font-bold tracking-tight w-full"
+                  className="bg-transparent outline-none text-[26px] font-bold tracking-tight w-full leading-none"
                   style={{ color: theme.colors.textPrimary }}
                   placeholder="0"
                 />
@@ -139,15 +252,22 @@ const OpportunityDetail = ({ opp, theme, onUpdate }) => {
             </div>
             <div className="w-px self-stretch my-3" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)' }} />
             <div
-              className="flex flex-col justify-center py-2 pl-5 cursor-pointer min-w-[140px]"
+              className="flex flex-col justify-center py-2 px-5 cursor-pointer"
               onClick={()=>discountOpen? setDiscountOpen(false):openDiscount()}
               ref={discBtn}
             >
               <span className="text-[10px] font-semibold uppercase tracking-widest mb-1.5" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Discount</span>
               <div className="flex items-center gap-1.5">
-                <span className="text-[16px] font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>{draft.discount || '—'}</span>
+                <span className="text-[15px] font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>{draft.discount || '—'}</span>
                 <ChevronDown className="w-3.5 h-3.5" style={{ color: theme.colors.textSecondary, opacity: 0.4 }} />
               </div>
+            </div>
+            <div className="w-px self-stretch my-3" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)' }} />
+            <div className="flex flex-col justify-center py-2 pl-5">
+              <span className="text-[10px] font-semibold uppercase tracking-widest mb-1.5" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Net Value</span>
+              <span className="text-[20px] font-bold tracking-tight leading-none" style={{ color: theme.colors.accent }}>
+                {netValue > 0 && discountPct > 0 ? `$${netValue.toLocaleString()}` : '—'}
+              </span>
             </div>
           </div>
 
@@ -155,16 +275,16 @@ const OpportunityDetail = ({ opp, theme, onUpdate }) => {
           <div style={sectionCard}>
             <span className="text-[10px] font-semibold uppercase tracking-widest block mb-5" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Pipeline Stage</span>
             <div
-              className="relative px-1 select-none"
+              className="relative px-5 select-none"
               ref={stageTrackRef}
               style={{ cursor: stageDragging ? 'grabbing' : 'pointer', touchAction: 'none' }}
               onMouseDown={e => onStagePointerDown(e.clientX)}
               onTouchStart={e => onStagePointerDown(e.touches[0].clientX)}
             >
               {/* Track background */}
-              <div className="absolute top-[7px] left-0 right-0 h-[3px] rounded-full" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)' }} />
+              <div className="absolute top-[7px] left-5 right-5 h-[3px] rounded-full" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)' }} />
               {/* Track filled */}
-              <div className="absolute top-[7px] left-0 h-[3px] rounded-full transition-all" style={{ backgroundColor: theme.colors.accent, width: `${stagePct}%`, transitionDuration: stageDragging ? '0ms' : '300ms' }} />
+              <div className="absolute top-[7px] left-5 h-[3px] rounded-full transition-all" style={{ backgroundColor: theme.colors.accent, width: `calc(${stagePct / 100} * (100% - 40px))`, transitionDuration: stageDragging ? '0ms' : '300ms' }} />
               {/* Stage nodes */}
               <div className="relative flex justify-between">
                 {STAGES.map((s, i) => {
@@ -189,6 +309,8 @@ const OpportunityDetail = ({ opp, theme, onUpdate }) => {
                           color: isCurrent ? theme.colors.textPrimary : theme.colors.textSecondary,
                           opacity: isCurrent ? 1 : 0.45,
                           fontWeight: isCurrent ? 700 : 500,
+                          left: '50%',
+                          transform: i === 0 ? 'translateX(-10%)' : i === STAGES.length - 1 ? 'translateX(-90%)' : 'translateX(-50%)',
                         }}
                       >
                         {s}
@@ -199,12 +321,12 @@ const OpportunityDetail = ({ opp, theme, onUpdate }) => {
               </div>
             </div>
             <div className="h-8" />
-          </div>
 
-          {/* Win Probability */}
-          <div style={sectionCard}>
-            <span className="text-[10px] font-semibold uppercase tracking-widest block mb-1" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Win Probability</span>
-            <ProbabilitySlider value={draft.winProbability||0} onChange={v=>update('winProbability',v)} theme={theme} showLabel={false} />
+            {/* Win Probability inline */}
+            <div className="pt-2 border-t" style={{ borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }}>
+              <span className="text-[10px] font-semibold uppercase tracking-widest block mb-1" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Win Probability</span>
+              <ProbabilitySlider value={draft.winProbability||0} onChange={v=>update('winProbability',v)} theme={theme} showLabel={false} />
+            </div>
           </div>
 
           {/* Details grid */}
@@ -235,15 +357,14 @@ const OpportunityDetail = ({ opp, theme, onUpdate }) => {
             </div>
           </div>
 
-          {/* Contact */}
+          {/* Contact — searchable from dealer's contacts */}
           <div style={sectionCard}>
             <span className="text-[10px] font-semibold uppercase tracking-widest block mb-2" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Contact</span>
-            <input
-              value={draft.contact||''}
-              onChange={e=>update('contact',e.target.value)}
-              className="w-full outline-none text-[15px] font-medium py-2 px-3.5 rounded-xl"
-              style={{ color: theme.colors.textPrimary, background: fieldBg, border: fieldBorder }}
-              placeholder="Contact name"
+            <ContactSearchSelector
+              value={draft.contact || ''}
+              onChange={v => update('contact', v)}
+              dealers={draft.dealers || []}
+              theme={theme}
             />
           </div>
 
@@ -377,18 +498,23 @@ const OpportunityDetail = ({ opp, theme, onUpdate }) => {
             ) : (
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full flex flex-col items-center justify-center gap-2 py-6 rounded-2xl transition-colors"
-                style={{ border: `2px dashed ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}`, color: theme.colors.textSecondary, opacity: 0.5 }}
+                className="w-full flex flex-col items-center justify-center gap-2.5 py-8 rounded-2xl transition-all hover:opacity-80"
+                style={{ border: `2px dashed ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}`, color: theme.colors.textSecondary }}
               >
-                <Paperclip size={20} />
-                <span className="text-[11px] font-medium">Drop files here or click to upload</span>
+                <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}>
+                  <Paperclip size={18} style={{ opacity: 0.5 }} />
+                </div>
+                <div className="text-center">
+                  <span className="text-[12px] font-semibold block">Drop files or click to upload</span>
+                  <span className="text-[10px] block mt-0.5" style={{ opacity: 0.5 }}>PDF, DOC, images & more</span>
+                </div>
               </button>
             )}
 
             {/* Request a Quote CTA */}
             <button
-              onClick={() => {/* TODO: open RequestQuoteModal */}}
-              className="w-full mt-4 flex items-center justify-center gap-2 py-3 rounded-2xl text-[13px] font-bold transition-all active:scale-[0.98]"
+              onClick={() => setQuoteModalOpen(true)}
+              className="w-full mt-4 flex items-center justify-center gap-2 py-3 rounded-2xl text-[13px] font-bold transition-all active:scale-[0.98] hover:opacity-90"
               style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
             >
               <Send size={14} /> Request a Quote
@@ -396,8 +522,11 @@ const OpportunityDetail = ({ opp, theme, onUpdate }) => {
           </div>
 
           {/* Autosaved indicator */}
-          <div className="flex justify-center pt-1 pb-4">
-            <span className="text-[10px] font-medium tracking-wide" style={{ color: theme.colors.textSecondary, opacity: 0.35 }}>Changes saved automatically</span>
+          <div className="flex justify-center pt-2 pb-6">
+            <div className="flex items-center gap-1.5">
+              <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#4A7C59', opacity: 0.5 }} />
+              <span className="text-[10px] font-medium tracking-wide" style={{ color: theme.colors.textSecondary, opacity: 0.35 }}>Changes saved automatically</span>
+            </div>
           </div>
 
         </div>
@@ -409,6 +538,21 @@ const OpportunityDetail = ({ opp, theme, onUpdate }) => {
           </div>
         </div>
       )}
+      <RequestQuoteModal
+        show={quoteModalOpen}
+        onClose={() => setQuoteModalOpen(false)}
+        theme={theme}
+        onSubmit={(data) => {
+          const newDoc = { id: Date.now() + '_quote_request', fileName: `Quote Request - ${data.projectName || draft.project || 'Untitled'}.pdf`, type: 'Quote Request', size: '—', date: new Date().toLocaleDateString() };
+          update('documents', [...(draft.documents || []), newDoc]);
+          setQuoteModalOpen(false);
+        }}
+        initialData={{
+          projectName: draft.project || draft.name || '',
+          dealerName: (draft.dealers || [])[0] || '',
+          adFirm: (draft.designFirms || [])[0] || '',
+        }}
+      />
     </div>
   );
 };

@@ -182,7 +182,7 @@ const MiniAvatar = ({ member, selected, onToggle, colors }) => {
     );
 };
 
-export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = INITIAL_MEMBERS }) => {
+export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = INITIAL_MEMBERS, initialData }) => {
     const [formData, setFormData] = useState({
         projectName: '',
         quoteType: 'new',
@@ -197,6 +197,18 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
         files: [],
         selectedTeamMembers: [],
     });
+
+    // Pre-fill from initialData when modal opens
+    React.useEffect(() => {
+        if (show && initialData) {
+            setFormData(prev => ({
+                ...prev,
+                projectName: initialData.projectName || prev.projectName,
+                dealerName: initialData.dealerName || prev.dealerName,
+                adName: initialData.adFirm || prev.adName,
+            }));
+        }
+    }, [show, initialData]);
     
     const [showTeamSection, setShowTeamSection] = useState(false);
     const [errors, setErrors] = useState({});
@@ -334,8 +346,8 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                     exit={{ opacity: 0, y: 20, scale: 0.98 }}
                     transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
                     onClick={(e) => e.stopPropagation()}
-                    className="w-full max-w-lg my-6 rounded-2xl overflow-hidden relative"
-                    style={{ backgroundColor: colors.surface }}
+                    className="w-full max-w-lg my-6 rounded-3xl overflow-hidden relative"
+                    style={{ backgroundColor: colors.surface, boxShadow: '0 25px 60px -12px rgba(0,0,0,0.25)' }}
                 >
                     {/* Success Overlay */}
                     <AnimatePresence>
@@ -362,28 +374,28 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                     </AnimatePresence>
 
                     {/* Header */}
-                    <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: colors.border }}>
-                        <div className="flex items-center gap-2.5">
+                    <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: colors.border }}>
+                        <div className="flex items-center gap-3">
                             <div 
-                                className="w-9 h-9 rounded-xl flex items-center justify-center"
+                                className="w-10 h-10 rounded-2xl flex items-center justify-center"
                                 style={{ backgroundColor: `${colors.accent}10` }}
                             >
-                                <FileText className="w-4.5 h-4.5" style={{ color: colors.accent }} />
+                                <FileText className="w-5 h-5" style={{ color: colors.accent }} />
                             </div>
-                            <h2 className="text-lg font-bold" style={{ color: colors.textPrimary }}>
+                            <h2 className="text-lg font-bold tracking-tight" style={{ color: colors.textPrimary }}>
                                 Request a Quote
                             </h2>
                         </div>
                         <button
                             onClick={onClose}
-                            className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/5"
+                            className="w-9 h-9 rounded-full flex items-center justify-center transition-colors hover:bg-black/5"
                         >
-                            <X className="w-4.5 h-4.5" style={{ color: colors.textSecondary }} />
+                            <X className="w-5 h-5" style={{ color: colors.textSecondary }} />
                         </button>
                     </div>
 
                     {/* Form */}
-                    <form onSubmit={handleSubmit} className="p-5 space-y-4 max-h-[70vh] overflow-y-auto scrollbar-hide">
+                    <form onSubmit={handleSubmit} className="px-6 py-5 space-y-5 max-h-[70vh] overflow-y-auto scrollbar-hide">
                         
                         {/* Project Name */}
                         <div>
@@ -492,7 +504,7 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                             </div>
                         </div>
 
-                        {/* Items Needed - Compact */}
+                        {/* Items Needed - Clean pills */}
                         <div>
                             <label style={labelStyle}>Items Needed</label>
                             <div className="flex flex-wrap gap-2">
@@ -503,26 +515,13 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                                             key={item.id}
                                             type="button"
                                             onClick={() => toggleItem(item.id)}
-                                            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all"
+                                            className="px-4 py-2 rounded-full text-xs font-semibold transition-all"
                                             style={{
-                                                backgroundColor: isSelected ? `${colors.accent}10` : colors.subtle,
-                                                color: isSelected ? colors.accent : colors.textSecondary,
+                                                backgroundColor: isSelected ? `${colors.accent}15` : colors.subtle,
+                                                color: isSelected ? colors.textPrimary : colors.textSecondary,
                                                 border: `1px solid ${isSelected ? colors.accent : colors.border}`,
                                             }}
                                         >
-                                            <div 
-                                                className="w-3.5 h-3.5 rounded flex items-center justify-center"
-                                                style={{ 
-                                                    backgroundColor: isSelected ? colors.accent : 'transparent',
-                                                    border: `1.5px solid ${isSelected ? colors.accent : colors.border}`,
-                                                }}
-                                            >
-                                                {isSelected && (
-                                                    <svg className="w-2 h-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                                    </svg>
-                                                )}
-                                            </div>
                                             {item.label}
                                         </button>
                                     );
@@ -657,13 +656,13 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
 
                     {/* Footer */}
                     <div 
-                        className="flex items-center justify-end gap-2 px-5 py-3 border-t"
+                        className="flex items-center justify-end gap-3 px-6 py-4 border-t"
                         style={{ borderColor: colors.border, backgroundColor: colors.subtle }}
                     >
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-4 py-2 rounded-lg text-sm font-semibold hover:bg-black/5"
+                            className="px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-black/5 transition-colors"
                             style={{ color: colors.textPrimary }}
                         >
                             Cancel
@@ -672,7 +671,7 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                             type="submit"
                             onClick={handleSubmit}
                             disabled={isSubmitting}
-                            className="px-5 py-2 rounded-lg text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60"
+                            className="px-6 py-2.5 rounded-xl text-sm font-bold transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60"
                             style={{ backgroundColor: colors.accent, color: '#FFFFFF' }}
                         >
                             {isSubmitting ? (
