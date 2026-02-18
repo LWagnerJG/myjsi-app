@@ -335,12 +335,12 @@ export const NewLeadScreen = ({
                 </button>
               </div>
             ) : (
-              <div className="flex flex-wrap gap-1.5">
+              <div className="grid grid-cols-3 gap-1.5">
                 {VERTICALS.map(v => {
                   const lbl = v === 'Other (Please specify)' ? 'Other' : v;
                   return (
                     <PillButton key={v} size="xs" isSelected={newLeadData.vertical === v}
-                      onClick={() => upd('vertical', v)} theme={theme}>{lbl}</PillButton>
+                      onClick={() => upd('vertical', v)} theme={theme} className="w-full">{lbl}</PillButton>
                   );
                 })}
               </div>
