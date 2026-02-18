@@ -126,35 +126,59 @@ const OpportunityDetail = ({ opp, theme, onUpdate }) => {
             </div>
           </div>
 
-          {/* Pipeline & Win */}
-          <div style={sectionCard} className="space-y-5">
-            <div>
-              <span className="text-[10px] font-semibold uppercase tracking-widest block mb-3" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Pipeline Stage</span>
-              <div className="flex flex-wrap gap-1.5">
-                {STAGES.map(s => {
-                  const active = s === draft.stage;
+          {/* Pipeline Stage slider */}
+          <div style={sectionCard}>
+            <span className="text-[10px] font-semibold uppercase tracking-widest block mb-5" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Pipeline Stage</span>
+            <div className="relative px-2">
+              {/* Track background */}
+              <div className="absolute top-[7px] left-2 right-2 h-[3px] rounded-full" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)' }} />
+              {/* Track filled */}
+              <div className="absolute top-[7px] left-2 h-[3px] rounded-full transition-all duration-300" style={{ backgroundColor: theme.colors.accent, width: `${(STAGES.indexOf(draft.stage) / Math.max(STAGES.length - 1, 1)) * 100}%` }} />
+              {/* Stage nodes */}
+              <div className="relative flex justify-between">
+                {STAGES.map((s, i) => {
+                  const activeIdx = STAGES.indexOf(draft.stage);
+                  const reached = i <= activeIdx;
+                  const isCurrent = s === draft.stage;
                   return (
                     <button
                       key={s}
                       onClick={() => update('stage', s)}
-                      className="px-3.5 py-1.5 rounded-full text-[11px] font-semibold transition-all"
-                      style={{
-                        backgroundColor: active ? theme.colors.textPrimary : 'transparent',
-                        color: active ? (isDark ? '#1a1a1a' : '#fff') : theme.colors.textSecondary,
-                        border: active ? 'none' : fieldBorder,
-                      }}
+                      className="flex flex-col items-center group"
+                      style={{ width: 0, position: 'relative' }}
                     >
-                      {s}
+                      <div
+                        className="rounded-full transition-all duration-300 flex-shrink-0"
+                        style={{
+                          width: isCurrent ? 17 : 11,
+                          height: isCurrent ? 17 : 11,
+                          backgroundColor: reached ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.10)'),
+                          border: isCurrent ? `3px solid ${isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.08)'}` : 'none',
+                          marginTop: isCurrent ? -1 : 2,
+                        }}
+                      />
+                      <span
+                        className="absolute top-6 text-[9px] font-semibold whitespace-nowrap transition-all"
+                        style={{
+                          color: isCurrent ? theme.colors.textPrimary : theme.colors.textSecondary,
+                          opacity: isCurrent ? 1 : 0.5,
+                          fontWeight: isCurrent ? 700 : 500,
+                        }}
+                      >
+                        {s}
+                      </span>
                     </button>
                   );
                 })}
               </div>
             </div>
-            <div className="w-full h-px" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }} />
-            <div>
-              <span className="text-[10px] font-semibold uppercase tracking-widest block mb-3" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Win Probability</span>
-              <ProbabilitySlider value={draft.winProbability||0} onChange={v=>update('winProbability',v)} theme={theme} />
-            </div>
+            <div className="h-8" /> {/* spacer for labels */}
+          </div>
+
+          {/* Win Probability */}
+          <div style={sectionCard}>
+            <span className="text-[10px] font-semibold uppercase tracking-widest block mb-1" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Win Probability</span>
+            <ProbabilitySlider value={draft.winProbability||0} onChange={v=>update('winProbability',v)} theme={theme} showLabel={false} />
           </div>
 
           {/* Details grid */}
