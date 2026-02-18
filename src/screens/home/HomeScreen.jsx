@@ -865,7 +865,7 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                     animate={lampAnim}
                     style={{ transformOrigin: '80% 0%' }}
                 >
-                    <svg width="56" height="58" viewBox="0 0 150 155" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <svg width="46" height="50" viewBox="0 0 150 165" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <defs>
                             <linearGradient id="shadeFabric" x1="0.05" y1="0" x2="0.95" y2="1">
                                 <stop offset="0%" stopColor="#DDDAD6"/>
@@ -898,35 +898,35 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                         </defs>
 
                         {/* Wooden dowel — thick, visible above & below shade */}
-                        <rect x="97.5" y="12" width="9" height="140" rx="4.5" fill="url(#woodMount)"/>
-                        <rect x="97.5" y="12" width="9" height="140" rx="4.5" fill="none" stroke="rgba(140,120,75,0.18)" strokeWidth="0.6"/>
-                        <line x1="102" y1="14" x2="102" y2="150" stroke="rgba(185,160,115,0.08)" strokeWidth="0.5"/>
+                        <rect x="78" y="6" width="9" height="155" rx="4.5" fill="url(#woodMount)"/>
+                        <rect x="78" y="6" width="9" height="155" rx="4.5" fill="none" stroke="rgba(140,120,75,0.18)" strokeWidth="0.6"/>
+                        <line x1="82.5" y1="8" x2="82.5" y2="158" stroke="rgba(185,160,115,0.08)" strokeWidth="0.5"/>
 
                         {/* Small metal hook — compact curve tucked against top edge */}
-                        <path d="M102 14 L102 5 C102 0 108 -2 114 -1 C118 0 119 4 117 8"
+                        <path d="M82.5 8 L82.5 0 C82.5 -4 88 -6 94 -5 C98 -4 99 0 97 4"
                               stroke="#505660" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
 
                         {/* Metal ferrule collar at hook-dowel junction */}
-                        <ellipse cx="102" cy="14" rx="6.5" ry="2.2" fill="#4A4E54"/>
-                        <ellipse cx="102" cy="14" rx="6.5" ry="2.2" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="0.4"/>
+                        <ellipse cx="82.5" cy="8" rx="6.5" ry="2.2" fill="#4A4E54"/>
+                        <ellipse cx="82.5" cy="8" rx="6.5" ry="2.2" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="0.4"/>
 
-                        {/* Shade — straight-sided trapezoid, tilted slightly */}
-                        <g transform="rotate(-4, 76, 96)">
+                        {/* Shade — straight trapezoid, tilted down-left */}
+                        <g transform="rotate(3, 76, 60)">
                             <g filter="url(#lampShadow)">
-                                <path d="M48 55 L112 55 L130 126 L18 126 Z" fill="url(#shadeFabric)"/>
-                                <path d="M48 55 L112 55 L130 126 L18 126 Z" fill="url(#shadeShadow)"/>
-                                <path d="M48 55 L112 55 L130 126 L18 126 Z" fill="url(#shadeInnerGlow)"/>
-                                <path d="M48 55 L112 55 L130 126 L18 126 Z" stroke="rgba(160,155,148,0.22)" strokeWidth="0.6" fill="none"/>
-                                <line x1="50" y1="73" x2="112" y2="73" stroke="rgba(160,155,148,0.04)" strokeWidth="0.4"/>
-                                <line x1="42" y1="88" x2="119" y2="88" stroke="rgba(160,155,148,0.04)" strokeWidth="0.4"/>
-                                <line x1="34" y1="103" x2="124" y2="103" stroke="rgba(160,155,148,0.03)" strokeWidth="0.4"/>
-                                <line x1="26" y1="118" x2="129" y2="118" stroke="rgba(160,155,148,0.03)" strokeWidth="0.4"/>
+                                <path d="M42 28 L108 28 L126 108 L12 108 Z" fill="url(#shadeFabric)"/>
+                                <path d="M42 28 L108 28 L126 108 L12 108 Z" fill="url(#shadeShadow)"/>
+                                <path d="M42 28 L108 28 L126 108 L12 108 Z" fill="url(#shadeInnerGlow)"/>
+                                <path d="M42 28 L108 28 L126 108 L12 108 Z" stroke="rgba(160,155,148,0.22)" strokeWidth="0.6" fill="none"/>
+                                <line x1="44" y1="44" x2="110" y2="44" stroke="rgba(160,155,148,0.04)" strokeWidth="0.4"/>
+                                <line x1="36" y1="60" x2="117" y2="60" stroke="rgba(160,155,148,0.04)" strokeWidth="0.4"/>
+                                <line x1="28" y1="76" x2="122" y2="76" stroke="rgba(160,155,148,0.03)" strokeWidth="0.4"/>
+                                <line x1="20" y1="92" x2="127" y2="92" stroke="rgba(160,155,148,0.03)" strokeWidth="0.4"/>
                             </g>
                             {/* Top rim */}
-                            <ellipse cx="80" cy="55" rx="32" ry="2.2" fill="rgba(205,200,194,0.35)"/>
-                            {/* Bottom rim — stronger definition */}
-                            <ellipse cx="74" cy="126" rx="56" ry="3.2" fill="rgba(200,190,175,0.30)"/>
-                            <ellipse cx="74" cy="126.5" rx="54" ry="1.2" fill="rgba(255,235,200,0.10)"/>
+                            <ellipse cx="75" cy="28" rx="33" ry="2.2" fill="rgba(205,200,194,0.35)"/>
+                            {/* Bottom rim */}
+                            <ellipse cx="69" cy="108" rx="57" ry="3.2" fill="rgba(200,190,175,0.30)"/>
+                            <ellipse cx="69" cy="108.5" rx="55" ry="1.2" fill="rgba(255,235,200,0.10)"/>
                         </g>
                     </svg>
                 </motion.div>
@@ -937,31 +937,31 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                 {/* Primary light cone — overlaps shade bottom for seamless join */}
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: lampLightReady && lampOn ? 1 : 0 }}
                     transition={{ duration: 2.2, ease: [0.15, 0.85, 0.3, 1] }}
-                    style={{ position: 'absolute', top: 50, left: '50%', transform: 'translateX(-50%)',
+                    style={{ position: 'absolute', top: 42, left: '50%', transform: 'translateX(-50%)',
                         width: 0, height: 0,
-                        borderLeft: '45px solid transparent', borderRight: '45px solid transparent',
-                        borderTop: '350px solid rgba(255,225,170,0.045)',
+                        borderLeft: '38px solid transparent', borderRight: '38px solid transparent',
+                        borderTop: '320px solid rgba(255,225,170,0.045)',
                         pointerEvents: 'none', filter: 'blur(16px)' }} />
                 {/* Warm inner glow — tighter cone */}
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: lampLightReady && lampOn ? 0.8 : 0 }}
                     transition={{ duration: 1.8, ease: [0.15, 0.85, 0.3, 1], delay: 0.15 }}
-                    style={{ position: 'absolute', top: 51, left: '50%', transform: 'translateX(-50%)',
+                    style={{ position: 'absolute', top: 43, left: '50%', transform: 'translateX(-50%)',
                         width: 0, height: 0,
-                        borderLeft: '24px solid transparent', borderRight: '24px solid transparent',
-                        borderTop: '240px solid rgba(255,218,165,0.055)',
+                        borderLeft: '20px solid transparent', borderRight: '20px solid transparent',
+                        borderTop: '220px solid rgba(255,218,165,0.055)',
                         pointerEvents: 'none', filter: 'blur(10px)' }} />
-                {/* Hot spot glow at shade opening — brighter */}
+                {/* Hot spot glow at shade opening */}
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: lampLightReady && lampOn ? 0.7 : 0 }}
                     transition={{ duration: 2.0, ease: [0.15, 0.85, 0.3, 1], delay: 0.3 }}
-                    style={{ position: 'absolute', top: 46, left: '50%', transform: 'translateX(-50%)',
-                        width: 50, height: 14, borderRadius: '50%',
+                    style={{ position: 'absolute', top: 38, left: '50%', transform: 'translateX(-50%)',
+                        width: 42, height: 12, borderRadius: '50%',
                         background: 'radial-gradient(ellipse at 50% 80%, rgba(255,232,195,0.18) 0%, rgba(255,218,165,0.06) 50%, transparent 80%)',
                         pointerEvents: 'none', filter: 'blur(3px)' }} />
                 {/* Subtle ambient halo */}
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: lampLightReady && lampOn ? 0.4 : 0 }}
                     transition={{ duration: 2.6, ease: [0.15, 0.85, 0.3, 1], delay: 0.5 }}
-                    style={{ position: 'absolute', top: 32, left: '50%', transform: 'translateX(-50%)',
-                        width: 110, height: 60, borderRadius: '50%',
+                    style={{ position: 'absolute', top: 24, left: '50%', transform: 'translateX(-50%)',
+                        width: 95, height: 50, borderRadius: '50%',
                         background: 'radial-gradient(ellipse at 50% 70%, rgba(255,235,200,0.06) 0%, transparent 70%)',
                         pointerEvents: 'none', filter: 'blur(8px)' }} />
             </div>,
