@@ -269,8 +269,8 @@ const ProjectCard = ({ opp, theme, onClick }) => {
             )}
             {discountPct && (
               <span className="inline-flex items-center h-5 px-2 rounded-full text-[10px] font-semibold"
-                style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)', color: theme.colors.textSecondary }}
-              >{discountPct}</span>
+                style={{ backgroundColor: isDark ? 'rgba(194,160,52,0.18)' : 'rgba(194,160,52,0.12)', color: isDark ? '#D4B94E' : '#8B7A2E' }}
+              >{discountPct} off</span>
             )}
           </div>
         </div>
@@ -416,9 +416,23 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
         <div className="px-4 sm:px-6 lg:px-8 pt-3 pb-40 max-w-5xl mx-auto w-full">
           {projectsTab==='pipeline' && (
             filteredOpportunities.length ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {filteredOpportunities.map(opp=> <ProjectCard key={opp.id} opp={opp} theme={theme} onClick={()=>setSelectedOpportunity(opp)} />)}
-              </div>
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {filteredOpportunities.map(opp=> <ProjectCard key={opp.id} opp={opp} theme={theme} onClick={()=>setSelectedOpportunity(opp)} />)}
+                </div>
+                <div className="flex justify-center pt-5 pb-2">
+                  <div
+                    className="inline-flex items-center gap-2 px-5 py-2 rounded-full"
+                    style={{
+                      backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
+                      border: isDark ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(0,0,0,0.05)',
+                    }}
+                  >
+                    <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>{selectedPipelineStage} Total</span>
+                    <span className="text-[15px] font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>{fmtCurrency(stageTotals.totalValue)}</span>
+                  </div>
+                </div>
+              </>
             ) :
             <div className="flex flex-col items-center justify-center py-12"><Briefcase className="w-12 h-12 mb-4" style={{ color: theme.colors.textSecondary }} /><p className="text-center text-sm font-medium" style={{ color: theme.colors.textSecondary }}>No projects in {selectedPipelineStage}</p><p className="text-center text-xs mt-1" style={{ color: theme.colors.textSecondary }}>Add a new project to get started</p></div>
           )}
@@ -450,24 +464,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
           )}
         </div>
       </div>
-      {projectsTab==='pipeline' && (
-        <div className="fixed bottom-20 left-0 right-0 z-30 pointer-events-none flex justify-center">
-          <div
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full pointer-events-auto"
-            style={{
-              backgroundColor: isDark ? 'rgba(30,30,30,0.85)' : 'rgba(255,255,255,0.88)',
-              backdropFilter: 'blur(24px)',
-              WebkitBackdropFilter: 'blur(24px)',
-              border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.08)',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.10)',
-            }}
-          >
-            <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: theme.colors.textSecondary, opacity: 0.6 }}>{selectedPipelineStage}</span>
-            <span className="text-[10px] opacity-30" style={{ color: theme.colors.textSecondary }}>·</span>
-            <span className="text-[15px] font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>{fmtCurrency(stageTotals.totalValue)}</span>
-          </div>
-        </div>
-      )}
+
     </div>
   );
 });
