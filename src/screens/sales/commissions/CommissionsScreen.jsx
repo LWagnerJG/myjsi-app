@@ -23,7 +23,7 @@ export const CommissionsScreen = ({ theme }) => {
   const toggle = useCallback((id) => setOpenId(p => p === id ? null : id), []);
 
   return (
-    <div className="h-full flex flex-col" style={{ backgroundColor: theme.colors.background }}>
+    <div className="h-full flex flex-col app-header-offset" style={{ backgroundColor: theme.colors.background }}>
 
       {/* Summary header */}
       <div className="px-4 sm:px-6 pt-5 pb-4">
