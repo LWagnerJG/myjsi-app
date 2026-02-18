@@ -57,29 +57,30 @@ const END_USER_OPTIONS = [
 const Section = ({ title, titleRight, children, theme, className = '' }) => {
   const dark = isDarkTheme(theme);
   const divider = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+  const lineStyle = { width: '32%', height: 0, borderBottom: `1px solid ${divider}` };
   return (
     <div className={`rounded-2xl ${className}`} style={{
-      padding: '16px 20px', backgroundColor: dark ? theme.colors.surface : '#fff',
+      padding: '14px 20px', backgroundColor: dark ? theme.colors.surface : '#fff',
       border: `1px solid ${divider}`,
     }}>
       {title && !titleRight && (
-        <div className="mb-2.5">
-          <h3 className="text-[15px] font-bold pb-1.5" style={{
-            color: theme.colors.textPrimary,
+        <>
+          <h3 className="text-[15px] font-bold" style={{
+            color: theme.colors.textPrimary, marginBottom: 6,
           }}>{title}</h3>
-          <div style={{ width: '32%', borderBottom: `1px solid ${divider}` }} />
-        </div>
+          <div style={lineStyle} />
+        </>
       )}
       {title && titleRight && (
-        <div className="mb-2.5">
+        <>
           <div className="flex items-center gap-4">
             <h3 className="text-[15px] font-bold flex-shrink-0" style={{
               color: theme.colors.textPrimary,
             }}>{title}</h3>
             <div className="ml-auto min-w-0" style={{ width: '55%' }}>{titleRight}</div>
           </div>
-          <div style={{ width: '32%', borderBottom: `1px solid ${divider}`, marginTop: 4 }} />
-        </div>
+          <div style={{ ...lineStyle, marginTop: 4 }} />
+        </>
       )}
       {children}
     </div>
