@@ -507,20 +507,53 @@ const PostCard = React.memo(({ post, index, theme, dark, isLiked, isUpvoted, isE
 });
 PostCard.displayName = 'PostCard';
 
+const pollTimeLeft = (endsAt) => {
+  if (!endsAt) return null;
+  const diff = endsAt - Date.now();
+  if (diff <= 0) return 'Voting closed';
+  const days = Math.floor(diff / 86400000);
+  const hrs = Math.floor((diff % 86400000) / 3600000);
+  const mins = Math.floor((diff % 3600000) / 60000);
+  if (days > 1) return `${days}d left to vote`;
+  if (days === 1) return `${hrs}h left to vote`;
+  if (hrs > 0) return `${hrs}h ${mins}m left`;
+  if (mins > 0) return `${mins}m left`;
+  return 'Closing soon';
+};
+
 const PollCard = React.memo(({ poll, index, theme, dark, votedOption, onPollVote }) => {
   const totalVotes = (poll.options || []).reduce((s, o) => s + (o.votes || 0), 0);
+  const timeLeft = pollTimeLeft(poll.endsAt);
+  const isClosed = poll.endsAt && poll.endsAt < Date.now();
   return (
     <div className="rounded-2xl overflow-hidden p-3.5 space-y-2.5" style={{ backgroundColor: cardBg(dark) }}>
       <div className="flex items-center gap-1.5">
         <BarChart3 className="w-3 h-3" style={{ color: theme.colors.textSecondary }} />
         <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: theme.colors.textSecondary }}>Poll</span>
+        {timeLeft && (
+          <span
+            className="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full"
+            style={{
+              backgroundColor: isClosed
+                ? (dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)')
+                : (dark ? 'rgba(74,124,89,0.18)' : 'rgba(74,124,89,0.10)'),
+              color: isClosed ? theme.colors.textSecondary : '#4A7C59',
+            }}
+          >
+            {timeLeft}
+          </span>
+        )}
       </div>
       <div className="flex items-start gap-2.5">
         <Avatar src={poll.user?.avatar} alt={poll.user?.name} dark={dark} theme={theme} />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <span className="text-[13px] font-semibold" style={{ color: theme.colors.textPrimary }}>{poll.user?.name}</span>
-            <span className="text-[11px]" style={{ color: theme.colors.textSecondary }}>{poll.timeAgo}</span>
+            <span
+              className="text-[11px] cursor-default"
+              title={formatExactTimestamp(poll.createdAt)}
+              style={{ color: theme.colors.textSecondary }}
+            >{formatTimestamp(poll.createdAt)}</span>
           </div>
           <p className="text-[13px] mt-1 font-semibold" style={{ color: theme.colors.textPrimary }}>{poll.question}</p>
           <div className="mt-2 space-y-1.5">

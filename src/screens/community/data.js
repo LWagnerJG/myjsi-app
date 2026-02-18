@@ -47,6 +47,7 @@ export const INITIAL_POLLS = [
         subreddit: null,
         user: { name: 'Doug Shapiro', avatar: null },
         createdAt: Date.now() - 1000 * 60 * 60 * 24,
+        endsAt: Date.now() + 1000 * 60 * 60 * 24 * 5, // closes in 5 days
         question: 'Which Vision base finish do you spec the most?',
         options: [
             { id: 'truss', text: 'Truss', votes: 8 },
