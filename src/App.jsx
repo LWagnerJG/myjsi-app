@@ -169,6 +169,7 @@ function App() {
     // Navigation / UI state
     const [navigationHistory, setNavigationHistory] = useState(() => [pathToScreen(window.location.pathname)]);
     const [lastNavigationDirection, setLastNavigationDirection] = useState('forward');
+    const [screenParams, setScreenParams] = useState({});
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const profileBtnRef = useRef(null);
     const [voiceMessage, setVoiceMessage] = useState('');
@@ -177,7 +178,7 @@ function App() {
     const [homeResetKey, setHomeResetKey] = useState(0);
 
     // Domain state
-    const [userSettings, setUserSettings] = useState({ id: 1, firstName: 'Luke', lastName: 'Wagner', homeAddress: '5445 N Deerwood Lake Rd, Jasper, IN 47546' });
+    const [userSettings, setUserSettings] = useState({ id: 1, firstName: 'Luke', lastName: 'Wagner', homeAddress: '5445 N Deerwood Lake Rd, Jasper, IN 47546', shirtSize: 'L' });
     const [opportunities, setOpportunities] = useState(INITIAL_OPPORTUNITIES);
     const [myProjects, setMyProjects] = useState(MY_PROJECTS_DATA);
     const [projectsTabOverride, setProjectsTabOverride] = useState(null);
@@ -243,8 +244,9 @@ function App() {
 
     useEffect(() => { document.body.style.backgroundColor = currentTheme.colors.background; }, [currentTheme.colors.background]);
 
-    const handleNavigate = useCallback((screen) => {
+    const handleNavigate = useCallback((screen, params = {}) => {
         setLastNavigationDirection('forward');
+        setScreenParams(params || {});
         setNavigationHistory((prev) => {
             const next = [...prev, screen];
             window.history.pushState({ stack: next }, '', screenToPath(screen));
@@ -259,6 +261,7 @@ function App() {
         }
         if (navigationHistory.length > 1) {
             setLastNavigationDirection('backward');
+            setScreenParams({});
             window.history.back();
         }
     }, [currentScreen, navigationHistory.length]);
@@ -362,6 +365,7 @@ function App() {
         setSuccessMessage,
         showAlert: handleShowAlert,
         currentScreen,
+        screenParams,
         opportunities,
         setOpportunities,
         myProjects,

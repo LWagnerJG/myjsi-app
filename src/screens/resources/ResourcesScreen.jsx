@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import {
     Database, Search, Share2, FileText, DollarSign, Calendar, Percent,
-    Palette, Package, Users, MapPin, MonitorPlay, Wrench, Clock, ChevronRight
+    Palette, Package, Users, MapPin, MonitorPlay, Wrench, Clock, ChevronRight, Gift
 } from 'lucide-react';
 import { RESOURCES_DATA } from './data.js';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
@@ -22,7 +22,8 @@ const sublabelMap = {
     'Social Media': 'Brand share kit',
     'Presentations': 'Slide deck library',
     'Tradeshows': 'Select and view show info',
-    'New Dealer Sign-Up': 'Sign up new dealers'
+    'New Dealer Sign-Up': 'Sign up new dealers',
+    'LWYD Marketplace': 'ElliottBucks rewards shop'
 };
 
 const CORE_LABELS = {
@@ -72,6 +73,7 @@ export const ResourcesScreen = ({ theme, onNavigate, homeApps }) => {
         if (label.includes('Install')) return Wrench;
         if (label.includes('Tradeshow')) return Calendar;
         if (label.includes('Tradeshows')) return Calendar;
+        if (label.includes('Marketplace')) return Gift;
         // Core app labels mapping fallback to Database icon
         if (Object.values(CORE_LABELS).includes(label)) return Database;
         return Database;

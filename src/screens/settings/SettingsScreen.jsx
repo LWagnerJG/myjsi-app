@@ -88,11 +88,11 @@ const SectionHeader = ({ icon: Icon, title, subtitle, theme }) => (
   </div>
 );
 
-export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme }) => {
+export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings, setUserSettings }) => {
   const isDark = isDarkTheme(theme);
-  const [firstName, setFirstName] = useState('Luke');
-  const [lastName, setLastName] = useState('Wagner');
-  const [shirtSize, setShirtSize] = useState('L');
+  const [firstName, setFirstName] = useState(userSettings?.firstName || 'Luke');
+  const [lastName, setLastName] = useState(userSettings?.lastName || 'Wagner');
+  const [shirtSize, setShirtSize] = useState(userSettings?.shirtSize || 'L');
   const [notif, setNotif] = useState({ newOrder: true, samplesShipped: true, leadTimeChange: true, communityPost: false, replacementApproved: true, commissionPosted: true, orderUpdate: true });
   const notifLabels = { newOrder:'New order placed', orderUpdate:'Order status update', samplesShipped:'Samples shipped', leadTimeChange:'Lead time change', replacementApproved:'Replacement approved', commissionPosted:'Commission posted', communityPost:'New JSI community post' };
   const notifKeys = Object.keys(notif);
@@ -131,7 +131,7 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme }) => {
               </div>
               <div>
                 <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5" style={{ color: theme.colors.textSecondary }}>T-Shirt Size</label>
-                <Select value={shirtSize} onChange={setShirtSize} options={['XS','S','M','L','XL','XXL'].map(s=>({value:s,label:s}))} theme={theme} />
+                <Select value={shirtSize} onChange={(s) => { setShirtSize(s); setUserSettings?.(prev => ({ ...prev, shirtSize: s })); }} options={['XS','S','M','L','XL','XXL'].map(s=>({value:s,label:s}))} theme={theme} />
               </div>
             </div>
           </GlassCard>

@@ -25,6 +25,8 @@ const HelpScreen = React.lazy(() => import('../screens/help/HelpScreen.jsx').the
 const LogoutScreen = React.lazy(() => import('../screens/logout/LogoutScreen.jsx').then(m => ({ default: m.LogoutScreen })));
 const SettingsScreen = React.lazy(() => import('../screens/settings/index.js').then(m => ({ default: m.SettingsScreen })));
 const SamplesScreen = React.lazy(() => import('../screens/samples/index.js').then(m => ({ default: m.SamplesScreen })));
+const MarketplaceScreen = React.lazy(() => import('../screens/marketplace/index.js').then(m => ({ default: m.MarketplaceScreen })));
+const PresentationsScreen = React.lazy(() => import('../screens/resources/presentations/index.js').then(m => ({ default: m.PresentationsScreen })));
 
 // NOTE:
 // Feature resource detail routes (e.g. 'lead-times', 'commission-rates', etc.) are now handled lazily
@@ -52,6 +54,8 @@ export const SCREEN_MAP = {
   'add-new-install': AddNewInstallScreen,
   'product-comparison': ProductComparisonScreen,
   'competitive-analysis': CompetitiveAnalysisScreen,
+  'marketplace': MarketplaceScreen,
+  'presentations': PresentationsScreen,
   // 'new-dealer-signup' is lazy-loaded in App.jsx
 };
 
@@ -70,4 +74,5 @@ export {
   CommunityScreen,
   CreateContentModal,
   SamplesScreen,
+  MarketplaceScreen,
 };

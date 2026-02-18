@@ -1,6 +1,7 @@
 // src/screens/samples/SamplesScreen.jsx
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
+import { FloatingCart } from '../../components/common/FloatingCart.jsx';
 import { isDarkTheme } from '../../design-system/tokens.js';
 import {
     Package, Plus, ShoppingCart, Trash2, Minus, CheckCircle, Home,
@@ -200,21 +201,14 @@ const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, designFi
 
     return (
         <>
-            {/* Floating pill cart button when collapsed */}
+            {/* Floating cart pill — shared component */}
             {!isExpanded && (
-                <button
+                <FloatingCart
+                    itemCount={totalCartItems}
+                    label={`View Cart (${totalCartItems})`}
                     onClick={() => setIsExpanded(true)}
-                    className="fixed bottom-6 left-1/2 -translate-x-1/2 z-10 flex items-center gap-3 pl-4 pr-5 py-3 rounded-full shadow-xl transition-all duration-200 active:scale-95"
-                    style={{
-                        backgroundColor: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(53, 53, 53, 0.65)',
-                        boxShadow: '0 4px 16px rgba(0,0,0,0.15)'
-                    }}
-                >
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(255,255,255,0.12)' }}>
-                        <ShoppingCart className="w-4 h-4 text-white" />
-                    </div>
-                    <span className="text-white font-semibold text-sm">View Cart ({totalCartItems})</span>
-                </button>
+                    theme={theme}
+                />
             )}
 
             {/* Expanded drawer modal */}

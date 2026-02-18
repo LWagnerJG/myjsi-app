@@ -8,7 +8,7 @@ import {
     MousePointer, BarChart2, Users, PieChart, Armchair,
     Database, Briefcase, MessageSquare, Package, RotateCw, Search, Paperclip,
     DollarSign, UserPlus, MapPin, Percent, FileText, Calendar, Palette,
-    Wrench, MonitorPlay, Share2, Hourglass, Settings, HelpCircle, Send
+    Wrench, MonitorPlay, Share2, Hourglass, Settings, HelpCircle, Send, Gift
 } from 'lucide-react';
 
 // Re-export theme data from centralized location
@@ -45,6 +45,7 @@ export const allApps = [
     { name: 'Presentations', route: 'resources/presentations', icon: MonitorPlay },
     { name: 'Request Field Visit', route: 'resources/request-field-visit', icon: MapPin },
     { name: 'New Dealer Sign-Up', route: 'resources/new-dealer-signup', icon: UserPlus },
+    // Marketplace lives in Resources > Marketing & Communication, not on home screen
 ];
 
 // Default home screen apps (used when user hasn't customized)

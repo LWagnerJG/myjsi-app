@@ -8,9 +8,10 @@ import { HomeSearchInput } from '../../components/common/SearchInput.jsx';
 import { QuickActionDropdown } from '../../components/common/QuickActionDropdown.jsx';
 import { RequestQuoteModal } from '../../components/common/RequestQuoteModal.jsx';
 import { DESIGN_TOKENS, isDarkTheme } from '../../design-system/tokens.js';
-import { Check, Plus, X, Settings as SettingsIcon, GripVertical, Lock, Paperclip, MessageCircle, Megaphone, Package, Calendar, DollarSign, Zap, ChevronRight, ChevronDown } from 'lucide-react';
+import { Check, Plus, X, Settings as SettingsIcon, GripVertical, Lock, Paperclip, MessageCircle, Megaphone, Package, Calendar, DollarSign, Zap, ChevronRight, ChevronDown, Gift } from 'lucide-react';
 import { LEAD_TIMES_DATA } from '../resources/lead-times/data.js';
 import { ANNOUNCEMENTS } from '../community/data.js';
+import { MARKETPLACE_PRODUCTS, INITIAL_BALANCE, formatElliottBucks } from '../marketplace/data.js';
 import { motion, useAnimation } from 'framer-motion';
 import {
     DndContext,
@@ -32,10 +33,33 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-// Badge data for specific app routes
-const APP_BADGES = {
-    'sales': { value: '$1.2M', label: 'YTD', color: '#4A7C59' },
-    'projects': { value: '24', label: 'Open', color: '#5B7B8C' }
+// Live badge data for core app tiles — must be kept in sync with real data imports
+const getAppBadge = (route, recentOrders, posts, leadTimeFavoritesData, samplesCartCount) => {
+    switch (route) {
+        case 'orders': {
+            const open = recentOrders?.filter(o => o.status !== 'Delivered' && o.status !== 'Cancelled').length || 0;
+            return open > 0 ? { value: String(open), label: 'Open', color: '#5B7B8C' } : null;
+        }
+        case 'sales': {
+            const ytd = recentOrders?.reduce((s, o) => s + (o.net || 0), 0) || 0;
+            if (!ytd) return null;
+            const fmt = ytd >= 1000000 ? `$${(ytd / 1000000).toFixed(1)}M` : `$${Math.round(ytd / 1000)}K`;
+            return { value: fmt, label: 'YTD', color: '#4A7C59' };
+        }
+        case 'community': {
+            const count = posts?.length || 0;
+            return count > 0 ? { value: String(count), label: 'Posts', color: '#C4956A' } : null;
+        }
+        case 'resources': {
+            const faveCount = leadTimeFavoritesData?.length || 0;
+            return faveCount > 0 ? { value: String(faveCount), label: 'Tracked', color: '#5B7B8C' } : null;
+        }
+        case 'samples': {
+            return samplesCartCount > 0 ? { value: String(samplesCartCount), label: 'In Cart', color: '#C4956A' } : null;
+        }
+        default:
+            return null;
+    }
 };
 
 const MIN_PINNED_APPS = 3;
@@ -220,7 +244,7 @@ const FeaturePicker = ({ value, onChange, options, colors, isDark }) => {
     );
 };
 
-export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpdateHomeApps, homeResetKey, posts, isDarkMode, onToggleTheme }) => {
+export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpdateHomeApps, homeResetKey, posts, isDarkMode, onToggleTheme, cart }) => {
     const [isEditMode, setIsEditMode] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [activeDragId, setActiveDragId] = useState(null);
@@ -240,15 +264,16 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
     // Handle quick action selection from dropdown
     const handleQuickAction = useCallback((actionId) => {
         switch (actionId) {
+            case 'presentation-builder':
+                onNavigate?.('presentations', { openBuilder: true });
+                break;
             case 'quote':
                 setShowQuoteModal(true);
                 break;
             case 'upload':
-                // Could trigger a file upload modal or navigate
                 console.log('Upload action');
                 break;
             case 'spec':
-                // Navigate to spec check or open modal
                 onNavigate?.('resources');
                 break;
             case 'feedback':
@@ -582,7 +607,8 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
         { id: 'lead-times', label: 'Lead Times' },
         { id: 'announcements', label: 'Announcements' },
         { id: 'products', label: 'Products' },
-        { id: 'projects', label: 'Projects' }
+        { id: 'projects', label: 'Projects' },
+        { id: 'marketplace', label: 'LWYD Marketplace' },
     ]), []);
 
     const leadTimeFavoritesData = useMemo(() => {
@@ -594,6 +620,8 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
     const recentOrders = useMemo(() => {
         return [...ORDER_DATA].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 3);
     }, []);
+
+    const samplesCartCount = useMemo(() => Object.values(cart || {}).reduce((sum, qty) => sum + qty, 0), [cart]);
 
     const hoverBg = isDark ? 'hover:bg-white/[0.06]' : 'hover:bg-black/[0.03]';
     const subtleBg = isDark ? 'bg-white/[0.08]' : 'bg-black/5';
@@ -724,29 +752,86 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
             );
         }
 
-        return (
-            <div className="space-y-3">
-                {recentOrders.map((order) => (
+        if (mode === 'marketplace') {
+            const featured = MARKETPLACE_PRODUCTS.slice(0, 3);
+            return (
+                <div className="space-y-3">
+                    {/* Balance hero */}
                     <button
-                        key={order.orderNumber}
-                        onClick={() => onNavigate('orders')}
-                        className={`w-full flex items-center justify-between p-3 rounded-2xl ${hoverBg} transition-colors`}
+                        onClick={() => onNavigate('marketplace')}
+                        className={`w-full flex items-center gap-3 p-3 rounded-2xl ${hoverBg} transition-colors`}
+                        style={{
+                            background: isDark
+                                ? 'linear-gradient(135deg, rgba(53,53,53,0.6) 0%, rgba(60,60,60,0.6) 100%)'
+                                : 'linear-gradient(135deg, #353535 0%, #494949 100%)',
+                        }}
                     >
-                        <div className="flex items-center gap-3 min-w-0">
-                            <div className={`w-9 h-9 rounded-xl ${subtleBg} flex items-center justify-center text-[10px] font-bold`} style={{ color: colors.textPrimary }}>PO</div>
-                            <div className="text-left min-w-0">
-                                <div className="text-sm font-semibold truncate" style={{ color: colors.textPrimary }}>{order.company}</div>
-                                <div className="text-[10px] uppercase tracking-widest opacity-50" style={{ color: colors.textSecondary }}>
-                                    {new Date(order.date).toLocaleDateString()}
+                        <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'rgba(255,255,255,0.14)' }}>
+                            <Gift className="w-4 h-4 text-white" />
+                        </div>
+                        <div className="text-left">
+                            <div className="text-sm font-bold text-white">{formatElliottBucks(INITIAL_BALANCE)} available</div>
+                            <div className="text-[10px] text-white/60">ElliottBucks balance</div>
+                        </div>
+                        <ChevronRight className="w-4 h-4 ml-auto text-white/40" />
+                    </button>
+                    {/* Featured products */}
+                    {featured.map(p => (
+                        <button
+                            key={p.id}
+                            onClick={() => onNavigate('marketplace')}
+                            className={`w-full flex items-center justify-between p-3 rounded-2xl ${hoverBg} transition-colors`}
+                            style={{ border: `1px solid ${colors.border}` }}
+                        >
+                            <div className="flex items-center gap-3 min-w-0">
+                                <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0" style={{ border: `1px solid ${colors.border}` }}>
+                                    <img src={p.image} alt={p.name} className="w-full h-full object-cover" />
+                                </div>
+                                <div className="text-left min-w-0">
+                                    <div className="text-sm font-semibold truncate" style={{ color: colors.textPrimary }}>{p.name}</div>
+                                    <div className="text-[10px]" style={{ color: colors.textSecondary }}>{formatElliottBucks(p.price)}</div>
                                 </div>
                             </div>
+                            <ChevronRight className="w-3.5 h-3.5 flex-shrink-0 opacity-30" style={{ color: colors.textSecondary }} />
+                        </button>
+                    ))}
+                </div>
+            );
+        }
+
+        return (
+            <div className="space-y-1">
+                {recentOrders.map((order) => {
+                    const statusColor = {
+                        'Order Entry': '#6B7280',
+                        'Acknowledged': '#C4956A',
+                        'In Production': '#6366F1',
+                        'Shipping': '#06B6D4',
+                        'Delivered': '#4A7C59',
+                    }[order.status] || colors.textSecondary;
+                    return (
+                    <button
+                        key={order.orderNumber}
+                        onClick={() => onNavigate(`orders/${order.orderNumber}`)}
+                        className={`w-full flex items-center gap-3 p-3 rounded-2xl ${hoverBg} transition-colors`}
+                    >
+                        {/* Status dot */}
+                        <div className="flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${statusColor}14` }}>
+                            <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: statusColor }} />
                         </div>
-                        <div className="text-right">
-                            <div className="text-sm font-bold" style={{ color: colors.textPrimary }}>${order.net.toLocaleString()}</div>
-                            <div className="text-[10px] uppercase tracking-widest opacity-50" style={{ color: colors.textSecondary }}>{order.status}</div>
+                        {/* Project + Dealer */}
+                        <div className="text-left min-w-0 flex-1">
+                            <div className="text-sm font-semibold truncate" style={{ color: colors.textPrimary }}>{order.details}</div>
+                            <div className="text-[11px] truncate" style={{ color: colors.textSecondary }}>{order.company}</div>
+                        </div>
+                        {/* Amount + Status */}
+                        <div className="text-right flex-shrink-0">
+                            <div className="text-sm font-bold tabular-nums" style={{ color: colors.textPrimary }}>${order.net.toLocaleString()}</div>
+                            <div className="text-[10px] font-medium" style={{ color: statusColor }}>{order.status}</div>
                         </div>
                     </button>
-                ))}
+                    );
+                })}
             </div>
         );
     }, [colors, leadTimeFavoritesData, communityPosts, onNavigate, recentOrders, hoverBg, subtleBg]);
@@ -971,11 +1056,15 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                                 onClick={() => setIsEditMode(!isEditMode)}
                                 title={isEditMode ? 'Exit edit mode' : 'Customize home apps'}
                                 aria-label={isEditMode ? 'Exit edit mode' : 'Customize home apps'}
-                                className="flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-semibold transition-all active:scale-95"
+                                className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold transition-all active:scale-95"
                                 style={{
-                                    backgroundColor: isEditMode ? colors.textPrimary : `${colors.tileSurface}CC`,
-                                    color: isEditMode ? '#FFFFFF' : colors.textSecondary,
-                                    border: 'none'
+                                    backgroundColor: isEditMode
+                                        ? (isDark ? 'rgba(255,255,255,0.90)' : colors.textPrimary)
+                                        : (isDark ? 'rgba(255,255,255,0.09)' : 'rgba(53,53,53,0.07)'),
+                                    color: isEditMode
+                                        ? (isDark ? '#1A1A1A' : '#FFFFFF')
+                                        : colors.textSecondary,
+                                    border: `1px solid ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)'}`,
                                 }}
                             >
                                 {isEditMode ? (
@@ -993,13 +1082,12 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                         )}
                     </div>
                     {isEditMode && (
-                        <div
-                            className="text-[10px] font-medium px-2.5 py-1 rounded-full inline-flex items-center gap-2"
-                            style={{ color: colors.textSecondary, backgroundColor: `${colors.tileSurface}` }}
+                        <p
+                            className="text-[10px] font-medium px-0.5"
+                            style={{ color: colors.textSecondary, opacity: 0.5 }}
                         >
-                            <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ backgroundColor: colors.textSecondary }} />
-                            Drag to reorder. Keep at least 3 apps pinned. Resources stays pinned.
-                        </div>
+                            Drag to reorder &nbsp;·&nbsp; min 3 apps &nbsp;·&nbsp; Resources always pinned
+                        </p>
                     )}
 
                     {isEditMode ? (
@@ -1062,9 +1150,9 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                     ) : (
                         <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2">
                             {currentApps.map((app) => {
-                                const badge = APP_BADGES[app.route];
+                                const badge = getAppBadge(app.route, recentOrders, posts, leadTimeFavoritesData, samplesCartCount);
                                 return (
-                                    <motion.button
+                                    <button
                                         key={app.route}
                                         onClick={() => onNavigate(app.route)}
                                         aria-label={`Open ${app.name}`}
@@ -1088,45 +1176,45 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                                             {app.name}
                                         </span>
                                         {badge && (
-                                            <div 
-                                                className="absolute top-2 right-2 px-1.5 py-[1px] rounded-full text-[9px] font-bold border"
-                                                style={{ 
-                                                    backgroundColor: `${badge.color}15`, // Very subtle transparent background 
+                                            <div
+                                                className="absolute top-2 right-2 px-1.5 py-[1px] rounded-full text-[9px] font-bold"
+                                                style={{
+                                                    backgroundColor: `${badge.color}18`,
                                                     color: badge.color,
-                                                    borderColor: `${badge.color}30`
+                                                    border: `1px solid ${badge.color}30`,
                                                 }}
                                             >
                                                 {badge.value}
                                             </div>
                                         )}
-                                    </motion.button>
+                                    </button>
                                 );
                             })}
                         </div>
                     )}
 
                     {isEditMode && (
-                        <div className="space-y-2">
-                            <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: colors.textSecondary }}>Add Apps</div>
+                        <div className="space-y-2 pt-1">
+                            {/* "Add Apps" header — same style as "Core Apps" */}
+                            <div className="text-[12px] font-semibold uppercase tracking-widest" style={{ color: colors.textSecondary, opacity: 0.55 }}>Add Apps</div>
                             <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2">
                                 {availableApps.map((app) => (
-                                    <motion.button
-                                        layout
+                                    <button
                                         key={app.route}
                                         onClick={() => toggleApp(app.route)}
-                                        className={`flex flex-col items-center justify-center gap-1 px-2 py-1.5 rounded-xl border border-dashed ${isDark ? 'hover:bg-white/[0.04]' : 'hover:bg-black/[0.02]'} transition-all active:scale-95`}
+                                        className={`flex flex-col items-center justify-center gap-1 px-2 py-1.5 rounded-xl ${isDark ? 'hover:bg-white/[0.05]' : 'hover:bg-black/[0.03]'} transition-colors active:scale-95`}
                                         style={{
                                             backgroundColor: colors.tileSurface,
-                                            borderColor: 'transparent',
+                                            border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.05)',
                                             width: '100%',
                                             minWidth: 0
                                         }}
                                     >
                                         <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${colors.accent}10` }}>
-                                            <Plus className="w-3 h-3 opacity-40" style={{ color: colors.textSecondary }} />
+                                            <Plus className="w-3 h-3" style={{ color: colors.textSecondary, opacity: 0.5 }} />
                                         </div>
                                         <span className="text-[9px] font-semibold" style={{ color: colors.textSecondary }}>{app.name}</span>
-                                    </motion.button>
+                                    </button>
                                 ))}
                             </div>
                         </div>
@@ -1145,6 +1233,7 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                             else if (homeFeatureMode === 'lead-times') onNavigate('resources/lead-times');
                             else if (homeFeatureMode === 'products') onNavigate('products');
                             else if (homeFeatureMode === 'projects') onNavigate('projects');
+                            else if (homeFeatureMode === 'marketplace') onNavigate('marketplace');
                             else onNavigate('orders');
                         }}
                     >
@@ -1167,6 +1256,7 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                                         else if (homeFeatureMode === 'lead-times') onNavigate('resources/lead-times');
                                         else if (homeFeatureMode === 'products') onNavigate('products');
                                         else if (homeFeatureMode === 'projects') onNavigate('projects');
+                                        else if (homeFeatureMode === 'marketplace') onNavigate('marketplace');
                                         else onNavigate('orders');
                                     }}
                                     className="text-[11px] font-semibold uppercase tracking-widest flex items-center gap-1 transition-opacity hover:opacity-60"
@@ -1190,6 +1280,7 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                             else if (secondaryFeatureMode === 'lead-times') onNavigate('resources/lead-times');
                             else if (secondaryFeatureMode === 'products') onNavigate('products');
                             else if (secondaryFeatureMode === 'projects') onNavigate('projects');
+                            else if (secondaryFeatureMode === 'marketplace') onNavigate('marketplace');
                             else onNavigate('orders');
                         }}
                     >
@@ -1212,6 +1303,7 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                                         else if (secondaryFeatureMode === 'lead-times') onNavigate('resources/lead-times');
                                         else if (secondaryFeatureMode === 'products') onNavigate('products');
                                         else if (secondaryFeatureMode === 'projects') onNavigate('projects');
+                                        else if (secondaryFeatureMode === 'marketplace') onNavigate('marketplace');
                                         else onNavigate('orders');
                                     }}
                                     className="text-[11px] font-semibold uppercase tracking-widest flex items-center gap-1 transition-opacity hover:opacity-60"

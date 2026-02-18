@@ -1,752 +1,550 @@
 ﻿import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Search, Check, Plus } from 'lucide-react';
+import { X, Search, Check, Upload } from 'lucide-react';
 import { FormInput } from '../../components/forms/FormInput.jsx';
 import { PortalNativeSelect } from '../../components/forms/PortalNativeSelect.jsx';
 import { AutoCompleteCombobox } from '../../components/forms/AutoCompleteCombobox.jsx';
 import { ToggleSwitch } from '../../components/forms/ToggleSwitch.jsx';
 import { ProbabilitySlider } from '../../components/forms/ProbabilitySlider.jsx';
-import { FormSection, SettingsRow } from '../../components/forms/FormSections.jsx';
 import { SpotlightMultiSelect } from '../../components/common/SpotlightMultiSelect.jsx';
 import { InfoTooltip } from '../../components/common/InfoTooltip.jsx';
 import { PillButton, PrimaryButton } from '../../components/common/JSIButtons.jsx';
-import { DESIGN_TOKENS } from '../../design-system/tokens.js';
+import { DESIGN_TOKENS, isDarkTheme } from '../../design-system/tokens.js';
 
-// Import data from proper feature-based sources
-import { 
-    STAGES, 
-    VERTICALS, 
-    COMPETITORS, 
-    DISCOUNT_OPTIONS 
+import {
+  STAGES, VERTICALS, COMPETITORS, DISCOUNT_OPTIONS,
 } from './data.js';
 import { LEAD_TIMES_DATA } from '../resources/lead-times/data.js';
 import { JSI_LAMINATES, JSI_VENEERS, JSI_SERIES } from '../products/data.js';
-import { FINISH_SAMPLES } from '../samples'; // re-exported by screens/samples/index.js
+import { FINISH_SAMPLES } from '../samples';
 import { CONTRACTS_DATA } from '../resources/contracts/data.js';
 import { VisionOptions, KnoxOptions, WinkHoopzOptions } from './product-options.jsx';
 
-// Enhanced Product Spotlight with debounced typeahead search and keyboard navigation
+/* ═══════════════════════════════════════════════════════════════
+   HELPERS
+   ═══════════════════════════════════════════════════════════════ */
+
+const parseCurrency = (raw) => {
+  if (raw == null) return null;
+  const n = Number(String(raw).replace(/[^0-9.]/g, ''));
+  return Number.isFinite(n) ? n : null;
+};
+
+const CITY_OPTIONS = [
+  'Indianapolis, IN', 'Jasper, IN', 'Evansville, IN', 'Bloomington, IN', 'Fort Wayne, IN',
+  'Cincinnati, OH', 'Louisville, KY', 'Nashville, TN', 'Chicago, IL', 'St. Louis, MO',
+  'Columbus, OH', 'Cleveland, OH', 'Detroit, MI', 'Milwaukee, WI', 'Minneapolis, MN',
+  'Atlanta, GA', 'Charlotte, NC', 'Raleigh, NC', 'Pittsburgh, PA', 'Philadelphia, PA',
+  'New York, NY', 'Boston, MA', 'Washington, DC', 'Baltimore, MD', 'Richmond, VA',
+  'Dallas, TX', 'Austin, TX', 'Houston, TX', 'San Antonio, TX', 'Denver, CO',
+  'Phoenix, AZ', 'Las Vegas, NV', 'Los Angeles, CA', 'San Diego, CA', 'San Francisco, CA',
+  'Seattle, WA', 'Portland, OR', 'Salt Lake City, UT', 'Kansas City, MO', 'Omaha, NE',
+];
+
+const PO_OPTIONS = ['Unknown', 'Within 30 Days', '30\u201360 Days', '60\u2013180 Days', '180+ Days', 'Next Year'];
+const REWARD_THRESHOLD = 250000;
+
+/* ═══════════════════════════════════════════════════════════════
+   LIGHTWEIGHT UI PRIMITIVES
+   ═══════════════════════════════════════════════════════════════ */
+
+/* — section card — */
+const Section = ({ title, children, theme, className = '' }) => {
+  const dark = isDarkTheme(theme);
+  return (
+    <div className={`rounded-2xl ${className}`} style={{
+      padding: '20px', backgroundColor: dark ? '#2A2A2A' : '#fff',
+      border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
+    }}>
+      {title && (
+        <h3 className="text-[15px] font-bold mb-4 pb-3" style={{
+          color: theme.colors.textPrimary, borderBottom: `1px solid ${theme.colors.border}`,
+        }}>{title}</h3>
+      )}
+      {children}
+    </div>
+  );
+};
+
+/* — compact field row — supports inline (label left, field right) — */
+const Row = ({ label, children, theme, tip, noSep, inline }) => (
+  <div className={`${inline ? 'flex items-center gap-4 py-2.5' : 'py-3'} ${noSep ? '' : 'border-t'}`}
+    style={{ borderColor: noSep ? undefined : theme.colors.border }}>
+    {label && (
+      <div className={`flex items-center gap-1.5 ${inline ? 'flex-shrink-0' : 'mb-1.5'}`}>
+        <label className={`text-[13px] font-semibold ${inline ? 'whitespace-nowrap' : ''}`}
+          style={{ color: theme.colors.textPrimary }}>{label}</label>
+        {tip && <InfoTooltip content={tip} theme={theme} position="right" size="sm" />}
+      </div>
+    )}
+    {inline ? <div className="flex-1 min-w-0">{children}</div> : children}
+  </div>
+);
+
+/* ═══════════════════════════════════════════════════════════════
+   PRODUCT SPOTLIGHT (FIXED SCROLL ISSUE)
+   ═══════════════════════════════════════════════════════════════ */
 const ProductSpotlight = ({ selectedSeries, onAdd, available, theme }) => {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState('');
-  const [highlightIdx, setHighlightIdx] = useState(0);
+  const [hlIdx, setHlIdx] = useState(0);
   const anchorRef = useRef(null);
   const menuRef = useRef(null);
   const inputRef = useRef(null);
-  const [pos, setPos] = useState({ top: 0, left: 0, width: 0, ready: false });
-  const [debouncedQ, setDebouncedQ] = useState('');
-
-  // Debounce search query for better performance
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedQ(q), 150);
-    return () => clearTimeout(timer);
-  }, [q]);
+  const [pos, setPos] = useState({ top: 0, left: 0, width: 0 });
 
   const norm = s => s.toLowerCase();
-
-  // Filter with fuzzy matching and highlight
   const filtered = useMemo(() => {
-    if (!debouncedQ.trim()) return available.slice(0, 30);
-    const searchTerm = norm(debouncedQ);
-    return available
-      .filter(s => norm(s).includes(searchTerm))
-      .slice(0, 30);
-  }, [available, debouncedQ]);
+    if (!q.trim()) return available.slice(0, 40);
+    return available.filter(s => norm(s).includes(norm(q))).slice(0, 40);
+  }, [available, q]);
 
-  // Reset highlight when results change
-  useEffect(() => {
-    setHighlightIdx(0);
-  }, [filtered.length]);
+  useEffect(() => setHlIdx(0), [filtered.length]);
 
-  const computePos = useCallback(() => {
-    if (anchorRef.current) {
-      const r = anchorRef.current.getBoundingClientRect();
-      setPos({ top: r.bottom + window.scrollY + 8, left: r.left + window.scrollX, width: r.width, ready: true });
-    }
+  const measure = useCallback(() => {
+    if (!anchorRef.current) return;
+    const r = anchorRef.current.getBoundingClientRect();
+    setPos({ top: r.bottom + 6, left: r.left, width: r.width });
   }, []);
 
-  const openMenu = useCallback(() => {
-    computePos();
-    setOpen(true);
-    setHighlightIdx(0);
-  }, [computePos]);
+  const doOpen = useCallback(() => { measure(); setOpen(true); }, [measure]);
 
+  // close on outside click — but NOT on scroll inside menu
   useEffect(() => {
-    if (open) computePos();
-  }, [open, computePos]);
-
-  // Close on outside click/scroll
-  useEffect(() => {
-    const close = e => {
-      if (!anchorRef.current || !menuRef.current) return;
-      if (!anchorRef.current.contains(e.target) && !menuRef.current.contains(e.target)) setOpen(false);
+    if (!open) return;
+    const close = (e) => {
+      if (anchorRef.current?.contains(e.target) || menuRef.current?.contains(e.target)) return;
+      setOpen(false);
     };
-    if (open) {
-      document.addEventListener('mousedown', close);
-      document.addEventListener('scroll', close, true);
-      window.addEventListener('resize', close);
-    }
-    return () => {
-      document.removeEventListener('mousedown', close);
-      document.removeEventListener('scroll', close, true);
-      window.removeEventListener('resize', close);
-    };
+    document.addEventListener('mousedown', close);
+    window.addEventListener('resize', () => setOpen(false));
+    return () => { document.removeEventListener('mousedown', close); window.removeEventListener('resize', () => setOpen(false)); };
   }, [open]);
 
-  // Keyboard navigation
-  const handleKeyDown = useCallback((e) => {
-    if (!open) {
-      if (e.key === 'ArrowDown' || e.key === 'Enter') {
-        e.preventDefault();
-        openMenu();
-      }
-      return;
-    }
+  const pick = useCallback((s) => {
+    if (!selectedSeries.includes(s)) onAdd(s);
+    setQ(''); setOpen(false);
+  }, [selectedSeries, onAdd]);
 
-    switch (e.key) {
-      case 'ArrowDown':
-        e.preventDefault();
-        setHighlightIdx(i => Math.min(i + 1, filtered.length - 1));
-        break;
-      case 'ArrowUp':
-        e.preventDefault();
-        setHighlightIdx(i => Math.max(i - 1, 0));
-        break;
-      case 'Enter':
-        e.preventDefault();
-        if (filtered[highlightIdx] && !selectedSeries.includes(filtered[highlightIdx])) {
-          onAdd(filtered[highlightIdx]);
-          setQ('');
-          setOpen(false);
-        }
-        break;
-      case 'Escape':
-        e.preventDefault();
-        setOpen(false);
-        break;
-    }
-  }, [open, filtered, highlightIdx, onAdd, openMenu, selectedSeries]);
-
-  // Highlight matched substring
-  const highlightMatch = (text, query) => {
-    if (!query.trim()) return text;
-    const idx = text.toLowerCase().indexOf(query.toLowerCase());
-    if (idx === -1) return text;
-    return (
-      <>
-        {text.slice(0, idx)}
-        <span className="font-bold" style={{ color: theme.colors.accent }}>{text.slice(idx, idx + query.length)}</span>
-        {text.slice(idx + query.length)}
-      </>
-    );
-  };
+  const onKey = useCallback((e) => {
+    if (!open) { if (e.key === 'ArrowDown' || e.key === 'Enter') { e.preventDefault(); doOpen(); } return; }
+    if (e.key === 'ArrowDown') { e.preventDefault(); setHlIdx(i => Math.min(i + 1, filtered.length - 1)); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); setHlIdx(i => Math.max(i - 1, 0)); }
+    else if (e.key === 'Enter') { e.preventDefault(); if (filtered[hlIdx]) pick(filtered[hlIdx]); }
+    else if (e.key === 'Escape') { e.preventDefault(); setOpen(false); }
+  }, [open, filtered, hlIdx, pick, doOpen]);
 
   return (
-    <div className="w-full" ref={anchorRef}>
-      <div
-        onClick={openMenu}
-                className="flex items-center gap-2 px-4 cursor-text"
-                style={{ height: 48, borderRadius: 9999, background: theme.colors.surface, border: `1px solid ${theme.colors.border}` }}
-      >
-        <Search className="w-3.5 h-3.5" style={{ color: theme.colors.textSecondary }} />
-        <input
-          ref={inputRef}
-          value={q}
-          onChange={e => { setQ(e.target.value); if (!open) openMenu(); }}
-          onFocus={openMenu}
-          onKeyDown={handleKeyDown}
+    <div ref={anchorRef}>
+      <div onClick={doOpen}
+        className="flex items-center gap-2 px-3.5 cursor-text"
+        style={{ height: 44, borderRadius: 9999, background: theme.colors.surface, border: `1px solid ${theme.colors.border}` }}>
+        <Search className="w-3.5 h-3.5 flex-shrink-0" style={{ color: theme.colors.textSecondary }} />
+        <input ref={inputRef} value={q}
+          onChange={e => { setQ(e.target.value); if (!open) doOpen(); }}
+          onFocus={doOpen} onKeyDown={onKey}
           placeholder="Search products..."
-          className="flex-1 bg-transparent outline-none text-[14px]"
-          style={{ color: theme.colors.textPrimary }}
-        />
+          className="flex-1 bg-transparent outline-none text-[13px]"
+          style={{ color: theme.colors.textPrimary }} />
       </div>
       {open && createPortal(
-        <div
-          ref={menuRef}
-          className="fixed rounded-2xl border shadow-2xl overflow-hidden"
+        <div ref={menuRef}
+          className="fixed rounded-2xl border shadow-xl overflow-hidden"
           style={{
-            top: pos.top,
-            left: pos.left,
-            width: pos.width,
-            maxHeight: 360,
-            background: theme.colors.surface,
-            borderColor: theme.colors.border,
+            top: pos.top, left: pos.left, width: pos.width,
+            maxHeight: 280, background: theme.colors.surface, borderColor: theme.colors.border,
             zIndex: DESIGN_TOKENS.zIndex.popover,
-            opacity: pos.ready ? 1 : 0
-          }}
-        >
-          <div className="overflow-y-auto scrollbar-hide" style={{ maxHeight: 360 }}>
-            {filtered.length > 0 ? (
-              filtered.map((s, idx) => {
-                const isSelected = selectedSeries.includes(s);
-                const isHighlighted = idx === highlightIdx;
-                return (
-                  <button
-                    key={s}
-                    type="button"
-                    onMouseDown={e => {
-                      e.preventDefault();
-                      if (!isSelected) {
-                        onAdd(s);
-                        setQ('');
-                        setOpen(false);
-                      }
-                    }}
-                    onMouseEnter={() => setHighlightIdx(idx)}
-                    className={`w-full text-left px-3 py-2.5 text-sm flex items-center justify-between transition-colors ${isHighlighted ? 'bg-black/5' : ''}`}
-                    style={{
-                      color: isSelected ? theme.colors.textSecondary : theme.colors.textPrimary,
-                      opacity: isSelected ? 0.6 : 1
-                    }}
-                    disabled={isSelected}
-                  >
-                    <span>{highlightMatch(s, debouncedQ)}</span>
-                    {isSelected && <Check className="w-4 h-4" style={{ color: theme.colors.accent }} />}
-                  </button>
-                );
-              })
-            ) : (
-              <div className="px-3 py-4 text-sm text-center" style={{ color: theme.colors.textSecondary }}>
-                No products found matching "{q}"
-              </div>
+          }}>
+          <div className="overflow-y-auto" style={{ maxHeight: 280, WebkitOverflowScrolling: 'touch' }}>
+            {filtered.length > 0 ? filtered.map((s, idx) => {
+              const sel = selectedSeries.includes(s);
+              const hl = idx === hlIdx;
+              return (
+                <button key={s} type="button"
+                  onClick={() => pick(s)}
+                  onMouseEnter={() => setHlIdx(idx)}
+                  className={`w-full text-left px-3.5 py-2.5 text-[13px] flex items-center justify-between transition-colors ${hl ? 'bg-black/5' : ''}`}
+                  style={{ color: sel ? theme.colors.textSecondary : theme.colors.textPrimary, opacity: sel ? 0.5 : 1 }}>
+                  <span>{s}</span>
+                  {sel && <Check className="w-3.5 h-3.5" style={{ color: theme.colors.accent }} />}
+                </button>
+              );
+            }) : (
+              <div className="px-3.5 py-4 text-[13px] text-center" style={{ color: theme.colors.textSecondary }}>No products found</div>
             )}
           </div>
-        </div>,
-        document.body
+        </div>, document.body
       )}
     </div>
   );
 };
 
-// Add global style for hidden scrollbar once
-if(typeof document!=='undefined' && !document.getElementById('custom-scroll-hide-style')){ const st=document.createElement('style'); st.id='custom-scroll-hide-style'; st.innerHTML=`.custom-scroll-hide{scrollbar-width:none;} .custom-scroll-hide::-webkit-scrollbar{display:none;}`; document.head.appendChild(st);} 
+/* ═══════════════════════════════════════════════════════════════
+   PRODUCT CARD (added series with options)
+   ═══════════════════════════════════════════════════════════════ */
+const ProductCard = React.memo(({ product, idx, onRemove, onUpdate, theme }) => {
+  const hasOpts = ['Vision', 'Knox', 'Wink', 'Hoopz'].includes(product.series);
+  return (
+    <div className="rounded-xl border" style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.border }}>
+      <div className="flex items-center justify-between px-3.5 py-2.5">
+        <span className="text-[13px] font-semibold" style={{ color: theme.colors.textPrimary }}>{product.series}</span>
+        <button type="button" onClick={() => onRemove(idx)}
+          className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium transition-all"
+          style={{ color: '#B85C5C' }}>
+          <X className="w-3 h-3" /> Remove
+        </button>
+      </div>
+      {hasOpts && (
+        <div className="px-3.5 pb-3">
+          {product.series === 'Vision' && <VisionOptions theme={theme} product={product} productIndex={idx} onUpdate={onUpdate} />}
+          {product.series === 'Knox' && <KnoxOptions theme={theme} product={product} productIndex={idx} onUpdate={onUpdate} />}
+          {(product.series === 'Wink' || product.series === 'Hoopz') && <WinkHoopzOptions theme={theme} product={product} productIndex={idx} onUpdate={onUpdate} />}
+        </div>
+      )}
+    </div>
+  );
+});
 
+/* ═══════════════════════════════════════════════════════════════
+   MAIN — NEW LEAD SCREEN
+   ═══════════════════════════════════════════════════════════════ */
 export const NewLeadScreen = ({
-    theme,
-    onSuccess,
-    designFirms,
-    setDesignFirms,
-    dealers,
-    setDealers,
-    newLeadData = {},
-    onNewLeadChange,
+  theme, onSuccess,
+  designFirms, setDesignFirms,
+  dealers, setDealers,
+  newLeadData = {},
+  onNewLeadChange,
 }) => {
-    const REWARD_THRESHOLD = 250000;
+  const stageOptions = useMemo(() => STAGES.filter(s => s !== 'Won' && s !== 'Lost'), []);
 
-    const stageOptions = useMemo(() => STAGES.filter(stage => stage !== 'Won' && stage !== 'Lost'), []);
-    const timeframeOptions = useMemo(() => {
-        const nextYear = new Date().getFullYear() + 1;
-        const yearPlusTwo = nextYear + 1;
-        return ['Within 30 Days', '30-60 Days', '90-180 Days', 'Unknown', String(nextYear), String(yearPlusTwo)];
-    }, []);
+  useEffect(() => {
+    if (newLeadData.projectStatus && !stageOptions.includes(newLeadData.projectStatus))
+      onNewLeadChange({ projectStatus: stageOptions[0] });
+  }, [newLeadData.projectStatus, stageOptions, onNewLeadChange]);
 
-    useEffect(() => {
-        if (newLeadData.projectStatus && !stageOptions.includes(newLeadData.projectStatus)) {
-            onNewLeadChange({ projectStatus: stageOptions[0] });
-        }
-    }, [newLeadData.projectStatus, stageOptions, onNewLeadChange]);
+  const upd = useCallback((field, value) => {
+    if (field === 'vertical' && value !== 'Other (Please specify)')
+      return onNewLeadChange({ [field]: value, otherVertical: '' });
+    onNewLeadChange({ [field]: value });
+  }, [onNewLeadChange]);
 
-    const CITY_OPTIONS = useMemo(() => ([
-        'Indianapolis, IN', 'Jasper, IN', 'Evansville, IN', 'Bloomington, IN', 'Fort Wayne, IN',
-        'Cincinnati, OH', 'Louisville, KY', 'Nashville, TN', 'Chicago, IL', 'St. Louis, MO',
-        'Columbus, OH', 'Cleveland, OH', 'Detroit, MI', 'Milwaukee, WI', 'Minneapolis, MN',
-        'Atlanta, GA', 'Charlotte, NC', 'Raleigh, NC', 'Pittsburgh, PA', 'Philadelphia, PA',
-        'New York, NY', 'Boston, MA', 'Washington, DC', 'Baltimore, MD', 'Richmond, VA',
-        'Dallas, TX', 'Austin, TX', 'Houston, TX', 'San Antonio, TX', 'Denver, CO',
-        'Phoenix, AZ', 'Las Vegas, NV', 'Los Angeles, CA', 'San Diego, CA', 'San Francisco, CA',
-        'Seattle, WA', 'Portland, OR', 'Salt Lake City, UT', 'Kansas City, MO', 'Omaha, NE'
-    ]), []);
+  /* auto-disable rewards below threshold */
+  const lastEstRef = useRef(null);
+  useEffect(() => {
+    const amt = parseCurrency(newLeadData.estimatedList);
+    const prev = lastEstRef.current;
+    if (amt !== null && amt > 0 && amt < REWARD_THRESHOLD && (prev === null || prev >= REWARD_THRESHOLD))
+      onNewLeadChange({ salesReward: false, designerReward: false });
+    lastEstRef.current = amt;
+  }, [newLeadData.estimatedList, newLeadData.salesReward, newLeadData.designerReward, onNewLeadChange]);
 
-    const updateField = (field, value) => {
-        // Clear otherVertical when vertical changes away from "Other"
-        if (field === 'vertical' && value !== 'Other (Please specify)') {
-            onNewLeadChange({ [field]: value, otherVertical: '' });
-        } else {
-            onNewLeadChange({ [field]: value });
-        }
-    };
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!newLeadData.projectStatus) return alert('Please select a Project Stage before submitting.');
+    onSuccess(newLeadData);
+  };
 
-    const parseCurrencyValue = (raw) => {
-        if (raw === null || raw === undefined) return null;
-        const numeric = Number(String(raw).replace(/[^0-9.]/g, ''));
-        return Number.isFinite(numeric) ? numeric : null;
-    };
+  const toggleCompetitor = (c) => {
+    const list = newLeadData.competitors || [];
+    upd('competitors', list.includes(c) ? list.filter(x => x !== c) : [...list, c]);
+  };
 
-    const lastEstimatedRef = useRef(null);
+  const addProduct = useCallback((series) => {
+    if (!series || (newLeadData.products || []).some(p => p.series === series)) return;
+    upd('products', [...(newLeadData.products || []), { series, hasGlassDoors: false, surfaceTypes: [], materials: [], hasWoodBack: false, polyColor: '' }]);
+  }, [newLeadData.products, upd]);
 
-    useEffect(() => {
-        const amount = parseCurrencyValue(newLeadData.estimatedList);
-        const prevAmount = lastEstimatedRef.current;
-        const shouldAutoDisable = amount !== null && amount > 0 && amount < REWARD_THRESHOLD && (prevAmount === null || prevAmount >= REWARD_THRESHOLD);
+  const removeProduct = useCallback((idx) => {
+    upd('products', (newLeadData.products || []).filter((_, i) => i !== idx));
+  }, [newLeadData.products, upd]);
 
-        if (shouldAutoDisable && (newLeadData.salesReward !== false || newLeadData.designerReward !== false)) {
-            onNewLeadChange({ salesReward: false, designerReward: false });
-        }
+  const updateProductOption = useCallback((pi, key, value) => {
+    upd('products', (newLeadData.products || []).map((p, i) => i === pi ? { ...p, [key]: value } : p));
+  }, [newLeadData.products, upd]);
 
-        lastEstimatedRef.current = amount;
-    }, [newLeadData.estimatedList, newLeadData.salesReward, newLeadData.designerReward, onNewLeadChange]);
-    
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!newLeadData.projectStatus) {
-            alert('Please select a Project Stage before submitting.');
-            return;
-        }
-        onSuccess(newLeadData);
-    };
-    
-    const toggleCompetitor = (c) => {
-        const list = newLeadData.competitors || [];
-        const next = list.includes(c) ? list.filter(x => x !== c) : [...list, c];
-        updateField('competitors', next);
-    };
-    
-    const addProduct = (series) => {
-        if (!series) return;
-        if ((newLeadData.products||[]).some(p=>p.series===series)) return;
-        const newProducts = [...(newLeadData.products || []), { series, hasGlassDoors:false, materials:[], hasWoodBack:false, polyColor:'' }];
-        updateField('products', newProducts);
-    };
-    
-    const removeProduct = (idx) => {
-        const newProducts = (newLeadData.products || []).filter((_, i) => i !== idx);
-        updateField('products', newProducts);
-    };
-    
-    const updateProductOption = (pi, key, value) => {
-        const newProducts = (newLeadData.products || []).map((p, i) => i === pi ? { ...p, [key]: value } : p);
-        updateField('products', newProducts);
-    };
-    
-    // Stakeholder management functions
-    const addDesignFirm = (firm) => {
-        const currentFirms = newLeadData.designFirms || [];
-        if (!currentFirms.includes(firm)) {
-            updateField('designFirms', [...currentFirms, firm]);
-        }
-    };
-    
-    const removeDesignFirm = (firm) => {
-        const currentFirms = newLeadData.designFirms || [];
-        updateField('designFirms', currentFirms.filter(f => f !== firm));
-    };
-    
-    const addDealer = (dealer) => {
-        const currentDealers = newLeadData.dealers || [];
-        if (!currentDealers.includes(dealer)) {
-            updateField('dealers', [...currentDealers, dealer]);
-        }
-    };
-    
-    const removeDealer = (dealer) => {
-        const currentDealers = newLeadData.dealers || [];
-        updateField('dealers', currentDealers.filter(d => d !== dealer));
-    };
-    
-    return (
-        <form onSubmit={handleSubmit} className="lead-form-inline flex flex-col h-full overflow-y-auto scrollbar-hide app-header-offset" style={{ backgroundColor: theme.colors.background }}>
-            <div className="px-4 lg:px-6 pt-4 max-w-5xl mx-auto w-full">
-                <div className="grid gap-6 lg:grid-cols-2">
-                <FormSection title="Project Details" theme={theme} className="pt-5 lg:pt-6">
-                    <div>
-                        <SettingsRow label={null} isFirst={true} theme={theme} className="no-label compact">
-                            <FormInput
-                                label=""
-                                required
-                                value={newLeadData.project || ''}
-                                onChange={e => updateField('project', e.target.value)}
-                                placeholder="Project Name"
-                                theme={theme}
-                                size="sm"
-                                surfaceBg={true}
-                            />
-                        </SettingsRow>
-                        <SettingsRow label="Project Stage" theme={theme} className="stack">
-                            <div className="space-y-3">
-                                <input
-                                    type="range"
-                                    min={0}
-                                    max={stageOptions.length - 1}
-                                    step={1}
-                                    value={Math.max(0, stageOptions.indexOf(newLeadData.projectStatus))}
-                                    onChange={(e) => updateField('projectStatus', stageOptions[Number(e.target.value)])}
-                                    className="w-full accent-black"
-                                />
-                                <div className="flex items-center justify-between text-xs" style={{ color: theme.colors.textSecondary }}>
-                                    {stageOptions.map((stage, idx) => (
-                                        <span
-                                            key={stage}
-                                            className={idx === Math.max(0, stageOptions.indexOf(newLeadData.projectStatus)) ? 'font-semibold' : 'opacity-60'}
-                                        >
-                                            {stage.replace('Decision/Bidding', 'Decision')}
-                                        </span>
-                                    ))}
-                                </div>
-                            </div>
-                        </SettingsRow>
-                        <SettingsRow label="Vertical" theme={theme} className="stack">
-                            <div className="grid grid-cols-3 gap-2">
-                                {VERTICALS.map(vertical => {
-                                    const isOther = vertical === 'Other (Please specify)';
-                                    const displayText = isOther ? 'Other' : vertical;
-                                    return (
-                                        <PillButton
-                                            key={vertical}
-                                            size="compact"
-                                            isSelected={newLeadData.vertical === vertical}
-                                            onClick={() => updateField('vertical', vertical)}
-                                            theme={theme}
-                                            className="min-w-[96px] justify-center"
-                                        >
-                                            {displayText}
-                                        </PillButton>
-                                    );
-                                })}
-                            </div>
-                            {newLeadData.vertical === 'Other (Please specify)' && (
-                                <div className="pt-2">
-                                    <FormInput
-                                        label=""
-                                        value={newLeadData.otherVertical || ''}
-                                        onChange={e => updateField('otherVertical', e.target.value)}
-                                        placeholder="Enter vertical"
-                                        theme={theme}
-                                        size="sm"
-                                        surfaceBg={true}
-                                    />
-                                </div>
-                            )}
-                        </SettingsRow>
-                        <SettingsRow label={
-                            <div className="flex items-center gap-2">
-                                <span>Installation Location</span>
-                                <InfoTooltip
-                                    content="When a product is specified in one territory but ordered from another, we associate 70% of the credit to the specifying territory and 30% to the ordering territory."
-                                    theme={theme}
-                                    position="right"
-                                    size="sm"
-                                />
-                            </div>
-                        } theme={theme}>
-                            <AutoCompleteCombobox
-                                value={newLeadData.installationLocation || ''}
-                                onChange={(val) => updateField('installationLocation', val)}
-                                onSelect={(val) => updateField('installationLocation', val)}
-                                options={CITY_OPTIONS}
-                                placeholder="Install City, State"
-                                theme={theme}
-                                resetOnSelect={false}
-                            />
-                        </SettingsRow>
-                    </div>
-                </FormSection>
+  /* quote state: 'existing' | 'needed' | null */
+  const quoteMode = newLeadData.jsiQuoteExists ? 'existing' : newLeadData.quoteNeeded ? 'needed' : null;
+  const setQuoteMode = (mode) => {
+    onNewLeadChange({
+      jsiQuoteExists: mode === 'existing',
+      quoteNeeded: mode === 'needed',
+      ...(mode !== 'existing' ? { jsiQuoteNumber: '' } : {}),
+    });
+  };
 
-                <FormSection title="Stakeholders" theme={theme}>
-                    <div>
-                        <SettingsRow label={null} isFirst={true} theme={theme} className="compact no-label">
-                            <SpotlightMultiSelect
-                                selectedItems={newLeadData.designFirms || []}
-                                onAddItem={addDesignFirm}
-                                onRemoveItem={removeDesignFirm}
-                                options={designFirms || []}
-                                onAddNew={(f) => setDesignFirms((p) => [...new Set([f, ...p])])}
-                                placeholder="A&D Firm"
-                                theme={theme}
-                            />
-                        </SettingsRow>
-                        <SettingsRow label={null} theme={theme} className="compact no-label">
-                            <SpotlightMultiSelect
-                                selectedItems={newLeadData.dealers || []}
-                                onAddItem={addDealer}
-                                onRemoveItem={removeDealer}
-                                options={(newLeadData.dealers || []).length > 0 ? (dealers || []).filter(d => d !== 'Undecided') : (dealers || [])}
-                                onAddNew={(d) => setDealers((p) => [...new Set([d, ...p])])}
-                                placeholder="Dealer(s)"
-                                theme={theme}
-                            />
-                        </SettingsRow>
-                    </div>
-                </FormSection>
-                
-                <FormSection title="Competition & Products" theme={theme}>
-                    <div>
-                        <SettingsRow label="Bid?" isFirst={true} theme={theme}>
-                            <div className="flex justify-end">
-                                <ToggleSwitch
-                                    checked={!!newLeadData.isBid}
-                                    onChange={(e) => updateField('isBid', e.target.checked)}
-                                    theme={theme}
-                                />
-                            </div>
-                        </SettingsRow>
-                        <SettingsRow label="Competition?" theme={theme}>
-                            <div className="flex justify-end">
-                                <ToggleSwitch
-                                    checked={!!newLeadData.competitionPresent}
-                                    onChange={(e) => updateField('competitionPresent', e.target.checked)}
-                                    theme={theme}
-                                />
-                            </div>
-                        </SettingsRow>
+  const c = theme.colors;
+  const dark = isDarkTheme(theme);
 
-                        <div className="-mx-4">
-                            <div className="px-4">
-                                <div
-                                    className={`rounded-2xl transition-all duration-400 ease-out overflow-hidden ${
-                                        newLeadData.competitionPresent
-                                            ? 'p-5 opacity-100 max-h-[600px] translate-y-0'
-                                            : 'p-0 opacity-0 max-h-0 -translate-y-1 pointer-events-none'
-                                    }`}
-                                    style={{
-                                        backgroundColor: theme.colors.subtle,
-                                        border: `1.5px solid ${theme.colors.border}`
-                                    }}
-                                >
-                                    <div className="grid gap-2" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))' }}>
-                                        {[...COMPETITORS.filter(c=>c!=='None'), 'Other'].map(c => (
-                                            <PillButton
-                                                key={c}
-                                                size="compact"
-                                                isSelected={(newLeadData.competitors||[]).includes(c)}
-                                                onClick={() => toggleCompetitor(c)}
-                                                theme={theme}
-                                                className="whitespace-nowrap min-w-[96px] justify-center"
-                                            >
-                                                {c}
-                                            </PillButton>
-                                        ))}
-                                    </div>
-                                    {(newLeadData.competitors || []).includes('Other') && (
-                                        <div className="pt-3">
-                                            <FormInput
-                                                label=""
-                                                value={newLeadData.otherCompetitor || ''}
-                                                onChange={e => updateField('otherCompetitor', e.target.value)}
-                                                placeholder="Other competitor"
-                                                theme={theme}
-                                                size="sm"
-                                                surfaceBg={true}
-                                            />
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                                        </div>
-                                        <div className="mt-6" />
-                                        <SettingsRow label="Products" theme={theme}>
-                        <ProductSpotlight
-                          selectedSeries={(newLeadData.products||[]).map(p=>p.series)}
-                          onAdd={addProduct}
-                          available={JSI_SERIES}
-                          theme={theme}
-                        />
-                    </SettingsRow>
-                    {(newLeadData.products || []).length > 0 && (
-                        <div className="space-y-3 pt-2">
-                            {(newLeadData.products || []).map((p, idx) => {
-                                const hasOptions = ['Vision', 'Knox', 'Wink', 'Hoopz'].includes(p.series);
-                                return (
-                                    <div
-                                        key={idx}
-                                        className={`${hasOptions ? 'p-4 rounded-2xl' : 'p-3 rounded-full'} space-y-3 border`}
-                                        style={{
-                                            borderColor: theme.colors.border,
-                                            backgroundColor: theme.colors.surface,
-                                            boxShadow: '0 1px 3px rgba(53,53,53,0.04)'
-                                        }}
-                                    >
-                                        <div className="flex items-center justify-between">
-                                            <span
-                                                className="font-semibold text-sm"
-                                                style={{ color: theme.colors.textPrimary }}
-                                            >
-                                                {p.series}
-                                            </span>
-                                            <button
-                                                type="button"
-                                                onClick={()=>removeProduct(idx)}
-                                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all border"
-                                                style={{
-                                                    borderColor: theme.colors.border,
-                                                    color:'#B85C5C'
-                                                }}
-                                            >
-                                                <X className="w-3.5 h-3.5" />
-                                                Remove
-                                            </button>
-                                        </div>
-                                        {hasOptions && (
-                                            <div className="animate-fade-in">
-                                                {p.series === 'Vision' && (<VisionOptions theme={theme} product={p} productIndex={idx} onUpdate={updateProductOption} />)}
-                                                {p.series === 'Knox' && (<KnoxOptions theme={theme} product={p} productIndex={idx} onUpdate={updateProductOption} />)}
-                                                {(p.series === 'Wink' || p.series === 'Hoopz') && (<WinkHoopzOptions theme={theme} product={p} productIndex={idx} onUpdate={updateProductOption} />)}
-                                            </div>
-                                        )}
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    )}
+  return (
+    <form onSubmit={handleSubmit}
+      className="flex flex-col h-full overflow-y-auto scrollbar-hide app-header-offset"
+      style={{ backgroundColor: c.background }}>
+      <div className="px-4 sm:px-5 pt-4 pb-8 max-w-2xl mx-auto w-full">
 
-                    <div className="mt-6" />
-                    <SettingsRow label="Existing JSI Quote?" theme={theme}>
-                        <div className="flex justify-end">
-                            <ToggleSwitch
-                                checked={!!newLeadData.jsiQuoteExists}
-                                onChange={(e) => updateField('jsiQuoteExists', e.target.checked)}
-                                theme={theme}
-                            />
-                        </div>
-                    </SettingsRow>
-                    {newLeadData.jsiQuoteExists && (
-                        <SettingsRow label={null} theme={theme} className="compact no-label">
-                            <FormInput
-                                label=""
-                                value={newLeadData.jsiQuoteNumber || ''}
-                                onChange={e => updateField('jsiQuoteNumber', e.target.value)}
-                                placeholder="JSI Quote #"
-                                theme={theme}
-                                size="sm"
-                                surfaceBg={true}
-                            />
-                        </SettingsRow>
-                    )}
-                </FormSection>
+        {/* ── 1. Project Details ── */}
+        <Section title="Project Details" theme={theme} className="mb-4">
+          <Row label={null} theme={theme} noSep>
+            <FormInput value={newLeadData.project || ''} onChange={e => upd('project', e.target.value)}
+              placeholder="Project Name *" theme={theme} size="sm" surfaceBg required />
+          </Row>
 
-                <FormSection title="Financials & Timeline" theme={theme}>
-                    <div>
-                        <SettingsRow label="Estimated List" isFirst={true} theme={theme}>
-                            <FormInput
-                                label=""
-                                required
-                                type="currency"
-                                surfaceBg={true}
-                                value={newLeadData.estimatedList || ''}
-                                onChange={e => updateField('estimatedList', e.target.value)}
-                                placeholder="$0"
-                                theme={theme}
-                            />
-                        </SettingsRow>
-                        <SettingsRow label="Win Probability" theme={theme}>
-                            <ProbabilitySlider
-                                showLabel={false}
-                                value={newLeadData.winProbability || 50}
-                                onChange={v => updateField('winProbability', v)}
-                                theme={theme}
-                            />
-                        </SettingsRow>
-                        <SettingsRow label="Discount" theme={theme}>
-                            <PortalNativeSelect
-                                label=""
-                                value={newLeadData.discount || ''}
-                                onChange={e => updateField('discount', e.target.value)}
-                                options={DISCOUNT_OPTIONS.map(d => ({ label: d, value: d }))}
-                                placeholder="Select Discount"
-                                theme={theme}
-                                mutedValues={["Undecided"]}
-                            />
-                        </SettingsRow>
-                        <SettingsRow label="Rewards" theme={theme}>
-                            <div
-                                className="grid grid-cols-2 gap-1 rounded-full p-1 border"
-                                style={{ backgroundColor: theme.colors.subtle, borderColor: theme.colors.border }}
-                            >
-                                <button
-                                    type="button"
-                                    onClick={() => updateField('salesReward', !(newLeadData.salesReward !== false))}
-                                    className="w-full px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all"
-                                    style={{
-                                        backgroundColor: newLeadData.salesReward !== false ? theme.colors.textPrimary : 'transparent',
-                                        color: newLeadData.salesReward !== false ? '#FFFFFF' : theme.colors.textPrimary
-                                    }}
-                                >
-                                    {newLeadData.salesReward !== false ? '✓ ' : ''}Sales Reward
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => updateField('designerReward', !(newLeadData.designerReward !== false))}
-                                    className="w-full px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all"
-                                    style={{
-                                        backgroundColor: newLeadData.designerReward !== false ? theme.colors.textPrimary : 'transparent',
-                                        color: newLeadData.designerReward !== false ? '#FFFFFF' : theme.colors.textPrimary
-                                    }}
-                                >
-                                    {newLeadData.designerReward !== false ? '✓ ' : ''}Designer Reward
-                                </button>
-                            </div>
-                        </SettingsRow>
-                        <SettingsRow label="PO Timeframe" theme={theme} className="stack">
-                            <div className="grid grid-cols-2 gap-3">
-                                {timeframeOptions.map(timeframe => (
-                                    <PillButton
-                                        key={timeframe}
-                                        size="compact"
-                                        isSelected={newLeadData.poTimeframe === timeframe}
-                                        onClick={() => updateField('poTimeframe', timeframe)}
-                                        theme={theme}
-                                    >
-                                        {timeframe}
-                                    </PillButton>
-                                ))}
-                            </div>
-                        </SettingsRow>
-                        <SettingsRow label="Contract?" theme={theme}>
-                            <PortalNativeSelect
-                                label=""
-                                value={newLeadData.contractType || ''}
-                                onChange={e => updateField('contractType', e.target.value)}
-                                options={[
-                                    { label: 'None', value: 'none' },
-                                    ...Object.keys(CONTRACTS_DATA).map(key => ({ label: CONTRACTS_DATA[key].name, value: key }))
-                                ]}
-                                placeholder="Select Contract"
-                                theme={theme}
-                                mutedValues={["none", "None"]}
-                            />
-                        </SettingsRow>
-                    </div>
-                </FormSection>
-
-                <FormSection title="Notes" theme={theme} className="lg:col-span-2">
-                    <div className="pt-2">
-                        <FormInput
-                            label=""
-                            type="textarea"
-                            surfaceBg={true}
-                            value={newLeadData.notes || ''}
-                            onChange={e => updateField('notes', e.target.value)}
-                            placeholder="Enter any further details..."
-                            theme={theme}
-                        />
-                    </div>
-                </FormSection>
-
-                
-                {/* Submit Button */}
-                <div className="pt-8 pb-mobile-nav-safe lg:pb-12 lg:col-span-2">
-                    <PrimaryButton
-                        type="submit"
-                        theme={theme}
-                        size="large"
-                        fullWidth
-                        disabled={!newLeadData.project || !newLeadData.projectStatus}
-                    >
-                        Submit Lead →
-                    </PrimaryButton>
-                    {(!newLeadData.project || !newLeadData.projectStatus) && (
-                        <p
-                            className="text-sm text-center mt-4"
-                            style={{
-                                color: theme.colors.textSecondary
-                            }}
-                        >
-                            Please fill in required fields to submit
-                        </p>
-                    )}
-                </div>
-                </div>
+          <Row label="Project Stage" theme={theme}>
+            <div className="space-y-2">
+              <input type="range" min={0} max={stageOptions.length - 1} step={1}
+                value={Math.max(0, stageOptions.indexOf(newLeadData.projectStatus))}
+                onChange={e => upd('projectStatus', stageOptions[+e.target.value])}
+                className="w-full accent-black" />
+              <div className="flex justify-between text-[10px]" style={{ color: c.textSecondary }}>
+                {stageOptions.map((s, i) => (
+                  <span key={s} className={i === stageOptions.indexOf(newLeadData.projectStatus) ? 'font-bold' : 'opacity-50'}>
+                    {s.replace('Decision/Bidding', 'Decision')}
+                  </span>
+                ))}
+              </div>
             </div>
-        </form>
-    );
+          </Row>
+
+          <Row label="Vertical" theme={theme}>
+            <div className="flex flex-wrap gap-1.5">
+              {VERTICALS.map(v => {
+                const lbl = v === 'Other (Please specify)' ? 'Other' : v;
+                return (
+                  <PillButton key={v} size="xs" isSelected={newLeadData.vertical === v}
+                    onClick={() => upd('vertical', v)} theme={theme}>{lbl}</PillButton>
+                );
+              })}
+            </div>
+            {newLeadData.vertical === 'Other (Please specify)' && (
+              <div className="mt-2">
+                <FormInput value={newLeadData.otherVertical || ''} onChange={e => upd('otherVertical', e.target.value)}
+                  placeholder="Enter vertical" theme={theme} size="sm" surfaceBg />
+              </div>
+            )}
+          </Row>
+
+          <Row label="Install Date" theme={theme} inline>
+            <FormInput type="date" value={newLeadData.expectedInstallDate || ''}
+              onChange={e => upd('expectedInstallDate', e.target.value)}
+              theme={theme} size="sm" surfaceBg />
+          </Row>
+
+          <Row label="Location" theme={theme} inline
+            tip="70% credit to specifying territory, 30% to ordering when territories differ.">
+            <AutoCompleteCombobox
+              value={newLeadData.installationLocation || ''}
+              onChange={val => upd('installationLocation', val)}
+              onSelect={val => upd('installationLocation', val)}
+              options={CITY_OPTIONS}
+              placeholder="City, State"
+              theme={theme}
+              resetOnSelect={false} />
+          </Row>
+        </Section>
+
+        {/* ── 2. Stakeholders ── */}
+        <Section title="Stakeholders" theme={theme} className="mb-4">
+          <Row label={null} theme={theme} noSep>
+            <SpotlightMultiSelect
+              selectedItems={newLeadData.dealers || []}
+              onAddItem={d => { const cur = newLeadData.dealers || []; if (!cur.includes(d)) upd('dealers', [...cur, d]); }}
+              onRemoveItem={d => upd('dealers', (newLeadData.dealers || []).filter(x => x !== d))}
+              options={(newLeadData.dealers || []).length > 0 ? (dealers || []).filter(d => d !== 'Undecided') : (dealers || [])}
+              onAddNew={d => setDealers(p => [...new Set([d, ...p])])}
+              placeholder="Dealer(s)"
+              theme={theme} />
+          </Row>
+          <Row label={null} theme={theme}>
+            <SpotlightMultiSelect
+              selectedItems={newLeadData.designFirms || []}
+              onAddItem={f => { const cur = newLeadData.designFirms || []; if (!cur.includes(f)) upd('designFirms', [...cur, f]); }}
+              onRemoveItem={f => upd('designFirms', (newLeadData.designFirms || []).filter(x => x !== f))}
+              options={designFirms || []}
+              onAddNew={f => setDesignFirms(p => [...new Set([f, ...p])])}
+              placeholder="A&D Firm(s)"
+              theme={theme} />
+          </Row>
+          <Row label="End User" theme={theme} inline>
+            <FormInput value={newLeadData.endUser || ''} onChange={e => upd('endUser', e.target.value)}
+              placeholder="Company or contact name" theme={theme} size="sm" surfaceBg />
+          </Row>
+        </Section>
+
+        {/* ── 3. Competition & Products ── */}
+        <Section title="Competition & Products" theme={theme} className="mb-4">
+          {/* bid + competition toggles, inline */}
+          <div className="flex items-center justify-between py-2">
+            <span className="text-[13px] font-semibold" style={{ color: c.textPrimary }}>Bid?</span>
+            <ToggleSwitch checked={!!newLeadData.isBid} onChange={e => upd('isBid', e.target.checked)} theme={theme} />
+          </div>
+          <div className="flex items-center justify-between py-2 border-t" style={{ borderColor: c.border }}>
+            <span className="text-[13px] font-semibold" style={{ color: c.textPrimary }}>Competition?</span>
+            <ToggleSwitch checked={!!newLeadData.competitionPresent} onChange={e => upd('competitionPresent', e.target.checked)} theme={theme} />
+          </div>
+
+          {/* competitor chips — animate in */}
+          <div style={{
+            display: 'grid', gridTemplateRows: newLeadData.competitionPresent ? '1fr' : '0fr',
+            opacity: newLeadData.competitionPresent ? 1 : 0,
+            transition: 'grid-template-rows .3s ease, opacity .25s ease',
+          }}>
+            <div style={{ overflow: 'hidden' }}>
+              <div className="pt-3 pb-1">
+                <div className="flex flex-wrap gap-1.5">
+                  {[...COMPETITORS.filter(c => c !== 'None'), 'Other'].map(comp => (
+                    <PillButton key={comp} size="xs" isSelected={(newLeadData.competitors || []).includes(comp)}
+                      onClick={() => toggleCompetitor(comp)} theme={theme}>{comp}</PillButton>
+                  ))}
+                </div>
+                {(newLeadData.competitors || []).includes('Other') && (
+                  <div className="mt-2">
+                    <FormInput value={newLeadData.otherCompetitor || ''} onChange={e => upd('otherCompetitor', e.target.value)}
+                      placeholder="Other competitor" theme={theme} size="sm" surfaceBg />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* products */}
+          <Row label="Products" theme={theme}>
+            <ProductSpotlight
+              selectedSeries={(newLeadData.products || []).map(p => p.series)}
+              onAdd={addProduct} available={JSI_SERIES} theme={theme} />
+          </Row>
+
+          {(newLeadData.products || []).length > 0 && (
+            <div className="space-y-2 pt-1">
+              {(newLeadData.products || []).map((p, idx) => (
+                <ProductCard key={p.series + idx} product={p} idx={idx}
+                  onRemove={removeProduct} onUpdate={updateProductOption} theme={theme} />
+              ))}
+            </div>
+          )}
+
+          {/* JSI Quote — inline pills, click again to deselect */}
+          <div className="py-3 border-t" style={{ borderColor: c.border }}>
+            <div className="flex items-center gap-2">
+              <label className="text-[13px] font-semibold flex-shrink-0 whitespace-nowrap" style={{ color: c.textPrimary }}>JSI Quote</label>
+              <button type="button" onClick={() => setQuoteMode(quoteMode === 'existing' ? null : 'existing')}
+                className="px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all border flex-shrink-0"
+                style={{
+                  backgroundColor: quoteMode === 'existing' ? c.textPrimary : 'transparent',
+                  color: quoteMode === 'existing' ? (dark ? '#1a1a1a' : '#fff') : c.textPrimary,
+                  borderColor: quoteMode === 'existing' ? c.textPrimary : c.border,
+                }}>Existing Quote</button>
+              {quoteMode === 'existing' ? (
+                <div className="flex-1 min-w-[100px]">
+                  <input value={newLeadData.jsiQuoteNumber || ''} onChange={e => upd('jsiQuoteNumber', e.target.value)}
+                    placeholder="Quote #" className="w-full rounded-full px-3 py-1.5 text-[12px] outline-none border"
+                    style={{ color: c.textPrimary, borderColor: c.border, backgroundColor: c.surface }} />
+                </div>
+              ) : (
+                <button type="button" onClick={() => setQuoteMode(quoteMode === 'needed' ? null : 'needed')}
+                  className="px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all border flex-shrink-0"
+                  style={{
+                    backgroundColor: quoteMode === 'needed' ? c.textPrimary : 'transparent',
+                    color: quoteMode === 'needed' ? (dark ? '#1a1a1a' : '#fff') : c.textPrimary,
+                    borderColor: quoteMode === 'needed' ? c.textPrimary : c.border,
+                  }}>Quote Needed</button>
+              )}
+            </div>
+            {quoteMode === 'needed' && (
+              <div className="mt-2.5 rounded-xl p-3 flex items-start gap-2.5" style={{ backgroundColor: c.subtle }}>
+                <Upload className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: c.textSecondary }} />
+                <div>
+                  <p className="text-[12px] font-medium" style={{ color: c.textPrimary }}>Upload specs or request later</p>
+                  <p className="text-[11px] mt-0.5" style={{ color: c.textSecondary }}>
+                    Attach a PDF now, or request a quote from the project page later.
+                  </p>
+                  <button type="button" className="mt-1.5 text-[11px] font-semibold underline" style={{ color: c.accent }}>
+                    Choose File
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </Section>
+
+        {/* ── 4. Financials & Timeline ── */}
+        <Section title="Financials & Timeline" theme={theme} className="mb-4">
+          <Row label="Estimated List *" theme={theme} noSep inline>
+            <FormInput type="currency" value={newLeadData.estimatedList || ''} required
+              onChange={e => upd('estimatedList', e.target.value)}
+              placeholder="$0" theme={theme} surfaceBg />
+          </Row>
+
+          <Row label="Win Probability" theme={theme}>
+            <ProbabilitySlider showLabel={false} value={newLeadData.winProbability || 50}
+              onChange={v => upd('winProbability', v)} theme={theme} />
+          </Row>
+
+          <Row label="Discount" theme={theme} inline>
+            <PortalNativeSelect value={newLeadData.discount || ''}
+              onChange={e => upd('discount', e.target.value)}
+              options={DISCOUNT_OPTIONS.map(d => ({ label: d, value: d }))}
+              placeholder="Select Discount" theme={theme} mutedValues={['Undecided']} />
+          </Row>
+
+          <Row label="Rewards" theme={theme}>
+            <div className="grid grid-cols-2 gap-1 rounded-full p-1 border"
+              style={{ backgroundColor: c.subtle, borderColor: c.border }}>
+              {[['salesReward', 'Sales Reward'], ['designerReward', 'Designer Reward']].map(([key, lbl]) => {
+                const on = newLeadData[key] !== false;
+                return (
+                  <button key={key} type="button" onClick={() => upd(key, !on)}
+                    className="px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all text-center"
+                    style={{
+                      backgroundColor: on ? c.textPrimary : 'transparent',
+                      color: on ? (dark ? '#1a1a1a' : '#fff') : c.textPrimary,
+                    }}>{on ? '✓ ' : ''}{lbl}</button>
+                );
+              })}
+            </div>
+          </Row>
+
+          <Row label="PO Timeframe" theme={theme}>
+            <div className="flex flex-wrap gap-1.5">
+              {PO_OPTIONS.map(t => (
+                <PillButton key={t} size="xs"
+                  isSelected={newLeadData.poTimeframe === t}
+                  onClick={() => upd('poTimeframe', t)} theme={theme}>{t}</PillButton>
+              ))}
+            </div>
+          </Row>
+
+          <Row label="Contract" theme={theme} inline>
+            <PortalNativeSelect value={newLeadData.contractType || ''}
+              onChange={e => upd('contractType', e.target.value)}
+              options={[
+                { label: 'None', value: 'none' },
+                ...Object.keys(CONTRACTS_DATA).map(k => ({ label: CONTRACTS_DATA[k].name, value: k })),
+              ]}
+              placeholder="Select Contract" theme={theme} mutedValues={['none', 'None']} />
+          </Row>
+        </Section>
+
+        {/* ── 5. Notes ── */}
+        <Section theme={theme} className="mb-6">
+          <FormInput type="textarea" value={newLeadData.notes || ''}
+            onChange={e => upd('notes', e.target.value)}
+            placeholder="Notes or additional details..."
+            theme={theme} surfaceBg />
+        </Section>
+
+        {/* ── Submit ── */}
+        <div className="pb-8">
+          <PrimaryButton type="submit" theme={theme} size="large" fullWidth
+            disabled={!newLeadData.project || !newLeadData.projectStatus}>
+            Submit Lead →
+          </PrimaryButton>
+          {(!newLeadData.project || !newLeadData.projectStatus) && (
+            <p className="text-[12px] text-center mt-3" style={{ color: c.textSecondary }}>
+              Please fill in required fields to submit
+            </p>
+          )}
+        </div>
+
+      </div>
+    </form>
+  );
 };

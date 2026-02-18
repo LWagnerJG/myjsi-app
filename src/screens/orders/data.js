@@ -127,13 +127,13 @@ export const ORDER_DATA = [
 
 export const STATUS_COLORS = {
     'Discovery': '#5B7B8C',
-    'Specifying': '#10B981',
+    'Specifying': '#4A7C59',
     'Decision/Bidding': '#C4956A',
     'PO Expected': '#5B7B8C',
-    'Won': '#059669',
+    'Won': '#4A7C59',
     'Lost': '#B85C5C',
-    'Order Entry': '#6B7280',
-    'Acknowledged': '#C4956A',
-    'In Production': '#6366F1',
-    'Shipping': '#06B6D4',
+    'Order Entry': '#8B8680',
+    'Acknowledged': '#A1845C',
+    'In Production': '#5B7B8C',
+    'Shipping': '#4A7C59',
 };

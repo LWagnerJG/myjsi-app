@@ -1,10 +1,11 @@
 // QuickActionDropdown - Plus button dropdown for quick actions
 import React, { useState, useRef, useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import { Plus, FileText, Upload, FileSpreadsheet, MessageSquarePlus, X } from 'lucide-react';
+import { Plus, FileText, Upload, FileSpreadsheet, MessageSquarePlus, Presentation, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const QUICK_ACTIONS = [
+    { id: 'presentation-builder', label: 'Presentation Builder', icon: Presentation, description: 'AI-generate a custom deck' },
     { id: 'quote', label: 'Request a Quote', icon: FileText, description: 'Get pricing for your project' },
     { id: 'upload', label: 'Upload a File', icon: Upload, description: 'Share documents or specs' },
     { id: 'spec', label: 'Spec Check Request', icon: FileSpreadsheet, description: 'Verify product specifications' },
