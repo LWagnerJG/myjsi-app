@@ -72,11 +72,12 @@ const Section = ({ title, children, theme, className = '' }) => {
 };
 
 /* — compact field row — supports inline (label left, field right) — */
+const LABEL_W = 'w-[110px]';          // fixed label column for consistent alignment
 const Row = ({ label, children, theme, tip, noSep, inline }) => (
   <div className={`${inline ? 'flex items-center gap-3 py-2.5' : 'py-3'} ${noSep ? '' : 'border-t'}`}
     style={{ borderColor: noSep ? undefined : theme.colors.border }}>
     {label && (
-      <div className={`flex items-center gap-1.5 ${inline ? 'flex-shrink-0 min-w-0' : 'mb-1.5'}`}>
+      <div className={`flex items-center gap-1.5 ${inline ? `flex-shrink-0 ${LABEL_W}` : 'mb-1.5'}`}>
         <label className={`text-[13px] font-semibold ${inline ? 'whitespace-nowrap' : ''}`}
           style={{ color: theme.colors.textPrimary }}>{label}</label>
         {tip && <InfoTooltip content={tip} theme={theme} position="right" size="sm" />}
@@ -310,22 +311,28 @@ export const NewLeadScreen = ({
           </Row>
 
           <Row label="Vertical" theme={theme} inline>
-            <div className="flex flex-wrap gap-1.5 justify-end">
-              {VERTICALS.map(v => {
-                const lbl = v === 'Other (Please specify)' ? 'Other' : v;
-                return (
-                  <PillButton key={v} size="xs" isSelected={newLeadData.vertical === v}
-                    onClick={() => upd('vertical', v)} theme={theme}>{lbl}</PillButton>
-                );
-              })}
-            </div>
+            {newLeadData.vertical === 'Other (Please specify)' ? (
+              <div className="flex items-center gap-2">
+                <FormInput value={newLeadData.otherVertical || ''} onChange={e => upd('otherVertical', e.target.value)}
+                  placeholder="Enter vertical" theme={theme} size="sm" surfaceBg />
+                <button type="button" onClick={() => upd('vertical', '')}
+                  className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full"
+                  style={{ backgroundColor: c.subtle }}>
+                  <X className="w-3.5 h-3.5" style={{ color: c.textSecondary }} />
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-1.5 justify-end">
+                {VERTICALS.map(v => {
+                  const lbl = v === 'Other (Please specify)' ? 'Other' : v;
+                  return (
+                    <PillButton key={v} size="xs" isSelected={newLeadData.vertical === v}
+                      onClick={() => upd('vertical', v)} theme={theme}>{lbl}</PillButton>
+                  );
+                })}
+              </div>
+            )}
           </Row>
-          {newLeadData.vertical === 'Other (Please specify)' && (
-            <Row label={null} theme={theme}>
-              <FormInput value={newLeadData.otherVertical || ''} onChange={e => upd('otherVertical', e.target.value)}
-                placeholder="Enter vertical" theme={theme} size="sm" surfaceBg />
-            </Row>
-          )}
 
           <Row label="Install Date" theme={theme} inline>
             <FormInput type="date" value={newLeadData.expectedInstallDate || ''}
@@ -348,25 +355,25 @@ export const NewLeadScreen = ({
 
         {/* ── 2. Stakeholders ── */}
         <Section title="Stakeholders" theme={theme} className="mb-4">
-          <Row label={null} theme={theme} noSep>
+          <Row label="Dealer(s)" theme={theme} noSep inline>
             <SpotlightMultiSelect
               selectedItems={newLeadData.dealers || []}
               onAddItem={d => { const cur = newLeadData.dealers || []; if (!cur.includes(d)) upd('dealers', [...cur, d]); }}
               onRemoveItem={d => upd('dealers', (newLeadData.dealers || []).filter(x => x !== d))}
               options={(newLeadData.dealers || []).length > 0 ? (dealers || []).filter(d => d !== 'Undecided') : (dealers || [])}
               onAddNew={d => setDealers(p => [...new Set([d, ...p])])}
-              placeholder="Dealer(s)"
+              placeholder="Search"
               theme={theme}
               compact />
           </Row>
-          <Row label={null} theme={theme}>
+          <Row label="A&D Firm(s)" theme={theme} inline>
             <SpotlightMultiSelect
               selectedItems={newLeadData.designFirms || []}
               onAddItem={f => { const cur = newLeadData.designFirms || []; if (!cur.includes(f)) upd('designFirms', [...cur, f]); }}
               onRemoveItem={f => upd('designFirms', (newLeadData.designFirms || []).filter(x => x !== f))}
               options={designFirms || []}
               onAddNew={f => setDesignFirms(p => [...new Set([f, ...p])])}
-              placeholder="A&D Firm(s)"
+              placeholder="Search"
               theme={theme}
               compact />
           </Row>
