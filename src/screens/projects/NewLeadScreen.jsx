@@ -400,7 +400,7 @@ export const NewLeadScreen = ({
           </Row>
 
           <Row label="Win Probability" theme={theme} inline>
-            <div className="flex items-center gap-2.5 flex-1 min-w-0">
+            <div className="flex items-center gap-2.5 flex-1 min-w-0" style={{ minHeight: 40 }}>
               <input type="range" min={10} max={100} step={10}
                 value={newLeadData.winProbability || 50}
                 onChange={e => upd('winProbability', Number(e.target.value))}

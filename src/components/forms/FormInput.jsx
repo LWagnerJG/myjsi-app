@@ -17,8 +17,9 @@ export const FormInput = React.memo(({
 }) => {
     const controlledValue = value === undefined || value === null ? '' : value;
 
-    const textSizeClass = size === 'sm' ? 'text-sm' : 'text-base';
-    const inputClass = `w-full px-4 py-3 border rounded-full focus:ring-2 outline-none ${textSizeClass} ${icon ? 'pr-10' : ''} ${className}`;
+    const textSizeClass = size === 'sm' ? 'text-[13px]' : 'text-base';
+    const paddingClass = size === 'sm' ? 'px-4' : 'px-4 py-3';
+    const inputClass = `w-full ${paddingClass} border rounded-full focus:outline-none focus:ring-0 ${textSizeClass} ${icon ? 'pr-10' : ''} ${className}`;
 
     const backgroundColor = surfaceBg ? theme.colors.surface : theme.colors.subtle;
 
@@ -26,7 +27,7 @@ export const FormInput = React.memo(({
         backgroundColor,
         borderColor: theme.colors.border,
         color: readOnly && !controlledValue ? theme.colors.textSecondary : theme.colors.textPrimary,
-        ringColor: theme.colors.accent,
+        ...(size === 'sm' ? { height: 40 } : {}),
     };
 
     // inject placeholder color class once (theme dependent best-effort)
@@ -91,8 +92,8 @@ export const FormInput = React.memo(({
                     <textarea
                         {...baseProps}
                         rows="4"
-                        className={`w-full px-4 py-3 border rounded-3xl focus:ring-2 outline-none ${textSizeClass} placeholder-theme-secondary ${className}`}
-                        style={{ ...styles, resize: 'none' }}
+                        className={`w-full px-4 py-3 border rounded-3xl focus:outline-none focus:ring-0 ${textSizeClass} placeholder-theme-secondary ${className}`}
+                        style={{ ...styles, resize: 'none', height: 'auto' }}
                     />
                 ) : (
                     <input
