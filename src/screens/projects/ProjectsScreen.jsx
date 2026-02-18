@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
-import { Briefcase, ChevronRight } from 'lucide-react';
+import { Briefcase, ChevronRight, ChevronDown, DollarSign, Percent, Building2, Users, Package, FileText } from 'lucide-react';
 import { STAGES, VERTICALS, COMPETITORS, DISCOUNT_OPTIONS, PO_TIMEFRAMES, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS } from './data.js';
 import { ProbabilitySlider } from '../../components/forms/ProbabilitySlider.jsx';
 import { ToggleSwitch } from '../../components/forms/ToggleSwitch.jsx';
@@ -47,6 +47,7 @@ const CurrencyInput = ({ value, onChange, theme }) => {
 
 // ================= Opportunity Detail (clean UI) =================
 const OpportunityDetail = ({ opp, theme, onUpdate }) => {
+  const isDark = theme.name === 'dark';
   const [draft,setDraft]=useState(opp); const dirty=useRef(false); const saveRef=useRef(null);
   useEffect(()=>{ setDraft(opp); },[opp]);
   const update=(k,v)=> setDraft(p=>{ const n={...p,[k]:v}; dirty.current= true; return n; });
@@ -54,7 +55,7 @@ const OpportunityDetail = ({ opp, theme, onUpdate }) => {
 
   // Discount dropdown
   const [discountOpen,setDiscountOpen]=useState(false); const discBtn=useRef(null); const discMenu=useRef(null); const [discPos,setDiscPos]=useState({top:0,left:0,width:0});
-  const openDiscount=()=>{ if(discBtn.current){ const r=discBtn.current.getBoundingClientRect(); setDiscPos({ top:r.bottom+8+window.scrollY, left:r.left+window.scrollX, width:r.width }); } setDiscountOpen(true); };
+  const openDiscount=()=>{ if(discBtn.current){ const r=discBtn.current.getBoundingClientRect(); setDiscPos({ top:r.bottom+8+window.scrollY, left:r.left+window.scrollX, width: Math.max(r.width, 200) }); } setDiscountOpen(true); };
   useEffect(()=>{ if(!discountOpen) return; const handler=e=>{ if(discMenu.current && !discMenu.current.contains(e.target) && !discBtn.current.contains(e.target)) setDiscountOpen(false); }; window.addEventListener('mousedown',handler); window.addEventListener('resize',()=>setDiscountOpen(false)); return ()=>window.removeEventListener('mousedown',handler); },[discountOpen]);
 
   // Tag helpers
@@ -63,169 +64,216 @@ const OpportunityDetail = ({ opp, theme, onUpdate }) => {
   const addProductSeries = (series)=>{ if(!series) return; const list=draft.products||[]; if(!list.some(p=>p.series===series)) update('products',[...list,{series}]); };
   const removeProductSeries = (series)=> update('products',(draft.products||[]).filter(p=>p.series!==series));
 
+  // Shared styles
+  const cardBg = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.72)';
+  const cardBorder = isDark ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(0,0,0,0.06)';
+  const sectionCard = { backgroundColor: cardBg, border: cardBorder, borderRadius: 20, padding: '20px' };
+  const fieldBg = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.025)';
+  const fieldBorder = isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)';
+
+  const displayValue = fmtCurrency(draft.value);
+
   return (
     <div className="flex flex-col h-full app-header-offset" style={{ background: theme.colors.background }}>
-      <div className="px-4 sm:px-6 lg:px-8 pt-5 pb-40 overflow-y-auto scrollbar-hide">
-        <div className="max-w-5xl mx-auto w-full">
-        <GlassCard theme={theme} className="p-6 rounded-3xl space-y-8" variant="elevated">
-          {/* Header */}
-          <div className="space-y-1">
-            <InlineTextInput value={draft.project||draft.name} onChange={v=>update('project',v)} theme={theme} className="text-[20px] leading-tight" />
-            <InlineTextInput value={draft.company} onChange={v=>update('company',v)} theme={theme} placeholder="Company" className="text-sm font-medium opacity-80" />
+      <div className="flex-1 overflow-y-auto scrollbar-hide">
+        <div className="px-4 sm:px-6 lg:px-8 pt-4 pb-32 max-w-3xl mx-auto w-full space-y-4">
+
+          {/* Hero header */}
+          <div className="pt-1 pb-2">
+            <input
+              value={draft.project||draft.name||''}
+              onChange={e=>update('project',e.target.value)}
+              className="w-full bg-transparent outline-none text-[22px] font-semibold tracking-tight"
+              style={{ color: theme.colors.textPrimary }}
+              placeholder="Project name"
+            />
+            <input
+              value={draft.company||''}
+              onChange={e=>update('company',e.target.value)}
+              className="w-full bg-transparent outline-none text-[13px] font-medium mt-0.5"
+              style={{ color: theme.colors.accent, opacity: 0.8 }}
+              placeholder="Company"
+            />
           </div>
 
-          {/* Stage & Discount row */}
-          <div className="flex flex-col gap-6">
-            <div>
-              <SoftLabel theme={theme}>Stage</SoftLabel>
-              <div className="flex flex-wrap gap-2 mt-2">
-                {STAGES.map(s => (
-                  <PillButton
+          {/* Key metrics row */}
+          <div className="grid grid-cols-3 gap-3">
+            <div style={sectionCard} className="flex flex-col items-center justify-center py-4">
+              <span className="text-[10px] font-semibold uppercase tracking-widest mb-1" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Value</span>
+              <CurrencyInput value={draft.value} onChange={v=>update('value',v)} theme={theme} />
+            </div>
+            <div style={sectionCard} className="flex flex-col items-center justify-center py-4">
+              <span className="text-[10px] font-semibold uppercase tracking-widest mb-1" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Win %</span>
+              <span className="text-[18px] font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>{draft.winProbability||0}%</span>
+            </div>
+            <div style={sectionCard} className="flex flex-col items-center justify-center py-4 cursor-pointer" onClick={()=>discountOpen? setDiscountOpen(false):openDiscount()} ref={discBtn}>
+              <span className="text-[10px] font-semibold uppercase tracking-widest mb-1" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Discount</span>
+              <div className="flex items-center gap-1">
+                <span className="text-[14px] font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>{draft.discount || '—'}</span>
+                <ChevronDown className="w-3 h-3" style={{ color: theme.colors.textSecondary, opacity: 0.5 }} />
+              </div>
+            </div>
+          </div>
+
+          {/* Stage */}
+          <div style={sectionCard}>
+            <span className="text-[10px] font-semibold uppercase tracking-widest block mb-3" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Pipeline Stage</span>
+            <div className="flex flex-wrap gap-1.5">
+              {STAGES.map(s => {
+                const active = s === draft.stage;
+                return (
+                  <button
                     key={s}
-                    isSelected={s === draft.stage}
                     onClick={() => update('stage', s)}
-                    theme={theme}
-                    size="compact"
+                    className="px-3.5 py-1.5 rounded-full text-[11px] font-semibold transition-all"
+                    style={{
+                      backgroundColor: active ? theme.colors.textPrimary : 'transparent',
+                      color: active ? (isDark ? '#1a1a1a' : '#fff') : theme.colors.textSecondary,
+                      border: active ? 'none' : fieldBorder,
+                    }}
                   >
                     {s}
-                  </PillButton>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Win Probability */}
+          <div style={sectionCard}>
+            <span className="text-[10px] font-semibold uppercase tracking-widest block mb-3" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Win Probability</span>
+            <ProbabilitySlider value={draft.winProbability||0} onChange={v=>update('winProbability',v)} theme={theme} />
+          </div>
+
+          {/* Details grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Vertical */}
+            <div style={sectionCard}>
+              <span className="text-[10px] font-semibold uppercase tracking-widest block mb-3" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Vertical</span>
+              <div className="flex flex-wrap gap-1.5">
+                {VERTICALS.map(v => {
+                  const active = v === draft.vertical;
+                  return (
+                    <button key={v} onClick={() => update('vertical', v)} className="px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all" style={{ backgroundColor: active ? theme.colors.textPrimary : 'transparent', color: active ? (isDark ? '#1a1a1a' : '#fff') : theme.colors.textSecondary, border: active ? 'none' : fieldBorder }}>{v}</button>
+                  );
+                })}
+              </div>
+            </div>
+            {/* PO Timeframe */}
+            <div style={sectionCard}>
+              <span className="text-[10px] font-semibold uppercase tracking-widest block mb-3" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>PO Timeframe</span>
+              <div className="flex flex-wrap gap-1.5">
+                {PO_TIMEFRAMES.map(t => {
+                  const active = t === draft.poTimeframe;
+                  return (
+                    <button key={t} onClick={() => update('poTimeframe', t)} className="px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all" style={{ backgroundColor: active ? theme.colors.textPrimary : 'transparent', color: active ? (isDark ? '#1a1a1a' : '#fff') : theme.colors.textSecondary, border: active ? 'none' : fieldBorder }}>{t}</button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Contact */}
+          <div style={sectionCard}>
+            <span className="text-[10px] font-semibold uppercase tracking-widest block mb-2" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Contact</span>
+            <input
+              value={draft.contact||''}
+              onChange={e=>update('contact',e.target.value)}
+              className="w-full bg-transparent outline-none text-[14px] font-medium py-1"
+              style={{ color: theme.colors.textPrimary, borderBottom: fieldBorder }}
+              placeholder="Contact name"
+            />
+          </div>
+
+          {/* Competition */}
+          <div style={sectionCard}>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Competition</span>
+              <ToggleSwitch checked={!!draft.competitionPresent} onChange={v=>update('competitionPresent',v)} theme={theme} />
+            </div>
+            {draft.competitionPresent && (
+              <div className="flex flex-wrap gap-1.5">
+                {COMPETITORS.filter(c => c !== 'None').map(c => {
+                  const on = (draft.competitors || []).includes(c);
+                  return (
+                    <button key={c} onClick={() => { const list = draft.competitors || []; update('competitors', on ? list.filter(x => x !== c) : [...list, c]); }} className="px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all" style={{ backgroundColor: on ? theme.colors.textPrimary : 'transparent', color: on ? (isDark ? '#1a1a1a' : '#fff') : theme.colors.textSecondary, border: on ? 'none' : fieldBorder }}>{c}</button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Products */}
+          <div style={sectionCard}>
+            <span className="text-[10px] font-semibold uppercase tracking-widest block mb-3" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Products</span>
+            <div className="flex flex-wrap gap-2">
+              {(draft.products||[]).map(p=> (
+                <button key={p.series} onClick={()=>removeProductSeries(p.series)} className="px-3 h-8 rounded-full text-[11px] font-semibold flex items-center gap-1.5 transition-all" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)', color: theme.colors.textPrimary }}>
+                  {p.series}<span className="opacity-40 text-[10px]">×</span>
+                </button>
+              ))}
+              <SuggestInputPill placeholder="Add series" suggestions={JSI_SERIES} onAdd={addProductSeries} theme={theme} />
+            </div>
+          </div>
+
+          {/* Design Firms & Dealers */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div style={sectionCard}>
+              <span className="text-[10px] font-semibold uppercase tracking-widest block mb-3" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Design Firms</span>
+              <div className="flex flex-wrap gap-2">
+                {(draft.designFirms||[]).map(f=> (
+                  <button key={f} onClick={()=>removeFrom('designFirms',f)} className="px-3 h-7 rounded-full text-[11px] font-semibold flex items-center gap-1.5 transition-all" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)', color: theme.colors.textPrimary }}>
+                    {f}<span className="opacity-40 text-[10px]">×</span>
+                  </button>
                 ))}
+                <SuggestInputPill placeholder="Add firm" suggestions={INITIAL_DESIGN_FIRMS} onAdd={v=>addUnique('designFirms',v)} theme={theme} />
               </div>
             </div>
-            <div className="flex flex-wrap items-end gap-8">
-              <div className="flex flex-col gap-2">
-                <SoftLabel theme={theme}>Discount</SoftLabel>
-                <button ref={discBtn} onClick={()=>discountOpen? setDiscountOpen(false):openDiscount()} className="px-4 h-9 rounded-full text-xs font-semibold border shadow-sm flex items-center gap-2" style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary, borderColor: theme.colors.border }}>{draft.discount || 'Undecided'} <span className={`transition-transform ${discountOpen?'rotate-180':''}`}>?</span></button>
-              </div>
-              <div className="flex flex-col gap-2 min-w-[220px]">
-                <SoftLabel theme={theme}>Vertical</SoftLabel>
-                <div className="flex flex-wrap gap-2 max-w-[380px]">
-                  {VERTICALS.map(v => (
-                    <PillButton
-                      key={v}
-                      isSelected={v === draft.vertical}
-                      onClick={() => update('vertical', v)}
-                      theme={theme}
-                      size="compact"
-                    >
-                      {v}
-                    </PillButton>
-                  ))}
-                </div>
-              </div>
-              <div className="flex flex-col gap-2">
-                <SoftLabel theme={theme}>PO Timeframe</SoftLabel>
-                <div className="flex flex-wrap gap-2 max-w-[360px]">
-                  {PO_TIMEFRAMES.map(t => (
-                    <PillButton
-                      key={t}
-                      isSelected={t === draft.poTimeframe}
-                      onClick={() => update('poTimeFrame', t)}
-                      theme={theme}
-                      size="compact"
-                    >
-                      {t}
-                    </PillButton>
-                  ))}
-                </div>
+            <div style={sectionCard}>
+              <span className="text-[10px] font-semibold uppercase tracking-widest block mb-3" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Dealers</span>
+              <div className="flex flex-wrap gap-2">
+                {(draft.dealers||[]).map(f=> (
+                  <button key={f} onClick={()=>removeFrom('dealers',f)} className="px-3 h-7 rounded-full text-[11px] font-semibold flex items-center gap-1.5 transition-all" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)', color: theme.colors.textPrimary }}>
+                    {f}<span className="opacity-40 text-[10px]">×</span>
+                  </button>
+                ))}
+                <SuggestInputPill placeholder="Add dealer" suggestions={INITIAL_DEALERS} onAdd={v=>addUnique('dealers',v)} theme={theme} />
               </div>
             </div>
           </div>
 
-          {/* Metrics */}
-          <div className="flex flex-wrap gap-3">
-            <div className="px-3 h-8 flex items-center gap-1 rounded-full border text-[11px] font-semibold" style={{ background: theme.colors.surface, borderColor: theme.colors.border, color: theme.colors.textPrimary }}>$ {draft.value?.toString().replace(/[^0-9]/g,'') || '0'}</div>
-            <div className="px-3 h-8 flex items-center gap-1 rounded-full border text-[11px] font-semibold" style={{ background: theme.colors.surface, borderColor: theme.colors.border, color: theme.colors.textPrimary }}>Win {draft.winProbability||0}%</div>
-            <div className="px-3 h-8 flex items-center gap-1 rounded-full border text-[11px] font-semibold" style={{ background: theme.colors.surface, borderColor: theme.colors.border, color: theme.colors.textPrimary }}>{draft.discount||'Undecided'}</div>
-          </div>
-
-          {/* Probability & competition */}
-          <div className="grid gap-8 md:grid-cols-2">
-            <div className="space-y-4">
-              <div className="flex flex-col gap-2">
-                <SoftLabel theme={theme}>Win Probability</SoftLabel>
-                <ProbabilitySlider value={draft.winProbability||0} onChange={v=>update('winProbability',v)} theme={theme} />
-              </div>
-              <div className="flex items-center gap-4">
-                <SoftLabel theme={theme}>Competition?</SoftLabel>
-                <ToggleSwitch checked={!!draft.competitionPresent} onChange={v=>update('competitionPresent',v)} theme={theme} />
-              </div>
-              {draft.competitionPresent && (
-                <div className="pt-2">
-                  <SoftLabel theme={theme}>Competitors</SoftLabel>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {COMPETITORS.filter(c => c !== 'None').map(c => {
-                      const on = (draft.competitors || []).includes(c);
-                      return (
-                        <PillButton
-                          key={c}
-                          isSelected={on}
-                          onClick={() => {
-                            const list = draft.competitors || [];
-                            update('competitors', on ? list.filter(x => x !== c) : [...list, c]);
-                          }}
-                          theme={theme}
-                          size="compact"
-                        >
-                          {c}
-                        </PillButton>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-6">
-                <div className="flex flex-col gap-1"><SoftLabel theme={theme}>Contact</SoftLabel><InlineTextInput value={draft.contact} onChange={v=>update('contact',v)} theme={theme} placeholder="Contact" /></div>
-                <div className="flex flex-col gap-1"><SoftLabel theme={theme}>Value</SoftLabel><CurrencyInput value={draft.value} onChange={v=>update('value',v)} theme={theme} /></div>
-              </div>
-              <div>
-                <SoftLabel theme={theme}>Products</SoftLabel>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {(draft.products||[]).map(p=> <button key={p.series} onClick={()=>removeProductSeries(p.series)} className="px-3 h-8 rounded-full text-[11px] font-medium flex items-center gap-1 border" style={{ background: theme.colors.subtle, borderColor: theme.colors.border, color: theme.colors.textPrimary }}>{p.series}<span className="opacity-60">×</span></button>)}
-                  <SuggestInputPill placeholder="Add series" suggestions={JSI_SERIES} onAdd={addProductSeries} theme={theme} />
-                </div>
-              </div>
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <SoftLabel theme={theme}>Design Firms</SoftLabel>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {(draft.designFirms||[]).map(f=> <button key={f} onClick={()=>removeFrom('designFirms',f)} className="px-3 h-8 rounded-full text-[11px] font-medium flex items-center gap-1 border" style={{ background: theme.colors.subtle, borderColor: theme.colors.border, color: theme.colors.textPrimary }}>{f}<span className="opacity-60">×</span></button>)}
-                    <SuggestInputPill placeholder="Add firm" suggestions={INITIAL_DESIGN_FIRMS} onAdd={v=>addUnique('designFirms',v)} theme={theme} />
-                  </div>
-                </div>
-                <div>
-                  <SoftLabel theme={theme}>Dealers</SoftLabel>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {(draft.dealers||[]).map(f=> <button key={f} onClick={()=>removeFrom('dealers',f)} className="px-3 h-8 rounded-full text-[11px] font-medium flex items-center gap-1 border" style={{ background: theme.colors.subtle, borderColor: theme.colors.border, color: theme.colors.textPrimary }}>{f}<span className="opacity-60">×</span></button>)}
-                    <SuggestInputPill placeholder="Add dealer" suggestions={INITIAL_DEALERS} onAdd={v=>addUnique('dealers',v)} theme={theme} />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <SoftLabel theme={theme}>Notes</SoftLabel>
-            <textarea value={draft.notes||''} onChange={e=>update('notes',e.target.value)} rows={4} className="w-full mt-2 resize-none rounded-xl p-3 text-sm outline-none border" style={{ background: theme.colors.surface, borderColor: theme.colors.border, color: theme.colors.textPrimary }} placeholder="Add project notes..." />
+          {/* Notes */}
+          <div style={sectionCard}>
+            <span className="text-[10px] font-semibold uppercase tracking-widest block mb-2" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Notes</span>
+            <textarea
+              value={draft.notes||''}
+              onChange={e=>update('notes',e.target.value)}
+              rows={4}
+              className="w-full resize-none rounded-2xl p-3.5 text-[13px] leading-relaxed outline-none"
+              style={{ background: fieldBg, border: fieldBorder, color: theme.colors.textPrimary }}
+              placeholder="Add project notes..."
+            />
             {Array.isArray(draft.quotes)&&draft.quotes.length>0 && (
-              <div className="mt-4 space-y-2">
-                <SoftLabel theme={theme}>Quotes</SoftLabel>
-                <div className="flex flex-col gap-2">
-                  {draft.quotes.map(q=> <a key={q.id} href={q.url} target="_blank" rel="noopener noreferrer" className="px-3 py-2 rounded-lg text-xs font-medium border transition-colors" style={{ color: theme.colors.textPrimary, borderColor: theme.colors.border }} onMouseEnter={e => e.currentTarget.style.backgroundColor = theme.colors.subtle} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>{q.fileName}</a>)}
+              <div className="mt-4">
+                <span className="text-[10px] font-semibold uppercase tracking-widest block mb-2" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Quotes</span>
+                <div className="flex flex-col gap-1.5">
+                  {draft.quotes.map(q=> <a key={q.id} href={q.url} target="_blank" rel="noopener noreferrer" className="px-3 py-2 rounded-xl text-[12px] font-medium transition-colors" style={{ color: theme.colors.textPrimary, background: fieldBg, border: fieldBorder }} onMouseEnter={e => e.currentTarget.style.opacity = '0.7'} onMouseLeave={e => e.currentTarget.style.opacity = '1'}>{q.fileName}</a>)}
                 </div>
               </div>
             )}
           </div>
-          <p className="text-[11px] italic opacity-70" style={{ color: theme.colors.textSecondary }}>Autosaved</p>
-        </GlassCard>
+
+          {/* Autosaved indicator */}
+          <div className="flex justify-center pt-1 pb-4">
+            <span className="text-[10px] font-medium tracking-wide" style={{ color: theme.colors.textSecondary, opacity: 0.35 }}>Changes saved automatically</span>
+          </div>
+
         </div>
       </div>
       {discountOpen && (
-        <div ref={discMenu} className="fixed rounded-2xl border shadow-2xl overflow-hidden" style={{ top:discPos.top, left:discPos.left, width:discPos.width, background:theme.colors.surface, borderColor:theme.colors.border, zIndex: DESIGN_TOKENS.zIndex.popover }}>
-          <div className="max-h-[360px] overflow-y-auto custom-scroll-hide py-1">
-            {DISCOUNT_OPTIONS.map(opt=> <button key={opt} onClick={()=>{ update('discount',opt); setDiscountOpen(false); }} className={`w-full text-left px-3 py-2 text-xs transition-colors ${opt===draft.discount?'font-semibold':''}`} style={{ color: theme.colors.textPrimary }} onMouseEnter={e => e.currentTarget.style.backgroundColor = theme.colors.subtle} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>{opt}</button>)}
+        <div ref={discMenu} className="fixed rounded-2xl overflow-hidden" style={{ top:discPos.top, left:discPos.left, width:discPos.width, background: isDark ? '#2a2a2a' : '#fff', border: cardBorder, boxShadow: '0 8px 32px rgba(0,0,0,0.12)', zIndex: DESIGN_TOKENS.zIndex.popover }}>
+          <div className="max-h-[360px] overflow-y-auto scrollbar-hide py-1">
+            {DISCOUNT_OPTIONS.map(opt=> <button key={opt} onClick={()=>{ update('discount',opt); setDiscountOpen(false); }} className={`w-full text-left px-4 py-2.5 text-[12px] transition-colors ${opt===draft.discount?'font-bold':'font-medium'}`} style={{ color: theme.colors.textPrimary }} onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>{opt}</button>)}
           </div>
         </div>
       )}
@@ -233,10 +281,8 @@ const OpportunityDetail = ({ opp, theme, onUpdate }) => {
   );
 };
 
-// Project card component (restored)
+// Project card component
 const ProjectCard = ({ opp, theme, onClick }) => {
-  const discountPct = typeof opp.discount === 'string' ? opp.discount : typeof opp.discount === 'number' ? opp.discount+'%' : null;
-  const winPct = typeof opp.winProbability === 'number' ? `${opp.winProbability}%` : null;
   let displayValue = opp.value;
   if (displayValue != null) {
     if (typeof displayValue === 'number') displayValue = '$' + displayValue.toLocaleString();
@@ -255,27 +301,11 @@ const ProjectCard = ({ opp, theme, onClick }) => {
           borderRadius: 18,
         }}
       >
-        {/* Top row: name + badges */}
-        <div className="flex items-start justify-between gap-3 mb-1">
-          <div className="min-w-0 flex-1">
-            <p className="font-semibold text-[14px] leading-snug truncate" style={{ color: theme.colors.textPrimary }}>{opp.name}</p>
-            <p className="mt-0.5 text-[11px] font-medium truncate" style={{ color: theme.colors.accent, opacity: 0.8 }}>{opp.company||'Unknown'}</p>
-          </div>
-          <div className="flex items-center gap-1.5 flex-shrink-0">
-            {winPct && (
-              <span className="inline-flex items-center h-5 px-2 rounded-full text-[10px] font-semibold"
-                style={{ backgroundColor: isDark ? 'rgba(74,124,89,0.15)' : 'rgba(74,124,89,0.10)', color: '#4A7C59' }}
-              >{winPct}</span>
-            )}
-            {discountPct && (
-              <span className="inline-flex items-center h-5 px-2 rounded-full text-[10px] font-semibold"
-                style={{ backgroundColor: isDark ? 'rgba(194,160,52,0.18)' : 'rgba(194,160,52,0.12)', color: isDark ? '#D4B94E' : '#8B7A2E' }}
-              >{discountPct} off</span>
-            )}
-          </div>
+        <div className="mb-2">
+          <p className="font-semibold text-[14px] leading-snug truncate" style={{ color: theme.colors.textPrimary }}>{opp.name}</p>
+          <p className="mt-0.5 text-[11px] font-medium truncate" style={{ color: theme.colors.accent, opacity: 0.8 }}>{opp.company||'Unknown'}</p>
         </div>
-        {/* Value */}
-        <div className="flex items-end justify-end mt-2">
+        <div className="flex items-end justify-end">
           <p className="font-bold text-[20px] tracking-tight" style={{ color: theme.colors.textPrimary }}>{displayValue}</p>
         </div>
       </div>
