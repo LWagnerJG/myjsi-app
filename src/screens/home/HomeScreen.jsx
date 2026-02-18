@@ -1232,32 +1232,32 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                 className="fixed inset-x-0 z-[28] px-5 sm:px-7 lg:px-10 pointer-events-none"
                 style={{ bottom: 82 }}
             >
-                <div
-                    className="max-w-5xl mx-auto pointer-events-auto flex items-center justify-between px-5 py-2.5"
+                <button
+                    onClick={() => onNavigate('feedback')}
+                    className="max-w-5xl mx-auto pointer-events-auto flex items-center justify-between px-5 py-2.5 w-full transition-all active:scale-[0.99]"
                     style={{
                         backdropFilter: 'blur(48px)',
                         WebkitBackdropFilter: 'blur(48px)',
-                        backgroundColor: isDark ? 'rgba(18,18,18,0.22)' : 'rgba(250,248,245,0.22)',
-                        border: 'none',
+                        backgroundColor: isDark ? 'rgba(18,18,18,0.14)' : 'rgba(250,248,245,0.14)',
+                        border: isDark ? '1px solid rgba(255,255,255,0.09)' : '1px solid rgba(0,0,0,0.07)',
                         borderRadius: 999,
+                        display: 'flex',
                     }}
                 >
-                    <p className="text-[11px] opacity-35" style={{ color: colors.textPrimary }}>
+                    <p className="text-[11px] opacity-30" style={{ color: colors.textPrimary }}>
                         Help us improve MyJSI
                     </p>
-                    <button
-                        onClick={() => onNavigate('feedback')}
-                        className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-semibold transition-all active:scale-95"
+                    <span
+                        className="flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-semibold"
                         style={{
-                            backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.08)',
+                            backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.06)',
                             color: colors.textPrimary,
-                            border: 'none',
                         }}
                     >
                         Share Feedback
-                        <ChevronRight className="w-3 h-3 opacity-50" />
-                    </button>
-                </div>
+                        <ChevronRight className="w-3 h-3 opacity-40" />
+                    </span>
+                </button>
             </div>
 
             {/* Request Quote Modal */}
