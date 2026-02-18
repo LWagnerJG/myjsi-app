@@ -190,8 +190,8 @@ const ProductSpotlight = ({ selectedSeries, onAdd, available, theme }) => {
 const ProductCard = React.memo(({ product, idx, onRemove, onUpdate, theme }) => {
   const hasOpts = ['Vision', 'Knox', 'Wink', 'Hoopz'].includes(product.series);
   return (
-    <div className="rounded-xl border" style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.border }}>
-      <div className="flex items-center justify-between px-3.5 py-2.5">
+    <div className="rounded-2xl border" style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.border }}>
+      <div className="flex items-center justify-between px-4 py-3">
         <span className="text-[13px] font-semibold" style={{ color: theme.colors.textPrimary }}>{product.series}</span>
         <button type="button" onClick={() => onRemove(idx)}
           className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium transition-all"
@@ -200,7 +200,7 @@ const ProductCard = React.memo(({ product, idx, onRemove, onUpdate, theme }) => 
         </button>
       </div>
       {hasOpts && (
-        <div className="px-3.5 pb-3">
+        <div className="px-4 pb-3">
           {product.series === 'Vision' && <VisionOptions theme={theme} product={product} productIndex={idx} onUpdate={onUpdate} />}
           {product.series === 'Knox' && <KnoxOptions theme={theme} product={product} productIndex={idx} onUpdate={onUpdate} />}
           {(product.series === 'Wink' || product.series === 'Hoopz') && <WinkHoopzOptions theme={theme} product={product} productIndex={idx} onUpdate={onUpdate} />}
@@ -309,8 +309,8 @@ export const NewLeadScreen = ({
             </div>
           </Row>
 
-          <Row label="Vertical" theme={theme}>
-            <div className="flex flex-wrap gap-1.5">
+          <Row label="Vertical" theme={theme} inline>
+            <div className="flex flex-wrap gap-1.5 justify-end">
               {VERTICALS.map(v => {
                 const lbl = v === 'Other (Please specify)' ? 'Other' : v;
                 return (
@@ -319,13 +319,13 @@ export const NewLeadScreen = ({
                 );
               })}
             </div>
-            {newLeadData.vertical === 'Other (Please specify)' && (
-              <div className="mt-2">
-                <FormInput value={newLeadData.otherVertical || ''} onChange={e => upd('otherVertical', e.target.value)}
-                  placeholder="Enter vertical" theme={theme} size="sm" surfaceBg />
-              </div>
-            )}
           </Row>
+          {newLeadData.vertical === 'Other (Please specify)' && (
+            <Row label={null} theme={theme}>
+              <FormInput value={newLeadData.otherVertical || ''} onChange={e => upd('otherVertical', e.target.value)}
+                placeholder="Enter vertical" theme={theme} size="sm" surfaceBg />
+            </Row>
+          )}
 
           <Row label="Install Date" theme={theme} inline>
             <FormInput type="date" value={newLeadData.expectedInstallDate || ''}
@@ -382,7 +382,71 @@ export const NewLeadScreen = ({
           </Row>
         </Section>
 
-        {/* ── 3. Competition & Products ── */}
+        {/* ── 3. Financials & Timeline ── */}
+        <Section title="Financials & Timeline" theme={theme} className="mb-4">
+          <Row label="Estimated List *" theme={theme} noSep inline>
+            <FormInput type="currency" value={newLeadData.estimatedList || ''} required
+              onChange={e => upd('estimatedList', e.target.value)}
+              placeholder="$0" theme={theme} surfaceBg />
+          </Row>
+
+          <Row label="Win Probability" theme={theme} inline>
+            <div className="flex items-center gap-2.5 flex-1 min-w-0">
+              <input type="range" min={10} max={100} step={10}
+                value={newLeadData.winProbability || 50}
+                onChange={e => upd('winProbability', Number(e.target.value))}
+                className="flex-1 accent-black" style={{ minWidth: 0 }} />
+              <span className="text-[12px] font-semibold tabular-nums w-[32px] text-right flex-shrink-0"
+                style={{ color: c.textPrimary }}>{newLeadData.winProbability || 50}%</span>
+            </div>
+          </Row>
+
+          <Row label="Discount" theme={theme} inline>
+            <PortalNativeSelect value={newLeadData.discount || ''}
+              onChange={e => upd('discount', e.target.value)}
+              options={DISCOUNT_OPTIONS.map(d => ({ label: d, value: d }))}
+              placeholder="Select Discount" theme={theme} mutedValues={['Undecided']} />
+          </Row>
+
+          <Row label="Rewards" theme={theme} inline>
+            <div className="flex gap-1 rounded-full p-0.5 border"
+              style={{ backgroundColor: c.subtle, borderColor: c.border }}>
+              {[['salesReward', 'Sales'], ['designerReward', 'Designer']].map(([key, lbl]) => {
+                const on = newLeadData[key] !== false;
+                return (
+                  <button key={key} type="button" onClick={() => upd(key, !on)}
+                    className="px-3 py-1 rounded-full text-[11px] font-semibold transition-all text-center whitespace-nowrap"
+                    style={{
+                      backgroundColor: on ? c.textPrimary : 'transparent',
+                      color: on ? (dark ? '#1a1a1a' : '#fff') : c.textPrimary,
+                    }}>{on ? '✓ ' : ''}{lbl}</button>
+                );
+              })}
+            </div>
+          </Row>
+
+          <Row label="PO Timeframe" theme={theme} inline>
+            <div className="flex flex-wrap gap-1.5 justify-end">
+              {PO_OPTIONS.map(t => (
+                <PillButton key={t} size="xs"
+                  isSelected={newLeadData.poTimeframe === t}
+                  onClick={() => upd('poTimeframe', t)} theme={theme}>{t}</PillButton>
+              ))}
+            </div>
+          </Row>
+
+          <Row label="Contract" theme={theme} inline>
+            <PortalNativeSelect value={newLeadData.contractType || ''}
+              onChange={e => upd('contractType', e.target.value)}
+              options={[
+                { label: 'None', value: 'none' },
+                ...Object.keys(CONTRACTS_DATA).map(k => ({ label: CONTRACTS_DATA[k].name, value: k })),
+              ]}
+              placeholder="Select Contract" theme={theme} mutedValues={['none', 'None']} />
+          </Row>
+        </Section>
+
+        {/* ── 4. Competition & Products ── */}
         <Section title="Competition & Products" theme={theme} className="mb-4">
           {/* bid + competition toggles, inline */}
           <div className="flex items-center justify-between py-2">
@@ -418,15 +482,20 @@ export const NewLeadScreen = ({
             </div>
           </div>
 
-          {/* products */}
-          <Row label="Products" theme={theme}>
-            <ProductSpotlight
-              selectedSeries={(newLeadData.products || []).map(p => p.series)}
-              onAdd={addProduct} available={JSI_SERIES} theme={theme} />
-          </Row>
+          {/* products — search inline to right of label */}
+          <div className="py-3 border-t" style={{ borderColor: c.border }}>
+            <div className="flex items-center gap-3">
+              <label className="text-[13px] font-semibold flex-shrink-0 whitespace-nowrap" style={{ color: c.textPrimary }}>Products</label>
+              <div className="flex-1 min-w-0">
+                <ProductSpotlight
+                  selectedSeries={(newLeadData.products || []).map(p => p.series)}
+                  onAdd={addProduct} available={JSI_SERIES} theme={theme} />
+              </div>
+            </div>
+          </div>
 
           {(newLeadData.products || []).length > 0 && (
-            <div className="space-y-2 pt-1">
+            <div className="space-y-2 pb-1">
               {(newLeadData.products || []).map((p, idx) => (
                 <ProductCard key={p.series + idx} product={p} idx={idx}
                   onRemove={removeProduct} onUpdate={updateProductOption} theme={theme} />
@@ -462,7 +531,7 @@ export const NewLeadScreen = ({
               )}
             </div>
             {quoteMode === 'needed' && (
-              <div className="mt-2.5 rounded-xl p-3 flex items-start gap-2.5" style={{ backgroundColor: c.subtle }}>
+              <div className="mt-2.5 rounded-2xl p-3 flex items-start gap-2.5" style={{ backgroundColor: c.subtle }}>
                 <Upload className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: c.textSecondary }} />
                 <div>
                   <p className="text-[12px] font-medium" style={{ color: c.textPrimary }}>Upload specs or request later</p>
@@ -476,66 +545,6 @@ export const NewLeadScreen = ({
               </div>
             )}
           </div>
-        </Section>
-
-        {/* ── 4. Financials & Timeline ── */}
-        <Section title="Financials & Timeline" theme={theme} className="mb-4">
-          <Row label="Estimated List *" theme={theme} noSep inline>
-            <FormInput type="currency" value={newLeadData.estimatedList || ''} required
-              onChange={e => upd('estimatedList', e.target.value)}
-              placeholder="$0" theme={theme} surfaceBg />
-          </Row>
-
-          <Row label="Win Probability" theme={theme} inline>
-            <PortalNativeSelect value={String(newLeadData.winProbability || 50)}
-              onChange={e => upd('winProbability', Number(e.target.value))}
-              options={WIN_PCT_OPTIONS.map(p => ({ label: `${p}%`, value: String(p) }))}
-              placeholder="50%" theme={theme} />
-          </Row>
-
-          <Row label="Discount" theme={theme} inline>
-            <PortalNativeSelect value={newLeadData.discount || ''}
-              onChange={e => upd('discount', e.target.value)}
-              options={DISCOUNT_OPTIONS.map(d => ({ label: d, value: d }))}
-              placeholder="Select Discount" theme={theme} mutedValues={['Undecided']} />
-          </Row>
-
-          <Row label="Rewards" theme={theme}>
-            <div className="grid grid-cols-2 gap-1 rounded-full p-1 border"
-              style={{ backgroundColor: c.subtle, borderColor: c.border }}>
-              {[['salesReward', 'Sales Reward'], ['designerReward', 'Designer Reward']].map(([key, lbl]) => {
-                const on = newLeadData[key] !== false;
-                return (
-                  <button key={key} type="button" onClick={() => upd(key, !on)}
-                    className="px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all text-center"
-                    style={{
-                      backgroundColor: on ? c.textPrimary : 'transparent',
-                      color: on ? (dark ? '#1a1a1a' : '#fff') : c.textPrimary,
-                    }}>{on ? '✓ ' : ''}{lbl}</button>
-                );
-              })}
-            </div>
-          </Row>
-
-          <Row label="PO Timeframe" theme={theme} inline>
-            <div className="flex flex-wrap gap-1.5 justify-end">
-              {PO_OPTIONS.map(t => (
-                <PillButton key={t} size="xs"
-                  isSelected={newLeadData.poTimeframe === t}
-                  onClick={() => upd('poTimeframe', t)} theme={theme}>{t}</PillButton>
-              ))}
-            </div>
-          </Row>
-
-          <Row label="Contract" theme={theme} inline>
-            <PortalNativeSelect value={newLeadData.contractType || ''}
-              onChange={e => upd('contractType', e.target.value)}
-              options={[
-                { label: 'None', value: 'none' },
-                ...Object.keys(CONTRACTS_DATA).map(k => ({ label: CONTRACTS_DATA[k].name, value: k })),
-              ]}
-              placeholder="Select Contract" theme={theme} mutedValues={['none', 'None']} />
-          </Row>
         </Section>
 
         {/* ── 5. Notes ── */}
