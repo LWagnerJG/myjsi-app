@@ -416,17 +416,12 @@ export const NewLeadScreen = ({
           </Row>
 
           <Row label="Rewards" theme={theme} inline>
-            <div className="flex gap-1 rounded-full p-0.5 border"
-              style={{ backgroundColor: c.subtle, borderColor: c.border }}>
+            <div className="flex flex-wrap gap-1.5 justify-end">
               {[['salesReward', 'Sales'], ['designerReward', 'Designer']].map(([key, lbl]) => {
                 const on = newLeadData[key] !== false;
                 return (
-                  <button key={key} type="button" onClick={() => upd(key, !on)}
-                    className="px-3 py-1 rounded-full text-[11px] font-semibold transition-all text-center whitespace-nowrap"
-                    style={{
-                      backgroundColor: on ? c.textPrimary : 'transparent',
-                      color: on ? (dark ? '#1a1a1a' : '#fff') : c.textPrimary,
-                    }}>{on ? '✓ ' : ''}{lbl}</button>
+                  <PillButton key={key} size="xs" isSelected={on}
+                    onClick={() => upd(key, !on)} theme={theme}>{lbl}</PillButton>
                 );
               })}
             </div>
