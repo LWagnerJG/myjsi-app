@@ -79,7 +79,7 @@ const Section = ({ title, titleRight, children, theme, className = '' }) => {
             }}>{title}</h3>
             <div className="ml-auto min-w-0" style={{ width: '55%' }}>{titleRight}</div>
           </div>
-          <div style={{ ...lineStyle, marginTop: 2 }} />
+          <div style={{ ...lineStyle, marginTop: -3 }} />
         </>
       )}
       {children}
