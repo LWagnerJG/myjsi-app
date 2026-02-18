@@ -396,23 +396,23 @@ export const NewLeadScreen = ({
           </Row>
 
           <Row label="Rewards" theme={theme} inline>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="grid grid-cols-2 gap-1.5">
               {[['salesReward', 'Sales Reward'], ['designerReward', 'Designer Reward']].map(([key, lbl]) => {
                 const on = newLeadData[key] !== false;
                 return (
                   <PillButton key={key} size="xs" isSelected={on}
-                    onClick={() => upd(key, !on)} theme={theme}>{on ? '✓ ' : ''}{lbl}</PillButton>
+                    onClick={() => upd(key, !on)} theme={theme} className="w-full">{on ? '✓ ' : ''}{lbl}</PillButton>
                 );
               })}
             </div>
           </Row>
 
           <Row label="PO Timeframe" theme={theme} inline>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="grid grid-cols-3 gap-1.5">
               {PO_OPTIONS.map(t => (
                 <PillButton key={t} size="xs"
                   isSelected={newLeadData.poTimeframe === t}
-                  onClick={() => upd('poTimeframe', t)} theme={theme}>{t}</PillButton>
+                  onClick={() => upd('poTimeframe', t)} theme={theme} className="w-full">{t}</PillButton>
               ))}
             </div>
           </Row>
@@ -518,11 +518,11 @@ export const NewLeadScreen = ({
                 </button>
               </div>
             ) : (
-              <div className="flex flex-wrap gap-1.5">
+              <div className="grid grid-cols-2 gap-1.5">
                 <PillButton size="xs" isSelected={false}
-                  onClick={() => setQuoteMode('existing')} theme={theme}>Existing Quote</PillButton>
+                  onClick={() => setQuoteMode('existing')} theme={theme} className="w-full">Existing Quote</PillButton>
                 <PillButton size="xs" isSelected={quoteMode === 'needed'}
-                  onClick={() => setQuoteMode(quoteMode === 'needed' ? null : 'needed')} theme={theme}>Quote Needed</PillButton>
+                  onClick={() => setQuoteMode(quoteMode === 'needed' ? null : 'needed')} theme={theme} className="w-full">Quote Needed</PillButton>
               </div>
             )}
           </Row>
