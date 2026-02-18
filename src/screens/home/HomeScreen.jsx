@@ -846,7 +846,7 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                 className="select-none"
                 style={{
                     position: 'fixed',
-                    top: 0,
+                    top: 6,
                     right: lampRight,
                     zIndex: 35,
                     display: 'flex',
@@ -934,34 +934,34 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                 </div>
 
                 {/* Light effects — warm layered glow beneath shade */}
-                {/* Primary light cone — overlaps shade bottom for seamless join */}
+                {/* Primary light cone — starts at shade bottom */}
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: lampLightReady && lampOn ? 1 : 0 }}
                     transition={{ duration: 2.2, ease: [0.15, 0.85, 0.3, 1] }}
-                    style={{ position: 'absolute', top: 42, left: '50%', transform: 'translateX(-50%)',
+                    style={{ position: 'absolute', top: 35, left: '50%', transform: 'translateX(-50%)',
                         width: 0, height: 0,
-                        borderLeft: '38px solid transparent', borderRight: '38px solid transparent',
-                        borderTop: '320px solid rgba(255,225,170,0.045)',
+                        borderLeft: '36px solid transparent', borderRight: '36px solid transparent',
+                        borderTop: '300px solid rgba(255,225,170,0.045)',
                         pointerEvents: 'none', filter: 'blur(16px)' }} />
                 {/* Warm inner glow — tighter cone */}
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: lampLightReady && lampOn ? 0.8 : 0 }}
                     transition={{ duration: 1.8, ease: [0.15, 0.85, 0.3, 1], delay: 0.15 }}
-                    style={{ position: 'absolute', top: 43, left: '50%', transform: 'translateX(-50%)',
+                    style={{ position: 'absolute', top: 35, left: '50%', transform: 'translateX(-50%)',
                         width: 0, height: 0,
-                        borderLeft: '20px solid transparent', borderRight: '20px solid transparent',
-                        borderTop: '220px solid rgba(255,218,165,0.055)',
+                        borderLeft: '18px solid transparent', borderRight: '18px solid transparent',
+                        borderTop: '200px solid rgba(255,218,165,0.055)',
                         pointerEvents: 'none', filter: 'blur(10px)' }} />
                 {/* Hot spot glow at shade opening */}
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: lampLightReady && lampOn ? 0.7 : 0 }}
                     transition={{ duration: 2.0, ease: [0.15, 0.85, 0.3, 1], delay: 0.3 }}
-                    style={{ position: 'absolute', top: 38, left: '50%', transform: 'translateX(-50%)',
-                        width: 42, height: 12, borderRadius: '50%',
+                    style={{ position: 'absolute', top: 33, left: '50%', transform: 'translateX(-50%)',
+                        width: 38, height: 10, borderRadius: '50%',
                         background: 'radial-gradient(ellipse at 50% 80%, rgba(255,232,195,0.18) 0%, rgba(255,218,165,0.06) 50%, transparent 80%)',
                         pointerEvents: 'none', filter: 'blur(3px)' }} />
                 {/* Subtle ambient halo */}
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: lampLightReady && lampOn ? 0.4 : 0 }}
                     transition={{ duration: 2.6, ease: [0.15, 0.85, 0.3, 1], delay: 0.5 }}
-                    style={{ position: 'absolute', top: 24, left: '50%', transform: 'translateX(-50%)',
-                        width: 95, height: 50, borderRadius: '50%',
+                    style={{ position: 'absolute', top: 28, left: '50%', transform: 'translateX(-50%)',
+                        width: 80, height: 40, borderRadius: '50%',
                         background: 'radial-gradient(ellipse at 50% 70%, rgba(255,235,200,0.06) 0%, transparent 70%)',
                         pointerEvents: 'none', filter: 'blur(8px)' }} />
             </div>,
