@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Settings, User, HelpCircle, LogOut } from 'lucide-react';
+import { Settings, User, HelpCircle, LogOut, Moon, Sun } from 'lucide-react';
 import { isDarkTheme, DESIGN_TOKENS } from '../../design-system/tokens.js';
 
-export const ProfileMenu = ({ show, onClose, onNavigate, theme, anchorRef }) => {
+export const ProfileMenu = ({ show, onClose, onNavigate, theme, anchorRef, isDarkMode, onToggleTheme }) => {
     const isDark = isDarkTheme(theme);
     const [pos, setPos] = useState(null);
 
@@ -24,6 +24,7 @@ export const ProfileMenu = ({ show, onClose, onNavigate, theme, anchorRef }) => 
     const menuItems = [
         { label: 'Settings', action: () => { onNavigate('settings'); onClose(); }, icon: Settings },
         { label: 'App Users', action: () => { onNavigate('members'); onClose(); }, icon: User },
+        { label: 'Dark Mode', action: onToggleTheme, icon: isDarkMode ? Sun : Moon, toggle: true },
         { label: 'Help', action: () => { onNavigate('help'); onClose(); }, icon: HelpCircle },
         { label: 'Log Out', action: () => { onNavigate('logout'); onClose(); }, icon: LogOut, danger: true },
     ];
@@ -53,7 +54,18 @@ export const ProfileMenu = ({ show, onClose, onNavigate, theme, anchorRef }) => 
                         onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                     >
                         <item.icon className="w-4 h-4 mr-3 flex-shrink-0" style={{ color: item.danger ? '#B85C5C' : theme.colors.textSecondary }} />
-                        {item.label}
+                        <span className="flex-1">{item.label}</span>
+                        {item.toggle && (
+                            <div className="w-9 h-5 rounded-full relative transition-colors duration-200 flex-shrink-0"
+                                style={{ backgroundColor: isDarkMode ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)') }}>
+                                <div className="absolute top-0.5 w-4 h-4 rounded-full transition-transform duration-200"
+                                    style={{
+                                        backgroundColor: isDarkMode ? theme.colors.accentText : '#fff',
+                                        transform: isDarkMode ? 'translateX(17px)' : 'translateX(2px)',
+                                        boxShadow: '0 1px 2px rgba(0,0,0,0.15)',
+                                    }} />
+                            </div>
+                        )}
                     </button>
                 ))}
             </div>

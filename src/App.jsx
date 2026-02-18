@@ -432,7 +432,7 @@ function App() {
                     </ErrorBoundary>
                 </div>
                 {showProfileMenu && (
-                    <ProfileMenu show={showProfileMenu} onClose={() => setShowProfileMenu(false)} onNavigate={handleNavigate} theme={currentTheme} anchorRef={profileBtnRef} />
+                    <ProfileMenu show={showProfileMenu} onClose={() => setShowProfileMenu(false)} onNavigate={handleNavigate} theme={currentTheme} anchorRef={profileBtnRef} isDarkMode={isDarkMode} onToggleTheme={() => setIsDarkMode(d => !d)} />
                 )}
                 <VoiceModal message={voiceMessage} show={!!voiceMessage} theme={currentTheme} />
                 <SuccessToast message={successMessage} show={!!successMessage} theme={currentTheme} />
