@@ -1,6 +1,6 @@
 ﻿import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Search, Check, Upload, Paperclip, FileText, Trash2 } from 'lucide-react';
+import { X, Search, Check, Upload, Paperclip, FileText, ArrowRight } from 'lucide-react';
 import { FormInput } from '../../components/forms/FormInput.jsx';
 import { PortalNativeSelect } from '../../components/forms/PortalNativeSelect.jsx';
 import { AutoCompleteCombobox } from '../../components/forms/AutoCompleteCombobox.jsx';
@@ -13,9 +13,7 @@ import { DESIGN_TOKENS, isDarkTheme } from '../../design-system/tokens.js';
 import {
   STAGES, VERTICALS, COMPETITORS, DISCOUNT_OPTIONS,
 } from './data.js';
-import { LEAD_TIMES_DATA } from '../resources/lead-times/data.js';
-import { JSI_LAMINATES, JSI_VENEERS, JSI_SERIES } from '../products/data.js';
-import { FINISH_SAMPLES } from '../samples';
+import { JSI_SERIES } from '../products/data.js';
 import { CONTRACTS_DATA } from '../resources/contracts/data.js';
 import { VisionOptions, KnoxOptions, WinkHoopzOptions } from './product-options.jsx';
 
@@ -41,7 +39,6 @@ const CITY_OPTIONS = [
 ];
 
 const PO_OPTIONS = ['Unknown', '<30 Days', '30\u201360 Days', '60\u2013180 Days', '180+ Days', 'Next Year'];
-const WIN_PCT_OPTIONS = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
 const REWARD_THRESHOLD = 250000;
 
 const END_USER_OPTIONS = [
@@ -66,7 +63,7 @@ const Section = ({ title, titleRight, children, theme, className = '' }) => {
       {title && !titleRight && (
         <>
           <h3 className="text-[15px] font-bold" style={{
-            color: theme.colors.textPrimary, marginBottom: 6,
+            color: theme.colors.textPrimary, marginBottom: 6, letterSpacing: '-0.01em',
           }}>{title}</h3>
           <div style={lineStyle} />
         </>
@@ -75,7 +72,7 @@ const Section = ({ title, titleRight, children, theme, className = '' }) => {
         <>
           <div className="flex items-center gap-4">
             <h3 className="text-[15px] font-bold flex-shrink-0" style={{
-              color: theme.colors.textPrimary,
+              color: theme.colors.textPrimary, letterSpacing: '-0.01em',
             }}>{title}</h3>
             <div className="ml-auto min-w-0" style={{ width: '55%' }}>{titleRight}</div>
           </div>
@@ -97,7 +94,7 @@ const Row = ({ label, children, theme, tip, noSep, inline }) => {
     {label && (
       <div className={`flex items-center gap-1.5 ${inline ? `flex-shrink-0 ${LABEL_W}` : 'mb-1.5'}`}>
         <label className={`text-[13px] font-semibold ${inline ? 'whitespace-nowrap' : ''}`}
-          style={{ color: theme.colors.textPrimary }}>{label}</label>
+          style={{ color: theme.colors.textPrimary, letterSpacing: '-0.01em' }}>{label}</label>
         {tip && <InfoTooltip content={tip} theme={theme} position="right" size="sm" />}
       </div>
     )}
@@ -226,8 +223,8 @@ const ProductCard = React.memo(({ product, idx, onRemove, onUpdate, theme }) => 
       <div className="flex items-center justify-between px-4 py-3">
         <span className="text-[13px] font-semibold" style={{ color: theme.colors.textPrimary }}>{product.series}</span>
         <button type="button" onClick={() => onRemove(idx)}
-          className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium transition-all"
-          style={{ color: '#B85C5C' }}>
+          className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium transition-all active:scale-[0.97]"
+          style={{ color: '#B85C5C', backgroundColor: 'rgba(184,92,92,0.08)' }}>
           <X className="w-3 h-3" /> Remove
         </button>
       </div>
@@ -539,8 +536,8 @@ export const NewLeadScreen = ({
               <div className="flex items-center gap-1.5 justify-end">
                 <div className="flex-1 min-w-[100px]">
                   <input value={newLeadData.jsiQuoteNumber || ''} onChange={e => upd('jsiQuoteNumber', e.target.value)}
-                    placeholder="Quote #" className="w-full rounded-full px-3 py-1.5 text-[12px] outline-none border"
-                    style={{ color: c.textPrimary, borderColor: c.border, backgroundColor: c.surface }} />
+                    placeholder="Quote #" className="w-full rounded-full px-4 text-[13px] outline-none border placeholder-theme-secondary"
+                    style={{ height: 34, color: c.textPrimary, borderColor: c.border, backgroundColor: c.surface }} />
                 </div>
                 <button type="button" onClick={() => setQuoteMode(null)}
                   className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full"
@@ -607,7 +604,7 @@ export const NewLeadScreen = ({
             {(newLeadData.attachments || []).length > 0 && (
               <div className="space-y-1.5 mb-3">
                 {(newLeadData.attachments || []).map((file, i) => (
-                  <div key={i} className="flex items-center gap-2.5 px-3 py-2 rounded-xl border"
+                  <div key={i} className="flex items-center gap-2.5 px-3 py-2 rounded-2xl border"
                     style={{ backgroundColor: c.surface, borderColor: c.border }}>
                     <FileText className="w-3.5 h-3.5 flex-shrink-0" style={{ color: c.textSecondary }} />
                     <span className="flex-1 text-[12px] font-medium truncate" style={{ color: c.textPrimary }}>{file.name}</span>
@@ -641,8 +638,9 @@ export const NewLeadScreen = ({
         {/* ── Submit ── */}
         <div className="pb-6">
           <PrimaryButton type="submit" theme={theme} size="large" fullWidth
-            disabled={!newLeadData.project || !newLeadData.projectStatus}>
-            Submit Lead →
+            disabled={!newLeadData.project || !newLeadData.projectStatus}
+            icon={<ArrowRight className="w-5 h-5" />}>
+            Submit Lead
           </PrimaryButton>
           {(!newLeadData.project || !newLeadData.projectStatus) && (
             <p className="text-[12px] text-center mt-2" style={{ color: c.textSecondary }}>
