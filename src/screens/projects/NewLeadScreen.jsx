@@ -68,11 +68,11 @@ const Section = ({ title, titleRight, children, theme, className = '' }) => {
         }}>{title}</h3>
       )}
       {title && titleRight && (
-        <div className="flex items-center gap-4 mb-3">
+        <div className="flex items-center gap-4 mb-3 pb-2.5" style={{
+          borderBottom: `1px solid ${divider}`,
+        }}>
           <h3 className="text-[15px] font-bold flex-shrink-0" style={{
             color: theme.colors.textPrimary,
-            borderBottom: `1px solid ${divider}`,
-            paddingBottom: 6,
           }}>{title}</h3>
           <div className="ml-auto min-w-0" style={{ width: '55%' }}>{titleRight}</div>
         </div>
