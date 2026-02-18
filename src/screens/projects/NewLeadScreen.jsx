@@ -54,7 +54,7 @@ const END_USER_OPTIONS = [
    ═══════════════════════════════════════════════════════════════ */
 
 /* — section card — */
-const Section = ({ title, children, theme, className = '' }) => {
+const Section = ({ title, titleRight, children, theme, className = '' }) => {
   const dark = isDarkTheme(theme);
   const divider = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
   return (
@@ -62,10 +62,19 @@ const Section = ({ title, children, theme, className = '' }) => {
       padding: '20px', backgroundColor: dark ? theme.colors.surface : '#fff',
       border: `1px solid ${divider}`,
     }}>
-      {title && (
+      {title && !titleRight && (
         <h3 className="text-[15px] font-bold mb-3 pb-2.5" style={{
           color: theme.colors.textPrimary, borderBottom: `1px solid ${divider}`,
         }}>{title}</h3>
+      )}
+      {title && titleRight && (
+        <div className="flex items-end gap-4 mb-3">
+          <h3 className="text-[15px] font-bold pb-2.5 flex-shrink-0" style={{
+            color: theme.colors.textPrimary,
+            borderBottom: `1px solid ${divider}`,
+          }}>{title}</h3>
+          <div className="flex-1 min-w-0 pb-1">{titleRight}</div>
+        </div>
       )}
       {children}
     </div>
@@ -304,11 +313,10 @@ export const NewLeadScreen = ({
       <div className="px-4 sm:px-5 pt-4 pb-8 max-w-2xl mx-auto w-full">
 
         {/* ── 1. Project Details ── */}
-        <Section title="Project Details" theme={theme} className="mb-4">
-          <Row label={null} theme={theme} noSep>
-            <FormInput value={newLeadData.project || ''} onChange={e => upd('project', e.target.value)}
-              placeholder="Project Name *" theme={theme} size="sm" surfaceBg required />
-          </Row>
+        <Section title="Project Details" theme={theme} className="mb-4" titleRight={
+          <FormInput value={newLeadData.project || ''} onChange={e => upd('project', e.target.value)}
+            placeholder="Project Name *" theme={theme} size="sm" surfaceBg required />
+        }>
 
           <Reveal show={!!(newLeadData.project && newLeadData.project.trim())}>
           <Row label="Stage" theme={theme} inline>
