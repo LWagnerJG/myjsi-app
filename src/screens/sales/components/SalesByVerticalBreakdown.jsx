@@ -22,31 +22,23 @@ export const SalesByVerticalBreakdown = ({ data = [], theme, showOverview = true
   const grandTotal = useMemo(() => prepared.reduce((s, d) => s + (d.value || 0), 0), [prepared]);
   const maxValue = useMemo(() => prepared.reduce((m, r) => Math.max(m, r.value || 0), 0) || 1, [prepared]);
 
-  const overview = showOverview ? (
-    <div className="flex w-full h-[3px] overflow-hidden rounded-full mb-4" style={{ background: theme.colors.subtle }} aria-hidden="true">
-      {prepared.map(seg => (
-        <div key={seg.name} className="h-full" style={{ flex: seg.pct, background: seg.color, minWidth: seg.pct < 1 ? 3 : undefined }} />
-      ))}
-    </div>
-  ) : null;
-
   return (
     <div className="w-full" aria-label={`Sales by vertical total ${fmtMoney(grandTotal)}`}>
-      {overview}
       <ol className="divide-y" style={{ borderColor: theme.colors.border }}>
-        {prepared.map(row => {
+        {prepared.map((row, idx) => {
           const rel = (row.value / maxValue) * 100; // relative to max for bar length
           const pctStr = row.pct >= 10 ? row.pct.toFixed(1) : row.pct.toFixed(2);
+          // desaturate bar opacity by rank so dominant verticals pop, tail ones recede
+          const barOpacity = Math.max(0.35, 0.75 - idx * 0.07);
           return (
             <li key={row.name} className="grid grid-cols-[160px_1fr_auto_auto] gap-4 items-center py-3">
-              {/* Label */}
+              {/* Label — no colored dot, clean text only */}
               <div className="flex items-center gap-2 min-w-0 pr-2">
-                <span className="w-3.5 h-3.5 rounded-full flex-shrink-0" style={{ background: row.color }} />
                 <span className="text-xs font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{row.name}</span>
               </div>
               {/* Bar track */}
-              <div className="relative h-2 rounded-full overflow-hidden" style={{ background: theme.colors.subtle }} aria-hidden="true">
-                <div className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${rel}%`, background: row.color, opacity: .85, transition: 'width 480ms cubic-bezier(.4,.2,.2,1)' }} />
+              <div className="relative h-1.5 rounded-full overflow-hidden" style={{ background: theme.colors.subtle }} aria-hidden="true">
+                <div className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${rel}%`, background: row.color, opacity: barOpacity, transition: 'width 480ms cubic-bezier(.4,.2,.2,1)' }} />
               </div>
               {/* Value */}
               <div className="text-xs font-semibold tabular-nums text-right" style={{ color: theme.colors.textPrimary }}>

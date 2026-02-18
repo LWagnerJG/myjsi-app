@@ -266,10 +266,10 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                 </div>
                 <button
                   onClick={() => onNavigate('customer-rank')}
-                  className="px-3.5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all"
-                  style={{ backgroundColor: colors.accent, color: isDark ? '#1A1A1A' : '#FFFFFF' }}
-                  onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
-                  onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+                  className="px-3.5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border"
+                  style={{ backgroundColor: 'transparent', color: colors.textSecondary, borderColor: colors.border }}
+                  onMouseEnter={e => { e.currentTarget.style.color = colors.textPrimary; e.currentTarget.style.borderColor = colors.textSecondary; }}
+                  onMouseLeave={e => { e.currentTarget.style.color = colors.textSecondary; e.currentTarget.style.borderColor = colors.border; }}
                 >
                   View
                 </button>
@@ -302,10 +302,10 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                 </div>
                 <button
                   onClick={() => onNavigate('incentive-rewards')}
-                  className="px-3.5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all"
-                  style={{ backgroundColor: colors.accent, color: isDark ? '#1A1A1A' : '#FFFFFF' }}
-                  onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
-                  onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+                  className="px-3.5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border"
+                  style={{ backgroundColor: 'transparent', color: colors.textSecondary, borderColor: colors.border }}
+                  onMouseEnter={e => { e.currentTarget.style.color = colors.textPrimary; e.currentTarget.style.borderColor = colors.textSecondary; }}
+                  onMouseLeave={e => { e.currentTarget.style.color = colors.textSecondary; e.currentTarget.style.borderColor = colors.border; }}
                 >
                   View
                 </button>
