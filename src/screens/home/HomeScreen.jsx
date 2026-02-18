@@ -8,7 +8,7 @@ import { HomeSearchInput } from '../../components/common/SearchInput.jsx';
 import { QuickActionDropdown } from '../../components/common/QuickActionDropdown.jsx';
 import { RequestQuoteModal } from '../../components/common/RequestQuoteModal.jsx';
 import { DESIGN_TOKENS, isDarkTheme } from '../../design-system/tokens.js';
-import { Check, Plus, X, Settings as SettingsIcon, GripVertical, Lock, Paperclip, MessageCircle, Megaphone, Package, Calendar, DollarSign, Zap, ChevronRight } from 'lucide-react';
+import { Check, Plus, X, Settings as SettingsIcon, GripVertical, Lock, Paperclip, MessageCircle, Megaphone, Package, Calendar, DollarSign, Zap, ChevronRight, ChevronDown } from 'lucide-react';
 import { LEAD_TIMES_DATA } from '../resources/lead-times/data.js';
 import { ANNOUNCEMENTS } from '../community/data.js';
 import { motion, useAnimation } from 'framer-motion';
@@ -156,6 +156,69 @@ const SortableAppTile = React.memo(({ id, app, colors, onRemove, isRemoveDisable
         </div>
     );
 });
+
+// Custom feature card picker — replaces native <select> in edit mode
+const FeaturePicker = ({ value, onChange, options, colors, isDark }) => {
+    const [open, setOpen] = useState(false);
+    const ref = useRef(null);
+
+    useEffect(() => {
+        if (!open) return;
+        const handler = (e) => {
+            if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, [open]);
+
+    const current = options.find(o => o.id === value);
+
+    return (
+        <div className="relative" ref={ref}>
+            <button
+                onClick={(e) => { e.stopPropagation(); setOpen(p => !p); }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all active:scale-95"
+                style={{
+                    backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)',
+                    color: colors.textSecondary,
+                    border: `1px solid ${colors.border}`,
+                }}
+            >
+                {current?.label}
+                <ChevronDown className="w-3 h-3 opacity-60" style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+            </button>
+            {open && (
+                <div
+                    className="absolute right-0 top-full mt-2 w-44 rounded-2xl overflow-hidden z-30 py-1.5"
+                    style={{
+                        backgroundColor: isDark ? 'rgba(36,36,36,0.96)' : 'rgba(252,250,248,0.98)',
+                        border: isDark ? '1px solid rgba(255,255,255,0.09)' : '1px solid rgba(0,0,0,0.08)',
+                        boxShadow: isDark ? '0 8px 32px rgba(0,0,0,0.45)' : '0 8px 32px rgba(0,0,0,0.12)',
+                        backdropFilter: 'blur(16px)',
+                        WebkitBackdropFilter: 'blur(16px)',
+                    }}
+                >
+                    {options.map(opt => (
+                        <button
+                            key={opt.id}
+                            onClick={(e) => { e.stopPropagation(); onChange(opt.id); setOpen(false); }}
+                            className="w-full text-left px-4 py-2.5 text-[13px] transition-colors"
+                            style={{
+                                backgroundColor: opt.id === value
+                                    ? (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)')
+                                    : 'transparent',
+                                color: opt.id === value ? colors.textPrimary : colors.textSecondary,
+                                fontWeight: opt.id === value ? 600 : 400,
+                            }}
+                        >
+                            {opt.label}
+                        </button>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};
 
 export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpdateHomeApps, homeResetKey, posts, isDarkMode, onToggleTheme }) => {
     const [isEditMode, setIsEditMode] = useState(false);
@@ -809,7 +872,7 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
             document.body
             )}
 
-            <div className="px-4 sm:px-6 lg:px-8 pt-0 sm:pt-1 pb-20 space-y-5 lg:space-y-7 max-w-5xl mx-auto w-full" style={{ position: 'relative', zIndex: 2 }}>
+            <div className="px-4 sm:px-6 lg:px-8 pt-0 sm:pt-1 pb-36 space-y-5 lg:space-y-7 max-w-5xl mx-auto w-full" style={{ position: 'relative', zIndex: 2 }}>
 
                 {/* Header Section */}
                 <div className="space-y-0.5 hidden sm:block">
@@ -1090,20 +1153,13 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                                 {homeFeatureOptions.find(o => o.id === homeFeatureMode)?.label || 'Recent Activity'}
                             </h4>
                             {isEditMode ? (
-                                <select
+                                <FeaturePicker
                                     value={homeFeatureMode}
-                                    onChange={(e) => setHomeFeatureMode(e.target.value)}
-                                    className="text-[11px] font-semibold rounded-full px-3 py-1"
-                                    style={{
-                                        backgroundColor: `${colors.surface}CC`,
-                                        color: colors.textSecondary,
-                                        border: `1px solid ${colors.border}`
-                                    }}
-                                >
-                                    {homeFeatureOptions.map(option => (
-                                        <option key={option.id} value={option.id}>{option.label}</option>
-                                    ))}
-                                </select>
+                                    onChange={setHomeFeatureMode}
+                                    options={homeFeatureOptions}
+                                    colors={colors}
+                                    isDark={isDark}
+                                />
                             ) : (
                                 <button
                                     onClick={() => {
@@ -1142,20 +1198,13 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                                 {homeFeatureOptions.find(o => o.id === secondaryFeatureMode)?.label || 'Community'}
                             </h4>
                             {isEditMode ? (
-                                <select
+                                <FeaturePicker
                                     value={secondaryFeatureMode}
-                                    onChange={(e) => setSecondaryFeatureMode(e.target.value)}
-                                    className="text-[11px] font-semibold rounded-full px-3 py-1"
-                                    style={{
-                                        backgroundColor: `${colors.surface}CC`,
-                                        color: colors.textSecondary,
-                                        border: `1px solid ${colors.border}`
-                                    }}
-                                >
-                                    {homeFeatureOptions.map(option => (
-                                        <option key={option.id} value={option.id}>{option.label}</option>
-                                    ))}
-                                </select>
+                                    onChange={setSecondaryFeatureMode}
+                                    options={homeFeatureOptions}
+                                    colors={colors}
+                                    isDark={isDark}
+                                />
                             ) : (
                                 <button
                                     onClick={() => {
@@ -1176,24 +1225,33 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                         {renderHomeFeatureContent(secondaryFeatureMode)}
                     </GlassCard>
                 </div>
+            </div>
 
-                {/* Feedback CTA */}
-                <button
-                    onClick={() => onNavigate('feedback')}
-                    className="w-full px-5 py-4 flex items-center justify-between transition-all active:scale-[0.99]"
-                    style={{
-                        backgroundColor: colors.tileSurface,
-                        border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
-                        borderRadius: 24,
-                        boxShadow: 'none'
-                    }}
-                >
-                    <div className="space-y-0.5 text-left">
-                        <h4 className="text-sm font-semibold" style={{ color: colors.textPrimary }}>Share Feedback</h4>
-                        <p className="text-xs" style={{ color: colors.textSecondary }}>Help improve the MyJSI experience.</p>
-                    </div>
-                    <ChevronRight className="w-4 h-4 flex-shrink-0 opacity-30" style={{ color: colors.textSecondary }} />
-                </button>
+            {/* Sticky glassy feedback bar — above bottom nav */}
+            <div
+                className="fixed inset-x-0 z-[28] px-4 sm:px-6 lg:px-8 pointer-events-none"
+                style={{ bottom: 72 }}
+            >
+                <div className="max-w-5xl mx-auto pointer-events-auto">
+                    <button
+                        onClick={() => onNavigate('feedback')}
+                        className="w-full px-5 py-3.5 flex items-center justify-between transition-all active:scale-[0.99]"
+                        style={{
+                            backdropFilter: 'blur(24px)',
+                            WebkitBackdropFilter: 'blur(24px)',
+                            backgroundColor: isDark ? 'rgba(28,28,28,0.82)' : 'rgba(242,239,235,0.86)',
+                            border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.07)',
+                            borderRadius: 20,
+                            boxShadow: isDark ? '0 4px 28px rgba(0,0,0,0.4)' : '0 4px 28px rgba(0,0,0,0.09)',
+                        }}
+                    >
+                        <div className="space-y-0.5 text-left">
+                            <h4 className="text-sm font-semibold" style={{ color: colors.textPrimary }}>Share Feedback</h4>
+                            <p className="text-xs" style={{ color: colors.textSecondary }}>Help improve the MyJSI experience.</p>
+                        </div>
+                        <ChevronRight className="w-4 h-4 flex-shrink-0 opacity-30" style={{ color: colors.textSecondary }} />
+                    </button>
+                </div>
             </div>
 
             {/* Request Quote Modal */}
