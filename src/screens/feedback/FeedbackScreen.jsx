@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Send, Paperclip, X } from 'lucide-react';
-import { DESIGN_TOKENS, isDarkTheme } from '../../design-system/tokens.js';
+import { isDarkTheme } from '../../design-system/tokens.js';
 
 export const FeedbackScreen = ({ theme }) => {
     const [feedbackType, setFeedbackType] = useState('general');
@@ -9,7 +9,7 @@ export const FeedbackScreen = ({ theme }) => {
     const [submitted, setSubmitted] = useState(false);
 
     const isDark = isDarkTheme(theme);
-    const colors = DESIGN_TOKENS.getColors(theme);
+    const colors = theme.colors;
 
     const feedbackTypes = [
         { value: 'general', label: 'General' },
