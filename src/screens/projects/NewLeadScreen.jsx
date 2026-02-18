@@ -59,26 +59,26 @@ const Section = ({ title, titleRight, children, theme, className = '' }) => {
   const divider = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
   return (
     <div className={`rounded-2xl ${className}`} style={{
-      padding: '20px', backgroundColor: dark ? theme.colors.surface : '#fff',
+      padding: '16px 20px', backgroundColor: dark ? theme.colors.surface : '#fff',
       border: `1px solid ${divider}`,
     }}>
       {title && !titleRight && (
-        <div className="mb-3">
-          <h3 className="text-[15px] font-bold pb-2.5" style={{
+        <div className="mb-2.5">
+          <h3 className="text-[15px] font-bold pb-1.5" style={{
             color: theme.colors.textPrimary,
           }}>{title}</h3>
-          <div style={{ width: '45%', borderBottom: `1px solid ${divider}` }} />
+          <div style={{ width: '32%', borderBottom: `1px solid ${divider}` }} />
         </div>
       )}
       {title && titleRight && (
-        <div className="mb-3">
+        <div className="mb-2.5">
           <div className="flex items-center gap-4">
             <h3 className="text-[15px] font-bold flex-shrink-0" style={{
               color: theme.colors.textPrimary,
             }}>{title}</h3>
             <div className="ml-auto min-w-0" style={{ width: '55%' }}>{titleRight}</div>
           </div>
-          <div style={{ width: '45%', borderBottom: `1px solid ${divider}`, marginTop: 6 }} />
+          <div style={{ width: '32%', borderBottom: `1px solid ${divider}`, marginTop: 4 }} />
         </div>
       )}
       {children}
