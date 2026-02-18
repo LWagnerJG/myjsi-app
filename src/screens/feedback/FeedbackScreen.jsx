@@ -184,37 +184,3 @@ export const FeedbackScreen = ({ theme }) => {
         </div>
     );
 };
-                            </label>
-                        </div>
-                        {files.length > 0 && (
-                            <ul className="mt-4 space-y-2">
-                                {files.map((f, i) => (
-                                    <li key={`${f.name}-${i}`} className="flex items-center justify-between px-4 py-2 border" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${innerBorder}`, borderRadius: RADIUS_INNER }}>
-                                        <div className="min-w-0">
-                                            <div className="truncate text-sm" style={{ color: theme.colors.textPrimary }}>{f.name}</div>
-                                            <div className="text-[11px]" style={{ color: theme.colors.textSecondary }}>{formatFileSize(f.size)} • {f.type || 'File'}</div>
-                                        </div>
-                                        <button type="button" onClick={() => removeFile(i)} className="ml-3 p-1 rounded-full hover:bg-black/5"><X className="w-4 h-4" style={{ color: theme.colors.textSecondary }} /></button>
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
-                    </GlassCard>
-
-                    <div className="pt-1">
-                        <PrimaryButton
-                            type="submit"
-                            disabled={!subject.trim() || !message.trim()}
-                            theme={theme}
-                            size="default"
-                            fullWidth
-                            icon={<Send className="w-5 h-5" />}
-                        >
-                            Submit Feedback
-                        </PrimaryButton>
-                    </div>
-                </form>
-            </div>
-        </div>
-    );
-};
