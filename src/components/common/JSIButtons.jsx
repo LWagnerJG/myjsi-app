@@ -89,14 +89,15 @@ export const PillButton = ({
     ...props
 }) => {
     const sizeClasses = {
-        xs: 'px-3 py-2 text-[11px]',
+        xs: 'px-3.5 py-1.5 text-[11px]',
         compact: 'px-4 py-2.5 text-xs',
         default: 'px-5 py-3.5 text-sm',
         large: 'px-6 py-4 text-base'
     };
 
+    const borderClass = size === 'xs' ? 'border' : 'border-2';
     const selectedShadow = '0 2px 8px rgba(53,53,53,0.10), 0 1px 3px rgba(53,53,53,0.06)';
-    const unselectedShadow = '0 1px 3px rgba(53,53,53,0.04)';
+    const unselectedShadow = 'none';
     const resolvedSelectedBg = selectedBg || '#353535';
     const resolvedSelectedText = selectedText || '#FFFFFF';
     const resolvedUnselectedBg = unselectedBg || '#FFFFFF';
@@ -108,7 +109,7 @@ export const PillButton = ({
             type={type}
             onClick={onClick}
             disabled={disabled}
-            className={`${sizeClasses[size]} font-semibold rounded-full transition-all border-2 text-center hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed ${className}`}
+            className={`${sizeClasses[size]} font-semibold rounded-full transition-all ${borderClass} text-center hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed ${className}`}
             style={{
                 backgroundColor: isSelected ? resolvedSelectedBg : resolvedUnselectedBg,
                 color: isSelected ? resolvedSelectedText : resolvedUnselectedText,

@@ -423,8 +423,7 @@ export const NewLeadScreen = ({
                 const on = newLeadData[key] !== false;
                 return (
                   <PillButton key={key} size="xs" isSelected={on}
-                    onClick={() => upd(key, !on)} theme={theme}
-                    className="min-w-[110px]">{on ? '✓  ' : ''}{lbl}</PillButton>
+                    onClick={() => upd(key, !on)} theme={theme}>{on ? '✓ ' : ''}{lbl}</PillButton>
                 );
               })}
             </div>
@@ -487,56 +486,33 @@ export const NewLeadScreen = ({
             </div>
           </div>
 
-          {/* products — search inline to right of label */}
-          <div className="py-3 border-t" style={{ borderColor: c.border }}>
-            <div className="flex items-center gap-3">
-              <label className="text-[13px] font-semibold flex-shrink-0 whitespace-nowrap" style={{ color: c.textPrimary }}>Products</label>
-              <div className="flex-1 min-w-0">
-                <ProductSpotlight
-                  selectedSeries={(newLeadData.products || []).map(p => p.series)}
-                  onAdd={addProduct} available={JSI_SERIES} theme={theme} />
-              </div>
-            </div>
-          </div>
-
-          {(newLeadData.products || []).length > 0 && (
-            <div className="space-y-2 pb-1">
-              {(newLeadData.products || []).map((p, idx) => (
-                <ProductCard key={p.series + idx} product={p} idx={idx}
-                  onRemove={removeProduct} onUpdate={updateProductOption} theme={theme} />
-              ))}
-            </div>
-          )}
-
           {/* JSI Quote — inline pills, click again to deselect */}
-          <div className="py-3 border-t" style={{ borderColor: c.border }}>
-            <div className="flex items-center gap-2">
-              <label className="text-[13px] font-semibold flex-shrink-0 whitespace-nowrap" style={{ color: c.textPrimary }}>JSI Quote</label>
-              <button type="button" onClick={() => setQuoteMode(quoteMode === 'existing' ? null : 'existing')}
-                className="px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all border flex-shrink-0"
-                style={{
-                  backgroundColor: quoteMode === 'existing' ? c.textPrimary : 'transparent',
-                  color: quoteMode === 'existing' ? (dark ? '#1a1a1a' : '#fff') : c.textPrimary,
-                  borderColor: quoteMode === 'existing' ? c.textPrimary : c.border,
-                }}>Existing Quote</button>
-              {quoteMode === 'existing' ? (
+          <Row label="JSI Quote" theme={theme} inline>
+            {quoteMode === 'existing' ? (
+              <div className="flex items-center gap-1.5 justify-end">
                 <div className="flex-1 min-w-[100px]">
                   <input value={newLeadData.jsiQuoteNumber || ''} onChange={e => upd('jsiQuoteNumber', e.target.value)}
                     placeholder="Quote #" className="w-full rounded-full px-3 py-1.5 text-[12px] outline-none border"
                     style={{ color: c.textPrimary, borderColor: c.border, backgroundColor: c.surface }} />
                 </div>
-              ) : (
-                <button type="button" onClick={() => setQuoteMode(quoteMode === 'needed' ? null : 'needed')}
-                  className="px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all border flex-shrink-0"
-                  style={{
-                    backgroundColor: quoteMode === 'needed' ? c.textPrimary : 'transparent',
-                    color: quoteMode === 'needed' ? (dark ? '#1a1a1a' : '#fff') : c.textPrimary,
-                    borderColor: quoteMode === 'needed' ? c.textPrimary : c.border,
-                  }}>Quote Needed</button>
-              )}
-            </div>
-            {quoteMode === 'needed' && (
-              <div className="mt-2.5 rounded-2xl p-3 flex items-start gap-2.5" style={{ backgroundColor: c.subtle }}>
+                <button type="button" onClick={() => setQuoteMode(null)}
+                  className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full"
+                  style={{ backgroundColor: c.subtle }}>
+                  <X className="w-3.5 h-3.5" style={{ color: c.textSecondary }} />
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-1.5 justify-end">
+                <PillButton size="xs" isSelected={false}
+                  onClick={() => setQuoteMode('existing')} theme={theme}>Existing Quote</PillButton>
+                <PillButton size="xs" isSelected={quoteMode === 'needed'}
+                  onClick={() => setQuoteMode(quoteMode === 'needed' ? null : 'needed')} theme={theme}>Quote Needed</PillButton>
+              </div>
+            )}
+          </Row>
+          {quoteMode === 'needed' && (
+            <div className="pb-2">
+              <div className="rounded-2xl p-3 flex items-start gap-2.5" style={{ backgroundColor: c.subtle }}>
                 <Upload className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: c.textSecondary }} />
                 <div>
                   <p className="text-[12px] font-medium" style={{ color: c.textPrimary }}>Upload specs or request later</p>
@@ -548,8 +524,24 @@ export const NewLeadScreen = ({
                   </button>
                 </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
+
+          {/* products — search inline to right of label */}
+          <Row label="Products" theme={theme} inline>
+            <ProductSpotlight
+              selectedSeries={(newLeadData.products || []).map(p => p.series)}
+              onAdd={addProduct} available={JSI_SERIES} theme={theme} />
+          </Row>
+
+          {(newLeadData.products || []).length > 0 && (
+            <div className="space-y-2 pb-1">
+              {(newLeadData.products || []).map((p, idx) => (
+                <ProductCard key={p.series + idx} product={p} idx={idx}
+                  onRemove={removeProduct} onUpdate={updateProductOption} theme={theme} />
+              ))}
+            </div>
+          )}
         </Section>
 
         {/* ── 5. Notes ── */}
