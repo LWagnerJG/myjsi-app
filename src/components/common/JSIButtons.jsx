@@ -1,5 +1,5 @@
 import React from 'react';
-import { DESIGN_TOKENS } from '../../design-system/tokens.js';
+import { DESIGN_TOKENS, isDarkTheme } from '../../design-system/tokens.js';
 
 /**
  * JSI Frost Button - Frosted glass CTA button
@@ -96,7 +96,10 @@ export const PillButton = ({
     };
 
     const borderClass = size === 'xs' ? 'border' : 'border-2';
-    const selectedShadow = '0 2px 8px rgba(53,53,53,0.10), 0 1px 3px rgba(53,53,53,0.06)';
+    const dark = props.theme && isDarkTheme(props.theme);
+    const selectedShadow = dark
+      ? '0 2px 8px rgba(0,0,0,0.25), 0 1px 3px rgba(0,0,0,0.15)'
+      : '0 2px 8px rgba(53,53,53,0.10), 0 1px 3px rgba(53,53,53,0.06)';
     const unselectedShadow = 'none';
 
     // Theme-aware defaults: use theme colors when available, fall back to light-mode defaults
@@ -162,11 +165,13 @@ export const PrimaryButton = ({
             type={type}
             onClick={onClick}
             disabled={disabled}
-            className={`${fullWidth ? 'w-full' : ''} ${sizeClasses[size]} px-8 font-bold rounded-full transition-all hover:scale-[1.01] hover:shadow-xl active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2 ${className}`}
+            className={`${fullWidth ? 'w-full' : ''} ${sizeClasses[size]} px-8 font-bold rounded-full transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2 ${className}`}
             style={{
                 backgroundColor: theme.colors.accent,
-                color: '#FFFFFF',
-                boxShadow: DESIGN_TOKENS.shadows.button,
+                color: theme.colors.accentText || '#FFFFFF',
+                boxShadow: isDarkTheme(theme)
+                    ? '0 2px 12px rgba(0,0,0,0.3)'
+                    : DESIGN_TOKENS.shadows.button,
                 letterSpacing: '-0.01em',
                 fontWeight: 600
             }}
