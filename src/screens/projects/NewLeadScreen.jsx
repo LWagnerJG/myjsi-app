@@ -5,7 +5,6 @@ import { FormInput } from '../../components/forms/FormInput.jsx';
 import { PortalNativeSelect } from '../../components/forms/PortalNativeSelect.jsx';
 import { AutoCompleteCombobox } from '../../components/forms/AutoCompleteCombobox.jsx';
 import { ToggleSwitch } from '../../components/forms/ToggleSwitch.jsx';
-import { ProbabilitySlider } from '../../components/forms/ProbabilitySlider.jsx';
 import { SpotlightMultiSelect } from '../../components/common/SpotlightMultiSelect.jsx';
 import { InfoTooltip } from '../../components/common/InfoTooltip.jsx';
 import { PillButton, PrimaryButton } from '../../components/common/JSIButtons.jsx';
@@ -42,7 +41,13 @@ const CITY_OPTIONS = [
 ];
 
 const PO_OPTIONS = ['Unknown', 'Within 30 Days', '30\u201360 Days', '60\u2013180 Days', '180+ Days', 'Next Year'];
+const WIN_PCT_OPTIONS = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
 const REWARD_THRESHOLD = 250000;
+
+const END_USER_OPTIONS = [
+  'ABC Corporation', 'GlobalTech', 'Midwest Health', 'State University', 'Metro Hospitality',
+  'Innovate Labs', 'XYZ Industries', 'Acme Corp', 'TechVentures', 'Summit Partners',
+];
 
 /* ═══════════════════════════════════════════════════════════════
    LIGHTWEIGHT UI PRIMITIVES
@@ -68,16 +73,16 @@ const Section = ({ title, children, theme, className = '' }) => {
 
 /* — compact field row — supports inline (label left, field right) — */
 const Row = ({ label, children, theme, tip, noSep, inline }) => (
-  <div className={`${inline ? 'flex items-center gap-4 py-2.5' : 'py-3'} ${noSep ? '' : 'border-t'}`}
+  <div className={`${inline ? 'flex items-center gap-3 py-2.5' : 'py-3'} ${noSep ? '' : 'border-t'}`}
     style={{ borderColor: noSep ? undefined : theme.colors.border }}>
     {label && (
-      <div className={`flex items-center gap-1.5 ${inline ? 'flex-shrink-0' : 'mb-1.5'}`}>
+      <div className={`flex items-center gap-1.5 ${inline ? 'flex-shrink-0 min-w-0' : 'mb-1.5'}`}>
         <label className={`text-[13px] font-semibold ${inline ? 'whitespace-nowrap' : ''}`}
           style={{ color: theme.colors.textPrimary }}>{label}</label>
         {tip && <InfoTooltip content={tip} theme={theme} position="right" size="sm" />}
       </div>
     )}
-    {inline ? <div className="flex-1 min-w-0">{children}</div> : children}
+    {inline ? <div className="flex-1 min-w-0 overflow-hidden">{children}</div> : children}
   </div>
 );
 
@@ -351,7 +356,8 @@ export const NewLeadScreen = ({
               options={(newLeadData.dealers || []).length > 0 ? (dealers || []).filter(d => d !== 'Undecided') : (dealers || [])}
               onAddNew={d => setDealers(p => [...new Set([d, ...p])])}
               placeholder="Dealer(s)"
-              theme={theme} />
+              theme={theme}
+              compact />
           </Row>
           <Row label={null} theme={theme}>
             <SpotlightMultiSelect
@@ -361,11 +367,18 @@ export const NewLeadScreen = ({
               options={designFirms || []}
               onAddNew={f => setDesignFirms(p => [...new Set([f, ...p])])}
               placeholder="A&D Firm(s)"
-              theme={theme} />
+              theme={theme}
+              compact />
           </Row>
           <Row label="End User" theme={theme} inline>
-            <FormInput value={newLeadData.endUser || ''} onChange={e => upd('endUser', e.target.value)}
-              placeholder="Company or contact name" theme={theme} size="sm" surfaceBg />
+            <AutoCompleteCombobox
+              value={newLeadData.endUser || ''}
+              onChange={val => upd('endUser', val)}
+              onSelect={val => upd('endUser', val)}
+              options={END_USER_OPTIONS}
+              placeholder="Company or contact"
+              theme={theme}
+              resetOnSelect={false} />
           </Row>
         </Section>
 
@@ -473,9 +486,11 @@ export const NewLeadScreen = ({
               placeholder="$0" theme={theme} surfaceBg />
           </Row>
 
-          <Row label="Win Probability" theme={theme}>
-            <ProbabilitySlider showLabel={false} value={newLeadData.winProbability || 50}
-              onChange={v => upd('winProbability', v)} theme={theme} />
+          <Row label="Win Probability" theme={theme} inline>
+            <PortalNativeSelect value={String(newLeadData.winProbability || 50)}
+              onChange={e => upd('winProbability', Number(e.target.value))}
+              options={WIN_PCT_OPTIONS.map(p => ({ label: `${p}%`, value: String(p) }))}
+              placeholder="50%" theme={theme} />
           </Row>
 
           <Row label="Discount" theme={theme} inline>
@@ -502,8 +517,8 @@ export const NewLeadScreen = ({
             </div>
           </Row>
 
-          <Row label="PO Timeframe" theme={theme}>
-            <div className="flex flex-wrap gap-1.5">
+          <Row label="PO Timeframe" theme={theme} inline>
+            <div className="flex flex-wrap gap-1.5 justify-end">
               {PO_OPTIONS.map(t => (
                 <PillButton key={t} size="xs"
                   isSelected={newLeadData.poTimeframe === t}

@@ -575,11 +575,12 @@ const ProjectCard = ({ opp, theme, onClick }) => {
   return (
     <button onClick={onClick} className="w-full text-left group" style={{ WebkitTapHighlightColor:'transparent' }}>
       <div
-        className="p-4 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0"
+        className="p-4 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
         style={{
-          backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.8)',
-          border: isDark ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(0,0,0,0.06)',
+          backgroundColor: isDark ? '#2F2F2F' : 'rgba(255,255,255,0.85)',
+          border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)',
           borderRadius: 18,
+          boxShadow: isDark ? '0 2px 8px rgba(0,0,0,0.3)' : '0 1px 4px rgba(0,0,0,0.06)',
         }}
       >
         <div className="mb-2">
@@ -735,8 +736,8 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
                   <div
                     className="inline-flex items-center gap-2 px-5 py-2 rounded-full"
                     style={{
-                      backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
-                      border: isDark ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(0,0,0,0.05)',
+                      backgroundColor: isDark ? '#2F2F2F' : 'rgba(0,0,0,0.03)',
+                      border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.05)',
                     }}
                   >
                     <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>{selectedPipelineStage} Total</span>

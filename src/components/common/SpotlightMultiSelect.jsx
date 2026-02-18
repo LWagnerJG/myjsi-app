@@ -11,6 +11,7 @@ export function SpotlightMultiSelect({
   onAddNew,
   placeholder = "Search...",
   theme,
+  compact = false,
 }) {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
@@ -116,21 +117,43 @@ export function SpotlightMultiSelect({
       <div
         ref={anchorRef}
         className="flex items-center gap-2 px-4 cursor-text"
-        style={{ height: 48, borderRadius: 9999, background: palette.field, border: `1px solid ${palette.border}` }}
+        style={{ height: compact ? 40 : 48, borderRadius: 9999, background: palette.field, border: `1px solid ${palette.border}` }}
         onClick={() => setOpen(true)}
       >
-        <Search className="w-3.5 h-3.5" style={{ color: palette.hint }} />
+        <Search className="w-3.5 h-3.5 flex-shrink-0" style={{ color: palette.hint }} />
         <input
           value={q}
           onChange={(e) => { setQ(e.target.value); setOpen(true); }}
           onFocus={() => setOpen(true)}
-          placeholder={placeholder}
-          className="flex-1 bg-transparent outline-none text-[14px]"
+          placeholder={selectedItems.length > 0 && compact ? '' : placeholder}
+          className={`flex-1 bg-transparent outline-none min-w-[60px] ${compact ? 'text-[13px]' : 'text-[14px]'}`}
           style={{ color: palette.text }}
         />
+        {/* compact: render chips inside the search bar */}
+        {compact && selectedItems.length > 0 && (
+          <div className="flex items-center gap-1 flex-shrink-0 overflow-hidden max-w-[55%]">
+            {selectedItems.map((s) => (
+              <span
+                key={s}
+                className="inline-flex items-center gap-1 pl-2 pr-1 py-0.5 rounded-full text-[11px] font-medium border flex-shrink-0"
+                style={{ background: palette.chipBg, borderColor: palette.border, color: palette.text }}
+              >
+                <span className="truncate max-w-[80px]">{s}</span>
+                <button
+                  onClick={(e) => { e.stopPropagation(); onRemoveItem?.(s); }}
+                  className="w-4 h-4 flex items-center justify-center rounded-full"
+                  aria-label="Remove"
+                >
+                  <X className="w-3 h-3" style={{ color: palette.hint }} />
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
-      {selectedItems.length > 0 && (
+      {/* non-compact: render chips below the search bar */}
+      {!compact && selectedItems.length > 0 && (
         <div className="flex flex-wrap gap-2 pt-2">
           {selectedItems.map((s) => (
             <span
