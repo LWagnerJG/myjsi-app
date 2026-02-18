@@ -79,7 +79,7 @@ const Section = ({ title, titleRight, children, theme, className = '' }) => {
             }}>{title}</h3>
             <div className="ml-auto min-w-0" style={{ width: '55%' }}>{titleRight}</div>
           </div>
-          <div style={{ ...lineStyle, marginTop: 4 }} />
+          <div style={{ ...lineStyle, marginTop: 2 }} />
         </>
       )}
       {children}
@@ -600,7 +600,7 @@ export const NewLeadScreen = ({
             onChange={e => upd('notes', e.target.value)}
             placeholder="Add notes, context, or special instructions..."
             rows="3"
-            className="w-full px-4 py-3 text-[13px] rounded-2xl border focus:outline-none focus:ring-0 resize-none placeholder-theme-secondary"
+            className="mt-2.5 w-full px-4 py-3 text-[13px] rounded-2xl border focus:outline-none focus:ring-0 resize-none placeholder-theme-secondary"
             style={{ backgroundColor: c.surface, borderColor: c.border, color: c.textPrimary }}
           />
 
