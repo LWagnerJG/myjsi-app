@@ -1009,8 +1009,8 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                                         style={{
                                             minHeight: 104,
                                             backgroundColor: colors.tileSurface,
-                                            border: 'none',
-                                            boxShadow: colors.tileShadow,
+                                            border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
+                                            boxShadow: 'none',
                                             width: '100%',
                                             minWidth: 0
                                         }}
@@ -1113,7 +1113,7 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                                         else if (homeFeatureMode === 'projects') onNavigate('projects');
                                         else onNavigate('orders');
                                     }}
-                                    className="text-[11px] font-semibold uppercase tracking-widest transition-opacity flex items-center gap-1"
+                                    className="text-[11px] font-semibold uppercase tracking-widest flex items-center gap-1 transition-opacity hover:opacity-60"
                                     style={{ color: colors.textSecondary }}
                                 >
                                     Open
@@ -1165,7 +1165,7 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                                         else if (secondaryFeatureMode === 'projects') onNavigate('projects');
                                         else onNavigate('orders');
                                     }}
-                                    className="text-[11px] font-semibold uppercase tracking-widest transition-opacity flex items-center gap-1"
+                                    className="text-[11px] font-semibold uppercase tracking-widest flex items-center gap-1 transition-opacity hover:opacity-60"
                                     style={{ color: colors.textSecondary }}
                                 >
                                     Open
@@ -1178,23 +1178,22 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                 </div>
 
                 {/* Feedback CTA */}
-                <div className="mt-4 lg:mt-5">
-                    <button
-                        onClick={() => onNavigate('feedback')}
-                        className="w-full px-5 py-4 flex items-center justify-between rounded-2xl transition-all active:scale-[0.99]"
-                        style={{
-                            backgroundColor: colors.tileSurface,
-                            border: 'none',
-                            boxShadow: colors.tileShadow
-                        }}
-                    >
-                        <div className="space-y-0.5 text-left">
-                            <h4 className="text-sm font-semibold" style={{ color: colors.textPrimary }}>Share Feedback</h4>
-                            <p className="text-xs" style={{ color: colors.textSecondary }}>Help improve the MyJSI experience.</p>
-                        </div>
-                        <ChevronRight className="w-4 h-4 flex-shrink-0 opacity-30" style={{ color: colors.textSecondary }} />
-                    </button>
-                </div>
+                <button
+                    onClick={() => onNavigate('feedback')}
+                    className="w-full px-5 py-4 flex items-center justify-between transition-all active:scale-[0.99]"
+                    style={{
+                        backgroundColor: colors.tileSurface,
+                        border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
+                        borderRadius: 24,
+                        boxShadow: 'none'
+                    }}
+                >
+                    <div className="space-y-0.5 text-left">
+                        <h4 className="text-sm font-semibold" style={{ color: colors.textPrimary }}>Share Feedback</h4>
+                        <p className="text-xs" style={{ color: colors.textSecondary }}>Help improve the MyJSI experience.</p>
+                    </div>
+                    <ChevronRight className="w-4 h-4 flex-shrink-0 opacity-30" style={{ color: colors.textSecondary }} />
+                </button>
             </div>
 
             {/* Request Quote Modal */}
