@@ -398,12 +398,11 @@ export const NewLeadScreen = ({
         </Section>
 
         {/* ── 2. Financials & Timeline ── */}
-        <Section title="Financials & Timeline" theme={theme} className="mb-4">
-          <Row label="Estimated List *" theme={theme} noSep inline>
-            <FormInput type="currency" value={newLeadData.estimatedList || ''} required
-              onChange={e => upd('estimatedList', e.target.value)}
-              placeholder="$0" theme={theme} surfaceBg />
-          </Row>
+        <Section title="Financials & Timeline" theme={theme} className="mb-4" titleRight={
+          <FormInput type="currency" value={newLeadData.estimatedList || ''} required
+            onChange={e => upd('estimatedList', e.target.value)}
+            placeholder="Estimated List $" theme={theme} size="sm" surfaceBg />
+        }>
 
           <Reveal show={!!(newLeadData.estimatedList && String(newLeadData.estimatedList).replace(/[^0-9]/g, '').length > 0)}>
           <Row label="Win Probability" theme={theme} inline>
