@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { isDarkTheme } from '../../design-system/tokens.js';
 
 export const FormInput = React.memo(({
     label,
@@ -19,7 +20,8 @@ export const FormInput = React.memo(({
 
     const textSizeClass = size === 'sm' ? 'text-[13px]' : 'text-base';
     const paddingClass = size === 'sm' ? 'px-4' : 'px-4 py-3';
-    const inputClass = `w-full ${paddingClass} border rounded-full focus:outline-none focus:ring-0 ${textSizeClass} ${icon ? 'pr-10' : ''} ${className}`;
+    const dateDarkClass = type === 'date' && isDarkTheme(theme) ? 'jsi-date-dark' : '';
+    const inputClass = `w-full ${paddingClass} border rounded-full focus:outline-none focus:ring-0 ${textSizeClass} ${dateDarkClass} ${icon ? 'pr-10' : ''} ${className}`;
 
     const backgroundColor = surfaceBg ? theme.colors.surface : theme.colors.subtle;
 

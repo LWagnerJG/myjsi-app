@@ -68,12 +68,13 @@ const Section = ({ title, titleRight, children, theme, className = '' }) => {
         }}>{title}</h3>
       )}
       {title && titleRight && (
-        <div className="flex items-end gap-4 mb-3">
-          <h3 className="text-[15px] font-bold pb-2.5 flex-shrink-0" style={{
+        <div className="flex items-center gap-4 mb-3">
+          <h3 className="text-[15px] font-bold flex-shrink-0" style={{
             color: theme.colors.textPrimary,
             borderBottom: `1px solid ${divider}`,
+            paddingBottom: 6,
           }}>{title}</h3>
-          <div className="flex-1 min-w-0 pb-1">{titleRight}</div>
+          <div className="flex-1 min-w-0">{titleRight}</div>
         </div>
       )}
       {children}
@@ -82,7 +83,7 @@ const Section = ({ title, titleRight, children, theme, className = '' }) => {
 };
 
 /* — compact field row — supports inline (label left, field right) — */
-const LABEL_W = 'w-[110px]';          // fixed label column for consistent alignment
+const LABEL_W = 'w-[120px]';          // fixed label column for consistent alignment
 const Row = ({ label, children, theme, tip, noSep, inline }) => {
   const divider = isDarkTheme(theme) ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
   return (
@@ -305,6 +306,10 @@ export const NewLeadScreen = ({
 
   const c = theme.colors;
   const dark = isDarkTheme(theme);
+  const rangeStyle = {
+    '--range-track': dark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.15)',
+    '--range-thumb': dark ? '#EDE8E3' : '#353535',
+  };
 
   return (
     <form onSubmit={handleSubmit}
@@ -319,12 +324,12 @@ export const NewLeadScreen = ({
         }>
 
           <Reveal show={!!(newLeadData.project && newLeadData.project.trim())}>
-          <Row label="Stage" theme={theme} inline>
+          <Row label="Stage" theme={theme} inline noSep>
             <div className="space-y-1">
               <input type="range" min={0} max={stageOptions.length - 1} step={1}
                 value={Math.max(0, stageOptions.indexOf(newLeadData.projectStatus))}
                 onChange={e => upd('projectStatus', stageOptions[+e.target.value])}
-                className="w-full accent-black" />
+                className="w-full jsi-range" style={rangeStyle} />
               <div className="flex justify-between text-[10px]" style={{ color: c.textSecondary }}>
                 {stageOptions.map((s, i) => (
                   <span key={s} className={i === stageOptions.indexOf(newLeadData.projectStatus) ? 'font-bold' : 'opacity-50'}>
@@ -394,7 +399,7 @@ export const NewLeadScreen = ({
               <input type="range" min={10} max={100} step={10}
                 value={newLeadData.winProbability || 50}
                 onChange={e => upd('winProbability', Number(e.target.value))}
-                className="flex-1 accent-black" style={{ minWidth: 0 }} />
+                className="flex-1 jsi-range" style={{ minWidth: 0, ...rangeStyle }} />
               <span className="text-[12px] font-semibold tabular-nums w-[32px] text-right flex-shrink-0"
                 style={{ color: c.textPrimary }}>{newLeadData.winProbability || 50}%</span>
             </div>

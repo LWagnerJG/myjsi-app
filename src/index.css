@@ -207,6 +207,57 @@ h6 {
     display: none;
 }
 
+/* ── JSI custom range slider ── */
+/* Set --range-track and --range-thumb via inline style on the <input> */
+.jsi-range {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    border-radius: 9999px;
+    background: var(--range-track, rgba(0,0,0,0.18));
+    outline: none;
+    cursor: pointer;
+}
+.jsi-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--range-thumb, #353535);
+    box-shadow: 0 1px 6px rgba(0,0,0,0.25);
+    cursor: pointer;
+}
+.jsi-range::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--range-thumb, #353535);
+    box-shadow: 0 1px 6px rgba(0,0,0,0.25);
+    cursor: pointer;
+    border: none;
+}
+.jsi-range::-webkit-slider-runnable-track {
+    height: 4px;
+    border-radius: 9999px;
+}
+.jsi-range::-moz-range-track {
+    height: 4px;
+    border-radius: 9999px;
+    background: var(--range-track, rgba(0,0,0,0.18));
+}
+
+/* ── Date input calendar icon – lighter in dark mode ── */
+/* Applied via .jsi-date-dark class added by FormInput when dark theme detected */
+.jsi-date-dark::-webkit-calendar-picker-indicator {
+    filter: invert(0.85) sepia(0.05) saturate(0) brightness(1.1);
+    opacity: 0.55;
+    cursor: pointer;
+}
+.jsi-date-dark {
+    color-scheme: dark;
+}
+
 .app-header-offset {
     padding-top: calc(var(--app-header-offset) + var(--safe-area-inset-top));
 }
