@@ -95,7 +95,7 @@ const SortableAppTile = React.memo(({ id, app, colors, onRemove, isRemoveDisable
         touchAction: 'none', // Critical for pointer interactions
         width: '100%',
         minWidth: 0,
-        minHeight: 96
+        minHeight: 104
     };
 
     return (
@@ -104,7 +104,7 @@ const SortableAppTile = React.memo(({ id, app, colors, onRemove, isRemoveDisable
             style={style}
             {...attributes}
             {...listeners}
-            className="relative flex flex-col items-center justify-center gap-1 p-2.5 rounded-2xl cursor-grab active:cursor-grabbing"
+            className="relative flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl cursor-grab active:cursor-grabbing"
         >
             {/* Draggable Indicator (Subtle) */}
             <div className="absolute top-2 left-2 opacity-30">
@@ -140,15 +140,15 @@ const SortableAppTile = React.memo(({ id, app, colors, onRemove, isRemoveDisable
 
             {/* App Icon */}
             <div 
-                className="w-8 h-8 rounded-xl flex items-center justify-center mb-0.5" 
-                style={{ backgroundColor: `${colors.accent}12` }}
+                className="w-10 h-10 rounded-xl flex items-center justify-center mb-1" 
+                style={{ backgroundColor: `${colors.accent}10` }}
             >
-                <app.icon className="w-4 h-4" style={{ color: colors.accent }} />
+                <app.icon className="w-5 h-5" style={{ color: colors.accent }} />
             </div>
 
             {/* App Name */}
             <span 
-                className="text-[10px] font-bold tracking-tight text-center leading-3 line-clamp-2 w-full px-1" 
+                className="text-[11px] font-semibold tracking-tight text-center leading-tight line-clamp-2 w-full px-1" 
                 style={{ color: colors.textPrimary }}
             >
                 {app.name}
@@ -218,17 +218,17 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
         if (isDarkMode) {
             hasEnteredRef.current = false;
             setLampLightReady(false);
-            lampAnim.set({ y: -90, opacity: 0, rotate: 0 });
+            lampAnim.set({ y: -70, opacity: 0, rotate: 0 });
             lampAnim.start(
                 { y: 0, opacity: 1 },
                 {
-                    y: { duration: 0.78, ease: [0.22, 0.68, 0.35, 1] },
-                    opacity: { duration: 0.4, ease: 'easeOut' },
+                    y: { duration: 0.9, ease: [0.16, 0.77, 0.29, 0.98] },
+                    opacity: { duration: 0.5, ease: 'easeOut' },
                 }
             ).then(() => {
                 return lampAnim.start(
-                    { rotate: [0, 2.8, -2.1, 1.35, -0.75, 0.3, 0] },
-                    { rotate: { duration: 1.25, ease: [0.28, 0.11, 0.32, 1], times: [0, 0.16, 0.34, 0.52, 0.7, 0.86, 1] } }
+                    { rotate: [0, 2.0, -1.4, 0.8, -0.35, 0.12, 0] },
+                    { rotate: { duration: 1.6, ease: [0.25, 0.1, 0.25, 1], times: [0, 0.15, 0.32, 0.50, 0.68, 0.84, 1] } }
                 );
             }).then(() => {
                 hasEnteredRef.current = true;
@@ -272,8 +272,8 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
         // Only allow turning OFF (clicking switches to light mode)
         setLampLightReady(false);
         lampAnim.start(
-            { y: -60, opacity: 0 },
-            { duration: 0.28, ease: [0.5, 0, 0.84, 0] }
+            { y: -50, opacity: 0 },
+            { duration: 0.38, ease: [0.4, 0, 0.7, 0.2] }
         ).then(() => {
             setLampOn(false);
             if (isDarkMode && onToggleTheme) onToggleTheme();
@@ -708,81 +708,108 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                 onClick={handleLampClick}
                 title="Turn light off"
             >
-                {/* Perspective wrapper */}
-                <div style={{ perspective: '600px' }}>
-                <div style={{ transform: 'rotateY(32deg) rotateX(-6deg)', transformStyle: 'preserve-3d' }}>
+                {/* Perspective wrapper — gentle 3D tilt */}
+                <div style={{ perspective: '800px' }}>
+                <div style={{ transform: 'rotateY(18deg) rotateX(-3deg)', transformStyle: 'preserve-3d' }}>
                 <motion.div
-                    initial={{ y: -90, opacity: 0, rotate: 0 }}
+                    initial={{ y: -70, opacity: 0, rotate: 0 }}
                     animate={lampAnim}
-                    style={{ transformOrigin: '80% 0%' }}
+                    style={{ transformOrigin: '75% 0%' }}
                 >
-                    <svg width="54" height="64" viewBox="0 0 140 170" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <svg width="54" height="68" viewBox="0 0 140 190" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <defs>
-                            <linearGradient id="shadeFabric" x1="0" y1="0" x2="0.4" y2="1">
-                                <stop offset="0%" stopColor="#D5D0CA"/>
-                                <stop offset="50%" stopColor="#C9C4BD"/>
-                                <stop offset="100%" stopColor="#BAB5AE"/>
+                            {/* Fabric shade gradient - light grey linen, light from upper-left */}
+                            <linearGradient id="shadeFabric" x1="0.05" y1="0" x2="0.95" y2="1">
+                                <stop offset="0%" stopColor="#DDDAD6"/>
+                                <stop offset="25%" stopColor="#D4D1CC"/>
+                                <stop offset="55%" stopColor="#C9C6C1"/>
+                                <stop offset="100%" stopColor="#BDBAB4"/>
                             </linearGradient>
-                            <linearGradient id="shadeHighlight" x1="0.3" y1="0" x2="0.7" y2="1">
-                                <stop offset="0%" stopColor="rgba(255,255,255,0.28)"/>
-                                <stop offset="100%" stopColor="rgba(0,0,0,0.05)"/>
+                            {/* Right-side shadow to show shade is 3D */}
+                            <linearGradient id="shadeShadow" x1="0" y1="0.5" x2="1" y2="0.5">
+                                <stop offset="0%" stopColor="rgba(255,255,255,0)" />
+                                <stop offset="65%" stopColor="rgba(0,0,0,0)" />
+                                <stop offset="100%" stopColor="rgba(0,0,0,0.06)" />
                             </linearGradient>
+                            {/* Wood dowel */}
                             <linearGradient id="woodMount" x1="0.5" y1="0" x2="0.5" y2="1">
-                                <stop offset="0%" stopColor="#D7C49A"/>
-                                <stop offset="60%" stopColor="#C9B68A"/>
-                                <stop offset="100%" stopColor="#BCA277"/>
+                                <stop offset="0%" stopColor="#E6DCBA"/>
+                                <stop offset="50%" stopColor="#D9CCA4"/>
+                                <stop offset="100%" stopColor="#CCBE90"/>
                             </linearGradient>
-                            <filter id="lampShadow" x="-20%" y="-10%" width="140%" height="130%">
-                                <feDropShadow dx="0" dy="2" stdDeviation="1.5" floodColor="rgba(0,0,0,0.15)"/>
+                            <filter id="lampShadow" x="-12%" y="-6%" width="124%" height="116%">
+                                <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="blur"/>
+                                <feOffset dx="0" dy="1.5" result="offsetBlur"/>
+                                <feFlood floodColor="rgba(0,0,0,0.08)" result="color"/>
+                                <feComposite in2="offsetBlur" operator="in"/>
+                                <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
                             </filter>
                         </defs>
 
-                        {/* Wood mount plate */}
-                        <rect x="106" y="0" width="16" height="28" rx="3.5" fill="url(#woodMount)"/>
-                        <line x1="111" y1="3" x2="111" y2="25" stroke="rgba(160,130,90,0.2)" strokeWidth="0.6"/>
-                        <line x1="117" y1="2" x2="117" y2="26" stroke="rgba(160,130,90,0.15)" strokeWidth="0.5"/>
+                        {/* Vertical wooden dowel — thin birch, visible above shade & below */}
+                        <rect x="97" y="42" width="5.5" height="132" rx="2.75" fill="url(#woodMount)"/>
+                        <line x1="99" y1="44" x2="99" y2="170" stroke="rgba(185,160,115,0.12)" strokeWidth="0.4"/>
 
-                        {/* Curved hook arm */}
-                        <path d="M114 28 C114 44 112 54 104 62 C96 70 84 72 76 72" stroke="#3C3E42" strokeWidth="4.5" strokeLinecap="round" fill="none"/>
-                        <circle cx="76" cy="72" r="2.5" fill="#3C3E42"/>
+                        {/* Dark metal hook arm — goes up from dowel, curves right, hooks right-and-down */}
+                        <path d="M100 42 L100 22 C100 10 109 4 118 4" stroke="#3A3D41" strokeWidth="3.8" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                        {/* Hook curl — curls to the right and downward like a shepherd's crook */}
+                        <path d="M118 4 C128 4 134 10 134 18 C134 26 129 30 124 30" stroke="#3A3D41" strokeWidth="3.8" strokeLinecap="round" fill="none"/>
 
-                        {/* Fabric drum shade */}
+                        {/* Tapered fabric shade — narrower top, wider bottom, near-straight sides with very subtle curve */}
                         <g filter="url(#lampShadow)">
-                            <path d="M50 78 L102 78 L110 140 L42 140 Z" fill="url(#shadeFabric)"/>
-                            <path d="M54 82 L98 82 L105 136 L46 136 Z" fill="url(#shadeHighlight)" opacity="0.35"/>
-                            <path d="M50 78 L102 78 L110 140 L42 140 Z" stroke="rgba(140,135,128,0.25)" strokeWidth="0.8" fill="none"/>
-                            <line x1="49" y1="98" x2="107" y2="98" stroke="rgba(160,155,148,0.1)" strokeWidth="0.5"/>
-                            <line x1="48" y1="118" x2="109" y2="118" stroke="rgba(160,155,148,0.08)" strokeWidth="0.5"/>
+                            {/* Main shade body */}
+                            <path d="M58 68 L104 68 C106 86 112 114 118 144 L38 144 C44 114 50 86 58 68 Z" fill="url(#shadeFabric)"/>
+                            {/* 3D shadow on right side */}
+                            <path d="M58 68 L104 68 C106 86 112 114 118 144 L38 144 C44 114 50 86 58 68 Z" fill="url(#shadeShadow)"/>
+                            {/* Outline */}
+                            <path d="M58 68 L104 68 C106 86 112 114 118 144 L38 144 C44 114 50 86 58 68 Z" stroke="rgba(160,155,148,0.22)" strokeWidth="0.6" fill="none"/>
+                            {/* Subtle horizontal fabric weave texture */}
+                            <line x1="55" y1="82" x2="109" y2="82" stroke="rgba(160,155,148,0.05)" strokeWidth="0.4"/>
+                            <line x1="52" y1="96" x2="112" y2="96" stroke="rgba(160,155,148,0.05)" strokeWidth="0.4"/>
+                            <line x1="48" y1="110" x2="115" y2="110" stroke="rgba(160,155,148,0.04)" strokeWidth="0.4"/>
+                            <line x1="45" y1="124" x2="117" y2="124" stroke="rgba(160,155,148,0.04)" strokeWidth="0.4"/>
+                            <line x1="42" y1="138" x2="118" y2="138" stroke="rgba(160,155,148,0.03)" strokeWidth="0.4"/>
                         </g>
 
+                        {/* Top rim */}
+                        <ellipse cx="81" cy="68" rx="23" ry="2" fill="rgba(205,200,194,0.35)"/>
                         {/* Bottom rim */}
-                        <ellipse cx="76" cy="140" rx="34" ry="3" fill="rgba(185,180,172,0.4)"/>
+                        <ellipse cx="78" cy="144" rx="40" ry="2.8" fill="rgba(185,180,172,0.25)"/>
 
                         {/* Hanging cord */}
-                        <path d="M76 144 C76 152 75.5 160 75 170" stroke="#2F3136" strokeWidth="2.2" strokeLinecap="round" fill="none"/>
+                        <path d="M78 147 C78 158 77.5 168 77 186" stroke="#2F3136" strokeWidth="1.6" strokeLinecap="round" fill="none"/>
                     </svg>
                 </motion.div>
                 </div>
                 </div>
 
-                {/* Light effects */}
+                {/* Light effects — warm layered glow beneath shade */}
+                {/* Primary light cone */}
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: lampLightReady && lampOn ? 1 : 0 }}
-                    transition={{ duration: 1.8, ease: [0.2, 0.9, 0.3, 1] }}
-                    style={{ position: 'absolute', top: 54, left: '45%', transform: 'translateX(-50%)',
-                        width: 88, height: 430,
-                        background: 'radial-gradient(ellipse 34% 48% at 50% 0%, rgba(255,228,178,0.16) 0%, rgba(255,214,160,0.06) 38%, rgba(255,204,150,0.015) 62%, transparent 85%)',
-                        pointerEvents: 'none', filter: 'blur(2.5px)' }} />
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: lampLightReady && lampOn ? 0.55 : 0 }}
-                    transition={{ duration: 1.6, ease: [0.2, 0.9, 0.3, 1] }}
-                    style={{ position: 'absolute', top: 42, left: '45%', transform: 'translateX(-50%)',
-                        width: 62, height: 14, borderRadius: '50%',
-                        background: 'radial-gradient(ellipse at 50% 100%, rgba(255,230,185,0.18) 0%, rgba(255,220,168,0.05) 48%, transparent 72%)',
+                    transition={{ duration: 2.2, ease: [0.15, 0.85, 0.3, 1] }}
+                    style={{ position: 'absolute', top: 58, left: '44%', transform: 'translateX(-50%)',
+                        width: 96, height: 460,
+                        background: 'radial-gradient(ellipse 36% 50% at 50% 0%, rgba(255,225,170,0.14) 0%, rgba(255,212,155,0.05) 35%, rgba(255,200,145,0.012) 60%, transparent 82%)',
                         pointerEvents: 'none', filter: 'blur(3px)' }} />
+                {/* Secondary warm halo around shade bottom */}
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: lampLightReady && lampOn ? 0.7 : 0 }}
+                    transition={{ duration: 2.0, ease: [0.15, 0.85, 0.3, 1], delay: 0.3 }}
+                    style={{ position: 'absolute', top: 50, left: '44%', transform: 'translateX(-50%)',
+                        width: 72, height: 20, borderRadius: '50%',
+                        background: 'radial-gradient(ellipse at 50% 80%, rgba(255,228,185,0.16) 0%, rgba(255,218,165,0.04) 55%, transparent 78%)',
+                        pointerEvents: 'none', filter: 'blur(4px)' }} />
+                {/* Subtle ambient glow */}
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: lampLightReady && lampOn ? 0.45 : 0 }}
+                    transition={{ duration: 2.6, ease: [0.15, 0.85, 0.3, 1], delay: 0.5 }}
+                    style={{ position: 'absolute', top: 30, left: '44%', transform: 'translateX(-50%)',
+                        width: 130, height: 80, borderRadius: '50%',
+                        background: 'radial-gradient(ellipse at 50% 70%, rgba(255,235,200,0.06) 0%, transparent 70%)',
+                        pointerEvents: 'none', filter: 'blur(8px)' }} />
             </div>,
             document.body
             )}
 
-            <div className="px-4 sm:px-6 lg:px-8 pt-0 sm:pt-1 pb-20 space-y-4 lg:space-y-6 max-w-5xl mx-auto w-full" style={{ position: 'relative', zIndex: 2 }}>
+            <div className="px-4 sm:px-6 lg:px-8 pt-0 sm:pt-1 pb-20 space-y-5 lg:space-y-7 max-w-5xl mx-auto w-full" style={{ position: 'relative', zIndex: 2 }}>
 
                 {/* Header Section */}
                 <div className="space-y-0.5 hidden sm:block">
@@ -873,7 +900,7 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                 {/* Reconfigurable Apps section */}
                 <div className="space-y-2">
                     <div className="flex items-center justify-between px-0.5">
-                        <div className="text-[13px] font-medium tracking-tight" style={{ color: colors.textSecondary }}>
+                        <div className="text-[12px] font-semibold uppercase tracking-widest" style={{ color: colors.textSecondary, opacity: 0.55 }}>
                             Core Apps
                         </div>
                         {onUpdateHomeApps && (
@@ -943,23 +970,23 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                                 {activeApp ? (
                                     <div className="w-[96px] sm:w-[104px] lg:w-[112px]">
                                         <div
-                                            className="relative flex flex-col items-center justify-center gap-1 p-2.5 rounded-2xl"
+                                            className="relative flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl"
                                             style={{
                                                 backgroundColor: colors.tileSurface,
                                                 boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
                                                 width: '100%',
                                                 minWidth: 0,
-                                                minHeight: 96
+                                                minHeight: 104
                                             }}
                                         >
                                             <div
-                                                className="w-8 h-8 rounded-xl flex items-center justify-center mb-0.5"
-                                                style={{ backgroundColor: `${colors.accent}12` }}
+                                                className="w-10 h-10 rounded-xl flex items-center justify-center mb-0.5"
+                                                style={{ backgroundColor: `${colors.accent}10` }}
                                             >
-                                                <activeApp.icon className="w-4 h-4" style={{ color: colors.accent }} />
+                                                <activeApp.icon className="w-5 h-5" style={{ color: colors.accent }} />
                                             </div>
                                             <span
-                                                className="text-[10px] font-bold tracking-tight text-center leading-3 line-clamp-2 w-full px-1"
+                                                className="text-[11px] font-semibold tracking-tight text-center leading-tight line-clamp-2 w-full px-1"
                                                 style={{ color: colors.textPrimary }}
                                             >
                                                 {activeApp.name}
@@ -978,9 +1005,9 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                                         key={app.route}
                                         onClick={() => onNavigate(app.route)}
                                         aria-label={`Open ${app.name}`}
-                                        className="relative flex flex-col items-center justify-center rounded-2xl transition-all active:scale-95 group gap-1 p-2.5"
+                                        className="relative flex flex-col items-center justify-center rounded-2xl transition-all active:scale-95 group gap-1.5 p-3"
                                         style={{
-                                            minHeight: 96,
+                                            minHeight: 104,
                                             backgroundColor: colors.tileSurface,
                                             border: 'none',
                                             boxShadow: colors.tileShadow,
@@ -989,12 +1016,12 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                                         }}
                                     >
                                         <div
-                                            className="rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 w-8 h-8"
-                                            style={{ backgroundColor: `${colors.accent}12` }}
+                                            className="rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 w-10 h-10"
+                                            style={{ backgroundColor: `${colors.accent}10` }}
                                         >
-                                            <app.icon className="w-4 h-4" style={{ color: colors.accent }} />
+                                            <app.icon className="w-5 h-5" style={{ color: colors.accent }} />
                                         </div>
-                                        <span className="text-[10px] font-bold tracking-tight text-center" style={{ color: colors.textPrimary }}>
+                                        <span className="text-[11px] font-semibold tracking-tight text-center leading-tight line-clamp-2 px-1" style={{ color: colors.textPrimary }}>
                                             {app.name}
                                         </span>
                                         {badge && (
@@ -1154,27 +1181,18 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                 <div className="mt-4 lg:mt-5">
                     <button
                         onClick={() => onNavigate('feedback')}
-                        className="w-full px-5 py-4 flex items-center justify-between rounded-2xl transition-all hover:scale-[1.01] active:scale-[0.99]"
+                        className="w-full px-5 py-4 flex items-center justify-between rounded-2xl transition-all active:scale-[0.99]"
                         style={{
-                            backgroundColor: colors.tileSurface,
                             backgroundColor: colors.tileSurface,
                             border: 'none',
                             boxShadow: colors.tileShadow
                         }}
                     >
                         <div className="space-y-0.5 text-left">
-                            <h4 className="text-sm font-semibold" style={{ color: colors.textPrimary }}>Feedback</h4>
-                            <p className="text-xs" style={{ color: colors.textSecondary }}>Improve the MyJSI app experience.</p>
+                            <h4 className="text-sm font-semibold" style={{ color: colors.textPrimary }}>Share Feedback</h4>
+                            <p className="text-xs" style={{ color: colors.textSecondary }}>Help improve the MyJSI experience.</p>
                         </div>
-                        <div
-                            className="px-4 py-2 rounded-full text-xs font-semibold flex-shrink-0"
-                            style={{
-                                backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(53,53,53,0.06)',
-                                color: colors.textPrimary
-                            }}
-                        >
-                            Send
-                        </div>
+                        <ChevronRight className="w-4 h-4 flex-shrink-0 opacity-30" style={{ color: colors.textSecondary }} />
                     </button>
                 </div>
             </div>
