@@ -62,8 +62,8 @@ const Section = ({ title, children, theme, className = '' }) => {
       border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
     }}>
       {title && (
-        <h3 className="text-[15px] font-bold mb-4 pb-3" style={{
-          color: theme.colors.textPrimary, borderBottom: `1px solid ${theme.colors.border}`,
+        <h3 className="text-[15px] font-bold mb-3 pb-2.5" style={{
+          color: theme.colors.textPrimary, borderBottom: `1px solid ${theme.colors.border}80`,
         }}>{title}</h3>
       )}
       {children}
@@ -74,8 +74,8 @@ const Section = ({ title, children, theme, className = '' }) => {
 /* — compact field row — supports inline (label left, field right) — */
 const LABEL_W = 'w-[110px]';          // fixed label column for consistent alignment
 const Row = ({ label, children, theme, tip, noSep, inline }) => (
-  <div className={`${inline ? 'flex items-center gap-3 py-2.5' : 'py-3'} ${noSep ? '' : 'border-t'}`}
-    style={{ borderColor: noSep ? undefined : theme.colors.border }}>
+  <div className={`${inline ? 'flex items-center gap-3' : ''} py-2.5 ${noSep ? '' : 'border-t'}`}
+    style={{ borderColor: noSep ? undefined : `${theme.colors.border}80` }}>
     {label && (
       <div className={`flex items-center gap-1.5 ${inline ? `flex-shrink-0 ${LABEL_W}` : 'mb-1.5'}`}>
         <label className={`text-[13px] font-semibold ${inline ? 'whitespace-nowrap' : ''}`}
@@ -419,11 +419,12 @@ export const NewLeadScreen = ({
 
           <Row label="Rewards" theme={theme} inline>
             <div className="flex flex-wrap gap-1.5 justify-end">
-              {[['salesReward', 'Sales'], ['designerReward', 'Designer']].map(([key, lbl]) => {
+              {[['salesReward', 'Sales Reward'], ['designerReward', 'Designer Reward']].map(([key, lbl]) => {
                 const on = newLeadData[key] !== false;
                 return (
                   <PillButton key={key} size="xs" isSelected={on}
-                    onClick={() => upd(key, !on)} theme={theme}>{lbl}</PillButton>
+                    onClick={() => upd(key, !on)} theme={theme}
+                    className="min-w-[110px]">{on ? '✓  ' : ''}{lbl}</PillButton>
                 );
               })}
             </div>
@@ -453,11 +454,11 @@ export const NewLeadScreen = ({
         {/* ── 4. Competition & Products ── */}
         <Section title="Competition & Products" theme={theme} className="mb-4">
           {/* bid + competition toggles, inline */}
-          <div className="flex items-center justify-between py-2">
+          <div className="flex items-center justify-between py-2.5">
             <span className="text-[13px] font-semibold" style={{ color: c.textPrimary }}>Bid?</span>
             <ToggleSwitch checked={!!newLeadData.isBid} onChange={e => upd('isBid', e.target.checked)} theme={theme} />
           </div>
-          <div className="flex items-center justify-between py-2 border-t" style={{ borderColor: c.border }}>
+          <div className="flex items-center justify-between py-2.5 border-t" style={{ borderColor: `${c.border}80` }}>
             <span className="text-[13px] font-semibold" style={{ color: c.textPrimary }}>Competition?</span>
             <ToggleSwitch checked={!!newLeadData.competitionPresent} onChange={e => upd('competitionPresent', e.target.checked)} theme={theme} />
           </div>
