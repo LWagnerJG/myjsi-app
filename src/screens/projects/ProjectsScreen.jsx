@@ -235,39 +235,44 @@ const OpportunityDetail = ({ opp, theme, onUpdate }) => {
           </div>
 
           {/* Value · Discount · Net bar */}
-          <div style={sectionCard} className="flex items-stretch">
-            <div className="flex-1 flex flex-col justify-center py-2 pr-4">
-              <span className="text-[10px] font-semibold uppercase tracking-widest mb-1.5" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>List Value</span>
-              <div className="flex items-baseline gap-1.5">
-                <span className="text-[22px] font-bold tracking-tight leading-none" style={{ color: theme.colors.textSecondary, opacity: 0.3 }}>$</span>
+          <div style={sectionCard}>
+            {/* Top row: List Value input */}
+            <div className="pb-3">
+              <span className="text-[10px] font-semibold uppercase tracking-widest mb-1.5 block" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>List Value</span>
+              <div className="flex items-baseline gap-2">
+                <span className="text-[24px] font-bold tracking-tight leading-none" style={{ color: theme.colors.textSecondary, opacity: 0.3 }}>$</span>
                 <input
                   inputMode="numeric"
                   value={(() => { const raw = (''+(draft.value||'')).replace(/[^0-9]/g,''); return raw ? parseInt(raw,10).toLocaleString() : ''; })()}
                   onChange={e=>{ const val=e.target.value.replace(/[^0-9]/g,''); update('value', val? ('$'+parseInt(val,10).toLocaleString()):''); }}
-                  className="bg-transparent outline-none text-[26px] font-bold tracking-tight w-full leading-none"
+                  className="bg-transparent outline-none text-[28px] font-bold tracking-tight w-full leading-none"
                   style={{ color: theme.colors.textPrimary }}
                   placeholder="0"
                 />
               </div>
             </div>
-            <div className="w-px self-stretch my-3" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)' }} />
-            <div
-              className="flex flex-col justify-center py-2 px-5 cursor-pointer"
-              onClick={()=>discountOpen? setDiscountOpen(false):openDiscount()}
-              ref={discBtn}
-            >
-              <span className="text-[10px] font-semibold uppercase tracking-widest mb-1.5" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Discount</span>
-              <div className="flex items-center gap-1.5">
-                <span className="text-[15px] font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>{draft.discount || '—'}</span>
-                <ChevronDown className="w-3.5 h-3.5" style={{ color: theme.colors.textSecondary, opacity: 0.4 }} />
+            {/* Divider */}
+            <div className="h-px" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }} />
+            {/* Bottom row: Discount + Net side by side */}
+            <div className="flex items-stretch pt-3 gap-0">
+              <div
+                className="flex-1 flex flex-col justify-center cursor-pointer min-w-0"
+                onClick={()=>discountOpen? setDiscountOpen(false):openDiscount()}
+                ref={discBtn}
+              >
+                <span className="text-[10px] font-semibold uppercase tracking-widest mb-1" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Discount</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[14px] font-bold tracking-tight truncate" style={{ color: theme.colors.textPrimary }}>{draft.discount || '—'}</span>
+                  <ChevronDown className="w-3.5 h-3.5 flex-shrink-0" style={{ color: theme.colors.textSecondary, opacity: 0.4 }} />
+                </div>
               </div>
-            </div>
-            <div className="w-px self-stretch my-3" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)' }} />
-            <div className="flex flex-col justify-center py-2 pl-5">
-              <span className="text-[10px] font-semibold uppercase tracking-widest mb-1.5" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Net Value</span>
-              <span className="text-[20px] font-bold tracking-tight leading-none" style={{ color: theme.colors.accent }}>
-                {netValue > 0 && discountPct > 0 ? `$${netValue.toLocaleString()}` : '—'}
-              </span>
+              <div className="w-px self-stretch mx-4" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }} />
+              <div className="flex flex-col justify-center">
+                <span className="text-[10px] font-semibold uppercase tracking-widest mb-1" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Net Value</span>
+                <span className="text-[18px] font-bold tracking-tight leading-none whitespace-nowrap" style={{ color: theme.colors.accent }}>
+                  {netValue > 0 && discountPct > 0 ? `$${netValue.toLocaleString()}` : '—'}
+                </span>
+              </div>
             </div>
           </div>
 
