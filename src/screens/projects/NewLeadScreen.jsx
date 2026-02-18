@@ -87,6 +87,18 @@ const Row = ({ label, children, theme, tip, noSep, inline }) => (
   </div>
 );
 
+/* — animated reveal wrapper — uses CSS grid-row trick for smooth height — */
+const Reveal = ({ show, children }) => (
+  <div style={{
+    display: 'grid',
+    gridTemplateRows: show ? '1fr' : '0fr',
+    opacity: show ? 1 : 0,
+    transition: 'grid-template-rows .35s cubic-bezier(.4,0,.2,1), opacity .3s ease',
+  }}>
+    <div style={{ overflow: 'hidden' }}>{children}</div>
+  </div>
+);
+
 /* ═══════════════════════════════════════════════════════════════
    PRODUCT SPOTLIGHT (FIXED SCROLL ISSUE)
    ═══════════════════════════════════════════════════════════════ */
@@ -294,6 +306,7 @@ export const NewLeadScreen = ({
               placeholder="Project Name *" theme={theme} size="sm" surfaceBg required />
           </Row>
 
+          <Reveal show={!!(newLeadData.project && newLeadData.project.trim())}>
           <Row label="Stage" theme={theme} inline>
             <div className="space-y-1">
               <input type="range" min={0} max={stageOptions.length - 1} step={1}
@@ -352,46 +365,10 @@ export const NewLeadScreen = ({
               compact
               resetOnSelect={false} />
           </Row>
+          </Reveal>
         </Section>
 
-        {/* ── 2. Stakeholders ── */}
-        <Section title="Stakeholders" theme={theme} className="mb-4">
-          <Row label="Dealer(s)" theme={theme} noSep inline>
-            <SpotlightMultiSelect
-              selectedItems={newLeadData.dealers || []}
-              onAddItem={d => { const cur = newLeadData.dealers || []; if (!cur.includes(d)) upd('dealers', [...cur, d]); }}
-              onRemoveItem={d => upd('dealers', (newLeadData.dealers || []).filter(x => x !== d))}
-              options={(newLeadData.dealers || []).length > 0 ? (dealers || []).filter(d => d !== 'Undecided') : (dealers || [])}
-              onAddNew={d => setDealers(p => [...new Set([d, ...p])])}
-              placeholder="Search"
-              theme={theme}
-              compact />
-          </Row>
-          <Row label="A&D Firm(s)" theme={theme} inline>
-            <SpotlightMultiSelect
-              selectedItems={newLeadData.designFirms || []}
-              onAddItem={f => { const cur = newLeadData.designFirms || []; if (!cur.includes(f)) upd('designFirms', [...cur, f]); }}
-              onRemoveItem={f => upd('designFirms', (newLeadData.designFirms || []).filter(x => x !== f))}
-              options={designFirms || []}
-              onAddNew={f => setDesignFirms(p => [...new Set([f, ...p])])}
-              placeholder="Search"
-              theme={theme}
-              compact />
-          </Row>
-          <Row label="End User" theme={theme} inline>
-            <AutoCompleteCombobox
-              value={newLeadData.endUser || ''}
-              onChange={val => upd('endUser', val)}
-              onSelect={val => upd('endUser', val)}
-              options={END_USER_OPTIONS}
-              placeholder="Search"
-              theme={theme}
-              compact
-              resetOnSelect={false} />
-          </Row>
-        </Section>
-
-        {/* ── 3. Financials & Timeline ── */}
+        {/* ── 2. Financials & Timeline ── */}
         <Section title="Financials & Timeline" theme={theme} className="mb-4">
           <Row label="Estimated List *" theme={theme} noSep inline>
             <FormInput type="currency" value={newLeadData.estimatedList || ''} required
@@ -399,6 +376,7 @@ export const NewLeadScreen = ({
               placeholder="$0" theme={theme} surfaceBg />
           </Row>
 
+          <Reveal show={!!(newLeadData.estimatedList && String(newLeadData.estimatedList).replace(/[^0-9]/g, '').length > 0)}>
           <Row label="Win Probability" theme={theme} inline>
             <div className="flex items-center gap-2.5 flex-1 min-w-0" style={{ minHeight: 40 }}>
               <input type="range" min={10} max={100} step={10}
@@ -447,6 +425,44 @@ export const NewLeadScreen = ({
                 ...Object.keys(CONTRACTS_DATA).map(k => ({ label: CONTRACTS_DATA[k].name, value: k })),
               ]}
               placeholder="Select Contract" theme={theme} mutedValues={['none', 'None']} />
+          </Row>
+          </Reveal>
+        </Section>
+
+        {/* ── 3. Stakeholders ── */}
+        <Section title="Stakeholders" theme={theme} className="mb-4">
+          <Row label="Dealer(s)" theme={theme} noSep inline>
+            <SpotlightMultiSelect
+              selectedItems={newLeadData.dealers || []}
+              onAddItem={d => { const cur = newLeadData.dealers || []; if (!cur.includes(d)) upd('dealers', [...cur, d]); }}
+              onRemoveItem={d => upd('dealers', (newLeadData.dealers || []).filter(x => x !== d))}
+              options={(newLeadData.dealers || []).length > 0 ? (dealers || []).filter(d => d !== 'Undecided') : (dealers || [])}
+              onAddNew={d => setDealers(p => [...new Set([d, ...p])])}
+              placeholder="Search"
+              theme={theme}
+              compact />
+          </Row>
+          <Row label="A&D Firm(s)" theme={theme} inline>
+            <SpotlightMultiSelect
+              selectedItems={newLeadData.designFirms || []}
+              onAddItem={f => { const cur = newLeadData.designFirms || []; if (!cur.includes(f)) upd('designFirms', [...cur, f]); }}
+              onRemoveItem={f => upd('designFirms', (newLeadData.designFirms || []).filter(x => x !== f))}
+              options={designFirms || []}
+              onAddNew={f => setDesignFirms(p => [...new Set([f, ...p])])}
+              placeholder="Search"
+              theme={theme}
+              compact />
+          </Row>
+          <Row label="End User" theme={theme} inline>
+            <AutoCompleteCombobox
+              value={newLeadData.endUser || ''}
+              onChange={val => upd('endUser', val)}
+              onSelect={val => upd('endUser', val)}
+              options={END_USER_OPTIONS}
+              placeholder="Search"
+              theme={theme}
+              compact
+              resetOnSelect={false} />
           </Row>
         </Section>
 
