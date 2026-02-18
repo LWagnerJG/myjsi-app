@@ -92,7 +92,7 @@ export const FormInput = React.memo(({
                     <textarea
                         {...baseProps}
                         rows="4"
-                        className={`w-full px-4 py-3 border rounded-3xl focus:outline-none focus:ring-0 ${textSizeClass} placeholder-theme-secondary ${className}`}
+                        className={`w-full ${size === 'sm' ? 'px-4 py-2.5' : 'px-4 py-3'} border rounded-3xl focus:outline-none focus:ring-0 ${textSizeClass} placeholder-theme-secondary ${className}`}
                         style={{ ...styles, resize: 'none', height: 'auto' }}
                     />
                 ) : (

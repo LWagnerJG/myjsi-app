@@ -549,7 +549,7 @@ export const NewLeadScreen = ({
           <FormInput type="textarea" value={newLeadData.notes || ''}
             onChange={e => upd('notes', e.target.value)}
             placeholder="Notes or additional details..."
-            theme={theme} surfaceBg />
+            theme={theme} size="sm" surfaceBg />
         </Section>
 
         {/* ── Submit ── */}
