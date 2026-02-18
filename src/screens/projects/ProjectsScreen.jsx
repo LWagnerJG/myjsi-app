@@ -673,15 +673,6 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
                 );
               })}
             </div>
-            {projectsTab==='pipeline' && (
-              <button
-                onClick={()=>onNavigate('new-lead')}
-                className="h-8 inline-flex items-center justify-center gap-1 rounded-full text-[11px] font-semibold transition-all px-3.5 whitespace-nowrap"
-                style={{ backgroundColor: theme.colors.textPrimary, color: isDark ? '#1a1a1a' : '#fff' }}
-              >
-                + New Project
-              </button>
-            )}
             {projectsTab==='my-projects' && (
               <button
                 onClick={()=>onNavigate('add-new-install')}
