@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
+import { motion } from 'framer-motion';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { Briefcase, ChevronRight, ChevronDown, DollarSign, Percent, Building2, Users, Package, FileText, Upload, Plus, Eye, Send, Paperclip, Search, UserPlus } from 'lucide-react';
 import { RequestQuoteModal } from '../../components/common/RequestQuoteModal.jsx';
@@ -721,7 +722,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
             filteredOpportunities.length ? (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {filteredOpportunities.map(opp=> <ProjectCard key={opp.id} opp={opp} theme={theme} onClick={()=>setSelectedOpportunity(opp)} />)}
+                  {filteredOpportunities.map((opp, i)=> <motion.div key={opp.id} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: i * 0.05 }}><ProjectCard opp={opp} theme={theme} onClick={()=>setSelectedOpportunity(opp)} /></motion.div>)}
                 </div>
                 <div className="flex justify-center pt-5 pb-2">
                   <div
@@ -742,8 +743,9 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
           {projectsTab==='my-projects' && (
             (myProjects||[]).length ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {(myProjects||[]).map(p=> (
-                  <button key={p.id} onClick={()=>setSelectedInstall(p)} className="w-full text-left group" style={{ WebkitTapHighlightColor:'transparent' }}>
+                {(myProjects||[]).map((p, i)=> (
+                  <motion.div key={p.id} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: i * 0.05 }}>
+                  <button onClick={()=>setSelectedInstall(p)} className="w-full text-left group" style={{ WebkitTapHighlightColor:'transparent' }}>
                     <div
                       className="overflow-hidden transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
                       style={{
@@ -761,6 +763,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
                       </div>
                     </div>
                   </button>
+                  </motion.div>
                 ))}
               </div>
             ) : <div className="flex flex-col items-center justify-center py-12"><Briefcase className="w-12 h-12 mb-4" style={{ color: theme.colors.textSecondary }} /><p className="text-center text-sm font-medium" style={{ color: theme.colors.textSecondary }}>No installations recorded yet</p><p className="text-center text-xs mt-1" style={{ color: theme.colors.textSecondary }}>Add install photos and details to build your portfolio</p></div>

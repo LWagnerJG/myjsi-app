@@ -278,8 +278,11 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                 {topLeaders.map((leader, idx) => {
                   const rank = RANK_STYLES[idx] || RANK_STYLES[2];
                   return (
-                    <div
+                    <motion.div
                       key={leader.id}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.3, delay: idx * 0.08 }}
                       className="flex items-center justify-between text-xs py-2 px-3 rounded-xl transition-colors"
                       style={{ backgroundColor: rank.bg }}
                     >
@@ -288,7 +291,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                         <span className="font-semibold truncate">{leader.name}</span>
                       </div>
                       <span className="font-bold tabular-nums shrink-0 ml-2">{formatCurrency(leader.bookings)}</span>
-                    </div>
+                    </motion.div>
                   );
                 })}
               </div>

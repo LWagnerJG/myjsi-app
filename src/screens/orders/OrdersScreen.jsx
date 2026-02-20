@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { Calendar, List, Building2, ChevronLeft, ChevronRight, Package } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { SearchInput } from '../../components/common/SearchInput.jsx';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
@@ -239,12 +240,17 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                                     <Building2 className="w-[18px] h-[18px]" style={{ color: theme.colors.textPrimary }} />
                                 </button>
                                 {dealerMenuOpen && (
-                                    <div className="absolute right-0 mt-2 w-56 max-h-72 overflow-y-auto p-2 z-20 rounded-2xl" style={{ backgroundColor: theme.colors.surface, border: dark ? '1px solid rgba(255,255,255,0.12)' : `1px solid ${theme.colors.border}`, boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }}>
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.95, y: -4 }}
+                                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                                        transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                                        className="absolute right-0 mt-2 w-56 max-h-72 overflow-y-auto p-2 z-20 rounded-2xl"
+                                        style={{ transformOrigin: 'top right', backgroundColor: theme.colors.surface, border: dark ? '1px solid rgba(255,255,255,0.12)' : `1px solid ${theme.colors.border}`, boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }}>
                                         {dealers.map(d => {
                                             const active = d === selectedDealer;
                                             return <button key={d} onClick={() => { setSelectedDealer(d); setDealerMenuOpen(false); }} className={`w-full text-left px-3 py-2 rounded-xl text-sm transition active:scale-95 ${active ? 'font-semibold' : ''}`} style={{ backgroundColor: active ? theme.colors.subtle : 'transparent', color: theme.colors.textPrimary }} onMouseEnter={e => { if (!active) e.currentTarget.style.backgroundColor = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'; }} onMouseLeave={e => { if (!active) e.currentTarget.style.backgroundColor = 'transparent'; }}>{formatCompanyName(d)}</button>;
                                         })}
-                                    </div>
+                                    </motion.div>
                                 )}
                             </div>
                             <button onClick={() => setViewMode(v => v === 'list' ? 'calendar' : 'list')} className="h-10 w-10 rounded-full flex items-center justify-center active:scale-90 transition border" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.06)' : theme.colors.surface, borderColor: dark ? 'rgba(255,255,255,0.12)' : theme.colors.border }} title={viewMode === 'list' ? 'Calendar View' : 'List View'}>
@@ -258,20 +264,30 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
             {/* Content */}
             <div ref={scrollRef} className="flex-1 overflow-y-auto scrollbar-hide">
                 <div className="px-4 sm:px-6 lg:px-8 pt-3 pb-24 max-w-5xl mx-auto w-full">
-                    {viewMode === 'list' ? (
-                        groupKeys.length ? (
+                    <AnimatePresence mode="wait">
+                      {viewMode === 'list' ? (
+                        <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+                          {groupKeys.length ? (
                             <div className="space-y-4">
-                                {groupKeys.map(k => <DateGroupCard key={k} theme={theme} dateKey={k} group={grouped[k]} onNavigate={onNavigate} />)}
+                                {groupKeys.map((k, i) => (
+                                  <motion.div key={k} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: i * 0.06 }}>
+                                    <DateGroupCard theme={theme} dateKey={k} group={grouped[k]} onNavigate={onNavigate} />
+                                  </motion.div>
+                                ))}
                             </div>
-                        ) : (
-                            <div className="flex flex-col items-center justify-center py-16 text-center">
+                          ) : (
+                            <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3 }} className="flex flex-col items-center justify-center py-16 text-center">
                                 <Package className="w-10 h-10 mb-3" style={{ color: theme.colors.textSecondary, opacity: 0.4 }} />
                                 <p className="text-sm font-medium" style={{ color: theme.colors.textSecondary }}>No orders found</p>
-                            </div>
-                        )
-                    ) : (
-                        <OrderCalendarView orders={filtered} theme={theme} dateType={dateType} onOrderClick={(o) => onNavigate(`orders/${o.orderNumber}`)} />
-                    )}
+                            </motion.div>
+                          )}
+                        </motion.div>
+                      ) : (
+                        <motion.div key="calendar" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+                          <OrderCalendarView orders={filtered} theme={theme} dateType={dateType} onOrderClick={(o) => onNavigate(`orders/${o.orderNumber}`)} />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                 </div>
             </div>
         </div>

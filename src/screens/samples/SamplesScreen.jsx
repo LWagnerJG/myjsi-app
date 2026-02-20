@@ -1,5 +1,6 @@
 // src/screens/samples/SamplesScreen.jsx
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { FloatingCart } from '../../components/common/FloatingCart.jsx';
 import { isDarkTheme } from '../../design-system/tokens.js';
@@ -7,6 +8,7 @@ import {
     Package, Plus, ShoppingCart, Trash2, Minus, CheckCircle, Home,
     ChevronDown, Users, X, Search, MapPin, Building2, Layers, Send
 } from 'lucide-react';
+import { hapticSuccess, hapticMedium } from '../../utils/haptics.js';
 import { SAMPLE_PRODUCTS, SAMPLE_CATEGORIES, FINISH_CATEGORIES, FINISH_SAMPLES } from './data.js';
 import { getSampleProduct } from './sampleIndex.js';
 
@@ -191,6 +193,7 @@ const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, designFi
 
     const submit = useCallback(() => {
         if (!shipToName.trim() || !address1.trim() || cartItems.length === 0) return;
+        hapticSuccess();
         setJustSubmitted(true); setOverlayPhase('enter');
         Object.entries(cart).forEach(([id, qty]) => { if (qty > 0) onUpdateCart({ id }, -qty); });
         setTimeout(() => { onNavigate && onNavigate('home'); setOverlayPhase('exit'); }, prefersReduced ? 600 : 900);
@@ -212,10 +215,21 @@ const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, designFi
             )}
 
             {/* Expanded drawer modal */}
+            <AnimatePresence>
             {isExpanded && (
                 <div className="fixed inset-0 z-30" onClick={() => setIsExpanded(false)}>
-                    <div className="absolute inset-0 bg-black/30" />
-                    <div
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="absolute inset-0 bg-black/30"
+                    />
+                    <motion.div
+                        initial={{ y: '100%', opacity: 0.5 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: '100%', opacity: 0.5 }}
+                        transition={{ type: 'spring', stiffness: 400, damping: 34 }}
                         className="absolute bottom-4 left-4 right-4 max-w-md mx-auto rounded-3xl overflow-hidden"
                         style={{ backgroundColor: theme.colors.surface, boxShadow: '0 4px 20px rgba(0,0,0,0.1)', maxHeight: '75vh' }}
                         onClick={(e) => e.stopPropagation()}
@@ -304,9 +318,10 @@ const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, designFi
                                 Submit Sample Request
                             </button>
                         </div>
-                    </div>
+                    </motion.div>
                 </div>
             )}
+            </AnimatePresence>
             <DirectoryModal show={showDir} onClose={() => setShowDir(false)} onSelect={({ name, address1: addr1, address2: addr2 }) => { safeSetShipTo(name); safeSetAddress1(addr1); safeSetAddress2(addr2); }} theme={theme} dealers={dealers} designFirms={designFirms} />
             {justSubmitted && (
                 <div className="fixed inset-0 z-[1200] flex items-center justify-center pointer-events-none">
@@ -394,7 +409,7 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                     const qty = cart[pid] || 0;
                     const hasImage = !!product.image;
                     const bg = hasImage ? theme.colors.subtle : (product.color || theme.colors.subtle);
-                    const addOne = (e) => { if (e) e.stopPropagation(); onUpdateCart({ ...product, id: pid }, 1); };
+                    const addOne = (e) => { if (e) e.stopPropagation(); hapticMedium(); onUpdateCart({ ...product, id: pid }, 1); };
                     const removeOne = (e) => { if (e) e.stopPropagation(); onUpdateCart({ ...product, id: pid }, -1); };
 
                     return (
@@ -451,7 +466,7 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                                         style={{ color: isActive ? theme.colors.accent : theme.colors.textSecondary, background: 'transparent' }}
                                     >
                                         {cat.name}
-                                        {isActive && <span className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full" style={{ backgroundColor: theme.colors.accent }} />}
+                                        {isActive && <motion.span layoutId="samples-tab-underline" className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full" style={{ backgroundColor: theme.colors.accent }} transition={{ type: 'spring', stiffness: 500, damping: 35 }} />}
                                     </button>
                                 );
                             })}

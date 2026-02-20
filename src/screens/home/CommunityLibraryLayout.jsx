@@ -8,8 +8,9 @@ import { isDarkTheme } from '../../design-system/tokens.js';
 import {
   Monitor, Users, Heart, MessageSquare, Bookmark, ChevronUp,
   Shield, Wrench, Briefcase, Star, PenTool, Building2, Sparkles,
-  X, Send
+  X, Send, Download, Share2, ZoomIn
 } from 'lucide-react';
+import { hapticMedium } from '../../utils/haptics.js';
 
 // ─── Timestamp helpers ─────────────────────────────────────────────────────────
 const formatTs = (ts) => {
@@ -58,9 +59,94 @@ const MiniAvatar = ({ src, name, dark, size = 28 }) => (
   </div>
 );
 
+// ─── ImageLightbox ─────────────────────────────────────────────────────────────
+const ImageLightbox = ({ src, alt, onClose }) => {
+  useEffect(() => {
+    const h = (e) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, [onClose]);
+
+  const handleDownload = useCallback(async () => {
+    try {
+      const resp = await fetch(src, { mode: 'cors' });
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = (alt || 'image').replace(/[^a-zA-Z0-9_-]/g, '_') + '.jpg';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch {
+      window.open(src, '_blank');
+    }
+  }, [src, alt]);
+
+  const handleShare = useCallback(async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: alt || 'Image', url: src });
+      } catch { /* user cancelled */ }
+    } else {
+      try {
+        await navigator.clipboard.writeText(src);
+      } catch {
+        window.prompt('Copy this link:', src);
+      }
+    }
+  }, [src, alt]);
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[400] flex items-center justify-center"
+      style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)' }}
+      onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      {/* Top-right actions */}
+      <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
+        <button
+          onClick={handleDownload}
+          className="w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90"
+          style={{ backgroundColor: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)' }}
+          title="Download"
+        >
+          <Download className="w-5 h-5 text-white" />
+        </button>
+        <button
+          onClick={handleShare}
+          className="w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90"
+          style={{ backgroundColor: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)' }}
+          title="Share"
+        >
+          <Share2 className="w-5 h-5 text-white" />
+        </button>
+        <button
+          onClick={onClose}
+          className="w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90"
+          style={{ backgroundColor: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)' }}
+          title="Close"
+        >
+          <X className="w-5 h-5 text-white" />
+        </button>
+      </div>
+      {/* Image */}
+      <img
+        src={src}
+        alt={alt || 'Preview'}
+        className="max-w-[92vw] max-h-[85vh] rounded-2xl object-contain select-none"
+        style={{ boxShadow: '0 24px 80px rgba(0,0,0,0.5)' }}
+      />
+    </div>,
+    document.body
+  );
+};
+
 // ─── PostDetailSheet ───────────────────────────────────────────────────────────
 const PostDetailSheet = ({ post, theme, dark, isLiked, isUpvoted, onToggleLike, onUpvote, onAddComment, onClose }) => {
   const [draft, setDraft] = useState('');
+  const [lightboxSrc, setLightboxSrc] = useState(null);
   // Local comments so new submissions appear instantly without waiting for global state re-render
   const [localComments, setLocalComments] = useState(() => post.comments || []);
 
@@ -108,24 +194,38 @@ const PostDetailSheet = ({ post, theme, dark, isLiked, isUpvoted, onToggleLike, 
         <div className="flex-1 overflow-y-auto px-4 pb-2 space-y-3">
           {post.title && <p className="text-[15px] font-bold" style={{ color: theme.colors.textPrimary }}>{post.title}</p>}
           {post.text && <p className="text-[13px] leading-relaxed whitespace-pre-line" style={{ color: theme.colors.textSecondary }}>{post.text}</p>}
-          {post.image && <img src={post.image} alt="post" className="w-full rounded-2xl object-cover" />}
+          {post.image && (
+            <button onClick={() => setLightboxSrc(post.image)} className="block w-full relative group rounded-2xl overflow-hidden">
+              <img src={post.image} alt="post" className="w-full rounded-2xl object-cover" />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
+                <ZoomIn className="w-6 h-6 text-white drop-shadow-lg" />
+              </div>
+            </button>
+          )}
           {(post.images || []).length > 0 && (
             <div className="grid grid-cols-2 gap-2">
-              {post.images.map((img, i) => <img key={i} src={img} alt="" className="w-full h-32 rounded-xl object-cover" />)}
+              {post.images.map((img, i) => (
+                <button key={i} onClick={() => setLightboxSrc(img)} className="block relative group rounded-xl overflow-hidden">
+                  <img src={img} alt="" className="w-full h-32 rounded-xl object-cover" />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
+                    <ZoomIn className="w-5 h-5 text-white drop-shadow-lg" />
+                  </div>
+                </button>
+              ))}
             </div>
           )}
 
           {/* Engagement row */}
           <div className="flex items-center gap-1 py-2 border-t" style={{ borderColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }}>
             <button
-              onClick={() => onUpvote?.(post.id)}
+              onClick={() => { hapticMedium(); onUpvote?.(post.id); }}
               className="flex items-center gap-1.5 text-[12px] font-semibold px-3 py-1.5 rounded-full transition-all active:scale-95"
               style={{ color: isUpvoted ? '#f97316' : theme.colors.textSecondary, backgroundColor: isUpvoted ? (dark ? 'rgba(249,115,22,0.12)' : 'rgba(249,115,22,0.08)') : 'transparent' }}
             >
               <ChevronUp className="w-4 h-4" /> {post.upvotes || 0}
             </button>
             <button
-              onClick={() => onToggleLike?.(post.id)}
+              onClick={() => { hapticMedium(); onToggleLike?.(post.id); }}
               className="flex items-center gap-1.5 text-[12px] font-medium px-3 py-1.5 rounded-full transition-all active:scale-95"
               style={{ color: isLiked ? theme.colors.accent : theme.colors.textSecondary, backgroundColor: isLiked ? (dark ? 'rgba(255,255,255,0.08)' : `${theme.colors.accent}10`) : 'transparent' }}
             >
@@ -173,14 +273,15 @@ const PostDetailSheet = ({ post, theme, dark, isLiked, isUpvoted, onToggleLike, 
           </button>
         </form>
       </div>
+      {lightboxSrc && <ImageLightbox src={lightboxSrc} alt={post.title || 'Post image'} onClose={() => setLightboxSrc(null)} />}
     </div>,
     document.body
   );
 };
 
 // ─── Divider ──────────────────────────────────────────────────────────────────
-const FeedDivider = ({ label, dark, theme }) => (
-  <div className="flex items-center gap-2.5 my-4">
+const FeedDivider = ({ label, dark, theme, first }) => (
+  <div className={`flex items-center gap-2.5 ${first ? 'mt-3 mb-4' : 'mt-6 mb-4'}`}>
     <div className="flex-1 h-px" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }} />
     <span className="text-[9px] font-bold uppercase tracking-[0.12em]" style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>{label}</span>
     <div className="flex-1 h-px" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }} />
@@ -189,7 +290,6 @@ const FeedDivider = ({ label, dark, theme }) => (
 
 // ─── SubredditFeed ─────────────────────────────────────────────────────────────
 const SubredditFeed = ({ subreddit, allPosts, theme, dark, likedPosts, postUpvotes, onToggleLike, onUpvote, onAddComment }) => {
-  const [detailPost, setDetailPost] = useState(null);
 
   // Sort all posts by upvotes (highest first), then by recency as tiebreaker
   const { topPosts, latestPosts } = useMemo(() => {
@@ -199,8 +299,9 @@ const SubredditFeed = ({ subreddit, allPosts, theme, dark, likedPosts, postUpvot
       if (diff !== 0) return diff;
       return (b.createdAt || 0) - (a.createdAt || 0);
     });
-    // Top 3 most-upvoted stay pinned as "Trending"
-    const top = sorted.filter(p => (p.upvotes || 0) > 0).slice(0, 3);
+    // Top 3 most-upvoted stay pinned as "Trending" (cap so Latest always has content)
+    const maxTrending = Math.min(3, Math.max(0, sorted.length - 1));
+    const top = sorted.filter(p => (p.upvotes || 0) > 0).slice(0, maxTrending);
     const topIds = new Set(top.map(p => p.id));
     const latest = sorted.filter(p => !topIds.has(p.id));
     return { topPosts: top, latestPosts: latest };
@@ -211,12 +312,7 @@ const SubredditFeed = ({ subreddit, allPosts, theme, dark, likedPosts, postUpvot
 
   return (
     <div>
-      {/* Description */}
-      <p className="text-[11px] leading-snug mb-3" style={{ color: theme.colors.textSecondary, opacity: 0.6 }}>
-        {subreddit.description}
-      </p>
-
-      {/* Posts — Trending pinned up top, rest by upvotes below */}
+      {/* Posts — Trending pinned up top, Latest below */}
       {!allVisible.length ? (
         <div className="flex flex-col items-center py-12 gap-3">
           <Icon className="w-8 h-8" style={{ color: theme.colors.textSecondary, opacity: 0.2 }} />
@@ -226,11 +322,7 @@ const SubredditFeed = ({ subreddit, allPosts, theme, dark, likedPosts, postUpvot
         <>
           {topPosts.length > 0 && (
             <>
-              {/* Trending section header */}
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-[9px] font-bold uppercase tracking-[0.12em]" style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>Trending</span>
-                <div className="flex-1 h-px" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }} />
-              </div>
+              <FeedDivider label="Trending" dark={dark} theme={theme} first />
               <div className="space-y-3">
                 {topPosts.map((post, idx) => {
                   const isLiked = !!likedPosts?.[post.id];
@@ -238,13 +330,13 @@ const SubredditFeed = ({ subreddit, allPosts, theme, dark, likedPosts, postUpvot
                   return (
                     <SubredditPostCard key={post.id} post={post} idx={idx} isTop
                       dark={dark} theme={theme} isLiked={isLiked} isUpvoted={isUpvoted}
-                      onOpen={() => setDetailPost(post)} onUpvote={onUpvote} onToggleLike={onToggleLike} />
+                      onUpvote={onUpvote} onToggleLike={onToggleLike} onAddComment={onAddComment} />
                   );
                 })}
               </div>
             </>
           )}
-          {topPosts.length > 0 && latestPosts.length > 0 && (
+          {latestPosts.length > 0 && (
             <FeedDivider label="Latest" dark={dark} theme={theme} />
           )}
           {latestPosts.length > 0 && (
@@ -255,71 +347,144 @@ const SubredditFeed = ({ subreddit, allPosts, theme, dark, likedPosts, postUpvot
                 return (
                   <SubredditPostCard key={post.id} post={post}
                     dark={dark} theme={theme} isLiked={isLiked} isUpvoted={isUpvoted}
-                    onOpen={() => setDetailPost(post)} onUpvote={onUpvote} onToggleLike={onToggleLike} />
+                    onUpvote={onUpvote} onToggleLike={onToggleLike} onAddComment={onAddComment} />
                 );
               })}
             </div>
           )}
         </>
       )}
+    </div>
+  );
+};
 
-      {detailPost && (
+// ─── SubredditPostCard ─────────────────────────────────────────────────────────
+const SubredditPostCard = ({ post, idx, isTop, dark, theme, isLiked, isUpvoted, onOpen, onUpvote, onToggleLike, onAddComment }) => {
+  const [showComments, setShowComments] = useState(false);
+  const [draft, setDraft] = useState('');
+  const [localComments, setLocalComments] = useState(() => post.comments || []);
+  const [lightboxSrc, setLightboxSrc] = useState(null);
+  const [showDetail, setShowDetail] = useState(false);
+  const commentCount = localComments.length;
+
+  const submitComment = useCallback((e) => {
+    e.preventDefault();
+    const t = draft.trim();
+    if (!t) return;
+    const c = { id: Date.now(), name: 'You', text: t };
+    setLocalComments(prev => [...prev, c]);
+    onAddComment?.(post.id, t);
+    setDraft('');
+  }, [draft, post.id, onAddComment]);
+
+  return (
+    <div
+      className="rounded-2xl overflow-hidden"
+      style={{ backgroundColor: dark ? '#2A2A2A' : '#FFFFFF', border: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'}` }}
+    >
+      {/* Post body */}
+      <div className="p-3.5 pb-2">
+        <div className="flex items-center gap-2 mb-1.5">
+          {isTop && typeof idx === 'number' && (
+            <span className="text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0"
+              style={{ backgroundColor: dark ? 'rgba(249,115,22,0.18)' : 'rgba(249,115,22,0.10)', color: '#f97316' }}>
+              {idx + 1}
+            </span>
+          )}
+          <MiniAvatar src={post.user?.avatar} name={post.user?.name} dark={dark} />
+          <span className="text-[12px] font-semibold" style={{ color: theme.colors.textPrimary }}>{post.user?.name}</span>
+          <span className="text-[10px] ml-auto cursor-default" title={formatExact(post.createdAt)} style={{ color: theme.colors.textSecondary }}>{formatTs(post.createdAt)}</span>
+        </div>
+        <button onClick={() => setShowDetail(true)} className="text-left w-full">
+          {post.title && <p className="text-[13px] font-bold mb-1" style={{ color: theme.colors.textPrimary }}>{post.title}</p>}
+          <p className="text-[12px] leading-relaxed line-clamp-3" style={{ color: theme.colors.textSecondary }}>{post.text}</p>
+        </button>
+        {post.image && (
+          <button onClick={() => setLightboxSrc(post.image)} className="block w-full relative group rounded-xl overflow-hidden mt-2">
+            <img src={post.image} alt="post" className="w-full rounded-xl object-cover max-h-40" />
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
+              <ZoomIn className="w-5 h-5 text-white drop-shadow-lg" />
+            </div>
+          </button>
+        )}
+      </div>
+
+      {/* Action bar */}
+      <div className="px-3 py-2 flex items-center gap-2 border-t" style={{ borderColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}>
+        <button onClick={() => onUpvote?.(post.id)} className="flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-full transition-all" style={{ color: isUpvoted ? '#f97316' : theme.colors.textSecondary, backgroundColor: isUpvoted ? (dark ? 'rgba(249,115,22,0.12)' : 'rgba(249,115,22,0.08)') : 'transparent' }}>
+          <ChevronUp className="w-3 h-3" /> {post.upvotes || 0}
+        </button>
+        <button onClick={() => onToggleLike?.(post.id)} className="flex items-center gap-1 text-[11px] font-medium px-2 py-1 rounded-full transition-all" style={{ color: isLiked ? theme.colors.accent : theme.colors.textSecondary, backgroundColor: isLiked ? (dark ? 'rgba(255,255,255,0.08)' : `${theme.colors.accent}10`) : 'transparent' }}>
+          <Heart className="w-3 h-3" style={isLiked ? { fill: theme.colors.accent } : undefined} /> {post.likes || 0}
+        </button>
+        <button
+          onClick={() => setShowComments(v => !v)}
+          className="flex items-center gap-1 text-[11px] ml-auto px-2 py-1 rounded-full transition-all"
+          style={{ color: showComments ? theme.colors.accent : theme.colors.textSecondary, backgroundColor: showComments ? (dark ? 'rgba(255,255,255,0.06)' : `${theme.colors.accent}08`) : 'transparent' }}
+        >
+          <MessageSquare className="w-3 h-3" /> {commentCount}
+        </button>
+      </div>
+
+      {/* Inline comments */}
+      {showComments && (
+        <div className="px-3.5 pb-3 border-t" style={{ borderColor: dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)' }}>
+          {localComments.length > 0 ? (
+            <div className="space-y-1.5 pt-2.5">
+              {localComments.map(c => (
+                <div key={c.id} className="flex items-start gap-2">
+                  <div className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold flex-shrink-0 mt-0.5" style={{ backgroundColor: dark ? '#333' : '#EDEAE4', color: theme.colors.textSecondary }}>
+                    {c.name?.[0] || '?'}
+                  </div>
+                  <div>
+                    <span className="text-[11px] font-semibold" style={{ color: theme.colors.textPrimary }}>{c.name}</span>
+                    <span className="text-[11px] ml-1.5" style={{ color: theme.colors.textSecondary }}>{c.text}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-[11px] py-2.5 text-center" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>No comments yet</p>
+          )}
+          <form onSubmit={submitComment} className="flex items-center gap-2 mt-2">
+            <input
+              value={draft}
+              onChange={e => setDraft(e.target.value)}
+              placeholder="Reply\u2026"
+              className="flex-1 text-[12px] h-8 px-3 rounded-full outline-none"
+              style={{ backgroundColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)', color: theme.colors.textPrimary }}
+            />
+            <button disabled={!draft.trim()} className="h-7 w-7 rounded-full flex items-center justify-center disabled:opacity-25 transition-opacity flex-shrink-0" style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}>
+              <Send className="w-3 h-3" />
+            </button>
+          </form>
+        </div>
+      )}
+      {lightboxSrc && <ImageLightbox src={lightboxSrc} alt={post.title || 'Post image'} onClose={() => setLightboxSrc(null)} />}
+      {showDetail && (
         <PostDetailSheet
-          post={detailPost}
+          post={{ ...post, comments: localComments }}
           theme={theme}
           dark={dark}
-          isLiked={!!likedPosts?.[detailPost.id]}
-          isUpvoted={!!postUpvotes?.[detailPost.id]}
+          isLiked={isLiked}
+          isUpvoted={isUpvoted}
           onToggleLike={onToggleLike}
           onUpvote={onUpvote}
-          onAddComment={onAddComment}
-          onClose={() => setDetailPost(null)}
+          onAddComment={(id, text) => {
+            const c = { id: Date.now(), name: 'You', text };
+            setLocalComments(prev => [...prev, c]);
+            onAddComment?.(id, text);
+          }}
+          onClose={() => setShowDetail(false)}
         />
       )}
     </div>
   );
 };
 
-// ─── SubredditPostCard ─────────────────────────────────────────────────────────
-const SubredditPostCard = ({ post, idx, isTop, dark, theme, isLiked, isUpvoted, onOpen, onUpvote, onToggleLike }) => (
-  <button
-    onClick={onOpen}
-    className="w-full rounded-2xl overflow-hidden text-left active:scale-[0.99] transition-transform"
-    style={{ backgroundColor: dark ? '#2A2A2A' : '#FFFFFF', border: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'}` }}
-  >
-    <div className="p-3.5 pb-2">
-      <div className="flex items-center gap-2 mb-1.5">
-        {isTop && typeof idx === 'number' && (
-          <span className="text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0"
-            style={{ backgroundColor: dark ? 'rgba(249,115,22,0.18)' : 'rgba(249,115,22,0.10)', color: '#f97316' }}>
-            {idx + 1}
-          </span>
-        )}
-        <MiniAvatar src={post.user?.avatar} name={post.user?.name} dark={dark} />
-        <span className="text-[12px] font-semibold" style={{ color: theme.colors.textPrimary }}>{post.user?.name}</span>
-        <span className="text-[10px] ml-auto cursor-default" title={formatExact(post.createdAt)} style={{ color: theme.colors.textSecondary }}>{formatTs(post.createdAt)}</span>
-      </div>
-      {post.title && <p className="text-[13px] font-bold mb-1" style={{ color: theme.colors.textPrimary }}>{post.title}</p>}
-      <p className="text-[12px] leading-relaxed line-clamp-3" style={{ color: theme.colors.textSecondary }}>{post.text}</p>
-      {post.image && <img src={post.image} alt="post" className="w-full rounded-xl mt-2 object-cover max-h-40" />}
-    </div>
-    <div className="px-3 py-2 flex items-center gap-2 border-t" style={{ borderColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }} onClick={e => e.stopPropagation()}>
-      <button onClick={(e) => { e.stopPropagation(); onUpvote?.(post.id); }} className="flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-full transition-all" style={{ color: isUpvoted ? '#f97316' : theme.colors.textSecondary, backgroundColor: isUpvoted ? (dark ? 'rgba(249,115,22,0.12)' : 'rgba(249,115,22,0.08)') : 'transparent' }}>
-        <ChevronUp className="w-3 h-3" /> {post.upvotes || 0}
-      </button>
-      <button onClick={(e) => { e.stopPropagation(); onToggleLike?.(post.id); }} className="flex items-center gap-1 text-[11px] font-medium px-2 py-1 rounded-full transition-all" style={{ color: isLiked ? theme.colors.accent : theme.colors.textSecondary, backgroundColor: isLiked ? (dark ? 'rgba(255,255,255,0.08)' : `${theme.colors.accent}10`) : 'transparent' }}>
-        <Heart className="w-3 h-3" style={isLiked ? { fill: theme.colors.accent } : undefined} /> {post.likes || 0}
-      </button>
-      <span className="flex items-center gap-1 text-[11px] ml-auto" style={{ color: theme.colors.textSecondary }}>
-        <MessageSquare className="w-3 h-3" /> {(post.comments || []).length}
-      </span>
-    </div>
-  </button>
-);
-
 // ─── Channel chips — minimal text pills ─────────────────────────────────────────
 const ChannelChips = ({ theme, dark, onSelect }) => (
-  <div className="flex gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+  <div className="flex gap-1.5 overflow-x-auto no-scrollbar pt-3 pb-0.5">
     {SUBREDDITS.map((sub) => (
       <button
         key={sub.id}
@@ -342,28 +507,26 @@ const ChannelAwareFeed = ({
   onToggleLike, onUpvote, onPollVote, onAddComment, openCreateContentModal, query,
   activeSubreddit, onSelectSubreddit,
 }) => {
-  const [detailPost, setDetailPost] = useState(null);
 
-  // Hot-score: blend of upvotes and recency — all hooks above conditional return
-  const feed = useMemo(() => {
+  // Split general feed into Trending (top 3 by upvotes) + Latest (everything else by recency)
+  const { trendingFeed, latestFeed } = useMemo(() => {
     const now = Date.now();
     const timeSafe = (x) => (typeof x.createdAt === 'number' ? x.createdAt : now);
     const all = [
-      ...(posts || []).map(p => ({ ...p, _type: 'post', createdAt: timeSafe(p) })),
-      ...(polls || []).map(p => ({ ...p, _type: 'poll', createdAt: timeSafe(p) })),
+      ...(posts || []).filter(p => !p.subreddit).map(p => ({ ...p, _type: 'post', createdAt: timeSafe(p) })),
+      ...(polls || []).filter(p => !p.subreddit).map(p => ({ ...p, _type: 'poll', createdAt: timeSafe(p) })),
     ];
     const q = (query || '').trim().toLowerCase();
     const filtered = q
       ? all.filter(item => [item.user?.name, item.text, item.title, item.question, ...(item.options || []).map(o => o.text)].filter(Boolean).join(' ').toLowerCase().includes(q))
       : all;
-    // Hot score: upvotes boost + recency decay (posts with upvotes float up, but fresh content stays visible)
-    return [...filtered].sort((a, b) => {
-      const ageA = (now - a.createdAt) / 3600000; // hours
-      const ageB = (now - b.createdAt) / 3600000;
-      const scoreA = (a.upvotes || 0) * 2 - ageA * 0.5;
-      const scoreB = (b.upvotes || 0) * 2 - ageB * 0.5;
-      return scoreB - scoreA;
-    });
+    // Trending: top 3 by upvotes
+    const byUpvotes = [...filtered].sort((a, b) => (b.upvotes || 0) - (a.upvotes || 0) || (b.createdAt - a.createdAt));
+    const trending = byUpvotes.filter(p => (p.upvotes || 0) > 0).slice(0, 3);
+    const trendingIds = new Set(trending.map(p => p.id));
+    // Latest: everything else by recency
+    const latest = [...filtered].filter(p => !trendingIds.has(p.id)).sort((a, b) => b.createdAt - a.createdAt);
+    return { trendingFeed: trending, latestFeed: latest };
   }, [posts, polls, query]);
 
   // ── Drilled-in channel view ──
@@ -384,41 +547,42 @@ const ChannelAwareFeed = ({
   }
 
   // ── General community feed ──
+  const renderItem = (item) => {
+    if (item._type === 'poll') {
+      return <PollCard key={`poll-${item.id}`} poll={item} theme={theme} dark={dark} votedOption={pollChoices?.[item.id]} onPollVote={onPollVote} />;
+    }
+    return (
+      <SubredditPostCard key={item.id} post={item}
+        dark={dark} theme={theme}
+        isLiked={!!likedPosts?.[item.id]} isUpvoted={!!postUpvotes?.[item.id]}
+        onUpvote={onUpvote} onToggleLike={onToggleLike} onAddComment={onAddComment} />
+    );
+  };
+
+  const hasAnything = trendingFeed.length > 0 || latestFeed.length > 0;
+
   return (
-    <div className="space-y-3">
+    <div>
       {/* Channel chips */}
       <ChannelChips theme={theme} dark={dark} onSelect={onSelectSubreddit} />
 
-      {/* Feed */}
-      {feed.length > 0 ? (
-        feed.map((item) => {
-          if (item._type === 'poll') {
-            return <PollCard key={`poll-${item.id}`} poll={item} theme={theme} dark={dark} votedOption={pollChoices?.[item.id]} onPollVote={onPollVote} />;
-          }
-          return (
-            <SubredditPostCard key={item.id} post={item}
-              dark={dark} theme={theme}
-              isLiked={!!likedPosts?.[item.id]} isUpvoted={!!postUpvotes?.[item.id]}
-              onOpen={() => setDetailPost(item)} onUpvote={onUpvote} onToggleLike={onToggleLike} />
-          );
-        })
-      ) : (
+      {!hasAnything ? (
         <div className="text-center text-[13px] pt-16" style={{ color: theme.colors.textSecondary }}>No content found.</div>
-      )}
-
-      {/* Post detail sheet */}
-      {detailPost && (
-        <PostDetailSheet
-          post={detailPost}
-          theme={theme}
-          dark={dark}
-          isLiked={!!likedPosts?.[detailPost.id]}
-          isUpvoted={!!postUpvotes?.[detailPost.id]}
-          onToggleLike={onToggleLike}
-          onUpvote={onUpvote}
-          onAddComment={onAddComment}
-          onClose={() => setDetailPost(null)}
-        />
+      ) : (
+        <>
+          {trendingFeed.length > 0 && (
+            <>
+              <FeedDivider label="Trending" dark={dark} theme={theme} first />
+              <div className="space-y-3">{trendingFeed.map(renderItem)}</div>
+            </>
+          )}
+          {latestFeed.length > 0 && (
+            <>
+              <FeedDivider label="Latest" dark={dark} theme={theme} />
+              <div className="space-y-3">{latestFeed.map(renderItem)}</div>
+            </>
+          )}
+        </>
       )}
     </div>
   );
@@ -642,33 +806,57 @@ export const CommunityLibraryLayout = ({
       {/* ── Header ── */}
       <div className="flex-shrink-0 px-4 pt-2" style={{ backgroundColor: theme.colors.background }}>
         <div className="max-w-3xl mx-auto w-full">
-          {/* Tabs */}
-          <div className="flex items-center gap-0.5">
-            {TABS.map(tab => (
-              <button key={tab} onClick={() => switchTab(tab.toLowerCase())} className="text-[14px] px-3 py-2 transition-all" style={tabStyle(activeTab === tab.toLowerCase())}>
-                {tab}
-              </button>
-            ))}
-          </div>
-
-          {/* Sub-community title */}
-          {inSubCommunity && (
-            <div className="flex items-center gap-2 mt-1.5 mb-1">
+          {/* Tabs row — sub-community name slides in from left, tabs shift right */}
+          <div className="flex items-center h-10">
+            {/* Sub-community title (left — expands to push tabs right) */}
+            <div
+              className="flex items-center gap-2 flex-shrink-0 overflow-hidden transition-all duration-300 ease-in-out"
+              style={{
+                maxWidth: inSubCommunity ? 300 : 0,
+                opacity: inSubCommunity ? 1 : 0,
+                marginRight: inSubCommunity ? 10 : 0,
+              }}
+            >
               {SubIcon && (
-                <div className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${activeSubreddit.color}18`, color: activeSubreddit.color }}>
-                  <SubIcon className="w-2.5 h-2.5" />
+                <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${activeSubreddit?.color}18`, color: activeSubreddit?.color }}>
+                  <SubIcon className="w-3 h-3" />
                 </div>
               )}
-              <p className="text-[14px] font-bold" style={{ color: theme.colors.textPrimary }}>
+              <span className="text-[15px] font-bold whitespace-nowrap" style={{ color: theme.colors.textPrimary }}>
                 {activeSubreddit?.name}
-              </p>
-              <span className="text-[10px] font-medium" style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>{activeSubreddit?.members} members</span>
+              </span>
+              <span className="text-[10px] font-medium whitespace-nowrap" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>
+                {activeSubreddit?.members}
+              </span>
             </div>
-          )}
+
+            {/* Divider dot */}
+            <div
+              className="w-1 h-1 rounded-full flex-shrink-0 transition-all duration-300 ease-in-out"
+              style={{
+                backgroundColor: theme.colors.textSecondary,
+                opacity: inSubCommunity ? 0.2 : 0,
+                transform: inSubCommunity ? 'scale(1)' : 'scale(0)',
+                marginRight: inSubCommunity ? 8 : 0,
+              }}
+            />
+
+            {/* Tabs — start left, shift right as sub-community title expands */}
+            <div className="flex items-center gap-0.5 transition-all duration-300 ease-in-out">
+              {TABS.map(tab => (
+                <button key={tab} onClick={() => switchTab(tab.toLowerCase())}
+                  className="text-[13px] px-2.5 py-2 transition-all whitespace-nowrap"
+                  style={tabStyle(activeTab === tab.toLowerCase())}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+          </div>
 
           {/* Search + Post inline */}
           {activeTab !== 'my board' && (
-            <div className="flex items-center gap-2 mt-1.5 mb-1">
+            <div className="flex items-center gap-2 mt-2 mb-2">
               <div className="flex-1">
                 <StandardSearchBar
                   id="community-main-search"

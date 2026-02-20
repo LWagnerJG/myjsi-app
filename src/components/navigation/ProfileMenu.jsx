@@ -55,7 +55,12 @@ export const ProfileMenu = ({ show, onClose, onNavigate, theme, anchorRef, isDar
     const hoverBg = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
 
     return createPortal(
-        <div className="fixed inset-0 pointer-events-auto" style={{ zIndex: DESIGN_TOKENS.zIndex.popover }} onClick={onClose}>
+        <div className="fixed inset-0 pointer-events-auto" style={{ zIndex: DESIGN_TOKENS.zIndex.popover, animation: 'profileMenuBgFade 200ms ease-out' }} onClick={onClose}>
+            <style>{`
+                @keyframes profileMenuBgFade { from { opacity: 0; } to { opacity: 1; } }
+                @keyframes profileMenuSlideIn { from { opacity: 0; transform: scale(0.92) translateY(-6px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+                @keyframes profileMenuItemStagger { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+            `}</style>
             <div 
                 ref={menuRef}
                 role="menu"
@@ -68,16 +73,18 @@ export const ProfileMenu = ({ show, onClose, onNavigate, theme, anchorRef, isDar
                     right: pos.right,
                     backgroundColor: isDark ? '#282828' : '#FFFFFF',
                     border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.06)',
-                    boxShadow: DESIGN_TOKENS.shadows.modal
+                    boxShadow: DESIGN_TOKENS.shadows.modal,
+                    animation: 'profileMenuSlideIn 200ms cubic-bezier(0.16,1,0.3,1)',
+                    transformOrigin: 'top right',
                 }}
             >
-                {menuItems.map(item => (
+                {menuItems.map((item, idx) => (
                     <button 
                         key={item.label} 
                         role="menuitem"
                         onClick={item.action} 
                         className="w-full text-left flex items-center px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
-                        style={{ color: item.danger ? '#B85C5C' : theme.colors.textPrimary }}
+                        style={{ color: item.danger ? '#B85C5C' : theme.colors.textPrimary, animation: `profileMenuItemStagger 250ms cubic-bezier(0.16,1,0.3,1) ${idx * 30}ms both` }}
                         onMouseEnter={e => e.currentTarget.style.backgroundColor = hoverBg}
                         onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                     >

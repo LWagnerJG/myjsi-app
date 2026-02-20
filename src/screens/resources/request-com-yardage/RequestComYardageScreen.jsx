@@ -4,6 +4,7 @@ import { Modal } from '../../../components/common/Modal.jsx';
 import { FrostButton, PrimaryButton } from '../../../components/common/JSIButtons.jsx';
 import { X, Plus, Minus, Trash2 } from 'lucide-react';
 import { FABRICS_DATA, JSI_MODELS } from '../../products/data.js';
+import { hapticSuccess } from '../../../utils/haptics.js';
 
 /* Inline editable qty — tap the number to type directly (opens numpad on mobile) */
 const QtyValue = ({ value, onChange, theme }) => {
@@ -81,6 +82,7 @@ export const RequestComYardageScreen = ({ theme, showAlert, onNavigate, userSett
         try {
             const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
             if ([200, 201, 202].includes(res.status)) {
+                hapticSuccess();
                 showAlert('Submitted successfully.');
                 setSelectedItems([]);
                 setShowConfirm(false);

@@ -4,6 +4,7 @@ import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import { FormInput } from '../../../components/common/FormComponents.jsx';
 import { MapPin, Calendar, Camera, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { FIELD_VISIT_REQUIREMENTS } from './data.js';
+import { hapticSuccess } from '../../../utils/haptics.js';
 
 export const RequestFieldVisitScreen = ({ theme, setSuccessMessage, onNavigate }) => {
     // Calendar state
@@ -48,6 +49,7 @@ export const RequestFieldVisitScreen = ({ theme, setSuccessMessage, onNavigate }
     // Submission
     const handleSubmit = () => {
         if (selectedDate && soNumber && address && notes && photos.length) {
+            hapticSuccess();
             setSuccessMessage('Field visit requested!');
             setTimeout(() => {
                 setSuccessMessage('');

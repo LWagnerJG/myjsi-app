@@ -3,6 +3,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { X, FileText, Calendar, CheckCircle2, Upload, ChevronDown, ChevronUp, Users, Search, Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { hapticSuccess } from '../../utils/haptics.js';
 import { INITIAL_MEMBERS } from '../../screens/members/data.js';
 
 const FORMAT_OPTIONS = [
@@ -226,6 +227,7 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
         if (!validateForm()) return;
         setIsSubmitting(true);
         await new Promise(r => setTimeout(r, 1200));
+        hapticSuccess();
         setIsSubmitting(false);
         setSubmitSuccess(true);
         setTimeout(() => {

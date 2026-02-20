@@ -12,7 +12,8 @@ import { Check, Plus, X, Settings as SettingsIcon, GripVertical, Lock, Paperclip
 import { LEAD_TIMES_DATA } from '../resources/lead-times/data.js';
 import { ANNOUNCEMENTS } from '../community/data.js';
 import { MARKETPLACE_PRODUCTS, INITIAL_BALANCE, formatElliottBucks } from '../marketplace/data.js';
-import { motion, useAnimation } from 'framer-motion';
+import { motion, useAnimation, AnimatePresence } from 'framer-motion';
+import { hapticMedium } from '../../utils/haptics.js';
 import {
     DndContext,
     DragOverlay,
@@ -224,6 +225,7 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
     const handleLampClick = useCallback((e) => {
         e.stopPropagation();
         e.preventDefault();
+        hapticMedium();
         // Allow click immediately — cancel any running entrance animation
         setLampLightReady(false);
         lampAnim.stop();
@@ -1062,7 +1064,17 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                                 <ChevronDown className="w-3 h-3" /> Use the dropdown above to change this card's content
                             </p>
                         )}
-                        {renderHomeFeatureContent(homeFeatureMode)}
+                        <AnimatePresence mode="wait">
+                          <motion.div
+                            key={homeFeatureMode}
+                            initial={{ opacity: 0, y: 6 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -6 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            {renderHomeFeatureContent(homeFeatureMode)}
+                          </motion.div>
+                        </AnimatePresence>
                     </GlassCard>
 
                     <GlassCard
@@ -1122,7 +1134,17 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                                 <ChevronDown className="w-3 h-3" /> Use the dropdown above to change this card's content
                             </p>
                         )}
-                        {renderHomeFeatureContent(secondaryFeatureMode)}
+                        <AnimatePresence mode="wait">
+                          <motion.div
+                            key={secondaryFeatureMode}
+                            initial={{ opacity: 0, y: 6 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -6 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            {renderHomeFeatureContent(secondaryFeatureMode)}
+                          </motion.div>
+                        </AnimatePresence>
                     </GlassCard>
                 </div>
             </div>
@@ -1135,23 +1157,24 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
             >
                 <button
                     onClick={() => onNavigate('feedback')}
-                    className="max-w-5xl mx-auto pointer-events-auto flex items-center justify-between px-5 py-2.5 w-full transition-all active:scale-[0.99]"
+                    className="max-w-5xl mx-auto pointer-events-auto flex items-center justify-between px-5 py-3 w-full transition-all active:scale-[0.99]"
                     style={{
                         backdropFilter: 'blur(48px)',
                         WebkitBackdropFilter: 'blur(48px)',
-                        backgroundColor: isDark ? 'rgba(18,18,18,0.14)' : 'rgba(250,248,245,0.14)',
-                        border: isDark ? '1px solid rgba(255,255,255,0.09)' : '1px solid rgba(0,0,0,0.07)',
+                        backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.55)',
+                        border: isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(0,0,0,0.06)',
                         borderRadius: 999,
+                        boxShadow: isDark ? '0 2px 12px rgba(0,0,0,0.2)' : '0 2px 12px rgba(0,0,0,0.04)',
                         display: 'flex',
                     }}
                 >
-                    <p className="text-[11px] opacity-30" style={{ color: colors.textPrimary }}>
+                    <p className="text-[11.5px] font-medium" style={{ color: colors.textPrimary, opacity: 0.5 }}>
                         Help us improve MyJSI
                     </p>
                     <span
-                        className="flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-semibold"
+                        className="flex items-center gap-1 px-3.5 py-1.5 rounded-full text-[11px] font-bold"
                         style={{
-                            backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.06)',
+                            backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.07)',
                             color: colors.textPrimary,
                         }}
                     >

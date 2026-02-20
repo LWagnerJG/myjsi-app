@@ -10,6 +10,7 @@ import {
   Target, UserPlus, ShoppingBag, Search, ArrowLeft, Wallet,
   Tag, TrendingUp, History, Gift, CreditCard, Ban
 } from 'lucide-react';
+import { hapticMedium, hapticSuccess, hapticLight } from '../../utils/haptics.js';
 import {
   MARKETPLACE_PRODUCTS, MARKETPLACE_CATEGORIES, SHIRT_SIZES, HAT_SIZES,
   INITIAL_BALANCE, BALANCE_HISTORY, INITIAL_ORDERS,
@@ -534,6 +535,7 @@ export const MarketplaceScreen = ({ theme, onNavigate, userSettings }) => {
 
   // Cart helpers
   const addToCart = useCallback((product, size) => {
+    hapticMedium();
     setCart(prev => {
       const existing = prev.find(i => i.productId === product.id && i.size === size);
       if (existing) {
@@ -563,6 +565,7 @@ export const MarketplaceScreen = ({ theme, onNavigate, userSettings }) => {
 
   const handleCheckout = useCallback(() => {
     if (balance < totalCartPrice || cart.length === 0) return;
+    hapticSuccess();
 
     // Create order
     const newOrder = {
@@ -643,7 +646,7 @@ export const MarketplaceScreen = ({ theme, onNavigate, userSettings }) => {
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => { hapticLight(); setActiveTab(tab.id); }}
                   className="relative flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-all"
                   style={{ color: isActive ? theme.colors.accent : theme.colors.textSecondary, background: 'transparent' }}
                 >

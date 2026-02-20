@@ -4,11 +4,12 @@ import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { User, Bell, Palette, ChevronDown } from 'lucide-react';
 import { LEAD_TIMES_DATA } from '../resources/lead-times/data.js';
 import { isDarkTheme, DESIGN_TOKENS } from '../../design-system/tokens.js';
+import { hapticLight } from '../../utils/haptics.js';
 
 const Toggle = ({ checked, onChange, theme }) => {
   const isDark = isDarkTheme(theme);
   return (
-    <button onClick={() => onChange(!checked)} className="w-12 h-7 rounded-full transition-all duration-200 relative flex-shrink-0" style={{ backgroundColor: checked ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.12)' : theme.colors.border) }}>
+    <button onClick={() => { hapticLight(); onChange(!checked); }} className="w-12 h-7 rounded-full transition-all duration-200 relative flex-shrink-0" style={{ backgroundColor: checked ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.12)' : theme.colors.border) }}>
       <div className="w-5.5 h-5.5 rounded-full transition-transform duration-200 absolute top-[3px]" style={{ width: 22, height: 22, backgroundColor: checked ? (isDark ? '#1A1A1A' : '#FFFFFF') : (isDark ? 'rgba(255,255,255,0.5)' : '#FFFFFF'), transform: checked ? 'translateX(24px)' : 'translateX(3px)', boxShadow: '0 1px 4px rgba(0,0,0,0.15)', left: 0 }} />
     </button>
   );
