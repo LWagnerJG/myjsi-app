@@ -84,10 +84,7 @@ export const CustomerRankingScreen = ({ theme }) => {
         const otherVal = c[otherTab] || 0;
 
         return (
-            <motion.button
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: Math.min(i * 0.04, 0.4), duration: 0.3 }}
+            <button
                 onClick={() => open(c)}
                 className="w-full text-left group"
             >
@@ -115,7 +112,7 @@ export const CustomerRankingScreen = ({ theme }) => {
                                 <motion.div
                                     initial={{ width: 0 }}
                                     animate={{ width: `${pct}%` }}
-                                    transition={{ duration: 0.6, delay: i * 0.04, ease: 'easeOut' }}
+                                    transition={{ duration: 0.4, ease: 'easeOut' }}
                                     className="h-full rounded-full"
                                     style={{ backgroundColor: theme.colors.accent }}
                                 />
@@ -136,7 +133,7 @@ export const CustomerRankingScreen = ({ theme }) => {
 
                     <ChevronRight className="w-4 h-4 shrink-0 opacity-0 group-hover:opacity-40 transition-opacity" />
                 </div>
-            </motion.button>
+            </button>
         );
     };
 

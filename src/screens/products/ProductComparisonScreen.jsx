@@ -38,13 +38,10 @@ const ProductTabs = React.memo(({ products, activeProduct, onProductSelect, them
           const active = activeProduct?.id === p.id;
           const baseScale = p?.thumbScale || (isCasegoods ? 1.25 : 1.0);
           return (
-            <motion.button
+            <button
               key={p.id}
               onClick={() => onProductSelect(p)}
               aria-pressed={active}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.04, duration: 0.35, ease: 'easeOut' }}
               className="relative flex-shrink-0 flex flex-col items-center rounded-2xl transition-all duration-300 group"
               style={{
                 width: 88,
@@ -82,7 +79,7 @@ const ProductTabs = React.memo(({ products, activeProduct, onProductSelect, them
                 transition={{ type: 'spring', stiffness: 400, damping: 28 }}
                 style={{ backgroundColor: theme.colors.accent }}
               />
-            </motion.button>
+            </button>
           );
         })}
       </div>
@@ -116,9 +113,9 @@ const ProductHero = React.memo(({ product, theme, categoryId, onNavigate, catego
           ? '0 4px 12px rgba(0,0,0,0.2)'
           : '0 2px 8px rgba(53,53,53,0.08)',
       }}
-      initial={{ opacity: 0, scale: 0.97 }}
+      initial={false}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.5, ease: [0.22, 0.8, 0.12, 0.99] }}
+      transition={{ duration: 0.3, ease: [0.22, 0.8, 0.12, 0.99] }}
     >
       {/* Product image with crossfade */}
       <AnimatePresence mode="wait">
@@ -128,10 +125,10 @@ const ProductHero = React.memo(({ product, theme, categoryId, onNavigate, catego
           alt={product.name}
           className="absolute inset-0 w-full h-full object-contain group-hover:scale-[1.03] transition-transform duration-700"
           style={{ transform: `scale(${baseZoom})` }}
-          initial={{ opacity: 0, scale: baseZoom * 0.95 }}
-          animate={{ opacity: 1, scale: baseZoom }}
-          exit={{ opacity: 0, scale: baseZoom * 1.02 }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
         />
       </AnimatePresence>
 
@@ -150,10 +147,10 @@ const ProductHero = React.memo(({ product, theme, categoryId, onNavigate, catego
             <motion.h2
               key={product.name}
               className="text-[28px] sm:text-[32px] font-bold text-white drop-shadow-md tracking-tight"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.35 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
             >
               {product.name}
             </motion.h2>
@@ -165,7 +162,7 @@ const ProductHero = React.memo(({ product, theme, categoryId, onNavigate, catego
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.3, delay: 0.05 }}
+              transition={{ duration: 0.15 }}
             >
               ${product.price?.toLocaleString() || 'TBD'}
             </motion.p>
@@ -309,12 +306,9 @@ const PricingTable = React.memo(({
   }, [isCasegoods, materialMode, typicalLayout]);
 
   return (
-    <motion.div
+    <div
       className="rounded-[24px] overflow-hidden"
       style={{ ...glassStyle(theme, dark) }}
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.15, ease: [0.22, 0.8, 0.12, 0.99] }}
     >
       {/* Config section */}
       <div className="px-5 pt-5 space-y-3">
@@ -350,12 +344,9 @@ const PricingTable = React.memo(({
           const active = p.id === activeProduct?.id;
           const price = computePrice(p);
           return (
-            <motion.button
+            <button
               key={p.id}
               onClick={() => onSelectProduct(p)}
-              initial={{ opacity: 0, x: -8 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.08 + i * 0.04, duration: 0.3 }}
               className="w-full group px-5 py-3.5 flex items-center justify-between text-[13px] transition-all duration-200 text-left rounded-none"
               style={{
                 cursor: active ? 'default' : 'pointer',
@@ -372,14 +363,13 @@ const PricingTable = React.memo(({
             >
               <span className="flex items-center gap-3">
                 {/* Active indicator */}
-                <motion.span
-                  className="inline-block rounded-full"
-                  animate={{
+                <span
+                  className="inline-block rounded-full transition-all duration-200"
+                  style={{
                     width: active ? 3 : 2,
                     height: active ? 20 : 14,
                     backgroundColor: active ? theme.colors.accent : (dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)'),
                   }}
-                  transition={{ type: 'spring', stiffness: 350, damping: 25 }}
                 />
                 <span
                   className={`font-medium transition-all ${active ? 'font-semibold' : ''}`}
@@ -394,11 +384,11 @@ const PricingTable = React.memo(({
               >
                 ${price?.toLocaleString?.() || 'TBD'}
               </span>
-            </motion.button>
+            </button>
           );
         })}
       </div>
-    </motion.div>
+    </div>
   );
 });
 PricingTable.displayName = 'PricingTable';
@@ -453,11 +443,8 @@ export const ProductComparisonScreen = ({ categoryId, onNavigate, theme }) => {
       <div className="flex-1 overflow-y-auto scrollbar-hide">
         <div className="px-4 sm:px-5 lg:px-8 pt-3 pb-8 space-y-4 max-w-5xl mx-auto w-full">
           {/* Category title */}
-          <motion.div
+          <div
             className="px-1 pt-1"
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
           >
             <h1
               className="text-2xl sm:text-3xl font-bold tracking-tight"
@@ -468,7 +455,7 @@ export const ProductComparisonScreen = ({ categoryId, onNavigate, theme }) => {
             <p className="text-sm mt-0.5" style={{ color: theme.colors.textSecondary }}>
               {visibleProducts.length} {visibleProducts.length === 1 ? 'series' : 'series'} available
             </p>
-          </motion.div>
+          </div>
 
           {/* Product tabs */}
           <ProductTabs
@@ -511,15 +498,3 @@ export const ProductComparisonScreen = ({ categoryId, onNavigate, theme }) => {
     </div>
   );
 };
-
-// Inject keyframes if missing
-if (typeof document !== 'undefined' && !document.getElementById('product-comp-anim')) {
-  const style = document.createElement('style');
-  style.id = 'product-comp-anim';
-  style.innerHTML = `
-    @keyframes fadeInHero{0%{opacity:0;transform:scale(.92)}60%{opacity:1}100%{opacity:1}}
-    @keyframes fadeSlide{0%{opacity:0;transform:translateY(12px)}100%{opacity:1;transform:translateY(0)}}
-    @keyframes rowFade{0%{opacity:0;transform:translateY(4px)}100%{opacity:1;transform:translateY(0)}}
-  `;
-  document.head.appendChild(style);
-}

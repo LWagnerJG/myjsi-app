@@ -266,13 +266,13 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                 <div className="px-4 sm:px-6 lg:px-8 pt-3 pb-24 max-w-5xl mx-auto w-full">
                     <AnimatePresence mode="wait">
                       {viewMode === 'list' ? (
-                        <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+                        <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
                           {groupKeys.length ? (
                             <div className="space-y-4">
                                 {groupKeys.map((k, i) => (
-                                  <motion.div key={k} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: i * 0.06 }}>
+                                  <div key={k}>
                                     <DateGroupCard theme={theme} dateKey={k} group={grouped[k]} onNavigate={onNavigate} />
-                                  </motion.div>
+                                  </div>
                                 ))}
                             </div>
                           ) : (

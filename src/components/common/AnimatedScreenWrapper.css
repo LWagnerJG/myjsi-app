@@ -11,9 +11,10 @@
     position: absolute;
     inset: 0;
     background-color: inherit;
-    will-change: transform, opacity;
+    will-change: transform;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
+    contain: layout style;
 }
 
 .panel-content {
@@ -53,51 +54,23 @@
 }
 
 @keyframes enterRight {
-    from {
-        transform: translateX(100%);
-        opacity: .98;
-    }
-
-    to {
-        transform: translateX(0%);
-        opacity: 1;
-    }
+    from { transform: translate3d(100%, 0, 0); }
+    to   { transform: translate3d(0, 0, 0); }
 }
 
 @keyframes exitLeft {
-    from {
-        transform: translateX(0%);
-        opacity: 1;
-    }
-
-    to {
-        transform: translateX(-10%);
-        opacity: 0;
-    }
+    from { transform: translate3d(0, 0, 0); opacity: 1; }
+    to   { transform: translate3d(-18%, 0, 0); opacity: 0.35; }
 }
 
 @keyframes enterLeft {
-    from {
-        transform: translateX(-30%);
-        opacity: .98;
-    }
-
-    to {
-        transform: translateX(0%);
-        opacity: 1;
-    }
+    from { transform: translate3d(-18%, 0, 0); }
+    to   { transform: translate3d(0, 0, 0); }
 }
 
 @keyframes exitRight {
-    from {
-        transform: translateX(0%);
-        opacity: 1;
-    }
-
-    to {
-        transform: translateX(100%);
-        opacity: 0;
-    }
+    from { transform: translate3d(0, 0, 0); }
+    to   { transform: translate3d(100%, 0, 0); }
 }
 
 /* Back-swipe helpers */

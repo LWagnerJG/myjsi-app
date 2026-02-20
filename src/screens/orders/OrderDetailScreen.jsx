@@ -41,14 +41,15 @@ const useFadeUp = (delay = 0) => {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    // Start with CSS transition ready, then trigger on next frame
+    el.style.transition = 'none';
     el.style.opacity = '0';
-    el.style.transform = 'translateY(12px)';
-    const t = setTimeout(() => {
-      el.style.transition = 'opacity .4s ease, transform .4s ease';
-      el.style.opacity = '1';
-      el.style.transform = 'translateY(0)';
-    }, delay);
-    return () => clearTimeout(t);
+    el.style.transform = 'translateY(8px)';
+    // Force reflow then apply transition
+    void el.offsetHeight;
+    el.style.transition = `opacity .35s ease ${delay}ms, transform .35s ease ${delay}ms`;
+    el.style.opacity = '1';
+    el.style.transform = 'translateY(0)';
   }, [delay]);
   return ref;
 };

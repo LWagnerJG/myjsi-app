@@ -206,7 +206,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${progressPct}%` }}
-                    transition={{ duration: 1, ease: 'easeOut' }}
+                    transition={{ duration: 0.6, ease: 'easeOut' }}
                     className="h-full rounded-full"
                     style={{ backgroundColor: colors.accent }}
                   />
@@ -238,7 +238,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                           <motion.div
                             initial={{ height: 0 }}
                             animate={{ height: `${Math.max(6, (pct / 100) * 52)}px` }}
-                            transition={{ duration: 0.6, delay: i * 0.05 }}
+                            transition={{ duration: 0.4, ease: 'easeOut' }}
                             className="w-full rounded-md"
                             style={{
                               backgroundColor: colors.accent,
@@ -282,7 +282,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                       key={leader.id}
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.3, delay: idx * 0.08 }}
+                      transition={{ duration: 0.25 }}
                       className="flex items-center justify-between text-xs py-2 px-3 rounded-xl transition-colors"
                       style={{ backgroundColor: rank.bg }}
                     >
@@ -356,9 +356,9 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                 return (
                   <motion.button
                     key={order.orderNumber}
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.06 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.2 }}
                     onClick={() => setSelectedOrder(order)}
                     className="w-full flex items-center justify-between px-3.5 py-3 rounded-xl active:scale-[0.98] transition-all group"
                     onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.025)'}
@@ -448,7 +448,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                         <motion.div
                           initial={{ height: 0 }}
                           animate={{ height: `${Math.max(4, pct)}%` }}
-                          transition={{ duration: 0.5, delay: i * 0.04 }}
+                          transition={{ duration: 0.4, ease: 'easeOut' }}
                           className="w-full rounded-lg relative"
                           style={{
                             backgroundColor: colors.accent,

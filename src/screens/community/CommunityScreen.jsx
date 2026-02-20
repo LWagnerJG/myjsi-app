@@ -54,11 +54,8 @@ const ANNOUNCEMENT_COLORS = {
 const StoriesBar = ({ theme, dark }) => (
   <div className="flex gap-3 overflow-x-auto no-scrollbar py-1">
     {STORIES.map((story, i) => (
-      <motion.button
+      <button
         key={story.id}
-        initial={{ opacity: 0, scale: 0.85 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: i * 0.04, type: 'spring', stiffness: 320, damping: 26 }}
         className="flex flex-col items-center gap-1 flex-shrink-0 group"
       >
         <div
@@ -85,7 +82,7 @@ const StoriesBar = ({ theme, dark }) => (
         <span className="text-[10px] font-medium max-w-[56px] truncate" style={{ color: theme.colors.textSecondary }}>
           {story.label}
         </span>
-      </motion.button>
+      </button>
     ))}
   </div>
 );
@@ -323,7 +320,7 @@ export const AnnouncementsRow = ({ announcements, theme, dark, onNavigate, onDis
                 initial={{ opacity: 0, x: 16 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.15 } }}
-                transition={{ delay: i * 0.04 }}
+                transition={{ duration: 0.2 }}
                 className="relative flex-shrink-0 rounded-xl"
                 style={{
                   backgroundColor: dark ? 'rgba(255,255,255,0.05)' : theme.colors.surface,
@@ -835,11 +832,8 @@ export const CommunityScreen = ({
           {effectiveViewMode === 'library' && !embedMode && (
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 px-4">
               {photoLibrary.map((photo, i) => (
-                <motion.button
+                <button
                   key={photo.id}
-                  initial={{ opacity: 0, scale: 0.96 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: i * 0.03 }}
                   onClick={() => onNavigate?.(`community/post/${photo.post.id}`)}
                   className="group relative rounded-xl overflow-hidden aspect-square"
                   style={{ backgroundColor: cardBg(dark) }}
@@ -848,7 +842,7 @@ export const CommunityScreen = ({
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2">
                     <p className="text-[10px] text-white line-clamp-2 font-medium">{photo.post.title || photo.post.text || photo.post.user?.name}</p>
                   </div>
-                </motion.button>
+                </button>
               ))}
               {!photoLibrary.length && <p className="col-span-full text-center text-[13px] pt-16" style={{ color: theme.colors.textSecondary }}>No photos found.</p>}
             </div>

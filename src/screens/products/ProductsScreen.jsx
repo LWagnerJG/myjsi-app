@@ -15,7 +15,6 @@ import {
     Package,
     ChevronRight
 } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { PRODUCTS_CATEGORIES_DATA, PRODUCT_DATA, FABRICS_DATA, JSI_MODELS, JSI_SERIES } from './data.js';
 
 // ─── Clean card helpers ───────────────────────────────────────────────────────────────
@@ -31,7 +30,6 @@ const CategoryCard = React.memo(({
     theme,
     viewMode,
     onClick,
-    index = 0,
     className = ''
 }) => {
     const dark = isDarkTheme(theme);
@@ -39,10 +37,7 @@ const CategoryCard = React.memo(({
 
     if (viewMode === 'grid') {
         return (
-            <motion.div
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.06, duration: 0.45, ease: [0.22, 0.8, 0.12, 0.99] }}
+            <div
                 onClick={handleClick}
                 className={`rounded-[24px] overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.015] active:scale-[0.985] ${className}`}
                 style={{
@@ -87,16 +82,13 @@ const CategoryCard = React.memo(({
                         {category.description}
                     </div>
                 )}
-            </motion.div>
+            </div>
         );
     }
 
     // List view
     return (
-        <motion.div
-            initial={{ opacity: 0, x: -8 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.04, duration: 0.35 }}
+        <div
             onClick={handleClick}
             className={`rounded-2xl overflow-hidden cursor-pointer transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] ${className}`}
             style={{ ...cardStyle(dark) }}
@@ -127,7 +119,7 @@ const CategoryCard = React.memo(({
                 </div>
                 <ChevronRight className="w-4 h-4 flex-shrink-0 opacity-40" style={{ color: theme.colors.textSecondary }} />
             </div>
-        </motion.div>
+        </div>
     );
 });
 CategoryCard.displayName = 'CategoryCard';
@@ -386,7 +378,6 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
                                     theme={theme}
                                     viewMode={viewMode}
                                     onClick={handleCategoryClick}
-                                    index={i}
                                 />
                             ))}
                         </div>
