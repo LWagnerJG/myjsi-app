@@ -3,8 +3,9 @@ import React, { useState, useCallback, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { X, FileText, Calendar, CheckCircle2, Upload, ChevronDown, ChevronUp, Users, Search, Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { hapticSuccess } from '../../utils/haptics.js';
+import { hapticMedium, hapticSuccess } from '../../utils/haptics.js';
 import { INITIAL_MEMBERS } from '../../screens/members/data.js';
+import { CONTRACTS_DATA } from '../../screens/resources/contracts/data.js';
 
 const FORMAT_OPTIONS = [
     { id: 'pdf', label: 'PDF' },
@@ -147,8 +148,8 @@ const MiniAvatar = ({ member, selected, onToggle, isDark, colors }) => {
 /* ══════════════════════════════════════════════════════════════════════════ */
 export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = INITIAL_MEMBERS, initialData }) => {
     const [formData, setFormData] = useState({
-        projectName: '', quoteType: 'new', neededByDate: '', neededByTime: '',
-        projectType: 'commercial', dealerName: '', adName: '', itemsNeeded: [],
+        projectName: '', quoteType: 'new', neededByDate: '',
+        projectType: 'commercial', contractName: '', dealerName: '', adName: '', itemsNeeded: [],
         formats: ['pdf'], projectInfo: '', files: [], selectedTeamMembers: [],
     });
 
@@ -225,6 +226,7 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
     const handleSubmit = useCallback(async e => {
         e.preventDefault();
         if (!validateForm()) return;
+        hapticMedium();
         setIsSubmitting(true);
         await new Promise(r => setTimeout(r, 1200));
         hapticSuccess();
@@ -233,7 +235,7 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
         setTimeout(() => {
             onSubmit?.(formData);
             setSubmitSuccess(false);
-            setFormData({ projectName: '', quoteType: 'new', neededByDate: '', neededByTime: '', projectType: 'commercial', dealerName: '', adName: '', itemsNeeded: [], formats: ['pdf'], projectInfo: '', files: [], selectedTeamMembers: [] });
+            setFormData({ projectName: '', quoteType: 'new', neededByDate: '', projectType: 'commercial', contractName: '', dealerName: '', adName: '', itemsNeeded: [], formats: ['pdf'], projectInfo: '', files: [], selectedTeamMembers: [] });
             onClose();
         }, 1200);
     }, [formData, validateForm, onSubmit, onClose]);
@@ -342,34 +344,61 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                                     <Calendar className="w-3 h-3 inline mr-1 opacity-60" style={{ marginBottom: 1 }} />
                                     Needed By
                                 </label>
-                                <div className="flex gap-2">
-                                    <input type="date" value={formData.neededByDate}
-                                        onChange={e => updateField('neededByDate', e.target.value)}
-                                        style={{ ...inputBase, flex: 1 }} className="date-input" />
-                                    <input type="time" value={formData.neededByTime}
-                                        onChange={e => updateField('neededByTime', e.target.value)}
-                                        style={{ ...inputBase, width: 100 }} />
-                                </div>
+                                <input type="date" value={formData.neededByDate}
+                                    onChange={e => updateField('neededByDate', e.target.value)}
+                                    style={inputBase} />
                             </div>
                         </div>
 
                         {/* Project Type */}
                         <div>
-                            <label style={labelCls}>Project Type *</label>
-                            <div className="grid grid-cols-2 gap-2">
+                            <label style={labelCls}>Project Type</label>
+                            <div className="flex p-0.5 rounded-xl" style={{ backgroundColor: colors.subtle }}>
                                 {['commercial', 'contract'].map(type => (
                                     <button key={type} type="button"
-                                        onClick={() => updateField('projectType', type)}
-                                        className="py-3 rounded-xl text-[13px] font-bold transition-all"
+                                        onClick={() => { updateField('projectType', type); if (type === 'commercial') updateField('contractName', ''); }}
+                                        className="flex-1 py-2.5 rounded-[10px] text-[12px] font-bold transition-all"
                                         style={{
-                                            backgroundColor: formData.projectType === type ? colors.accent : colors.subtle,
-                                            color: formData.projectType === type ? (isDark ? '#1a1a1a' : '#FFFFFF') : colors.textPrimary,
-                                            border: `1px solid ${formData.projectType === type ? colors.accent : colors.border}`,
+                                            backgroundColor: formData.projectType === type ? colors.surfaceElevated : 'transparent',
+                                            color: formData.projectType === type ? colors.textPrimary : colors.textSecondary,
+                                            boxShadow: formData.projectType === type ? (isDark ? '0 1px 4px rgba(0,0,0,0.3)' : '0 1px 4px rgba(0,0,0,0.08)') : 'none',
                                         }}>
                                         {type.charAt(0).toUpperCase() + type.slice(1)}
                                     </button>
                                 ))}
                             </div>
+                            <AnimatePresence>
+                                {formData.projectType === 'contract' && (
+                                    <motion.div
+                                        initial={{ height: 0, opacity: 0 }}
+                                        animate={{ height: 'auto', opacity: 1 }}
+                                        exit={{ height: 0, opacity: 0 }}
+                                        transition={{ duration: 0.2 }}
+                                        className="overflow-hidden">
+                                        <div className="pt-3">
+                                            <label style={{ ...labelCls, marginBottom: 4 }}>Contract</label>
+                                            <div className="relative">
+                                                <select
+                                                    value={formData.contractName || ''}
+                                                    onChange={e => updateField('contractName', e.target.value)}
+                                                    style={{
+                                                        ...inputBase,
+                                                        appearance: 'none',
+                                                        WebkitAppearance: 'none',
+                                                        paddingRight: 36,
+                                                        cursor: 'pointer',
+                                                    }}>
+                                                    <option value="">Select Contract</option>
+                                                    {Object.keys(CONTRACTS_DATA).map(k => (
+                                                        <option key={k} value={k}>{CONTRACTS_DATA[k].name}</option>
+                                                    ))}
+                                                </select>
+                                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: colors.textSecondary }} />
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
 
                         {/* Dealer & A&D */}
