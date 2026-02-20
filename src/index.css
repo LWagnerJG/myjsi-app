@@ -19,7 +19,7 @@
     --content-padding-tablet: 1.5rem;    /* 24px - px-6 */
     --content-padding-desktop: 2rem;     /* 32px - px-8 */
 
-    /* JSI Dealer Brand Tokens */
+    /* JSI Dealer Brand Tokens (static) */
     --jsi-charcoal: #353535;
     --jsi-white: #FFFFFF;
     --jsi-stone: #E3E0D8;
@@ -44,6 +44,66 @@
     /* Map existing tokens to new ones for compatibility */
     --accent-color: var(--jsi-charcoal);
     --bg-color: var(--jsi-warm-beige);
+
+    /* ============================================================
+       THEME-AWARE CSS CUSTOM PROPERTIES (Light mode defaults)
+       These are dynamically toggled via [data-theme="dark"]
+       allowing Tailwind utilities like bg-theme-surface to work.
+       ============================================================ */
+    --theme-background: #F0EDE8;
+    --theme-surface: #FFFFFF;
+    --theme-primary: #353535;
+    --theme-accent: #353535;
+    --theme-accent-text: #FFFFFF;
+    --theme-text-primary: #353535;
+    --theme-text-secondary: #5B7B8C;
+    --theme-border: #E3E0D8;
+    --theme-subtle: #DFE2DD;
+    --theme-shadow: rgba(53, 53, 53, 0.1);
+    --theme-input-bg: #FFFFFF;
+    --theme-overlay: rgba(0, 0, 0, 0.5);
+    --theme-hover: rgba(0, 0, 0, 0.05);
+    --theme-active: rgba(0, 0, 0, 0.08);
+    --theme-focus-ring: rgba(53, 53, 53, 0.2);
+    --theme-success: #4A7C59;
+    --theme-success-light: rgba(74, 124, 89, 0.12);
+    --theme-warning: #C4956A;
+    --theme-warning-light: rgba(196, 149, 106, 0.12);
+    --theme-error: #B85C5C;
+    --theme-error-light: rgba(184, 92, 92, 0.12);
+    --theme-info: #5B7B8C;
+    --theme-info-light: rgba(91, 123, 140, 0.12);
+    --theme-card-bg: #FFFFFF;
+    --theme-card-border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+/* Dark theme overrides */
+[data-theme="dark"] {
+    --theme-background: #1A1A1A;
+    --theme-surface: #262626;
+    --theme-primary: #F5F0EB;
+    --theme-accent: #F5F0EB;
+    --theme-accent-text: #1A1A1A;
+    --theme-text-primary: #EDE8E3;
+    --theme-text-secondary: #958E85;
+    --theme-border: rgba(255, 255, 255, 0.12);
+    --theme-subtle: rgba(255, 255, 255, 0.07);
+    --theme-shadow: rgba(0, 0, 0, 0.5);
+    --theme-input-bg: rgba(255, 255, 255, 0.08);
+    --theme-overlay: rgba(0, 0, 0, 0.7);
+    --theme-hover: rgba(255, 255, 255, 0.05);
+    --theme-active: rgba(255, 255, 255, 0.08);
+    --theme-focus-ring: rgba(255, 255, 255, 0.3);
+    --theme-success: #6B9B7A;
+    --theme-success-light: rgba(107, 155, 122, 0.2);
+    --theme-warning: #D4A87A;
+    --theme-warning-light: rgba(212, 168, 122, 0.2);
+    --theme-error: #C87070;
+    --theme-error-light: rgba(200, 112, 112, 0.2);
+    --theme-info: #7B9BAC;
+    --theme-info-light: rgba(123, 155, 172, 0.2);
+    --theme-card-bg: #2A2A2A;
+    --theme-card-border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 @supports(height:100dvh) {
@@ -198,12 +258,14 @@ h6 {
     }
 }
 
-.scrollbar-hide {
+.scrollbar-hide,
+.no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
 }
 
-.scrollbar-hide::-webkit-scrollbar {
+.scrollbar-hide::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
     display: none;
 }
 
@@ -474,6 +536,15 @@ h6 {
 /* Animations */
 .animate-fade-in {
     animation: fadeIn .2s ease-out forwards;
+}
+
+.animate-pulse-subtle {
+    animation: pulseSubtle 2s ease-in-out infinite;
+}
+
+@keyframes pulseSubtle {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
 }
 
 @keyframes fadeIn {

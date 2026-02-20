@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { PageTitle } from '../../../components/common/PageTitle.jsx';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
-import { FormInput, PortalNativeSelect } from '../../../components/common/FormComponents.jsx';
+import { FormInput } from '../../../components/common/FormComponents.jsx';
+import { PortalNativeSelect } from '../../../components/forms/PortalNativeSelect.jsx';
 import { DISCOUNT_OPTIONS } from './data.js';
 
 export const NewDealerSignUpScreen = ({ theme, setSuccessMessage, onNavigate, handleAddDealer }) => {

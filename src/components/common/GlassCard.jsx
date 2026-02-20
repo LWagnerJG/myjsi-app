@@ -36,14 +36,24 @@ export const GlassCard = React.memo(
 
     const borderColor = theme?.colors?.border || JSI_COLORS.stone;
 
+    const isInteractive = interactive || variant === 'interactive';
+
     // Interactive classes
-    const interactiveClasses = interactive || variant === 'interactive'
+    const interactiveClasses = isInteractive
       ? 'cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.985] active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#353535]/10'
       : '';
 
     const outlinedBorder = variant === 'outlined'
       ? `1.5px solid ${borderColor}`
       : cardBorder;
+
+    // Keyboard support for interactive cards
+    const handleKeyDown = isInteractive ? (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        props.onClick?.(e);
+      }
+    } : undefined;
 
     return (
       <Component
@@ -56,6 +66,7 @@ export const GlassCard = React.memo(
           border: outlinedBorder,
           ...style
         }}
+        {...(isInteractive && { role: 'button', tabIndex: 0, onKeyDown: handleKeyDown })}
         {...props}
       >
         {children}
@@ -81,7 +92,7 @@ export const ProductCard = React.memo(
     },
     ref
   ) {
-    const [isHovered, setIsHovered] = React.useState(false);
+    const [isActive, setIsActive] = React.useState(false);
 
     return (
       <div
@@ -93,8 +104,17 @@ export const ProductCard = React.memo(
           boxShadow: DESIGN_TOKENS.shadows.card,
           ...style,
         }}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
+        onMouseEnter={() => setIsActive(true)}
+        onMouseLeave={() => setIsActive(false)}
+        onFocus={() => setIsActive(true)}
+        onBlur={(e) => {
+          // Keep overlay visible while focus is within the card
+          if (!e.currentTarget.contains(e.relatedTarget)) {
+            setIsActive(false);
+          }
+        }}
+        role="group"
+        aria-label={`${familyName || ''} ${subCategoryTitle || ''}`.trim()}
         {...props}
       >
         {/* Image */}
@@ -102,7 +122,7 @@ export const ProductCard = React.memo(
           <div className="aspect-[4/3] overflow-hidden">
             <img
               src={image}
-              alt={subCategoryTitle}
+              alt={`${familyName || ''} ${subCategoryTitle || ''}`.trim()}
               loading="lazy"
               width="400"
               height="300"
@@ -132,13 +152,13 @@ export const ProductCard = React.memo(
           {children}
         </div>
 
-        {/* JSI Dark Overlay on Hover */}
+        {/* JSI Dark Overlay on Hover/Focus */}
         <div
           className="absolute inset-0 flex items-center justify-center gap-3 transition-all duration-300"
           style={{
-            backgroundColor: isHovered ? 'rgba(53,53,53,0.85)' : 'rgba(53,53,53,0)',
-            opacity: isHovered ? 1 : 0,
-            pointerEvents: isHovered ? 'auto' : 'none',
+            backgroundColor: isActive ? 'rgba(53,53,53,0.85)' : 'rgba(53,53,53,0)',
+            opacity: isActive ? 1 : 0,
+            pointerEvents: isActive ? 'auto' : 'none',
           }}
         >
           {onLearnClick && (

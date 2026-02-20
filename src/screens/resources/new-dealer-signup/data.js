@@ -25,17 +25,8 @@ export const MARKETS = [
     'Other'
 ];
 
-export const DISCOUNT_OPTIONS = [
-    '10%',
-    '15%',
-    '20%',
-    '25%',
-    '30%',
-    '35%',
-    '40%',
-    '45%',
-    '50%'
-];
+// Standard stacked-discount options — pull from central constants
+export { DISCOUNT_OPTIONS } from '../../../constants/discounts.js';
 
 export const FORM_SECTIONS = [
     {

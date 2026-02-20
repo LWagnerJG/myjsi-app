@@ -236,8 +236,27 @@ const AnnouncementDetailModal = ({ announcement, theme, dark, onClose, onNavigat
 /* ── Compact Announcements — horizontal drag-scroll row ── */
 export const AnnouncementsRow = ({ announcements, theme, dark, onNavigate, onDismiss }) => {
   const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
   const rowRef = useRef(null);
   const drag = useRef({ active: false, startX: 0, scrollLeft: 0, moved: false });
+
+  const checkScroll = useCallback(() => {
+    const el = rowRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 2);
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 2);
+  }, []);
+
+  useEffect(() => {
+    checkScroll();
+    const el = rowRef.current;
+    if (!el) return;
+    el.addEventListener('scroll', checkScroll, { passive: true });
+    const ro = new ResizeObserver(checkScroll);
+    ro.observe(el);
+    return () => { el.removeEventListener('scroll', checkScroll); ro.disconnect(); };
+  }, [checkScroll, announcements.length]);
 
   const onPointerDown = useCallback((e) => {
     const el = rowRef.current;
@@ -263,8 +282,27 @@ export const AnnouncementsRow = ({ announcements, theme, dark, onNavigate, onDis
 
   if (!announcements.length) return null;
 
+  const fadeBase = dark ? '42,42,42' : '255,255,255';
+
   return (
     <div className="px-4">
+      <div className="relative">
+        {/* Left fade */}
+        <div
+          className="absolute left-0 top-0 bottom-0 w-14 z-10 pointer-events-none transition-opacity duration-200"
+          style={{
+            opacity: canScrollLeft ? 1 : 0,
+            background: `linear-gradient(to right, rgba(${fadeBase},1) 0%, rgba(${fadeBase},0.85) 35%, rgba(${fadeBase},0) 100%)`,
+          }}
+        />
+        {/* Right fade */}
+        <div
+          className="absolute right-0 top-0 bottom-0 w-16 z-10 pointer-events-none transition-opacity duration-200"
+          style={{
+            opacity: canScrollRight ? 1 : 0,
+            background: `linear-gradient(to left, rgba(${fadeBase},1) 0%, rgba(${fadeBase},0.85) 35%, rgba(${fadeBase},0) 100%)`,
+          }}
+        />
       <div
         ref={rowRef}
         onPointerDown={onPointerDown}
@@ -328,6 +366,7 @@ export const AnnouncementsRow = ({ announcements, theme, dark, onNavigate, onDis
             );
           })}
         </AnimatePresence>
+      </div>
       </div>
 
       {/* Detail modal */}
@@ -521,7 +560,7 @@ const pollTimeLeft = (endsAt) => {
   return 'Closing soon';
 };
 
-const PollCard = React.memo(({ poll, index, theme, dark, votedOption, onPollVote }) => {
+export const PollCard = React.memo(({ poll, index, theme, dark, votedOption, onPollVote }) => {
   const totalVotes = (poll.options || []).reduce((s, o) => s + (o.votes || 0), 0);
   const timeLeft = pollTimeLeft(poll.endsAt);
   const isClosed = poll.endsAt && poll.endsAt < Date.now();

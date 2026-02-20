@@ -20,7 +20,7 @@ export const AnimatedScreenWrapper = ({
             setAnimating(true);
         }
         prevChildrenRef.current = children;
-    }, [screenKey, children, currentKey]);
+    }, [screenKey, currentKey]);
 
     useEffect(() => {
         if (!animating || !containerRef.current) return;
@@ -161,7 +161,7 @@ export const AnimatedScreenWrapper = ({
     }, [animating, currentKey]);
 
     return (
-        <div ref={containerRef} className="animated-screen-container" role="main" aria-live="polite">
+        <div ref={containerRef} className="animated-screen-container" aria-live="polite">
             {prevNode && (
                 <div data-role="previous" className="panel" aria-hidden="true">
                     {prevNode}

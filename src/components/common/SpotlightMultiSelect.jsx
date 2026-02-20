@@ -16,9 +16,11 @@ export function SpotlightMultiSelect({
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const [pos, setPos] = useState({ top: 0, left: 0, width: 0 });
+  const [activeIndex, setActiveIndex] = useState(-1);
   const anchorRef = useRef(null);
   const menuRef = useRef(null);
   const inputRef = useRef(null);
+  const listboxId = useMemo(() => `listbox-${Math.random().toString(36).substr(2, 9)}`, []);
 
   const norm = (s) => (s || "").trim().toLowerCase();
   const available = useMemo(
@@ -32,6 +34,12 @@ export function SpotlightMultiSelect({
 
   const exactExists = useMemo(() => available.some(o => norm(o) === norm(q)), [available, q]);
   const canCreate = q && !exactExists;
+
+  const totalItems = filtered.length + (canCreate ? 1 : 0);
+
+  useEffect(() => {
+    setActiveIndex(-1);
+  }, [q, open]);
 
   const palette = {
     bg: theme.colors.surface,
@@ -69,31 +77,93 @@ export function SpotlightMultiSelect({
   const pick = (val) => { if (!val) return; onAddItem?.(val); setQ(""); setOpen(false); inputRef.current?.blur(); };
   const create = () => { const name = q.trim(); if (!name) return; onAddNew?.(name); onAddItem?.(name); setQ(""); setOpen(false); inputRef.current?.blur(); };
 
+  const handleKeyDown = (e) => {
+    if (!open) {
+      if (e.key === 'ArrowDown' || e.key === 'Enter') {
+        e.preventDefault();
+        setOpen(true);
+      }
+      return;
+    }
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setActiveIndex(prev => (prev < totalItems - 1 ? prev + 1 : prev));
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setActiveIndex(prev => (prev > 0 ? prev - 1 : prev));
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (activeIndex >= 0 && activeIndex < filtered.length) {
+          pick(filtered[activeIndex]);
+        } else if (activeIndex === filtered.length && canCreate) {
+          create();
+        } else if (filtered.length === 1 && !canCreate) {
+          pick(filtered[0]);
+        } else if (canCreate && filtered.length === 0) {
+          create();
+        }
+        break;
+      case 'Escape':
+        e.preventDefault();
+        setOpen(false);
+        inputRef.current?.blur();
+        break;
+      case 'Tab':
+        setOpen(false);
+        break;
+    }
+  };
+
+  useEffect(() => {
+    if (open && activeIndex >= 0 && menuRef.current) {
+      const activeEl = menuRef.current.querySelector(`[data-index="${activeIndex}"]`);
+      if (activeEl) {
+        activeEl.scrollIntoView({ block: 'nearest' });
+      }
+    }
+  }, [activeIndex, open]);
+
   const Menu = () =>
     createPortal(
       <div
         ref={menuRef}
         className="fixed rounded-2xl overflow-hidden shadow-2xl border custom-scroll-hide"
         style={{ top: pos.top, left: pos.left, width: pos.width, background: palette.bg, border: `1px solid ${palette.border}`, zIndex: 9999, maxHeight: 360, overflowY: 'auto' }}
+        role="listbox"
+        id={listboxId}
       >
         <div className="py-1">
-          {filtered.map((opt) => (
+          {filtered.map((opt, idx) => (
             <button
               key={opt}
-              className="w-full text-left px-3 py-2 text-sm hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+              id={`${listboxId}-option-${idx}`}
+              data-index={idx}
+              role="option"
+              aria-selected={activeIndex === idx}
+              className={`w-full text-left px-3 py-2 text-sm transition-colors ${activeIndex === idx ? 'bg-black/10 dark:bg-white/10' : 'hover:bg-black/5 dark:hover:bg-white/5'}`}
               style={{ color: palette.text }}
               onMouseDown={(e) => { e.preventDefault(); pick(opt); }}
+              onMouseEnter={() => setActiveIndex(idx)}
             >
               {opt}
             </button>
           ))}
           {canCreate && (
             <>
-              <div className="h-px my-1" style={{ background: palette.border }} />
+              {filtered.length > 0 && <div className="h-px my-1" style={{ background: palette.border }} />}
               <button
-                className="w-full text-left px-3 py-2 text-sm font-semibold flex items-center gap-2 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                id={`${listboxId}-option-${filtered.length}`}
+                data-index={filtered.length}
+                role="option"
+                aria-selected={activeIndex === filtered.length}
+                className={`w-full text-left px-3 py-2 text-sm font-semibold flex items-center gap-2 transition-colors ${activeIndex === filtered.length ? 'bg-black/10 dark:bg-white/10' : 'hover:bg-black/5 dark:hover:bg-white/5'}`}
                 style={{ color: palette.accent }}
                 onMouseDown={(e) => { e.preventDefault(); create(); }}
+                onMouseEnter={() => setActiveIndex(filtered.length)}
               >
                 <Plus className="w-4 h-4" /> Create "{q.trim()}"
               </button>
@@ -119,7 +189,7 @@ export function SpotlightMultiSelect({
         ref={anchorRef}
         className="flex items-center gap-2 px-4 cursor-text"
         style={{ height: compact ? 40 : 48, borderRadius: 9999, background: palette.field, border: `1px solid ${palette.border}` }}
-        onClick={() => setOpen(true)}
+        onClick={() => { setOpen(true); inputRef.current?.focus(); }}
       >
         <Search className="w-3.5 h-3.5 flex-shrink-0" style={{ color: palette.hint }} />
         <input
@@ -127,9 +197,15 @@ export function SpotlightMultiSelect({
           value={q}
           onChange={(e) => { setQ(e.target.value); setOpen(true); }}
           onFocus={() => setOpen(true)}
+          onKeyDown={handleKeyDown}
           placeholder={selectedItems.length > 0 && compact ? '' : placeholder}
           className={`flex-1 bg-transparent outline-none min-w-[60px] ${compact ? 'text-[13px]' : 'text-[14px]'}`}
           style={{ color: palette.text }}
+          role="combobox"
+          aria-expanded={open}
+          aria-controls={open ? listboxId : undefined}
+          aria-autocomplete="list"
+          aria-activedescendant={activeIndex >= 0 ? `${listboxId}-option-${activeIndex}` : undefined}
         />
         {/* compact: render chips inside the search bar */}
         {compact && selectedItems.length > 0 && (
@@ -144,7 +220,7 @@ export function SpotlightMultiSelect({
                 <button
                   onClick={(e) => { e.stopPropagation(); onRemoveItem?.(s); }}
                   className="w-4 h-4 flex items-center justify-center rounded-full"
-                  aria-label="Remove"
+                  aria-label={`Remove ${s}`}
                 >
                   <X className="w-3 h-3" style={{ color: palette.hint }} />
                 </button>
@@ -167,7 +243,7 @@ export function SpotlightMultiSelect({
               <button
                 onClick={() => onRemoveItem?.(s)}
                 className="w-5 h-5 flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-                aria-label="Remove"
+                aria-label={`Remove ${s}`}
               >
                 <X className="w-3.5 h-3.5" style={{ color: palette.hint }} />
               </button>

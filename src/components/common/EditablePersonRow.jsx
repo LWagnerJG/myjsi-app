@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { PortalNativeSelect } from '../forms/PortalNativeSelect';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Hourglass } from 'lucide-react';
 
 export const EditablePersonRow = ({ person, theme, onUpdateRole, onRemovePerson }) => {
     const [isEditing, setIsEditing] = useState(false);
@@ -20,19 +20,22 @@ export const EditablePersonRow = ({ person, theme, onUpdateRole, onRemovePerson 
     };
 
     return (
-        <button
-            onClick={() => setIsEditing(!isEditing)}
-            className="w-full flex flex-col items-start px-3 py-2 rounded-full transition-all duration-200"
+        <div
+            className="w-full flex flex-col items-start px-3 py-2 rounded-2xl transition-all duration-200"
             style={{
                 backgroundColor: isEditing ? theme.colors.subtle : 'transparent',
             }}
         >
-            <div className="flex items-center justify-between w-full">
+            <button 
+                onClick={() => setIsEditing(!isEditing)}
+                className="flex items-center justify-between w-full text-left"
+                aria-expanded={isEditing}
+            >
                 <span className="font-semibold text-base" style={{ color: theme.colors.textPrimary }}>
                     {person.name}
                 </span>
                 {person.status === 'pending' && <Hourglass className="w-3 h-3 text-amber-500 ml-2" />}
-            </div>
+            </button>
 
             {isEditing && (
                 <div className="flex items-center space-x-2 animate-fade-in w-full mt-2">
@@ -44,11 +47,11 @@ export const EditablePersonRow = ({ person, theme, onUpdateRole, onRemovePerson 
                         theme={theme}
                         placeholder="Change Role"
                     />
-                    <button onClick={(e) => { e.stopPropagation(); onRemovePerson(person.name); }} className="p-2 rounded-full" style={{ color: '#B85C5C' }}>
+                    <button onClick={() => onRemovePerson(person.name)} className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors" style={{ color: '#B85C5C' }} aria-label={`Remove ${person.name}`}>
                         <Trash2 className="w-4 h-4" />
                     </button>
                 </div>
             )}
-        </button>
+        </div>
     );
 };

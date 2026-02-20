@@ -1,4 +1,5 @@
 ﻿import React, { useState, useMemo, useCallback, useEffect, useRef, Suspense } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { lightTheme, darkTheme } from './data/index.js';
 import { DEFAULT_HOME_APPS, allApps } from './data.jsx';
 import { INITIAL_OPPORTUNITIES, MY_PROJECTS_DATA, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS, EMPTY_LEAD, STAGES } from './screens/projects/data.js';
@@ -25,6 +26,7 @@ const CommissionRatesScreen = React.lazy(() => import('./screens/resources/commi
 const LeadTimesScreen = React.lazy(() => import('./screens/resources/lead-times/index.js'));
 const ContractsScreen = React.lazy(() => import('./screens/resources/contracts/index.js'));
 const DealerDirectoryScreen = React.lazy(() => import('./screens/resources/dealer-directory/index.js'));
+const DealerDetailScreen = React.lazy(() => import('./screens/resources/dealer-directory/DealerDetailScreen.jsx').then(m => ({ default: m.DealerDetailScreen })));
 const DiscontinuedFinishesScreen = React.lazy(() => import('./screens/resources/discontinued-finishes/index.js'));
 const TradeshowsScreen = React.lazy(() => import('./screens/resources/tradeshows/index.js'));
 const SampleDiscountsScreen = React.lazy(() => import('./screens/resources/sample-discounts/index.js'));
@@ -89,7 +91,7 @@ const pathToScreen = (pathname) => {
     return trimmed ? decodeURI(trimmed) : 'home';
 };
 
-const ScreenRouter = ({ screenKey, projectsScreenRef, SuspenseFallback, ...rest }) => {
+const ScreenRouter = React.memo(({ screenKey, projectsScreenRef, SuspenseFallback, ...rest }) => {
     if (!screenKey) return null;
     const parts = screenKey.split('/');
     const base = parts[0];
@@ -142,6 +144,12 @@ const ScreenRouter = ({ screenKey, projectsScreenRef, SuspenseFallback, ...rest 
     }
 
     if (base === 'orders' && parts.length > 1) return <OrderDetailScreen {...rest} />;
+
+    // Dealer directory detail route: resources/dealer-directory/{id}
+    if (base === 'resources' && parts[1] === 'dealer-directory' && parts[2]) {
+        return lazyWrap(DealerDetailScreen, { screenKey });
+    }
+
     if (base === 'resources' && parts.length > 1) return <ResourceDetailScreen {...rest} />;
 
     // All SCREEN_MAP components may be lazy - wrap in Suspense
@@ -151,9 +159,14 @@ const ScreenRouter = ({ screenKey, projectsScreenRef, SuspenseFallback, ...rest 
             <ScreenComponent {...rest} />
         </Suspense>
     );
-};
+});
+ScreenRouter.displayName = 'ScreenRouter';
 
 function App() {
+    // React Router hooks
+    const routerNavigate = useNavigate();
+    const location = useLocation();
+
     // Persistent preferences / cart
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [cart, setCart] = usePersistentState('samples.cart', {});
@@ -167,8 +180,7 @@ function App() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // Navigation / UI state
-    const [navigationHistory, setNavigationHistory] = useState(() => [pathToScreen(window.location.pathname)]);
+    // Navigation / UI state — direction tracked for AnimatedScreenWrapper
     const [lastNavigationDirection, setLastNavigationDirection] = useState('forward');
     const [screenParams, setScreenParams] = useState({});
     const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -177,6 +189,19 @@ function App() {
     const [successMessage, setSuccessMessage] = useState('');
     const [alertInfo, setAlertInfo] = useState({ show: false, message: '' });
     const [homeResetKey, setHomeResetKey] = useState(0);
+
+    // Track navigation depth for back button visibility and direction detection
+    const [navDepth, setNavDepth] = useState(0);
+
+    // Derive current screen from React Router location
+    const currentScreen = useMemo(() => pathToScreen(location.pathname), [location.pathname]);
+
+    // Screen name for aria-live route announcer
+    const screenLabel = useMemo(() => {
+        if (!currentScreen || currentScreen === 'home') return 'Home';
+        const app = allApps.find(a => a.route === currentScreen.split('/')[0]);
+        return app?.name || currentScreen.split('/')[0].replace(/-/g, ' ');
+    }, [currentScreen]);
 
     // Domain state
     const [userSettings, setUserSettings] = useState({ id: 1, firstName: 'Luke', lastName: 'Wagner', homeAddress: '5445 N Deerwood Lake Rd, Jasper, IN 47546', shirtSize: 'L' });
@@ -203,7 +228,6 @@ function App() {
     const [newLeadData, setNewLeadData] = usePersistentState('draft.newLead', EMPTY_LEAD);
 
     const projectsScreenRef = useRef(null);
-    const currentScreen = navigationHistory[navigationHistory.length - 1];
 
     const currentTheme = useMemo(() => (isDarkMode ? darkTheme : lightTheme), [isDarkMode]);
 
@@ -219,57 +243,35 @@ function App() {
         };
     }, []);
 
-    useEffect(() => {
-        const initialScreen = pathToScreen(window.location.pathname);
-        const initialStack = Array.isArray(window.history.state?.stack) && window.history.state.stack.length
-            ? window.history.state.stack
-            : [initialScreen];
-
-        if (!Array.isArray(window.history.state?.stack)) {
-            window.history.replaceState({ stack: initialStack }, '', screenToPath(initialScreen));
-        }
-
-        setNavigationHistory(initialStack);
-
-        const handlePopState = (event) => {
-            const stack = Array.isArray(event.state?.stack) && event.state.stack.length
-                ? event.state.stack
-                : [pathToScreen(window.location.pathname)];
-            setNavigationHistory(stack);
-            setLastNavigationDirection('backward');
-        };
-
-        window.addEventListener('popstate', handlePopState);
-        return () => window.removeEventListener('popstate', handlePopState);
-    }, []);
-
     useEffect(() => { document.body.style.backgroundColor = currentTheme.colors.background; }, [currentTheme.colors.background]);
+
+    // Sync data-theme attribute on <html> for CSS variable theming
+    useEffect(() => {
+        document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+    }, [isDarkMode]);
 
     const handleNavigate = useCallback((screen, params = {}) => {
         setLastNavigationDirection('forward');
         setScreenParams(params || {});
-        setNavigationHistory((prev) => {
-            const next = [...prev, screen];
-            window.history.pushState({ stack: next }, '', screenToPath(screen));
-            return next;
-        });
-    }, []);
+        setNavDepth(d => d + 1);
+        routerNavigate(screenToPath(screen));
+    }, [routerNavigate]);
 
     const handleBack = useCallback(() => {
-        if (navigationHistory.length > 1) {
+        if (navDepth > 0) {
             setLastNavigationDirection('backward');
             setScreenParams({});
-            window.history.back();
+            setNavDepth(d => Math.max(0, d - 1));
+            routerNavigate(-1);
         }
-    }, [navigationHistory.length]);
+    }, [routerNavigate, navDepth]);
 
     const handleHome = useCallback(() => {
-        const next = ['home'];
-        setNavigationHistory(next);
         setLastNavigationDirection('backward');
-        window.history.pushState({ stack: next }, '', '/');
+        setNavDepth(0);
+        routerNavigate('/', { replace: true });
         setHomeResetKey((prev) => prev + 1);
-    }, []);
+    }, [routerNavigate]);
 
     const handleVoiceActivate = useCallback((message) => { setVoiceMessage(message); setTimeout(() => setVoiceMessage(''), 1500); }, []);
     const handleAskAI = useCallback((query) => { setVoiceMessage(`AI Search: ${query}`); setTimeout(() => setVoiceMessage(''), 2500); }, []);
@@ -352,8 +354,12 @@ function App() {
         setHomeApps(filtered);
     }, [setHomeApps]);
 
+    // Stable callbacks extracted from inline arrows (prevents screenProps re-creation)
+    const handleToggleTheme = useCallback(() => setIsDarkMode(d => !d), []);
+    const openCreateContentModal = useCallback(() => setShowCreateContentModal(true), []);
+    const clearProjectsInitialTab = useCallback(() => setProjectsTabOverride(null), []);
 
-    const screenProps = {
+    const screenProps = useMemo(() => ({
         theme: currentTheme,
         onNavigate: handleNavigate,
         onAskAI: handleAskAI,
@@ -380,7 +386,7 @@ function App() {
         onToggleLike: handleToggleLike,
         onAddComment: handleAddComment,
         onPollVote: handlePollVote,
-        openCreateContentModal: () => setShowCreateContentModal(true),
+        openCreateContentModal,
         savedImageIds,
         onToggleSaveImage: handleToggleSaveImage,
         postUpvotes,
@@ -396,40 +402,55 @@ function App() {
         newLeadData,
         onNewLeadChange: handleNewLeadChange,
         isDarkMode,
-        onToggleTheme: () => setIsDarkMode(d => !d),
+        onToggleTheme: handleToggleTheme,
         onSuccess: handleLeadSuccess,
         onAddInstall: handleAddInstall,
         projectsInitialTab: projectsTabOverride,
-        clearProjectsInitialTab: () => setProjectsTabOverride(null),
+        clearProjectsInitialTab,
         homeApps,
         onUpdateHomeApps: handleUpdateHomeApps,
         homeResetKey
-    };
+    }), [
+        currentTheme, handleNavigate, handleAskAI, handleVoiceActivate,
+        handleBack, userSettings, handleShowAlert, currentScreen, screenParams,
+        opportunities, myProjects, members, currentUserId,
+        posts, polls, likedPosts, pollChoices, handleToggleLike,
+        handleAddComment, handlePollVote, openCreateContentModal, savedImageIds,
+        handleToggleSaveImage, postUpvotes, handleUpvote, cart, setCart,
+        handleUpdateCart, dealerDirectory, designFirms, dealers, newLeadData,
+        handleNewLeadChange, isDarkMode, handleToggleTheme, handleLeadSuccess,
+        handleAddInstall, projectsTabOverride, clearProjectsInitialTab,
+        homeApps, handleUpdateHomeApps, homeResetKey
+    ]);
 
-    const suspenseFallback = (
+    const suspenseFallback = useMemo(() => (
         <ScreenSkeleton theme={currentTheme} />
-    );
+    ), [currentTheme]);
 
     return (
         <ToastHost theme={currentTheme}>
             <div className="h-screen-safe w-screen font-sans flex flex-col relative" style={{ backgroundColor: currentTheme.colors.background }}>
+                {/* Screen reader route announcer */}
+                <div aria-live="polite" aria-atomic="true" className="sr-only">
+                    {screenLabel} screen
+                </div>
                 <AppHeader
                     theme={currentTheme}
                     userName={userSettings.firstName}
-                    showBack={navigationHistory.length > 1}
+                    showBack={navDepth > 0}
                     handleBack={handleBack}
                     onHomeClick={handleHome}
                     onProfileClick={() => setShowProfileMenu(p => !p)}
                     isDarkMode={isDarkMode}
                     profileBtnRef={profileBtnRef}
                 />
-                <div className="flex-1 overflow-hidden" style={{ backgroundColor: currentTheme.colors.background }}>
+                <main className="flex-1 overflow-hidden max-w-5xl mx-auto w-full" style={{ backgroundColor: currentTheme.colors.background }}>
                     <ErrorBoundary key={currentScreen} theme={currentTheme}>
-                        <AnimatedScreenWrapper screenKey={currentScreen} direction={lastNavigationDirection} onSwipeBack={navigationHistory.length > 1 ? handleBack : null}>
+                        <AnimatedScreenWrapper screenKey={currentScreen} direction={lastNavigationDirection} onSwipeBack={navDepth > 0 ? handleBack : null}>
                             <ScreenRouter screenKey={currentScreen} projectsScreenRef={projectsScreenRef} SuspenseFallback={suspenseFallback} {...screenProps} />
                         </AnimatedScreenWrapper>
                     </ErrorBoundary>
-                </div>
+                </main>
                 {showProfileMenu && (
                     <ProfileMenu show={showProfileMenu} onClose={() => setShowProfileMenu(false)} onNavigate={handleNavigate} theme={currentTheme} anchorRef={profileBtnRef} isDarkMode={isDarkMode} onToggleTheme={() => setIsDarkMode(d => !d)} />
                 )}

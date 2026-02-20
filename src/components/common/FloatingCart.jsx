@@ -56,7 +56,7 @@ export const FloatingCart = React.memo(({ itemCount = 0, label, onClick, theme, 
                 "
                 style={{ backgroundColor: 'rgba(255,255,255,0.18)' }}
             >
-                <ShoppingCart className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-white" />
+                <ShoppingCart className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-white" aria-hidden="true" />
             </div>
 
             {/* Label */}

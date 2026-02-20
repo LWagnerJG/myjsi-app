@@ -11,8 +11,9 @@ import { PillButton, PrimaryButton } from '../../components/common/JSIButtons.js
 import { DESIGN_TOKENS, isDarkTheme } from '../../design-system/tokens.js';
 
 import {
-  STAGES, VERTICALS, COMPETITORS, DISCOUNT_OPTIONS,
+  STAGES, VERTICALS, COMPETITORS,
 } from './data.js';
+import { DISCOUNT_OPTIONS_WITH_UNKNOWN } from '../../constants/discounts.js';
 import { JSI_SERIES } from '../products/data.js';
 import { CONTRACTS_DATA } from '../resources/contracts/data.js';
 import { VisionOptions, KnoxOptions, WinkHoopzOptions } from './product-options.jsx';
@@ -421,8 +422,8 @@ export const NewLeadScreen = ({
           <Row label="Discount" theme={theme} inline>
             <PortalNativeSelect value={newLeadData.discount || ''}
               onChange={e => upd('discount', e.target.value)}
-              options={DISCOUNT_OPTIONS.map(d => ({ label: d, value: d }))}
-              placeholder="Select Discount" theme={theme} mutedValues={['Undecided']} />
+              options={DISCOUNT_OPTIONS_WITH_UNKNOWN.map(d => ({ label: d, value: d }))}
+              placeholder="Select Discount" theme={theme} mutedValues={['Unknown']} />
           </Row>
 
           <Row label="Rewards" theme={theme} inline>

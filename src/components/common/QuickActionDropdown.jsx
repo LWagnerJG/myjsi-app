@@ -1,5 +1,5 @@
 // QuickActionDropdown - Plus button dropdown for quick actions
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import { Plus, FileText, Upload, FileSpreadsheet, MessageSquarePlus, Presentation, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -14,9 +14,12 @@ const QUICK_ACTIONS = [
 
 export const QuickActionDropdown = ({ theme, onActionSelect, className = '' }) => {
     const [isOpen, setIsOpen] = useState(false);
+    const [focusedIndex, setFocusedIndex] = useState(-1);
     const buttonRef = useRef(null);
     const dropdownRef = useRef(null);
+    const itemRefs = useRef([]);
     const [position, setPosition] = useState({ top: 0, left: 0 });
+    const menuId = React.useId();
 
     const colors = {
         surface: theme?.colors?.surface || '#FFFFFF',
@@ -44,6 +47,18 @@ export const QuickActionDropdown = ({ theme, onActionSelect, className = '' }) =
         }
     }, [isOpen]);
 
+    // Focus first menu item when opened
+    useEffect(() => {
+        if (isOpen) {
+            setFocusedIndex(0);
+            requestAnimationFrame(() => {
+                itemRefs.current[0]?.focus();
+            });
+        } else {
+            setFocusedIndex(-1);
+        }
+    }, [isOpen]);
+
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (
@@ -57,7 +72,10 @@ export const QuickActionDropdown = ({ theme, onActionSelect, className = '' }) =
         };
 
         const handleEscape = (e) => {
-            if (e.key === 'Escape') setIsOpen(false);
+            if (e.key === 'Escape') {
+                setIsOpen(false);
+                buttonRef.current?.focus();
+            }
         };
 
         if (isOpen) {
@@ -73,8 +91,40 @@ export const QuickActionDropdown = ({ theme, onActionSelect, className = '' }) =
 
     const handleActionClick = (actionId) => {
         setIsOpen(false);
+        buttonRef.current?.focus();
         onActionSelect?.(actionId);
     };
+
+    // Arrow key navigation within the menu
+    const handleMenuKeyDown = useCallback((e) => {
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            setFocusedIndex(prev => {
+                const next = prev < QUICK_ACTIONS.length - 1 ? prev + 1 : 0;
+                itemRefs.current[next]?.focus();
+                return next;
+            });
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            setFocusedIndex(prev => {
+                const next = prev > 0 ? prev - 1 : QUICK_ACTIONS.length - 1;
+                itemRefs.current[next]?.focus();
+                return next;
+            });
+        } else if (e.key === 'Home') {
+            e.preventDefault();
+            setFocusedIndex(0);
+            itemRefs.current[0]?.focus();
+        } else if (e.key === 'End') {
+            e.preventDefault();
+            const last = QUICK_ACTIONS.length - 1;
+            setFocusedIndex(last);
+            itemRefs.current[last]?.focus();
+        } else if (e.key === 'Tab') {
+            setIsOpen(false);
+            buttonRef.current?.focus();
+        }
+    }, []);
 
     const dropdownContent = (
         <AnimatePresence>
@@ -93,6 +143,10 @@ export const QuickActionDropdown = ({ theme, onActionSelect, className = '' }) =
                         boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
                         border: `1px solid ${colors.border}`,
                     }}
+                    id={menuId}
+                    role="menu"
+                    aria-label="Quick Actions"
+                    onKeyDown={handleMenuKeyDown}
                 >
                     {/* Header */}
                     <div 
@@ -104,27 +158,30 @@ export const QuickActionDropdown = ({ theme, onActionSelect, className = '' }) =
                                 Quick Actions
                             </span>
                             <button
-                                onClick={() => setIsOpen(false)}
+                                onClick={() => { setIsOpen(false); buttonRef.current?.focus(); }}
+                                aria-label="Close menu"
                                 className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-black/5 transition-colors"
                             >
-                                <X className="w-3.5 h-3.5" style={{ color: colors.textSecondary }} />
+                                <X className="w-3.5 h-3.5" aria-hidden="true" style={{ color: colors.textSecondary }} />
                             </button>
                         </div>
                     </div>
 
                     {/* Actions List */}
                     <div className="py-2">
-                        {QUICK_ACTIONS.map((action) => (
+                        {QUICK_ACTIONS.map((action, index) => (
                             <button
                                 key={action.id}
+                                ref={el => itemRefs.current[index] = el}
+                                role="menuitem"
                                 onClick={() => handleActionClick(action.id)}
-                                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-black/[0.03] transition-colors text-left group"
+                                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-black/[0.03] transition-colors text-left group outline-none focus:bg-black/[0.03]"
                             >
                                 <div 
                                     className="w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-105"
                                     style={{ backgroundColor: `${colors.accent}0D` }}
                                 >
-                                    <action.icon className="w-5 h-5" style={{ color: colors.accent }} />
+                                    <action.icon className="w-5 h-5" aria-hidden="true" style={{ color: colors.accent }} />
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <div className="text-sm font-semibold" style={{ color: colors.textPrimary }}>
@@ -152,8 +209,10 @@ export const QuickActionDropdown = ({ theme, onActionSelect, className = '' }) =
                 style={{ color: colors.textSecondary }}
                 aria-label="Quick actions"
                 aria-expanded={isOpen}
+                aria-haspopup="menu"
+                aria-controls={isOpen ? menuId : undefined}
             >
-                <Plus className="w-5 h-5 transition-transform" />
+                <Plus className="w-5 h-5 transition-transform" aria-hidden="true" />
             </button>
             {ReactDOM.createPortal(dropdownContent, document.body)}
         </>

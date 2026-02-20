@@ -56,6 +56,7 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
             }}
             className={`flex items-center flex-1 ${className}`}
             autoComplete="off"
+            role="search"
         >
             <style>{`
         @keyframes siFadeIn { from { opacity: 0 } to { opacity: .52 } }
@@ -174,10 +175,11 @@ export const SearchInput = React.memo(function SearchInput({
 
     return (
         <div id={id} className={`flex items-center flex-1 ${isHeader ? 'gap-2' : 'gap-2'} ${className}`}
+             role="search"
              style={{ ...pill, ...style }}>
-            <Search className="w-5 h-5" style={{ color: iconColor }} />
+            <Search className="w-5 h-5" aria-hidden="true" style={{ color: iconColor }} />
             <input
-                type="text"
+                type="search"
                 value={value}
                 onChange={(e) => onChange && onChange(e.target.value)}
                 placeholder={placeholder}

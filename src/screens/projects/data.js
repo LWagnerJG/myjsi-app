@@ -24,9 +24,8 @@ export const EMPTY_LEAD = { project: '', designFirm: '', dealer: '', winProbabil
 export const URGENCY_LEVELS = ['Low', 'Medium', 'High'];
 export const PO_TIMEFRAMES = ['Unknown', 'Within 30 Days', '30-60 Days', '60-180 Days', '180+ Days', 'Next Year'];
 export const COMPETITORS = ['None', 'Kimball', 'OFS', 'Indiana', 'National', 'Haworth', 'HNI', 'MillerKnoll', 'Steelcase', 'Versteel', 'Krug', 'Lazyboy', 'DarRan', 'Hightower', 'Allsteel'];
-export const DISCOUNT_OPTIONS = ['Undecided', '50/20 (60.00%)', '50/20/1 (60.4%)', '50/20/2 (60.80%)', '50/20/4 (61.60%)', '50/20/2/3 (61.98%)', '50/20/5 (62.00%)', '50/20/3 (61.20%)', '50/20/6 (62.40%)', '50/25 (62.50%)', '50/20/5/2 (62.76%)', '50/20/7 (62.80%)', '50/20/8 (63.20%)', '50/10/10/10 (63.55%)', '50/20/9 (63.6%)', '50/20/10 (64.00%)', '50/20/8/3 (64.30%)', '50/20/10/3 (65.08%)', '50/20/10/5 (65.80%)', '50/20/15 (66.00%)'];
+export { DISCOUNT_OPTIONS, DAILY_DISCOUNT_OPTIONS, DISCOUNT_OPTIONS_WITH_UNKNOWN } from '../../constants/discounts.js';
 export const VERTICALS = ['Corporate', 'Education', 'Government', 'Healthcare', 'Hospitality', 'Other (Please specify)'];
 export const WIN_PROBABILITY_OPTIONS = ['20%', '40%', '60%', '80%', '100%'];
 export const INITIAL_DESIGN_FIRMS = ['N/A', 'Undecided', 'McGee Designhouse', 'Ratio', 'CSO', 'IDO', 'Studio M'];
 export const INITIAL_DEALERS = ['Undecided', 'Business Furniture', 'COE', 'OfficeWorks', 'RJE'];
-export const DAILY_DISCOUNT_OPTIONS = DISCOUNT_OPTIONS;

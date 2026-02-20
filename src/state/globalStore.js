@@ -1,35 +1,21 @@
-// Simple global store using a minimal pub/sub (could swap to Zustand later)
-import { useEffect, useState } from 'react';
+import { create } from 'zustand';
 
-const listeners = new Set();
-let state = {
+export const useGlobalStore = create((set, get) => ({
   cart: {},
-};
-
-export const getState = () => state;
-
-export const setState = (partialOrFn) => {
-  const partial = typeof partialOrFn === 'function' ? partialOrFn(state) : partialOrFn;
-  state = { ...state, ...partial };
-  listeners.forEach((l) => l(state));
-};
-
-export const updateCartItem = (id, delta) => {
-  setState(({ cart }) => {
-    const next = { ...cart };
+  updateCartItem: (id, delta) => set((state) => {
+    const next = { ...state.cart };
     const current = next[id] || 0;
     const quantity = Math.max(0, current + delta);
     if (quantity === 0) delete next[id]; else next[id] = quantity;
     return { cart: next };
-  });
-};
+  }),
+  setState: (partialOrFn) => set((state) => {
+    return typeof partialOrFn === 'function' ? partialOrFn(state) : partialOrFn;
+  }),
+}));
 
-export function useGlobalState(selector = s => s) {
-  const [slice, setSlice] = useState(() => selector(state));
-  useEffect(() => {
-    const listener = (s) => setSlice(selector(s));
-    listeners.add(listener);
-    return () => listeners.delete(listener);
-  }, [selector]);
-  return slice;
-}
+export const getState = () => useGlobalStore.getState();
+export const setState = (partialOrFn) => useGlobalStore.getState().setState(partialOrFn);
+export const updateCartItem = (id, delta) => useGlobalStore.getState().updateCartItem(id, delta);
+export const useGlobalState = (selector = s => s) => useGlobalStore(selector);
+

@@ -26,160 +26,23 @@ import {
 import {
     SortableContext,
     rectSortingStrategy,
-    useSortable,
     arrayMove,
     sortableKeyboardCoordinates,
-    defaultAnimateLayoutChanges
 } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 
-// Live badge data for core app tiles — must be kept in sync with real data imports
-const getAppBadge = (route, recentOrders, posts, leadTimeFavoritesData, samplesCartCount) => {
-    switch (route) {
-        case 'orders': {
-            const open = recentOrders?.filter(o => o.status !== 'Delivered' && o.status !== 'Cancelled').length || 0;
-            return open > 0 ? { value: String(open), label: 'Open', color: '#5B7B8C' } : null;
-        }
-        case 'sales': {
-            const ytd = recentOrders?.reduce((s, o) => s + (o.net || 0), 0) || 0;
-            if (!ytd) return null;
-            const fmt = ytd >= 1000000 ? `$${(ytd / 1000000).toFixed(1)}M` : `$${Math.round(ytd / 1000)}K`;
-            return { value: fmt, label: 'YTD', color: '#4A7C59' };
-        }
-        case 'community': {
-            const count = posts?.length || 0;
-            return count > 0 ? { value: String(count), label: 'Posts', color: '#C4956A' } : null;
-        }
-        case 'resources': {
-            const faveCount = leadTimeFavoritesData?.length || 0;
-            return faveCount > 0 ? { value: String(faveCount), label: 'Tracked', color: '#5B7B8C' } : null;
-        }
-        case 'samples': {
-            return samplesCartCount > 0 ? { value: String(samplesCartCount), label: 'In Cart', color: '#C4956A' } : null;
-        }
-        default:
-            return null;
-    }
-};
-
-const MIN_PINNED_APPS = 3;
-const MAX_PINNED_APPS = 12;
-const NON_REMOVABLE_APPS = new Set(['resources']);
-const EXCLUDED_ROUTES = new Set(['settings', 'feedback', 'help', 'contracts', 'members', 'resources/dealer_registration']);
-
-const areArraysEqual = (a, b) => {
-    if (a === b) return true;
-    if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false;
-    for (let i = 0; i < a.length; i += 1) {
-        if (a[i] !== b[i]) return false;
-    }
-    return true;
-};
-
-const getCommunityAuthorSafe = (post) => {
-    if (!post) return 'Community';
-    if (typeof post.user === 'string') return post.user;
-    if (typeof post.name === 'string') return post.name;
-    if (typeof post.author === 'string') return post.author;
-    if (post.user?.name) return post.user.name;
-    if (post.user?.firstName || post.user?.lastName) {
-        return `${post.user?.firstName || ''} ${post.user?.lastName || ''}`.trim();
-    }
-    return 'Community';
-};
-
-const getCommunityTextSafe = (post) => {
-    if (!post) return 'New update available';
-    if (typeof post.text === 'string') return post.text;
-    if (typeof post.content === 'string') return post.content;
-    if (typeof post.message === 'string') return post.message;
-    if (typeof post.title === 'string') return post.title;
-    return 'New update available';
-};
-
-const SortableAppTile = React.memo(({ id, app, colors, onRemove, isRemoveDisabled = false, isRemoveLocked = false, isOverlay = false }) => {
-    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-        id,
-        animateLayoutChanges: (args) => {
-            if (isOverlay) return false;
-            return defaultAnimateLayoutChanges({
-                ...args,
-                isSorting: true
-            });
-        }
-    });
-    
-    const style = {
-        transform: CSS.Transform.toString(transform),
-        transition: isDragging ? undefined : transition,
-        backgroundColor: `${colors.tileSurface || colors.surface}`,
-        boxShadow: isOverlay ? '0 8px 24px rgba(0,0,0,0.1)' : (isDragging ? '0 4px 12px rgba(0,0,0,0.08)' : 'none'),
-        opacity: isDragging ? 0.9 : 1,
-        zIndex: isDragging ? 20 : 'auto',
-        touchAction: 'none', // Critical for pointer interactions
-        width: '100%',
-        minWidth: 0,
-        minHeight: 104
-    };
-
-    return (
-        <div
-            ref={setNodeRef}
-            style={style}
-            {...attributes}
-            {...listeners}
-            className="relative flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl cursor-grab active:cursor-grabbing"
-        >
-            {/* Draggable Indicator (Subtle) */}
-            <div className="absolute top-2 left-2 opacity-30">
-                <GripVertical className="w-3 h-3" style={{ color: colors.textSecondary }} />
-            </div>
-
-            {/* Remove Button */}
-            {!isOverlay && !isRemoveLocked && (
-                <button
-                    // Stop propagation so clicking X doesn't start a drag
-                    onPointerDown={(e) => e.stopPropagation()}
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        if (!isRemoveDisabled) onRemove(app.route);
-                    }}
-                    className={`absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full text-white flex items-center justify-center shadow-md z-10 transition-all ${isRemoveDisabled ? 'bg-gray-300 cursor-not-allowed' : 'hover:scale-110'}`}
-                    style={!isRemoveDisabled ? { backgroundColor: '#B85C5C' } : undefined}
-                    aria-label="Remove app"
-                    aria-disabled={isRemoveDisabled}
-                >
-                    <X className="w-3.5 h-3.5" />
-                </button>
-            )}
-
-            {!isOverlay && isRemoveLocked && (
-                <div
-                    className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center shadow-md z-10"
-                    aria-label="Pinned app"
-                >
-                    <Lock className="w-3.5 h-3.5" />
-                </div>
-            )}
-
-            {/* App Icon */}
-            <div 
-                className="w-10 h-10 rounded-xl flex items-center justify-center mb-1" 
-                style={{ backgroundColor: `${colors.accent}10` }}
-            >
-                <app.icon className="w-5 h-5" style={{ color: colors.accent }} />
-            </div>
-
-            {/* App Name */}
-            <span 
-                className="text-[11px] font-semibold tracking-tight text-center leading-tight line-clamp-2 w-full px-1" 
-                style={{ color: colors.textPrimary }}
-            >
-                {app.name}
-            </span>
-        </div>
-    );
-});
+// Extracted modules
+import { SortableAppTile } from './components/SortableAppTile.jsx';
+import { useHomeChat } from './hooks/useHomeChat.js';
+import {
+    getAppBadge,
+    MIN_PINNED_APPS,
+    MAX_PINNED_APPS,
+    NON_REMOVABLE_APPS,
+    EXCLUDED_ROUTES,
+    areArraysEqual,
+    getCommunityAuthorSafe,
+    getCommunityTextSafe,
+} from './utils/homeUtils.js';
 
 // Custom feature card picker — replaces native <select> in edit mode
 const FeaturePicker = ({ value, onChange, options, colors, isDark }) => {
@@ -201,11 +64,11 @@ const FeaturePicker = ({ value, onChange, options, colors, isDark }) => {
         <div className="relative" ref={ref}>
             <button
                 onClick={(e) => { e.stopPropagation(); setOpen(p => !p); }}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all active:scale-95"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all active:scale-95 animate-pulse-subtle"
                 style={{
-                    backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)',
-                    color: colors.textSecondary,
-                    border: `1px solid ${colors.border}`,
+                    backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(53,53,53,0.08)',
+                    color: colors.textPrimary,
+                    border: `1.5px solid ${isDark ? 'rgba(255,255,255,0.25)' : 'rgba(53,53,53,0.20)'}`,
                 }}
             >
                 {current?.label}
@@ -244,18 +107,23 @@ const FeaturePicker = ({ value, onChange, options, colors, isDark }) => {
     );
 };
 
-export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpdateHomeApps, homeResetKey, posts, isDarkMode, onToggleTheme, cart }) => {
+export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, homeApps, onUpdateHomeApps, homeResetKey, posts, isDarkMode, onToggleTheme, cart }) => {
     const [isEditMode, setIsEditMode] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [activeDragId, setActiveDragId] = useState(null);
     const [showQuoteModal, setShowQuoteModal] = useState(false);
-    const [isChatOpen, setIsChatOpen] = useState(false);
-    const [chatMessages, setChatMessages] = useState([]);
-    const [chatInput, setChatInput] = useState('');
-    const [chatAttachments, setChatAttachments] = useState([]);
-    const [isBotThinking, setIsBotThinking] = useState(false);
-    const chatFileInputRef = useRef(null);
-    const botReplyTimeoutRef = useRef(null);
+
+    // Chat logic extracted to custom hook
+    const {
+        isChatOpen, setIsChatOpen,
+        chatMessages, chatInput, setChatInput,
+        chatAttachments, isBotThinking,
+        chatFileInputRef,
+        openChatFromQuery, handleChatSubmit,
+        handleChatFilePick, handleChatFilesSelected,
+        handleRemoveAttachment, resetChat,
+    } = useHomeChat();
+
     const [homeFeatureMode, setHomeFeatureMode] = useState('activity');
     const [secondaryFeatureMode, setSecondaryFeatureMode] = useState('community');
     const [leadTimeFavorites, setLeadTimeFavorites] = useState([]);
@@ -418,12 +286,11 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
         if (prevHomeResetKeyRef.current !== homeResetKey) {
             prevHomeResetKeyRef.current = homeResetKey;
             if (isChatOpen) {
-                setIsChatOpen(false);
+                resetChat();
                 setSearchQuery('');
-                setChatMessages([]);
             }
         }
-    }, [homeResetKey, isChatOpen]);
+    }, [homeResetKey, isChatOpen, resetChat]);
 
     const currentApps = useMemo(() => {
         return safeHomeApps.map(route => allApps.find(a => a.route === route)).filter(Boolean);
@@ -459,78 +326,6 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
         }
     }, [safeHomeApps, onUpdateHomeApps]);
 
-
-    const appendChatTurn = useCallback((text, attachments = []) => {
-        const trimmed = text?.trim();
-        if (!trimmed) return;
-        const now = Date.now();
-        setChatMessages((prev) => ([
-            ...prev,
-            { id: `u-${now}`, role: 'user', text: trimmed, attachments }
-        ]));
-        if (botReplyTimeoutRef.current) {
-            clearTimeout(botReplyTimeoutRef.current);
-        }
-        setIsBotThinking(true);
-
-        // Generate contextual reply based on query content
-        const lower = trimmed.toLowerCase();
-        let reply = '';
-        if (lower.includes('lead time') || lower.includes('leadtime')) {
-            reply = 'You can check current lead times under Resources → Lead Times. Most standard series ship in 4-6 weeks, and Quick Ship items are available in 10 business days.';
-        } else if (lower.includes('order') || lower.includes('po ')) {
-            reply = 'You can track all your orders from the Orders screen. Use the search bar to find a specific PO number, or filter by status.';
-        } else if (lower.includes('sample')) {
-            reply = 'Head to the Samples screen to browse and request product samples. You can add items to your cart and submit a request.';
-        } else if (lower.includes('commission') || lower.includes('rate')) {
-            reply = 'Commission rate information is available under Resources → Commission Rates. Rates vary by product category and dealer tier.';
-        } else if (lower.includes('product') || lower.includes('finish') || lower.includes('fabric')) {
-            reply = 'Check out the Products screen to browse all JSI product lines, finishes, and fabrics. You can compare products side-by-side too.';
-        } else if (lower.includes('project') || lower.includes('lead') || lower.includes('pipeline')) {
-            reply = 'Your project pipeline is in the Projects screen. You can add new leads, track existing projects, and manage installs there.';
-        } else if (lower.includes('help') || lower.includes('support')) {
-            reply = 'For support, visit the Help screen or submit feedback through the Feedback form. You can also contact your JSI rep directly.';
-        } else if (lower.includes('hello') || lower.includes('hi') || lower.includes('hey')) {
-            reply = 'Hello! I\'m Elliott, your JSI assistant. How can I help you today? I can help with orders, lead times, products, samples, and more.';
-        } else {
-            reply = `I can help with that! Here are some things I can assist with:\n\n• **Orders** — Track POs and shipments\n• **Lead Times** — Check current production schedules\n• **Products** — Browse finishes, fabrics, and specs\n• **Samples** — Request product samples\n• **Projects** — Manage your pipeline\n\nTry asking me about any of these topics!`;
-        }
-
-        botReplyTimeoutRef.current = setTimeout(() => {
-            setChatMessages((prev) => ([
-                ...prev,
-                { id: `a-${now}`, role: 'assistant', text: reply }
-            ]));
-            setIsBotThinking(false);
-        }, 700);
-    }, []);
-
-    useEffect(() => {
-        return () => {
-            if (botReplyTimeoutRef.current) {
-                clearTimeout(botReplyTimeoutRef.current);
-            }
-        };
-    }, []);
-
-    // Escape key to close chat
-    useEffect(() => {
-        if (!isChatOpen) return;
-        const handleEscape = (e) => {
-            if (e.key === 'Escape') setIsChatOpen(false);
-        };
-        document.addEventListener('keydown', handleEscape);
-        return () => document.removeEventListener('keydown', handleEscape);
-    }, [isChatOpen]);
-
-    const openChatFromQuery = useCallback((query) => {
-        const trimmed = query?.trim();
-        if (!trimmed) return;
-        setIsChatOpen(true);
-        appendChatTurn(trimmed.replace(/^\?\s*/, ''), []);
-        setSearchQuery('');
-    }, [appendChatTurn]);
-
     const handleSearchSubmit = useCallback((val) => {
         const trimmed = val?.trim();
         if (!trimmed) return;
@@ -542,36 +337,6 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
         }
         setSearchQuery('');
     }, [onNavigate, openChatFromQuery, spotlightResults]);
-
-    const handleChatSubmit = useCallback((e) => {
-        e.preventDefault();
-        if (!chatInput.trim()) return;
-        appendChatTurn(chatInput, chatAttachments);
-        setChatInput('');
-        setChatAttachments([]);
-        if (chatFileInputRef.current) {
-            chatFileInputRef.current.value = '';
-        }
-    }, [appendChatTurn, chatAttachments, chatInput]);
-
-    const handleChatFilePick = useCallback(() => {
-        chatFileInputRef.current?.click();
-    }, []);
-
-    const handleChatFilesSelected = useCallback((event) => {
-        const files = Array.from(event.target.files || []);
-        if (!files.length) return;
-        const mapped = files.map((file) => ({
-            id: `${file.name}-${file.size}-${file.lastModified}`,
-            name: file.name,
-            size: file.size
-        }));
-        setChatAttachments((prev) => ([...prev, ...mapped]));
-    }, []);
-
-    const handleRemoveAttachment = useCallback((id) => {
-        setChatAttachments((prev) => prev.filter((file) => file.id !== id));
-    }, []);
 
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -1067,7 +832,7 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                                 onClick={() => setIsEditMode(!isEditMode)}
                                 title={isEditMode ? 'Exit edit mode' : 'Customize home apps'}
                                 aria-label={isEditMode ? 'Exit edit mode' : 'Customize home apps'}
-                                className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold transition-all active:scale-95"
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all active:scale-95"
                                 style={{
                                     backgroundColor: isEditMode
                                         ? (isDark ? 'rgba(255,255,255,0.90)' : colors.textPrimary)
@@ -1080,25 +845,31 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                             >
                                 {isEditMode ? (
                                     <>
-                                        <Check className="w-3 h-3" />
+                                        <Check className="w-3.5 h-3.5" />
                                         <span>Done</span>
                                     </>
                                 ) : (
                                     <>
-                                        <GripVertical className="w-3 h-3" />
-                                        <span>Edit Layout</span>
+                                        <GripVertical className="w-3.5 h-3.5" />
+                                        <span>Customize</span>
                                     </>
                                 )}
                             </button>
                         )}
                     </div>
                     {isEditMode && (
-                        <p
-                            className="text-[10px] font-medium px-0.5"
-                            style={{ color: colors.textSecondary, opacity: 0.5 }}
+                        <div
+                            className="flex items-center gap-2 px-3 py-2 rounded-xl"
+                            style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.04)', border: `1px dashed ${isDark ? 'rgba(255,255,255,0.15)' : 'rgba(53,53,53,0.15)'}` }}
                         >
-                            Drag to reorder &nbsp;·&nbsp; min 3 apps &nbsp;·&nbsp; Resources always pinned
-                        </p>
+                            <GripVertical className="w-3.5 h-3.5 flex-shrink-0" style={{ color: colors.textSecondary, opacity: 0.5 }} />
+                            <p
+                                className="text-[11px] font-medium"
+                                style={{ color: colors.textSecondary, opacity: 0.7 }}
+                            >
+                                Drag apps to reorder &nbsp;·&nbsp; Use dropdowns below to swap card content
+                            </p>
+                        </div>
                     )}
 
                     {isEditMode ? (
@@ -1236,9 +1007,17 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     <GlassCard
                         theme={theme}
-                        className="p-6 cursor-pointer transition-shadow"
-                        style={{ borderRadius: 24, backgroundColor: colors.tileSurface, border: 'none', boxShadow: colors.tileShadow }}
+                        className={`p-6 cursor-pointer transition-all duration-300 ${isEditMode ? 'ring-2 ring-dashed' : ''}`}
+                        style={{
+                            borderRadius: 24,
+                            backgroundColor: colors.tileSurface,
+                            border: isEditMode
+                                ? `2px dashed ${isDark ? 'rgba(255,255,255,0.25)' : 'rgba(53,53,53,0.20)'}`
+                                : 'none',
+                            boxShadow: isEditMode ? 'none' : colors.tileShadow,
+                        }}
                         onClick={(e) => {
+                            if (isEditMode) return;
                             if (e.target.closest('button, a, select')) return;
                             if (homeFeatureMode === 'community') onNavigate('community');
                             else if (homeFeatureMode === 'lead-times') onNavigate('resources/lead-times');
@@ -1278,14 +1057,27 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                                 </button>
                             )}
                         </div>
+                        {isEditMode && (
+                            <p className="text-[10px] font-medium mb-3 flex items-center gap-1" style={{ color: colors.accent, opacity: 0.7 }}>
+                                <ChevronDown className="w-3 h-3" /> Use the dropdown above to change this card's content
+                            </p>
+                        )}
                         {renderHomeFeatureContent(homeFeatureMode)}
                     </GlassCard>
 
                     <GlassCard
                         theme={theme}
-                        className="p-6 hidden lg:block cursor-pointer transition-shadow"
-                        style={{ borderRadius: 24, backgroundColor: colors.tileSurface, border: 'none', boxShadow: colors.tileShadow }}
+                        className={`p-6 hidden lg:block cursor-pointer transition-all duration-300`}
+                        style={{
+                            borderRadius: 24,
+                            backgroundColor: colors.tileSurface,
+                            border: isEditMode
+                                ? `2px dashed ${isDark ? 'rgba(255,255,255,0.25)' : 'rgba(53,53,53,0.20)'}`
+                                : 'none',
+                            boxShadow: isEditMode ? 'none' : colors.tileShadow,
+                        }}
                         onClick={(e) => {
+                            if (isEditMode) return;
                             if (e.target.closest('button, a, select')) return;
                             if (secondaryFeatureMode === 'community') onNavigate('community');
                             else if (secondaryFeatureMode === 'lead-times') onNavigate('resources/lead-times');
@@ -1325,12 +1117,18 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                                 </button>
                             )}
                         </div>
+                        {isEditMode && (
+                            <p className="text-[10px] font-medium mb-3 flex items-center gap-1" style={{ color: colors.accent, opacity: 0.7 }}>
+                                <ChevronDown className="w-3 h-3" /> Use the dropdown above to change this card's content
+                            </p>
+                        )}
                         {renderHomeFeatureContent(secondaryFeatureMode)}
                     </GlassCard>
                 </div>
             </div>
 
             {/* Sticky glassy feedback bar — above bottom nav */}
+            {!isEditMode && (
             <div
                 className="fixed inset-x-0 z-[28] px-5 sm:px-7 lg:px-10 pointer-events-none"
                 style={{ bottom: 82 }}
@@ -1362,6 +1160,7 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
                     </span>
                 </button>
             </div>
+            )}
 
             {/* Request Quote Modal */}
             <RequestQuoteModal
@@ -1566,6 +1365,5 @@ export const HomeScreen = ({ theme, onNavigate, onVoiceActivate, homeApps, onUpd
 
         </div>
     );
-};
-
-
+});
+HomeScreen.displayName = 'HomeScreen';

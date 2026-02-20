@@ -27,9 +27,9 @@ export const ToastHost = ({ children, theme }) => {
   return (
     <ToastContext.Provider value={{ push }}>
       {children}
-      <div className="fixed inset-x-0 bottom-4 flex flex-col items-center gap-2 px-2 z-[1200] pointer-events-none">
+      <div className="fixed inset-x-0 bottom-4 flex flex-col items-center gap-2 px-2 z-[1200] pointer-events-none" role="log" aria-label="Notifications">
         {toasts.map(t => (
-          <div key={t.id} role="status" aria-live="polite" className={`pointer-events-auto px-4 py-2 rounded-full shadow-md text-sm font-medium backdrop-blur-sm transition ${prefersReduced.current ? '' : 'animate-fade-in'}`}
+          <div key={t.id} role="status" aria-live={t.type === 'error' ? 'assertive' : 'polite'} className={`pointer-events-auto px-4 py-2 rounded-full shadow-md text-sm font-medium backdrop-blur-sm transition ${prefersReduced.current ? '' : 'animate-fade-in'}`}
             style={{ background: theme.colors.surface, color: theme.colors.textPrimary, border: `1px solid ${theme.colors.border}` }}>
             {t.message}
           </div>

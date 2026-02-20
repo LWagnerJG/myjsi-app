@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Settings, User, HelpCircle, LogOut, Moon, Sun } from 'lucide-react';
 import { isDarkTheme, DESIGN_TOKENS } from '../../design-system/tokens.js';
@@ -6,6 +6,7 @@ import { isDarkTheme, DESIGN_TOKENS } from '../../design-system/tokens.js';
 export const ProfileMenu = ({ show, onClose, onNavigate, theme, anchorRef, isDarkMode, onToggleTheme }) => {
     const isDark = isDarkTheme(theme);
     const [pos, setPos] = useState(null);
+    const menuRef = useRef(null);
 
     useEffect(() => {
         if (!show || !anchorRef?.current) { setPos(null); return; }
@@ -18,6 +19,28 @@ export const ProfileMenu = ({ show, onClose, onNavigate, theme, anchorRef, isDar
         window.addEventListener('scroll', update, true);
         return () => { window.removeEventListener('resize', update); window.removeEventListener('scroll', update, true); };
     }, [show, anchorRef]);
+
+    useEffect(() => {
+        if (show && menuRef.current) {
+            const firstItem = menuRef.current.querySelector('[role="menuitem"]');
+            if (firstItem) firstItem.focus();
+        }
+    }, [show]);
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Escape') {
+            onClose();
+            anchorRef?.current?.focus();
+        } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+            e.preventDefault();
+            const items = Array.from(menuRef.current.querySelectorAll('[role="menuitem"]'));
+            const index = items.indexOf(document.activeElement);
+            let nextIndex = e.key === 'ArrowDown' ? index + 1 : index - 1;
+            if (nextIndex >= items.length) nextIndex = 0;
+            if (nextIndex < 0) nextIndex = items.length - 1;
+            items[nextIndex]?.focus();
+        }
+    };
 
     if (!show || !pos) return null;
     
@@ -34,8 +57,12 @@ export const ProfileMenu = ({ show, onClose, onNavigate, theme, anchorRef, isDar
     return createPortal(
         <div className="fixed inset-0 pointer-events-auto" style={{ zIndex: DESIGN_TOKENS.zIndex.popover }} onClick={onClose}>
             <div 
-                className="absolute w-52 p-1.5 rounded-2xl space-y-0.5" 
+                ref={menuRef}
+                role="menu"
+                aria-label="Profile Menu"
+                className="absolute w-52 p-1.5 rounded-2xl space-y-0.5 outline-none" 
                 onClick={(e) => e.stopPropagation()}
+                onKeyDown={handleKeyDown}
                 style={{
                     top: pos.top,
                     right: pos.right,
@@ -47,8 +74,9 @@ export const ProfileMenu = ({ show, onClose, onNavigate, theme, anchorRef, isDar
                 {menuItems.map(item => (
                     <button 
                         key={item.label} 
+                        role="menuitem"
                         onClick={item.action} 
-                        className="w-full text-left flex items-center px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors"
+                        className="w-full text-left flex items-center px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
                         style={{ color: item.danger ? '#B85C5C' : theme.colors.textPrimary }}
                         onMouseEnter={e => e.currentTarget.style.backgroundColor = hoverBg}
                         onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
