@@ -35,7 +35,7 @@ export const FeedbackScreen = ({ theme }) => {
     function handleSubmit(e) {
         e.preventDefault();
         if (!message.trim()) return;
-        console.log('Feedback submitted:', { type: feedbackType, message: message.trim(), attachments: files.map(f => ({ name: f.name, size: f.size })), timestamp: new Date().toISOString() });
+        if (import.meta.env.DEV) console.log('Feedback submitted:', { type: feedbackType, message: message.trim(), attachments: files.map(f => ({ name: f.name, size: f.size })), timestamp: new Date().toISOString() });
         setSubmitted(true);
     }
 

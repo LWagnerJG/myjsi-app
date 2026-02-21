@@ -1,6 +1,5 @@
 import React from 'react';
 import { Modal } from './Modal';
-import { X } from 'lucide-react';
 
 export const AddressBookModal = ({ show, onClose, addresses, onSelectAddress, theme }) => {
     if (!show) return null;

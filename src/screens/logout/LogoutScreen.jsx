@@ -6,7 +6,7 @@ import { LogOut, Home } from 'lucide-react';
 export const LogoutScreen = ({ theme, onNavigate }) => {
     const handleLogout = () => {
         // Here you would typically clear user session/tokens
-        console.log('User logged out');
+        if (import.meta.env.DEV) console.log('User logged out');
         // For now, just navigate back to home
         onNavigate('home');
     };

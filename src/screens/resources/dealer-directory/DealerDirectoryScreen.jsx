@@ -6,9 +6,7 @@ import { PillButton } from '../../../components/common/JSIButtons.jsx';
 import { Filter, Plus, ChevronRight, MapPin, TrendingUp, Building2, DollarSign } from 'lucide-react';
 import { DEALER_DIRECTORY_DATA } from './data.js';
 import { isDarkTheme } from '../../../design-system/tokens.js';
-
-/* ── Format currency like the Sales page: full with commas ── */
-const formatCurrency = (n) => '$' + Number(n).toLocaleString();
+import { formatCurrency } from '../../../utils/format.js';
 
 /* ────────────────────────────────────────────────
  *  Mini sparkline — pure SVG, no deps

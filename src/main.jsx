@@ -21,8 +21,10 @@ const hideSplash = () => {
     setTimeout(() => s.remove(), 280);     // wait for the fade to finish
 };
 
-// Ensure we only hide after React has painted at least once
-requestAnimationFrame(hideSplash);
-
-// Extra safety: if something delays paint, remove on full load too
-window.addEventListener('load', hideSplash);
+// Ensure we only hide after React has painted at least once.
+// The 'load' listener acts as a safety net if requestAnimationFrame fires too early.
+if (document.readyState === 'complete') {
+    requestAnimationFrame(hideSplash);
+} else {
+    window.addEventListener('load', hideSplash, { once: true });
+}

@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Modal } from '../../components/common/Modal';
 import { ArrowUp, ArrowDown, TrendingUp, Award, DollarSign, BarChart, Table, ChevronRight, Target, Trophy, Calendar } from 'lucide-react';
 import { MONTHLY_SALES_DATA, SALES_VERTICALS_DATA, CUSTOMER_RANK_DATA, INCENTIVE_REWARDS_DATA } from './data.js';
@@ -8,8 +8,7 @@ import { CountUp } from '../../components/common/CountUp.jsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { isDarkTheme } from '../../design-system/tokens.js';
-
-const formatCompanyName = (name = '') => name.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+import { formatCurrency, formatCompanyName } from '../../utils/format.js';
 
 const SALES_TOP_ACTIONS = [
   { value: 'rewards', label: 'Dealer Rewards', icon: Award, route: 'incentive-rewards' },
@@ -87,7 +86,6 @@ export const SalesScreen = ({ theme, onNavigate }) => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [hoveredBar, setHoveredBar] = useState(null);
   const isDark = isDarkTheme(theme);
-  const formatCurrency = useCallback((n) => `$${Number(n || 0).toLocaleString()}`, []);
 
   const colors = useMemo(() => ({
     background: theme?.colors?.background || '#F0EDE8',

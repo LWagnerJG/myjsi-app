@@ -1,3 +1,8 @@
+/**
+ * @deprecated Use './format.js' (re-exported via './index.js') instead.
+ * This file is kept for backwards compatibility only.
+ */
+
 // Central formatting helpers (currency, percentage, etc.)
 export const formatCurrency = (value, currency = 'USD') => {
   if (value === undefined || value === null || value === '') return '$0';

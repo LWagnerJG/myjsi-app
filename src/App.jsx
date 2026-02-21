@@ -325,12 +325,18 @@ function App() {
         setPolls((prev) => prev.map(pl => pl.id !== pollId ? pl : { ...pl, options: pl.options.map(o => o.id === optionId ? { ...o, votes: (o.votes || 0) + 1 } : o) }));
     }, []);
 
+    // Reusable helper – flash a success toast for a fixed duration
+    const flashSuccess = useCallback((msg, ms = 1500) => {
+        setSuccessMessage(msg);
+        setTimeout(() => setSuccessMessage(''), ms);
+    }, []);
+
     const handleCreatePost = useCallback((payload) => {
         if (payload.type === 'poll') setPolls((prev) => [payload, ...prev]); else {
             const post = { id: payload.id, type: 'post', user: payload.user, text: payload.text ?? payload.content ?? '', image: payload.image || null, images: payload.images || [], likes: payload.likes ?? 0, comments: payload.comments || [], timeAgo: 'now', createdAt: payload.createdAt || Date.now() };
             setPosts((prev) => [post, ...prev]);
         }
-        setShowCreateContentModal(false); setSuccessMessage('Posted!'); setTimeout(() => setSuccessMessage(''), 1500);
+        setShowCreateContentModal(false); flashSuccess('Posted!');
     }, []);
 
     const handleShowAlert = useCallback((message) => setAlertInfo({ show: true, message }), []);
@@ -340,13 +346,13 @@ function App() {
         // Fire-and-forget: send lead data to shared Excel via Power Automate
         submitLeadToExcel(lead);
         const newOpp = { id: Date.now(), name: lead.project || 'Untitled Project', stage: lead.projectStatus && STAGES.includes(lead.projectStatus) ? lead.projectStatus : STAGES[0], discount: lead.discount || 'Undecided', value: lead.estimatedList || '$0', company: lead.designFirms?.[0] || lead.dealers?.[0] || 'Unknown', contact: lead.contact || '', poTimeframe: lead.poTimeframe || '', ...lead };
-        setOpportunities(prev => [newOpp, ...prev]); setNewLeadData(EMPTY_LEAD); handleNavigate('projects'); setProjectsTabOverride('pipeline'); setSuccessMessage('Lead Added'); setTimeout(() => setSuccessMessage(''), 1500);
-    }, [handleNavigate, setNewLeadData]);
+        setOpportunities(prev => [newOpp, ...prev]); setNewLeadData(EMPTY_LEAD); handleNavigate('projects'); setProjectsTabOverride('pipeline'); flashSuccess('Lead Added');
+    }, [handleNavigate, setNewLeadData, flashSuccess]);
 
     const handleAddInstall = useCallback((install) => {
         const enriched = { id: 'inst-' + Date.now(), photos: install.photos || [], standards: [], quotes: [], ...install };
-        setMyProjects(prev => [enriched, ...prev]); handleNavigate('projects'); setProjectsTabOverride('my-projects'); setSuccessMessage('Install Added'); setTimeout(() => setSuccessMessage(''), 1500);
-    }, [handleNavigate]);
+        setMyProjects(prev => [enriched, ...prev]); handleNavigate('projects'); setProjectsTabOverride('my-projects'); flashSuccess('Install Added');
+    }, [handleNavigate, flashSuccess]);
 
     const handleUpdateHomeApps = useCallback((apps) => {
         if (!Array.isArray(apps)) return;
@@ -358,6 +364,10 @@ function App() {
     const handleToggleTheme = useCallback(() => setIsDarkMode(d => !d), []);
     const openCreateContentModal = useCallback(() => setShowCreateContentModal(true), []);
     const clearProjectsInitialTab = useCallback(() => setProjectsTabOverride(null), []);
+    const toggleProfileMenu = useCallback(() => setShowProfileMenu(p => !p), []);
+    const closeProfileMenu = useCallback(() => setShowProfileMenu(false), []);
+    const closeCreateContentModal = useCallback(() => setShowCreateContentModal(false), []);
+    const closeAlert = useCallback(() => setAlertInfo({ show: false, message: '' }), []);
 
     const screenProps = useMemo(() => ({
         theme: currentTheme,
@@ -440,7 +450,7 @@ function App() {
                     showBack={navDepth > 0}
                     handleBack={handleBack}
                     onHomeClick={handleHome}
-                    onProfileClick={() => setShowProfileMenu(p => !p)}
+                    onProfileClick={toggleProfileMenu}
                     isDarkMode={isDarkMode}
                     profileBtnRef={profileBtnRef}
                 />
@@ -452,12 +462,12 @@ function App() {
                     </ErrorBoundary>
                 </main>
                 {showProfileMenu && (
-                    <ProfileMenu show={showProfileMenu} onClose={() => setShowProfileMenu(false)} onNavigate={handleNavigate} theme={currentTheme} anchorRef={profileBtnRef} isDarkMode={isDarkMode} onToggleTheme={() => setIsDarkMode(d => !d)} />
+                    <ProfileMenu show={showProfileMenu} onClose={closeProfileMenu} onNavigate={handleNavigate} theme={currentTheme} anchorRef={profileBtnRef} isDarkMode={isDarkMode} onToggleTheme={handleToggleTheme} />
                 )}
                 <VoiceModal message={voiceMessage} show={!!voiceMessage} theme={currentTheme} />
                 <SuccessToast message={successMessage} show={!!successMessage} theme={currentTheme} />
-                <CreateContentModal show={showCreateContentModal} onClose={() => setShowCreateContentModal(false)} theme={currentTheme} onCreatePost={handleCreatePost} />
-                <Modal show={alertInfo.show} onClose={() => setAlertInfo({ show: false, message: '' })} title="Alert" theme={currentTheme}>
+                <CreateContentModal show={showCreateContentModal} onClose={closeCreateContentModal} theme={currentTheme} onCreatePost={handleCreatePost} />
+                <Modal show={alertInfo.show} onClose={closeAlert} title="Alert" theme={currentTheme}>
                     <p>{alertInfo.message}</p>
                 </Modal>
             </div>

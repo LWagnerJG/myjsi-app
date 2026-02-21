@@ -7,8 +7,8 @@ import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { HomeSearchInput } from '../../components/common/SearchInput.jsx';
 import { QuickActionDropdown } from '../../components/common/QuickActionDropdown.jsx';
 import { RequestQuoteModal } from '../../components/common/RequestQuoteModal.jsx';
-import { DESIGN_TOKENS, isDarkTheme } from '../../design-system/tokens.js';
-import { Check, Plus, X, Settings as SettingsIcon, GripVertical, Lock, Paperclip, MessageCircle, Megaphone, Package, Calendar, DollarSign, Zap, ChevronRight, ChevronDown, Gift } from 'lucide-react';
+import { isDarkTheme } from '../../design-system/tokens.js';
+import { Check, Plus, X, Paperclip, MessageCircle, Megaphone, Package, Calendar, DollarSign, Zap, ChevronRight, ChevronDown, Gift, Settings2 } from 'lucide-react';
 import { LEAD_TIMES_DATA } from '../resources/lead-times/data.js';
 import { ANNOUNCEMENTS } from '../community/data.js';
 import { MARKETPLACE_PRODUCTS, INITIAL_BALANCE, formatElliottBucks } from '../marketplace/data.js';
@@ -22,7 +22,8 @@ import {
     MeasuringStrategy,
     closestCenter,
     useSensor,
-    useSensors
+    useSensors,
+    useDroppable
 } from '@dnd-kit/core';
 import {
     SortableContext,
@@ -44,6 +45,34 @@ import {
     getCommunityAuthorSafe,
     getCommunityTextSafe,
 } from './utils/homeUtils.js';
+
+// Droppable "remove" zone — lives inside the DndContext
+const RemoveDropZone = ({ children, isDark, colors, isActive }) => {
+    const { setNodeRef, isOver } = useDroppable({ id: '__remove_zone__' });
+    const highlight = isActive && isOver;
+    return (
+        <div
+            ref={setNodeRef}
+            className="rounded-2xl transition-all duration-200"
+            style={{
+                padding: highlight ? 12 : 8,
+                backgroundColor: highlight
+                    ? (isDark ? 'rgba(184,92,92,0.15)' : 'rgba(184,92,92,0.08)')
+                    : (isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)'),
+                border: highlight
+                    ? '2px dashed rgba(184,92,92,0.5)'
+                    : `1px dashed ${isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)'}`,
+            }}
+        >
+            {highlight && (
+                <p className="text-[11px] font-semibold text-center mb-2" style={{ color: '#B85C5C' }}>
+                    Drop here to remove
+                </p>
+            )}
+            {children}
+        </div>
+    );
+};
 
 // Custom feature card picker — replaces native <select> in edit mode
 const FeaturePicker = ({ value, onChange, options, colors, isDark }) => {
@@ -140,7 +169,7 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                 setShowQuoteModal(true);
                 break;
             case 'upload':
-                console.log('Upload action');
+                // TODO: implement upload action
                 break;
             case 'spec':
                 onNavigate?.('resources');
@@ -386,13 +415,54 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
     }, [leadTimeFavorites]);
 
     const recentOrders = useMemo(() => {
-        return [...ORDER_DATA].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 3);
+        return [...ORDER_DATA].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
     }, []);
+
+    // Shared route lookup for feature card modes
+    const FEATURE_ROUTES = useMemo(() => ({
+        community: 'community',
+        'lead-times': 'resources/lead-times',
+        products: 'products',
+        projects: 'projects',
+        marketplace: 'marketplace',
+    }), []);
+    const navigateFeature = useCallback((mode) => {
+        onNavigate(FEATURE_ROUTES[mode] || 'orders');
+    }, [onNavigate, FEATURE_ROUTES]);
 
     const samplesCartCount = useMemo(() => Object.values(cart || {}).reduce((sum, qty) => sum + qty, 0), [cart]);
 
+    // Smart grid: pick responsive Tailwind classes that create balanced rows
+    // Static class names so Tailwind JIT can detect them at build time
+    // 3 cols on phone (standard mobile pattern), scales up for tablet/desktop
+    const GRID_COL_CLASSES = {
+        2: 'grid-cols-2',
+        3: 'grid-cols-3',
+        4: 'grid-cols-3 sm:grid-cols-4',
+        5: 'grid-cols-3 sm:grid-cols-5',
+        6: 'grid-cols-3 sm:grid-cols-4 md:grid-cols-6',
+    };
+    const appGridCols = useMemo(() => {
+        const count = currentApps.length;
+        const editCount = count + 1; // +1 for the Done tile
+        const calcCols = (n) => {
+            if (n <= 2) return 2;
+            if (n <= 4) return n;
+            if (n % 4 === 0) return 4;   // 8→4, 12→4
+            if (n % 3 === 0) return 3;   // 6→3, 9→3
+            if (n % 5 === 0) return 5;   // 5→5, 10→5
+            if (n <= 10) return Math.ceil(n / 2);  // 7→4
+            return Math.ceil(n / 3);
+        };
+        const viewCols = calcCols(count);
+        return {
+            cols: viewCols,
+            view: GRID_COL_CLASSES[viewCols] || 'grid-cols-3 sm:grid-cols-4',
+            edit: GRID_COL_CLASSES[calcCols(editCount)] || 'grid-cols-3 sm:grid-cols-4',
+        };
+    }, [currentApps.length]);
+
     const hoverBg = isDark ? 'hover:bg-white/[0.06]' : 'hover:bg-black/[0.03]';
-    const subtleBg = isDark ? 'bg-white/[0.08]' : 'bg-black/5';
 
     const renderHomeFeatureContent = useCallback((mode) => {
         if (mode === 'community') {
@@ -406,7 +476,7 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                                     onNavigate(`community/post/${post.id}`);
                                 }}
                                 className={`w-full p-3 rounded-2xl text-left ${hoverBg} transition-colors`}
-                                style={{ border: `1px solid ${colors.border}` }}
+                                style={{ border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)' }}
                             >
                                 <div className="flex items-start gap-3">
                                     {(() => {
@@ -451,6 +521,7 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                                 key={`${item.series}-${item.type}`}
                                 onClick={() => onNavigate('resources/lead-times')}
                                 className={`w-full flex items-center justify-between p-3 rounded-2xl ${hoverBg} transition-colors`}
+                                style={{ border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)' }}
                             >
                                 <div className="text-left">
                                     <div className="text-sm font-semibold" style={{ color: colors.textPrimary }}>{item.series}</div>
@@ -481,7 +552,7 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                                 key={ann.id}
                                 onClick={() => ann.actionRoute ? onNavigate(ann.actionRoute) : onNavigate('community')}
                                 className={`w-full flex items-start gap-3 p-3 rounded-2xl text-left ${hoverBg} transition-colors`}
-                                style={{ border: `1px solid ${colors.border}`, borderLeft: `3px solid ${accentColor}` }}
+                                style={{ border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)', borderLeft: `3px solid ${accentColor}` }}
                             >
                                 <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${accentColor}15`, color: accentColor }}>
                                     <Icon className="w-3.5 h-3.5" />
@@ -501,7 +572,7 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
         if (mode === 'products') {
             return (
                 <div className="space-y-3">
-                    <button onClick={() => onNavigate('products')} className={`w-full p-4 rounded-2xl text-left ${hoverBg} transition-colors`} style={{ border: `1px solid ${colors.border}` }}>
+                    <button onClick={() => onNavigate('products')} className={`w-full p-3 rounded-2xl text-left ${hoverBg} transition-colors`} style={{ border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)' }}>
                         <div className="text-sm font-semibold" style={{ color: colors.textPrimary }}>Browse Products</div>
                         <div className="text-xs" style={{ color: colors.textSecondary }}>Explore finishes and specs</div>
                     </button>
@@ -512,7 +583,7 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
         if (mode === 'projects') {
             return (
                 <div className="space-y-3">
-                    <button onClick={() => onNavigate('projects')} className={`w-full p-4 rounded-2xl text-left ${hoverBg} transition-colors`} style={{ border: `1px solid ${colors.border}` }}>
+                    <button onClick={() => onNavigate('projects')} className={`w-full p-3 rounded-2xl text-left ${hoverBg} transition-colors`} style={{ border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)' }}>
                         <div className="text-sm font-semibold" style={{ color: colors.textPrimary }}>Project Pipeline</div>
                         <div className="text-xs" style={{ color: colors.textSecondary }}>View leads and installs</div>
                     </button>
@@ -549,10 +620,10 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                             key={p.id}
                             onClick={() => onNavigate('marketplace')}
                             className={`w-full flex items-center justify-between p-3 rounded-2xl ${hoverBg} transition-colors`}
-                            style={{ border: `1px solid ${colors.border}` }}
+                            style={{ border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)' }}
                         >
                             <div className="flex items-center gap-3 min-w-0">
-                                <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0" style={{ border: `1px solid ${colors.border}` }}>
+                                <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0" style={{ border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)' }}>
                                     <img src={p.image} alt={p.name} className="w-full h-full object-cover" />
                                 </div>
                                 <div className="text-left min-w-0">
@@ -568,7 +639,7 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
         }
 
         return (
-            <div className="space-y-1">
+            <div className="divide-y" style={{ borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }}>
                 {recentOrders.map((order) => {
                     const statusColor = {
                         'Order Entry': '#6B7280',
@@ -581,11 +652,11 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                     <button
                         key={order.orderNumber}
                         onClick={() => onNavigate(`orders/${order.orderNumber}`)}
-                        className={`w-full flex items-center gap-3 p-3 rounded-2xl ${hoverBg} transition-colors`}
+                        className={`w-full flex items-center gap-3 py-2.5 px-1 ${hoverBg} transition-colors`}
                     >
                         {/* Status dot */}
-                        <div className="flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${statusColor}14` }}>
-                            <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: statusColor }} />
+                        <div className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${statusColor}14` }}>
+                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: statusColor }} />
                         </div>
                         {/* Project + Dealer */}
                         <div className="text-left min-w-0 flex-1">
@@ -602,10 +673,10 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                 })}
             </div>
         );
-    }, [colors, leadTimeFavoritesData, communityPosts, onNavigate, recentOrders, hoverBg, subtleBg]);
+    }, [colors, leadTimeFavoritesData, communityPosts, onNavigate, recentOrders, hoverBg]);
 
     return (
-        <div className="flex flex-col h-full overflow-y-auto scrollbar-hide app-header-offset" style={{ backgroundColor: colors.background, position: 'relative', overflowX: 'hidden' }}>
+        <div className="flex flex-col h-full overflow-hidden scrollbar-hide app-header-offset" style={{ backgroundColor: colors.background, position: 'relative', overflowX: 'hidden', '--section-gap': 'clamp(12px, 2.2vh, 28px)' }}>
 
             {/* ── Indie Sconce – only visible in dark mode, portalled to body ── */}
             {isDarkMode && ReactDOM.createPortal(
@@ -735,45 +806,56 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
             document.body
             )}
 
-            <div className="px-4 sm:px-6 lg:px-8 pt-0 sm:pt-1 pb-36 space-y-5 lg:space-y-7 max-w-5xl mx-auto w-full" style={{ position: 'relative', zIndex: 2 }}>
+            <div
+                className="px-4 sm:px-6 lg:px-8 flex flex-col flex-1 min-h-0 max-w-5xl mx-auto w-full"
+                style={{
+                    paddingTop: 'var(--section-gap)',
+                    paddingBottom: 'var(--section-gap)',
+                    gap: 'var(--section-gap)',
+                    position: 'relative',
+                    zIndex: 2,
+                }}
+            >
 
-                {/* Header Section */}
-                <div className="space-y-0.5 hidden sm:block">
-                    <h2 className="text-3xl font-semibold tracking-tight" style={{ color: colors.textPrimary }}>Dashboard</h2>
-                    <div className="text-[13px] font-medium" style={{ color: colors.textSecondary }}>{todayLabel}</div>
-                </div>
+                {/* Header + Search — side-by-side on lg, stacked otherwise */}
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-8">
+                    {/* Header Section */}
+                    <div className="space-y-0.5 hidden sm:block sm:shrink-0">
+                        <h2 className="text-3xl font-semibold tracking-tight whitespace-nowrap" style={{ color: colors.textPrimary }}>Dashboard</h2>
+                        <div className="text-[13px] font-medium whitespace-nowrap" style={{ color: colors.textSecondary }}>{todayLabel}</div>
+                    </div>
 
-                {/* Search / Spotlight */}
-                <div className="relative group">
-                    <div className="absolute inset-0 bg-transparent rounded-full" />
-                    <GlassCard
-                        theme={theme}
-                        className="relative z-10 px-5 flex items-center"
-                        style={{
-                            borderRadius: 9999,
-                            height: 56,
-                            paddingTop: 0,
-                            paddingBottom: 0,
-                            backgroundColor: colors.tileSurface,
-                            border: 'none',
-                            boxShadow: colors.tileShadow
-                        }}
-                    >
-                        <HomeSearchInput
-                            value={searchQuery}
-                            onChange={setSearchQuery}
-                            onSubmit={handleSearchSubmit}
-                            onVoiceClick={() => onVoiceActivate && onVoiceActivate('Voice search active')}
+                    {/* Search / Spotlight */}
+                    <div className="relative group sm:flex-1 sm:min-w-0">
+                        <div className="absolute inset-0 bg-transparent rounded-full" />
+                        <GlassCard
                             theme={theme}
-                            className="w-full"
-                        />
-                        {/* Quick Actions Dropdown (Plus button) */}
-                        <QuickActionDropdown 
-                            theme={theme}
-                            onActionSelect={handleQuickAction}
-                            className="ml-2"
-                        />
-                    </GlassCard>
+                            className="relative z-10 px-5 flex items-center"
+                            style={{
+                                borderRadius: 9999,
+                                height: 56,
+                                paddingTop: 0,
+                                paddingBottom: 0,
+                                backgroundColor: colors.tileSurface,
+                                border: 'none',
+                                boxShadow: colors.tileShadow
+                            }}
+                        >
+                            <HomeSearchInput
+                                value={searchQuery}
+                                onChange={setSearchQuery}
+                                onSubmit={handleSearchSubmit}
+                                onVoiceClick={() => onVoiceActivate && onVoiceActivate('Voice search active')}
+                                theme={theme}
+                                className="w-full"
+                            />
+                            {/* Quick Actions Dropdown (Plus button) */}
+                            <QuickActionDropdown 
+                                theme={theme}
+                                onActionSelect={handleQuickAction}
+                                className="ml-2"
+                            />
+                        </GlassCard>
 
                     {searchQuery.trim() && (
                         <div className="absolute left-0 right-0 top-full mt-2 z-20">
@@ -821,59 +903,11 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                             </GlassCard>
                         </div>
                     )}
+                    </div>
                 </div>
 
-                {/* Reconfigurable Apps section */}
-                <div className="space-y-2">
-                    <div className="flex items-center justify-between px-0.5">
-                        <div className="text-[12px] font-semibold uppercase tracking-widest" style={{ color: colors.textSecondary, opacity: 0.55 }}>
-                            Core Apps
-                        </div>
-                        {onUpdateHomeApps && (
-                            <button
-                                onClick={() => setIsEditMode(!isEditMode)}
-                                title={isEditMode ? 'Exit edit mode' : 'Customize home apps'}
-                                aria-label={isEditMode ? 'Exit edit mode' : 'Customize home apps'}
-                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all active:scale-95"
-                                style={{
-                                    backgroundColor: isEditMode
-                                        ? (isDark ? 'rgba(255,255,255,0.90)' : colors.textPrimary)
-                                        : (isDark ? 'rgba(255,255,255,0.09)' : 'rgba(53,53,53,0.07)'),
-                                    color: isEditMode
-                                        ? (isDark ? '#1A1A1A' : '#FFFFFF')
-                                        : colors.textSecondary,
-                                    border: `1px solid ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)'}`,
-                                }}
-                            >
-                                {isEditMode ? (
-                                    <>
-                                        <Check className="w-3.5 h-3.5" />
-                                        <span>Done</span>
-                                    </>
-                                ) : (
-                                    <>
-                                        <GripVertical className="w-3.5 h-3.5" />
-                                        <span>Customize</span>
-                                    </>
-                                )}
-                            </button>
-                        )}
-                    </div>
-                    {isEditMode && (
-                        <div
-                            className="flex items-center gap-2 px-3 py-2 rounded-xl"
-                            style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.04)', border: `1px dashed ${isDark ? 'rgba(255,255,255,0.15)' : 'rgba(53,53,53,0.15)'}` }}
-                        >
-                            <GripVertical className="w-3.5 h-3.5 flex-shrink-0" style={{ color: colors.textSecondary, opacity: 0.5 }} />
-                            <p
-                                className="text-[11px] font-medium"
-                                style={{ color: colors.textSecondary, opacity: 0.7 }}
-                            >
-                                Drag apps to reorder &nbsp;·&nbsp; Use dropdowns below to swap card content
-                            </p>
-                        </div>
-                    )}
-
+                {/* App grid */}
+                <div className="relative">
                     {isEditMode ? (
                         <DndContext
                             sensors={sensors}
@@ -881,13 +915,21 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                             measuring={{ droppable: { strategy: MeasuringStrategy.WhileDragging } }}
                             onDragStart={(event) => setActiveDragId(event.active?.id || null)}
                             onDragEnd={(event) => {
-                                handleReorder(event);
+                                const { active, over } = event;
+                                // If dropped on the remove zone, remove the app
+                                if (over?.id === '__remove_zone__' && active?.id) {
+                                    if (!NON_REMOVABLE_APPS.has(active.id) && safeHomeApps.length > MIN_PINNED_APPS) {
+                                        onUpdateHomeApps(safeHomeApps.filter(r => r !== active.id));
+                                    }
+                                } else {
+                                    handleReorder(event);
+                                }
                                 setActiveDragId(null);
                             }}
                             onDragCancel={() => setActiveDragId(null)}
                         >
                             <SortableContext items={safeHomeApps} strategy={rectSortingStrategy}>
-                                <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2">
+                                <div className={`grid gap-1.5 sm:gap-2 ${appGridCols.edit}`}>
                                     {currentApps.map((app) => (
                                         <SortableAppTile
                                             key={app.route}
@@ -899,19 +941,58 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                                             isRemoveLocked={NON_REMOVABLE_APPS.has(app.route)}
                                         />
                                     ))}
+                                    {/* Done button as last grid tile */}
+                                    <button
+                                        onClick={() => setIsEditMode(false)}
+                                        className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl transition-all active:scale-95"
+                                        style={{
+                                            minHeight: 104,
+                                            backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)',
+                                            border: `2px dashed ${isDark ? 'rgba(255,255,255,0.15)' : 'rgba(53,53,53,0.15)'}`,
+                                        }}
+                                    >
+                                        <Check className="w-5 h-5" style={{ color: colors.accent }} />
+                                        <span className="text-[11px] font-semibold tracking-tight" style={{ color: colors.accent }}>Done</span>
+                                    </button>
                                 </div>
                             </SortableContext>
+
+                            {/* Add / Remove zone */}
+                            <div className="space-y-1.5 pt-2">
+                                <div className="text-[11px] font-semibold uppercase tracking-widest px-0.5" style={{ color: colors.textSecondary, opacity: 0.45 }}>Available Apps</div>
+                                <RemoveDropZone isDark={isDark} colors={colors} isActive={!!activeDragId}>
+                                    <div className={`grid gap-1.5 ${appGridCols.edit}`}>
+                                        {availableApps.map((app) => (
+                                            <button
+                                                key={app.route}
+                                                onClick={() => toggleApp(app.route)}
+                                                className="flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl text-[11px] font-semibold transition-all active:scale-95"
+                                                style={{
+                                                    backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(53,53,53,0.07)',
+                                                    color: colors.textSecondary,
+                                                    border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)',
+                                                }}
+                                            >
+                                                <Plus className="w-3 h-3 opacity-50 shrink-0" />
+                                                <span className="truncate">{app.name}</span>
+                                            </button>
+                                        ))}
+                                        {availableApps.length === 0 && (
+                                            <span className="text-[11px] py-1 col-span-full text-center" style={{ color: colors.textSecondary, opacity: 0.5 }}>All apps added</span>
+                                        )}
+                                    </div>
+                                </RemoveDropZone>
+                            </div>
+
                             <DragOverlay>
                                 {activeApp ? (
-                                    <div className="w-[96px] sm:w-[104px] lg:w-[112px]">
+                                    <div style={{ width: 104 }}>
                                         <div
                                             className="relative flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl"
                                             style={{
                                                 backgroundColor: colors.tileSurface,
                                                 boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
-                                                width: '100%',
-                                                minWidth: 0,
-                                                minHeight: 104
+                                                minHeight: 104,
                                             }}
                                         >
                                             <div
@@ -932,7 +1013,8 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                             </DragOverlay>
                         </DndContext>
                     ) : (
-                        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2">
+                        <>
+                        <div className={`grid gap-1.5 sm:gap-2 ${appGridCols.view}`}>
                             {currentApps.map((app) => {
                                 const badge = getAppBadge(app.route, recentOrders, posts, leadTimeFavoritesData, samplesCartCount);
                                 return (
@@ -940,28 +1022,25 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                                         key={app.route}
                                         onClick={() => onNavigate(app.route)}
                                         aria-label={`Open ${app.name}`}
-                                        className="relative flex flex-col items-center justify-center rounded-2xl transition-all active:scale-95 group gap-1.5 p-3"
+                                        className="relative flex flex-col items-center justify-center rounded-2xl transition-all active:scale-95 group gap-1.5 p-2.5 sm:p-3"
                                         style={{
-                                            minHeight: 104,
+                                            minHeight: 88,
                                             backgroundColor: colors.tileSurface,
                                             border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
-                                            boxShadow: 'none',
-                                            width: '100%',
-                                            minWidth: 0
                                         }}
                                     >
                                         <div
-                                            className="rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 w-10 h-10"
+                                            className="rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 w-9 h-9 sm:w-10 sm:h-10"
                                             style={{ backgroundColor: `${colors.accent}10` }}
                                         >
-                                            <app.icon className="w-5 h-5" style={{ color: colors.accent }} />
+                                            <app.icon className="w-[18px] h-[18px] sm:w-5 sm:h-5" style={{ color: colors.accent }} />
                                         </div>
-                                        <span className="text-[11px] font-semibold tracking-tight text-center leading-tight line-clamp-2 px-1" style={{ color: colors.textPrimary }}>
+                                        <span className="text-[11px] sm:text-xs font-semibold tracking-tight text-center leading-tight line-clamp-2 px-0.5" style={{ color: colors.textPrimary }}>
                                             {app.name}
                                         </span>
                                         {badge && (
                                             <div
-                                                className="absolute top-2 right-2 px-1.5 py-[1px] rounded-full text-[9px] font-bold"
+                                                className="absolute top-1.5 right-1.5 px-1.5 py-[1px] rounded-full text-[9px] font-bold"
                                                 style={{
                                                     backgroundColor: `${badge.color}18`,
                                                     color: badge.color,
@@ -975,44 +1054,31 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                                 );
                             })}
                         </div>
-                    )}
-
-                    {isEditMode && (
-                        <div className="space-y-2 pt-1">
-                            {/* "Add Apps" header — same style as "Core Apps" */}
-                            <div className="text-[12px] font-semibold uppercase tracking-widest" style={{ color: colors.textSecondary, opacity: 0.55 }}>Add Apps</div>
-                            <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2">
-                                {availableApps.map((app) => (
-                                    <button
-                                        key={app.route}
-                                        onClick={() => toggleApp(app.route)}
-                                        className={`flex flex-col items-center justify-center gap-1 px-2 py-1.5 rounded-xl ${isDark ? 'hover:bg-white/[0.05]' : 'hover:bg-black/[0.03]'} transition-colors active:scale-95`}
-                                        style={{
-                                            backgroundColor: colors.tileSurface,
-                                            border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.05)',
-                                            width: '100%',
-                                            minWidth: 0
-                                        }}
-                                    >
-                                        <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${colors.accent}10` }}>
-                                            <Plus className="w-3 h-3" style={{ color: colors.textSecondary, opacity: 0.5 }} />
-                                        </div>
-                                        <span className="text-[9px] font-semibold" style={{ color: colors.textSecondary }}>{app.name}</span>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
+                        {/* Compact edit strip — positioned inside the section gap, not adding height */}
+                        {onUpdateHomeApps && (
+                            <button
+                                onClick={() => setIsEditMode(true)}
+                                aria-label="Customize home apps"
+                                className="absolute left-0 flex items-center gap-1.5 transition-opacity hover:opacity-60 active:opacity-40"
+                                style={{ bottom: 'calc(var(--section-gap) * -0.5)', transform: 'translateY(50%)' }}
+                            >
+                                <Settings2 className="w-3 h-3" style={{ color: colors.textSecondary, opacity: 0.35 }} />
+                                <span className="text-[9.5px] font-medium" style={{ color: colors.textSecondary, opacity: 0.35 }}>Edit</span>
+                            </button>
+                        )}
+                        </>
                     )}
                 </div>
 
-                {/* Home feature card(s) */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {/* Home feature card(s) — flex-grow to fill remaining space */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 flex-1 min-h-0" style={{ gap: 'var(--section-gap)' }}>
                     <GlassCard
                         theme={theme}
-                        className={`p-6 cursor-pointer transition-all duration-300 ${isEditMode ? 'ring-2 ring-dashed' : ''}`}
+                        className={`flex flex-col cursor-pointer transition-all duration-300 overflow-hidden ${isEditMode ? 'ring-2 ring-dashed' : ''}`}
                         style={{
                             borderRadius: 24,
                             backgroundColor: colors.tileSurface,
+                            padding: 0,
                             border: isEditMode
                                 ? `2px dashed ${isDark ? 'rgba(255,255,255,0.25)' : 'rgba(53,53,53,0.20)'}`
                                 : 'none',
@@ -1021,15 +1087,10 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                         onClick={(e) => {
                             if (isEditMode) return;
                             if (e.target.closest('button, a, select')) return;
-                            if (homeFeatureMode === 'community') onNavigate('community');
-                            else if (homeFeatureMode === 'lead-times') onNavigate('resources/lead-times');
-                            else if (homeFeatureMode === 'products') onNavigate('products');
-                            else if (homeFeatureMode === 'projects') onNavigate('projects');
-                            else if (homeFeatureMode === 'marketplace') onNavigate('marketplace');
-                            else onNavigate('orders');
+                            navigateFeature(homeFeatureMode);
                         }}
                     >
-                        <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center justify-between px-6 pt-5 pb-3 flex-shrink-0">
                             <h4 className="text-lg font-bold" style={{ color: colors.textPrimary }}>
                                 {homeFeatureOptions.find(o => o.id === homeFeatureMode)?.label || 'Recent Activity'}
                             </h4>
@@ -1043,16 +1104,9 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                                 />
                             ) : (
                                 <button
-                                    onClick={() => {
-                                        if (homeFeatureMode === 'community') onNavigate('community');
-                                        else if (homeFeatureMode === 'lead-times') onNavigate('resources/lead-times');
-                                        else if (homeFeatureMode === 'products') onNavigate('products');
-                                        else if (homeFeatureMode === 'projects') onNavigate('projects');
-                                        else if (homeFeatureMode === 'marketplace') onNavigate('marketplace');
-                                        else onNavigate('orders');
-                                    }}
-                                    className="text-[11px] font-semibold uppercase tracking-widest flex items-center gap-1 transition-opacity hover:opacity-60"
-                                    style={{ color: colors.textSecondary }}
+                                    onClick={() => navigateFeature(homeFeatureMode)}
+                                    className="text-[11px] font-medium uppercase tracking-wide flex items-center gap-1 px-2.5 py-1.5 rounded-full transition-colors"
+                                    style={{ color: colors.textSecondary, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}
                                 >
                                     Open
                                     <ChevronRight className="w-3 h-3" />
@@ -1060,29 +1114,32 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                             )}
                         </div>
                         {isEditMode && (
-                            <p className="text-[10px] font-medium mb-3 flex items-center gap-1" style={{ color: colors.accent, opacity: 0.7 }}>
+                            <p className="text-[10px] font-medium mb-3 px-6 flex items-center gap-1" style={{ color: colors.accent, opacity: 0.7 }}>
                                 <ChevronDown className="w-3 h-3" /> Use the dropdown above to change this card's content
                             </p>
                         )}
-                        <AnimatePresence mode="wait">
-                          <motion.div
-                            key={homeFeatureMode}
-                            initial={{ opacity: 0, y: 6 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -6 }}
-                            transition={{ duration: 0.2 }}
-                          >
-                            {renderHomeFeatureContent(homeFeatureMode)}
-                          </motion.div>
-                        </AnimatePresence>
+                        <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hide px-6 pb-5">
+                            <AnimatePresence mode="wait">
+                              <motion.div
+                                key={homeFeatureMode}
+                                initial={{ opacity: 0, y: 6 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -6 }}
+                                transition={{ duration: 0.2 }}
+                              >
+                                {renderHomeFeatureContent(homeFeatureMode)}
+                              </motion.div>
+                            </AnimatePresence>
+                        </div>
                     </GlassCard>
 
                     <GlassCard
                         theme={theme}
-                        className={`p-6 hidden lg:block cursor-pointer transition-all duration-300`}
+                        className={`hidden sm:flex flex-col cursor-pointer transition-all duration-300 overflow-hidden`}
                         style={{
                             borderRadius: 24,
                             backgroundColor: colors.tileSurface,
+                            padding: 0,
                             border: isEditMode
                                 ? `2px dashed ${isDark ? 'rgba(255,255,255,0.25)' : 'rgba(53,53,53,0.20)'}`
                                 : 'none',
@@ -1091,15 +1148,10 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                         onClick={(e) => {
                             if (isEditMode) return;
                             if (e.target.closest('button, a, select')) return;
-                            if (secondaryFeatureMode === 'community') onNavigate('community');
-                            else if (secondaryFeatureMode === 'lead-times') onNavigate('resources/lead-times');
-                            else if (secondaryFeatureMode === 'products') onNavigate('products');
-                            else if (secondaryFeatureMode === 'projects') onNavigate('projects');
-                            else if (secondaryFeatureMode === 'marketplace') onNavigate('marketplace');
-                            else onNavigate('orders');
+                            navigateFeature(secondaryFeatureMode);
                         }}
                     >
-                        <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center justify-between px-6 pt-5 pb-3 flex-shrink-0">
                             <h4 className="text-lg font-bold" style={{ color: colors.textPrimary }}>
                                 {homeFeatureOptions.find(o => o.id === secondaryFeatureMode)?.label || 'Community'}
                             </h4>
@@ -1113,16 +1165,9 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                                 />
                             ) : (
                                 <button
-                                    onClick={() => {
-                                        if (secondaryFeatureMode === 'community') onNavigate('community');
-                                        else if (secondaryFeatureMode === 'lead-times') onNavigate('resources/lead-times');
-                                        else if (secondaryFeatureMode === 'products') onNavigate('products');
-                                        else if (secondaryFeatureMode === 'projects') onNavigate('projects');
-                                        else if (secondaryFeatureMode === 'marketplace') onNavigate('marketplace');
-                                        else onNavigate('orders');
-                                    }}
-                                    className="text-[11px] font-semibold uppercase tracking-widest flex items-center gap-1 transition-opacity hover:opacity-60"
-                                    style={{ color: colors.textSecondary }}
+                                    onClick={() => navigateFeature(secondaryFeatureMode)}
+                                    className="text-[11px] font-medium uppercase tracking-wide flex items-center gap-1 px-2.5 py-1.5 rounded-full transition-colors"
+                                    style={{ color: colors.textSecondary, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}
                                 >
                                     Open
                                     <ChevronRight className="w-3 h-3" />
@@ -1130,60 +1175,48 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                             )}
                         </div>
                         {isEditMode && (
-                            <p className="text-[10px] font-medium mb-3 flex items-center gap-1" style={{ color: colors.accent, opacity: 0.7 }}>
+                            <p className="text-[10px] font-medium mb-3 px-6 flex items-center gap-1" style={{ color: colors.accent, opacity: 0.7 }}>
                                 <ChevronDown className="w-3 h-3" /> Use the dropdown above to change this card's content
                             </p>
                         )}
-                        <AnimatePresence mode="wait">
-                          <motion.div
-                            key={secondaryFeatureMode}
-                            initial={{ opacity: 0, y: 6 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -6 }}
-                            transition={{ duration: 0.2 }}
-                          >
-                            {renderHomeFeatureContent(secondaryFeatureMode)}
-                          </motion.div>
-                        </AnimatePresence>
+                        <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hide px-6 pb-5">
+                            <AnimatePresence mode="wait">
+                              <motion.div
+                                key={secondaryFeatureMode}
+                                initial={{ opacity: 0, y: 6 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -6 }}
+                                transition={{ duration: 0.2 }}
+                              >
+                                {renderHomeFeatureContent(secondaryFeatureMode)}
+                              </motion.div>
+                            </AnimatePresence>
+                        </div>
                     </GlassCard>
                 </div>
-            </div>
 
-            {/* Sticky glassy feedback bar — above bottom nav */}
-            {!isEditMode && (
-            <div
-                className="fixed inset-x-0 z-[28] px-5 sm:px-7 lg:px-10 pointer-events-none"
-                style={{ bottom: 82 }}
-            >
-                <button
-                    onClick={() => onNavigate('feedback')}
-                    className="max-w-5xl mx-auto pointer-events-auto flex items-center justify-between px-5 py-3 w-full transition-all active:scale-[0.99]"
-                    style={{
-                        backdropFilter: 'blur(48px)',
-                        WebkitBackdropFilter: 'blur(48px)',
-                        backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.55)',
-                        border: isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(0,0,0,0.06)',
-                        borderRadius: 999,
-                        boxShadow: isDark ? '0 2px 12px rgba(0,0,0,0.2)' : '0 2px 12px rgba(0,0,0,0.04)',
-                        display: 'flex',
-                    }}
-                >
-                    <p className="text-[11.5px] font-medium" style={{ color: colors.textPrimary, opacity: 0.5 }}>
-                        Help us improve MyJSI
-                    </p>
-                    <span
-                        className="flex items-center gap-1 px-3.5 py-1.5 rounded-full text-[11px] font-bold"
+                {/* Glassy feedback bar — in flow, not fixed */}
+                {!isEditMode && (
+                    <button
+                        onClick={() => onNavigate('feedback')}
+                        className="flex-shrink-0 flex items-center justify-between px-5 h-12 w-full rounded-full transition-all active:scale-[0.99]"
                         style={{
-                            backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.07)',
-                            color: colors.textPrimary,
+                            backdropFilter: 'blur(16px) saturate(2) brightness(1.12) contrast(1.05)',
+                            WebkitBackdropFilter: 'blur(16px) saturate(2) brightness(1.12) contrast(1.05)',
+                            backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.10)',
+                            boxShadow: isDark
+                                ? 'inset 0 0.5px 0 rgba(255,255,255,0.12), inset 0 -0.5px 0 rgba(255,255,255,0.04), 0 2px 12px rgba(0,0,0,0.08)'
+                                : 'inset 0 0.5px 0 rgba(255,255,255,0.7), inset 0 -0.5px 0 rgba(255,255,255,0.2), 0 2px 12px rgba(0,0,0,0.04)',
+                            borderRadius: 999,
                         }}
                     >
-                        Share Feedback
-                        <ChevronRight className="w-3 h-3 opacity-40" />
-                    </span>
-                </button>
+                        <span className="text-[11.5px] font-medium" style={{ color: colors.textPrimary, opacity: 0.4 }}>Help us improve MyJSI</span>
+                        <span className="flex items-center gap-1 text-[11px] font-semibold" style={{ color: colors.textPrimary, opacity: 0.4 }}>
+                            Share Feedback <ChevronRight className="w-3 h-3" />
+                        </span>
+                    </button>
+                )}
             </div>
-            )}
 
             {/* Request Quote Modal */}
             <RequestQuoteModal
@@ -1191,8 +1224,8 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                 onClose={() => setShowQuoteModal(false)}
                 theme={theme}
                 onSubmit={(data) => {
-                    console.log('Quote request submitted:', data);
-                    // Handle quote submission - could send to API
+                    // TODO: wire to quote submission API
+                    if (import.meta.env.DEV) console.log('Quote request submitted:', data);
                 }}
             />
 
@@ -1238,7 +1271,7 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                             </div>
                             <button
                                 onClick={() => setIsChatOpen(false)}
-                                className={`p-2 rounded-full transition-colors ${isDark ? 'hover:bg-white/10' : 'hover:bg-black/10'}`}
+                                className={`p-2 rounded-full transition-colors ${isDark ? 'hover:bg-white/[0.06]' : 'hover:bg-black/[0.03]'}`}
                                 aria-label="Close chat"
                             >
                                 <X className="w-5 h-5" style={{ color: colors.textSecondary }} />

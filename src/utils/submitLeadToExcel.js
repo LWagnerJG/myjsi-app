@@ -68,7 +68,7 @@ export async function submitLeadToExcel(lead) {
       body: JSON.stringify(flattenLead(lead)),
     });
     if ([200, 201, 202].includes(res.status)) {
-      console.log('[submitLeadToExcel] Lead sent to Excel successfully.');
+      if (import.meta.env.DEV) console.log('[submitLeadToExcel] Lead sent to Excel successfully.');
       return true;
     }
     console.error('[submitLeadToExcel] Unexpected status:', res.status);

@@ -34,7 +34,7 @@ export const ComColRequest = ({ theme, showAlert }) => {
     setSubmitting(true);
     try {
       // For now just log; could be wired to flow similar to Yardage request.
-      console.log('COM/COL Pattern Submission', form);
+      if (import.meta.env.DEV) console.log('COM/COL Pattern Submission', form);
       setSubmitted(true);
       showAlert && showAlert('COM / COL Pattern request submitted');
       setTimeout(() => setSubmitted(false), 2500);

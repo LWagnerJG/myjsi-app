@@ -7,13 +7,13 @@ import { CUSTOMER_RANK_DATA } from './data.js';
 import { isDarkTheme } from '../../design-system/tokens.js';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrendingUp, TrendingDown, ArrowUpRight, ChevronRight, Search, X } from 'lucide-react';
+import { formatCurrency } from '../../utils/format.js';
 
 const RANKING_TAB_OPTIONS = [
     { value: 'sales', label: 'Sales' },
     { value: 'bookings', label: 'Bookings' }
 ];
 
-const formatCurrency = (n) => `$${Number(n || 0).toLocaleString()}`;
 const formatCompact = (n) => {
     const abs = Math.abs(n);
     if (abs >= 1e6) return `$${(n / 1e6).toFixed(1)}M`;
