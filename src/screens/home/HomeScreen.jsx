@@ -1059,11 +1059,11 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                             <button
                                 onClick={() => setIsEditMode(true)}
                                 aria-label="Customize home apps"
-                                className="absolute left-0 flex items-center gap-1.5 transition-opacity hover:opacity-60 active:opacity-40"
+                                className="absolute right-0 flex items-center gap-1.5 transition-opacity hover:opacity-60 active:opacity-40"
                                 style={{ bottom: 'calc(var(--section-gap) * -0.5)', transform: 'translateY(50%)' }}
                             >
                                 <Settings2 className="w-3 h-3" style={{ color: colors.textSecondary, opacity: 0.35 }} />
-                                <span className="text-[9.5px] font-medium" style={{ color: colors.textSecondary, opacity: 0.35 }}>Edit</span>
+                                <span className="text-[9.5px] font-medium" style={{ color: colors.textSecondary, opacity: 0.35 }}>Customize</span>
                             </button>
                         )}
                         </>
@@ -1199,15 +1199,11 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                 {!isEditMode && (
                     <button
                         onClick={() => onNavigate('feedback')}
-                        className="flex-shrink-0 flex items-center justify-between px-5 h-12 w-full rounded-full transition-all active:scale-[0.99]"
+                        className="flex-shrink-0 flex items-center justify-between px-5 h-12 w-full rounded-full transition-all active:scale-[0.99] mb-1"
                         style={{
-                            backdropFilter: 'blur(16px) saturate(2) brightness(1.12) contrast(1.05)',
-                            WebkitBackdropFilter: 'blur(16px) saturate(2) brightness(1.12) contrast(1.05)',
-                            backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.10)',
-                            boxShadow: isDark
-                                ? 'inset 0 0.5px 0 rgba(255,255,255,0.12), inset 0 -0.5px 0 rgba(255,255,255,0.04), 0 2px 12px rgba(0,0,0,0.08)'
-                                : 'inset 0 0.5px 0 rgba(255,255,255,0.7), inset 0 -0.5px 0 rgba(255,255,255,0.2), 0 2px 12px rgba(0,0,0,0.04)',
-                            borderRadius: 999,
+                            backgroundColor: colors.tileSurface,
+                            border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
+                            borderRadius: 9999,
                         }}
                     >
                         <span className="text-[11.5px] font-medium" style={{ color: colors.textPrimary, opacity: 0.4 }}>Help us improve MyJSI</span>
