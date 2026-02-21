@@ -639,7 +639,7 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
         }
 
         return (
-            <div className="divide-y" style={{ borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }}>
+            <div className="divide-y" style={{ borderColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)' }}>
                 {recentOrders.map((order) => {
                     const statusColor = {
                         'Order Entry': '#6B7280',
@@ -652,7 +652,7 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                     <button
                         key={order.orderNumber}
                         onClick={() => onNavigate(`orders/${order.orderNumber}`)}
-                        className={`w-full flex items-center gap-3 py-2.5 px-1 ${hoverBg} transition-colors`}
+                        className={`w-full flex items-center gap-3 py-3.5 px-1 ${hoverBg} transition-colors`}
                     >
                         {/* Status dot */}
                         <div className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${statusColor}14` }}>
@@ -1105,8 +1105,8 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                             ) : (
                                 <button
                                     onClick={() => navigateFeature(homeFeatureMode)}
-                                    className="text-[11px] font-medium uppercase tracking-wide flex items-center gap-1 px-2.5 py-1.5 rounded-full transition-colors"
-                                    style={{ color: colors.textSecondary, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}
+                                    className="text-[10px] font-medium uppercase tracking-wide flex items-center gap-0.5 transition-opacity hover:opacity-60"
+                                    style={{ color: colors.textSecondary, opacity: 0.4 }}
                                 >
                                     Open
                                     <ChevronRight className="w-3 h-3" />
@@ -1166,8 +1166,8 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                             ) : (
                                 <button
                                     onClick={() => navigateFeature(secondaryFeatureMode)}
-                                    className="text-[11px] font-medium uppercase tracking-wide flex items-center gap-1 px-2.5 py-1.5 rounded-full transition-colors"
-                                    style={{ color: colors.textSecondary, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}
+                                    className="text-[10px] font-medium uppercase tracking-wide flex items-center gap-0.5 transition-opacity hover:opacity-60"
+                                    style={{ color: colors.textSecondary, opacity: 0.4 }}
                                 >
                                     Open
                                     <ChevronRight className="w-3 h-3" />
