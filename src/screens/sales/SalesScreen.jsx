@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Modal } from '../../components/common/Modal';
 import { ArrowUp, ArrowDown, TrendingUp, Award, DollarSign, BarChart, Table, ChevronRight, Target, Trophy, Calendar } from 'lucide-react';
 import { MONTHLY_SALES_DATA, SALES_VERTICALS_DATA, CUSTOMER_RANK_DATA, INCENTIVE_REWARDS_DATA } from './data.js';
@@ -120,6 +120,13 @@ export const SalesScreen = ({ theme, onNavigate }) => {
   const topLeaders = useMemo(() => [...CUSTOMER_RANK_DATA].sort((a, b) => (b.bookings || 0) - (a.bookings || 0)).slice(0, 3), []);
   const activeTotal = chartDataType === 'bookings' ? totalBookings : totalSales;
 
+  // Hoist max calculations out of render loops
+  const chartMax = useMemo(() => Math.max(...MONTHLY_SALES_DATA.map(d => chartDataType === 'bookings' ? d.bookings : d.sales)), [chartDataType]);
+
+  // Delay internal animations until after screen transition settles
+  const [ready, setReady] = useState(false);
+  useEffect(() => { const t = setTimeout(() => setReady(true), 280); return () => clearTimeout(t); }, []);
+
   const rewardsSnapshot = useMemo(() => {
     const entries = Object.entries(INCENTIVE_REWARDS_DATA || {});
     if (!entries.length) return null;
@@ -201,12 +208,13 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                   </div>
                 </div>
                 <div className="h-2.5 w-full rounded-full overflow-hidden" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }}>
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${progressPct}%` }}
-                    transition={{ duration: 0.6, ease: 'easeOut' }}
+                  <div
                     className="h-full rounded-full"
-                    style={{ backgroundColor: colors.accent }}
+                    style={{
+                      backgroundColor: colors.accent,
+                      width: ready ? `${progressPct}%` : '0%',
+                      transition: 'width 0.6s ease-out',
+                    }}
                   />
                 </div>
                 <div className="text-[11px] font-semibold opacity-45 tabular-nums">{progressPct.toFixed(1)}% of $7M goal</div>
@@ -217,8 +225,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                 <div className="h-16 flex items-end gap-1.5">
                   {MONTHLY_SALES_DATA.map((m, i) => {
                     const val = chartDataType === 'bookings' ? m.bookings : m.sales;
-                    const max = Math.max(...MONTHLY_SALES_DATA.map(d => chartDataType === 'bookings' ? d.bookings : d.sales));
-                    const pct = (val / max) * 100;
+                    const pct = (val / chartMax) * 100;
                     const isHovered = hoveredBar === `mini-${i}`;
                     return (
                       <div
@@ -233,15 +240,13 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                               ${(val / 1000).toFixed(0)}k
                             </div>
                           )}
-                          <motion.div
-                            initial={{ height: 0 }}
-                            animate={{ height: `${Math.max(6, (pct / 100) * 52)}px` }}
-                            transition={{ duration: 0.4, ease: 'easeOut' }}
+                          <div
                             className="w-full rounded-md"
                             style={{
+                              height: ready ? `${Math.max(6, (pct / 100) * 52)}px` : '0px',
                               backgroundColor: colors.accent,
                               opacity: isHovered ? (isDark ? 0.65 : 0.45) : (isDark ? 0.4 : 0.25),
-                              transition: 'opacity 0.15s',
+                              transition: `height 0.4s ease-out ${i * 30}ms, opacity 0.15s`,
                             }}
                           />
                         </div>
@@ -276,20 +281,22 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                 {topLeaders.map((leader, idx) => {
                   const rank = RANK_STYLES[idx] || RANK_STYLES[2];
                   return (
-                    <motion.div
+                    <div
                       key={leader.id}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.25 }}
                       className="flex items-center justify-between text-xs py-2 px-3 rounded-xl transition-colors"
-                      style={{ backgroundColor: rank.bg }}
+                      style={{
+                        backgroundColor: rank.bg,
+                        opacity: ready ? 1 : 0,
+                        transform: ready ? 'translateX(0)' : 'translateX(-8px)',
+                        transition: `opacity 0.25s ease ${idx * 60}ms, transform 0.25s ease ${idx * 60}ms`,
+                      }}
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
                         <span className="text-sm" aria-label={`Rank ${idx + 1}`}>{rank.icon}</span>
                         <span className="font-semibold truncate">{leader.name}</span>
                       </div>
                       <span className="font-bold tabular-nums shrink-0 ml-2">{formatCurrency(leader.bookings)}</span>
-                    </motion.div>
+                    </div>
                   );
                 })}
               </div>
@@ -352,13 +359,14 @@ export const SalesScreen = ({ theme, onNavigate }) => {
               {recentOrders.map((order, i) => {
                 const sc = statusColor(order.status);
                 return (
-                  <motion.button
+                  <button
                     key={order.orderNumber}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.2 }}
                     onClick={() => setSelectedOrder(order)}
                     className="w-full flex items-center justify-between px-3.5 py-3 rounded-xl active:scale-[0.98] transition-all group"
+                    style={{
+                      opacity: ready ? 1 : 0,
+                      transition: `opacity 0.2s ease ${i * 40}ms`,
+                    }}
                     onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.025)'}
                     onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                   >
@@ -383,7 +391,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                         {order.status}
                       </span>
                     </div>
-                  </motion.button>
+                  </button>
                 );
               })}
             </div>
@@ -432,8 +440,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
               >
                 {MONTHLY_SALES_DATA.map((m, i) => {
                   const val = chartDataType === 'bookings' ? m.bookings : m.sales;
-                  const max = Math.max(...MONTHLY_SALES_DATA.map(d => chartDataType === 'bookings' ? d.bookings : d.sales));
-                  const pct = (val / max) * 100;
+                  const pct = (val / chartMax) * 100;
                   const isHovered = hoveredBar === `chart-${i}`;
                   return (
                     <div
@@ -443,15 +450,13 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                       onMouseLeave={() => setHoveredBar(null)}
                     >
                       <div className="w-full h-44 relative flex items-end justify-center">
-                        <motion.div
-                          initial={{ height: 0 }}
-                          animate={{ height: `${Math.max(4, pct)}%` }}
-                          transition={{ duration: 0.4, ease: 'easeOut' }}
+                        <div
                           className="w-full rounded-lg relative"
                           style={{
+                            height: ready ? `${Math.max(4, pct)}%` : '0%',
                             backgroundColor: colors.accent,
                             opacity: isHovered ? (isDark ? 0.7 : 0.5) : (isDark ? 0.4 : 0.28),
-                            transition: 'opacity 0.15s',
+                            transition: `height 0.4s ease-out ${i * 30}ms, opacity 0.15s`,
                           }}
                         />
                         {isHovered && (
@@ -477,8 +482,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
               >
                 {MONTHLY_SALES_DATA.map((m, i) => {
                   const val = chartDataType === 'bookings' ? m.bookings : m.sales;
-                  const max = Math.max(...MONTHLY_SALES_DATA.map(d => chartDataType === 'bookings' ? d.bookings : d.sales));
-                  const pct = (val / max) * 100;
+                  const pct = (val / chartMax) * 100;
                   return (
                     <div
                       key={m.month}
