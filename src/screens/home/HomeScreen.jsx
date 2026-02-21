@@ -639,7 +639,7 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
         }
 
         return (
-            <div className="divide-y" style={{ borderColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)' }}>
+            <div className="divide-y" style={{ borderColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)' }}>
                 {recentOrders.map((order) => {
                     const statusColor = {
                         'Order Entry': '#6B7280',
@@ -944,22 +944,22 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                                     {/* Done button as last grid tile */}
                                     <button
                                         onClick={() => setIsEditMode(false)}
-                                        className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl transition-all active:scale-95"
+                                        className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl transition-all active:scale-95 shadow-sm"
                                         style={{
                                             minHeight: 104,
-                                            backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)',
-                                            border: `2px dashed ${isDark ? 'rgba(255,255,255,0.15)' : 'rgba(53,53,53,0.15)'}`,
+                                            backgroundColor: colors.accent,
+                                            color: isDark ? '#000' : '#fff',
                                         }}
                                     >
-                                        <Check className="w-5 h-5" style={{ color: colors.accent }} />
-                                        <span className="text-[11px] font-semibold tracking-tight" style={{ color: colors.accent }}>Done</span>
+                                        <Check className="w-5 h-5" style={{ color: isDark ? '#000' : '#fff' }} />
+                                        <span className="text-xs font-bold tracking-tight" style={{ color: isDark ? '#000' : '#fff' }}>Done</span>
                                     </button>
                                 </div>
                             </SortableContext>
 
                             {/* Add / Remove zone */}
-                            <div className="space-y-1.5 pt-2">
-                                <div className="text-[11px] font-semibold uppercase tracking-widest px-0.5" style={{ color: colors.textSecondary, opacity: 0.45 }}>Available Apps</div>
+                            <div className="space-y-1.5 pt-3">
+                                <div className="text-[11px] font-medium px-0.5" style={{ color: colors.textSecondary, opacity: 0.5 }}>Tap to add apps to your home</div>
                                 <RemoveDropZone isDark={isDark} colors={colors} isActive={!!activeDragId}>
                                     <div className={`grid gap-1.5 ${appGridCols.edit}`}>
                                         {availableApps.map((app) => (
@@ -1035,7 +1035,7 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                                         >
                                             <app.icon className="w-[18px] h-[18px] sm:w-5 sm:h-5" style={{ color: colors.accent }} />
                                         </div>
-                                        <span className="text-[11px] sm:text-xs font-semibold tracking-tight text-center leading-tight line-clamp-2 px-0.5" style={{ color: colors.textPrimary }}>
+                                        <span className="text-xs sm:text-[13px] font-semibold tracking-tight text-center leading-tight line-clamp-2 px-0.5" style={{ color: colors.textPrimary }}>
                                             {app.name}
                                         </span>
                                         {badge && (
