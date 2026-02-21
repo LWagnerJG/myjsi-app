@@ -414,6 +414,23 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
             .slice(0, 6);
     }, [leadTimeFavorites]);
 
+    // Smart title-case: respects acronyms (LLC, INC, MSD, LECC, etc.),
+    // keeps already-mixed-case words, lowercases small words mid-sentence
+    const smartTitleCase = useCallback((str) => {
+        if (!str) return '';
+        // If it's already mixed case (has both upper and lower), return as-is
+        if (str !== str.toUpperCase() && str !== str.toLowerCase()) return str;
+        const ALWAYS_UPPER = new Set(['LLC', 'INC', 'LP', 'LLP', 'PC', 'PA', 'NA', 'DBA', 'MSD', 'LECC', 'II', 'III', 'IV']);
+        const SMALL_WORDS = new Set(['of', 'the', 'and', 'in', 'at', 'to', 'for', 'a', 'an', 'on', 'by', 'or']);
+        return str.split(' ').map((word, i) => {
+            const clean = word.replace(/[^A-Za-z]/g, '');
+            if (ALWAYS_UPPER.has(clean.toUpperCase())) return word.toUpperCase();
+            if (i > 0 && SMALL_WORDS.has(clean.toLowerCase()) && word.length <= 3) return word.toLowerCase();
+            // Title-case: first letter up, rest lower
+            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+        }).join(' ');
+    }, []);
+
     const recentOrders = useMemo(() => {
         return [...ORDER_DATA].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
     }, []);
@@ -639,7 +656,7 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
         }
 
         return (
-            <div className="divide-y" style={{ borderColor: isDark ? 'rgba(255,255,255,0.015)' : 'rgba(0,0,0,0.015)' }}>
+            <div className="divide-y" style={{ borderColor: isDark ? 'rgba(255,255,255,0.01)' : 'rgba(0,0,0,0.01)' }}>
                 {recentOrders.map((order) => {
                     const statusColor = {
                         'Order Entry': '#6B7280',
@@ -660,8 +677,8 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                         </div>
                         {/* Project + Dealer */}
                         <div className="text-left min-w-0 flex-1">
-                            <div className="text-sm font-semibold truncate" style={{ color: colors.textPrimary }}>{order.details}</div>
-                            <div className="text-[11px] truncate" style={{ color: colors.textSecondary }}>{order.company}</div>
+                            <div className="text-sm font-semibold truncate" style={{ color: colors.textPrimary }}>{smartTitleCase(order.details)}</div>
+                            <div className="text-[11px] truncate" style={{ color: colors.textSecondary }}>{smartTitleCase(order.company)}</div>
                         </div>
                         {/* Amount + Status */}
                         <div className="text-right flex-shrink-0">
@@ -673,7 +690,7 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                 })}
             </div>
         );
-    }, [colors, leadTimeFavoritesData, communityPosts, onNavigate, recentOrders, hoverBg]);
+    }, [colors, leadTimeFavoritesData, communityPosts, onNavigate, recentOrders, hoverBg, smartTitleCase]);
 
     return (
         <div className="flex flex-col h-full overflow-hidden scrollbar-hide app-header-offset" style={{ backgroundColor: colors.background, position: 'relative', overflowX: 'hidden', '--section-gap': 'clamp(12px, 2.2vh, 28px)' }}>
@@ -1105,8 +1122,8 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                             ) : (
                                 <button
                                     onClick={() => navigateFeature(homeFeatureMode)}
-                                    className="text-[10px] font-medium uppercase tracking-wide flex items-center gap-0.5 transition-opacity hover:opacity-60"
-                                    style={{ color: colors.textSecondary, opacity: 0.4 }}
+                                    className="text-[9.5px] font-medium flex items-center gap-0.5 transition-opacity hover:opacity-60"
+                                    style={{ color: colors.textSecondary, opacity: 0.35 }}
                                 >
                                     Open
                                     <ChevronRight className="w-3 h-3" />
@@ -1166,8 +1183,8 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                             ) : (
                                 <button
                                     onClick={() => navigateFeature(secondaryFeatureMode)}
-                                    className="text-[10px] font-medium uppercase tracking-wide flex items-center gap-0.5 transition-opacity hover:opacity-60"
-                                    style={{ color: colors.textSecondary, opacity: 0.4 }}
+                                    className="text-[9.5px] font-medium flex items-center gap-0.5 transition-opacity hover:opacity-60"
+                                    style={{ color: colors.textSecondary, opacity: 0.35 }}
                                 >
                                     Open
                                     <ChevronRight className="w-3 h-3" />
@@ -1206,8 +1223,8 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                             borderRadius: 9999,
                         }}
                     >
-                        <span className="text-[11.5px] font-medium" style={{ color: colors.textPrimary, opacity: 0.4 }}>Help us improve MyJSI</span>
-                        <span className="flex items-center gap-1 text-[11px] font-semibold" style={{ color: colors.textPrimary, opacity: 0.4 }}>
+                        <span className="text-[9.5px] font-medium" style={{ color: colors.textSecondary, opacity: 0.35 }}>Help us improve MyJSI</span>
+                        <span className="flex items-center gap-0.5 text-[9.5px] font-medium" style={{ color: colors.textSecondary, opacity: 0.35 }}>
                             Share Feedback <ChevronRight className="w-3 h-3" />
                         </span>
                     </button>
