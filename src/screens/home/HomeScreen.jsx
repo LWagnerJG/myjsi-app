@@ -639,7 +639,7 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
         }
 
         return (
-            <div className="divide-y" style={{ borderColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)' }}>
+            <div className="divide-y" style={{ borderColor: isDark ? 'rgba(255,255,255,0.015)' : 'rgba(0,0,0,0.015)' }}>
                 {recentOrders.map((order) => {
                     const statusColor = {
                         'Order Entry': '#6B7280',
@@ -1199,7 +1199,7 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                 {!isEditMode && (
                     <button
                         onClick={() => onNavigate('feedback')}
-                        className="flex-shrink-0 flex items-center justify-between px-5 h-12 w-full rounded-full transition-all active:scale-[0.99] mb-1"
+                        className="flex-shrink-0 flex items-center justify-between px-5 h-12 w-full rounded-full transition-all active:scale-[0.99] mb-2"
                         style={{
                             backgroundColor: colors.tileSurface,
                             border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
