@@ -188,14 +188,14 @@ export const SalesScreen = ({ theme, onNavigate }) => {
 
   return (
     <div className="flex flex-col h-full overflow-y-auto scrollbar-hide app-header-offset" style={{ backgroundColor: colors.background, scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-      <div className="px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-5 lg:space-y-6 max-w-5xl mx-auto w-full pb-6">
+      <div className="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-5 pb-4 space-y-4 lg:space-y-5 max-w-5xl mx-auto w-full">
 
         {/* ── Hero KPI + sidebar ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1.65fr_1fr] xl:grid-cols-[1.8fr_1fr] gap-5 lg:gap-6 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.65fr_1fr] xl:grid-cols-[1.8fr_1fr] gap-4 lg:gap-5 items-stretch">
 
           {/* Main KPI card */}
-          <GlassCard theme={theme} className="p-6 sm:p-7" variant="elevated">
-            <div className="space-y-5">
+          <GlassCard theme={theme} className="p-5 sm:p-6" variant="elevated">
+            <div className="space-y-4">
               {/* Header */}
               <div className="flex items-start justify-between gap-3">
                 <div className="space-y-1 min-w-0">
@@ -267,9 +267,9 @@ export const SalesScreen = ({ theme, onNavigate }) => {
           {/* Sidebar cards */}
           <div className="grid grid-cols-1 gap-4">
             {/* Leaderboard */}
-            <GlassCard theme={theme} className="p-5 space-y-3" variant="elevated">
+            <GlassCard theme={theme} className="p-4 space-y-2.5" variant="elevated">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm font-semibold">
+                <div className="flex items-center gap-2 text-[13px] font-semibold">
                   <TrendingUp className="w-3.5 h-3.5 opacity-50" /> Leaderboard
                 </div>
                 <button onClick={() => onNavigate('customer-rank')}
@@ -300,9 +300,9 @@ export const SalesScreen = ({ theme, onNavigate }) => {
             </GlassCard>
 
             {/* Dealer Rewards */}
-            <GlassCard theme={theme} className="p-5 space-y-3" variant="elevated">
+            <GlassCard theme={theme} className="p-4 space-y-2.5" variant="elevated">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm font-semibold">
+                <div className="flex items-center gap-2 text-[13px] font-semibold">
                   <Trophy className="w-3.5 h-3.5 opacity-50" /> Dealer Rewards
                 </div>
                 <button onClick={() => onNavigate('incentive-rewards')}
@@ -343,11 +343,11 @@ export const SalesScreen = ({ theme, onNavigate }) => {
         </div>
 
         {/* ── Data sections ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-5 lg:gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-4 lg:gap-5">
           {/* Recent Activity */}
-          <GlassCard theme={theme} className="p-5 sm:p-6 space-y-3" variant="elevated">
+          <GlassCard theme={theme} className="p-4 sm:p-5 space-y-2" variant="elevated">
             <div className="flex justify-between items-center">
-              <h3 className="text-[15px] font-bold">Recent Activity</h3>
+              <h3 className="text-[14px] font-bold">Recent Activity</h3>
               <button onClick={() => onNavigate('orders')}
                 className="text-[10px] font-bold uppercase tracking-widest opacity-35 hover:opacity-80 flex items-center gap-0.5 transition-opacity">
                 All Orders <ChevronRight className="w-3 h-3" />
@@ -386,9 +386,9 @@ export const SalesScreen = ({ theme, onNavigate }) => {
           </GlassCard>
 
           {/* Invoiced by Vertical */}
-          <GlassCard theme={theme} className="p-5 sm:p-6 space-y-3" variant="elevated">
+          <GlassCard theme={theme} className="p-4 sm:p-5 space-y-2" variant="elevated">
             <div className="flex justify-between items-center">
-              <h3 className="text-[15px] font-bold">Invoiced by Vertical</h3>
+              <h3 className="text-[14px] font-bold">Invoiced by Vertical</h3>
               <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
                 style={{ backgroundColor: subtle(isDark, 1.5), color: colors.textSecondary }}>YTD</span>
             </div>
@@ -397,10 +397,10 @@ export const SalesScreen = ({ theme, onNavigate }) => {
         </div>
 
         {/* ── Monthly Trend (desktop) ── */}
-        <GlassCard theme={theme} className="p-5 sm:p-6 space-y-4 hidden sm:block" variant="elevated">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <h3 className="text-[15px] font-bold">Monthly Trend</h3>
+        <GlassCard theme={theme} className="p-4 sm:p-5 space-y-3" variant="elevated">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2.5">
+              <h3 className="text-[14px] font-bold">Monthly Trend</h3>
               <InlineToggle options={toggleOpts} value={chartDataType} onChange={setChartDataType} colors={colors} />
             </div>
             <button onClick={() => setMonthlyView(v => v === 'chart' ? 'table' : 'chart')}
@@ -415,7 +415,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
           <AnimatePresence mode="wait">
             {monthlyView === 'chart' ? (
               <motion.div key="chart" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}
-                className="min-h-[200px] flex items-end gap-2.5 overflow-hidden px-1 pb-1">
+                className="min-h-[140px] sm:min-h-[180px] flex items-end gap-1.5 sm:gap-2.5 overflow-hidden px-1 pb-1">
                 {MONTHLY_SALES_DATA.map((m, i) => {
                   const val = chartDataType === 'bookings' ? m.bookings : m.sales;
                   const pct = (val / chartMax) * 100;
@@ -423,7 +423,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                   return (
                     <div key={m.month} className="flex-1 flex flex-col items-center gap-2 cursor-default"
                       onMouseEnter={() => setHoveredBar(`chart-${i}`)} onMouseLeave={() => setHoveredBar(null)}>
-                      <div className="w-full h-40 relative flex items-end justify-center">
+                      <div className="w-full h-28 sm:h-36 relative flex items-end justify-center">
                         <div className="w-full rounded-lg"
                           style={{
                             height: ready ? `${Math.max(4, pct)}%` : '0%',
@@ -467,36 +467,36 @@ export const SalesScreen = ({ theme, onNavigate }) => {
         {/* ── Commissions Preview ── */}
         {commissionsSnapshot && (
           <button onClick={() => onNavigate('commissions')} className="w-full text-left group">
-            <GlassCard theme={theme} className="p-5 sm:p-6" variant="elevated">
+            <GlassCard theme={theme} className="p-4 sm:p-5" variant="elevated">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: subtle(isDark, 1.5) }}>
-                    <DollarSign className="w-4 h-4 opacity-50" />
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: subtle(isDark, 1.5) }}>
+                    <DollarSign className="w-3.5 h-3.5 opacity-50" />
                   </div>
                   <div>
-                    <h3 className="text-[15px] font-bold leading-tight">Commissions</h3>
-                    <p className="text-[10px] font-medium opacity-35">{commissionsSnapshot.year} · {commissionsSnapshot.quartersReported} quarter{commissionsSnapshot.quartersReported !== 1 ? 's' : ''}</p>
+                    <h3 className="text-[14px] font-bold leading-tight">Commissions</h3>
+                    <p className="text-[9px] font-medium opacity-30">{commissionsSnapshot.year} · {commissionsSnapshot.quartersReported} quarter{commissionsSnapshot.quartersReported !== 1 ? 's' : ''}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-lg sm:text-xl font-black tabular-nums">{formatCurrency(commissionsSnapshot.ytdTotal)}</span>
-                  <ChevronRight className="w-4 h-4 opacity-25 group-hover:opacity-60 transition-opacity" />
+                  <span className="text-base sm:text-lg font-black tabular-nums">{formatCurrency(commissionsSnapshot.ytdTotal)}</span>
+                  <ChevronRight className="w-3.5 h-3.5 opacity-25 group-hover:opacity-60 transition-opacity" />
                 </div>
               </div>
 
               {commissionsSnapshot.topEarners.length > 0 && (
-                <div className="flex gap-1.5 mt-3 overflow-hidden">
+                <div className="flex gap-1.5 mt-2.5 overflow-hidden">
                   {commissionsSnapshot.topEarners.map(([name, amount]) => (
-                    <div key={name} className="flex-1 min-w-0 py-1.5 px-2.5 rounded-xl" style={{ backgroundColor: subtle(isDark) }}>
-                      <div className="text-[9px] font-medium opacity-35 truncate mb-0.5">{name}</div>
-                      <div className="text-[11px] font-bold tabular-nums">{formatCurrency(amount)}</div>
+                    <div key={name} className="flex-1 min-w-0 py-1.5 px-2 rounded-lg" style={{ backgroundColor: subtle(isDark) }}>
+                      <div className="text-[8px] font-medium opacity-30 truncate mb-0.5">{name}</div>
+                      <div className="text-[10px] font-bold tabular-nums">{formatCurrency(amount)}</div>
                     </div>
                   ))}
                 </div>
               )}
 
-              <div className="text-[10px] font-bold uppercase tracking-widest opacity-25 group-hover:opacity-50 flex items-center gap-1 mt-3 transition-opacity">
-                View all commissions <ChevronRight className="w-3 h-3" />
+              <div className="text-[9px] font-bold uppercase tracking-widest opacity-20 group-hover:opacity-50 flex items-center gap-1 mt-2 transition-opacity">
+                View all commissions <ChevronRight className="w-2.5 h-2.5" />
               </div>
             </GlassCard>
           </button>
