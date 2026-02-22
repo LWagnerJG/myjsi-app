@@ -34,7 +34,7 @@ export const getAppBadge = (route, recentOrders, posts, leadTimeFavoritesData, s
 
 // Home screen configuration constants
 export const MIN_PINNED_APPS = 3;
-export const MAX_PINNED_APPS = 12;
+export const MAX_PINNED_APPS = 9;
 export const NON_REMOVABLE_APPS = new Set(['resources']);
 export const EXCLUDED_ROUTES = new Set(['settings', 'feedback', 'help', 'contracts', 'members', 'resources/dealer_registration']);
 

@@ -693,7 +693,7 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
     }, [colors, leadTimeFavoritesData, communityPosts, onNavigate, recentOrders, hoverBg, smartTitleCase]);
 
     return (
-        <div className="flex flex-col h-full overflow-hidden scrollbar-hide app-header-offset" style={{ backgroundColor: colors.background, position: 'relative', overflowX: 'hidden', '--section-gap': 'clamp(12px, 2.2vh, 28px)' }}>
+        <div className={`flex flex-col h-full scrollbar-hide app-header-offset ${isEditMode ? 'overflow-y-auto' : 'overflow-hidden'}`} style={{ backgroundColor: colors.background, position: 'relative', overflowX: 'hidden', '--section-gap': 'clamp(12px, 2.2vh, 28px)' }}>
 
             {/* ── Indie Sconce – only visible in dark mode, portalled to body ── */}
             {isDarkMode && ReactDOM.createPortal(

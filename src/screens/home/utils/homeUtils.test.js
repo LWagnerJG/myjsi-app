@@ -152,8 +152,8 @@ describe('homeUtils', () => {
             expect(MIN_PINNED_APPS).toBe(3);
         });
 
-        it('MAX_PINNED_APPS is 12', () => {
-            expect(MAX_PINNED_APPS).toBe(12);
+        it('MAX_PINNED_APPS is 9', () => {
+            expect(MAX_PINNED_APPS).toBe(9);
         });
 
         it('resources is non-removable', () => {
