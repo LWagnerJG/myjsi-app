@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { LibraryGrid } from '../library/LibraryGrid.jsx';
 import { PollCard } from '../community/CommunityScreen.jsx';
@@ -50,7 +50,7 @@ const SUBREDDITS = [
 // ─── Avatar helper ─────────────────────────────────────────────────────────────
 const MiniAvatar = ({ src, name, dark, size = 28 }) => (
   <div
-    className="rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden text-[10px] font-bold"
+    className="rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden text-[11px] font-bold"
     style={{ width: size, height: size, backgroundColor: dark ? '#444' : '#E3E0D8' }}
   >
     {src
@@ -182,7 +182,7 @@ const PostDetailSheet = ({ post, theme, dark, isLiked, isUpvoted, onToggleLike, 
             <MiniAvatar src={post.user?.avatar} name={post.user?.name} dark={dark} />
             <div>
               <p className="text-[13px] font-semibold" style={{ color: theme.colors.textPrimary }}>{post.user?.name}</p>
-              <p className="text-[10px]" title={formatExact(post.createdAt)} style={{ color: theme.colors.textSecondary }}>{formatTs(post.createdAt)}</p>
+              <p className="text-[11px]" title={formatExact(post.createdAt)} style={{ color: theme.colors.textSecondary }}>{formatTs(post.createdAt)}</p>
             </div>
           </div>
           <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }}>
@@ -219,19 +219,19 @@ const PostDetailSheet = ({ post, theme, dark, isLiked, isUpvoted, onToggleLike, 
           <div className="flex items-center gap-1 py-2 border-t" style={{ borderColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }}>
             <button
               onClick={() => { hapticMedium(); onUpvote?.(post.id); }}
-              className="flex items-center gap-1.5 text-[12px] font-semibold px-3 py-1.5 rounded-full transition-all active:scale-95"
+              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full transition-all active:scale-95"
               style={{ color: isUpvoted ? '#f97316' : theme.colors.textSecondary, backgroundColor: isUpvoted ? (dark ? 'rgba(249,115,22,0.12)' : 'rgba(249,115,22,0.08)') : 'transparent' }}
             >
               <ChevronUp className="w-4 h-4" /> {post.upvotes || 0}
             </button>
             <button
               onClick={() => { hapticMedium(); onToggleLike?.(post.id); }}
-              className="flex items-center gap-1.5 text-[12px] font-medium px-3 py-1.5 rounded-full transition-all active:scale-95"
+              className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full transition-all active:scale-95"
               style={{ color: isLiked ? theme.colors.accent : theme.colors.textSecondary, backgroundColor: isLiked ? (dark ? 'rgba(255,255,255,0.08)' : `${theme.colors.accent}10`) : 'transparent' }}
             >
               <Heart className="w-4 h-4" style={isLiked ? { fill: theme.colors.accent } : undefined} /> {post.likes || 0}
             </button>
-            <span className="text-[11px] ml-auto" style={{ color: theme.colors.textSecondary }}>
+            <span className="text-xs ml-auto" style={{ color: theme.colors.textSecondary }}>
               {localComments.length} comment{localComments.length !== 1 ? 's' : ''}
             </span>
           </div>
@@ -240,17 +240,17 @@ const PostDetailSheet = ({ post, theme, dark, isLiked, isUpvoted, onToggleLike, 
           <div className="space-y-2 pb-2">
             {localComments.map(c => (
               <div key={c.id} className="flex items-start gap-2">
-                <div className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0" style={{ backgroundColor: dark ? '#333' : '#EDEAE4', color: theme.colors.textSecondary }}>
+                <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0" style={{ backgroundColor: dark ? '#333' : '#EDEAE4', color: theme.colors.textSecondary }}>
                   {c.name?.[0] || '?'}
                 </div>
                 <div className="flex-1 rounded-xl px-2.5 py-1.5" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }}>
-                  <p className="text-[11px] font-semibold" style={{ color: theme.colors.textPrimary }}>{c.name}</p>
-                  <p className="text-[11px] mt-0.5" style={{ color: theme.colors.textSecondary }}>{c.text}</p>
+                  <p className="text-xs font-semibold" style={{ color: theme.colors.textPrimary }}>{c.name}</p>
+                  <p className="text-xs mt-0.5" style={{ color: theme.colors.textSecondary }}>{c.text}</p>
                 </div>
               </div>
             ))}
             {!localComments.length && (
-              <p className="text-[12px] text-center py-4" style={{ color: theme.colors.textSecondary }}>No comments yet \u2014 be the first.</p>
+              <p className="text-xs text-center py-4" style={{ color: theme.colors.textSecondary }}>No comments yet \u2014 be the first.</p>
             )}
           </div>
         </div>
@@ -283,7 +283,7 @@ const PostDetailSheet = ({ post, theme, dark, isLiked, isUpvoted, onToggleLike, 
 const FeedDivider = ({ label, dark, theme, first }) => (
   <div className={`flex items-center gap-2.5 ${first ? 'mt-3 mb-4' : 'mt-6 mb-4'}`}>
     <div className="flex-1 h-px" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }} />
-    <span className="text-[9px] font-bold uppercase tracking-[0.12em]" style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>{label}</span>
+    <span className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>{label}</span>
     <div className="flex-1 h-px" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }} />
   </div>
 );
@@ -386,18 +386,18 @@ const SubredditPostCard = ({ post, idx, isTop, dark, theme, isLiked, isUpvoted, 
       <div className="p-3.5 pb-2">
         <div className="flex items-center gap-2 mb-1.5">
           {isTop && typeof idx === 'number' && (
-            <span className="text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0"
+            <span className="text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0"
               style={{ backgroundColor: dark ? 'rgba(249,115,22,0.18)' : 'rgba(249,115,22,0.10)', color: '#f97316' }}>
               {idx + 1}
             </span>
           )}
           <MiniAvatar src={post.user?.avatar} name={post.user?.name} dark={dark} />
-          <span className="text-[12px] font-semibold" style={{ color: theme.colors.textPrimary }}>{post.user?.name}</span>
-          <span className="text-[10px] ml-auto cursor-default" title={formatExact(post.createdAt)} style={{ color: theme.colors.textSecondary }}>{formatTs(post.createdAt)}</span>
+          <span className="text-xs font-semibold" style={{ color: theme.colors.textPrimary }}>{post.user?.name}</span>
+          <span className="text-[11px] ml-auto cursor-default" title={formatExact(post.createdAt)} style={{ color: theme.colors.textSecondary }}>{formatTs(post.createdAt)}</span>
         </div>
         <button onClick={() => setShowDetail(true)} className="text-left w-full">
           {post.title && <p className="text-[13px] font-bold mb-1" style={{ color: theme.colors.textPrimary }}>{post.title}</p>}
-          <p className="text-[12px] leading-relaxed line-clamp-3" style={{ color: theme.colors.textSecondary }}>{post.text}</p>
+          <p className="text-xs leading-relaxed line-clamp-3" style={{ color: theme.colors.textSecondary }}>{post.text}</p>
         </button>
         {post.image && (
           <button onClick={() => setLightboxSrc(post.image)} className="block w-full relative group rounded-xl overflow-hidden mt-2">
@@ -411,15 +411,15 @@ const SubredditPostCard = ({ post, idx, isTop, dark, theme, isLiked, isUpvoted, 
 
       {/* Action bar */}
       <div className="px-3 py-2 flex items-center gap-2 border-t" style={{ borderColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}>
-        <button onClick={() => onUpvote?.(post.id)} className="flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-full transition-all" style={{ color: isUpvoted ? '#f97316' : theme.colors.textSecondary, backgroundColor: isUpvoted ? (dark ? 'rgba(249,115,22,0.12)' : 'rgba(249,115,22,0.08)') : 'transparent' }}>
+        <button onClick={() => onUpvote?.(post.id)} className="flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full transition-all" style={{ color: isUpvoted ? '#f97316' : theme.colors.textSecondary, backgroundColor: isUpvoted ? (dark ? 'rgba(249,115,22,0.12)' : 'rgba(249,115,22,0.08)') : 'transparent' }}>
           <ChevronUp className="w-3 h-3" /> {post.upvotes || 0}
         </button>
-        <button onClick={() => onToggleLike?.(post.id)} className="flex items-center gap-1 text-[11px] font-medium px-2 py-1 rounded-full transition-all" style={{ color: isLiked ? theme.colors.accent : theme.colors.textSecondary, backgroundColor: isLiked ? (dark ? 'rgba(255,255,255,0.08)' : `${theme.colors.accent}10`) : 'transparent' }}>
+        <button onClick={() => onToggleLike?.(post.id)} className="flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full transition-all" style={{ color: isLiked ? theme.colors.accent : theme.colors.textSecondary, backgroundColor: isLiked ? (dark ? 'rgba(255,255,255,0.08)' : `${theme.colors.accent}10`) : 'transparent' }}>
           <Heart className="w-3 h-3" style={isLiked ? { fill: theme.colors.accent } : undefined} /> {post.likes || 0}
         </button>
         <button
           onClick={() => setShowComments(v => !v)}
-          className="flex items-center gap-1 text-[11px] ml-auto px-2 py-1 rounded-full transition-all"
+          className="flex items-center gap-1 text-xs ml-auto px-2 py-1 rounded-full transition-all"
           style={{ color: showComments ? theme.colors.accent : theme.colors.textSecondary, backgroundColor: showComments ? (dark ? 'rgba(255,255,255,0.06)' : `${theme.colors.accent}08`) : 'transparent' }}
         >
           <MessageSquare className="w-3 h-3" /> {commentCount}
@@ -433,25 +433,25 @@ const SubredditPostCard = ({ post, idx, isTop, dark, theme, isLiked, isUpvoted, 
             <div className="space-y-1.5 pt-2.5">
               {localComments.map(c => (
                 <div key={c.id} className="flex items-start gap-2">
-                  <div className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold flex-shrink-0 mt-0.5" style={{ backgroundColor: dark ? '#333' : '#EDEAE4', color: theme.colors.textSecondary }}>
+                  <div className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5" style={{ backgroundColor: dark ? '#333' : '#EDEAE4', color: theme.colors.textSecondary }}>
                     {c.name?.[0] || '?'}
                   </div>
                   <div>
-                    <span className="text-[11px] font-semibold" style={{ color: theme.colors.textPrimary }}>{c.name}</span>
-                    <span className="text-[11px] ml-1.5" style={{ color: theme.colors.textSecondary }}>{c.text}</span>
+                    <span className="text-xs font-semibold" style={{ color: theme.colors.textPrimary }}>{c.name}</span>
+                    <span className="text-xs ml-1.5" style={{ color: theme.colors.textSecondary }}>{c.text}</span>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-[11px] py-2.5 text-center" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>No comments yet</p>
+            <p className="text-xs py-2.5 text-center" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>No comments yet</p>
           )}
           <form onSubmit={submitComment} className="flex items-center gap-2 mt-2">
             <input
               value={draft}
               onChange={e => setDraft(e.target.value)}
               placeholder="Reply\u2026"
-              className="flex-1 text-[12px] h-8 px-3 rounded-full outline-none"
+              className="flex-1 text-xs h-8 px-3 rounded-full outline-none"
               style={{ backgroundColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)', color: theme.colors.textPrimary }}
             />
             <button disabled={!draft.trim()} className="h-7 w-7 rounded-full flex items-center justify-center disabled:opacity-25 transition-opacity flex-shrink-0" style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}>
@@ -489,7 +489,7 @@ const ChannelChips = ({ theme, dark, onSelect }) => (
       <button
         key={sub.id}
         onClick={() => onSelect(sub)}
-        className="text-[11px] font-medium px-2.5 py-1 rounded-full flex-shrink-0 whitespace-nowrap transition-all active:scale-95"
+        className="text-xs font-medium px-2.5 py-1 rounded-full flex-shrink-0 whitespace-nowrap transition-all active:scale-95"
         style={{
           color: theme.colors.textSecondary,
           backgroundColor: dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
@@ -600,19 +600,19 @@ const PostMiniCard = ({ post, theme, dark, isLiked, isUpvoted, onToggleLike, onU
       >
         <div className="flex items-center gap-2 mb-1.5">
           <MiniAvatar src={post.user?.avatar} name={post.user?.name} dark={dark} size={24} />
-          <span className="text-[12px] font-semibold" style={{ color: theme.colors.textPrimary }}>{post.user?.name}</span>
-          <span className="text-[10px] ml-auto" title={formatExact(post.createdAt)} style={{ color: theme.colors.textSecondary }}>{formatTs(post.createdAt)}</span>
+          <span className="text-xs font-semibold" style={{ color: theme.colors.textPrimary }}>{post.user?.name}</span>
+          <span className="text-[11px] ml-auto" title={formatExact(post.createdAt)} style={{ color: theme.colors.textSecondary }}>{formatTs(post.createdAt)}</span>
         </div>
-        {post.title && <p className="text-[12px] font-semibold mb-0.5" style={{ color: theme.colors.textPrimary }}>{post.title}</p>}
-        <p className="text-[12px] line-clamp-2 leading-relaxed" style={{ color: theme.colors.textSecondary }}>{post.text}</p>
+        {post.title && <p className="text-xs font-semibold mb-0.5" style={{ color: theme.colors.textPrimary }}>{post.title}</p>}
+        <p className="text-xs line-clamp-2 leading-relaxed" style={{ color: theme.colors.textSecondary }}>{post.text}</p>
         <div className="flex items-center gap-3 mt-2">
-          <span className="flex items-center gap-1 text-[10px]" style={{ color: isUpvoted ? '#f97316' : theme.colors.textSecondary }}>
+          <span className="flex items-center gap-1 text-[11px]" style={{ color: isUpvoted ? '#f97316' : theme.colors.textSecondary }}>
             <ChevronUp className="w-3 h-3" /> {post.upvotes || 0}
           </span>
-          <span className="flex items-center gap-1 text-[10px]" style={{ color: isLiked ? theme.colors.accent : theme.colors.textSecondary }}>
+          <span className="flex items-center gap-1 text-[11px]" style={{ color: isLiked ? theme.colors.accent : theme.colors.textSecondary }}>
             <Heart className="w-3 h-3" style={isLiked ? { fill: theme.colors.accent } : undefined} /> {post.likes || 0}
           </span>
-          <span className="flex items-center gap-1 text-[10px] ml-auto" style={{ color: theme.colors.textSecondary }}>
+          <span className="flex items-center gap-1 text-[11px] ml-auto" style={{ color: theme.colors.textSecondary }}>
             <MessageSquare className="w-3 h-3" /> {(post.comments || []).length}
           </span>
         </div>
@@ -653,9 +653,9 @@ const MyBoardView = ({ theme, dark, savedImageIds, onToggleSaveImage, posts, lik
   const SectionHeader = ({ label, count, icon: Icon }) => (
     <div className="flex items-center gap-2 mb-3">
       <Icon className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
-      <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: theme.colors.textSecondary }}>{label}</span>
+      <span className="text-xs font-bold uppercase tracking-widest" style={{ color: theme.colors.textSecondary }}>{label}</span>
       {count > 0 && (
-        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)', color: theme.colors.textSecondary }}>{count}</span>
+        <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded-full" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)', color: theme.colors.textSecondary }}>{count}</span>
       )}
     </div>
   );
@@ -664,8 +664,8 @@ const MyBoardView = ({ theme, dark, savedImageIds, onToggleSaveImage, posts, lik
     return (
       <div className="flex flex-col items-center py-20 gap-3 px-8 text-center">
         <Bookmark className="w-10 h-10" style={{ color: theme.colors.textSecondary, opacity: 0.25 }} />
-        <p className="text-[14px] font-semibold" style={{ color: theme.colors.textPrimary }}>Your board is empty</p>
-        <p className="text-[12px] leading-relaxed" style={{ color: theme.colors.textSecondary }}>
+        <p className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>Your board is empty</p>
+        <p className="text-xs leading-relaxed" style={{ color: theme.colors.textSecondary }}>
           Save library images with \u2665, upvote or like posts, or leave a comment \u2014 everything you interact with collects here.
         </p>
       </div>
@@ -706,7 +706,7 @@ const MyBoardView = ({ theme, dark, savedImageIds, onToggleSaveImage, posts, lik
           </div>
         </section>
       )}
-      <p className="text-[10px] text-center" style={{ color: theme.colors.textSecondary, opacity: 0.35 }}>
+      <p className="text-[11px] text-center" style={{ color: theme.colors.textSecondary, opacity: 0.35 }}>
         Your private activity log \u2014 only visible to you.
       </p>
     </div>
@@ -825,7 +825,7 @@ export const CommunityLibraryLayout = ({
               <span className="text-[15px] font-bold whitespace-nowrap" style={{ color: theme.colors.textPrimary }}>
                 {activeSubreddit?.name}
               </span>
-              <span className="text-[10px] font-medium whitespace-nowrap" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>
+              <span className="text-[11px] font-medium whitespace-nowrap" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>
                 {activeSubreddit?.members}
               </span>
             </div>
@@ -866,7 +866,7 @@ export const CommunityLibraryLayout = ({
                   theme={theme}
                 />
               </div>
-              <button onClick={openCreateContentModal} className="h-12 px-5 rounded-full text-[12px] font-semibold transition-all active:scale-95 flex-shrink-0" style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}>
+              <button onClick={openCreateContentModal} className="h-12 px-5 rounded-full text-xs font-semibold transition-all active:scale-95 flex-shrink-0" style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}>
                 + Post
               </button>
             </div>

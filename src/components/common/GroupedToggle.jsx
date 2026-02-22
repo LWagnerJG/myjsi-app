@@ -39,7 +39,7 @@ export const SegmentedToggle = ({
       py: 'py-1.5', 
       gap: 'gap-1.5',
       iconSize: 'w-3.5 h-3.5',
-      badgeSize: 'w-4 h-4 text-[10px]'
+      badgeSize: 'w-4 h-4 text-[11px]'
     },
     md: { 
       text: 'text-[15px]', 

@@ -156,7 +156,7 @@ const DiscountBadge = ({ value, theme }) => (
     <div className="w-16 h-16 md:w-18 md:h-18 rounded-full grid place-items-center text-center" style={{ border: `3px solid ${theme.colors.accent}`, color: theme.colors.accent }}>
         <div className="leading-tight">
             <div className="text-xl font-bold tracking-tight">{value}</div>
-            <div className="text-[10px] font-semibold tracking-wider opacity-80">OFF</div>
+            <div className="text-[11px] font-semibold tracking-wider opacity-80">OFF</div>
         </div>
     </div>
 );

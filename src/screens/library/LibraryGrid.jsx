@@ -54,7 +54,7 @@ export const LibraryGrid = ({ theme, query, parentHeaderRef, savedImageIds = [],
                   </button>
                 )}
                 <div className="absolute inset-x-0 bottom-0 p-2 pt-8 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                  <p className="text-[11px] leading-tight text-white line-clamp-2">{a.title || `${a.series||''} ${a.finish||''}`}</p>
+                  <p className="text-xs leading-tight text-white line-clamp-2">{a.title || `${a.series||''} ${a.finish||''}`}</p>
                 </div>
               </button>
             );
@@ -101,17 +101,17 @@ export const LibraryGrid = ({ theme, query, parentHeaderRef, savedImageIds = [],
               {/* Info */}
               <div className="p-5 space-y-4">
                 <div>
-                  <h2 className="text-[17px] font-bold leading-snug" style={{ color: theme.colors.textPrimary }}>{selected.title || selected.series}</h2>
+                  <h2 className="text-lg font-bold leading-snug" style={{ color: theme.colors.textPrimary }}>{selected.title || selected.series}</h2>
                   {(selected.location || selected.finish) && (
-                    <p className="text-[12px] mt-0.5" style={{ color: theme.colors.textSecondary }}>{selected.location || selected.finish}</p>
+                    <p className="text-xs mt-0.5" style={{ color: theme.colors.textSecondary }}>{selected.location || selected.finish}</p>
                   )}
                 </div>
 
                 {/* Tags */}
                 <div className="flex flex-wrap gap-1.5">
-                  {selected.series && <span className="px-3 py-1 rounded-full text-[11px] font-medium" style={{ background: theme.colors.subtle, color: theme.colors.textSecondary }}>{selected.series}</span>}
-                  {selected.finish && <span className="px-3 py-1 rounded-full text-[11px] font-medium" style={{ background: theme.colors.subtle, color: theme.colors.textSecondary }}>{selected.finish}</span>}
-                  {(selected.tags||[]).map(t => <span key={t} className="px-3 py-1 rounded-full text-[11px]" style={{ background: theme.colors.subtle, color: theme.colors.textSecondary }}>{t}</span>)}
+                  {selected.series && <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ background: theme.colors.subtle, color: theme.colors.textSecondary }}>{selected.series}</span>}
+                  {selected.finish && <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ background: theme.colors.subtle, color: theme.colors.textSecondary }}>{selected.finish}</span>}
+                  {(selected.tags||[]).map(t => <span key={t} className="px-3 py-1 rounded-full text-xs" style={{ background: theme.colors.subtle, color: theme.colors.textSecondary }}>{t}</span>)}
                 </div>
 
                 {/* Actions */}

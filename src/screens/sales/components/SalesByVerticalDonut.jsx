@@ -68,7 +68,7 @@ export const SalesByVerticalDonut = ({ data, theme, showHeader=true }) => {
         {/* Legend (static, non-clickable) */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 gap-2 md:w-56 content-start" aria-label="Vertical legend">
           {legend.map(item => (
-            <div key={item.name} className="flex items-center gap-2 px-2 py-1.5 rounded-xl text-[11px] font-medium" style={{ background: theme.colors.subtle, color: theme.colors.textPrimary, border:`1px solid ${theme.colors.border}` }}>
+            <div key={item.name} className="flex items-center gap-2 px-2 py-1.5 rounded-xl text-xs font-medium" style={{ background: theme.colors.subtle, color: theme.colors.textPrimary, border:`1px solid ${theme.colors.border}` }}>
               <span className="w-3.5 h-3.5 rounded-full shrink-0" style={{ background:item.color }} aria-hidden="true" />
               <span className="truncate flex-1" title={item.name}>{item.name}</span>
               <span className="opacity-70 tabular-nums" aria-label={`${item.pct.toFixed(1)} percent`}>{item.pct.toFixed(1)}%</span>

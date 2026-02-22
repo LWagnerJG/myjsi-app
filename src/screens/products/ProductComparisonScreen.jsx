@@ -62,7 +62,7 @@ const ProductTabs = React.memo(({ products, activeProduct, onProductSelect, them
                 />
               </div>
               <span
-                className="mt-1.5 text-[11px] font-semibold tracking-tight text-center leading-tight line-clamp-1 w-full px-1 transition-colors"
+                className="mt-1.5 text-xs font-semibold tracking-tight text-center leading-tight line-clamp-1 w-full px-1 transition-colors"
                 style={{ color: active ? theme.colors.textPrimary : theme.colors.textSecondary }}
               >
                 {p.name}
@@ -158,7 +158,7 @@ const ProductHero = React.memo(({ product, theme, categoryId, onNavigate, catego
           <AnimatePresence mode="wait">
             <motion.p
               key={product.price}
-              className="mt-0.5 text-[17px] font-semibold text-white/90 drop-shadow-sm"
+              className="mt-0.5 text-lg font-semibold text-white/90 drop-shadow-sm"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -222,7 +222,7 @@ const GlassSegmentedToggle = React.memo(({ options, value, onChange, theme }) =>
           <button
             key={label}
             onClick={() => onChange(val)}
-            className="relative z-10 flex-1 rounded-full flex items-center justify-center whitespace-nowrap text-[12px] font-semibold transition-colors duration-200"
+            className="relative z-10 flex-1 rounded-full flex items-center justify-center whitespace-nowrap text-xs font-semibold transition-colors duration-200"
             style={{ color: active ? theme.colors.textPrimary : theme.colors.textSecondary }}
           >
             {label}
@@ -245,7 +245,7 @@ const ConfigPills = React.memo(({ pills, activeValue, onSelect, theme }) => {
           <button
             key={pill}
             onClick={() => onSelect(pill)}
-            className="flex-shrink-0 px-4 py-2 rounded-full text-[12px] font-semibold transition-all duration-250 active:scale-95 hover:scale-[1.02]"
+            className="flex-shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all duration-250 active:scale-95 hover:scale-[1.02]"
             style={{
               backgroundColor: active
                 ? theme.colors.accent
@@ -330,10 +330,10 @@ const PricingTable = React.memo(({
 
       {/* Column headers */}
       <div className="px-5 pt-3 pb-1 flex items-center justify-between">
-        <span className="text-[10px] font-bold tracking-[0.12em] uppercase" style={{ color: theme.colors.textSecondary }}>
+        <span className="text-[11px] font-bold tracking-[0.12em] uppercase" style={{ color: theme.colors.textSecondary }}>
           Series
         </span>
-        <span className="text-[10px] font-bold tracking-[0.12em] uppercase" style={{ color: theme.colors.textSecondary }}>
+        <span className="text-[11px] font-bold tracking-[0.12em] uppercase" style={{ color: theme.colors.textSecondary }}>
           List
         </span>
       </div>

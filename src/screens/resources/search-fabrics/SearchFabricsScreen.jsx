@@ -334,7 +334,7 @@ export const SearchFabricsScreen = ({ theme, onNavigate, onUpdateCart }) => {
                     </div>
 
                     {/* Detail chips row */}
-                    <div className="flex flex-wrap gap-2 text-[11px]">
+                    <div className="flex flex-wrap gap-2 text-xs">
                       <span className="px-2.5 py-1 rounded-full" style={{ background: theme.colors.subtle, color: theme.colors.textSecondary }}>
                         Grade {r.grade}
                       </span>

@@ -116,7 +116,7 @@ const Stage = React.memo(({ stage, state, isLast, subtitle, actions, progress, d
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="font-semibold text-[15px] leading-tight" style={{ color: txtClr }}>{stage.label}</span>
-              {now && <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded" style={{ backgroundColor: JSI_COLORS.charcoal, color: '#fff' }}>Current</span>}
+              {now && <span className="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded" style={{ backgroundColor: JSI_COLORS.charcoal, color: '#fff' }}>Current</span>}
             </div>
             {subtitle && !later && <p className="text-[13px] mt-0.5" style={{ color: c.textSecondary }}>{subtitle}</p>}
           </div>
@@ -131,7 +131,7 @@ const Stage = React.memo(({ stage, state, isLast, subtitle, actions, progress, d
             <div className="h-[7px] rounded-full overflow-hidden" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.07)' : 'rgba(53,53,53,0.07)' }}>
               <div className="h-full rounded-full" style={{ width: `${progress}%`, backgroundColor: JSI_COLORS.charcoal, transition: 'width .8s cubic-bezier(.4,0,.2,1)' }} />
             </div>
-            <p className="text-[11px] font-medium mt-1 text-right" style={{ color: c.textSecondary }}>{progress}%</p>
+            <p className="text-xs font-medium mt-1 text-right" style={{ color: c.textSecondary }}>{progress}%</p>
           </div>
         )}
       </div>
@@ -147,7 +147,7 @@ const LineItem = React.memo(({ item, open, onToggle, c, dark }) => (
   }}>
     <button onClick={onToggle}
       className="w-full text-left px-4 py-3 flex items-center gap-3 select-none focus:outline-none">
-      <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 text-[11px] font-bold"
+      <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-bold"
         style={{
           backgroundColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.05)',
           color: c.textSecondary,
@@ -155,12 +155,12 @@ const LineItem = React.memo(({ item, open, onToggle, c, dark }) => (
         {item.line}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="font-medium text-[14px] leading-tight truncate" style={{ color: c.textPrimary }}>{tc(item.name)}</p>
-        <p className="text-[11px] mt-0.5" style={{ color: c.textSecondary }}>{item.model}</p>
+        <p className="font-medium text-sm leading-tight truncate" style={{ color: c.textPrimary }}>{tc(item.name)}</p>
+        <p className="text-xs mt-0.5" style={{ color: c.textSecondary }}>{item.model}</p>
       </div>
       <div className="text-right flex-shrink-0 mr-1">
-        <p className="font-semibold text-[14px]" style={{ color: c.textPrimary }}>{$(item.extNet, true)}</p>
-        <p className="text-[11px]" style={{ color: c.textSecondary }}>Qty {item.quantity}</p>
+        <p className="font-semibold text-sm" style={{ color: c.textPrimary }}>{$(item.extNet, true)}</p>
+        <p className="text-xs" style={{ color: c.textSecondary }}>Qty {item.quantity}</p>
       </div>
       <ChevronDown className="w-4 h-4 flex-shrink-0 transition-transform" style={{
         color: c.textSecondary, transform: open ? 'rotate(180deg)' : 'none',
@@ -174,7 +174,7 @@ const LineItem = React.memo(({ item, open, onToggle, c, dark }) => (
             <div className="grid grid-cols-3 gap-3">
               {[['Unit Price', $(item.net, true)], ['Extended', $(item.extNet, true)], ['Quantity', item.quantity]].map(([l, v]) => (
                 <div key={l}>
-                  <p className="text-[10px] uppercase tracking-wider font-medium" style={{ color: c.textSecondary }}>{l}</p>
+                  <p className="text-[11px] uppercase tracking-wider font-medium" style={{ color: c.textSecondary }}>{l}</p>
                   <p className="text-[13px] font-semibold mt-0.5" style={{ color: c.textPrimary }}>{v}</p>
                 </div>
               ))}
@@ -184,8 +184,8 @@ const LineItem = React.memo(({ item, open, onToggle, c, dark }) => (
               <div className="rounded-xl py-2.5 px-3" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.03)' : 'rgba(53,53,53,0.025)' }}>
                 {item.specs.map((s, i) => (
                   <div key={i} className="flex items-center justify-between py-1">
-                    <span className="text-[11px] font-medium uppercase tracking-wide" style={{ color: c.textSecondary }}>{s.label}</span>
-                    <span className="text-[12px] font-semibold" style={{ color: c.textPrimary }}>{s.value}</span>
+                    <span className="text-xs font-medium uppercase tracking-wide" style={{ color: c.textSecondary }}>{s.label}</span>
+                    <span className="text-xs font-semibold" style={{ color: c.textPrimary }}>{s.value}</span>
                   </div>
                 ))}
               </div>
@@ -222,7 +222,7 @@ const AckModal = ({ order, onClose, onShare, dark, c }) => (
           <div className="grid grid-cols-2 gap-3">
             {[['PO Number', order.po], ['Order Date', fd(order.date)], ['Ship Date', fd(order.shipDate)], ['Discount', order.discount]].map(([l, v]) => (
               <div key={l}>
-                <p className="text-[10px] uppercase tracking-wider font-medium" style={{ color: c.textSecondary }}>{l}</p>
+                <p className="text-[11px] uppercase tracking-wider font-medium" style={{ color: c.textSecondary }}>{l}</p>
                 <p className="text-sm font-semibold mt-0.5" style={{ color: c.textPrimary }}>{v}</p>
               </div>
             ))}
@@ -230,19 +230,19 @@ const AckModal = ({ order, onClose, onShare, dark, c }) => (
           {/* ship to */}
           {order.shipTo && (
             <div>
-              <p className="text-[10px] uppercase tracking-wider font-medium mb-1" style={{ color: c.textSecondary }}>Ship To</p>
+              <p className="text-[11px] uppercase tracking-wider font-medium mb-1" style={{ color: c.textSecondary }}>Ship To</p>
               <p className="text-[13px] leading-relaxed whitespace-pre-line" style={{ color: c.textPrimary }}>{tc(order.shipTo)}</p>
             </div>
           )}
           {/* items */}
           <div>
-            <p className="text-[10px] uppercase tracking-wider font-medium mb-2" style={{ color: c.textSecondary }}>Items</p>
+            <p className="text-[11px] uppercase tracking-wider font-medium mb-2" style={{ color: c.textSecondary }}>Items</p>
             {order.lineItems.map((li, i) => (
               <div key={li.line} className="flex items-start justify-between gap-3 py-2.5"
                 style={{ borderBottom: i < order.lineItems.length - 1 ? `1px solid ${c.border}` : 'none' }}>
                 <div className="flex-1 min-w-0">
                   <p className="text-[13px] font-medium" style={{ color: c.textPrimary }}>{tc(li.name)}</p>
-                  <p className="text-[11px] mt-0.5" style={{ color: c.textSecondary }}>{li.model} · Qty {li.quantity}</p>
+                  <p className="text-xs mt-0.5" style={{ color: c.textSecondary }}>{li.model} · Qty {li.quantity}</p>
                 </div>
                 <p className="text-[13px] font-semibold whitespace-nowrap" style={{ color: c.textPrimary }}>{$(li.extNet, true)}</p>
               </div>
@@ -283,7 +283,7 @@ const ClipsModal = ({ onClose, dark, c }) => (
         <div className="flex items-center justify-between px-5 py-3.5" style={{ borderBottom: `1px solid ${c.border}` }}>
           <div>
             <h3 className="text-sm font-bold" style={{ color: c.textPrimary }}>Production Clips</h3>
-            <p className="text-[11px] mt-0.5" style={{ color: c.textSecondary }}>Live from the JSI factory floor</p>
+            <p className="text-xs mt-0.5" style={{ color: c.textSecondary }}>Live from the JSI factory floor</p>
           </div>
           <button onClick={onClose} className="p-2 -mr-2 rounded-full transition active:scale-95" style={{ backgroundColor: c.subtle }} aria-label="Close">
             <X className="w-4 h-4" style={{ color: c.textPrimary }} />
@@ -301,7 +301,7 @@ const ClipsModal = ({ onClose, dark, c }) => (
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate" style={{ color: c.textPrimary }}>{clip.title}</p>
-                <p className="text-[11px] mt-0.5" style={{ color: c.textSecondary }}>{clip.duration}</p>
+                <p className="text-xs mt-0.5" style={{ color: c.textSecondary }}>{clip.duration}</p>
               </div>
             </div>
           ))}
@@ -377,7 +377,7 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
               </div>
               <div className="text-right flex-shrink-0 pt-0.5">
                 <p className="text-lg font-bold" style={{ color: c.textPrimary }}>{$(order.net, true)}</p>
-                <p className="text-[11px] font-medium" style={{ color: c.textSecondary }}>Ship {fs(order.shipDate) || '—'}</p>
+                <p className="text-xs font-medium" style={{ color: c.textSecondary }}>Ship {fs(order.shipDate) || '—'}</p>
               </div>
             </div>
           </div>
@@ -405,14 +405,14 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
                   ['Discount', order.discount],
                 ].map(([l, v]) => (
                   <div key={l}>
-                    <p className="text-[11px] uppercase tracking-wide font-medium" style={{ color: c.textSecondary }}>{l}</p>
+                    <p className="text-xs uppercase tracking-wide font-medium" style={{ color: c.textSecondary }}>{l}</p>
                     <p className="text-sm font-semibold mt-0.5" style={{ color: c.textPrimary }}>{v}</p>
                   </div>
                 ))}
               </div>
               {order.shipTo && (
                 <div className="mt-4 pt-3" style={{ borderTop: `1px solid ${c.border}` }}>
-                  <p className="text-[11px] uppercase tracking-wide font-medium mb-1" style={{ color: c.textSecondary }}>Ship To</p>
+                  <p className="text-xs uppercase tracking-wide font-medium mb-1" style={{ color: c.textSecondary }}>Ship To</p>
                   <p className="text-[13px] leading-relaxed whitespace-pre-line" style={{ color: c.textPrimary }}>{tc(order.shipTo)}</p>
                 </div>
               )}

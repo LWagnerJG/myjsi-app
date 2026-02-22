@@ -48,7 +48,7 @@ export const ComColRequest = ({ theme, showAlert }) => {
   }, [form, canSubmit, showAlert]);
 
   const sectionLabel = (txt) => (
-    <div className="text-[11px] font-semibold uppercase tracking-wide px-1" style={{ color: theme.colors.textSecondary }}>{txt}</div>
+    <div className="text-xs font-semibold uppercase tracking-wide px-1" style={{ color: theme.colors.textSecondary }}>{txt}</div>
   );
 
   const inputBase = "w-full rounded-xl px-4 py-3 text-sm outline-none border transition";

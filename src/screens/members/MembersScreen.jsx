@@ -93,7 +93,7 @@ const getAvatarColor = (name) => {
 const Avatar = ({ firstName, lastName, size = 'md' }) => {
     const initials = `${(firstName || '')[0] || ''}${(lastName || '')[0] || ''}`.toUpperCase();
     const bg = getAvatarColor(`${firstName}${lastName}`);
-    const sizes = { sm: 'w-8 h-8 text-[11px]', md: 'w-10 h-10 text-sm', lg: 'w-12 h-12 text-base' };
+    const sizes = { sm: 'w-8 h-8 text-xs', md: 'w-10 h-10 text-sm', lg: 'w-12 h-12 text-base' };
     return (
         <div className={`${sizes[size]} rounded-full flex items-center justify-center font-semibold flex-shrink-0 select-none`}
             style={{ backgroundColor: bg, color: '#fff' }}>
@@ -227,14 +227,14 @@ const InviteModal = ({ open, onClose, onInvite, theme, roles }) => {
                         {/* Name row */}
                         <div className="grid grid-cols-2 gap-3">
                             <div>
-                                <label className="text-[11px] font-semibold uppercase tracking-wider block mb-1" style={{ color: theme.colors.textSecondary }}>First Name</label>
+                                <label className="text-xs font-semibold uppercase tracking-wider block mb-1" style={{ color: theme.colors.textSecondary }}>First Name</label>
                                 <input type="text" value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Jane"
                                     className="w-full px-3 py-2 rounded-xl text-sm outline-none" style={fieldStyle}
                                     onFocus={e => e.target.style.borderColor = theme.colors.accent}
                                     onBlur={e => e.target.style.borderColor = theme.colors.border} />
                             </div>
                             <div>
-                                <label className="text-[11px] font-semibold uppercase tracking-wider block mb-1" style={{ color: theme.colors.textSecondary }}>Last Name</label>
+                                <label className="text-xs font-semibold uppercase tracking-wider block mb-1" style={{ color: theme.colors.textSecondary }}>Last Name</label>
                                 <input type="text" value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Smith"
                                     className="w-full px-3 py-2 rounded-xl text-sm outline-none" style={fieldStyle}
                                     onFocus={e => e.target.style.borderColor = theme.colors.accent}
@@ -244,7 +244,7 @@ const InviteModal = ({ open, onClose, onInvite, theme, roles }) => {
 
                         {/* Email */}
                         <div>
-                            <label className="text-[11px] font-semibold uppercase tracking-wider block mb-1" style={{ color: theme.colors.textSecondary }}>Email</label>
+                            <label className="text-xs font-semibold uppercase tracking-wider block mb-1" style={{ color: theme.colors.textSecondary }}>Email</label>
                             <input ref={emailRef} type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="jane@example.com"
                                 className="w-full px-3 py-2 rounded-xl text-sm outline-none" style={fieldStyle}
                                 onFocus={e => e.target.style.borderColor = theme.colors.accent}
@@ -254,7 +254,7 @@ const InviteModal = ({ open, onClose, onInvite, theme, roles }) => {
 
                         {/* Phone (optional) */}
                         <div>
-                            <label className="text-[11px] font-semibold uppercase tracking-wider block mb-1" style={{ color: theme.colors.textSecondary }}>
+                            <label className="text-xs font-semibold uppercase tracking-wider block mb-1" style={{ color: theme.colors.textSecondary }}>
                                 Phone <span className="normal-case tracking-normal font-normal" style={{ color: theme.colors.textSecondary }}>— optional</span>
                             </label>
                             <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="555-123-4567"
@@ -265,7 +265,7 @@ const InviteModal = ({ open, onClose, onInvite, theme, roles }) => {
 
                         {/* Role */}
                         <div>
-                            <label className="text-[11px] font-semibold uppercase tracking-wider block mb-1.5" style={{ color: theme.colors.textSecondary }}>Role</label>
+                            <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: theme.colors.textSecondary }}>Role</label>
                             <div className="flex flex-wrap gap-1.5">
                                 {roles.map(r => (
                                     <button key={r.value} onClick={() => setRole(r.value)}
@@ -471,13 +471,13 @@ const MemberCard = ({ theme, user, expanded, onToggle, onChangeRole, onTogglePer
                         </div>
 
                         <div className="space-y-1.5">
-                            <div className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: theme.colors.textSecondary }}>Role</div>
+                            <div className="text-xs font-semibold uppercase tracking-wider" style={{ color: theme.colors.textSecondary }}>Role</div>
                             <RoleDropdown value={user.role} roles={REP_ROLES} onChange={onChangeRole} theme={theme} />
                         </div>
 
                         {!admin && (
                             <div className="space-y-1.5">
-                                <div className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: theme.colors.textSecondary }}>Permissions</div>
+                                <div className="text-xs font-semibold uppercase tracking-wider" style={{ color: theme.colors.textSecondary }}>Permissions</div>
                                 <div className="flex flex-wrap gap-1.5">
                                     {Object.entries(PERMISSION_LABELS).map(([key, label]) => (
                                         <PermToggle key={key} permKey={key} label={label} enabled={!!user.permissions[key]} onToggle={() => onTogglePerm(key)} theme={theme} />
@@ -564,7 +564,7 @@ const DealerCompanyCard = ({ company, expanded, onToggle, theme }) => {
                                             {u.email}
                                         </span>
                                     </div>
-                                    <span className="text-[11px] font-medium px-2 py-0.5 rounded-full flex-shrink-0"
+                                    <span className="text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0"
                                         style={{ backgroundColor: theme.colors.surface, color: theme.colors.textSecondary, border: `1px solid ${theme.colors.border}` }}>
                                         {getRoleLabel(u.role)}
                                     </span>
@@ -714,7 +714,7 @@ const MembersScreenContent = ({ theme, onNavigate }) => {
                             >
                                 <span className="flex items-center gap-1.5">
                                     {t.label}
-                                    <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded-full"
+                                    <span className="text-xs font-semibold px-1.5 py-0.5 rounded-full"
                                         style={{
                                             backgroundColor: tab === t.key ? `${theme.colors.accent}12` : theme.colors.subtle,
                                             color: tab === t.key ? theme.colors.accent : theme.colors.textSecondary,

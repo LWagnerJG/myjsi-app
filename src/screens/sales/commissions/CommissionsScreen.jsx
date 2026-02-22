@@ -34,7 +34,7 @@ export const CommissionsScreen = ({ theme }) => {
                 <span className="text-3xl sm:text-4xl font-black tracking-tight" style={{ color: theme.colors.textPrimary }}>
                   {fmtMoney(total)}
                 </span>
-                <span className="text-[11px] font-bold uppercase tracking-widest opacity-40">YTD</span>
+                <span className="text-xs font-bold uppercase tracking-widest opacity-40">YTD</span>
               </div>
               <div className="flex items-center gap-1.5 mt-1.5">
                 <TrendingUp className="w-3.5 h-3.5 opacity-40" style={{ color: theme.colors.textPrimary }} />
@@ -89,7 +89,7 @@ export const CommissionsScreen = ({ theme }) => {
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-[15px] font-bold" style={{ color: theme.colors.textPrimary }}>{m.month}</span>
                     <span
-                      className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                      className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
                       style={{
                         backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)',
                         color: theme.colors.textSecondary,
@@ -98,11 +98,11 @@ export const CommissionsScreen = ({ theme }) => {
                       Paid {paidStr}
                     </span>
                   </div>
-                  <div className="text-[11px] mt-1 font-medium" style={{ color: theme.colors.textSecondary }}>
+                  <div className="text-xs mt-1 font-medium" style={{ color: theme.colors.textSecondary }}>
                     {dateRange}
                   </div>
                 </div>
-                <span className="text-[17px] font-black tabular-nums shrink-0" style={{ color: theme.colors.textPrimary }}>
+                <span className="text-lg font-black tabular-nums shrink-0" style={{ color: theme.colors.textPrimary }}>
                   {fmtMoney(m.amount)}
                 </span>
                 <ChevronDown
@@ -139,12 +139,12 @@ export const CommissionsScreen = ({ theme }) => {
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex-1 min-w-0 space-y-0.5">
                             <div className="font-bold text-[13px]" style={{ color: theme.colors.textPrimary }}>{inv.so}</div>
-                            <div className="text-[11px] font-medium truncate" style={{ color: theme.colors.textSecondary }}>{inv.dealer}</div>
-                            <div className="text-[11px] truncate" style={{ color: theme.colors.textSecondary, opacity: 0.7 }}>{inv.project}</div>
+                            <div className="text-xs font-medium truncate" style={{ color: theme.colors.textSecondary }}>{inv.dealer}</div>
+                            <div className="text-xs truncate" style={{ color: theme.colors.textSecondary, opacity: 0.7 }}>{inv.project}</div>
                           </div>
                           <div className="text-right shrink-0 space-y-1">
                             <div
-                              className="text-[11px] font-bold px-2.5 py-1 rounded-full tabular-nums"
+                              className="text-xs font-bold px-2.5 py-1 rounded-full tabular-nums"
                               style={{
                                 backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)',
                                 color: theme.colors.textSecondary,
@@ -152,7 +152,7 @@ export const CommissionsScreen = ({ theme }) => {
                             >
                               {rateDisplay}% rate
                             </div>
-                            <div className="text-[10px]" style={{ color: theme.colors.textSecondary, opacity: 0.55 }}>{invDate}</div>
+                            <div className="text-[11px]" style={{ color: theme.colors.textSecondary, opacity: 0.55 }}>{invDate}</div>
                           </div>
                         </div>
 
@@ -162,15 +162,15 @@ export const CommissionsScreen = ({ theme }) => {
                           style={{ borderTop: `1px solid ${theme.colors.border}` }}
                         >
                           <div>
-                            <div className="text-[9px] font-semibold uppercase tracking-wider mb-1 opacity-50" style={{ color: theme.colors.textSecondary }}>Invoiced</div>
+                            <div className="text-[10px] font-semibold uppercase tracking-wider mb-1 opacity-50" style={{ color: theme.colors.textSecondary }}>Invoiced</div>
                             <div className="text-sm font-semibold tabular-nums" style={{ color: theme.colors.textSecondary }}>{fmtMoney(inv.invoicedAmount)}</div>
                           </div>
                           <div className="text-center">
-                            <div className="text-[9px] font-semibold uppercase tracking-wider mb-1 opacity-50" style={{ color: theme.colors.textSecondary }}>Net</div>
+                            <div className="text-[10px] font-semibold uppercase tracking-wider mb-1 opacity-50" style={{ color: theme.colors.textSecondary }}>Net</div>
                             <div className="text-sm font-bold tabular-nums" style={{ color: theme.colors.textPrimary }}>{fmtMoney(inv.netAmount)}</div>
                           </div>
                           <div className="text-right">
-                            <div className="text-[9px] font-semibold uppercase tracking-wider mb-1 opacity-50" style={{ color: theme.colors.textSecondary }}>Earned</div>
+                            <div className="text-[10px] font-semibold uppercase tracking-wider mb-1 opacity-50" style={{ color: theme.colors.textSecondary }}>Earned</div>
                             <div className="text-[15px] font-black tabular-nums" style={{ color: theme.colors.textPrimary }}>{fmtMoney(inv.commission)}</div>
                           </div>
                         </div>
@@ -188,15 +188,15 @@ export const CommissionsScreen = ({ theme }) => {
                       }}
                     >
                       <div>
-                        <div className="text-[9px] font-semibold uppercase tracking-wider mb-1.5 opacity-50" style={{ color: theme.colors.textSecondary }}>Invoiced</div>
+                        <div className="text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-50" style={{ color: theme.colors.textSecondary }}>Invoiced</div>
                         <div className="text-sm font-bold tabular-nums" style={{ color: theme.colors.textSecondary }}>{fmtMoney(m.details[1].listTotal)}</div>
                       </div>
                       <div>
-                        <div className="text-[9px] font-semibold uppercase tracking-wider mb-1.5 opacity-50" style={{ color: theme.colors.textSecondary }}>Net</div>
+                        <div className="text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-50" style={{ color: theme.colors.textSecondary }}>Net</div>
                         <div className="text-sm font-bold tabular-nums" style={{ color: theme.colors.textPrimary }}>{fmtMoney(m.details[1].netTotal)}</div>
                       </div>
                       <div>
-                        <div className="text-[9px] font-semibold uppercase tracking-wider mb-1.5 opacity-50" style={{ color: theme.colors.textSecondary }}>Total Earned</div>
+                        <div className="text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-50" style={{ color: theme.colors.textSecondary }}>Total Earned</div>
                         <div className="text-base font-black tabular-nums" style={{ color: theme.colors.textPrimary }}>{fmtMoney(m.details[1].commissionTotal)}</div>
                       </div>
                     </div>

@@ -103,7 +103,7 @@ export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
                                 {/* Discount block */}
                                 <div className="flex-shrink-0 w-24 text-center flex flex-col justify-center">
                                     <p className="text-4xl font-extrabold tracking-tight leading-none" style={{ color: theme.colors.accent }}>{discountPercent}%</p>
-                                    <p className="text-[10px] mt-1 font-semibold uppercase tracking-wide" style={{ color: theme.colors.textSecondary }}>Off List</p>
+                                    <p className="text-[11px] mt-1 font-semibold uppercase tracking-wide" style={{ color: theme.colors.textSecondary }}>Off List</p>
                                 </div>
                                 {/* Vertical divider (discrete) */}
                                 <div className="w-px my-1" style={{ background: theme.colors.border, opacity: .35 }} />

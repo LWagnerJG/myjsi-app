@@ -79,9 +79,9 @@ export const SocialMediaScreen = ({ theme }) => {
     return (
       <div className="aspect-square w-full rounded-xl overflow-hidden relative bg-black/5 cursor-pointer border" style={{ borderColor: theme.colors.border }} onClick={()=>setPreview(post)}>
         {!errored && <img src={post.url} alt={post.caption.slice(0,60)} className="w-full h-full object-cover select-none" loading="lazy" onError={()=>setErrored(true)} />}
-        {errored && <div className="absolute inset-0 flex items-center justify-center text-[11px] font-medium" style={{ color: theme.colors.textSecondary }}>Image unavailable</div>}
+        {errored && <div className="absolute inset-0 flex items-center justify-center text-xs font-medium" style={{ color: theme.colors.textSecondary }}>Image unavailable</div>}
         <div className="absolute top-0 left-0 right-0 h-10 bg-gradient-to-b from-black/55 to-transparent pointer-events-none" />
-        <div className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: theme.colors.surface, border:`1px solid ${theme.colors.border}`, color: theme.colors.textSecondary }}>{formatDate(post.createdDate)}</div>
+        <div className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold" style={{ background: theme.colors.surface, border:`1px solid ${theme.colors.border}`, color: theme.colors.textSecondary }}>{formatDate(post.createdDate)}</div>
       </div>
     );
   };
@@ -108,12 +108,12 @@ export const SocialMediaScreen = ({ theme }) => {
     <div className="flex flex-col h-full app-header-offset" style={{ background: theme.colors.background }}>
       {/* Help bar */}
       <div className="px-4 pb-1">
-        <PillButton theme={theme} onClick={()=>setShowHelp(h=>!h)} size="compact" className="flex items-center gap-1.5 text-[11px]">
+        <PillButton theme={theme} onClick={()=>setShowHelp(h=>!h)} size="compact" className="flex items-center gap-1.5 text-xs">
           <Info className="w-3.5 h-3.5" /> How to use {showHelp ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
         </PillButton>
         {showHelp && (
           <div className="mt-2">
-            <GlassCard theme={theme} className="p-3 text-[11px] leading-relaxed">
+            <GlassCard theme={theme} className="p-3 text-xs leading-relaxed">
               <p style={{ color: theme.colors.textSecondary }}>
                 Tap Instagram / LinkedIn: we try native share (supports direct image on some devices). If not supported we copy the caption, download the image, and attempt to open the app. Complete the post by choosing the downloaded image and pasting the caption.
               </p>
@@ -132,7 +132,7 @@ export const SocialMediaScreen = ({ theme }) => {
           <div className="max-w-md w-full" onClick={(e)=>e.stopPropagation()}>
             <div className="relative rounded-xl overflow-hidden mb-3">
               <img src={preview.url} alt={preview.caption.slice(0,60)} className="w-full object-cover" />
-              <div className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: theme.colors.surface, border:`1px solid ${theme.colors.border}`, color: theme.colors.textSecondary }}>{formatDate(preview.createdDate)}</div>
+              <div className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold" style={{ background: theme.colors.surface, border:`1px solid ${theme.colors.border}`, color: theme.colors.textSecondary }}>{formatDate(preview.createdDate)}</div>
             </div>
             <GlassCard theme={theme} className="p-4 space-y-3">
               <p className="text-sm" style={{ color: theme.colors.textPrimary }}>{preview.caption}</p>

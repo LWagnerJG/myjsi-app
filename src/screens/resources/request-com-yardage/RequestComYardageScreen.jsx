@@ -225,7 +225,7 @@ export const RequestComYardageScreen = ({ theme, showAlert, onNavigate, userSett
             {/* Confirmation modal */}
             <Modal show={showConfirm} onClose={() => setShowConfirm(false)} title="Confirm Request" theme={theme}>
                 <div>
-                    <p className="text-[10px] font-semibold tracking-widest uppercase mb-3" style={{ color: theme.colors.textSecondary }}>
+                    <p className="text-[11px] font-semibold tracking-widest uppercase mb-3" style={{ color: theme.colors.textSecondary }}>
                         ITEMS TO SUBMIT
                     </p>
                     <div className="space-y-2 mb-5">

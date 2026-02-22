@@ -74,7 +74,7 @@ const DirectoryModal = ({ show, onClose, onSelect, theme, dealers = [], designFi
                             </div>
                             <div>
                                 <h3 className="font-bold text-[15px] tracking-tight" style={{ color: theme.colors.textPrimary }}>Ship to Company</h3>
-                                <p className="text-[11px]" style={{ color: theme.colors.textSecondary }}>Select a saved address</p>
+                                <p className="text-xs" style={{ color: theme.colors.textSecondary }}>Select a saved address</p>
                             </div>
                         </div>
                         <button onClick={onClose} aria-label="Close" className="w-8 h-8 rounded-full flex items-center justify-center active:scale-95 transition" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}>
@@ -112,13 +112,13 @@ const DirectoryModal = ({ show, onClose, onSelect, theme, dealers = [], designFi
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2">
                                             <p className="font-semibold text-[13px] truncate" style={{ color: theme.colors.textPrimary }}>{it.name}</p>
-                                            {it.type === 'dealer' && <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ backgroundColor: isDark ? 'rgba(74,124,89,0.15)' : 'rgba(74,124,89,0.08)', color: '#4A7C59' }}>Dealer</span>}
-                                            {it.type === 'design' && <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ backgroundColor: isDark ? 'rgba(91,123,140,0.15)' : 'rgba(91,123,140,0.08)', color: '#5B7B8C' }}>Design</span>}
+                                            {it.type === 'dealer' && <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ backgroundColor: isDark ? 'rgba(74,124,89,0.15)' : 'rgba(74,124,89,0.08)', color: '#4A7C59' }}>Dealer</span>}
+                                            {it.type === 'design' && <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ backgroundColor: isDark ? 'rgba(91,123,140,0.15)' : 'rgba(91,123,140,0.08)', color: '#5B7B8C' }}>Design</span>}
                                         </div>
                                         {it.address && (
                                             <div className="flex items-center gap-1 mt-0.5">
                                                 <MapPin className="w-3 h-3 flex-shrink-0" style={{ color: theme.colors.textSecondary, opacity: 0.5 }} />
-                                                <p className="text-[11px] leading-snug truncate" style={{ color: theme.colors.textSecondary }}>{it.address}</p>
+                                                <p className="text-xs leading-snug truncate" style={{ color: theme.colors.textSecondary }}>{it.address}</p>
                                             </div>
                                         )}
                                     </div>
@@ -241,8 +241,8 @@ const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, designFi
                                     <ShoppingCart className="w-5 h-5 text-white" />
                                 </div>
                                 <div>
-                                    <p className="font-bold text-[14px]" style={{ color: theme.colors.textPrimary }}>Sample Cart</p>
-                                    <p className="text-[11px]" style={{ color: theme.colors.textSecondary }}>{totalCartItems} sample{totalCartItems !== 1 ? 's' : ''} selected</p>
+                                    <p className="font-bold text-sm" style={{ color: theme.colors.textPrimary }}>Sample Cart</p>
+                                    <p className="text-xs" style={{ color: theme.colors.textSecondary }}>{totalCartItems} sample{totalCartItems !== 1 ? 's' : ''} selected</p>
                                 </div>
                             </div>
                             <ChevronDown className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
@@ -252,7 +252,7 @@ const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, designFi
                         <div className="px-5 pb-5 pt-3 max-h-[60vh] overflow-y-auto scrollbar-hide flex flex-col gap-5">
                             {/* Items section */}
                             <div>
-                                <p className="text-[11px] font-bold uppercase tracking-widest mb-2 px-1" style={{ color: theme.colors.textSecondary, letterSpacing: '0.06em' }}>Items</p>
+                                <p className="text-xs font-bold uppercase tracking-widest mb-2 px-1" style={{ color: theme.colors.textSecondary, letterSpacing: '0.06em' }}>Items</p>
                                 <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.015)', border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'}` }}>
                                     <div className="px-2 py-1">
                                         {cartItems.map((item, idx) => (<DrawerItem key={item.id} item={item} onUpdateCart={onUpdateCart} theme={theme} isLast={idx === 0} />))}
@@ -263,11 +263,11 @@ const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, designFi
                             {/* Ship To section */}
                             <div>
                                 <div className="flex items-center justify-between mb-2.5">
-                                    <p className="text-[11px] font-bold uppercase tracking-widest px-1" style={{ color: theme.colors.textSecondary, letterSpacing: '0.06em' }}>Ship To</p>
+                                    <p className="text-xs font-bold uppercase tracking-widest px-1" style={{ color: theme.colors.textSecondary, letterSpacing: '0.06em' }}>Ship To</p>
                                     <div className="flex items-center gap-1.5">
                                         <button
                                             onClick={() => setShowDir(true)}
-                                            className="flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-full active:scale-95 transition-all"
+                                            className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full active:scale-95 transition-all"
                                             style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.04)', color: theme.colors.textPrimary }}
                                             onMouseEnter={e => { e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)'; }}
                                             onMouseLeave={e => { e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.04)'; }}
@@ -277,7 +277,7 @@ const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, designFi
                                         </button>
                                         <button
                                             onClick={() => { safeSetShipTo('Home'); safeSetAddress1(userSettings?.homeAddress || ''); safeSetAddress2(''); }}
-                                            className="flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-full active:scale-95 transition-all"
+                                            className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full active:scale-95 transition-all"
                                             style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.04)', color: theme.colors.textPrimary }}
                                             onMouseEnter={e => { e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)'; }}
                                             onMouseLeave={e => { e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.04)'; }}
@@ -289,15 +289,15 @@ const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, designFi
                                 </div>
                                 <div className="space-y-2">
                                     <div className="relative">
-                                        <label className="absolute left-4 top-1.5 text-[9px] font-bold uppercase tracking-wider" style={{ color: theme.colors.textSecondary }}>Recipient / Company</label>
+                                        <label className="absolute left-4 top-1.5 text-[10px] font-bold uppercase tracking-wider" style={{ color: theme.colors.textSecondary }}>Recipient / Company</label>
                                         <input value={shipToName || ''} onChange={(e) => safeSetShipTo(e.target.value)} className="w-full rounded-2xl px-4 pt-5 pb-2.5 text-[13px] outline-none border transition focus:ring-2" style={{ background: isDark ? 'rgba(255,255,255,0.04)' : theme.colors.inputBackground, borderColor: theme.colors.border, color: theme.colors.textPrimary }} />
                                     </div>
                                     <div className="relative">
-                                        <label className="absolute left-4 top-1.5 text-[9px] font-bold uppercase tracking-wider" style={{ color: theme.colors.textSecondary }}>Street Address</label>
+                                        <label className="absolute left-4 top-1.5 text-[10px] font-bold uppercase tracking-wider" style={{ color: theme.colors.textSecondary }}>Street Address</label>
                                         <input value={address1 || ''} onChange={(e) => safeSetAddress1(e.target.value)} className="w-full rounded-2xl px-4 pt-5 pb-2.5 text-[13px] outline-none border transition focus:ring-2" style={{ background: isDark ? 'rgba(255,255,255,0.04)' : theme.colors.inputBackground, borderColor: theme.colors.border, color: theme.colors.textPrimary }} />
                                     </div>
                                     <div className="relative">
-                                        <label className="absolute left-4 top-1.5 text-[9px] font-bold uppercase tracking-wider" style={{ color: theme.colors.textSecondary }}>Suite / Unit (optional)</label>
+                                        <label className="absolute left-4 top-1.5 text-[10px] font-bold uppercase tracking-wider" style={{ color: theme.colors.textSecondary }}>Suite / Unit (optional)</label>
                                         <input value={address2 || ''} onChange={(e) => safeSetAddress2(e.target.value)} className="w-full rounded-2xl px-4 pt-5 pb-2.5 text-[13px] outline-none border transition focus:ring-2" style={{ background: isDark ? 'rgba(255,255,255,0.04)' : theme.colors.inputBackground, borderColor: theme.colors.border, color: theme.colors.textPrimary }} />
                                     </div>
                                 </div>
@@ -329,7 +329,7 @@ const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, designFi
                     <div className="relative px-10 py-8 rounded-3xl text-center" style={{ background: theme.colors.surface, color: theme.colors.textPrimary, border: `1px solid ${theme.colors.border}`, transform: overlayPhase==='enter' ? 'scale(1)' : 'scale(.9)', opacity: overlayPhase==='enter' ? 1 : 0.9, transition: prefersReduced ? 'none' : 'transform 480ms cubic-bezier(.3,1,.3,1), opacity 360ms ease', boxShadow:'0 6px 24px -4px rgba(0,0,0,0.12)' }}>
                         <CheckCircle className="w-10 h-10 mx-auto mb-3" style={{ color: '#4A7C59' }} />
                         <p className="font-bold text-[15px]">Sample Request Submitted</p>
-                        <p className="text-[12px] mt-1" style={{ color: theme.colors.textSecondary }}>You'll receive a confirmation email shortly.</p>
+                        <p className="text-xs mt-1" style={{ color: theme.colors.textSecondary }}>You'll receive a confirmation email shortly.</p>
                     </div>
                 </div>
             )}
@@ -398,8 +398,8 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                         {setQty > 0 && <CheckCircle className="w-4 h-4" style={{ color: theme.colors.accentText }} />}
                     </div>
                     <div className="px-3 py-2 text-center" style={{ backgroundColor: setQty > 0 ? theme.colors.accent : theme.colors.surface }}>
-                        <p className="text-[12px] font-bold" style={{ color: setQty > 0 ? theme.colors.accentText : theme.colors.textPrimary }}>All {currentCategoryName}</p>
-                        <p className="text-[10px] mt-0.5 font-medium" style={{ color: setQty > 0 ? 'rgba(255,255,255,0.7)' : theme.colors.textSecondary }}>{products.length} finishes</p>
+                        <p className="text-xs font-bold" style={{ color: setQty > 0 ? theme.colors.accentText : theme.colors.textPrimary }}>All {currentCategoryName}</p>
+                        <p className="text-[11px] mt-0.5 font-medium" style={{ color: setQty > 0 ? 'rgba(255,255,255,0.7)' : theme.colors.textSecondary }}>{products.length} finishes</p>
                     </div>
                 </div>
 
@@ -504,7 +504,7 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                                     <p className="text-[13px] font-bold" style={{ color: fullQty > 0 ? theme.colors.accentText : theme.colors.textPrimary }}>
                                         Full JSI Sample Set
                                     </p>
-                                    <p className="text-[11px] mt-0.5" style={{ color: fullQty > 0 ? 'rgba(255,255,255,0.7)' : theme.colors.textSecondary }}>
+                                    <p className="text-xs mt-0.5" style={{ color: fullQty > 0 ? 'rgba(255,255,255,0.7)' : theme.colors.textSecondary }}>
                                         Every finish across all categories • {totalFinishCount} samples
                                     </p>
                                 </div>

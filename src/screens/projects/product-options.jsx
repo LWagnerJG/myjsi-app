@@ -7,7 +7,7 @@ import { FINISH_SAMPLES } from '../samples';
 /* ── tiny chip ──────────────────────────────────────────────── */
 const Chip = ({ label, selected, onClick, theme }) => (
   <button type="button" onClick={onClick}
-    className="px-2.5 py-1 text-[11px] rounded-full font-medium transition-all border leading-tight"
+    className="px-2.5 py-1 text-xs rounded-full font-medium transition-all border leading-tight"
     style={{
       backgroundColor: selected ? theme.colors.accent : 'transparent',
       color: selected ? '#fff' : theme.colors.textPrimary,
@@ -41,7 +41,7 @@ const SurfaceTypeSelector = ({ selected = [], onChange, theme }) => (
 /* ── finish picker (laminate/veneer chips + TBD) ─────────────── */
 const FinishPicker = ({ label, options, selected = [], onToggle, theme }) => (
   <div>
-    <p className="text-[11px] uppercase tracking-wider font-medium mb-1.5" style={{ color: theme.colors.textSecondary }}>{label}</p>
+    <p className="text-xs uppercase tracking-wider font-medium mb-1.5" style={{ color: theme.colors.textSecondary }}>{label}</p>
     <div className="flex flex-wrap gap-1.5">
       <Chip label="TBD" selected={selected.includes('TBD')} onClick={() => onToggle('TBD')} theme={theme} />
       {options.map(o => (
@@ -86,7 +86,7 @@ export const VisionOptions = ({ theme, product, productIndex, onUpdate }) => {
 
       {/* surface type */}
       <div>
-        <p className="text-[11px] uppercase tracking-wider font-medium mb-1.5" style={{ color: theme.colors.textSecondary }}>Surface Type</p>
+        <p className="text-xs uppercase tracking-wider font-medium mb-1.5" style={{ color: theme.colors.textSecondary }}>Surface Type</p>
         <SurfaceTypeSelector selected={surfaces} onChange={v => onUpdate(productIndex, 'surfaceTypes', v)} theme={theme} />
       </div>
 
@@ -94,7 +94,7 @@ export const VisionOptions = ({ theme, product, productIndex, onUpdate }) => {
       {showLam && <FinishPicker label="Laminate" options={JSI_LAMINATES} selected={materials} onToggle={toggleMat} theme={theme} />}
       {showVen && <FinishPicker label="Veneer" options={JSI_VENEERS} selected={materials} onToggle={toggleMat} theme={theme} />}
       {!showLam && !showVen && surfaces.length === 0 && (
-        <p className="text-[11px] italic" style={{ color: theme.colors.textSecondary }}>Select a surface type to choose finishes</p>
+        <p className="text-xs italic" style={{ color: theme.colors.textSecondary }}>Select a surface type to choose finishes</p>
       )}
     </div>
   );

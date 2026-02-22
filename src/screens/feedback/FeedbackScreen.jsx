@@ -77,7 +77,7 @@ export const FeedbackScreen = ({ theme }) => {
 
                         {/* Type selector — grid of equal-width tiles */}
                         <div className="mb-4">
-                            <span className="text-[11px] font-semibold uppercase tracking-widest mb-2.5 block" style={{ color: colors.textSecondary, opacity: 0.6 }}>Category</span>
+                            <span className="text-xs font-semibold uppercase tracking-widest mb-2.5 block" style={{ color: colors.textSecondary, opacity: 0.6 }}>Category</span>
                             <div className="grid grid-cols-4 gap-2">
                                 {feedbackTypes.map(t => {
                                     const active = feedbackType === t.value;
@@ -87,7 +87,7 @@ export const FeedbackScreen = ({ theme }) => {
                                             key={t.value}
                                             type="button"
                                             onClick={() => setFeedbackType(t.value)}
-                                            className="flex flex-col items-center justify-center gap-1.5 py-3 rounded-2xl text-[11px] font-semibold transition-all"
+                                            className="flex flex-col items-center justify-center gap-1.5 py-3 rounded-2xl text-xs font-semibold transition-all"
                                             style={{
                                                 backgroundColor: active
                                                     ? (isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)')
@@ -110,9 +110,9 @@ export const FeedbackScreen = ({ theme }) => {
                         {/* Message */}
                         <div className="mb-4">
                             <div className="flex items-center justify-between mb-2.5">
-                                <span className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: colors.textSecondary, opacity: 0.6 }}>Message</span>
+                                <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: colors.textSecondary, opacity: 0.6 }}>Message</span>
                                 {message.length > 0 && (
-                                    <span className="text-[10px] tabular-nums" style={{ color: colors.textSecondary, opacity: 0.35 }}>{message.length}</span>
+                                    <span className="text-[11px] tabular-nums" style={{ color: colors.textSecondary, opacity: 0.35 }}>{message.length}</span>
                                 )}
                             </div>
                             <div style={{ backgroundColor: cardBg, border: cardBorder, borderRadius: 20 }} className="p-1">
@@ -136,9 +136,9 @@ export const FeedbackScreen = ({ theme }) => {
                         {/* Attachments */}
                         <div className="mb-6">
                             <div className="flex items-center justify-between mb-2.5">
-                                <span className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: colors.textSecondary, opacity: 0.6 }}>Attachments</span>
+                                <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: colors.textSecondary, opacity: 0.6 }}>Attachments</span>
                                 <label
-                                    className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium cursor-pointer transition-all active:scale-95"
+                                    className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium cursor-pointer transition-all active:scale-95"
                                     style={{
                                         backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
                                         color: colors.textSecondary,
@@ -160,8 +160,8 @@ export const FeedbackScreen = ({ theme }) => {
                                                 style={{ backgroundColor: subtleBg }}
                                             >
                                                 <div className="min-w-0">
-                                                    <div className="truncate text-[12px] font-medium" style={{ color: colors.textPrimary }}>{f.name}</div>
-                                                    <div className="text-[10px]" style={{ color: colors.textSecondary, opacity: 0.45 }}>{formatFileSize(f.size)}</div>
+                                                    <div className="truncate text-xs font-medium" style={{ color: colors.textPrimary }}>{f.name}</div>
+                                                    <div className="text-[11px]" style={{ color: colors.textSecondary, opacity: 0.45 }}>{formatFileSize(f.size)}</div>
                                                 </div>
                                                 <button type="button" onClick={() => removeFile(i)} className="ml-3 p-1 rounded-full transition-opacity hover:opacity-60">
                                                     <X className="w-3.5 h-3.5" style={{ color: colors.textSecondary }} />

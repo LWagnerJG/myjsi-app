@@ -61,7 +61,7 @@ const SuggestInputPill = ({ placeholder, suggestions, onAdd, theme }) => {
 };
 
 // Helper label / inputs (restored)
-const SoftLabel = ({ children, theme }) => <span className="text-[11px] uppercase tracking-wide font-semibold" style={{ color: theme.colors.textSecondary }}>{children}</span>;
+const SoftLabel = ({ children, theme }) => <span className="text-xs uppercase tracking-wide font-semibold" style={{ color: theme.colors.textSecondary }}>{children}</span>;
 
 // Contact search selector — pulls contacts from associated dealers
 const ContactSearchSelector = ({ value, onChange, dealers, theme }) => {
@@ -85,12 +85,12 @@ const ContactSearchSelector = ({ value, onChange, dealers, theme }) => {
     <div className="relative" ref={ref}>
       {value ? (
         <div className="flex items-center gap-2.5 py-2 px-3.5 rounded-xl" style={{ background: fieldBg, border: fieldBorder }}>
-          <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0" style={{ backgroundColor: theme.colors.accent + '18', color: theme.colors.accent }}>
+          <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0" style={{ backgroundColor: theme.colors.accent + '18', color: theme.colors.accent }}>
             {value.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
           </div>
-          <span className="flex-1 text-[14px] font-medium truncate" style={{ color: theme.colors.textPrimary }}>{value}</span>
+          <span className="flex-1 text-sm font-medium truncate" style={{ color: theme.colors.textPrimary }}>{value}</span>
           <button onClick={() => { onChange(''); setQuery(''); }} className="p-0.5 rounded-full opacity-40 hover:opacity-100 transition-opacity">
-            <span className="text-[14px] leading-none" style={{ color: theme.colors.textSecondary }}>×</span>
+            <span className="text-sm leading-none" style={{ color: theme.colors.textSecondary }}>×</span>
           </button>
         </div>
       ) : (
@@ -101,7 +101,7 @@ const ContactSearchSelector = ({ value, onChange, dealers, theme }) => {
             onChange={e => { setQuery(e.target.value); setOpen(true); }}
             onFocus={() => setOpen(true)}
             onKeyDown={e => { if (e.key === 'Enter' && query.trim()) { onChange(query.trim()); setQuery(''); setOpen(false); } if (e.key === 'Escape') setOpen(false); }}
-            className="flex-1 bg-transparent outline-none text-[14px] font-medium"
+            className="flex-1 bg-transparent outline-none text-sm font-medium"
             style={{ color: theme.colors.textPrimary }}
             placeholder="Search contacts..."
           />
@@ -112,16 +112,16 @@ const ContactSearchSelector = ({ value, onChange, dealers, theme }) => {
           <div className="max-h-[200px] overflow-y-auto scrollbar-hide py-1">
             {filtered.length > 0 ? filtered.map(c => (
               <button key={c.name} onClick={() => { onChange(c.name); setQuery(''); setOpen(false); }} className="w-full text-left px-3 py-2.5 flex items-center gap-2.5 transition-colors" onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0" style={{ backgroundColor: theme.colors.accent + '18', color: theme.colors.accent }}>
+                <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0" style={{ backgroundColor: theme.colors.accent + '18', color: theme.colors.accent }}>
                   {c.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
                 </div>
                 <div className="min-w-0">
                   <div className="text-[13px] font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{c.name}</div>
-                  <div className="text-[10px] truncate" style={{ color: theme.colors.textSecondary, opacity: 0.6 }}>{c.title} · {c.dealer}</div>
+                  <div className="text-[11px] truncate" style={{ color: theme.colors.textSecondary, opacity: 0.6 }}>{c.title} · {c.dealer}</div>
                 </div>
               </button>
             )) : (
-              <div className="px-3 py-3 text-center text-[12px]" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>
+              <div className="px-3 py-3 text-center text-xs" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>
                 {contacts.length === 0 ? 'Add a dealer to see contacts' : 'No matching contacts'}
               </div>
             )}
@@ -129,7 +129,7 @@ const ContactSearchSelector = ({ value, onChange, dealers, theme }) => {
           {query.trim() && !contacts.some(c => c.name.toLowerCase() === query.toLowerCase()) && (
             <button onClick={() => { onChange(query.trim()); setQuery(''); setOpen(false); }} className="w-full text-left px-3 py-2.5 flex items-center gap-2 border-t transition-colors" style={{ borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }} onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
               <UserPlus size={14} style={{ color: theme.colors.accent }} />
-              <span className="text-[12px] font-semibold" style={{ color: theme.colors.accent }}>Add "{query.trim()}"</span>
+              <span className="text-xs font-semibold" style={{ color: theme.colors.accent }}>Add "{query.trim()}"</span>
             </button>
           )}
         </div>
@@ -238,7 +238,7 @@ const OpportunityDetail = ({ opp, theme, onUpdate }) => {
           <div style={sectionCard}>
             {/* Top row: List Value input */}
             <div className="pb-3">
-              <span className="text-[10px] font-semibold uppercase tracking-widest mb-1.5 block" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>List Value</span>
+              <span className="text-[11px] font-semibold uppercase tracking-widest mb-1.5 block" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>List Value</span>
               <div className="flex items-baseline gap-2">
                 <span className="text-[24px] font-bold tracking-tight leading-none" style={{ color: theme.colors.textSecondary, opacity: 0.3 }}>$</span>
                 <input
@@ -260,16 +260,16 @@ const OpportunityDetail = ({ opp, theme, onUpdate }) => {
                 onClick={()=>discountOpen? setDiscountOpen(false):openDiscount()}
                 ref={discBtn}
               >
-                <span className="text-[10px] font-semibold uppercase tracking-widest mb-1" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Discount</span>
+                <span className="text-[11px] font-semibold uppercase tracking-widest mb-1" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Discount</span>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[14px] font-bold tracking-tight truncate" style={{ color: theme.colors.textPrimary }}>{draft.discount || '—'}</span>
+                  <span className="text-sm font-bold tracking-tight truncate" style={{ color: theme.colors.textPrimary }}>{draft.discount || '—'}</span>
                   <ChevronDown className="w-3.5 h-3.5 flex-shrink-0" style={{ color: theme.colors.textSecondary, opacity: 0.4 }} />
                 </div>
               </div>
               <div className="w-px self-stretch mx-4" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }} />
               <div className="flex flex-col justify-center">
-                <span className="text-[10px] font-semibold uppercase tracking-widest mb-1" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Net Value</span>
-                <span className="text-[18px] font-bold tracking-tight leading-none whitespace-nowrap" style={{ color: theme.colors.accent }}>
+                <span className="text-[11px] font-semibold uppercase tracking-widest mb-1" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Net Value</span>
+                <span className="text-lg font-bold tracking-tight leading-none whitespace-nowrap" style={{ color: theme.colors.accent }}>
                   {netValue > 0 && discountPct > 0 ? `$${netValue.toLocaleString()}` : '—'}
                 </span>
               </div>
@@ -278,7 +278,7 @@ const OpportunityDetail = ({ opp, theme, onUpdate }) => {
 
           {/* Pipeline Stage — draggable slider */}
           <div style={sectionCard}>
-            <span className="text-[10px] font-semibold uppercase tracking-widest block mb-5" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Pipeline Stage</span>
+            <span className="text-[11px] font-semibold uppercase tracking-widest block mb-5" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Pipeline Stage</span>
             <div
               className="relative px-5 select-none"
               ref={stageTrackRef}
@@ -309,7 +309,7 @@ const OpportunityDetail = ({ opp, theme, onUpdate }) => {
                         }}
                       />
                       <span
-                        className="absolute top-6 text-[9px] font-semibold whitespace-nowrap transition-all pointer-events-none"
+                        className="absolute top-6 text-[10px] font-semibold whitespace-nowrap transition-all pointer-events-none"
                         style={{
                           color: isCurrent ? theme.colors.textPrimary : theme.colors.textSecondary,
                           opacity: isCurrent ? 1 : 0.45,
@@ -329,7 +329,7 @@ const OpportunityDetail = ({ opp, theme, onUpdate }) => {
 
             {/* Win Probability inline */}
             <div className="pt-2 border-t" style={{ borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }}>
-              <span className="text-[10px] font-semibold uppercase tracking-widest block mb-1" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Win Probability</span>
+              <span className="text-[11px] font-semibold uppercase tracking-widest block mb-1" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Win Probability</span>
               <ProbabilitySlider value={draft.winProbability||0} onChange={v=>update('winProbability',v)} theme={theme} showLabel={false} />
             </div>
           </div>
@@ -338,24 +338,24 @@ const OpportunityDetail = ({ opp, theme, onUpdate }) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Vertical */}
             <div style={sectionCard}>
-              <span className="text-[10px] font-semibold uppercase tracking-widest block mb-3" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Vertical</span>
+              <span className="text-[11px] font-semibold uppercase tracking-widest block mb-3" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Vertical</span>
               <div className="flex flex-wrap gap-1.5">
                 {VERTICALS.map(v => {
                   const active = v === draft.vertical;
                   return (
-                    <button key={v} onClick={() => update('vertical', v)} className="px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all" style={{ backgroundColor: active ? theme.colors.textPrimary : 'transparent', color: active ? (isDark ? '#1a1a1a' : '#fff') : theme.colors.textSecondary, border: active ? 'none' : fieldBorder }}>{v}</button>
+                    <button key={v} onClick={() => update('vertical', v)} className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all" style={{ backgroundColor: active ? theme.colors.textPrimary : 'transparent', color: active ? (isDark ? '#1a1a1a' : '#fff') : theme.colors.textSecondary, border: active ? 'none' : fieldBorder }}>{v}</button>
                   );
                 })}
               </div>
             </div>
             {/* PO Timeframe */}
             <div style={sectionCard}>
-              <span className="text-[10px] font-semibold uppercase tracking-widest block mb-3" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>PO Timeframe</span>
+              <span className="text-[11px] font-semibold uppercase tracking-widest block mb-3" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>PO Timeframe</span>
               <div className="flex flex-wrap gap-1.5">
                 {PO_TIMEFRAMES.map(t => {
                   const active = t === draft.poTimeframe;
                   return (
-                    <button key={t} onClick={() => update('poTimeframe', t)} className="px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all" style={{ backgroundColor: active ? theme.colors.textPrimary : 'transparent', color: active ? (isDark ? '#1a1a1a' : '#fff') : theme.colors.textSecondary, border: active ? 'none' : fieldBorder }}>{t}</button>
+                    <button key={t} onClick={() => update('poTimeframe', t)} className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all" style={{ backgroundColor: active ? theme.colors.textPrimary : 'transparent', color: active ? (isDark ? '#1a1a1a' : '#fff') : theme.colors.textSecondary, border: active ? 'none' : fieldBorder }}>{t}</button>
                   );
                 })}
               </div>
@@ -364,7 +364,7 @@ const OpportunityDetail = ({ opp, theme, onUpdate }) => {
 
           {/* Contact — searchable from dealer's contacts */}
           <div style={sectionCard}>
-            <span className="text-[10px] font-semibold uppercase tracking-widest block mb-2" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Contact</span>
+            <span className="text-[11px] font-semibold uppercase tracking-widest block mb-2" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Contact</span>
             <ContactSearchSelector
               value={draft.contact || ''}
               onChange={v => update('contact', v)}
@@ -378,7 +378,7 @@ const OpportunityDetail = ({ opp, theme, onUpdate }) => {
             {/* Competition */}
             <div style={sectionCard}>
               <div className="flex items-center justify-between mb-3">
-                <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Competition</span>
+                <span className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Competition</span>
                 <button
                   onClick={() => update('competitionPresent', !draft.competitionPresent)}
                   className="relative w-10 h-[22px] rounded-full transition-colors duration-200 flex-shrink-0"
@@ -392,7 +392,7 @@ const OpportunityDetail = ({ opp, theme, onUpdate }) => {
                   {COMPETITORS.filter(c => c !== 'None').map(c => {
                     const on = (draft.competitors || []).includes(c);
                     return (
-                      <button key={c} onClick={() => { const list = draft.competitors || []; update('competitors', on ? list.filter(x => x !== c) : [...list, c]); }} className="px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all" style={{ backgroundColor: on ? theme.colors.textPrimary : 'transparent', color: on ? (isDark ? '#1a1a1a' : '#fff') : theme.colors.textSecondary, border: on ? 'none' : fieldBorder }}>{c}</button>
+                      <button key={c} onClick={() => { const list = draft.competitors || []; update('competitors', on ? list.filter(x => x !== c) : [...list, c]); }} className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all" style={{ backgroundColor: on ? theme.colors.textPrimary : 'transparent', color: on ? (isDark ? '#1a1a1a' : '#fff') : theme.colors.textSecondary, border: on ? 'none' : fieldBorder }}>{c}</button>
                     );
                   })}
                 </div>
@@ -401,11 +401,11 @@ const OpportunityDetail = ({ opp, theme, onUpdate }) => {
 
             {/* Products */}
             <div style={sectionCard}>
-              <span className="text-[10px] font-semibold uppercase tracking-widest block mb-3" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Products</span>
+              <span className="text-[11px] font-semibold uppercase tracking-widest block mb-3" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Products</span>
               <div className="flex flex-wrap gap-2">
                 {(draft.products||[]).map(p=> (
-                  <button key={p.series} onClick={()=>removeProductSeries(p.series)} className="px-3 h-8 rounded-full text-[11px] font-semibold flex items-center gap-1.5 transition-all" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)', color: theme.colors.textPrimary }}>
-                    {p.series}<span className="opacity-40 text-[10px]">×</span>
+                  <button key={p.series} onClick={()=>removeProductSeries(p.series)} className="px-3 h-8 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)', color: theme.colors.textPrimary }}>
+                    {p.series}<span className="opacity-40 text-[11px]">×</span>
                   </button>
                 ))}
                 <SuggestInputPill placeholder="Add series" suggestions={JSI_SERIES} onAdd={addProductSeries} theme={theme} />
@@ -416,22 +416,22 @@ const OpportunityDetail = ({ opp, theme, onUpdate }) => {
           {/* Design Firms & Dealers */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div style={sectionCard}>
-              <span className="text-[10px] font-semibold uppercase tracking-widest block mb-3" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Design Firms</span>
+              <span className="text-[11px] font-semibold uppercase tracking-widest block mb-3" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Design Firms</span>
               <div className="flex flex-wrap gap-2">
                 {(draft.designFirms||[]).map(f=> (
-                  <button key={f} onClick={()=>removeFrom('designFirms',f)} className="px-3 h-7 rounded-full text-[11px] font-semibold flex items-center gap-1.5 transition-all" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)', color: theme.colors.textPrimary }}>
-                    {f}<span className="opacity-40 text-[10px]">×</span>
+                  <button key={f} onClick={()=>removeFrom('designFirms',f)} className="px-3 h-7 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)', color: theme.colors.textPrimary }}>
+                    {f}<span className="opacity-40 text-[11px]">×</span>
                   </button>
                 ))}
                 <SuggestInputPill placeholder="Add firm" suggestions={INITIAL_DESIGN_FIRMS} onAdd={v=>addUnique('designFirms',v)} theme={theme} />
               </div>
             </div>
             <div style={sectionCard}>
-              <span className="text-[10px] font-semibold uppercase tracking-widest block mb-3" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Dealers</span>
+              <span className="text-[11px] font-semibold uppercase tracking-widest block mb-3" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Dealers</span>
               <div className="flex flex-wrap gap-2">
                 {(draft.dealers||[]).map(f=> (
-                  <button key={f} onClick={()=>removeFrom('dealers',f)} className="px-3 h-7 rounded-full text-[11px] font-semibold flex items-center gap-1.5 transition-all" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)', color: theme.colors.textPrimary }}>
-                    {f}<span className="opacity-40 text-[10px]">×</span>
+                  <button key={f} onClick={()=>removeFrom('dealers',f)} className="px-3 h-7 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)', color: theme.colors.textPrimary }}>
+                    {f}<span className="opacity-40 text-[11px]">×</span>
                   </button>
                 ))}
                 <SuggestInputPill placeholder="Add dealer" suggestions={INITIAL_DEALERS} onAdd={v=>addUnique('dealers',v)} theme={theme} />
@@ -441,7 +441,7 @@ const OpportunityDetail = ({ opp, theme, onUpdate }) => {
 
           {/* Notes */}
           <div style={sectionCard}>
-            <span className="text-[10px] font-semibold uppercase tracking-widest block mb-2" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Notes</span>
+            <span className="text-[11px] font-semibold uppercase tracking-widest block mb-2" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Notes</span>
             <textarea
               value={draft.notes||''}
               onChange={e=>update('notes',e.target.value)}
@@ -455,10 +455,10 @@ const OpportunityDetail = ({ opp, theme, onUpdate }) => {
           {/* Documents & Quotes */}
           <div style={sectionCard}>
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Documents & Quotes</span>
+              <span className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Documents & Quotes</span>
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
                 style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)', color: theme.colors.textPrimary }}
               >
                 <Upload size={12} /> Upload
@@ -488,8 +488,8 @@ const OpportunityDetail = ({ opp, theme, onUpdate }) => {
                   >
                     <FileText size={16} style={{ color: theme.colors.accent, flexShrink: 0 }} />
                     <div className="flex-1 min-w-0">
-                      <div className="text-[12px] font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{doc.fileName}</div>
-                      <div className="text-[10px]" style={{ color: theme.colors.textSecondary, opacity: 0.6 }}>{doc.type} · {doc.size} · {doc.date}</div>
+                      <div className="text-xs font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{doc.fileName}</div>
+                      <div className="text-[11px]" style={{ color: theme.colors.textSecondary, opacity: 0.6 }}>{doc.type} · {doc.size} · {doc.date}</div>
                     </div>
                     <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button className="p-1 rounded-full transition-colors" style={{ color: theme.colors.textSecondary }} title="Preview"><Eye size={14} /></button>
@@ -510,8 +510,8 @@ const OpportunityDetail = ({ opp, theme, onUpdate }) => {
                   <Paperclip size={18} style={{ opacity: 0.5 }} />
                 </div>
                 <div className="text-center">
-                  <span className="text-[12px] font-semibold block">Drop files or click to upload</span>
-                  <span className="text-[10px] block mt-0.5" style={{ opacity: 0.5 }}>PDF, DOC, images & more</span>
+                  <span className="text-xs font-semibold block">Drop files or click to upload</span>
+                  <span className="text-[11px] block mt-0.5" style={{ opacity: 0.5 }}>PDF, DOC, images & more</span>
                 </div>
               </button>
             )}
@@ -530,7 +530,7 @@ const OpportunityDetail = ({ opp, theme, onUpdate }) => {
           <div className="flex justify-center pt-2 pb-6">
             <div className="flex items-center gap-1.5">
               <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#4A7C59', opacity: 0.5 }} />
-              <span className="text-[10px] font-medium tracking-wide" style={{ color: theme.colors.textSecondary, opacity: 0.35 }}>Changes saved automatically</span>
+              <span className="text-[11px] font-medium tracking-wide" style={{ color: theme.colors.textSecondary, opacity: 0.35 }}>Changes saved automatically</span>
             </div>
           </div>
 
@@ -539,7 +539,7 @@ const OpportunityDetail = ({ opp, theme, onUpdate }) => {
       {discountOpen && (
         <div ref={discMenu} className="fixed rounded-2xl overflow-hidden" style={{ top:discPos.top, left:discPos.left, width:discPos.width, background: isDark ? '#2a2a2a' : '#fff', border: cardBorder, boxShadow: '0 8px 32px rgba(0,0,0,0.12)', zIndex: DESIGN_TOKENS.zIndex.popover }}>
           <div className="max-h-[360px] overflow-y-auto scrollbar-hide py-1">
-            {DISCOUNT_OPTIONS.map(opt=> <button key={opt} onClick={()=>{ update('discount',opt); setDiscountOpen(false); }} className={`w-full text-left px-4 py-2.5 text-[12px] transition-colors ${opt===draft.discount?'font-bold':'font-medium'}`} style={{ color: theme.colors.textPrimary }} onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>{opt}</button>)}
+            {DISCOUNT_OPTIONS.map(opt=> <button key={opt} onClick={()=>{ update('discount',opt); setDiscountOpen(false); }} className={`w-full text-left px-4 py-2.5 text-xs transition-colors ${opt===draft.discount?'font-bold':'font-medium'}`} style={{ color: theme.colors.textPrimary }} onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>{opt}</button>)}
           </div>
         </div>
       )}
@@ -584,8 +584,8 @@ const ProjectCard = ({ opp, theme, onClick }) => {
         }}
       >
         <div className="mb-2">
-          <p className="font-semibold text-[14px] leading-snug truncate" style={{ color: theme.colors.textPrimary }}>{opp.name}</p>
-          <p className="mt-0.5 text-[11px] font-medium truncate" style={{ color: theme.colors.accent, opacity: 0.8 }}>{opp.company||'Unknown'}</p>
+          <p className="font-semibold text-sm leading-snug truncate" style={{ color: theme.colors.textPrimary }}>{opp.name}</p>
+          <p className="mt-0.5 text-xs font-medium truncate" style={{ color: theme.colors.accent, opacity: 0.8 }}>{opp.company||'Unknown'}</p>
         </div>
         <div className="flex items-end justify-end">
           <p className="font-bold text-[20px] tracking-tight" style={{ color: theme.colors.textPrimary }}>{displayValue}</p>
@@ -659,7 +659,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
                   <button
                     key={tab.value}
                     onClick={() => setProjectsTab(tab.value)}
-                    className="px-4 py-1.5 rounded-xl text-[12px] font-semibold transition-all"
+                    className="px-4 py-1.5 rounded-xl text-xs font-semibold transition-all"
                     style={{
                       backgroundColor: active
                         ? (isDark ? 'rgba(255,255,255,0.14)' : '#fff')
@@ -676,7 +676,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
             {projectsTab==='my-projects' && (
               <button
                 onClick={()=>onNavigate('add-new-install')}
-                className="h-8 inline-flex items-center justify-center gap-1 rounded-full text-[11px] font-semibold transition-all px-3.5 whitespace-nowrap"
+                className="h-8 inline-flex items-center justify-center gap-1 rounded-full text-xs font-semibold transition-all px-3.5 whitespace-nowrap"
                 style={{ backgroundColor: theme.colors.textPrimary, color: isDark ? '#1a1a1a' : '#fff' }}
               >
                 + New Install
@@ -692,7 +692,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
                   <React.Fragment key={stage}>
                     <button
                       onClick={()=>setSelectedPipelineStage(stage)}
-                      className="text-[11px] font-semibold transition-all px-3 py-1.5 rounded-full"
+                      className="text-xs font-semibold transition-all px-3 py-1.5 rounded-full"
                       style={{
                       color: active ? theme.colors.accentText : theme.colors.textSecondary,
                         backgroundColor: active ? theme.colors.textPrimary : 'transparent',
@@ -701,7 +701,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
                     >
                       {showIndex && <span className="opacity-60 mr-0.5">{i+1}</span>} {stage}
                     </button>
-                    {i<STAGES.length-1 && <span className="text-[10px] opacity-25 select-none" style={{ color: theme.colors.textSecondary }}>›</span>}
+                    {i<STAGES.length-1 && <span className="text-[11px] opacity-25 select-none" style={{ color: theme.colors.textSecondary }}>›</span>}
                   </React.Fragment>
                 ); })}
               </div>
@@ -731,7 +731,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
                       border: isDark ? `1px solid ${theme.colors.border}` : '1px solid rgba(0,0,0,0.05)',
                     }}
                   >
-                    <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>{selectedPipelineStage} Total</span>
+                    <span className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>{selectedPipelineStage} Total</span>
                     <span className="text-[15px] font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>{fmtCurrency(stageTotals.totalValue)}</span>
                   </div>
                 </div>
@@ -757,7 +757,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
                         <div className="absolute bottom-0 left-0 p-3.5">
                           <h3 className="text-[15px] font-bold text-white tracking-tight leading-snug">{p.name}</h3>
-                          <p className="text-white/80 font-medium text-[11px] mt-0.5">{p.location}</p>
+                          <p className="text-white/80 font-medium text-xs mt-0.5">{p.location}</p>
                         </div>
                       </div>
                     </div>

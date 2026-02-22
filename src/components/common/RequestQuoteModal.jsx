@@ -111,7 +111,7 @@ const SearchSelect = ({ value, onChange, options, placeholder, theme, onAddNew }
                                 </>
                             )}
                             {!filtered.length && !canCreate && (
-                                <div className="px-3 py-3 text-[12px] text-center" style={{ color: c.textSecondary }}>No results</div>
+                                <div className="px-3 py-3 text-xs text-center" style={{ color: c.textSecondary }}>No results</div>
                             )}
                         </div>
                     </div>
@@ -127,7 +127,7 @@ const MiniAvatar = ({ member, selected, onToggle, isDark, colors }) => {
     return (
         <button type="button" onClick={() => onToggle(member.id)} className="relative group"
             title={`${member.firstName} ${member.lastName}`}>
-            <div className="w-9 h-9 rounded-full flex items-center justify-center text-[10px] font-bold transition-all"
+            <div className="w-9 h-9 rounded-full flex items-center justify-center text-[11px] font-bold transition-all"
                 style={{
                     backgroundColor: selected ? colors.accent : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)'),
                     color: selected ? '#FFFFFF' : colors.textPrimary,
@@ -298,7 +298,7 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                                 style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}>
                                 <FileText className="w-5 h-5" style={{ color: colors.textPrimary }} />
                             </div>
-                            <h2 className="text-[18px] font-bold tracking-tight" style={{ color: colors.textPrimary }}>Request a Quote</h2>
+                            <h2 className="text-lg font-bold tracking-tight" style={{ color: colors.textPrimary }}>Request a Quote</h2>
                         </div>
                         <button onClick={onClose} className="w-9 h-9 rounded-full flex items-center justify-center transition-colors"
                             onMouseEnter={e => e.currentTarget.style.backgroundColor = colors.hoverBg}
@@ -317,7 +317,7 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                                 onChange={e => updateField('projectName', e.target.value)}
                                 placeholder="Enter project name"
                                 style={{ ...inputBase, borderColor: errors.projectName ? colors.error : colors.fieldBorder }} />
-                            {errors.projectName && <p className="mt-1 text-[11px] font-medium" style={{ color: colors.error }}>{errors.projectName}</p>}
+                            {errors.projectName && <p className="mt-1 text-xs font-medium" style={{ color: colors.error }}>{errors.projectName}</p>}
                         </div>
 
                         {/* Type + Needed By */}
@@ -328,7 +328,7 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                                     {['new', 'revision'].map(type => (
                                         <button key={type} type="button"
                                             onClick={() => updateField('quoteType', type)}
-                                            className="flex-1 py-2.5 rounded-[10px] text-[12px] font-bold transition-all"
+                                            className="flex-1 py-2.5 rounded-[10px] text-xs font-bold transition-all"
                                             style={{
                                                 backgroundColor: formData.quoteType === type ? colors.surfaceElevated : 'transparent',
                                                 color: formData.quoteType === type ? colors.textPrimary : colors.textSecondary,
@@ -357,7 +357,7 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                                 {['commercial', 'contract'].map(type => (
                                     <button key={type} type="button"
                                         onClick={() => { updateField('projectType', type); if (type === 'commercial') updateField('contractName', ''); }}
-                                        className="flex-1 py-2.5 rounded-[10px] text-[12px] font-bold transition-all"
+                                        className="flex-1 py-2.5 rounded-[10px] text-xs font-bold transition-all"
                                         style={{
                                             backgroundColor: formData.projectType === type ? colors.surfaceElevated : 'transparent',
                                             color: formData.projectType === type ? colors.textPrimary : colors.textSecondary,
@@ -407,7 +407,7 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                                 <label style={labelCls}>Dealer *</label>
                                 <SearchSelect value={formData.dealerName} onChange={v => updateField('dealerName', v)}
                                     options={DEALERS_LIST} placeholder="Search dealer..." theme={theme} onAddNew={() => {}} />
-                                {errors.dealerName && <p className="mt-1 text-[11px] font-medium" style={{ color: colors.error }}>{errors.dealerName}</p>}
+                                {errors.dealerName && <p className="mt-1 text-xs font-medium" style={{ color: colors.error }}>{errors.dealerName}</p>}
                             </div>
                             <div>
                                 <label style={labelCls}>A&D Firm</label>
@@ -424,7 +424,7 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                                     const on = formData.itemsNeeded.includes(item.id);
                                     return (
                                         <button key={item.id} type="button" onClick={() => toggleItem(item.id)}
-                                            className="px-4 py-2 rounded-full text-[11px] font-bold transition-all"
+                                            className="px-4 py-2 rounded-full text-xs font-bold transition-all"
                                             style={{
                                                 backgroundColor: on ? (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)') : 'transparent',
                                                 color: on ? colors.textPrimary : colors.textSecondary,
@@ -445,7 +445,7 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                                     const on = formData.formats.includes(fmt.id);
                                     return (
                                         <button key={fmt.id} type="button" onClick={() => toggleFormat(fmt.id, !on)}
-                                            className="px-3.5 py-1.5 rounded-full text-[11px] font-bold transition-all"
+                                            className="px-3.5 py-1.5 rounded-full text-xs font-bold transition-all"
                                             style={{
                                                 backgroundColor: on ? colors.accent : 'transparent',
                                                 color: on ? (isDark ? '#1a1a1a' : '#FFFFFF') : colors.textSecondary,
@@ -481,12 +481,12 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                                 onMouseEnter={e => e.currentTarget.style.backgroundColor = colors.hoverBg}
                                 onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
                                 <input type="file" multiple onChange={handleFileChange} className="hidden" id="rfq-file-upload" />
-                                <p className="text-[12px] font-medium">Click to upload files</p>
+                                <p className="text-xs font-medium">Click to upload files</p>
                             </button>
                             {formData.files.length > 0 && (
                                 <div className="mt-2.5 flex flex-wrap gap-2">
                                     {formData.files.map((file, idx) => (
-                                        <div key={idx} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium"
+                                        <div key={idx} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium"
                                             style={{ backgroundColor: colors.subtle, color: colors.textPrimary }}>
                                             <FileText className="w-3 h-3 flex-shrink-0" style={{ color: colors.accent }} />
                                             <span className="max-w-[100px] truncate">{file.name}</span>
@@ -510,9 +510,9 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                                 onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
                                 <div className="flex items-center gap-2.5">
                                     <Users className="w-4 h-4" style={{ color: colors.textSecondary, opacity: 0.6 }} />
-                                    <span className="text-[12px] font-semibold" style={{ color: colors.textSecondary }}>Include Team Members</span>
+                                    <span className="text-xs font-semibold" style={{ color: colors.textSecondary }}>Include Team Members</span>
                                     {formData.selectedTeamMembers.length > 0 && (
-                                        <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold"
+                                        <span className="px-1.5 py-0.5 rounded-full text-[11px] font-bold"
                                             style={{ backgroundColor: colors.success, color: '#fff' }}>
                                             {formData.selectedTeamMembers.length}
                                         </span>

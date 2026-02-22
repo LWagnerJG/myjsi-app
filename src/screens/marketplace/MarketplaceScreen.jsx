@@ -36,7 +36,7 @@ const SizePicker = ({ sizes, selected, onSelect, theme }) => {
           <button
             key={s}
             onClick={(e) => { e.stopPropagation(); onSelect(s); }}
-            className="px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all active:scale-95"
+            className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95"
             style={{
               backgroundColor: active ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.04)'),
               color: active ? theme.colors.accentText : theme.colors.textSecondary,
@@ -111,7 +111,7 @@ const ProductCard = React.memo(({ product, cartQty, onAdd, onRemoveOne, defaultS
         />
         {product.badge && (
           <span
-            className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider"
+            className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider"
             style={{
               backgroundColor: badgeColors[product.badge]?.bg || theme.colors.accent,
               color: badgeColors[product.badge]?.text || '#fff',
@@ -135,7 +135,7 @@ const ProductCard = React.memo(({ product, cartQty, onAdd, onRemoveOne, defaultS
         )}
         {/* Price badge */}
         <span
-          className="absolute bottom-3 right-3 px-3 py-1.5 rounded-full text-[12px] font-bold"
+          className="absolute bottom-3 right-3 px-3 py-1.5 rounded-full text-xs font-bold"
           style={{
             backgroundColor: isDark ? 'rgba(0,0,0,0.75)' : 'rgba(255,255,255,0.92)',
             color: theme.colors.textPrimary,
@@ -148,10 +148,10 @@ const ProductCard = React.memo(({ product, cartQty, onAdd, onRemoveOne, defaultS
 
       {/* Info */}
       <div className="flex-1 flex flex-col p-4 gap-2">
-        <h4 className="text-[14px] font-bold leading-tight" style={{ color: theme.colors.textPrimary }}>
+        <h4 className="text-sm font-bold leading-tight" style={{ color: theme.colors.textPrimary }}>
           {product.name}
         </h4>
-        <p className="text-[11px] leading-relaxed flex-1" style={{ color: theme.colors.textSecondary }}>
+        <p className="text-xs leading-relaxed flex-1" style={{ color: theme.colors.textSecondary }}>
           {product.description}
         </p>
 
@@ -181,7 +181,7 @@ const ProductCard = React.memo(({ product, cartQty, onAdd, onRemoveOne, defaultS
             <button
               onClick={handleAdd}
               disabled={sizes && !selectedSize}
-              className="flex-1 h-9 flex items-center justify-center gap-1.5 rounded-full text-[12px] font-bold transition-all active:scale-[0.97] disabled:opacity-40"
+              className="flex-1 h-9 flex items-center justify-center gap-1.5 rounded-full text-xs font-bold transition-all active:scale-[0.97] disabled:opacity-40"
               style={{
                 backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.08)',
                 color: theme.colors.textPrimary,
@@ -196,7 +196,7 @@ const ProductCard = React.memo(({ product, cartQty, onAdd, onRemoveOne, defaultS
           <button
             onClick={handleAdd}
             disabled={sizes && !selectedSize}
-            className="mt-1 w-full py-2.5 rounded-full text-[12px] font-bold transition-all active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="mt-1 w-full py-2.5 rounded-full text-xs font-bold transition-all active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             style={{
               backgroundColor: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(53,53,53,0.07)',
               color: theme.colors.textPrimary,
@@ -257,8 +257,8 @@ const CartDrawer = ({ cart, balance, onUpdateQty, onRemove, onCheckout, theme })
                   <ShoppingCart className="w-5 h-5" style={{ color: theme.colors.accentText }} />
                 </div>
                 <div>
-                  <p className="font-bold text-[14px]" style={{ color: theme.colors.textPrimary }}>Your Cart</p>
-                  <p className="text-[11px]" style={{ color: theme.colors.textSecondary }}>{totalItems} item{totalItems !== 1 ? 's' : ''}</p>
+                  <p className="font-bold text-sm" style={{ color: theme.colors.textPrimary }}>Your Cart</p>
+                  <p className="text-xs" style={{ color: theme.colors.textSecondary }}>{totalItems} item{totalItems !== 1 ? 's' : ''}</p>
                 </div>
               </div>
               <ChevronDown className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
@@ -267,7 +267,7 @@ const CartDrawer = ({ cart, balance, onUpdateQty, onRemove, onCheckout, theme })
             <div className="px-5 pb-5 pt-3 max-h-[65vh] overflow-y-auto scrollbar-hide flex flex-col gap-4">
               {/* Items */}
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-widest mb-2 px-1" style={{ color: theme.colors.textSecondary }}>Items</p>
+                <p className="text-xs font-bold uppercase tracking-widest mb-2 px-1" style={{ color: theme.colors.textSecondary }}>Items</p>
                 <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.015)', border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'}` }}>
                   <div className="px-3 py-1">
                     {cart.map((item, idx) => (
@@ -278,8 +278,8 @@ const CartDrawer = ({ cart, balance, onUpdateQty, onRemove, onCheckout, theme })
                             <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-semibold truncate text-[12px]" style={{ color: theme.colors.textPrimary }}>{item.name}</p>
-                            <p className="text-[10px]" style={{ color: theme.colors.textSecondary }}>
+                            <p className="font-semibold truncate text-xs" style={{ color: theme.colors.textPrimary }}>{item.name}</p>
+                            <p className="text-[11px]" style={{ color: theme.colors.textSecondary }}>
                               {item.size && `Size ${item.size} · `}{formatElliottBucks(item.price)}
                             </p>
                           </div>
@@ -290,7 +290,7 @@ const CartDrawer = ({ cart, balance, onUpdateQty, onRemove, onCheckout, theme })
                             >
                               {item.qty === 1 ? <Trash2 className="w-3.5 h-3.5" style={{ color: '#B85C5C' }} /> : <Minus className="w-3.5 h-3.5" style={{ color: theme.colors.textSecondary }} />}
                             </button>
-                            <span className="font-bold w-5 text-center text-[12px]" style={{ color: theme.colors.textPrimary }}>{item.qty}</span>
+                            <span className="font-bold w-5 text-center text-xs" style={{ color: theme.colors.textPrimary }}>{item.qty}</span>
                             <button
                               onClick={() => onUpdateQty(item.cartId, 1)}
                               className="w-7 h-7 flex items-center justify-center rounded-full active:scale-90 transition"
@@ -308,16 +308,16 @@ const CartDrawer = ({ cart, balance, onUpdateQty, onRemove, onCheckout, theme })
               {/* Summary */}
               <div className="rounded-2xl p-4" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(53,53,53,0.02)', border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'}` }}>
                 <div className="flex justify-between mb-1.5">
-                  <span className="text-[12px]" style={{ color: theme.colors.textSecondary }}>Subtotal</span>
-                  <span className="text-[12px] font-semibold" style={{ color: theme.colors.textPrimary }}>{formatElliottBucks(totalPrice)}</span>
+                  <span className="text-xs" style={{ color: theme.colors.textSecondary }}>Subtotal</span>
+                  <span className="text-xs font-semibold" style={{ color: theme.colors.textPrimary }}>{formatElliottBucks(totalPrice)}</span>
                 </div>
                 <div className="flex justify-between mb-1.5">
-                  <span className="text-[12px]" style={{ color: theme.colors.textSecondary }}>Your Balance</span>
-                  <span className="text-[12px] font-semibold" style={{ color: canAfford ? theme.colors.success : theme.colors.error }}>{formatElliottBucks(balance)}</span>
+                  <span className="text-xs" style={{ color: theme.colors.textSecondary }}>Your Balance</span>
+                  <span className="text-xs font-semibold" style={{ color: canAfford ? theme.colors.success : theme.colors.error }}>{formatElliottBucks(balance)}</span>
                 </div>
                 <div className="border-t pt-2 mt-2 flex justify-between" style={{ borderColor: theme.colors.border }}>
-                  <span className="text-[12px] font-bold" style={{ color: theme.colors.textPrimary }}>Remaining After</span>
-                  <span className="text-[12px] font-bold" style={{ color: canAfford ? theme.colors.success : theme.colors.error }}>
+                  <span className="text-xs font-bold" style={{ color: theme.colors.textPrimary }}>Remaining After</span>
+                  <span className="text-xs font-bold" style={{ color: canAfford ? theme.colors.success : theme.colors.error }}>
                     {canAfford ? formatElliottBucks(balance - totalPrice) : 'Insufficient'}
                   </span>
                 </div>
@@ -362,9 +362,9 @@ const OrderCard = ({ order, theme }) => {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <p className="text-[13px] font-bold" style={{ color: theme.colors.textPrimary }}>{order.id}</p>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ backgroundColor: cfg.bg, color: cfg.color }}>{cfg.label}</span>
+            <span className="px-2 py-0.5 rounded-full text-[11px] font-bold" style={{ backgroundColor: cfg.bg, color: cfg.color }}>{cfg.label}</span>
           </div>
-          <p className="text-[11px] mt-0.5" style={{ color: theme.colors.textSecondary }}>
+          <p className="text-xs mt-0.5" style={{ color: theme.colors.textSecondary }}>
             {new Date(order.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} · {formatElliottBucks(order.total)}
           </p>
         </div>
@@ -375,7 +375,7 @@ const OrderCard = ({ order, theme }) => {
         <div className="px-4 pb-4 space-y-3" style={{ borderTop: `1px solid ${theme.colors.border}` }}>
           {/* Items */}
           <div className="pt-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: theme.colors.textSecondary }}>Items</p>
+            <p className="text-[11px] font-bold uppercase tracking-widest mb-2" style={{ color: theme.colors.textSecondary }}>Items</p>
             {order.items.map((item, i) => {
               const prod = getProductById(item.productId);
               return (
@@ -384,8 +384,8 @@ const OrderCard = ({ order, theme }) => {
                     {prod?.image ? <img src={prod.image} alt={item.name} className="w-full h-full object-cover" /> : <Package className="w-4 h-4 m-auto" style={{ color: theme.colors.textSecondary }} />}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[12px] font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{item.name}</p>
-                    <p className="text-[10px]" style={{ color: theme.colors.textSecondary }}>
+                    <p className="text-xs font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{item.name}</p>
+                    <p className="text-[11px]" style={{ color: theme.colors.textSecondary }}>
                       Qty {item.qty}{item.size ? ` · Size ${item.size}` : ''} · {formatElliottBucks(item.price)}
                     </p>
                   </div>
@@ -400,21 +400,21 @@ const OrderCard = ({ order, theme }) => {
               {order.tracking && (
                 <div className="flex items-center gap-2 mb-1.5">
                   <Truck className="w-3.5 h-3.5 flex-shrink-0" style={{ color: theme.colors.textSecondary }} />
-                  <p className="text-[11px] font-mono" style={{ color: theme.colors.textPrimary }}>{order.tracking}</p>
+                  <p className="text-xs font-mono" style={{ color: theme.colors.textPrimary }}>{order.tracking}</p>
                 </div>
               )}
               {order.status === 'delivered' && order.deliveredDate && (
-                <p className="text-[11px]" style={{ color: theme.colors.success }}>
+                <p className="text-xs" style={{ color: theme.colors.success }}>
                   Delivered {new Date(order.deliveredDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                 </p>
               )}
               {order.status === 'shipped' && order.estimatedDelivery && (
-                <p className="text-[11px]" style={{ color: theme.colors.info }}>
+                <p className="text-xs" style={{ color: theme.colors.info }}>
                   Estimated delivery {new Date(order.estimatedDelivery).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                 </p>
               )}
               {order.status === 'processing' && order.estimatedDelivery && (
-                <p className="text-[11px]" style={{ color: theme.colors.warning }}>
+                <p className="text-xs" style={{ color: theme.colors.warning }}>
                   Ships by {new Date(order.estimatedDelivery).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                 </p>
               )}
@@ -447,12 +447,12 @@ const BalanceCard = ({ balance, theme }) => {
       <div className="relative z-10">
         <div className="flex items-center gap-2 mb-3">
           <Wallet className="w-4 h-4 text-white/60" />
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-white/60">ElliottBucks Balance</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-white/60">ElliottBucks Balance</p>
         </div>
         <p className="text-4xl font-bold text-white tracking-tight">
           {formatElliottBucks(balance)}
         </p>
-        <p className="text-[11px] text-white/50 mt-1">Redeem for exclusive LWYD merchandise</p>
+        <p className="text-xs text-white/50 mt-1">Redeem for exclusive LWYD merchandise</p>
       </div>
     </div>
   );
@@ -473,8 +473,8 @@ const TransactionRow = ({ txn, theme, isLast }) => {
         <Icon className="w-4 h-4" style={{ color: isCredit ? theme.colors.success : theme.colors.error }} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-[12px] font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{txn.description}</p>
-        <p className="text-[10px]" style={{ color: theme.colors.textSecondary }}>
+        <p className="text-xs font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{txn.description}</p>
+        <p className="text-[11px]" style={{ color: theme.colors.textSecondary }}>
           {new Date(txn.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
         </p>
       </div>
@@ -508,7 +508,7 @@ const CheckoutSuccess = ({ show, theme }) => {
       >
         <CheckCircle className="w-10 h-10 mx-auto mb-3" style={{ color: '#4A7C59' }} />
         <p className="font-bold text-[15px]">Order Placed!</p>
-        <p className="text-[12px] mt-1" style={{ color: theme.colors.textSecondary }}>Your LWYD merch is on its way.</p>
+        <p className="text-xs mt-1" style={{ color: theme.colors.textSecondary }}>Your LWYD merch is on its way.</p>
       </div>
     </div>
   );
@@ -656,7 +656,7 @@ export const MarketplaceScreen = ({ theme, onNavigate, userSettings }) => {
                     <span className="w-2 h-2 rounded-full bg-blue-400 absolute top-2 right-1" />
                   )}
                   {tab.id === 'shop' && cartItemCount > 0 && (
-                    <span className="ml-1 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center" style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}>
+                    <span className="ml-1 min-w-[18px] h-[18px] px-1 rounded-full text-[11px] font-bold flex items-center justify-center" style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}>
                       {cartItemCount}
                     </span>
                   )}
@@ -713,7 +713,7 @@ export const MarketplaceScreen = ({ theme, onNavigate, userSettings }) => {
                     <button
                       key={cat.id}
                       onClick={() => setSelectedCategory(cat.id)}
-                      className="px-4 py-2 rounded-full text-[12px] font-semibold whitespace-nowrap transition-all active:scale-95 flex-shrink-0"
+                      className="px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all active:scale-95 flex-shrink-0"
                       style={{
                         backgroundColor: active ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.04)'),
                         color: active ? theme.colors.accentText : theme.colors.textSecondary,
@@ -746,8 +746,8 @@ export const MarketplaceScreen = ({ theme, onNavigate, userSettings }) => {
                   <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.04)' }}>
                     <Search className="w-7 h-7" style={{ color: theme.colors.textSecondary }} />
                   </div>
-                  <p className="text-[14px] font-semibold mb-1" style={{ color: theme.colors.textPrimary }}>No products found</p>
-                  <p className="text-[12px]" style={{ color: theme.colors.textSecondary }}>Try adjusting your search or category filter.</p>
+                  <p className="text-sm font-semibold mb-1" style={{ color: theme.colors.textPrimary }}>No products found</p>
+                  <p className="text-xs" style={{ color: theme.colors.textSecondary }}>Try adjusting your search or category filter.</p>
                 </div>
               )}
 
@@ -774,7 +774,7 @@ export const MarketplaceScreen = ({ theme, onNavigate, userSettings }) => {
                         <SIcon className="w-4 h-4" style={{ color: s.color }} />
                       </div>
                       <p className="text-xl font-bold" style={{ color: theme.colors.textPrimary }}>{count}</p>
-                      <p className="text-[10px] font-medium" style={{ color: theme.colors.textSecondary }}>{s.label}</p>
+                      <p className="text-[11px] font-medium" style={{ color: theme.colors.textSecondary }}>{s.label}</p>
                     </GlassCard>
                   );
                 })}
@@ -790,11 +790,11 @@ export const MarketplaceScreen = ({ theme, onNavigate, userSettings }) => {
                   <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.04)' }}>
                     <Package className="w-7 h-7" style={{ color: theme.colors.textSecondary }} />
                   </div>
-                  <p className="text-[14px] font-semibold mb-1" style={{ color: theme.colors.textPrimary }}>No orders yet</p>
-                  <p className="text-[12px]" style={{ color: theme.colors.textSecondary }}>Shop the LWYD collection to place your first order.</p>
+                  <p className="text-sm font-semibold mb-1" style={{ color: theme.colors.textPrimary }}>No orders yet</p>
+                  <p className="text-xs" style={{ color: theme.colors.textSecondary }}>Shop the LWYD collection to place your first order.</p>
                   <button
                     onClick={() => setActiveTab('shop')}
-                    className="mt-4 px-5 py-2.5 rounded-full text-[12px] font-bold transition-all active:scale-95"
+                    className="mt-4 px-5 py-2.5 rounded-full text-xs font-bold transition-all active:scale-95"
                     style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
                   >
                     Start Shopping
@@ -816,14 +816,14 @@ export const MarketplaceScreen = ({ theme, onNavigate, userSettings }) => {
                   <p className="text-lg font-bold" style={{ color: theme.colors.textPrimary }}>
                     {formatElliottBucks(txnHistory.filter(t => t.type === 'credit').reduce((s, t) => s + t.amount, 0))}
                   </p>
-                  <p className="text-[10px] font-medium" style={{ color: theme.colors.textSecondary }}>Total Earned</p>
+                  <p className="text-[11px] font-medium" style={{ color: theme.colors.textSecondary }}>Total Earned</p>
                 </GlassCard>
                 <GlassCard theme={theme} className="p-4 text-center">
                   <ShoppingBag className="w-5 h-5 mx-auto mb-2" style={{ color: theme.colors.error }} />
                   <p className="text-lg font-bold" style={{ color: theme.colors.textPrimary }}>
                     {formatElliottBucks(Math.abs(txnHistory.filter(t => t.type === 'debit').reduce((s, t) => s + t.amount, 0)))}
                   </p>
-                  <p className="text-[10px] font-medium" style={{ color: theme.colors.textSecondary }}>Total Spent</p>
+                  <p className="text-[11px] font-medium" style={{ color: theme.colors.textSecondary }}>Total Spent</p>
                 </GlassCard>
               </div>
 
@@ -831,7 +831,7 @@ export const MarketplaceScreen = ({ theme, onNavigate, userSettings }) => {
               <GlassCard theme={theme} className="px-4 py-3">
                 <div className="flex items-center gap-2 mb-3">
                   <History className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
-                  <p className="text-[12px] font-bold uppercase tracking-widest" style={{ color: theme.colors.textSecondary }}>Transaction History</p>
+                  <p className="text-xs font-bold uppercase tracking-widest" style={{ color: theme.colors.textSecondary }}>Transaction History</p>
                 </div>
                 {txnHistory.map((txn, i) => (
                   <TransactionRow key={txn.id} txn={txn} theme={theme} isLast={i === txnHistory.length - 1} />
@@ -856,10 +856,10 @@ export const MarketplaceScreen = ({ theme, onNavigate, userSettings }) => {
                         <Award className="w-3 h-3" style={{ color: theme.colors.accent }} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[12px] font-semibold" style={{ color: theme.colors.textPrimary }}>{item.title}</p>
-                        <p className="text-[10px]" style={{ color: theme.colors.textSecondary }}>{item.desc}</p>
+                        <p className="text-xs font-semibold" style={{ color: theme.colors.textPrimary }}>{item.title}</p>
+                        <p className="text-[11px]" style={{ color: theme.colors.textSecondary }}>{item.desc}</p>
                       </div>
-                      <span className="text-[10px] font-bold flex-shrink-0 px-2 py-1 rounded-full" style={{ backgroundColor: isDark ? 'rgba(74,124,89,0.15)' : 'rgba(74,124,89,0.08)', color: theme.colors.success }}>
+                      <span className="text-[11px] font-bold flex-shrink-0 px-2 py-1 rounded-full" style={{ backgroundColor: isDark ? 'rgba(74,124,89,0.15)' : 'rgba(74,124,89,0.08)', color: theme.colors.success }}>
                         {item.amount}
                       </span>
                     </div>

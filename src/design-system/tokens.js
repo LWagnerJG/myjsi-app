@@ -49,13 +49,17 @@ export const JSI_TYPOGRAPHY = {
     h8: { size: '1rem', mobileSize: '0.875rem', weight: 500, lineHeight: 1.4, letterSpacing: '0' },           // 16px / 14px (Grotesk 18/16 scale)
   },
 
-  // Body text with weight variations
+  // Body text scale (standardized across app)
+  // 10px micro → 11px caption → 12px small → 13px compact → 14px body → 15px large → 16px+ headings
   body: {
-    large: { size: '1.125rem', weight: 400, lineHeight: 1.6 },    // 18px - Light/Regular
-    default: { size: '1rem', weight: 400, lineHeight: 1.6 },      // 16px - Regular
-    small: { size: '0.875rem', weight: 400, lineHeight: 1.5 },    // 14px - Regular
-    tiny: { size: '0.75rem', weight: 500, lineHeight: 1.4 },      // 12px - Medium
-    micro: { size: '0.625rem', weight: 500, lineHeight: 1.3 },    // 10px - Medium (labels)
+    large: { size: '1.125rem', weight: 400, lineHeight: 1.6 },    // 18px - text-lg
+    default: { size: '1rem', weight: 400, lineHeight: 1.6 },      // 16px - text-base
+    bodyLarge: { size: '0.9375rem', weight: 400, lineHeight: 1.5 }, // 15px - card titles
+    body: { size: '0.875rem', weight: 400, lineHeight: 1.5 },     // 14px - text-sm (standard body)
+    compact: { size: '0.8125rem', weight: 400, lineHeight: 1.5 }, // 13px - body compact
+    small: { size: '0.75rem', weight: 500, lineHeight: 1.4 },     // 12px - text-xs (form labels)
+    caption: { size: '0.6875rem', weight: 500, lineHeight: 1.3 }, // 11px - captions, meta
+    micro: { size: '0.625rem', weight: 600, lineHeight: 1.3 },    // 10px - badges, tracking text
   },
 
   // Font weights

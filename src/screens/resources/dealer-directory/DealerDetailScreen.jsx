@@ -29,13 +29,13 @@ const HBar = ({ label, value, maxValue, color, isDark, colors, rank }) => {
     return (
         <div className="flex items-center gap-2.5 py-1.5">
             {rank != null && (
-                <span className="text-[11px] font-bold w-4 text-center flex-shrink-0" style={{ color: colors.textSecondary }}>{rank}</span>
+                <span className="text-xs font-bold w-4 text-center flex-shrink-0" style={{ color: colors.textSecondary }}>{rank}</span>
             )}
             <span className="text-[13px] font-semibold w-28 flex-shrink-0 truncate" style={{ color: colors.textPrimary }}>{label}</span>
             <div className="flex-1 h-4 rounded-full overflow-hidden" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}>
                 <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: color || colors.accent, opacity: 0.8 }} />
             </div>
-            <span className="text-[12px] font-bold w-16 text-right flex-shrink-0" style={{ color: colors.textPrimary }}>{fmt(value)}</span>
+            <span className="text-xs font-bold w-16 text-right flex-shrink-0" style={{ color: colors.textPrimary }}>{fmt(value)}</span>
         </div>
     );
 };
@@ -97,7 +97,7 @@ const MonthlyBarChart = ({ data, colors, isDark }) => {
                 const hPct = (d.amount / max) * 100;
                 return (
                     <div key={d.month} className="flex-1 flex flex-col items-center gap-1 min-w-0">
-                        <span className="text-[9px] font-bold" style={{ color: colors.textSecondary }}>{fmtK(d.amount)}</span>
+                        <span className="text-[10px] font-bold" style={{ color: colors.textSecondary }}>{fmtK(d.amount)}</span>
                         <div className="w-full flex justify-center" style={{ height: 80 }}>
                             <div
                                 className="rounded-t-md transition-all duration-500"
@@ -111,7 +111,7 @@ const MonthlyBarChart = ({ data, colors, isDark }) => {
                                 }}
                             />
                         </div>
-                        <span className="text-[10px] font-semibold" style={{ color: colors.textSecondary }}>{d.month}</span>
+                        <span className="text-[11px] font-semibold" style={{ color: colors.textSecondary }}>{d.month}</span>
                     </div>
                 );
             })}
@@ -129,10 +129,10 @@ const GoalProgress = ({ current, goal, label, isDark, colors, barHeight = 'h-2.5
     return (
         <div className={className}>
             <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[12px] font-semibold" style={{ color: colors.textSecondary }}>
+                <span className="text-xs font-semibold" style={{ color: colors.textSecondary }}>
                     {fmt(current)} of {fmt(goal)} {label}
                 </span>
-                <span className="text-[12px] font-black px-2 py-0.5 rounded-full" style={{ backgroundColor: bgTint, color }}>{pct}%</span>
+                <span className="text-xs font-black px-2 py-0.5 rounded-full" style={{ backgroundColor: bgTint, color }}>{pct}%</span>
             </div>
             <div className={`w-full ${barHeight} rounded-full overflow-hidden`} style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }}>
                 <div className="h-full rounded-full transition-all duration-700" style={{ width: `${Math.min(pct, 100)}%`, backgroundColor: color }} />
@@ -292,11 +292,11 @@ export const DealerDetailScreen = ({ theme, setSuccessMessage, dealerDirectory, 
                 <GlassCard theme={theme} className="p-5" variant="elevated">
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: colors.textSecondary, opacity: 0.7 }}>YTD Sales</p>
+                            <p className="text-[11px] font-bold uppercase tracking-widest mb-0.5" style={{ color: colors.textSecondary, opacity: 0.7 }}>YTD Sales</p>
                             <p className="text-2xl font-black tracking-tight leading-tight" style={{ color: colors.textPrimary }}>{fmt(dealer.sales)}</p>
                         </div>
                         <div>
-                            <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: colors.textSecondary, opacity: 0.7 }}>Bookings</p>
+                            <p className="text-[11px] font-bold uppercase tracking-widest mb-0.5" style={{ color: colors.textSecondary, opacity: 0.7 }}>Bookings</p>
                             <p className="text-2xl font-black tracking-tight leading-tight" style={{ color: colors.textPrimary }}>{fmt(dealer.bookings)}</p>
                         </div>
                     </div>
@@ -308,7 +308,7 @@ export const DealerDetailScreen = ({ theme, setSuccessMessage, dealerDirectory, 
                     {dealer.rebatableGoal > 0 && (
                         <div className="mt-3 pt-3 border-t" style={{ borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)' }}>
                             <div className="flex items-center gap-1.5 mb-1.5">
-                                <span className="text-[11px] font-semibold tracking-wide" style={{ color: colors.textSecondary, opacity: 0.6 }}>
+                                <span className="text-xs font-semibold tracking-wide" style={{ color: colors.textSecondary, opacity: 0.6 }}>
                                     Rebatable: {fmt(dealer.rebatableSales)} of {fmt(dealer.rebatableGoal)}
                                 </span>
                                 <button
@@ -319,13 +319,13 @@ export const DealerDetailScreen = ({ theme, setSuccessMessage, dealerDirectory, 
                                 >
                                     <Info className="w-3.5 h-3.5" />
                                 </button>
-                                <span className="text-[11px] font-bold ml-auto" style={{
+                                <span className="text-xs font-bold ml-auto" style={{
                                     color: rebatePct >= 80 ? '#4A7C59' : rebatePct >= 50 ? '#C4956A' : '#B85C5C',
                                     opacity: 0.7
                                 }}>{rebatePct}%</span>
                             </div>
                             {showRebateInfo && (
-                                <p className="text-[11px] leading-relaxed mb-2 px-2 py-1.5 rounded-lg" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(91,123,140,0.06)', color: colors.textSecondary }}>
+                                <p className="text-xs leading-relaxed mb-2 px-2 py-1.5 rounded-lg" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(91,123,140,0.06)', color: colors.textSecondary }}>
                                     Rebatable sales for {new Date().getFullYear()} include only projects at this dealer's standard daily discount.
                                 </p>
                             )}
@@ -375,7 +375,7 @@ export const DealerDetailScreen = ({ theme, setSuccessMessage, dealerDirectory, 
                                     {dealer.verticalSales.map(v => (
                                         <div key={v.label} className="flex items-center gap-2">
                                             <div className="w-2.5 h-2.5 rounded-sm flex-shrink-0" style={{ backgroundColor: v.color }} />
-                                            <span className="text-[12px] font-semibold whitespace-nowrap" style={{ color: colors.textPrimary }}>{v.label}</span>
+                                            <span className="text-xs font-semibold whitespace-nowrap" style={{ color: colors.textPrimary }}>{v.label}</span>
                                         </div>
                                     ))}
                                 </div>
@@ -389,8 +389,8 @@ export const DealerDetailScreen = ({ theme, setSuccessMessage, dealerDirectory, 
                                         const pct = totalVerticalSales ? Math.round((v.value / totalVerticalSales) * 100) : 0;
                                         return (
                                             <div key={v.label} className="flex items-center gap-2 justify-end">
-                                                <span className="text-[11px] font-bold" style={{ color: colors.textSecondary }}>{pct}%</span>
-                                                <span className="text-[12px] font-bold text-right" style={{ color: colors.textPrimary, minWidth: 56 }}>{fmt(v.value)}</span>
+                                                <span className="text-xs font-bold" style={{ color: colors.textSecondary }}>{pct}%</span>
+                                                <span className="text-xs font-bold text-right" style={{ color: colors.textPrimary, minWidth: 56 }}>{fmt(v.value)}</span>
                                             </div>
                                         );
                                     })}
@@ -403,7 +403,7 @@ export const DealerDetailScreen = ({ theme, setSuccessMessage, dealerDirectory, 
                     {dealer.seriesSales?.length > 0 && (
                         <GlassCard theme={theme} className="p-4">
                             <SectionHeader icon={Briefcase} title="Sales by Series" colors={colors}
-                                right={<span className="text-[11px] font-bold" style={{ color: colors.textSecondary }}>{dealer.seriesSales.length} series</span>}
+                                right={<span className="text-xs font-bold" style={{ color: colors.textSecondary }}>{dealer.seriesSales.length} series</span>}
                             />
                             <div className="space-y-0">
                                 {dealer.seriesSales.map((s, i) => (
@@ -419,7 +419,7 @@ export const DealerDetailScreen = ({ theme, setSuccessMessage, dealerDirectory, 
                     <GlassCard theme={theme} className="p-4">
                         <SectionHeader icon={Award} title="Sales & Designer Rewards" colors={colors} />
                         <div className="overflow-x-auto -mx-2 scrollbar-hide">
-                            <table className="w-full text-[12px]" style={{ minWidth: 420 }}>
+                            <table className="w-full text-xs" style={{ minWidth: 420 }}>
                                 <thead>
                                     <tr>
                                         <th className="text-left pl-2 pb-2 font-bold" style={{ color: colors.textSecondary }}>Name</th>
@@ -436,7 +436,7 @@ export const DealerDetailScreen = ({ theme, setSuccessMessage, dealerDirectory, 
                                         <tr key={rep.name} className="border-t" style={{ borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }}>
                                             <td className="pl-2 py-2 font-semibold" style={{ color: colors.textPrimary }}>{rep.name}</td>
                                             <td className="py-2">
-                                                <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase"
+                                                <span className="px-2 py-0.5 rounded-md text-[11px] font-bold uppercase"
                                                     style={{
                                                         backgroundColor: rep.type === 'sales' ? 'rgba(74,124,89,0.12)' : 'rgba(91,123,140,0.12)',
                                                         color: rep.type === 'sales' ? '#4A7C59' : '#5B7B8C'
@@ -468,9 +468,9 @@ export const DealerDetailScreen = ({ theme, setSuccessMessage, dealerDirectory, 
                                     <div key={i} className="flex items-center gap-3 py-2.5 border-b last:border-0" style={{ borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }}>
                                         <div className="flex-1 min-w-0">
                                             <p className="text-[13px] font-semibold truncate" style={{ color: colors.textPrimary }}>{proj.name}</p>
-                                            <p className="text-[11px] mt-0.5" style={{ color: colors.textSecondary }}>{new Date(proj.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                                            <p className="text-xs mt-0.5" style={{ color: colors.textSecondary }}>{new Date(proj.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
                                         </div>
-                                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold flex-shrink-0"
+                                        <span className="px-2 py-0.5 rounded-full text-[11px] font-bold flex-shrink-0"
                                             style={{ backgroundColor: statusCfg.bg, color: statusCfg.color }}>
                                             {statusCfg.label || proj.status}
                                         </span>
@@ -507,13 +507,13 @@ export const DealerDetailScreen = ({ theme, setSuccessMessage, dealerDirectory, 
                             if (members.length === 0) return null;
                             return (
                                 <div key={section.key}>
-                                    <p className="text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: colors.textSecondary }}>{section.title}</p>
+                                    <p className="text-[11px] font-bold uppercase tracking-wider mb-1.5" style={{ color: colors.textSecondary }}>{section.title}</p>
                                     <div className="space-y-0">
                                         {members.map(m => (
                                             <div key={m.name} className="flex items-center justify-between py-2 border-b last:border-0" style={{ borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }}>
                                                 <div className="min-w-0 flex-1">
                                                     <p className="text-[13px] font-semibold truncate" style={{ color: colors.textPrimary }}>{m.name}</p>
-                                                    <p className="text-[11px] truncate" style={{ color: m.status === 'pending' ? '#C4956A' : colors.textSecondary }}>
+                                                    <p className="text-xs truncate" style={{ color: m.status === 'pending' ? '#C4956A' : colors.textSecondary }}>
                                                         {m.status === 'pending' ? 'Pending Invitation' : m.email}
                                                     </p>
                                                 </div>
@@ -533,7 +533,7 @@ export const DealerDetailScreen = ({ theme, setSuccessMessage, dealerDirectory, 
                                 <div className="fixed inset-0 z-10" onClick={() => setMenuState({ open: false, person: null, top: 0, left: 0 })} />
                                 <div className="absolute z-20 animate-fade-in" style={{ top: menuState.top, left: Math.max(0, menuState.left) }}>
                                     <GlassCard theme={theme} className="p-1 w-56">
-                                        <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider" style={{ color: colors.textSecondary }}>Change Role</div>
+                                        <div className="px-2 py-1 text-[11px] font-bold uppercase tracking-wider" style={{ color: colors.textSecondary }}>Change Role</div>
                                         {ROLE_OPTIONS.map(opt => (
                                             <button
                                                 key={opt.value}

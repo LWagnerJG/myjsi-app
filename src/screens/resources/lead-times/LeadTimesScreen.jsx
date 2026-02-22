@@ -76,7 +76,7 @@ const QuickShipModal = ({ isOpen, onClose, seriesName, theme }) => {
                     <ExternalLink className="w-4 h-4" />
                 </button>
                 
-                <p className="text-[11px] text-center mt-4" style={{ color: theme.colors.textSecondary }}>
+                <p className="text-xs text-center mt-4" style={{ color: theme.colors.textSecondary }}>
                     Click to see available models, finishes, and program details on jsifurniture.com
                 </p>
             </div>
@@ -93,7 +93,7 @@ const QuickShipBadge = ({ onClick }) => (
         title="QuickShip Available"
     >
         <Zap className="w-3 h-3" style={{ color: '#9A8A78' }} />
-        <span className="text-[9px] font-semibold tracking-wide" style={{ color: '#9A8A78' }}>QS</span>
+        <span className="text-[10px] font-semibold tracking-wide" style={{ color: '#9A8A78' }}>QS</span>
     </button>
 );
 
@@ -147,7 +147,7 @@ export const LeadTimesScreen = ({ theme = {} }) => {
     }, [searchTerm, sortFastest]);
 
     const LVLabel = ({ label }) => (
-        <span className="text-[10px] font-bold" style={{ color: safeTheme.colors.textSecondary }}>{label}</span>
+        <span className="text-[11px] font-bold" style={{ color: safeTheme.colors.textSecondary }}>{label}</span>
     );
 
     const LeadTimeInfo = ({ typeData }) => (

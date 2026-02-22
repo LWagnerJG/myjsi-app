@@ -25,7 +25,7 @@ export const CommissionRatesScreen = ({ theme }) => {
                                     {['Discounts', 'Rep Comm.', 'Spiff'].map((h) => (
                                         <th
                                             key={h}
-                                            className="py-2.5 px-3 text-[11px] font-semibold uppercase tracking-wider"
+                                            className="py-2.5 px-3 text-xs font-semibold uppercase tracking-wider"
                                             style={{ color: theme.colors.textSecondary, borderBottom: `1.5px solid ${theme.colors.border}` }}
                                         >
                                             {h}
@@ -53,7 +53,7 @@ export const CommissionRatesScreen = ({ theme }) => {
                                                     {rate.discount}
                                                     {isContract && (
                                                         <span
-                                                            className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
+                                                            className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
                                                             style={{ backgroundColor: `${theme.colors.info}14`, color: theme.colors.info }}
                                                         >
                                                             Contract

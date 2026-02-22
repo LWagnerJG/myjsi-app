@@ -67,13 +67,13 @@ export const InstallInstructionsScreen = ({ theme }) => {
           <div className="absolute inset-0 bg-black/30 flex items-center justify-center group-hover:bg-black/45 transition-colors">
             <Play className="w-6 h-6 text-white" />
           </div>
-          <span className="absolute bottom-1 right-1 text-[10px] px-1.5 py-0.5 rounded-full font-medium bg-black/60 text-white tracking-wide">{instruction.duration}</span>
+          <span className="absolute bottom-1 right-1 text-[11px] px-1.5 py-0.5 rounded-full font-medium bg-black/60 text-white tracking-wide">{instruction.duration}</span>
         </div>
         {/* Content */}
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2 mb-2">
             <h3 className="font-semibold text-base leading-snug flex-1" style={{ color: theme.colors.textPrimary }}>{instruction.name}</h3>
-            <span className="px-2 py-0.5 rounded-full text-[11px] font-medium" style={{ backgroundColor: theme.colors.accent+'20', color: theme.colors.accent }}>{instruction.type}</span>
+            <span className="px-2 py-0.5 rounded-full text-xs font-medium" style={{ backgroundColor: theme.colors.accent+'20', color: theme.colors.accent }}>{instruction.type}</span>
           </div>
           <div className="flex flex-wrap gap-2">
             <PillButton

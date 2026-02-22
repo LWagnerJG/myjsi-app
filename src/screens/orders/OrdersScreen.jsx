@@ -81,7 +81,7 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
                                 onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; }}
                             >
                                 <span className="text-sm" style={{ color: theme.colors.textPrimary }}>{day}</span>
-                                {has && <span className="text-[10px]" style={{ color: theme.colors.textSecondary }}>{currency0(total)}</span>}
+                                {has && <span className="text-[11px]" style={{ color: theme.colors.textSecondary }}>{currency0(total)}</span>}
                             </button>
                         );
                     })}
@@ -105,13 +105,13 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <p className="font-semibold text-[15px] leading-snug truncate" style={{ color: theme.colors.textPrimary }}>{o.details}</p>
-                                        <p className="text-[12px] mt-0.5 truncate" style={{ color: theme.colors.textSecondary }}>{formatCompanyName(o.company)}</p>
+                                        <p className="text-xs mt-0.5 truncate" style={{ color: theme.colors.textSecondary }}>{formatCompanyName(o.company)}</p>
                                         <div className="flex items-center gap-2 mt-1.5">
-                                            <span className="text-[10px] font-medium px-1.5 py-px rounded" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)', color: theme.colors.textSecondary }}>SO {o.orderNumber}</span>
-                                            <span className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: sc }}>{o.status}</span>
+                                            <span className="text-[11px] font-medium px-1.5 py-px rounded" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)', color: theme.colors.textSecondary }}>SO {o.orderNumber}</span>
+                                            <span className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: sc }}>{o.status}</span>
                                         </div>
                                     </div>
-                                    <p className="font-bold text-[16px] tabular-nums flex-shrink-0" style={{ color: theme.colors.textPrimary }}>{currency0(o.net)}</p>
+                                    <p className="font-bold text-base tabular-nums flex-shrink-0" style={{ color: theme.colors.textPrimary }}>{currency0(o.net)}</p>
                                 </div>
                             </div>
                         );
@@ -139,13 +139,13 @@ const OrderRow = ({ order, theme, onNavigate, isLast }) => {
                 </div>
                 <div className="flex-1 min-w-0">
                     <p className="font-semibold text-[15px] leading-snug truncate" style={{ color: theme.colors.textPrimary }}>{order.details}</p>
-                    <p className="text-[12px] mt-0.5 truncate" style={{ color: theme.colors.textSecondary }}>{formatCompanyName(order.company)}</p>
+                    <p className="text-xs mt-0.5 truncate" style={{ color: theme.colors.textSecondary }}>{formatCompanyName(order.company)}</p>
                     <div className="flex items-center gap-2 mt-1.5">
-                        <span className="text-[10px] font-medium px-1.5 py-px rounded" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)', color: theme.colors.textSecondary }}>SO {order.orderNumber}</span>
-                        <span className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: statusColor }}>{order.status}</span>
+                        <span className="text-[11px] font-medium px-1.5 py-px rounded" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)', color: theme.colors.textSecondary }}>SO {order.orderNumber}</span>
+                        <span className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: statusColor }}>{order.status}</span>
                     </div>
                 </div>
-                <p className="font-bold text-[16px] tabular-nums flex-shrink-0" style={{ color: theme.colors.textPrimary }}>{currency0(order.net)}</p>
+                <p className="font-bold text-base tabular-nums flex-shrink-0" style={{ color: theme.colors.textPrimary }}>{currency0(order.net)}</p>
             </div>
             {!isLast && <div className="mx-4" style={{ borderTop: `1px solid ${dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}` }} />}
         </button>
@@ -166,8 +166,8 @@ const DateGroupCard = ({ theme, dateKey, group, onNavigate }) => {
             boxShadow: dark ? 'none' : '0 1px 4px rgba(0,0,0,0.06)',
         }}>
             <div className="flex items-baseline justify-between px-4 pt-3.5 pb-1">
-                <h2 className="text-[11px] font-bold tracking-wider" style={{ color: theme.colors.textSecondary }}>{label}</h2>
-                <p className="text-[11px]" style={{ color: theme.colors.textSecondary }}>{group.orders.length} {group.orders.length === 1 ? 'order' : 'orders'} &middot; {currency0(group.total)}</p>
+                <h2 className="text-xs font-bold tracking-wider" style={{ color: theme.colors.textSecondary }}>{label}</h2>
+                <p className="text-xs" style={{ color: theme.colors.textSecondary }}>{group.orders.length} {group.orders.length === 1 ? 'order' : 'orders'} &middot; {currency0(group.total)}</p>
             </div>
             <div>
                 {group.orders.map((o, idx) => (

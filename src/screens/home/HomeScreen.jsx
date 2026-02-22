@@ -65,7 +65,7 @@ const RemoveDropZone = ({ children, isDark, colors, isActive }) => {
             }}
         >
             {highlight && (
-                <p className="text-[11px] font-semibold text-center mb-2" style={{ color: '#B85C5C' }}>
+                <p className="text-xs font-semibold text-center mb-2" style={{ color: '#B85C5C' }}>
                     Drop here to remove
                 </p>
             )}
@@ -94,7 +94,7 @@ const FeaturePicker = ({ value, onChange, options, colors, isDark }) => {
         <div className="relative" ref={ref}>
             <button
                 onClick={(e) => { e.stopPropagation(); setOpen(p => !p); }}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all active:scale-95 animate-pulse-subtle"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95 animate-pulse-subtle"
                 style={{
                     backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(53,53,53,0.08)',
                     color: colors.textPrimary,
@@ -512,7 +512,7 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                                             {getCommunityTextSafe(post)}
                                         </div>
                                         {post.timeAgo && (
-                                            <div className="text-[10px] mt-1 opacity-50" style={{ color: colors.textSecondary }}>
+                                            <div className="text-[11px] mt-1 opacity-50" style={{ color: colors.textSecondary }}>
                                                 {post.timeAgo}
                                             </div>
                                         )}
@@ -542,7 +542,7 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                             >
                                 <div className="text-left">
                                     <div className="text-sm font-semibold" style={{ color: colors.textPrimary }}>{item.series}</div>
-                                    <div className="text-[10px] uppercase tracking-widest opacity-60" style={{ color: colors.textSecondary }}>{item.type}</div>
+                                    <div className="text-[11px] uppercase tracking-widest opacity-60" style={{ color: colors.textSecondary }}>{item.type}</div>
                                 </div>
                                 <div className="text-sm font-bold" style={{ color: colors.textPrimary }}>{item.weeks} wks</div>
                             </button>
@@ -576,7 +576,7 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <div className="text-sm font-semibold truncate" style={{ color: colors.textPrimary }}>{ann.title}</div>
-                                    <div className="text-[10px] mt-0.5 line-clamp-1" style={{ color: colors.textSecondary }}>{ann.subtitle || ann.text}</div>
+                                    <div className="text-[11px] mt-0.5 line-clamp-1" style={{ color: colors.textSecondary }}>{ann.subtitle || ann.text}</div>
                                 </div>
                                 <ChevronRight className="w-3.5 h-3.5 mt-1 flex-shrink-0 opacity-30" style={{ color: colors.textSecondary }} />
                             </button>
@@ -627,7 +627,7 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                         </div>
                         <div className="text-left">
                             <div className="text-sm font-bold text-white">{formatElliottBucks(INITIAL_BALANCE)} available</div>
-                            <div className="text-[10px] text-white/60">ElliottBucks balance</div>
+                            <div className="text-[11px] text-white/60">ElliottBucks balance</div>
                         </div>
                         <ChevronRight className="w-4 h-4 ml-auto text-white/40" />
                     </button>
@@ -645,7 +645,7 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                                 </div>
                                 <div className="text-left min-w-0">
                                     <div className="text-sm font-semibold truncate" style={{ color: colors.textPrimary }}>{p.name}</div>
-                                    <div className="text-[10px]" style={{ color: colors.textSecondary }}>{formatElliottBucks(p.price)}</div>
+                                    <div className="text-[11px]" style={{ color: colors.textSecondary }}>{formatElliottBucks(p.price)}</div>
                                 </div>
                             </div>
                             <ChevronRight className="w-3.5 h-3.5 flex-shrink-0 opacity-30" style={{ color: colors.textSecondary }} />
@@ -678,12 +678,12 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                         {/* Project + Dealer */}
                         <div className="text-left min-w-0 flex-1">
                             <div className="text-sm font-semibold truncate" style={{ color: colors.textPrimary }}>{smartTitleCase(order.details)}</div>
-                            <div className="text-[11px] truncate" style={{ color: colors.textSecondary }}>{smartTitleCase(order.company)}</div>
+                            <div className="text-xs truncate" style={{ color: colors.textSecondary }}>{smartTitleCase(order.company)}</div>
                         </div>
                         {/* Amount + Status */}
                         <div className="text-right flex-shrink-0">
                             <div className="text-sm font-bold tabular-nums" style={{ color: colors.textPrimary }}>${order.net.toLocaleString()}</div>
-                            <div className="text-[10px] font-medium" style={{ color: statusColor }}>{order.status}</div>
+                            <div className="text-[11px] font-medium" style={{ color: statusColor }}>{order.status}</div>
                         </div>
                     </button>
                     );
@@ -893,7 +893,7 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                                             </div>
                                             <div className="text-left">
                                                 <div className="text-sm font-semibold" style={{ color: colors.textPrimary }}>{app.name}</div>
-                                                <div className="text-[11px]" style={{ color: colors.textSecondary }}>{app.route}</div>
+                                                <div className="text-xs" style={{ color: colors.textSecondary }}>{app.route}</div>
                                             </div>
                                         </button>
                                     ))}
@@ -911,7 +911,7 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                                         </div>
                                         <div className="text-left">
                                             <div className="text-sm font-semibold" style={{ color: colors.textPrimary }}>Ask Elliott Bot</div>
-                                            <div className="text-[11px]" style={{ color: colors.textSecondary }}>
+                                            <div className="text-xs" style={{ color: colors.textSecondary }}>
                                                 {searchQuery.trim()}
                                             </div>
                                         </div>
@@ -976,14 +976,14 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
 
                             {/* Add / Remove zone */}
                             <div className="space-y-1.5 pt-3">
-                                <div className="text-[11px] font-medium px-0.5" style={{ color: colors.textSecondary, opacity: 0.5 }}>Tap to add apps to your home</div>
+                                <div className="text-xs font-medium px-0.5" style={{ color: colors.textSecondary, opacity: 0.5 }}>Tap to add apps to your home</div>
                                 <RemoveDropZone isDark={isDark} colors={colors} isActive={!!activeDragId}>
                                     <div className={`grid gap-1.5 ${appGridCols.edit}`}>
                                         {availableApps.map((app) => (
                                             <button
                                                 key={app.route}
                                                 onClick={() => toggleApp(app.route)}
-                                                className="flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl text-[11px] font-semibold transition-all active:scale-95"
+                                                className="flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl text-xs font-semibold transition-all active:scale-95"
                                                 style={{
                                                     backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(53,53,53,0.07)',
                                                     color: colors.textSecondary,
@@ -995,7 +995,7 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                                             </button>
                                         ))}
                                         {availableApps.length === 0 && (
-                                            <span className="text-[11px] py-1 col-span-full text-center" style={{ color: colors.textSecondary, opacity: 0.5 }}>All apps added</span>
+                                            <span className="text-xs py-1 col-span-full text-center" style={{ color: colors.textSecondary, opacity: 0.5 }}>All apps added</span>
                                         )}
                                     </div>
                                 </RemoveDropZone>
@@ -1019,7 +1019,7 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                                                 <activeApp.icon className="w-5 h-5" style={{ color: colors.accent }} />
                                             </div>
                                             <span
-                                                className="text-[11px] font-semibold tracking-tight text-center leading-tight line-clamp-2 w-full px-1"
+                                                className="text-xs font-semibold tracking-tight text-center leading-tight line-clamp-2 w-full px-1"
                                                 style={{ color: colors.textPrimary }}
                                             >
                                                 {activeApp.name}
@@ -1057,7 +1057,7 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                                         </span>
                                         {badge && (
                                             <div
-                                                className="absolute top-1.5 right-1.5 px-1.5 py-[1px] rounded-full text-[9px] font-bold"
+                                                className="absolute top-1.5 right-1.5 px-1.5 py-[1px] rounded-full text-[10px] font-bold"
                                                 style={{
                                                     backgroundColor: `${badge.color}18`,
                                                     color: badge.color,
@@ -1131,7 +1131,7 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                             )}
                         </div>
                         {isEditMode && (
-                            <p className="text-[10px] font-medium mb-3 px-6 flex items-center gap-1" style={{ color: colors.accent, opacity: 0.7 }}>
+                            <p className="text-[11px] font-medium mb-3 px-6 flex items-center gap-1" style={{ color: colors.accent, opacity: 0.7 }}>
                                 <ChevronDown className="w-3 h-3" /> Use the dropdown above to change this card's content
                             </p>
                         )}
@@ -1192,7 +1192,7 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                             )}
                         </div>
                         {isEditMode && (
-                            <p className="text-[10px] font-medium mb-3 px-6 flex items-center gap-1" style={{ color: colors.accent, opacity: 0.7 }}>
+                            <p className="text-[11px] font-medium mb-3 px-6 flex items-center gap-1" style={{ color: colors.accent, opacity: 0.7 }}>
                                 <ChevronDown className="w-3 h-3" /> Use the dropdown above to change this card's content
                             </p>
                         )}
@@ -1332,7 +1332,7 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                                                     {msg.attachments.map((file) => (
                                                         <span
                                                             key={file.id}
-                                                            className="text-[10px] px-2 py-1 rounded-full"
+                                                            className="text-[11px] px-2 py-1 rounded-full"
                                                             style={{
                                                                 backgroundColor: msg.role === 'user' ? 'rgba(255,255,255,0.2)' : `${colors.border}66`,
                                                                 color: msg.role === 'user' ? '#FFFFFF' : colors.textSecondary
@@ -1373,7 +1373,7 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                                     {chatAttachments.map((file) => (
                                         <div
                                             key={file.id}
-                                            className="flex items-center gap-2 px-2.5 py-1 rounded-full text-[11px]"
+                                            className="flex items-center gap-2 px-2.5 py-1 rounded-full text-xs"
                                             style={{ backgroundColor: `${colors.surface}CC`, border: `1px solid ${colors.border}`, color: colors.textSecondary }}
                                         >
                                             <span className="truncate max-w-[200px]">{file.name}</span>

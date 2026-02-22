@@ -40,7 +40,7 @@ export const FormInput = ({
                 onChange={onChange}
                 required={required}
                 placeholder={placeholder}
-                className="w-full focus-ring outline-none text-[14px] placeholder-opacity-70"
+                className="w-full focus-ring outline-none text-sm placeholder-opacity-70"
                 style={{
                     minHeight: 96,
                     resize: "none",
@@ -57,7 +57,7 @@ export const FormInput = ({
                 onChange={onChange}
                 required={required}
                 placeholder={placeholder}
-                className="w-full focus-ring outline-none text-[14px] placeholder-opacity-70"
+                className="w-full focus-ring outline-none text-sm placeholder-opacity-70"
                 style={{
                     height: H,
                     padding: "0 14px",
@@ -107,7 +107,7 @@ export const PortalNativeSelect = ({
                 onFocus={handleFocus}
                 onBlur={handleBlur}
                 required={required}
-                className="w-full appearance-none outline-none text-[14px] transition-colors"
+                className="w-full appearance-none outline-none text-sm transition-colors"
                 style={{
                     height: H,
                     padding: "0 44px 0 16px",
@@ -190,7 +190,7 @@ export const TagInput = ({
                     onChange={(e) => { setInputValue(e.target.value); setOpen(true); }}
                     onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); add(inputValue); } }}
                     placeholder="Add competitor..."
-                    className="flex-1 min-w-[140px] bg-transparent outline-none text-[14px]"
+                    className="flex-1 min-w-[140px] bg-transparent outline-none text-sm"
                     style={{ color: theme.colors.textPrimary }}
                 />
             </div>

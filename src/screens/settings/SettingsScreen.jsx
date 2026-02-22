@@ -123,15 +123,15 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
             <SectionHeader icon={User} title="Account" theme={theme} />
             <div className="p-5 space-y-4">
               <div>
-                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5" style={{ color: theme.colors.textSecondary }}>First Name</label>
+                <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: theme.colors.textSecondary }}>First Name</label>
                 <input value={firstName} onChange={e=>setFirstName(e.target.value)} className="w-full px-4 py-2.5 rounded-2xl text-sm font-medium outline-none transition-all focus:ring-2 focus:ring-offset-1" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : theme.colors.surface, border:`1px solid ${theme.colors.border}`, color:theme.colors.textPrimary, focusRingColor: theme.colors.accent }} />
               </div>
               <div>
-                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5" style={{ color: theme.colors.textSecondary }}>Last Name</label>
+                <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: theme.colors.textSecondary }}>Last Name</label>
                 <input value={lastName} onChange={e=>setLastName(e.target.value)} className="w-full px-4 py-2.5 rounded-2xl text-sm font-medium outline-none transition-all focus:ring-2 focus:ring-offset-1" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : theme.colors.surface, border:`1px solid ${theme.colors.border}`, color:theme.colors.textPrimary }} />
               </div>
               <div>
-                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5" style={{ color: theme.colors.textSecondary }}>T-Shirt Size</label>
+                <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: theme.colors.textSecondary }}>T-Shirt Size</label>
                 <Select value={shirtSize} onChange={(s) => { setShirtSize(s); setUserSettings?.(prev => ({ ...prev, shirtSize: s })); }} options={['XS','S','M','L','XL','XXL'].map(s=>({value:s,label:s}))} theme={theme} />
               </div>
             </div>
@@ -150,7 +150,7 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
                   {k === 'leadTimeChange' && notif.leadTimeChange && (
                     <div className="px-3 pb-3 -mt-1">
                       <div className="p-4 rounded-2xl" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)' }}>
-                        <div className="text-[11px] font-semibold uppercase tracking-wider mb-3" style={{ color: theme.colors.textSecondary }}>Favorite lead time series</div>
+                        <div className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: theme.colors.textSecondary }}>Favorite lead time series</div>
                         <div className="flex flex-wrap gap-2">
                           {leadTimeOptions.map((series) => {
                             const active = leadTimeFavorites.includes(series);
@@ -159,7 +159,7 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
                                 key={series}
                                 type="button"
                                 onClick={() => setLeadTimeFavorites(prev => active ? prev.filter(s => s !== series) : [...prev, series])}
-                                className="px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all active:scale-95"
+                                className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95"
                                 style={{
                                   backgroundColor: active ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.06)' : theme.colors.subtle),
                                   color: active ? (isDark ? '#1A1A1A' : '#FFFFFF') : theme.colors.textSecondary,
@@ -171,7 +171,7 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
                             );
                           })}
                         </div>
-                        <div className="text-[10px] mt-3 font-medium" style={{ color: theme.colors.textSecondary }}>
+                        <div className="text-[11px] mt-3 font-medium" style={{ color: theme.colors.textSecondary }}>
                           {leadTimeFavorites.length} selected
                         </div>
                       </div>
@@ -193,7 +193,7 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
             </div>
           </GlassCard>
 
-          <div className="pt-1 pb-4 text-center text-[10px] font-medium" style={{ color: theme.colors.textSecondary }}>v0.9.3</div>
+          <div className="pt-1 pb-4 text-center text-[11px] font-medium" style={{ color: theme.colors.textSecondary }}>v0.9.3</div>
         </div>
       </div>
     </div>

@@ -113,7 +113,7 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
                             <p className="font-semibold text-[13px] leading-tight truncate" style={{ color: theme.colors.textPrimary }}>
                                 {formatFinishName(finish.OldFinish)}
                             </p>
-                            <p className="text-[11px] font-medium tracking-wide mt-0.5" style={{ color: theme.colors.textSecondary }}>
+                            <p className="text-xs font-medium tracking-wide mt-0.5" style={{ color: theme.colors.textSecondary }}>
                                 {finish.OldVeneerCode}
                             </p>
                         </div>
@@ -142,7 +142,7 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
                             <p className="font-semibold text-[13px] leading-tight truncate" style={{ color: theme.colors.textPrimary }}>
                                 {formatFinishName(finish.NewFinishName)}
                             </p>
-                            <p className="text-[11px] font-medium tracking-wide mt-0.5" style={{ color: theme.colors.accent }}>
+                            <p className="text-xs font-medium tracking-wide mt-0.5" style={{ color: theme.colors.accent }}>
                                 {finish.NewVeneerCode || finish.NewSolidCode || finish.OldSolidCode}
                             </p>
                         </div>
@@ -257,10 +257,10 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
                                     size={56}
                                 />
                                 <div className="text-center">
-                                    <p className="text-[11px] font-semibold leading-tight" style={{ color: theme.colors.textSecondary }}>
+                                    <p className="text-xs font-semibold leading-tight" style={{ color: theme.colors.textSecondary }}>
                                         {formatFinishName(selectedFinish.OldFinish)}
                                     </p>
-                                    <p className="text-[10px] mt-0.5" style={{ color: theme.colors.textSecondary, opacity: 0.6 }}>
+                                    <p className="text-[11px] mt-0.5" style={{ color: theme.colors.textSecondary, opacity: 0.6 }}>
                                         Discontinued
                                     </p>
                                 </div>
@@ -276,10 +276,10 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
                                     size={56}
                                 />
                                 <div className="text-center">
-                                    <p className="text-[11px] font-semibold leading-tight" style={{ color: theme.colors.textPrimary }}>
+                                    <p className="text-xs font-semibold leading-tight" style={{ color: theme.colors.textPrimary }}>
                                         {formatFinishName(selectedFinish.NewFinishName)}
                                     </p>
-                                    <p className="text-[10px] mt-0.5" style={{ color: theme.colors.accent }}>
+                                    <p className="text-[11px] mt-0.5" style={{ color: theme.colors.accent }}>
                                         Replacement
                                     </p>
                                 </div>

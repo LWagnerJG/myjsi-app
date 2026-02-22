@@ -73,7 +73,7 @@ const CategoryCard = React.memo(({
                 </div>
                 {category.description && (
                     <div
-                        className="px-5 py-2.5 text-[12px] font-medium"
+                        className="px-5 py-2.5 text-xs font-medium"
                         style={{
                             color: theme.colors.textSecondary,
                             borderTop: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.05)',
@@ -111,7 +111,7 @@ const CategoryCard = React.memo(({
                             {category.name}
                         </h3>
                         {category.description && (
-                            <p className="text-[11px] mt-0.5" style={{ color: theme.colors.textSecondary }}>
+                            <p className="text-xs mt-0.5" style={{ color: theme.colors.textSecondary }}>
                                 {category.description}
                             </p>
                         )}

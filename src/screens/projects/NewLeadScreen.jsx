@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Search, Check, Upload, Paperclip, FileText, ArrowRight } from 'lucide-react';
 import { FormInput } from '../../components/forms/FormInput.jsx';
@@ -224,7 +224,7 @@ const ProductCard = React.memo(({ product, idx, onRemove, onUpdate, theme }) => 
       <div className="flex items-center justify-between px-4 py-3">
         <span className="text-[13px] font-semibold" style={{ color: theme.colors.textPrimary }}>{product.series}</span>
         <button type="button" onClick={() => onRemove(idx)}
-          className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium transition-all active:scale-[0.97]"
+          className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-all active:scale-[0.97]"
           style={{ color: '#B85C5C', backgroundColor: 'rgba(184,92,92,0.08)' }}>
           <X className="w-3 h-3" /> Remove
         </button>
@@ -339,7 +339,7 @@ export const NewLeadScreen = ({
                   return (
                     <span key={s}
                       onClick={() => upd('projectStatus', s)}
-                      className="text-[10px] cursor-pointer select-none text-center transition-all duration-150"
+                      className="text-[11px] cursor-pointer select-none text-center transition-all duration-150"
                       style={{
                         color: active ? c.textPrimary : c.textSecondary,
                         fontWeight: active ? 700 : 400,
@@ -414,7 +414,7 @@ export const NewLeadScreen = ({
                 value={newLeadData.winProbability || 50}
                 onChange={e => upd('winProbability', Number(e.target.value))}
                 className="flex-1 jsi-range" style={{ minWidth: 0, ...rangeStyle }} />
-              <span className="text-[12px] font-semibold tabular-nums w-[32px] text-right flex-shrink-0"
+              <span className="text-xs font-semibold tabular-nums w-[32px] text-right flex-shrink-0"
                 style={{ color: c.textPrimary }}>{newLeadData.winProbability || 50}%</span>
             </div>
           </Row>
@@ -560,11 +560,11 @@ export const NewLeadScreen = ({
               <div className="rounded-2xl p-3 flex items-start gap-2.5" style={{ backgroundColor: c.subtle }}>
                 <Upload className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: c.textSecondary }} />
                 <div>
-                  <p className="text-[12px] font-medium" style={{ color: c.textPrimary }}>Upload specs or request later</p>
-                  <p className="text-[11px] mt-0.5" style={{ color: c.textSecondary }}>
+                  <p className="text-xs font-medium" style={{ color: c.textPrimary }}>Upload specs or request later</p>
+                  <p className="text-xs mt-0.5" style={{ color: c.textSecondary }}>
                     Attach a PDF now, or request a quote from the project page later.
                   </p>
-                  <button type="button" className="mt-1.5 text-[11px] font-semibold underline" style={{ color: c.accent }}>
+                  <button type="button" className="mt-1.5 text-xs font-semibold underline" style={{ color: c.accent }}>
                     Choose File
                   </button>
                 </div>
@@ -608,8 +608,8 @@ export const NewLeadScreen = ({
                   <div key={i} className="flex items-center gap-2.5 px-3 py-2 rounded-2xl border"
                     style={{ backgroundColor: c.surface, borderColor: c.border }}>
                     <FileText className="w-3.5 h-3.5 flex-shrink-0" style={{ color: c.textSecondary }} />
-                    <span className="flex-1 text-[12px] font-medium truncate" style={{ color: c.textPrimary }}>{file.name}</span>
-                    <span className="text-[11px] flex-shrink-0" style={{ color: c.textSecondary }}>
+                    <span className="flex-1 text-xs font-medium truncate" style={{ color: c.textPrimary }}>{file.name}</span>
+                    <span className="text-xs flex-shrink-0" style={{ color: c.textSecondary }}>
                       {file.size < 1024 ? `${file.size} B` : file.size < 1048576 ? `${(file.size / 1024).toFixed(0)} KB` : `${(file.size / 1048576).toFixed(1)} MB`}
                     </span>
                     <button type="button" onClick={() => upd('attachments', (newLeadData.attachments || []).filter((_, j) => j !== i))}
@@ -625,7 +625,7 @@ export const NewLeadScreen = ({
               className="flex items-center gap-2 px-3.5 py-2.5 rounded-2xl border border-dashed cursor-pointer transition-colors"
               style={{ borderColor: c.border, backgroundColor: dark ? 'rgba(255,255,255,0.03)' : 'transparent' }}>
               <Paperclip className="w-3.5 h-3.5" style={{ color: c.textSecondary }} />
-              <span className="text-[12px] font-medium" style={{ color: c.textSecondary }}>Attach files</span>
+              <span className="text-xs font-medium" style={{ color: c.textSecondary }}>Attach files</span>
               <input type="file" multiple className="hidden"
                 onChange={e => {
                   const files = Array.from(e.target.files || []).map(f => ({ name: f.name, size: f.size, type: f.type }));
@@ -644,7 +644,7 @@ export const NewLeadScreen = ({
             Submit Lead
           </PrimaryButton>
           {(!newLeadData.project || !newLeadData.projectStatus) && (
-            <p className="text-[12px] text-center mt-2" style={{ color: c.textSecondary }}>
+            <p className="text-xs text-center mt-2" style={{ color: c.textSecondary }}>
               Please fill in required fields to submit
             </p>
           )}

@@ -79,7 +79,7 @@ const StoriesBar = ({ theme, dark }) => (
             )}
           </div>
         </div>
-        <span className="text-[10px] font-medium max-w-[56px] truncate" style={{ color: theme.colors.textSecondary }}>
+        <span className="text-[11px] font-medium max-w-[56px] truncate" style={{ color: theme.colors.textSecondary }}>
           {story.label}
         </span>
       </button>
@@ -158,9 +158,9 @@ const AnnouncementDetailModal = ({ announcement, theme, dark, onClose, onNavigat
                   <Icon className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color }}>{announcement.category?.replace('-', ' ')}</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-widest" style={{ color }}>{announcement.category?.replace('-', ' ')}</p>
                   {formattedDate && (
-                    <p className="text-[11px] mt-0.5" style={{ color: theme.colors.textSecondary }}>{formattedDate}</p>
+                    <p className="text-xs mt-0.5" style={{ color: theme.colors.textSecondary }}>{formattedDate}</p>
                   )}
                 </div>
               </div>
@@ -176,7 +176,7 @@ const AnnouncementDetailModal = ({ announcement, theme, dark, onClose, onNavigat
 
           {/* Content */}
           <div className="px-5 pb-4 space-y-3">
-            <h3 className="text-[17px] font-bold leading-snug" style={{ color: theme.colors.textPrimary }}>{announcement.title}</h3>
+            <h3 className="text-lg font-bold leading-snug" style={{ color: theme.colors.textPrimary }}>{announcement.title}</h3>
             <p className="text-[13px] font-medium" style={{ color: theme.colors.textSecondary }}>{announcement.subtitle}</p>
             {announcement.text && (
               <p className="text-[13px] leading-relaxed" style={{ color: dark ? '#C0C0C0' : '#555555' }}>{announcement.text}</p>
@@ -342,8 +342,8 @@ export const AnnouncementsRow = ({ announcements, theme, dark, onNavigate, onDis
                     <Icon className="w-3.5 h-3.5" />
                   </div>
                   <div className="text-left min-w-0 flex-1">
-                    <p className="text-[11px] font-semibold leading-tight truncate" style={{ color: theme.colors.textPrimary }}>{a.title}</p>
-                    <p className="text-[10px] leading-tight truncate mt-0.5" style={{ color: theme.colors.textSecondary }}>{a.subtitle}</p>
+                    <p className="text-xs font-semibold leading-tight truncate" style={{ color: theme.colors.textPrimary }}>{a.title}</p>
+                    <p className="text-[11px] leading-tight truncate mt-0.5" style={{ color: theme.colors.textSecondary }}>{a.subtitle}</p>
                   </div>
                 </button>
 
@@ -398,7 +398,7 @@ const ActionBtn = React.memo(({ active, icon: Icon, count, onClick, label, theme
   <button
     onClick={onClick}
     aria-label={label}
-    className="flex items-center gap-1 text-[11px] font-medium px-2.5 py-1.5 rounded-full transition-all active:scale-95"
+    className="flex items-center gap-1 text-xs font-medium px-2.5 py-1.5 rounded-full transition-all active:scale-95"
     style={{
       color: active ? theme.colors.accent : theme.colors.textSecondary,
       backgroundColor: active
@@ -442,7 +442,7 @@ const PostCard = React.memo(({ post, index, theme, dark, isLiked, isUpvoted, isE
           <div className="flex-1 min-w-0">
             <span className="text-[13px] font-semibold" style={{ color: theme.colors.textPrimary }}>{post.user?.name}</span>
             <span
-              className="text-[11px] font-medium ml-2 cursor-default"
+              className="text-xs font-medium ml-2 cursor-default"
               title={formatExactTimestamp(post.createdAt)}
               style={{ color: theme.colors.textSecondary }}
             >
@@ -474,7 +474,7 @@ const PostCard = React.memo(({ post, index, theme, dark, isLiked, isUpvoted, isE
         <button
           onClick={() => onUpvote?.(post.id)}
           aria-label="Upvote"
-          className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1.5 rounded-full transition-all active:scale-95"
+          className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-full transition-all active:scale-95"
           style={{
             color: isUpvoted ? '#f97316' : theme.colors.textSecondary,
             backgroundColor: isUpvoted ? (dark ? 'rgba(249,115,22,0.12)' : 'rgba(249,115,22,0.08)') : 'transparent',
@@ -490,7 +490,7 @@ const PostCard = React.memo(({ post, index, theme, dark, isLiked, isUpvoted, isE
             if (navigator.share) navigator.share({ title: post.title || 'Post', text: post.text });
             else navigator.clipboard.writeText(post.text || window.location.href);
           }}
-          className="flex items-center gap-1 text-[11px] font-medium px-2.5 py-1.5 rounded-full active:scale-95"
+          className="flex items-center gap-1 text-xs font-medium px-2.5 py-1.5 rounded-full active:scale-95"
           style={{ color: theme.colors.textSecondary }}
         >
           <Share2 className="w-3.5 h-3.5" />
@@ -509,19 +509,19 @@ const PostCard = React.memo(({ post, index, theme, dark, isLiked, isUpvoted, isE
             {(post.comments || []).map(c => (
               <div key={c.id} className="flex items-start gap-2">
                 <div
-                  className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0"
+                  className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0"
                   style={{ backgroundColor: dark ? '#333' : '#EDEAE4', color: theme.colors.textSecondary }}
                 >
                   {c.name?.[0] || '?'}
                 </div>
                 <div className="flex-1 rounded-xl px-2.5 py-1.5" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }}>
-                  <p className="text-[11px] font-semibold" style={{ color: theme.colors.textPrimary }}>{c.name}</p>
-                  <p className="text-[11px] mt-0.5" style={{ color: theme.colors.textSecondary }}>{c.text}</p>
+                  <p className="text-xs font-semibold" style={{ color: theme.colors.textPrimary }}>{c.name}</p>
+                  <p className="text-xs mt-0.5" style={{ color: theme.colors.textSecondary }}>{c.text}</p>
                 </div>
               </div>
             ))}
             {(post.comments || []).length === 0 && (
-              <p className="text-[11px]" style={{ color: theme.colors.textSecondary }}>No comments yet.</p>
+              <p className="text-xs" style={{ color: theme.colors.textSecondary }}>No comments yet.</p>
             )}
           </div>
           <form onSubmit={submitComment} className="flex items-center gap-2">
@@ -529,7 +529,7 @@ const PostCard = React.memo(({ post, index, theme, dark, isLiked, isUpvoted, isE
               value={draft}
               onChange={e => setDraft(e.target.value)}
               placeholder="Add a comment..."
-              className="flex-1 text-[12px] px-3 py-1.5 rounded-full outline-none"
+              className="flex-1 text-xs px-3 py-1.5 rounded-full outline-none"
               style={{ backgroundColor: dark ? '#333' : '#F0EDE8', color: theme.colors.textPrimary }}
             />
             <button disabled={!draft.trim()} className="p-1.5 rounded-full disabled:opacity-30" style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}>
@@ -565,10 +565,10 @@ export const PollCard = React.memo(({ poll, index, theme, dark, votedOption, onP
     <div className="rounded-2xl overflow-hidden p-3.5 space-y-2.5" style={{ backgroundColor: cardBg(dark) }}>
       <div className="flex items-center gap-1.5">
         <BarChart3 className="w-3 h-3" style={{ color: theme.colors.textSecondary }} />
-        <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: theme.colors.textSecondary }}>Poll</span>
+        <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: theme.colors.textSecondary }}>Poll</span>
         {timeLeft && (
           <span
-            className="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full"
+            className="ml-auto text-[11px] font-semibold px-2 py-0.5 rounded-full"
             style={{
               backgroundColor: isClosed
                 ? (dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)')
@@ -586,7 +586,7 @@ export const PollCard = React.memo(({ poll, index, theme, dark, votedOption, onP
           <div className="flex items-center gap-2">
             <span className="text-[13px] font-semibold" style={{ color: theme.colors.textPrimary }}>{poll.user?.name}</span>
             <span
-              className="text-[11px] cursor-default"
+              className="text-xs cursor-default"
               title={formatExactTimestamp(poll.createdAt)}
               style={{ color: theme.colors.textSecondary }}
             >{formatTimestamp(poll.createdAt)}</span>
@@ -610,7 +610,7 @@ export const PollCard = React.memo(({ poll, index, theme, dark, votedOption, onP
                     opacity: votedOption && !active ? 0.65 : 1,
                   }}
                 >
-                  <span className="relative z-10 text-[12px] font-medium flex justify-between">
+                  <span className="relative z-10 text-xs font-medium flex justify-between">
                     <span>{opt.text}</span>
                     {!!votedOption && <span className="font-bold">{percent}%</span>}
                   </span>
@@ -631,7 +631,7 @@ export const PollCard = React.memo(({ poll, index, theme, dark, votedOption, onP
             })}
           </div>
           {totalVotes > 0 && (
-            <p className="text-[10px] mt-1.5 font-medium" style={{ color: theme.colors.textSecondary }}>
+            <p className="text-[11px] mt-1.5 font-medium" style={{ color: theme.colors.textSecondary }}>
               {totalVotes} vote{totalVotes !== 1 ? 's' : ''}
             </p>
           )}
@@ -840,7 +840,7 @@ export const CommunityScreen = ({
                 >
                   <img src={photo.src} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2">
-                    <p className="text-[10px] text-white line-clamp-2 font-medium">{photo.post.title || photo.post.text || photo.post.user?.name}</p>
+                    <p className="text-[11px] text-white line-clamp-2 font-medium">{photo.post.title || photo.post.text || photo.post.user?.name}</p>
                   </div>
                 </button>
               ))}

@@ -92,7 +92,7 @@ export const DealerDirectoryScreen = ({ theme, setSuccessMessage, dealerDirector
                         <div key={stat.label} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.04)' }}>
                             <stat.icon className="w-4 h-4 flex-shrink-0" style={{ color: colors.textSecondary }} />
                             <div className="min-w-0">
-                                <p className="text-[11px] uppercase tracking-wide font-bold" style={{ color: colors.textSecondary }}>{stat.label}</p>
+                                <p className="text-xs uppercase tracking-wide font-bold" style={{ color: colors.textSecondary }}>{stat.label}</p>
                                 <p className="text-[15px] font-black tracking-tight" style={{ color: colors.textPrimary }}>{stat.value}</p>
                             </div>
                         </div>
@@ -150,7 +150,7 @@ export const DealerDirectoryScreen = ({ theme, setSuccessMessage, dealerDirector
                                 {/* Top row — name + sparkline + chevron */}
                                 <div className="flex items-start justify-between mb-1.5">
                                     <div className="min-w-0 flex-1">
-                                        <h3 className="font-bold text-[17px] tracking-tight truncate" style={{ color: colors.textPrimary }}>{dealer.name}</h3>
+                                        <h3 className="font-bold text-lg tracking-tight truncate" style={{ color: colors.textPrimary }}>{dealer.name}</h3>
                                         <div className="flex items-center gap-1 mt-1">
                                             <MapPin className="w-3.5 h-3.5 flex-shrink-0" style={{ color: colors.textSecondary, opacity: 0.6 }} />
                                             <p className="text-[13px] truncate" style={{ color: colors.textSecondary }}>{dealer.address}</p>
@@ -167,15 +167,15 @@ export const DealerDirectoryScreen = ({ theme, setSuccessMessage, dealerDirector
                                 {/* Stats row — full formatted like sales page */}
                                 <div className="flex items-end gap-5 mt-3">
                                     <div>
-                                        <p className="text-[11px] font-bold uppercase tracking-wide" style={{ color: colors.textSecondary }}>Sales</p>
-                                        <p className="text-[17px] font-black tracking-tight" style={{ color: colors.textPrimary }}>{formatCurrency(dealer.sales)}</p>
+                                        <p className="text-xs font-bold uppercase tracking-wide" style={{ color: colors.textSecondary }}>Sales</p>
+                                        <p className="text-lg font-black tracking-tight" style={{ color: colors.textPrimary }}>{formatCurrency(dealer.sales)}</p>
                                     </div>
                                     <div>
-                                        <p className="text-[11px] font-bold uppercase tracking-wide" style={{ color: colors.textSecondary }}>Bookings</p>
-                                        <p className="text-[17px] font-black tracking-tight" style={{ color: colors.textPrimary }}>{formatCurrency(dealer.bookings)}</p>
+                                        <p className="text-xs font-bold uppercase tracking-wide" style={{ color: colors.textSecondary }}>Bookings</p>
+                                        <p className="text-lg font-black tracking-tight" style={{ color: colors.textPrimary }}>{formatCurrency(dealer.bookings)}</p>
                                     </div>
                                     <div>
-                                        <p className="text-[11px] font-bold uppercase tracking-wide" style={{ color: colors.textSecondary }}>Discount</p>
+                                        <p className="text-xs font-bold uppercase tracking-wide" style={{ color: colors.textSecondary }}>Discount</p>
                                         <p className="text-[15px] font-bold tracking-tight" style={{ color: colors.textPrimary }}>{dealer.dailyDiscount}</p>
                                     </div>
                                 </div>
@@ -185,9 +185,9 @@ export const DealerDirectoryScreen = ({ theme, setSuccessMessage, dealerDirector
                             {goalPct !== null && (
                                 <div className="px-4 py-2.5 flex items-center gap-3" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)' }}>
                                     <div className="flex items-center gap-2 flex-1 min-w-0">
-                                        <span className="text-[11px] font-semibold flex-shrink-0" style={{ color: colors.textSecondary }}>YTD Goal</span>
+                                        <span className="text-xs font-semibold flex-shrink-0" style={{ color: colors.textSecondary }}>YTD Goal</span>
                                         <ProgressBar value={dealer.sales} max={dealer.ytdGoal} color={goalPct >= 80 ? '#4A7C59' : goalPct >= 50 ? '#C4956A' : colors.accent} bgColor={isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'} />
-                                        <span className="text-[12px] font-bold flex-shrink-0" style={{ color: goalPct >= 80 ? '#4A7C59' : goalPct >= 50 ? '#C4956A' : colors.textPrimary }}>{goalPct}%</span>
+                                        <span className="text-xs font-bold flex-shrink-0" style={{ color: goalPct >= 80 ? '#4A7C59' : goalPct >= 50 ? '#C4956A' : colors.textPrimary }}>{goalPct}%</span>
                                     </div>
                                 </div>
                             )}

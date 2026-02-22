@@ -199,7 +199,7 @@ export function SpotlightMultiSelect({
           onFocus={() => setOpen(true)}
           onKeyDown={handleKeyDown}
           placeholder={selectedItems.length > 0 && compact ? '' : placeholder}
-          className={`flex-1 bg-transparent outline-none min-w-[60px] ${compact ? 'text-[13px]' : 'text-[14px]'}`}
+          className={`flex-1 bg-transparent outline-none min-w-[60px] ${compact ? 'text-[13px]' : 'text-sm'}`}
           style={{ color: palette.text }}
           role="combobox"
           aria-expanded={open}
@@ -213,7 +213,7 @@ export function SpotlightMultiSelect({
             {selectedItems.map((s) => (
               <span
                 key={s}
-                className="inline-flex items-center gap-1 pl-2 pr-1 py-0.5 rounded-full text-[11px] font-medium border flex-shrink-0"
+                className="inline-flex items-center gap-1 pl-2 pr-1 py-0.5 rounded-full text-xs font-medium border flex-shrink-0"
                 style={{ background: palette.chipBg, borderColor: palette.border, color: palette.text }}
               >
                 <span className="truncate max-w-[120px]">{s}</span>

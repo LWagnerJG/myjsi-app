@@ -6,7 +6,7 @@ import { COMPETITION_METRICS } from './comparison-data.js';
 import { Modal } from '../../components/common/Modal.jsx';
 
 const AdvantageChip = ({ value, onClick }) => (
-    <button onClick={onClick} className={`min-w-[42px] inline-flex items-center justify-center px-2 py-1 text-[11px] font-semibold rounded-full focus:outline-none focus:ring-2 focus:ring-white/40 transition ${value > 0 ? COMPETITION_METRICS.displayFormat.advantage.positive : COMPETITION_METRICS.displayFormat.advantage.negative}`}>
+    <button onClick={onClick} className={`min-w-[42px] inline-flex items-center justify-center px-2 py-1 text-xs font-semibold rounded-full focus:outline-none focus:ring-2 focus:ring-white/40 transition ${value > 0 ? COMPETITION_METRICS.displayFormat.advantage.positive : COMPETITION_METRICS.displayFormat.advantage.negative}`}>
         {value > 0 ? `+${value}%` : `${value}%`}
     </button>
 );
@@ -52,7 +52,7 @@ const VersusList = ({ jsiProduct, competitors = [], theme, title }) => {
                                 </div>
                             </div>
                             {open && (
-                                <div className="mt-2 ml-1 mr-1 rounded-lg px-3 py-2 text-[11px] leading-relaxed flex items-start gap-2" style={{ background: theme.colors.subtle, color: theme.colors.textSecondary }}>
+                                <div className="mt-2 ml-1 mr-1 rounded-lg px-3 py-2 text-xs leading-relaxed flex items-start gap-2" style={{ background: theme.colors.subtle, color: theme.colors.textSecondary }}>
                                     <Info className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
                                     <span>{getMessage(val)}</span>
                                 </div>

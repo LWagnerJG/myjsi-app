@@ -1,4 +1,4 @@
-﻿import React, { useState, useRef, useEffect, useMemo, useLayoutEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useLayoutEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import StandardSearchBar from '../../../components/common/StandardSearchBar.jsx';
@@ -46,7 +46,7 @@ const SlideCarousel = ({ pres, theme, onViewFull }) => {
                         style={{ width: i === idx ? 18 : 6, height: 6, background: i === idx ? theme.colors.accent : 'rgba(255,255,255,0.55)' }} />
                 ))}
             </div>
-            <button onClick={onViewFull} className="absolute top-2 right-2 px-2.5 py-1 rounded-full text-[10px] font-semibold transition-opacity"
+            <button onClick={onViewFull} className="absolute top-2 right-2 px-2.5 py-1 rounded-full text-[11px] font-semibold transition-opacity"
                 style={{ background: theme.colors.surface, border: `1px solid ${theme.colors.border}`, color: theme.colors.textSecondary, boxShadow: '0 1px 4px rgba(0,0,0,0.12)' }}>
                 View
             </button>
@@ -67,7 +67,7 @@ const PresentationCard = ({ p, theme, onAddToMyDecks, myDeckIds, onDownload, onS
             <div className="px-5 pb-5 space-y-3">
                 <div className="space-y-1.5">
                     <h3 className="font-semibold text-[15px] leading-snug" style={{ color: theme.colors.textPrimary }}>{p.title}</h3>
-                    <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-medium">
+                    <div className="flex flex-wrap items-center gap-1.5 text-xs font-medium">
                         <span className="px-2 py-0.5 rounded-full" style={{ background: `${theme.colors.accent}18`, color: theme.colors.accent }}>{p.category}</span>
                         <span style={{ color: theme.colors.textSecondary }}>{p.type} Â· {p.size}</span>
                         <span style={{ color: theme.colors.textSecondary }}>Updated {new Date(p.lastUpdated).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
@@ -112,23 +112,23 @@ const MyDeckCard = ({ deck, theme, onDownload, onShare, onDelete }) => {
                     : <div className="w-full h-full flex items-center justify-center"><LayoutGrid className="w-8 h-8 opacity-20" style={{ color: theme.colors.textPrimary }} /></div>
                 }
                 {isGenerated && (
-                    <span className="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                    <span className="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold"
                         style={{ background: `${theme.colors.accent}CC`, color: theme.colors.accentText || '#FFF' }}>
                         <Sparkles className="w-2.5 h-2.5" /> AI Generated
                     </span>
                 )}
-                <span className="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase"
+                <span className="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[11px] font-semibold uppercase"
                     style={{ background: 'rgba(0,0,0,0.45)', color: '#FFF' }}>
                     {deck.format}
                 </span>
             </div>
             <div className="px-4 py-4 space-y-3">
                 <div className="space-y-1">
-                    <h3 className="font-semibold text-[14px] leading-snug" style={{ color: theme.colors.textPrimary }}>{deck.title}</h3>
+                    <h3 className="font-semibold text-sm leading-snug" style={{ color: theme.colors.textPrimary }}>{deck.title}</h3>
                     {deck.prompt && (
-                        <p className="text-[11px] leading-relaxed line-clamp-2" style={{ color: theme.colors.textSecondary }}>{deck.prompt}</p>
+                        <p className="text-xs leading-relaxed line-clamp-2" style={{ color: theme.colors.textSecondary }}>{deck.prompt}</p>
                     )}
-                    <div className="flex items-center gap-1 text-[11px]" style={{ color: theme.colors.textSecondary }}>
+                    <div className="flex items-center gap-1 text-xs" style={{ color: theme.colors.textSecondary }}>
                         <Clock className="w-3 h-3" />
                         <span>{new Date(deck.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                         {deck.slideCount && <span>Â· {deck.slideCount} slides</span>}
@@ -215,7 +215,7 @@ const PresentationBuilder = ({ theme, onDeckGenerated }) => {
                     </div>
                     <div>
                         <p className="font-bold text-[15px]" style={{ color: theme.colors.textPrimary }}>Presentation Builder</p>
-                        <p className="text-[11px]" style={{ color: theme.colors.textSecondary }}>AI-powered Â· exports to PPTX or PDF</p>
+                        <p className="text-xs" style={{ color: theme.colors.textSecondary }}>AI-powered Â· exports to PPTX or PDF</p>
                     </div>
                 </div>
                 <p className="text-[13px] leading-relaxed pt-1" style={{ color: theme.colors.textSecondary }}>
@@ -236,11 +236,11 @@ const PresentationBuilder = ({ theme, onDeckGenerated }) => {
                                 onFocus={() => setShowSuggestions(true)}
                                 rows={4}
                                 placeholder="e.g. Create a pitch for Riverside Medical covering lounge seating and training room solutionsâ€¦"
-                                className="w-full px-4 pt-4 pb-2 text-[14px] resize-none outline-none bg-transparent leading-relaxed"
+                                className="w-full px-4 pt-4 pb-2 text-sm resize-none outline-none bg-transparent leading-relaxed"
                                 style={{ color: theme.colors.textPrimary }}
                             />
                             <div className="flex items-center justify-between px-4 pb-3 pt-1">
-                                <span className="text-[11px]" style={{ color: prompt.length > 300 ? '#ef4444' : theme.colors.textSecondary }}>{prompt.length}/500</span>
+                                <span className="text-xs" style={{ color: prompt.length > 300 ? '#ef4444' : theme.colors.textSecondary }}>{prompt.length}/500</span>
                                 {prompt.length > 0 && (
                                     <button onClick={() => setPrompt('')} className="rounded-full p-1 transition-colors hover:bg-black/5">
                                         <X className="w-3.5 h-3.5" style={{ color: theme.colors.textSecondary }} />
@@ -253,16 +253,16 @@ const PresentationBuilder = ({ theme, onDeckGenerated }) => {
                         <AnimatePresence>
                             {showSuggestions && (
                                 <motion.div key="suggestions" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
-                                    <p className="text-[11px] font-semibold uppercase tracking-widest mb-2 px-1" style={{ color: theme.colors.textSecondary }}>Quick Starts</p>
+                                    <p className="text-xs font-semibold uppercase tracking-widest mb-2 px-1" style={{ color: theme.colors.textSecondary }}>Quick Starts</p>
                                     <div className="flex flex-wrap gap-2">
                                         {BUILDER_PROMPT_SUGGESTIONS.map(s => (
                                             <button key={s.label} onClick={() => { setPrompt(s.prompt); setShowSuggestions(false); }}
-                                                className="px-3 py-1.5 rounded-full text-[12px] font-medium transition-all active:scale-95"
+                                                className="px-3 py-1.5 rounded-full text-xs font-medium transition-all active:scale-95"
                                                 style={{ border: `1px solid ${borderColor}`, color: theme.colors.textSecondary, background: accentBg }}>
                                                 {s.label}
                                             </button>
                                         ))}
-                                        <button onClick={() => setShowSuggestions(false)} className="px-3 py-1.5 rounded-full text-[12px] font-medium transition-all" style={{ color: theme.colors.textSecondary }}>
+                                        <button onClick={() => setShowSuggestions(false)} className="px-3 py-1.5 rounded-full text-xs font-medium transition-all" style={{ color: theme.colors.textSecondary }}>
                                             <X className="w-3 h-3 inline mr-1" />Hide
                                         </button>
                                     </div>
@@ -272,11 +272,11 @@ const PresentationBuilder = ({ theme, onDeckGenerated }) => {
 
                         {/* Export format selector */}
                         <div className="flex items-center gap-3">
-                            <p className="text-[12px] font-semibold uppercase tracking-widest" style={{ color: theme.colors.textSecondary }}>Export as</p>
+                            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: theme.colors.textSecondary }}>Export as</p>
                             <div className="flex gap-2">
                                 {BUILDER_EXPORT_FORMATS.map(f => (
                                     <button key={f.id} onClick={() => setExportFormat(f.id)}
-                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all"
+                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
                                         style={{
                                             border: `1.5px solid ${exportFormat === f.id ? theme.colors.accent : borderColor}`,
                                             color: exportFormat === f.id ? theme.colors.accent : theme.colors.textSecondary,
@@ -312,7 +312,7 @@ const PresentationBuilder = ({ theme, onDeckGenerated }) => {
                             </div>
                         </div>
                         <div className="space-y-1.5">
-                            <p className="font-bold text-[16px]" style={{ color: theme.colors.textPrimary }}>Building your deckâ€¦</p>
+                            <p className="font-bold text-base" style={{ color: theme.colors.textPrimary }}>Building your deckâ€¦</p>
                             <p className="text-[13px] leading-relaxed max-w-[260px]" style={{ color: theme.colors.textSecondary }}>
                                 JSI's AI is crafting slides, selecting content & applying brand styles.
                             </p>
@@ -330,7 +330,7 @@ const PresentationBuilder = ({ theme, onDeckGenerated }) => {
                             </div>
                             <div className="flex-1 min-w-0">
                                 <p className="text-[13px] font-semibold" style={{ color: theme.colors.textPrimary }}>Deck ready</p>
-                                <p className="text-[11px] truncate" style={{ color: theme.colors.textSecondary }}>{generatedDeck.slideCount} slides Â· {generatedDeck.format.toUpperCase()}</p>
+                                <p className="text-xs truncate" style={{ color: theme.colors.textSecondary }}>{generatedDeck.slideCount} slides Â· {generatedDeck.format.toUpperCase()}</p>
                             </div>
                         </div>
 
@@ -343,9 +343,9 @@ const PresentationBuilder = ({ theme, onDeckGenerated }) => {
                                 <div>
                                     <div className="flex items-start gap-2">
                                         <Sparkles className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" style={{ color: theme.colors.accent }} />
-                                        <h3 className="font-semibold text-[14px] leading-snug" style={{ color: theme.colors.textPrimary }}>{generatedDeck.title}</h3>
+                                        <h3 className="font-semibold text-sm leading-snug" style={{ color: theme.colors.textPrimary }}>{generatedDeck.title}</h3>
                                     </div>
-                                    <p className="text-[11px] mt-1.5 line-clamp-2 leading-relaxed" style={{ color: theme.colors.textSecondary }}>{generatedDeck.prompt}</p>
+                                    <p className="text-xs mt-1.5 line-clamp-2 leading-relaxed" style={{ color: theme.colors.textSecondary }}>{generatedDeck.prompt}</p>
                                 </div>
                                 <div className="flex gap-2">
                                     <button onClick={handleDownload}
@@ -385,7 +385,7 @@ const SlidePreviewModal = ({ preview, theme, onClose, onDownload, onShare }) => 
                 style={{ background: isDark ? theme.colors.surface : '#FFFFFF', border: `1px solid ${theme.colors.border}`, boxShadow: '0 24px 60px rgba(0,0,0,0.35)' }}
                 onClick={e => e.stopPropagation()}>
                 <div className="px-5 py-4 flex justify-between items-center" style={{ borderBottom: `1px solid ${theme.colors.border}` }}>
-                    <h2 className="font-bold text-[16px]" style={{ color: theme.colors.textPrimary }}>{preview.pres.title}</h2>
+                    <h2 className="font-bold text-base" style={{ color: theme.colors.textPrimary }}>{preview.pres.title}</h2>
                     <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-black/5" style={{ color: theme.colors.textSecondary }}>
                         <X className="w-4 h-4" />
                     </button>
@@ -394,19 +394,19 @@ const SlidePreviewModal = ({ preview, theme, onClose, onDownload, onShare }) => 
                     {preview.pres.slides.map((s, i) => (
                         <div key={s.id} className="relative rounded-xl overflow-hidden" style={{ border: `1px solid ${theme.colors.border}` }}>
                             <img src={s.image} alt={s.caption} className="w-full h-28 object-cover" />
-                            <div className="px-2 py-1 text-[9px] bg-black/50 text-white absolute inset-x-0 bottom-0 truncate">{s.caption}</div>
-                            <div className="absolute top-1 left-1 w-5 h-5 rounded-full bg-black/45 text-white text-[10px] font-bold flex items-center justify-center">{i + 1}</div>
+                            <div className="px-2 py-1 text-[10px] bg-black/50 text-white absolute inset-x-0 bottom-0 truncate">{s.caption}</div>
+                            <div className="absolute top-1 left-1 w-5 h-5 rounded-full bg-black/45 text-white text-[11px] font-bold flex items-center justify-center">{i + 1}</div>
                         </div>
                     ))}
                 </div>
                 <div className="px-5 py-4 flex gap-3" style={{ borderTop: `1px solid ${theme.colors.border}` }}>
                     <button onClick={onDownload}
-                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-2xl text-[14px] font-semibold transition-all active:scale-[0.97]"
+                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-2xl text-sm font-semibold transition-all active:scale-[0.97]"
                         style={{ background: theme.colors.accent, color: theme.colors.accentText || (isDark ? '#1A1A1A' : '#FFF') }}>
                         <Download className="w-4 h-4" /> Download PDF
                     </button>
                     <button onClick={onShare}
-                        className="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-[14px] font-semibold transition-all active:scale-[0.97]"
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-semibold transition-all active:scale-[0.97]"
                         style={{ border: `1.5px solid ${theme.colors.border}`, color: theme.colors.textPrimary }}>
                         <Share2 className="w-4 h-4" /> Share
                     </button>
@@ -506,7 +506,7 @@ export const PresentationsScreen = ({ theme, screenParams }) => {
                     const active = activeTab === id;
                     return (
                         <button key={id} onClick={() => setActiveTab(id)}
-                            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-2xl text-[12px] font-semibold transition-all"
+                            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-2xl text-xs font-semibold transition-all"
                             style={{
                                 background: active ? colors.accent : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.05)'),
                                 color: active ? (colors.accentText || (isDark ? '#1A1A1A' : '#FFFFFF')) : colors.textSecondary,
@@ -515,7 +515,7 @@ export const PresentationsScreen = ({ theme, screenParams }) => {
                             <Icon className="w-3.5 h-3.5" />
                             {label}
                             {id === 'my-decks' && myDecks.length > 0 && (
-                                <span className="ml-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold"
+                                <span className="ml-0.5 px-1.5 py-0.5 rounded-full text-[11px] font-bold"
                                     style={{ background: active ? 'rgba(255,255,255,0.25)' : `${colors.accent}20`, color: active ? (isDark ? '#1A1A1A' : '#FFF') : colors.accent }}>
                                     {myDecks.length}
                                 </span>

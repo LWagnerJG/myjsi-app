@@ -45,7 +45,7 @@ export const SalesByVerticalBreakdown = ({ data = [], theme, showOverview = true
                 {fmtMoney(row.value)}
               </div>
               {/* Percent */}
-              <div className="text-[11px] font-medium tabular-nums text-right" style={{ color: theme.colors.textSecondary }}>
+              <div className="text-xs font-medium tabular-nums text-right" style={{ color: theme.colors.textSecondary }}>
                 {pctStr}%
               </div>
             </li>
