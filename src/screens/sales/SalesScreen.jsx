@@ -148,10 +148,11 @@ export const SalesScreen = ({ theme, onNavigate }) => {
     const [key, data] = sorted[sorted.length - 1];
     const sales = data?.sales || [];
     const designers = data?.designers || [];
-    const top = [...sales].sort((a, b) => (b.amount || 0) - (a.amount || 0))[0];
+    const topSales = [...sales].sort((a, b) => (b.amount || 0) - (a.amount || 0)).slice(0, 2);
+    const topDesigners = [...designers].sort((a, b) => (b.amount || 0) - (a.amount || 0)).slice(0, 2);
     const totalSalesR = sales.reduce((s, r) => s + (r.amount || 0), 0);
     const totalDesignR = designers.reduce((s, r) => s + (r.amount || 0), 0);
-    return { key, top, totalSalesR, totalDesignR, totalAll: totalSalesR + totalDesignR, salesCount: sales.length, designersCount: designers.length };
+    return { key, topSales, topDesigners, totalSalesR, totalDesignR, totalAll: totalSalesR + totalDesignR, salesCount: sales.length, designersCount: designers.length };
   }, []);
 
   /* ── commissions snapshot (latest available year with data) ── */
@@ -188,7 +189,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
 
   return (
     <div className="flex flex-col h-full overflow-y-auto scrollbar-hide app-header-offset" style={{ backgroundColor: colors.background, scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-      <div className="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-5 pb-4 space-y-4 lg:space-y-5 max-w-5xl mx-auto w-full">
+      <div className="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-5 pb-2 space-y-4 lg:space-y-5 max-w-5xl mx-auto w-full">
 
         {/* ── Hero KPI + sidebar ── */}
         <div className="grid grid-cols-1 lg:grid-cols-[1.65fr_1fr] xl:grid-cols-[1.8fr_1fr] gap-4 lg:gap-5 items-stretch">
@@ -267,78 +268,89 @@ export const SalesScreen = ({ theme, onNavigate }) => {
           {/* Sidebar cards */}
           <div className="grid grid-cols-1 gap-4">
             {/* Leaderboard */}
-            <GlassCard theme={theme} className="p-4 space-y-2.5" variant="elevated">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-[13px] font-semibold">
-                  <TrendingUp className="w-3.5 h-3.5 opacity-50" /> Leaderboard
-                </div>
-                <button onClick={() => onNavigate('customer-rank')}
-                  className="text-[10px] font-bold uppercase tracking-widest opacity-35 hover:opacity-80 flex items-center gap-0.5 transition-opacity">
-                  View All <ChevronRight className="w-3 h-3" />
-                </button>
-              </div>
-              <div className="space-y-1">
-                {topLeaders.map((leader, idx) => (
-                  <div key={leader.id} className="flex items-center justify-between text-xs py-2 px-3 rounded-xl"
-                    style={{
-                      backgroundColor: subtle(isDark),
-                      opacity: ready ? 1 : 0,
-                      transform: ready ? 'none' : 'translateX(-4px)',
-                      transition: `opacity 0.3s ease ${0.05 + idx * 0.05}s, transform 0.3s ease ${0.05 + idx * 0.05}s`,
-                    }}>
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shrink-0"
-                        style={{ backgroundColor: subtle(isDark, 2), color: colors.textSecondary }}>
-                        {idx + 1}
-                      </span>
-                      <span className="font-semibold truncate">{leader.name}</span>
-                    </div>
-                    <span className="font-bold tabular-nums shrink-0 ml-2">{formatCurrency(leader.bookings)}</span>
+            <button onClick={() => onNavigate('customer-rank')} className="w-full text-left group">
+              <GlassCard theme={theme} className="p-4 space-y-2.5" variant="elevated">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-[13px] font-semibold">
+                    <TrendingUp className="w-3.5 h-3.5 opacity-50" /> Leaderboard
                   </div>
-                ))}
-              </div>
-            </GlassCard>
+                  <span className="text-[10px] font-bold uppercase tracking-widest opacity-25 group-hover:opacity-60 flex items-center gap-0.5 transition-opacity">
+                    View All <ChevronRight className="w-3 h-3" />
+                  </span>
+                </div>
+                <div className="space-y-1">
+                  {topLeaders.map((leader, idx) => (
+                    <div key={leader.id} className="flex items-center justify-between text-xs py-2 px-3 rounded-xl"
+                      style={{
+                        backgroundColor: subtle(isDark),
+                        opacity: ready ? 1 : 0,
+                        transform: ready ? 'none' : 'translateX(-4px)',
+                        transition: `opacity 0.3s ease ${0.05 + idx * 0.05}s, transform 0.3s ease ${0.05 + idx * 0.05}s`,
+                      }}>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shrink-0"
+                          style={{ backgroundColor: subtle(isDark, 2), color: colors.textSecondary }}>
+                          {idx + 1}
+                        </span>
+                        <span className="font-semibold truncate">{leader.name}</span>
+                      </div>
+                      <span className="font-bold tabular-nums shrink-0 ml-2">{formatCurrency(leader.bookings)}</span>
+                    </div>
+                  ))}
+                </div>
+              </GlassCard>
+            </button>
 
             {/* Dealer Rewards */}
-            <GlassCard theme={theme} className="p-4 space-y-2.5" variant="elevated">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-[13px] font-semibold">
-                  <Trophy className="w-3.5 h-3.5 opacity-50" /> Dealer Rewards
-                </div>
-                <button onClick={() => onNavigate('incentive-rewards')}
-                  className="text-[10px] font-bold uppercase tracking-widest opacity-35 hover:opacity-80 flex items-center gap-0.5 transition-opacity">
-                  Details <ChevronRight className="w-3 h-3" />
-                </button>
-              </div>
-              {rewardsSnapshot ? (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between py-2 px-3 rounded-xl text-xs" style={{ backgroundColor: subtle(isDark) }}>
-                    <div className="flex items-center gap-2">
-                      <Calendar className="w-3.5 h-3.5 opacity-35" />
-                      <span className="font-semibold">{rewardsSnapshot.key}</span>
-                    </div>
-                    <span className="font-bold tabular-nums">{formatCurrency(rewardsSnapshot.totalAll)}</span>
+            <button onClick={() => onNavigate('incentive-rewards')} className="w-full text-left group">
+              <GlassCard theme={theme} className="p-4 space-y-2.5" variant="elevated">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-[13px] font-semibold">
+                    <Trophy className="w-3.5 h-3.5 opacity-50" /> Dealer Rewards
                   </div>
-                  <div className="flex gap-1.5">
-                    <div className="flex-1 py-1.5 px-2.5 rounded-xl text-center" style={{ backgroundColor: subtle(isDark) }}>
-                      <div className="text-[9px] font-medium opacity-35 mb-0.5">Sales ({rewardsSnapshot.salesCount})</div>
-                      <div className="text-[11px] font-bold tabular-nums">{formatCurrency(rewardsSnapshot.totalSalesR)}</div>
+                  <span className="text-[10px] font-bold uppercase tracking-widest opacity-25 group-hover:opacity-60 flex items-center gap-0.5 transition-opacity">
+                    Details <ChevronRight className="w-3 h-3" />
+                  </span>
+                </div>
+                {rewardsSnapshot ? (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between py-2 px-3 rounded-xl text-xs" style={{ backgroundColor: subtle(isDark) }}>
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-3.5 h-3.5 opacity-35" />
+                        <span className="font-semibold">{rewardsSnapshot.key}</span>
+                      </div>
+                      <span className="font-bold tabular-nums">{formatCurrency(rewardsSnapshot.totalAll)}</span>
                     </div>
-                    <div className="flex-1 py-1.5 px-2.5 rounded-xl text-center" style={{ backgroundColor: subtle(isDark) }}>
-                      <div className="text-[9px] font-medium opacity-35 mb-0.5">Design ({rewardsSnapshot.designersCount})</div>
-                      <div className="text-[11px] font-bold tabular-nums">{formatCurrency(rewardsSnapshot.totalDesignR)}</div>
+                    <div className="space-y-1.5">
+                      {rewardsSnapshot.topSales.length > 0 && (
+                        <div className="py-1.5 px-2.5 rounded-xl" style={{ backgroundColor: subtle(isDark) }}>
+                          <div className="text-[9px] font-medium opacity-35 mb-1">Top Sales</div>
+                          {rewardsSnapshot.topSales.map((p, i) => (
+                            <div key={p.name} className="flex items-center justify-between">
+                              <span className="text-[11px] font-semibold truncate">{p.name}</span>
+                              <span className="text-[10px] font-bold tabular-nums opacity-60 ml-2">{formatCurrency(p.amount)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {rewardsSnapshot.topDesigners.length > 0 && (
+                        <div className="py-1.5 px-2.5 rounded-xl" style={{ backgroundColor: subtle(isDark) }}>
+                          <div className="text-[9px] font-medium opacity-35 mb-1">Top Design</div>
+                          {rewardsSnapshot.topDesigners.map((p, i) => (
+                            <div key={p.name} className="flex items-center justify-between">
+                              <span className="text-[11px] font-semibold truncate">{p.name}</span>
+                              <span className="text-[10px] font-bold tabular-nums opacity-60 ml-2">{formatCurrency(p.amount)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
-                  {rewardsSnapshot.top && (
-                    <div className="text-[9px] font-medium opacity-30 px-1">
-                      Top: {rewardsSnapshot.top.name} — {formatCurrency(rewardsSnapshot.top.amount)}
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <p className="text-xs opacity-40">No rewards data yet.</p>
-              )}
-            </GlassCard>
+                ) : (
+                  <p className="text-xs opacity-40">No rewards data yet.</p>
+                )}
+              </GlassCard>
+            </button>
           </div>
         </div>
 
