@@ -1,11 +1,9 @@
-import React, { useMemo, useState, useEffect, useCallback } from 'react';
-import { Modal } from '../../components/common/Modal';
-import { ArrowUp, ArrowDown, TrendingUp, BarChart, Table, ChevronRight, Target, Trophy, Calendar, DollarSign } from 'lucide-react';
+import React, { useMemo, useState, useEffect } from 'react';
+import { ArrowUp, ArrowDown, TrendingUp, ChevronRight, Target, Trophy, Calendar, DollarSign } from 'lucide-react';
 import { MONTHLY_SALES_DATA, SALES_VERTICALS_DATA, CUSTOMER_RANK_DATA, INCENTIVE_REWARDS_DATA } from './data.js';
 import { ORDER_DATA, STATUS_COLORS } from '../orders/data.js';
 import { SalesByVerticalBreakdown } from './components/SalesByVerticalBreakdown.jsx';
 import { CountUp } from '../../components/common/CountUp.jsx';
-import { motion, AnimatePresence } from 'framer-motion';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { isDarkTheme } from '../../design-system/tokens.js';
 import { formatCurrency, formatCompanyName } from '../../utils/format.js';
@@ -25,52 +23,6 @@ const sortQuarterEntries = (entries) =>
     const pa = parseQuarterKey(a[0]), pb = parseQuarterKey(b[0]);
     return pa.y === pb.y ? pa.q - pb.q : pa.y - pb.y;
   });
-
-/* ── Order Detail Modal ──────────────────────────────────────── */
-
-const OrderModal = ({ order, onClose, theme }) => {
-  if (!order) return null;
-  const c = {
-    primary: theme?.colors?.textPrimary || '#353535',
-    accent: theme?.colors?.accent || '#353535',
-    secondary: theme?.colors?.secondary || '#666666',
-  };
-  return (
-    <Modal show={!!order} onClose={onClose} title={`PO #${order.po}`} theme={theme}>
-      <div className="space-y-6 text-sm" style={{ color: c.primary }}>
-        <div className="flex justify-between items-start">
-          <div>
-            <h3 className="text-xl font-bold">{formatCompanyName(order.company)}</h3>
-            <p className="opacity-60">{order.details}</p>
-          </div>
-          <div className="text-right">
-            <p className="text-2xl font-black" style={{ color: c.accent }}>${order.net.toLocaleString()}</p>
-            <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
-              style={{ backgroundColor: (STATUS_COLORS[order.status] || c.secondary) + '20', color: STATUS_COLORS[order.status] || c.secondary }}>
-              {order.status}
-            </span>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-6 p-4 rounded-2xl" style={{ backgroundColor: theme?.colors?.subtle || 'rgba(0,0,0,0.02)' }}>
-          <div><div className="text-[10px] uppercase tracking-widest font-bold opacity-40">Order Date</div><div className="font-bold">{new Date(order.date).toLocaleDateString()}</div></div>
-          <div><div className="text-[10px] uppercase tracking-widest font-bold opacity-40">Ship Date</div><div className="font-bold">{new Date(order.shipDate).toLocaleDateString()}</div></div>
-        </div>
-        <div>
-          <h4 className="text-xs font-bold uppercase tracking-widest opacity-40 mb-3">Line Items</h4>
-          <div className="space-y-3">{order.lineItems?.map(li => (
-            <div key={li.line} className="flex justify-between items-center py-2 last:border-0" style={{ borderBottom: `1px solid ${theme?.colors?.border || 'rgba(0,0,0,0.03)'}` }}>
-              <div className="flex items-center gap-3">
-                <span className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs" style={{ backgroundColor: theme?.colors?.subtle || 'rgba(0,0,0,0.04)' }}>{li.quantity}x</span>
-                <span className="font-bold">{li.name}</span>
-              </div>
-              <span className="font-bold">${li.extNet.toLocaleString()}</span>
-            </div>
-          ))}</div>
-        </div>
-      </div>
-    </Modal>
-  );
-};
 
 /* ── Inline text toggle (discrete) ───────────────────────────── */
 
@@ -97,9 +49,7 @@ const InlineToggle = ({ options, value, onChange, colors }) => (
 /* ── Main Screen ─────────────────────────────────────────────── */
 
 export const SalesScreen = ({ theme, onNavigate }) => {
-  const [monthlyView, setMonthlyView] = useState('chart');
   const [chartDataType, setChartDataType] = useState('bookings');
-  const [selectedOrder, setSelectedOrder] = useState(null);
   const [hoveredBar, setHoveredBar] = useState(null);
   const isDark = isDarkTheme(theme);
 
@@ -178,7 +128,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
     { value: 'sales', label: 'Sales' },
   ], []);
 
-  const statusColor = useCallback((status) => STATUS_COLORS[status] || colors.textSecondary, [colors.textSecondary]);
+  const statusColor = (status) => STATUS_COLORS[status] || colors.textSecondary;
 
   /* ── animation gate — wait for screen slide-in ── */
 
@@ -357,45 +307,44 @@ export const SalesScreen = ({ theme, onNavigate }) => {
         {/* ── Data sections ── */}
         <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-4 lg:gap-5">
           {/* Recent Activity */}
-          <GlassCard theme={theme} className="p-4 sm:p-5 space-y-2" variant="elevated">
-            <div className="flex justify-between items-center">
-              <h3 className="text-[14px] font-bold">Recent Activity</h3>
-              <button onClick={() => onNavigate('orders')}
-                className="text-[10px] font-bold uppercase tracking-widest opacity-35 hover:opacity-80 flex items-center gap-0.5 transition-opacity">
-                All Orders <ChevronRight className="w-3 h-3" />
-              </button>
-            </div>
-            <div className="space-y-0.5">
-              {recentOrders.map((order, i) => {
-                const sc = statusColor(order.status);
-                return (
-                  <button key={order.orderNumber} onClick={() => setSelectedOrder(order)}
-                    className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl active:scale-[0.98] transition-all"
-                    style={{ opacity: ready ? 1 : 0, transition: `opacity 0.25s ease ${0.08 + i * 0.03}s` }}
-                    onMouseEnter={e => e.currentTarget.style.backgroundColor = subtle(isDark, 1.5)}
-                    onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-[9px] shrink-0"
-                        style={{ backgroundColor: subtle(isDark, 1.8) }}>
-                        PO
+          <button onClick={() => onNavigate('orders')} className="w-full text-left group">
+            <GlassCard theme={theme} className="p-4 sm:p-5 space-y-2" variant="elevated">
+              <div className="flex justify-between items-center">
+                <h3 className="text-[14px] font-bold">Recent Activity</h3>
+                <span className="text-[10px] font-bold uppercase tracking-widest opacity-25 group-hover:opacity-60 flex items-center gap-0.5 transition-opacity">
+                  All Orders <ChevronRight className="w-3 h-3" />
+                </span>
+              </div>
+              <div className="space-y-0.5">
+                {recentOrders.map((order, i) => {
+                  const sc = statusColor(order.status);
+                  return (
+                    <div key={order.orderNumber}
+                      className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl"
+                      style={{ opacity: ready ? 1 : 0, transition: `opacity 0.25s ease ${0.08 + i * 0.03}s` }}>
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-[9px] shrink-0"
+                          style={{ backgroundColor: subtle(isDark, 1.8) }}>
+                          PO
+                        </div>
+                        <div className="text-left min-w-0">
+                          <p className="text-[13px] font-bold truncate max-w-[170px]">{formatCompanyName(order.company)}</p>
+                          <p className="text-[10px] font-medium opacity-35 tabular-nums">{new Date(order.date).toLocaleDateString()}</p>
+                        </div>
                       </div>
-                      <div className="text-left min-w-0">
-                        <p className="text-[13px] font-bold truncate max-w-[170px]">{formatCompanyName(order.company)}</p>
-                        <p className="text-[10px] font-medium opacity-35 tabular-nums">{new Date(order.date).toLocaleDateString()}</p>
+                      <div className="text-right shrink-0 ml-2 space-y-0.5">
+                        <p className="text-[13px] font-black tabular-nums">${order.net.toLocaleString()}</p>
+                        <span className="inline-block text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
+                          style={{ backgroundColor: sc + '14', color: sc }}>
+                          {order.status}
+                        </span>
                       </div>
                     </div>
-                    <div className="text-right shrink-0 ml-2 space-y-0.5">
-                      <p className="text-[13px] font-black tabular-nums">${order.net.toLocaleString()}</p>
-                      <span className="inline-block text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
-                        style={{ backgroundColor: sc + '14', color: sc }}>
-                        {order.status}
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </GlassCard>
+                  );
+                })}
+              </div>
+            </GlassCard>
+          </button>
 
           {/* Invoiced by Vertical */}
           <GlassCard theme={theme} className="p-4 sm:p-5 space-y-2" variant="elevated">
@@ -407,74 +356,6 @@ export const SalesScreen = ({ theme, onNavigate }) => {
             <SalesByVerticalBreakdown theme={theme} data={SALES_VERTICALS_DATA.map(v => ({ name: v.label, value: v.value, color: v.color }))} />
           </GlassCard>
         </div>
-
-        {/* ── Monthly Trend (desktop) ── */}
-        <GlassCard theme={theme} className="p-4 sm:p-5 space-y-3" variant="elevated">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-2.5">
-              <h3 className="text-[14px] font-bold">Monthly Trend</h3>
-              <InlineToggle options={toggleOpts} value={chartDataType} onChange={setChartDataType} colors={colors} />
-            </div>
-            <button onClick={() => setMonthlyView(v => v === 'chart' ? 'table' : 'chart')}
-              className="p-1.5 rounded-lg transition-colors" style={{ backgroundColor: subtle(isDark, 1.5) }}
-              onMouseEnter={e => e.currentTarget.style.backgroundColor = subtle(isDark, 3)}
-              onMouseLeave={e => e.currentTarget.style.backgroundColor = subtle(isDark, 1.5)}
-              aria-label={monthlyView === 'chart' ? 'Table view' : 'Chart view'}>
-              {monthlyView === 'chart' ? <Table className="w-3.5 h-3.5 opacity-50" /> : <BarChart className="w-3.5 h-3.5 opacity-50" />}
-            </button>
-          </div>
-
-          <AnimatePresence mode="wait">
-            {monthlyView === 'chart' ? (
-              <motion.div key="chart" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}
-                className="min-h-[140px] sm:min-h-[180px] flex items-end gap-1.5 sm:gap-2.5 overflow-hidden px-1 pb-1">
-                {MONTHLY_SALES_DATA.map((m, i) => {
-                  const val = chartDataType === 'bookings' ? m.bookings : m.sales;
-                  const pct = (val / chartMax) * 100;
-                  const isHovered = hoveredBar === `chart-${i}`;
-                  return (
-                    <div key={m.month} className="flex-1 flex flex-col items-center gap-2 cursor-default"
-                      onMouseEnter={() => setHoveredBar(`chart-${i}`)} onMouseLeave={() => setHoveredBar(null)}>
-                      <div className="w-full h-28 sm:h-36 relative flex items-end justify-center">
-                        <div className="w-full rounded-lg"
-                          style={{
-                            height: ready ? `${Math.max(4, pct)}%` : '0%',
-                            backgroundColor: colors.accent,
-                            opacity: isHovered ? (isDark ? 0.6 : 0.4) : (isDark ? 0.3 : 0.2),
-                            transition: `height 0.4s ease-out ${i * 0.025}s, opacity 0.15s`,
-                          }} />
-                        {isHovered && (
-                          <div className="absolute -top-5 left-1/2 -translate-x-1/2 text-[9px] font-black whitespace-nowrap px-1.5 py-0.5 rounded"
-                            style={{ backgroundColor: colors.accent, color: isDark ? '#1A1A1A' : '#FFF' }}>
-                            ${(val / 1000).toFixed(0)}k
-                          </div>
-                        )}
-                      </div>
-                      <span className="text-[9px] font-semibold" style={{ opacity: isHovered ? 0.8 : 0.3, transition: 'opacity 0.15s' }}>{m.month}</span>
-                    </div>
-                  );
-                })}
-              </motion.div>
-            ) : (
-              <motion.div key="table" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
-                {MONTHLY_SALES_DATA.map((m, i) => {
-                  const val = chartDataType === 'bookings' ? m.bookings : m.sales;
-                  const pct = (val / chartMax) * 100;
-                  return (
-                    <div key={m.month} className="flex items-center gap-3 py-2.5"
-                      style={{ borderBottom: i < MONTHLY_SALES_DATA.length - 1 ? `1px solid ${colors.border}` : 'none' }}>
-                      <span className="w-9 text-[11px] font-bold" style={{ color: colors.textPrimary }}>{m.month}</span>
-                      <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: subtle(isDark, 1.5) }}>
-                        <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: colors.accent, opacity: isDark ? 0.4 : 0.25, transition: 'width 0.4s ease' }} />
-                      </div>
-                      <span className="text-[11px] font-bold tabular-nums w-20 text-right">{formatCurrency(val)}</span>
-                    </div>
-                  );
-                })}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </GlassCard>
 
         {/* ── Commissions Preview ── */}
         {commissionsSnapshot && (
@@ -515,7 +396,6 @@ export const SalesScreen = ({ theme, onNavigate }) => {
         )}
       </div>
 
-      <OrderModal order={selectedOrder} onClose={() => setSelectedOrder(null)} theme={theme} />
     </div>
   );
 };
