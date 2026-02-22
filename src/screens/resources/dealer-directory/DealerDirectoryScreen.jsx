@@ -1,123 +1,109 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { PageTitle } from '../../../components/common/PageTitle.jsx';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import { ChevronRight, MapPin, Building2, Search, UserPlus } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { DEALER_DIRECTORY_DATA } from './data.js';
 import { isDarkTheme } from '../../../design-system/tokens.js';
 import { formatCurrency } from '../../../utils/format.js';
 
 /* ────────────────────────────────────────────────
- *  Mini sparkline — pure SVG
+ *  Carousel card
  * ──────────────────────────────────────────────── */
-const Spark = ({ data, color, w = 56, h = 20 }) => {
-    if (!data || data.length < 2) return null;
-    const mx = Math.max(...data), mn = Math.min(...data), r = mx - mn || 1;
-    const pts = data.map((v, i) => `${(i / (data.length - 1)) * w},${h - ((v - mn) / r) * (h - 4) - 2}`).join(' ');
-    return (
-        <svg width={w} height={h} className="flex-shrink-0 opacity-50">
-            <polyline fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points={pts} />
-        </svg>
-    );
-};
-
-/* ────────────────────────────────────────────────
- *  Peek card — the active card in the carousel
- * ──────────────────────────────────────────────── */
-const SWIPE_THRESHOLD = 40;
-
-const ActiveCard = ({ dealer, colors, isDark, onTap }) => {
+const CarouselCard = React.memo(({ dealer, colors, isDark, onTap, isCenter }) => {
     const goalPct = dealer?.ytdGoal ? Math.round((dealer.sales / dealer.ytdGoal) * 100) : null;
     const goalColor = goalPct >= 80 ? '#4A7C59' : goalPct >= 50 ? '#C4956A' : colors.accent;
-    const sparkData = dealer?.monthlySales?.map(m => m.amount) || [];
 
     return (
         <div
-            className="rounded-2xl overflow-hidden select-none cursor-pointer"
+            onClick={onTap}
+            className="rounded-[20px] overflow-hidden select-none cursor-pointer transition-all duration-300"
             style={{
                 backgroundColor: isDark ? colors.surface : '#FFFFFF',
-                border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)',
-                boxShadow: isDark ? '0 4px 24px rgba(0,0,0,0.3)' : '0 2px 16px rgba(0,0,0,0.06)',
+                border: isDark ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(0,0,0,0.05)',
+                boxShadow: isCenter
+                    ? (isDark ? '0 8px 32px rgba(0,0,0,0.4)' : '0 4px 20px rgba(0,0,0,0.08)')
+                    : (isDark ? '0 2px 8px rgba(0,0,0,0.2)' : '0 1px 6px rgba(0,0,0,0.04)'),
+                opacity: isCenter ? 1 : 0.7,
+                transform: isCenter ? 'scale(1)' : 'scale(0.95)',
             }}
-            onClick={onTap}
         >
-            <div className="px-5 pt-5 pb-4">
-                {/* Name + monogram */}
-                <div className="flex items-center gap-3 mb-3.5">
+            {/* Header — monogram + name */}
+            <div className="px-4 pt-4 pb-3">
+                <div className="flex items-center gap-3 mb-3">
                     <div
-                        className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 text-sm font-bold"
-                        style={{ backgroundColor: `${colors.accent}10`, color: colors.accent }}
+                        className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-sm font-bold"
+                        style={{ backgroundColor: `${colors.accent}0D`, color: colors.accent }}
                     >
                         {dealer.name.charAt(0)}
                     </div>
                     <div className="flex-1 min-w-0">
-                        <h3 className="text-[17px] font-bold tracking-tight truncate" style={{ color: colors.textPrimary }}>
+                        <h3 className="text-[15px] font-bold tracking-tight truncate" style={{ color: colors.textPrimary }}>
                             {dealer.name}
                         </h3>
                         <div className="flex items-center gap-1 mt-0.5">
-                            <MapPin className="w-3 h-3 flex-shrink-0" style={{ color: colors.textSecondary, opacity: 0.45 }} />
-                            <span className="text-[11px] truncate" style={{ color: colors.textSecondary }}>{dealer.address}</span>
+                            <MapPin className="w-2.5 h-2.5 flex-shrink-0" style={{ color: colors.textSecondary, opacity: 0.4 }} />
+                            <span className="text-[10px] truncate" style={{ color: colors.textSecondary }}>
+                                {dealer.territory || dealer.address?.split(',').slice(1).join(',').trim() || dealer.address}
+                            </span>
                         </div>
                     </div>
-                    <ChevronRight className="w-4 h-4 flex-shrink-0" style={{ color: colors.textSecondary, opacity: 0.2 }} />
                 </div>
 
-                {/* Metrics */}
-                <div className="grid grid-cols-3 gap-2">
-                    {[
-                        { label: 'Sales', value: formatCurrency(dealer.sales) },
-                        { label: 'Bookings', value: formatCurrency(dealer.bookings) },
-                        { label: 'Discount', value: dealer.dailyDiscount },
-                    ].map(m => (
-                        <div key={m.label}>
-                            <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: colors.textSecondary }}>{m.label}</p>
-                            <p className="text-[14px] font-bold tracking-tight mt-0.5" style={{ color: colors.textPrimary }}>{m.value}</p>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            {/* Footer strip */}
-            <div className="px-5 py-2.5 flex items-center justify-between" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.025)' : 'rgba(0,0,0,0.015)' }}>
-                <div className="flex items-center gap-2">
+                {/* Metrics row */}
+                <div className="flex items-end gap-4">
+                    <div>
+                        <p className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: colors.textSecondary }}>Sales</p>
+                        <p className="text-[15px] font-black tracking-tight" style={{ color: colors.textPrimary }}>{formatCurrency(dealer.sales)}</p>
+                    </div>
+                    <div>
+                        <p className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: colors.textSecondary }}>Bookings</p>
+                        <p className="text-[13px] font-bold tracking-tight" style={{ color: colors.textSecondary }}>{formatCurrency(dealer.bookings)}</p>
+                    </div>
                     {goalPct !== null && (
-                        <>
-                            <div className="w-16 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }}>
+                        <div className="ml-auto flex items-center gap-1.5">
+                            <div className="w-12 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)' }}>
                                 <div className="h-full rounded-full" style={{ width: `${Math.min(goalPct, 100)}%`, backgroundColor: goalColor }} />
                             </div>
-                            <span className="text-[10px] font-semibold" style={{ color: goalColor }}>{goalPct}% YTD</span>
-                        </>
+                            <span className="text-[10px] font-bold" style={{ color: goalColor }}>{goalPct}%</span>
+                        </div>
                     )}
                 </div>
-                <Spark data={sparkData} color={colors.accent} />
             </div>
         </div>
     );
-};
+});
 
 /* ────────────────────────────────────────────────
- *  Peek preview (prev/next side cards)
+ *  Scroll-snap carousel hook
  * ──────────────────────────────────────────────── */
-const PeekCard = ({ dealer, colors, isDark, onClick }) => (
-    <div
-        className="rounded-2xl overflow-hidden cursor-pointer h-full flex flex-col justify-center px-3 py-4"
-        style={{
-            backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.025)',
-            border: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.04)',
-        }}
-        onClick={onClick}
-    >
-        <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center mx-auto mb-2 text-xs font-bold"
-            style={{ backgroundColor: `${colors.accent}10`, color: colors.accent }}
-        >
-            {dealer.name.charAt(0)}
-        </div>
-        <p className="text-[10px] font-semibold text-center leading-tight truncate" style={{ color: colors.textSecondary }}>
-            {dealer.name.split(' ')[0]}
-        </p>
-    </div>
-);
+const useSnapCarousel = (itemCount) => {
+    const trackRef = useRef(null);
+    const [centerIdx, setCenterIdx] = useState(0);
+
+    const onScroll = useCallback(() => {
+        const el = trackRef.current;
+        if (!el || !el.children.length) return;
+        const scrollCenter = el.scrollLeft + el.offsetWidth / 2;
+        let closest = 0, closestDist = Infinity;
+        for (let i = 0; i < el.children.length; i++) {
+            const child = el.children[i];
+            const childCenter = child.offsetLeft + child.offsetWidth / 2;
+            const dist = Math.abs(scrollCenter - childCenter);
+            if (dist < closestDist) { closestDist = dist; closest = i; }
+        }
+        setCenterIdx(closest);
+    }, []);
+
+    const scrollTo = useCallback((idx) => {
+        const el = trackRef.current;
+        if (!el || !el.children[idx]) return;
+        const child = el.children[idx];
+        const scrollTarget = child.offsetLeft - (el.offsetWidth / 2) + (child.offsetWidth / 2);
+        el.scrollTo({ left: scrollTarget, behavior: 'smooth' });
+    }, []);
+
+    return { trackRef, centerIdx, onScroll, scrollTo };
+};
 
 /* ────────────────────────────────────────────────
  *  Main screen
@@ -125,7 +111,6 @@ const PeekCard = ({ dealer, colors, isDark, onClick }) => (
 export const DealerDirectoryScreen = ({ theme, setSuccessMessage, dealerDirectory, onNavigate }) => {
     const dealers = useMemo(() => dealerDirectory || DEALER_DIRECTORY_DATA || [], [dealerDirectory]);
     const [searchTerm, setSearchTerm] = useState('');
-    const [activeIdx, setActiveIdx] = useState(0);
     const isDark = isDarkTheme(theme);
     const colors = theme.colors;
 
@@ -140,90 +125,71 @@ export const DealerDirectoryScreen = ({ theme, setSuccessMessage, dealerDirector
         .sort((a, b) => a.name.localeCompare(b.name)),
     [dealers, searchTerm]);
 
-    const clampedIdx = Math.min(activeIdx, Math.max(sorted.length - 1, 0));
-    if (clampedIdx !== activeIdx) setActiveIdx(clampedIdx);
-
-    const goNext = useCallback(() => setActiveIdx(i => Math.min(i + 1, sorted.length - 1)), [sorted.length]);
-    const goPrev = useCallback(() => setActiveIdx(i => Math.max(i - 1, 0)), []);
-
-    const handleDragEnd = useCallback((_e, info) => {
-        if (info.offset.x < -SWIPE_THRESHOLD) goNext();
-        else if (info.offset.x > SWIPE_THRESHOLD) goPrev();
-    }, [goNext, goPrev]);
-
-    const current = sorted[clampedIdx];
-    const prevDealer = clampedIdx > 0 ? sorted[clampedIdx - 1] : null;
-    const nextDealer = clampedIdx < sorted.length - 1 ? sorted[clampedIdx + 1] : null;
+    const { trackRef, centerIdx, onScroll, scrollTo } = useSnapCarousel(sorted.length);
 
     const divider = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)';
 
     return (
         <div className="flex flex-col h-full app-header-offset overflow-hidden" style={{ backgroundColor: colors.background }}>
-            {/* Header */}
-            <div className="flex-shrink-0 px-4 pt-1">
+
+            {/* Title */}
+            <div className="flex-shrink-0 px-4 pt-1 pb-1">
                 <PageTitle title="Dealers" theme={theme} />
             </div>
 
-            {/* Carousel: prev peek | active card | next peek */}
-            {sorted.length > 0 && current ? (
-                <div className="flex-shrink-0 px-2 pb-3">
-                    <div className="flex items-stretch gap-2" style={{ minHeight: 185 }}>
-                        {/* Prev peek */}
-                        <div className="w-14 flex-shrink-0">
-                            {prevDealer ? (
-                                <PeekCard dealer={prevDealer} colors={colors} isDark={isDark} onClick={goPrev} />
-                            ) : <div />}
-                        </div>
-
-                        {/* Active card — swipeable */}
-                        <div className="flex-1 min-w-0">
-                            <AnimatePresence mode="wait" initial={false}>
-                                <motion.div
-                                    key={current.id}
-                                    initial={{ opacity: 0, scale: 0.96 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    exit={{ opacity: 0, scale: 0.96 }}
-                                    transition={{ type: 'spring', stiffness: 400, damping: 32 }}
-                                    drag="x"
-                                    dragConstraints={{ left: 0, right: 0 }}
-                                    dragElastic={0.12}
-                                    onDragEnd={handleDragEnd}
-                                    className="touch-pan-y h-full"
-                                >
-                                    <ActiveCard
-                                        dealer={current}
-                                        colors={colors}
-                                        isDark={isDark}
-                                        onTap={() => onNavigate?.(`resources/dealer-directory/${current.id}`)}
-                                    />
-                                </motion.div>
-                            </AnimatePresence>
-                        </div>
-
-                        {/* Next peek */}
-                        <div className="w-14 flex-shrink-0">
-                            {nextDealer ? (
-                                <PeekCard dealer={nextDealer} colors={colors} isDark={isDark} onClick={goNext} />
-                            ) : <div />}
-                        </div>
+            {/* ── Carousel ── */}
+            {sorted.length > 0 ? (
+                <div className="flex-shrink-0 pb-3">
+                    {/* Horizontal scroll-snap track */}
+                    <div
+                        ref={trackRef}
+                        onScroll={onScroll}
+                        className="flex gap-3 overflow-x-auto scrollbar-hide scroll-smooth px-4"
+                        style={{
+                            scrollSnapType: 'x mandatory',
+                            WebkitOverflowScrolling: 'touch',
+                            paddingLeft: 'calc(50% - 130px)',
+                            paddingRight: 'calc(50% - 130px)',
+                        }}
+                    >
+                        {sorted.map((d, i) => (
+                            <div
+                                key={d.id}
+                                className="flex-shrink-0"
+                                style={{ width: 260, scrollSnapAlign: 'center' }}
+                            >
+                                <CarouselCard
+                                    dealer={d}
+                                    colors={colors}
+                                    isDark={isDark}
+                                    isCenter={i === centerIdx}
+                                    onTap={() => onNavigate?.(`resources/dealer-directory/${d.id}`)}
+                                />
+                            </div>
+                        ))}
                     </div>
 
                     {/* Dot indicator */}
                     {sorted.length > 1 && sorted.length <= 15 && (
-                        <div className="flex justify-center gap-1 pt-3">
+                        <div className="flex justify-center gap-[5px] pt-3">
                             {sorted.map((_, i) => (
                                 <button
                                     key={i}
-                                    onClick={() => setActiveIdx(i)}
-                                    className="rounded-full transition-all duration-200"
+                                    onClick={() => scrollTo(i)}
+                                    className="rounded-full transition-all duration-300 ease-out"
                                     style={{
-                                        width: i === clampedIdx ? 16 : 5,
+                                        width: i === centerIdx ? 18 : 5,
                                         height: 5,
-                                        backgroundColor: i === clampedIdx ? colors.accent : (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)'),
+                                        backgroundColor: i === centerIdx ? colors.accent : (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)'),
                                     }}
                                 />
                             ))}
                         </div>
+                    )}
+                    {sorted.length > 15 && (
+                        <p className="text-center text-[11px] font-medium pt-2" style={{ color: colors.textSecondary }}>
+                            {centerIdx + 1} / {sorted.length}
+                        </p>
                     )}
                 </div>
             ) : (
@@ -234,22 +200,22 @@ export const DealerDirectoryScreen = ({ theme, setSuccessMessage, dealerDirector
                 </div>
             )}
 
-            {/* All Dealers list section */}
+            {/* ── List section ── */}
             <div className="flex-1 min-h-0 flex flex-col">
-                {/* Search + Add Dealer row */}
-                <div className="flex-shrink-0 px-4 pb-2 flex items-center gap-2">
+                {/* Search + Add Dealer */}
+                <div className="flex-shrink-0 px-4 pb-2.5 flex items-center gap-2">
                     <div
                         className="flex-1 flex items-center gap-2.5 px-3.5 rounded-xl"
                         style={{
                             height: 40,
-                            backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.035)',
+                            backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
                             border: `1px solid ${divider}`,
                         }}
                     >
-                        <Search className="w-3.5 h-3.5 flex-shrink-0" style={{ color: colors.textSecondary, opacity: 0.45 }} />
+                        <Search className="w-3.5 h-3.5 flex-shrink-0" style={{ color: colors.textSecondary, opacity: 0.4 }} />
                         <input
                             value={searchTerm}
-                            onChange={e => { setSearchTerm(e.target.value); setActiveIdx(0); }}
+                            onChange={e => setSearchTerm(e.target.value)}
                             placeholder="Search dealers..."
                             className="flex-1 bg-transparent text-[13px] outline-none"
                             style={{ color: colors.textPrimary }}
@@ -272,20 +238,17 @@ export const DealerDirectoryScreen = ({ theme, setSuccessMessage, dealerDirector
                     </button>
                 </div>
 
-                {/* Scrollable dealer list */}
+                {/* Dealer list */}
                 <div className="flex-1 overflow-y-auto scrollbar-hide px-4 pb-24">
                     <GlassCard theme={theme} className="p-0 overflow-hidden" style={{ borderRadius: 16 }}>
                         {sorted.map((d, i) => {
-                            const isActive = i === clampedIdx;
+                            const isActive = i === centerIdx;
                             const goalPct = d.ytdGoal ? Math.round((d.sales / d.ytdGoal) * 100) : null;
                             const goalColor = goalPct >= 80 ? '#4A7C59' : goalPct >= 50 ? '#C4956A' : colors.accent;
                             return (
                                 <button
                                     key={d.id}
-                                    onClick={() => {
-                                        setActiveIdx(i);
-                                        onNavigate?.(`resources/dealer-directory/${d.id}`);
-                                    }}
+                                    onClick={() => onNavigate?.(`resources/dealer-directory/${d.id}`)}
                                     className="w-full text-left flex items-center gap-3 px-4 py-3 transition-colors active:opacity-80"
                                     style={{
                                         borderBottom: i < sorted.length - 1 ? `1px solid ${divider}` : 'none',
@@ -303,7 +266,7 @@ export const DealerDirectoryScreen = ({ theme, setSuccessMessage, dealerDirector
                                         {d.name.charAt(0)}
                                     </div>
 
-                                    {/* Name + address */}
+                                    {/* Name + territory */}
                                     <div className="flex-1 min-w-0">
                                         <p className="text-[13px] font-semibold tracking-tight truncate" style={{ color: colors.textPrimary }}>
                                             {d.name}
