@@ -46,9 +46,7 @@ const ProductTabs = React.memo(({ products, activeProduct, onProductSelect, them
               style={{
                 width: 88,
                 padding: '10px 4px 8px',
-                backgroundColor: active
-                  ? (dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.04)')
-                  : 'transparent',
+                backgroundColor: 'transparent',
                 WebkitTapHighlightColor: 'transparent',
               }}
             >
@@ -189,30 +187,29 @@ const ProductHero = React.memo(({ product, theme, categoryId, onNavigate, catego
 });
 ProductHero.displayName = 'ProductHero';
 
-// ─── Segmented pill toggle (glass) ───────────────────────────────────────────
+// ─── Segmented pill toggle (clean) ──────────────────────────────────────────
 const GlassSegmentedToggle = React.memo(({ options, value, onChange, theme }) => {
   const dark = isDarkTheme(theme);
   const activeIdx = options.findIndex(o => (typeof o === 'string' ? o.toLowerCase() : o) === value);
 
   return (
     <div
-      className="relative flex h-11 rounded-full p-1 overflow-hidden"
+      className="relative flex h-10 rounded-xl p-0.5 overflow-hidden"
       style={{
         backgroundColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
-        border: dark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)',
       }}
     >
       {/* Sliding indicator */}
       <motion.span
-        className="absolute top-1 bottom-1 rounded-full"
+        className="absolute top-0.5 bottom-0.5 rounded-[10px]"
         style={{
-          width: `calc((100% - 0.5rem) / ${options.length})`,
-          left: 4,
-          ...glassStyle(theme, dark),
-          border: 'none',
+          width: `calc((100% - 0.25rem) / ${options.length})`,
+          left: 2,
+          backgroundColor: dark ? 'rgba(255,255,255,0.12)' : '#fff',
+          boxShadow: dark ? 'none' : '0 1px 4px rgba(0,0,0,0.08)',
         }}
         animate={{ x: `${activeIdx * 100}%` }}
-        transition={{ type: 'spring', stiffness: 350, damping: 32 }}
+        transition={{ type: 'spring', stiffness: 380, damping: 34 }}
       />
       {options.map(opt => {
         const label = typeof opt === 'string' ? opt : opt;
@@ -222,7 +219,7 @@ const GlassSegmentedToggle = React.memo(({ options, value, onChange, theme }) =>
           <button
             key={label}
             onClick={() => onChange(val)}
-            className="relative z-10 flex-1 rounded-full flex items-center justify-center whitespace-nowrap text-xs font-semibold transition-colors duration-200"
+            className="relative z-10 flex-1 rounded-[10px] flex items-center justify-center whitespace-nowrap text-[13px] font-semibold transition-colors duration-200"
             style={{ color: active ? theme.colors.textPrimary : theme.colors.textSecondary }}
           >
             {label}
@@ -238,25 +235,24 @@ GlassSegmentedToggle.displayName = 'GlassSegmentedToggle';
 const ConfigPills = React.memo(({ pills, activeValue, onSelect, theme }) => {
   const dark = isDarkTheme(theme);
   return (
-    <div className="flex gap-2 overflow-x-auto scrollbar-hide py-1">
+    <div className="flex gap-1.5 overflow-x-auto scrollbar-hide py-0.5">
       {pills.map(pill => {
         const active = pill === activeValue || pill.toLowerCase() === activeValue;
         return (
           <button
             key={pill}
             onClick={() => onSelect(pill)}
-            className="flex-shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all duration-250 active:scale-95 hover:scale-[1.02]"
+            className="flex-shrink-0 px-4 py-2 rounded-xl text-[13px] font-semibold transition-all duration-200 active:scale-[0.97]"
             style={{
               backgroundColor: active
-                ? theme.colors.accent
-                : (dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'),
+                ? (dark ? 'rgba(255,255,255,0.12)' : theme.colors.accent)
+                : 'transparent',
               color: active
-                ? theme.colors.accentText
+                ? (dark ? '#fff' : theme.colors.accentText)
                 : theme.colors.textSecondary,
-              border: active ? 'none' : (dark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)'),
-              boxShadow: active
-                ? (dark ? '0 2px 12px rgba(255,255,255,0.12)' : '0 2px 12px rgba(53,53,53,0.15)')
-                : 'none',
+              border: active
+                ? (dark ? '1px solid rgba(255,255,255,0.12)' : `1px solid ${theme.colors.accent}`)
+                : (dark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)'),
             }}
           >
             {pill}
@@ -307,33 +303,41 @@ const PricingTable = React.memo(({
 
   return (
     <div
-      className="rounded-[24px] overflow-hidden"
+      className="rounded-[20px] overflow-hidden"
       style={{ ...glassStyle(theme, dark) }}
     >
       {/* Config section */}
-      <div className="px-5 pt-5 space-y-3">
-        {pills.length > 0 && (
-          <ConfigPills pills={pills} activeValue={activePill} onSelect={onPillSelect} theme={theme} />
-        )}
-        {showMaterialToggle && (
-          <GlassSegmentedToggle
-            options={['Laminate', 'Veneer']}
-            value={materialMode}
-            onChange={onMaterialModeChange}
-            theme={theme}
-          />
-        )}
-      </div>
+      {(pills.length > 0 || showMaterialToggle) && (
+        <div className="px-4 pt-4 pb-3 space-y-2.5">
+          {pills.length > 0 && (
+            <div>
+              <p className="text-[11px] font-semibold tracking-wide uppercase mb-2" style={{ color: theme.colors.textSecondary }}>Configuration</p>
+              <ConfigPills pills={pills} activeValue={activePill} onSelect={onPillSelect} theme={theme} />
+            </div>
+          )}
+          {showMaterialToggle && (
+            <div>
+              <p className="text-[11px] font-semibold tracking-wide uppercase mb-2" style={{ color: theme.colors.textSecondary }}>Material</p>
+              <GlassSegmentedToggle
+                options={['Laminate', 'Veneer']}
+                value={materialMode}
+                onChange={onMaterialModeChange}
+                theme={theme}
+              />
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Divider */}
-      <div className="mx-5 mt-4 mb-0" style={{ height: 1, backgroundColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }} />
+      <div className="mx-4" style={{ height: 1, backgroundColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }} />
 
       {/* Column headers */}
-      <div className="px-5 pt-3 pb-1 flex items-center justify-between">
-        <span className="text-[11px] font-bold tracking-[0.12em] uppercase" style={{ color: theme.colors.textSecondary }}>
+      <div className="px-4 pt-3 pb-1 flex items-center justify-between">
+        <span className="text-[11px] font-semibold tracking-wide uppercase" style={{ color: theme.colors.textSecondary }}>
           Series
         </span>
-        <span className="text-[11px] font-bold tracking-[0.12em] uppercase" style={{ color: theme.colors.textSecondary }}>
+        <span className="text-[11px] font-semibold tracking-wide uppercase" style={{ color: theme.colors.textSecondary }}>
           List
         </span>
       </div>
@@ -347,7 +351,7 @@ const PricingTable = React.memo(({
             <button
               key={p.id}
               onClick={() => onSelectProduct(p)}
-              className="w-full group px-5 py-3.5 flex items-center justify-between text-[13px] transition-all duration-200 text-left rounded-none"
+              className="w-full group px-4 py-3 flex items-center justify-between text-[13px] transition-all duration-200 text-left rounded-none"
               style={{
                 cursor: active ? 'default' : 'pointer',
                 backgroundColor: active
@@ -452,9 +456,7 @@ export const ProductComparisonScreen = ({ categoryId, onNavigate, theme }) => {
             >
               {categoryData.name}
             </h1>
-            <p className="text-sm mt-0.5" style={{ color: theme.colors.textSecondary }}>
-              {visibleProducts.length} {visibleProducts.length === 1 ? 'series' : 'series'} available
-            </p>
+
           </div>
 
           {/* Product tabs */}
