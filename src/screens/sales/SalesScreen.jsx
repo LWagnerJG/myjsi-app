@@ -188,8 +188,8 @@ export const SalesScreen = ({ theme, onNavigate }) => {
   /* ── render ── */
 
   return (
-    <div className="flex flex-col h-full overflow-y-auto scrollbar-hide app-header-offset" style={{ backgroundColor: colors.background, scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-      <div className="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-5 pb-2 space-y-4 lg:space-y-5 max-w-5xl mx-auto w-full">
+    <div className="min-h-full app-header-offset" style={{ backgroundColor: colors.background }}>
+      <div className="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-5 pb-4 space-y-4 lg:space-y-5 max-w-5xl mx-auto w-full">
 
         {/* ── Hero KPI + sidebar ── */}
         <div className="grid grid-cols-1 lg:grid-cols-[1.65fr_1fr] xl:grid-cols-[1.8fr_1fr] gap-4 lg:gap-5 items-stretch">

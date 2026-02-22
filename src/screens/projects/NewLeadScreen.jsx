@@ -316,7 +316,7 @@ export const NewLeadScreen = ({
 
   return (
     <form onSubmit={handleSubmit}
-      className="flex flex-col h-full overflow-y-auto scrollbar-hide app-header-offset"
+      className="min-h-full app-header-offset"
       style={{ backgroundColor: c.background }}>
       <div className="px-4 sm:px-5 pt-4 pb-8 max-w-2xl mx-auto w-full">
 

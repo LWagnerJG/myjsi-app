@@ -21,7 +21,7 @@ export const TradeshowsScreen = ({ theme }) => {
   // (Assumes parent uses currentScreen state; simpler: we expose a global listener via window but not needed.)
 
   return (
-    <div className="px-4 pb-10 space-y-6 h-full overflow-y-auto app-header-offset">
+    <div className="px-4 pb-10 space-y-6 min-h-full app-header-offset">
       {!active && (
         <div className="mt-2">
           <h1 className="text-2xl font-semibold mb-4" style={{ color: text }}>Tradeshows</h1>
