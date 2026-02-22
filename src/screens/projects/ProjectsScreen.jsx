@@ -577,18 +577,19 @@ const ProjectCard = ({ opp, theme, onClick }) => {
       <div
         className="p-4 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
         style={{
-          backgroundColor: isDark ? theme.colors.surface : 'rgba(255,255,255,0.85)',
+          backgroundColor: isDark ? theme.colors.surface : '#fff',
           border: isDark ? `1px solid ${theme.colors.border}` : '1px solid rgba(0,0,0,0.06)',
-          borderRadius: 18,
-          boxShadow: isDark ? '0 2px 12px rgba(0,0,0,0.35)' : '0 1px 4px rgba(0,0,0,0.06)',
+          borderRadius: 16,
+          boxShadow: isDark ? '0 2px 12px rgba(0,0,0,0.35)' : '0 1px 6px rgba(0,0,0,0.05)',
         }}
       >
-        <div className="mb-2">
-          <p className="font-semibold text-sm leading-snug truncate" style={{ color: theme.colors.textPrimary }}>{opp.name}</p>
-          <p className="mt-0.5 text-xs font-medium truncate" style={{ color: theme.colors.accent, opacity: 0.8 }}>{opp.company||'Unknown'}</p>
+        <div className="mb-3">
+          <p className="font-semibold text-[15px] leading-snug truncate" style={{ color: theme.colors.textPrimary }}>{opp.name}</p>
+          <p className="mt-1 text-[13px] font-medium truncate" style={{ color: theme.colors.accent, opacity: 0.8 }}>{opp.company||'Unknown'}</p>
         </div>
-        <div className="flex items-end justify-end">
-          <p className="font-bold text-[20px] tracking-tight" style={{ color: theme.colors.textPrimary }}>{displayValue}</p>
+        <div className="flex items-center justify-between">
+          <span className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: theme.colors.textSecondary }}>List</span>
+          <p className="font-bold text-xl tracking-tight" style={{ color: theme.colors.textPrimary }}>{displayValue}</p>
         </div>
       </div>
     </button>
@@ -652,20 +653,20 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
         <div className="px-4 sm:px-6 lg:px-8 pt-2 pb-2 max-w-5xl mx-auto w-full">
           {/* Tab row: two tab pills + action button */}
           <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-1 p-1 rounded-2xl" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.04)' }}>
+                <div className="flex items-center gap-1 p-1 rounded-xl" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.04)' }}>
               {PROJECTS_TAB_OPTIONS.map(tab => {
                 const active = projectsTab === tab.value;
                 return (
                   <button
                     key={tab.value}
                     onClick={() => setProjectsTab(tab.value)}
-                    className="px-4 py-1.5 rounded-xl text-xs font-semibold transition-all"
+                    className="px-4 py-2 rounded-[10px] text-[13px] font-semibold transition-all"
                     style={{
                       backgroundColor: active
                         ? (isDark ? 'rgba(255,255,255,0.14)' : '#fff')
                         : 'transparent',
                       color: active ? theme.colors.textPrimary : theme.colors.textSecondary,
-                      boxShadow: active ? '0 1px 3px rgba(0,0,0,0.06)' : 'none',
+                      boxShadow: active ? '0 1px 4px rgba(0,0,0,0.08)' : 'none',
                     }}
                   >
                     {tab.label}
@@ -673,13 +674,22 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
                 );
               })}
             </div>
+            {projectsTab==='pipeline' && (
+              <button
+                onClick={()=>onNavigate('new-lead')}
+                className="h-9 inline-flex items-center justify-center gap-1.5 rounded-xl text-[13px] font-semibold transition-all px-4 whitespace-nowrap active:scale-[0.97]"
+                style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
+              >
+                <Plus size={15} strokeWidth={2.5} /> New Project
+              </button>
+            )}
             {projectsTab==='my-projects' && (
               <button
                 onClick={()=>onNavigate('add-new-install')}
-                className="h-8 inline-flex items-center justify-center gap-1 rounded-full text-xs font-semibold transition-all px-3.5 whitespace-nowrap"
-                style={{ backgroundColor: theme.colors.textPrimary, color: isDark ? '#1a1a1a' : '#fff' }}
+                className="h-9 inline-flex items-center justify-center gap-1.5 rounded-xl text-[13px] font-semibold transition-all px-4 whitespace-nowrap active:scale-[0.97]"
+                style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
               >
-                + New Install
+                <Plus size={15} strokeWidth={2.5} /> New Install
               </button>
             )}
           </div>
@@ -687,31 +697,25 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
         {projectsTab==='pipeline' && (
           <div className="px-4 sm:px-6 lg:px-8 pb-2 relative max-w-5xl mx-auto w-full">
             <div ref={stagesScrollRef} onScroll={updateStageFade} className="overflow-x-auto scrollbar-hide">
-              <div className="flex items-center gap-1.5 py-1 whitespace-nowrap">
+              <div className="flex items-center gap-1 py-1 whitespace-nowrap">
                 {STAGES.map((stage,i)=>{ const active= selectedPipelineStage===stage; const showIndex= stage!=='Won' && stage!=='Lost'; return (
-                  <React.Fragment key={stage}>
                     <button
+                      key={stage}
                       onClick={()=>setSelectedPipelineStage(stage)}
-                      className="text-xs font-semibold transition-all px-3 py-1.5 rounded-full"
+                      className="text-[13px] font-semibold transition-all px-3.5 py-1.5 rounded-xl"
                       style={{
-                      color: active ? theme.colors.accentText : theme.colors.textSecondary,
+                        color: active ? theme.colors.accentText : theme.colors.textSecondary,
                         backgroundColor: active ? theme.colors.textPrimary : 'transparent',
-                        opacity: active ? 1 : 0.7,
+                        opacity: active ? 1 : 0.65,
                       }}
                     >
-                      {showIndex && <span className="opacity-60 mr-0.5">{i+1}</span>} {stage}
+                      {showIndex && <span className="opacity-50 mr-0.5">{i+1}</span>} {stage}
                     </button>
-                    {i<STAGES.length-1 && <span className="text-[11px] opacity-25 select-none" style={{ color: theme.colors.textSecondary }}>›</span>}
-                  </React.Fragment>
                 ); })}
               </div>
             </div>
             {showStageFadeLeft && <div className="pointer-events-none absolute inset-y-0 left-0 w-8" style={{ background:`linear-gradient(to right, ${theme.colors.background}, ${theme.colors.background}00)` }} />}
-            {showStageFadeRight && <div className="pointer-events-none absolute inset-y-0 right-0 w-10 flex items-center justify-end pr-1" style={{ background:`linear-gradient(to left, ${theme.colors.background}, ${theme.colors.background}00)` }}>
-              <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }}>
-                <ChevronRight className="w-3 h-3" style={{ color: theme.colors.textSecondary }} />
-              </div>
-            </div>}
+            {showStageFadeRight && <div className="pointer-events-none absolute inset-y-0 right-0 w-10" style={{ background:`linear-gradient(to left, ${theme.colors.background}, ${theme.colors.background}00)` }} />}
           </div>
         )}
       </div>
@@ -720,28 +724,42 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
           {projectsTab==='pipeline' && (
             filteredOpportunities.length ? (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
                   {filteredOpportunities.map((opp, i)=> <div key={opp.id}><ProjectCard opp={opp} theme={theme} onClick={()=>setSelectedOpportunity(opp)} /></div>)}
                 </div>
-                <div className="flex justify-center pt-5 pb-2">
+                <div className="mt-5">
                   <div
-                    className="inline-flex items-center gap-2 px-5 py-2 rounded-full"
+                    className="rounded-2xl p-5"
                     style={{
-                      backgroundColor: isDark ? theme.colors.surface : 'rgba(0,0,0,0.03)',
-                      border: isDark ? `1px solid ${theme.colors.border}` : '1px solid rgba(0,0,0,0.05)',
+                      backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.025)',
+                      border: isDark ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(0,0,0,0.06)',
                     }}
                   >
-                    <span className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>{selectedPipelineStage} Total</span>
-                    <span className="text-[15px] font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>{fmtCurrency(stageTotals.totalValue)}</span>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: theme.colors.textSecondary }}>{selectedPipelineStage} Pipeline</p>
+                        <p className="text-[13px] font-medium mt-0.5" style={{ color: theme.colors.textSecondary }}>{filteredOpportunities.length} {filteredOpportunities.length === 1 ? 'project' : 'projects'}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: theme.colors.textSecondary }}>Total Value</p>
+                        <p className="text-2xl font-bold tracking-tight mt-0.5" style={{ color: theme.colors.textPrimary }}>{fmtCurrency(stageTotals.totalValue)}</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </>
             ) :
-            <div className="flex flex-col items-center justify-center py-12"><Briefcase className="w-12 h-12 mb-4" style={{ color: theme.colors.textSecondary }} /><p className="text-center text-sm font-medium" style={{ color: theme.colors.textSecondary }}>No projects in {selectedPipelineStage}</p><p className="text-center text-xs mt-1" style={{ color: theme.colors.textSecondary }}>Add a new project to get started</p></div>
+            <div className="flex flex-col items-center justify-center py-16">
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }}>
+                <Briefcase className="w-7 h-7" style={{ color: theme.colors.textSecondary, opacity: 0.5 }} />
+              </div>
+              <p className="text-center text-[15px] font-semibold" style={{ color: theme.colors.textPrimary }}>No projects in {selectedPipelineStage}</p>
+              <p className="text-center text-[13px] mt-1" style={{ color: theme.colors.textSecondary }}>Tap "+ New Project" to add one</p>
+            </div>
           )}
           {projectsTab==='my-projects' && (
             (myProjects||[]).length ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
                 {(myProjects||[]).map((p, i)=> (
                   <div key={p.id}>
                   <button onClick={()=>setSelectedInstall(p)} className="w-full text-left group" style={{ WebkitTapHighlightColor:'transparent' }}>
@@ -765,7 +783,13 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
                   </div>
                 ))}
               </div>
-            ) : <div className="flex flex-col items-center justify-center py-12"><Briefcase className="w-12 h-12 mb-4" style={{ color: theme.colors.textSecondary }} /><p className="text-center text-sm font-medium" style={{ color: theme.colors.textSecondary }}>No installations recorded yet</p><p className="text-center text-xs mt-1" style={{ color: theme.colors.textSecondary }}>Add install photos and details to build your portfolio</p></div>
+            ) : <div className="flex flex-col items-center justify-center py-16">
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }}>
+                <Briefcase className="w-7 h-7" style={{ color: theme.colors.textSecondary, opacity: 0.5 }} />
+              </div>
+              <p className="text-center text-[15px] font-semibold" style={{ color: theme.colors.textPrimary }}>No installations recorded yet</p>
+              <p className="text-center text-[13px] mt-1" style={{ color: theme.colors.textSecondary }}>Add install photos and details to build your portfolio</p>
+            </div>
           )}
         </div>
       </div>
