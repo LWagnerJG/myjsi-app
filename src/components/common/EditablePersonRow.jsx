@@ -47,7 +47,7 @@ export const EditablePersonRow = ({ person, theme, onUpdateRole, onRemovePerson 
                         theme={theme}
                         placeholder="Change Role"
                     />
-                    <button onClick={() => onRemovePerson(person.name)} className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors" style={{ color: '#B85C5C' }} aria-label={`Remove ${person.name}`}>
+                    <button onClick={() => onRemovePerson(person.name)} className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 dark:hover:bg-white/5 transition-colors" style={{ color: '#B85C5C' }} aria-label={`Remove ${person.name}`}>
                         <Trash2 className="w-4 h-4" />
                     </button>
                 </div>

@@ -517,7 +517,7 @@ export const DealerDetailScreen = ({ theme, setSuccessMessage, dealerDirectory, 
                                                         {m.status === 'pending' ? 'Pending Invitation' : m.email}
                                                     </p>
                                                 </div>
-                                                <button onClick={(e) => handleMenuOpen(e, m)} className="p-1.5 rounded-full transition-colors hover:bg-black/5">
+                                                <button onClick={(e) => handleMenuOpen(e, m)} className="p-1.5 rounded-full transition-colors hover:bg-black/5 dark:hover:bg-white/5">
                                                     <MoreVertical className="w-4 h-4" style={{ color: colors.textSecondary }} />
                                                 </button>
                                             </div>
@@ -538,7 +538,7 @@ export const DealerDetailScreen = ({ theme, setSuccessMessage, dealerDirectory, 
                                             <button
                                                 key={opt.value}
                                                 onClick={() => handleUpdatePersonRole(menuState.person, opt.value)}
-                                                className="w-full flex justify-between items-center text-left py-2 px-2 text-sm font-semibold rounded-lg hover:bg-black/5"
+                                                className="w-full flex justify-between items-center text-left py-2 px-2 text-sm font-semibold rounded-lg hover:bg-black/5 dark:hover:bg-white/5"
                                             >
                                                 <span style={{ color: menuState.person?.roleLabel === opt.value ? colors.accent : colors.textPrimary }}>{opt.label}</span>
                                                 {menuState.person?.roleLabel === opt.value && <CheckCircle className="w-4 h-4" style={{ color: colors.accent }} />}

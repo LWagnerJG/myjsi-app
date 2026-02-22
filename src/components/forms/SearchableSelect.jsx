@@ -139,7 +139,7 @@ export const SearchableSelect = ({
                       type="button"
                       onClick={() => { onMissingAction(); setOpen(false); }}
                       className="w-full text-xs font-semibold px-4 py-2 rounded-full"
-                      style={{ background: '#B85C5C', color: '#fff' }}
+                      style={{ background: theme.colors.error || theme.colors.destructive || '#B85C5C', color: theme.colors.accentText || '#fff' }}
                     >
                       {missingActionLabel}
                     </button>

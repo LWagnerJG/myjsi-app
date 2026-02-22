@@ -242,7 +242,7 @@ const PresentationBuilder = ({ theme, onDeckGenerated }) => {
                             <div className="flex items-center justify-between px-4 pb-3 pt-1">
                                 <span className="text-xs" style={{ color: prompt.length > 300 ? '#ef4444' : theme.colors.textSecondary }}>{prompt.length}/500</span>
                                 {prompt.length > 0 && (
-                                    <button onClick={() => setPrompt('')} className="rounded-full p-1 transition-colors hover:bg-black/5">
+                                    <button onClick={() => setPrompt('')} className="rounded-full p-1 transition-colors hover:bg-black/5 dark:hover:bg-white/5">
                                         <X className="w-3.5 h-3.5" style={{ color: theme.colors.textSecondary }} />
                                     </button>
                                 )}
@@ -386,7 +386,7 @@ const SlidePreviewModal = ({ preview, theme, onClose, onDownload, onShare }) => 
                 onClick={e => e.stopPropagation()}>
                 <div className="px-5 py-4 flex justify-between items-center" style={{ borderBottom: `1px solid ${theme.colors.border}` }}>
                     <h2 className="font-bold text-base" style={{ color: theme.colors.textPrimary }}>{preview.pres.title}</h2>
-                    <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-black/5" style={{ color: theme.colors.textSecondary }}>
+                    <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-black/5 dark:hover:bg-white/5" style={{ color: theme.colors.textSecondary }}>
                         <X className="w-4 h-4" />
                     </button>
                 </div>

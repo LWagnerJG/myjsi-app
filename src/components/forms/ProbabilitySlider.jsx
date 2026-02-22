@@ -52,7 +52,7 @@ export const ProbabilitySlider = ({ value, onChange, theme, showLabel = true }) 
                 <div ref={sliderRef} className="relative h-2 rounded-full" style={{ backgroundColor: theme.colors.border }}>
                     <div className="absolute top-0 left-0 h-full rounded-full" style={{ backgroundColor: theme.colors.accent, width: `${safeValue}%` }} />
                     <div className="absolute top-1/2 transform -translate-x-1/2 -translate-y-1/2" style={{ left: `${safeValue}%` }}>
-                        <div className="px-2 py-1 text-xs font-bold rounded-full whitespace-nowrap shadow-lg border bg-white" style={{ color: theme.colors.textPrimary, borderColor: theme.colors.border }}>{safeValue}%</div>
+                        <div className="px-2 py-1 text-xs font-bold rounded-full whitespace-nowrap shadow-lg border" style={{ backgroundColor: theme.colors.surface || '#fff', color: theme.colors.textPrimary, borderColor: theme.colors.border }}>{safeValue}%</div>
                     </div>
                 </div>
             </div>

@@ -225,8 +225,8 @@ export const CreateContentModal = ({ show, onClose, theme, onCreatePost }) => {
                     style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }}
                   >Cancel</button>
                   <button type="submit" disabled={!canSubmit}
-                    className="flex-1 h-11 rounded-full text-[13px] font-semibold text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                    style={{ backgroundColor: theme.colors.accent }}
+                    className="flex-1 h-11 rounded-full text-[13px] font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
                   >{mode === 'poll' ? 'Create Poll' : 'Post'}</button>
                 </div>
             </form>

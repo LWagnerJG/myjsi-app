@@ -12,7 +12,7 @@ export const AddressBookModal = ({ show, onClose, addresses, onSelectAddress, th
                         <div
                             key={index}
                             onClick={() => onSelectAddress(addr.address)}
-                            className="p-3 rounded-lg cursor-pointer transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                            className="p-3 rounded-lg cursor-pointer transition-colors hover:bg-black/5 dark:hover:bg-white/5 dark:hover:bg-white/5"
                             style={{ color: theme.colors.textPrimary }}
                         >
                             <p className="font-bold">{addr.name}</p>

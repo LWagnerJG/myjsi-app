@@ -192,7 +192,7 @@ export const AutoCompleteCombobox = React.memo(({
                     <button 
                         type="button" 
                         onClick={handleAdd} 
-                        className="inline-flex items-center space-x-1 px-3 py-2 text-sm font-semibold rounded-full transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                        className="inline-flex items-center space-x-1 px-3 py-2 text-sm font-semibold rounded-full transition-colors hover:bg-black/5 dark:hover:bg-white/5 dark:hover:bg-white/5"
                         style={{ 
                             color: theme.colors.accent,
                             backgroundColor: 'transparent'

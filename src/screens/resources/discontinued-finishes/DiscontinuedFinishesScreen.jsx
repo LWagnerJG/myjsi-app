@@ -310,7 +310,7 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
                                 className="flex-1 font-semibold py-2.5 rounded-full text-[13px] flex items-center justify-center gap-2 transition-all duration-150"
                                 style={{
                                     backgroundColor: theme.colors.accent,
-                                    color: '#FFFFFF',
+                                    color: theme.colors.accentText,
                                     boxShadow: 'none',
                                 }}
                                 onMouseEnter={e => { e.currentTarget.style.opacity = '0.9'; }}

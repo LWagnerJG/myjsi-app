@@ -142,7 +142,7 @@ export const RequestComYardageScreen = ({ theme, showAlert, onNavigate, userSett
                                         </p>
                                         <button
                                             onClick={() => removeItem(item.key)}
-                                            className="w-7 h-7 flex items-center justify-center rounded-full flex-shrink-0 active:scale-90 transition-all hover:bg-black/5"
+                                            className="w-7 h-7 flex items-center justify-center rounded-full flex-shrink-0 active:scale-90 transition-all hover:bg-black/5 dark:hover:bg-white/5"
                                             aria-label="Remove line"
                                         >
                                             <X className="w-3.5 h-3.5" style={{ color: theme.colors.textSecondary }} />
@@ -173,7 +173,7 @@ export const RequestComYardageScreen = ({ theme, showAlert, onNavigate, userSett
                                                     if (item.quantity <= 1) removeItem(item.key);
                                                     else updateItem(item.key, { quantity: item.quantity - 1 });
                                                 }}
-                                                className="w-9 h-9 flex items-center justify-center rounded-l-full active:scale-90 transition-all hover:bg-black/5"
+                                                className="w-9 h-9 flex items-center justify-center rounded-l-full active:scale-90 transition-all hover:bg-black/5 dark:hover:bg-white/5"
                                                 aria-label={item.quantity <= 1 ? 'Remove item' : 'Decrease quantity'}
                                             >
                                                 {item.quantity <= 1
@@ -188,7 +188,7 @@ export const RequestComYardageScreen = ({ theme, showAlert, onNavigate, userSett
                                             />
                                             <button
                                                 onClick={() => updateItem(item.key, { quantity: item.quantity + 1 })}
-                                                className="w-9 h-9 flex items-center justify-center rounded-r-full active:scale-90 transition-all hover:bg-black/5"
+                                                className="w-9 h-9 flex items-center justify-center rounded-r-full active:scale-90 transition-all hover:bg-black/5 dark:hover:bg-white/5"
                                                 aria-label="Increase quantity"
                                             >
                                                 <Plus className="w-3.5 h-3.5" style={{ color: theme.colors.textSecondary }} />

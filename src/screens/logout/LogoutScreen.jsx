@@ -34,7 +34,7 @@ export const LogoutScreen = ({ theme, onNavigate }) => {
                         <button
                             onClick={handleLogout}
                             className="w-full flex items-center justify-center space-x-2 py-3 px-6 rounded-full font-semibold text-white transition-all duration-200 transform active:scale-95"
-                            style={{ backgroundColor: '#B85C5C' }}
+                            style={{ backgroundColor: 'var(--theme-error, #B85C5C)' }}
                         >
                             <LogOut className="w-5 h-5" />
                             <span>Yes, Sign Out</span>

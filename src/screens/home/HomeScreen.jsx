@@ -479,7 +479,7 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
         };
     }, [currentApps.length]);
 
-    const hoverBg = isDark ? 'hover:bg-white/[0.06]' : 'hover:bg-black/[0.03]';
+    const hoverBg = isDark ? 'hover:bg-white/[0.06]' : 'hover:bg-black/[0.03] dark:hover:bg-white/[0.03]';
 
     const renderHomeFeatureContent = useCallback((mode) => {
         if (mode === 'community') {
@@ -1284,7 +1284,7 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                             </div>
                             <button
                                 onClick={() => setIsChatOpen(false)}
-                                className={`p-2 rounded-full transition-colors ${isDark ? 'hover:bg-white/[0.06]' : 'hover:bg-black/[0.03]'}`}
+                                className={`p-2 rounded-full transition-colors ${isDark ? 'hover:bg-white/[0.06]' : 'hover:bg-black/[0.03] dark:hover:bg-white/[0.03]'}`}
                                 aria-label="Close chat"
                             >
                                 <X className="w-5 h-5" style={{ color: colors.textSecondary }} />

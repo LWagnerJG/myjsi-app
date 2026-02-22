@@ -10,7 +10,7 @@ const Chip = ({ label, selected, onClick, theme }) => (
     className="px-2.5 py-1 text-xs rounded-full font-medium transition-all border leading-tight"
     style={{
       backgroundColor: selected ? theme.colors.accent : 'transparent',
-      color: selected ? '#fff' : theme.colors.textPrimary,
+      color: selected ? (theme.colors.accentText || '#fff') : theme.colors.textPrimary,
       borderColor: selected ? theme.colors.accent : theme.colors.border,
     }}>{label}</button>
 );
@@ -28,7 +28,7 @@ const SurfaceTypeSelector = ({ selected = [], onChange, theme }) => (
           className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-full border transition-all"
           style={{
             backgroundColor: on ? theme.colors.accent : 'transparent',
-            color: on ? '#fff' : theme.colors.textPrimary,
+            color: on ? (theme.colors.accentText || '#fff') : theme.colors.textPrimary,
             borderColor: on ? theme.colors.accent : theme.colors.border,
           }}>
           {on && <Check className="w-3 h-3" />} {t}

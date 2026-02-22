@@ -142,7 +142,7 @@ export const AddNewInstallScreen = ({ theme, onAddInstall }) => {
                                         key={p.place_id}
                                         type="button"
                                         onClick={() => handleSelectPrediction(p)}
-                                        className="block w-full text-left p-2 rounded-md hover:bg-black/5 transition-all duration-200 transform active:scale-95"
+                                        className="block w-full text-left p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 transform active:scale-95"
                                         style={{ color: theme.colors.textPrimary }}
                                     >
                                         {p.description}
@@ -202,8 +202,8 @@ export const AddNewInstallScreen = ({ theme, onAddInstall }) => {
                 <div className="pt-2">
                     <button 
                         type="submit" 
-                        className="w-full font-bold py-3.5 px-6 rounded-full text-white transition-all duration-200 transform active:scale-95" 
-                        style={{ backgroundColor: theme.colors.accent }}
+                        className="w-full font-bold py-3.5 px-6 rounded-full transition-all duration-200 transform active:scale-95" 
+                        style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
                     >
                         Submit Install
                     </button>

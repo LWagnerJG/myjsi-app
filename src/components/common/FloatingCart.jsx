@@ -61,11 +61,11 @@ export const FloatingCart = React.memo(({ itemCount = 0, label, onClick, theme, 
                         "
                         style={{ backgroundColor: 'rgba(255,255,255,0.18)' }}
                     >
-                        <ShoppingCart className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-white" aria-hidden="true" />
+                        <ShoppingCart className={`w-4 h-4 sm:w-[18px] sm:h-[18px] ${isDark ? 'text-gray-900' : 'text-white'}`} aria-hidden="true" />
                     </div>
 
                     {/* Label */}
-                    <span className="text-white font-semibold text-sm sm:text-[15px] whitespace-nowrap">
+                    <span className={`${isDark ? 'text-gray-900' : 'text-white'} font-semibold text-sm sm:text-[15px] whitespace-nowrap`}>
                         {label}
                     </span>
                 </motion.button>

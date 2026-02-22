@@ -7,8 +7,8 @@ import { INSTALL_INSTRUCTIONS_DATA } from './data.js';
 
 const CARD_SHADOW = '0 4px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.06)';
 
-const WhiteCard = ({ children, className='', style={} }) => (
-  <div className={`rounded-3xl border transition-shadow duration-200 bg-white ${className}`} style={{ borderColor:'rgba(0,0,0,0.07)', boxShadow: CARD_SHADOW, ...style }}>
+const WhiteCard = ({ children, className='', style={}, theme }) => (
+  <div className={`rounded-3xl border transition-shadow duration-200 ${className}`} style={{ backgroundColor: theme?.colors?.surface || '#fff', borderColor: theme?.colors?.border || 'rgba(0,0,0,0.07)', boxShadow: CARD_SHADOW, ...style }}>
     {children}
   </div>
 );
@@ -55,7 +55,7 @@ export const InstallInstructionsScreen = ({ theme }) => {
   );
 
   const InstructionCard = ({ instruction }) => (
-    <WhiteCard className="p-4">
+    <WhiteCard className="p-4" theme={theme}>
       <div className="flex items-start gap-4">
         {/* Thumbnail */}
         <div

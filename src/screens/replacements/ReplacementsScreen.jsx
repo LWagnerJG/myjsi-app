@@ -145,8 +145,8 @@ function ReplacementForm({
             <div className="flex">
                 <button
                     onClick={onSubmit}
-                    className="flex-1 py-3 rounded-full font-semibold text-white active:scale-95"
-                    style={{ backgroundColor: theme.colors.accent }}
+                    className="flex-1 py-3 rounded-full font-semibold active:scale-95"
+                    style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
                 >
                     Submit Replacement
                 </button>

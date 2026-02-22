@@ -144,7 +144,7 @@ export function SpotlightMultiSelect({
               data-index={idx}
               role="option"
               aria-selected={activeIndex === idx}
-              className={`w-full text-left px-3 py-2 text-sm transition-colors ${activeIndex === idx ? 'bg-black/10 dark:bg-white/10' : 'hover:bg-black/5 dark:hover:bg-white/5'}`}
+              className={`w-full text-left px-3 py-2 text-sm transition-colors ${activeIndex === idx ? 'bg-black/10 dark:bg-white/10' : 'hover:bg-black/5 dark:hover:bg-white/5 dark:hover:bg-white/5'}`}
               style={{ color: palette.text }}
               onMouseDown={(e) => { e.preventDefault(); pick(opt); }}
               onMouseEnter={() => setActiveIndex(idx)}
@@ -160,7 +160,7 @@ export function SpotlightMultiSelect({
                 data-index={filtered.length}
                 role="option"
                 aria-selected={activeIndex === filtered.length}
-                className={`w-full text-left px-3 py-2 text-sm font-semibold flex items-center gap-2 transition-colors ${activeIndex === filtered.length ? 'bg-black/10 dark:bg-white/10' : 'hover:bg-black/5 dark:hover:bg-white/5'}`}
+                className={`w-full text-left px-3 py-2 text-sm font-semibold flex items-center gap-2 transition-colors ${activeIndex === filtered.length ? 'bg-black/10 dark:bg-white/10' : 'hover:bg-black/5 dark:hover:bg-white/5 dark:hover:bg-white/5'}`}
                 style={{ color: palette.accent }}
                 onMouseDown={(e) => { e.preventDefault(); create(); }}
                 onMouseEnter={() => setActiveIndex(filtered.length)}
@@ -242,7 +242,7 @@ export function SpotlightMultiSelect({
               {s}
               <button
                 onClick={() => onRemoveItem?.(s)}
-                className="w-5 h-5 flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                className="w-5 h-5 flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/5 dark:hover:bg-white/5 transition-colors"
                 aria-label={`Remove ${s}`}
               >
                 <X className="w-3.5 h-3.5" style={{ color: palette.hint }} />

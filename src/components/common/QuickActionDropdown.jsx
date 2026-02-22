@@ -160,7 +160,7 @@ export const QuickActionDropdown = ({ theme, onActionSelect, className = '' }) =
                             <button
                                 onClick={() => { setIsOpen(false); buttonRef.current?.focus(); }}
                                 aria-label="Close menu"
-                                className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-black/5 transition-colors"
+                                className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                             >
                                 <X className="w-3.5 h-3.5" aria-hidden="true" style={{ color: colors.textSecondary }} />
                             </button>
@@ -175,7 +175,7 @@ export const QuickActionDropdown = ({ theme, onActionSelect, className = '' }) =
                                 ref={el => itemRefs.current[index] = el}
                                 role="menuitem"
                                 onClick={() => handleActionClick(action.id)}
-                                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-black/[0.03] transition-colors text-left group outline-none focus:bg-black/[0.03]"
+                                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-black/[0.03] dark:hover:bg-white/[0.03] transition-colors text-left group outline-none focus:bg-black/[0.03] dark:focus:bg-white/[0.03]"
                             >
                                 <div 
                                     className="w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-105"
@@ -205,7 +205,7 @@ export const QuickActionDropdown = ({ theme, onActionSelect, className = '' }) =
                 ref={buttonRef}
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all hover:bg-black/5 ${isOpen ? 'bg-black/5 rotate-45' : ''} ${className}`}
+                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all hover:bg-black/5 dark:hover:bg-white/5 ${isOpen ? 'bg-black/5 dark:bg-white/5 rotate-45' : ''} ${className}`}
                 style={{ color: colors.textSecondary }}
                 aria-label="Quick actions"
                 aria-expanded={isOpen}

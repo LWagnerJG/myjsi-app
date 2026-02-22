@@ -130,7 +130,7 @@ const MiniAvatar = ({ member, selected, onToggle, isDark, colors }) => {
             <div className="w-9 h-9 rounded-full flex items-center justify-center text-[11px] font-bold transition-all"
                 style={{
                     backgroundColor: selected ? colors.accent : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)'),
-                    color: selected ? '#FFFFFF' : colors.textPrimary,
+                    color: selected ? (colors.accentText || '#FFFFFF') : colors.textPrimary,
                     border: `2px solid ${selected ? colors.accent : 'transparent'}`,
                 }}>
                 {initials}
@@ -513,7 +513,7 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                                     <span className="text-xs font-semibold" style={{ color: colors.textSecondary }}>Include Team Members</span>
                                     {formData.selectedTeamMembers.length > 0 && (
                                         <span className="px-1.5 py-0.5 rounded-full text-[11px] font-bold"
-                                            style={{ backgroundColor: colors.success, color: '#fff' }}>
+                                            style={{ backgroundColor: colors.success, color: colors.accentText || '#fff' }}>
                                             {formData.selectedTeamMembers.length}
                                         </span>
                                     )}

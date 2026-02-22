@@ -66,7 +66,7 @@ const CustomSelect = ({ label, value, onChange, options, theme, placeholder, req
             <button
                 type="button"
                 onClick={handleToggle}
-                className="w-full px-3 py-2 rounded-lg border text-sm text-left flex items-center justify-between transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/5 transform active:scale-95"
+                className="w-full px-3 py-2 rounded-lg border text-sm text-left flex items-center justify-between transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/5 dark:hover:bg-white/5 transform active:scale-95"
                 style={{
                     backgroundColor: theme.colors.surface,
                     border: `1px solid ${theme.colors.border}`,
@@ -96,7 +96,7 @@ const CustomSelect = ({ label, value, onChange, options, theme, placeholder, req
                                 key={option.value}
                                 type="button"
                                 onClick={() => handleSelect(option)}
-                                className="w-full px-3 py-2 text-left text-sm hover:bg-black/5 dark:hover:bg-white/5 first:rounded-t-lg last:rounded-b-lg transition-all duration-200 transform active:scale-95"
+                                className="w-full px-3 py-2 text-left text-sm hover:bg-black/5 dark:hover:bg-white/5 dark:hover:bg-white/5 first:rounded-t-lg last:rounded-b-lg transition-all duration-200 transform active:scale-95"
                                 style={{ color: theme.colors.textPrimary }}
                             >
                                 {option.label}

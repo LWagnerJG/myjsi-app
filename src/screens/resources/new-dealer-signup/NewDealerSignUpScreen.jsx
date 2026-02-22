@@ -59,8 +59,8 @@ export const NewDealerSignUpScreen = ({ theme, setSuccessMessage, onNavigate, ha
                             <button
                                 type="submit"
                                 disabled={!formData.companyName || !formData.adminEmail || !formData.dailyDiscount}
-                                className="w-full font-bold py-4 px-6 rounded-full text-white transition disabled:opacity-50"
-                                style={{ backgroundColor: theme.colors.accent }}
+                                className="w-full font-bold py-4 px-6 rounded-full transition disabled:opacity-50"
+                                style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
                             >
                                 Submit
                             </button>

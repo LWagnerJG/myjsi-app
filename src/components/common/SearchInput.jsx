@@ -126,7 +126,7 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
             <button
                 type="button"
                 onClick={onVoiceClick}
-                className="ml-3 w-10 h-10 rounded-full flex items-center justify-center transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                className="ml-3 w-10 h-10 rounded-full flex items-center justify-center transition-colors hover:bg-black/5 dark:hover:bg-white/5 dark:hover:bg-white/5"
                 style={{ color: theme.colors.textSecondary }}
                 aria-label="Voice input"
             >

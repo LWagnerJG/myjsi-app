@@ -119,7 +119,7 @@ export const CompetitiveAnalysisScreen = ({ categoryId, productId, theme }) => {
                     </div>
                     <div className="flex justify-end gap-3 pt-2">
                         <button type="button" onClick={()=>setShowRequest(false)} className="px-5 h-10 rounded-full font-semibold" style={{ background: theme.colors.subtle, color: theme.colors.textPrimary, border: `1px solid ${theme.colors.border}` }}>Cancel</button>
-                        <button type="submit" disabled={!canSubmit || submitted} className="px-6 h-10 rounded-full font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed" style={{ background: theme.colors.accent }}>
+                        <button type="submit" disabled={!canSubmit || submitted} className="px-6 h-10 rounded-full font-semibold disabled:opacity-50 disabled:cursor-not-allowed" style={{ background: theme.colors.accent, color: theme.colors.accentText }}>
                             {submitted ? 'Sent!' : 'Submit'}
                         </button>
                     </div>

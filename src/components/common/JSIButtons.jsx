@@ -20,6 +20,7 @@ export const FrostButton = ({
     variant = 'dark', // 'dark' | 'light'
     size = 'default', // 'default' | 'compact' | 'large'
     icon = null,
+    theme = null,
     ...props
 }) => {
     const sizeClasses = {
@@ -28,15 +29,23 @@ export const FrostButton = ({
         large: 'px-6 py-4 text-base gap-3'
     };
 
-    const darkStyle = {
-        backgroundColor: '#353535',
-        color: '#FFFFFF',
+    const darkStyle = theme ? {
+        backgroundColor: theme.colors.accent,
+        color: theme.colors.accentText,
+        boxShadow: 'none'
+    } : {
+        backgroundColor: 'var(--theme-accent, #353535)',
+        color: 'var(--theme-accent-text, #FFFFFF)',
         boxShadow: 'none'
     };
 
-    const lightStyle = {
-        backgroundColor: '#FFFFFF',
-        color: '#353535',
+    const lightStyle = theme ? {
+        backgroundColor: theme.colors.surface,
+        color: theme.colors.textPrimary,
+        boxShadow: 'none'
+    } : {
+        backgroundColor: 'var(--theme-surface, #FFFFFF)',
+        color: 'var(--theme-text-primary, #353535)',
         boxShadow: 'none'
     };
 

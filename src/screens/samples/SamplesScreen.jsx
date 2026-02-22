@@ -238,7 +238,7 @@ const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, designFi
                         <div className="flex items-center justify-between px-5 py-4 cursor-pointer" onClick={() => setIsExpanded(false)} style={{ borderBottom: `1px solid ${theme.colors.border}` }}>
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: theme.colors.accent }}>
-                                    <ShoppingCart className="w-5 h-5 text-white" />
+                                    <ShoppingCart className="w-5 h-5" style={{ color: theme.colors.accentText || '#fff' }} />
                                 </div>
                                 <div>
                                     <p className="font-bold text-sm" style={{ color: theme.colors.textPrimary }}>Sample Cart</p>

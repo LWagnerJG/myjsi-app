@@ -198,7 +198,7 @@ const ProductSpotlight = ({ selectedSeries, onAdd, available, theme }) => {
                 <button key={s} type="button"
                   onClick={() => pick(s)}
                   onMouseEnter={() => setHlIdx(idx)}
-                  className={`w-full text-left px-3.5 py-2.5 text-[13px] flex items-center justify-between transition-colors ${hl ? 'bg-black/5' : ''}`}
+                  className={`w-full text-left px-3.5 py-2.5 text-[13px] flex items-center justify-between transition-colors ${hl ? 'bg-black/5 dark:bg-white/5' : ''}`}
                   style={{ color: sel ? theme.colors.textSecondary : theme.colors.textPrimary, opacity: sel ? 0.5 : 1 }}>
                   <span>{s}</span>
                   {sel && <Check className="w-3.5 h-3.5" style={{ color: theme.colors.accent }} />}

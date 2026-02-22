@@ -197,7 +197,7 @@ const TransferRequestModal = ({
                                                 setFormData(prev => ({ ...prev, projectName: name }));
                                                 setShowProjectDropdown(false);
                                             }}
-                                            className="w-full text-left px-3 py-2 text-sm hover:bg-black/5"
+                                            className="w-full text-left px-3 py-2 text-sm hover:bg-black/5 dark:hover:bg-white/5"
                                             style={{ color: theme.colors.textPrimary }}
                                         >
                                             {name}
@@ -512,7 +512,7 @@ const RequestItem = React.memo(({ item, onRemoveFromRequest, theme, isFirst = fa
             </div>
             <button
                 onClick={() => onRemoveFromRequest(item.id)}
-                className="w-6 h-6 flex items-center justify-center rounded-full transition-all duration-200 transform active:scale-90 hover:bg-black/5 dark:hover:bg-white/5"
+                className="w-6 h-6 flex items-center justify-center rounded-full transition-all duration-200 transform active:scale-90 hover:bg-black/5 dark:hover:bg-white/5 dark:hover:bg-white/5"
             >
                 <Trash2 className="w-3 h-3" style={{ color: '#B85C5C' }} />
             </button>
@@ -631,7 +631,7 @@ const RequestDrawer = ({
             <div className="flex items-center justify-between p-4 cursor-pointer" onClick={() => setIsExpanded(!isExpanded)}>
                 <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: theme.colors.accent }}>
-                        <Package className="w-5 h-5 text-white" />
+                        <Package className="w-5 h-5" style={{ color: theme.colors.accentText || '#fff' }} />
                     </div>
                     <div>
                         <p className="font-bold text-sm" style={{ color: theme.colors.textPrimary }}>Request ({totalRequestItems})</p>
@@ -719,7 +719,7 @@ const RequestDrawer = ({
                                                     type="button"
                                                     key={p.id || name}
                                                     onClick={() => selectProject(name)}
-                                                    className="w-full text-left px-3 py-2 text-sm hover:bg-black/5"
+                                                    className="w-full text-left px-3 py-2 text-sm hover:bg-black/5 dark:hover:bg-white/5"
                                                     style={{ color: theme.colors.textPrimary }}
                                                 >
                                                     {name}
@@ -788,7 +788,7 @@ const RequestDrawer = ({
                                 <button
                                     type="button"
                                     onClick={handleUseHomeAddress}
-                                    className="flex items-center space-x-1 text-xs font-semibold p-1 rounded-lg hover:bg-black/5 transition-all duration-200"
+                                    className="flex items-center space-x-1 text-xs font-semibold p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200"
                                 >
                                     <Home className="w-3 h-3" style={{ color: theme.colors.secondary }} />
                                     <span>Use Home</span>

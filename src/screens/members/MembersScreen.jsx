@@ -69,8 +69,8 @@ class MembersErrorBoundary extends React.Component {
                     <h2 className="text-lg font-bold mb-2">Something went wrong</h2>
                     <p className="text-sm text-gray-600 mb-4">There was an error loading this screen.</p>
                     <button onClick={() => this.setState({ hasError: false, error: null })}
-                        className="px-4 py-2 rounded-full text-sm font-semibold text-white"
-                        style={{ backgroundColor: '#353535' }}>
+                        className="px-4 py-2 rounded-full text-sm font-semibold"
+                        style={{ backgroundColor: 'var(--theme-accent, #353535)', color: 'var(--theme-accent-text, #fff)' }}>
                         Try Again
                     </button>
                 </div>
@@ -149,7 +149,7 @@ const ConfirmModal = ({ open, title, message, confirmLabel, onConfirm, onCancel,
                     </button>
                     <button onClick={onConfirm}
                         className="px-4 py-1.5 rounded-full text-xs font-semibold transition-opacity hover:opacity-90"
-                        style={{ backgroundColor: '#B85C5C', color: '#fff' }}>
+                        style={{ backgroundColor: 'var(--theme-error, #B85C5C)', color: '#fff' }}>
                         {confirmLabel || 'Remove'}
                     </button>
                 </div>
@@ -369,7 +369,7 @@ const RoleDropdown = ({ value, roles, onChange, theme }) => {
                             <button
                                 key={r.value}
                                 onClick={() => { onChange(r.value); setOpen(false); }}
-                                className="w-full text-left px-3.5 py-2 text-sm transition-colors flex items-center justify-between hover:bg-black/[0.03]"
+                                className="w-full text-left px-3.5 py-2 text-sm transition-colors flex items-center justify-between hover:bg-black/[0.03] dark:hover:bg-white/[0.03]"
                                 style={{ color: theme.colors.textPrimary }}
                             >
                                 <span className="flex items-center gap-2">

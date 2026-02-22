@@ -115,13 +115,13 @@ export const RequestFieldVisitScreen = ({ theme, setSuccessMessage, onNavigate }
                                     isSelected 
                                         ? 'ring-2 ring-offset-2 scale-110' 
                                         : isAvailable 
-                                            ? 'hover:bg-black/5 dark:hover:bg-white/5' 
+                                            ? 'hover:bg-black/5 dark:hover:bg-white/5 dark:hover:bg-white/5' 
                                             : 'opacity-40 cursor-not-allowed'
                                 }`}
                                 style={{
                                     ringColor: isSelected ? theme.colors.accent : 'transparent',
                                     backgroundColor: isSelected ? theme.colors.accent : 'transparent',
-                                    color: isSelected ? '#fff' : theme.colors.textPrimary,
+                                    color: isSelected ? (theme.colors.accentText || '#fff') : theme.colors.textPrimary,
                                 }}
                             >
                                 {day}
@@ -249,7 +249,7 @@ export const RequestFieldVisitScreen = ({ theme, setSuccessMessage, onNavigate }
                                         {photos.length < FIELD_VISIT_REQUIREMENTS.maxPhotos && (
                                             <button
                                                 onClick={() => fileInputRef.current?.click()}
-                                                className="flex flex-col items-center justify-center aspect-square border-2 border-dashed rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                                                className="flex flex-col items-center justify-center aspect-square border-2 border-dashed rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/5 dark:hover:bg-white/5"
                                                 style={{ 
                                                     borderColor: theme.colors.border, 
                                                     color: theme.colors.textSecondary 

@@ -116,7 +116,7 @@ const Stage = React.memo(({ stage, state, isLast, subtitle, actions, progress, d
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="font-semibold text-[15px] leading-tight" style={{ color: txtClr }}>{stage.label}</span>
-              {now && <span className="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded" style={{ backgroundColor: JSI_COLORS.charcoal, color: '#fff' }}>Current</span>}
+              {now && <span className="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.12)' : JSI_COLORS.charcoal, color: dark ? c.textPrimary : '#fff' }}>Current</span>}
             </div>
             {subtitle && !later && <p className="text-[13px] mt-0.5" style={{ color: c.textSecondary }}>{subtitle}</p>}
           </div>

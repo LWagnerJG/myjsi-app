@@ -178,9 +178,9 @@ export const LeadTimesScreen = ({ theme = {} }) => {
                     aria-label={sortFastest ? 'Sort alphabetically' : 'Sort by fastest lead time'}
                     title={sortFastest ? 'Alphabetical order' : 'Fastest lead time'}
                     style={{
-                        backgroundColor: '#ffffff',
+                        backgroundColor: safeTheme.colors.surface || '#ffffff',
                         color: sortFastest ? safeTheme.colors.accent : safeTheme.colors.textPrimary,
-                        borderColor: sortFastest ? safeTheme.colors.accent : 'rgba(0,0,0,0.10)'
+                        borderColor: sortFastest ? safeTheme.colors.accent : (safeTheme.colors.border || 'rgba(0,0,0,0.10)')
                     }}
                 >
                     {sortFastest ? <ListOrdered className="w-5 h-5" /> : <Timer className="w-5 h-5" />}

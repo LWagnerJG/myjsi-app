@@ -84,9 +84,10 @@ export const EmptyState = ({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
           onClick={action.onClick}
-          className="px-6 py-3 rounded-full font-semibold text-white shadow-lg transition-transform hover:scale-105 active:scale-95"
+          className="px-6 py-3 rounded-full font-semibold shadow-lg transition-transform hover:scale-105 active:scale-95"
           style={{
             backgroundColor: theme.colors.accent,
+            color: theme.colors.accentText,
             borderRadius: DESIGN_TOKENS.borderRadius.pill
           }}
         >
