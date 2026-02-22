@@ -1,7 +1,6 @@
 import React from 'react';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import { isDarkTheme } from '../../../design-system/tokens.js';
-import { Percent, ArrowRightLeft } from 'lucide-react';
 import * as Data from './data.js';
 
 /* ── helpers ─────────────────────────────────────────── */
@@ -55,48 +54,8 @@ export const CommissionRatesScreen = ({ theme }) => {
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
             <div className="flex-1 overflow-y-auto scrollbar-hide px-4 pb-6 space-y-4">
 
-                {/* ── Split ── */}
-                <GlassCard theme={theme} className="rounded-[22px] overflow-hidden mt-2">
-                    <div className="px-5 pt-5 pb-4">
-                        <div className="flex items-center gap-2 mb-4">
-                            <ArrowRightLeft className="w-4 h-4" style={{ color: theme.colors.textSecondary, opacity: 0.5 }} />
-                            <span className="text-[11px] font-bold uppercase tracking-[0.08em]" style={{ color: theme.colors.textSecondary, opacity: 0.55 }}>
-                                Commission Split
-                            </span>
-                        </div>
-
-                        {/* Two side-by-side metric */}
-                        <div className="flex gap-3">
-                            {split.map((seg, i) => (
-                                <div
-                                    key={i}
-                                    className="flex-1 rounded-2xl px-4 py-3.5 text-center"
-                                    style={{ backgroundColor: dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.025)' }}
-                                >
-                                    <div className="text-[26px] font-extrabold leading-none tracking-tight" style={{ color: theme.colors.textPrimary }}>
-                                        {seg.value}<span className="text-[16px] font-bold" style={{ color: theme.colors.textSecondary }}>%</span>
-                                    </div>
-                                    <div className="mt-1.5 flex items-center justify-center gap-1.5">
-                                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: seg.color }} />
-                                        <span className="text-[12px] font-medium" style={{ color: theme.colors.textSecondary }}>
-                                            {seg.label}
-                                        </span>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-
-                        {/* Thin proportional bar underneath */}
-                        <div className="flex mt-3 h-1.5 rounded-full overflow-hidden">
-                            {split.map((seg, i) => (
-                                <div key={i} style={{ width: `${seg.value}%`, backgroundColor: seg.color }} />
-                            ))}
-                        </div>
-                    </div>
-                </GlassCard>
-
                 {/* ── Standard Rates ── */}
-                <GlassCard theme={theme} className="rounded-[22px] overflow-hidden">
+                <GlassCard theme={theme} className="rounded-[22px] overflow-hidden mt-2">
                     <SectionLabel theme={theme}>Standard Discounts</SectionLabel>
                     {standardRates.map((rate) => (
                         <RateRow key={rate.discount} rate={rate} theme={theme} dark={dark} />
@@ -110,6 +69,23 @@ export const CommissionRatesScreen = ({ theme }) => {
                         <RateRow key={rate.discount} rate={rate} theme={theme} dark={dark} />
                     ))}
                 </GlassCard>
+
+                {/* ── Split (discrete footer) ── */}
+                <div className="flex items-center justify-center gap-4 pt-1 pb-2">
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.06em]" style={{ color: theme.colors.textSecondary, opacity: 0.4 }}>
+                        Split
+                    </span>
+                    <div className="flex h-1 rounded-full overflow-hidden w-24">
+                        {split.map((seg, i) => (
+                            <div key={i} style={{ width: `${seg.value}%`, backgroundColor: seg.color, opacity: 0.6 }} />
+                        ))}
+                    </div>
+                    {split.map((seg, i) => (
+                        <span key={i} className="text-[11px] tabular-nums" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>
+                            {seg.label} {seg.value}%
+                        </span>
+                    ))}
+                </div>
 
             </div>
         </div>
