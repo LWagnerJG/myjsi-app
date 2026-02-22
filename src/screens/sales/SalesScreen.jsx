@@ -32,7 +32,7 @@ const InlineToggle = ({ options, value, onChange, colors }) => (
       <button
         key={opt.value}
         onClick={() => onChange(opt.value)}
-        className="rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider transition-all"
+        className="rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-wider transition-all"
         style={{
           backgroundColor: value === opt.value ? colors.surface : 'transparent',
           color: value === opt.value ? colors.textPrimary : colors.textSecondary,
@@ -150,7 +150,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
               {/* Header */}
               <div className="flex items-start justify-between gap-3">
                 <div className="space-y-1 min-w-0">
-                  <p className="text-xs font-bold uppercase tracking-widest opacity-40">
+                  <p className="text-[13px] font-bold uppercase tracking-widest opacity-40">
                     {chartDataType === 'bookings' ? 'Total Bookings' : 'Total Sales'}
                   </p>
                   <div className="text-4xl sm:text-[42px] font-black tracking-tight leading-none" style={{ opacity: ready ? 1 : 0, transition: 'opacity 0.4s ease' }}>
@@ -167,10 +167,10 @@ export const SalesScreen = ({ theme, onNavigate }) => {
               {/* Progress to goal */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-xs font-semibold opacity-50">
+                  <div className="flex items-center gap-2 text-[13px] font-semibold opacity-50">
                     <Target className="w-3.5 h-3.5" /> Progress to Goal
                   </div>
-                  <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-widest"
+                  <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-widest"
                     style={{
                       backgroundColor: aheadOfPace ? (isDark ? 'rgba(107,155,122,0.15)' : 'rgba(74,124,89,0.08)') : (isDark ? 'rgba(200,112,112,0.15)' : 'rgba(184,92,92,0.08)'),
                       color: aheadOfPace ? (isDark ? '#6B9B7A' : '#4A7C59') : (isDark ? '#C87070' : '#B85C5C'),
@@ -182,7 +182,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                 <div className="h-2 w-full rounded-full overflow-hidden" style={{ backgroundColor: subtle(isDark, 1.5) }}>
                   <div className="h-full rounded-full" style={{ backgroundColor: colors.accent, width: ready ? `${progressPct}%` : '0%', transition: 'width 0.7s ease-out 0.1s' }} />
                 </div>
-                <div className="text-[11px] font-semibold opacity-35 tabular-nums">{progressPct.toFixed(1)}% of $7M goal</div>
+                <div className="text-xs font-semibold opacity-35 tabular-nums">{progressPct.toFixed(1)}% of $7M goal</div>
               </div>
 
               {/* Mini sparkline */}
@@ -216,35 +216,35 @@ export const SalesScreen = ({ theme, onNavigate }) => {
           </GlassCard>
 
           {/* Sidebar cards */}
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-1 grid-rows-2 gap-4">
             {/* Leaderboard */}
-            <button onClick={() => onNavigate('customer-rank')} className="w-full text-left group">
-              <GlassCard theme={theme} className="p-4 space-y-2.5" variant="elevated">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-[13px] font-semibold">
-                    <TrendingUp className="w-3.5 h-3.5 opacity-50" /> Leaderboard
+            <button onClick={() => onNavigate('customer-rank')} className="w-full h-full text-left group">
+              <GlassCard theme={theme} className="p-4 sm:p-5 h-full flex flex-col" variant="elevated">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2 text-[15px] font-bold">
+                    <TrendingUp className="w-4 h-4 opacity-50" /> Leaderboard
                   </div>
-                  <span className="text-[11px] font-bold uppercase tracking-widest opacity-25 group-hover:opacity-60 flex items-center gap-0.5 transition-opacity">
-                    View All <ChevronRight className="w-3 h-3" />
+                  <span className="text-xs font-bold uppercase tracking-widest opacity-25 group-hover:opacity-60 flex items-center gap-0.5 transition-opacity">
+                    View All <ChevronRight className="w-3.5 h-3.5" />
                   </span>
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-1.5 flex-1 flex flex-col justify-center">
                   {topLeaders.map((leader, idx) => (
-                    <div key={leader.id} className="flex items-center justify-between text-xs py-2 px-3 rounded-xl"
+                    <div key={leader.id} className="flex items-center justify-between py-2.5 px-3.5 rounded-xl"
                       style={{
                         backgroundColor: subtle(isDark),
                         opacity: ready ? 1 : 0,
                         transform: ready ? 'none' : 'translateX(-4px)',
                         transition: `opacity 0.3s ease ${0.05 + idx * 0.05}s, transform 0.3s ease ${0.05 + idx * 0.05}s`,
                       }}>
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className="w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-black shrink-0"
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-black shrink-0"
                           style={{ backgroundColor: subtle(isDark, 2), color: colors.textSecondary }}>
                           {idx + 1}
                         </span>
-                        <span className="font-semibold truncate">{leader.name}</span>
+                        <span className="text-sm font-semibold truncate">{leader.name}</span>
                       </div>
-                      <span className="font-bold tabular-nums shrink-0 ml-2">{formatCurrency(leader.bookings)}</span>
+                      <span className="text-sm font-bold tabular-nums shrink-0 ml-2">{formatCurrency(leader.bookings)}</span>
                     </div>
                   ))}
                 </div>
@@ -252,52 +252,56 @@ export const SalesScreen = ({ theme, onNavigate }) => {
             </button>
 
             {/* Dealer Rewards */}
-            <button onClick={() => onNavigate('incentive-rewards')} className="w-full text-left group">
-              <GlassCard theme={theme} className="p-4 space-y-2.5" variant="elevated">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-[13px] font-semibold">
-                    <Trophy className="w-3.5 h-3.5 opacity-50" /> Dealer Rewards
+            <button onClick={() => onNavigate('incentive-rewards')} className="w-full h-full text-left group">
+              <GlassCard theme={theme} className="p-4 sm:p-5 h-full flex flex-col" variant="elevated">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2 text-[15px] font-bold">
+                    <Trophy className="w-4 h-4 opacity-50" /> Dealer Rewards
                   </div>
-                  <span className="text-[11px] font-bold uppercase tracking-widest opacity-25 group-hover:opacity-60 flex items-center gap-0.5 transition-opacity">
-                    Details <ChevronRight className="w-3 h-3" />
+                  <span className="text-xs font-bold uppercase tracking-widest opacity-25 group-hover:opacity-60 flex items-center gap-0.5 transition-opacity">
+                    Details <ChevronRight className="w-3.5 h-3.5" />
                   </span>
                 </div>
                 {rewardsSnapshot ? (
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between py-2 px-3 rounded-xl text-xs" style={{ backgroundColor: subtle(isDark) }}>
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-3.5 h-3.5 opacity-35" />
-                        <span className="font-semibold">{rewardsSnapshot.key}</span>
+                  <div className="flex-1 flex flex-col justify-center space-y-3">
+                    <div className="flex items-center justify-between py-2.5 px-3.5 rounded-xl" style={{ backgroundColor: subtle(isDark) }}>
+                      <div className="flex items-center gap-2.5">
+                        <Calendar className="w-4 h-4 opacity-35" />
+                        <span className="text-sm font-semibold">{rewardsSnapshot.key}</span>
                       </div>
-                      <span className="font-bold tabular-nums">{formatCurrency(rewardsSnapshot.totalAll)}</span>
+                      <span className="text-sm font-bold tabular-nums">{formatCurrency(rewardsSnapshot.totalAll)}</span>
                     </div>
-                    <div className="space-y-1.5">
+                    <div className="grid grid-cols-2 gap-3">
                       {rewardsSnapshot.topSales.length > 0 && (
-                        <div className="py-1.5 px-2.5 rounded-xl" style={{ backgroundColor: subtle(isDark) }}>
-                          <div className="text-[10px] font-medium opacity-35 mb-1">Top Sales</div>
-                          {rewardsSnapshot.topSales.map((p, i) => (
-                            <div key={p.name} className="flex items-center justify-between">
-                              <span className="text-xs font-semibold truncate">{p.name}</span>
-                              <span className="text-[11px] font-bold tabular-nums opacity-60 ml-2">{formatCurrency(p.amount)}</span>
-                            </div>
-                          ))}
+                        <div>
+                          <div className="text-xs font-bold uppercase tracking-wider opacity-30 mb-1.5">Top Sales</div>
+                          <div className="space-y-1">
+                            {rewardsSnapshot.topSales.map((p) => (
+                              <div key={p.name}>
+                                <div className="text-sm font-semibold truncate">{p.name}</div>
+                                <div className="text-xs font-bold tabular-nums opacity-50">{formatCurrency(p.amount)}</div>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       )}
                       {rewardsSnapshot.topDesigners.length > 0 && (
-                        <div className="py-1.5 px-2.5 rounded-xl" style={{ backgroundColor: subtle(isDark) }}>
-                          <div className="text-[10px] font-medium opacity-35 mb-1">Top Design</div>
-                          {rewardsSnapshot.topDesigners.map((p, i) => (
-                            <div key={p.name} className="flex items-center justify-between">
-                              <span className="text-xs font-semibold truncate">{p.name}</span>
-                              <span className="text-[11px] font-bold tabular-nums opacity-60 ml-2">{formatCurrency(p.amount)}</span>
-                            </div>
-                          ))}
+                        <div>
+                          <div className="text-xs font-bold uppercase tracking-wider opacity-30 mb-1.5">Top Design</div>
+                          <div className="space-y-1">
+                            {rewardsSnapshot.topDesigners.map((p) => (
+                              <div key={p.name}>
+                                <div className="text-sm font-semibold truncate">{p.name}</div>
+                                <div className="text-xs font-bold tabular-nums opacity-50">{formatCurrency(p.amount)}</div>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       )}
                     </div>
                   </div>
                 ) : (
-                  <p className="text-xs opacity-40">No rewards data yet.</p>
+                  <p className="text-sm opacity-40">No rewards data yet.</p>
                 )}
               </GlassCard>
             </button>
@@ -310,9 +314,9 @@ export const SalesScreen = ({ theme, onNavigate }) => {
           <button onClick={() => onNavigate('orders')} className="w-full text-left group">
             <GlassCard theme={theme} className="p-4 sm:p-5 space-y-2" variant="elevated">
               <div className="flex justify-between items-center">
-                <h3 className="text-sm font-bold">Recent Activity</h3>
-                <span className="text-[11px] font-bold uppercase tracking-widest opacity-25 group-hover:opacity-60 flex items-center gap-0.5 transition-opacity">
-                  All Orders <ChevronRight className="w-3 h-3" />
+                <h3 className="text-[15px] font-bold">Recent Activity</h3>
+                <span className="text-xs font-bold uppercase tracking-widest opacity-25 group-hover:opacity-60 flex items-center gap-0.5 transition-opacity">
+                  All Orders <ChevronRight className="w-3.5 h-3.5" />
                 </span>
               </div>
               <div className="space-y-0.5">
@@ -323,18 +327,18 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                       className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl"
                       style={{ opacity: ready ? 1 : 0, transition: `opacity 0.25s ease ${0.08 + i * 0.03}s` }}>
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-[10px] shrink-0"
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs shrink-0"
                           style={{ backgroundColor: subtle(isDark, 1.8) }}>
                           PO
                         </div>
                         <div className="text-left min-w-0">
-                          <p className="text-[13px] font-bold truncate max-w-[170px]">{formatCompanyName(order.company)}</p>
-                          <p className="text-[11px] font-medium opacity-35 tabular-nums">{new Date(order.date).toLocaleDateString()}</p>
+                          <p className="text-sm font-bold truncate max-w-[170px]">{formatCompanyName(order.company)}</p>
+                          <p className="text-xs font-medium opacity-35 tabular-nums">{new Date(order.date).toLocaleDateString()}</p>
                         </div>
                       </div>
                       <div className="text-right shrink-0 ml-2 space-y-0.5">
-                        <p className="text-[13px] font-black tabular-nums">${order.net.toLocaleString()}</p>
-                        <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
+                        <p className="text-sm font-black tabular-nums">${order.net.toLocaleString()}</p>
+                        <span className="inline-block text-[11px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
                           style={{ backgroundColor: sc + '14', color: sc }}>
                           {order.status}
                         </span>
@@ -349,8 +353,8 @@ export const SalesScreen = ({ theme, onNavigate }) => {
           {/* Invoiced by Vertical */}
           <GlassCard theme={theme} className="p-4 sm:p-5 space-y-2" variant="elevated">
             <div className="flex justify-between items-center">
-              <h3 className="text-sm font-bold">Invoiced by Vertical</h3>
-              <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
+              <h3 className="text-[15px] font-bold">Invoiced by Vertical</h3>
+              <span className="text-[11px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
                 style={{ backgroundColor: subtle(isDark, 1.5), color: colors.textSecondary }}>YTD</span>
             </div>
             <SalesByVerticalBreakdown theme={theme} data={SALES_VERTICALS_DATA.map(v => ({ name: v.label, value: v.value, color: v.color }))} />
@@ -367,8 +371,8 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                     <DollarSign className="w-3.5 h-3.5 opacity-50" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold leading-tight">Commissions</h3>
-                    <p className="text-[10px] font-medium opacity-30">{commissionsSnapshot.year} · {commissionsSnapshot.quartersReported} quarter{commissionsSnapshot.quartersReported !== 1 ? 's' : ''}</p>
+                    <h3 className="text-[15px] font-bold leading-tight">Commissions</h3>
+                    <p className="text-xs font-medium opacity-30">{commissionsSnapshot.year} · {commissionsSnapshot.quartersReported} quarter{commissionsSnapshot.quartersReported !== 1 ? 's' : ''}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-1.5">
@@ -381,15 +385,15 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                 <div className="flex gap-1.5 mt-2.5 overflow-hidden">
                   {commissionsSnapshot.topEarners.map(([name, amount]) => (
                     <div key={name} className="flex-1 min-w-0 py-1.5 px-2 rounded-lg" style={{ backgroundColor: subtle(isDark) }}>
-                      <div className="text-[10px] font-medium opacity-30 truncate mb-0.5">{name}</div>
-                      <div className="text-[11px] font-bold tabular-nums">{formatCurrency(amount)}</div>
+                      <div className="text-xs font-medium opacity-30 truncate mb-0.5">{name}</div>
+                      <div className="text-[13px] font-bold tabular-nums">{formatCurrency(amount)}</div>
                     </div>
                   ))}
                 </div>
               )}
 
-              <div className="text-[10px] font-bold uppercase tracking-widest opacity-20 group-hover:opacity-50 flex items-center gap-1 mt-2 transition-opacity">
-                View all commissions <ChevronRight className="w-2.5 h-2.5" />
+              <div className="text-xs font-bold uppercase tracking-widest opacity-20 group-hover:opacity-50 flex items-center gap-1 mt-2 transition-opacity">
+                View all commissions <ChevronRight className="w-3 h-3" />
               </div>
             </GlassCard>
           </button>
