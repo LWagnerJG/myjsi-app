@@ -1,128 +1,114 @@
 import React from 'react';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import { isDarkTheme } from '../../../design-system/tokens.js';
+import { Percent, ArrowRightLeft } from 'lucide-react';
 import * as Data from './data.js';
+
+/* ── helpers ─────────────────────────────────────────── */
+const CONTRACT_NAMES = new Set(['GSA', 'Omnia', 'Premier', 'TIPS']);
+
+const standardRates = Data.COMMISSION_RATES_DATA.standard.filter(r => !CONTRACT_NAMES.has(r.discount));
+const contractRates = Data.COMMISSION_RATES_DATA.standard.filter(r => CONTRACT_NAMES.has(r.discount));
+
+/* ── single rate row ─────────────────────────────────── */
+const RateRow = ({ rate, theme, dark }) => (
+    <div
+        className="flex items-center justify-between px-4 py-[10px]"
+        style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'}` }}
+    >
+        <span className="text-[13px] font-semibold tabular-nums" style={{ color: theme.colors.textPrimary }}>
+            {rate.discount}
+        </span>
+        <div className="flex items-center gap-5">
+            <span className="text-[13px] font-bold tabular-nums min-w-[52px] text-right" style={{ color: theme.colors.accent }}>
+                {rate.rep}
+            </span>
+            <span
+                className="text-[13px] tabular-nums min-w-[36px] text-right"
+                style={{ color: rate.spiff === 'N/A' ? theme.colors.textSecondary : theme.colors.textPrimary, opacity: rate.spiff === 'N/A' ? 0.4 : 0.7 }}
+            >
+                {rate.spiff}
+            </span>
+        </div>
+    </div>
+);
+
+/* ── section heading inside card ─────────────────────── */
+const SectionLabel = ({ children, theme }) => (
+    <div className="flex items-center justify-between px-4 py-2.5"
+        style={{ borderBottom: `1px solid ${theme.colors.border}` }}>
+        <span className="text-[11px] font-bold uppercase tracking-[0.08em]" style={{ color: theme.colors.textSecondary, opacity: 0.55 }}>
+            {children}
+        </span>
+        <div className="flex items-center gap-5">
+            <span className="text-[10px] font-bold uppercase tracking-[0.06em] min-w-[52px] text-right" style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>Rep</span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.06em] min-w-[36px] text-right" style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>Spiff</span>
+        </div>
+    </div>
+);
 
 export const CommissionRatesScreen = ({ theme }) => {
     const dark = isDarkTheme(theme);
+    const split = Data.COMMISSION_RATES_DATA.split;
 
     return (
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
-            <div className="flex-1 overflow-y-auto scrollbar-hide px-4 pb-6">
+            <div className="flex-1 overflow-y-auto scrollbar-hide px-4 pb-6 space-y-4">
 
-                {/* ── Rates Table ── */}
-                <GlassCard theme={theme} className="rounded-[24px] overflow-hidden mt-2">
-                    <div className="px-5 pt-5 pb-1">
-                        <h2 className="text-base font-bold" style={{ color: theme.colors.textPrimary }}>
-                            Discount Schedule
-                        </h2>
-                    </div>
+                {/* ── Split ── */}
+                <GlassCard theme={theme} className="rounded-[22px] overflow-hidden mt-2">
+                    <div className="px-5 pt-5 pb-4">
+                        <div className="flex items-center gap-2 mb-4">
+                            <ArrowRightLeft className="w-4 h-4" style={{ color: theme.colors.textSecondary, opacity: 0.5 }} />
+                            <span className="text-[11px] font-bold uppercase tracking-[0.08em]" style={{ color: theme.colors.textSecondary, opacity: 0.55 }}>
+                                Commission Split
+                            </span>
+                        </div>
 
-                    <div className="px-3 pb-4 overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
-                            <thead>
-                                <tr>
-                                    {['Discounts', 'Rep Comm.', 'Spiff'].map((h) => (
-                                        <th
-                                            key={h}
-                                            className="py-2.5 px-3 text-xs font-semibold uppercase tracking-wider"
-                                            style={{ color: theme.colors.textSecondary, borderBottom: `1.5px solid ${theme.colors.border}` }}
-                                        >
-                                            {h}
-                                        </th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {Data.COMMISSION_RATES_DATA.standard.map((rate, i) => {
-                                    const isContract = ['GSA', 'Omnia', 'Premier', 'TIPS'].includes(rate.discount);
-                                    return (
-                                        <tr
-                                            key={rate.discount}
-                                            style={{
-                                                backgroundColor: i % 2 === 1
-                                                    ? (dark ? 'rgba(255,255,255,0.025)' : 'rgba(0,0,0,0.018)')
-                                                    : 'transparent',
-                                            }}
-                                        >
-                                            <td
-                                                className="py-3 px-3 text-sm font-semibold"
-                                                style={{ color: theme.colors.textPrimary, borderBottom: `1px solid ${theme.colors.border}20` }}
-                                            >
-                                                <span className="flex items-center gap-2">
-                                                    {rate.discount}
-                                                    {isContract && (
-                                                        <span
-                                                            className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
-                                                            style={{ backgroundColor: `${theme.colors.info}14`, color: theme.colors.info }}
-                                                        >
-                                                            Contract
-                                                        </span>
-                                                    )}
-                                                </span>
-                                            </td>
-                                            <td
-                                                className="py-3 px-3 text-sm font-bold tabular-nums"
-                                                style={{ color: theme.colors.textPrimary, borderBottom: `1px solid ${theme.colors.border}20` }}
-                                            >
-                                                {rate.rep}
-                                            </td>
-                                            <td
-                                                className="py-3 px-3 text-sm tabular-nums"
-                                                style={{
-                                                    color: rate.spiff === 'N/A' ? theme.colors.textSecondary : theme.colors.textPrimary,
-                                                    borderBottom: `1px solid ${theme.colors.border}20`,
-                                                }}
-                                            >
-                                                {rate.spiff}
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
+                        {/* Two side-by-side metric */}
+                        <div className="flex gap-3">
+                            {split.map((seg, i) => (
+                                <div
+                                    key={i}
+                                    className="flex-1 rounded-2xl px-4 py-3.5 text-center"
+                                    style={{ backgroundColor: dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.025)' }}
+                                >
+                                    <div className="text-[26px] font-extrabold leading-none tracking-tight" style={{ color: theme.colors.textPrimary }}>
+                                        {seg.value}<span className="text-[16px] font-bold" style={{ color: theme.colors.textSecondary }}>%</span>
+                                    </div>
+                                    <div className="mt-1.5 flex items-center justify-center gap-1.5">
+                                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: seg.color }} />
+                                        <span className="text-[12px] font-medium" style={{ color: theme.colors.textSecondary }}>
+                                            {seg.label}
+                                        </span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Thin proportional bar underneath */}
+                        <div className="flex mt-3 h-1.5 rounded-full overflow-hidden">
+                            {split.map((seg, i) => (
+                                <div key={i} style={{ width: `${seg.value}%`, backgroundColor: seg.color }} />
+                            ))}
+                        </div>
                     </div>
                 </GlassCard>
 
-                {/* ── Commission Split ── */}
-                <GlassCard theme={theme} className="rounded-[24px] overflow-hidden mt-5">
-                    <div className="px-5 pt-5 pb-1">
-                        <h2 className="text-base font-bold" style={{ color: theme.colors.textPrimary }}>
-                            Commission Split
-                        </h2>
-                    </div>
+                {/* ── Standard Rates ── */}
+                <GlassCard theme={theme} className="rounded-[22px] overflow-hidden">
+                    <SectionLabel theme={theme}>Standard Discounts</SectionLabel>
+                    {standardRates.map((rate) => (
+                        <RateRow key={rate.discount} rate={rate} theme={theme} dark={dark} />
+                    ))}
+                </GlassCard>
 
-                    <div className="px-5 pt-3 pb-5">
-                        {/* Visual split bar */}
-                        <div className="h-11 rounded-full overflow-hidden flex" style={{ border: `1px solid ${theme.colors.border}` }}>
-                            {Data.COMMISSION_RATES_DATA.split.map((seg, i) => (
-                                <div
-                                    key={i}
-                                    className="h-full flex items-center justify-center"
-                                    style={{ width: `${seg.value}%`, backgroundColor: seg.color }}
-                                >
-                                    <span className="text-sm font-bold text-white drop-shadow-sm">
-                                        {seg.value}%
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
-
-                        {/* Legend */}
-                        <div className="flex items-center justify-center gap-6 mt-3">
-                            {Data.COMMISSION_RATES_DATA.split.map((seg, i) => (
-                                <div key={i} className="flex items-center gap-2">
-                                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: seg.color }} />
-                                    <span className="text-sm font-medium" style={{ color: theme.colors.textPrimary }}>
-                                        {seg.label}
-                                    </span>
-                                    <span className="text-xs" style={{ color: theme.colors.textSecondary }}>
-                                        ({seg.value}%)
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
+                {/* ── Contract Rates ── */}
+                <GlassCard theme={theme} className="rounded-[22px] overflow-hidden">
+                    <SectionLabel theme={theme}>Contract Pricing</SectionLabel>
+                    {contractRates.map((rate) => (
+                        <RateRow key={rate.discount} rate={rate} theme={theme} dark={dark} />
+                    ))}
                 </GlassCard>
 
             </div>
