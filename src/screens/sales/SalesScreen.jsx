@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { Modal } from '../../components/common/Modal';
-import { ArrowUp, ArrowDown, TrendingUp, Award, DollarSign, BarChart, Table, ChevronRight, Target, Trophy, Calendar } from 'lucide-react';
+import { ArrowUp, ArrowDown, TrendingUp, BarChart, Table, ChevronRight, Target, Trophy, Calendar, DollarSign } from 'lucide-react';
 import { MONTHLY_SALES_DATA, SALES_VERTICALS_DATA, CUSTOMER_RANK_DATA, INCENTIVE_REWARDS_DATA } from './data.js';
 import { ORDER_DATA, STATUS_COLORS } from '../orders/data.js';
 import { SalesByVerticalBreakdown } from './components/SalesByVerticalBreakdown.jsx';
@@ -10,17 +10,7 @@ import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { isDarkTheme } from '../../design-system/tokens.js';
 import { formatCurrency, formatCompanyName } from '../../utils/format.js';
 
-const SALES_TOP_ACTIONS = [
-  { value: 'rewards', label: 'Dealer Rewards', icon: Award, route: 'incentive-rewards' },
-  { value: 'comms', label: 'Commissions', icon: DollarSign, route: 'commissions' },
-];
 
-// Rank colors — gold/silver/bronze in JSI earth tones
-const RANK_STYLES = [
-  { bg: 'rgba(196, 149, 106, 0.18)', color: '#8B7355', icon: '🥇' },
-  { bg: 'rgba(160, 152, 144, 0.15)', color: '#7A7268', icon: '🥈' },
-  { bg: 'rgba(196, 149, 106, 0.10)', color: '#A09080', icon: '🥉' },
-];
 
 const OrderModal = ({ order, onClose, theme }) => {
   if (!order) return null;
@@ -141,9 +131,29 @@ export const SalesScreen = ({ theme, onNavigate }) => {
     });
     const [key, data] = entries[entries.length - 1];
     const sales = data?.sales || [];
+    const designers = data?.designers || [];
     const top = [...sales].sort((a, b) => (b.amount || 0) - (a.amount || 0))[0];
-    const total = sales.reduce((s, r) => s + (r.amount || 0), 0);
-    return { key, top, total };
+    const totalSalesRewards = sales.reduce((s, r) => s + (r.amount || 0), 0);
+    const totalDesignerRewards = designers.reduce((s, r) => s + (r.amount || 0), 0);
+    const totalAll = totalSalesRewards + totalDesignerRewards;
+    // Get previous quarter for comparison
+    const prevEntry = entries.length >= 2 ? entries[entries.length - 2] : null;
+    const prevTotal = prevEntry ? ([...(prevEntry[1]?.sales || []), ...(prevEntry[1]?.designers || [])]).reduce((s, r) => s + (r.amount || 0), 0) : 0;
+    return { key, top, totalSalesRewards, totalDesignerRewards, totalAll, prevTotal, salesCount: sales.length, designersCount: designers.length };
+  }, []);
+
+  // Commissions snapshot — aggregate all quarters for the current year
+  const commissionsSnapshot = useMemo(() => {
+    const entries = Object.entries(INCENTIVE_REWARDS_DATA || {});
+    if (!entries.length) return null;
+    const currentYear = new Date().getFullYear();
+    const yearEntries = entries.filter(([k]) => k.startsWith(String(currentYear)));
+    const allSales = yearEntries.flatMap(([, d]) => d?.sales || []);
+    const byPerson = {};
+    allSales.forEach(s => { byPerson[s.name] = (byPerson[s.name] || 0) + s.amount; });
+    const sorted = Object.entries(byPerson).sort((a, b) => b[1] - a[1]);
+    const ytdTotal = sorted.reduce((s, [, v]) => s + v, 0);
+    return { ytdTotal, topEarners: sorted.slice(0, 3), quartersReported: yearEntries.length };
   }, []);
 
   const chartToggleOpts = [
@@ -156,23 +166,6 @@ export const SalesScreen = ({ theme, onNavigate }) => {
   return (
     <div className="flex flex-col h-full overflow-y-auto scrollbar-hide app-header-offset" style={{ backgroundColor: colors.background, scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
       <div className="px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6 lg:space-y-8 max-w-5xl mx-auto w-full pb-20 lg:pb-12">
-
-        {/* Navigation Buttons */}
-        <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide pb-1">
-          {SALES_TOP_ACTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              onClick={() => onNavigate(opt.route)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-full text-[13px] font-medium whitespace-nowrap transition-all border"
-              style={{ backgroundColor: colors.surface, color: colors.textSecondary, borderColor: colors.border }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = colors.accent; e.currentTarget.style.color = colors.textPrimary; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = colors.border; e.currentTarget.style.color = colors.textSecondary; }}
-            >
-              <opt.icon className="w-4 h-4" />
-              {opt.label}
-            </button>
-          ))}
-        </div>
 
         {/* Hero Section - Main KPI + Side Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-[1.65fr_1fr] xl:grid-cols-[1.8fr_1fr] gap-5 lg:gap-6 items-stretch">
@@ -269,36 +262,35 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                 </div>
                 <button
                   onClick={() => onNavigate('customer-rank')}
-                  className="px-3.5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border"
-                  style={{ backgroundColor: 'transparent', color: colors.textSecondary, borderColor: colors.border }}
-                  onMouseEnter={e => { e.currentTarget.style.color = colors.textPrimary; e.currentTarget.style.borderColor = colors.textSecondary; }}
-                  onMouseLeave={e => { e.currentTarget.style.color = colors.textSecondary; e.currentTarget.style.borderColor = colors.border; }}
+                  className="text-[11px] font-bold uppercase tracking-widest opacity-40 hover:opacity-100 flex items-center gap-1 transition-opacity"
                 >
-                  View
+                  View All <ChevronRight className="w-3 h-3" />
                 </button>
               </div>
-              <div className="space-y-1.5">
-                {topLeaders.map((leader, idx) => {
-                  const rank = RANK_STYLES[idx] || RANK_STYLES[2];
-                  return (
-                    <div
-                      key={leader.id}
-                      className="flex items-center justify-between text-xs py-2 px-3 rounded-xl transition-colors"
-                      style={{
-                        backgroundColor: rank.bg,
-                        opacity: ready ? 1 : 0,
-                        transform: ready ? 'translateX(0)' : 'translateX(-8px)',
-                        transition: `opacity 0.25s ease ${idx * 60}ms, transform 0.25s ease ${idx * 60}ms`,
-                      }}
-                    >
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <span className="text-sm" aria-label={`Rank ${idx + 1}`}>{rank.icon}</span>
-                        <span className="font-semibold truncate">{leader.name}</span>
-                      </div>
-                      <span className="font-bold tabular-nums shrink-0 ml-2">{formatCurrency(leader.bookings)}</span>
+              <div className="space-y-1">
+                {topLeaders.map((leader, idx) => (
+                  <div
+                    key={leader.id}
+                    className="flex items-center justify-between text-xs py-2.5 px-3 rounded-xl"
+                    style={{
+                      backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.025)',
+                      opacity: ready ? 1 : 0,
+                      transform: ready ? 'translateX(0)' : 'translateX(-6px)',
+                      transition: `opacity 0.25s ease ${idx * 60}ms, transform 0.25s ease ${idx * 60}ms`,
+                    }}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span
+                        className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shrink-0"
+                        style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)', color: colors.textSecondary }}
+                      >
+                        {idx + 1}
+                      </span>
+                      <span className="font-semibold truncate">{leader.name}</span>
                     </div>
-                  );
-                })}
+                    <span className="font-bold tabular-nums shrink-0 ml-2">{formatCurrency(leader.bookings)}</span>
+                  </div>
+                ))}
               </div>
             </GlassCard>
 
@@ -310,27 +302,36 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                 </div>
                 <button
                   onClick={() => onNavigate('incentive-rewards')}
-                  className="px-3.5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border"
-                  style={{ backgroundColor: 'transparent', color: colors.textSecondary, borderColor: colors.border }}
-                  onMouseEnter={e => { e.currentTarget.style.color = colors.textPrimary; e.currentTarget.style.borderColor = colors.textSecondary; }}
-                  onMouseLeave={e => { e.currentTarget.style.color = colors.textSecondary; e.currentTarget.style.borderColor = colors.border; }}
+                  className="text-[11px] font-bold uppercase tracking-widest opacity-40 hover:opacity-100 flex items-center gap-1 transition-opacity"
                 >
-                  View
+                  Details <ChevronRight className="w-3 h-3" />
                 </button>
               </div>
               {rewardsSnapshot ? (
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between py-2 px-3 rounded-xl text-xs" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)' }}>
+                  {/* Current quarter total */}
+                  <div className="flex items-center justify-between py-2.5 px-3 rounded-xl text-xs" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.025)' }}>
                     <div className="flex items-center gap-2">
-                      <Calendar className="w-3.5 h-3.5 opacity-50" />
+                      <Calendar className="w-3.5 h-3.5 opacity-40" />
                       <span className="font-semibold">{rewardsSnapshot.key}</span>
                     </div>
-                    <span className="font-bold tabular-nums" style={{ color: isDark ? '#6B9B7A' : '#4A7C59' }}>{formatCurrency(rewardsSnapshot.total)}</span>
+                    <span className="font-bold tabular-nums">{formatCurrency(rewardsSnapshot.totalAll)}</span>
                   </div>
+                  {/* Breakdown row */}
+                  <div className="flex gap-2">
+                    <div className="flex-1 py-2 px-3 rounded-xl text-center" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.025)' }}>
+                      <div className="text-[10px] font-medium opacity-40 mb-0.5">Sales ({rewardsSnapshot.salesCount})</div>
+                      <div className="text-xs font-bold tabular-nums">{formatCurrency(rewardsSnapshot.totalSalesRewards)}</div>
+                    </div>
+                    <div className="flex-1 py-2 px-3 rounded-xl text-center" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.025)' }}>
+                      <div className="text-[10px] font-medium opacity-40 mb-0.5">Design ({rewardsSnapshot.designersCount})</div>
+                      <div className="text-xs font-bold tabular-nums">{formatCurrency(rewardsSnapshot.totalDesignerRewards)}</div>
+                    </div>
+                  </div>
+                  {/* Top earner */}
                   {rewardsSnapshot.top && (
-                    <div className="flex items-center justify-between py-2 px-3 rounded-xl text-xs" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)' }}>
-                      <span className="font-medium truncate" style={{ color: colors.textSecondary }}>Top: {rewardsSnapshot.top.name}</span>
-                      <span className="font-bold tabular-nums shrink-0 ml-2">{formatCurrency(rewardsSnapshot.top.amount)}</span>
+                    <div className="text-[10px] font-medium opacity-40 px-1">
+                      Top earner: {rewardsSnapshot.top.name} — {formatCurrency(rewardsSnapshot.top.amount)}
                     </div>
                   )}
                 </div>
@@ -501,6 +502,54 @@ export const SalesScreen = ({ theme, onNavigate }) => {
             )}
           </AnimatePresence>
         </GlassCard>
+
+        {/* Commissions Preview Tile */}
+        {commissionsSnapshot && (
+          <button
+            onClick={() => onNavigate('commissions')}
+            className="w-full text-left group"
+          >
+            <GlassCard theme={theme} className="p-6 sm:p-7 space-y-4" variant="elevated">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div
+                    className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                    style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}
+                  >
+                    <DollarSign className="w-4.5 h-4.5" style={{ opacity: 0.6 }} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold leading-tight">Commissions</h3>
+                    <p className="text-[11px] font-medium opacity-40">{new Date().getFullYear()} YTD · {commissionsSnapshot.quartersReported} quarter{commissionsSnapshot.quartersReported !== 1 ? 's' : ''} reported</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xl sm:text-2xl font-black tabular-nums">{formatCurrency(commissionsSnapshot.ytdTotal)}</span>
+                  <ChevronRight className="w-4 h-4 opacity-30 group-hover:opacity-70 transition-opacity" />
+                </div>
+              </div>
+
+              {commissionsSnapshot.topEarners.length > 0 && (
+                <div className="flex gap-2 overflow-hidden">
+                  {commissionsSnapshot.topEarners.map(([name, amount], i) => (
+                    <div
+                      key={name}
+                      className="flex-1 min-w-0 py-2 px-3 rounded-xl"
+                      style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.025)' }}
+                    >
+                      <div className="text-[10px] font-medium opacity-40 truncate mb-0.5">{name}</div>
+                      <div className="text-xs font-bold tabular-nums">{formatCurrency(amount)}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="text-[11px] font-bold uppercase tracking-widest opacity-30 group-hover:opacity-60 flex items-center gap-1.5 transition-opacity">
+                View all commissions <ChevronRight className="w-3 h-3" />
+              </div>
+            </GlassCard>
+          </button>
+        )}
 
       </div>
 
