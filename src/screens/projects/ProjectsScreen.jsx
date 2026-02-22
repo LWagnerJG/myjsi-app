@@ -647,7 +647,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
   if(selectedOpportunity) return <OpportunityDetail opp={selectedOpportunity} theme={theme} onUpdate={u=>{ updateOpportunity(u); setSelectedOpportunity(u); }} />;
   if(selectedInstall) return <InstallationDetail project={selectedInstall} theme={theme} onAddPhotoFiles={addInstallPhotos} />;
   return (
-    <div className="h-full flex flex-col app-header-offset" style={{ backgroundColor: theme.colors.background }}>
+    <div className="h-full flex flex-col app-header-offset relative" style={{ backgroundColor: theme.colors.background }}>
       {/* Controls - fixed below app header */}
       <div className="flex-shrink-0" style={{ backgroundColor: theme.colors.background }}>
         <div className="px-4 sm:px-6 lg:px-8 pt-2 pb-2 max-w-5xl mx-auto w-full">
@@ -727,26 +727,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
                   {filteredOpportunities.map((opp, i)=> <div key={opp.id}><ProjectCard opp={opp} theme={theme} onClick={()=>setSelectedOpportunity(opp)} /></div>)}
                 </div>
-                <div className="mt-5">
-                  <div
-                    className="rounded-2xl p-5"
-                    style={{
-                      backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.025)',
-                      border: isDark ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(0,0,0,0.06)',
-                    }}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: theme.colors.textSecondary }}>{selectedPipelineStage} Pipeline</p>
-                        <p className="text-[13px] font-medium mt-0.5" style={{ color: theme.colors.textSecondary }}>{filteredOpportunities.length} {filteredOpportunities.length === 1 ? 'project' : 'projects'}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: theme.colors.textSecondary }}>Total Value</p>
-                        <p className="text-2xl font-bold tracking-tight mt-0.5" style={{ color: theme.colors.textPrimary }}>{fmtCurrency(stageTotals.totalValue)}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+
               </>
             ) :
             <div className="flex flex-col items-center justify-center py-16">
@@ -793,6 +774,40 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
           )}
         </div>
       </div>
+
+      {/* Sticky bottom totals bar — glassy overlay */}
+      {projectsTab === 'pipeline' && filteredOpportunities.length > 0 && (
+        <div
+          className="absolute bottom-0 left-0 right-0 pointer-events-none"
+          style={{ zIndex: 20 }}
+        >
+          <div
+            className="pointer-events-auto mx-4 sm:mx-6 lg:mx-8 mb-4 max-w-5xl mx-auto"
+          >
+            <div
+              className="rounded-2xl px-5 py-4 flex items-center justify-between"
+              style={{
+                backgroundColor: isDark ? 'rgba(30,30,30,0.75)' : 'rgba(255,255,255,0.72)',
+                backdropFilter: 'blur(20px) saturate(1.8)',
+                WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+                border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.08)',
+                boxShadow: isDark
+                  ? '0 -4px 24px rgba(0,0,0,0.3)'
+                  : '0 -2px 20px rgba(0,0,0,0.06)',
+              }}
+            >
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: theme.colors.textSecondary }}>{selectedPipelineStage} Pipeline</p>
+                <p className="text-[13px] font-medium mt-0.5" style={{ color: theme.colors.textSecondary }}>{filteredOpportunities.length} {filteredOpportunities.length === 1 ? 'project' : 'projects'}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: theme.colors.textSecondary }}>Total Value</p>
+                <p className="text-2xl font-bold tracking-tight mt-0.5" style={{ color: theme.colors.textPrimary }}>{fmtCurrency(stageTotals.totalValue)}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
