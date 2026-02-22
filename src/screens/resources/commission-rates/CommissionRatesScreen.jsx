@@ -1,5 +1,6 @@
 import React from 'react';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
+import { InfoTooltip } from '../../../components/common/InfoTooltip.jsx';
 import { isDarkTheme } from '../../../design-system/tokens.js';
 import * as Data from './data.js';
 
@@ -10,10 +11,10 @@ const standardRates = Data.COMMISSION_RATES_DATA.standard.filter(r => !CONTRACT_
 const contractRates = Data.COMMISSION_RATES_DATA.standard.filter(r => CONTRACT_NAMES.has(r.discount));
 
 /* ── single rate row ─────────────────────────────────── */
-const RateRow = ({ rate, theme, dark }) => (
+const RateRow = ({ rate, theme, dark, isLast }) => (
     <div
-        className="flex items-center justify-between px-4 py-[10px]"
-        style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'}` }}
+        className="flex items-center justify-between px-4 py-[11px]"
+        style={{ borderBottom: isLast ? 'none' : `1px solid ${dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'}` }}
     >
         <span className="text-[13px] font-semibold tabular-nums" style={{ color: theme.colors.textPrimary }}>
             {rate.discount}
@@ -33,12 +34,15 @@ const RateRow = ({ rate, theme, dark }) => (
 );
 
 /* ── section heading inside card ─────────────────────── */
-const SectionLabel = ({ children, theme }) => (
+const SectionLabel = ({ children, theme, extra }) => (
     <div className="flex items-center justify-between px-4 py-2.5"
         style={{ borderBottom: `1px solid ${theme.colors.border}` }}>
-        <span className="text-[11px] font-bold uppercase tracking-[0.08em]" style={{ color: theme.colors.textSecondary, opacity: 0.55 }}>
-            {children}
-        </span>
+        <div className="flex items-center gap-2">
+            <span className="text-[11px] font-bold uppercase tracking-[0.08em]" style={{ color: theme.colors.textSecondary, opacity: 0.55 }}>
+                {children}
+            </span>
+            {extra}
+        </div>
         <div className="flex items-center gap-5">
             <span className="text-[10px] font-bold uppercase tracking-[0.06em] min-w-[52px] text-right" style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>Rep</span>
             <span className="text-[10px] font-bold uppercase tracking-[0.06em] min-w-[36px] text-right" style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>Spiff</span>
@@ -52,29 +56,39 @@ export const CommissionRatesScreen = ({ theme }) => {
 
     return (
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
-            <div className="flex-1 overflow-y-auto scrollbar-hide px-4 pb-6 space-y-4">
+            <div className="flex-1 overflow-y-auto scrollbar-hide px-4 pb-6 space-y-3.5">
 
                 {/* ── Standard Rates ── */}
                 <GlassCard theme={theme} className="rounded-[22px] overflow-hidden mt-2">
                     <SectionLabel theme={theme}>Standard Discounts</SectionLabel>
-                    {standardRates.map((rate) => (
-                        <RateRow key={rate.discount} rate={rate} theme={theme} dark={dark} />
+                    {standardRates.map((rate, i) => (
+                        <RateRow key={rate.discount} rate={rate} theme={theme} dark={dark} isLast={i === standardRates.length - 1} />
                     ))}
                 </GlassCard>
 
                 {/* ── Contract Rates ── */}
                 <GlassCard theme={theme} className="rounded-[22px] overflow-hidden">
                     <SectionLabel theme={theme}>Contract Pricing</SectionLabel>
-                    {contractRates.map((rate) => (
-                        <RateRow key={rate.discount} rate={rate} theme={theme} dark={dark} />
+                    {contractRates.map((rate, i) => (
+                        <RateRow key={rate.discount} rate={rate} theme={theme} dark={dark} isLast={i === contractRates.length - 1} />
                     ))}
                 </GlassCard>
 
                 {/* ── Commission Split ── */}
                 <GlassCard theme={theme} className="rounded-[22px] overflow-hidden">
-                    <div className="px-4 py-3.5 flex items-center gap-4">
-                        {/* Proportional bar */}
-                        <div className="flex h-7 rounded-lg overflow-hidden flex-1">
+                    <div className="flex items-center justify-between px-4 pt-3.5 pb-2">
+                        <span className="text-[11px] font-bold uppercase tracking-[0.08em]" style={{ color: theme.colors.textSecondary, opacity: 0.55 }}>
+                            Commission Split
+                        </span>
+                        <InfoTooltip
+                            theme={theme}
+                            size="sm"
+                            position="left"
+                            content="When two reps are involved in a sale, the specifying rep (who spec'd the product) receives 70% of the commission and the ordering rep (who placed the order) receives 30%."
+                        />
+                    </div>
+                    <div className="px-4 pb-3">
+                        <div className="flex h-8 rounded-xl overflow-hidden">
                             {split.map((seg, i) => (
                                 <div
                                     key={i}
@@ -88,7 +102,7 @@ export const CommissionRatesScreen = ({ theme }) => {
                             ))}
                         </div>
                     </div>
-                    <div className="flex items-center justify-center gap-5 px-4 pb-3.5 -mt-1">
+                    <div className="flex items-center justify-center gap-5 px-4 pb-3.5">
                         {split.map((seg, i) => (
                             <div key={i} className="flex items-center gap-1.5">
                                 <div className="w-2 h-2 rounded-full" style={{ backgroundColor: seg.color }} />
