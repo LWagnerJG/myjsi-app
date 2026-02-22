@@ -1,9 +1,10 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import { isDarkTheme } from '../../../design-system/tokens.js';
-import { ExternalLink, Copy, Share2, ChevronDown, ChevronUp, FileText } from 'lucide-react';
+import { ExternalLink, Copy, Share2, Download, FileText, Link2 } from 'lucide-react';
 import { CONTRACTS_DATA } from './data.js';
 
+/* ── constants ────────────────────────────────────────── */
 const TABS = [
     { label: 'Omnia', value: 'omnia' },
     { label: 'TIPS', value: 'tips' },
@@ -11,38 +12,50 @@ const TABS = [
     { label: 'GSA', value: 'gsa' },
 ];
 
+const DOC_VERSIONS = [
+    { key: 'documentUrl',       label: 'Rep Version',    short: 'Rep' },
+    { key: 'dealerDocumentUrl', label: 'Dealer Version', short: 'Dealer' },
+    { key: 'publicDocumentUrl', label: 'Public Version', short: 'Public' },
+];
+
+/* ── main screen ──────────────────────────────────────── */
 export const ContractsScreen = ({ theme, setSuccessMessage }) => {
     const [active, setActive] = useState('omnia');
     const dark = isDarkTheme(theme);
     const contract = CONTRACTS_DATA[active];
+    const hasMargins = contract.discounts?.some(r => r.margin);
 
-    const feedback = (msg) => { setSuccessMessage?.(msg); if (msg) setTimeout(() => setSuccessMessage?.(''), 1400); };
+    const feedback = useCallback((msg) => {
+        setSuccessMessage?.(msg);
+        if (msg) setTimeout(() => setSuccessMessage?.(''), 1400);
+    }, [setSuccessMessage]);
 
-    const copyPdf = async () => { try { await navigator.clipboard.writeText(contract.documentUrl || ''); feedback('PDF link copied'); } catch { /* no-op */ } };
-    const shareDealer = async () => {
-        const url = contract.dealerDocumentUrl || contract.documentUrl;
-        if (navigator.share) { try { await navigator.share({ title: `${contract.name} Dealer Version`, url }); } catch { /* no-op */ } } else { await navigator.clipboard.writeText(url || ''); feedback('Dealer link copied'); }
-    };
-    const sharePublic = async () => {
-        const url = contract.publicDocumentUrl || contract.documentUrl;
-        if (navigator.share) { try { await navigator.share({ title: `${contract.name} Public Version`, url }); } catch { /* no-op */ } } else { await navigator.clipboard.writeText(url || ''); feedback('Public link copied'); }
-    };
+    const copyUrl = useCallback(async (url, label) => {
+        try { await navigator.clipboard.writeText(url); feedback(`${label} link copied`); } catch { /* no-op */ }
+    }, [feedback]);
+
+    const shareUrl = useCallback(async (url, title) => {
+        if (navigator.share) { try { await navigator.share({ title, url }); } catch { /* no-op */ } }
+        else { await navigator.clipboard.writeText(url); feedback('Link copied'); }
+    }, [feedback]);
 
     return (
         <div className="flex h-full flex-col app-header-offset" style={{ backgroundColor: theme.colors.background }}>
-            {/* ── Tab pills ── */}
-            <div className="px-4 pt-1 pb-2">
-                <div className="flex gap-1.5">
+
+            {/* ── Full-width tab bar ── */}
+            <div className="px-4 pt-1 pb-2.5">
+                <div className="flex rounded-xl overflow-hidden" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}>
                     {TABS.map(t => {
                         const on = active === t.value;
                         return (
                             <button
                                 key={t.value}
                                 onClick={() => setActive(t.value)}
-                                className="px-3.5 py-[7px] rounded-full text-[13px] font-semibold transition-all"
+                                className="flex-1 py-[9px] text-[13px] font-semibold transition-all text-center"
                                 style={{
-                                    backgroundColor: on ? theme.colors.accent : (dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'),
+                                    backgroundColor: on ? theme.colors.accent : 'transparent',
                                     color: on ? (theme.colors.accentText || '#fff') : theme.colors.textSecondary,
+                                    borderRadius: on ? '12px' : '0',
                                 }}
                             >
                                 {t.label}
@@ -55,9 +68,9 @@ export const ContractsScreen = ({ theme, setSuccessMessage }) => {
             {/* ── Scrollable content ── */}
             <div className="flex-1 overflow-y-auto px-4 pb-6 scrollbar-hide space-y-3.5">
 
-                {/* Contract name */}
-                <div className="pt-1">
-                    <h2 className="text-[17px] font-bold" style={{ color: theme.colors.textPrimary }}>
+                {/* Contract title */}
+                <div className="pt-0.5">
+                    <h2 className="text-[17px] font-bold leading-snug" style={{ color: theme.colors.textPrimary }}>
                         {contract.name}
                     </h2>
                     {contract.subtitle && (
@@ -65,40 +78,94 @@ export const ContractsScreen = ({ theme, setSuccessMessage }) => {
                     )}
                 </div>
 
-                {/* ── Delivery tiers ── */}
+                {/* ── Pricing tiers ── */}
                 <GlassCard theme={theme} className="rounded-[22px] overflow-hidden">
-                    <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: `1px solid ${theme.colors.border}` }}>
-                        <span className="text-[11px] font-bold uppercase tracking-[0.08em]" style={{ color: theme.colors.textSecondary, opacity: 0.55 }}>
-                            Delivery Tiers
+                    {/* Column headers */}
+                    <div className="flex items-center px-4 py-2.5" style={{ borderBottom: `1px solid ${theme.colors.border}` }}>
+                        <span className="flex-1 text-[11px] font-bold uppercase tracking-[0.08em]" style={{ color: theme.colors.textSecondary, opacity: 0.55 }}>
+                            Pricing Tiers
                         </span>
-                        <div className="flex items-center gap-4">
-                            <span className="text-[10px] font-bold uppercase tracking-[0.06em] min-w-[44px] text-right" style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>Dealer</span>
-                            <span className="text-[10px] font-bold uppercase tracking-[0.06em] min-w-[44px] text-right" style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>Rep</span>
+                        <div className="flex items-center" style={{ gap: '2px' }}>
+                            <span className="text-[10px] font-bold uppercase tracking-[0.05em] w-[50px] text-center" style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>Dlr</span>
+                            <span className="text-[10px] font-bold uppercase tracking-[0.05em] w-[50px] text-center" style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>Rep</span>
+                            {hasMargins && (
+                                <span className="text-[10px] font-bold uppercase tracking-[0.05em] w-[52px] text-center" style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>Margin</span>
+                            )}
                         </div>
                     </div>
+
+                    {/* Rows */}
                     {contract.discounts?.map((row, idx) => (
-                        <TierRow key={idx} row={row} theme={theme} dark={dark} isLast={idx === contract.discounts.length - 1} />
+                        <div
+                            key={idx}
+                            className="flex items-center px-4 py-3"
+                            style={{ borderBottom: idx < contract.discounts.length - 1 ? `1px solid ${dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'}` : 'none' }}
+                        >
+                            {/* Left: discount + label */}
+                            <div className="flex-1 min-w-0 flex items-baseline gap-2">
+                                <span className="text-[15px] font-extrabold tabular-nums flex-shrink-0" style={{ color: theme.colors.accent }}>
+                                    {row.discount}
+                                </span>
+                                <span className="text-[13px] font-medium truncate" style={{ color: theme.colors.textPrimary }}>
+                                    {row.label}
+                                </span>
+                            </div>
+                            {/* Right: stats */}
+                            <div className="flex items-center flex-shrink-0" style={{ gap: '2px' }}>
+                                <span className="text-[13px] font-semibold tabular-nums w-[50px] text-center" style={{ color: theme.colors.textPrimary }}>
+                                    {row.dealerCommission}
+                                </span>
+                                <span className="text-[13px] tabular-nums w-[50px] text-center" style={{ color: theme.colors.textSecondary }}>
+                                    {row.repCommission}
+                                </span>
+                                {hasMargins && (
+                                    <span className="text-[12px] tabular-nums w-[52px] text-center font-medium" style={{ color: theme.colors.textSecondary, opacity: row.margin ? 0.6 : 0.3 }}>
+                                        {row.margin || '—'}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
                     ))}
                 </GlassCard>
 
-                {/* ── Margin calcs (collapsible) ── */}
-                {contract.marginCalcs?.length > 0 && (
-                    <MarginBlock margins={contract.marginCalcs} theme={theme} dark={dark} />
-                )}
-
-                {/* ── Disclaimer ── */}
+                {/* ── Disclaimer (if any) ── */}
                 {contract.disclaimer && (
-                    <p className="text-[12px] italic px-1" style={{ color: theme.colors.textSecondary, opacity: 0.7 }}>
+                    <p className="text-[12px] italic px-1 leading-relaxed" style={{ color: theme.colors.textSecondary, opacity: 0.65 }}>
                         {contract.disclaimer}
                     </p>
                 )}
 
-                {/* ── Actions ── */}
+                {/* ── Document Versions ── */}
                 <GlassCard theme={theme} className="rounded-[22px] overflow-hidden">
-                    <ActionRow icon={FileText} label="View Contract PDF" onClick={() => window.open(contract.documentUrl, '_blank')} theme={theme} dark={dark} accent />
-                    <ActionRow icon={Copy} label="Copy PDF Link" onClick={copyPdf} theme={theme} dark={dark} />
-                    <ActionRow icon={Share2} label="Share Dealer Version" onClick={shareDealer} theme={theme} dark={dark} />
-                    <ActionRow icon={Share2} label="Share Public Version" onClick={sharePublic} theme={theme} dark={dark} isLast />
+                    <div className="px-4 py-2.5" style={{ borderBottom: `1px solid ${theme.colors.border}` }}>
+                        <span className="text-[11px] font-bold uppercase tracking-[0.08em]" style={{ color: theme.colors.textSecondary, opacity: 0.55 }}>
+                            Documents
+                        </span>
+                    </div>
+
+                    {DOC_VERSIONS.map((ver, idx) => {
+                        const url = contract[ver.key];
+                        if (!url) return null;
+                        return (
+                            <div
+                                key={ver.key}
+                                className="px-4 py-3 flex items-center justify-between"
+                                style={{ borderBottom: idx < DOC_VERSIONS.length - 1 ? `1px solid ${dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'}` : 'none' }}
+                            >
+                                <div className="flex items-center gap-2.5 min-w-0">
+                                    <FileText className="w-4 h-4 flex-shrink-0" style={{ color: theme.colors.textSecondary, opacity: 0.5 }} />
+                                    <span className="text-[13px] font-medium" style={{ color: theme.colors.textPrimary }}>
+                                        {ver.label}
+                                    </span>
+                                </div>
+                                <div className="flex items-center gap-1 flex-shrink-0">
+                                    <IconBtn icon={ExternalLink} title="Open" onClick={() => window.open(url, '_blank')} theme={theme} dark={dark} />
+                                    <IconBtn icon={Link2} title="Copy link" onClick={() => copyUrl(url, ver.short)} theme={theme} dark={dark} />
+                                    <IconBtn icon={Share2} title="Share" onClick={() => shareUrl(url, `${contract.name} — ${ver.label}`)} theme={theme} dark={dark} />
+                                </div>
+                            </div>
+                        );
+                    })}
                 </GlassCard>
 
             </div>
@@ -106,79 +173,15 @@ export const ContractsScreen = ({ theme, setSuccessMessage }) => {
     );
 };
 
-/* ── tier row ─────────────────────────────────────────── */
-const TierRow = ({ row, theme, dark, isLast }) => (
-    <div
-        className="flex items-center justify-between px-4 py-3"
-        style={{ borderBottom: isLast ? 'none' : `1px solid ${dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'}` }}
-    >
-        <div className="flex items-center gap-3 min-w-0">
-            <span
-                className="text-[15px] font-extrabold tabular-nums flex-shrink-0"
-                style={{ color: theme.colors.accent }}
-            >
-                {row.discount}
-            </span>
-            <span className="text-[13px] font-medium truncate" style={{ color: theme.colors.textPrimary }}>
-                {row.label}
-            </span>
-        </div>
-        <div className="flex items-center gap-4 flex-shrink-0">
-            <span className="text-[13px] font-semibold tabular-nums min-w-[44px] text-right" style={{ color: theme.colors.textPrimary }}>
-                {row.dealerCommission}
-            </span>
-            <span className="text-[13px] tabular-nums min-w-[44px] text-right" style={{ color: theme.colors.textSecondary }}>
-                {row.repCommission}
-            </span>
-        </div>
-    </div>
-);
-
-/* ── collapsible margin block ─────────────────────────── */
-const MarginBlock = ({ margins, theme, dark }) => {
-    const [open, setOpen] = useState(false);
-    return (
-        <GlassCard theme={theme} className="rounded-[22px] overflow-hidden">
-            <button
-                type="button"
-                onClick={() => setOpen(!open)}
-                className="w-full flex items-center justify-between px-4 py-3 transition-colors"
-            >
-                <span className="text-[13px] font-semibold" style={{ color: theme.colors.textPrimary }}>
-                    Dealer Margins
-                </span>
-                {open
-                    ? <ChevronUp className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
-                    : <ChevronDown className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
-                }
-            </button>
-            {open && (
-                <div className="px-4 pb-3 space-y-1">
-                    {margins.map((m, i) => (
-                        <div key={i} className="flex items-center gap-2">
-                            <div className="w-1 h-1 rounded-full" style={{ backgroundColor: theme.colors.textSecondary, opacity: 0.4 }} />
-                            <span className="text-[12px] tabular-nums" style={{ color: theme.colors.textSecondary }}>
-                                {m}
-                            </span>
-                        </div>
-                    ))}
-                </div>
-            )}
-        </GlassCard>
-    );
-};
-
-/* ── action row ───────────────────────────────────────── */
-const ActionRow = ({ icon: Icon, label, onClick, theme, dark, isLast, accent }) => (
+/* ── small icon button ────────────────────────────────── */
+const IconBtn = ({ icon: Icon, title, onClick, theme, dark }) => (
     <button
         type="button"
         onClick={onClick}
-        className="w-full flex items-center gap-3 px-4 py-3 transition-colors active:opacity-70"
-        style={{ borderBottom: isLast ? 'none' : `1px solid ${dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'}` }}
+        title={title}
+        className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors active:opacity-60"
+        style={{ backgroundColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}
     >
-        <Icon className="w-[18px] h-[18px] flex-shrink-0" style={{ color: accent ? theme.colors.accent : theme.colors.textSecondary }} />
-        <span className="text-[13px] font-medium" style={{ color: accent ? theme.colors.accent : theme.colors.textPrimary }}>
-            {label}
-        </span>
+        <Icon className="w-[15px] h-[15px]" style={{ color: theme.colors.textSecondary }} />
     </button>
 );

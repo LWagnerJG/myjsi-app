@@ -14,24 +14,22 @@ export const CONTRACTS_DATA = {
                 discount: '54%',
                 dealerCommission: '15%',
                 repCommission: '3.90%',
+                margin: '60.90%',
             },
             {
                 label: 'Inside Delivery',
                 discount: '53%',
                 dealerCommission: '17%',
                 repCommission: '3.83%',
+                margin: '60.99%',
             },
             {
                 label: 'Delivered & Installed',
                 discount: '52%',
                 dealerCommission: '18%',
                 repCommission: '3.75%',
+                margin: '60.64%',
             },
-        ],
-        marginCalcs: [
-            '54/15 = 60.90%',
-            '53/17 = 60.99%',
-            '52/18 = 60.64%',
         ],
     },
 
