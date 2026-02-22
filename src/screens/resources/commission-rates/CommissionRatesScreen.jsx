@@ -70,22 +70,35 @@ export const CommissionRatesScreen = ({ theme }) => {
                     ))}
                 </GlassCard>
 
-                {/* ── Split (discrete footer) ── */}
-                <div className="flex items-center justify-center gap-4 pt-1 pb-2">
-                    <span className="text-[11px] font-semibold uppercase tracking-[0.06em]" style={{ color: theme.colors.textSecondary, opacity: 0.4 }}>
-                        Split
-                    </span>
-                    <div className="flex h-1 rounded-full overflow-hidden w-24">
+                {/* ── Commission Split ── */}
+                <GlassCard theme={theme} className="rounded-[22px] overflow-hidden">
+                    <div className="px-4 py-3.5 flex items-center gap-4">
+                        {/* Proportional bar */}
+                        <div className="flex h-7 rounded-lg overflow-hidden flex-1">
+                            {split.map((seg, i) => (
+                                <div
+                                    key={i}
+                                    className="h-full flex items-center justify-center"
+                                    style={{ width: `${seg.value}%`, backgroundColor: seg.color }}
+                                >
+                                    <span className="text-[11px] font-bold text-white drop-shadow-sm">
+                                        {seg.value}%
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="flex items-center justify-center gap-5 px-4 pb-3.5 -mt-1">
                         {split.map((seg, i) => (
-                            <div key={i} style={{ width: `${seg.value}%`, backgroundColor: seg.color, opacity: 0.6 }} />
+                            <div key={i} className="flex items-center gap-1.5">
+                                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: seg.color }} />
+                                <span className="text-[12px] font-medium" style={{ color: theme.colors.textSecondary }}>
+                                    {seg.label}
+                                </span>
+                            </div>
                         ))}
                     </div>
-                    {split.map((seg, i) => (
-                        <span key={i} className="text-[11px] tabular-nums" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>
-                            {seg.label} {seg.value}%
-                        </span>
-                    ))}
-                </div>
+                </GlassCard>
 
             </div>
         </div>
