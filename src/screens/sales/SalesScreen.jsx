@@ -137,6 +137,29 @@ export const SalesScreen = ({ theme, onNavigate }) => {
 
   /* ── render ── */
 
+  /* shared tile header */
+  const TileHeader = ({ icon: Icon, title, action, onAction, badge }) => (
+    <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center gap-2">
+        {Icon && <Icon className="w-4 h-4 opacity-40" />}
+        <h3 className="text-[15px] font-bold">{title}</h3>
+        {badge && (
+          <span className="text-[11px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
+            style={{ backgroundColor: subtle(isDark, 1.5), color: colors.textSecondary }}>{badge}</span>
+        )}
+      </div>
+      {action && (
+        <span className="text-xs font-bold uppercase tracking-widest opacity-30 group-hover:opacity-60 flex items-center gap-0.5 transition-opacity">
+          {action} <ChevronRight className="w-3.5 h-3.5" />
+        </span>
+      )}
+    </div>
+  );
+
+  /* shared content row */
+  const tileRowCls = "flex items-center justify-between py-2.5 px-3.5 rounded-xl";
+  const tileRowBg = subtle(isDark);
+
   return (
     <div className="min-h-full app-header-offset" style={{ backgroundColor: colors.background }}>
       <div className="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-5 pb-4 space-y-4 lg:space-y-5 max-w-5xl mx-auto w-full">
@@ -145,12 +168,12 @@ export const SalesScreen = ({ theme, onNavigate }) => {
         <div className="grid grid-cols-1 lg:grid-cols-[1.65fr_1fr] xl:grid-cols-[1.8fr_1fr] gap-4 lg:gap-5 items-stretch">
 
           {/* Main KPI card */}
-          <GlassCard theme={theme} className="p-5 sm:p-6" variant="elevated">
+          <GlassCard theme={theme} className="p-5" variant="elevated">
             <div className="space-y-4">
               {/* Header */}
               <div className="flex items-start justify-between gap-3">
                 <div className="space-y-1 min-w-0">
-                  <p className="text-[13px] font-bold uppercase tracking-widest opacity-40">
+                  <p className="text-xs font-bold uppercase tracking-widest opacity-40">
                     {chartDataType === 'bookings' ? 'Total Bookings' : 'Total Sales'}
                   </p>
                   <div className="text-4xl sm:text-[42px] font-black tracking-tight leading-none" style={{ opacity: ready ? 1 : 0, transition: 'opacity 0.4s ease' }}>
@@ -167,7 +190,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
               {/* Progress to goal */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-[13px] font-semibold opacity-50">
+                  <div className="flex items-center gap-2 text-xs font-semibold opacity-50">
                     <Target className="w-3.5 h-3.5" /> Progress to Goal
                   </div>
                   <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-widest"
@@ -196,7 +219,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                       onMouseEnter={() => setHoveredBar(`mini-${i}`)} onMouseLeave={() => setHoveredBar(null)}>
                       <div className="w-full relative">
                         {isHovered && (
-                          <div className="absolute -top-4 left-1/2 -translate-x-1/2 text-[10px] font-bold whitespace-nowrap" style={{ color: colors.textPrimary }}>
+                          <div className="absolute -top-4 left-1/2 -translate-x-1/2 text-[11px] font-bold whitespace-nowrap" style={{ color: colors.textPrimary }}>
                             ${(val / 1000).toFixed(0)}k
                           </div>
                         )}
@@ -207,7 +230,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                           transition: `height 0.4s ease-out ${0.1 + i * 0.025}s, opacity 0.15s`,
                         }} />
                       </div>
-                      <span className="text-[10px] font-semibold" style={{ opacity: isHovered ? 0.7 : 0.3, transition: 'opacity 0.15s' }}>{m.month}</span>
+                      <span className="text-[11px] font-semibold" style={{ opacity: isHovered ? 0.7 : 0.3, transition: 'opacity 0.15s' }}>{m.month}</span>
                     </div>
                   );
                 })}
@@ -219,20 +242,13 @@ export const SalesScreen = ({ theme, onNavigate }) => {
           <div className="grid grid-cols-1 grid-rows-2 gap-4">
             {/* Leaderboard */}
             <button onClick={() => onNavigate('customer-rank')} className="w-full h-full text-left group">
-              <GlassCard theme={theme} className="p-4 sm:p-5 h-full flex flex-col" variant="elevated">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2 text-[15px] font-bold">
-                    <TrendingUp className="w-4 h-4 opacity-50" /> Leaderboard
-                  </div>
-                  <span className="text-xs font-bold uppercase tracking-widest opacity-25 group-hover:opacity-60 flex items-center gap-0.5 transition-opacity">
-                    View All <ChevronRight className="w-3.5 h-3.5" />
-                  </span>
-                </div>
+              <GlassCard theme={theme} className="p-5 h-full flex flex-col" variant="elevated">
+                <TileHeader icon={TrendingUp} title="Leaderboard" action="View All" />
                 <div className="space-y-1.5 flex-1 flex flex-col justify-center">
                   {topLeaders.map((leader, idx) => (
-                    <div key={leader.id} className="flex items-center justify-between py-2.5 px-3.5 rounded-xl"
+                    <div key={leader.id} className={tileRowCls}
                       style={{
-                        backgroundColor: subtle(isDark),
+                        backgroundColor: tileRowBg,
                         opacity: ready ? 1 : 0,
                         transform: ready ? 'none' : 'translateX(-4px)',
                         transition: `opacity 0.3s ease ${0.05 + idx * 0.05}s, transform 0.3s ease ${0.05 + idx * 0.05}s`,
@@ -253,46 +269,39 @@ export const SalesScreen = ({ theme, onNavigate }) => {
 
             {/* Dealer Rewards */}
             <button onClick={() => onNavigate('incentive-rewards')} className="w-full h-full text-left group">
-              <GlassCard theme={theme} className="p-4 sm:p-5 h-full flex flex-col" variant="elevated">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2 text-[15px] font-bold">
-                    <Trophy className="w-4 h-4 opacity-50" /> Dealer Rewards
-                  </div>
-                  <span className="text-xs font-bold uppercase tracking-widest opacity-25 group-hover:opacity-60 flex items-center gap-0.5 transition-opacity">
-                    Details <ChevronRight className="w-3.5 h-3.5" />
-                  </span>
-                </div>
+              <GlassCard theme={theme} className="p-5 h-full flex flex-col" variant="elevated">
+                <TileHeader icon={Trophy} title="Dealer Rewards" action="Details" />
                 {rewardsSnapshot ? (
-                  <div className="flex-1 flex flex-col justify-center space-y-3">
-                    <div className="flex items-center justify-between py-2.5 px-3.5 rounded-xl" style={{ backgroundColor: subtle(isDark) }}>
+                  <div className="flex-1 flex flex-col justify-center space-y-1.5">
+                    <div className={tileRowCls} style={{ backgroundColor: tileRowBg }}>
                       <div className="flex items-center gap-2.5">
                         <Calendar className="w-4 h-4 opacity-35" />
                         <span className="text-sm font-semibold">{rewardsSnapshot.key}</span>
                       </div>
                       <span className="text-sm font-bold tabular-nums">{formatCurrency(rewardsSnapshot.totalAll)}</span>
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 gap-2 pt-1">
                       {rewardsSnapshot.topSales.length > 0 && (
-                        <div>
-                          <div className="text-xs font-bold uppercase tracking-wider opacity-30 mb-1.5">Top Sales</div>
-                          <div className="space-y-1">
+                        <div className="py-2 px-3.5 rounded-xl" style={{ backgroundColor: tileRowBg }}>
+                          <div className="text-[11px] font-bold uppercase tracking-wider opacity-30 mb-1.5">Top Sales</div>
+                          <div className="space-y-1.5">
                             {rewardsSnapshot.topSales.map((p) => (
                               <div key={p.name}>
                                 <div className="text-sm font-semibold truncate">{p.name}</div>
-                                <div className="text-xs font-bold tabular-nums opacity-50">{formatCurrency(p.amount)}</div>
+                                <div className="text-xs tabular-nums opacity-50">{formatCurrency(p.amount)}</div>
                               </div>
                             ))}
                           </div>
                         </div>
                       )}
                       {rewardsSnapshot.topDesigners.length > 0 && (
-                        <div>
-                          <div className="text-xs font-bold uppercase tracking-wider opacity-30 mb-1.5">Top Design</div>
-                          <div className="space-y-1">
+                        <div className="py-2 px-3.5 rounded-xl" style={{ backgroundColor: tileRowBg }}>
+                          <div className="text-[11px] font-bold uppercase tracking-wider opacity-30 mb-1.5">Top Design</div>
+                          <div className="space-y-1.5">
                             {rewardsSnapshot.topDesigners.map((p) => (
                               <div key={p.name}>
                                 <div className="text-sm font-semibold truncate">{p.name}</div>
-                                <div className="text-xs font-bold tabular-nums opacity-50">{formatCurrency(p.amount)}</div>
+                                <div className="text-xs tabular-nums opacity-50">{formatCurrency(p.amount)}</div>
                               </div>
                             ))}
                           </div>
@@ -301,7 +310,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                     </div>
                   </div>
                 ) : (
-                  <p className="text-sm opacity-40">No rewards data yet.</p>
+                  <p className="text-sm opacity-40 flex-1 flex items-center">No rewards data yet.</p>
                 )}
               </GlassCard>
             </button>
@@ -312,32 +321,30 @@ export const SalesScreen = ({ theme, onNavigate }) => {
         <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-4 lg:gap-5">
           {/* Recent Activity */}
           <button onClick={() => onNavigate('orders')} className="w-full text-left group">
-            <GlassCard theme={theme} className="p-4 sm:p-5 space-y-2" variant="elevated">
-              <div className="flex justify-between items-center">
-                <h3 className="text-[15px] font-bold">Recent Activity</h3>
-                <span className="text-xs font-bold uppercase tracking-widest opacity-25 group-hover:opacity-60 flex items-center gap-0.5 transition-opacity">
-                  All Orders <ChevronRight className="w-3.5 h-3.5" />
-                </span>
-              </div>
-              <div className="space-y-0.5">
+            <GlassCard theme={theme} className="p-5" variant="elevated">
+              <TileHeader title="Recent Activity" action="All Orders" />
+              <div className="space-y-1.5">
                 {recentOrders.map((order, i) => {
                   const sc = statusColor(order.status);
                   return (
-                    <div key={order.orderNumber}
-                      className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl"
-                      style={{ opacity: ready ? 1 : 0, transition: `opacity 0.25s ease ${0.08 + i * 0.03}s` }}>
-                      <div className="flex items-center gap-3">
+                    <div key={order.orderNumber} className={tileRowCls}
+                      style={{
+                        backgroundColor: tileRowBg,
+                        opacity: ready ? 1 : 0,
+                        transition: `opacity 0.25s ease ${0.08 + i * 0.03}s`,
+                      }}>
+                      <div className="flex items-center gap-3 min-w-0">
                         <div className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs shrink-0"
-                          style={{ backgroundColor: subtle(isDark, 1.8) }}>
+                          style={{ backgroundColor: subtle(isDark, 2) }}>
                           PO
                         </div>
                         <div className="text-left min-w-0">
-                          <p className="text-sm font-bold truncate max-w-[170px]">{formatCompanyName(order.company)}</p>
-                          <p className="text-xs font-medium opacity-35 tabular-nums">{new Date(order.date).toLocaleDateString()}</p>
+                          <p className="text-sm font-semibold truncate max-w-[170px]">{formatCompanyName(order.company)}</p>
+                          <p className="text-xs opacity-40 tabular-nums">{new Date(order.date).toLocaleDateString()}</p>
                         </div>
                       </div>
                       <div className="text-right shrink-0 ml-2 space-y-0.5">
-                        <p className="text-sm font-black tabular-nums">${order.net.toLocaleString()}</p>
+                        <p className="text-sm font-bold tabular-nums">${order.net.toLocaleString()}</p>
                         <span className="inline-block text-[11px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
                           style={{ backgroundColor: sc + '14', color: sc }}>
                           {order.status}
@@ -351,12 +358,8 @@ export const SalesScreen = ({ theme, onNavigate }) => {
           </button>
 
           {/* Invoiced by Vertical */}
-          <GlassCard theme={theme} className="p-4 sm:p-5 space-y-2" variant="elevated">
-            <div className="flex justify-between items-center">
-              <h3 className="text-[15px] font-bold">Invoiced by Vertical</h3>
-              <span className="text-[11px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
-                style={{ backgroundColor: subtle(isDark, 1.5), color: colors.textSecondary }}>YTD</span>
-            </div>
+          <GlassCard theme={theme} className="p-5" variant="elevated">
+            <TileHeader title="Invoiced by Vertical" badge="YTD" />
             <SalesByVerticalBreakdown theme={theme} data={SALES_VERTICALS_DATA.map(v => ({ name: v.label, value: v.value, color: v.color }))} />
           </GlassCard>
         </div>
@@ -364,36 +367,26 @@ export const SalesScreen = ({ theme, onNavigate }) => {
         {/* ── Commissions Preview ── */}
         {commissionsSnapshot && (
           <button onClick={() => onNavigate('commissions')} className="w-full text-left group">
-            <GlassCard theme={theme} className="p-4 sm:p-5" variant="elevated">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: subtle(isDark, 1.5) }}>
-                    <DollarSign className="w-3.5 h-3.5 opacity-50" />
+            <GlassCard theme={theme} className="p-5" variant="elevated">
+              <TileHeader icon={DollarSign} title="Commissions" action="View All" />
+              <div className="space-y-2.5">
+                <div className={tileRowCls} style={{ backgroundColor: tileRowBg }}>
+                  <div className="flex items-center gap-2.5">
+                    <Calendar className="w-4 h-4 opacity-35" />
+                    <span className="text-sm font-semibold">{commissionsSnapshot.year} · {commissionsSnapshot.quartersReported}Q reported</span>
                   </div>
-                  <div>
-                    <h3 className="text-[15px] font-bold leading-tight">Commissions</h3>
-                    <p className="text-xs font-medium opacity-30">{commissionsSnapshot.year} · {commissionsSnapshot.quartersReported} quarter{commissionsSnapshot.quartersReported !== 1 ? 's' : ''}</p>
+                  <span className="text-base font-black tabular-nums">{formatCurrency(commissionsSnapshot.ytdTotal)}</span>
+                </div>
+                {commissionsSnapshot.topEarners.length > 0 && (
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {commissionsSnapshot.topEarners.map(([name, amount]) => (
+                      <div key={name} className="py-2 px-3.5 rounded-xl min-w-0" style={{ backgroundColor: tileRowBg }}>
+                        <div className="text-xs opacity-35 truncate mb-0.5">{name}</div>
+                        <div className="text-sm font-bold tabular-nums">{formatCurrency(amount)}</div>
+                      </div>
+                    ))}
                   </div>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-base sm:text-lg font-black tabular-nums">{formatCurrency(commissionsSnapshot.ytdTotal)}</span>
-                  <ChevronRight className="w-3.5 h-3.5 opacity-25 group-hover:opacity-60 transition-opacity" />
-                </div>
-              </div>
-
-              {commissionsSnapshot.topEarners.length > 0 && (
-                <div className="flex gap-1.5 mt-2.5 overflow-hidden">
-                  {commissionsSnapshot.topEarners.map(([name, amount]) => (
-                    <div key={name} className="flex-1 min-w-0 py-1.5 px-2 rounded-lg" style={{ backgroundColor: subtle(isDark) }}>
-                      <div className="text-xs font-medium opacity-30 truncate mb-0.5">{name}</div>
-                      <div className="text-[13px] font-bold tabular-nums">{formatCurrency(amount)}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              <div className="text-xs font-bold uppercase tracking-widest opacity-20 group-hover:opacity-50 flex items-center gap-1 mt-2 transition-opacity">
-                View all commissions <ChevronRight className="w-3 h-3" />
+                )}
               </div>
             </GlassCard>
           </button>
