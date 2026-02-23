@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export const useGlobalStore = create((set, get) => ({
+export const useGlobalStore = create((set) => ({
   cart: {},
   updateCartItem: (id, delta) => set((state) => {
     const next = { ...state.cart };

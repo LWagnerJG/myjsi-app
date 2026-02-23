@@ -34,7 +34,7 @@ const ProductTabs = React.memo(({ products, activeProduct, onProductSelect, them
         ref={scrollRef}
         className="flex overflow-x-auto scrollbar-hide px-3 py-3 gap-1"
       >
-        {products.map((p, i) => {
+        {products.map((p) => {
           const active = activeProduct?.id === p.id;
           const baseScale = p?.thumbScale || (isCasegoods ? 1.25 : 1.0);
           return (
@@ -344,7 +344,7 @@ const PricingTable = React.memo(({
 
       {/* Product rows */}
       <div className="pb-2">
-        {sorted.map((p, i) => {
+        {sorted.map((p) => {
           const active = p.id === activeProduct?.id;
           const price = computePrice(p);
           return (

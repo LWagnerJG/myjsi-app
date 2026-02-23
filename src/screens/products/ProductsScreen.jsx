@@ -199,7 +199,7 @@ const EmptyState = React.memo(({ searchTerm, theme }) => {
 EmptyState.displayName = 'EmptyState';
 
 // ─── Series Row ─────────────────────────────────────────────────────────────
-const SeriesRow = React.memo(({ series, theme, dark, isLast, onClick }) => (
+const SeriesRow = React.memo(({ series, theme, isLast, onClick }) => (
     <button
         onClick={() => onClick(series)}
         className="w-full flex items-center justify-between px-4 py-3.5 text-left transition-colors hover:opacity-80 active:opacity-60"
@@ -371,7 +371,7 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
                         <EmptyState searchTerm={searchTerm} theme={theme} />
                     ) : (
                         <div className={viewMode === 'grid' ? 'space-y-4' : 'space-y-2'} style={{ paddingTop: 4 }}>
-                            {filteredCategories.map((category, i) => (
+                            {filteredCategories.map((category) => (
                                 <CategoryCard
                                     key={category.name}
                                     category={category}

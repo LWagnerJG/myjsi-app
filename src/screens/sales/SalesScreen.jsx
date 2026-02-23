@@ -138,7 +138,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
   /* ── render ── */
 
   /* shared tile header */
-  const TileHeader = ({ icon: Icon, title, action, onAction, badge }) => (
+  const TileHeader = ({ icon: Icon, title, action, badge }) => (
     <div className="flex items-center justify-between mb-3">
       <div className="flex items-center gap-2">
         {Icon && <Icon className="w-4 h-4 opacity-40" />}

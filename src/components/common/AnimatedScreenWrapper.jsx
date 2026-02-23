@@ -20,7 +20,7 @@ export const AnimatedScreenWrapper = ({
             setAnimating(true);
         }
         prevChildrenRef.current = children;
-    }, [screenKey, currentKey]);
+    }, [screenKey, currentKey, children]);
 
     useEffect(() => {
         if (!animating || !containerRef.current) return;

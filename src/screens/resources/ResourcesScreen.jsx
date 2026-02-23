@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import { RESOURCES_DATA } from './data.js';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
-import { DEFAULT_HOME_APPS } from '../../data.jsx';
+import { DEFAULT_HOME_APPS } from '../../constants/apps.js';
 
 const sublabelMap = {
     'Lead Times': 'Production estimates',

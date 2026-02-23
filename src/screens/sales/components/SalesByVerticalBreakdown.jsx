@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 
 // Simplified / clean vertical breakdown (no inline chips, consistent layout)
-export const SalesByVerticalBreakdown = ({ data = [], theme, showOverview = true, palette }) => {
+export const SalesByVerticalBreakdown = ({ data = [], theme, palette }) => {
   const prepared = useMemo(() => {
     if (!Array.isArray(data)) return [];
     const total = data.reduce((s, d) => s + (d.value || 0), 0) || 1;
@@ -24,14 +24,14 @@ export const SalesByVerticalBreakdown = ({ data = [], theme, showOverview = true
 
   return (
     <div className="w-full" aria-label={`Sales by vertical total ${fmtMoney(grandTotal)}`}>
-      <ol className="divide-y" style={{ borderColor: theme.colors.border }}>
+      <ol className="w-full">
         {prepared.map((row, idx) => {
           const rel = (row.value / maxValue) * 100; // relative to max for bar length
           const pctStr = row.pct >= 10 ? row.pct.toFixed(1) : row.pct.toFixed(2);
           // desaturate bar opacity by rank so dominant verticals pop, tail ones recede
           const barOpacity = Math.max(0.35, 0.75 - idx * 0.07);
           return (
-            <li key={row.name} className="grid grid-cols-[160px_1fr_auto_auto] gap-4 items-center py-3">
+            <li key={row.name} className="grid grid-cols-[160px_1fr_auto_auto] gap-4 items-center py-3" style={idx > 0 ? { borderTop: `1px solid ${theme.colors.border}` } : undefined}>
               {/* Label — no colored dot, clean text only */}
               <div className="flex items-center gap-2 min-w-0 pr-2">
                 <span className="text-xs font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{row.name}</span>

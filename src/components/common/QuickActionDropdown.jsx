@@ -14,7 +14,6 @@ const QUICK_ACTIONS = [
 
 export const QuickActionDropdown = ({ theme, onActionSelect, className = '' }) => {
     const [isOpen, setIsOpen] = useState(false);
-    const [focusedIndex, setFocusedIndex] = useState(-1);
     const buttonRef = useRef(null);
     const dropdownRef = useRef(null);
     const itemRefs = useRef([]);
@@ -50,12 +49,9 @@ export const QuickActionDropdown = ({ theme, onActionSelect, className = '' }) =
     // Focus first menu item when opened
     useEffect(() => {
         if (isOpen) {
-            setFocusedIndex(0);
             requestAnimationFrame(() => {
                 itemRefs.current[0]?.focus();
             });
-        } else {
-            setFocusedIndex(-1);
         }
     }, [isOpen]);
 
@@ -97,28 +93,21 @@ export const QuickActionDropdown = ({ theme, onActionSelect, className = '' }) =
 
     // Arrow key navigation within the menu
     const handleMenuKeyDown = useCallback((e) => {
+        const currentIndex = itemRefs.current.findIndex(ref => ref === document.activeElement);
         if (e.key === 'ArrowDown') {
             e.preventDefault();
-            setFocusedIndex(prev => {
-                const next = prev < QUICK_ACTIONS.length - 1 ? prev + 1 : 0;
-                itemRefs.current[next]?.focus();
-                return next;
-            });
+            const next = currentIndex < QUICK_ACTIONS.length - 1 ? currentIndex + 1 : 0;
+            itemRefs.current[next]?.focus();
         } else if (e.key === 'ArrowUp') {
             e.preventDefault();
-            setFocusedIndex(prev => {
-                const next = prev > 0 ? prev - 1 : QUICK_ACTIONS.length - 1;
-                itemRefs.current[next]?.focus();
-                return next;
-            });
+            const next = currentIndex > 0 ? currentIndex - 1 : QUICK_ACTIONS.length - 1;
+            itemRefs.current[next]?.focus();
         } else if (e.key === 'Home') {
             e.preventDefault();
-            setFocusedIndex(0);
             itemRefs.current[0]?.focus();
         } else if (e.key === 'End') {
             e.preventDefault();
             const last = QUICK_ACTIONS.length - 1;
-            setFocusedIndex(last);
             itemRefs.current[last]?.focus();
         } else if (e.key === 'Tab') {
             setIsOpen(false);

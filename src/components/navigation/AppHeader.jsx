@@ -1,6 +1,6 @@
 import React from 'react';
 import { ArrowLeft, User, Search } from 'lucide-react';
-import { logoLight } from '../../data.jsx';
+import { logoLight } from '../../data/theme/themeData.js';
 import { isDarkTheme } from '../../design-system/tokens.js';
 
 export const AppHeader = React.memo(({

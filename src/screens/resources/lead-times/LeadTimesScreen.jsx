@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import { Timer, ListOrdered, Zap, X, ExternalLink } from 'lucide-react';
 import { LEAD_TIMES_DATA, QUICKSHIP_SERIES } from './data.js';
+import { isDarkTheme } from '../../../design-system/tokens.js';
 import StandardSearchBar from '../../../components/common/StandardSearchBar.jsx';
 
 // Fallback colors if theme tokens missing
@@ -84,21 +85,25 @@ const QuickShipModal = ({ isOpen, onClose, seriesName, theme }) => {
     );
 };
 
-// QuickShip Badge Component - minimal professional style
-const QuickShipBadge = ({ onClick }) => (
+// QuickShip Badge Component - inline pill style
+const QuickShipBadge = ({ onClick, isDark }) => (
     <button
-        onClick={onClick}
-        className="flex items-center gap-0.5 px-1.5 py-0.5 rounded transition-all hover:opacity-80 active:scale-95"
-        style={{ backgroundColor: 'transparent' }}
+        onClick={(e) => { e.stopPropagation(); onClick(); }}
+        className="inline-flex items-center gap-1 px-2 py-1 rounded-full transition-all hover:opacity-80 active:scale-95"
+        style={{
+            backgroundColor: isDark ? 'rgba(212,175,55,0.12)' : 'rgba(212,175,55,0.08)',
+            border: `1px solid ${isDark ? 'rgba(212,175,55,0.2)' : 'rgba(154,138,120,0.15)'}`,
+        }}
         title="QuickShip Available"
     >
-        <Zap className="w-3 h-3" style={{ color: '#9A8A78' }} />
-        <span className="text-[10px] font-semibold tracking-wide" style={{ color: '#9A8A78' }}>QS</span>
+        <Zap className="w-3 h-3" style={{ color: isDark ? '#D4AF37' : '#9A8A78' }} fill={isDark ? '#D4AF37' : '#9A8A78'} />
+        <span className="text-[10px] font-bold tracking-wide" style={{ color: isDark ? '#D4AF37' : '#9A8A78' }}>QuickShip</span>
     </button>
 );
 
 export const LeadTimesScreen = ({ theme = {} }) => {
     const safeTheme = ensureTheme(theme);
+    const isDark = isDarkTheme(theme);
 
     const [searchTerm, setSearchTerm] = useState('');
     const [sortFastest, setSortFastest] = useState(false);
@@ -151,10 +156,27 @@ export const LeadTimesScreen = ({ theme = {} }) => {
     );
 
     const LeadTimeInfo = ({ typeData }) => (
-        <div className="relative w-20 h-20">
-            <img src={typeData.image} alt="" className="w-full h-full object-contain" />
-            <div className="absolute bottom-0.5 right-0.5 h-7 w-7 flex items-center justify-center rounded-full shadow-md" style={{ backgroundColor: safeTheme.colors.subtle }}>
-                <span className="text-xs font-bold" style={{ color: safeTheme.colors.textSecondary }}>{typeData.weeks}</span>
+        <div className="relative">
+            <div
+                className="w-20 h-20 rounded-xl overflow-hidden flex items-center justify-center"
+                style={isDark ? { backgroundColor: 'rgba(255,255,255,0.08)' } : undefined}
+            >
+                <img
+                    src={typeData.image}
+                    alt=""
+                    className="w-full h-full object-contain"
+                    style={isDark ? { filter: 'brightness(0.9) contrast(1.05)' } : undefined}
+                />
+            </div>
+            <div
+                className="absolute -bottom-1 -right-1 h-7 w-7 flex items-center justify-center rounded-full"
+                style={{
+                    backgroundColor: isDark ? 'rgba(42,42,42,0.9)' : safeTheme.colors.subtle,
+                    border: isDark ? '2px solid rgba(255,255,255,0.1)' : '2px solid rgba(255,255,255,0.8)',
+                    boxShadow: isDark ? '0 2px 6px rgba(0,0,0,0.4)' : '0 1px 3px rgba(0,0,0,0.1)',
+                }}
+            >
+                <span className="text-xs font-bold" style={{ color: isDark ? '#E8DDD0' : safeTheme.colors.textSecondary }}>{typeData.weeks}</span>
             </div>
         </div>
     );
@@ -180,7 +202,9 @@ export const LeadTimesScreen = ({ theme = {} }) => {
                     style={{
                         backgroundColor: safeTheme.colors.surface || '#ffffff',
                         color: sortFastest ? safeTheme.colors.accent : safeTheme.colors.textPrimary,
-                        borderColor: sortFastest ? safeTheme.colors.accent : (safeTheme.colors.border || 'rgba(0,0,0,0.10)')
+                        borderColor: isDark
+                            ? (sortFastest ? safeTheme.colors.accent : 'rgba(255,255,255,0.1)')
+                            : (sortFastest ? safeTheme.colors.accent : (safeTheme.colors.border || 'rgba(0,0,0,0.10)'))
                     }}
                 >
                     {sortFastest ? <ListOrdered className="w-5 h-5" /> : <Timer className="w-5 h-5" />}
@@ -189,47 +213,79 @@ export const LeadTimesScreen = ({ theme = {} }) => {
         </div>
 
             {/* Vertical list of cards */}
-            <div className="flex-1 overflow-y-auto px-4 pb-4 pt-1 space-y-2.5 scrollbar-hide">
+            <div className="flex-1 overflow-y-auto px-4 pb-4 pt-1 space-y-3 scrollbar-hide">
                 {rows.map(({ series, types, isQuickShip }, idx) => (
                     <GlassCard 
                         key={series} 
                         theme={safeTheme} 
-                        className={`relative px-5 py-3 flex items-center justify-between rounded-3xl ${idx === 0 ? 'mt-1' : ''}`}
+                        className={`relative px-5 pr-6 py-4 flex items-center justify-between rounded-3xl ${idx === 0 ? 'mt-1' : ''}`}
+                        style={isDark ? { border: '1px solid rgba(255,255,255,0.08)' } : undefined}
                     >
-                        {/* QuickShip badge in top-right corner - z-10 ensures it's above images */}
-                        {isQuickShip && (
-                            <div className="absolute top-2 right-2 z-10">
-                                <QuickShipBadge onClick={() => openQuickShipModal(series)} />
-                            </div>
-                        )}
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-col gap-1.5 shrink-0">
                             <h3 className="text-xl font-bold tracking-tight" style={{ color: safeTheme.colors.textPrimary }}>
                                 {series}
                             </h3>
+                            {isQuickShip && (
+                                <QuickShipBadge onClick={() => openQuickShipModal(series)} isDark={isDark} />
+                            )}
                         </div>
-                        <div className="flex items-center justify-end space-x-3 mr-4">
+                        <div className="flex items-center justify-end space-x-3">
                             {types['Upholstery'] && <LeadTimeInfo typeData={types['Upholstery']} />}
                             {types['Seating'] && <LeadTimeInfo typeData={types['Seating']} />}
                             {types['Wood Seating'] && <LeadTimeInfo typeData={types['Wood Seating']} />}
                             {types['Casegoods'] && <LeadTimeInfo typeData={types['Casegoods']} />}
                             {types['Tables'] && <LeadTimeInfo typeData={types['Tables']} />}
                             {types['Laminate'] && (
-                                <div className="relative w-20 h-20 text-center">
+                                <div className="relative text-center">
                                     <LVLabel label="Laminate" />
-                                    <img src={types['Laminate'].image} alt="Laminate" className="w-full h-full object-contain" />
-                                    <div className="absolute bottom-0.5 right-0.5 h-7 w-7 flex items-center justify-center rounded-full shadow-md" style={{ backgroundColor: safeTheme.colors.subtle }}>
-                                        <span className="text-xs font-bold" style={{ color: safeTheme.colors.textSecondary }}>
+                                    <div
+                                        className="w-20 h-20 rounded-xl overflow-hidden flex items-center justify-center"
+                                        style={isDark ? { backgroundColor: 'rgba(255,255,255,0.08)' } : undefined}
+                                    >
+                                        <img
+                                            src={types['Laminate'].image}
+                                            alt="Laminate"
+                                            className="w-full h-full object-contain"
+                                            style={isDark ? { filter: 'brightness(0.9) contrast(1.05)' } : undefined}
+                                        />
+                                    </div>
+                                    <div
+                                        className="absolute -bottom-1 -right-1 h-7 w-7 flex items-center justify-center rounded-full"
+                                        style={{
+                                            backgroundColor: isDark ? 'rgba(42,42,42,0.9)' : safeTheme.colors.subtle,
+                                            border: isDark ? '2px solid rgba(255,255,255,0.1)' : '2px solid rgba(255,255,255,0.8)',
+                                            boxShadow: isDark ? '0 2px 6px rgba(0,0,0,0.4)' : '0 1px 3px rgba(0,0,0,0.1)',
+                                        }}
+                                    >
+                                        <span className="text-xs font-bold" style={{ color: isDark ? '#E8DDD0' : safeTheme.colors.textSecondary }}>
                                             {types['Laminate'].weeks}
                                         </span>
                                     </div>
                                 </div>
                             )}
                             {types['Veneer'] && (
-                                <div className="relative w-20 h-20 text-center">
+                                <div className="relative text-center">
                                     <LVLabel label="Veneer" />
-                                    <img src={types['Veneer'].image} alt="Veneer" className="w-full h-full object-contain" />
-                                    <div className="absolute bottom-0.5 right-0.5 h-7 w-7 flex items-center justify-center rounded-full shadow-md" style={{ backgroundColor: safeTheme.colors.subtle }}>
-                                        <span className="text-xs font-bold" style={{ color: safeTheme.colors.textSecondary }}>
+                                    <div
+                                        className="w-20 h-20 rounded-xl overflow-hidden flex items-center justify-center"
+                                        style={isDark ? { backgroundColor: 'rgba(255,255,255,0.08)' } : undefined}
+                                    >
+                                        <img
+                                            src={types['Veneer'].image}
+                                            alt="Veneer"
+                                            className="w-full h-full object-contain"
+                                            style={isDark ? { filter: 'brightness(0.9) contrast(1.05)' } : undefined}
+                                        />
+                                    </div>
+                                    <div
+                                        className="absolute -bottom-1 -right-1 h-7 w-7 flex items-center justify-center rounded-full"
+                                        style={{
+                                            backgroundColor: isDark ? 'rgba(42,42,42,0.9)' : safeTheme.colors.subtle,
+                                            border: isDark ? '2px solid rgba(255,255,255,0.1)' : '2px solid rgba(255,255,255,0.8)',
+                                            boxShadow: isDark ? '0 2px 6px rgba(0,0,0,0.4)' : '0 1px 3px rgba(0,0,0,0.1)',
+                                        }}
+                                    >
+                                        <span className="text-xs font-bold" style={{ color: isDark ? '#E8DDD0' : safeTheme.colors.textSecondary }}>
                                             {types['Veneer'].weeks}
                                         </span>
                                     </div>

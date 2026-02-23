@@ -1,13 +1,16 @@
 ﻿import React, { useState, useMemo, useCallback, useEffect, useRef, Suspense } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { lightTheme, darkTheme } from './data/index.js';
-import { DEFAULT_HOME_APPS, allApps } from './data.jsx';
+import { DEFAULT_HOME_APPS, allApps } from './constants/apps.js';
 import { INITIAL_OPPORTUNITIES, MY_PROJECTS_DATA, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS, EMPTY_LEAD, STAGES } from './screens/projects/data.js';
 import { INITIAL_POSTS, INITIAL_POLLS, INITIAL_WINS, SUBREDDIT_POSTS } from './screens/community/data.js';
 import { INITIAL_MEMBERS } from './screens/members/data.js';
 import { DEALER_DIRECTORY_DATA } from './screens/resources/dealer-directory/data.js';
 
-import { AppHeader, ProfileMenu, SCREEN_MAP, VoiceModal, SuccessToast } from './ui.jsx';
+import { AppHeader } from './components/navigation/AppHeader.jsx';
+import { ProfileMenu } from './components/navigation/ProfileMenu.jsx';
+import { VoiceModal, SuccessToast } from './components/feedback/ToastsAndModals.jsx';
+import { SCREEN_MAP } from './config/screenMap.js';
 import { OrderDetailScreen } from './screens/orders/index.js';
 import { Modal } from './components/common/Modal.jsx';
 import { ResourceDetailScreen } from './screens/utility/UtilityScreens.jsx';
@@ -96,6 +99,11 @@ const ScreenRouter = React.memo(({ screenKey, projectsScreenRef, SuspenseFallbac
     const parts = screenKey.split('/');
     const base = parts[0];
 
+    if (base === 'projects' && parts[1]) {
+        // Deep link: /projects/{id} — find the opportunity and show detail
+        const oppId = parts[1];
+        return <ProjectsScreen ref={projectsScreenRef} {...rest} deepLinkOppId={oppId} />;
+    }
     if (base === 'projects') return <ProjectsScreen ref={projectsScreenRef} {...rest} />;
 
     // Feature screens (lazy) inside Suspense to isolate fallback flicker per screen
@@ -337,7 +345,7 @@ function App() {
             setPosts((prev) => [post, ...prev]);
         }
         setShowCreateContentModal(false); flashSuccess('Posted!');
-    }, []);
+    }, [flashSuccess]);
 
     const handleShowAlert = useCallback((message) => setAlertInfo({ show: true, message }), []);
     const handleNewLeadChange = useCallback((updates) => setNewLeadData((prev) => ({ ...prev, ...updates })), [setNewLeadData]);

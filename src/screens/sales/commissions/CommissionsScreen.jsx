@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { GlassCard } from '../../../components/common/GlassCard';
-import { ChevronDown, TrendingUp, ChevronDown as ChevronDownSm } from 'lucide-react';
+import { ChevronDown, TrendingUp } from 'lucide-react';
 import { COMMISSIONS_DATA, COMMISSION_YEARS } from './data.js';
 import { isDarkTheme } from '../../../design-system/tokens.js';
 

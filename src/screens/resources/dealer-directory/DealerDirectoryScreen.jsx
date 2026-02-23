@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { PageTitle } from '../../../components/common/PageTitle.jsx';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import { ChevronRight, MapPin, Building2, Search, UserPlus } from 'lucide-react';
@@ -76,7 +76,7 @@ const CarouselCard = React.memo(({ dealer, colors, isDark, onTap, isCenter }) =>
 /* ────────────────────────────────────────────────
  *  Scroll-snap carousel hook
  * ──────────────────────────────────────────────── */
-const useSnapCarousel = (itemCount) => {
+const useSnapCarousel = () => {
     const trackRef = useRef(null);
     const [centerIdx, setCenterIdx] = useState(0);
 
@@ -108,7 +108,7 @@ const useSnapCarousel = (itemCount) => {
 /* ────────────────────────────────────────────────
  *  Main screen
  * ──────────────────────────────────────────────── */
-export const DealerDirectoryScreen = ({ theme, setSuccessMessage, dealerDirectory, onNavigate }) => {
+export const DealerDirectoryScreen = ({ theme, dealerDirectory, onNavigate }) => {
     const dealers = useMemo(() => dealerDirectory || DEALER_DIRECTORY_DATA || [], [dealerDirectory]);
     const [searchTerm, setSearchTerm] = useState('');
     const isDark = isDarkTheme(theme);

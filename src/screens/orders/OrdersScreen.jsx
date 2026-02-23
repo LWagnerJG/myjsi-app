@@ -93,7 +93,7 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
                     <h3 className="font-bold" style={{ color: theme.colors.textPrimary }}>
                         {selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </h3>
-                    {selectedOrders.map((o, idx) => {
+                    {selectedOrders.map((o) => {
                         const sc = STATUS_COLORS[o.status] || '#8B8680';
                         return (
                             <div key={o.orderNumber} className="rounded-2xl overflow-hidden cursor-pointer active:scale-[0.99] transition"
@@ -269,7 +269,7 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                         <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
                           {groupKeys.length ? (
                             <div className="space-y-4">
-                                {groupKeys.map((k, i) => (
+                                {groupKeys.map((k) => (
                                   <div key={k}>
                                     <DateGroupCard theme={theme} dateKey={k} group={grouped[k]} onNavigate={onNavigate} />
                                   </div>

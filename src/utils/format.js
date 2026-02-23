@@ -25,6 +25,27 @@ export const formatCompanyName = (name = '') =>
   name.toLowerCase().replace(/\b(\w)/g, (s) => s.toUpperCase());
 
 /**
+ * Smart title-case: respects acronyms (LLC, INC, MSD, LECC, etc.),
+ * keeps already-mixed-case words, lowercases small words mid-sentence
+ * @param {string} str - String to format
+ * @returns {string} Smart title-cased string
+ */
+export const smartTitleCase = (str) => {
+    if (!str) return '';
+    // If it's already mixed case (has both upper and lower), return as-is
+    if (str !== str.toUpperCase() && str !== str.toLowerCase()) return str;
+    const ALWAYS_UPPER = new Set(['LLC', 'INC', 'LP', 'LLP', 'PC', 'PA', 'NA', 'DBA', 'MSD', 'LECC', 'II', 'III', 'IV']);
+    const SMALL_WORDS = new Set(['of', 'the', 'and', 'in', 'at', 'to', 'for', 'a', 'an', 'on', 'by', 'or']);
+    return str.split(' ').map((word, i) => {
+        const clean = word.replace(/[^A-Za-z]/g, '');
+        if (ALWAYS_UPPER.has(clean.toUpperCase())) return word.toUpperCase();
+        if (i > 0 && SMALL_WORDS.has(clean.toLowerCase()) && word.length <= 3) return word.toLowerCase();
+        // Title-case: first letter up, rest lower
+        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    }).join(' ');
+};
+
+/**
  * Format a date string to locale date
  * @param {string|Date} dateStr - Date to format
  * @param {object} options - Intl.DateTimeFormat options
