@@ -1,7 +1,7 @@
 import React from 'react';
 import { User, Calendar, ArrowRightLeft } from 'lucide-react';
 import { Modal } from '../../../../components/common/Modal.jsx';
-import { AVAILABILITY_STATUS, STATUS_LABELS, STATUS_COLORS, CURRENT_USER, SALES_REPS } from './data.js';
+import { AVAILABILITY_STATUS, STATUS_LABELS, STATUS_COLORS, CURRENT_USER, SALES_REPS } from '../data.js';
 
 const getRepById = (repId) => SALES_REPS.find(r => r.id === repId);
 const formatDate = (dateStr) => {

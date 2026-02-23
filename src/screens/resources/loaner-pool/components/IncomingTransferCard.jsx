@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowRightLeft, Calendar, MessageSquare, Check, X } from 'lucide-react';
-import { CURRENT_USER, SALES_REPS, TRANSFER_STATUS, TRANSFER_STATUS_LABELS, TRANSFER_STATUS_COLORS } from './data.js';
+import { CURRENT_USER, SALES_REPS, TRANSFER_STATUS, TRANSFER_STATUS_LABELS, TRANSFER_STATUS_COLORS } from '../data.js';
 
 const getRepById = (repId) => SALES_REPS.find(r => r.id === repId);
 const formatDate = (dateStr) => {

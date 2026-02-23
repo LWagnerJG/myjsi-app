@@ -1,6 +1,6 @@
 import React from 'react';
 import { ArrowRightLeft } from 'lucide-react';
-import { AVAILABILITY_STATUS, STATUS_LABELS, CURRENT_USER, SALES_REPS } from './data.js';
+import { AVAILABILITY_STATUS, STATUS_LABELS, CURRENT_USER, SALES_REPS } from '../data.js';
 
 const getRepById = (repId) => SALES_REPS.find(r => r.id === repId);
 const formatDate = (dateStr) => {

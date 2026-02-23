@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { Trash2, ChevronUp, ChevronDown, Package, Send } from 'lucide-react';
 import { FormInput } from '../../../../components/common/FormComponents.jsx';
-import { LOAN_DURATIONS } from './data.js';
+import { LOAN_DURATIONS } from '../data.js';
 
 export const RequestItem = React.memo(({ item, onRemoveFromRequest, theme, isFirst = false }) => (
     <>

@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Modal } from '../../../../components/common/Modal.jsx';
 import { FormInput } from '../../../../components/common/FormComponents.jsx';
 import { Send, User, Calendar, MessageSquare } from 'lucide-react';
-import { CURRENT_USER, SALES_REPS } from './data.js';
+import { CURRENT_USER, SALES_REPS } from '../data.js';
 
 const getRepById = (repId) => SALES_REPS.find(r => r.id === repId);
 

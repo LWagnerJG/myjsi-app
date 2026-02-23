@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { ArrowRightLeft } from 'lucide-react';
-import { CURRENT_USER, TRANSFER_STATUS } from './data.js';
+import { CURRENT_USER, TRANSFER_STATUS } from '../data.js';
 import { IncomingTransferCard } from './IncomingTransferCard.jsx';
 
 export const TransfersTab = ({ transferRequests, products, theme, onApprove, onDecline }) => {
