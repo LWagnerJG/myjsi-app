@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { UserPlus, X, Check, Send } from 'lucide-react';
+import { hapticSuccess } from '../../../../utils/haptics.js';
 
 export const InviteModal = ({ open, onClose, onInvite, theme, roles }) => {
     const [email, setEmail] = useState('');
@@ -24,6 +25,7 @@ export const InviteModal = ({ open, onClose, onInvite, theme, roles }) => {
 
     const handleSend = () => {
         if (!valid) return;
+        hapticSuccess();
         onInvite({ email: email.trim(), firstName: firstName.trim(), lastName: lastName.trim(), phone: phone.trim(), role });
         setSent(true);
         setTimeout(() => { setSent(false); onClose(); }, 1400);

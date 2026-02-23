@@ -4,6 +4,7 @@ import { Modal } from '../../components/common/Modal.jsx';
 import { Camera, Image, AlertCircle, CheckCircle, Clock, XCircle } from 'lucide-react';
 import { REPLACEMENT_REQUESTS_DATA } from './data.js';
 import jsQR from 'jsqr';
+import { hapticSuccess } from '../../utils/haptics.js';
 
 function RequestCard({ r, theme, getStatusColor, getStatusText, getIcon, onClick }) {
     const dateText = new Date(r.date).toLocaleDateString();
@@ -168,7 +169,7 @@ export const ReplacementsScreen = ({ theme }) => {
     useEffect(() => { const onPop = () => { if (inFormRef.current) { setView('list'); setIsScanning(false); inFormRef.current = false; } }; window.addEventListener('popstate', onPop); return () => window.removeEventListener('popstate', onPop); }, []);
     const goToForm = useCallback(() => { if (!inFormRef.current) { window.history.pushState({ jsiReplacements: 'form' }, ''); inFormRef.current = true; } setView('form'); }, []);
     const onChange = useCallback((k,v)=> setFormData(p => (p[k]===v? p : { ...p, [k]:v })), []);
-    const submit = useCallback(()=> { setReplacementRequests(p => [{ name: `${formData.salesOrder} - ${formData.lineItem}`, dealer: formData.dealer?.trim() || 'Unknown Dealer', date: new Date().toISOString().split('T')[0], status: 'Pending', photos: formData.photos.slice() }, ...p]); setFormData({ salesOrder: '', lineItem: '', dealer: '', notes: '', photos: [] }); setView('list'); inFormRef.current=false; }, [formData]);
+    const submit = useCallback(()=> { hapticSuccess(); setReplacementRequests(p => [{ name: `${formData.salesOrder} - ${formData.lineItem}`, dealer: formData.dealer?.trim() || 'Unknown Dealer', date: new Date().toISOString().split('T')[0], status: 'Pending', photos: formData.photos.slice() }, ...p]); setFormData({ salesOrder: '', lineItem: '', dealer: '', notes: '', photos: [] }); setView('list'); inFormRef.current=false; }, [formData]);
 
     const getStatusColor = s => ({ Pending: theme.colors.accent + '22', Approved: 'rgba(74,124,89,0.13)', Rejected: 'rgba(184,92,92,0.13)' }[s] || theme.colors.subtle);
     const getStatusText = s => ({ Pending: theme.colors.accent, Approved: '#4A7C59', Rejected: '#B85C5C' }[s] || theme.colors.textSecondary);

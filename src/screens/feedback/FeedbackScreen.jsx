@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Send, Paperclip, X, MessageSquare, Bug, Lightbulb, Sparkles, CheckCircle2 } from 'lucide-react';
 import { isDarkTheme } from '../../design-system/tokens.js';
+import { hapticSuccess } from '../../utils/haptics.js';
 
 export const FeedbackScreen = ({ theme }) => {
     const [feedbackType, setFeedbackType] = useState('general');
@@ -35,6 +36,7 @@ export const FeedbackScreen = ({ theme }) => {
     function handleSubmit(e) {
         e.preventDefault();
         if (!message.trim()) return;
+        hapticSuccess();
         if (import.meta.env.DEV) console.log('Feedback submitted:', { type: feedbackType, message: message.trim(), attachments: files.map(f => ({ name: f.name, size: f.size })), timestamp: new Date().toISOString() });
         setSubmitted(true);
     }

@@ -2,6 +2,7 @@ import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { Trash2, ChevronUp, ChevronDown, Package, Send } from 'lucide-react';
 import { FormInput } from '../../../../components/common/FormComponents.jsx';
 import { LOAN_DURATIONS } from '../data.js';
+import { hapticSuccess } from '../../../../utils/haptics.js';
 
 export const RequestItem = React.memo(({ item, onRemoveFromRequest, theme, isFirst = false }) => (
     <>
@@ -99,6 +100,7 @@ export const RequestDrawer = ({
             !requestForm.duration.trim()
         ) return;
 
+        hapticSuccess();
         ensureProjectExists(requestForm.projectName);
         onSubmitRequest(requestForm);
 

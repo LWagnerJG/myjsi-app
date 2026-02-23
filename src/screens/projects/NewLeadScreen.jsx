@@ -8,6 +8,7 @@ import { SpotlightMultiSelect } from '../../components/common/SpotlightMultiSele
 import { InfoTooltip } from '../../components/common/InfoTooltip.jsx';
 import { PillButton, PrimaryButton } from '../../components/common/JSIButtons.jsx';
 import { DESIGN_TOKENS, isDarkTheme } from '../../design-system/tokens.js';
+import { hapticSuccess } from '../../utils/haptics.js';
 
 import {
   STAGES, VERTICALS, COMPETITORS,
@@ -85,6 +86,7 @@ export const NewLeadScreen = ({
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!newLeadData.projectStatus) return alert('Please select a Project Stage before submitting.');
+    hapticSuccess();
     onSuccess(newLeadData);
   };
 

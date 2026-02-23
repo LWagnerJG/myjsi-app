@@ -4,6 +4,7 @@ import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { FormInput } from '../../components/common/FormComponents.jsx';
 import { X, ImageIcon } from 'lucide-react';
 import { INSTALLATION_CONSTANTS, FORM_VALIDATION } from './installation-data.js';
+import { hapticSuccess } from '../../utils/haptics.js';
 
 export const AddNewInstallScreen = ({ theme, onAddInstall }) => {
     const [projectName, setProjectName] = useState('');
@@ -110,6 +111,7 @@ export const AddNewInstallScreen = ({ theme, onAddInstall }) => {
             createdAt: new Date().toISOString()
         };
         
+        hapticSuccess();
         onAddInstall(newInstall);
     }, [projectName, location, photos, validateForm, onAddInstall]);
 

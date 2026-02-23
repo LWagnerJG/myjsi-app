@@ -1,6 +1,7 @@
 import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { Modal } from '../../components/common/Modal.jsx';
 import { X, ImageIcon, ListChecks } from 'lucide-react';
+import { hapticSuccess } from '../../utils/haptics.js';
 
 export const CreateContentModal = ({ show, onClose, theme, onCreatePost }) => {
     const [mode, setMode] = useState('post'); // 'post' | 'poll'
@@ -61,6 +62,7 @@ export const CreateContentModal = ({ show, onClose, theme, onCreatePost }) => {
     const submit = (e) => {
         e.preventDefault();
         if (!canSubmit) return;
+        hapticSuccess();
         const now = Date.now();
         if (mode === 'poll') {
             const optionTexts = [
