@@ -30,18 +30,17 @@ export const HomeHeader = ({
         <div className="relative group">
             {/* Dashboard label + search bar on one row */}
             <div className="flex items-center gap-4">
-                <div className="shrink-0 hidden sm:block min-w-[120px] flex-1">
+                <div className="shrink-0 hidden sm:block min-w-[120px]">
                     <h2 className="text-[28px] font-semibold tracking-tight leading-none" style={{ color: colors.textPrimary }}>Dashboard</h2>
                     <div className="text-[12px] font-medium whitespace-nowrap mt-1.5" style={{ color: colors.textSecondary, opacity: 0.5 }}>{todayLabel}</div>
                 </div>
 
                 <GlassCard
                 theme={theme}
-                className="relative z-10 px-5 flex items-center flex-1 min-w-0"
+                className="relative z-10 px-5 flex items-center min-w-0 ml-auto w-full max-w-[760px]"
                 style={{
                     borderRadius: 9999,
                     height: 56,
-                    maxWidth: 680,
                     paddingTop: 0,
                     paddingBottom: 0,
                     backgroundColor: colors.tileSurface,

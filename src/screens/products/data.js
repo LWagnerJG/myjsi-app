@@ -148,17 +148,28 @@ export const FABRICS_DATA = [
     { supplier: 'Arc-Com', pattern: 'Astor', grade: 'A', tackable: 'yes', textile: 'Fabric', series: 'Alden' },
     { supplier: 'Arc-Com', pattern: 'Caldera', grade: 'B', tackable: 'no', textile: 'Coated', series: 'Alden' },
     { supplier: 'Arc-Com', pattern: 'Demo', grade: 'A', tackable: 'yes', textile: 'Fabric', series: 'Alden' },
+    { supplier: 'Arc-Com', pattern: 'Traverse', grade: 'C', tackable: 'yes', textile: 'Fabric', series: 'Arwyn' },
+    { supplier: 'Arc-Com', pattern: 'Kinetic', grade: 'A', tackable: 'no', textile: 'Coated', series: 'Arwyn' },
+    { supplier: 'Arc-Com', pattern: 'Highlight', grade: 'B', tackable: 'yes', textile: 'Fabric', series: 'Arwyn' },
+    { supplier: 'Arc-Com', pattern: 'Prospect', grade: 'D', tackable: 'yes', textile: 'Fabric', series: 'Vision' },
+    { supplier: 'Arc-Com', pattern: 'Metro', grade: 'C', tackable: 'no', textile: 'Fabric', series: 'Wink' },
+    { supplier: 'Arc-Com', pattern: 'Rally', grade: 'A', tackable: 'yes', textile: 'Fabric', series: 'Convert' },
+    { supplier: 'Arc-Com', pattern: 'Strand', grade: 'B', tackable: 'no', textile: 'Coated', series: 'Symmetry' },
     
     // Maharam Fabrics
     { supplier: 'Maharam', pattern: 'Origin', grade: 'C', tackable: 'yes', textile: 'Fabric', series: 'Vision' },
     { supplier: 'Maharam', pattern: 'Climb', grade: 'D', tackable: 'no', textile: 'Fabric', series: 'Vision' },
     { supplier: 'Maharam', pattern: 'Rigid', grade: 'B', tackable: 'yes', textile: 'Fabric', series: 'Wink' },
     { supplier: 'Maharam', pattern: 'Mode', grade: 'A', tackable: 'yes', textile: 'Fabric', series: 'Symmetry' },
+    { supplier: 'Maharam', pattern: 'Relay', grade: 'B', tackable: 'yes', textile: 'Fabric', series: 'Arwyn' },
+    { supplier: 'Maharam', pattern: 'Canvas', grade: 'C', tackable: 'no', textile: 'Fabric', series: 'Alden' },
     
     // Momentum Fabrics
     { supplier: 'Momentum', pattern: 'Luxe Weave', grade: 'C', tackable: 'yes', textile: 'Fabric', series: 'Convert' },
     { supplier: 'Momentum', pattern: 'Origin', grade: 'B', tackable: 'no', textile: 'Fabric', series: 'Vision' },
     { supplier: 'Momentum', pattern: 'Prospect', grade: 'D', tackable: 'yes', textile: 'Coated', series: 'Momentum' },
+    { supplier: 'Momentum', pattern: 'Riff', grade: 'A', tackable: 'yes', textile: 'Fabric', series: 'Arwyn' },
+    { supplier: 'Momentum', pattern: 'Silica', grade: 'E', tackable: 'no', textile: 'Fabric', series: 'Alden' },
     
     // Architex Fabrics
     { supplier: 'Architex', pattern: 'Origin', grade: 'A', tackable: 'yes', textile: 'Fabric', series: 'Allied' },
