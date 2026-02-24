@@ -2,6 +2,7 @@ import React from 'react';
 import { ChevronRight, Package, DollarSign, Calendar, Zap, Gift, Megaphone } from 'lucide-react';
 import { ANNOUNCEMENTS } from '../../community/data.js';
 import { MARKETPLACE_PRODUCTS, INITIAL_BALANCE, formatElliottBucks } from '../../marketplace/data.js';
+import { PRODUCTS_CATEGORIES_DATA, PRODUCT_DATA } from '../../products/data.js';
 import { getCommunityAuthorSafe, getCommunityTextSafe } from '../utils/homeUtils.js';
 import { smartTitleCase } from '../../../utils/format.js';
 
@@ -11,10 +12,16 @@ export const HomeFeatureContent = ({
     leadTimeFavoritesData,
     communityPosts,
     onNavigate,
+    opportunities,
     recentOrders,
     hoverBg,
     isDark
 }) => {
+    const parseCurrencyValue = (rawValue) => {
+        const numeric = parseFloat(String(rawValue ?? '').replace(/[^0-9.]/g, ''));
+        return Number.isFinite(numeric) ? numeric : 0;
+    };
+
     if (mode === 'community') {
         return (
             <div className="space-y-3">
@@ -120,23 +127,100 @@ export const HomeFeatureContent = ({
     }
 
     if (mode === 'products') {
+        const categories = (PRODUCTS_CATEGORIES_DATA || []).slice(0, 6);
+
         return (
             <div className="space-y-3">
-                <button onClick={() => onNavigate('products')} className={`w-full p-3 rounded-2xl text-left ${hoverBg} transition-colors`} style={{ border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)' }}>
-                    <div className="text-sm font-semibold" style={{ color: colors.textPrimary }}>Browse Products</div>
-                    <div className="text-xs" style={{ color: colors.textSecondary }}>Explore finishes and specs</div>
-                </button>
+                <div className="space-y-2">
+                    {categories.map((category) => {
+                        const key = (category.nav || '').split('/').pop();
+                        const seriesCount = Array.isArray(PRODUCT_DATA?.[key]?.products) ? PRODUCT_DATA[key].products.length : 0;
+                        return (
+                            <button
+                                key={category.nav}
+                                onClick={() => onNavigate(category.nav)}
+                                className={`w-full flex items-center gap-3 p-3 rounded-2xl text-left ${hoverBg} transition-colors`}
+                                style={{ border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)' }}
+                            >
+                                <div className="w-11 h-11 rounded-xl overflow-hidden flex-shrink-0">
+                                    <img
+                                        src={category.images?.[0]}
+                                        alt={category.name}
+                                        className="w-full h-full object-contain object-center mix-blend-multiply"
+                                        loading="lazy"
+                                    />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <div className="text-sm font-semibold truncate" style={{ color: colors.textPrimary }}>
+                                        {category.name}
+                                    </div>
+                                    <div className="text-xs truncate" style={{ color: colors.textSecondary }}>
+                                        {category.description}
+                                    </div>
+                                </div>
+                                <div className="text-right flex-shrink-0">
+                                    <div className="text-[11px] font-semibold" style={{ color: colors.textSecondary }}>
+                                        {seriesCount} series
+                                    </div>
+                                </div>
+                                <ChevronRight className="w-3.5 h-3.5 flex-shrink-0 opacity-30" style={{ color: colors.textSecondary }} />
+                            </button>
+                        );
+                    })}
+                </div>
             </div>
         );
     }
 
     if (mode === 'projects') {
+        const allOpportunities = Array.isArray(opportunities) ? opportunities : [];
+        const discoveryProjects = allOpportunities.filter((project) => project.stage === 'Discovery').slice(0, 3);
+        const specifyingProjects = allOpportunities.filter((project) => project.stage === 'Specifying').slice(0, 2);
+        const highlighted = [...discoveryProjects, ...specifyingProjects];
         return (
             <div className="space-y-3">
-                <button onClick={() => onNavigate('projects')} className={`w-full p-3 rounded-2xl text-left ${hoverBg} transition-colors`} style={{ border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)' }}>
-                    <div className="text-sm font-semibold" style={{ color: colors.textPrimary }}>Project Pipeline</div>
-                    <div className="text-xs" style={{ color: colors.textSecondary }}>View leads and installs</div>
-                </button>
+                {highlighted.length > 0 ? (
+                    <div className="space-y-2">
+                        {highlighted.map((project) => (
+                            <button
+                                key={project.id}
+                                onClick={() => onNavigate(`projects/${project.id}`)}
+                                className={`w-full flex items-center gap-3 p-3 rounded-2xl text-left ${hoverBg} transition-colors`}
+                                style={{ border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)' }}
+                            >
+                                <div className="flex-1 min-w-0">
+                                    <div className="text-sm font-semibold truncate" style={{ color: colors.textPrimary }}>
+                                        {project.name}
+                                    </div>
+                                    <div className="text-xs truncate" style={{ color: colors.textSecondary }}>
+                                        {project.company || project.contact || project.stage}
+                                    </div>
+                                </div>
+                                <div className="text-right flex-shrink-0">
+                                    <div
+                                        className="text-[10px] uppercase tracking-widest font-semibold"
+                                        style={{ color: colors.textSecondary, opacity: 0.8 }}
+                                    >
+                                        {project.stage}
+                                    </div>
+                                    <div className="text-sm font-bold tabular-nums" style={{ color: colors.textPrimary }}>
+                                        ${parseCurrencyValue(project.value).toLocaleString()}
+                                    </div>
+                                </div>
+                                <ChevronRight className="w-3.5 h-3.5 flex-shrink-0 opacity-30" style={{ color: colors.textSecondary }} />
+                            </button>
+                        ))}
+                    </div>
+                ) : (
+                    <button
+                        onClick={() => onNavigate('projects')}
+                        className={`w-full p-3 rounded-2xl text-left ${hoverBg} transition-colors`}
+                        style={{ border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)' }}
+                    >
+                        <div className="text-sm font-semibold" style={{ color: colors.textPrimary }}>No active projects yet</div>
+                        <div className="text-xs" style={{ color: colors.textSecondary }}>Tap to open Projects and create one</div>
+                    </button>
+                )}
             </div>
         );
     }

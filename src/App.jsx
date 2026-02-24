@@ -273,6 +273,9 @@ function App() {
     const handleNavigate = useCallback((screen, params = {}) => {
         setLastNavigationDirection('forward');
         setScreenParams(params || {});
+        if (screen === 'projects' && params?.tab) {
+            setProjectsTabOverride(params.tab);
+        }
         setNavDepth(d => d + 1);
         routerNavigate(screenToPath(screen));
     }, [routerNavigate]);

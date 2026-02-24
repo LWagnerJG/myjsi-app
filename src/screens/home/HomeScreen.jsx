@@ -3,7 +3,9 @@ import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import { allApps, DEFAULT_HOME_APPS } from '../../constants/apps.js';
 import { ORDER_DATA } from '../orders/data.js';
 import { RequestQuoteModal } from '../../components/common/RequestQuoteModal.jsx';
+import { SpecCheckRequestModal } from '../../components/common/SpecCheckRequestModal.jsx';
 import { isDarkTheme } from '../../design-system/tokens.js';
+import { usePersistentState } from '../../hooks/usePersistentState.js';
 import { ChevronRight } from 'lucide-react';
 import { LEAD_TIMES_DATA } from '../resources/lead-times/data.js';
 import {
@@ -34,11 +36,27 @@ import {
 } from './utils/homeUtils.js';
 
 
-export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, homeApps, onUpdateHomeApps, homeResetKey, posts, isDarkMode, onToggleTheme, cart }) => {
+export const HomeScreen = React.memo(({
+    theme,
+    onNavigate,
+    onVoiceActivate,
+    homeApps,
+    onUpdateHomeApps,
+    homeResetKey,
+    posts,
+    isDarkMode,
+    onToggleTheme,
+    cart,
+    opportunities = [],
+    myProjects = [],
+    setMyProjects,
+    setSuccessMessage,
+}) => {
     const [isEditMode, setIsEditMode] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [activeDragId, setActiveDragId] = useState(null);
     const [showQuoteModal, setShowQuoteModal] = useState(false);
+    const [showSpecCheckModal, setShowSpecCheckModal] = useState(false);
 
     // Chat logic extracted to custom hook
     const {
@@ -51,8 +69,8 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
         handleRemoveAttachment, resetChat,
     } = useHomeChat();
 
-    const [homeFeatureMode, setHomeFeatureMode] = useState('activity');
-    const [secondaryFeatureMode, setSecondaryFeatureMode] = useState('community');
+    const [homeFeatureMode, setHomeFeatureMode] = usePersistentState('pref.homeFeatureMode.primary', 'activity');
+    const [secondaryFeatureMode, setSecondaryFeatureMode] = usePersistentState('pref.homeFeatureMode.secondary', 'community');
     const [leadTimeFavorites, setLeadTimeFavorites] = useState([]);
     const prevHomeResetKeyRef = useRef(homeResetKey);
 
@@ -69,7 +87,7 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                 // TODO: implement upload action
                 break;
             case 'spec':
-                onNavigate?.('resources');
+                setShowSpecCheckModal(true);
                 break;
             case 'feedback':
                 onNavigate?.('feedback');
@@ -78,6 +96,61 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                 break;
         }
     }, [onNavigate]);
+
+    const handleSpecCheckSubmit = useCallback((payload) => {
+        const typedProjectName = (payload?.projectInput || '').trim();
+        const selectedProject = payload?.selectedProject || null;
+
+        let targetProject = selectedProject;
+        if (!targetProject && typedProjectName) {
+            const existing = (myProjects || []).find((project) => {
+                const name = project?.name || project?.projectName || '';
+                return name.toLowerCase() === typedProjectName.toLowerCase();
+            });
+
+            if (existing) {
+                targetProject = existing;
+            } else {
+                const newProject = {
+                    id: `proj_${Date.now()}`,
+                    name: typedProjectName,
+                    location: 'Location TBD',
+                    image: 'https://webresources.jsifurniture.com/production/uploads/jsi_vision_install_0000010.jpg',
+                    stage: 'Discovery',
+                    status: 'Open',
+                    createdAt: Date.now(),
+                    specCheckRequests: [],
+                };
+                targetProject = newProject;
+                if (typeof setMyProjects === 'function') {
+                    setMyProjects((prev) => [newProject, ...(prev || [])]);
+                }
+            }
+        }
+
+        if (targetProject && typeof setMyProjects === 'function') {
+            setMyProjects((prev) => (prev || []).map((project) => {
+                if (String(project.id) !== String(targetProject.id)) return project;
+                const nextRequest = {
+                    id: `spec_${Date.now()}`,
+                    notes: payload?.notes || '',
+                    files: (payload?.files || []).map((file) => ({ name: file.name, size: file.size, type: file.type })),
+                    createdAt: Date.now(),
+                };
+                return {
+                    ...project,
+                    specCheckRequests: [nextRequest, ...(project.specCheckRequests || [])],
+                };
+            }));
+        }
+
+        setShowSpecCheckModal(false);
+        onNavigate?.('projects', { tab: 'my-projects' });
+        if (typeof setSuccessMessage === 'function') {
+            setSuccessMessage('Spec check request submitted');
+            setTimeout(() => setSuccessMessage(''), 1600);
+        }
+    }, [myProjects, onNavigate, setMyProjects, setSuccessMessage]);
 
     // Safe theme color extraction with fallbacks
     const isDark = isDarkTheme(theme);
@@ -371,6 +444,7 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                     leadTimeFavoritesData={leadTimeFavoritesData}
                     communityPosts={communityPosts}
                     onNavigate={onNavigate}
+                    opportunities={opportunities}
                     recentOrders={recentOrders}
                     hoverBg={hoverBg}
                 />
@@ -404,6 +478,13 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
                     // TODO: wire to quote submission API
                     if (import.meta.env.DEV) console.log('Quote request submitted:', data);
                 }}
+            />
+            <SpecCheckRequestModal
+                show={showSpecCheckModal}
+                onClose={() => setShowSpecCheckModal(false)}
+                theme={theme}
+                myProjects={myProjects}
+                onSubmit={handleSpecCheckSubmit}
             />
 
             <ChatOverlay

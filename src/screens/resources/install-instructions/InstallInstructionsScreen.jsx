@@ -1,13 +1,10 @@
-﻿import React, { useState, useMemo, useEffect } from 'react';
+﻿import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import { isDarkTheme } from '../../../design-system/tokens.js';
 import StandardSearchBar from '../../../components/common/StandardSearchBar.jsx';
 import { FileText, Clock, Wrench, ExternalLink, Play, X } from 'lucide-react';
 import { INSTALL_INSTRUCTIONS_DATA } from './data.js';
-import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z } from '../../../components/common/modalUtils.js';
-import { getModalMotion } from '../../../design-system/motion.js';
-import { usePrefersReducedMotion } from '../../../hooks/usePrefersReducedMotion.js';
+import { UNIFIED_MODAL_Z } from '../../../components/common/modalUtils.js';
 
 const DEMO_VIMEO_EMBED_URL = 'https://player.vimeo.com/video/76979871';
 
@@ -64,12 +61,15 @@ const toEmbedUrl = (rawUrl) => {
 export const InstallInstructionsScreen = ({ theme }) => {
   const c = theme.colors;
   const isDark = isDarkTheme(theme);
-  const prefersReducedMotion = usePrefersReducedMotion();
-  const modalMotion = getModalMotion(prefersReducedMotion);
+  const listRef = useRef(null);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState('all');
   const [activeVideo, setActiveVideo] = useState(null);
+  const [isTopCollapsed, setIsTopCollapsed] = useState(false);
+  const [isMobileViewport, setIsMobileViewport] = useState(
+    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  );
 
   const instructions = useMemo(
     () => [...(INSTALL_INSTRUCTIONS_DATA || [])].sort((a, b) => a.title.localeCompare(b.title)),
@@ -106,6 +106,21 @@ export const InstallInstructionsScreen = ({ theme }) => {
     };
   }, [activeVideo]);
 
+  useEffect(() => {
+    if (!activeVideo) return undefined;
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') setActiveVideo(null);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [activeVideo]);
+
+  useEffect(() => {
+    const onResize = () => setIsMobileViewport(window.innerWidth < 768);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
   const handleSearchChange = (value) => {
     if (typeof value === 'string') setSearchTerm(value);
     else setSearchTerm(value?.target?.value || '');
@@ -123,55 +138,83 @@ export const InstallInstructionsScreen = ({ theme }) => {
     });
   };
 
+  const handleListScroll = (e) => {
+    const scrollTop = e.currentTarget.scrollTop;
+    const isMobile = window.innerWidth < 768;
+    const shouldCollapse = isMobile && scrollTop > 28;
+    setIsTopCollapsed(shouldCollapse);
+  };
+
+  const showCompactSearch = isMobileViewport && isTopCollapsed;
+
   return (
     <div className="flex flex-col h-full app-header-offset">
-      <div className="px-4 sm:px-5 pt-2 pb-4">
-        <div className="rounded-3xl border p-4 sm:p-5 lg:p-6 space-y-4" style={{ backgroundColor: cardBg, borderColor: divider }}>
-          <div className="flex flex-wrap items-start justify-between gap-3 sm:gap-4">
-            <div>
-              <h2 className="text-[19px] sm:text-[20px] font-bold tracking-tight" style={{ color: c.textPrimary }}>Install Instructions</h2>
-              <p className="text-[12px] mt-0.5" style={{ color: c.textSecondary }}>
-                {instructions.length} guides organized by product type.
-              </p>
+      <div className={`px-4 sm:px-5 pt-2 ${showCompactSearch ? 'pb-2' : 'pb-4'}`}>
+        {showCompactSearch ? (
+          <div className="transition-all duration-200">
+            <StandardSearchBar
+              value={searchTerm}
+              onChange={handleSearchChange}
+              placeholder="Search by series, type, or keyword..."
+              theme={theme}
+            />
+          </div>
+        ) : (
+          <div className="rounded-3xl border p-4 sm:p-5 lg:p-6 space-y-4" style={{ backgroundColor: cardBg, borderColor: divider }}>
+            <div
+              className="overflow-hidden transition-all duration-200"
+              style={{ maxHeight: isTopCollapsed ? 0 : 120, opacity: isTopCollapsed ? 0 : 1 }}
+            >
+              <div className="flex flex-wrap items-start justify-between gap-3 sm:gap-4">
+              <div>
+                <h2 className="text-[19px] sm:text-[20px] font-bold tracking-tight" style={{ color: c.textPrimary }}>Install Instructions</h2>
+                <p className="text-[12px] mt-0.5" style={{ color: c.textSecondary }}>
+                  {instructions.length} guides organized by product type.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5" style={{ backgroundColor: subtleBg }}>
+                  <FileText className="w-3.5 h-3.5" style={{ color: c.textSecondary }} />
+                  <span className="text-[11px] leading-none font-semibold" style={{ color: c.textSecondary }}>{instructions.length} Docs</span>
+                </div>
+                <div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5" style={{ backgroundColor: subtleBg }}>
+                  <span className="text-[11px] leading-none font-semibold" style={{ color: c.textSecondary }}>{typeCount} Types</span>
+                </div>
+              </div>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5" style={{ backgroundColor: subtleBg }}>
-                <FileText className="w-3.5 h-3.5" style={{ color: c.textSecondary }} />
-                <span className="text-[11px] leading-none font-semibold" style={{ color: c.textSecondary }}>{instructions.length} Docs</span>
-              </div>
-              <div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5" style={{ backgroundColor: subtleBg }}>
-                <span className="text-[11px] leading-none font-semibold" style={{ color: c.textSecondary }}>{typeCount} Types</span>
-              </div>
+
+            <StandardSearchBar
+              value={searchTerm}
+              onChange={handleSearchChange}
+              placeholder="Search by series, type, or keyword..."
+              theme={theme}
+            />
+
+            <div
+              className="grid w-full grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-2 overflow-hidden transition-all duration-200"
+              style={{ maxHeight: isTopCollapsed ? 0 : 240, opacity: isTopCollapsed ? 0 : 1 }}
+            >
+              {types.map((type) => (
+                <button
+                  key={type}
+                  onClick={() => setSelectedType(type)}
+                  className="h-9 px-3 rounded-full text-[12px] font-semibold whitespace-nowrap transition-colors inline-flex items-center justify-center leading-none"
+                  style={{
+                    backgroundColor: selectedType === type ? c.accent : subtleBg,
+                    color: selectedType === type ? c.accentText : c.textSecondary,
+                    border: selectedType === type ? 'none' : `1px solid ${divider}`,
+                  }}
+                >
+                  {type === 'all' ? 'All Types' : type}
+                </button>
+              ))}
             </div>
           </div>
-
-          <StandardSearchBar
-            value={searchTerm}
-            onChange={handleSearchChange}
-            placeholder="Search by series, type, or keyword..."
-            theme={theme}
-          />
-
-          <div className="grid w-full grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-2">
-            {types.map((type) => (
-              <button
-                key={type}
-                onClick={() => setSelectedType(type)}
-                className="h-9 px-3 rounded-full text-[12px] font-semibold whitespace-nowrap transition-colors inline-flex items-center justify-center leading-none"
-                style={{
-                  backgroundColor: selectedType === type ? c.accent : subtleBg,
-                  color: selectedType === type ? c.accentText : c.textSecondary,
-                  border: selectedType === type ? 'none' : `1px solid ${divider}`,
-                }}
-              >
-                {type === 'all' ? 'All Types' : type}
-              </button>
-            ))}
-          </div>
-        </div>
+        )}
       </div>
 
-      <div className="flex-1 overflow-y-auto scrollbar-hide px-4 sm:px-5 pb-8">
+      <div ref={listRef} onScroll={handleListScroll} className="flex-1 overflow-y-auto scrollbar-hide px-4 sm:px-5 pb-8">
         {filtered.length ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3.5">
             {filtered.map((item) => {
@@ -193,15 +236,12 @@ export const InstallInstructionsScreen = ({ theme }) => {
                       aria-label={`Play ${item.title} video`}
                       className="absolute inset-0 flex items-center justify-center"
                     >
-                      <motion.span
-                        className="w-14 h-14 rounded-full flex items-center justify-center"
+                      <span
+                        className="w-14 h-14 rounded-full flex items-center justify-center transition-transform duration-200 group-hover:scale-110 active:scale-95"
                         style={{ backgroundColor: 'rgba(255,255,255,0.18)', border: '1.5px solid rgba(255,255,255,0.34)' }}
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.95 }}
-                        transition={{ type: 'spring', stiffness: 360, damping: 22 }}
                       >
                         <Play className="w-6 h-6 text-white ml-0.5" fill="white" />
-                      </motion.span>
+                      </span>
                     </button>
 
                     <div className="absolute top-2.5 right-2.5 h-6 px-2.5 rounded-full inline-flex items-center pointer-events-none" style={{ backgroundColor: 'rgba(0,0,0,0.45)' }}>
@@ -219,19 +259,21 @@ export const InstallInstructionsScreen = ({ theme }) => {
                       <h3 className="text-[15px] font-bold leading-snug tracking-tight" style={{ color: c.textPrimary }}>{item.title}</h3>
                     </div>
 
-                    <button
-                      onClick={() => openLink(item.pdfUrl)}
-                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-[12px] font-bold transition-all motion-tap"
-                      style={{
-                        backgroundColor: c.accent,
-                        color: c.accentText,
-                        border: 'none',
-                      }}
-                    >
-                      <FileText className="w-3.5 h-3.5" />
-                      Open Installation Guide
-                      <ExternalLink className="w-3.5 h-3.5" style={{ opacity: 0.9 }} />
-                    </button>
+                    <div>
+                      <button
+                        onClick={() => openLink(item.pdfUrl)}
+                        className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-[12px] font-bold transition-all motion-tap"
+                        style={{
+                          backgroundColor: c.accent,
+                          color: c.accentText,
+                          border: 'none',
+                        }}
+                      >
+                        <FileText className="w-3.5 h-3.5" />
+                        Guide
+                        <ExternalLink className="w-3.5 h-3.5" style={{ opacity: 0.9 }} />
+                      </button>
+                    </div>
                   </div>
                 </article>
               );
@@ -250,33 +292,15 @@ export const InstallInstructionsScreen = ({ theme }) => {
         )}
       </div>
 
-      <AnimatePresence>
-        {activeVideo && createPortal(
-          <motion.div
+      {activeVideo && createPortal(
+          <div
             className="fixed inset-0 flex items-center justify-center p-4"
-            style={{ zIndex: UNIFIED_MODAL_Z + 30 }}
-            initial={modalMotion.backdrop.initial}
-            animate={modalMotion.backdrop.animate}
-            exit={modalMotion.backdrop.exit}
-            transition={modalMotion.backdrop.transition}
+            style={{ zIndex: UNIFIED_MODAL_Z + 30, backgroundColor: 'rgba(0,0,0,0.62)' }}
             onClick={() => setActiveVideo(null)}
           >
-            <motion.div
-              className="absolute inset-0"
-              style={getUnifiedBackdropStyle(true, prefersReducedMotion)}
-              initial={modalMotion.backdrop.initial}
-              animate={modalMotion.backdrop.animate}
-              exit={modalMotion.backdrop.exit}
-              transition={modalMotion.backdrop.transition}
-            />
-
-            <motion.div
+            <div
               className="relative w-full max-w-5xl rounded-3xl overflow-hidden border"
               style={{ backgroundColor: c.surface, borderColor: divider, boxShadow: '0 24px 60px rgba(0,0,0,0.35)' }}
-              initial={modalMotion.card.initial}
-              animate={modalMotion.card.animate}
-              exit={modalMotion.card.exit}
-              transition={modalMotion.card.transition}
               onClick={(e) => e.stopPropagation()}
             >
               <div className="h-12 px-4 flex items-center justify-between" style={{ borderBottom: `1px solid ${divider}` }}>
@@ -293,18 +317,17 @@ export const InstallInstructionsScreen = ({ theme }) => {
               <div className="relative w-full" style={{ paddingTop: '56.25%', backgroundColor: '#111' }}>
                 <iframe
                   title="Install Instruction Video"
-                  src={activeVideo.url}
+                  src={activeVideo.url + (activeVideo.url.includes('?') ? '&' : '?') + 'autoplay=1&muted=0'}
                   className="absolute inset-0 w-full h-full"
                   frameBorder="0"
                   allow="autoplay; fullscreen; picture-in-picture"
                   allowFullScreen
                 />
               </div>
-            </motion.div>
-          </motion.div>,
+            </div>
+          </div>,
           document.body
         )}
-      </AnimatePresence>
     </div>
   );
 };

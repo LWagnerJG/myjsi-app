@@ -19,6 +19,7 @@ export const HomeFeatureCards = ({
     leadTimeFavoritesData,
     communityPosts,
     onNavigate,
+    opportunities,
     recentOrders,
     hoverBg
 }) => {
@@ -70,7 +71,7 @@ export const HomeFeatureCards = ({
                         <ChevronDown className="w-3 h-3" /> Use the dropdown above to change this card's content
                     </p>
                 )}
-                <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hide px-6 pb-5">
+                <div className={`flex-1 min-h-0 px-6 pb-5 ${isEditMode ? 'overflow-visible' : 'overflow-y-auto scrollbar-hide'}`}>
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={homeFeatureMode}
@@ -85,6 +86,7 @@ export const HomeFeatureCards = ({
                                 leadTimeFavoritesData={leadTimeFavoritesData}
                                 communityPosts={communityPosts}
                                 onNavigate={onNavigate}
+                                opportunities={opportunities}
                                 recentOrders={recentOrders}
                                 hoverBg={hoverBg}
                                 isDark={isDark}
@@ -140,7 +142,7 @@ export const HomeFeatureCards = ({
                         <ChevronDown className="w-3 h-3" /> Use the dropdown above to change this card's content
                     </p>
                 )}
-                <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hide px-6 pb-5">
+                <div className={`flex-1 min-h-0 px-6 pb-5 ${isEditMode ? 'overflow-visible' : 'overflow-y-auto scrollbar-hide'}`}>
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={secondaryFeatureMode}
@@ -155,6 +157,7 @@ export const HomeFeatureCards = ({
                                 leadTimeFavoritesData={leadTimeFavoritesData}
                                 communityPosts={communityPosts}
                                 onNavigate={onNavigate}
+                                opportunities={opportunities}
                                 recentOrders={recentOrders}
                                 hoverBg={hoverBg}
                                 isDark={isDark}

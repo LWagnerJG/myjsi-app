@@ -10,9 +10,16 @@ export const PRODUCT_DATA = {
     'benches': {
         name: 'Benches',
         products: [
-            { id: 'native', name: 'Native', price: 1200, image: 'https://via.placeholder.com/300x200/E3DBC8/2A2A2A?text=Native+Bench' },
-            { id: 'poet', name: 'Poet', price: 780, image: 'https://via.placeholder.com/300x200/D9CDBA/2A2A2A?text=Poet+Bench' },
-            { id: 'indie', name: 'Indie', price: 920, image: 'https://via.placeholder.com/300x200/C7AD8E/2A2A2A?text=Indie+Bench' },
+            { id: 'native', name: 'Native', price: 1200, image: localImage('/category-images/bench-images/api_native.jpg') },
+            { id: 'poet', name: 'Poet', price: 1280, image: localImage('/category-images/bench-images/api_poet.jpg') },
+            { id: 'indie', name: 'Indie', price: 1320, image: localImage('/category-images/bench-images/api_indie.jpg') },
+            { id: 'oxley', name: 'Oxley', price: 1360, image: localImage('/category-images/bench-images/api_oxley.jpg') },
+            { id: 'arwyn-bench', name: 'Arwyn', price: 1400, image: localImage('/category-images/bench-images/api_arwyn.jpg') },
+            { id: 'bespace-bench', name: 'BeSPACE', price: 1440, image: localImage('/category-images/bench-images/api_bespace.jpg') },
+            { id: 'finn-nu-bench', name: 'Finn Nu', price: 1480, image: localImage('/category-images/bench-images/api_finn-nu.jpg') },
+            { id: 'americana-bench', name: 'Americana', price: 1520, image: localImage('/category-images/bench-images/api_americana.jpg') },
+            { id: 'boston-bench', name: 'Boston', price: 1560, image: localImage('/category-images/bench-images/api_boston.jpg') },
+            { id: 'connect-bench', name: 'Connect', price: 1600, image: localImage('/category-images/bench-images/api_connect.jpg') },
         ],
         competition: [],
         competitionByProduct: {
@@ -24,12 +31,16 @@ export const PRODUCT_DATA = {
     'casegoods': {
         name: 'Casegoods',
         products: [
-            { id: 'vision', name: 'Vision', price: 3200, image: localImage('/category-images/casegood-images/jsi_vision_config_000007.jpg') },
-            { id: 'flux', name: 'Flux', price: 3700, image: localImage('/category-images/casegood-images/jsi_flux_config_00008.jpg') },
-            { id: 'brogan', name: 'Brogan', price: 4200, image: localImage('/category-images/casegood-images/jsi_brogan_config_0015.jpg') },
-            { id: 'finale', name: 'Finale', price: 4700, image: localImage('/category-images/casegood-images/jsi_finale_config_00013_UWjv5eM.jpg') },
-            { id: 'walden', name: 'Walden', price: 5200, image: localImage('/category-images/casegood-images/jsi_walden_config_00001.jpg') },
-            { id: 'wellington', name: 'Wellington', price: 5700, image: localImage('/category-images/casegood-images/jsi_wellington_config_00006.jpg') },
+            { id: 'vision', name: 'Vision', price: 3200, image: localImage('/category-images/casegood-images/api_vision.jpg') },
+            { id: 'flux', name: 'Flux Private Office', price: 3700, image: localImage('/category-images/casegood-images/api_flux-private-office.jpg') },
+            { id: 'brogan', name: 'Brogan', price: 4200, image: localImage('/category-images/casegood-images/api_brogan.jpg') },
+            { id: 'finale', name: 'Finale', price: 4700, image: localImage('/category-images/casegood-images/api_finale.jpg') },
+            { id: 'walden', name: 'Walden', price: 5200, image: localImage('/category-images/casegood-images/api_walden.jpg') },
+            { id: 'wellington', name: 'Wellington', price: 5700, image: localImage('/category-images/casegood-images/api_wellington.jpg') },
+            { id: 'anthology-casegoods', name: 'Anthology', price: 5900, image: localImage('/category-images/casegood-images/api_anthology.jpg') },
+            { id: 'bespace-casegoods', name: 'BeSPACE', price: 5400, image: localImage('/category-images/casegood-images/api_bespace.jpg') },
+            { id: 'native-casegoods', name: 'Native', price: 5000, image: localImage('/category-images/casegood-images/api_native.jpg') },
+            { id: 'connect-casegoods', name: 'Connect', price: 4600, image: localImage('/category-images/casegood-images/api_connect.jpg') },
         ],
         competition: [],
         competitionByProduct: {
@@ -44,9 +55,15 @@ export const PRODUCT_DATA = {
     'conference-tables': {
         name: 'Conference Tables',
         products: [
-            { id: 'vision-table', name: 'Vision', price: 4500, image: localImage('/category-images/conference-images/jsi_anthology_comp_0003_NBW46kS.jpg') },
-            { id: 'reef', name: 'Reef', price: 4200, image: localImage('/category-images/conference-images/jsi_anthology_comp_0004_OlfZHks.jpg') },
-            { id: 'moto', name: 'Moto', price: 4000, image: localImage('/category-images/conference-images/jsi_anthology_comp_0006.jpg') },
+            { id: 'vision-table', name: 'Vision', price: 4500, image: localImage('/category-images/conference-images/api_vision.jpg') },
+            { id: 'reef', name: 'Reef', price: 4200, image: localImage('/category-images/conference-images/api_reef.jpg') },
+            { id: 'moto', name: 'Moto', price: 4000, image: localImage('/category-images/conference-images/api_moto.jpg') },
+            { id: 'anthology-table', name: 'Anthology', price: 4700, image: localImage('/category-images/conference-images/api_anthology.jpg') },
+            { id: 'lok-conference-table', name: 'Lok Conference', price: 4300, image: localImage('/category-images/conference-images/api_lok-conference.jpg') },
+            { id: 'brogan-table', name: 'Brogan', price: 4600, image: localImage('/category-images/conference-images/api_brogan.jpg') },
+            { id: 'finale-table', name: 'Finale', price: 4800, image: localImage('/category-images/conference-images/api_finale.jpg') },
+            { id: 'walden-table', name: 'Walden', price: 5100, image: localImage('/category-images/conference-images/api_walden.jpg') },
+            { id: 'wellington-table', name: 'Wellington', price: 5400, image: localImage('/category-images/conference-images/api_wellington.jpg') },
         ],
         competition: [],
         competitionByProduct: {
@@ -102,9 +119,20 @@ export const PRODUCT_DATA = {
     'lounge': {
         name: 'Lounge',
         products: [
-            { id: 'arwyn', name: 'Arwyn', price: 1500, image: 'https://via.placeholder.com/300x200/E3DBC8/2A2A2A?text=Arwyn+Lounge' },
-            { id: 'caav', name: 'Caav', price: 1800, image: 'https://via.placeholder.com/300x200/D9CDBA/2A2A2A?text=Caav+Lounge' },
-            { id: 'finn', name: 'Finn', price: 1600, image: 'https://via.placeholder.com/300x200/C7AD8E/2A2A2A?text=Finn+Lounge' },
+            { id: 'arwyn', name: 'Arwyn', price: 1500, image: localImage('/category-images/lounge-images/api_arwyn.jpg') },
+            { id: 'caav', name: 'Caav', price: 1800, image: localImage('/category-images/lounge-images/api_caav.jpg') },
+            { id: 'finn', name: 'Finn', price: 1600, image: localImage('/category-images/lounge-images/api_finn.jpg') },
+            { id: 'indie-lounge', name: 'Indie', price: 1700, image: localImage('/category-images/lounge-images/api_indie.jpg') },
+            { id: 'poet-lounge', name: 'Poet', price: 1750, image: localImage('/category-images/lounge-images/api_poet.jpg') },
+            { id: 'finn-nu-lounge', name: 'Finn Nu', price: 1650, image: localImage('/category-images/lounge-images/api_finn-nu.jpg') },
+            { id: 'jude-lounge', name: 'Jude', price: 1680, image: localImage('/category-images/lounge-images/api_jude.jpg') },
+            { id: 'teekan-lounge', name: 'Teekan', price: 1850, image: localImage('/category-images/lounge-images/api_teekan.jpg') },
+            { id: 'bespace-lounge', name: 'BeSPACE', price: 1900, image: localImage('/category-images/lounge-images/api_bespace.jpg') },
+            { id: 'satisse-lounge', name: 'Satisse', price: 1880, image: localImage('/category-images/lounge-images/api_satisse.jpg') },
+            { id: 'connect-lounge', name: 'Connect', price: 1720, image: localImage('/category-images/lounge-images/api_connect.jpg') },
+            { id: 'moto-lounge', name: 'Moto', price: 1760, image: localImage('/category-images/lounge-images/api_moto.jpg') },
+            { id: 'bourne-lounge', name: 'Bourne', price: 1625, image: localImage('/category-images/lounge-images/api_bourne.jpg') },
+            { id: 'harbor-lounge', name: 'Harbor', price: 1820, image: localImage('/category-images/lounge-images/api_harbor.jpg') },
         ],
         competition: [],
         competitionByProduct: {
@@ -116,9 +144,17 @@ export const PRODUCT_DATA = {
     'swivels': {
         name: 'Swivels',
         products: [
-            { id: 'arwyn-swivel', name: 'Arwyn', price: 1300, image: 'https://via.placeholder.com/300x200/E3DBC8/2A2A2A?text=Arwyn+Swivel' },
-            { id: 'wink', name: 'Wink', price: 500, image: 'https://via.placeholder.com/300x200/D9CDBA/2A2A2A?text=Wink+Swivel' },
-            { id: 'protocol', name: 'Protocol', price: 800, image: 'https://via.placeholder.com/300x200/C7AD8E/2A2A2A?text=Protocol+Swivel' },
+            { id: 'arwyn-swivel', name: 'Arwyn', price: 1300, image: localImage('/category-images/swivel-images/api_arwyn.jpg') },
+            { id: 'protocol', name: 'Protocol', price: 1180, image: localImage('/category-images/swivel-images/api_protocol.jpg') },
+            { id: 'cosgrove-swivel', name: 'Cosgrove', price: 1250, image: localImage('/category-images/swivel-images/api_cosgrove.jpg') },
+            { id: 'garvey-r5', name: 'Garvey R5', price: 980, image: localImage('/category-images/swivel-images/api_garvey-r5.jpg') },
+            { id: 'newton-swivel', name: 'Newton', price: 920, image: localImage('/category-images/swivel-images/api_newton.jpg') },
+            { id: 'proxy-swivel', name: 'Proxy', price: 1050, image: localImage('/category-images/swivel-images/api_proxy.jpg') },
+            { id: 'americana-swivel', name: 'Americana', price: 860, image: localImage('/category-images/swivel-images/api_americana.jpg') },
+            { id: 'boston-swivel', name: 'Boston', price: 890, image: localImage('/category-images/swivel-images/api_boston.jpg') },
+            { id: 'knox-swivel', name: 'Knox', price: 940, image: localImage('/category-images/swivel-images/api_knox.jpg') },
+            { id: 'harbor-swivel', name: 'Harbor', price: 1010, image: localImage('/category-images/swivel-images/api_harbor.jpg') },
+            { id: 'madison-swivel', name: 'Madison', price: 1070, image: localImage('/category-images/swivel-images/api_madison.jpg') },
         ],
         competition: [],
         competitionByProduct: {
@@ -130,9 +166,13 @@ export const PRODUCT_DATA = {
     'training-tables': {
         name: 'Training Tables',
         products: [
-            { id: 'moto-training', name: 'Moto', price: 900, image: 'https://via.placeholder.com/300x200/E3DBC8/2A2A2A?text=Moto+Training' },
-            { id: 'connect', name: 'Connect', price: 850, image: 'https://via.placeholder.com/300x200/D9CDBA/2A2A2A?text=Connect+Training' },
-            { id: 'bespace', name: 'BeSpace', price: 950, image: 'https://via.placeholder.com/300x200/C7AD8E/2A2A2A?text=BeSpace+Training' },
+            { id: 'moto-training', name: 'Moto', price: 900, image: localImage('/category-images/training-images/api_moto.jpg') },
+            { id: 'connect', name: 'Connect', price: 850, image: localImage('/category-images/training-images/api_connect.jpg') },
+            { id: 'bespace', name: 'BeSPACE', price: 950, image: localImage('/category-images/training-images/api_bespace.jpg') },
+            { id: 'lok-training', name: 'Lok Training', price: 980, image: localImage('/category-images/training-images/api_lok-training.jpg') },
+            { id: 'lok-teamwork', name: 'Lok Teamwork Tables', price: 1020, image: localImage('/category-images/training-images/api_lok-teamwork-tables.jpg') },
+            { id: 'nosh-training', name: 'Nosh', price: 920, image: localImage('/category-images/training-images/api_nosh.jpg') },
+            { id: 'draft-training', name: 'Draft', price: 880, image: localImage('/category-images/training-images/api_draft.jpg') },
         ],
         competition: [],
         competitionByProduct: {
@@ -243,9 +283,9 @@ export const PRODUCTS_CATEGORIES_DATA = [
         description: 'Storage and workspace solutions',
         nav: 'products/category/casegoods',
         images: [
-            '/category-images/casegood-images/jsi_vision_config_000007.jpg',
-            '/category-images/casegood-images/jsi_flux_config_00008.jpg',
-            '/category-images/casegood-images/jsi_brogan_config_0015.jpg'
+            '/category-images/casegood-images/api_vision.jpg',
+            '/category-images/casegood-images/api_flux-private-office.jpg',
+            '/category-images/casegood-images/api_brogan.jpg'
         ].map(localImage)
     },
     {
@@ -253,9 +293,9 @@ export const PRODUCTS_CATEGORIES_DATA = [
         description: 'Meeting and collaboration tables',
         nav: 'products/category/conference-tables',
         images: [
-            '/category-images/conference-images/jsi_anthology_comp_0003_NBW46kS.jpg',
-            '/category-images/conference-images/jsi_anthology_comp_0004_OlfZHks.jpg',
-            '/category-images/conference-images/jsi_anthology_comp_0006.jpg'
+            '/category-images/conference-images/api_vision.jpg',
+            '/category-images/conference-images/api_reef.jpg',
+            '/category-images/conference-images/api_moto.jpg'
         ].map(localImage)
     },
     {
@@ -273,9 +313,9 @@ export const PRODUCTS_CATEGORIES_DATA = [
         description: 'Casual and soft seating',
         nav: 'products/category/lounge',
         images: [
-            '/category-images/lounge-images/jsi_arwyn_comp_00002.jpg',
-            '/category-images/lounge-images/jsi_indie_comp_00060.jpg',
-            '/category-images/lounge-images/jsi_poet_component_00008.jpg' // corrected poet image
+            '/category-images/lounge-images/api_arwyn.jpg',
+            '/category-images/lounge-images/api_caav.jpg',
+            '/category-images/lounge-images/api_poet.jpg'
         ].map(localImage)
     },
     {
@@ -283,9 +323,9 @@ export const PRODUCTS_CATEGORIES_DATA = [
         description: 'Task and office chairs',
         nav: 'products/category/swivels',
         images: [
-            '/category-images/swivel-images/jsi_arwynconference_comp_0001_7U1AfYF.jpg', // corrected filename
-            '/category-images/swivel-images/jsi_cosgrove_comp_highback_arms_00002_KAky10n.jpg', // corrected filename
-            '/category-images/swivel-images/jsi_garveyr5_comp_00002.jpg' // corrected garvey filename
+            '/category-images/swivel-images/api_arwyn.jpg',
+            '/category-images/swivel-images/api_protocol.jpg',
+            '/category-images/swivel-images/api_garvey-r5.jpg'
         ].map(localImage)
     },
     {
@@ -293,9 +333,9 @@ export const PRODUCTS_CATEGORIES_DATA = [
         description: 'Flexible training furniture',
         nav: 'products/category/training-tables',
         images: [
-            '/category-images/training-images/jsi_lokquickship_comp_0004_scnOitC.jpg', // quickship hero
-            '/category-images/training-images/jsi_lok_comp_00001.jpg',
-            '/category-images/training-images/jsi_nosh_comp_00011.jpg' // corrected nosh filename
+            '/category-images/training-images/lok-training-lkt022.jpg',
+            '/category-images/training-images/lok-training-lkt023.jpg',
+            '/category-images/training-images/lok-training-lkt024.jpg'
         ].map(localImage)
     },
     {
@@ -303,9 +343,9 @@ export const PRODUCTS_CATEGORIES_DATA = [
         description: 'Multi-seat solutions',
         nav: 'products/category/benches',
         images: [
-            '/category-images/bench-images/jsi_indie_comp_00040.jpg',
-            '/category-images/bench-images/jsi_native_comp_00028.jpg',
-            '/category-images/bench-images/jsi_oxley_comp_00001_5ueHuWt.jpg' // corrected third image to existing oxley file
+            '/category-images/bench-images/api_native.jpg',
+            '/category-images/bench-images/api_poet.jpg',
+            '/category-images/bench-images/api_indie.jpg'
         ].map(localImage)
     }
 ];

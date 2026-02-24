@@ -46,6 +46,9 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
 
   const dark = isDarkTheme(theme);
   const c = theme.colors;
+  const panelBg = dark ? 'rgba(255,255,255,0.03)' : '#FFFFFF';
+  const panelBorder = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+  const panelSubtle = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)';
 
   const hdrRef = useFadeUp(0);
   const tlRef  = useFadeUp(80);
@@ -90,11 +93,11 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
       <div className="flex-1 overflow-y-auto px-4 sm:px-6 pb-8 scrollbar-hide">
         <div className="max-w-xl mx-auto w-full">
 
-          {/* ── header with inline key stats ── */}
+          {/* ── header with grouped order snapshot ── */}
           <div ref={hdrRef} className="mb-8 mt-2">
-            <div className="flex flex-col gap-3">
+            <div className="rounded-3xl border p-4 sm:p-5 space-y-4" style={{ backgroundColor: panelBg, borderColor: panelBorder }}>
               <div className="flex items-center justify-between">
-                <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }}>
+                <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md" style={{ backgroundColor: panelSubtle }}>
                   <span className="text-xs font-bold tracking-wide" style={{ color: c.textSecondary }}>ORDER #{order.orderNumber}</span>
                 </div>
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ backgroundColor: dark ? 'rgba(74, 124, 89, 0.2)' : 'rgba(74, 124, 89, 0.1)' }}>
@@ -102,28 +105,36 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
                   <span className="text-xs font-bold" style={{ color: dark ? '#81C784' : '#4A7C59' }}>{order.status}</span>
                 </div>
               </div>
-              
+
               <div>
                 <h1 className="text-[28px] font-extrabold leading-tight tracking-tight" style={{ color: c.textPrimary }}>{tc(order.details)}</h1>
                 <p className="text-[15px] font-medium mt-1" style={{ color: c.textSecondary }}>{tc(order.company)}</p>
               </div>
 
-              <div className="flex items-center gap-6 mt-2 pt-4 border-t" style={{ borderColor: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }}>
+              <div className="grid grid-cols-3 gap-3 pt-3 border-t" style={{ borderColor: panelBorder }}>
                 <div>
                   <p className="text-[11px] font-bold uppercase tracking-wider mb-0.5" style={{ color: c.textSecondary, opacity: 0.7 }}>Net Total</p>
                   <p className="text-xl font-bold" style={{ color: c.textPrimary }}>{$(order.net, true)}</p>
                 </div>
-                <div className="w-px h-8" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }} />
                 <div>
                   <p className="text-[11px] font-bold uppercase tracking-wider mb-0.5" style={{ color: c.textSecondary, opacity: 0.7 }}>Est. Ship</p>
                   <p className="text-[15px] font-semibold" style={{ color: c.textPrimary }}>{fs(order.shipDate) || '—'}</p>
                 </div>
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-wider mb-0.5" style={{ color: c.textSecondary, opacity: 0.7 }}>Items</p>
+                  <p className="text-[15px] font-semibold" style={{ color: c.textPrimary }}>{qty}</p>
+                </div>
               </div>
+
             </div>
           </div>
 
           {/* ── timeline ── */}
-          <div ref={tlRef} className="mb-6">
+          <div ref={tlRef} className="mb-6 rounded-3xl border p-4 sm:p-5" style={{ backgroundColor: panelBg, borderColor: panelBorder }}>
+            <div className="flex items-center justify-between mb-3 px-1">
+              <h3 className="font-bold text-[15px]" style={{ color: c.textPrimary }}>Order Progress</h3>
+              <span className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: c.textSecondary }}>Timeline</span>
+            </div>
             {STAGES.map((s, i) => (
               <Stage key={s.key} stage={s} state={state(i)} isLast={i === 5} subtitle={subs[i] ?? null}
                 actions={acts[i] ?? null} progress={i === cur ? pct : null} dark={dark} c={c} idx={i} />

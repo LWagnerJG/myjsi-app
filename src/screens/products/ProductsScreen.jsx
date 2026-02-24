@@ -39,33 +39,29 @@ const CategoryCard = React.memo(({
         return (
             <div
                 onClick={handleClick}
-                className={`rounded-[24px] overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.015] active:scale-[0.985] ${className}`}
+                className={`rounded-[24px] overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] ${className}`}
                 style={{
                     ...cardStyle(dark),
                     padding: 0,
                 }}
             >
-                <div className="p-5 pb-3">
+                <div className="p-5 pb-3 min-h-[148px]">
                     <div className="flex items-center justify-between mb-3">
                         <h2 className="text-xl font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>
                             {category.name}
                         </h2>
                         <ChevronRight className="w-5 h-5 opacity-40" style={{ color: theme.colors.textSecondary }} />
                     </div>
-                    <div className="flex gap-3 overflow-x-auto scrollbar-hide pl-2 sm:pl-3 pr-2 -mr-2">
+                    <div className="w-full md:max-w-[430px] ml-0 md:ml-auto grid grid-cols-3 gap-3">
                         {category.images?.map((img, i) => (
                             <div
                                 key={i}
-                                className="flex-shrink-0 w-[100px] h-[80px] rounded-2xl overflow-hidden"
-                                style={{
-                                    backgroundColor: dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
-                                }}
+                                className="w-full h-[86px] rounded-2xl overflow-hidden"
                             >
                                 <img
                                     src={img}
                                     alt={`${category.name} ${i + 1}`}
-                                    className="w-full h-full object-cover object-center scale-[1.2] hover:scale-[1.3] transition-transform duration-500"
-                                    style={{ objectPosition: '58% center' }}
+                                    className="w-full h-full object-contain object-center mix-blend-multiply scale-[1.04] hover:scale-[1.1] transition-transform duration-500"
                                     loading="lazy"
                                 />
                             </div>
@@ -98,12 +94,12 @@ const CategoryCard = React.memo(({
                 <div className="flex items-center gap-3">
                     <div
                         className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0"
-                        style={{ backgroundColor: dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)' }}
+                        style={{ backgroundColor: 'transparent' }}
                     >
                         <img
                             src={category.images?.[0]}
                             alt={category.name}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-contain mix-blend-multiply"
                             loading="lazy"
                         />
                     </div>
@@ -128,21 +124,23 @@ CategoryCard.displayName = 'CategoryCard';
 // ─── View mode toggle — glass button ─────────────────────────────────────────
 const ViewModeToggle = React.memo(({ viewMode, onToggle, theme }) => {
     const dark = isDarkTheme(theme);
+    const isGrid = viewMode === 'grid';
+    const actionLabel = isGrid ? 'Switch to List' : 'Switch to Tiles';
     return (
         <button
             onClick={onToggle}
-            className="p-3 rounded-full transition-all duration-200 active:scale-90 hover:scale-105"
+            className="h-12 px-4 rounded-full transition-all duration-200 active:scale-95 hover:scale-[1.02] inline-flex items-center gap-2.5"
             style={{
                 ...cardStyle(dark),
-                padding: '12px',
+                minWidth: 156,
             }}
-            aria-label={`Switch to ${viewMode === 'grid' ? 'list' : 'grid'} view`}
+            aria-label={actionLabel}
+            title={actionLabel}
         >
-            {viewMode === 'grid' ? (
-                <List className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />
-            ) : (
-                <Grid className="w-5 h-5" style={{ color: theme.colors.textPrimary }} />
-            )}
+            {isGrid ? <List className="w-4.5 h-4.5" style={{ color: theme.colors.textPrimary }} /> : <Grid className="w-4.5 h-4.5" style={{ color: theme.colors.textPrimary }} />}
+            <span className="text-[12px] font-semibold leading-none whitespace-nowrap" style={{ color: theme.colors.textPrimary }}>
+                {actionLabel}
+            </span>
         </button>
     );
 });
@@ -330,8 +328,11 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
         setSearchTerm('');
     }, []);
 
-    const handleSearchChange = useCallback((e) => {
-        setSearchTerm(e.target.value);
+    const handleSearchChange = useCallback((valueOrEvent) => {
+        const value = typeof valueOrEvent === 'string'
+            ? valueOrEvent
+            : valueOrEvent?.target?.value || '';
+        setSearchTerm(value);
     }, []);
 
     return (
@@ -371,7 +372,7 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
                     ) : filteredCategories.length === 0 ? (
                         <EmptyState searchTerm={searchTerm} theme={theme} />
                     ) : (
-                        <div className={viewMode === 'grid' ? 'space-y-4' : 'space-y-2'} style={{ paddingTop: 4 }}>
+                        <div className={viewMode === 'grid' ? 'grid grid-cols-1 xl:grid-cols-2 gap-4' : 'space-y-2'} style={{ paddingTop: 4 }}>
                             {filteredCategories.map((category) => (
                                 <CategoryCard
                                     key={category.name}
@@ -379,6 +380,7 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
                                     theme={theme}
                                     viewMode={viewMode}
                                     onClick={handleCategoryClick}
+                                    className={viewMode === 'grid' ? 'h-full' : ''}
                                 />
                             ))}
                         </div>

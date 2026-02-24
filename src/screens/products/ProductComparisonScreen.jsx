@@ -93,13 +93,15 @@ const ProductHero = React.memo(({ product, theme, categoryId, onNavigate, catego
     () => onNavigate(`products/category/${categoryId}/competition/${product.id}`),
     [categoryId, onNavigate, product.id]
   );
-  const isChairCategory = /chair|guest|seating/i.test(categoryId) || /chair|guest|seating/i.test(categoryName || '');
+  const isGuestCategory = categoryId === 'guest' || /guest/i.test(categoryName || '');
+  const isSeatingLikeCategory = /chair|guest|seating|swivel|lounge|bench|stool/i.test(categoryId) ||
+    /chair|guest|seating|swivel|lounge|bench|stool/i.test(categoryName || '');
   const isCasegoods = categoryId === 'casegoods';
-  const aspectClass = isChairCategory ? 'aspect-[4/3]' : 'aspect-[16/10]';
+  const aspectClass = isGuestCategory ? 'aspect-[4/3] lg:aspect-[16/10] xl:aspect-[16/9]' : 'aspect-[16/10] xl:aspect-[16/9]';
 
   let baseZoom = product.heroScale
     ? Math.min(1.18, Math.max(0.85, product.heroScale))
-    : (isChairCategory ? 0.96 : 1.12);
+    : (isSeatingLikeCategory ? 0.96 : 1.12);
   if (isCasegoods) baseZoom *= 1.15;
 
   return (

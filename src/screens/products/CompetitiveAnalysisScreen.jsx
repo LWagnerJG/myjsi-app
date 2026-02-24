@@ -78,7 +78,9 @@ export const CompetitiveAnalysisScreen = ({ categoryId, productId, theme }) => {
 
     const product = categoryData.products?.find(p => p.id === productId) || categoryData.products?.[0];
     const perProductList = categoryData.competitionByProduct?.[product?.id] || [];
-    const categoryCompetitors = categoryData.competition || [];
+    const categoryFallback = categoryData.competition || [];
+    const firstMappedCompetition = Object.values(categoryData.competitionByProduct || {})[0] || [];
+    const categoryCompetitors = categoryFallback.length ? categoryFallback : firstMappedCompetition;
 
     const handleChange = (e) => setFormState(s => ({ ...s, [e.target.name]: e.target.value }));
     const canSubmit = formState.manufacturer.trim() && formState.series.trim();

@@ -10,8 +10,19 @@ export const FeaturePicker = ({ value, onChange, options, colors, isDark }) => {
         const handler = (e) => {
             if (ref.current && !ref.current.contains(e.target)) setOpen(false);
         };
+        const closeOnScrollIntent = () => setOpen(false);
         document.addEventListener('mousedown', handler);
-        return () => document.removeEventListener('mousedown', handler);
+        window.addEventListener('scroll', closeOnScrollIntent, true);
+        window.addEventListener('wheel', closeOnScrollIntent, { passive: true });
+        window.addEventListener('touchmove', closeOnScrollIntent, { passive: true });
+        window.addEventListener('resize', closeOnScrollIntent);
+        return () => {
+            document.removeEventListener('mousedown', handler);
+            window.removeEventListener('scroll', closeOnScrollIntent, true);
+            window.removeEventListener('wheel', closeOnScrollIntent);
+            window.removeEventListener('touchmove', closeOnScrollIntent);
+            window.removeEventListener('resize', closeOnScrollIntent);
+        };
     }, [open]);
 
     const current = options.find(o => o.id === value);
