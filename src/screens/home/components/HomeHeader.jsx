@@ -29,10 +29,10 @@ export const HomeHeader = ({
     return (
         <div className="relative group">
             {/* Dashboard label + search bar on one row */}
-            <div className="flex items-center gap-3">
-                <div className="shrink-0 hidden sm:block">
-                    <h2 className="text-[22px] font-extrabold tracking-tight leading-none" style={{ color: colors.textPrimary }}>Dashboard</h2>
-                    <div className="text-[13px] font-semibold whitespace-nowrap mt-1" style={{ color: colors.textSecondary, opacity: 0.55 }}>{todayLabel}</div>
+            <div className="flex items-center gap-4">
+                <div className="shrink-0 hidden sm:block min-w-[120px] flex-1">
+                    <h2 className="text-[28px] font-semibold tracking-tight leading-none" style={{ color: colors.textPrimary }}>Dashboard</h2>
+                    <div className="text-[12px] font-medium whitespace-nowrap mt-1.5" style={{ color: colors.textSecondary, opacity: 0.5 }}>{todayLabel}</div>
                 </div>
 
                 <GlassCard
@@ -41,6 +41,7 @@ export const HomeHeader = ({
                 style={{
                     borderRadius: 9999,
                     height: 56,
+                    maxWidth: 680,
                     paddingTop: 0,
                     paddingBottom: 0,
                     backgroundColor: colors.tileSurface,

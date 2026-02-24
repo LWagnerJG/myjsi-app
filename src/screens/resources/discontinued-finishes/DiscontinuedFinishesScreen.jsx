@@ -1,224 +1,205 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import StandardSearchBar from '../../../components/common/StandardSearchBar.jsx';
 import { Modal } from '../../../components/common/Modal.jsx';
-import { ArrowRight, Search, ShoppingCart, Palette } from 'lucide-react';
+import { Search, ShoppingCart, Palette } from 'lucide-react';
 import { isDarkTheme } from '../../../design-system/tokens.js';
 import { DISCONTINUED_FINISHES } from './data.js';
 import { SAMPLE_PRODUCTS } from '../../samples/data.js';
 
 export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) => {
-    const [finishes, setFinishes] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedFinish, setSelectedFinish] = useState(null);
     const isDark = isDarkTheme(theme);
+    const text = theme.colors.textPrimary;
+    const sub = theme.colors.textSecondary;
+    const accent = theme.colors.accent;
 
-    useEffect(() => {
-        const staticFinishes = DISCONTINUED_FINISHES.map((finish, index) => ({
-            id: index + 1,
-            OldFinish: finish.oldName,
-            NewFinishName: finish.newName,
-            Category: finish.category,
-            OldVeneerCode: finish.veneer,
-            NewVeneerCode: finish.veneer,
-            OldSolidCode: finish.solid,
-            NewSolidCode: finish.solid
-        }));
-        setFinishes(staticFinishes);
-        setIsLoading(false);
-    }, []);
-
-    const getLocalFinishImagePath = (finishName) => {
-        if (!finishName) return '';
-        const finishData = DISCONTINUED_FINISHES.find(f => f.oldName === finishName || f.newName === finishName);
-        return finishData?.newImage || '';
+    const fmtDate = (d) => {
+        if (!d) return '';
+        const [y, m] = d.split('-');
+        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        return `${months[parseInt(m, 10) - 1]} ${y}`;
     };
 
-    const formatFinishName = (name) => !name ? '' : name.split(' ').map((w, i) => i === 0 ? w.charAt(0).toUpperCase() + w.slice(1).toLowerCase() : w.toLowerCase()).join(' ');
+    const LongArrow = () => (
+        <svg width="28" height="12" viewBox="0 0 28 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="0" y1="6" x2="22" y2="6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            <polyline points="20,2 26,6 20,10" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+    );
 
-    const groupedFinishes = useMemo(() => {
-        const lowercasedFilter = searchTerm.toLowerCase().trim();
-        const filtered = finishes.filter(finish => {
-            const cat = typeof finish.Category === 'string' ? finish.Category : finish.Category?.Value || '';
-            return (
-                (finish.OldFinish || '').toLowerCase().includes(lowercasedFilter) ||
-                (finish.NewFinishName || '').toLowerCase().includes(lowercasedFilter) ||
-                cat.toLowerCase().includes(lowercasedFilter)
-            );
-        });
-        return filtered.reduce((acc, f) => {
-            const cat = typeof f.Category === 'string' ? f.Category : f.Category?.Value || 'Uncategorized';
-            (acc[cat] = acc[cat] || []).push(f);
+    const finishes = useMemo(() =>
+        DISCONTINUED_FINISHES.map((f) => ({
+            id: f.id,
+            oldName: f.oldName,
+            newName: f.newName,
+            category: f.category,
+            lab: f.lab || null,
+            discontinuedDate: f.discontinuedDate || '',
+            newImage: f.newImage || '',
+        })),
+    []);
+
+    const getImg = (name) => {
+        if (!name) return '';
+        const d = DISCONTINUED_FINISHES.find(f => f.oldName === name || f.newName === name);
+        return d?.newImage || '';
+    };
+
+    const fmt = (name) => !name ? '' : name.split(' ').map((w, i) => i === 0 ? w.charAt(0).toUpperCase() + w.slice(1).toLowerCase() : w.toLowerCase()).join(' ');
+
+    const grouped = useMemo(() => {
+        const q = searchTerm.toLowerCase().trim();
+        const filtered = finishes.filter(f =>
+            f.oldName.toLowerCase().includes(q) ||
+            f.newName.toLowerCase().includes(q) ||
+            f.category.toLowerCase().includes(q) ||
+            (f.lab || '').toLowerCase().includes(q)
+        );
+        const order = ['Wood Veneer', 'Laminate', 'Metal'];
+        const g = filtered.reduce((acc, f) => {
+            (acc[f.category] = acc[f.category] || []).push(f);
             return acc;
         }, {});
+        return order.filter(c => g[c]).map(c => [c, g[c]]);
     }, [searchTerm, finishes]);
 
     const handleOrderClick = () => {
         if (!selectedFinish) return;
-        const targetName = (selectedFinish.NewFinishName || '').toLowerCase();
+        const targetName = (selectedFinish.newName || '').toLowerCase();
         const sampleMatch = SAMPLE_PRODUCTS.find(p => (p.name || '').toLowerCase() === targetName);
         const newItem = sampleMatch || {
             id: `sample-${targetName.replace(/\s+/g, '-')}`,
-            name: formatFinishName(selectedFinish.NewFinishName),
+            name: fmt(selectedFinish.newName),
             category: 'finishes',
-            image: getLocalFinishImagePath(selectedFinish.NewFinishName)
+            image: getImg(selectedFinish.newName),
         };
         if (onUpdateCart) onUpdateCart(newItem, 1);
         setSelectedFinish(null);
         onNavigate && onNavigate('samples/cart');
     };
 
-    /* ── Finish swatch with inset shadow for tactile depth ── */
-    const FinishSwatch = ({ image, alt, size = 42 }) => (
+    /* ── Swatch ── */
+    const Swatch = ({ image, alt, size = 40, color }) => (
         <div
-            className="flex-shrink-0 rounded-full overflow-hidden"
+            className="flex-shrink-0 overflow-hidden"
             style={{
                 width: size,
                 height: size,
-                border: `1.5px solid ${isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)'}`,
-                boxShadow: isDark
-                    ? '0 1px 3px rgba(0,0,0,0.15)'
-                    : '0 1px 3px rgba(53,53,53,0.06)',
-                backgroundColor: isDark ? '#3C3C3C' : theme.colors.subtle,
+                borderRadius: 12,
+                border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'}`,
+                backgroundColor: color || (isDark ? '#3C3C3C' : theme.colors.subtle),
             }}
         >
             {image ? (
                 <img src={image} alt={alt} className="w-full h-full object-cover" />
             ) : (
                 <div className="w-full h-full flex items-center justify-center">
-                    <Palette className="w-4 h-4" style={{ color: theme.colors.textSecondary, opacity: 0.4 }} />
+                    <Palette className="w-4 h-4" style={{ color: sub, opacity: 0.25 }} />
                 </div>
             )}
         </div>
     );
 
-    /* ── Single finish mapping row ── */
+    /* ── Single row ── */
     const FinishRow = ({ finish, isLast }) => {
-        const oldImg = getLocalFinishImagePath(finish.OldFinish);
-        const newImg = getLocalFinishImagePath(finish.NewFinishName);
+        const oldImg = getImg(finish.oldName);
+        const newImg = getImg(finish.newName);
         return (
             <button
                 onClick={() => setSelectedFinish(finish)}
-                className="w-full text-left transition-all duration-150 focus:outline-none group"
-                style={{ padding: '14px 16px', borderRadius: 16 }}
-                onMouseEnter={e => { e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.025)'; }}
-                onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+                className="w-full text-left focus:outline-none active:scale-[0.995] transition-transform"
             >
-                <div className="flex items-center gap-3">
-                    {/* Old (discontinued) finish */}
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <FinishSwatch image={oldImg} alt={finish.OldFinish} />
+                <div
+                    className="items-center px-4 py-3"
+                    style={{
+                        display: 'grid',
+                        gridTemplateColumns: '46% 28px 1fr',
+                        gap: 0,
+                        alignItems: 'center',
+                    }}
+                >
+                    {/* Old finish — fixed 38% column keeps arrow in a consistent spot */}
+                    <div className="flex items-center gap-2.5 min-w-0 pr-2">
+                        <Swatch image={oldImg} alt={finish.oldName} />
                         <div className="min-w-0">
-                            <p className="font-semibold text-[13px] leading-tight truncate" style={{ color: theme.colors.textPrimary }}>
-                                {formatFinishName(finish.OldFinish)}
+                            <p className="font-semibold text-[13px] leading-tight truncate" style={{ color: text }}>
+                                {fmt(finish.oldName)}
                             </p>
-                            <p className="text-xs font-medium tracking-wide mt-0.5" style={{ color: theme.colors.textSecondary }}>
-                                {finish.OldVeneerCode}
+                            <p className="text-[10px] font-medium mt-0.5" style={{ color: sub }}>
+                                {finish.discontinuedDate && (
+                                    <span style={{ opacity: 0.7 }}>Disc. {fmtDate(finish.discontinuedDate)}</span>
+                                )}
+                                {finish.lab && (
+                                    <span style={{ opacity: 0.45 }}>{finish.discontinuedDate ? '  ·  ' : ''}Lab {finish.lab}</span>
+                                )}
                             </p>
                         </div>
                     </div>
 
-                    {/* Arrow pill */}
-                    <div
-                        className="flex-shrink-0 flex items-center justify-center"
-                        style={{
-                            width: 28,
-                            height: 28,
-                            borderRadius: 9999,
-                            backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(53,53,53,0.04)',
-                        }}
-                    >
-                        <ArrowRight
-                            className="w-3.5 h-3.5 transition-transform duration-150 group-hover:translate-x-0.5"
-                            style={{ color: theme.colors.textSecondary }}
-                        />
+                    {/* Arrow — always at the 38% mark, never shifts */}
+                    <div className="flex items-center justify-center" style={{ color: accent, opacity: 0.5 }}>
+                        <LongArrow />
                     </div>
 
-                    {/* New (replacement) finish */}
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <FinishSwatch image={newImg} alt={finish.NewFinishName} />
+                    {/* New finish — takes all remaining space */}
+                    <div className="flex items-center gap-2.5 min-w-0 pl-7">
+                        <Swatch image={newImg} alt={finish.newName} />
                         <div className="min-w-0">
-                            <p className="font-semibold text-[13px] leading-tight truncate" style={{ color: theme.colors.textPrimary }}>
-                                {formatFinishName(finish.NewFinishName)}
+                            <p className="font-semibold text-[13px] leading-tight truncate" style={{ color: text }}>
+                                {fmt(finish.newName)}
                             </p>
-                            <p className="text-xs font-medium tracking-wide mt-0.5" style={{ color: theme.colors.accent }}>
-                                {finish.NewVeneerCode || finish.NewSolidCode || finish.OldSolidCode}
+                            <p className="text-[10px] font-medium mt-0.5" style={{ color: accent, opacity: 0.55 }}>
+                                Replacement
                             </p>
                         </div>
                     </div>
                 </div>
 
-                {/* Separator — skip on last item */}
+                {/* Divider */}
                 {!isLast && (
-                    <div
-                        className="mt-3.5 mx-1"
-                        style={{ borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'}` }}
-                    />
+                    <div className="mx-4" style={{ height: 1, backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)' }} />
                 )}
             </button>
         );
     };
 
-    /* ── Skeleton loader for perceived speed ── */
-    const LoadingSkeleton = () => (
-        <div className="space-y-4 mt-2">
-            {[1, 2, 3].map(i => (
-                <div key={i} className="space-y-3">
-                    <div className="h-4 rounded-full animate-pulse" style={{ width: i === 1 ? 120 : 90, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }} />
-                    <GlassCard theme={theme} className="p-3">
-                        {[1, 2, 3].map(j => (
-                            <div key={j} className="flex items-center gap-3 py-3">
-                                <div className="w-10 h-10 rounded-full animate-pulse" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }} />
-                                <div className="flex-1 space-y-1.5">
-                                    <div className="h-3 w-24 rounded-full animate-pulse" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }} />
-                                    <div className="h-2 w-14 rounded-full animate-pulse" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)' }} />
-                                </div>
-                                <div className="w-6 h-6 rounded-full animate-pulse" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)' }} />
-                                <div className="flex-1 space-y-1.5">
-                                    <div className="h-3 w-20 rounded-full animate-pulse" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }} />
-                                    <div className="h-2 w-14 rounded-full animate-pulse" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)' }} />
-                                </div>
-                            </div>
-                        ))}
-                    </GlassCard>
-                </div>
-            ))}
-        </div>
-    );
-
     return (
         <div className="h-full flex flex-col app-header-offset">
-            {/* Search bar — fixed below app header */}
-            <div className="flex-shrink-0 px-4 pt-1 pb-3" style={{ backgroundColor: theme.colors.background }}>
+            {/* Title + search */}
+            <div className="flex-shrink-0 px-5 pt-5 pb-3" style={{ backgroundColor: theme.colors.background }}>
+                <h1
+                    className="text-3xl font-bold tracking-tight mb-3"
+                    style={{ color: text, letterSpacing: '-0.02em' }}
+                >
+                    Discontinued Finishes
+                </h1>
                 <StandardSearchBar
                     value={searchTerm}
                     onChange={(val) => setSearchTerm(val)}
-                    placeholder="Search discontinued or replacement..."
+                    placeholder="Search by finish name..."
                     theme={theme}
                 />
             </div>
 
-            <div className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-hide">
-                {isLoading ? (
-                    <LoadingSkeleton />
-                ) : Object.keys(groupedFinishes).length > 0 ? (
-                    <div className="space-y-6 mt-1">
-                        {Object.entries(groupedFinishes).map(([category, finishItems]) => (
+            <div className="flex-1 overflow-y-auto px-5 pb-8 scrollbar-hide">
+                {grouped.length > 0 ? (
+                    <div className="space-y-5 mt-1">
+                        {grouped.map(([category, items]) => (
                             <section key={category}>
-                                {/* Category header — JSI uppercase label style */}
                                 <h2
-                                    className="text-[13px] font-bold uppercase tracking-widest mb-2.5 px-1"
-                                    style={{ color: theme.colors.textPrimary, letterSpacing: '0.08em' }}
+                                    className="text-[11px] font-bold uppercase tracking-[0.1em] mb-2 px-0.5"
+                                    style={{ color: sub, opacity: 0.55 }}
                                 >
                                     {category}
                                 </h2>
-                                <GlassCard theme={theme} className="overflow-hidden" style={{ padding: 4 }}>
-                                    {finishItems.map((finish, index) => (
+                                <GlassCard theme={theme} className="overflow-hidden" style={{ padding: 0 }}>
+                                    {items.map((finish, index) => (
                                         <FinishRow
-                                            key={finish.id || index}
+                                            key={finish.id}
                                             finish={finish}
-                                            isLast={index === finishItems.length - 1}
+                                            isLast={index === items.length - 1}
                                         />
                                     ))}
                                 </GlassCard>
@@ -226,95 +207,63 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
                         ))}
                     </div>
                 ) : (
-                    <div className="flex flex-col items-center justify-center py-16">
+                    <div className="flex flex-col items-center justify-center py-20">
                         <div
-                            className="w-14 h-14 rounded-full flex items-center justify-center mb-4"
+                            className="w-12 h-12 rounded-full flex items-center justify-center mb-3"
                             style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.04)' }}
                         >
-                            <Search className="w-6 h-6" style={{ color: theme.colors.textSecondary }} />
+                            <Search className="w-5 h-5" style={{ color: sub }} />
                         </div>
-                        <p className="font-semibold text-[15px]" style={{ color: theme.colors.textPrimary }}>
-                            No results found
+                        <p className="font-semibold text-[15px]" style={{ color: text }}>
+                            No results
                         </p>
-                        <p className="text-[13px] mt-1 text-center max-w-[260px]" style={{ color: theme.colors.textSecondary }}>
-                            No finishes match &ldquo;{searchTerm}&rdquo;. Try a different name or code.
+                        <p className="text-[13px] mt-1 text-center max-w-[240px]" style={{ color: sub }}>
+                            No finishes match &ldquo;{searchTerm}&rdquo;
                         </p>
                     </div>
                 )}
             </div>
 
-            {/* ── Confirmation modal with visual preview ── */}
+            {/* Modal */}
             <Modal show={!!selectedFinish} onClose={() => setSelectedFinish(null)} title="Add Replacement Sample" theme={theme}>
                 {selectedFinish && (
                     <div className="space-y-5">
-                        {/* Visual mapping preview */}
-                        <div className="flex items-center justify-center gap-5 py-3">
-                            {/* Old finish */}
+                        <div className="flex items-center justify-center gap-6 py-4">
                             <div className="flex flex-col items-center gap-2">
-                                <FinishSwatch
-                                    image={getLocalFinishImagePath(selectedFinish.OldFinish)}
-                                    alt={selectedFinish.OldFinish}
-                                    size={56}
-                                />
+                                <Swatch image={getImg(selectedFinish.oldName)} alt={selectedFinish.oldName} size={52} />
                                 <div className="text-center">
-                                    <p className="text-xs font-semibold leading-tight" style={{ color: theme.colors.textSecondary }}>
-                                        {formatFinishName(selectedFinish.OldFinish)}
-                                    </p>
-                                    <p className="text-[11px] mt-0.5" style={{ color: theme.colors.textSecondary, opacity: 0.6 }}>
-                                        Discontinued
-                                    </p>
+                                    <p className="text-xs font-semibold" style={{ color: sub }}>{fmt(selectedFinish.oldName)}</p>
+                                    <p className="text-[10px] mt-0.5 font-medium" style={{ color: sub, opacity: 0.5 }}>Discontinued</p>
                                 </div>
                             </div>
-
-                            <ArrowRight className="w-4 h-4 flex-shrink-0 mt-[-20px]" style={{ color: theme.colors.textSecondary }} />
-
-                            {/* New finish */}
+                            <div className="flex-shrink-0 -mt-5" style={{ color: sub, opacity: 0.4 }}>
+                                <LongArrow />
+                            </div>
                             <div className="flex flex-col items-center gap-2">
-                                <FinishSwatch
-                                    image={getLocalFinishImagePath(selectedFinish.NewFinishName)}
-                                    alt={selectedFinish.NewFinishName}
-                                    size={56}
-                                />
+                                <Swatch image={getImg(selectedFinish.newName)} alt={selectedFinish.newName} size={52} />
                                 <div className="text-center">
-                                    <p className="text-xs font-semibold leading-tight" style={{ color: theme.colors.textPrimary }}>
-                                        {formatFinishName(selectedFinish.NewFinishName)}
-                                    </p>
-                                    <p className="text-[11px] mt-0.5" style={{ color: theme.colors.accent }}>
-                                        Replacement
-                                    </p>
+                                    <p className="text-xs font-semibold" style={{ color: text }}>{fmt(selectedFinish.newName)}</p>
+                                    <p className="text-[10px] mt-0.5 font-medium" style={{ color: accent }}>Replacement</p>
                                 </div>
                             </div>
                         </div>
 
-                        <p className="text-[13px] text-center leading-relaxed" style={{ color: theme.colors.textSecondary }}>
-                            Add a sample of <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>{formatFinishName(selectedFinish.NewFinishName)}</span> to your cart?
+                        <p className="text-[13px] text-center leading-relaxed" style={{ color: sub }}>
+                            Add a sample of <span className="font-semibold" style={{ color: text }}>{fmt(selectedFinish.newName)}</span> to your cart?
                         </p>
 
-                        {/* Action buttons — pill style per JSI design system */}
                         <div className="flex gap-3 pt-1">
                             <button
                                 onClick={() => setSelectedFinish(null)}
-                                className="flex-1 font-semibold py-2.5 rounded-full text-[13px] transition-all duration-150"
-                                style={{
-                                    backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : theme.colors.subtle,
-                                    color: theme.colors.textPrimary,
-                                    border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'transparent'}`,
-                                }}
-                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)'; }}
-                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.06)' : theme.colors.subtle; }}
+                                className="flex-1 font-semibold py-2.5 rounded-full text-[13px] active:scale-95 transition-all"
+                                style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : theme.colors.subtle, color: text }}
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleOrderClick}
-                                className="flex-1 font-semibold py-2.5 rounded-full text-[13px] flex items-center justify-center gap-2 transition-all duration-150"
-                                style={{
-                                    backgroundColor: theme.colors.accent,
-                                    color: theme.colors.accentText,
-                                    boxShadow: 'none',
-                                }}
-                                onMouseEnter={e => { e.currentTarget.style.opacity = '0.9'; }}
-                                onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
+                                className="flex-1 font-semibold py-2.5 rounded-full text-[13px] flex items-center justify-center gap-2 active:scale-95 transition-all"
+                                style={{ backgroundColor: accent, color: theme.colors.accentText }}
                             >
                                 <ShoppingCart className="w-3.5 h-3.5" />
                                 Add to Cart

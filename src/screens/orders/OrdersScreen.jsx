@@ -165,9 +165,15 @@ const DateGroupCard = ({ theme, dateKey, group, onNavigate }) => {
             border: dark ? '1px solid rgba(255,255,255,0.06)' : 'none',
             boxShadow: dark ? 'none' : '0 1px 4px rgba(0,0,0,0.06)',
         }}>
-            <div className="flex items-baseline justify-between px-4 pt-3.5 pb-1">
-                <h2 className="text-xs font-bold tracking-wider" style={{ color: theme.colors.textSecondary }}>{label}</h2>
-                <p className="text-xs" style={{ color: theme.colors.textSecondary }}>{group.orders.length} {group.orders.length === 1 ? 'order' : 'orders'} &middot; {currency0(group.total)}</p>
+            <div
+                className="flex items-baseline justify-between px-4 pt-3 pb-2"
+                style={{
+                    backgroundColor: dark ? 'rgba(255,255,255,0.03)' : 'rgba(53,53,53,0.025)',
+                    borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'}`,
+                }}
+            >
+                <h2 className="text-xs font-bold tracking-wider" style={{ color: theme.colors.accent }}>{label}</h2>
+                <p className="text-[11px] font-medium" style={{ color: theme.colors.textSecondary, opacity: 0.7 }}>{group.orders.length} {group.orders.length === 1 ? 'order' : 'orders'} &middot; {currency0(group.total)}</p>
             </div>
             <div>
                 {group.orders.map((o, idx) => (
@@ -225,19 +231,22 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
     return (
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
             {/* Controls */}
-            <div className="flex-shrink-0 max-w-5xl mx-auto w-full">
-                <div className="px-4 sm:px-6 lg:px-8 pt-2 pb-3 flex flex-col gap-2.5">
+            <div className="flex-shrink-0 max-w-2xl mx-auto w-full">
+                <div className="px-5 pt-2 pb-3 flex flex-col gap-3">
                     <div style={{ height: 56 }}>
                         <SearchInput value={searchTerm} onChange={setSearchTerm} placeholder="Search orders..." theme={theme} variant="header" />
                     </div>
-                    <div className="flex items-center gap-2">
-                        <div className="min-w-0 flex-1 max-w-[220px]">
+                    <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
                             <SegmentedToggle value={dateType} onChange={setDateType} options={[{ value: 'shipDate', label: 'Ship Date' }, { value: 'date', label: 'PO Date' }]} theme={theme} size="sm" />
                         </div>
-                        <div className="ml-auto flex items-center gap-2">
+                        <div className="flex items-center gap-2.5">
                             <div ref={dealerRef} className="relative flex-shrink-0">
-                                <button onClick={() => setDealerMenuOpen(o => !o)} className="h-10 w-10 rounded-full flex items-center justify-center active:scale-90 transition border" style={{ backgroundColor: selectedDealer !== 'All Dealers' ? `${theme.colors.accent}12` : dark ? 'rgba(255,255,255,0.06)' : theme.colors.surface, borderColor: selectedDealer !== 'All Dealers' ? `${theme.colors.accent}30` : dark ? 'rgba(255,255,255,0.12)' : theme.colors.border }} title={selectedDealer}>
-                                    <Building2 className="w-[18px] h-[18px]" style={{ color: theme.colors.textPrimary }} />
+                                <button onClick={() => setDealerMenuOpen(o => !o)} className="h-10 rounded-full flex items-center justify-center active:scale-95 transition border w-10 md:w-auto md:px-4 md:gap-2" style={{ backgroundColor: selectedDealer !== 'All Dealers' ? `${theme.colors.accent}12` : dark ? 'rgba(255,255,255,0.06)' : theme.colors.surface, borderColor: selectedDealer !== 'All Dealers' ? `${theme.colors.accent}30` : dark ? 'rgba(255,255,255,0.12)' : theme.colors.border }} title={selectedDealer}>
+                                    <Building2 className="w-[18px] h-[18px] flex-shrink-0" style={{ color: theme.colors.textPrimary }} />
+                                    <span className="hidden md:inline text-[13px] font-medium whitespace-nowrap" style={{ color: theme.colors.textPrimary }}>
+                                        {selectedDealer === 'All Dealers' ? 'Dealers' : formatCompanyName(selectedDealer)}
+                                    </span>
                                 </button>
                                 {dealerMenuOpen && (
                                     <motion.div
@@ -253,8 +262,11 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                                     </motion.div>
                                 )}
                             </div>
-                            <button onClick={() => setViewMode(v => v === 'list' ? 'calendar' : 'list')} className="h-10 w-10 rounded-full flex items-center justify-center active:scale-90 transition border" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.06)' : theme.colors.surface, borderColor: dark ? 'rgba(255,255,255,0.12)' : theme.colors.border }} title={viewMode === 'list' ? 'Calendar View' : 'List View'}>
-                                {viewMode === 'list' ? <Calendar className="w-[18px] h-[18px]" style={{ color: theme.colors.textPrimary }} /> : <List className="w-[18px] h-[18px]" style={{ color: theme.colors.textPrimary }} />}
+                            <button onClick={() => setViewMode(v => v === 'list' ? 'calendar' : 'list')} className="h-10 rounded-full flex items-center justify-center active:scale-95 transition border w-10 md:w-auto md:px-4 md:gap-2" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.06)' : theme.colors.surface, borderColor: dark ? 'rgba(255,255,255,0.12)' : theme.colors.border }} title={viewMode === 'list' ? 'Calendar View' : 'List View'}>
+                                {viewMode === 'list' ? <Calendar className="w-[18px] h-[18px] flex-shrink-0" style={{ color: theme.colors.textPrimary }} /> : <List className="w-[18px] h-[18px] flex-shrink-0" style={{ color: theme.colors.textPrimary }} />}
+                                <span className="hidden md:inline text-[13px] font-medium whitespace-nowrap" style={{ color: theme.colors.textPrimary }}>
+                                    {viewMode === 'list' ? 'Calendar' : 'List'}
+                                </span>
                             </button>
                         </div>
                     </div>
@@ -263,7 +275,7 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
 
             {/* Content */}
             <div ref={scrollRef} className="flex-1 overflow-y-auto scrollbar-hide">
-                <div className="px-4 sm:px-6 lg:px-8 pt-3 pb-24 max-w-5xl mx-auto w-full">
+                <div className="px-5 pt-3 pb-24 max-w-2xl mx-auto w-full">
                     <AnimatePresence mode="wait">
                       {viewMode === 'list' ? (
                         <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>

@@ -213,7 +213,7 @@ export const HomeScreen = React.memo(({ theme, onNavigate, onVoiceActivate, home
 
     const todayLabel = useMemo(() => {
         const now = new Date();
-        return now.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+        return now.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
     }, []);
 
     const communityPosts = useMemo(() => {

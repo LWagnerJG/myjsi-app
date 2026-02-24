@@ -124,6 +124,14 @@ const ScreenRouter = React.memo(({ screenKey, projectsScreenRef, SuspenseFallbac
         const normalizedFirst = normalizeResourceSlug(firstSegment);
         const normalized = [normalizedFirst, ...slug.split('/').slice(1)].join('/');
 
+        // Tradeshows sub-routes: resources/tradeshows/{brandId}/{showId?}
+        if (normalizedFirst === 'tradeshows' && parts.length >= 3) {
+            return lazyWrap(TradeshowsScreen, {
+                initialBrandId: parts[2],
+                initialShowId: parts[3] || null,
+            });
+        }
+
         // Direct feature screen match (single segment feature slugs only)
         if (RESOURCE_FEATURE_SCREENS[normalized]) {
             return lazyWrap(RESOURCE_FEATURE_SCREENS[normalized]);
