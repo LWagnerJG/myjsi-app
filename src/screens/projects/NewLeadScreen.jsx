@@ -17,6 +17,7 @@ import { DISCOUNT_OPTIONS_WITH_UNKNOWN } from '../../constants/discounts.js';
 import { JSI_SERIES } from '../products/data.js';
 import { CONTRACTS_DATA } from '../resources/contracts/data.js';
 import { VisionOptions, KnoxOptions, WinkHoopzOptions } from './product-options.jsx';
+import { CITY_OPTIONS } from '../../constants/locations.js';
 
 /* ═══════════════════════════════════════════════════════════════
    HELPERS
@@ -27,17 +28,6 @@ const parseCurrency = (raw) => {
   const n = Number(String(raw).replace(/[^0-9.]/g, ''));
   return Number.isFinite(n) ? n : null;
 };
-
-const CITY_OPTIONS = [
-  'Indianapolis, IN', 'Jasper, IN', 'Evansville, IN', 'Bloomington, IN', 'Fort Wayne, IN',
-  'Cincinnati, OH', 'Louisville, KY', 'Nashville, TN', 'Chicago, IL', 'St. Louis, MO',
-  'Columbus, OH', 'Cleveland, OH', 'Detroit, MI', 'Milwaukee, WI', 'Minneapolis, MN',
-  'Atlanta, GA', 'Charlotte, NC', 'Raleigh, NC', 'Pittsburgh, PA', 'Philadelphia, PA',
-  'New York, NY', 'Boston, MA', 'Washington, DC', 'Baltimore, MD', 'Richmond, VA',
-  'Dallas, TX', 'Austin, TX', 'Houston, TX', 'San Antonio, TX', 'Denver, CO',
-  'Phoenix, AZ', 'Las Vegas, NV', 'Los Angeles, CA', 'San Diego, CA', 'San Francisco, CA',
-  'Seattle, WA', 'Portland, OR', 'Salt Lake City, UT', 'Kansas City, MO', 'Omaha, NE',
-];
 
 const PO_OPTIONS = ['Unknown', '<30 Days', '30\u201360 Days', '60\u2013180 Days', '180+ Days', 'Next Year'];
 const REWARD_THRESHOLD = 250000;

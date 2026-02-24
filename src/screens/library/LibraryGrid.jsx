@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { INITIAL_ASSETS } from './data.js';
 import { X, Download, Share2, Copy, Heart } from 'lucide-react';
+import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z } from '../../components/common/modalUtils.js';
 
 // Simple in-memory library grid with mock data
 export const LibraryGrid = ({ theme, query, parentHeaderRef, savedImageIds = [], onToggleSaveImage, assetsOverride }) => {
@@ -68,8 +69,8 @@ export const LibraryGrid = ({ theme, query, parentHeaderRef, savedImageIds = [],
       {/* Detail modal via portal so it's never clipped by overflow containers */}
       {selected && createPortal(
         <div
-          className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center"
-          style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(6px)' }}
+          className="fixed inset-0 flex items-end sm:items-center justify-center"
+          style={{ ...getUnifiedBackdropStyle(true), zIndex: UNIFIED_MODAL_Z }}
           onMouseDown={(e) => { if (e.target === e.currentTarget) closeDetail(); }}
         >
           <div

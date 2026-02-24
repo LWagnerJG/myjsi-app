@@ -47,7 +47,6 @@ const BRAND_GRADIENTS = {
 const BrandSelection = ({ theme, onSelect }) => {
   const text = theme.colors.textPrimary;
   const sub = theme.colors.textSecondary;
-  const accent = theme.colors.accent;
 
   return (
     <div className="flex flex-col h-full">

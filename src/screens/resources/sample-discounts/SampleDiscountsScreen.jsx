@@ -7,7 +7,6 @@ export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
     const text = theme.colors.textPrimary;
     const sub = theme.colors.textSecondary;
     const accent = theme.colors.accent;
-    const border = theme.colors.border;
 
     const handleCopy = useCallback((ssa) => {
         const full = `SSA ${ssa}`;

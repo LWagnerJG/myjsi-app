@@ -1,5 +1,7 @@
-import React, { createContext, useCallback, useState, useRef, useEffect } from 'react';
+import React, { createContext, useCallback, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getToastMotion } from '../../design-system/motion.js';
+import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion.js';
 
 const ToastContext = createContext(null);
 
@@ -7,10 +9,7 @@ let idCounter = 0;
 
 export const ToastHost = ({ children, theme }) => {
   const [toasts, setToasts] = useState([]);
-  const prefersReduced = useRef(false);
-  useEffect(() => {
-    prefersReduced.current = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  }, []);
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   const push = useCallback((message, options={}) => {
     const id = ++idCounter;
@@ -25,7 +24,7 @@ export const ToastHost = ({ children, theme }) => {
     return () => timers.forEach(clearTimeout);
   }, [toasts]);
 
-  const reduced = prefersReduced.current;
+  const toastMotion = getToastMotion(prefersReducedMotion);
 
   return (
     <ToastContext.Provider value={{ push }}>
@@ -35,11 +34,11 @@ export const ToastHost = ({ children, theme }) => {
           {toasts.map(t => (
             <motion.div
               key={t.id}
-              layout={!reduced}
-              initial={reduced ? undefined : { opacity: 0, y: 16, scale: 0.92 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={reduced ? undefined : { opacity: 0, y: -8, scale: 0.92, transition: { duration: 0.2 } }}
-              transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+              layout={!prefersReducedMotion}
+              initial={toastMotion.initial}
+              animate={toastMotion.animate}
+              exit={toastMotion.exit}
+              transition={toastMotion.transition}
               role="status"
               aria-live={t.type === 'error' ? 'assertive' : 'polite'}
               className="pointer-events-auto px-4 py-2 rounded-full shadow-md text-sm font-medium backdrop-blur-sm"

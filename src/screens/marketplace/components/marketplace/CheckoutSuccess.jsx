@@ -1,12 +1,16 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { CheckCircle } from 'lucide-react';
+import { getUnifiedBackdropStyle, UNIFIED_BACKDROP_TRANSITION, UNIFIED_MODAL_Z } from '../../../../components/common/modalUtils.js';
+import { MOTION_DURATIONS_MS, MOTION_EASINGS, buildCssTransition } from '../../../../design-system/motion.js';
+import { usePrefersReducedMotion } from '../../../../hooks/usePrefersReducedMotion.js';
 
 export const CheckoutSuccess = ({ show, theme }) => {
+  const prefersReduced = usePrefersReducedMotion();
   if (!show) return null;
-  const prefersReduced = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-  return (
-    <div className="fixed inset-0 z-[1200] flex items-center justify-center pointer-events-none">
-      <div className="absolute inset-0" style={{ background: show ? 'rgba(0,0,0,0.35)' : 'rgba(0,0,0,0)', transition: prefersReduced ? 'none' : 'background 320ms ease' }} />
+  return createPortal(
+    <div className="fixed inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: UNIFIED_MODAL_Z + 100 }}>
+      <div className="absolute inset-0" style={{ ...getUnifiedBackdropStyle(show, prefersReduced), transition: prefersReduced ? 'none' : UNIFIED_BACKDROP_TRANSITION }} />
       <div
         className="relative px-10 py-8 rounded-3xl text-center"
         style={{
@@ -15,7 +19,12 @@ export const CheckoutSuccess = ({ show, theme }) => {
           border: `1px solid ${theme.colors.border}`,
           transform: show ? 'scale(1)' : 'scale(.9)',
           opacity: show ? 1 : 0.9,
-          transition: prefersReduced ? 'none' : 'transform 480ms cubic-bezier(.3,1,.3,1), opacity 360ms ease',
+          transition: prefersReduced
+            ? 'none'
+            : [
+              buildCssTransition('transform', MOTION_DURATIONS_MS.slow, MOTION_EASINGS.springOut),
+              buildCssTransition('opacity', MOTION_DURATIONS_MS.medium, MOTION_EASINGS.standard),
+            ].join(', '),
           boxShadow: '0 6px 24px -4px rgba(0,0,0,0.12)',
         }}
       >
@@ -23,6 +32,7 @@ export const CheckoutSuccess = ({ show, theme }) => {
         <p className="font-bold text-[15px]">Order Placed!</p>
         <p className="text-xs mt-1" style={{ color: theme.colors.textSecondary }}>Your LWYD merch is on its way.</p>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

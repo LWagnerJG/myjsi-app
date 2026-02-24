@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ExternalLink, Share2, CheckCircle2, Link2, Megaphone } from 'lucide-react';
 import { ANNOUNCEMENT_COLORS, ANNOUNCEMENT_ICONS } from './utils.js';
+import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z } from '../../../../components/common/modalUtils.js';
 
 export const AnnouncementDetailModal = ({ announcement, theme, dark, onClose, onNavigate }) => {
   const [copied, setCopied] = useState(false);
@@ -47,11 +48,12 @@ export const AnnouncementDetailModal = ({ announcement, theme, dark, onClose, on
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center"
+        className="fixed inset-0 flex items-end sm:items-center justify-center"
+        style={{ zIndex: UNIFIED_MODAL_Z }}
         onClick={onClose}
       >
         {/* Backdrop */}
-        <div className="absolute inset-0" style={{ backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }} />
+        <div className="absolute inset-0" style={getUnifiedBackdropStyle(true)} />
 
         {/* Modal */}
         <motion.div

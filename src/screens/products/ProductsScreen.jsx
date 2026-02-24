@@ -52,7 +52,7 @@ const CategoryCard = React.memo(({
                         </h2>
                         <ChevronRight className="w-5 h-5 opacity-40" style={{ color: theme.colors.textSecondary }} />
                     </div>
-                    <div className="flex gap-3 overflow-x-auto scrollbar-hide -mr-2">
+                    <div className="flex gap-3 overflow-x-auto scrollbar-hide pl-2 sm:pl-3 pr-2 -mr-2">
                         {category.images?.map((img, i) => (
                             <div
                                 key={i}
@@ -65,6 +65,7 @@ const CategoryCard = React.memo(({
                                     src={img}
                                     alt={`${category.name} ${i + 1}`}
                                     className="w-full h-full object-cover object-center scale-[1.2] hover:scale-[1.3] transition-transform duration-500"
+                                    style={{ objectPosition: '58% center' }}
                                     loading="lazy"
                                 />
                             </div>

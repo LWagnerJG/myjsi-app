@@ -1,13 +1,15 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { X, Download, Share2 } from 'lucide-react';
 import { isDarkTheme } from '../../../../design-system/tokens.js';
+import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z } from '../../../../components/common/modalUtils.js';
 
 export const SlidePreviewModal = ({ preview, theme, onClose, onDownload, onShare }) => {
     const isDark = isDarkTheme(theme);
     if (!preview) return null;
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4" onClick={onClose}>
+    return createPortal(
+        <div className="fixed inset-0 flex items-center justify-center p-4" style={{ ...getUnifiedBackdropStyle(true), zIndex: UNIFIED_MODAL_Z }} onClick={onClose}>
             <motion.div initial={{ opacity: 0, scale: 0.94 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.94 }} transition={{ duration: 0.2 }}
                 className="max-w-3xl w-full rounded-3xl overflow-hidden"
                 style={{ background: isDark ? theme.colors.surface : '#FFFFFF', border: `1px solid ${theme.colors.border}`, boxShadow: '0 24px 60px rgba(0,0,0,0.35)' }}
@@ -40,6 +42,7 @@ export const SlidePreviewModal = ({ preview, theme, onClose, onDownload, onShare
                     </button>
                 </div>
             </motion.div>
-        </div>
+        </div>,
+        document.body
     );
 };

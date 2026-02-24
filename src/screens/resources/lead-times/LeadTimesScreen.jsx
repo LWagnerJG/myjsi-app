@@ -1,9 +1,11 @@
 import React, { useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import { Timer, ListOrdered, Zap, X, ExternalLink } from 'lucide-react';
 import { LEAD_TIMES_DATA, QUICKSHIP_SERIES } from './data.js';
 import { isDarkTheme } from '../../../design-system/tokens.js';
 import StandardSearchBar from '../../../components/common/StandardSearchBar.jsx';
+import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z } from '../../../components/common/modalUtils.js';
 
 // Fallback colors if theme tokens missing
 const ensureTheme = (theme) => ({
@@ -27,10 +29,10 @@ const QuickShipModal = ({ isOpen, onClose, seriesName, theme }) => {
         window.open('https://www.jsifurniture.com/products/quickship-program/', '_blank');
     };
     
-    return (
+    return createPortal(
         <div 
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+            className="fixed inset-0 flex items-center justify-center p-4"
+            style={{ ...getUnifiedBackdropStyle(true), zIndex: UNIFIED_MODAL_Z }}
             onClick={onClose}
         >
             <div 
@@ -81,7 +83,8 @@ const QuickShipModal = ({ isOpen, onClose, seriesName, theme }) => {
                     Click to see available models, finishes, and program details on jsifurniture.com
                 </p>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 

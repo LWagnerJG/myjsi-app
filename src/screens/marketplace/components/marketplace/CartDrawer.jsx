@@ -1,8 +1,10 @@
 import React, { useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { isDarkTheme } from '../../../../design-system/tokens.js';
 import { ShoppingCart, ChevronDown, Trash2, Minus, Plus, CreditCard } from 'lucide-react';
 import { FloatingCart } from '../../../../components/common/FloatingCart.jsx';
 import { formatElliottBucks } from '../../data.js';
+import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z } from '../../../../components/common/modalUtils.js';
 
 export const CartDrawer = ({ cart, balance, onUpdateQty, onRemove, onCheckout, theme }) => {
   const [expanded, setExpanded] = useState(false);
@@ -26,9 +28,9 @@ export const CartDrawer = ({ cart, balance, onUpdateQty, onRemove, onCheckout, t
       )}
 
       {/* Expanded */}
-      {expanded && (
-        <div className="fixed inset-0 z-30" onClick={() => setExpanded(false)}>
-          <div className="absolute inset-0 bg-black/30" />
+      {expanded && createPortal(
+        <div className="fixed inset-0" style={{ zIndex: UNIFIED_MODAL_Z }} onClick={() => setExpanded(false)}>
+          <div className="absolute inset-0" style={getUnifiedBackdropStyle(true)} />
           <div
             className="absolute bottom-4 left-4 right-4 max-w-md mx-auto rounded-3xl overflow-hidden"
             style={{ backgroundColor: theme.colors.surface, boxShadow: '0 4px 20px rgba(0,0,0,0.1)', maxHeight: '80vh' }}
@@ -126,7 +128,8 @@ export const CartDrawer = ({ cart, balance, onUpdateQty, onRemove, onCheckout, t
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

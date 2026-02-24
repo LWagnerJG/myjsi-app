@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronDown, Share2, X, Play, Download } from 'lucide-react';
 import { JSI_COLORS } from '../../design-system/tokens.js';
+import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z } from '../../components/common/modalUtils.js';
 
 /* ── helpers ────────────────────────────────────────────────── */
 const ABBR = /\b(llc|inc|msd|lecc)\b/gi;
@@ -184,8 +185,8 @@ export const LineItem = React.memo(({ item, open, onToggle, c, dark }) => (
 /* ── ACK modal (portal, centered, rich HTML — no iframe) ─────── */
 export const AckModal = ({ order, onClose, onShare, dark, c }) => (
   <Portal>
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" role="dialog" aria-label="Acknowledgment">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+    <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: UNIFIED_MODAL_Z }} role="dialog" aria-label="Acknowledgment">
+      <div className="absolute inset-0" style={getUnifiedBackdropStyle(true)} onClick={onClose} />
       <div className="relative w-full max-w-md rounded-2xl overflow-hidden flex flex-col" style={{
         maxHeight: '85vh', backgroundColor: dark ? '#2A2A2A' : '#fff',
         border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
@@ -258,8 +259,8 @@ export const AckModal = ({ order, onClose, onShare, dark, c }) => (
 /* ── clips modal (portal) ───────────────────────────────────── */
 export const ClipsModal = ({ onClose, dark, c }) => (
   <Portal>
-    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center" role="dialog" aria-label="Production clips">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+    <div className="fixed inset-0 flex items-end sm:items-center justify-center" style={{ zIndex: UNIFIED_MODAL_Z }} role="dialog" aria-label="Production clips">
+      <div className="absolute inset-0" style={getUnifiedBackdropStyle(true)} onClick={onClose} />
       <div className="relative w-full max-w-lg rounded-t-2xl sm:rounded-2xl overflow-hidden flex flex-col" style={{
         maxHeight: '80vh', backgroundColor: dark ? '#2A2A2A' : '#fff',
         border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',

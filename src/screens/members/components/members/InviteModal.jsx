@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { UserPlus, X, Check, Send } from 'lucide-react';
 import { hapticSuccess } from '../../../../utils/haptics.js';
+import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z } from '../../../../components/common/modalUtils.js';
 
 export const InviteModal = ({ open, onClose, onInvite, theme, roles }) => {
     const [email, setEmail] = useState('');
@@ -38,8 +39,8 @@ export const InviteModal = ({ open, onClose, onInvite, theme, roles }) => {
     };
 
     return createPortal(
-        <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-black/25 backdrop-blur-sm" onClick={onClose} />
+        <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: UNIFIED_MODAL_Z }}>
+            <div className="absolute inset-0" style={getUnifiedBackdropStyle(true)} onClick={onClose} />
             <div className="relative w-full max-w-md rounded-2xl p-0 overflow-hidden"
                 style={{ backgroundColor: theme.colors.surface, boxShadow: '0 20px 60px rgba(0,0,0,0.18)', border: `1px solid ${theme.colors.border}` }}>
 

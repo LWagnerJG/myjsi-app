@@ -75,6 +75,16 @@
     --theme-info-light: rgba(91, 123, 140, 0.12);
     --theme-card-bg: #FFFFFF;
     --theme-card-border: 1px solid rgba(0, 0, 0, 0.06);
+
+    /* Shared motion tokens */
+    --motion-duration-fast: 160ms;
+    --motion-duration-standard: 220ms;
+    --motion-duration-medium: 260ms;
+    --motion-duration-slow: 320ms;
+    --motion-duration-screen: 250ms;
+    --motion-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+    --motion-ease-emphasized: cubic-bezier(0.23, 1, 0.32, 1);
+    --motion-ease-spring-out: cubic-bezier(0.3, 1, 0.3, 1);
 }
 
 /* Dark theme overrides */
@@ -104,6 +114,16 @@
     --theme-info-light: rgba(123, 155, 172, 0.2);
     --theme-card-bg: #2A2A2A;
     --theme-card-border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --motion-duration-fast: 1ms;
+        --motion-duration-standard: 1ms;
+        --motion-duration-medium: 1ms;
+        --motion-duration-slow: 1ms;
+        --motion-duration-screen: 1ms;
+    }
 }
 
 @supports(height:100dvh) {
@@ -686,4 +706,39 @@ h6 {
     background-color: rgba(53, 53, 53, 0.85);
     opacity: 1;
     pointer-events: auto;
+}
+
+/* Shared motion utility classes */
+.motion-tap {
+    transition: transform var(--motion-duration-fast) var(--motion-ease-standard);
+}
+
+.motion-tap:active {
+    transform: scale(0.98);
+}
+
+.motion-card {
+    transition:
+        transform var(--motion-duration-standard) var(--motion-ease-standard),
+        box-shadow var(--motion-duration-standard) var(--motion-ease-standard);
+}
+
+.motion-card:hover {
+    transform: translateY(-2px);
+}
+
+.motion-fade-up {
+    animation: motionFadeUp var(--motion-duration-standard) var(--motion-ease-emphasized) both;
+}
+
+@keyframes motionFadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

@@ -56,7 +56,7 @@ export const FrostButton = ({
             type={type}
             onClick={onClick}
             disabled={disabled}
-            className={`${sizeClasses[size]} font-semibold rounded-full transition-all duration-200 flex items-center justify-center hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed ${className}`}
+            className={`${sizeClasses[size]} font-semibold rounded-full transition-all duration-200 flex items-center justify-center motion-tap hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed ${className}`}
             style={{
                 ...variantStyle,
                 letterSpacing: '-0.01em'
@@ -124,7 +124,7 @@ export const PillButton = ({
             type={type}
             onClick={onClick}
             disabled={disabled}
-            className={`${sizeClasses[size]} font-semibold rounded-full transition-all ${borderClass} text-center whitespace-nowrap active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed ${className}`}
+            className={`${sizeClasses[size]} font-semibold rounded-full transition-all motion-tap ${borderClass} text-center whitespace-nowrap active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed ${className}`}
             style={{
                 backgroundColor: isSelected ? resolvedSelectedBg : resolvedUnselectedBg,
                 color: isSelected ? resolvedSelectedText : resolvedUnselectedText,
@@ -174,7 +174,7 @@ export const PrimaryButton = ({
             type={type}
             onClick={onClick}
             disabled={disabled}
-            className={`${fullWidth ? 'w-full' : ''} ${sizeClasses[size]} px-8 font-bold rounded-full transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2 ${className}`}
+            className={`${fullWidth ? 'w-full' : ''} ${sizeClasses[size]} px-8 font-bold rounded-full transition-all motion-tap hover:scale-[1.01] active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2 ${className}`}
             style={{
                 backgroundColor: theme.colors.accent,
                 color: theme.colors.accentText || '#FFFFFF',
@@ -223,7 +223,7 @@ export const SecondaryButton = ({
             type={type}
             onClick={onClick}
             disabled={disabled}
-            className={`${fullWidth ? 'w-full' : ''} ${sizeClasses[size]} px-8 font-semibold rounded-full transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed border-2 ${className}`}
+            className={`${fullWidth ? 'w-full' : ''} ${sizeClasses[size]} px-8 font-semibold rounded-full transition-all motion-tap hover:scale-[1.01] active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed border-2 ${className}`}
             style={{
                 backgroundColor: 'transparent',
                 color: theme.colors.accent,

@@ -10,6 +10,8 @@ export const CommunityLibraryLayout = ({
   theme,
   posts, polls, likedPosts, pollChoices, postUpvotes = {},
   onToggleLike, onUpvote, onPollVote, onAddComment, openCreateContentModal,
+  openLibraryUploadModal,
+  libraryAssets,
   savedImageIds = [], onToggleSaveImage,
 }) => {
   const dark = isDarkTheme(theme);
@@ -144,8 +146,8 @@ export const CommunityLibraryLayout = ({
                   theme={theme}
                 />
               </div>
-              <button onClick={openCreateContentModal} className="h-12 px-5 rounded-full text-xs font-semibold transition-all active:scale-95 flex-shrink-0" style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}>
-                + Post
+              <button onClick={activeTab === 'library' ? openLibraryUploadModal : openCreateContentModal} className="h-12 px-5 rounded-full text-xs font-semibold transition-all active:scale-95 flex-shrink-0" style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}>
+                {activeTab === 'library' ? '+ Upload' : '+ Post'}
               </button>
             </div>
           )}
@@ -168,7 +170,7 @@ export const CommunityLibraryLayout = ({
             </div>
 
             <div style={paneStyle('library')}>
-              <LibraryGrid theme={theme} query={query} savedImageIds={savedImageIds} onToggleSaveImage={onToggleSaveImage} />
+              <LibraryGrid theme={theme} query={query} savedImageIds={savedImageIds} onToggleSaveImage={onToggleSaveImage} assetsOverride={libraryAssets} />
             </div>
 
             {hasBoardContent && (

@@ -33,19 +33,26 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
     const [selectedCategory, setSelectedCategory] = useState('tfl');
     const totalCartItems = useMemo(() => Object.values(cart).reduce((s, q) => s + q, 0), [cart]);
 
+    const isFinishCategory = useMemo(
+        () => FINISH_CATEGORIES.some((cat) => cat.id === selectedCategory),
+        [selectedCategory]
+    );
+
     const filteredProducts = useMemo(() => {
-        const isFinish = FINISH_CATEGORIES.some((cat) => cat.id === selectedCategory);
-        const base = isFinish ? FINISH_SAMPLES.filter((s) => s.category === selectedCategory) : SAMPLE_PRODUCTS.filter((p) => p.category === selectedCategory && !p.subcategory);
+        const base = isFinishCategory
+            ? FINISH_SAMPLES.filter((s) => s.category === selectedCategory)
+            : SAMPLE_PRODUCTS.filter((p) => p.category === selectedCategory && !p.subcategory);
         if (selectedCategory === 'tfl') {
             const order = ['woodgrain', 'stone', 'metallic', 'solid'];
             return base.sort((a, b) => (order.indexOf(a.finishType || 'solid') - order.indexOf(b.finishType || 'solid')) || a.name.localeCompare(b.name));
         }
         return base;
-    }, [selectedCategory]);
+    }, [selectedCategory, isFinishCategory]);
 
     const currentCategoryName = FINISH_CATEGORIES.find((c) => c.id === selectedCategory)?.name || SAMPLE_CATEGORIES.find((c) => c.id === selectedCategory)?.name || 'Unknown';
     const allCategories = [...FINISH_CATEGORIES, ...SAMPLE_CATEGORIES.filter((cat) => cat.id !== 'finishes')];
     const cleanName = (name) => String(name || '').split('|')[0].trim();
+    const categoryItemLabel = isFinishCategory ? 'finishes' : 'samples';
 
     const totalFinishCount = FINISH_SAMPLES.length;
 
@@ -77,7 +84,7 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                     </div>
                     <div className="px-3 py-2 text-center" style={{ backgroundColor: setQty > 0 ? theme.colors.accent : theme.colors.surface }}>
                         <p className="text-xs font-bold" style={{ color: setQty > 0 ? theme.colors.accentText : theme.colors.textPrimary }}>All {currentCategoryName}</p>
-                        <p className="text-[11px] mt-0.5 font-medium" style={{ color: setQty > 0 ? 'rgba(255,255,255,0.7)' : theme.colors.textSecondary }}>{products.length} finishes</p>
+                        <p className="text-[11px] mt-0.5 font-medium" style={{ color: setQty > 0 ? 'rgba(255,255,255,0.7)' : theme.colors.textSecondary }}>{products.length} {categoryItemLabel}</p>
                     </div>
                 </div>
 
@@ -207,5 +214,4 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
         </div>
     );
 };
-
 

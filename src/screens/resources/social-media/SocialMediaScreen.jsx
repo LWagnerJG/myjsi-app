@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import { PillButton } from '../../../components/common/JSIButtons.jsx';
 import { Instagram, Linkedin, Copy, Info, ChevronDown, ChevronUp } from 'lucide-react';
 import { SOCIAL_MEDIA_POSTS } from './data.js';
+import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z } from '../../../components/common/modalUtils.js';
 
 // Format relative / short date
 const formatDate = (dStr) => {
@@ -127,8 +129,8 @@ export const SocialMediaScreen = ({ theme }) => {
         {!posts.length && <div className="text-sm" style={{ color: theme.colors.textSecondary }}>No content available.</div>}
       </div>
 
-      {preview && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={()=>setPreview(null)}>
+      {preview && createPortal(
+        <div className="fixed inset-0 flex items-center justify-center p-4" style={{ ...getUnifiedBackdropStyle(true), zIndex: UNIFIED_MODAL_Z }} onClick={()=>setPreview(null)}>
           <div className="max-w-md w-full" onClick={(e)=>e.stopPropagation()}>
             <div className="relative rounded-xl overflow-hidden mb-3">
               <img src={preview.url} alt={preview.caption.slice(0,60)} className="w-full object-cover" />
@@ -152,7 +154,8 @@ export const SocialMediaScreen = ({ theme }) => {
               </div>
             </GlassCard>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {toast && (

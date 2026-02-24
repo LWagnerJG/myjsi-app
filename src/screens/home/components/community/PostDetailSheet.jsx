@@ -5,6 +5,7 @@ import { MiniAvatar } from './MiniAvatar.jsx';
 import { ImageLightbox } from './ImageLightbox.jsx';
 import { formatTs, formatExact } from './utils.js';
 import { hapticMedium } from '../../../../utils/haptics.js';
+import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z } from '../../../../components/common/modalUtils.js';
 
 export const PostDetailSheet = ({ post, theme, dark, isLiked, isUpvoted, onToggleLike, onUpvote, onAddComment, onClose }) => {
   const [draft, setDraft] = useState('');
@@ -30,8 +31,8 @@ export const PostDetailSheet = ({ post, theme, dark, isLiked, isUpvoted, onToggl
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[300] flex items-end sm:items-center justify-center"
-      style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(6px)' }}
+      className="fixed inset-0 flex items-end sm:items-center justify-center"
+      style={{ ...getUnifiedBackdropStyle(true), zIndex: UNIFIED_MODAL_Z }}
       onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div

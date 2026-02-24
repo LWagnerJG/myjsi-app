@@ -40,7 +40,7 @@ export const GlassCard = React.memo(
 
     // Interactive classes
     const interactiveClasses = isInteractive
-      ? 'cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.985] active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#353535]/10'
+      ? 'cursor-pointer motion-card motion-tap hover:-translate-y-0.5 active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#353535]/10'
       : '';
 
     const outlinedBorder = variant === 'outlined'

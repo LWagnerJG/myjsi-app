@@ -1,10 +1,10 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { PageTitle } from '../../components/common/PageTitle.jsx';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { FormInput } from '../../components/common/FormComponents.jsx';
-import { X, ImageIcon } from 'lucide-react';
+import { X, ImageIcon, Upload } from 'lucide-react';
 import { INSTALLATION_CONSTANTS, FORM_VALIDATION } from './installation-data.js';
 import { hapticSuccess } from '../../utils/haptics.js';
+import { isDarkTheme } from '../../design-system/tokens.js';
 
 export const AddNewInstallScreen = ({ theme, onAddInstall }) => {
     const [projectName, setProjectName] = useState('');
@@ -14,11 +14,34 @@ export const AddNewInstallScreen = ({ theme, onAddInstall }) => {
     const [predictions, setPredictions] = useState([]);
     const [showPredictions, setShowPredictions] = useState(false);
     const autocompleteService = useRef(null);
+    const locationFieldRef = useRef(null);
+    const isDark = isDarkTheme(theme);
+
+    const photoPreviewUrls = useMemo(
+        () => photos.map(file => URL.createObjectURL(file)),
+        [photos]
+    );
+
+    useEffect(() => {
+        return () => {
+            photoPreviewUrls.forEach(url => URL.revokeObjectURL(url));
+        };
+    }, [photoPreviewUrls]);
 
     useEffect(() => {
         if (window.google && window.google.maps && window.google.maps.places) {
             autocompleteService.current = new window.google.maps.places.AutocompleteService();
         }
+    }, []);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (locationFieldRef.current && !locationFieldRef.current.contains(event.target)) {
+                setShowPredictions(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
     const handleLocationChange = useCallback((e) => {
@@ -64,6 +87,7 @@ export const AddNewInstallScreen = ({ theme, onAddInstall }) => {
                 alert(`Maximum ${INSTALLATION_CONSTANTS.PHOTO_REQUIREMENTS.maxPhotos} photos allowed.`);
             }
         }
+        e.target.value = '';
     }, [photos.length]);
 
     const removePhoto = useCallback((photoIndex) => {
@@ -116,99 +140,145 @@ export const AddNewInstallScreen = ({ theme, onAddInstall }) => {
     }, [projectName, location, photos, validateForm, onAddInstall]);
 
     return (
-        <form onSubmit={handleSubmit} className="h-full flex flex-col">
-            <PageTitle title="Add New Install" theme={theme} />
-            <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4 scrollbar-hide">
-                <GlassCard theme={theme} className="p-4 space-y-4">
-                    <FormInput
-                        label="Project Name"
-                        value={projectName}
-                        onChange={(e) => setProjectName(e.target.value)}
-                        placeholder="e.g., Acme Corp HQ"
-                        theme={theme}
-                        required
-                    />
-                    <div className="relative">
-                        <FormInput
-                            label="Location"
-                            value={location}
-                            onChange={handleLocationChange}
-                            placeholder="e.g., Jasper, IN"
-                            theme={theme}
-                            required
-                        />
-                        {showPredictions && predictions.length > 0 && (
-                            <GlassCard theme={theme} className="absolute w-full mt-1 z-10 p-1">
-                                {predictions.map(p => (
-                                    <button
-                                        key={p.place_id}
-                                        type="button"
-                                        onClick={() => handleSelectPrediction(p)}
-                                        className="block w-full text-left p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 transform active:scale-95"
-                                        style={{ color: theme.colors.textPrimary }}
+        <form onSubmit={handleSubmit} className="h-full flex flex-col app-header-offset" style={{ backgroundColor: theme.colors.background }}>
+            <div className="flex-1 overflow-y-auto scrollbar-hide">
+                <div className="max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-4 pb-24">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5">
+                        <GlassCard theme={theme} className="lg:col-span-5 p-5 sm:p-6 space-y-5">
+                            <div>
+                                <h2 className="text-[18px] font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>Install Details</h2>
+                            </div>
+                            <FormInput
+                                label="Project Name"
+                                value={projectName}
+                                onChange={(e) => setProjectName(e.target.value)}
+                                placeholder="e.g., Acme Corp HQ"
+                                theme={theme}
+                                required
+                            />
+                            <div ref={locationFieldRef} className="relative">
+                                <FormInput
+                                    label="Location"
+                                    value={location}
+                                    onChange={handleLocationChange}
+                                    placeholder="e.g., Jasper, IN"
+                                    theme={theme}
+                                    required
+                                />
+                                {showPredictions && predictions.length > 0 && (
+                                    <div
+                                        className="absolute left-0 right-0 mt-1.5 z-20 rounded-2xl border p-1.5 max-h-52 overflow-y-auto scrollbar-hide"
+                                        style={{
+                                            backgroundColor: theme.colors.surface,
+                                            borderColor: theme.colors.border,
+                                            boxShadow: '0 10px 22px rgba(0,0,0,0.10)',
+                                        }}
                                     >
-                                        {p.description}
-                                    </button>
-                                ))}
-                            </GlassCard>
-                        )}
-                    </div>
-                    
-                    {/* Photo Upload Section */}
-                    <div className="space-y-3">
-                        <label className="block text-sm font-medium" style={{ color: theme.colors.textSecondary }}>
-                            Photos <span style={{ color: '#B85C5C' }}>*</span>
-                            <span className="text-xs ml-2">
-                                ({photos.length}/{INSTALLATION_CONSTANTS.PHOTO_REQUIREMENTS.maxPhotos})
-                            </span>
-                        </label>
-                        <div className="grid grid-cols-3 gap-3">
-                            {photos.map((file, idx) => (
-                                <div key={idx} className="relative aspect-square">
-                                    <img 
-                                        src={URL.createObjectURL(file)} 
-                                        alt={`preview-${idx}`} 
-                                        className="w-full h-full object-cover rounded-xl shadow-md" 
-                                    />
-                                    <button 
-                                        type="button" 
-                                        onClick={() => removePhoto(idx)} 
-                                        className="absolute -top-1 -right-1 rounded-full p-0.5 transition-all duration-200 transform active:scale-90"
-                                        style={{ backgroundColor: '#B85C5C', color: 'white' }}
-                                    >
-                                        <X className="w-4 h-4" />
-                                    </button>
+                                        {predictions.map(p => (
+                                            <button
+                                                key={p.place_id}
+                                                type="button"
+                                                onClick={() => handleSelectPrediction(p)}
+                                                className="block w-full text-left px-3 py-2 rounded-xl transition-colors"
+                                                style={{ color: theme.colors.textPrimary }}
+                                                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'; }}
+                                                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+                                            >
+                                                {p.description}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </GlassCard>
+
+                        <GlassCard theme={theme} className="lg:col-span-7 p-5 sm:p-6 space-y-5">
+                            <div className="flex items-center justify-between">
+                                <label className="text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>
+                                    Photos <span style={{ color: '#B85C5C' }}>*</span>
+                                </label>
+                                <span className="text-[12px] font-semibold tabular-nums" style={{ color: theme.colors.textSecondary }}>
+                                    {photos.length}/{INSTALLATION_CONSTANTS.PHOTO_REQUIREMENTS.maxPhotos}
+                                </span>
+                            </div>
+
+                            {photoPreviewUrls.length === 0 ? (
+                                <button
+                                    type="button"
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className="w-full min-h-[220px] rounded-3xl border-2 border-dashed flex flex-col items-center justify-center gap-3 transition-colors motion-tap"
+                                    style={{
+                                        borderColor: theme.colors.border,
+                                        backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : theme.colors.subtle,
+                                        color: theme.colors.textSecondary,
+                                    }}
+                                >
+                                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)' }}>
+                                        <Upload className="w-6 h-6" />
+                                    </div>
+                                    <span className="font-semibold text-[14px]" style={{ color: theme.colors.textPrimary }}>Add Photos</span>
+                                    <span className="text-[12px]" style={{ color: theme.colors.textSecondary }}>
+                                        Upload one or more install photos
+                                    </span>
+                                </button>
+                            ) : (
+                                <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
+                                    {photoPreviewUrls.map((url, idx) => (
+                                        <div key={url} className="relative aspect-square rounded-2xl overflow-hidden border" style={{ borderColor: theme.colors.border }}>
+                                            <img
+                                                src={url}
+                                                alt={`preview-${idx}`}
+                                                className="w-full h-full object-cover"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => removePhoto(idx)}
+                                                className="absolute top-1.5 right-1.5 w-7 h-7 rounded-full flex items-center justify-center transition-transform motion-tap"
+                                                style={{ backgroundColor: 'rgba(24,24,24,0.68)', color: '#fff' }}
+                                                aria-label={`Remove photo ${idx + 1}`}
+                                            >
+                                                <X className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                    {photos.length < INSTALLATION_CONSTANTS.PHOTO_REQUIREMENTS.maxPhotos && (
+                                        <button
+                                            type="button"
+                                            onClick={() => fileInputRef.current?.click()}
+                                            className="aspect-square rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-1.5 transition-colors motion-tap"
+                                            style={{
+                                                borderColor: theme.colors.border,
+                                                color: theme.colors.textSecondary,
+                                                backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : theme.colors.subtle,
+                                            }}
+                                        >
+                                            <ImageIcon className="w-5 h-5" />
+                                            <span className="text-[12px] font-semibold">Add</span>
+                                        </button>
+                                    )}
                                 </div>
-                            ))}
-                        </div>
-                        <button 
-                            type="button" 
-                            onClick={() => fileInputRef.current?.click()} 
-                            disabled={photos.length >= INSTALLATION_CONSTANTS.PHOTO_REQUIREMENTS.maxPhotos}
-                            className="w-full flex items-center justify-center space-x-2 py-3 rounded-full transition-all duration-200 transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed" 
-                            style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }}
-                        >
-                            <ImageIcon className="w-5 h-5" />
-                            <span className="font-semibold">Add Photo</span>
-                        </button>
-                        <input 
-                            type="file" 
-                            ref={fileInputRef} 
-                            multiple 
-                            accept={INSTALLATION_CONSTANTS.PHOTO_REQUIREMENTS.acceptedFormats.join(',')}
-                            className="hidden" 
-                            onChange={handleFileChange} 
-                        />
+                            )}
+
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                multiple
+                                accept={INSTALLATION_CONSTANTS.PHOTO_REQUIREMENTS.acceptedFormats.join(',')}
+                                className="hidden"
+                                onChange={handleFileChange}
+                            />
+                        </GlassCard>
                     </div>
-                </GlassCard>
-                <div className="pt-2">
-                    <button 
-                        type="submit" 
-                        className="w-full font-bold py-3.5 px-6 rounded-full transition-all duration-200 transform active:scale-95" 
-                        style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
-                    >
-                        Submit Install
-                    </button>
+
+                    <div className="sticky mt-5 flex justify-center" style={{ bottom: 'clamp(0.75rem, 2.5vh, 1.5rem)' }}>
+                        <button
+                            type="submit"
+                            className="w-full max-w-xl font-bold text-[14px] h-12 px-7 rounded-full transition-all motion-tap"
+                            style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
+                        >
+                            Upload Install Photo(s)
+                        </button>
+                    </div>
                 </div>
             </div>
         </form>

@@ -1,5 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState, useCallback } from 'react';
 import './AnimatedScreenWrapper.css';
+import { MOTION_DURATIONS_MS, MOTION_EASINGS, toCssBezier } from '../../design-system/motion.js';
+import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion.js';
 
 export const AnimatedScreenWrapper = ({
     children,
@@ -12,6 +14,9 @@ export const AnimatedScreenWrapper = ({
     const [prevNode, setPrevNode] = useState(null);
     const [animating, setAnimating] = useState(false);
     const prevChildrenRef = useRef(children);
+    const prefersReducedMotion = usePrefersReducedMotion();
+    const screenAnimationMs = prefersReducedMotion ? 1 : MOTION_DURATIONS_MS.screen;
+    const settleAnimationMs = prefersReducedMotion ? 0 : MOTION_DURATIONS_MS.standard;
 
     useLayoutEffect(() => {
         if (screenKey !== currentKey) {
@@ -44,9 +49,9 @@ export const AnimatedScreenWrapper = ({
             setAnimating(false);
         };
 
-        const t = setTimeout(done, 250);
+        const t = setTimeout(done, screenAnimationMs + 24);
         return () => clearTimeout(t);
-    }, [animating, direction]);
+    }, [animating, direction, screenAnimationMs]);
 
     const gesture = useRef({ active: false, locked: false, startX: 0, startY: 0, dx: 0 });
 
@@ -113,11 +118,15 @@ export const AnimatedScreenWrapper = ({
         const commit = g.dx > w * 0.28;
 
         if (cur) {
-            cur.style.transition = 'transform 220ms ease';
+            cur.style.transition = prefersReducedMotion
+                ? 'none'
+                : `transform ${settleAnimationMs}ms ${toCssBezier(MOTION_EASINGS.springOut)}`;
             cur.style.transform = commit ? `translateX(${w}px)` : 'translateX(0px)';
         }
         if (shadow) {
-            shadow.style.transition = 'opacity 220ms ease';
+            shadow.style.transition = prefersReducedMotion
+                ? 'none'
+                : `opacity ${settleAnimationMs}ms ${toCssBezier(MOTION_EASINGS.standard)}`;
             shadow.style.opacity = commit ? '0' : '0.25';
         }
 
@@ -126,8 +135,8 @@ export const AnimatedScreenWrapper = ({
             root?.classList.remove('gesture-lock');
             gesture.current = { active: false, locked: false, startX: 0, startY: 0, dx: 0 };
             if (commit) onSwipeBack();
-        }, 240);
-    }, [onSwipeBack]);
+        }, settleAnimationMs + 20);
+    }, [onSwipeBack, prefersReducedMotion, settleAnimationMs]);
 
     useEffect(() => {
         const root = containerRef.current;
@@ -161,7 +170,17 @@ export const AnimatedScreenWrapper = ({
     }, [animating, currentKey]);
 
     return (
-        <div ref={containerRef} className="animated-screen-container" aria-live="polite">
+        <div
+            ref={containerRef}
+            className="animated-screen-container"
+            aria-live="polite"
+            style={{
+                '--screen-motion-duration': `${screenAnimationMs}ms`,
+                '--screen-motion-ease': toCssBezier(MOTION_EASINGS.emphasized),
+                '--screen-shadow-duration': `${prefersReducedMotion ? 1 : MOTION_DURATIONS_MS.medium}ms`,
+                '--screen-shadow-ease': toCssBezier(MOTION_EASINGS.standard),
+            }}
+        >
             {prevNode && (
                 <div data-role="previous" className="panel" aria-hidden="true">
                     {prevNode}

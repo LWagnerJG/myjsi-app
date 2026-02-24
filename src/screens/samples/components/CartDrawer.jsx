@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { createPortal } from 'react-dom';
 import { FloatingCart } from '../../../components/common/FloatingCart.jsx';
 import { isDarkTheme } from '../../../design-system/tokens.js';
 import { ShoppingCart, ChevronDown, Building2, Home, Send, CheckCircle } from 'lucide-react';
@@ -8,6 +9,9 @@ import { SAMPLE_CATEGORIES, FINISH_CATEGORIES } from '../data.js';
 import { getSampleProduct } from '../sampleIndex.js';
 import { DirectoryModal } from './DirectoryModal.jsx';
 import { DrawerItem } from './DrawerItem.jsx';
+import { getUnifiedBackdropStyle, UNIFIED_BACKDROP_TRANSITION, UNIFIED_MODAL_Z } from '../../../components/common/modalUtils.js';
+import { getBottomSheetMotion, getModalMotion, MOTION_DURATIONS_MS, MOTION_EASINGS, buildCssTransition } from '../../../design-system/motion.js';
+import { usePrefersReducedMotion } from '../../../hooks/usePrefersReducedMotion.js';
 
 const idOf = (x) => String(x);
 
@@ -20,7 +24,9 @@ export const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, d
     const [justSubmitted, setJustSubmitted] = useState(false);
     const [overlayPhase, setOverlayPhase] = useState('idle');
     const isDark = isDarkTheme(theme);
-    const prefersReduced = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const prefersReduced = usePrefersReducedMotion();
+    const sheetMotion = getBottomSheetMotion(prefersReduced);
+    const modalMotion = getModalMotion(prefersReduced);
 
     const safeSetShipTo = (v) => setShipToName(v ?? '');
     const safeSetAddress1 = (v) => setAddress1(v ?? '');
@@ -59,25 +65,27 @@ export const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, d
             )}
 
             {/* Expanded drawer modal */}
-            <AnimatePresence>
-            {isExpanded && (
-                <div className="fixed inset-0 z-30" onClick={() => setIsExpanded(false)}>
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="absolute inset-0 bg-black/30"
-                    />
-                    <motion.div
-                        initial={{ y: '100%', opacity: 0.5 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        exit={{ y: '100%', opacity: 0.5 }}
-                        transition={{ type: 'spring', stiffness: 400, damping: 34 }}
-                        className="absolute bottom-4 left-4 right-4 max-w-md mx-auto rounded-3xl overflow-hidden"
-                        style={{ backgroundColor: theme.colors.surface, boxShadow: '0 4px 20px rgba(0,0,0,0.1)', maxHeight: '75vh' }}
-                        onClick={(e) => e.stopPropagation()}
-                    >
+            {typeof document !== 'undefined' && createPortal(
+                <AnimatePresence>
+                {isExpanded && (
+                    <div className="fixed inset-0" style={{ zIndex: UNIFIED_MODAL_Z }} onClick={() => setIsExpanded(false)}>
+                        <motion.div
+                            initial={modalMotion.backdrop.initial}
+                            animate={modalMotion.backdrop.animate}
+                            exit={modalMotion.backdrop.exit}
+                            transition={modalMotion.backdrop.transition}
+                            className="absolute inset-0"
+                            style={getUnifiedBackdropStyle(true, prefersReduced)}
+                        />
+                        <motion.div
+                            initial={sheetMotion.initial}
+                            animate={sheetMotion.animate}
+                            exit={sheetMotion.exit}
+                            transition={sheetMotion.transition}
+                            className="absolute bottom-4 left-4 right-4 max-w-md mx-auto rounded-3xl overflow-hidden"
+                            style={{ backgroundColor: theme.colors.surface, boxShadow: '0 4px 20px rgba(0,0,0,0.1)', maxHeight: '75vh' }}
+                            onClick={(e) => e.stopPropagation()}
+                        >
                         {/* Header */}
                         <div className="flex items-center justify-between px-5 py-4 cursor-pointer" onClick={() => setIsExpanded(false)} style={{ borderBottom: `1px solid ${theme.colors.border}` }}>
                             <div className="flex items-center gap-3">
@@ -162,20 +170,33 @@ export const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, d
                                 Submit Sample Request
                             </button>
                         </div>
-                    </motion.div>
-                </div>
-            )}
-            </AnimatePresence>
-            <DirectoryModal show={showDir} onClose={() => setShowDir(false)} onSelect={({ name, address1: addr1, address2: addr2 }) => { safeSetShipTo(name); safeSetAddress1(addr1); safeSetAddress2(addr2); }} theme={theme} dealers={dealers} designFirms={designFirms} />
-            {justSubmitted && (
-                <div className="fixed inset-0 z-[1200] flex items-center justify-center pointer-events-none">
-                    <div className="absolute inset-0" style={{ background: overlayPhase==='enter' ? 'rgba(0,0,0,0.35)' : 'rgba(0,0,0,0)', transition: prefersReduced ? 'none' : 'background 320ms ease' }} />
-                    <div className="relative px-10 py-8 rounded-3xl text-center" style={{ background: theme.colors.surface, color: theme.colors.textPrimary, border: `1px solid ${theme.colors.border}`, transform: overlayPhase==='enter' ? 'scale(1)' : 'scale(.9)', opacity: overlayPhase==='enter' ? 1 : 0.9, transition: prefersReduced ? 'none' : 'transform 480ms cubic-bezier(.3,1,.3,1), opacity 360ms ease', boxShadow:'0 6px 24px -4px rgba(0,0,0,0.12)' }}>
-                        <CheckCircle className="w-10 h-10 mx-auto mb-3" style={{ color: '#4A7C59' }} />
-                        <p className="font-bold text-[15px]">Sample Request Submitted</p>
-                        <p className="text-xs mt-1" style={{ color: theme.colors.textSecondary }}>You'll receive a confirmation email shortly.</p>
+                        </motion.div>
                     </div>
-                </div>
+                )}
+                </AnimatePresence>,
+                document.body
+            )}
+            <DirectoryModal show={showDir} onClose={() => setShowDir(false)} onSelect={({ name, address1: addr1, address2: addr2 }) => { safeSetShipTo(name); safeSetAddress1(addr1); safeSetAddress2(addr2); }} theme={theme} dealers={dealers} designFirms={designFirms} />
+            {typeof document !== 'undefined' && createPortal(
+                justSubmitted && (
+                    <div className="fixed inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: UNIFIED_MODAL_Z + 100 }}>
+                        <div
+                            className="absolute inset-0"
+                            style={{
+                                background: overlayPhase==='enter' ? 'rgba(0,0,0,0.35)' : 'rgba(0,0,0,0)',
+                                backdropFilter: overlayPhase==='enter' && !prefersReduced ? 'blur(10px)' : 'blur(0px)',
+                                WebkitBackdropFilter: overlayPhase==='enter' && !prefersReduced ? 'blur(10px)' : 'blur(0px)',
+                                transition: prefersReduced ? 'none' : UNIFIED_BACKDROP_TRANSITION
+                            }}
+                        />
+                        <div className="relative px-10 py-8 rounded-3xl text-center" style={{ background: theme.colors.surface, color: theme.colors.textPrimary, border: `1px solid ${theme.colors.border}`, transform: overlayPhase==='enter' ? 'scale(1)' : 'scale(.9)', opacity: overlayPhase==='enter' ? 1 : 0.9, transition: prefersReduced ? 'none' : [buildCssTransition('transform', MOTION_DURATIONS_MS.slow, MOTION_EASINGS.springOut), buildCssTransition('opacity', MOTION_DURATIONS_MS.medium, MOTION_EASINGS.standard)].join(', '), boxShadow:'0 6px 24px -4px rgba(0,0,0,0.12)' }}>
+                            <CheckCircle className="w-10 h-10 mx-auto mb-3" style={{ color: '#4A7C59' }} />
+                            <p className="font-bold text-[15px]">Sample Request Submitted</p>
+                            <p className="text-xs mt-1" style={{ color: theme.colors.textSecondary }}>You'll receive a confirmation email shortly.</p>
+                        </div>
+                    </div>
+                ),
+                document.body
             )}
         </>
     );

@@ -7,6 +7,7 @@ import { hapticMedium, hapticSuccess } from '../../utils/haptics.js';
 import { INITIAL_MEMBERS } from '../../screens/members/data.js';
 import { CONTRACTS_DATA } from '../../screens/resources/contracts/data.js';
 import { SearchSelect, MiniAvatar } from './RequestQuoteModalComponents.jsx';
+import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z } from './modalUtils.js';
 
 const FORMAT_OPTIONS = [
     { id: 'pdf', label: 'PDF' },
@@ -151,8 +152,8 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
         <AnimatePresence>
             <motion.div
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                className="fixed inset-0 flex items-center justify-center z-[999] p-4 overflow-y-auto"
-                style={{ backgroundColor: isDark ? 'rgba(0,0,0,0.70)' : 'rgba(0,0,0,0.45)' }}
+                className="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto"
+                style={{ ...getUnifiedBackdropStyle(true), zIndex: UNIFIED_MODAL_Z }}
                 onClick={onClose}
             >
                 <motion.div

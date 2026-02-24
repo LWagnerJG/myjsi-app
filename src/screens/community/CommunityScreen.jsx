@@ -23,6 +23,7 @@ export const CommunityScreen = ({
   onPollVote,
   onAddComment,
   openCreateContentModal,
+  openLibraryUploadModal,
   onNavigate,
   embedMode = false,
   externalQuery = '',
@@ -124,13 +125,13 @@ export const CommunityScreen = ({
                 theme={theme}
               />
             </div>
-            {openCreateContentModal && (
+            {(openCreateContentModal || openLibraryUploadModal) && (
               <button
-                onClick={openCreateContentModal}
+                onClick={viewMode === 'library' ? openLibraryUploadModal : openCreateContentModal}
                 className="h-10 px-4 rounded-full text-[13px] font-semibold transition-all active:scale-95 flex-shrink-0"
                 style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
               >
-                + Post
+                {viewMode === 'library' ? '+ Upload' : '+ Post'}
               </button>
             )}
           </div>

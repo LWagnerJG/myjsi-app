@@ -3,12 +3,17 @@ import ReactDOM from 'react-dom';
 import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { isDarkTheme, DESIGN_TOKENS } from '../../design-system/tokens.js';
+import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z } from './modalUtils.js';
+import { getModalMotion } from '../../design-system/motion.js';
+import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion.js';
 
 export const Modal = ({ show, onClose, title, children, theme, maxWidth = 'max-w-md' }) => {
     const isDark = isDarkTheme(theme);
     const modalRef = useRef(null);
     const previouslyFocusedRef = useRef(null);
     const titleId = React.useId();
+    const prefersReducedMotion = usePrefersReducedMotion();
+    const modalMotion = getModalMotion(prefersReducedMotion);
 
     // Lock body scroll and handle focus management
     useEffect(() => {
@@ -71,20 +76,21 @@ export const Modal = ({ show, onClose, title, children, theme, maxWidth = 'max-w
             {show && (
                 <motion.div
                     className="fixed inset-0 flex items-center justify-center pointer-events-auto p-4"
-                    style={{ zIndex: DESIGN_TOKENS.zIndex.modal }}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
+                    style={{ zIndex: Math.max(DESIGN_TOKENS.zIndex.modal || 0, UNIFIED_MODAL_Z) }}
+                    initial={modalMotion.backdrop.initial}
+                    animate={modalMotion.backdrop.animate}
+                    exit={modalMotion.backdrop.exit}
+                    transition={modalMotion.backdrop.transition}
                     onClick={onClose}
                 >
                     {/* Backdrop */}
                     <motion.div
                         className="absolute inset-0"
-                        style={{ backgroundColor: theme?.colors?.overlay || 'rgba(0,0,0,0.5)' }}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
+                        style={getUnifiedBackdropStyle(true, prefersReducedMotion)}
+                        initial={modalMotion.backdrop.initial}
+                        animate={modalMotion.backdrop.animate}
+                        exit={modalMotion.backdrop.exit}
+                        transition={modalMotion.backdrop.transition}
                     />
 
                     {/* Modal card */}
@@ -103,10 +109,10 @@ export const Modal = ({ show, onClose, title, children, theme, maxWidth = 'max-w
                             boxShadow: DESIGN_TOKENS.shadows.modal,
                             maxHeight: '85vh',
                         }}
-                        initial={{ opacity: 0, scale: 0.95, y: 12 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.97, y: 8 }}
-                        transition={{ type: 'spring', damping: 28, stiffness: 350 }}
+                        initial={modalMotion.card.initial}
+                        animate={modalMotion.card.animate}
+                        exit={modalMotion.card.exit}
+                        transition={modalMotion.card.transition}
                     >
                         {title && (
                             <div

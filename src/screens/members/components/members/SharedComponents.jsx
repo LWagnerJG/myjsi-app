@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { Building2, AlertTriangle, Shield, ChevronDown, Check } from 'lucide-react';
 import { getAvatarColor } from './utils.js';
 import { getRoleLabel, isAdminRole, PERMISSION_DESCRIPTIONS } from '../../data.js';
+import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z } from '../../../../components/common/modalUtils.js';
 
 export const Avatar = ({ firstName, lastName, size = 'md' }) => {
     const initials = `${(firstName || '')[0] || ''}${(lastName || '')[0] || ''}`.toUpperCase();
@@ -29,9 +30,9 @@ export const CompanyAvatar = ({ name }) => {
 export const ConfirmModal = ({ open, title, message, confirmLabel, onConfirm, onCancel, theme }) => {
     if (!open) return null;
     return createPortal(
-        <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
+        <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: UNIFIED_MODAL_Z }}>
             {/* backdrop */}
-            <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onCancel} />
+            <div className="absolute inset-0" style={getUnifiedBackdropStyle(true)} onClick={onCancel} />
             {/* card */}
             <div className="relative w-full max-w-sm rounded-2xl p-5 space-y-4"
                 style={{

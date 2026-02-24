@@ -4,6 +4,8 @@ import React from 'react';
 import { ShoppingCart } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { isDarkTheme } from '../../design-system/tokens.js';
+import { getFloatingPillMotion } from '../../design-system/motion.js';
+import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion.js';
 
 /**
  * FloatingCart
@@ -18,15 +20,17 @@ import { isDarkTheme } from '../../design-system/tokens.js';
 export const FloatingCart = React.memo(({ itemCount = 0, label, onClick, theme, visible = true }) => {
     const isDark = isDarkTheme(theme);
     const show = visible && itemCount > 0;
+    const prefersReducedMotion = usePrefersReducedMotion();
+    const floatingPillMotion = getFloatingPillMotion(prefersReducedMotion);
 
     return (
         <AnimatePresence>
             {show && (
                 <motion.button
-                    initial={{ opacity: 0, y: 24, scale: 0.92 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 24, scale: 0.92 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+                    initial={floatingPillMotion.initial}
+                    animate={floatingPillMotion.animate}
+                    exit={floatingPillMotion.exit}
+                    transition={floatingPillMotion.transition}
                     onClick={onClick}
                     aria-label={label || `Cart with ${itemCount} item${itemCount !== 1 ? 's' : ''}`}
                     className="
@@ -36,7 +40,7 @@ export const FloatingCart = React.memo(({ itemCount = 0, label, onClick, theme, 
                         pl-4 pr-5 py-3
                         sm:pl-5 sm:pr-6 sm:py-3.5
                         rounded-full
-                        transition-shadow duration-200 active:scale-95
+                        transition-shadow duration-200 active:scale-95 motion-tap
                     "
                     style={{
                         backdropFilter: 'blur(24px)',

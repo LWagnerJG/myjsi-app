@@ -1,13 +1,17 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { isDarkTheme } from '../../../design-system/tokens.js';
 import { X, Search, MapPin, Building2 } from 'lucide-react';
+import { getUnifiedBackdropStyle, UNIFIED_BACKDROP_TRANSITION, UNIFIED_MODAL_Z } from '../../../components/common/modalUtils.js';
+import { MOTION_DURATIONS_MS, MOTION_EASINGS, buildCssTransition } from '../../../design-system/motion.js';
+import { usePrefersReducedMotion } from '../../../hooks/usePrefersReducedMotion.js';
 
 export const DirectoryModal = ({ show, onClose, onSelect, theme, dealers = [], designFirms = [] }) => {
     const [q, setQ] = useState('');
     const [mounted, setMounted] = useState(show);
     const [visible, setVisible] = useState(false);
     const isDark = isDarkTheme(theme);
-    const prefersReduced = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const prefersReduced = usePrefersReducedMotion();
 
     const items = useMemo(() => {
         const normalize = (x, idx, type) => ({
@@ -33,15 +37,32 @@ export const DirectoryModal = ({ show, onClose, onSelect, theme, dealers = [], d
 
     if (!mounted) return null;
 
-    return (
-        <div className="fixed inset-0 z-[1100] flex flex-col justify-end sm:justify-center items-center pointer-events-none">
-            <div style={{ position: 'fixed', left: 0, right: 0, bottom: 0, top: 0, background: visible ? 'rgba(0,0,0,0.3)' : 'transparent', transition: prefersReduced ? 'none' : 'background 200ms ease', pointerEvents: 'auto' }} onClick={onClose} />
+    return createPortal(
+        <div className="fixed inset-0 flex flex-col justify-end sm:justify-center items-center pointer-events-none" style={{ zIndex: UNIFIED_MODAL_Z + 10 }}>
+            <div
+                style={{
+                    position: 'fixed',
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    top: 0,
+                    ...getUnifiedBackdropStyle(visible, prefersReduced),
+                    transition: prefersReduced ? 'none' : UNIFIED_BACKDROP_TRANSITION,
+                    pointerEvents: 'auto'
+                }}
+                onClick={onClose}
+            />
             <div
                 className="w-full sm:mx-auto pointer-events-auto"
                 style={{
                     transform: visible ? 'translateY(0) scale(1)' : 'translateY(16px) scale(.97)',
                     opacity: visible ? 1 : 0,
-                    transition: prefersReduced ? 'none' : 'transform 300ms cubic-bezier(.3,1,.3,1), opacity 260ms ease',
+                    transition: prefersReduced
+                        ? 'none'
+                        : [
+                            buildCssTransition('transform', MOTION_DURATIONS_MS.slow, MOTION_EASINGS.springOut),
+                            buildCssTransition('opacity', MOTION_DURATIONS_MS.medium, MOTION_EASINGS.standard),
+                        ].join(', '),
                     background: theme.colors.surface,
                     boxShadow: '0 8px 24px -4px rgba(0,0,0,0.12)',
                     borderRadius: 24,
@@ -122,6 +143,7 @@ export const DirectoryModal = ({ show, onClose, onSelect, theme, dealers = [], d
                     </div>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };

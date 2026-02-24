@@ -16,6 +16,8 @@ import { Modal } from './components/common/Modal.jsx';
 import { ResourceDetailScreen } from './screens/utility/UtilityScreens.jsx';
 import { ProductComparisonScreen, CompetitiveAnalysisScreen, SalesScreen, SamplesScreen } from './config/screenMap.js';
 import { CreateContentModal } from './screens/community/CreateContentModal.jsx';
+import { UploadToLibraryModal } from './screens/library/UploadToLibraryModal.jsx';
+import { INITIAL_ASSETS } from './screens/library/data.js';
 import { AnimatedScreenWrapper } from './components/common/AnimatedScreenWrapper.jsx';
 import { ProjectsScreen } from './screens/projects/ProjectsScreen.jsx';
 import { usePersistentState } from './hooks/usePersistentState.js';
@@ -234,6 +236,8 @@ function App() {
     const [likedPosts, setLikedPosts] = useState({});
     const [pollChoices, setPollChoices] = useState({});
     const [showCreateContentModal, setShowCreateContentModal] = useState(false);
+    const [showLibraryUploadModal, setShowLibraryUploadModal] = useState(false);
+    const [libraryAssets, setLibraryAssets] = useState(INITIAL_ASSETS);
     const [savedImageIds, setSavedImageIds] = usePersistentState('library.saved', []);
     const [postUpvotes, setPostUpvotes] = useState({});
 
@@ -347,6 +351,12 @@ function App() {
         setTimeout(() => setSuccessMessage(''), ms);
     }, []);
 
+    const handleLibraryUpload = useCallback((assets) => {
+        setLibraryAssets(prev => [...assets, ...prev]);
+        setShowLibraryUploadModal(false);
+        flashSuccess(assets.length > 1 ? `${assets.length} images uploaded!` : 'Image uploaded!');
+    }, [flashSuccess]);
+
     const handleCreatePost = useCallback((payload) => {
         if (payload.type === 'poll') setPolls((prev) => [payload, ...prev]); else {
             const post = { id: payload.id, type: 'post', user: payload.user, text: payload.text ?? payload.content ?? '', image: payload.image || null, images: payload.images || [], likes: payload.likes ?? 0, comments: payload.comments || [], timeAgo: 'now', createdAt: payload.createdAt || Date.now() };
@@ -379,6 +389,8 @@ function App() {
     // Stable callbacks extracted from inline arrows (prevents screenProps re-creation)
     const handleToggleTheme = useCallback(() => setIsDarkMode(d => !d), []);
     const openCreateContentModal = useCallback(() => setShowCreateContentModal(true), []);
+    const openLibraryUploadModal = useCallback(() => setShowLibraryUploadModal(true), []);
+    const closeLibraryUploadModal = useCallback(() => setShowLibraryUploadModal(false), []);
     const clearProjectsInitialTab = useCallback(() => setProjectsTabOverride(null), []);
     const toggleProfileMenu = useCallback(() => setShowProfileMenu(p => !p), []);
     const closeProfileMenu = useCallback(() => setShowProfileMenu(false), []);
@@ -413,6 +425,8 @@ function App() {
         onAddComment: handleAddComment,
         onPollVote: handlePollVote,
         openCreateContentModal,
+        openLibraryUploadModal,
+        libraryAssets,
         savedImageIds,
         onToggleSaveImage: handleToggleSaveImage,
         postUpvotes,
@@ -441,7 +455,7 @@ function App() {
         handleBack, userSettings, handleShowAlert, currentScreen, screenParams,
         opportunities, myProjects, members, currentUserId,
         posts, polls, likedPosts, pollChoices, handleToggleLike,
-        handleAddComment, handlePollVote, openCreateContentModal, savedImageIds,
+        handleAddComment, handlePollVote, openCreateContentModal, openLibraryUploadModal, libraryAssets, savedImageIds,
         handleToggleSaveImage, postUpvotes, handleUpvote, cart, setCart,
         handleUpdateCart, dealerDirectory, designFirms, dealers, newLeadData,
         handleNewLeadChange, isDarkMode, handleToggleTheme, handleLeadSuccess,
@@ -483,6 +497,7 @@ function App() {
                 <VoiceModal message={voiceMessage} show={!!voiceMessage} theme={currentTheme} />
                 <SuccessToast message={successMessage} show={!!successMessage} theme={currentTheme} />
                 <CreateContentModal show={showCreateContentModal} onClose={closeCreateContentModal} theme={currentTheme} onCreatePost={handleCreatePost} />
+                <UploadToLibraryModal show={showLibraryUploadModal} onClose={closeLibraryUploadModal} theme={currentTheme} onUpload={handleLibraryUpload} />
                 <Modal show={alertInfo.show} onClose={closeAlert} title="Alert" theme={currentTheme}>
                     <p>{alertInfo.message}</p>
                 </Modal>
