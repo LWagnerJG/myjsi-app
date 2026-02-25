@@ -790,11 +790,14 @@ export const NewLeadScreen = ({
           title="New Lead"
           subtitle={STEP_DESCRIPTIONS[step]}
           titleRight={(
-            <div className="flex items-center gap-2">
+            <div
+              className="rounded-2xl border p-1.5 flex items-center gap-1.5"
+              style={{ borderColor: subtleBorder, backgroundColor: c.surface }}
+            >
               <InlineStepHealth health={health} theme={theme} />
               <span
-                className="inline-flex h-7 items-center rounded-full px-3 text-[11px] font-semibold"
-                style={{ backgroundColor: c.subtle, color: c.textSecondary }}
+                className="inline-flex h-8 items-center rounded-full px-3 text-[11px] font-semibold"
+                style={{ backgroundColor: c.background, color: c.textSecondary, border: `1px solid ${subtleBorder}` }}
               >
                 Step {step + 1} of 3
               </span>
@@ -802,7 +805,10 @@ export const NewLeadScreen = ({
           )}
           theme={theme}
         >
-          <div className="grid grid-cols-3 gap-1.5 pt-0.5">
+          <div
+            className="grid grid-cols-3 gap-1.5 pt-0.5 rounded-2xl border p-1.5"
+            style={{ borderColor: subtleBorder, backgroundColor: c.surface }}
+          >
             {STEP_LABELS.map((label, idx) => {
               const active = step === idx;
               const done = completion[idx].done;
@@ -812,15 +818,15 @@ export const NewLeadScreen = ({
                   key={label}
                   type="button"
                   onClick={() => setStep(idx)}
-                  className="rounded-lg px-2 py-1 text-left transition-colors"
+                  className="rounded-xl px-2.5 py-1.5 text-left transition-colors"
                   style={{
-                    backgroundColor: active ? c.accent : c.surface,
+                    backgroundColor: active ? c.accent : c.background,
                     color: active ? c.accentText : c.textPrimary,
                     border: `1px solid ${active ? c.accent : subtleBorder}`,
                   }}
                 >
-                  <div className="text-[11px] leading-none font-semibold">{label}</div>
-                  <div className="text-[10px] mt-0.5 leading-none" style={{ opacity: active ? 0.9 : 0.65 }}>
+                  <div className="text-[11px] leading-none font-semibold tracking-[0.01em]">{label}</div>
+                  <div className="text-[10px] mt-1 leading-none" style={{ opacity: active ? 0.9 : 0.7 }}>
                     {done}/{total}
                   </div>
                 </button>
