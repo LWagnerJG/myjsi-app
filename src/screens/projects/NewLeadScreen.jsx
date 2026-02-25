@@ -1,456 +1,1499 @@
-import React, { useMemo, useRef, useEffect, useCallback } from 'react';
-import { X, Search, Check, Upload, Paperclip, FileText, ArrowRight } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { AlertTriangle, ArrowLeft, ArrowRight, CheckCircle2, FileText, Paperclip, UploadCloud, X } from 'lucide-react';
 import { FormInput } from '../../components/forms/FormInput.jsx';
-import { PortalNativeSelect } from '../../components/forms/PortalNativeSelect.jsx';
 import { AutoCompleteCombobox } from '../../components/forms/AutoCompleteCombobox.jsx';
+import { PortalNativeSelect } from '../../components/forms/PortalNativeSelect.jsx';
 import { ToggleSwitch } from '../../components/forms/ToggleSwitch.jsx';
 import { SpotlightMultiSelect } from '../../components/common/SpotlightMultiSelect.jsx';
-import { InfoTooltip } from '../../components/common/InfoTooltip.jsx';
 import { PillButton, PrimaryButton } from '../../components/common/JSIButtons.jsx';
-import { DESIGN_TOKENS, isDarkTheme } from '../../design-system/tokens.js';
+import { isDarkTheme } from '../../design-system/tokens.js';
 import { hapticSuccess } from '../../utils/haptics.js';
-
-import {
-  STAGES, VERTICALS, COMPETITORS,
-} from './data.js';
+import { STAGES, VERTICALS, COMPETITORS } from './data.js';
 import { DISCOUNT_OPTIONS_WITH_UNKNOWN } from '../../constants/discounts.js';
 import { JSI_SERIES } from '../products/data.js';
 import { CONTRACTS_DATA } from '../resources/contracts/data.js';
-import { VisionOptions, KnoxOptions, WinkHoopzOptions } from './product-options.jsx';
-import { CITY_OPTIONS } from '../../constants/locations.js';
+import { ProductCard, ProductSpotlight, Row, Section } from './NewLeadScreenComponents.jsx';
 
-/* ═══════════════════════════════════════════════════════════════
-   HELPERS
-   ═══════════════════════════════════════════════════════════════ */
-
-const parseCurrency = (raw) => {
-  if (raw == null) return null;
-  const n = Number(String(raw).replace(/[^0-9.]/g, ''));
-  return Number.isFinite(n) ? n : null;
-};
-
-const PO_OPTIONS = ['Unknown', '<30 Days', '30\u201360 Days', '60\u2013180 Days', '180+ Days', 'Next Year'];
-const REWARD_THRESHOLD = 250000;
-
+const PO_OPTIONS = ['Unknown', '<30 Days', '30-60 Days', '60-180 Days', '180+ Days', 'Next Year'];
 const END_USER_OPTIONS = [
   'ABC Corporation', 'GlobalTech', 'Midwest Health', 'State University', 'Metro Hospitality',
   'Innovate Labs', 'XYZ Industries', 'Acme Corp', 'TechVentures', 'Summit Partners',
 ];
 
-/* ═══════════════════════════════════════════════════════════════
-   LIGHTWEIGHT UI PRIMITIVES
-   ═══════════════════════════════════════════════════════════════ */
+const FILE_LIMIT = 10;
+const FILE_MAX_SIZE = 20 * 1024 * 1024;
+const FILE_EXTENSIONS = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'png', 'jpg', 'jpeg', 'heic'];
+const FILE_ACCEPT = '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.png,.jpg,.jpeg,.heic';
+const STEP_LABELS = ['Basics', 'Scope', 'Review'];
+const STEP_DESCRIPTIONS = [
+  'Capture required project context.',
+  'Define commercial scope and stakeholders.',
+  'Confirm details before submission.',
+];
+const STEP_REQUIRED_FIELDS = {
+  0: [
+    { key: 'project', label: 'Project Name' },
+    { key: 'projectStatus', label: 'Stage' },
+    { key: 'vertical', label: 'Vertical' },
+    { key: 'otherVertical', label: 'Vertical Detail' },
+  ],
+  1: [
+    { key: 'estimatedList', label: 'Estimated List' },
+    { key: 'endUser', label: 'End User' },
+    { key: 'dealers', label: 'Dealer' },
+    { key: 'poTimeframe', label: 'PO Timeframe' },
+    { key: 'competitors', label: 'Competitor' },
+    { key: 'jsiQuoteNumber', label: 'JSI Quote Number' },
+  ],
+};
+const getSubtleBorder = (theme) => (isDarkTheme(theme) ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)');
 
-import { Section, Row, Reveal, ProductSpotlight, ProductCard } from './NewLeadScreenComponents.jsx';
+const parseCurrency = (raw) => {
+  const n = Number(String(raw ?? '').replace(/[^0-9.]/g, ''));
+  return Number.isFinite(n) ? n : 0;
+};
+
+const normalizeText = (v) => String(v || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+
+const formatBytes = (bytes) => {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
+
+const toStep1Percent = (ratio) => {
+  const raw = Number.isFinite(ratio) ? ratio * 100 : 0;
+  const rounded = Math.round(raw);
+  return Math.max(0, Math.min(100, rounded));
+};
+
+const parseDiscountPercent = (value) => {
+  const match = String(value || '').match(/\((\d+(?:\.\d+)?)%\)/);
+  if (!match) return null;
+  const parsed = Number(match[1]);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+const mergeUnique = (...lists) => {
+  const seen = new Set();
+  return lists
+    .flat()
+    .filter(Boolean)
+    .map((item) => String(item).trim())
+    .filter((item) => {
+      const key = item.toLowerCase();
+      if (!item || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+};
+
+const getSeriesProcurementPrompts = (series) => {
+  const name = String(series || '').toLowerCase();
+  const isWorksurface = /(table|desk|bench|case|storage|training|conference|lok|native|poet|indie|vision|knox|wink|hoopz)/.test(name);
+  if (isWorksurface) {
+    return {
+      first: {
+        label: 'Power / Data Package',
+        key: 'procurementCheckpoint',
+        placeholder: 'Select power/data status',
+        options: ['Defined', 'Likely Needed', 'Not Needed', 'Unknown'],
+      },
+      second: {
+        label: 'Finish Readiness',
+        key: 'productionReadiness',
+        placeholder: 'Select finish readiness',
+        options: ['Standard Finishes Finalized', 'Custom Finish Pending', 'Needs Design Review'],
+      },
+    };
+  }
+  return {
+    first: {
+      label: 'Upholstery / Textile',
+      key: 'procurementCheckpoint',
+      placeholder: 'Select textile status',
+      options: ['Grade Selected', 'COM/COL Required', 'Needs Dealer Input', 'Unknown'],
+    },
+    second: {
+      label: 'Production Priority',
+      key: 'productionReadiness',
+      placeholder: 'Select production priority',
+      options: ['Standard Lead Time', 'Expedite Request', 'Phased Delivery', 'Unknown'],
+    },
+  };
+};
+
+const getHealthBand = (ratio) => {
+  if (ratio < 0.35) return { label: 'At Risk', tone: '#B85C5C', step: 1 };
+  if (ratio < 0.6) return { label: 'Developing', tone: '#C4956A', step: 2 };
+  if (ratio < 0.85) return { label: 'Strong', tone: '#5B7B8C', step: 3 };
+  return { label: 'Ready', tone: '#4A7C59', step: 4 };
+};
+
+const FieldError = ({ show, message }) => {
+  if (!show || !message) return null;
+  return <p className="text-xs mt-1.5" style={{ color: '#B85C5C' }}>{message}</p>;
+};
+
+const StrengthCircle = ({ percent, tone, size = 44, stroke = 4, textSize = '11px' }) => {
+  const normalized = Number.isFinite(percent) ? Math.max(0, Math.min(100, percent)) : 0;
+  const radius = (size - stroke) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (normalized / 100) * circumference;
+
+  return (
+    <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
+      <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke="currentColor"
+          strokeWidth={stroke}
+          fill="none"
+          className="opacity-15"
+        />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke={tone}
+          strokeWidth={stroke}
+          strokeLinecap="round"
+          fill="none"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          style={{ transition: 'stroke-dashoffset 240ms ease' }}
+        />
+      </svg>
+      <span className="absolute font-semibold" style={{ fontSize: textSize, color: tone }}>
+        {normalized}
+      </span>
+    </div>
+  );
+};
+
+const InlineStepHealth = ({ health, theme }) => {
+  const c = theme.colors;
+  const subtleBorder = getSubtleBorder(theme);
+  return (
+    <div
+      className="inline-flex items-center gap-2 rounded-full border pl-1.5 pr-2.5 py-1"
+      style={{ borderColor: subtleBorder, backgroundColor: c.surface }}
+    >
+      <StrengthCircle percent={health.percent} tone={health.tone} size={30} stroke={3} textSize="10px" />
+      <span className="text-[11px] font-semibold" style={{ color: c.textSecondary }}>
+        {health.percent}/100
+      </span>
+    </div>
+  );
+};
+
+const DiscreteHealthMeter = ({ health, theme, compact = false }) => {
+  const c = theme.colors;
+  const subtleBorder = getSubtleBorder(theme);
+  return (
+    <div
+      className={`rounded-[20px] border ${compact ? 'px-3 py-2.5' : 'px-3.5 py-3'}`}
+      style={{ borderColor: subtleBorder, backgroundColor: c.surface }}
+    >
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.03em]" style={{ color: c.textSecondary }}>
+            Lead Score
+          </p>
+          <div className="mt-0.5 flex items-center gap-2">
+            <p className="text-lg font-bold leading-none" style={{ color: c.textPrimary }}>
+              {health.percent}/100
+            </p>
+            <span
+              className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold"
+              style={{ color: health.tone, backgroundColor: `${health.tone}1A` }}
+            >
+              {health.label}
+            </span>
+          </div>
+        </div>
+        {!compact && <StrengthCircle percent={health.percent} tone={health.tone} size={50} stroke={4} textSize="11px" />}
+      </div>
+      <div className="mt-2 h-2 rounded-full overflow-hidden" style={{ backgroundColor: c.subtle }}>
+        <div
+          className="h-full rounded-full"
+          style={{ width: `${health.percent}%`, backgroundColor: health.tone, transition: 'width 240ms ease' }}
+        />
+      </div>
+    </div>
+  );
+};
 
 export const NewLeadScreen = ({
-  theme, onSuccess,
-  designFirms, setDesignFirms,
-  dealers, setDealers,
+  theme,
+  onNavigate,
+  onSuccess,
+  designFirms,
+  setDesignFirms,
+  dealers,
+  setDealers,
+  opportunities = [],
   newLeadData = {},
   onNewLeadChange,
 }) => {
-  const stageOptions = useMemo(() => STAGES.filter(s => s !== 'Won' && s !== 'Lost'), []);
+  const c = theme.colors;
+  const dark = isDarkTheme(theme);
+  const subtleBorder = getSubtleBorder(theme);
+  const stageOptions = useMemo(() => STAGES.filter((stage) => stage !== 'Won' && stage !== 'Lost'), []);
+
+  const [step, setStep] = useState(0);
+  const [touched, setTouched] = useState({});
+  const [submitAttempted, setSubmitAttempted] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+  const [fileNotice, setFileNotice] = useState('');
+  const fileInputRef = useRef(null);
+  const installDateInputRef = useRef(null);
+  const [endUserOptions, setEndUserOptions] = useState(() => mergeUnique(
+    END_USER_OPTIONS,
+    (opportunities || []).map((opp) => opp.company),
+  ));
 
   useEffect(() => {
-    if (newLeadData.projectStatus && !stageOptions.includes(newLeadData.projectStatus))
+    if (newLeadData.projectStatus && !stageOptions.includes(newLeadData.projectStatus)) {
       onNewLeadChange({ projectStatus: stageOptions[0] });
-  }, [newLeadData.projectStatus, stageOptions, onNewLeadChange]);
+    }
+  }, [newLeadData.projectStatus, onNewLeadChange, stageOptions]);
+
+  useEffect(() => {
+    if (!String(newLeadData.endUser || '').trim()) return;
+    setEndUserOptions((prev) => mergeUnique(prev, newLeadData.endUser));
+  }, [newLeadData.endUser]);
+
+  useEffect(() => {
+    setEndUserOptions((prev) => mergeUnique(prev, (opportunities || []).map((opp) => opp.company)));
+  }, [opportunities]);
 
   const upd = useCallback((field, value) => {
-    if (field === 'vertical' && value !== 'Other (Please specify)')
-      return onNewLeadChange({ [field]: value, otherVertical: '' });
+    if (field === 'vertical' && value !== 'Other (Please specify)') {
+      onNewLeadChange({ vertical: value, otherVertical: '' });
+      return;
+    }
+    if (field === 'competitionPresent' && value === false) {
+      onNewLeadChange({ competitionPresent: false, competitors: [], otherCompetitor: '' });
+      return;
+    }
     onNewLeadChange({ [field]: value });
   }, [onNewLeadChange]);
 
-  /* auto-disable rewards below threshold */
-  const lastEstRef = useRef(parseCurrency(newLeadData.estimatedList));
-  useEffect(() => {
-    const amt = parseCurrency(newLeadData.estimatedList);
-    const prev = lastEstRef.current;
-    if (amt !== null && amt > 0 && amt < REWARD_THRESHOLD && (prev === null || prev >= REWARD_THRESHOLD))
-      onNewLeadChange({ salesReward: false, designerReward: false });
-    lastEstRef.current = amt;
-  }, [newLeadData.estimatedList, newLeadData.salesReward, newLeadData.designerReward, onNewLeadChange]);
+  const markTouched = useCallback((field) => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+  }, []);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!newLeadData.projectStatus) return alert('Please select a Project Stage before submitting.');
-    hapticSuccess();
-    onSuccess(newLeadData);
-  };
+  const addEndUserOption = useCallback((value) => {
+    const normalized = String(value || '').trim();
+    if (!normalized) return;
+    setEndUserOptions((prev) => mergeUnique(prev, normalized));
+    upd('endUser', normalized);
+    markTouched('endUser');
+  }, [markTouched, upd]);
 
-  const toggleCompetitor = (c) => {
-    const list = newLeadData.competitors || [];
-    upd('competitors', list.includes(c) ? list.filter(x => x !== c) : [...list, c]);
-  };
+  const stageIndex = useMemo(() => {
+    const idx = stageOptions.indexOf(newLeadData.projectStatus);
+    return idx >= 0 ? idx : 0;
+  }, [newLeadData.projectStatus, stageOptions]);
+
+  const stageThumbPercent = useMemo(() => {
+    if (stageOptions.length <= 1) return 0;
+    return (stageIndex / (stageOptions.length - 1)) * 100;
+  }, [stageIndex, stageOptions.length]);
+
+  const stageLabelTransform = useMemo(() => {
+    if (stageThumbPercent <= 6) return 'translateX(0)';
+    if (stageThumbPercent >= 94) return 'translateX(-100%)';
+    return 'translateX(-50%)';
+  }, [stageThumbPercent]);
+
+  const setStageByIndex = useCallback((index) => {
+    if (!stageOptions.length) return;
+    const bounded = Math.max(0, Math.min(stageOptions.length - 1, index));
+    upd('projectStatus', stageOptions[bounded]);
+    markTouched('projectStatus');
+  }, [markTouched, stageOptions, upd]);
+
+  const openInstallDatePicker = useCallback(() => {
+    const input = installDateInputRef.current;
+    if (!input) return;
+    if (typeof input.showPicker === 'function') {
+      input.showPicker();
+      return;
+    }
+    input.focus();
+    input.click();
+  }, []);
+
+  const quoteMode = newLeadData.jsiQuoteExists ? 'existing' : newLeadData.quoteNeeded ? 'needed' : (newLeadData.noQuoteNeeded ? 'not-needed' : null);
+  const setQuoteMode = useCallback((mode) => {
+    onNewLeadChange({
+      jsiQuoteExists: mode === 'existing',
+      quoteNeeded: mode === 'needed',
+      noQuoteNeeded: mode === 'not-needed',
+      ...(mode !== 'existing' ? { jsiQuoteNumber: '' } : {}),
+    });
+  }, [onNewLeadChange]);
+
+  const duplicateMatches = useMemo(() => {
+    const project = normalizeText(newLeadData.project);
+    const endUser = normalizeText(newLeadData.endUser);
+    if (!project && !endUser) return [];
+    return (opportunities || [])
+      .filter((opp) => {
+        const name = normalizeText(opp.name || opp.project);
+        const company = normalizeText(opp.company);
+        const projectHit = project && (name.includes(project) || project.includes(name));
+        const companyHit = endUser && (company.includes(endUser) || endUser.includes(company));
+        return projectHit || companyHit;
+      })
+      .slice(0, 3);
+  }, [newLeadData.project, newLeadData.endUser, opportunities]);
+
+  const errors = useMemo(() => {
+    const next = {};
+    if (!String(newLeadData.project || '').trim()) next.project = 'Project name is required.';
+    if (!newLeadData.projectStatus) next.projectStatus = 'Project stage is required.';
+    if (!newLeadData.vertical) next.vertical = 'Vertical is required.';
+    if (newLeadData.vertical === 'Other (Please specify)' && !String(newLeadData.otherVertical || '').trim()) {
+      next.otherVertical = 'Please enter the vertical type.';
+    }
+    if (parseCurrency(newLeadData.estimatedList) <= 0) next.estimatedList = 'Estimated list must be greater than zero.';
+    if (!String(newLeadData.endUser || '').trim()) next.endUser = 'Select or create an end user.';
+    if (!(newLeadData.dealers || []).length) next.dealers = 'Add at least one dealer.';
+    if (!newLeadData.poTimeframe) next.poTimeframe = 'PO timeframe is required.';
+    if (newLeadData.competitionPresent && !(newLeadData.competitors || []).length) {
+      next.competitors = 'Add at least one competitor or switch Competition off.';
+    }
+    if (newLeadData.jsiQuoteExists && !String(newLeadData.jsiQuoteNumber || '').trim()) {
+      next.jsiQuoteNumber = 'Quote number is required when Existing Quote is selected.';
+    }
+    return next;
+  }, [
+    newLeadData.project,
+    newLeadData.projectStatus,
+    newLeadData.vertical,
+    newLeadData.otherVertical,
+    newLeadData.estimatedList,
+    newLeadData.endUser,
+    newLeadData.dealers,
+    newLeadData.poTimeframe,
+    newLeadData.competitionPresent,
+    newLeadData.competitors,
+    newLeadData.jsiQuoteExists,
+    newLeadData.jsiQuoteNumber,
+  ]);
+
+  const completion = useMemo(() => {
+    const basicChecks = [
+      !!String(newLeadData.project || '').trim(),
+      !!newLeadData.projectStatus,
+      !!newLeadData.vertical && (newLeadData.vertical !== 'Other (Please specify)' || !!String(newLeadData.otherVertical || '').trim()),
+      !!String(newLeadData.installationLocation || '').trim() || !!String(newLeadData.expectedInstallDate || '').trim(),
+    ];
+    const scopeChecks = [
+      parseCurrency(newLeadData.estimatedList) > 0,
+      !!String(newLeadData.endUser || '').trim(),
+      !!(newLeadData.dealers || []).length,
+      !!newLeadData.poTimeframe,
+      !!(newLeadData.products || []).length,
+      !newLeadData.competitionPresent || !!(newLeadData.competitors || []).length,
+    ];
+    const reviewChecks = [
+      !newLeadData.jsiQuoteExists || !!String(newLeadData.jsiQuoteNumber || '').trim(),
+      !duplicateMatches.length,
+      !(newLeadData.products || []).length || (newLeadData.products || []).every((product) => {
+        const prompts = getSeriesProcurementPrompts(product.series);
+        return !!product[prompts.first.key] && !!product[prompts.second.key];
+      }),
+    ];
+    return [
+      { done: basicChecks.filter(Boolean).length, total: basicChecks.length },
+      { done: scopeChecks.filter(Boolean).length, total: scopeChecks.length },
+      { done: reviewChecks.filter(Boolean).length, total: reviewChecks.length },
+    ];
+  }, [
+    duplicateMatches.length,
+    newLeadData.competitionPresent,
+    newLeadData.competitors,
+    newLeadData.dealers,
+    newLeadData.endUser,
+    newLeadData.estimatedList,
+    newLeadData.expectedInstallDate,
+    newLeadData.installationLocation,
+    newLeadData.jsiQuoteExists,
+    newLeadData.jsiQuoteNumber,
+    newLeadData.otherVertical,
+    newLeadData.poTimeframe,
+    newLeadData.products,
+    newLeadData.project,
+    newLeadData.projectStatus,
+    newLeadData.vertical,
+  ]);
+
+  const health = useMemo(() => {
+    const products = newLeadData.products || [];
+    const intakeReadyCount = products.filter((product) => {
+      const prompts = getSeriesProcurementPrompts(product.series);
+      return !!product[prompts.first.key] && !!product[prompts.second.key];
+    }).length;
+    const intakeRatio = products.length ? intakeReadyCount / products.length : 0;
+    const winProbabilityValue = Number(newLeadData.winProbability || 50);
+    const estimatedListValue = parseCurrency(newLeadData.estimatedList);
+    const discountPercent = parseDiscountPercent(newLeadData.discount);
+    const hasInstallDetails = !!String(newLeadData.installationLocation || '').trim() || !!String(newLeadData.expectedInstallDate || '').trim();
+    const stageProgress = newLeadData.projectStatus ? (stageIndex + 1) / Math.max(stageOptions.length, 1) : 0;
+
+    const estimatedListPoints = estimatedListValue >= 250000
+      ? 14
+      : estimatedListValue >= 100000
+        ? 12
+        : estimatedListValue >= 50000
+          ? 10
+          : estimatedListValue >= 20000
+            ? 8
+            : estimatedListValue > 0
+              ? 6
+              : 0;
+
+    const poTimeframePoints = {
+      '<30 Days': 8,
+      '30-60 Days': 7,
+      '60-180 Days': 5,
+      '180+ Days': 3,
+      'Next Year': 2,
+      Unknown: 4,
+    }[newLeadData.poTimeframe] ?? 0;
+
+    const discountPoints = discountPercent == null
+      ? 3
+      : discountPercent < 64
+        ? 8
+        : discountPercent <= 64
+          ? 7
+          : discountPercent <= 66
+            ? 6
+            : discountPercent <= 70
+              ? 4
+              : 2;
+
+    const quotePoints = quoteMode === 'existing'
+      ? (String(newLeadData.jsiQuoteNumber || '').trim() ? 7 : 3)
+      : quoteMode === 'needed'
+        ? 5
+        : quoteMode === 'not-needed'
+          ? 6
+          : 3;
+
+    const competitionPoints = newLeadData.competitionPresent
+      ? ((newLeadData.competitors || []).length ? 4 : 1)
+      : 7;
+
+    const signals = [
+      { label: 'Project Name', points: String(newLeadData.project || '').trim() ? 5 : 0, max: 5 },
+      { label: 'Stage Progress', points: Math.round(stageProgress * 10), max: 10 },
+      { label: 'Vertical', points: newLeadData.vertical && (newLeadData.vertical !== 'Other (Please specify)' || String(newLeadData.otherVertical || '').trim()) ? 3 : 0, max: 3 },
+      { label: 'Win Probability', points: Math.round((winProbabilityValue / 100) * 10), max: 10 },
+      { label: 'Estimated List', points: estimatedListPoints, max: 14 },
+      { label: 'PO Timeframe', points: poTimeframePoints, max: 8 },
+      { label: 'End User', points: String(newLeadData.endUser || '').trim() ? 5 : 0, max: 5 },
+      { label: 'Dealer Coverage', points: (newLeadData.dealers || []).length ? 6 : 0, max: 6 },
+      { label: 'A&D Alignment', points: (newLeadData.designFirms || []).length ? 3 : 1, max: 3 },
+      { label: 'Discount Quality', points: discountPoints, max: 8 },
+      { label: 'Competition Position', points: competitionPoints, max: 7 },
+      { label: 'Quote Strategy', points: quotePoints, max: 7 },
+      { label: 'JSI Series', points: products.length ? 4 : 0, max: 4 },
+      { label: 'Plant Intake', points: Math.round(intakeRatio * 5), max: 5 },
+      { label: 'Install Details', points: hasInstallDetails ? 2 : 0, max: 2 },
+      { label: 'Rewards', points: (newLeadData.salesReward !== false || newLeadData.designerReward !== false) ? 1 : 0, max: 1 },
+      { label: 'Notes Added', points: String(newLeadData.notes || '').trim() ? 1 : 0, max: 1 },
+      { label: 'Files Added', points: (newLeadData.attachments || []).length ? 1 : 0, max: 1 },
+    ];
+
+    const score = signals.reduce((sum, signal) => sum + signal.points, 0);
+    const max = signals.reduce((sum, signal) => sum + signal.max, 0);
+    const ratio = max ? score / max : 0;
+    const percent = toStep1Percent(ratio);
+    const missing = signals
+      .filter((signal) => signal.points < signal.max)
+      .sort((a, b) => (b.max - b.points) - (a.max - a.points))
+      .map((signal) => signal.label);
+
+    return { score, max, percent, missing, ...getHealthBand(ratio) };
+  }, [
+    newLeadData.project,
+    newLeadData.projectStatus,
+    newLeadData.vertical,
+    newLeadData.winProbability,
+    newLeadData.otherVertical,
+    newLeadData.estimatedList,
+    newLeadData.poTimeframe,
+    newLeadData.endUser,
+    newLeadData.dealers,
+    newLeadData.designFirms,
+    newLeadData.competitionPresent,
+    newLeadData.competitors,
+    newLeadData.salesReward,
+    newLeadData.designerReward,
+    newLeadData.discount,
+    quoteMode,
+    newLeadData.jsiQuoteNumber,
+    newLeadData.products,
+    newLeadData.installationLocation,
+    newLeadData.expectedInstallDate,
+    newLeadData.notes,
+    newLeadData.attachments,
+    stageIndex,
+    stageOptions.length,
+  ]);
+  const salesRewardEnabled = newLeadData.salesReward !== false;
+  const designerRewardEnabled = newLeadData.designerReward !== false;
+
+  const parsedEstimatedList = useMemo(() => parseCurrency(newLeadData.estimatedList), [newLeadData.estimatedList]);
+  const notesPreview = useMemo(() => {
+    const notes = String(newLeadData.notes || '').trim();
+    return notes.length > 210 ? `${notes.slice(0, 207)}...` : notes;
+  }, [newLeadData.notes]);
+  const seriesCount = (newLeadData.products || []).length;
+  const readinessChecks = useMemo(() => {
+    return (newLeadData.products || []).map((product) => {
+      const prompts = getSeriesProcurementPrompts(product.series);
+      const firstAnswer = product[prompts.first.key];
+      const secondAnswer = product[prompts.second.key];
+      return {
+        series: product.series,
+        firstLabel: prompts.first.label,
+        firstValue: firstAnswer || 'Pending',
+        secondLabel: prompts.second.label,
+        secondValue: secondAnswer || 'Pending',
+        done: !!firstAnswer && !!secondAnswer,
+      };
+    });
+  }, [newLeadData.products]);
+  const intakeReadyCount = useMemo(() => readinessChecks.filter((item) => item.done).length, [readinessChecks]);
+  const selectedSeriesNames = useMemo(
+    () => (newLeadData.products || []).map((product) => product.series).filter(Boolean),
+    [newLeadData.products],
+  );
+  const filledReviewItems = useMemo(() => {
+    const items = [];
+    const add = (label, value) => {
+      if (value == null) return;
+      const text = String(value).trim();
+      if (!text) return;
+      items.push({ label, value: text });
+    };
+
+    add('Project', newLeadData.project);
+    add('Stage', newLeadData.projectStatus);
+    add('Vertical', newLeadData.vertical === 'Other (Please specify)' ? newLeadData.otherVertical : newLeadData.vertical);
+    if (parsedEstimatedList > 0) add('Estimated List', `$${parsedEstimatedList.toLocaleString()}`);
+    add('PO Timeframe', newLeadData.poTimeframe);
+    add('End User', newLeadData.endUser);
+    if ((newLeadData.dealers || []).length) add('Dealers', (newLeadData.dealers || []).join(', '));
+    if ((newLeadData.designFirms || []).length) add('A&D Firms', (newLeadData.designFirms || []).join(', '));
+    if (newLeadData.installationLocation) add('Location', newLeadData.installationLocation);
+    if (newLeadData.expectedInstallDate) add('Install Date', newLeadData.expectedInstallDate);
+    if (quoteMode === 'existing' && newLeadData.jsiQuoteNumber) add('JSI Quote #', newLeadData.jsiQuoteNumber);
+    if (quoteMode === 'needed') add('Quote', 'Quote needed');
+    if (quoteMode === 'not-needed') add('Quote', 'No quote needed');
+    if (selectedSeriesNames.length) add('JSI Series', selectedSeriesNames.join(', '));
+    if (seriesCount) add('Series Intake', `${intakeReadyCount}/${seriesCount} ready`);
+    if (newLeadData.competitionPresent) {
+      add('Competition', 'Yes');
+      if ((newLeadData.competitors || []).length) add('Competitors', (newLeadData.competitors || []).join(', '));
+    } else {
+      add('Competition', 'No');
+    }
+    add('Rewards', `Sales ${salesRewardEnabled ? 'On' : 'Off'} | Designer ${designerRewardEnabled ? 'On' : 'Off'}`);
+    if (notesPreview) add('Notes', notesPreview);
+    if ((newLeadData.attachments || []).length) add('Attachments', `${(newLeadData.attachments || []).length} file(s)`);
+
+    return items;
+  }, [
+    intakeReadyCount,
+    newLeadData.project,
+    newLeadData.projectStatus,
+    newLeadData.vertical,
+    newLeadData.otherVertical,
+    parsedEstimatedList,
+    newLeadData.poTimeframe,
+    newLeadData.endUser,
+    newLeadData.dealers,
+    newLeadData.designFirms,
+    newLeadData.installationLocation,
+    newLeadData.expectedInstallDate,
+    quoteMode,
+    newLeadData.jsiQuoteNumber,
+    selectedSeriesNames,
+    seriesCount,
+    newLeadData.competitionPresent,
+    newLeadData.competitors,
+    salesRewardEnabled,
+    designerRewardEnabled,
+    notesPreview,
+    newLeadData.attachments,
+  ]);
+
+  const reviewAiSummary = useMemo(() => {
+    const stageLabel = stageOptions[stageIndex] || 'an early stage';
+    const estimatedText = parsedEstimatedList > 0 ? `$${parsedEstimatedList.toLocaleString()}` : 'no estimated list yet';
+    const compText = newLeadData.competitionPresent
+      ? `${(newLeadData.competitors || []).length || 0} competitor${(newLeadData.competitors || []).length === 1 ? '' : 's'} tracked`
+      : 'no active competition logged';
+    const quoteText = quoteMode === 'existing'
+      ? 'an existing JSI quote is already attached'
+      : quoteMode === 'needed'
+        ? 'a quote is marked as needed'
+        : quoteMode === 'not-needed'
+          ? 'no quote is needed'
+          : 'quote status is still open';
+    return `This lead is ${health.percent}/100 (${health.label.toLowerCase()}) with ${newLeadData.winProbability || 50}% win probability, stage set to ${stageLabel}, and estimated list at ${estimatedText}. Positioning shows ${compText}, ${quoteText}, and stronger completion in plant intake and stakeholder coverage will lift the score fastest.`;
+  }, [
+    health.label,
+    health.percent,
+    newLeadData.competitionPresent,
+    newLeadData.competitors,
+    newLeadData.winProbability,
+    parsedEstimatedList,
+    quoteMode,
+    stageIndex,
+    stageOptions,
+  ]);
+
+  const visibleError = useCallback((field) => {
+    return (submitAttempted || touched[field]) ? errors[field] : null;
+  }, [errors, submitAttempted, touched]);
+
+  const stepValid = useMemo(() => {
+    if (step === 0) return !errors.project && !errors.projectStatus && !errors.vertical && !errors.otherVertical;
+    if (step === 1) return !errors.estimatedList && !errors.endUser && !errors.dealers && !errors.poTimeframe && !errors.competitors && !errors.jsiQuoteNumber;
+    return !errors.project && !errors.projectStatus && !errors.vertical && !errors.otherVertical && !errors.estimatedList && !errors.endUser && !errors.dealers && !errors.poTimeframe && !errors.competitors && !errors.jsiQuoteNumber;
+  }, [errors, step]);
+
+  const stepRequirementHint = useMemo(() => {
+    if (step >= 2 || stepValid) return null;
+    const requiredFields = STEP_REQUIRED_FIELDS[step] || [];
+    const missing = requiredFields.find((field) => !!errors[field.key]);
+    if (!missing) return null;
+    return {
+      fieldLabel: missing.label,
+      stageLabel: STEP_LABELS[step],
+    };
+  }, [errors, step, stepValid]);
+
+  const canSubmit = useMemo(() => {
+    return !errors.project && !errors.projectStatus && !errors.vertical && !errors.otherVertical
+      && !errors.estimatedList && !errors.endUser && !errors.dealers && !errors.poTimeframe && !errors.competitors && !errors.jsiQuoteNumber;
+  }, [errors]);
+
+  const markStepFieldsTouched = useCallback((stepIdx) => {
+    if (stepIdx === 0) setTouched((prev) => ({ ...prev, project: true, projectStatus: true, vertical: true, otherVertical: true }));
+    if (stepIdx === 1) setTouched((prev) => ({ ...prev, estimatedList: true, endUser: true, dealers: true, poTimeframe: true, competitors: true, jsiQuoteNumber: true }));
+  }, []);
+
+  const goNext = useCallback(() => {
+    markStepFieldsTouched(step);
+    if (!stepValid) return;
+    setStep((prev) => Math.min(prev + 1, 2));
+  }, [markStepFieldsTouched, step, stepValid]);
+
+  const goBack = useCallback(() => {
+    setStep((prev) => Math.max(prev - 1, 0));
+  }, []);
 
   const addProduct = useCallback((series) => {
-    if (!series || (newLeadData.products || []).some(p => p.series === series)) return;
-    upd('products', [...(newLeadData.products || []), { series, hasGlassDoors: false, surfaceTypes: [], materials: [], hasWoodBack: false, polyColor: '' }]);
+    if (!series || (newLeadData.products || []).some((p) => p.series === series)) return;
+    upd('products', [
+      ...(newLeadData.products || []),
+      {
+        series,
+        hasGlassDoors: false,
+        surfaceTypes: [],
+        materials: [],
+        hasWoodBack: false,
+        polyColor: '',
+        procurementCheckpoint: '',
+        productionReadiness: '',
+      },
+    ]);
   }, [newLeadData.products, upd]);
 
   const removeProduct = useCallback((idx) => {
     upd('products', (newLeadData.products || []).filter((_, i) => i !== idx));
   }, [newLeadData.products, upd]);
 
-  const updateProductOption = useCallback((pi, key, value) => {
-    upd('products', (newLeadData.products || []).map((p, i) => i === pi ? { ...p, [key]: value } : p));
+  const updateProductOption = useCallback((idx, key, value) => {
+    upd('products', (newLeadData.products || []).map((p, i) => (i === idx ? { ...p, [key]: value } : p)));
   }, [newLeadData.products, upd]);
 
-  /* quote state: 'existing' | 'needed' | null */
-  const quoteMode = newLeadData.jsiQuoteExists ? 'existing' : newLeadData.quoteNeeded ? 'needed' : null;
-  const setQuoteMode = (mode) => {
-    onNewLeadChange({
-      jsiQuoteExists: mode === 'existing',
-      quoteNeeded: mode === 'needed',
-      ...(mode !== 'existing' ? { jsiQuoteNumber: '' } : {}),
-    });
-  };
+  const addFiles = useCallback((fileList) => {
+    const incoming = Array.from(fileList || []);
+    if (!incoming.length) return;
+    const current = newLeadData.attachments || [];
+    const dedupeKeys = new Set(current.map((f) => `${f.name}_${f.size}_${f.lastModified || 0}`));
+    const next = [...current];
+    let rejected = '';
 
-  const c = theme.colors;
-  const dark = isDarkTheme(theme);
-  const rangeStyle = {
-    '--range-track': dark ? 'rgba(255,255,255,0.13)' : 'rgba(53,53,53,0.12)',
-    '--range-thumb': dark ? '#EDE8E3' : '#353535',
-  };
+    for (const file of incoming) {
+      const ext = String(file.name || '').split('.').pop()?.toLowerCase() || '';
+      if (!FILE_EXTENSIONS.includes(ext)) {
+        rejected = `Unsupported file type: .${ext || 'unknown'}`;
+        continue;
+      }
+      if (file.size > FILE_MAX_SIZE) {
+        rejected = `File too large: ${file.name} (max 20 MB).`;
+        continue;
+      }
+      if (next.length >= FILE_LIMIT) {
+        rejected = `Attachment limit reached (${FILE_LIMIT}).`;
+        break;
+      }
+      const key = `${file.name}_${file.size}_${file.lastModified || 0}`;
+      if (dedupeKeys.has(key)) continue;
+      dedupeKeys.add(key);
+      next.push({
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        lastModified: file.lastModified || Date.now(),
+      });
+    }
+    upd('attachments', next);
+    setFileNotice(rejected || '');
+  }, [newLeadData.attachments, upd]);
+
+  const handleDrop = useCallback((event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setDragActive(false);
+    addFiles(event.dataTransfer?.files);
+  }, [addFiles]);
+
+  const handleSubmit = useCallback((event) => {
+    event.preventDefault();
+    setSubmitAttempted(true);
+    markStepFieldsTouched(0);
+    markStepFieldsTouched(1);
+    if (!canSubmit) return;
+    hapticSuccess();
+    onSuccess(newLeadData);
+  }, [canSubmit, markStepFieldsTouched, newLeadData, onSuccess]);
 
   return (
-    <form onSubmit={handleSubmit}
-      className="min-h-full app-header-offset"
-      style={{ backgroundColor: c.background }}>
-      <div className="px-4 sm:px-5 pt-5 pb-10 max-w-2xl mx-auto w-full space-y-5">
-
-        {/* ── 1. Project Details ── */}
-        <Section title="Project Details" theme={theme} titleRight={
-          <FormInput value={newLeadData.project || ''} onChange={e => upd('project', e.target.value)}
-            placeholder="Project Name *" theme={theme} size="sm" surfaceBg required />
-        }>
-
-          <Reveal show={!!(newLeadData.project && newLeadData.project.trim())}>
-          <Row label="Stage" theme={theme} inline noSep>
-            <div>
-              <input type="range" min={0} max={stageOptions.length - 1} step={1}
-                value={Math.max(0, stageOptions.indexOf(newLeadData.projectStatus))}
-                onChange={e => upd('projectStatus', stageOptions[+e.target.value])}
-                className="w-full jsi-range" style={rangeStyle} />
-              <div className="flex justify-between -mt-0.5" style={{ padding: '0 2px' }}>
-                {stageOptions.map((s, i) => {
-                  const active = i === stageOptions.indexOf(newLeadData.projectStatus);
-                  return (
-                    <span key={s}
-                      onClick={() => upd('projectStatus', s)}
-                      className="text-[11px] cursor-pointer select-none text-center transition-all duration-150"
-                      style={{
-                        color: active ? c.textPrimary : c.textSecondary,
-                        fontWeight: active ? 700 : 400,
-                        opacity: active ? 1 : 0.55,
-                        flex: i === 0 || i === stageOptions.length - 1 ? 'none' : '1',
-                        width: i === 0 || i === stageOptions.length - 1 ? 'auto' : undefined,
-                      }}>
-                      {s.replace('Decision/Bidding', 'Decision')}
-                    </span>
-                  );
-                })}
-              </div>
+    <form onSubmit={handleSubmit} className="min-h-full app-header-offset flex flex-col" style={{ backgroundColor: c.background }}>
+      <div className="px-4 sm:px-5 pt-5 pb-32 max-w-3xl mx-auto w-full space-y-4">
+        <Section
+          title="New Lead"
+          subtitle={STEP_DESCRIPTIONS[step]}
+          titleRight={(
+            <div className="flex items-center gap-2">
+              <InlineStepHealth health={health} theme={theme} />
+              <span
+                className="inline-flex h-7 items-center rounded-full px-3 text-[11px] font-semibold"
+                style={{ backgroundColor: c.subtle, color: c.textSecondary }}
+              >
+                Step {step + 1} of 3
+              </span>
             </div>
-          </Row>
-
-          <Row label="Vertical" theme={theme} inline>
-            {newLeadData.vertical === 'Other (Please specify)' ? (
-              <div className="flex items-center gap-2">
-                <FormInput value={newLeadData.otherVertical || ''} onChange={e => upd('otherVertical', e.target.value)}
-                  placeholder="Enter vertical" theme={theme} size="sm" surfaceBg />
-                <button type="button" onClick={() => upd('vertical', '')}
-                  className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full"
-                  style={{ backgroundColor: c.subtle }}>
-                  <X className="w-3.5 h-3.5" style={{ color: c.textSecondary }} />
+          )}
+          theme={theme}
+        >
+          <div className="grid grid-cols-3 gap-1.5 pt-0.5">
+            {STEP_LABELS.map((label, idx) => {
+              const active = step === idx;
+              const done = completion[idx].done;
+              const total = completion[idx].total;
+              return (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => setStep(idx)}
+                  className="rounded-lg px-2 py-1 text-left transition-colors"
+                  style={{
+                    backgroundColor: active ? c.accent : c.surface,
+                    color: active ? c.accentText : c.textPrimary,
+                    border: `1px solid ${active ? c.accent : subtleBorder}`,
+                  }}
+                >
+                  <div className="text-[11px] leading-none font-semibold">{label}</div>
+                  <div className="text-[10px] mt-0.5 leading-none" style={{ opacity: active ? 0.9 : 0.65 }}>
+                    {done}/{total}
+                  </div>
                 </button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-3 gap-1.5">
-                {VERTICALS.map(v => {
-                  const lbl = v === 'Other (Please specify)' ? 'Other' : v;
-                  return (
-                    <PillButton key={v} size="xs" isSelected={newLeadData.vertical === v}
-                      onClick={() => upd('vertical', v)} theme={theme} className="w-full">{lbl}</PillButton>
-                  );
-                })}
-              </div>
-            )}
-          </Row>
-
-          <Row label="Install Date" theme={theme} inline>
-            <FormInput type="date" value={newLeadData.expectedInstallDate || ''}
-              onChange={e => upd('expectedInstallDate', e.target.value)}
-              theme={theme} size="sm" surfaceBg />
-          </Row>
-
-          <Row label="Location" theme={theme} inline
-            tip="70% credit to specifying territory, 30% to ordering when territories differ.">
-            <AutoCompleteCombobox
-              value={newLeadData.installationLocation || ''}
-              onChange={val => upd('installationLocation', val)}
-              onSelect={val => upd('installationLocation', val)}
-              options={CITY_OPTIONS}
-              placeholder="City, State"
-              theme={theme}
-              compact
-              resetOnSelect={false} />
-          </Row>
-          </Reveal>
+              );
+            })}
+          </div>
         </Section>
 
-        {/* ── 2. Financials & Timeline ── */}
-        <Section title="Financials & Timeline" theme={theme} titleRight={
-          <FormInput type="currency" value={newLeadData.estimatedList || ''} required
-            onChange={e => upd('estimatedList', e.target.value)}
-            placeholder="Estimated List $" theme={theme} size="sm" surfaceBg />
-        }>
+        {step === 0 && (
+          <>
+            <Section title="Project Basics" theme={theme}>
+              <Row label="Project Name" theme={theme} inline noSep>
+                <div>
+                  <FormInput
+                    value={newLeadData.project || ''}
+                    onChange={(e) => { upd('project', e.target.value); markTouched('project'); }}
+                    onBlur={() => markTouched('project')}
+                    placeholder="Enter project name"
+                    theme={theme}
+                    size="sm"
+                    surfaceBg
+                  />
+                  <FieldError show={!!visibleError('project')} message={visibleError('project')} />
+                </div>
+              </Row>
 
-          <Reveal show={!!(newLeadData.estimatedList && String(newLeadData.estimatedList).replace(/[^0-9]/g, '').length > 0)}>
-          <Row label="Win Probability" theme={theme} inline noSep>
-            <div className="flex items-center gap-2.5 flex-1 min-w-0">
-              <input type="range" min={10} max={100} step={10}
-                value={newLeadData.winProbability || 50}
-                onChange={e => upd('winProbability', Number(e.target.value))}
-                className="flex-1 jsi-range" style={{ minWidth: 0, ...rangeStyle }} />
-              <span className="text-xs font-semibold tabular-nums w-[32px] text-right flex-shrink-0"
-                style={{ color: c.textPrimary }}>{newLeadData.winProbability || 50}%</span>
-            </div>
-          </Row>
+              <Row label="Stage" theme={theme} inline>
+                <div>
+                  <div className="relative px-1 pt-5 pb-1">
+                    <p
+                      className="absolute text-[11px] font-semibold whitespace-nowrap leading-none"
+                      style={{
+                        left: `${stageThumbPercent}%`,
+                        top: 2,
+                        transform: stageLabelTransform,
+                        color: c.textPrimary,
+                      }}
+                    >
+                      {stageOptions[stageIndex] || 'Not selected'}
+                    </p>
+                    <input
+                      type="range"
+                      min={0}
+                      max={Math.max(stageOptions.length - 1, 0)}
+                      step={1}
+                      value={stageIndex}
+                      onChange={(e) => setStageByIndex(Number(e.target.value))}
+                      className="w-full jsi-range"
+                    />
+                  </div>
+                  <FieldError show={!!visibleError('projectStatus')} message={visibleError('projectStatus')} />
+                </div>
+              </Row>
 
-          <Row label="Discount" theme={theme} inline>
-            <PortalNativeSelect value={newLeadData.discount || ''}
-              onChange={e => upd('discount', e.target.value)}
-              options={DISCOUNT_OPTIONS_WITH_UNKNOWN.map(d => ({ label: d, value: d }))}
-              placeholder="Select Discount" theme={theme} mutedValues={['Unknown']} />
-          </Row>
+              <Row label="Vertical" theme={theme} inline>
+                <div>
+                  <PortalNativeSelect
+                    value={newLeadData.vertical || ''}
+                    onChange={(e) => { upd('vertical', e.target.value); markTouched('vertical'); }}
+                    options={VERTICALS.map((v) => ({ label: v === 'Other (Please specify)' ? 'Other' : v, value: v }))}
+                    placeholder="Select vertical"
+                    theme={theme}
+                    size="sm"
+                  />
+                  {newLeadData.vertical === 'Other (Please specify)' && (
+                    <div className="mt-2">
+                      <FormInput
+                        value={newLeadData.otherVertical || ''}
+                        onChange={(e) => { upd('otherVertical', e.target.value); markTouched('otherVertical'); }}
+                        onBlur={() => markTouched('otherVertical')}
+                        placeholder="Enter vertical type"
+                        theme={theme}
+                        size="sm"
+                        surfaceBg
+                      />
+                    </div>
+                  )}
+                  <FieldError show={!!visibleError('vertical')} message={visibleError('vertical')} />
+                  <FieldError show={!!visibleError('otherVertical')} message={visibleError('otherVertical')} />
+                </div>
+              </Row>
 
-          <Row label="Rewards" theme={theme} inline>
-            <div className="grid grid-cols-2 gap-1.5">
-              {[['salesReward', 'Sales Reward'], ['designerReward', 'Designer Reward']].map(([key, lbl]) => {
-                const on = newLeadData[key] !== false;
-                return (
-                  <PillButton key={key} size="xs" isSelected={on}
-                    onClick={() => upd(key, !on)} theme={theme} className="w-full">{on ? '✓ ' : ''}{lbl}</PillButton>
-                );
-              })}
-            </div>
-          </Row>
+              <Row label="Location" theme={theme} inline>
+                <FormInput
+                  value={newLeadData.installationLocation || ''}
+                  onChange={(e) => { upd('installationLocation', e.target.value); markTouched('installationLocation'); }}
+                  placeholder="City, State"
+                  theme={theme}
+                  size="sm"
+                  surfaceBg
+                />
+              </Row>
 
-          <Row label="PO Timeframe" theme={theme} inline>
-            <div className="grid grid-cols-3 gap-1.5">
-              {PO_OPTIONS.map(t => (
-                <PillButton key={t} size="xs"
-                  isSelected={newLeadData.poTimeframe === t}
-                  onClick={() => upd('poTimeframe', t)} theme={theme} className="w-full">{t}</PillButton>
-              ))}
-            </div>
-          </Row>
+              <Row label="Install Date" theme={theme} inline>
+                <div className="relative">
+                  <input
+                    ref={installDateInputRef}
+                    type="date"
+                    value={newLeadData.expectedInstallDate || ''}
+                    onChange={(e) => upd('expectedInstallDate', e.target.value)}
+                    onClick={openInstallDatePicker}
+                    className="w-full h-10 rounded-full border px-4 pr-10 text-[13px] focus:outline-none focus:ring-0 jsi-date-input"
+                    style={{
+                      backgroundColor: c.surface,
+                      borderColor: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+                      color: c.textPrimary,
+                    }}
+                  />
+                </div>
+              </Row>
+            </Section>
 
-          <Row label="Contract" theme={theme} inline>
-            <PortalNativeSelect value={newLeadData.contractType || ''}
-              onChange={e => upd('contractType', e.target.value)}
-              options={[
-                { label: 'None', value: 'none' },
-                ...Object.keys(CONTRACTS_DATA).map(k => ({ label: CONTRACTS_DATA[k].name, value: k })),
-              ]}
-              placeholder="Select Contract" theme={theme} mutedValues={['none', 'None']} />
-          </Row>
-          </Reveal>
-        </Section>
-
-        {/* ── 3. Stakeholders ── */}
-        <Section title="Stakeholders" theme={theme}>
-          <Row label="Dealer(s)" theme={theme} noSep inline>
-            <SpotlightMultiSelect
-              selectedItems={newLeadData.dealers || []}
-              onAddItem={d => { const cur = newLeadData.dealers || []; if (!cur.includes(d)) upd('dealers', [...cur, d]); }}
-              onRemoveItem={d => upd('dealers', (newLeadData.dealers || []).filter(x => x !== d))}
-              options={(newLeadData.dealers || []).length > 0 ? (dealers || []).filter(d => d !== 'Undecided') : (dealers || [])}
-              onAddNew={d => setDealers(p => [...new Set([d, ...p])])}
-              placeholder="Search"
-              theme={theme}
-              compact />
-          </Row>
-          <Row label="A&D Firm(s)" theme={theme} inline>
-            <SpotlightMultiSelect
-              selectedItems={newLeadData.designFirms || []}
-              onAddItem={f => { const cur = newLeadData.designFirms || []; if (!cur.includes(f)) upd('designFirms', [...cur, f]); }}
-              onRemoveItem={f => upd('designFirms', (newLeadData.designFirms || []).filter(x => x !== f))}
-              options={designFirms || []}
-              onAddNew={f => setDesignFirms(p => [...new Set([f, ...p])])}
-              placeholder="Search"
-              theme={theme}
-              compact />
-          </Row>
-          <Row label="End User" theme={theme} inline>
-            <AutoCompleteCombobox
-              value={newLeadData.endUser || ''}
-              onChange={val => upd('endUser', val)}
-              onSelect={val => upd('endUser', val)}
-              options={END_USER_OPTIONS}
-              placeholder="Search"
-              theme={theme}
-              compact
-              resetOnSelect={false} />
-          </Row>
-        </Section>
-
-        {/* ── 4. Competition & Products ── */}
-        <Section title="Competition & Products" theme={theme}>
-          {/* bid + competition toggles */}
-          <Row label="Bid?" theme={theme} inline noSep>
-            <div className="flex justify-end"><ToggleSwitch checked={!!newLeadData.isBid} onChange={e => upd('isBid', e.target.checked)} theme={theme} /></div>
-          </Row>
-          <Row label="Competition?" theme={theme} inline>
-            <div className="flex justify-end"><ToggleSwitch checked={!!newLeadData.competitionPresent} onChange={e => upd('competitionPresent', e.target.checked)} theme={theme} /></div>
-          </Row>
-
-          {/* competitor chips — animate in */}
-          <div style={{
-            display: 'grid', gridTemplateRows: newLeadData.competitionPresent ? '1fr' : '0fr',
-            opacity: newLeadData.competitionPresent ? 1 : 0,
-            transition: 'grid-template-rows .3s ease, opacity .25s ease',
-          }}>
-            <div style={{ overflow: 'hidden' }}>
-              <Row label="Competitors" theme={theme} inline noSep>
-                <div className="grid grid-cols-3 gap-1.5">
-                  {[...COMPETITORS.filter(c => c !== 'None'), 'Other'].map(comp => (
-                    <PillButton key={comp} size="xs" isSelected={(newLeadData.competitors || []).includes(comp)}
-                      onClick={() => toggleCompetitor(comp)} theme={theme} className="w-full">{comp}</PillButton>
+            {!!duplicateMatches.length && (
+              <Section title="Potential Duplicates" theme={theme}>
+                <div className="space-y-2 pt-2">
+                  <div className="flex items-center gap-2 text-xs font-medium" style={{ color: '#B85C5C' }}>
+                    <AlertTriangle className="w-4 h-4" />
+                    Similar opportunities already exist.
+                  </div>
+                  {duplicateMatches.map((opp) => (
+                    <button
+                      key={opp.id}
+                      type="button"
+                      onClick={() => onNavigate?.(`projects/${opp.id}`)}
+                      className="w-full rounded-xl border px-3 py-2 text-left transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                      style={{ borderColor: subtleBorder }}
+                    >
+                      <div className="text-sm font-semibold" style={{ color: c.textPrimary }}>{opp.name}</div>
+                      <div className="text-xs" style={{ color: c.textSecondary }}>{opp.company || 'Unknown company'}</div>
+                    </button>
                   ))}
                 </div>
-                {(newLeadData.competitors || []).includes('Other') && (
-                  <div className="mt-2">
-                    <FormInput value={newLeadData.otherCompetitor || ''} onChange={e => upd('otherCompetitor', e.target.value)}
-                      placeholder="Other competitor" theme={theme} size="sm" surfaceBg />
+              </Section>
+            )}
+          </>
+        )}
+
+        {step === 1 && (
+          <>
+            <Section title="Commercial Scope" theme={theme}>
+              <Row label="Estimated List" theme={theme} inline noSep>
+                <div>
+                  <FormInput
+                    type="currency"
+                    value={newLeadData.estimatedList || ''}
+                    onChange={(e) => { upd('estimatedList', e.target.value); markTouched('estimatedList'); }}
+                    onBlur={() => markTouched('estimatedList')}
+                    placeholder="Estimated list amount"
+                    theme={theme}
+                    size="sm"
+                    surfaceBg
+                  />
+                  <FieldError show={!!visibleError('estimatedList')} message={visibleError('estimatedList')} />
+                </div>
+              </Row>
+
+              <Row label="Win Probability" theme={theme} inline>
+                <div className="flex items-center gap-2.5">
+                  <input
+                    type="range"
+                    min={10}
+                    max={100}
+                    step={10}
+                    value={newLeadData.winProbability || 50}
+                    onChange={(e) => upd('winProbability', Number(e.target.value))}
+                    className="flex-1 jsi-range"
+                    style={{ minWidth: 0 }}
+                  />
+                  <span className="text-xs font-semibold w-[36px] text-right" style={{ color: c.textPrimary }}>
+                    {newLeadData.winProbability || 50}%
+                  </span>
+                </div>
+              </Row>
+
+              <Row label="PO Timeframe" theme={theme} inline>
+                <div>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {PO_OPTIONS.map((item) => (
+                      <PillButton
+                        key={item}
+                        size="xs"
+                        isSelected={newLeadData.poTimeframe === item}
+                        onClick={() => { upd('poTimeframe', item); markTouched('poTimeframe'); }}
+                        theme={theme}
+                        className="w-full"
+                      >
+                        {item}
+                      </PillButton>
+                    ))}
+                  </div>
+                  <FieldError show={!!visibleError('poTimeframe')} message={visibleError('poTimeframe')} />
+                </div>
+              </Row>
+
+              <Row label="Discount" theme={theme} inline>
+                <PortalNativeSelect
+                  value={newLeadData.discount || ''}
+                  onChange={(e) => upd('discount', e.target.value)}
+                  options={DISCOUNT_OPTIONS_WITH_UNKNOWN.map((d) => ({ label: d, value: d }))}
+                  placeholder="Select discount"
+                  theme={theme}
+                  size="sm"
+                  mutedValues={['Unknown']}
+                />
+              </Row>
+
+              <Row label="Contract" theme={theme} inline>
+                <PortalNativeSelect
+                  value={newLeadData.contractType || ''}
+                  onChange={(e) => upd('contractType', e.target.value)}
+                  options={[
+                    { label: 'None', value: 'none' },
+                    ...Object.keys(CONTRACTS_DATA).map((key) => ({ label: CONTRACTS_DATA[key].name, value: key })),
+                  ]}
+                  placeholder="Select contract"
+                  theme={theme}
+                  size="sm"
+                  mutedValues={['none']}
+                />
+              </Row>
+            </Section>
+
+            <Section title="Stakeholders & Competition" theme={theme}>
+              <div className="grid gap-3 lg:grid-cols-3">
+                <div>
+                  <p className="text-[11px] font-semibold mb-1" style={{ color: c.textSecondary }}>End User</p>
+                  <AutoCompleteCombobox
+                    value={newLeadData.endUser || ''}
+                    onChange={(val) => { upd('endUser', val); markTouched('endUser'); }}
+                    onSelect={(val) => { upd('endUser', val); markTouched('endUser'); }}
+                    onAddNew={addEndUserOption}
+                    options={endUserOptions}
+                    placeholder="Search or add end user"
+                    theme={theme}
+                    compact
+                    resetOnSelect={false}
+                  />
+                  <FieldError show={!!visibleError('endUser')} message={visibleError('endUser')} />
+                </div>
+
+                <div>
+                  <p className="text-[11px] font-semibold mb-1" style={{ color: c.textSecondary }}>Dealer(s)</p>
+                  <SpotlightMultiSelect
+                    selectedItems={newLeadData.dealers || []}
+                    onAddItem={(dealer) => {
+                      const current = newLeadData.dealers || [];
+                      if (!current.includes(dealer)) upd('dealers', [...current, dealer]);
+                      markTouched('dealers');
+                    }}
+                    onRemoveItem={(dealer) => { upd('dealers', (newLeadData.dealers || []).filter((item) => item !== dealer)); markTouched('dealers'); }}
+                    options={(newLeadData.dealers || []).length > 0 ? (dealers || []).filter((item) => item !== 'Undecided') : (dealers || [])}
+                    onAddNew={(dealer) => setDealers((prev) => [...new Set([dealer, ...prev])])}
+                    placeholder="Search or create dealer"
+                    theme={theme}
+                    compact={false}
+                    integratedChips
+                  />
+                  <FieldError show={!!visibleError('dealers')} message={visibleError('dealers')} />
+                </div>
+
+                <div>
+                  <p className="text-[11px] font-semibold mb-1" style={{ color: c.textSecondary }}>A&D Firm(s)</p>
+                  <SpotlightMultiSelect
+                    selectedItems={newLeadData.designFirms || []}
+                    onAddItem={(firm) => {
+                      const current = newLeadData.designFirms || [];
+                      if (!current.includes(firm)) upd('designFirms', [...current, firm]);
+                    }}
+                    onRemoveItem={(firm) => upd('designFirms', (newLeadData.designFirms || []).filter((item) => item !== firm))}
+                    options={designFirms || []}
+                    onAddNew={(firm) => setDesignFirms((prev) => [...new Set([firm, ...prev])])}
+                    placeholder="Search or create firm"
+                    theme={theme}
+                    compact={false}
+                    integratedChips
+                  />
+                </div>
+              </div>
+
+              <div className="mt-3 grid gap-2.5 md:grid-cols-[1.2fr_1fr]">
+                <div
+                  className="h-full rounded-2xl border px-3 py-2.5"
+                  style={{
+                    backgroundColor: c.surface,
+                    borderColor: subtleBorder,
+                  }}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-[11px] font-semibold" style={{ color: c.textPrimary }}>Competition</p>
+                      <p className="text-[11px] mt-0.5" style={{ color: c.textSecondary }}>Is competition active?</p>
+                    </div>
+                    <div className="inline-flex items-center gap-2 rounded-full px-2.5 py-1" style={{ backgroundColor: c.subtle }}>
+                      <span className="text-[11px] font-semibold" style={{ color: newLeadData.competitionPresent ? c.textSecondary : c.textPrimary }}>No</span>
+                      <ToggleSwitch
+                        checked={!!newLeadData.competitionPresent}
+                        onChange={(event) => {
+                          upd('competitionPresent', event.target.checked);
+                          markTouched('competitionPresent');
+                          markTouched('competitors');
+                        }}
+                        theme={theme}
+                      />
+                      <span className="text-[11px] font-semibold" style={{ color: newLeadData.competitionPresent ? c.textPrimary : c.textSecondary }}>Yes</span>
+                    </div>
+                  </div>
+
+                  {newLeadData.competitionPresent && (
+                    <div className="mt-2.5">
+                      <SpotlightMultiSelect
+                        selectedItems={newLeadData.competitors || []}
+                        onAddItem={(competitor) => {
+                          const current = newLeadData.competitors || [];
+                          if (!current.includes(competitor)) upd('competitors', [...current, competitor]);
+                          markTouched('competitors');
+                        }}
+                        onRemoveItem={(competitor) => { upd('competitors', (newLeadData.competitors || []).filter((item) => item !== competitor)); markTouched('competitors'); }}
+                        options={COMPETITORS.filter((name) => name !== 'None')}
+                        onAddNew={(name) => upd('competitors', [...new Set([...(newLeadData.competitors || []), name])])}
+                        placeholder="Search or create competitor"
+                        theme={theme}
+                        compact={false}
+                        integratedChips
+                        bordered={false}
+                      />
+                      <FieldError show={!!visibleError('competitors')} message={visibleError('competitors')} />
+                    </div>
+                  )}
+                </div>
+
+                <div className="h-full rounded-2xl border px-3 py-2.5" style={{ borderColor: subtleBorder, backgroundColor: c.surface }}>
+                  <p className="text-[11px] font-semibold" style={{ color: c.textPrimary }}>Incentive Rewards</p>
+                  <div className="mt-2 grid grid-cols-2 gap-2">
+                    <div className="rounded-full px-2 py-1 inline-flex items-center justify-between gap-2" style={{ backgroundColor: c.subtle }}>
+                      <span className="text-[11px] font-semibold" style={{ color: c.textPrimary }}>Sales</span>
+                      <ToggleSwitch
+                        checked={salesRewardEnabled}
+                        onChange={(event) => { upd('salesReward', event.target.checked); markTouched('salesReward'); }}
+                        theme={theme}
+                      />
+                    </div>
+                    <div className="rounded-full px-2 py-1 inline-flex items-center justify-between gap-2" style={{ backgroundColor: c.subtle }}>
+                      <span className="text-[11px] font-semibold" style={{ color: c.textPrimary }}>Designer</span>
+                      <ToggleSwitch
+                        checked={designerRewardEnabled}
+                        onChange={(event) => { upd('designerReward', event.target.checked); markTouched('designerReward'); }}
+                        theme={theme}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </Section>
+
+            <Section title="Quote & JSI Series" theme={theme}>
+              <Row label="JSI Quote" theme={theme} inline noSep>
+                <div>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <PillButton
+                      size="xs"
+                      isSelected={quoteMode === 'existing'}
+                      onClick={() => { setQuoteMode('existing'); markTouched('jsiQuoteNumber'); }}
+                      theme={theme}
+                    >
+                      Existing Quote
+                    </PillButton>
+                    <PillButton
+                      size="xs"
+                      isSelected={quoteMode === 'needed'}
+                      onClick={() => setQuoteMode(quoteMode === 'needed' ? null : 'needed')}
+                      theme={theme}
+                    >
+                      Quote Needed
+                    </PillButton>
+                    <PillButton
+                      size="xs"
+                      isSelected={quoteMode === 'not-needed'}
+                      onClick={() => setQuoteMode(quoteMode === 'not-needed' ? null : 'not-needed')}
+                      theme={theme}
+                    >
+                      No Quote Needed
+                    </PillButton>
+                    {quoteMode === 'existing' && (
+                      <div className="flex-1 min-w-[190px]">
+                        <FormInput
+                          value={newLeadData.jsiQuoteNumber || ''}
+                          onChange={(e) => { upd('jsiQuoteNumber', e.target.value); markTouched('jsiQuoteNumber'); }}
+                          onBlur={() => markTouched('jsiQuoteNumber')}
+                          placeholder="Enter quote number"
+                          theme={theme}
+                          size="sm"
+                          surfaceBg
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <FieldError show={!!visibleError('jsiQuoteNumber')} message={visibleError('jsiQuoteNumber')} />
+                </div>
+              </Row>
+
+              <Row label="JSI Series" theme={theme} inline>
+                <div className="space-y-2">
+                  <ProductSpotlight
+                    selectedSeries={(newLeadData.products || []).map((p) => p.series)}
+                    onAdd={addProduct}
+                    available={JSI_SERIES}
+                    theme={theme}
+                  />
+                  <p className="text-[11px] px-1" style={{ color: c.textSecondary }}>
+                    {(newLeadData.products || []).length} selected • complete intake below.
+                  </p>
+                </div>
+              </Row>
+
+              {(newLeadData.products || []).length > 0 && (
+                <div className="space-y-2.5">
+                  {(newLeadData.products || []).map((product, idx) => (
+                    <div key={`${product.series}-${idx}`} className="rounded-[22px] border overflow-hidden" style={{ borderColor: subtleBorder, backgroundColor: c.surface }}>
+                      <ProductCard
+                        product={product}
+                        idx={idx}
+                        onRemove={removeProduct}
+                        onUpdate={updateProductOption}
+                        theme={theme}
+                        showBorder={false}
+                      />
+                      <div className="border-t px-4 py-3" style={{ borderColor: subtleBorder }}>
+                        <p className="text-xs font-semibold" style={{ color: c.textPrimary }}>
+                          Intake Details
+                        </p>
+                        <div className="grid gap-2 mt-2 md:grid-cols-2">
+                          {(() => {
+                            const prompts = getSeriesProcurementPrompts(product.series);
+                            return (
+                              <>
+                                <div className="rounded-xl border p-2" style={{ borderColor: subtleBorder, backgroundColor: c.background }}>
+                                  <p className="text-[11px] font-semibold mb-1.5" style={{ color: c.textSecondary }}>
+                                    {prompts.first.label}
+                                  </p>
+                                  <PortalNativeSelect
+                                    value={product[prompts.first.key] || ''}
+                                    onChange={(e) => updateProductOption(idx, prompts.first.key, e.target.value)}
+                                    options={prompts.first.options.map((option) => ({ label: option, value: option }))}
+                                    placeholder={prompts.first.placeholder}
+                                    theme={theme}
+                                    size="sm"
+                                  />
+                                </div>
+                                <div className="rounded-xl border p-2" style={{ borderColor: subtleBorder, backgroundColor: c.background }}>
+                                  <p className="text-[11px] font-semibold mb-1.5" style={{ color: c.textSecondary }}>
+                                    {prompts.second.label}
+                                  </p>
+                                  <PortalNativeSelect
+                                    value={product[prompts.second.key] || ''}
+                                    onChange={(e) => updateProductOption(idx, prompts.second.key, e.target.value)}
+                                    options={prompts.second.options.map((option) => ({ label: option, value: option }))}
+                                    placeholder={prompts.second.placeholder}
+                                    theme={theme}
+                                    size="sm"
+                                  />
+                                </div>
+                              </>
+                            );
+                          })()}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Section>
+          </>
+        )}
+
+        {step === 2 && (
+          <>
+            <Section title="Notes & Attachments" subtitle="Optional context and support files." theme={theme}>
+              <textarea
+                value={newLeadData.notes || ''}
+                onChange={(e) => upd('notes', e.target.value)}
+                rows={4}
+                placeholder="Add context, timing risks, or requirements..."
+                className="mt-2.5 w-full px-4 py-3 text-[13px] rounded-2xl border focus:outline-none resize-none"
+                style={{ backgroundColor: c.surface, borderColor: subtleBorder, color: c.textPrimary }}
+              />
+
+              <div className="mt-3 space-y-2">
+                <div
+                  onDragEnter={(e) => { e.preventDefault(); setDragActive(true); }}
+                  onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+                  onDragLeave={(e) => { e.preventDefault(); setDragActive(false); }}
+                  onDrop={handleDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                  className="rounded-2xl border border-dashed px-4 py-4 transition-colors cursor-pointer"
+                  style={{
+                    borderColor: dragActive ? c.accent : subtleBorder,
+                    backgroundColor: dragActive ? `${c.accent}12` : (dark ? 'rgba(255,255,255,0.03)' : 'transparent'),
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: c.subtle }}>
+                      <UploadCloud className="w-4 h-4" style={{ color: c.textSecondary }} />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold" style={{ color: c.textPrimary }}>
+                        Drag files here or click to upload
+                      </p>
+                      <p className="text-xs mt-0.5" style={{ color: c.textSecondary }}>
+                        Optional. Up to {FILE_LIMIT} files, 20 MB each (PDF, Office files, PNG/JPG/HEIC)
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="mt-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold border transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                    style={{ borderColor: subtleBorder, color: c.textPrimary }}
+                  >
+                    <Paperclip className="w-3.5 h-3.5" /> Browse Files
+                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept={FILE_ACCEPT}
+                    multiple
+                    className="hidden"
+                    onChange={(e) => {
+                      addFiles(e.target.files);
+                      e.target.value = '';
+                    }}
+                  />
+                </div>
+                {fileNotice && <p className="text-xs" style={{ color: '#B85C5C' }}>{fileNotice}</p>}
+                {(newLeadData.attachments || []).length > 0 && (
+                  <div className="space-y-1.5">
+                    {(newLeadData.attachments || []).map((file, idx) => (
+                      <div
+                        key={`${file.name}-${idx}`}
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl border"
+                        style={{ borderColor: subtleBorder, backgroundColor: c.surface }}
+                      >
+                        <FileText className="w-3.5 h-3.5" style={{ color: c.textSecondary }} />
+                        <span className="text-xs font-medium truncate flex-1" style={{ color: c.textPrimary }}>{file.name}</span>
+                        <span className="text-xs" style={{ color: c.textSecondary }}>{formatBytes(file.size || 0)}</span>
+                        <button
+                          type="button"
+                          onClick={() => upd('attachments', (newLeadData.attachments || []).filter((_, i) => i !== idx))}
+                          className="w-5 h-5 rounded-full flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/5"
+                          aria-label="Remove attachment"
+                        >
+                          <X className="w-3 h-3" style={{ color: c.textSecondary }} />
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 )}
-              </Row>
-            </div>
-          </div>
-
-          {/* JSI Quote — inline pills, click again to deselect */}
-          <Row label="JSI Quote" theme={theme} inline>
-            {quoteMode === 'existing' ? (
-              <div className="flex items-center gap-1.5 justify-end">
-                <div className="flex-1 min-w-[100px]">
-                  <input value={newLeadData.jsiQuoteNumber || ''} onChange={e => upd('jsiQuoteNumber', e.target.value)}
-                    placeholder="Quote #" className="w-full rounded-full px-4 text-[13px] outline-none border placeholder-theme-secondary"
-                    style={{ height: 34, color: c.textPrimary, borderColor: c.border, backgroundColor: c.surface }} />
-                </div>
-                <button type="button" onClick={() => setQuoteMode(null)}
-                  className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full"
-                  style={{ backgroundColor: c.subtle }}>
-                  <X className="w-3.5 h-3.5" style={{ color: c.textSecondary }} />
-                </button>
               </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-1.5">
-                <PillButton size="xs" isSelected={false}
-                  onClick={() => setQuoteMode('existing')} theme={theme} className="w-full">Existing Quote</PillButton>
-                <PillButton size="xs" isSelected={quoteMode === 'needed'}
-                  onClick={() => setQuoteMode(quoteMode === 'needed' ? null : 'needed')} theme={theme} className="w-full">Quote Needed</PillButton>
+            </Section>
+
+            <Section title="Submission Review" subtitle="Filled details ready for routing." theme={theme}>
+              <DiscreteHealthMeter health={health} theme={theme} />
+
+              <div className="mt-3 rounded-2xl border px-3 py-2.5" style={{ borderColor: subtleBorder, backgroundColor: c.surface }}>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.03em]" style={{ color: c.textSecondary }}>
+                  AI Summary
+                </p>
+                <p className="text-xs mt-1.5 leading-relaxed" style={{ color: c.textPrimary }}>
+                  {reviewAiSummary}
+                </p>
               </div>
-            )}
-          </Row>
-          {quoteMode === 'needed' && (
-            <div className="pb-1">
-              <div className="rounded-2xl p-3 flex items-start gap-2.5" style={{ backgroundColor: c.subtle }}>
-                <Upload className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: c.textSecondary }} />
-                <div>
-                  <p className="text-xs font-medium" style={{ color: c.textPrimary }}>Upload specs or request later</p>
-                  <p className="text-xs mt-0.5" style={{ color: c.textSecondary }}>
-                    Attach a PDF now, or request a quote from the project page later.
-                  </p>
-                  <button type="button" className="mt-1.5 text-xs font-semibold underline" style={{ color: c.accent }}>
-                    Choose File
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
 
-          {/* products — search inline to right of label */}
-          <Row label="Products" theme={theme} inline>
-            <ProductSpotlight
-              selectedSeries={(newLeadData.products || []).map(p => p.series)}
-              onAdd={addProduct} available={JSI_SERIES} theme={theme} />
-          </Row>
-
-          {(newLeadData.products || []).length > 0 && (
-            <div className="space-y-2 pb-1">
-              {(newLeadData.products || []).map((p, idx) => (
-                <ProductCard key={p.series + idx} product={p} idx={idx}
-                  onRemove={removeProduct} onUpdate={updateProductOption} theme={theme} />
-              ))}
-            </div>
-          )}
-        </Section>
-
-        {/* ── 5. Notes & Attachments ── */}
-        <Section title="Notes & Attachments" theme={theme}>
-          <textarea
-            value={newLeadData.notes || ''}
-            onChange={e => upd('notes', e.target.value)}
-            placeholder="Add notes, context, or special instructions..."
-            rows="3"
-            className="mt-2.5 w-full px-4 py-3 text-[13px] rounded-2xl border focus:outline-none focus:ring-0 resize-none placeholder-theme-secondary"
-            style={{ backgroundColor: c.surface, borderColor: c.border, color: c.textPrimary }}
-          />
-
-          {/* Attachments */}
-          <div className="mt-2">
-            {(newLeadData.attachments || []).length > 0 && (
-              <div className="space-y-1.5 mb-3">
-                {(newLeadData.attachments || []).map((file, i) => (
-                  <div key={i} className="flex items-center gap-2.5 px-3 py-2 rounded-2xl border"
-                    style={{ backgroundColor: c.surface, borderColor: c.border }}>
-                    <FileText className="w-3.5 h-3.5 flex-shrink-0" style={{ color: c.textSecondary }} />
-                    <span className="flex-1 text-xs font-medium truncate" style={{ color: c.textPrimary }}>{file.name}</span>
-                    <span className="text-xs flex-shrink-0" style={{ color: c.textSecondary }}>
-                      {file.size < 1024 ? `${file.size} B` : file.size < 1048576 ? `${(file.size / 1024).toFixed(0)} KB` : `${(file.size / 1048576).toFixed(1)} MB`}
-                    </span>
-                    <button type="button" onClick={() => upd('attachments', (newLeadData.attachments || []).filter((_, j) => j !== i))}
-                      className="flex-shrink-0 p-0.5 rounded-full transition-colors"
-                      style={{ color: c.textSecondary }}>
-                      <X className="w-3 h-3" style={{ color: c.textSecondary }} />
-                    </button>
+              <div className="mt-3 rounded-2xl border px-3 py-2.5" style={{ borderColor: subtleBorder, backgroundColor: c.surface }}>
+                {filledReviewItems.length > 0 ? (
+                  <div className="grid gap-2 md:grid-cols-2">
+                    {filledReviewItems.map((item) => (
+                      <div key={item.label} className="grid grid-cols-[104px_minmax(0,1fr)] gap-2">
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.02em]" style={{ color: c.textSecondary }}>
+                          {item.label}
+                        </span>
+                        <span className="text-[12px] font-medium break-words" style={{ color: c.textPrimary }}>
+                          {item.value}
+                        </span>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                ) : (
+                  <p className="text-xs" style={{ color: c.textSecondary }}>
+                    No lead details entered yet.
+                  </p>
+                )}
               </div>
-            )}
-            <label
-              className="flex items-center gap-2 px-3.5 py-2.5 rounded-2xl border border-dashed cursor-pointer transition-colors"
-              style={{ borderColor: c.border, backgroundColor: dark ? 'rgba(255,255,255,0.03)' : 'transparent' }}>
-              <Paperclip className="w-3.5 h-3.5" style={{ color: c.textSecondary }} />
-              <span className="text-xs font-medium" style={{ color: c.textSecondary }}>Attach files</span>
-              <input type="file" multiple className="hidden"
-                onChange={e => {
-                  const files = Array.from(e.target.files || []).map(f => ({ name: f.name, size: f.size, type: f.type }));
-                  upd('attachments', [...(newLeadData.attachments || []), ...files]);
-                  e.target.value = '';
-                }} />
-            </label>
-          </div>
-        </Section>
 
-        {/* ── Submit ── */}
-        <div className="pb-6">
-          <PrimaryButton type="submit" theme={theme} size="large" fullWidth
-            disabled={!newLeadData.project || !newLeadData.projectStatus}
-            icon={<ArrowRight className="w-5 h-5" />}>
-            Submit Lead
-          </PrimaryButton>
-          {(!newLeadData.project || !newLeadData.projectStatus) && (
-            <p className="text-xs text-center mt-2" style={{ color: c.textSecondary }}>
-              Please fill in required fields to submit
-            </p>
+              <div
+                className="mt-3 rounded-2xl border px-3 py-2.5 flex items-center gap-2 text-xs"
+                style={{
+                  borderColor: canSubmit ? '#4A7C5933' : '#B85C5C33',
+                  color: canSubmit ? '#4A7C59' : '#B85C5C',
+                  backgroundColor: canSubmit ? '#4A7C5912' : '#B85C5C12',
+                }}
+              >
+                {canSubmit ? <CheckCircle2 className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}
+                {canSubmit ? 'Lead is ready to submit.' : 'Complete required fields in Basics and Scope before submitting.'}
+              </div>
+            </Section>
+          </>
+        )}
+      </div>
+
+      <div
+        className="sticky bottom-0 z-20 border-t"
+        style={{
+          borderColor: subtleBorder,
+          backgroundColor: c.background,
+          backdropFilter: 'none',
+          WebkitBackdropFilter: 'none',
+        }}
+      >
+        <div className="max-w-3xl mx-auto px-4 sm:px-5 py-2.5" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 8px)' }}>
+          {stepRequirementHint && (
+            <div
+              className="mb-2.5 rounded-2xl border px-3 py-2.5 flex items-center gap-2.5"
+              style={{
+                borderColor: '#B85C5C4D',
+                backgroundColor: dark ? 'rgba(184,92,92,0.14)' : 'rgba(184,92,92,0.10)',
+              }}
+            >
+              <AlertTriangle className="w-4 h-4 shrink-0" style={{ color: '#B85C5C' }} />
+              <p className="text-xs leading-snug" style={{ color: c.textPrimary }}>
+                Complete the <span className="font-semibold" style={{ color: '#B85C5C' }}>{stepRequirementHint.fieldLabel}</span> field in <span className="font-bold" style={{ color: '#B85C5C' }}>{stepRequirementHint.stageLabel}</span> to continue.
+              </p>
+            </div>
           )}
+          <div
+            className={`rounded-2xl border p-2 grid items-center gap-2 ${step > 0 ? 'grid-cols-[auto_minmax(0,1fr)]' : 'grid-cols-1'}`}
+            style={{ borderColor: subtleBorder, backgroundColor: c.surface }}
+          >
+          {step > 0 && (
+            <button
+              type="button"
+              onClick={goBack}
+              className="h-11 min-w-[118px] px-3.5 rounded-full border text-[13px] font-semibold inline-flex items-center justify-center gap-1.5 transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+              style={{ borderColor: subtleBorder, color: c.textPrimary }}
+            >
+              <ArrowLeft className="w-4 h-4" /> {STEP_LABELS[step - 1]}
+            </button>
+          )}
+          {step < 2 ? (
+            <PrimaryButton
+              type="button"
+              onClick={goNext}
+              theme={theme}
+              size="default"
+              fullWidth
+              disabled={!stepValid}
+              icon={<ArrowRight className="w-4 h-4" />}
+            >
+              Continue
+            </PrimaryButton>
+          ) : (
+            <PrimaryButton
+              type="submit"
+              theme={theme}
+              size="default"
+              fullWidth
+              disabled={!canSubmit}
+              icon={<ArrowRight className="w-4 h-4" />}
+            >
+              Submit Lead
+            </PrimaryButton>
+          )}
+          </div>
         </div>
-
       </div>
     </form>
   );
