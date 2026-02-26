@@ -3,6 +3,7 @@ import { Trash2, ChevronUp, ChevronDown, Package, Send } from 'lucide-react';
 import { FormInput } from '../../../../components/common/FormComponents.jsx';
 import { LOAN_DURATIONS } from '../data.js';
 import { hapticSuccess } from '../../../../utils/haptics.js';
+import { createProjectDraft, getProjectDisplayName, projectNameMatches } from '../../../../utils/projectHelpers.js';
 
 export const RequestItem = React.memo(({ item, onRemoveFromRequest, theme, isFirst = false }) => (
     <>
@@ -55,7 +56,7 @@ export const RequestDrawer = ({
     const filteredProjects = useMemo(() => {
         const q = requestForm.projectName.trim().toLowerCase();
         if (!q) return (myProjects || []).slice(0, 6);
-        return (myProjects || []).filter(p => (p.name || p.projectName || '').toLowerCase().includes(q)).slice(0, 6);
+        return (myProjects || []).filter(p => getProjectDisplayName(p).toLowerCase().includes(q)).slice(0, 6);
     }, [requestForm.projectName, myProjects]);
 
     const selectProject = useCallback((name) => {
@@ -66,16 +67,10 @@ export const RequestDrawer = ({
     const ensureProjectExists = useCallback((nameRaw) => {
         const name = (nameRaw || '').trim();
         if (!name) return null;
-        const exists = (myProjects || []).some(p => (p.name || p.projectName || '').toLowerCase() === name.toLowerCase());
+        const exists = (myProjects || []).some(p => projectNameMatches(p, name));
         if (exists) return null;
 
-        const newProject = {
-            id: `proj_${Date.now()}`,
-            name,
-            stage: 'Discovery',
-            status: 'Open',
-            createdAt: Date.now()
-        };
+        const newProject = createProjectDraft(name);
 
         if (typeof setMyProjects === 'function') {
             setMyProjects(prev => [newProject, ...(prev || [])]);

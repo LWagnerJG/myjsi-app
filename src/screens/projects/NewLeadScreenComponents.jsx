@@ -9,55 +9,54 @@ import { VisionOptions, KnoxOptions, WinkHoopzOptions } from './product-options.
    LIGHTWEIGHT UI PRIMITIVES
    ═══════════════════════════════════════════════════════════════ */
 
-/* — section card — */
-export const Section = ({ title, titleRight, children, theme, className = '' }) => {
+/* Section card */
+export const Section = ({ title, subtitle, titleRight, children, theme, className = '' }) => {
   const dark = isDarkTheme(theme);
   const divider = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
-  const lineStyle = { width: '32%', height: 0, borderBottom: `1px solid ${divider}` };
   return (
-    <div className={`rounded-2xl ${className}`} style={{
-      padding: '18px 20px', backgroundColor: dark ? theme.colors.surface : '#fff',
+    <div className={`rounded-[28px] ${className}`} style={{
+      padding: '16px',
+      backgroundColor: dark ? theme.colors.surface : '#fff',
       border: `1px solid ${divider}`,
     }}>
-      {title && !titleRight && (
-        <>
-          <h3 className="text-[15px] font-bold" style={{
-            color: theme.colors.textPrimary, marginBottom: 6, letterSpacing: '-0.01em',
-          }}>{title}</h3>
-          <div style={lineStyle} />
-        </>
-      )}
-      {title && titleRight && (
-        <>
-          <div className="flex items-center gap-4">
-            <h3 className="text-[15px] font-bold flex-shrink-0" style={{
-              color: theme.colors.textPrimary, letterSpacing: '-0.01em',
-            }}>{title}</h3>
-            <div className="ml-auto min-w-0" style={{ width: '55%' }}>{titleRight}</div>
+      {title && (
+        <div className="mb-3">
+          <div className="flex items-start gap-3">
+            <div className="min-w-0">
+              <h3 className="text-[14px] font-semibold leading-tight" style={{
+                color: theme.colors.textPrimary,
+                letterSpacing: '-0.005em',
+              }}>{title}</h3>
+              {subtitle && (
+                <p className="text-[11px] mt-1 leading-snug" style={{ color: theme.colors.textSecondary }}>
+                  {subtitle}
+                </p>
+              )}
+            </div>
+            {titleRight && <div className="ml-auto min-w-0">{titleRight}</div>}
           </div>
-          <div style={{ ...lineStyle, marginTop: -3 }} />
-        </>
+        </div>
       )}
       {children}
     </div>
   );
 };
 
-/* — compact field row — supports inline (label left, field right) — */
-const LABEL_W = 'w-[105px]';          // fixed label column for consistent alignment
+/* Compact field row */
 export const Row = ({ label, children, theme, tip, noSep, inline }) => {
   const divider = isDarkTheme(theme) ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+  const rowLayout = inline ? 'grid items-start gap-2 md:grid-cols-[132px_minmax(0,1fr)] md:gap-3' : '';
   return (
-  <div className={`${inline ? 'flex items-center gap-3' : ''} py-3.5 ${noSep ? '' : 'border-t'}`}
+  <div className={`${rowLayout} py-2.5 ${noSep ? '' : 'border-t'}`}
     style={{ borderColor: noSep ? undefined : divider }}>
     {label && (
-      <div className={`flex items-center gap-1.5 ${inline ? `flex-shrink-0 ${LABEL_W}` : 'mb-1.5'}`}>
-        <label className={`text-[13px] font-semibold ${inline ? 'whitespace-nowrap' : ''}`}
-          style={{ color: theme.colors.textPrimary, letterSpacing: '-0.01em' }}>{label}</label>
+      <div className={`flex items-center gap-1.5 ${inline ? 'md:min-h-[36px] md:pt-1.5' : 'mb-1.5'}`}>
+        <label className={`text-[11px] font-semibold ${inline ? 'whitespace-nowrap' : ''}`}
+          style={{ color: theme.colors.textSecondary }}>{label}</label>
         {tip && <InfoTooltip content={tip} theme={theme} position="right" size="sm" />}
       </div>
     )}
-    {inline ? <div className="flex-1 min-w-0 overflow-hidden">{children}</div> : children}
+    {inline ? <div className="min-w-0 overflow-hidden">{children}</div> : children}
   </div>
   );
 };
@@ -127,16 +126,18 @@ export const ProductSpotlight = ({ selectedSeries, onAdd, available, theme }) =>
     else if (e.key === 'Escape') { e.preventDefault(); setOpen(false); }
   }, [open, filtered, hlIdx, pick, doOpen]);
 
+  const subtleBorder = isDarkTheme(theme) ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+
   return (
     <div ref={anchorRef}>
       <div onClick={doOpen}
         className="flex items-center gap-2 px-3.5 cursor-text"
-        style={{ height: 40, borderRadius: 9999, background: theme.colors.surface, border: `1px solid ${theme.colors.border}` }}>
+        style={{ height: 40, borderRadius: 9999, background: theme.colors.surface, border: `1px solid ${subtleBorder}` }}>
         <Search className="w-3.5 h-3.5 flex-shrink-0" style={{ color: theme.colors.textSecondary }} />
         <input ref={inputRef} value={q}
           onChange={e => { setQ(e.target.value); if (!open) doOpen(); }}
           onFocus={doOpen} onKeyDown={onKey}
-          placeholder="Search..."
+          placeholder="Search JSI series..."
           className="flex-1 bg-transparent outline-none text-[13px]"
           style={{ color: theme.colors.textPrimary }} />
       </div>
@@ -145,7 +146,7 @@ export const ProductSpotlight = ({ selectedSeries, onAdd, available, theme }) =>
           className="fixed rounded-2xl border shadow-xl overflow-hidden"
           style={{
             top: pos.top, left: pos.left, width: pos.width,
-            maxHeight: 280, background: theme.colors.surface, borderColor: theme.colors.border,
+            maxHeight: 280, background: theme.colors.surface, borderColor: subtleBorder,
             zIndex: DESIGN_TOKENS.zIndex.popover,
           }}>
           <div className="overflow-y-auto" style={{ maxHeight: 280, WebkitOverflowScrolling: 'touch' }}>
@@ -175,10 +176,14 @@ export const ProductSpotlight = ({ selectedSeries, onAdd, available, theme }) =>
 /* ═══════════════════════════════════════════════════════════════
    PRODUCT CARD (added series with options)
    ═══════════════════════════════════════════════════════════════ */
-export const ProductCard = React.memo(({ product, idx, onRemove, onUpdate, theme }) => {
+export const ProductCard = React.memo(({ product, idx, onRemove, onUpdate, theme, showBorder = true }) => {
+  const subtleBorder = isDarkTheme(theme) ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
   const hasOpts = ['Vision', 'Knox', 'Wink', 'Hoopz'].includes(product.series);
   return (
-    <div className="rounded-2xl border" style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.border }}>
+    <div
+      className={showBorder ? 'rounded-[22px] border' : ''}
+      style={{ backgroundColor: theme.colors.surface, borderColor: showBorder ? subtleBorder : 'transparent' }}
+    >
       <div className="flex items-center justify-between px-4 py-3">
         <span className="text-[13px] font-semibold" style={{ color: theme.colors.textPrimary }}>{product.series}</span>
         <button type="button" onClick={() => onRemove(idx)}

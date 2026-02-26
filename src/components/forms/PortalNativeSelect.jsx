@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Check } from 'lucide-react';
-import { DESIGN_TOKENS } from '../../design-system/tokens.js';
+import { DESIGN_TOKENS, isDarkTheme } from '../../design-system/tokens.js';
 
 /* ──────────────────────────────────────────────────────────────────
    PortalNativeSelect — On-brand custom dropdown
@@ -30,6 +30,7 @@ export const PortalNativeSelect = ({
   required = false,
   mutedValues = [],
   size = 'default',        // 'sm' | 'default'  — sm is compact/inline
+  bordered = true,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0, width: 0 });
@@ -150,6 +151,7 @@ export const PortalNativeSelect = ({
 
   // ── Style tokens ──────────────────────────────────────────────
   const c = theme.colors;
+  const subtleBorder = isDarkTheme(theme) ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
   const isSm = size === 'sm';
   const triggerH = isSm ? 34 : 44;
 
@@ -174,12 +176,12 @@ export const PortalNativeSelect = ({
         style={{
           height: triggerH,
           padding: isSm ? '0 12px' : '0 16px',
-          borderRadius: isSm ? 9999 : 16,
-          backgroundColor: c.surface,
-          border: `1px solid ${isOpen ? c.accent : c.border}`,
+          borderRadius: bordered ? (isSm ? 9999 : 16) : 0,
+          backgroundColor: bordered ? c.surface : 'transparent',
+          border: bordered ? `1px solid ${isOpen ? c.accent : subtleBorder}` : '1px solid transparent',
           color: (isPlaceholder || isMuted) ? c.textSecondary : c.textPrimary,
           fontSize: isSm ? 13 : 14,
-          boxShadow: isOpen ? `0 0 0 3px ${c.accent}18` : 'none',
+          boxShadow: bordered && isOpen ? `0 0 0 3px ${c.accent}18` : 'none',
         }}
       >
         <span className="truncate pr-2">{displayText}</span>
@@ -205,7 +207,7 @@ export const PortalNativeSelect = ({
                 left: position.left,
                 width: position.width,
                 backgroundColor: c.surface,
-                border: `1px solid ${c.border}`,
+                border: `1px solid ${subtleBorder}`,
                 boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
                 zIndex: DESIGN_TOKENS.zIndex.popover,
                 transformOrigin: openAbove ? 'bottom center' : 'top center',

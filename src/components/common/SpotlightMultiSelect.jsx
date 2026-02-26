@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Search, Plus, X } from "lucide-react";
 import { createPortal } from "react-dom";
+import { isDarkTheme } from "../../design-system/tokens.js";
 
 export function SpotlightMultiSelect({
   label,
@@ -12,6 +13,8 @@ export function SpotlightMultiSelect({
   placeholder = "Search...",
   theme,
   compact = false,
+  integratedChips = false,
+  bordered = true,
 }) {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
@@ -36,6 +39,7 @@ export function SpotlightMultiSelect({
   const canCreate = q && !exactExists;
 
   const totalItems = filtered.length + (canCreate ? 1 : 0);
+  const showIntegratedChips = !compact && integratedChips && selectedItems.length > 0;
 
   useEffect(() => {
     setActiveIndex(-1);
@@ -44,7 +48,7 @@ export function SpotlightMultiSelect({
   const palette = {
     bg: theme.colors.surface,
     field: theme.colors.surface,
-    border: theme.colors.border,
+    border: isDarkTheme(theme) ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
     text: theme.colors.textPrimary,
     hint: theme.colors.textSecondary,
     accent: theme.colors.accent,
@@ -188,7 +192,13 @@ export function SpotlightMultiSelect({
       <div
         ref={anchorRef}
         className="flex items-center gap-2 px-4 cursor-text"
-        style={{ height: compact ? 40 : 48, borderRadius: 9999, background: palette.field, border: `1px solid ${palette.border}` }}
+        style={{
+          height: compact ? 40 : 48,
+          borderRadius: showIntegratedChips ? '16px 16px 0 0' : 9999,
+          background: palette.field,
+          border: bordered ? `1px solid ${palette.border}` : 'none',
+          borderBottomWidth: bordered && showIntegratedChips ? 0 : 1,
+        }}
         onClick={() => { setOpen(true); inputRef.current?.focus(); }}
       >
         <Search className="w-3.5 h-3.5 flex-shrink-0" style={{ color: palette.hint }} />
@@ -209,14 +219,14 @@ export function SpotlightMultiSelect({
         />
         {/* compact: render chips inside the search bar */}
         {compact && selectedItems.length > 0 && (
-          <div className="flex items-center gap-1 flex-shrink-0 overflow-x-auto max-w-[60%] scrollbar-hide">
+          <div className="flex items-center gap-1 flex-shrink-0 overflow-x-auto max-w-[72%] scrollbar-hide">
             {selectedItems.map((s) => (
               <span
                 key={s}
                 className="inline-flex items-center gap-1 pl-2 pr-1 py-0.5 rounded-full text-xs font-medium border flex-shrink-0"
                 style={{ background: palette.chipBg, borderColor: palette.border, color: palette.text }}
               >
-                <span className="truncate max-w-[120px]">{s}</span>
+                <span className="truncate max-w-[180px]">{s}</span>
                 <button
                   onClick={(e) => { e.stopPropagation(); onRemoveItem?.(s); }}
                   className="w-4 h-4 flex items-center justify-center rounded-full"
@@ -232,12 +242,19 @@ export function SpotlightMultiSelect({
 
       {/* non-compact: render chips below the search bar */}
       {!compact && selectedItems.length > 0 && (
-        <div className="flex flex-wrap gap-2 pt-2">
+        <div
+          className={showIntegratedChips ? `flex flex-wrap gap-2 px-3 pb-2.5 pt-1.5 ${bordered ? 'border border-t-0' : ''} rounded-b-2xl` : 'flex flex-wrap gap-2 pt-2'}
+          style={showIntegratedChips ? (bordered ? { borderColor: palette.border, background: palette.field } : { background: palette.field }) : undefined}
+        >
           {selectedItems.map((s) => (
             <span
               key={s}
-              className="inline-flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-full text-sm border"
-              style={{ background: palette.chipBg, borderColor: palette.border, color: palette.text }}
+              className={`inline-flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-full text-sm ${bordered ? 'border' : ''}`}
+              style={{
+                background: showIntegratedChips ? theme.colors.subtle : palette.chipBg,
+                borderColor: palette.border,
+                color: palette.text,
+              }}
             >
               {s}
               <button

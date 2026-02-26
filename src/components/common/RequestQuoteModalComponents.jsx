@@ -17,12 +17,14 @@ export const SearchSelect = ({ value, onChange, options, placeholder, theme, onA
     const fieldBrd = isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.08)';
     const hoverBg = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)';
     const dropBg  = isDark ? '#2a2a2a' : '#fff';
+    const controlHeight = 46;
+    const controlRadius = 16;
 
     return (
         <div className="relative">
             <div
                 className="flex items-center gap-2 px-3 cursor-text"
-                style={{ height: 44, borderRadius: 14, background: fieldBg, border: fieldBrd }}
+                style={{ height: controlHeight, borderRadius: controlRadius, background: fieldBg, border: fieldBrd }}
                 onClick={() => setOpen(true)}
             >
                 <Search className="w-4 h-4 flex-shrink-0" style={{ color: c.textSecondary, opacity: 0.4 }} />
@@ -49,7 +51,7 @@ export const SearchSelect = ({ value, onChange, options, placeholder, theme, onA
             {open && !value && (
                 <>
                     <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-                    <div className="absolute top-full left-0 right-0 mt-1 rounded-xl overflow-hidden shadow-lg z-50"
+                    <div className="absolute top-full left-0 right-0 mt-1.5 rounded-2xl overflow-hidden shadow-lg z-50"
                         style={{ backgroundColor: dropBg, border: fieldBrd }}>
                         <div className="max-h-[200px] overflow-y-auto scrollbar-hide py-1">
                             {filtered.map(opt => (

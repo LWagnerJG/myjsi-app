@@ -352,6 +352,22 @@ h6 {
     color-scheme: dark;
 }
 
+.jsi-date-input {
+    font-family: inherit;
+    letter-spacing: 0.01em;
+    color-scheme: light;
+}
+
+.jsi-date-input::-webkit-calendar-picker-indicator {
+    opacity: 0.65;
+    cursor: pointer;
+    transition: opacity 140ms ease;
+}
+
+.jsi-date-input::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+}
+
 .app-header-offset {
     padding-top: calc(var(--app-header-offset) + var(--safe-area-inset-top));
 }

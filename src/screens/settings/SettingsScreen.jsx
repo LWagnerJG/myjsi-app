@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
-import { User, Bell, Palette, ChevronDown } from 'lucide-react';
+import { User, Bell, Palette, ChevronDown, MapPin, Loader2 } from 'lucide-react';
 import { LEAD_TIMES_DATA } from '../resources/lead-times/data.js';
 import { isDarkTheme, DESIGN_TOKENS } from '../../design-system/tokens.js';
 import { hapticLight } from '../../utils/haptics.js';
@@ -93,7 +93,13 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
   const isDark = isDarkTheme(theme);
   const [firstName, setFirstName] = useState(userSettings?.firstName || 'Luke');
   const [lastName, setLastName] = useState(userSettings?.lastName || 'Wagner');
+  const [streetAddress, setStreetAddress] = useState(userSettings?.streetAddress || userSettings?.homeAddress || '');
   const [shirtSize, setShirtSize] = useState(userSettings?.shirtSize || 'L');
+  const [addressSuggestions, setAddressSuggestions] = useState([]);
+  const [showAddressSuggestions, setShowAddressSuggestions] = useState(false);
+  const [addressLoading, setAddressLoading] = useState(false);
+  const addressRequestRef = useRef(null);
+  const addressCacheRef = useRef(new Map());
   const [notif, setNotif] = useState({ newOrder: true, samplesShipped: true, leadTimeChange: true, communityPost: false, replacementApproved: true, commissionPosted: true, orderUpdate: true });
   const notifLabels = { newOrder:'New order placed', orderUpdate:'Order status update', samplesShipped:'Samples shipped', leadTimeChange:'Lead time change', replacementApproved:'Replacement approved', commissionPosted:'Commission posted', communityPost:'New JSI community post' };
   const notifKeys = Object.keys(notif);
@@ -111,7 +117,78 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
     const unique = Array.from(new Set(LEAD_TIMES_DATA.map(item => item.series))).sort();
     return unique.slice(0, 24);
   }, []);
+  const fallbackAddressHints = useMemo(() => {
+    const candidates = [
+      userSettings?.streetAddress,
+      userSettings?.homeAddress,
+      '5445 N Deerwood Lake Rd, Jasper, IN 47546',
+      '4102 Meghan Beeler Court, South Bend, IN 46628',
+      '429 N Pennsylvania St, Indianapolis, IN 46204',
+      '201 E Market St, Louisville, KY 40202',
+      '111 W Berry St, Fort Wayne, IN 46802',
+    ];
+    return Array.from(new Set(candidates.filter(Boolean).map((item) => String(item).trim()))).slice(0, 6);
+  }, [userSettings?.homeAddress, userSettings?.streetAddress]);
   const hoverBg = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)';
+
+  useEffect(() => {
+    setFirstName(userSettings?.firstName || 'Luke');
+    setLastName(userSettings?.lastName || 'Wagner');
+    setStreetAddress(userSettings?.streetAddress || userSettings?.homeAddress || '');
+    setShirtSize(userSettings?.shirtSize || 'L');
+  }, [userSettings?.firstName, userSettings?.lastName, userSettings?.streetAddress, userSettings?.homeAddress, userSettings?.shirtSize]);
+
+  const applyStreetAddress = useCallback((value) => {
+    setStreetAddress(value);
+    setUserSettings?.(prev => ({ ...prev, streetAddress: value, homeAddress: value }));
+  }, [setUserSettings]);
+
+  useEffect(() => {
+    const query = String(streetAddress || '').trim();
+    if (query.length < 3) {
+      setAddressLoading(false);
+      setAddressSuggestions(query ? fallbackAddressHints.filter((hint) => hint.toLowerCase().includes(query.toLowerCase())) : fallbackAddressHints);
+      return;
+    }
+
+    const cacheKey = query.toLowerCase();
+    const cached = addressCacheRef.current.get(cacheKey);
+    if (cached) {
+      setAddressSuggestions(cached);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        if (addressRequestRef.current) addressRequestRef.current.abort();
+        const controller = new AbortController();
+        addressRequestRef.current = controller;
+        setAddressLoading(true);
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&countrycodes=us&q=${encodeURIComponent(query)}`,
+          {
+            signal: controller.signal,
+            headers: {
+              'Accept-Language': 'en-US',
+            },
+          }
+        );
+        if (!response.ok) throw new Error('Address lookup failed');
+        const rows = await response.json();
+        const suggestions = Array.from(new Set((rows || []).map((row) => row?.display_name).filter(Boolean)));
+        addressCacheRef.current.set(cacheKey, suggestions);
+        setAddressSuggestions(suggestions.length ? suggestions : fallbackAddressHints.filter((hint) => hint.toLowerCase().includes(query.toLowerCase())));
+      } catch (error) {
+        if (error?.name !== 'AbortError') {
+          setAddressSuggestions(fallbackAddressHints.filter((hint) => hint.toLowerCase().includes(query.toLowerCase())));
+        }
+      } finally {
+        setAddressLoading(false);
+      }
+    }, 220);
+
+    return () => clearTimeout(timer);
+  }, [streetAddress, fallbackAddressHints]);
 
   return (
     <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
@@ -121,17 +198,92 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
           {/* Account */}
           <GlassCard theme={theme} className="overflow-hidden">
             <SectionHeader icon={User} title="Account" theme={theme} />
-            <div className="p-5 space-y-4">
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: theme.colors.textSecondary }}>First Name</label>
-                <input value={firstName} onChange={e=>setFirstName(e.target.value)} className="w-full px-4 py-2.5 rounded-2xl text-sm font-medium outline-none transition-all focus:ring-2 focus:ring-offset-1" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : theme.colors.surface, border:`1px solid ${theme.colors.border}`, color:theme.colors.textPrimary, focusRingColor: theme.colors.accent }} />
+            <div className="p-4 space-y-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: theme.colors.textSecondary }}>First Name</label>
+                  <input
+                    value={firstName}
+                    onChange={e => {
+                      const value = e.target.value;
+                      setFirstName(value);
+                      setUserSettings?.(prev => ({ ...prev, firstName: value }));
+                    }}
+                    autoComplete="given-name"
+                    className="w-full px-4 h-10 rounded-2xl text-sm font-medium outline-none transition-all focus:ring-2 focus:ring-offset-1"
+                    style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : theme.colors.surface, border:`1px solid ${theme.colors.border}`, color:theme.colors.textPrimary, focusRingColor: theme.colors.accent }}
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: theme.colors.textSecondary }}>Last Name</label>
+                  <input
+                    value={lastName}
+                    onChange={e => {
+                      const value = e.target.value;
+                      setLastName(value);
+                      setUserSettings?.(prev => ({ ...prev, lastName: value }));
+                    }}
+                    autoComplete="family-name"
+                    className="w-full px-4 h-10 rounded-2xl text-sm font-medium outline-none transition-all focus:ring-2 focus:ring-offset-1"
+                    style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : theme.colors.surface, border:`1px solid ${theme.colors.border}`, color:theme.colors.textPrimary }}
+                  />
+                </div>
               </div>
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: theme.colors.textSecondary }}>Last Name</label>
-                <input value={lastName} onChange={e=>setLastName(e.target.value)} className="w-full px-4 py-2.5 rounded-2xl text-sm font-medium outline-none transition-all focus:ring-2 focus:ring-offset-1" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : theme.colors.surface, border:`1px solid ${theme.colors.border}`, color:theme.colors.textPrimary }} />
+                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: theme.colors.textSecondary }}>Street Address</label>
+                <div className="relative">
+                  <input
+                    value={streetAddress}
+                    onChange={e => applyStreetAddress(e.target.value)}
+                    onFocus={() => setShowAddressSuggestions(true)}
+                    onBlur={() => setTimeout(() => setShowAddressSuggestions(false), 120)}
+                    autoComplete="street-address"
+                    inputMode="text"
+                    placeholder="Start typing full street address"
+                    className="w-full pl-10 pr-4 h-10 rounded-2xl text-sm font-medium outline-none transition-all focus:ring-2 focus:ring-offset-1"
+                    style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : theme.colors.surface, border:`1px solid ${theme.colors.border}`, color:theme.colors.textPrimary }}
+                  />
+                  <MapPin className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: theme.colors.textSecondary }} />
+                  {showAddressSuggestions && (
+                    <div
+                      className="absolute left-0 right-0 mt-1.5 rounded-2xl border overflow-hidden z-20"
+                      style={{
+                        borderColor: theme.colors.border,
+                        backgroundColor: isDark ? '#242424' : '#FFFFFF',
+                        boxShadow: DESIGN_TOKENS.shadows.modal,
+                      }}
+                    >
+                      {addressLoading && (
+                        <div className="px-3 py-2.5 text-xs flex items-center gap-2" style={{ color: theme.colors.textSecondary }}>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          Searching addresses...
+                        </div>
+                      )}
+                      {!addressLoading && addressSuggestions.length === 0 && (
+                        <div className="px-3 py-2.5 text-xs" style={{ color: theme.colors.textSecondary }}>
+                          Keep typing to search full addresses
+                        </div>
+                      )}
+                      {!addressLoading && addressSuggestions.map((address) => (
+                        <button
+                          key={address}
+                          type="button"
+                          onMouseDown={() => applyStreetAddress(address)}
+                          className="w-full text-left px-3 py-2.5 text-xs transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                          style={{ color: theme.colors.textPrimary }}
+                        >
+                          {address}
+                        </button>
+                      ))}
+                      <div className="px-3 py-1.5 text-[10px] border-t" style={{ color: theme.colors.textSecondary, borderColor: theme.colors.border }}>
+                        Search powered by OpenStreetMap
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: theme.colors.textSecondary }}>T-Shirt Size</label>
+                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: theme.colors.textSecondary }}>T-Shirt Size</label>
                 <Select value={shirtSize} onChange={(s) => { setShirtSize(s); setUserSettings?.(prev => ({ ...prev, shirtSize: s })); }} options={['XS','S','M','L','XL','XXL'].map(s=>({value:s,label:s}))} theme={theme} />
               </div>
             </div>

@@ -16,7 +16,7 @@ const parseCurrency = (raw) => {
   return Number.isFinite(n) ? n : 0;
 };
 const fmtCurrency = (n) => n > 0 ? `$${n.toLocaleString()}` : '\u2014';
-const REWARD_THRESHOLD = 250000;
+const SPIFF_502010_MIN_LIST = 10000;
 
 /* ---- section primitives ---- */
 const Section = ({ title, children, theme, right }) => {
@@ -151,7 +151,7 @@ const QuoteTracker = ({ quotes = [], theme, onRequestQuote }) => {
 /* 
    MAIN COMPONENT
     */
-export const OpportunityDetail = ({ opp, theme, onUpdate }) => {
+export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId }) => {
   const isDark = isDarkTheme(theme);
   const c = theme.colors;
 
@@ -228,8 +228,11 @@ export const OpportunityDetail = ({ opp, theme, onUpdate }) => {
   const rawNumeric = parseCurrency(draft.value);
   const discountMatch = (draft.discount || '').match(/\(([\d.]+)%\)/);
   const discountPct = discountMatch ? parseFloat(discountMatch[1]) / 100 : 0;
+  const discountCode = String(draft.discount || '').split(' ')[0];
+  const isDiscount502010 = discountCode === '50/20/10';
   const netValue = discountPct > 0 ? Math.round(rawNumeric * (1 - discountPct)) : rawNumeric;
-  const rewardsEligible = rawNumeric >= REWARD_THRESHOLD;
+  const rewardsOn = (draft.salesReward !== false) || (draft.designerReward !== false);
+  const showSpiffWarning = isDiscount502010 && rewardsOn && rawNumeric > 0 && rawNumeric < SPIFF_502010_MIN_LIST;
 
   const [quoteModalOpen, setQuoteModalOpen] = useState(false);
   const enrichedQuotes = useMemo(() => (draft.quotes || []).map((q, i) => ({ ...q, status: q.status || (i === 0 ? 'complete' : 'in-progress') })), [draft.quotes]);
@@ -238,7 +241,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate }) => {
   return (
     <div className="flex flex-col h-full app-header-offset" style={{ background: c.background }}>
       <div className="flex-1 overflow-y-auto scrollbar-hide">
-        <div className="px-4 sm:px-5 pt-5 pb-10 max-w-2xl mx-auto w-full space-y-5">
+        <div className="px-4 sm:px-5 pt-5 pb-10 max-w-4xl mx-auto w-full space-y-4">
 
           {/* HERO */}
           <div className="pt-1 pb-1">
@@ -263,31 +266,35 @@ export const OpportunityDetail = ({ opp, theme, onUpdate }) => {
               </div>
             </div>
             <div className="h-px" style={{ backgroundColor: divider }} />
-            <div className="flex items-stretch pt-3 gap-0">
-              <div className="flex-1 flex flex-col justify-center cursor-pointer min-w-0" onClick={() => discountOpen ? setDiscountOpen(false) : openDiscount()} ref={discBtn}>
+            <div className="pt-3 grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_1px_minmax(0,1fr)] gap-3 sm:gap-0 items-stretch">
+              <div className="flex flex-col justify-center cursor-pointer min-w-0" onClick={() => discountOpen ? setDiscountOpen(false) : openDiscount()} ref={discBtn}>
                 <span className="text-[11px] font-semibold uppercase tracking-widest mb-1" style={{ color: c.textSecondary, opacity: 0.5 }}>Discount</span>
                 <div className="flex items-center gap-1.5">
                   <span className="text-sm font-bold tracking-tight truncate" style={{ color: c.textPrimary }}>{draft.discount || '\u2014'}</span>
                   <ChevronDown className="w-3.5 h-3.5 flex-shrink-0" style={{ color: c.textSecondary, opacity: 0.4 }} />
                 </div>
               </div>
-              <div className="w-px self-stretch mx-4" style={{ backgroundColor: divider }} />
-              <div className="flex flex-col justify-center">
+              <div className="hidden sm:block w-px self-stretch mx-4" style={{ backgroundColor: divider }} />
+              <div className="flex flex-col justify-center sm:pl-0">
                 <span className="text-[11px] font-semibold uppercase tracking-widest mb-1" style={{ color: c.textSecondary, opacity: 0.5 }}>Net Value</span>
                 <span className="text-lg font-bold tracking-tight leading-none whitespace-nowrap" style={{ color: c.accent }}>{netValue > 0 && discountPct > 0 ? fmtCurrency(netValue) : '\u2014'}</span>
               </div>
             </div>
             <div className="h-px mt-3" style={{ backgroundColor: divider }} />
-            <Row label="Sales Reward" theme={theme} noSep>
-              <div className="flex justify-end"><ToggleSwitch checked={draft.salesReward !== false} onChange={e => update('salesReward', e.target.checked)} theme={theme} /></div>
-            </Row>
-            <Row label="Designer Reward" theme={theme}>
-              <div className="flex justify-end"><ToggleSwitch checked={draft.designerReward !== false} onChange={e => update('designerReward', e.target.checked)} theme={theme} /></div>
-            </Row>
-            {!rewardsEligible && (draft.salesReward !== false || draft.designerReward !== false) && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-3">
+              <div className="rounded-xl border px-3 py-2 flex items-center justify-between" style={{ borderColor: divider, backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.015)' }}>
+                <span className="text-[12px] font-semibold" style={{ color: c.textPrimary }}>Sales Reward</span>
+                <ToggleSwitch checked={draft.salesReward !== false} onChange={e => update('salesReward', e.target.checked)} theme={theme} />
+              </div>
+              <div className="rounded-xl border px-3 py-2 flex items-center justify-between" style={{ borderColor: divider, backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.015)' }}>
+                <span className="text-[12px] font-semibold" style={{ color: c.textPrimary }}>Designer Reward</span>
+                <ToggleSwitch checked={draft.designerReward !== false} onChange={e => update('designerReward', e.target.checked)} theme={theme} />
+              </div>
+            </div>
+            {showSpiffWarning && (
               <div className="flex items-center gap-2 px-3 py-2 rounded-xl mt-1" style={{ backgroundColor: isDark ? 'rgba(196,149,106,0.08)' : 'rgba(196,149,106,0.06)' }}>
                 <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#C4956A' }} />
-                <span className="text-[11px] font-medium" style={{ color: '#C4956A' }}>Rewards require {'\u2265'} $250K list value</span>
+                <span className="text-[11px] font-medium" style={{ color: '#C4956A' }}>No spiff eligible: 50/20/10 with list value under $10K.</span>
               </div>
             )}
           </Section>
@@ -478,6 +485,8 @@ export const OpportunityDetail = ({ opp, theme, onUpdate }) => {
       )}
 
       <RequestQuoteModal show={quoteModalOpen} onClose={() => setQuoteModalOpen(false)} theme={theme}
+        members={members}
+        currentUserId={currentUserId}
         onSubmit={(data) => {
           const newQuote = { id: 'q-' + Date.now(), fileName: `Quote Request - ${data.projectName || draft.project || draft.name || 'Untitled'}.pdf`, status: 'requested', url: null };
           update('quotes', [...(draft.quotes || []), newQuote]);

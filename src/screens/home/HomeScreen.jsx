@@ -25,6 +25,7 @@ import { AppGrid } from './components/AppGrid.jsx';
 import { HomeFeatureCards } from './components/HomeFeatureCards.jsx';
 import { IndieSconce } from './components/IndieSconce.jsx';
 import { ChatOverlay } from './components/ChatOverlay.jsx';
+import { createProjectDraft, projectNameMatches } from '../../utils/projectHelpers.js';
 import { useHomeChat } from './hooks/useHomeChat.js';
 import { useIndieSconce } from './hooks/useIndieSconce.js';
 import {
@@ -50,6 +51,8 @@ export const HomeScreen = React.memo(({
     opportunities = [],
     myProjects = [],
     setMyProjects,
+    members,
+    currentUserId,
     setSuccessMessage,
 }) => {
     const [isEditMode, setIsEditMode] = useState(false);
@@ -103,24 +106,16 @@ export const HomeScreen = React.memo(({
 
         let targetProject = selectedProject;
         if (!targetProject && typedProjectName) {
-            const existing = (myProjects || []).find((project) => {
-                const name = project?.name || project?.projectName || '';
-                return name.toLowerCase() === typedProjectName.toLowerCase();
-            });
+            const existing = (myProjects || []).find((project) => projectNameMatches(project, typedProjectName));
 
             if (existing) {
                 targetProject = existing;
             } else {
-                const newProject = {
-                    id: `proj_${Date.now()}`,
-                    name: typedProjectName,
+                const newProject = createProjectDraft(typedProjectName, {
                     location: 'Location TBD',
                     image: 'https://webresources.jsifurniture.com/production/uploads/jsi_vision_install_0000010.jpg',
-                    stage: 'Discovery',
-                    status: 'Open',
-                    createdAt: Date.now(),
                     specCheckRequests: [],
-                };
+                });
                 targetProject = newProject;
                 if (typeof setMyProjects === 'function') {
                     setMyProjects((prev) => [newProject, ...(prev || [])]);
@@ -474,6 +469,8 @@ export const HomeScreen = React.memo(({
                 show={showQuoteModal}
                 onClose={() => setShowQuoteModal(false)}
                 theme={theme}
+                members={members}
+                currentUserId={currentUserId}
                 onSubmit={(data) => {
                     // TODO: wire to quote submission API
                     if (import.meta.env.DEV) console.log('Quote request submitted:', data);

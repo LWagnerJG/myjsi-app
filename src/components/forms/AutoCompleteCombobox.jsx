@@ -16,6 +16,8 @@ export const AutoCompleteCombobox = React.memo(({
     dropdownClassName = '',
     resetOnSelect = false,
     compact = false,
+    showDropdown = true,
+    showAddButton = true,
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [pos, setPos] = useState({ top: 0, left: 0, width: 0, height: 'auto' });
@@ -25,14 +27,17 @@ export const AutoCompleteCombobox = React.memo(({
     const dark = isDarkTheme(theme);
 
     const filtered = useMemo(() => {
+        if (!showDropdown) return [];
         const q = (value || '').toLowerCase();
         if (!q) return options;
         return options.filter(o => o.toLowerCase().includes(q));
-    }, [value, options]);
+    }, [showDropdown, value, options]);
 
     const shouldShowAddButton = useMemo(() => {
-        return onAddNew && value && value.trim() && !options.some(o => o.toLowerCase() === value.toLowerCase());
-    }, [onAddNew, value, options]);
+        return showAddButton && onAddNew && value && value.trim() && !options.some(o => o.toLowerCase() === value.toLowerCase());
+    }, [showAddButton, onAddNew, value, options]);
+
+    const subtleBorder = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
 
     // Use centralized theme detection to keep dark/light behavior consistent across screens
     const getDropdownStyles = () => {
@@ -40,17 +45,17 @@ export const AutoCompleteCombobox = React.memo(({
             return {
                 backgroundColor: theme.colors.surface,
                 color: theme.colors.textPrimary,
-                borderColor: 'rgba(255,255,255,0.12)',
+                borderColor: subtleBorder,
                 '--dropdown-bg': theme.colors.surface,
-                '--dropdown-border': 'rgba(255,255,255,0.12)'
+                '--dropdown-border': subtleBorder
             };
         } else {
             return {
                 backgroundColor: theme.colors.surface,
                 color: theme.colors.textPrimary,
-                borderColor: 'rgba(0,0,0,0.12)',
+                borderColor: subtleBorder,
                 '--dropdown-bg': theme.colors.surface,
-                '--dropdown-border': 'rgba(0,0,0,0.12)'
+                '--dropdown-border': subtleBorder
             };
         }
     };
@@ -101,13 +106,13 @@ export const AutoCompleteCombobox = React.memo(({
     }, [filtered.length]);
 
     useLayoutEffect(() => {
-        if (isOpen) {
+        if (showDropdown && isOpen) {
             calcPos();
         }
-    }, [isOpen, calcPos]);
+    }, [showDropdown, isOpen, calcPos]);
 
     useEffect(() => {
-        if (!isOpen) return;
+        if (!showDropdown || !isOpen) return;
         const handler = () => calcPos();
         window.addEventListener('resize', handler);
         window.addEventListener('scroll', handler, true);
@@ -115,7 +120,7 @@ export const AutoCompleteCombobox = React.memo(({
             window.removeEventListener('resize', handler);
             window.removeEventListener('scroll', handler, true);
         };
-    }, [isOpen, calcPos]);
+    }, [showDropdown, isOpen, calcPos]);
 
     useEffect(() => {
         const away = (e) => {
@@ -149,12 +154,12 @@ export const AutoCompleteCombobox = React.memo(({
     };
 
     const handleInputFocus = () => {
-        setIsOpen(true);
+        if (showDropdown) setIsOpen(true);
     };
 
     const handleInputChange = (e) => {
         onChange(e.target.value);
-        if (!isOpen) {
+        if (showDropdown && !isOpen) {
             setIsOpen(true);
         }
     };
@@ -171,6 +176,10 @@ export const AutoCompleteCombobox = React.memo(({
                 <input
                     ref={inputRef}
                     type="text"
+                    spellCheck={false}
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    autoComplete="off"
                     value={value || ''}
                     onFocus={handleInputFocus}
                     onChange={handleInputChange}
@@ -204,7 +213,7 @@ export const AutoCompleteCombobox = React.memo(({
             )}
 
             {/* Dropdown portal for filtered options */}
-            {isOpen && filtered.length > 0 && (
+            {showDropdown && isOpen && filtered.length > 0 && (
                 <DropdownPortal>
                     <div 
                         ref={dropRef} 
@@ -217,20 +226,18 @@ export const AutoCompleteCombobox = React.memo(({
                         }}
                     >
                         <div 
-                            className="overflow-y-auto scrollbar-hide rounded-2xl border transition-all duration-200 animate-fade-in autocomplete-dropdown"
+                            className="overflow-y-auto scrollbar-hide rounded-2xl border autocomplete-dropdown"
                             style={{ 
-                                height: `${pos.height}px`,
-                                backgroundColor: `${dropdownStyles.backgroundColor} !important`,
+                                maxHeight: `${pos.height}px`,
+                                backgroundColor: dropdownStyles.backgroundColor,
                                 borderColor: dropdownStyles.borderColor,
                                 color: dropdownStyles.color,
                                 boxShadow: '0 8px 24px rgba(0, 0, 0, 0.12)',
-                                backdropFilter: 'none !important',
-                                WebkitBackdropFilter: 'none !important',
-                                willChange: 'transform, opacity',
+                                backdropFilter: 'none',
+                                WebkitBackdropFilter: 'none',
                                 padding: '8px',
-                                // Multiple fallbacks for solid background
-                                background: `${dropdownStyles.backgroundColor} !important`,
-                                border: `1px solid ${dropdownStyles.borderColor} !important`
+                                background: dropdownStyles.backgroundColor,
+                                border: `1px solid ${dropdownStyles.borderColor}`
                             }}
                         >
                             {filtered.map((opt) => (
@@ -238,7 +245,7 @@ export const AutoCompleteCombobox = React.memo(({
                                     key={opt} 
                                     type="button" 
                                     onClick={() => handleSelectOption(opt)} 
-                                    className="block w-full text-left py-3 px-4 text-sm rounded-xl transition-all duration-150 font-medium hover:scale-[1.01] focus:outline-none focus:scale-[1.01]" 
+                                    className="block w-full text-left py-3 px-4 text-sm rounded-xl transition-colors duration-150 font-medium focus:outline-none" 
                                     style={{ 
                                         color: dropdownStyles.color,
                                         backgroundColor: 'transparent',

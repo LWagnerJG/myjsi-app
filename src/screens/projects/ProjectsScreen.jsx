@@ -7,6 +7,7 @@ import { ProbabilitySlider } from '../../components/forms/ProbabilitySlider.jsx'
 import { PillButton } from '../../components/common/JSIButtons.jsx';
 import { JSI_SERIES } from '../products/data.js';
 import { DESIGN_TOKENS, isDarkTheme } from '../../design-system/tokens.js';
+import { usePersistentState } from '../../hooks/usePersistentState.js';
 
 import { PROJECTS_TAB_OPTIONS, fmtCurrency } from './components/projects/utils.js';
 import { OpportunityDetail } from './components/projects/OpportunityDetail.jsx';
@@ -14,12 +15,22 @@ import { ProjectCard } from './components/projects/ProjectCard.jsx';
 import { InstallationDetail } from './components/projects/InstallationDetail.jsx';
 
 // Exported main ProjectsScreen (restored)
-export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, setOpportunities, myProjects, setMyProjects, projectsInitialTab, clearProjectsInitialTab, deepLinkOppId }, ref) => {
+export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, setOpportunities, myProjects, setMyProjects, projectsInitialTab, clearProjectsInitialTab, projectsInitialStage, clearProjectsInitialStage, deepLinkOppId, members, currentUserId }, ref) => {
   const isDark = isDarkTheme(theme);
-  const initial = projectsInitialTab || 'pipeline';
-  const [projectsTab, setProjectsTab] = useState(initial);
-  useEffect(()=>{ if(projectsInitialTab) clearProjectsInitialTab && clearProjectsInitialTab(); },[projectsInitialTab, clearProjectsInitialTab]);
-  const [selectedPipelineStage,setSelectedPipelineStage] = useState('Discovery');
+  const [projectsTab, setProjectsTab] = usePersistentState('pref.projects.activeTab', 'pipeline');
+  const [selectedPipelineStage, setSelectedPipelineStage] = usePersistentState('pref.projects.pipelineStage', 'Discovery');
+  useEffect(() => {
+    if (projectsInitialTab) {
+      setProjectsTab(projectsInitialTab);
+      clearProjectsInitialTab && clearProjectsInitialTab();
+    }
+  }, [projectsInitialTab, clearProjectsInitialTab, setProjectsTab]);
+  useEffect(() => {
+    if (projectsInitialStage && STAGES.includes(projectsInitialStage)) {
+      setSelectedPipelineStage(projectsInitialStage);
+      clearProjectsInitialStage && clearProjectsInitialStage();
+    }
+  }, [projectsInitialStage, clearProjectsInitialStage, setSelectedPipelineStage]);
   const [selectedOpportunity,setSelectedOpportunity] = useState(null);
   const [selectedInstall,setSelectedInstall] = useState(null);
   const scrollContainerRef = useRef(null);
@@ -42,7 +53,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
   const stageTotals = useMemo(()=>{ const totalValue = filteredOpportunities.reduce((sum,o)=>{ const raw= typeof o.value==='string'? o.value.replace(/[^0-9.]/g,''): o.value; const num=parseFloat(raw)||0; return sum+num; },0); return { totalValue }; },[filteredOpportunities]);
   const updateOpportunity = updated => setOpportunities(prev=> prev.map(o=> o.id===updated.id? updated:o));
   const addInstallPhotos = files => { if(!files||!selectedInstall) return; const arr=Array.from(files); setMyProjects(prev=> prev.map(p=> p.id===selectedInstall.id? {...p, photos:[...(p.photos||[]), ...arr]}:p)); setSelectedInstall(prev=> prev? {...prev, photos:[...(prev.photos||[]), ...arr]}: prev); };
-  if(selectedOpportunity) return <OpportunityDetail opp={selectedOpportunity} theme={theme} onUpdate={u=>{ updateOpportunity(u); setSelectedOpportunity(u); }} />;
+  if(selectedOpportunity) return <OpportunityDetail opp={selectedOpportunity} theme={theme} members={members} currentUserId={currentUserId} onUpdate={u=>{ updateOpportunity(u); setSelectedOpportunity(u); }} />;
   if(selectedInstall) return <InstallationDetail project={selectedInstall} theme={theme} onAddPhotoFiles={addInstallPhotos} />;
   return (
     <div className="h-full flex flex-col app-header-offset relative" style={{ backgroundColor: theme.colors.background }}>

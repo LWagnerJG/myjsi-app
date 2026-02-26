@@ -226,6 +226,7 @@ function App() {
     const [opportunities, setOpportunities] = useState(INITIAL_OPPORTUNITIES);
     const [myProjects, setMyProjects] = useState(MY_PROJECTS_DATA);
     const [projectsTabOverride, setProjectsTabOverride] = useState(null);
+    const [projectsStageOverride, setProjectsStageOverride] = useState(null);
     const [, setSelectedProject] = useState(null);
     const [members, setMembers] = useState(INITIAL_MEMBERS);
     const [currentUserId] = useState(1);
@@ -273,8 +274,9 @@ function App() {
     const handleNavigate = useCallback((screen, params = {}) => {
         setLastNavigationDirection('forward');
         setScreenParams(params || {});
-        if (screen === 'projects' && params?.tab) {
-            setProjectsTabOverride(params.tab);
+        if (screen === 'projects') {
+            if (params?.tab) setProjectsTabOverride(params.tab);
+            if (params?.stage) setProjectsStageOverride(params.stage);
         }
         setNavDepth(d => d + 1);
         routerNavigate(screenToPath(screen));
@@ -375,12 +377,12 @@ function App() {
         // Fire-and-forget: send lead data to shared Excel via Power Automate
         submitLeadToExcel(lead);
         const newOpp = { id: Date.now(), name: lead.project || 'Untitled Project', stage: lead.projectStatus && STAGES.includes(lead.projectStatus) ? lead.projectStatus : STAGES[0], discount: lead.discount || 'Undecided', value: lead.estimatedList || '$0', company: lead.designFirms?.[0] || lead.dealers?.[0] || 'Unknown', contact: lead.contact || '', poTimeframe: lead.poTimeframe || '', ...lead };
-        setOpportunities(prev => [newOpp, ...prev]); setNewLeadData(EMPTY_LEAD); handleNavigate('projects'); setProjectsTabOverride('pipeline'); flashSuccess('Lead Added');
+        setOpportunities(prev => [newOpp, ...prev]); setNewLeadData(EMPTY_LEAD); handleNavigate('projects', { tab: 'pipeline', stage: newOpp.stage }); flashSuccess('Lead Added');
     }, [handleNavigate, setNewLeadData, flashSuccess]);
 
     const handleAddInstall = useCallback((install) => {
         const enriched = { id: 'inst-' + Date.now(), photos: install.photos || [], standards: [], quotes: [], ...install };
-        setMyProjects(prev => [enriched, ...prev]); handleNavigate('projects'); setProjectsTabOverride('my-projects'); flashSuccess('Install Added');
+        setMyProjects(prev => [enriched, ...prev]); handleNavigate('projects', { tab: 'my-projects' }); flashSuccess('Install Added');
     }, [handleNavigate, flashSuccess]);
 
     const handleUpdateHomeApps = useCallback((apps) => {
@@ -395,6 +397,7 @@ function App() {
     const openLibraryUploadModal = useCallback(() => setShowLibraryUploadModal(true), []);
     const closeLibraryUploadModal = useCallback(() => setShowLibraryUploadModal(false), []);
     const clearProjectsInitialTab = useCallback(() => setProjectsTabOverride(null), []);
+    const clearProjectsInitialStage = useCallback(() => setProjectsStageOverride(null), []);
     const toggleProfileMenu = useCallback(() => setShowProfileMenu(p => !p), []);
     const closeProfileMenu = useCallback(() => setShowProfileMenu(false), []);
     const closeCreateContentModal = useCallback(() => setShowCreateContentModal(false), []);
@@ -450,6 +453,8 @@ function App() {
         onAddInstall: handleAddInstall,
         projectsInitialTab: projectsTabOverride,
         clearProjectsInitialTab,
+        projectsInitialStage: projectsStageOverride,
+        clearProjectsInitialStage,
         homeApps,
         onUpdateHomeApps: handleUpdateHomeApps,
         homeResetKey
@@ -462,7 +467,7 @@ function App() {
         handleToggleSaveImage, postUpvotes, handleUpvote, cart, setCart,
         handleUpdateCart, dealerDirectory, designFirms, dealers, newLeadData,
         handleNewLeadChange, isDarkMode, handleToggleTheme, handleLeadSuccess,
-        handleAddInstall, projectsTabOverride, clearProjectsInitialTab,
+        handleAddInstall, projectsTabOverride, clearProjectsInitialTab, projectsStageOverride, clearProjectsInitialStage,
         homeApps, handleUpdateHomeApps, homeResetKey
     ]);
 

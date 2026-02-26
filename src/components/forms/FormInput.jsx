@@ -17,6 +17,7 @@ export const FormInput = React.memo(({
     surfaceBg = false, // when true uses surface (lighter) instead of subtle
 }) => {
     const controlledValue = value === undefined || value === null ? '' : value;
+    const subtleBorder = isDarkTheme(theme) ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
 
     const textSizeClass = size === 'sm' ? 'text-[13px]' : 'text-base';
     const paddingClass = size === 'sm' ? 'px-4' : 'px-4 py-3';
@@ -27,7 +28,7 @@ export const FormInput = React.memo(({
 
     const styles = {
         backgroundColor,
-        borderColor: theme.colors.border,
+        borderColor: subtleBorder,
         color: readOnly && !controlledValue ? theme.colors.textSecondary : theme.colors.textPrimary,
         ...(size === 'sm' ? { height: 40 } : {}),
     };

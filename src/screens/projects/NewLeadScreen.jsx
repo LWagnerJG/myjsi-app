@@ -248,8 +248,10 @@ export const NewLeadScreen = ({
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [fileNotice, setFileNotice] = useState('');
+  const [hasReachedBottomOfStep, setHasReachedBottomOfStep] = useState(false);
   const fileInputRef = useRef(null);
   const installDateInputRef = useRef(null);
+  const bottomSentinelRef = useRef(null);
   const [endUserOptions, setEndUserOptions] = useState(() => mergeUnique(
     END_USER_OPTIONS,
     (opportunities || []).map((opp) => opp.company),
@@ -269,6 +271,27 @@ export const NewLeadScreen = ({
   useEffect(() => {
     setEndUserOptions((prev) => mergeUnique(prev, (opportunities || []).map((opp) => opp.company)));
   }, [opportunities]);
+
+  useEffect(() => {
+    setHasReachedBottomOfStep(false);
+  }, [step]);
+
+  useEffect(() => {
+    const node = bottomSentinelRef.current;
+    if (!node) return undefined;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setHasReachedBottomOfStep(true);
+        }
+      },
+      { threshold: 0.4 },
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [step]);
 
   const upd = useCallback((field, value) => {
     if (field === 'vertical' && value !== 'Other (Please specify)') {
@@ -341,13 +364,15 @@ export const NewLeadScreen = ({
   const duplicateMatches = useMemo(() => {
     const project = normalizeText(newLeadData.project);
     const endUser = normalizeText(newLeadData.endUser);
-    if (!project && !endUser) return [];
+    const projectQuery = project.length >= 3 ? project : '';
+    const endUserQuery = endUser.length >= 3 ? endUser : '';
+    if (!projectQuery && !endUserQuery) return [];
     return (opportunities || [])
       .filter((opp) => {
         const name = normalizeText(opp.name || opp.project);
         const company = normalizeText(opp.company);
-        const projectHit = project && (name.includes(project) || project.includes(name));
-        const companyHit = endUser && (company.includes(endUser) || endUser.includes(company));
+        const projectHit = projectQuery && (name.includes(projectQuery) || projectQuery.includes(name));
+        const companyHit = endUserQuery && (company.includes(endUserQuery) || endUserQuery.includes(company));
         return projectHit || companyHit;
       })
       .slice(0, 3);
@@ -790,14 +815,11 @@ export const NewLeadScreen = ({
           title="New Lead"
           subtitle={STEP_DESCRIPTIONS[step]}
           titleRight={(
-            <div
-              className="rounded-2xl border p-1.5 flex items-center gap-1.5"
-              style={{ borderColor: subtleBorder, backgroundColor: c.surface }}
-            >
+            <div className="flex items-center gap-1.5">
               <InlineStepHealth health={health} theme={theme} />
               <span
                 className="inline-flex h-8 items-center rounded-full px-3 text-[11px] font-semibold"
-                style={{ backgroundColor: c.background, color: c.textSecondary, border: `1px solid ${subtleBorder}` }}
+                style={{ backgroundColor: c.subtle, color: c.textSecondary }}
               >
                 Step {step + 1} of 3
               </span>
@@ -805,10 +827,7 @@ export const NewLeadScreen = ({
           )}
           theme={theme}
         >
-          <div
-            className="grid grid-cols-3 gap-1.5 pt-0.5 rounded-2xl border p-1.5"
-            style={{ borderColor: subtleBorder, backgroundColor: c.surface }}
-          >
+          <div className="grid grid-cols-3 gap-1.5 pt-0.5">
             {STEP_LABELS.map((label, idx) => {
               const active = step === idx;
               const done = completion[idx].done;
@@ -822,7 +841,7 @@ export const NewLeadScreen = ({
                   style={{
                     backgroundColor: active ? c.accent : c.background,
                     color: active ? c.accentText : c.textPrimary,
-                    border: `1px solid ${active ? c.accent : subtleBorder}`,
+                    border: `1px solid ${active ? c.accent : 'transparent'}`,
                   }}
                 >
                   <div className="text-[11px] leading-none font-semibold tracking-[0.01em]">{label}</div>
@@ -876,6 +895,21 @@ export const NewLeadScreen = ({
                       onChange={(e) => setStageByIndex(Number(e.target.value))}
                       className="w-full jsi-range"
                     />
+                    <div className="mt-1.5 flex items-center justify-between px-0.5">
+                      {stageOptions.map((stage, idx) => (
+                        <span
+                          key={stage}
+                          className="text-[10px] leading-none"
+                          style={{
+                            color: c.textSecondary,
+                            opacity: idx === stageIndex ? 0.95 : 0.45,
+                            fontWeight: idx === stageIndex ? 600 : 500,
+                          }}
+                        >
+                          {stage}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                   <FieldError show={!!visibleError('projectStatus')} message={visibleError('projectStatus')} />
                 </div>
@@ -883,26 +917,37 @@ export const NewLeadScreen = ({
 
               <Row label="Vertical" theme={theme} inline>
                 <div>
-                  <PortalNativeSelect
-                    value={newLeadData.vertical || ''}
-                    onChange={(e) => { upd('vertical', e.target.value); markTouched('vertical'); }}
-                    options={VERTICALS.map((v) => ({ label: v === 'Other (Please specify)' ? 'Other' : v, value: v }))}
-                    placeholder="Select vertical"
-                    theme={theme}
-                    size="sm"
-                  />
-                  {newLeadData.vertical === 'Other (Please specify)' && (
-                    <div className="mt-2">
-                      <FormInput
+                  {newLeadData.vertical === 'Other (Please specify)' ? (
+                    <div className="rounded-[18px] border overflow-hidden" style={{ borderColor: subtleBorder, backgroundColor: c.surface }}>
+                      <PortalNativeSelect
+                        value={newLeadData.vertical || ''}
+                        onChange={(e) => { upd('vertical', e.target.value); markTouched('vertical'); }}
+                        options={VERTICALS.map((v) => ({ label: v === 'Other (Please specify)' ? 'Other' : v, value: v }))}
+                        placeholder="Select vertical"
+                        theme={theme}
+                        size="sm"
+                        bordered={false}
+                      />
+                      <div className="h-px" style={{ backgroundColor: subtleBorder }} />
+                      <input
+                        type="text"
                         value={newLeadData.otherVertical || ''}
                         onChange={(e) => { upd('otherVertical', e.target.value); markTouched('otherVertical'); }}
                         onBlur={() => markTouched('otherVertical')}
-                        placeholder="Enter vertical type"
-                        theme={theme}
-                        size="sm"
-                        surfaceBg
+                        placeholder="Specify other vertical"
+                        className="w-full h-9 px-3.5 text-[13px] focus:outline-none focus:ring-0 placeholder-theme-secondary bg-transparent border-0"
+                        style={{ color: c.textPrimary }}
                       />
                     </div>
+                  ) : (
+                    <PortalNativeSelect
+                      value={newLeadData.vertical || ''}
+                      onChange={(e) => { upd('vertical', e.target.value); markTouched('vertical'); }}
+                      options={VERTICALS.map((v) => ({ label: v === 'Other (Please specify)' ? 'Other' : v, value: v }))}
+                      placeholder="Select vertical"
+                      theme={theme}
+                      size="sm"
+                    />
                   )}
                   <FieldError show={!!visibleError('vertical')} message={visibleError('vertical')} />
                   <FieldError show={!!visibleError('otherVertical')} message={visibleError('otherVertical')} />
@@ -1434,6 +1479,7 @@ export const NewLeadScreen = ({
             </Section>
           </>
         )}
+        <div ref={bottomSentinelRef} className="h-px" aria-hidden="true" />
       </div>
 
       <div
@@ -1446,24 +1492,20 @@ export const NewLeadScreen = ({
         }}
       >
         <div className="max-w-3xl mx-auto px-4 sm:px-5 py-2.5" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 8px)' }}>
-          {stepRequirementHint && (
+          {stepRequirementHint && hasReachedBottomOfStep && (
             <div
-              className="mb-2.5 rounded-2xl border px-3 py-2.5 flex items-center gap-2.5"
+              className="mb-2 rounded-xl px-2.5 py-2 flex items-center gap-2"
               style={{
-                borderColor: '#B85C5C4D',
-                backgroundColor: dark ? 'rgba(184,92,92,0.14)' : 'rgba(184,92,92,0.10)',
+                backgroundColor: dark ? 'rgba(184,92,92,0.12)' : 'rgba(184,92,92,0.08)',
               }}
             >
-              <AlertTriangle className="w-4 h-4 shrink-0" style={{ color: '#B85C5C' }} />
-              <p className="text-xs leading-snug" style={{ color: c.textPrimary }}>
-                Complete the <span className="font-semibold" style={{ color: '#B85C5C' }}>{stepRequirementHint.fieldLabel}</span> field in <span className="font-bold" style={{ color: '#B85C5C' }}>{stepRequirementHint.stageLabel}</span> to continue.
+              <AlertTriangle className="w-3.5 h-3.5 shrink-0" style={{ color: '#B85C5C' }} />
+              <p className="text-[11px] leading-snug" style={{ color: c.textSecondary }}>
+                Complete the <span className="font-bold" style={{ color: '#B85C5C' }}>{stepRequirementHint.fieldLabel}</span> field to continue.
               </p>
             </div>
           )}
-          <div
-            className={`rounded-2xl border p-2 grid items-center gap-2 ${step > 0 ? 'grid-cols-[auto_minmax(0,1fr)]' : 'grid-cols-1'}`}
-            style={{ borderColor: subtleBorder, backgroundColor: c.surface }}
-          >
+          <div className={`grid items-center gap-2 ${step > 0 ? 'grid-cols-[auto_minmax(0,1fr)]' : 'grid-cols-1'}`}>
           {step > 0 && (
             <button
               type="button"
