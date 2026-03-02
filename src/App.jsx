@@ -29,6 +29,7 @@ import { submitLeadToExcel } from './utils/submitLeadToExcel.js';
 // Lazy load less-frequently visited resource feature screens for bundle splitting
 const CommissionRatesScreen = React.lazy(() => import('./screens/resources/commission-rates/index.js'));
 const LeadTimesScreen = React.lazy(() => import('./screens/resources/lead-times/index.js'));
+const WeightRatingsScreen = React.lazy(() => import('./screens/resources/weight-ratings/index.js'));
 const ContractsScreen = React.lazy(() => import('./screens/resources/contracts/index.js'));
 const DealerDirectoryScreen = React.lazy(() => import('./screens/resources/dealer-directory/index.js'));
 const DealerDetailScreen = React.lazy(() => import('./screens/resources/dealer-directory/DealerDetailScreen.jsx').then(m => ({ default: m.DealerDetailScreen })));
@@ -56,7 +57,8 @@ const RESOURCE_SLUG_ALIASES = {
     'request_field_visit': 'request-field-visit',
     'social_media': 'social-media',
     'dealer_directory': 'dealer-directory',
-    'commission_rates': 'commission-rates'
+    'commission_rates': 'commission-rates',
+    'weight_ratings': 'weight-ratings'
     // 'new-dealer-signup' already canonical; no alias needed
 };
 
@@ -70,6 +72,7 @@ function normalizeResourceSlug(raw) {
 const RESOURCE_FEATURE_SCREENS = {
     'commission-rates': CommissionRatesScreen,
     'lead-times': LeadTimesScreen,
+    'weight-ratings': WeightRatingsScreen,
     'contracts': ContractsScreen,
     'dealer-directory': DealerDirectoryScreen,
     'discontinued-finishes': DiscontinuedFinishesScreen,
@@ -131,6 +134,12 @@ const ScreenRouter = React.memo(({ screenKey, projectsScreenRef, SuspenseFallbac
             return lazyWrap(TradeshowsScreen, {
                 initialBrandId: parts[2],
                 initialShowId: parts[3] || null,
+            });
+        }
+
+        if (normalizedFirst === 'weight-ratings') {
+            return lazyWrap(WeightRatingsScreen, {
+                initialSeriesSlug: parts[2] || null
             });
         }
 

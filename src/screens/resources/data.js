@@ -13,6 +13,7 @@ export const RESOURCES_DATA = [
         category: "Product & Finish Resources",
         items: [
             { label: "Lead Times", nav: "resources/lead-times" },
+            { label: "Weight Ratings", nav: "resources/weight-ratings" },
             { label: "Search Fabrics", nav: "resources/search-fabrics" },
             { label: "Request COM Yardage", nav: "resources/request-com-yardage" },
             { label: "Discontinued Finishes Database", nav: "resources/discontinued-finishes" },

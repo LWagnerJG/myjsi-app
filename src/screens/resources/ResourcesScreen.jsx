@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import {
     Database, Search, Share2, FileText, DollarSign, Calendar, Percent,
-    Palette, Package, Users, MapPin, MonitorPlay, Wrench, Clock, ChevronRight, Gift
+    Palette, Package, Users, MapPin, MonitorPlay, Wrench, Clock, ChevronRight, Gift, Scale
 } from 'lucide-react';
 import { RESOURCES_DATA } from './data.js';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
@@ -9,6 +9,7 @@ import { DEFAULT_HOME_APPS } from '../../constants/apps.js';
 
 const sublabelMap = {
     'Lead Times': 'Production estimates',
+    'Weight Ratings': 'Seating load limits',
     'Discontinued Finishes Database': 'Legacy surface archive',
     'Request COM Yardage': 'Fabric yardage form',
     'Search Fabrics': 'Textile library',
@@ -60,6 +61,7 @@ export const ResourcesScreen = ({ theme, onNavigate, homeApps }) => {
 
     const getResourceIcon = (label) => {
         if (label.includes('Lead Times')) return Clock;
+        if (label.includes('Weight Ratings')) return Scale;
         if (label.includes('Commission')) return DollarSign;
         if (label.includes('Contract')) return FileText;
         if (label.includes('Social')) return Share2;
