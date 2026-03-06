@@ -125,12 +125,12 @@ export const TOUR_VISIT_EXPERIENCE_TRACKS = [
 
 export const TOUR_VISIT_UPCOMING_VISITS = [
     {
-        id: 'jasper-march-hosted-visit',
-        title: 'Jasper Hosted Facility Visit',
+        id: 'north-star-health-jasper',
+        companyName: 'North Star Health Group',
         facilityName: 'Jasper Headquarters',
         dateLabel: 'Apr 17-18, 2026',
         overnightLabel: '2 days, 1 night',
-        attendees: 'Dealer principals + A&D guests',
+        attendees: 'Healthcare design leadership team',
         agenda: [
             {
                 dayLabel: 'Day 1',
@@ -148,6 +148,62 @@ export const TOUR_VISIT_UPCOMING_VISITS = [
                     '8:30 AM - Design studio deep dive and applications lab',
                     '10:30 AM - Sales enablement workshop: spec + positioning',
                     '12:00 PM - Leadership Q&A and next-step planning',
+                ],
+            },
+        ],
+    },
+    {
+        id: 'civic-workplace-chicago',
+        companyName: 'Civic Workplace Collective',
+        facilityName: 'Chicago Showroom',
+        dateLabel: 'May 9-10, 2026',
+        overnightLabel: '2 days, 1 night',
+        attendees: 'Dealer strategy and workplace clients',
+        agenda: [
+            {
+                dayLabel: 'Day 1',
+                sessions: [
+                    '10:00 AM - Welcome and intro conversation',
+                    '11:00 AM - Design studio deep dive and finish narratives',
+                    '1:00 PM - Product training essentials over hosted lunch',
+                    '3:00 PM - New product insight conversation',
+                    '6:30 PM - Hosted dinner with market storytelling review',
+                ],
+            },
+            {
+                dayLabel: 'Day 2',
+                sessions: [
+                    '8:30 AM - Application workshop: workplace + higher-ed',
+                    '10:15 AM - Sales enablement and specification roleplay',
+                    '11:45 AM - Wrap-up and next project commitments',
+                ],
+            },
+        ],
+    },
+    {
+        id: 'meridian-learning-dc',
+        companyName: 'Meridian Learning Systems',
+        facilityName: 'Washington DC Space',
+        dateLabel: 'Jun 4-5, 2026',
+        overnightLabel: '2 days, 1 night',
+        attendees: 'Education planning and procurement partners',
+        agenda: [
+            {
+                dayLabel: 'Day 1',
+                sessions: [
+                    '9:00 AM - Welcome and intro conversation',
+                    '10:00 AM - Product training essentials and planning priorities',
+                    '12:00 PM - Hosted lunch and insight exchange',
+                    '2:00 PM - New product insight conversation',
+                    '4:00 PM - Application review: student + faculty environments',
+                ],
+            },
+            {
+                dayLabel: 'Day 2',
+                sessions: [
+                    '8:45 AM - Hospitality and relationship-building walkthrough',
+                    '10:00 AM - Sales enablement session and roadmap alignment',
+                    '11:30 AM - Closing commitments and follow-up scheduling',
                 ],
             },
         ],

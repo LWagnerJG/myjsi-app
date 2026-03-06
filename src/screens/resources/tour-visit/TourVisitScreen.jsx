@@ -168,46 +168,76 @@ const ShareActionButton = ({ icon: Icon, label, onClick, disabled, theme }) => (
     </button>
 );
 
-const UpcomingVisitCard = ({ visit, theme }) => (
+const UpcomingVisitList = ({ visits, expandedVisitId, onToggleVisit, theme }) => (
     <GlassCard theme={theme} className="p-5 md:p-6">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-                <p className="text-[11px] font-medium uppercase tracking-[0.16em]" style={{ color: theme.colors.textSecondary }}>
-                    Upcoming visit
-                </p>
-                <h3 className="mt-1 text-lg font-semibold" style={{ color: theme.colors.textPrimary }}>
-                    {visit.title}
-                </h3>
-                <p className="mt-1 text-sm" style={{ color: theme.colors.textSecondary }}>
-                    {visit.facilityName} · {visit.attendees}
-                </p>
-            </div>
-            <div className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium" style={{
-                color: theme.colors.textSecondary,
-                backgroundColor: theme.colors.subtle,
-                border: TOUR_VISIT_SURFACE_BORDER,
-            }}>
-                <CalendarDays className="h-3.5 w-3.5" />
-                {visit.dateLabel} · {visit.overnightLabel}
-            </div>
+        <div className="flex items-center gap-2">
+            <CalendarDays className="h-4 w-4" style={{ color: theme.colors.textSecondary }} />
+            <p style={{ ...sectionLabelStyle, color: theme.colors.textSecondary }}>Upcoming Visits</p>
         </div>
 
-        <div className="mt-4 space-y-3">
-            {visit.agenda.map((day) => (
-                <div key={day.dayLabel} className="rounded-[16px] px-3.5 py-3" style={{
-                    backgroundColor: TOUR_VISIT_FIELD_SURFACE,
-                    border: TOUR_VISIT_SURFACE_BORDER,
-                }}>
-                    <p className="text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: theme.colors.textSecondary }}>
-                        {day.dayLabel}
-                    </p>
-                    <ul className="mt-2 space-y-1.5 text-sm" style={{ color: theme.colors.textPrimary }}>
-                        {day.sessions.map((session) => (
-                            <li key={session} className="leading-5">{session}</li>
-                        ))}
-                    </ul>
-                </div>
-            ))}
+        <p className="mt-2 text-sm" style={{ color: theme.colors.textSecondary }}>
+            Other routes are listed below. Click a company to view the full agenda.
+        </p>
+
+        <div className="mt-3 space-y-2.5">
+            {visits.map((visit) => {
+                const isExpanded = expandedVisitId === visit.id;
+
+                return (
+                    <div key={visit.id} className="rounded-[16px]" style={{
+                        backgroundColor: TOUR_VISIT_FIELD_SURFACE,
+                        border: TOUR_VISIT_SURFACE_BORDER,
+                    }}>
+                        <button
+                            type="button"
+                            onClick={() => onToggleVisit(visit.id)}
+                            className="flex w-full items-center justify-between gap-3 px-3.5 py-3 text-left"
+                        >
+                            <div>
+                                <h3 className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>
+                                    {visit.companyName}
+                                </h3>
+                                <p className="mt-1 text-xs" style={{ color: theme.colors.textSecondary }}>
+                                    {visit.facilityName} · {visit.dateLabel} · {visit.overnightLabel}
+                                </p>
+                            </div>
+                            <ChevronDown
+                                className="h-4 w-4 shrink-0 transition-transform duration-200"
+                                style={{
+                                    color: theme.colors.textSecondary,
+                                    transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                                }}
+                            />
+                        </button>
+
+                        {isExpanded ? (
+                            <div className="px-3.5 pb-3">
+                                <p className="text-xs" style={{ color: theme.colors.textSecondary }}>
+                                    {visit.attendees}
+                                </p>
+                                <div className="mt-2.5 space-y-2">
+                                    {visit.agenda.map((day) => (
+                                        <div key={`${visit.id}-${day.dayLabel}`} className="rounded-[12px] px-3 py-2.5" style={{
+                                            backgroundColor: theme.colors.surface,
+                                            border: TOUR_VISIT_SURFACE_BORDER,
+                                        }}>
+                                            <p className="text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: theme.colors.textSecondary }}>
+                                                {day.dayLabel}
+                                            </p>
+                                            <ul className="mt-1.5 space-y-1 text-xs" style={{ color: theme.colors.textPrimary }}>
+                                                {day.sessions.map((session) => (
+                                                    <li key={`${visit.id}-${day.dayLabel}-${session}`}>{session}</li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : null}
+                    </div>
+                );
+            })}
+
             <p className="text-xs" style={{ color: theme.colors.textSecondary }}>
                 Additional hosted visits will appear here as they are scheduled.
             </p>
@@ -637,6 +667,7 @@ export const TourVisitScreen = ({ theme, userSettings, onNavigate, setBackHandle
     const [guests, setGuests] = useState(() => [createRepGuest(userSettings)]);
     const [selectedFacilityId, setSelectedFacilityId] = useState('');
     const [showFacilityOptions, setShowFacilityOptions] = useState(true);
+    const [expandedUpcomingVisitId, setExpandedUpcomingVisitId] = useState(() => TOUR_VISIT_UPCOMING_VISITS[0]?.id || null);
     const [experienceSelections, setExperienceSelections] = useState(() => buildDefaultExperienceSelections());
     const [showExperienceError, setShowExperienceError] = useState(false);
     const [shareContact, setShareContact] = useState('');
@@ -658,7 +689,7 @@ export const TourVisitScreen = ({ theme, userSettings, onNavigate, setBackHandle
         [selectedFacilityId]
     );
 
-    const upcomingVisit = TOUR_VISIT_UPCOMING_VISITS[0];
+    const upcomingVisits = TOUR_VISIT_UPCOMING_VISITS;
     const selectedExperienceCount = useMemo(
         () => Object.values(experienceSelections).reduce((total, options) => total + options.length, 0),
         [experienceSelections]
@@ -679,6 +710,7 @@ export const TourVisitScreen = ({ theme, userSettings, onNavigate, setBackHandle
         setGuests([createRepGuest(userSettings)]);
         setSelectedFacilityId('');
         setShowFacilityOptions(true);
+        setExpandedUpcomingVisitId(TOUR_VISIT_UPCOMING_VISITS[0]?.id || null);
         setExperienceSelections(buildDefaultExperienceSelections());
         setShowExperienceError(false);
         setShareContact('');
@@ -821,6 +853,10 @@ export const TourVisitScreen = ({ theme, userSettings, onNavigate, setBackHandle
             };
         });
         setShowExperienceError(false);
+    };
+
+    const toggleUpcomingVisit = (visitId) => {
+        setExpandedUpcomingVisitId((currentId) => (currentId === visitId ? null : visitId));
     };
 
     const handleCopyShareLink = async () => {
@@ -1030,7 +1066,41 @@ export const TourVisitScreen = ({ theme, userSettings, onNavigate, setBackHandle
                             </div>
                         </GlassCard>
 
-                        {upcomingVisit ? <UpcomingVisitCard visit={upcomingVisit} theme={theme} /> : null}
+                        {selectedFacility && !showFacilityOptions ? (
+                            <SelectedFacilityCard
+                                facility={selectedFacility}
+                                theme={theme}
+                                onChange={() => setShowFacilityOptions(true)}
+                            />
+                        ) : (
+                            <GlassCard theme={theme} className="p-5 md:p-6">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <Building2 className="h-4 w-4" style={{ color: theme.colors.textSecondary }} />
+                                    <p style={{ ...sectionLabelStyle, color: theme.colors.textSecondary }}>Tour a Facility</p>
+                                </div>
+
+                                <div className="space-y-3">
+                                    {TOUR_VISIT_FACILITIES.map((facility) => (
+                                        <FacilityOption
+                                            key={facility.id}
+                                            facility={facility}
+                                            selected={selectedFacilityId === facility.id}
+                                            onClick={() => handleFacilitySelect(facility.id)}
+                                            theme={theme}
+                                        />
+                                    ))}
+                                </div>
+                            </GlassCard>
+                        )}
+
+                        {upcomingVisits.length ? (
+                            <UpcomingVisitList
+                                visits={upcomingVisits}
+                                expandedVisitId={expandedUpcomingVisitId}
+                                onToggleVisit={toggleUpcomingVisit}
+                                theme={theme}
+                            />
+                        ) : null}
 
                         <GlassCard theme={theme} className="p-5 md:p-6">
                             <div className="flex items-center gap-2">
@@ -1077,33 +1147,6 @@ export const TourVisitScreen = ({ theme, userSettings, onNavigate, setBackHandle
                                 <p className="mt-3 text-xs" style={{ color: theme.colors.textSecondary }}>{shareFeedback}</p>
                             ) : null}
                         </GlassCard>
-
-                        {selectedFacility && !showFacilityOptions ? (
-                            <SelectedFacilityCard
-                                facility={selectedFacility}
-                                theme={theme}
-                                onChange={() => setShowFacilityOptions(true)}
-                            />
-                        ) : (
-                            <GlassCard theme={theme} className="p-5 md:p-6">
-                                <div className="flex items-center gap-2 mb-3">
-                                    <Building2 className="h-4 w-4" style={{ color: theme.colors.textSecondary }} />
-                                    <p style={{ ...sectionLabelStyle, color: theme.colors.textSecondary }}>Tour a Facility</p>
-                                </div>
-
-                                <div className="space-y-3">
-                                    {TOUR_VISIT_FACILITIES.map((facility) => (
-                                        <FacilityOption
-                                            key={facility.id}
-                                            facility={facility}
-                                            selected={selectedFacilityId === facility.id}
-                                            onClick={() => handleFacilitySelect(facility.id)}
-                                            theme={theme}
-                                        />
-                                    ))}
-                                </div>
-                            </GlassCard>
-                        )}
 
                         {selectedFacility ? (
                             <div ref={formRef} className="space-y-3 animate-fade-in">
