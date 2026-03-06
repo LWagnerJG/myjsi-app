@@ -41,6 +41,7 @@ const InstallInstructionsScreen = React.lazy(() => import('./screens/resources/i
 const NewDealerSignUpScreen = React.lazy(() => import('./screens/resources/new-dealer-signup/index.js'));
 const PresentationsScreen = React.lazy(() => import('./screens/resources/presentations/index.js'));
 const RequestFieldVisitScreen = React.lazy(() => import('./screens/resources/request-field-visit/index.js'));
+const TourVisitScreen = React.lazy(() => import('./screens/resources/tour-visit/index.js'));
 const SearchFabricsScreen = React.lazy(() => import('./screens/resources/search-fabrics/index.js'));
 const RequestComYardageScreen = React.lazy(() => import('./screens/resources/request-com-yardage/index.js'));
 const SocialMediaScreen = React.lazy(() => import('./screens/resources/social-media/index.js'));
@@ -82,6 +83,7 @@ const RESOURCE_FEATURE_SCREENS = {
     'install-instructions': InstallInstructionsScreen,
     'presentations': PresentationsScreen,
     'request-field-visit': RequestFieldVisitScreen,
+    'tour-visit': TourVisitScreen,
     'new-dealer-signup': NewDealerSignUpScreen,
     'social-media': SocialMediaScreen,
     'search-fabrics': SearchFabricsScreen,
@@ -216,6 +218,7 @@ function App() {
     const [successMessage, setSuccessMessage] = useState('');
     const [alertInfo, setAlertInfo] = useState({ show: false, message: '' });
     const [homeResetKey, setHomeResetKey] = useState(0);
+    const backHandlerRef = useRef(null);
 
     // Track navigation depth for back button visibility and direction detection
     const [navDepth, setNavDepth] = useState(0);
@@ -292,6 +295,13 @@ function App() {
     }, [routerNavigate]);
 
     const handleBack = useCallback(() => {
+        if (typeof backHandlerRef.current === 'function') {
+            const handled = backHandlerRef.current();
+            if (handled) {
+                return;
+            }
+        }
+
         if (navDepth > 0) {
             setLastNavigationDirection('backward');
             setScreenParams({});
@@ -299,6 +309,10 @@ function App() {
             routerNavigate(-1);
         }
     }, [routerNavigate, navDepth]);
+
+    const setBackHandler = useCallback((handler) => {
+        backHandlerRef.current = typeof handler === 'function' ? handler : null;
+    }, []);
 
     const handleHome = useCallback(() => {
         setLastNavigationDirection('backward');
@@ -418,6 +432,7 @@ function App() {
         onAskAI: handleAskAI,
         onVoiceActivate: handleVoiceActivate,
         handleBack,
+        setBackHandler,
         userSettings,
         setUserSettings,
         setSuccessMessage,
@@ -469,7 +484,7 @@ function App() {
         homeResetKey
     }), [
         currentTheme, handleNavigate, handleAskAI, handleVoiceActivate,
-        handleBack, userSettings, handleShowAlert, currentScreen, screenParams,
+        handleBack, setBackHandler, userSettings, handleShowAlert, currentScreen, screenParams,
         opportunities, myProjects, members, currentUserId,
         posts, polls, likedPosts, pollChoices, handleToggleLike,
         handleAddComment, handlePollVote, openCreateContentModal, openLibraryUploadModal, libraryAssets, savedImageIds,

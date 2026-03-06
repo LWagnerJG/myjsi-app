@@ -170,14 +170,18 @@ export const HomeScreen = React.memo(({
     }), [theme, isDark]);
 
     const allAppRoutes = useMemo(() => new Set(allApps.map(app => app.route)), []);
+    const homeEligibleRoutes = useMemo(
+        () => new Set(allApps.filter((app) => app.homeEligible !== false).map((app) => app.route)),
+        []
+    );
 
     const normalizeHomeApps = useCallback((list) => {
         const baseList = Array.isArray(list) ? list : [];
         const unique = baseList.filter((route, index) => baseList.indexOf(route) === index);
-        const known = unique.filter(route => allAppRoutes.has(route));
+        const known = unique.filter(route => allAppRoutes.has(route) && homeEligibleRoutes.has(route));
         const withResources = known.includes('resources') ? known : ['resources', ...known];
         return withResources.length ? withResources : DEFAULT_HOME_APPS;
-    }, [allAppRoutes]);
+    }, [allAppRoutes, homeEligibleRoutes]);
 
     // Ensure homeApps is always a valid array
     const safeHomeApps = useMemo(() => {
@@ -219,7 +223,9 @@ export const HomeScreen = React.memo(({
     }, [safeHomeApps]);
 
     const availableApps = useMemo(() => {
-        return allApps.filter(app => !safeHomeApps.includes(app.route) && !EXCLUDED_ROUTES.has(app.route));
+        return allApps.filter(
+            (app) => app.homeEligible !== false && !safeHomeApps.includes(app.route) && !EXCLUDED_ROUTES.has(app.route)
+        );
     }, [safeHomeApps]);
 
     const spotlightResults = useMemo(() => {

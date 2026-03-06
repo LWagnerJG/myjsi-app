@@ -36,7 +36,7 @@ export const allApps = [
     { name: 'Install Instructions', route: 'resources/install-instructions', icon: Wrench },
     { name: 'Presentations', route: 'resources/presentations', icon: MonitorPlay },
     { name: 'Request Field Visit', route: 'resources/request-field-visit', icon: MapPin },
-    { name: 'New Dealer Sign-Up', route: 'resources/new-dealer-signup', icon: UserPlus },
+    { name: 'New Dealer Sign-Up', route: 'resources/new-dealer-signup', icon: UserPlus, homeEligible: false },
 ];
 
 // Default home screen apps (used when user hasn't customized)

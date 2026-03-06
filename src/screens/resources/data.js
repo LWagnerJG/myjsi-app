@@ -7,6 +7,7 @@ export const RESOURCES_DATA = [
             { label: "Commission Rates", nav: "resources/commission-rates" },
             { label: "Sample Discounts", nav: "resources/sample-discounts" },
             { label: "Contracts", nav: "resources/contracts" },
+            { label: "Tour Visit", nav: "resources/tour-visit" },
         ].sort((a, b) => a.label.localeCompare(b.label))
     },
     {

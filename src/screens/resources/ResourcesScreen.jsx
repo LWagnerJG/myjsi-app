@@ -1,11 +1,11 @@
 import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import {
     Database, Search, Share2, FileText, DollarSign, Calendar, Percent,
-    Palette, Package, Users, MapPin, MonitorPlay, Wrench, Clock, ChevronRight, Gift, Scale
+    Palette, Package, Users, MapPin, MonitorPlay, Wrench, Clock, ChevronRight, Gift, Scale, Plane
 } from 'lucide-react';
 import { RESOURCES_DATA } from './data.js';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
-import { DEFAULT_HOME_APPS } from '../../constants/apps.js';
+import { allApps, DEFAULT_HOME_APPS } from '../../constants/apps.js';
 
 const sublabelMap = {
     'Lead Times': 'Production estimates',
@@ -20,6 +20,7 @@ const sublabelMap = {
     'Install Instructions': 'Assembly guidance and videos',
     'Loaner Pool': 'Search sample chairs',
     'Request Field Visit': 'Onsite tech scheduling',
+    'Tour Visit': 'Facility travel planning',
     'Social Media': 'Brand share kit',
     'Presentations': 'Slide deck library',
     'Tradeshows': 'Select and view show info',
@@ -38,28 +39,74 @@ const CORE_LABELS = {
     // intentionally omit 'resources' to avoid recursion (cannot surface Resources inside itself if removed)
 };
 
+const CORE_APP_CATEGORY_MAP = {
+    orders: 'Sales & Rep Tools',
+    sales: 'Sales & Rep Tools',
+    projects: 'Sales & Rep Tools',
+    community: 'Marketing & Communication',
+    products: 'Product & Finish Resources',
+    samples: 'Dealer & Field Support',
+    replacements: 'Dealer & Field Support',
+};
+
+const CORE_APP_SUBLABELS = {
+    orders: 'Order tracking and status',
+    sales: 'Revenue and performance view',
+    products: 'Main product application',
+    projects: 'Pipeline and project management',
+    community: 'Team and dealer conversations',
+    samples: 'Sample ordering workflow',
+    replacements: 'Replacement request workflow',
+};
+
 export const ResourcesScreen = ({ theme, onNavigate, homeApps }) => {
-    // Compute core app fallbacks (apps removed from home but part of default set, excluding 'resources')
-    const coreFallbackItems = useMemo(() => {
+    const routeIconMap = useMemo(
+        () => new Map(allApps.map((app) => [app.route, app.icon])),
+        []
+    );
+
+    // Compute hidden home apps (apps removed from home but part of default set, excluding 'resources')
+    const hiddenCoreItems = useMemo(() => {
         const currentSet = new Set(homeApps || []);
         return DEFAULT_HOME_APPS
             .filter(r => r !== 'resources' && !currentSet.has(r))
-            .map(route => ({ label: CORE_LABELS[route] || route, nav: route }))
-            .sort((a,b)=>a.label.localeCompare(b.label));
+            .map((route) => ({
+                label: CORE_LABELS[route] || route,
+                nav: route,
+                sublabel: CORE_APP_SUBLABELS[route] || 'Application',
+                resourceCategory: CORE_APP_CATEGORY_MAP[route] || 'Sales & Rep Tools',
+            }));
     }, [homeApps]);
 
     const resourceCategories = useMemo(() => {
-        const base = RESOURCES_DATA || [];
-        if (coreFallbackItems.length === 0) return base;
-        return [
-            ...base,
-            { category: 'Core Apps', items: coreFallbackItems }
-        ];
-    }, [coreFallbackItems]);
+        const categoryMap = new Map(
+            (RESOURCES_DATA || []).map((category) => [
+                category.category,
+                {
+                    ...category,
+                    items: [...(category.items || [])],
+                },
+            ])
+        );
+
+        hiddenCoreItems.forEach((item) => {
+            const targetCategory = categoryMap.get(item.resourceCategory);
+            if (!targetCategory) return;
+            if (targetCategory.items.some((entry) => entry.nav === item.nav)) return;
+            targetCategory.items.push(item);
+            targetCategory.items.sort((a, b) => a.label.localeCompare(b.label));
+        });
+
+        return Array.from(categoryMap.values());
+    }, [hiddenCoreItems]);
 
     // scrollbar hiding is handled by the 'scrollbar-hide' Tailwind utility class
 
-    const getResourceIcon = (label) => {
+    const getResourceIcon = (item) => {
+        const coreIcon = routeIconMap.get(item.nav);
+        if (coreIcon) return coreIcon;
+
+        const label = item.label;
         if (label.includes('Lead Times')) return Clock;
         if (label.includes('Weight Ratings')) return Scale;
         if (label.includes('Commission')) return DollarSign;
@@ -71,19 +118,18 @@ export const ResourcesScreen = ({ theme, onNavigate, homeApps }) => {
         if (label.includes('Loaner')) return Package;
         if (label.includes('Dealer')) return Users;
         if (label.includes('Field Visit')) return MapPin;
+        if (label.includes('Tour Visit')) return Plane;
         if (label.includes('Presentations')) return MonitorPlay;
         if (label.includes('Install')) return Wrench;
         if (label.includes('Tradeshow')) return Calendar;
         if (label.includes('Tradeshows')) return Calendar;
         if (label.includes('Marketplace')) return Gift;
-        // Core app labels mapping fallback to Database icon
-        if (Object.values(CORE_LABELS).includes(label)) return Database;
         return Database;
     };
 
     const Row = ({ item, isFirst }) => {
-        const Icon = getResourceIcon(item.label);
-        const sub = sublabelMap[item.label] || (CORE_LABELS && Object.values(CORE_LABELS).includes(item.label) ? 'Main application' : 'Tool');
+        const Icon = getResourceIcon(item);
+        const sub = item.sublabel || sublabelMap[item.label] || 'Tool';
         const borderTop = isFirst ? 'transparent' : theme.colors.border;
         return (
             <li>

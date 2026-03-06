@@ -12,7 +12,9 @@ export const SearchableSelect = ({
   size = 'md',
   onMissingAction,
   missingActionLabel,
-  searchPlaceholder = 'Search...'
+  searchPlaceholder = 'Search...',
+  buttonClassName = '',
+  buttonStyle,
 }) => {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -99,8 +101,8 @@ export const SearchableSelect = ({
       <button
         type="button"
         onClick={() => { setOpen(o => !o); setTimeout(() => inputRef.current?.focus(), 0); }}
-        className={`w-full px-4 pr-11 text-left rounded-full border transition-colors ${sizeStyles}`}
-        style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.border, color: theme.colors.textPrimary }}
+        className={`w-full px-4 pr-11 text-left rounded-full border transition-colors ${sizeStyles} ${buttonClassName}`}
+        style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.border, color: theme.colors.textPrimary, ...buttonStyle }}
         aria-haspopup="listbox"
         aria-expanded={open}
       >

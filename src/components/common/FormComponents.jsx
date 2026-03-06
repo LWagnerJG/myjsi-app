@@ -15,10 +15,10 @@ const Label = ({ children, theme, required }) => (
 );
 
 export const FormInput = ({
-    label, value, onChange, theme, type = "text", required = false, name, placeholder, whiteBg = false, ...props
+    label, value, onChange, theme, type = "text", required = false, name, placeholder, whiteBg = false, insetLabel = false, softChrome = false, surfaceBackground, surfaceBorder, ...props
 }) => {
-    const baseBg = whiteBg ? '#fff' : theme.colors.subtle;
-    const baseBorder = `1px solid ${theme.colors.border}`;
+    const baseBg = surfaceBackground ?? (softChrome ? theme.colors.background : whiteBg ? '#fff' : theme.colors.subtle);
+    const baseBorder = surfaceBorder ?? (softChrome ? '1px solid rgba(0, 0, 0, 0.04)' : `1px solid ${theme.colors.border}`);
     const common = {
         borderRadius: R,
         backgroundColor: baseBg,
@@ -26,9 +26,18 @@ export const FormInput = ({
         color: theme.colors.textPrimary,
     };
     return (
-    <div>
-        {label ? (
+    <div className={insetLabel ? "relative" : undefined}>
+        {label && !insetLabel ? (
             <label className="block text-sm font-medium mb-1 px-1" style={{ color: theme.colors.textSecondary }}>
+                {label} {required ? <span style={{ color: '#B85C5C' }}>*</span> : null}
+            </label>
+        ) : null}
+
+        {label && insetLabel ? (
+            <label
+                className="absolute left-[14px] top-[8px] z-[1] text-[11px] font-medium leading-none"
+                style={{ color: theme.colors.textSecondary }}
+            >
                 {label} {required ? <span style={{ color: '#B85C5C' }}>*</span> : null}
             </label>
         ) : null}
@@ -44,7 +53,7 @@ export const FormInput = ({
                 style={{
                     minHeight: 96,
                     resize: "none",
-                    padding: "10px 14px",
+                    padding: insetLabel ? "28px 14px 10px" : "10px 14px",
                     ...common
                 }}
                 {...props}
@@ -59,8 +68,8 @@ export const FormInput = ({
                 placeholder={placeholder}
                 className="w-full focus-ring outline-none text-sm placeholder-opacity-70"
                 style={{
-                    height: H,
-                    padding: "0 14px",
+                    height: insetLabel ? 56 : H,
+                    padding: insetLabel ? "18px 14px 6px" : "0 14px",
                     ...common
                 }}
                 {...props}
@@ -78,54 +87,73 @@ export const PortalNativeSelect = ({
     placeholder,
     required = false,
     whiteBg = false,
+    insetLabel = false,
+    softChrome = false,
+    surfaceBackground,
+    surfaceBorder,
     ...props
 }) => {
     const selectRef = React.useRef(null);
-    const baseBg = whiteBg ? '#fff' : theme.colors.subtle;
+    const baseBg = surfaceBackground ?? (softChrome ? theme.colors.background : whiteBg ? '#fff' : theme.colors.subtle);
+    const baseBorder = surfaceBorder ?? (softChrome ? '1px solid rgba(0, 0, 0, 0.04)' : `1px solid ${theme.colors.border}`);
     const placeholderColor = theme.colors.textSecondary;
+    const focusRingColor = theme.colors.focusRing || 'rgba(0, 0, 0, 0.08)';
 
     const handleFocus = () => {
         if (selectRef.current) {
-            selectRef.current.style.boxShadow = '0 0 0 3px rgba(0,0,0,0.06)';
-            selectRef.current.style.borderColor = theme.colors.accent;
+            selectRef.current.style.boxShadow = `0 0 0 2px ${focusRingColor}`;
+            selectRef.current.style.borderColor = softChrome ? 'rgba(0, 0, 0, 0.08)' : theme.colors.border;
         }
     };
     const handleBlur = () => {
         if (selectRef.current) {
             selectRef.current.style.boxShadow = 'none';
-            selectRef.current.style.borderColor = theme.colors.border;
+            selectRef.current.style.borderColor = softChrome ? 'rgba(0, 0, 0, 0.04)' : theme.colors.border;
         }
     };
 
     return (
         <div className="relative">
-            {label ? <Label theme={theme} required={required}>{label}</Label> : null}
-            <select
-                ref={selectRef}
-                value={value}
-                onChange={onChange}
-                onFocus={handleFocus}
-                onBlur={handleBlur}
-                required={required}
-                className="w-full appearance-none outline-none text-sm transition-colors"
-                style={{
-                    height: H,
-                    padding: "0 44px 0 16px",
-                    borderRadius: R,
-                    backgroundColor: baseBg,
-                    border: `1px solid ${theme.colors.border}`,
-                    color: value ? theme.colors.textPrimary : placeholderColor,
-                    lineHeight: `${H - 2}px`,
-                    WebkitAppearance: 'none',
-                    MozAppearance: 'none'
-                }}
-                {...props}
-            >
-                {placeholder ? <option value="" disabled>{placeholder}</option> : null}
-                {options.map(o => { const opt = typeof o === 'string' ? { value: o, label: o } : o; return <option key={opt.value} value={opt.value}>{opt.label}</option>; })}
-            </select>
-            <div className="pointer-events-none absolute top-0 bottom-0 right-3 flex items-center justify-center" style={{ width:28 }}>
-                <ChevronDown style={{ width: 18, height: 18, color: theme.colors.textSecondary }} />
+            {label && !insetLabel ? <Label theme={theme} required={required}>{label}</Label> : null}
+            {label && insetLabel ? (
+                <label
+                    className="pointer-events-none absolute left-4 top-2 z-[1] text-[11px] font-medium leading-none"
+                    style={{ color: theme.colors.textSecondary }}
+                >
+                    {label} {required ? <span style={{ color: '#B85C5C' }}>*</span> : null}
+                </label>
+            ) : null}
+            <div className="relative">
+                <select
+                    ref={selectRef}
+                    value={value}
+                    onChange={onChange}
+                    onFocus={handleFocus}
+                    onBlur={handleBlur}
+                    required={required}
+                    className="w-full appearance-none outline-none text-sm transition-colors"
+                    style={{
+                        height: insetLabel ? 56 : H,
+                        padding: insetLabel ? "18px 44px 6px 16px" : "0 44px 0 16px",
+                        borderRadius: R,
+                        backgroundColor: baseBg,
+                        border: baseBorder,
+                        color: value ? theme.colors.textPrimary : placeholderColor,
+                        lineHeight: insetLabel ? 'normal' : `${H - 2}px`,
+                        WebkitAppearance: 'none',
+                        MozAppearance: 'none'
+                    }}
+                    {...props}
+                >
+                    {placeholder ? <option value="" disabled>{placeholder}</option> : null}
+                    {options.map(o => { const opt = typeof o === 'string' ? { value: o, label: o } : o; return <option key={opt.value} value={opt.value}>{opt.label}</option>; })}
+                </select>
+                <div
+                    className="pointer-events-none absolute right-3 top-1/2 flex items-center justify-center"
+                    style={{ width: 18, height: 18, transform: 'translateY(-50%)' }}
+                >
+                    <ChevronDown style={{ width: 18, height: 18, color: theme.colors.textSecondary }} />
+                </div>
             </div>
         </div>
     );
