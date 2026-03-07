@@ -145,13 +145,20 @@ export const SearchableSelect = ({
     }
   }, [menuPos, open]);
 
+  useEffect(() => {
+    if (!open) return;
+
+    const frame = requestAnimationFrame(() => {
+      inputRef.current?.focus();
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [open]);
+
   const openMenu = useCallback((seed = '') => {
     setOpen(true);
     setQuery(seed);
     onQueryChange && onQueryChange(seed);
-    requestAnimationFrame(() => {
-      inputRef.current?.focus();
-    });
   }, [onQueryChange]);
 
   const selectValue = (nextValue) => {
@@ -279,6 +286,7 @@ export const SearchableSelect = ({
             <button
               ref={(node) => assignRef(buttonRef, node)}
               type="button"
+              onFocus={() => openMenu('')}
               onClick={() => openMenu('')}
               onKeyDown={handleClosedKeyDown}
               className={`w-full rounded-full border text-left transition-colors ${sizeStyles} ${buttonClassName}`}

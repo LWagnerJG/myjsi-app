@@ -227,7 +227,7 @@ const DateRangeDropdown = ({ theme, startDate, endDate, onChangeStart, onChangeE
     const daysInMonth = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + 1, 0).getDate();
     const firstWeekday = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth(), 1).getDay();
     const summaryLabel = startDate && endDate
-        ? `${formatDateLabel(startDate)} - ${formatDateLabel(endDate)}`
+        ? `${formatDateLabel(startDate)} to ${formatDateLabel(endDate)}`
         : (startDate ? `${formatDateLabel(startDate)} - select end` : 'Select beginning and end');
 
     const dayCells = [
@@ -302,21 +302,36 @@ const DateRangeDropdown = ({ theme, startDate, endDate, onChangeStart, onChangeE
                         boxShadow: '0 18px 45px rgba(0, 0, 0, 0.12)',
                     }}
                 >
+                    <div className="grid grid-cols-2 gap-2">
+                        <div className="rounded-[12px] px-2.5 py-2" style={{ backgroundColor: TOUR_VISIT_FIELD_SURFACE, border: TOUR_VISIT_SURFACE_BORDER }}>
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.06em]" style={{ color: theme.colors.textSecondary }}>Begin</p>
+                            <p className="mt-0.5 text-[12px] font-medium" style={{ color: theme.colors.textPrimary }}>
+                                {startDate ? formatDateLabel(startDate) : 'Pick start'}
+                            </p>
+                        </div>
+                        <div className="rounded-[12px] px-2.5 py-2" style={{ backgroundColor: TOUR_VISIT_FIELD_SURFACE, border: TOUR_VISIT_SURFACE_BORDER }}>
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.06em]" style={{ color: theme.colors.textSecondary }}>End</p>
+                            <p className="mt-0.5 text-[12px] font-medium" style={{ color: theme.colors.textPrimary }}>
+                                {endDate ? formatDateLabel(endDate) : 'Pick end'}
+                            </p>
+                        </div>
+                    </div>
+
                     <div className="flex items-center justify-between gap-2">
                         <button
                             type="button"
                             onClick={() => goToMonth(-1)}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-full"
+                            className="mt-3 inline-flex h-8 w-8 items-center justify-center rounded-full"
                             style={{ border: '1px solid rgba(0, 0, 0, 0.08)', color: theme.colors.textSecondary }}
                             aria-label="Previous month"
                         >
                             <ArrowRight className="h-4 w-4 rotate-180" />
                         </button>
-                        <p className="text-[14px] font-semibold" style={{ color: theme.colors.textPrimary }}>{monthLabel}</p>
+                        <p className="mt-3 text-[14px] font-semibold" style={{ color: theme.colors.textPrimary }}>{monthLabel}</p>
                         <button
                             type="button"
                             onClick={() => goToMonth(1)}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-full"
+                            className="mt-3 inline-flex h-8 w-8 items-center justify-center rounded-full"
                             style={{ border: '1px solid rgba(0, 0, 0, 0.08)', color: theme.colors.textSecondary }}
                             aria-label="Next month"
                         >
@@ -359,32 +374,10 @@ const DateRangeDropdown = ({ theme, startDate, endDate, onChangeStart, onChangeE
                         })}
                     </div>
 
-                    <div className="mt-3 flex items-center justify-between gap-3 border-t pt-3" style={{ borderColor: 'rgba(0, 0, 0, 0.06)' }}>
-                        <div className="min-w-0 text-[11px]" style={{ color: theme.colors.textSecondary }}>
-                            <p>Begin: {startDate ? formatDateLabel(startDate) : 'Not set'}</p>
-                            <p>End: {endDate ? formatDateLabel(endDate) : 'Tap a final day'}</p>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    onChangeStart('');
-                                    onChangeEnd('');
-                                }}
-                                className="rounded-full px-3 py-1.5 text-[11px] font-medium"
-                                style={{ color: theme.colors.textSecondary, border: '1px solid rgba(0, 0, 0, 0.08)' }}
-                            >
-                                Clear
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setOpen(false)}
-                                className="rounded-full px-3 py-1.5 text-[11px] font-semibold"
-                                style={{ color: theme.colors.accentText, backgroundColor: theme.colors.accent }}
-                            >
-                                Done
-                            </button>
-                        </div>
+                    <div className="mt-3 border-t pt-2" style={{ borderColor: 'rgba(0, 0, 0, 0.06)' }}>
+                        <p className="text-[11px]" style={{ color: theme.colors.textSecondary }}>
+                            Click outside this panel when your dates look right.
+                        </p>
                     </div>
                 </div>
             ) : null}
@@ -1612,14 +1605,7 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                     </div>
 
                                     <div className="mt-2 pt-2" style={{ borderTop: '1px solid rgba(0, 0, 0, 0.04)' }}>
-                                        <div className="flex items-center justify-between gap-3">
-                                            <p style={{ ...sectionLabelStyle, color: theme.colors.textSecondary }}>Dates</p>
-                                            {requestedDateLabel ? (
-                                                <span className="text-[11px]" style={{ color: theme.colors.textSecondary }}>
-                                                    {requestedDateLabel}
-                                                </span>
-                                            ) : null}
-                                        </div>
+                                        <p style={{ ...sectionLabelStyle, color: theme.colors.textSecondary }}>Dates</p>
                                         <div className="mt-2">
                                             <DateRangeDropdown
                                                 theme={theme}
