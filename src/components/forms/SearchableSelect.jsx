@@ -15,6 +15,7 @@ export const SearchableSelect = ({
   searchPlaceholder = 'Search...',
   buttonClassName = '',
   buttonStyle,
+  onQueryChange,
 }) => {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -79,6 +80,7 @@ export const SearchableSelect = ({
     onChange && onChange(val);
     setOpen(false);
     setQuery('');
+    onQueryChange && onQueryChange('');
   };
   const clear = (e) => { e.stopPropagation(); selectValue(''); };
 
@@ -126,7 +128,17 @@ export const SearchableSelect = ({
               <input
                 ref={inputRef}
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  onQueryChange && onQueryChange(e.target.value);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && filtered.length === 0 && onMissingAction) {
+                    e.preventDefault();
+                    onMissingAction();
+                    setOpen(false);
+                  }
+                }}
                 placeholder={searchPlaceholder}
                 className="w-full px-3 py-2 text-sm rounded-xl outline-none border"
                 style={{ background: theme.colors.subtle, borderColor: theme.colors.border, color: theme.colors.textPrimary }}

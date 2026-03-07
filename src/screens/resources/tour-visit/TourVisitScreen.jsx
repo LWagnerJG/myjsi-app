@@ -18,6 +18,7 @@ import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import { FormInput } from '../../../components/common/FormComponents.jsx';
 import { SearchableSelect } from '../../../components/forms/SearchableSelect.jsx';
 import { hapticLight, hapticSuccess, hapticWarning } from '../../../utils/haptics.js';
+import { DEALER_DIRECTORY_DATA } from '../dealer-directory/data.js';
 import {
     TOUR_VISIT_AIRLINES,
     TOUR_VISIT_EXPERIENCE_TRACKS,
@@ -30,6 +31,8 @@ import {
 } from './data.js';
 
 const TOUR_VISIT_YES_NO_OPTIONS = ['No', 'Yes'];
+
+const buildNewCustomerId = (value) => `new-customer-${String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`;
 
 const buildDefaultExperienceSelections = () =>
     Object.fromEntries(TOUR_VISIT_EXPERIENCE_TRACKS.map((track) => [track.id, track.options.length ? [track.options[0]] : []]));
@@ -168,7 +171,28 @@ const ShareActionButton = ({ icon: Icon, label, onClick, disabled, theme }) => (
     </button>
 );
 
-const UpcomingVisitList = ({ visits, expandedVisitId, onToggleVisit, theme }) => (
+const EntryChoiceCard = ({ title, description, onClick, theme }) => (
+    <button
+        type="button"
+        onClick={onClick}
+        className="w-full rounded-[20px] px-4 py-4 text-left transition-all motion-card"
+        style={{
+            backgroundColor: theme.colors.surface,
+            border: `1px solid ${theme.colors.border}`,
+            color: theme.colors.textPrimary,
+        }}
+    >
+        <h3 className="text-base font-semibold">{title}</h3>
+        <p className="mt-1 text-sm leading-6" style={{ color: theme.colors.textSecondary }}>
+            {description}
+        </p>
+    </button>
+);
+
+const UpcomingVisitDirectory = ({ visits, expandedVisitId, onToggleVisit, theme }) => {
+    const selectedVisit = visits.find((visit) => visit.id === expandedVisitId) || null;
+
+    return (
     <GlassCard theme={theme} className="p-5 md:p-6">
         <div className="flex items-center gap-2">
             <CalendarDays className="h-4 w-4" style={{ color: theme.colors.textSecondary }} />
@@ -184,66 +208,70 @@ const UpcomingVisitList = ({ visits, expandedVisitId, onToggleVisit, theme }) =>
                 const isExpanded = expandedVisitId === visit.id;
 
                 return (
-                    <div key={visit.id} className="rounded-[16px]" style={{
-                        backgroundColor: TOUR_VISIT_FIELD_SURFACE,
-                        border: TOUR_VISIT_SURFACE_BORDER,
-                    }}>
-                        <button
-                            type="button"
-                            onClick={() => onToggleVisit(visit.id)}
-                            className="flex w-full items-center justify-between gap-3 px-3.5 py-3 text-left"
-                        >
-                            <div>
-                                <h3 className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>
-                                    {visit.companyName}
-                                </h3>
-                                <p className="mt-1 text-xs" style={{ color: theme.colors.textSecondary }}>
-                                    {visit.facilityName} · {visit.dateLabel} · {visit.overnightLabel}
-                                </p>
-                            </div>
-                            <ChevronDown
-                                className="h-4 w-4 shrink-0 transition-transform duration-200"
-                                style={{
-                                    color: theme.colors.textSecondary,
-                                    transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                                }}
-                            />
-                        </button>
-
-                        {isExpanded ? (
-                            <div className="px-3.5 pb-3">
-                                <p className="text-xs" style={{ color: theme.colors.textSecondary }}>
-                                    {visit.attendees}
-                                </p>
-                                <div className="mt-2.5 space-y-2">
-                                    {visit.agenda.map((day) => (
-                                        <div key={`${visit.id}-${day.dayLabel}`} className="rounded-[12px] px-3 py-2.5" style={{
-                                            backgroundColor: theme.colors.surface,
-                                            border: TOUR_VISIT_SURFACE_BORDER,
-                                        }}>
-                                            <p className="text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: theme.colors.textSecondary }}>
-                                                {day.dayLabel}
-                                            </p>
-                                            <ul className="mt-1.5 space-y-1 text-xs" style={{ color: theme.colors.textPrimary }}>
-                                                {day.sessions.map((session) => (
-                                                    <li key={`${visit.id}-${day.dayLabel}-${session}`}>{session}</li>
-                                                ))}
-                                            </ul>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        ) : null}
-                    </div>
+                    <button
+                        key={visit.id}
+                        type="button"
+                        onClick={() => onToggleVisit(visit.id)}
+                        className="flex w-full items-center justify-between gap-3 rounded-[14px] px-3.5 py-3 text-left transition-all"
+                        style={{
+                            backgroundColor: isExpanded ? theme.colors.subtle : TOUR_VISIT_FIELD_SURFACE,
+                            border: `1px solid ${isExpanded ? theme.colors.accent + '55' : 'rgba(0, 0, 0, 0.05)'}`,
+                        }}
+                    >
+                        <div>
+                            <h3 className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>
+                                {visit.companyName}
+                            </h3>
+                            <p className="mt-1 text-xs" style={{ color: theme.colors.textSecondary }}>
+                                {visit.dateLabel}
+                            </p>
+                        </div>
+                        <ChevronDown
+                            className="h-4 w-4 shrink-0 transition-transform duration-200"
+                            style={{
+                                color: theme.colors.textSecondary,
+                                transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                            }}
+                        />
+                    </button>
                 );
             })}
+
+            {selectedVisit ? (
+                <div className="rounded-[16px] px-3.5 py-3" style={{
+                    backgroundColor: theme.colors.surface,
+                    border: TOUR_VISIT_SURFACE_BORDER,
+                }}>
+                    <p className="text-xs" style={{ color: theme.colors.textSecondary }}>
+                        {selectedVisit.facilityName} · {selectedVisit.overnightLabel} · {selectedVisit.attendees}
+                    </p>
+                    <div className="mt-2.5 space-y-2">
+                        {selectedVisit.agenda.map((day) => (
+                            <div key={`${selectedVisit.id}-${day.dayLabel}`} className="rounded-[12px] px-3 py-2.5" style={{
+                                backgroundColor: TOUR_VISIT_FIELD_SURFACE,
+                                border: TOUR_VISIT_SURFACE_BORDER,
+                            }}>
+                                <p className="text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: theme.colors.textSecondary }}>
+                                    {day.dayLabel}
+                                </p>
+                                <ul className="mt-1.5 space-y-1 text-xs" style={{ color: theme.colors.textPrimary }}>
+                                    {day.sessions.map((session) => (
+                                        <li key={`${selectedVisit.id}-${day.dayLabel}-${session}`}>{session}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            ) : null}
 
             <p className="text-xs" style={{ color: theme.colors.textSecondary }}>
                 Additional hosted visits will appear here as they are scheduled.
             </p>
         </div>
     </GlassCard>
-);
+    );
+};
 
 const ExperienceTrackCard = ({ track, selectedOptions, onToggleOption, theme }) => (
     <div className="rounded-[18px] px-4 py-3.5" style={{
@@ -664,7 +692,13 @@ const AddAttendeeActions = ({
 };
 
 export const TourVisitScreen = ({ theme, userSettings, onNavigate, setBackHandler, members = [], currentUserId }) => {
+    const [entryMode, setEntryMode] = useState('home');
     const [guests, setGuests] = useState(() => [createRepGuest(userSettings)]);
+    const [customerVisitTitle, setCustomerVisitTitle] = useState('');
+    const [selectedCustomerId, setSelectedCustomerId] = useState('');
+    const [selectedCustomerLabel, setSelectedCustomerLabel] = useState('');
+    const [customerIsNewRecord, setCustomerIsNewRecord] = useState(false);
+    const [customerSearchQuery, setCustomerSearchQuery] = useState('');
     const [selectedFacilityId, setSelectedFacilityId] = useState('');
     const [showFacilityOptions, setShowFacilityOptions] = useState(true);
     const [expandedUpcomingVisitId, setExpandedUpcomingVisitId] = useState(() => TOUR_VISIT_UPCOMING_VISITS[0]?.id || null);
@@ -689,6 +723,34 @@ export const TourVisitScreen = ({ theme, userSettings, onNavigate, setBackHandle
         [selectedFacilityId]
     );
 
+    const customerDirectoryOptions = useMemo(() => {
+        const dealerOptions = DEALER_DIRECTORY_DATA.map((dealer) => ({
+            value: `dealer-${dealer.id}`,
+            label: `${dealer.name} (Dealer)`,
+        }));
+
+        const designerOptions = DEALER_DIRECTORY_DATA.flatMap((dealer) =>
+            (dealer.designers || []).map((designer) => ({
+                value: `designer-${dealer.id}-${designer.name}`,
+                label: `${designer.name} - ${dealer.name} (Designer)`,
+            }))
+        );
+
+        const memberOptions = members
+            .filter((member) => member?.firstName || member?.lastName)
+            .map((member) => ({
+                value: `member-${member.id}`,
+                label: `${member.firstName || ''} ${member.lastName || ''}`.trim() + ' (Internal)',
+            }));
+
+        const deduped = new Map();
+        [...dealerOptions, ...designerOptions, ...memberOptions].forEach((option) => {
+            if (!deduped.has(option.label)) deduped.set(option.label, option);
+        });
+
+        return Array.from(deduped.values()).sort((a, b) => a.label.localeCompare(b.label));
+    }, [members]);
+
     const upcomingVisits = TOUR_VISIT_UPCOMING_VISITS;
     const selectedExperienceCount = useMemo(
         () => Object.values(experienceSelections).reduce((total, options) => total + options.length, 0),
@@ -707,7 +769,13 @@ export const TourVisitScreen = ({ theme, userSettings, onNavigate, setBackHandle
     }, [activeShareFacilityId]);
 
     const resetTourVisitFlow = useCallback(() => {
+        setEntryMode('home');
         setGuests([createRepGuest(userSettings)]);
+        setCustomerVisitTitle('');
+        setSelectedCustomerId('');
+        setSelectedCustomerLabel('');
+        setCustomerIsNewRecord(false);
+        setCustomerSearchQuery('');
         setSelectedFacilityId('');
         setShowFacilityOptions(true);
         setExpandedUpcomingVisitId(TOUR_VISIT_UPCOMING_VISITS[0]?.id || null);
@@ -756,6 +824,7 @@ export const TourVisitScreen = ({ theme, userSettings, onNavigate, setBackHandle
         if (!linkedFacilityId) return;
 
         if (TOUR_VISIT_FACILITIES.some((facility) => facility.id === linkedFacilityId)) {
+            setEntryMode('new');
             setSelectedFacilityId(linkedFacilityId);
             setShowFacilityOptions(false);
         }
@@ -769,7 +838,7 @@ export const TourVisitScreen = ({ theme, userSettings, onNavigate, setBackHandle
     useEffect(() => {
         if (typeof setBackHandler !== 'function') return undefined;
 
-        if (selectedFacility && !showFacilityOptions) {
+        if (entryMode !== 'home') {
             setBackHandler(() => {
                 resetTourVisitFlow();
                 return true;
@@ -784,7 +853,7 @@ export const TourVisitScreen = ({ theme, userSettings, onNavigate, setBackHandle
         return () => {
             setBackHandler(null);
         };
-    }, [selectedFacility, setBackHandler, showFacilityOptions, resetTourVisitFlow]);
+    }, [entryMode, setBackHandler, resetTourVisitFlow]);
 
     useEffect(() => () => {
         if (successOverlayTimeoutRef.current) {
@@ -838,6 +907,54 @@ export const TourVisitScreen = ({ theme, userSettings, onNavigate, setBackHandle
         setShowFacilityOptions(false);
         setShareFeedback('');
         setFormMessage('');
+    };
+
+    const openNewTourFlow = () => {
+        hapticLight();
+        setEntryMode('new');
+        setFormMessage('');
+    };
+
+    const openUpcomingVisitsFlow = () => {
+        hapticLight();
+        setEntryMode('upcoming');
+        setFormMessage('');
+    };
+
+    const handleCustomerSelection = (customerId) => {
+        if (!customerId) {
+            setSelectedCustomerId('');
+            setSelectedCustomerLabel('');
+            setCustomerIsNewRecord(false);
+            return;
+        }
+
+        const selectedOption = customerDirectoryOptions.find((option) => option.value === customerId);
+        setSelectedCustomerId(customerId);
+        setSelectedCustomerLabel(selectedOption?.label || customerId);
+        setCustomerIsNewRecord(customerId.startsWith('new-customer-'));
+
+        if (!customerVisitTitle.trim() && selectedOption?.label) {
+            const baseTitle = selectedOption.label.replace(/\s*\((Dealer|Designer|Internal)\)$/, '');
+            setCustomerVisitTitle(`${baseTitle} Visit`);
+        }
+    };
+
+    const handleAddNewCustomerRecord = () => {
+        const nextLabel = customerSearchQuery.trim();
+        if (!nextLabel) return;
+
+        const newRecordId = buildNewCustomerId(nextLabel);
+        setSelectedCustomerId(newRecordId);
+        setSelectedCustomerLabel(nextLabel);
+        setCustomerIsNewRecord(true);
+
+        if (!customerVisitTitle.trim()) {
+            setCustomerVisitTitle(`${nextLabel} Visit`);
+        }
+
+        setFormMessage('');
+        hapticLight();
     };
 
     const toggleExperienceOption = (trackId, option) => {
@@ -971,6 +1088,18 @@ export const TourVisitScreen = ({ theme, userSettings, onNavigate, setBackHandle
     const handleSubmit = () => {
         setSubmitAttempted(true);
 
+        if (!customerVisitTitle.trim()) {
+            setFormMessage('Add a customer visit title before continuing.');
+            hapticWarning();
+            return;
+        }
+
+        if (!selectedCustomerId) {
+            setFormMessage('Select a customer (or add a new one) before continuing.');
+            hapticWarning();
+            return;
+        }
+
         if (!selectedFacility) {
             setFormMessage('Choose a facility before building the guest list.');
             hapticWarning();
@@ -1043,112 +1172,204 @@ export const TourVisitScreen = ({ theme, userSettings, onNavigate, setBackHandle
             <div className="screen-content-area">
                 <div className="screen-content-inner pt-4 md:pt-5">
                     <div className="mx-auto w-full max-w-[760px] space-y-3">
-                        <GlassCard theme={theme} className="p-5 md:p-6">
-                            <div className="flex items-start justify-between gap-4">
-                                <div>
-                                    <p className="text-[11px] font-medium uppercase tracking-[0.16em]" style={{ color: theme.colors.textSecondary }}>
-                                        Tour planning
-                                    </p>
-                                    <h1 className="mt-1 text-[28px] font-semibold leading-none" style={{ color: theme.colors.textPrimary }}>
-                                        Tour a Facility
-                                    </h1>
-                                    <p className="mt-3 text-sm leading-6" style={{ color: theme.colors.textSecondary }}>
-                                        Build a hosted visit plan, share the intake form with your contact, and align an itinerary before submission.
-                                    </p>
-                                </div>
-                                <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full" style={{
-                                    color: theme.colors.accent,
-                                    backgroundColor: theme.colors.accent + '12',
-                                    border: `1px solid ${theme.colors.accent}33`,
-                                }}>
-                                    <Sparkles className="h-5 w-5" />
-                                </span>
-                            </div>
-                        </GlassCard>
-
-                        {selectedFacility && !showFacilityOptions ? (
-                            <SelectedFacilityCard
-                                facility={selectedFacility}
-                                theme={theme}
-                                onChange={() => setShowFacilityOptions(true)}
-                            />
-                        ) : (
+                        {entryMode === 'home' ? (
                             <GlassCard theme={theme} className="p-5 md:p-6">
-                                <div className="flex items-center gap-2 mb-3">
-                                    <Building2 className="h-4 w-4" style={{ color: theme.colors.textSecondary }} />
-                                    <p style={{ ...sectionLabelStyle, color: theme.colors.textSecondary }}>Tour a Facility</p>
-                                </div>
+                                <p className="text-[11px] font-medium uppercase tracking-[0.16em]" style={{ color: theme.colors.textSecondary }}>
+                                    Tour planning
+                                </p>
+                                <h1 className="mt-1 text-[28px] font-semibold leading-none" style={{ color: theme.colors.textPrimary }}>
+                                    Tour a Facility
+                                </h1>
+                                <p className="mt-3 text-sm leading-6" style={{ color: theme.colors.textSecondary }}>
+                                    Choose a new factory tour request or review upcoming visits that are already filled out.
+                                </p>
 
-                                <div className="space-y-3">
-                                    {TOUR_VISIT_FACILITIES.map((facility) => (
-                                        <FacilityOption
-                                            key={facility.id}
-                                            facility={facility}
-                                            selected={selectedFacilityId === facility.id}
-                                            onClick={() => handleFacilitySelect(facility.id)}
-                                            theme={theme}
-                                        />
-                                    ))}
+                                <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
+                                    <EntryChoiceCard
+                                        title="Select a Tour Factory Experience"
+                                        description="Start a new request and build the itinerary with guests and experiences."
+                                        onClick={openNewTourFlow}
+                                        theme={theme}
+                                    />
+                                    <EntryChoiceCard
+                                        title="See Upcoming Visits"
+                                        description="View visits already submitted and open any route to review the agenda."
+                                        onClick={openUpcomingVisitsFlow}
+                                        theme={theme}
+                                    />
                                 </div>
                             </GlassCard>
-                        )}
-
-                        {upcomingVisits.length ? (
-                            <UpcomingVisitList
-                                visits={upcomingVisits}
-                                expandedVisitId={expandedUpcomingVisitId}
-                                onToggleVisit={toggleUpcomingVisit}
-                                theme={theme}
-                            />
                         ) : null}
 
-                        <GlassCard theme={theme} className="p-5 md:p-6">
-                            <div className="flex items-center gap-2">
-                                <Send className="h-4 w-4" style={{ color: theme.colors.textSecondary }} />
-                                <p style={{ ...sectionLabelStyle, color: theme.colors.textSecondary }}>Share Intake Form</p>
-                            </div>
-
-                            <p className="mt-2 text-sm" style={{ color: theme.colors.textSecondary }}>
-                                Send this form to a contact so they can fill details directly.
-                            </p>
-
-                            <div className="mt-3 grid grid-cols-1 gap-2.5 md:grid-cols-2">
-                                <FormInput
-                                    label="Contact Email or Mobile"
-                                    value={shareContact}
-                                    onChange={(event) => setShareContact(event.target.value)}
-                                    placeholder="name@dealer.com or 555-123-4567"
+                        {entryMode === 'upcoming' ? (
+                            <>
+                                <UpcomingVisitDirectory
+                                    visits={upcomingVisits}
+                                    expandedVisitId={expandedUpcomingVisitId}
+                                    onToggleVisit={toggleUpcomingVisit}
                                     theme={theme}
-                                    insetLabel
-                                    softChrome
-                                    surfaceBackground={TOUR_VISIT_FIELD_SURFACE}
-                                    surfaceBorder={TOUR_VISIT_SURFACE_BORDER}
                                 />
+                                <button
+                                    type="button"
+                                    onClick={openNewTourFlow}
+                                    className="w-full rounded-full px-5 py-3 text-sm font-semibold transition-all motion-tap"
+                                    style={{
+                                        color: theme.colors.accentText,
+                                        backgroundColor: theme.colors.accent,
+                                        border: `1px solid ${theme.colors.accent}`,
+                                    }}
+                                >
+                                    Start new tour request
+                                </button>
+                            </>
+                        ) : null}
 
-                                <div className="relative rounded-[16px] px-3.5 pt-7 pb-2.5" style={{
-                                    backgroundColor: TOUR_VISIT_FIELD_SURFACE,
-                                    border: TOUR_VISIT_SURFACE_BORDER,
-                                }}>
-                                    <span className="pointer-events-none absolute left-3.5 top-2 text-[11px] font-medium" style={{ color: theme.colors.textSecondary }}>
-                                        Share Link
-                                    </span>
-                                    <p className="truncate text-sm" style={{ color: theme.colors.textPrimary }}>{activeShareLink}</p>
-                                </div>
-                            </div>
+                        {entryMode === 'new' ? (
+                            <>
+                                <GlassCard theme={theme} className="p-5 md:p-6">
+                                    <div className="flex items-start justify-between gap-4">
+                                        <div>
+                                            <p className="text-[11px] font-medium uppercase tracking-[0.16em]" style={{ color: theme.colors.textSecondary }}>
+                                                New tour request
+                                            </p>
+                                            <h2 className="mt-1 text-xl font-semibold" style={{ color: theme.colors.textPrimary }}>
+                                                Customer Visit Details
+                                            </h2>
+                                        </div>
+                                        <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full" style={{
+                                            color: theme.colors.accent,
+                                            backgroundColor: theme.colors.accent + '12',
+                                            border: `1px solid ${theme.colors.accent}33`,
+                                        }}>
+                                            <Sparkles className="h-5 w-5" />
+                                        </span>
+                                    </div>
 
-                            <div className="mt-3 flex flex-wrap gap-2">
-                                <ShareActionButton icon={Copy} label="Copy Link" onClick={handleCopyShareLink} theme={theme} />
-                                <ShareActionButton icon={Mail} label="Email" onClick={handleEmailShare} disabled={!shareContact.trim()} theme={theme} />
-                                <ShareActionButton icon={MessageSquare} label="Text" onClick={handleTextShare} disabled={!shareContact.trim()} theme={theme} />
-                                <ShareActionButton icon={Send} label="Share" onClick={handleNativeShare} theme={theme} />
-                            </div>
+                                    <div className="mt-3 grid grid-cols-1 gap-2.5 md:grid-cols-2">
+                                        <FormInput
+                                            label="Customer Visit Title"
+                                            value={customerVisitTitle}
+                                            onChange={(event) => setCustomerVisitTitle(event.target.value)}
+                                            placeholder="Ex: North Star Health Group Strategy Visit"
+                                            theme={theme}
+                                            required
+                                            insetLabel
+                                            softChrome
+                                            surfaceBackground={TOUR_VISIT_FIELD_SURFACE}
+                                            surfaceBorder={TOUR_VISIT_SURFACE_BORDER}
+                                        />
 
-                            {shareFeedback ? (
-                                <p className="mt-3 text-xs" style={{ color: theme.colors.textSecondary }}>{shareFeedback}</p>
-                            ) : null}
-                        </GlassCard>
+                                        <div className="relative">
+                                            <label
+                                                className="pointer-events-none absolute left-4 top-2 z-[1] text-[11px] font-medium leading-none"
+                                                style={{ color: theme.colors.textSecondary }}
+                                            >
+                                                Customer (Dealer / Designer)
+                                            </label>
+                                            <SearchableSelect
+                                                value={selectedCustomerId}
+                                                onChange={handleCustomerSelection}
+                                                options={customerDirectoryOptions}
+                                                placeholder="Search dealer or designer"
+                                                theme={theme}
+                                                size="sm"
+                                                searchPlaceholder="Spotlight search dealers and designers"
+                                                onMissingAction={handleAddNewCustomerRecord}
+                                                missingActionLabel={customerSearchQuery.trim() ? `Add "${customerSearchQuery.trim()}" as new` : 'Add new customer'}
+                                                onQueryChange={setCustomerSearchQuery}
+                                                buttonClassName="!h-[56px] !rounded-[16px] !px-4 !pr-11 !pb-[6px] !pt-[18px] !text-sm"
+                                                buttonStyle={{
+                                                    backgroundColor: TOUR_VISIT_FIELD_SURFACE,
+                                                    border: TOUR_VISIT_SURFACE_BORDER,
+                                                    color: selectedCustomerId ? theme.colors.textPrimary : theme.colors.textSecondary,
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
 
-                        {selectedFacility ? (
+                                    {customerIsNewRecord ? (
+                                        <p className="mt-2 text-xs" style={{ color: theme.colors.textSecondary }}>
+                                            This customer will be captured as a new backend record when submitted.
+                                        </p>
+                                    ) : null}
+                                </GlassCard>
+
+                                {selectedFacility && !showFacilityOptions ? (
+                                    <SelectedFacilityCard
+                                        facility={selectedFacility}
+                                        theme={theme}
+                                        onChange={() => setShowFacilityOptions(true)}
+                                    />
+                                ) : (
+                                    <GlassCard theme={theme} className="p-5 md:p-6">
+                                        <div className="flex items-center gap-2 mb-3">
+                                            <Building2 className="h-4 w-4" style={{ color: theme.colors.textSecondary }} />
+                                            <p style={{ ...sectionLabelStyle, color: theme.colors.textSecondary }}>Tour a Facility</p>
+                                        </div>
+
+                                        <div className="space-y-3">
+                                            {TOUR_VISIT_FACILITIES.map((facility) => (
+                                                <FacilityOption
+                                                    key={facility.id}
+                                                    facility={facility}
+                                                    selected={selectedFacilityId === facility.id}
+                                                    onClick={() => handleFacilitySelect(facility.id)}
+                                                    theme={theme}
+                                                />
+                                            ))}
+                                        </div>
+                                    </GlassCard>
+                                )}
+
+                                <GlassCard theme={theme} className="p-5 md:p-6">
+                                    <div className="flex items-center gap-2">
+                                        <Send className="h-4 w-4" style={{ color: theme.colors.textSecondary }} />
+                                        <p style={{ ...sectionLabelStyle, color: theme.colors.textSecondary }}>Share Intake Form</p>
+                                    </div>
+
+                                    <p className="mt-2 text-sm" style={{ color: theme.colors.textSecondary }}>
+                                        Send this form to a contact so they can fill details directly.
+                                    </p>
+
+                                    <div className="mt-3 grid grid-cols-1 gap-2.5 md:grid-cols-2">
+                                        <FormInput
+                                            label="Contact Email or Mobile"
+                                            value={shareContact}
+                                            onChange={(event) => setShareContact(event.target.value)}
+                                            placeholder="name@dealer.com or 555-123-4567"
+                                            theme={theme}
+                                            insetLabel
+                                            softChrome
+                                            surfaceBackground={TOUR_VISIT_FIELD_SURFACE}
+                                            surfaceBorder={TOUR_VISIT_SURFACE_BORDER}
+                                        />
+
+                                        <div className="relative rounded-[16px] px-3.5 pt-7 pb-2.5" style={{
+                                            backgroundColor: TOUR_VISIT_FIELD_SURFACE,
+                                            border: TOUR_VISIT_SURFACE_BORDER,
+                                        }}>
+                                            <span className="pointer-events-none absolute left-3.5 top-2 text-[11px] font-medium" style={{ color: theme.colors.textSecondary }}>
+                                                Share Link
+                                            </span>
+                                            <p className="truncate text-sm" style={{ color: theme.colors.textPrimary }}>{activeShareLink}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-3 flex flex-wrap gap-2">
+                                        <ShareActionButton icon={Copy} label="Copy Link" onClick={handleCopyShareLink} theme={theme} />
+                                        <ShareActionButton icon={Mail} label="Email" onClick={handleEmailShare} disabled={!shareContact.trim()} theme={theme} />
+                                        <ShareActionButton icon={MessageSquare} label="Text" onClick={handleTextShare} disabled={!shareContact.trim()} theme={theme} />
+                                        <ShareActionButton icon={Send} label="Share" onClick={handleNativeShare} theme={theme} />
+                                    </div>
+
+                                    {shareFeedback ? (
+                                        <p className="mt-3 text-xs" style={{ color: theme.colors.textSecondary }}>{shareFeedback}</p>
+                                    ) : null}
+                                </GlassCard>
+                            </>
+                        ) : null}
+
+                        {entryMode === 'new' && selectedFacility ? (
                             <div ref={formRef} className="space-y-3 animate-fade-in">
                                 <GlassCard theme={theme} className="p-5 md:p-6">
                                     <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
@@ -1267,6 +1488,10 @@ export const TourVisitScreen = ({ theme, userSettings, onNavigate, setBackHandle
                                         <div>
                                             <p style={{ ...sectionLabelStyle, color: theme.colors.textSecondary }}>Review & Submit</p>
                                             <div className="mt-2 flex flex-wrap items-center gap-2 text-sm" style={{ color: theme.colors.textSecondary }}>
+                                                <span>{customerVisitTitle || 'Untitled visit'}</span>
+                                                <span>•</span>
+                                                <span>{selectedCustomerLabel || 'No customer selected'}</span>
+                                                <span>•</span>
                                                 <span className="inline-flex items-center gap-1.5">
                                                     <MapPin className="h-4 w-4" />
                                                     {selectedFacility.name}
