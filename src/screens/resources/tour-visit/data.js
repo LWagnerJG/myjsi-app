@@ -14,7 +14,7 @@ export const TOUR_VISIT_FACILITIES = [
     {
         id: 'chicago',
         label: 'Chicago',
-        name: 'Chicago Showroom',
+        name: 'Fulton Market Showroom',
         location: 'Chicago, Illinois',
         eyebrow: 'Showroom Experience',
         blurb: 'A design-forward stop focused on market conversations, hospitality, and curated product storytelling.',
@@ -95,31 +95,51 @@ export const TOUR_VISIT_EXPERIENCE_TRACKS = [
         id: 'manufacturing',
         title: 'Manufacturing Immersion',
         description: 'Hands-on visibility into how products are built and quality checked.',
-        options: ['Wood + metal process walk', 'Packaging and staging flow', 'Quality checkpoints review'],
+        options: [
+            { label: 'Wood + metal process walk', description: 'See core fabrication, assembly, and finish steps across the manufacturing floor.' },
+            { label: 'Packaging and staging flow', description: 'Review how product is packed, staged, and prepared for shipment and install.' },
+            { label: 'Quality checkpoints review', description: 'Walk through the quality checks used before product leaves the plant.' },
+        ],
     },
     {
         id: 'design',
         title: 'Design Studio Deep Dive',
         description: 'Explore product intent, finish decisions, and design language.',
-        options: ['Finish and material lab', 'Designer Q&A session', 'Future concepts preview'],
+        options: [
+            { label: 'Finish and material lab', description: 'Compare finishes and materials in a hands-on review with the product team.' },
+            { label: 'Designer Q&A session', description: 'Spend time with design leadership discussing product decisions and intent.' },
+            { label: 'Future concepts preview', description: 'Preview early-stage thinking and directional ideas under active exploration.' },
+        ],
     },
     {
         id: 'application',
         title: 'Application + Planning',
         description: 'Plan around real projects with practical product pairings.',
-        options: ['Workplace applications', 'Healthcare applications', 'Higher-ed applications'],
+        options: [
+            { label: 'Workplace applications', description: 'Focus on planning ideas and product mixes for workplace environments.' },
+            { label: 'Healthcare applications', description: 'Review relevant applications for patient, staff, and support spaces.' },
+            { label: 'Higher-ed applications', description: 'Explore product approaches for classrooms, commons, and campus settings.' },
+        ],
     },
     {
         id: 'sales',
         title: 'Sales Enablement',
         description: 'Build sharper messaging and spec conversation confidence.',
-        options: ['Specification objection handling', 'Storytelling by collection', 'Competitive positioning workshop'],
+        options: [
+            { label: 'Specification objection handling', description: 'Work through common specification concerns and response strategies.' },
+            { label: 'Storytelling by collection', description: 'Learn concise ways to present collections and their best-fit stories.' },
+            { label: 'Competitive positioning workshop', description: 'Sharpen how teams compare JSI against common competitive alternatives.' },
+        ],
     },
     {
         id: 'hospitality',
         title: 'Hospitality + Relationship',
         description: 'Create memorable hosted moments for dealer and client teams.',
-        options: ['Hosted dinner program', 'Leadership meet-and-greet', 'Showroom social walkthrough'],
+        options: [
+            { label: 'Hosted dinner program', description: 'Add a hosted dinner moment that supports stronger relationship-building.' },
+            { label: 'Leadership meet-and-greet', description: 'Create a short leadership introduction for key guests and hosted teams.' },
+            { label: 'Showroom social walkthrough', description: 'Turn the showroom visit into a more informal hosted social experience.' },
+        ],
     },
 ];
 
@@ -155,7 +175,7 @@ export const TOUR_VISIT_UPCOMING_VISITS = [
     {
         id: 'civic-workplace-chicago',
         companyName: 'Civic Workplace Collective',
-        facilityName: 'Chicago Showroom',
+        facilityName: 'Fulton Market Showroom',
         dateLabel: 'May 9-10, 2026',
         overnightLabel: '2 days, 1 night',
         attendees: 'Dealer strategy and workplace clients',
@@ -217,6 +237,7 @@ export const createTourGuest = (seed = {}) => ({
     legalFirstName: '',
     legalLastName: '',
     knownTravelerNumber: '',
+    funFact: '',
     preferredAirline: '',
     shirtSize: '',
     candleScent: '',
