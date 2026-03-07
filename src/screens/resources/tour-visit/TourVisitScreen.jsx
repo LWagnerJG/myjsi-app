@@ -108,11 +108,33 @@ const buildTripAgenda = (experienceSelections) => {
 const normalizeCustomerLabel = (label) => String(label || '').replace(/\s*\((Dealership|Design Firm|End User|Dealer|Designer)\)$/, '').trim();
 const getExperienceOptionLabel = (option) => (typeof option === 'string' ? option : option.label);
 const getExperienceOptionDescription = (option) => (typeof option === 'string' ? '' : option.description || '');
+const toIsoDate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
+const parseIsoDate = (isoDate) => {
+    if (!isoDate) return null;
+    const parsed = new Date(`${isoDate}T00:00:00`);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
 const formatDateLabel = (isoDate) => {
     if (!isoDate) return '';
-    const parsed = new Date(`${isoDate}T00:00:00`);
-    if (Number.isNaN(parsed.getTime())) return '';
+    const parsed = parseIsoDate(isoDate);
+    if (!parsed) return '';
     return parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+};
+const getDefaultDateRange = () => {
+    const today = new Date();
+    const startDate = new Date(today.getFullYear(), today.getMonth() + 1, today.getDate());
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + 1);
+
+    return {
+        start: toIsoDate(startDate),
+        end: toIsoDate(endDate),
+    };
 };
 const inferCustomerType = (companyName) => {
     const normalized = String(companyName || '').toLowerCase();
@@ -174,6 +196,201 @@ const TripMenuHeader = ({ title, theme }) => (
         </h2>
     </div>
 );
+
+const DATE_WEEKDAY_LABELS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+
+const DateRangeDropdown = ({ theme, startDate, endDate, onChangeStart, onChangeEnd }) => {
+    const containerRef = useRef(null);
+    const [open, setOpen] = useState(false);
+    const [visibleMonth, setVisibleMonth] = useState(() => {
+        const sourceDate = parseIsoDate(startDate) || new Date();
+        return new Date(sourceDate.getFullYear(), sourceDate.getMonth(), 1);
+    });
+
+    useEffect(() => {
+        if (!open) return;
+
+        const handlePointerDown = (event) => {
+            if (containerRef.current?.contains(event.target)) return;
+            setOpen(false);
+        };
+
+        document.addEventListener('mousedown', handlePointerDown);
+        document.addEventListener('touchstart', handlePointerDown);
+        return () => {
+            document.removeEventListener('mousedown', handlePointerDown);
+            document.removeEventListener('touchstart', handlePointerDown);
+        };
+    }, [open]);
+
+    const monthLabel = visibleMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    const daysInMonth = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + 1, 0).getDate();
+    const firstWeekday = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth(), 1).getDay();
+    const summaryLabel = startDate && endDate
+        ? `${formatDateLabel(startDate)} - ${formatDateLabel(endDate)}`
+        : (startDate ? `${formatDateLabel(startDate)} - select end` : 'Select beginning and end');
+
+    const dayCells = [
+        ...Array.from({ length: firstWeekday }, () => null),
+        ...Array.from({ length: daysInMonth }, (_, index) => {
+            const date = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth(), index + 1);
+            return {
+                iso: toIsoDate(date),
+                dayNumber: index + 1,
+            };
+        }),
+    ];
+
+    const handleDaySelect = (selectedIsoDate) => {
+        if (!startDate || (startDate && endDate)) {
+            onChangeStart(selectedIsoDate);
+            onChangeEnd('');
+            return;
+        }
+
+        if (selectedIsoDate < startDate) {
+            onChangeStart(selectedIsoDate);
+            return;
+        }
+
+        onChangeEnd(selectedIsoDate);
+        setOpen(false);
+    };
+
+    const goToMonth = (delta) => {
+        setVisibleMonth((current) => new Date(current.getFullYear(), current.getMonth() + delta, 1));
+    };
+
+    return (
+        <div ref={containerRef} className="relative">
+            <button
+                type="button"
+                onClick={() => {
+                    setVisibleMonth(() => {
+                        const sourceDate = parseIsoDate(startDate) || new Date();
+                        return new Date(sourceDate.getFullYear(), sourceDate.getMonth(), 1);
+                    });
+                    setOpen((current) => !current);
+                }}
+                className="w-full rounded-[16px] px-3.5 py-2.5 text-left"
+                style={{
+                    backgroundColor: TOUR_VISIT_FIELD_SURFACE,
+                    border: TOUR_VISIT_SURFACE_BORDER,
+                    color: theme.colors.textPrimary,
+                }}
+            >
+                <p className="text-[10px] font-semibold uppercase tracking-[0.06em]" style={{ color: theme.colors.textSecondary }}>
+                    Date Range
+                </p>
+                <div className="mt-1 flex items-center justify-between gap-3">
+                    <p className="text-[13px] font-medium" style={{ color: theme.colors.textPrimary }}>
+                        {summaryLabel}
+                    </p>
+                    <ChevronDown
+                        className={`h-4 w-4 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}
+                        style={{ color: theme.colors.textSecondary }}
+                    />
+                </div>
+            </button>
+
+            {open ? (
+                <div
+                    className="absolute left-0 right-0 top-[calc(100%+8px)] z-20 rounded-[18px] p-3"
+                    style={{
+                        backgroundColor: theme.colors.surface,
+                        border: TOUR_VISIT_SURFACE_BORDER,
+                        boxShadow: '0 18px 45px rgba(0, 0, 0, 0.12)',
+                    }}
+                >
+                    <div className="flex items-center justify-between gap-2">
+                        <button
+                            type="button"
+                            onClick={() => goToMonth(-1)}
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-full"
+                            style={{ border: '1px solid rgba(0, 0, 0, 0.08)', color: theme.colors.textSecondary }}
+                            aria-label="Previous month"
+                        >
+                            <ArrowRight className="h-4 w-4 rotate-180" />
+                        </button>
+                        <p className="text-[14px] font-semibold" style={{ color: theme.colors.textPrimary }}>{monthLabel}</p>
+                        <button
+                            type="button"
+                            onClick={() => goToMonth(1)}
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-full"
+                            style={{ border: '1px solid rgba(0, 0, 0, 0.08)', color: theme.colors.textSecondary }}
+                            aria-label="Next month"
+                        >
+                            <ArrowRight className="h-4 w-4" />
+                        </button>
+                    </div>
+
+                    <div className="mt-3 grid grid-cols-7 gap-1">
+                        {DATE_WEEKDAY_LABELS.map((label) => (
+                            <div key={label} className="text-center text-[11px] font-semibold" style={{ color: theme.colors.textSecondary }}>
+                                {label}
+                            </div>
+                        ))}
+                        {dayCells.map((cell, index) => {
+                            if (!cell) {
+                                return <div key={`blank-${index}`} className="h-9" />;
+                            }
+
+                            const isStart = startDate === cell.iso;
+                            const isEnd = endDate === cell.iso;
+                            const isInRange = startDate && endDate && cell.iso > startDate && cell.iso < endDate;
+
+                            return (
+                                <button
+                                    key={cell.iso}
+                                    type="button"
+                                    onClick={() => handleDaySelect(cell.iso)}
+                                    className="h-9 rounded-[10px] text-[13px] font-medium transition-colors"
+                                    style={{
+                                        color: isStart || isEnd ? theme.colors.accentText : theme.colors.textPrimary,
+                                        backgroundColor: isStart || isEnd
+                                            ? theme.colors.accent
+                                            : (isInRange ? `${theme.colors.accent}1A` : 'transparent'),
+                                        border: isStart || isEnd ? `1px solid ${theme.colors.accent}` : '1px solid transparent',
+                                    }}
+                                >
+                                    {cell.dayNumber}
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    <div className="mt-3 flex items-center justify-between gap-3 border-t pt-3" style={{ borderColor: 'rgba(0, 0, 0, 0.06)' }}>
+                        <div className="min-w-0 text-[11px]" style={{ color: theme.colors.textSecondary }}>
+                            <p>Begin: {startDate ? formatDateLabel(startDate) : 'Not set'}</p>
+                            <p>End: {endDate ? formatDateLabel(endDate) : 'Tap a final day'}</p>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    onChangeStart('');
+                                    onChangeEnd('');
+                                }}
+                                className="rounded-full px-3 py-1.5 text-[11px] font-medium"
+                                style={{ color: theme.colors.textSecondary, border: '1px solid rgba(0, 0, 0, 0.08)' }}
+                            >
+                                Clear
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setOpen(false)}
+                                className="rounded-full px-3 py-1.5 text-[11px] font-semibold"
+                                style={{ color: theme.colors.accentText, backgroundColor: theme.colors.accent }}
+                            >
+                                Done
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            ) : null}
+        </div>
+    );
+};
 
 const FacilityOption = ({ facility, selected, onClick, theme }) => (
     <button
@@ -850,8 +1067,8 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
     const [showSuccessOverlay, setShowSuccessOverlay] = useState(false);
     const [showRepPicker, setShowRepPicker] = useState(false);
     const [pendingGuestFocusId, setPendingGuestFocusId] = useState(null);
-    const [preferredDateStart, setPreferredDateStart] = useState('');
-    const [preferredDateEnd, setPreferredDateEnd] = useState('');
+    const [preferredDateStart, setPreferredDateStart] = useState(() => getDefaultDateRange().start);
+    const [preferredDateEnd, setPreferredDateEnd] = useState(() => getDefaultDateRange().end);
     const [activeInfoTrackId, setActiveInfoTrackId] = useState(null);
     const topSectionRef = useRef(null);
     const customerFieldRef = useRef(null);
@@ -903,6 +1120,8 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
     }, [activeShareFacilityId]);
 
     const resetTourVisitFlow = useCallback(() => {
+        const defaultDateRange = getDefaultDateRange();
+
         setEntryMode('home');
         setGuests([createRepGuest(userSettings)]);
         setSelectedCustomerId('');
@@ -919,8 +1138,8 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
         setShowSuccessOverlay(false);
         setShowRepPicker(false);
         setPendingGuestFocusId(null);
-        setPreferredDateStart('');
-        setPreferredDateEnd('');
+        setPreferredDateStart(defaultDateRange.start);
+        setPreferredDateEnd(defaultDateRange.end);
         setActiveInfoTrackId(null);
         hasInitializedExpandedGuestRef.current = false;
 
@@ -1222,6 +1441,8 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
         }, 1350);
 
         navigationTimeoutRef.current = setTimeout(() => {
+            const defaultDateRange = getDefaultDateRange();
+
             setEntryMode('home');
             setGuests([createRepGuest(userSettings)]);
             setSelectedCustomerId('');
@@ -1233,8 +1454,8 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
             setShowExperienceError(false);
             setExpandedGuestId(null);
             setPendingGuestFocusId(null);
-            setPreferredDateStart('');
-            setPreferredDateEnd('');
+            setPreferredDateStart(defaultDateRange.start);
+            setPreferredDateEnd(defaultDateRange.end);
             setActiveInfoTrackId(null);
             setSubmitAttempted(false);
             setFormMessage('');
@@ -1399,28 +1620,13 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                                 </span>
                                             ) : null}
                                         </div>
-                                        <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                                            <FormInput
-                                                label="Start Date"
-                                                type="date"
-                                                value={preferredDateStart}
-                                                onChange={(event) => setPreferredDateStart(event.target.value)}
+                                        <div className="mt-2">
+                                            <DateRangeDropdown
                                                 theme={theme}
-                                                insetLabel
-                                                softChrome
-                                                surfaceBackground={TOUR_VISIT_FIELD_SURFACE}
-                                                surfaceBorder={TOUR_VISIT_SURFACE_BORDER}
-                                            />
-                                            <FormInput
-                                                label="End Date"
-                                                type="date"
-                                                value={preferredDateEnd}
-                                                onChange={(event) => setPreferredDateEnd(event.target.value)}
-                                                theme={theme}
-                                                insetLabel
-                                                softChrome
-                                                surfaceBackground={TOUR_VISIT_FIELD_SURFACE}
-                                                surfaceBorder={TOUR_VISIT_SURFACE_BORDER}
+                                                startDate={preferredDateStart}
+                                                endDate={preferredDateEnd}
+                                                onChangeStart={setPreferredDateStart}
+                                                onChangeEnd={setPreferredDateEnd}
                                             />
                                         </div>
                                     </div>
