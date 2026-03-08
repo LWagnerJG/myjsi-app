@@ -10,11 +10,10 @@ import { DEALER_DIRECTORY_DATA } from './screens/resources/dealer-directory/data
 import { AppHeader } from './components/navigation/AppHeader.jsx';
 import { ProfileMenu } from './components/navigation/ProfileMenu.jsx';
 import { VoiceModal, SuccessToast } from './components/feedback/ToastsAndModals.jsx';
-import { SCREEN_MAP } from './config/screenMap.js';
+import { SCREEN_MAP, ProductComparisonScreen, CompetitiveAnalysisScreen, SalesScreen, SamplesScreen } from './config/screenMap.js';
 import { OrderDetailScreen } from './screens/orders/index.js';
 import { Modal } from './components/common/Modal.jsx';
 import { ResourceDetailScreen } from './screens/utility/UtilityScreens.jsx';
-import { ProductComparisonScreen, CompetitiveAnalysisScreen, SalesScreen, SamplesScreen } from './config/screenMap.js';
 import { CreateContentModal } from './screens/community/CreateContentModal.jsx';
 import { UploadToLibraryModal } from './screens/library/UploadToLibraryModal.jsx';
 import { INITIAL_ASSETS } from './screens/library/data.js';

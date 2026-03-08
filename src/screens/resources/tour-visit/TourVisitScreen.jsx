@@ -125,6 +125,24 @@ const formatDateLabel = (isoDate) => {
     if (!parsed) return '';
     return parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 };
+const formatDateRangeLabel = (startIsoDate, endIsoDate) => {
+    const start = parseIsoDate(startIsoDate);
+    const end = parseIsoDate(endIsoDate);
+    if (!start || !end) return '';
+
+    const sameYear = start.getFullYear() === end.getFullYear();
+    const sameMonth = sameYear && start.getMonth() === end.getMonth();
+
+    if (sameMonth) {
+        return `${start.toLocaleDateString('en-US', { month: 'short' })} ${start.getDate()}-${end.getDate()}, ${start.getFullYear()}`;
+    }
+
+    if (sameYear) {
+        return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}, ${start.getFullYear()}`;
+    }
+
+    return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} - ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+};
 const getDefaultDateRange = () => {
     const today = new Date();
     const startDate = new Date(today.getFullYear(), today.getMonth() + 1, today.getDate());
@@ -199,7 +217,16 @@ const TripMenuHeader = ({ title, theme }) => (
 
 const DATE_WEEKDAY_LABELS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
-const DateRangeDropdown = ({ theme, startDate, endDate, onChangeStart, onChangeEnd }) => {
+const DateRangeDropdown = ({
+    theme,
+    startDate,
+    endDate,
+    onChangeStart,
+    onChangeEnd,
+    showFieldLabel = true,
+    compact = false,
+    showChevron = true,
+}) => {
     const containerRef = useRef(null);
     const [open, setOpen] = useState(false);
     const [visibleMonth, setVisibleMonth] = useState(() => {
@@ -254,7 +281,6 @@ const DateRangeDropdown = ({ theme, startDate, endDate, onChangeStart, onChangeE
         }
 
         onChangeEnd(selectedIsoDate);
-        setOpen(false);
     };
 
     const goToMonth = (delta) => {
@@ -272,24 +298,28 @@ const DateRangeDropdown = ({ theme, startDate, endDate, onChangeStart, onChangeE
                     });
                     setOpen((current) => !current);
                 }}
-                className="w-full rounded-[16px] px-3.5 py-2.5 text-left"
+                className={`w-full text-left ${compact ? 'rounded-none px-0.5 py-0.5' : 'rounded-[16px] px-3.5 py-2.5'}`}
                 style={{
-                    backgroundColor: TOUR_VISIT_FIELD_SURFACE,
+                    backgroundColor: compact ? 'transparent' : TOUR_VISIT_FIELD_SURFACE,
                     border: 'none',
                     color: theme.colors.textPrimary,
                 }}
             >
-                <p className="text-[10px] font-semibold uppercase tracking-[0.06em]" style={{ color: theme.colors.textSecondary }}>
-                    Date Range
-                </p>
-                <div className="mt-1 flex items-center justify-between gap-3">
-                    <p className="text-[13px] font-medium" style={{ color: theme.colors.textPrimary }}>
+                {showFieldLabel ? (
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.06em]" style={{ color: theme.colors.textSecondary }}>
+                        Date Range
+                    </p>
+                ) : null}
+                <div className={`${showFieldLabel ? 'mt-1' : ''} flex items-center justify-between gap-3`}>
+                    <p className="text-[14px] font-medium" style={{ color: theme.colors.textPrimary }}>
                         {summaryLabel}
                     </p>
-                    <ChevronDown
-                        className={`h-4 w-4 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}
-                        style={{ color: theme.colors.textSecondary }}
-                    />
+                    {showChevron ? (
+                        <ChevronDown
+                            className={`h-4 w-4 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}
+                            style={{ color: theme.colors.textSecondary }}
+                        />
+                    ) : null}
                 </div>
             </button>
 
@@ -302,29 +332,21 @@ const DateRangeDropdown = ({ theme, startDate, endDate, onChangeStart, onChangeE
                         boxShadow: '0 18px 45px rgba(0, 0, 0, 0.12)',
                     }}
                 >
-                    <div className="rounded-[12px] px-3 py-2" style={{ backgroundColor: TOUR_VISIT_FIELD_SURFACE }}>
-                        <p className="text-[11px]" style={{ color: theme.colors.textSecondary }}>
-                            {startDate && endDate
-                                ? `${formatDateLabel(startDate)} to ${formatDateLabel(endDate)}`
-                                : (startDate ? `${formatDateLabel(startDate)} to pick end` : 'Pick beginning and ending dates')}
-                        </p>
-                    </div>
-
                     <div className="flex items-center justify-between gap-2">
                         <button
                             type="button"
                             onClick={() => goToMonth(-1)}
-                            className="mt-3 inline-flex h-8 w-8 items-center justify-center rounded-full"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-full"
                             style={{ color: theme.colors.textSecondary, backgroundColor: TOUR_VISIT_FIELD_SURFACE }}
                             aria-label="Previous month"
                         >
                             <ArrowRight className="h-4 w-4 rotate-180" />
                         </button>
-                        <p className="mt-3 text-[14px] font-semibold" style={{ color: theme.colors.textPrimary }}>{monthLabel}</p>
+                        <p className="text-[14px] font-semibold" style={{ color: theme.colors.textPrimary }}>{monthLabel}</p>
                         <button
                             type="button"
                             onClick={() => goToMonth(1)}
-                            className="mt-3 inline-flex h-8 w-8 items-center justify-center rounded-full"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-full"
                             style={{ color: theme.colors.textSecondary, backgroundColor: TOUR_VISIT_FIELD_SURFACE }}
                             aria-label="Next month"
                         >
@@ -374,20 +396,38 @@ const DateRangeDropdown = ({ theme, startDate, endDate, onChangeStart, onChangeE
                             );
                         })}
                     </div>
+
+                    {startDate && endDate ? (
+                        <div className="mt-3 flex justify-end border-t pt-3" style={{ borderColor: 'rgba(0, 0, 0, 0.06)' }}>
+                            <button
+                                type="button"
+                                onClick={() => setOpen(false)}
+                                className="inline-flex items-center rounded-full px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.08em]"
+                                style={{
+                                    backgroundColor: theme.colors.accent + '12',
+                                    color: theme.colors.textPrimary,
+                                    border: '1px solid rgba(0, 0, 0, 0.06)',
+                                }}
+                            >
+                                Confirm
+                            </button>
+                        </div>
+                    ) : null}
                 </div>
             ) : null}
         </div>
     );
 };
 
-const FacilityOption = ({ facility, selected, onClick, theme }) => (
+const FacilityOption = ({ facility, selected, onClick, theme, isInList = false, showTopDivider = false }) => (
     <button
         type="button"
         onClick={onClick}
-        className="w-full rounded-[16px] px-4 py-3.5 text-left transition-all motion-card"
+        className={`w-full px-4 py-3.5 text-left transition-all motion-card ${isInList ? '' : 'rounded-[16px]'}`}
         style={{
-            backgroundColor: TOUR_VISIT_FIELD_SURFACE,
+            backgroundColor: isInList ? 'transparent' : TOUR_VISIT_FIELD_SURFACE,
             border: selected ? `1px solid ${theme.colors.accent}55` : 'none',
+            borderTop: isInList && showTopDivider ? '1px solid rgba(0, 0, 0, 0.06)' : undefined,
             color: theme.colors.textPrimary,
             boxShadow: 'none',
         }}
@@ -414,21 +454,64 @@ const FacilityOption = ({ facility, selected, onClick, theme }) => (
     </button>
 );
 
+const TourVisitBooleanField = ({ label, value, onChange, theme }) => (
+    <div
+        className="rounded-[16px] px-3.5 py-2.5"
+        style={{
+            backgroundColor: TOUR_VISIT_FIELD_SURFACE,
+            border: TOUR_VISIT_SURFACE_BORDER,
+        }}
+    >
+        <div className="flex min-h-[36px] items-center justify-between gap-3">
+            <label className="text-[11px] font-medium leading-none" style={{ color: theme.colors.textSecondary }}>
+                {label}
+            </label>
+            <div className="flex items-center gap-1.5">
+                <button
+                    type="button"
+                    onClick={() => onChange(false)}
+                    className="rounded-full px-2.5 py-1 text-[11px] font-medium transition-all"
+                    style={{
+                        color: !value ? theme.colors.accentText : theme.colors.textSecondary,
+                        backgroundColor: !value ? theme.colors.accent : theme.colors.surface,
+                        border: !value ? `1px solid ${theme.colors.accent}` : '1px solid rgba(0, 0, 0, 0.08)',
+                    }}
+                >
+                    No
+                </button>
+                <button
+                    type="button"
+                    onClick={() => onChange(true)}
+                    className="rounded-full px-2.5 py-1 text-[11px] font-medium transition-all"
+                    style={{
+                        color: value ? theme.colors.accentText : theme.colors.textSecondary,
+                        backgroundColor: value ? theme.colors.accent : theme.colors.surface,
+                        border: value ? `1px solid ${theme.colors.accent}` : '1px solid rgba(0, 0, 0, 0.08)',
+                    }}
+                >
+                    Yes
+                </button>
+            </div>
+        </div>
+    </div>
+);
+
 const UpcomingVisitDirectory = ({ visits, expandedVisitId, onToggleVisit, theme }) => (
     <GlassCard theme={theme} className="p-5 md:p-6">
         <TripMenuHeader title="Upcoming Trips" theme={theme} />
 
-        <div className="space-y-2.5">
-            {visits.map((visit) => {
+        <div className="overflow-hidden rounded-[16px]" style={{ backgroundColor: TOUR_VISIT_FIELD_SURFACE }}>
+            {visits.map((visit, visitIndex) => {
                 const isExpanded = expandedVisitId === visit.id;
 
                 return (
                     <div
                         key={visit.id}
-                        className="overflow-hidden rounded-[16px]"
+                        className="overflow-hidden"
                         style={{
-                            backgroundColor: isExpanded ? theme.colors.surface : TOUR_VISIT_FIELD_SURFACE,
+                            backgroundColor: isExpanded ? 'rgba(255, 255, 255, 0.82)' : 'transparent',
                             border: 'none',
+                            borderTop: visitIndex > 0 ? '1px solid rgba(0, 0, 0, 0.06)' : 'none',
                         }}
                     >
                         <button
@@ -532,7 +615,7 @@ const UpcomingVisitDirectory = ({ visits, expandedVisitId, onToggleVisit, theme 
 
 const ExperienceTrackCard = ({ track, selectedOptions, onToggleOption, onOpenInfo, theme }) => (
     <div className="rounded-[16px] px-3.5 py-3" style={{
-        backgroundColor: theme.colors.surface,
+        backgroundColor: TOUR_VISIT_FIELD_SURFACE,
         border: 'none',
     }}>
         <div className="flex items-start justify-between gap-2">
@@ -565,13 +648,15 @@ const ExperienceTrackCard = ({ track, selectedOptions, onToggleOption, onOpenInf
                         type="button"
                         onClick={() => onToggleOption(track.id, optionLabel)}
                         title={optionDesc || undefined}
-                        className="rounded-full px-2.5 py-1 text-[11px] font-medium transition-all"
+                        className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold transition-all"
                         style={{
-                            color: isSelected ? theme.colors.accentText : theme.colors.textSecondary,
-                            backgroundColor: isSelected ? theme.colors.accent : theme.colors.background,
-                            border: 'none',
+                            color: isSelected ? theme.colors.accentText : theme.colors.textPrimary,
+                            backgroundColor: isSelected ? theme.colors.accent : theme.colors.surface,
+                            border: isSelected ? `1px solid ${theme.colors.accent}` : '1px solid rgba(0, 0, 0, 0.12)',
+                            boxShadow: isSelected ? '0 6px 14px rgba(0, 0, 0, 0.14)' : 'none',
                         }}
                     >
+                        {isSelected ? <Check className="h-3 w-3" /> : null}
                         {optionLabel}
                     </button>
                 );
@@ -583,6 +668,7 @@ const ExperienceTrackCard = ({ track, selectedOptions, onToggleOption, onOpenInf
 const GuestPanel = ({
     guest,
     guestIndex,
+    attendeeOrdinal,
     expanded,
     theme,
     embedded = false,
@@ -610,11 +696,15 @@ const GuestPanel = ({
 
     return (
         <div
-            className="rounded-[18px] px-3 py-2.5"
+            className={`rounded-[18px] px-3 py-2.5 ${embedded && !isFirst ? 'pt-3' : ''}`}
             style={{
-                backgroundColor: embedded ? 'transparent' : expanded ? TOUR_VISIT_PANEL_SURFACE : TOUR_VISIT_PANEL_SURFACE_COLLAPSED,
+                backgroundColor: embedded
+                    ? 'transparent'
+                    : expanded
+                        ? TOUR_VISIT_PANEL_SURFACE
+                        : TOUR_VISIT_PANEL_SURFACE_COLLAPSED,
                 border: 'none',
-                borderTop: embedded && !isFirst ? '1px solid rgba(0, 0, 0, 0.03)' : undefined,
+                borderTop: embedded && !isFirst ? '1px solid rgba(0, 0, 0, 0.06)' : undefined,
                 borderRadius: embedded ? 0 : 18,
             }}
         >
@@ -627,6 +717,12 @@ const GuestPanel = ({
             >
                 <div className="min-w-0 flex flex-1 items-center gap-2">
                     <div className="flex min-w-0 flex-wrap items-center gap-2">
+                        <span
+                            className="text-[11px] font-medium leading-none"
+                            style={{ color: theme.colors.textSecondary }}
+                        >
+                            {attendeeOrdinal}.
+                        </span>
                         <h3 className="text-[14px] font-semibold leading-5" style={{ color: theme.colors.textPrimary }}>
                             {getGuestDisplayName(guest, guestIndex)}
                         </h3>
@@ -714,6 +810,53 @@ const GuestPanel = ({
                             surfaceBackground={TOUR_VISIT_FIELD_SURFACE}
                             surfaceBorder={TOUR_VISIT_SURFACE_BORDER}
                         />
+
+                        {!repAttendee ? (
+                            <FormInput
+                                label="Date of Birth"
+                                type="date"
+                                value={guest.dateOfBirth || ''}
+                                onChange={(event) => onChange('dateOfBirth', event.target.value)}
+                                theme={theme}
+                                insetLabel
+                                softChrome
+                                surfaceBackground={TOUR_VISIT_FIELD_SURFACE}
+                                surfaceBorder={TOUR_VISIT_SURFACE_BORDER}
+                            />
+                        ) : null}
+
+                        {!repAttendee ? (
+                            <TourVisitSelectField
+                                label="T-Shirt Size"
+                                value={guest.shirtSize}
+                                onChange={(nextValue) => onChange('shirtSize', nextValue)}
+                                options={TOUR_VISIT_TSHIRT_SIZES}
+                                placeholder="Select size"
+                                searchable={false}
+                                theme={theme}
+                            />
+                        ) : null}
+
+                        <TourVisitSelectField
+                            label="Preferred Airline"
+                            value={guest.preferredAirline}
+                            onChange={(nextValue) => onChange('preferredAirline', nextValue)}
+                            options={TOUR_VISIT_AIRLINES}
+                            placeholder="Select airline"
+                            theme={theme}
+                        />
+
+                        <FormInput
+                            label="Known Traveler Number"
+                            value={guest.knownTravelerNumber}
+                            onChange={(event) => onChange('knownTravelerNumber', event.target.value)}
+                            placeholder="Optional"
+                            theme={theme}
+                            insetLabel
+                            softChrome
+                            surfaceBackground={TOUR_VISIT_FIELD_SURFACE}
+                            surfaceBorder={TOUR_VISIT_SURFACE_BORDER}
+                        />
                     </div>
 
                     {guestErrors.length ? (
@@ -729,65 +872,28 @@ const GuestPanel = ({
                         </div>
                     ) : null}
 
-                    <div className="mt-2">
-                        <div className="grid grid-cols-2 gap-2">
-                            <TourVisitSelectField
-                                label="Preferred Airline"
-                                value={guest.preferredAirline}
-                                onChange={(nextValue) => onChange('preferredAirline', nextValue)}
-                                options={TOUR_VISIT_AIRLINES}
-                                placeholder="Select airline"
-                                theme={theme}
-                            />
+                    {!repAttendee ? (
+                        <div className="mt-2 grid grid-cols-2 gap-2">
+                            <div className="space-y-2">
+                                <TourVisitBooleanField
+                                    label="Dietary Restrictions"
+                                    value={guest.hasDietaryRestrictions}
+                                    onChange={(nextValue) => onChange('hasDietaryRestrictions', nextValue)}
+                                    theme={theme}
+                                />
 
-                            <FormInput
-                                label="Known Traveler Number"
-                                value={guest.knownTravelerNumber}
-                                onChange={(event) => onChange('knownTravelerNumber', event.target.value)}
-                                placeholder="Optional"
-                                theme={theme}
-                                insetLabel
-                                softChrome
-                                surfaceBackground={TOUR_VISIT_FIELD_SURFACE}
-                                surfaceBorder={TOUR_VISIT_SURFACE_BORDER}
-                            />
-
-                            {!repAttendee ? (
-                                <>
-                                    <TourVisitSelectField
-                                        label="T-Shirt Size"
-                                        value={guest.shirtSize}
-                                        onChange={(nextValue) => onChange('shirtSize', nextValue)}
-                                        options={TOUR_VISIT_TSHIRT_SIZES}
-                                        placeholder="Select size"
-                                        searchable={false}
-                                        theme={theme}
-                                    />
-
-                                    <FormInput
-                                        label="Fun Fact"
-                                        value={guest.funFact || ''}
-                                        onChange={(event) => onChange('funFact', event.target.value)}
-                                        placeholder="Short note"
-                                        theme={theme}
-                                        insetLabel
-                                        softChrome
-                                        surfaceBackground={TOUR_VISIT_FIELD_SURFACE}
-                                        surfaceBorder={TOUR_VISIT_SURFACE_BORDER}
-                                        maxLength={60}
-                                    />
-
+                                {guest.hasDietaryRestrictions ? (
                                     <div
-                                        className="col-span-2 rounded-[16px] px-3 py-2.5"
+                                        className="rounded-[16px] px-3.5 py-3"
                                         style={{
                                             backgroundColor: TOUR_VISIT_FIELD_SURFACE,
-                                            border: 'none',
+                                            border: TOUR_VISIT_SURFACE_BORDER,
                                         }}
                                     >
-                                        <p className="text-[10px] font-semibold uppercase tracking-[0.06em]" style={{ color: theme.colors.textSecondary }}>
-                                            Dietary Restrictions
-                                        </p>
-                                        <div className="mt-1.5 flex flex-wrap gap-1.5">
+                                        <label className="text-[11px] font-medium leading-none" style={{ color: theme.colors.textSecondary }}>
+                                            Restriction Details
+                                        </label>
+                                        <div className="mt-2 flex flex-wrap gap-1.5">
                                             {TOUR_VISIT_DIETARY_RESTRICTIONS.map((restriction) => {
                                                 const isSelected = (guest.dietaryRestrictions || []).includes(restriction);
                                                 return (
@@ -807,8 +913,8 @@ const GuestPanel = ({
                                                         className="rounded-full px-2.5 py-1 text-[11px] font-medium transition-all"
                                                         style={{
                                                             color: isSelected ? theme.colors.textPrimary : theme.colors.textSecondary,
-                                                            backgroundColor: isSelected ? theme.colors.accent + '14' : TOUR_VISIT_FIELD_SURFACE,
-                                                            border: 'none',
+                                                            backgroundColor: isSelected ? theme.colors.accent + '14' : theme.colors.surface,
+                                                            border: '1px solid rgba(0, 0, 0, 0.05)',
                                                         }}
                                                     >
                                                         {restriction}
@@ -816,29 +922,42 @@ const GuestPanel = ({
                                                 );
                                             })}
                                         </div>
-
-                                        {(guest.dietaryRestrictions || []).includes('Other') ? (
-                                            <div className="mt-2">
-                                                <FormInput
-                                                    label="Other Dietary Notes"
-                                                    type="textarea"
-                                                    value={guest.dietaryRestrictionsOther || ''}
-                                                    onChange={(event) => onChange('dietaryRestrictionsOther', event.target.value)}
-                                                    placeholder="Briefly explain dietary restrictions"
-                                                    theme={theme}
-                                                    insetLabel
-                                                    softChrome
-                                                    surfaceBackground={theme.colors.surface}
-                                                    surfaceBorder={TOUR_VISIT_SURFACE_BORDER}
-                                                    maxLength={140}
-                                                />
-                                            </div>
-                                        ) : null}
                                     </div>
-                                </>
+                                ) : null}
+                            </div>
+
+                            <FormInput
+                                label="Fun Fact"
+                                value={guest.funFact || ''}
+                                onChange={(event) => onChange('funFact', event.target.value)}
+                                placeholder="Short note"
+                                theme={theme}
+                                insetLabel
+                                softChrome
+                                surfaceBackground={TOUR_VISIT_FIELD_SURFACE}
+                                surfaceBorder={TOUR_VISIT_SURFACE_BORDER}
+                                maxLength={60}
+                            />
+
+                            {guest.hasDietaryRestrictions && (guest.dietaryRestrictions || []).includes('Other') ? (
+                                <div className="col-span-2">
+                                    <FormInput
+                                        label="Other Dietary Notes"
+                                        type="textarea"
+                                        value={guest.dietaryRestrictionsOther || ''}
+                                        onChange={(event) => onChange('dietaryRestrictionsOther', event.target.value)}
+                                        placeholder="Briefly explain dietary restrictions"
+                                        theme={theme}
+                                        insetLabel
+                                        softChrome
+                                        surfaceBackground={TOUR_VISIT_FIELD_SURFACE}
+                                        surfaceBorder={TOUR_VISIT_SURFACE_BORDER}
+                                        maxLength={140}
+                                    />
+                                </div>
                             ) : null}
                         </div>
-                    </div>
+                    ) : null}
                     </div>
                 </div>
                 </div>
@@ -991,7 +1110,7 @@ const AddAttendeeActions = ({
                     placeholder="Select rep"
                     theme={theme}
                     size="sm"
-                    searchPlaceholder="Search reps"
+                    searchable={false}
                     buttonRef={repPickerRef}
                 />
             </div>
@@ -1093,7 +1212,7 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
 
     const requestedDateLabel = useMemo(() => {
         if (!preferredDateStart || !preferredDateEnd) return '';
-        return `${formatDateLabel(preferredDateStart)} - ${formatDateLabel(preferredDateEnd)}`;
+        return formatDateRangeLabel(preferredDateStart, preferredDateEnd);
     }, [preferredDateEnd, preferredDateStart]);
 
     const activeInfoTrack = useMemo(
@@ -1209,6 +1328,20 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
     }, []);
 
     const completedGuestCount = guests.filter(isGuestComplete).length;
+    const summaryCustomerLabel = normalizeCustomerLabel(selectedCustomerLabel) || 'Customer needed';
+    const summaryLocationLabel = selectedFacility?.name || 'Location needed';
+    const summaryDateLabel = requestedDateLabel || 'Dates needed';
+    const hasCoreTripDetails = Boolean(normalizeCustomerLabel(selectedCustomerLabel)) && Boolean(selectedFacility?.name) && Boolean(requestedDateLabel);
+    const summaryRows = [
+        { label: 'Customer', value: summaryCustomerLabel, isPending: !normalizeCustomerLabel(selectedCustomerLabel) },
+        { label: 'Location', value: summaryLocationLabel, isPending: !selectedFacility?.name },
+        { label: 'Dates', value: summaryDateLabel, isPending: !requestedDateLabel },
+    ];
+    const summaryStats = [
+        { label: 'Attendees', value: `${completedGuestCount}/${guests.length || 0}` },
+        { label: 'Experiences', value: String(selectedExperienceCount) },
+    ];
+    const summaryMissingCount = summaryRows.filter((item) => item.isPending).length;
 
     useEffect(() => {
         if (!pendingGuestFocusId) return;
@@ -1222,6 +1355,9 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                 guest.id === guestId
                     ? {
                         ...guest,
+                        ...(field === 'hasDietaryRestrictions' && !value
+                            ? { dietaryRestrictions: [], dietaryRestrictionsOther: '' }
+                            : {}),
                         [field]: value,
                     }
                     : guest
@@ -1474,14 +1610,16 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                 <GlassCard theme={theme} className="p-5 md:p-6">
                                     <TripMenuHeader title="Schedule Trip" theme={theme} />
 
-                                    <div className="space-y-2.5">
-                                        {TOUR_VISIT_FACILITIES.map((facility) => (
+                                    <div className="overflow-hidden rounded-[16px]" style={{ backgroundColor: TOUR_VISIT_FIELD_SURFACE }}>
+                                        {TOUR_VISIT_FACILITIES.map((facility, facilityIndex) => (
                                             <FacilityOption
                                                 key={facility.id}
                                                 facility={facility}
                                                 selected={false}
                                                 onClick={() => handleFacilitySelect(facility.id)}
                                                 theme={theme}
+                                                isInList
+                                                showTopDivider={facilityIndex > 0}
                                             />
                                         ))}
                                     </div>
@@ -1524,48 +1662,10 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                 <div ref={topSectionRef}>
                                     <GlassCard theme={theme} className="p-5 md:p-6">
                                     {selectedFacility && !showFacilityOptions ? (
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowFacilityOptions(true)}
-                                            className="w-full text-left"
-                                        >
-                                            <p style={{ ...sectionLabelStyle, color: theme.colors.textSecondary }}>Location</p>
-                                            <div className="mt-1.5 flex items-center justify-between gap-4">
-                                                <div className="min-w-0">
-                                                    <p className="text-[15px] font-semibold" style={{ color: theme.colors.textPrimary }}>
-                                                        {selectedFacility.name}
-                                                    </p>
-                                                    <p className="mt-0.5 text-[12px]" style={{ color: theme.colors.textSecondary }}>
-                                                        {selectedFacility.location}
-                                                    </p>
-                                                </div>
-                                                <span className="text-[11px] font-medium" style={{ color: theme.colors.textSecondary, opacity: 0.6 }}>
-                                                    Change
-                                                </span>
-                                            </div>
-                                        </button>
-                                    ) : (
                                         <div>
-                                            <p style={{ ...sectionLabelStyle, color: theme.colors.textSecondary }}>Location</p>
-                                            <div className="mt-2.5 space-y-2.5">
-                                                {TOUR_VISIT_FACILITIES.map((facility) => (
-                                                    <FacilityOption
-                                                        key={facility.id}
-                                                        facility={facility}
-                                                        selected={selectedFacilityId === facility.id}
-                                                        onClick={() => handleFacilitySelect(facility.id)}
-                                                        theme={theme}
-                                                    />
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    <div className="mt-3 pt-1">
-                                        <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2">
-                                            <div className="rounded-[14px] px-3 py-2" style={{ backgroundColor: TOUR_VISIT_FIELD_SURFACE, border: 'none' }}>
+                                            <div className="pb-3">
                                                 <p style={{ ...sectionLabelStyle, color: theme.colors.textSecondary }}>Customer</p>
-                                                <div className="mt-1">
+                                                <div className="mt-2">
                                                     <SearchableSelect
                                                         value={selectedCustomerId}
                                                         onChange={handleCustomerSelection}
@@ -1586,14 +1686,14 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                                         inlineSearch
                                                         minQueryLength={2}
                                                         dropdownIndicatorMode="hidden"
-                                                        buttonClassName="!h-[36px] !rounded-none !px-0.5 !pr-1 !text-[14px] !font-medium"
+                                                        buttonClassName="!h-[32px] !rounded-none !px-0 !pr-0 !text-[14px] !font-medium"
                                                         buttonStyle={{
                                                             backgroundColor: 'transparent',
                                                             border: 'none',
                                                             color: selectedCustomerId ? theme.colors.textPrimary : theme.colors.textSecondary,
                                                             boxShadow: 'none',
                                                         }}
-                                                        inputClassName="!h-[36px] !rounded-none !px-0.5 !pr-1 !text-[14px] !font-medium"
+                                                        inputClassName="!h-[32px] !rounded-none !px-0 !pr-0 !text-[14px] !font-medium"
                                                         inputStyle={{
                                                             backgroundColor: 'transparent',
                                                             border: 'none',
@@ -1604,31 +1704,142 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                                 </div>
                                             </div>
 
-                                            <div className="rounded-[14px] px-3 py-2" style={{ backgroundColor: TOUR_VISIT_FIELD_SURFACE, border: 'none' }}>
+                                            <div className="border-t py-3" style={{ borderColor: 'rgba(0, 0, 0, 0.08)' }}>
                                                 <p style={{ ...sectionLabelStyle, color: theme.colors.textSecondary }}>Dates</p>
-                                                <div className="mt-1.5">
+                                                <div className="mt-2">
                                                     <DateRangeDropdown
                                                         theme={theme}
                                                         startDate={preferredDateStart}
                                                         endDate={preferredDateEnd}
                                                         onChangeStart={setPreferredDateStart}
                                                         onChangeEnd={setPreferredDateEnd}
+                                                        showFieldLabel={false}
+                                                        compact
+                                                        showChevron={false}
                                                     />
                                                 </div>
                                             </div>
+
+                                            <div className="border-t py-3" style={{ borderColor: 'rgba(0, 0, 0, 0.08)' }}>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowFacilityOptions(true)}
+                                                    className="w-full text-left"
+                                                >
+                                                    <p style={{ ...sectionLabelStyle, color: theme.colors.textSecondary }}>Location</p>
+                                                    <div className="mt-2 flex items-center justify-between gap-4">
+                                                        <p className="text-[14px] font-medium" style={{ color: theme.colors.textPrimary }}>
+                                                            {selectedFacility.name}
+                                                        </p>
+                                                        <span className="text-[11px] font-medium" style={{ color: theme.colors.textSecondary, opacity: 0.6 }}>
+                                                            Change
+                                                        </span>
+                                                    </div>
+                                                </button>
+                                            </div>
+
+                                            <div className="border-t pt-3" style={{ borderColor: 'rgba(0, 0, 0, 0.08)' }}>
+                                                <button
+                                                    type="button"
+                                                    onClick={handleNativeShare}
+                                                    className="inline-flex items-center gap-1.5 text-[11px] font-medium transition-opacity hover:opacity-100"
+                                                    style={{ color: theme.colors.textSecondary, opacity: 0.6 }}
+                                                >
+                                                    <Send className="h-3 w-3" />
+                                                    Have someone else fill out?
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="mt-2 flex items-center justify-between pt-2">
-                                        <button
-                                            type="button"
-                                            onClick={handleNativeShare}
-                                            className="inline-flex items-center gap-1.5 text-[11px] font-medium transition-opacity hover:opacity-100"
-                                            style={{ color: theme.colors.textSecondary, opacity: 0.5 }}
-                                        >
-                                            <Send className="h-3 w-3" />
-                                            Have someone else fill out?
-                                        </button>
-                                    </div>
+                                    ) : (
+                                        <>
+                                            <div>
+                                                <p style={{ ...sectionLabelStyle, color: theme.colors.textSecondary }}>Location</p>
+                                                <div className="mt-2.5 overflow-hidden rounded-[16px]" style={{ backgroundColor: TOUR_VISIT_FIELD_SURFACE }}>
+                                                    {TOUR_VISIT_FACILITIES.map((facility, facilityIndex) => (
+                                                        <FacilityOption
+                                                            key={facility.id}
+                                                            facility={facility}
+                                                            selected={selectedFacilityId === facility.id}
+                                                            onClick={() => handleFacilitySelect(facility.id)}
+                                                            theme={theme}
+                                                            isInList
+                                                            showTopDivider={facilityIndex > 0}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            <div className="mt-3 border-t pt-2" style={{ borderColor: 'rgba(0, 0, 0, 0.06)' }}>
+                                                <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2">
+                                                    <div className="rounded-[14px] px-3 py-2" style={{ backgroundColor: TOUR_VISIT_FIELD_SURFACE, border: 'none' }}>
+                                                        <p style={{ ...sectionLabelStyle, color: theme.colors.textSecondary }}>Customer</p>
+                                                        <div className="mt-1">
+                                                            <SearchableSelect
+                                                                value={selectedCustomerId}
+                                                                onChange={handleCustomerSelection}
+                                                                options={customerDirectoryOptions}
+                                                                placeholder="Customer name"
+                                                                displayValue={normalizeCustomerLabel(selectedCustomerLabel)}
+                                                                theme={theme}
+                                                                size="sm"
+                                                                onBlurWithQuery={(typed) => {
+                                                                    if (!selectedCustomerId || customerIsNewRecord) {
+                                                                        const newId = buildNewCustomerId(typed);
+                                                                        setSelectedCustomerId(newId);
+                                                                        setSelectedCustomerLabel(typed);
+                                                                        setCustomerIsNewRecord(true);
+                                                                    }
+                                                                }}
+                                                                buttonRef={customerFieldRef}
+                                                                inlineSearch
+                                                                minQueryLength={2}
+                                                                dropdownIndicatorMode="hidden"
+                                                                buttonClassName="!h-[36px] !rounded-none !px-0.5 !pr-1 !text-[14px] !font-medium"
+                                                                buttonStyle={{
+                                                                    backgroundColor: 'transparent',
+                                                                    border: 'none',
+                                                                    color: selectedCustomerId ? theme.colors.textPrimary : theme.colors.textSecondary,
+                                                                    boxShadow: 'none',
+                                                                }}
+                                                                inputClassName="!h-[36px] !rounded-none !px-0.5 !pr-1 !text-[14px] !font-medium"
+                                                                inputStyle={{
+                                                                    backgroundColor: 'transparent',
+                                                                    border: 'none',
+                                                                    color: theme.colors.textPrimary,
+                                                                    boxShadow: 'none',
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="rounded-[14px] px-3 py-2" style={{ backgroundColor: TOUR_VISIT_FIELD_SURFACE, border: 'none' }}>
+                                                        <p style={{ ...sectionLabelStyle, color: theme.colors.textSecondary }}>Dates</p>
+                                                        <div className="mt-1">
+                                                            <DateRangeDropdown
+                                                                theme={theme}
+                                                                startDate={preferredDateStart}
+                                                                endDate={preferredDateEnd}
+                                                                onChangeStart={setPreferredDateStart}
+                                                                onChangeEnd={setPreferredDateEnd}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="mt-2 flex items-center justify-between border-t pt-2" style={{ borderColor: 'rgba(0, 0, 0, 0.06)' }}>
+                                                <button
+                                                    type="button"
+                                                    onClick={handleNativeShare}
+                                                    className="inline-flex items-center gap-1.5 text-[11px] font-medium transition-opacity hover:opacity-100"
+                                                    style={{ color: theme.colors.textSecondary, opacity: 0.65 }}
+                                                >
+                                                    <Send className="h-3 w-3" />
+                                                    Have someone else fill out?
+                                                </button>
+                                            </div>
+                                        </>
+                                    )}
                                     </GlassCard>
                                 </div>
                             </>
@@ -1658,6 +1869,7 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                                     key={guest.id}
                                                     guest={guest}
                                                     guestIndex={guest.isSelf ? 0 : displayGuestIndex}
+                                                    attendeeOrdinal={index + 1}
                                                     expanded={expandedGuestId === guest.id}
                                                     theme={theme}
                                                     embedded
@@ -1718,26 +1930,62 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                     ) : null}
                                 </GlassCard>
 
-                                <GlassCard theme={theme} className="p-5 md:p-6">
-                                    <div className="flex items-center justify-between gap-4">
-                                        <div className="min-w-0">
-                                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px]" style={{ color: theme.colors.textSecondary }}>
-                                                <span>{normalizeCustomerLabel(selectedCustomerLabel) || 'No customer'}</span>
-                                                <span style={{ opacity: 0.4 }}>·</span>
-                                                <span>{selectedFacility.name}</span>
-                                                <span style={{ opacity: 0.4 }}>·</span>
-                                                <span>{requestedDateLabel || 'Dates needed'}</span>
-                                                <span style={{ opacity: 0.4 }}>·</span>
-                                                <span>{completedGuestCount}/{guests.length || 0} attendees</span>
-                                                <span style={{ opacity: 0.4 }}>·</span>
-                                                <span>{selectedExperienceCount} experiences</span>
-                                            </div>
+                                <GlassCard theme={theme} className="p-3">
+                                    <div className="flex flex-col gap-2.5">
+                                        <div className="flex items-center justify-between gap-3">
+                                            <p style={{ ...sectionLabelStyle, color: theme.colors.textSecondary }}>Trip Summary</p>
+                                            {!hasCoreTripDetails ? (
+                                                <span className="text-[10px] font-medium" style={{ color: theme.colors.textSecondary, opacity: 0.82 }}>
+                                                    {summaryMissingCount} missing
+                                                </span>
+                                            ) : null}
+                                        </div>
+
+                                        <div className="grid grid-cols-[auto,1fr] gap-x-3 gap-y-1.5 md:hidden">
+                                            {summaryRows.map((item) => (
+                                                <React.Fragment key={item.label}>
+                                                    <span className="text-[11px] font-medium" style={{ color: theme.colors.textSecondary }}>
+                                                        {item.label}
+                                                    </span>
+                                                    <span className="text-right text-[13px] font-medium leading-5" style={{ color: item.isPending ? theme.colors.textSecondary : theme.colors.textPrimary }}>
+                                                        {item.value}
+                                                    </span>
+                                                </React.Fragment>
+                                            ))}
+                                        </div>
+
+                                        <div className="hidden md:flex md:flex-wrap md:items-center md:gap-x-2 md:gap-y-1.5">
+                                            {summaryRows.map((item, index) => (
+                                                <React.Fragment key={item.label}>
+                                                    {index > 0 ? <span style={{ color: theme.colors.textSecondary, opacity: 0.28 }}>•</span> : null}
+                                                    <span className="text-[11px]" style={{ color: theme.colors.textSecondary }}>
+                                                        {item.label}
+                                                    </span>
+                                                    <span className="text-[12px] font-medium" style={{ color: item.isPending ? theme.colors.textSecondary : theme.colors.textPrimary }}>
+                                                        {item.value}
+                                                    </span>
+                                                </React.Fragment>
+                                            ))}
+                                        </div>
+
+                                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 border-t pt-2" style={{ borderColor: 'rgba(0, 0, 0, 0.05)' }}>
+                                            {summaryStats.map((item, index) => (
+                                                <React.Fragment key={item.label}>
+                                                    {index > 0 ? <span style={{ color: theme.colors.textSecondary, opacity: 0.24 }}>•</span> : null}
+                                                    <span className="text-[11px]" style={{ color: theme.colors.textSecondary }}>
+                                                        {item.label}
+                                                    </span>
+                                                    <span className="text-[12px] font-medium" style={{ color: theme.colors.textPrimary }}>
+                                                        {item.value}
+                                                    </span>
+                                                </React.Fragment>
+                                            ))}
                                         </div>
 
                                         <button
                                             type="button"
                                             onClick={handleSubmit}
-                                            className="shrink-0 rounded-full px-8 py-2.5 text-sm font-semibold transition-all motion-tap"
+                                            className="w-full rounded-full px-6 py-2 text-sm font-semibold transition-all motion-tap md:w-auto md:self-end"
                                             style={{
                                                 color: theme.colors.accentText,
                                                 backgroundColor: theme.colors.accent,
@@ -1751,11 +1999,11 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
 
                                     {formMessage ? (
                                         <div
-                                            className="mt-3 rounded-2xl px-4 py-3 text-sm"
+                                            className="mt-2 rounded-[18px] px-3 py-2 text-[12px] leading-5"
                                             style={{
-                                                backgroundColor: theme.colors.errorLight,
+                                                backgroundColor: 'rgba(184, 92, 92, 0.08)',
                                                 color: theme.colors.error,
-                                                border: `1px solid ${theme.colors.destructiveBorder}`,
+                                                border: '1px solid rgba(184, 92, 92, 0.14)',
                                             }}
                                         >
                                             {formMessage}
