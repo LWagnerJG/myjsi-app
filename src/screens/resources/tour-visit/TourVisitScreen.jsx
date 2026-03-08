@@ -614,30 +614,34 @@ const UpcomingVisitDirectory = ({ visits, expandedVisitId, onToggleVisit, theme 
 );
 
 const ExperienceTrackCard = ({ track, selectedOptions, onToggleOption, onOpenInfo, theme }) => (
-    <div className="rounded-[16px] px-3.5 py-3" style={{
+    <div className="rounded-[16px] px-4 py-3.5" style={{
         backgroundColor: TOUR_VISIT_FIELD_SURFACE,
-        border: 'none',
+        border: '1px solid rgba(0, 0, 0, 0.04)',
     }}>
-        <div className="flex items-start justify-between gap-2">
+        <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
                 <h4 className="text-[14px] font-semibold" style={{ color: theme.colors.textPrimary }}>{track.title}</h4>
-                <p className="mt-1 text-[12px] leading-5" style={{ color: theme.colors.textSecondary }}>{track.description}</p>
+                {selectedOptions.length ? (
+                    <p className="mt-1 text-[11px] font-medium" style={{ color: theme.colors.textSecondary }}>
+                        {selectedOptions.length} selected
+                    </p>
+                ) : null}
             </div>
             <button
                 type="button"
                 onClick={() => onOpenInfo(track.id)}
-                className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium transition-colors"
+                aria-label={`More information about ${track.title}`}
+                className="inline-flex h-7 w-7 items-center justify-center rounded-full transition-colors"
                 style={{
                     color: theme.colors.textSecondary,
-                    backgroundColor: theme.colors.background,
-                    border: 'none',
+                    backgroundColor: theme.colors.surface,
+                    border: '1px solid rgba(0, 0, 0, 0.06)',
                 }}
             >
-                <Info className="h-3 w-3" />
-                Info
+                <Info className="h-3.5 w-3.5" />
             </button>
         </div>
-        <div className="mt-2.5 flex flex-wrap gap-1.5">
+        <div className="mt-3 flex flex-wrap gap-1.5">
             {track.options.map((option) => {
                 const optionLabel = getExperienceOptionLabel(option);
                 const optionDesc = getExperienceOptionDescription(option);
@@ -652,8 +656,8 @@ const ExperienceTrackCard = ({ track, selectedOptions, onToggleOption, onOpenInf
                         style={{
                             color: isSelected ? theme.colors.accentText : theme.colors.textPrimary,
                             backgroundColor: isSelected ? theme.colors.accent : theme.colors.surface,
-                            border: isSelected ? `1px solid ${theme.colors.accent}` : '1px solid rgba(0, 0, 0, 0.12)',
-                            boxShadow: isSelected ? '0 6px 14px rgba(0, 0, 0, 0.14)' : 'none',
+                            border: isSelected ? `1px solid ${theme.colors.accent}` : '1px solid rgba(0, 0, 0, 0.08)',
+                            boxShadow: 'none',
                         }}
                     >
                         {isSelected ? <Check className="h-3 w-3" /> : null}
@@ -1156,7 +1160,7 @@ const AddAttendeeActions = ({
     );
 };
 
-export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members = [], currentUserId }) => {
+export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members = [], currentUserId, currentScreen, onNavigate }) => {
     const [entryMode, setEntryMode] = useState('home');
     const [guests, setGuests] = useState(() => [createRepGuest(userSettings)]);
     const [selectedCustomerId, setSelectedCustomerId] = useState('');
@@ -1180,9 +1184,18 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
     const topSectionRef = useRef(null);
     const customerFieldRef = useRef(null);
     const hasInitializedExpandedGuestRef = useRef(false);
-    const hasHydratedShareParamsRef = useRef(false);
     const successOverlayTimeoutRef = useRef(null);
     const navigationTimeoutRef = useRef(null);
+
+    const routeParts = useMemo(
+        () => String(currentScreen || '').split('/').filter(Boolean),
+        [currentScreen]
+    );
+    const isNewTripRoute = routeParts[0] === 'new-trip';
+    const routeFacilityId = useMemo(() => {
+        const candidate = routeParts[1] || '';
+        return TOUR_VISIT_FACILITIES.some((facility) => facility.id === candidate) ? candidate : '';
+    }, [routeParts]);
 
     const selectedFacility = useMemo(
         () => TOUR_VISIT_FACILITIES.find((facility) => facility.id === selectedFacilityId) || null,
@@ -1223,11 +1236,21 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
     const activeShareFacilityId = selectedFacilityId || 'jasper';
     const activeShareLink = useMemo(() => {
         const origin = globalThis.location?.origin || 'https://portal.jsi.com';
-        return `${origin}/resources/tour-visit?intake=1&facility=${encodeURIComponent(activeShareFacilityId)}`;
+        return `${origin}/new-trip/${encodeURIComponent(activeShareFacilityId)}`;
     }, [activeShareFacilityId]);
+
+    const navigateToTripRoute = useCallback((facilityId = '') => {
+        if (typeof onNavigate !== 'function') return false;
+        onNavigate(facilityId ? `new-trip/${facilityId}` : 'new-trip');
+        return true;
+    }, [onNavigate]);
 
     const resetTourVisitFlow = useCallback(() => {
         const defaultDateRange = getDefaultDateRange();
+
+        if (isNewTripRoute && typeof onNavigate === 'function') {
+            onNavigate('resources/tour-visit');
+        }
 
         setEntryMode('home');
         setGuests([createRepGuest(userSettings)]);
@@ -1259,7 +1282,7 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
             clearTimeout(navigationTimeoutRef.current);
             navigationTimeoutRef.current = null;
         }
-    }, [upcomingVisits, userSettings]);
+    }, [isNewTripRoute, onNavigate, upcomingVisits, userSettings]);
 
     useEffect(() => {
         if (!hasInitializedExpandedGuestRef.current && !expandedGuestId && guests.length) {
@@ -1274,20 +1297,19 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
     }, [expandedGuestId, guests]);
 
     useEffect(() => {
-        if (hasHydratedShareParamsRef.current) return;
-        hasHydratedShareParamsRef.current = true;
-
         const search = globalThis.location?.search || '';
         const params = new URLSearchParams(search);
         const linkedFacilityId = params.get('facility');
-        if (!linkedFacilityId) return;
+        const queryFacilityId = TOUR_VISIT_FACILITIES.some((facility) => facility.id === linkedFacilityId) ? linkedFacilityId : '';
+        const deepLinkedFacilityId = routeFacilityId || queryFacilityId;
 
-        if (TOUR_VISIT_FACILITIES.some((facility) => facility.id === linkedFacilityId)) {
+        if (isNewTripRoute || deepLinkedFacilityId) {
             setEntryMode('new');
-            setSelectedFacilityId(linkedFacilityId);
-            setShowFacilityOptions(false);
+            setSelectedFacilityId(deepLinkedFacilityId);
+            setShowFacilityOptions(!deepLinkedFacilityId);
+            setFormMessage('');
         }
-    }, []);
+    }, [isNewTripRoute, routeFacilityId]);
 
     useEffect(() => {
         if (entryMode !== 'new' || !selectedFacilityId) return;
@@ -1331,7 +1353,6 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
     const summaryCustomerLabel = normalizeCustomerLabel(selectedCustomerLabel) || 'Customer needed';
     const summaryLocationLabel = selectedFacility?.name || 'Location needed';
     const summaryDateLabel = requestedDateLabel || 'Dates needed';
-    const hasCoreTripDetails = Boolean(normalizeCustomerLabel(selectedCustomerLabel)) && Boolean(selectedFacility?.name) && Boolean(requestedDateLabel);
     const summaryRows = [
         { label: 'Customer', value: summaryCustomerLabel, isPending: !normalizeCustomerLabel(selectedCustomerLabel) },
         { label: 'Location', value: summaryLocationLabel, isPending: !selectedFacility?.name },
@@ -1341,7 +1362,6 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
         { label: 'Attendees', value: `${completedGuestCount}/${guests.length || 0}` },
         { label: 'Experiences', value: String(selectedExperienceCount) },
     ];
-    const summaryMissingCount = summaryRows.filter((item) => item.isPending).length;
 
     useEffect(() => {
         if (!pendingGuestFocusId) return;
@@ -1373,12 +1393,14 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
         setSelectedFacilityId(facilityId);
         setShowFacilityOptions(false);
         setFormMessage('');
+        navigateToTripRoute(facilityId);
     };
 
     const openNewTourFlow = () => {
         hapticLight();
         setEntryMode('new');
         setFormMessage('');
+        navigateToTripRoute(selectedFacilityId);
     };
 
     const handleCustomerSelection = (customerId) => {
@@ -1426,8 +1448,8 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
 
         try {
             await globalThis.navigator.share({
-                title: 'Tour Intake Form',
-                text: 'Please complete this tour intake form.',
+                title: 'New Trip Form',
+                text: 'Please complete this new trip form.',
                 url: activeShareLink,
             });
         } catch { /* canceled */ }
@@ -1566,6 +1588,10 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
 
         navigationTimeoutRef.current = setTimeout(() => {
             const defaultDateRange = getDefaultDateRange();
+
+            if (isNewTripRoute && typeof onNavigate === 'function') {
+                onNavigate('resources/tour-visit');
+            }
 
             setEntryMode('home');
             setGuests([createRepGuest(userSettings)]);
@@ -1746,7 +1772,7 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                                     style={{ color: theme.colors.textSecondary, opacity: 0.6 }}
                                                 >
                                                     <Send className="h-3 w-3" />
-                                                    Have someone else fill out?
+                                                    Share form
                                                 </button>
                                             </div>
                                         </div>
@@ -1835,7 +1861,7 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                                     style={{ color: theme.colors.textSecondary, opacity: 0.65 }}
                                                 >
                                                     <Send className="h-3 w-3" />
-                                                    Have someone else fill out?
+                                                    Share form
                                                 </button>
                                             </div>
                                         </>
@@ -1899,11 +1925,7 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                             {selectedExperienceCount} selected
                                         </span>
                                     </div>
-                                    <p className="mt-1.5 text-[12px]" style={{ color: theme.colors.textSecondary }}>
-                                        Choose at least one option from each track to shape the hosted visit.
-                                    </p>
-
-                                    <div className="mt-2.5 grid grid-cols-1 gap-2 md:grid-cols-2">
+                                    <div className="mt-3 grid grid-cols-1 gap-2.5 md:grid-cols-2">
                                         {TOUR_VISIT_EXPERIENCE_TRACKS.map((track) => (
                                             <ExperienceTrackCard
                                                 key={track.id}
@@ -1930,52 +1952,45 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                     ) : null}
                                 </GlassCard>
 
-                                <GlassCard theme={theme} className="p-3">
-                                    <div className="flex flex-col gap-2.5">
-                                        <div className="flex items-center justify-between gap-3">
-                                            <p style={{ ...sectionLabelStyle, color: theme.colors.textSecondary }}>Trip Summary</p>
-                                            {!hasCoreTripDetails ? (
-                                                <span className="text-[10px] font-medium" style={{ color: theme.colors.textSecondary, opacity: 0.82 }}>
-                                                    {summaryMissingCount} missing
-                                                </span>
-                                            ) : null}
-                                        </div>
+                                <GlassCard theme={theme} className="p-5 md:p-6">
+                                    <div className="flex flex-col gap-3">
+                                        <p style={{ ...sectionLabelStyle, color: theme.colors.textSecondary }}>Summary</p>
 
-                                        <div className="grid grid-cols-[auto,1fr] gap-x-3 gap-y-1.5 md:hidden">
+                                        <div className="grid grid-cols-[auto,1fr] gap-x-3 gap-y-2 md:hidden">
                                             {summaryRows.map((item) => (
                                                 <React.Fragment key={item.label}>
                                                     <span className="text-[11px] font-medium" style={{ color: theme.colors.textSecondary }}>
                                                         {item.label}
                                                     </span>
-                                                    <span className="text-right text-[13px] font-medium leading-5" style={{ color: item.isPending ? theme.colors.textSecondary : theme.colors.textPrimary }}>
+                                                    <span className="text-right text-[14px] font-medium leading-5" style={{ color: item.isPending ? theme.colors.textSecondary : theme.colors.textPrimary }}>
                                                         {item.value}
                                                     </span>
                                                 </React.Fragment>
                                             ))}
                                         </div>
 
-                                        <div className="hidden md:flex md:flex-wrap md:items-center md:gap-x-2 md:gap-y-1.5">
+                                        <div className="hidden md:flex md:flex-wrap md:items-center md:gap-x-2 md:gap-y-2">
                                             {summaryRows.map((item, index) => (
                                                 <React.Fragment key={item.label}>
                                                     {index > 0 ? <span style={{ color: theme.colors.textSecondary, opacity: 0.28 }}>•</span> : null}
                                                     <span className="text-[11px]" style={{ color: theme.colors.textSecondary }}>
                                                         {item.label}
                                                     </span>
-                                                    <span className="text-[12px] font-medium" style={{ color: item.isPending ? theme.colors.textSecondary : theme.colors.textPrimary }}>
+                                                    <span className="text-[14px] font-medium" style={{ color: item.isPending ? theme.colors.textSecondary : theme.colors.textPrimary }}>
                                                         {item.value}
                                                     </span>
                                                 </React.Fragment>
                                             ))}
                                         </div>
 
-                                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 border-t pt-2" style={{ borderColor: 'rgba(0, 0, 0, 0.05)' }}>
+                                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 border-t pt-3" style={{ borderColor: 'rgba(0, 0, 0, 0.05)' }}>
                                             {summaryStats.map((item, index) => (
                                                 <React.Fragment key={item.label}>
                                                     {index > 0 ? <span style={{ color: theme.colors.textSecondary, opacity: 0.24 }}>•</span> : null}
                                                     <span className="text-[11px]" style={{ color: theme.colors.textSecondary }}>
                                                         {item.label}
                                                     </span>
-                                                    <span className="text-[12px] font-medium" style={{ color: theme.colors.textPrimary }}>
+                                                    <span className="text-[13px] font-medium" style={{ color: theme.colors.textPrimary }}>
                                                         {item.value}
                                                     </span>
                                                 </React.Fragment>
@@ -1985,7 +2000,7 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                         <button
                                             type="button"
                                             onClick={handleSubmit}
-                                            className="w-full rounded-full px-6 py-2 text-sm font-semibold transition-all motion-tap md:w-auto md:self-end"
+                                            className="w-full rounded-full px-6 py-2.5 text-sm font-semibold transition-all motion-tap md:w-auto md:self-end"
                                             style={{
                                                 color: theme.colors.accentText,
                                                 backgroundColor: theme.colors.accent,
@@ -1999,7 +2014,7 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
 
                                     {formMessage ? (
                                         <div
-                                            className="mt-2 rounded-[18px] px-3 py-2 text-[12px] leading-5"
+                                            className="mt-3 rounded-[18px] px-3.5 py-2.5 text-[12px] leading-5"
                                             style={{
                                                 backgroundColor: 'rgba(184, 92, 92, 0.08)',
                                                 color: theme.colors.error,

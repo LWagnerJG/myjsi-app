@@ -123,6 +123,10 @@ const ScreenRouter = React.memo(({ screenKey, projectsScreenRef, SuspenseFallbac
     if (screenKey === 'samples/cart') return lazyWrap(SamplesScreen, { initialCartOpen: true });
     if (base === 'samples') return lazyWrap(SamplesScreen);
 
+    if (base === 'new-trip') {
+        return lazyWrap(TourVisitScreen);
+    }
+
     // Resource route normalization (support legacy underscore routes)
     if (base === 'resources') {
         const slug = parts.slice(1).join('/');
