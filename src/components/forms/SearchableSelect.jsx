@@ -174,6 +174,7 @@ export const SearchableSelect = ({
   const sizeStyles = size === 'sm' ? 'py-2 text-sm' : 'py-3 text-base';
   const fieldClassName = inputClassName || buttonClassName;
   const fieldStyle = inputStyle || buttonStyle;
+  const showDropdownIndicator = dropdownIndicatorMode !== 'hidden';
   const dropdownIndicatorClassName = dropdownIndicatorMode === 'focus'
     ? `transition-opacity ${open ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100'}`
     : 'transition-opacity opacity-100';
@@ -300,9 +301,11 @@ export const SearchableSelect = ({
             </button>
           )}
 
-          <span className={`pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4 gap-1 ${dropdownIndicatorClassName}`}>
-            <ChevronDown className={`h-5 w-5 transition-transform ${open ? 'rotate-180' : ''}`} style={{ color: theme.colors.textSecondary }} />
-          </span>
+          {showDropdownIndicator ? (
+            <span className={`pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4 gap-1 ${dropdownIndicatorClassName}`}>
+              <ChevronDown className={`h-5 w-5 transition-transform ${open ? 'rotate-180' : ''}`} style={{ color: theme.colors.textSecondary }} />
+            </span>
+          ) : null}
         </div>
       ) : (
         <button
@@ -328,7 +331,9 @@ export const SearchableSelect = ({
             {allowClear && value ? (
               <X onClick={clear} className="h-4 w-4 cursor-pointer hover:opacity-70" style={{ color: theme.colors.textSecondary }} />
             ) : null}
-            <ChevronDown className={`h-5 w-5 transition-transform ${open ? 'rotate-180' : ''}`} style={{ color: theme.colors.textSecondary }} />
+            {showDropdownIndicator ? (
+              <ChevronDown className={`h-5 w-5 transition-transform ${open ? 'rotate-180' : ''}`} style={{ color: theme.colors.textSecondary }} />
+            ) : null}
           </span>
         </button>
       )}

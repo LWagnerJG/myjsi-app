@@ -1566,54 +1566,61 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                         </div>
                                     )}
 
-                                    <div className="mt-2 pt-2" style={{ borderTop: '1px solid rgba(0, 0, 0, 0.04)' }}>
-                                        <SearchableSelect
-                                            value={selectedCustomerId}
-                                            onChange={handleCustomerSelection}
-                                            options={customerDirectoryOptions}
-                                            placeholder="Customer name"
-                                            displayValue={normalizeCustomerLabel(selectedCustomerLabel)}
-                                            theme={theme}
-                                            size="sm"
-                                            onBlurWithQuery={(typed) => {
-                                                if (!selectedCustomerId || customerIsNewRecord) {
-                                                    const newId = buildNewCustomerId(typed);
-                                                    setSelectedCustomerId(newId);
-                                                    setSelectedCustomerLabel(typed);
-                                                    setCustomerIsNewRecord(true);
-                                                }
-                                            }}
-                                            buttonRef={customerFieldRef}
-                                            inlineSearch
-                                            minQueryLength={2}
-                                            dropdownIndicatorMode="focus"
-                                            buttonClassName="!h-[38px] !rounded-none !px-0.5 !pr-7 !text-[14px] !font-medium"
-                                            buttonStyle={{
-                                                backgroundColor: 'transparent',
-                                                border: 'none',
-                                                color: selectedCustomerId ? theme.colors.textPrimary : theme.colors.textSecondary,
-                                                boxShadow: 'none',
-                                            }}
-                                            inputClassName="!h-[38px] !rounded-none !px-0.5 !pr-7 !text-[14px] !font-medium"
-                                            inputStyle={{
-                                                backgroundColor: 'transparent',
-                                                border: 'none',
-                                                color: theme.colors.textPrimary,
-                                                boxShadow: 'none',
-                                            }}
-                                        />
-                                    </div>
+                                    <div className="mt-3 border-t pt-3" style={{ borderColor: 'rgba(0, 0, 0, 0.04)' }}>
+                                        <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2">
+                                            <div className="rounded-[14px] px-3 py-2" style={{ backgroundColor: TOUR_VISIT_FIELD_SURFACE, border: TOUR_VISIT_SURFACE_BORDER }}>
+                                                <p style={{ ...sectionLabelStyle, color: theme.colors.textSecondary }}>Customer</p>
+                                                <div className="mt-1">
+                                                    <SearchableSelect
+                                                        value={selectedCustomerId}
+                                                        onChange={handleCustomerSelection}
+                                                        options={customerDirectoryOptions}
+                                                        placeholder="Customer name"
+                                                        displayValue={normalizeCustomerLabel(selectedCustomerLabel)}
+                                                        theme={theme}
+                                                        size="sm"
+                                                        onBlurWithQuery={(typed) => {
+                                                            if (!selectedCustomerId || customerIsNewRecord) {
+                                                                const newId = buildNewCustomerId(typed);
+                                                                setSelectedCustomerId(newId);
+                                                                setSelectedCustomerLabel(typed);
+                                                                setCustomerIsNewRecord(true);
+                                                            }
+                                                        }}
+                                                        buttonRef={customerFieldRef}
+                                                        inlineSearch
+                                                        minQueryLength={2}
+                                                        dropdownIndicatorMode="hidden"
+                                                        buttonClassName="!h-[36px] !rounded-none !px-0.5 !pr-1 !text-[14px] !font-medium"
+                                                        buttonStyle={{
+                                                            backgroundColor: 'transparent',
+                                                            border: 'none',
+                                                            color: selectedCustomerId ? theme.colors.textPrimary : theme.colors.textSecondary,
+                                                            boxShadow: 'none',
+                                                        }}
+                                                        inputClassName="!h-[36px] !rounded-none !px-0.5 !pr-1 !text-[14px] !font-medium"
+                                                        inputStyle={{
+                                                            backgroundColor: 'transparent',
+                                                            border: 'none',
+                                                            color: theme.colors.textPrimary,
+                                                            boxShadow: 'none',
+                                                        }}
+                                                    />
+                                                </div>
+                                            </div>
 
-                                    <div className="mt-2 pt-2" style={{ borderTop: '1px solid rgba(0, 0, 0, 0.04)' }}>
-                                        <p style={{ ...sectionLabelStyle, color: theme.colors.textSecondary }}>Dates</p>
-                                        <div className="mt-2">
-                                            <DateRangeDropdown
-                                                theme={theme}
-                                                startDate={preferredDateStart}
-                                                endDate={preferredDateEnd}
-                                                onChangeStart={setPreferredDateStart}
-                                                onChangeEnd={setPreferredDateEnd}
-                                            />
+                                            <div className="rounded-[14px] px-3 py-2" style={{ backgroundColor: TOUR_VISIT_FIELD_SURFACE, border: TOUR_VISIT_SURFACE_BORDER }}>
+                                                <p style={{ ...sectionLabelStyle, color: theme.colors.textSecondary }}>Dates</p>
+                                                <div className="mt-1.5">
+                                                    <DateRangeDropdown
+                                                        theme={theme}
+                                                        startDate={preferredDateStart}
+                                                        endDate={preferredDateEnd}
+                                                        onChangeStart={setPreferredDateStart}
+                                                        onChangeEnd={setPreferredDateEnd}
+                                                    />
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                     <div className="mt-2 flex items-center justify-between pt-2" style={{ borderTop: '1px solid rgba(0, 0, 0, 0.04)' }}>
