@@ -44,8 +44,8 @@ const sectionLabelStyle = {
 
 const TOUR_VISIT_PANEL_SURFACE = 'rgba(255, 255, 255, 0.78)';
 const TOUR_VISIT_PANEL_SURFACE_COLLAPSED = 'rgba(255, 255, 255, 0.66)';
-const TOUR_VISIT_FIELD_SURFACE = 'rgba(255, 255, 255, 0.5)';
-const TOUR_VISIT_SURFACE_BORDER = '1px solid rgba(0, 0, 0, 0.04)';
+const TOUR_VISIT_FIELD_SURFACE = 'rgba(255, 255, 255, 0.72)';
+const TOUR_VISIT_SURFACE_BORDER = '1px solid rgba(0, 0, 0, 0.02)';
 
 const isRepAttendee = (guest) => guest.isSelf || Boolean(guest.linkedMemberId);
 
@@ -275,7 +275,7 @@ const DateRangeDropdown = ({ theme, startDate, endDate, onChangeStart, onChangeE
                 className="w-full rounded-[16px] px-3.5 py-2.5 text-left"
                 style={{
                     backgroundColor: TOUR_VISIT_FIELD_SURFACE,
-                    border: TOUR_VISIT_SURFACE_BORDER,
+                    border: 'none',
                     color: theme.colors.textPrimary,
                 }}
             >
@@ -298,18 +298,18 @@ const DateRangeDropdown = ({ theme, startDate, endDate, onChangeStart, onChangeE
                     className="absolute left-0 right-0 top-[calc(100%+8px)] z-20 rounded-[18px] p-3"
                     style={{
                         backgroundColor: theme.colors.surface,
-                        border: TOUR_VISIT_SURFACE_BORDER,
+                        border: 'none',
                         boxShadow: '0 18px 45px rgba(0, 0, 0, 0.12)',
                     }}
                 >
                     <div className="grid grid-cols-2 gap-2">
-                        <div className="rounded-[12px] px-2.5 py-2" style={{ backgroundColor: TOUR_VISIT_FIELD_SURFACE, border: TOUR_VISIT_SURFACE_BORDER }}>
+                        <div className="rounded-[12px] px-2.5 py-2" style={{ backgroundColor: TOUR_VISIT_FIELD_SURFACE, border: 'none' }}>
                             <p className="text-[10px] font-semibold uppercase tracking-[0.06em]" style={{ color: theme.colors.textSecondary }}>Begin</p>
                             <p className="mt-0.5 text-[12px] font-medium" style={{ color: theme.colors.textPrimary }}>
                                 {startDate ? formatDateLabel(startDate) : 'Pick start'}
                             </p>
                         </div>
-                        <div className="rounded-[12px] px-2.5 py-2" style={{ backgroundColor: TOUR_VISIT_FIELD_SURFACE, border: TOUR_VISIT_SURFACE_BORDER }}>
+                        <div className="rounded-[12px] px-2.5 py-2" style={{ backgroundColor: TOUR_VISIT_FIELD_SURFACE, border: 'none' }}>
                             <p className="text-[10px] font-semibold uppercase tracking-[0.06em]" style={{ color: theme.colors.textSecondary }}>End</p>
                             <p className="mt-0.5 text-[12px] font-medium" style={{ color: theme.colors.textPrimary }}>
                                 {endDate ? formatDateLabel(endDate) : 'Pick end'}
@@ -322,7 +322,7 @@ const DateRangeDropdown = ({ theme, startDate, endDate, onChangeStart, onChangeE
                             type="button"
                             onClick={() => goToMonth(-1)}
                             className="mt-3 inline-flex h-8 w-8 items-center justify-center rounded-full"
-                            style={{ border: '1px solid rgba(0, 0, 0, 0.08)', color: theme.colors.textSecondary }}
+                            style={{ color: theme.colors.textSecondary, backgroundColor: TOUR_VISIT_FIELD_SURFACE }}
                             aria-label="Previous month"
                         >
                             <ArrowRight className="h-4 w-4 rotate-180" />
@@ -332,7 +332,7 @@ const DateRangeDropdown = ({ theme, startDate, endDate, onChangeStart, onChangeE
                             type="button"
                             onClick={() => goToMonth(1)}
                             className="mt-3 inline-flex h-8 w-8 items-center justify-center rounded-full"
-                            style={{ border: '1px solid rgba(0, 0, 0, 0.08)', color: theme.colors.textSecondary }}
+                            style={{ color: theme.colors.textSecondary, backgroundColor: TOUR_VISIT_FIELD_SURFACE }}
                             aria-label="Next month"
                         >
                             <ArrowRight className="h-4 w-4" />
@@ -365,7 +365,7 @@ const DateRangeDropdown = ({ theme, startDate, endDate, onChangeStart, onChangeE
                                         backgroundColor: isStart || isEnd
                                             ? theme.colors.accent
                                             : (isInRange ? `${theme.colors.accent}1A` : 'transparent'),
-                                        border: isStart || isEnd ? `1px solid ${theme.colors.accent}` : '1px solid transparent',
+                                        border: 'none',
                                     }}
                                 >
                                     {cell.dayNumber}
@@ -374,7 +374,7 @@ const DateRangeDropdown = ({ theme, startDate, endDate, onChangeStart, onChangeE
                         })}
                     </div>
 
-                    <div className="mt-3 border-t pt-2" style={{ borderColor: 'rgba(0, 0, 0, 0.06)' }}>
+                    <div className="mt-3 pt-2">
                         <p className="text-[11px]" style={{ color: theme.colors.textSecondary }}>
                             Click outside this panel when your dates look right.
                         </p>
@@ -392,7 +392,7 @@ const FacilityOption = ({ facility, selected, onClick, theme }) => (
         className="w-full rounded-[16px] px-4 py-3.5 text-left transition-all motion-card"
         style={{
             backgroundColor: TOUR_VISIT_FIELD_SURFACE,
-            border: `1px solid ${selected ? theme.colors.accent : 'rgba(0, 0, 0, 0.05)'}`,
+            border: selected ? `1px solid ${theme.colors.accent}55` : 'none',
             color: theme.colors.textPrimary,
             boxShadow: 'none',
         }}
@@ -410,7 +410,7 @@ const FacilityOption = ({ facility, selected, onClick, theme }) => (
                 style={{
                     backgroundColor: theme.colors.surface,
                     color: selected ? theme.colors.accentText : theme.colors.textSecondary,
-                    border: `1px solid ${selected ? theme.colors.accent : theme.colors.border}`,
+                    border: 'none',
                 }}
             >
                 {selected ? <Check className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
@@ -433,7 +433,7 @@ const UpcomingVisitDirectory = ({ visits, expandedVisitId, onToggleVisit, theme 
                         className="overflow-hidden rounded-[16px]"
                         style={{
                             backgroundColor: isExpanded ? theme.colors.surface : TOUR_VISIT_FIELD_SURFACE,
-                            border: `1px solid ${isExpanded ? theme.colors.accent + '40' : 'rgba(0, 0, 0, 0.05)'}`,
+                            border: 'none',
                         }}
                     >
                         <button
@@ -459,7 +459,7 @@ const UpcomingVisitDirectory = ({ visits, expandedVisitId, onToggleVisit, theme 
                         </button>
 
                         {isExpanded ? (
-                            <div className="border-t px-3.5 pb-3.5 pt-3" style={{ borderColor: 'rgba(0, 0, 0, 0.06)' }}>
+                            <div className="px-3.5 pb-3.5 pt-1.5">
                                 <p className="text-xs" style={{ color: theme.colors.textSecondary }}>
                                     {visit.overnightLabel} · {visit.attendees}
                                 </p>
@@ -470,7 +470,7 @@ const UpcomingVisitDirectory = ({ visits, expandedVisitId, onToggleVisit, theme 
                                             className="rounded-[14px] px-3.5 py-3"
                                             style={{
                                                 backgroundColor: TOUR_VISIT_FIELD_SURFACE,
-                                                border: TOUR_VISIT_SURFACE_BORDER,
+                                                border: 'none',
                                             }}
                                         >
                                             <div className="flex items-center justify-between gap-3">
@@ -511,7 +511,7 @@ const UpcomingVisitDirectory = ({ visits, expandedVisitId, onToggleVisit, theme 
                                                                     className="flex-1 rounded-[12px] px-3 py-2.5"
                                                                     style={{
                                                                         backgroundColor: theme.colors.surface,
-                                                                        border: '1px solid rgba(0, 0, 0, 0.04)',
+                                                                        border: 'none',
                                                                     }}
                                                                 >
                                                                     <p className="text-sm leading-5" style={{ color: theme.colors.textPrimary }}>
@@ -538,7 +538,7 @@ const UpcomingVisitDirectory = ({ visits, expandedVisitId, onToggleVisit, theme 
 const ExperienceTrackCard = ({ track, selectedOptions, onToggleOption, onOpenInfo, theme }) => (
     <div className="rounded-[16px] px-3.5 py-3" style={{
         backgroundColor: TOUR_VISIT_FIELD_SURFACE,
-        border: TOUR_VISIT_SURFACE_BORDER,
+        border: 'none',
     }}>
         <div className="flex items-start justify-between gap-2">
             <h4 className="text-[14px] font-semibold" style={{ color: theme.colors.textPrimary }}>{track.title}</h4>
@@ -549,7 +549,7 @@ const ExperienceTrackCard = ({ track, selectedOptions, onToggleOption, onOpenInf
                 style={{
                     color: theme.colors.textSecondary,
                     backgroundColor: TOUR_VISIT_FIELD_SURFACE,
-                    border: '1px solid rgba(0, 0, 0, 0.06)',
+                    border: 'none',
                 }}
             >
                 <Info className="h-3 w-3" />
@@ -571,7 +571,7 @@ const ExperienceTrackCard = ({ track, selectedOptions, onToggleOption, onOpenInf
                         style={{
                             color: isSelected ? theme.colors.textPrimary : theme.colors.textSecondary,
                             backgroundColor: isSelected ? theme.colors.accent + '14' : TOUR_VISIT_FIELD_SURFACE,
-                            border: `1px solid ${isSelected ? theme.colors.accent + '40' : 'rgba(0, 0, 0, 0.06)'}`,
+                            border: 'none',
                         }}
                     >
                         {optionLabel}
@@ -615,8 +615,8 @@ const GuestPanel = ({
             className="rounded-[18px] px-3 py-2.5"
             style={{
                 backgroundColor: embedded ? 'transparent' : expanded ? TOUR_VISIT_PANEL_SURFACE : TOUR_VISIT_PANEL_SURFACE_COLLAPSED,
-                border: embedded ? 'none' : expanded ? TOUR_VISIT_SURFACE_BORDER : '1px solid rgba(0, 0, 0, 0.035)',
-                borderTop: embedded && !isFirst ? '1px solid rgba(0, 0, 0, 0.05)' : undefined,
+                border: 'none',
+                borderTop: embedded && !isFirst ? '1px solid rgba(0, 0, 0, 0.03)' : undefined,
                 borderRadius: embedded ? 0 : 18,
             }}
         >
@@ -691,7 +691,7 @@ const GuestPanel = ({
                             pointerEvents: expanded ? 'auto' : 'none',
                         }}
                     >
-                    <div className="rounded-[14px] p-2.5" style={{ backgroundColor: 'rgba(0, 0, 0, 0.02)', border: '1px solid rgba(0, 0, 0, 0.03)' }}>
+                    <div className="rounded-[14px] p-2.5" style={{ backgroundColor: 'rgba(0, 0, 0, 0.02)', border: 'none' }}>
                     <div className="grid grid-cols-2 gap-2">
                         <FormInput
                             label="First Name"
@@ -783,7 +783,7 @@ const GuestPanel = ({
                                         className="col-span-2 rounded-[16px] px-3 py-2.5"
                                         style={{
                                             backgroundColor: TOUR_VISIT_FIELD_SURFACE,
-                                            border: TOUR_VISIT_SURFACE_BORDER,
+                                            border: 'none',
                                         }}
                                     >
                                         <p className="text-[10px] font-semibold uppercase tracking-[0.06em]" style={{ color: theme.colors.textSecondary }}>
@@ -810,7 +810,7 @@ const GuestPanel = ({
                                                         style={{
                                                             color: isSelected ? theme.colors.textPrimary : theme.colors.textSecondary,
                                                             backgroundColor: isSelected ? theme.colors.accent + '14' : TOUR_VISIT_FIELD_SURFACE,
-                                                            border: `1px solid ${isSelected ? theme.colors.accent + '40' : 'rgba(0, 0, 0, 0.06)'}`,
+                                                            border: 'none',
                                                         }}
                                                     >
                                                         {restriction}
@@ -847,10 +847,7 @@ const GuestPanel = ({
                 </div>
 
             {footerAction ? (
-                <div
-                    className="mt-2 border-t pt-2"
-                    style={{ borderColor: 'rgba(0, 0, 0, 0.05)' }}
-                >
+                <div className="mt-2 pt-2">
                     {footerAction}
                 </div>
             ) : null}
@@ -912,7 +909,7 @@ const ExperienceTrackInfoOverlay = ({ theme, track, onClose }) => {
                 onClick={(event) => event.stopPropagation()}
                 style={{
                     backgroundColor: theme.colors.surface,
-                    border: `1px solid ${theme.colors.border}`,
+                    border: 'none',
                     boxShadow: `0 24px 70px ${theme.colors.shadow || 'rgba(53, 53, 53, 0.12)'}`,
                 }}
             >
@@ -925,7 +922,7 @@ const ExperienceTrackInfoOverlay = ({ theme, track, onClose }) => {
                         type="button"
                         onClick={onClose}
                         className="inline-flex h-8 w-8 items-center justify-center rounded-full"
-                        style={{ border: '1px solid rgba(0, 0, 0, 0.08)', color: theme.colors.textSecondary }}
+                        style={{ backgroundColor: TOUR_VISIT_FIELD_SURFACE, color: theme.colors.textSecondary }}
                     >
                         <X className="h-4 w-4" />
                     </button>
@@ -947,7 +944,7 @@ const ExperienceTrackInfoOverlay = ({ theme, track, onClose }) => {
                                 className="rounded-[16px] px-3.5 py-3"
                                 style={{
                                     backgroundColor: TOUR_VISIT_FIELD_SURFACE,
-                                    border: TOUR_VISIT_SURFACE_BORDER,
+                                    border: 'none',
                                 }}
                             >
                                 <p className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>{label}</p>
@@ -1009,7 +1006,7 @@ const AddAttendeeActions = ({
             style={{
                 gridTemplateColumns: availableTeamMembers.length ? '1fr 1fr' : '1fr',
                 backgroundColor: TOUR_VISIT_FIELD_SURFACE,
-                border: TOUR_VISIT_SURFACE_BORDER,
+                border: 'none',
             }}
         >
             <button
@@ -1031,7 +1028,7 @@ const AddAttendeeActions = ({
                     className="flex items-center justify-center gap-2 border-l px-4 py-2.5 text-sm font-medium transition-colors"
                     style={{
                         color: theme.colors.textSecondary,
-                        borderColor: 'rgba(0, 0, 0, 0.06)',
+                        borderColor: 'rgba(0, 0, 0, 0.03)',
                     }}
                 >
                     <Plus className="h-4 w-4" />
@@ -1566,9 +1563,9 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                         </div>
                                     )}
 
-                                    <div className="mt-3 border-t pt-3" style={{ borderColor: 'rgba(0, 0, 0, 0.04)' }}>
+                                    <div className="mt-3 pt-1">
                                         <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2">
-                                            <div className="rounded-[14px] px-3 py-2" style={{ backgroundColor: TOUR_VISIT_FIELD_SURFACE, border: TOUR_VISIT_SURFACE_BORDER }}>
+                                            <div className="rounded-[14px] px-3 py-2" style={{ backgroundColor: TOUR_VISIT_FIELD_SURFACE, border: 'none' }}>
                                                 <p style={{ ...sectionLabelStyle, color: theme.colors.textSecondary }}>Customer</p>
                                                 <div className="mt-1">
                                                     <SearchableSelect
@@ -1609,7 +1606,7 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                                 </div>
                                             </div>
 
-                                            <div className="rounded-[14px] px-3 py-2" style={{ backgroundColor: TOUR_VISIT_FIELD_SURFACE, border: TOUR_VISIT_SURFACE_BORDER }}>
+                                            <div className="rounded-[14px] px-3 py-2" style={{ backgroundColor: TOUR_VISIT_FIELD_SURFACE, border: 'none' }}>
                                                 <p style={{ ...sectionLabelStyle, color: theme.colors.textSecondary }}>Dates</p>
                                                 <div className="mt-1.5">
                                                     <DateRangeDropdown
@@ -1623,7 +1620,7 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="mt-2 flex items-center justify-between pt-2" style={{ borderTop: '1px solid rgba(0, 0, 0, 0.04)' }}>
+                                    <div className="mt-2 flex items-center justify-between pt-2">
                                         <button
                                             type="button"
                                             onClick={handleNativeShare}
@@ -1648,7 +1645,7 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                         className="mt-2.5 overflow-hidden rounded-[18px]"
                                         style={{
                                             backgroundColor: TOUR_VISIT_PANEL_SURFACE_COLLAPSED,
-                                            border: '1px solid rgba(0, 0, 0, 0.04)',
+                                            border: 'none',
                                         }}
                                     >
                                         {guests.map((guest, index) => {
