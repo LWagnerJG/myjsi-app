@@ -302,19 +302,12 @@ const DateRangeDropdown = ({ theme, startDate, endDate, onChangeStart, onChangeE
                         boxShadow: '0 18px 45px rgba(0, 0, 0, 0.12)',
                     }}
                 >
-                    <div className="grid grid-cols-2 gap-2">
-                        <div className="rounded-[12px] px-2.5 py-2" style={{ backgroundColor: TOUR_VISIT_FIELD_SURFACE, border: 'none' }}>
-                            <p className="text-[10px] font-semibold uppercase tracking-[0.06em]" style={{ color: theme.colors.textSecondary }}>Begin</p>
-                            <p className="mt-0.5 text-[12px] font-medium" style={{ color: theme.colors.textPrimary }}>
-                                {startDate ? formatDateLabel(startDate) : 'Pick start'}
-                            </p>
-                        </div>
-                        <div className="rounded-[12px] px-2.5 py-2" style={{ backgroundColor: TOUR_VISIT_FIELD_SURFACE, border: 'none' }}>
-                            <p className="text-[10px] font-semibold uppercase tracking-[0.06em]" style={{ color: theme.colors.textSecondary }}>End</p>
-                            <p className="mt-0.5 text-[12px] font-medium" style={{ color: theme.colors.textPrimary }}>
-                                {endDate ? formatDateLabel(endDate) : 'Pick end'}
-                            </p>
-                        </div>
+                    <div className="rounded-[12px] px-3 py-2" style={{ backgroundColor: TOUR_VISIT_FIELD_SURFACE }}>
+                        <p className="text-[11px]" style={{ color: theme.colors.textSecondary }}>
+                            {startDate && endDate
+                                ? `${formatDateLabel(startDate)} to ${formatDateLabel(endDate)}`
+                                : (startDate ? `${formatDateLabel(startDate)} to pick end` : 'Pick beginning and ending dates')}
+                        </p>
                     </div>
 
                     <div className="flex items-center justify-between gap-2">
@@ -339,7 +332,7 @@ const DateRangeDropdown = ({ theme, startDate, endDate, onChangeStart, onChangeE
                         </button>
                     </div>
 
-                    <div className="mt-3 grid grid-cols-7 gap-1">
+                    <div className="mt-3 grid grid-cols-7 gap-0">
                         {DATE_WEEKDAY_LABELS.map((label) => (
                             <div key={label} className="text-center text-[11px] font-semibold" style={{ color: theme.colors.textSecondary }}>
                                 {label}
@@ -352,32 +345,34 @@ const DateRangeDropdown = ({ theme, startDate, endDate, onChangeStart, onChangeE
 
                             const isStart = startDate === cell.iso;
                             const isEnd = endDate === cell.iso;
-                            const isInRange = startDate && endDate && cell.iso > startDate && cell.iso < endDate;
+                            const isInRange = startDate && endDate && cell.iso >= startDate && cell.iso <= endDate;
+                            const isSingleDayRange = isStart && isEnd;
+                            let rangeRadius = '10px';
+                            if (isInRange && !isSingleDayRange) {
+                                if (isStart) rangeRadius = '10px 0 0 10px';
+                                else if (isEnd) rangeRadius = '0 10px 10px 0';
+                                else rangeRadius = '0';
+                            }
 
                             return (
                                 <button
                                     key={cell.iso}
                                     type="button"
                                     onClick={() => handleDaySelect(cell.iso)}
-                                    className="h-9 rounded-[10px] text-[13px] font-medium transition-colors"
+                                    className="h-9 text-[13px] font-medium transition-colors"
                                     style={{
                                         color: isStart || isEnd ? theme.colors.accentText : theme.colors.textPrimary,
                                         backgroundColor: isStart || isEnd
                                             ? theme.colors.accent
                                             : (isInRange ? `${theme.colors.accent}1A` : 'transparent'),
                                         border: 'none',
+                                        borderRadius: rangeRadius,
                                     }}
                                 >
                                     {cell.dayNumber}
                                 </button>
                             );
                         })}
-                    </div>
-
-                    <div className="mt-3 pt-2">
-                        <p className="text-[11px]" style={{ color: theme.colors.textSecondary }}>
-                            Click outside this panel when your dates look right.
-                        </p>
                     </div>
                 </div>
             ) : null}
@@ -537,18 +532,21 @@ const UpcomingVisitDirectory = ({ visits, expandedVisitId, onToggleVisit, theme 
 
 const ExperienceTrackCard = ({ track, selectedOptions, onToggleOption, onOpenInfo, theme }) => (
     <div className="rounded-[16px] px-3.5 py-3" style={{
-        backgroundColor: TOUR_VISIT_FIELD_SURFACE,
+        backgroundColor: theme.colors.surface,
         border: 'none',
     }}>
         <div className="flex items-start justify-between gap-2">
-            <h4 className="text-[14px] font-semibold" style={{ color: theme.colors.textPrimary }}>{track.title}</h4>
+            <div className="min-w-0">
+                <h4 className="text-[14px] font-semibold" style={{ color: theme.colors.textPrimary }}>{track.title}</h4>
+                <p className="mt-1 text-[12px] leading-5" style={{ color: theme.colors.textSecondary }}>{track.description}</p>
+            </div>
             <button
                 type="button"
                 onClick={() => onOpenInfo(track.id)}
                 className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium transition-colors"
                 style={{
                     color: theme.colors.textSecondary,
-                    backgroundColor: TOUR_VISIT_FIELD_SURFACE,
+                    backgroundColor: theme.colors.background,
                     border: 'none',
                 }}
             >
@@ -556,7 +554,7 @@ const ExperienceTrackCard = ({ track, selectedOptions, onToggleOption, onOpenInf
                 Info
             </button>
         </div>
-        <div className="mt-2 flex flex-wrap gap-1.5">
+        <div className="mt-2.5 flex flex-wrap gap-1.5">
             {track.options.map((option) => {
                 const optionLabel = getExperienceOptionLabel(option);
                 const optionDesc = getExperienceOptionDescription(option);
@@ -569,8 +567,8 @@ const ExperienceTrackCard = ({ track, selectedOptions, onToggleOption, onOpenInf
                         title={optionDesc || undefined}
                         className="rounded-full px-2.5 py-1 text-[11px] font-medium transition-all"
                         style={{
-                            color: isSelected ? theme.colors.textPrimary : theme.colors.textSecondary,
-                            backgroundColor: isSelected ? theme.colors.accent + '14' : TOUR_VISIT_FIELD_SURFACE,
+                            color: isSelected ? theme.colors.accentText : theme.colors.textSecondary,
+                            backgroundColor: isSelected ? theme.colors.accent : theme.colors.background,
                             border: 'none',
                         }}
                     >
@@ -1683,7 +1681,15 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                 </GlassCard>
 
                                 <GlassCard theme={theme} className="p-5 md:p-6">
-                                    <p style={{ ...sectionLabelStyle, color: theme.colors.textSecondary }}>Experience Plan</p>
+                                    <div className="flex items-center justify-between gap-3">
+                                        <p style={{ ...sectionLabelStyle, color: theme.colors.textSecondary }}>Experience Plan</p>
+                                        <span className="rounded-full px-2.5 py-1 text-[11px] font-medium" style={{ color: theme.colors.textSecondary, backgroundColor: TOUR_VISIT_FIELD_SURFACE }}>
+                                            {selectedExperienceCount} selected
+                                        </span>
+                                    </div>
+                                    <p className="mt-1.5 text-[12px]" style={{ color: theme.colors.textSecondary }}>
+                                        Choose at least one option from each track to shape the hosted visit.
+                                    </p>
 
                                     <div className="mt-2.5 grid grid-cols-1 gap-2 md:grid-cols-2">
                                         {TOUR_VISIT_EXPERIENCE_TRACKS.map((track) => (
