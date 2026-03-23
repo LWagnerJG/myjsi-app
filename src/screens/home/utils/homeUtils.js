@@ -32,6 +32,19 @@ export const getAppBadge = (route, recentOrders, posts, leadTimeFavoritesData, s
     }
 };
 
+// Functional icon colors per app route — breaks the monochromatic sameness
+// by giving key tiles a semantically meaningful tint
+export const APP_ICON_COLORS = {
+    orders: '#5B7B8C',
+    sales: '#4A7C59',
+    community: '#C4956A',
+    samples: '#C4956A',
+    resources: '#5B7B8C',
+    projects: '#4A7C59',
+    marketplace: '#C4956A',
+    replacements: '#5B7B8C',
+};
+
 // Home screen configuration constants
 export const MIN_PINNED_APPS = 3;
 export const MAX_PINNED_APPS = 9;

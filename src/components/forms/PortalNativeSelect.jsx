@@ -31,6 +31,7 @@ export const PortalNativeSelect = ({
   mutedValues = [],
   size = 'default',        // 'sm' | 'default'  — sm is compact/inline
   bordered = true,
+  align = 'left',           // 'left' | 'right' — dropdown alignment
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0, width: 0 });
@@ -64,14 +65,17 @@ export const PortalNativeSelect = ({
     const spaceBelow = window.innerHeight - rect.bottom;
     const above = spaceBelow < maxH + pad && rect.top > maxH + pad;
     setOpenAbove(above);
+    const dropdownWidth = Math.max(rect.width, 200);
     setPosition({
       top: above
         ? rect.top + window.scrollY - pad
         : rect.bottom + window.scrollY + 4,
-      left: rect.left + window.scrollX,
-      width: Math.max(rect.width, 200),
+      left: align === 'right'
+        ? rect.right + window.scrollX - dropdownWidth
+        : rect.left + window.scrollX,
+      width: dropdownWidth,
     });
-  }, []);
+  }, [align]);
 
   // ── Open / close helpers ──────────────────────────────────────
   const open = useCallback(() => {

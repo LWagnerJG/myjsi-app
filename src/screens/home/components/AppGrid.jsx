@@ -1,5 +1,5 @@
-import React from 'react';
-import { Check, Plus, Settings2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Check, Plus, Settings2, Info } from 'lucide-react';
 import {
     DndContext,
     DragOverlay,
@@ -11,8 +11,7 @@ import {
     rectSortingStrategy,
 } from '@dnd-kit/sortable';
 import { SortableAppTile } from './SortableAppTile.jsx';
-import { RemoveDropZone } from './RemoveDropZone.jsx';
-import { getAppBadge, MIN_PINNED_APPS, NON_REMOVABLE_APPS } from '../utils/homeUtils.js';
+import { getAppBadge, APP_ICON_COLORS, MIN_PINNED_APPS, NON_REMOVABLE_APPS } from '../utils/homeUtils.js';
 
 export const AppGrid = ({
     isEditMode,
@@ -20,7 +19,6 @@ export const AppGrid = ({
     currentApps,
     availableApps,
     safeHomeApps,
-    activeDragId,
     setActiveDragId,
     activeApp,
     sensors,
@@ -45,21 +43,13 @@ export const AppGrid = ({
                 measuring={{ droppable: { strategy: MeasuringStrategy.WhileDragging } }}
                 onDragStart={(event) => setActiveDragId(event.active?.id || null)}
                 onDragEnd={(event) => {
-                    const { active, over } = event;
-                    // If dropped on the remove zone, remove the app
-                    if (over?.id === '__remove_zone__' && active?.id) {
-                        if (!NON_REMOVABLE_APPS.has(active.id) && safeHomeApps.length > MIN_PINNED_APPS) {
-                            onUpdateHomeApps(safeHomeApps.filter(r => r !== active.id));
-                        }
-                    } else {
-                        handleReorder(event);
-                    }
+                    handleReorder(event);
                     setActiveDragId(null);
                 }}
                 onDragCancel={() => setActiveDragId(null)}
             >
                 <SortableContext items={safeHomeApps} strategy={rectSortingStrategy}>
-                    <div className={`grid gap-1.5 sm:gap-2 ${appGridCols.edit}`}>
+                    <div className={`grid gap-2.5 sm:gap-3 ${appGridCols.view}`}>
                         {currentApps.map((app) => (
                             <SortableAppTile
                                 key={app.route}
@@ -74,52 +64,33 @@ export const AppGrid = ({
                     </div>
                 </SortableContext>
 
-                {/* Add / Remove zone */}
-                <div className="space-y-1.5 pt-3">
-                    <div className="text-xs font-medium px-0.5" style={{ color: colors.textSecondary, opacity: 0.5 }}>Tap to add apps to your home</div>
-                    <RemoveDropZone isDark={isDark} isActive={!!activeDragId}>
-                        <div className={`grid gap-1.5 ${appGridCols.edit}`}>
-                            {availableApps.map((app) => (
-                                <button
-                                    key={app.route}
-                                    onClick={() => toggleApp(app.route)}
-                                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all active:scale-95"
-                                    style={{
-                                        backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(53,53,53,0.07)',
-                                        color: colors.textSecondary,
-                                        border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)',
-                                    }}
-                                >
-                                    <Plus className="w-3 h-3 opacity-50 shrink-0" />
-                                    <span className="truncate text-left">{app.name}</span>
-                                </button>
-                            ))}
-                            {availableApps.length === 0 && (
-                                <span className="text-xs py-1 col-span-full text-center" style={{ color: colors.textSecondary, opacity: 0.5 }}>All apps added</span>
-                            )}
-                        </div>
-                    </RemoveDropZone>
-                </div>
+                {/* Available apps — discrete list */}
+                <AvailableAppsList
+                    availableApps={availableApps}
+                    toggleApp={toggleApp}
+                    colors={colors}
+                    isDark={isDark}
+                />
 
                 <DragOverlay>
                     {activeApp ? (
-                        <div style={{ width: 104 }}>
+                        <div style={{ width: 88 }}>
                             <div
-                                className="relative flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl"
+                                className="relative flex flex-col items-center justify-center gap-1.5 p-2.5 sm:p-3 rounded-2xl"
                                 style={{
                                     backgroundColor: colors.tileSurface,
-                                    boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
-                                    minHeight: 104,
+                                    boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                                    minHeight: 88,
                                 }}
                             >
                                 <div
-                                    className="w-10 h-10 rounded-xl flex items-center justify-center mb-0.5"
-                                    style={{ backgroundColor: `${colors.accent}10` }}
+                                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center"
+                                    style={{ backgroundColor: `${(APP_ICON_COLORS[activeApp.route] || colors.accent)}10` }}
                                 >
-                                    <activeApp.icon className="w-5 h-5" style={{ color: colors.accent }} />
+                                    <activeApp.icon className="w-[18px] h-[18px] sm:w-5 sm:h-5" style={{ color: APP_ICON_COLORS[activeApp.route] || colors.accent }} />
                                 </div>
                                 <span
-                                    className="text-xs font-semibold tracking-tight text-center leading-tight line-clamp-2 w-full px-1"
+                                    className="text-xs sm:text-[13px] font-semibold tracking-tight text-center leading-tight line-clamp-2 w-full px-0.5"
                                     style={{ color: colors.textPrimary }}
                                 >
                                     {activeApp.name}
@@ -153,9 +124,10 @@ export const AppGrid = ({
 
     return (
         <>
-            <div className={`grid gap-1.5 sm:gap-2 ${appGridCols.view}`}>
+            <div className={`grid gap-2.5 sm:gap-3 ${appGridCols.view}`}>
                 {currentApps.map((app) => {
                     const badge = getAppBadge(app.route, recentOrders, posts, leadTimeFavoritesData, samplesCartCount);
+                    const iconColor = APP_ICON_COLORS[app.route] || colors.accent;
                     return (
                         <button
                             key={app.route}
@@ -170,9 +142,9 @@ export const AppGrid = ({
                         >
                             <div
                                 className="rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 w-9 h-9 sm:w-10 sm:h-10"
-                                style={{ backgroundColor: `${colors.accent}10` }}
+                                style={{ backgroundColor: `${iconColor}10` }}
                             >
-                                <app.icon className="w-[18px] h-[18px] sm:w-5 sm:h-5" style={{ color: colors.accent }} />
+                                <app.icon className="w-[18px] h-[18px] sm:w-5 sm:h-5" style={{ color: iconColor }} />
                             </div>
                             <span className="text-xs sm:text-[13px] font-semibold tracking-tight text-center leading-tight line-clamp-2 px-0.5" style={{ color: colors.textPrimary }}>
                                 {app.name}
@@ -211,5 +183,62 @@ export const AppGrid = ({
                 </div>
             )}
         </>
+    );
+};
+
+/* ── Compact 3-col grid of available apps with info tooltips ──── */
+const AvailableAppsList = ({ availableApps, toggleApp, colors, isDark }) => {
+    const [tooltipId, setTooltipId] = useState(null);
+
+    if (availableApps.length === 0) {
+        return (
+            <div className="text-center py-3">
+                <span className="text-[11px] font-medium" style={{ color: colors.textSecondary, opacity: 0.5 }}>All apps added</span>
+            </div>
+        );
+    }
+
+    return (
+        <div className="pt-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                {availableApps.map((app) => (
+                    <div key={app.route} className="relative">
+                        <button
+                            onClick={() => toggleApp(app.route)}
+                            className="w-full flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-xs font-semibold transition-all active:scale-95"
+                            style={{
+                                backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.05)',
+                                color: colors.textSecondary,
+                                border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.05)',
+                            }}
+                        >
+                            <Plus className="w-3 h-3 opacity-40 shrink-0" />
+                            <span className="truncate text-left flex-1">{app.name}</span>
+                            <span
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                    setTooltipId(tooltipId === app.route ? null : app.route);
+                                }}
+                                className="shrink-0 opacity-25 hover:opacity-60 transition-opacity"
+                            >
+                                <Info className="w-3 h-3" style={{ color: colors.textSecondary }} />
+                            </span>
+                        </button>
+                        {tooltipId === app.route && app.desc && (
+                            <div
+                                className="absolute left-0 right-0 top-full mt-1 px-3 py-1.5 rounded-lg text-[11px] font-medium z-20 shadow-lg text-center"
+                                style={{
+                                    backgroundColor: isDark ? '#3A3A3A' : '#353535',
+                                    color: '#fff',
+                                }}
+                            >
+                                {app.desc}
+                            </div>
+                        )}
+                    </div>
+                ))}
+            </div>
+        </div>
     );
 };

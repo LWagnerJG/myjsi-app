@@ -1,64 +1,80 @@
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState } from 'react';
 import { GlassCard } from '../../components/common/GlassCard';
 import { PortalNativeSelect } from '../../components/forms/PortalNativeSelect';
-import { SegmentedToggle } from '../../components/common/GroupedToggle';
+import { formatCurrency } from '../../utils/format.js';
 import { INCENTIVE_REWARDS_DATA } from './data.js';
 
-const VIEW_FILTER_OPTIONS = [
-    { value: 'all', label: 'All' },
-    { value: 'sales', label: 'Sales' },
-    { value: 'designers', label: 'Designers' }
-];
+const parseQuarterKey = (key = '') => {
+    const match = key.match(/^(\d{4})-Q(\d)$/);
+    if (!match) return { year: 0, quarter: 0 };
+    return { year: Number(match[1]), quarter: Number(match[2]) };
+};
+
+const buildTimePeriods = (rewardData) => {
+    const quarterKeys = Object.keys(rewardData || {}).filter((key) => /^\d{4}-Q\d$/.test(key));
+    const years = [...new Set(quarterKeys.map((key) => parseQuarterKey(key).year))].sort((a, b) => b - a);
+    return years.flatMap((year) => {
+        const quarters = quarterKeys
+            .filter((key) => parseQuarterKey(key).year === year)
+            .sort((a, b) => parseQuarterKey(b).quarter - parseQuarterKey(a).quarter)
+            .map((key) => ({ value: key, label: `Q${parseQuarterKey(key).quarter} ${year}` }));
+        return [...quarters, { value: String(year), label: `${year} Annual` }];
+    });
+};
+
+const aggregate = (data, year) => {
+    const salesMap = new Map();
+    const designersMap = new Map();
+    Object.entries(data)
+        .filter(([key]) => key.startsWith(`${year}-Q`))
+        .forEach(([, d]) => {
+            d.sales?.forEach((p) => salesMap.set(p.name, (salesMap.get(p.name) || 0) + p.amount));
+            d.designers?.forEach((p) => designersMap.set(p.name, (designersMap.get(p.name) || 0) + p.amount));
+        });
+    const sales = [];
+    const designers = [];
+    salesMap.forEach((amount, name) => sales.push({ name, amount }));
+    designersMap.forEach((amount, name) => designers.push({ name, amount }));
+    return { sales, designers };
+};
+
+const Row = ({ rank, name, amount, theme }) => (
+    <div className="flex items-center justify-between py-2">
+        <div className="min-w-0 flex items-center gap-2.5">
+            <span
+                className="w-6 h-6 rounded-full text-xs font-semibold flex items-center justify-center shrink-0"
+                style={{ color: theme.colors.textSecondary, backgroundColor: theme.colors.border }}
+            >
+                {rank}
+            </span>
+            <span className="text-sm font-medium truncate" style={{ color: theme.colors.textPrimary }}>{name}</span>
+        </div>
+        <span className="text-sm font-semibold tabular-nums ml-3" style={{ color: theme.colors.textPrimary }}>
+            {formatCurrency(amount)}
+        </span>
+    </div>
+);
+
+const Leaderboard = ({ title, people, emptyLabel, theme }) => (
+    <GlassCard theme={theme} className="p-4">
+        <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: theme.colors.textSecondary }}>{title}</p>
+        {people.length > 0 ? (
+            <div className="divide-y" style={{ borderColor: theme.colors.border }}>
+                {people.map((p, i) => <Row key={p.name} rank={i + 1} name={p.name} amount={p.amount} theme={theme} />)}
+            </div>
+        ) : (
+            <p className="text-sm py-3" style={{ color: theme.colors.textSecondary }}>{emptyLabel}</p>
+        )}
+    </GlassCard>
+);
 
 export const IncentiveRewardsScreen = ({ theme }) => {
-    const generateTimePeriods = useCallback(() => {
-        const periods = [];
-        const now = new Date();
-        const currentYear = now.getFullYear();
-        const currentQuarter = Math.floor(now.getMonth() / 3) + 1;
-
-        for (let year = currentYear; year >= currentYear - 2; year--) {
-            const isCurrentYear = year === currentYear;
-            const quartersInYear = isCurrentYear ? currentQuarter : 4;
-
-            for (let q = quartersInYear; q >= 1; q--) {
-                periods.push({ value: `${year}-Q${q}`, label: `Q${q} ${year}` });
-            }
-            periods.push({ value: `${year}`, label: `${year} Annual` });
-        }
-        return periods;
-    }, []);
-
-    const timePeriods = useMemo(generateTimePeriods, [generateTimePeriods]);
-    const [selectedPeriod, setSelectedPeriod] = useState(timePeriods[0]?.value || new Date().getFullYear().toString());
-    const [viewFilter, setViewFilter] = useState('all');
+    const timePeriods = useMemo(() => buildTimePeriods(INCENTIVE_REWARDS_DATA), []);
+    const [selectedPeriod, setSelectedPeriod] = useState(timePeriods[0]?.value || '');
 
     const rewardsData = useMemo(() => {
         if (!selectedPeriod) return { sales: [], designers: [] };
-
-        const isAnnual = !selectedPeriod.includes('Q');
-        if (isAnnual) {
-            const year = selectedPeriod;
-            const salesMap = new Map();
-            const designersMap = new Map();
-
-            for (let q = 1; q <= 4; q++) {
-                const periodKey = `${year}-Q${q}`;
-                const periodData = INCENTIVE_REWARDS_DATA[periodKey];
-                if (periodData) {
-                    periodData.sales?.forEach(person => {
-                        salesMap.set(person.name, (salesMap.get(person.name) || 0) + person.amount);
-                    });
-                    periodData.designers?.forEach(person => {
-                        designersMap.set(person.name, (designersMap.get(person.name) || 0) + person.amount);
-                    });
-                }
-            }
-            const cumulativeData = { sales: [], designers: [] };
-            salesMap.forEach((amount, name) => cumulativeData.sales.push({ name, amount }));
-            designersMap.forEach((amount, name) => cumulativeData.designers.push({ name, amount }));
-            return cumulativeData;
-        }
+        if (!selectedPeriod.includes('Q')) return aggregate(INCENTIVE_REWARDS_DATA, selectedPeriod);
         return INCENTIVE_REWARDS_DATA[selectedPeriod] || { sales: [], designers: [] };
     }, [selectedPeriod]);
 
@@ -66,54 +82,27 @@ export const IncentiveRewardsScreen = ({ theme }) => {
     const sortedDesigners = useMemo(() => [...(rewardsData.designers || [])].sort((a, b) => b.amount - a.amount), [rewardsData.designers]);
 
     return (
-        <>
-            <div className="p-4 sm:px-6 lg:px-8 flex flex-wrap justify-between items-center gap-4 max-w-5xl mx-auto w-full">
-                <div className="w-40">
-                    <PortalNativeSelect
-                        value={selectedPeriod}
-                        onChange={e => setSelectedPeriod(e.target.value)}
-                        options={timePeriods}
-                        theme={theme}
-                    />
+        <div className="min-h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
+            <div className="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-5 pb-6 max-w-4xl mx-auto w-full space-y-4">
+                <div className="flex items-center gap-3">
+                    <p className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>Dealer Rewards</p>
+                    <div className="w-40">
+                        <PortalNativeSelect
+                            value={selectedPeriod}
+                            onChange={(e) => setSelectedPeriod(e.target.value)}
+                            options={timePeriods}
+                            theme={theme}
+                            size="sm"
+                            align="right"
+                        />
+                    </div>
                 </div>
-                <div className="flex-1 max-w-xs">
-                    <SegmentedToggle
-                        value={viewFilter}
-                        onChange={setViewFilter}
-                        options={VIEW_FILTER_OPTIONS}
-                        theme={theme}
-                        size="sm"
-                    />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Leaderboard title="Sales" people={sortedSales} emptyLabel="No sales rewards this period." theme={theme} />
+                    <Leaderboard title="Design" people={sortedDesigners} emptyLabel="No design rewards this period." theme={theme} />
                 </div>
             </div>
-            <div className="px-4 sm:px-6 lg:px-8 space-y-4 pb-4 max-w-5xl mx-auto w-full">
-                {(viewFilter === 'all' || viewFilter === 'sales') && (
-                    <GlassCard theme={theme} className="p-4">
-                        <h3 className="font-bold text-xl mb-2" style={{ color: theme.colors.textPrimary }}>Sales</h3>
-                        <div className="space-y-2">
-                            {sortedSales.length > 0 ? sortedSales.map(person => (
-                                <div key={person.name} className="flex justify-between items-center text-sm">
-                                    <span style={{ color: theme.colors.textPrimary }}>{person.name}</span>
-                                    <span className="font-semibold" style={{ color: theme.colors.accent }}>${person.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                                </div>
-                            )) : <p className="text-sm" style={{ color: theme.colors.textSecondary }}>No sales rewards for this period.</p>}
-                        </div>
-                    </GlassCard>
-                )}
-                {(viewFilter === 'all' || viewFilter === 'designers') && (
-                    <GlassCard theme={theme} className="p-4">
-                        <h3 className="font-bold text-xl mb-2" style={{ color: theme.colors.textPrimary }}>Designers</h3>
-                        <div className="space-y-2">
-                            {sortedDesigners.length > 0 ? sortedDesigners.map(person => (
-                                <div key={person.name} className="flex justify-between items-center text-sm">
-                                    <span style={{ color: theme.colors.textPrimary }}>{person.name}</span>
-                                    <span className="font-semibold" style={{ color: theme.colors.accent }}>${person.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                                </div>
-                            )) : <p className="text-sm" style={{ color: theme.colors.textSecondary }}>No designer rewards for this period.</p>}
-                        </div>
-                    </GlassCard>
-                )}
-            </div>
-        </>
+        </div>
     );
 };

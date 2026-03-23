@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import { HomeSearchInput } from '../../../components/common/SearchInput.jsx';
 import { QuickActionDropdown } from '../../../components/common/QuickActionDropdown.jsx';
@@ -24,8 +24,41 @@ export const HomeHeader = ({
     onNavigate,
     openChatFromQuery,
     hoverBg,
-    isDark
+    isDark,
+    onRfpFileDrop,
 }) => {
+    const [fileDragOver, setFileDragOver] = useState(false);
+
+    /* Native HTML file-drop (separate from @dnd-kit tile reorder) */
+    const handleDragEnter = useCallback((e) => {
+        if (e.dataTransfer?.types?.includes('Files')) {
+            e.preventDefault();
+            setFileDragOver(true);
+        }
+    }, []);
+    const handleDragOver = useCallback((e) => {
+        if (e.dataTransfer?.types?.includes('Files')) {
+            e.preventDefault(); // allow drop
+        }
+    }, []);
+    const handleDragLeave = useCallback((e) => {
+        // Only clear when actually leaving the container
+        if (!e.currentTarget.contains(e.relatedTarget)) {
+            setFileDragOver(false);
+        }
+    }, []);
+    const handleDrop = useCallback((e) => {
+        e.preventDefault();
+        setFileDragOver(false);
+        const file = e.dataTransfer?.files?.[0];
+        if (!file) return;
+        // Accept PDF-like files (check type or extension)
+        const isPdf = file.type === 'application/pdf' || file.name?.toLowerCase().endsWith('.pdf');
+        if (isPdf && onRfpFileDrop) {
+            onRfpFileDrop(file);
+        }
+    }, [onRfpFileDrop]);
+
     return (
         <div className="relative group">
             {/* Dashboard label + search bar on one row */}
@@ -38,14 +71,21 @@ export const HomeHeader = ({
                 <GlassCard
                 theme={theme}
                 className="relative z-10 px-5 flex items-center min-w-0 ml-auto w-full max-w-[760px]"
+                onDragEnter={handleDragEnter}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
                 style={{
                     borderRadius: 9999,
                     height: 56,
                     paddingTop: 0,
                     paddingBottom: 0,
                     backgroundColor: colors.tileSurface,
-                    border: 'none',
-                    boxShadow: colors.tileShadow
+                    border: fileDragOver ? `2px solid ${colors.accent}` : 'none',
+                    boxShadow: fileDragOver
+                        ? `0 0 0 4px ${colors.accent}22, ${colors.tileShadow || 'none'}`
+                        : colors.tileShadow,
+                    transition: 'border 200ms ease, box-shadow 200ms ease',
                 }}
             >
                 <HomeSearchInput

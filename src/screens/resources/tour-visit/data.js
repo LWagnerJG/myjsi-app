@@ -236,6 +236,7 @@ export const createTourGuest = (seed = {}) => ({
     linkedMemberId: null,
     legalFirstName: '',
     legalLastName: '',
+    dateOfBirth: '',
     knownTravelerNumber: '',
     funFact: '',
     preferredAirline: '',

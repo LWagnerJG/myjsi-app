@@ -24,10 +24,10 @@ export const HomeFeatureCards = ({
     hoverBg
 }) => {
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 flex-1 min-h-0" style={{ gap: 'var(--section-gap)' }}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <GlassCard
                 theme={theme}
-                className={`flex flex-col cursor-pointer transition-all duration-300 overflow-hidden ${isEditMode ? 'ring-2 ring-dashed' : ''}`}
+                className={`flex flex-col cursor-pointer transition-all duration-300 ${isEditMode ? 'ring-2 ring-dashed' : ''}`}
                 style={{
                     borderRadius: 24,
                     backgroundColor: colors.tileSurface,
@@ -58,8 +58,12 @@ export const HomeFeatureCards = ({
                     ) : (
                         <button
                             onClick={() => navigateFeature(homeFeatureMode)}
-                            className="text-[9.5px] font-medium flex items-center gap-0.5 transition-opacity hover:opacity-60"
-                            style={{ color: colors.textSecondary, opacity: 0.35 }}
+                            className="text-[10px] font-semibold flex items-center gap-1 px-2.5 py-1 rounded-full transition-all hover:opacity-80"
+                            style={{
+                                color: colors.textSecondary,
+                                opacity: 0.6,
+                                backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                            }}
                         >
                             Open
                             <ChevronRight className="w-3 h-3" />
@@ -71,7 +75,7 @@ export const HomeFeatureCards = ({
                         <ChevronDown className="w-3 h-3" /> Use the dropdown above to change this card's content
                     </p>
                 )}
-                <div className={`flex-1 min-h-0 px-6 pb-5 ${isEditMode ? 'overflow-visible' : 'overflow-y-auto scrollbar-hide'}`}>
+                <div className="px-6 pb-5">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={homeFeatureMode}
@@ -98,7 +102,7 @@ export const HomeFeatureCards = ({
 
             <GlassCard
                 theme={theme}
-                className={`hidden sm:flex flex-col cursor-pointer transition-all duration-300 overflow-hidden`}
+                className={`hidden sm:flex flex-col cursor-pointer transition-all duration-300`}
                 style={{
                     borderRadius: 24,
                     backgroundColor: colors.tileSurface,
@@ -129,8 +133,12 @@ export const HomeFeatureCards = ({
                     ) : (
                         <button
                             onClick={() => navigateFeature(secondaryFeatureMode)}
-                            className="text-[9.5px] font-medium flex items-center gap-0.5 transition-opacity hover:opacity-60"
-                            style={{ color: colors.textSecondary, opacity: 0.35 }}
+                            className="text-[10px] font-semibold flex items-center gap-1 px-2.5 py-1 rounded-full transition-all hover:opacity-80"
+                            style={{
+                                color: colors.textSecondary,
+                                opacity: 0.6,
+                                backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                            }}
                         >
                             Open
                             <ChevronRight className="w-3 h-3" />
@@ -142,7 +150,7 @@ export const HomeFeatureCards = ({
                         <ChevronDown className="w-3 h-3" /> Use the dropdown above to change this card's content
                     </p>
                 )}
-                <div className={`flex-1 min-h-0 px-6 pb-5 ${isEditMode ? 'overflow-visible' : 'overflow-y-auto scrollbar-hide'}`}>
+                <div className="px-6 pb-5">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={secondaryFeatureMode}

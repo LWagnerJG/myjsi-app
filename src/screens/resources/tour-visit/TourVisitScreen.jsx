@@ -177,6 +177,9 @@ const buildSubmittedUpcomingVisit = ({
         .map((guest) => [guest.legalFirstName, guest.legalLastName].filter(Boolean).join(' ').trim())
         .filter(Boolean)
         .join(', '),
+    approvalStatus: 'pending',
+    approvalLabel: 'Awaiting JSI approval',
+    agendaLabel: 'Draft agenda preloaded from selected experiences',
     agenda: buildTripAgenda(experienceSelections),
 });
 
@@ -503,6 +506,7 @@ const UpcomingVisitDirectory = ({ visits, expandedVisitId, onToggleVisit, theme 
         <div className="overflow-hidden rounded-[16px]" style={{ backgroundColor: TOUR_VISIT_FIELD_SURFACE }}>
             {visits.map((visit, visitIndex) => {
                 const isExpanded = expandedVisitId === visit.id;
+                const isPendingApproval = visit.approvalStatus === 'pending';
 
                 return (
                     <div
@@ -520,12 +524,31 @@ const UpcomingVisitDirectory = ({ visits, expandedVisitId, onToggleVisit, theme 
                             className="flex w-full items-center justify-between gap-3 px-3.5 py-3.5 text-left transition-all"
                         >
                             <div className="min-w-0">
-                                <h3 className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>
-                                    {visit.companyName}
-                                </h3>
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <h3 className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>
+                                        {visit.companyName}
+                                    </h3>
+                                    {isPendingApproval ? (
+                                        <span
+                                            className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em]"
+                                            style={{
+                                                color: theme.colors.warning,
+                                                backgroundColor: theme.colors.warningLight,
+                                                border: `1px solid ${theme.colors.warning}22`,
+                                            }}
+                                        >
+                                            Pending
+                                        </span>
+                                    ) : null}
+                                </div>
                                 <p className="mt-1 text-xs" style={{ color: theme.colors.textSecondary }}>
                                     {visit.dateLabel} · {visit.facilityName}
                                 </p>
+                                {isPendingApproval ? (
+                                    <p className="mt-1 text-[11px] font-medium" style={{ color: theme.colors.warning }}>
+                                        {visit.approvalLabel || 'Awaiting JSI approval'}
+                                    </p>
+                                ) : null}
                             </div>
                             <ChevronDown
                                 className="h-4 w-4 shrink-0 transition-transform duration-200"
@@ -541,6 +564,18 @@ const UpcomingVisitDirectory = ({ visits, expandedVisitId, onToggleVisit, theme 
                                 <p className="text-xs" style={{ color: theme.colors.textSecondary }}>
                                     {visit.overnightLabel} · {visit.attendees}
                                 </p>
+                                {visit.agendaLabel ? (
+                                    <div
+                                        className="mt-2 rounded-[14px] px-3 py-2 text-[11px] font-medium"
+                                        style={{
+                                            color: isPendingApproval ? theme.colors.warning : theme.colors.textSecondary,
+                                            backgroundColor: isPendingApproval ? theme.colors.warningLight : 'rgba(0, 0, 0, 0.03)',
+                                            border: `1px solid ${isPendingApproval ? `${theme.colors.warning}22` : 'rgba(0, 0, 0, 0.05)'}`,
+                                        }}
+                                    >
+                                        {visit.agendaLabel}
+                                    </div>
+                                ) : null}
                                 <div className="mt-3 space-y-3">
                                     {visit.agenda.map((day) => (
                                         <div
@@ -613,23 +648,39 @@ const UpcomingVisitDirectory = ({ visits, expandedVisitId, onToggleVisit, theme 
     </GlassCard>
 );
 
-const ExperienceTrackCard = ({ track, selectedOptions, onToggleOption, onOpenInfo, theme }) => (
+const ExperienceTrackCard = ({ track, selectedOptions, expanded, onToggleExpanded, onToggleOption, onOpenInfo, theme }) => (
     <div className="rounded-[16px] px-4 py-3.5" style={{
         backgroundColor: TOUR_VISIT_FIELD_SURFACE,
         border: '1px solid rgba(0, 0, 0, 0.04)',
     }}>
-        <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-                <h4 className="text-[14px] font-semibold" style={{ color: theme.colors.textPrimary }}>{track.title}</h4>
-                {selectedOptions.length ? (
-                    <p className="mt-1 text-[11px] font-medium" style={{ color: theme.colors.textSecondary }}>
-                        {selectedOptions.length} selected
-                    </p>
-                ) : null}
-            </div>
+        <div className="flex items-start gap-3">
             <button
                 type="button"
-                onClick={() => onOpenInfo(track.id)}
+                onClick={() => onToggleExpanded(track.id)}
+                className="flex min-w-0 flex-1 items-start justify-between gap-3 text-left"
+                aria-expanded={expanded}
+                aria-controls={`experience-track-${track.id}`}
+            >
+                <div className="min-w-0">
+                    <h4 className="text-[14px] font-semibold" style={{ color: theme.colors.textPrimary }}>{track.title}</h4>
+                    <p className="mt-1 text-[11px] font-medium" style={{ color: theme.colors.textSecondary }}>
+                        {selectedOptions.length ? `${selectedOptions.length} selected` : 'Click to choose'}
+                    </p>
+                </div>
+                <ChevronDown
+                    className="mt-0.5 h-4 w-4 shrink-0 transition-transform duration-200"
+                    style={{
+                        color: theme.colors.textSecondary,
+                        transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                    }}
+                />
+            </button>
+            <button
+                type="button"
+                onClick={(event) => {
+                    event.stopPropagation();
+                    onOpenInfo(track.id);
+                }}
                 aria-label={`More information about ${track.title}`}
                 className="inline-flex h-7 w-7 items-center justify-center rounded-full transition-colors"
                 style={{
@@ -641,31 +692,33 @@ const ExperienceTrackCard = ({ track, selectedOptions, onToggleOption, onOpenInf
                 <Info className="h-3.5 w-3.5" />
             </button>
         </div>
-        <div className="mt-3 flex flex-wrap gap-1.5">
-            {track.options.map((option) => {
-                const optionLabel = getExperienceOptionLabel(option);
-                const optionDesc = getExperienceOptionDescription(option);
-                const isSelected = selectedOptions.includes(optionLabel);
-                return (
-                    <button
-                        key={optionLabel}
-                        type="button"
-                        onClick={() => onToggleOption(track.id, optionLabel)}
-                        title={optionDesc || undefined}
-                        className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold transition-all"
-                        style={{
-                            color: isSelected ? theme.colors.accentText : theme.colors.textPrimary,
-                            backgroundColor: isSelected ? theme.colors.accent : theme.colors.surface,
-                            border: isSelected ? `1px solid ${theme.colors.accent}` : '1px solid rgba(0, 0, 0, 0.08)',
-                            boxShadow: 'none',
-                        }}
-                    >
-                        {isSelected ? <Check className="h-3 w-3" /> : null}
-                        {optionLabel}
-                    </button>
-                );
-            })}
-        </div>
+        {expanded ? (
+            <div id={`experience-track-${track.id}`} className="mt-3 flex flex-wrap gap-1.5">
+                {track.options.map((option) => {
+                    const optionLabel = getExperienceOptionLabel(option);
+                    const optionDesc = getExperienceOptionDescription(option);
+                    const isSelected = selectedOptions.includes(optionLabel);
+                    return (
+                        <button
+                            key={optionLabel}
+                            type="button"
+                            onClick={() => onToggleOption(track.id, optionLabel)}
+                            title={optionDesc || undefined}
+                            className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold transition-all"
+                            style={{
+                                color: isSelected ? theme.colors.accentText : theme.colors.textPrimary,
+                                backgroundColor: isSelected ? theme.colors.accent : theme.colors.surface,
+                                border: isSelected ? `1px solid ${theme.colors.accent}` : '1px solid rgba(0, 0, 0, 0.08)',
+                                boxShadow: 'none',
+                            }}
+                        >
+                            {isSelected ? <Check className="h-3 w-3" /> : null}
+                            {optionLabel}
+                        </button>
+                    );
+                })}
+            </div>
+        ) : null}
     </div>
 );
 
@@ -1006,7 +1059,9 @@ const TourVisitSuccessOverlay = ({ theme, facilityName, customerName }) => (
                 Added to Upcoming Trips
             </p>
             <p className="mt-2 text-sm" style={{ color: theme.colors.textSecondary }}>
-                {customerName ? `${customerName} · ${facilityName || 'Trip ready to review'}` : (facilityName ? `${facilityName} is ready to review.` : 'Your customer experience trip is ready to review.')}
+                {customerName
+                    ? `${customerName} · ${facilityName || 'Awaiting JSI approval'}`
+                    : (facilityName ? `${facilityName} is awaiting JSI approval.` : 'Your customer experience trip is awaiting JSI approval.')}
             </p>
         </div>
     </div>
@@ -1169,7 +1224,8 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
     const [selectedFacilityId, setSelectedFacilityId] = useState('');
     const [showFacilityOptions, setShowFacilityOptions] = useState(true);
     const [upcomingVisits, setUpcomingVisits] = useState(() => TOUR_VISIT_UPCOMING_VISITS);
-    const [expandedUpcomingVisitId, setExpandedUpcomingVisitId] = useState(() => TOUR_VISIT_UPCOMING_VISITS[0]?.id || null);
+    const [expandedUpcomingVisitId, setExpandedUpcomingVisitId] = useState(null);
+    const [expandedExperienceTrackId, setExpandedExperienceTrackId] = useState(null);
     const [experienceSelections, setExperienceSelections] = useState(() => buildDefaultExperienceSelections());
     const [showExperienceError, setShowExperienceError] = useState(false);
     const [expandedGuestId, setExpandedGuestId] = useState(null);
@@ -1259,7 +1315,8 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
         setCustomerIsNewRecord(false);
         setSelectedFacilityId('');
         setShowFacilityOptions(true);
-        setExpandedUpcomingVisitId(upcomingVisits[0]?.id || null);
+        setExpandedUpcomingVisitId(null);
+        setExpandedExperienceTrackId(null);
         setExperienceSelections(buildDefaultExperienceSelections());
         setShowExperienceError(false);
         setExpandedGuestId(null);
@@ -1282,7 +1339,7 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
             clearTimeout(navigationTimeoutRef.current);
             navigationTimeoutRef.current = null;
         }
-    }, [isNewTripRoute, onNavigate, upcomingVisits, userSettings]);
+    }, [isNewTripRoute, onNavigate, userSettings]);
 
     useEffect(() => {
         if (!hasInitializedExpandedGuestRef.current && !expandedGuestId && guests.length) {
@@ -1436,6 +1493,10 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
         setExpandedUpcomingVisitId((currentId) => (currentId === visitId ? null : visitId));
     };
 
+    const toggleExperienceTrack = (trackId) => {
+        setExpandedExperienceTrackId((currentId) => (currentId === trackId ? null : trackId));
+    };
+
     const handleNativeShare = async () => {
         if (!globalThis.navigator?.share) {
             // Fallback: copy the link
@@ -1573,7 +1634,7 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
         hapticSuccess();
         setShowSuccessOverlay(true);
         setUpcomingVisits((currentVisits) => [submittedVisit, ...currentVisits]);
-        setExpandedUpcomingVisitId(submittedVisit.id);
+        setExpandedUpcomingVisitId(null);
 
         if (successOverlayTimeoutRef.current) {
             clearTimeout(successOverlayTimeoutRef.current);
@@ -1601,6 +1662,7 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
             setSelectedFacilityId('');
             setShowFacilityOptions(true);
             setExperienceSelections(buildDefaultExperienceSelections());
+            setExpandedExperienceTrackId(null);
             setShowExperienceError(false);
             setExpandedGuestId(null);
             setPendingGuestFocusId(null);
@@ -1931,6 +1993,8 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                                 key={track.id}
                                                 track={track}
                                                 selectedOptions={experienceSelections[track.id] || []}
+                                                expanded={expandedExperienceTrackId === track.id}
+                                                onToggleExpanded={toggleExperienceTrack}
                                                 onToggleOption={toggleExperienceOption}
                                                 onOpenInfo={setActiveInfoTrackId}
                                                 theme={theme}

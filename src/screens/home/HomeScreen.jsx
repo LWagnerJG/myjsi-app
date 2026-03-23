@@ -6,7 +6,7 @@ import { RequestQuoteModal } from '../../components/common/RequestQuoteModal.jsx
 import { SpecCheckRequestModal } from '../../components/common/SpecCheckRequestModal.jsx';
 import { isDarkTheme } from '../../design-system/tokens.js';
 import { usePersistentState } from '../../hooks/usePersistentState.js';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, MessageSquarePlus } from 'lucide-react';
 import { LEAD_TIMES_DATA } from '../resources/lead-times/data.js';
 import {
     PointerSensor,
@@ -28,6 +28,7 @@ import { ChatOverlay } from './components/ChatOverlay.jsx';
 import { createProjectDraft, projectNameMatches } from '../../utils/projectHelpers.js';
 import { useHomeChat } from './hooks/useHomeChat.js';
 import { useIndieSconce } from './hooks/useIndieSconce.js';
+import { RfpDropModal } from '../rfp/RfpDropModal.jsx';
 import {
     MIN_PINNED_APPS,
     MAX_PINNED_APPS,
@@ -60,6 +61,9 @@ export const HomeScreen = React.memo(({
     const [activeDragId, setActiveDragId] = useState(null);
     const [showQuoteModal, setShowQuoteModal] = useState(false);
     const [showSpecCheckModal, setShowSpecCheckModal] = useState(false);
+    const [rfpDropFile, setRfpDropFile] = useState(null);
+    const [showRfpDropModal, setShowRfpDropModal] = useState(false);
+    const rfpFileInputRef = useRef(null);
 
     // Chat logic extracted to custom hook
     const {
@@ -87,7 +91,7 @@ export const HomeScreen = React.memo(({
                 setShowQuoteModal(true);
                 break;
             case 'upload':
-                // TODO: implement upload action
+                rfpFileInputRef.current?.click();
                 break;
             case 'spec':
                 setShowSpecCheckModal(true);
@@ -266,6 +270,32 @@ export const HomeScreen = React.memo(({
         setSearchQuery('');
     }, [onNavigate, openChatFromQuery, spotlightResults]);
 
+    const handleRfpFileDrop = useCallback((file) => {
+        setRfpDropFile(file);
+        setShowRfpDropModal(true);
+    }, []);
+
+    const handleRfpAccept = useCallback(() => {
+        setShowRfpDropModal(false);
+        onNavigate?.('rfp-responder', { preloadedFile: rfpDropFile });
+        setRfpDropFile(null);
+    }, [onNavigate, rfpDropFile]);
+
+    const handleRfpDismiss = useCallback(() => {
+        setShowRfpDropModal(false);
+        setRfpDropFile(null);
+    }, []);
+
+    const handleRfpFilePick = useCallback((e) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setRfpDropFile(file);
+            setShowRfpDropModal(true);
+        }
+        // Reset so the same file can be re-selected
+        e.target.value = '';
+    }, []);
+
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
         useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
@@ -329,42 +359,31 @@ export const HomeScreen = React.memo(({
 
     const samplesCartCount = useMemo(() => Object.values(cart || {}).reduce((sum, qty) => sum + qty, 0), [cart]);
 
-    // Smart grid: pick responsive Tailwind classes that create balanced rows
-    // Static class names so Tailwind JIT can detect them at build time
-    // 3 cols on phone (standard mobile pattern), scales up for tablet/desktop
-    const GRID_COL_CLASSES = useMemo(() => ({
-        2: 'grid-cols-2',
-        3: 'grid-cols-3',
-        4: 'grid-cols-3 sm:grid-cols-4',
-        5: 'grid-cols-3 sm:grid-cols-5',
-        6: 'grid-cols-3 sm:grid-cols-4 md:grid-cols-6',
-    }), []);
+    // Smart grid: always 3 cols on mobile, scale up on sm+ to fill rows evenly
     const appGridCols = useMemo(() => {
         const count = currentApps.length;
-        const editCount = count + 1; // +1 for the Done tile
-        const calcCols = (n) => {
-            if (n <= 2) return 2;
-            if (n <= 4) return n;
-            if (n % 4 === 0) return 4;   // 8→4, 12→4
-            if (n % 3 === 0) return 3;   // 6→3, 9→3
-            if (n % 5 === 0) return 5;   // 5→5, 10→5
-            if (n <= 10) return Math.ceil(n / 2);  // 7→4
-            return Math.ceil(n / 3);
+        // Mobile is always 3 cols. sm+ picks the best column count to avoid orphans.
+        const GRID_MAP = {
+            3: 'grid-cols-3',                             // 1×3
+            4: 'grid-cols-3 sm:grid-cols-4',              // mobile 3+1, sm 1×4
+            5: 'grid-cols-3 sm:grid-cols-5',              // mobile 3+2, sm 1×5
+            6: 'grid-cols-3',                             // 2×3 at all sizes
+            7: 'grid-cols-3 sm:grid-cols-4',              // mobile 3+3+1, sm 4+3
+            8: 'grid-cols-3 sm:grid-cols-4',              // mobile 3+3+2, sm 2×4
+            9: 'grid-cols-3',                             // 3×3 at all sizes
         };
-        const viewCols = calcCols(count);
         return {
-            cols: viewCols,
-            view: GRID_COL_CLASSES[viewCols] || 'grid-cols-3 sm:grid-cols-4',
-            edit: GRID_COL_CLASSES[calcCols(editCount)] || 'grid-cols-3 sm:grid-cols-4',
+            view: GRID_MAP[count] || 'grid-cols-3 sm:grid-cols-4',
+            edit: 'grid-cols-3 sm:grid-cols-4',
         };
-    }, [currentApps.length, GRID_COL_CLASSES]);
+    }, [currentApps.length]);
 
     const hoverBg = isDark ? 'hover:bg-white/[0.06]' : 'hover:bg-black/[0.03] dark:hover:bg-white/[0.03]';
 
 
 
     return (
-        <div className={`flex flex-col h-full scrollbar-hide app-header-offset ${isEditMode ? 'overflow-y-auto' : 'overflow-hidden'}`} style={{ backgroundColor: colors.background, position: 'relative', overflowX: 'hidden', '--section-gap': 'clamp(12px, 2.2vh, 28px)' }}>
+        <div className="flex flex-col h-full scrollbar-hide app-header-offset overflow-y-auto" style={{ backgroundColor: colors.background, position: 'relative', overflowX: 'hidden' }}>
 
             {/* ── Indie Sconce – only visible in dark mode, portalled to body ── */}
             <IndieSconce
@@ -377,11 +396,8 @@ export const HomeScreen = React.memo(({
             />
 
             <div
-                className={`px-4 sm:px-6 lg:px-8 flex flex-col max-w-5xl mx-auto w-full ${isEditMode ? '' : 'flex-1 min-h-0'}`}
+                className="px-4 sm:px-6 lg:px-8 flex flex-col max-w-5xl mx-auto w-full gap-4 sm:gap-6 py-4 sm:py-6"
                 style={{
-                    paddingTop: 'var(--section-gap)',
-                    paddingBottom: 'var(--section-gap)',
-                    gap: 'var(--section-gap)',
                     position: 'relative',
                     zIndex: 2,
                 }}
@@ -402,6 +418,7 @@ export const HomeScreen = React.memo(({
                     openChatFromQuery={openChatFromQuery}
                     hoverBg={hoverBg}
                     isDark={isDark}
+                    onRfpFileDrop={handleRfpFileDrop}
                 />
 
                 {/* App grid */}
@@ -450,23 +467,22 @@ export const HomeScreen = React.memo(({
                     hoverBg={hoverBg}
                 />
 
-                {/* Glassy feedback bar — in flow, not fixed */}
+                {/* Feedback CTA — warm accent to stand out */}
                 {!isEditMode && (
-                    <button
-                        onClick={() => onNavigate('feedback')}
-                        className="flex-shrink-0 flex items-center justify-between px-5 w-full rounded-full transition-all active:scale-[0.98] mb-2"
-                        style={{
-                            height: 56,
-                            backgroundColor: colors.tileSurface,
-                            border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)',
-                            borderRadius: 9999,
-                        }}
-                    >
-                        <span className="text-[11px] font-medium" style={{ color: colors.textSecondary }}>Help us improve MyJSI</span>
-                        <span className="flex items-center gap-1 text-[11px] font-semibold" style={{ color: colors.textPrimary }}>
-                            Share Feedback <ChevronRight className="w-3.5 h-3.5" />
-                        </span>
-                    </button>
+                    <div className="flex items-center justify-center pb-2">
+                        <button
+                            onClick={() => onNavigate('feedback')}
+                            className="flex items-center gap-2 px-5 py-2.5 rounded-full transition-all active:scale-[0.97] hover:opacity-90"
+                            style={{
+                                backgroundColor: isDark ? 'rgba(196,149,106,0.15)' : 'rgba(196,149,106,0.10)',
+                                color: '#C4956A',
+                                border: '1px solid rgba(196,149,106,0.25)',
+                            }}
+                        >
+                            <MessageSquarePlus className="w-3.5 h-3.5" />
+                            <span className="text-[12px] font-semibold">Share Feedback</span>
+                        </button>
+                    </div>
                 )}
             </div>
 
@@ -488,6 +504,23 @@ export const HomeScreen = React.memo(({
                 theme={theme}
                 myProjects={myProjects}
                 onSubmit={handleSpecCheckSubmit}
+            />
+
+            <RfpDropModal
+                show={showRfpDropModal}
+                onClose={handleRfpDismiss}
+                onAccept={handleRfpAccept}
+                file={rfpDropFile}
+                theme={theme}
+            />
+
+            {/* Hidden file input for Upload a File quick action */}
+            <input
+                ref={rfpFileInputRef}
+                type="file"
+                accept=".pdf"
+                className="hidden"
+                onChange={handleRfpFilePick}
             />
 
             <ChatOverlay

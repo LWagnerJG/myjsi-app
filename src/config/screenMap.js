@@ -27,6 +27,7 @@ const SettingsScreen = React.lazy(() => import('../screens/settings/index.js').t
 const SamplesScreen = React.lazy(() => import('../screens/samples/index.js').then(m => ({ default: m.SamplesScreen })));
 const MarketplaceScreen = React.lazy(() => import('../screens/marketplace/index.js').then(m => ({ default: m.MarketplaceScreen })));
 const PresentationsScreen = React.lazy(() => import('../screens/resources/presentations/index.js').then(m => ({ default: m.PresentationsScreen })));
+const RfpResponderScreen = React.lazy(() => import('../screens/rfp/RfpResponderScreen.jsx').then(m => ({ default: m.default })));
 
 // NOTE:
 // Feature resource detail routes (e.g. 'lead-times', 'commission-rates', etc.) are now handled lazily
@@ -56,6 +57,7 @@ export const SCREEN_MAP = {
   'competitive-analysis': CompetitiveAnalysisScreen,
   'marketplace': MarketplaceScreen,
   'presentations': PresentationsScreen,
+  'rfp-responder': RfpResponderScreen,
   // 'new-dealer-signup' is lazy-loaded in App.jsx
 };
 

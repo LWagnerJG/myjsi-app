@@ -16,7 +16,7 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
     const [tick, setTick] = useState(0);
     const [prevText, setPrevText] = useState(null);
     const phrases = useMemo(() => [
-        'Ask JSI anything...',
+        'Search or ask Elliott...',
         'What are lead times for Motif?',
         'Compare Jasper vs Motif specs',
         'Help me start a sample order',
@@ -26,7 +26,7 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
         'Draft an install checklist',
         'Find dealers near Indianapolis',
         'Summarize this contract',
-        'Chat with your AI assistant...',
+        'Ask Elliott about finishes...',
     ], []);
     const DISPLAY_MS = 8200;
     const FADE_MS = 1500;
