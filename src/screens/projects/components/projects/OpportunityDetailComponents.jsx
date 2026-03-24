@@ -10,7 +10,7 @@ export const SectionCard = ({ children, isDark, className = '' }) => {
   const cardBg = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.72)';
   const cardBorder = isDark ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(0,0,0,0.06)';
   return (
-    <div className={className} style={{ backgroundColor: cardBg, border: cardBorder, borderRadius: 20, padding: '20px' }}>
+    <div className={className} style={{ backgroundColor: cardBg, border: cardBorder, borderRadius: 24, padding: '20px' }}>
       {children}
     </div>
   );

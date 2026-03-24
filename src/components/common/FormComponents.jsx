@@ -3,7 +3,7 @@ import React from "react";
 import { ChevronDown, X } from "lucide-react";
 
 const H = 48;
-const R = 16; // unify radius with inputs
+const R = 24; // match --jsi-radius-input token
 
 const Label = ({ children, theme, required }) => (
     <label

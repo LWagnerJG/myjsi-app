@@ -2,7 +2,8 @@ import React, { useState, useMemo } from 'react';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import StandardSearchBar from '../../../components/common/StandardSearchBar.jsx';
 import { Modal } from '../../../components/common/Modal.jsx';
-import { Search, ShoppingCart, Palette } from 'lucide-react';
+import { ShoppingCart, Palette } from 'lucide-react';
+import { EmptyState } from '../../../components/common/EmptyState.jsx';
 import { isDarkTheme } from '../../../design-system/tokens.js';
 import { DISCONTINUED_FINISHES } from './data.js';
 import { SAMPLE_PRODUCTS } from '../../samples/data.js';
@@ -168,13 +169,7 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
     return (
         <div className="h-full flex flex-col app-header-offset">
             {/* Title + search */}
-            <div className="flex-shrink-0 px-5 pt-5 pb-3" style={{ backgroundColor: theme.colors.background }}>
-                <h1
-                    className="text-3xl font-bold tracking-tight mb-3"
-                    style={{ color: text, letterSpacing: '-0.02em' }}
-                >
-                    Discontinued Finishes
-                </h1>
+            <div className="flex-shrink-0 px-5 pt-3 pb-3" style={{ backgroundColor: theme.colors.background }}>
                 <StandardSearchBar
                     value={searchTerm}
                     onChange={(val) => setSearchTerm(val)}
@@ -207,20 +202,12 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
                         ))}
                     </div>
                 ) : (
-                    <div className="flex flex-col items-center justify-center py-20">
-                        <div
-                            className="w-12 h-12 rounded-full flex items-center justify-center mb-3"
-                            style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.04)' }}
-                        >
-                            <Search className="w-5 h-5" style={{ color: sub }} />
-                        </div>
-                        <p className="font-semibold text-[15px]" style={{ color: text }}>
-                            No results
-                        </p>
-                        <p className="text-[13px] mt-1 text-center max-w-[240px]" style={{ color: sub }}>
-                            No finishes match &ldquo;{searchTerm}&rdquo;
-                        </p>
-                    </div>
+                    <EmptyState
+                        icon={Palette}
+                        title="No results"
+                        description={`No finishes match "${searchTerm}"`}
+                        theme={theme}
+                    />
                 )}
             </div>
 
@@ -255,14 +242,14 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
                         <div className="flex gap-3 pt-1">
                             <button
                                 onClick={() => setSelectedFinish(null)}
-                                className="flex-1 font-semibold py-2.5 rounded-full text-[13px] active:scale-95 transition-all"
+                                className="flex-1 font-semibold py-2.5 rounded-full text-[13px] motion-tap active:scale-[0.98] transition-all"
                                 style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : theme.colors.subtle, color: text }}
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleOrderClick}
-                                className="flex-1 font-semibold py-2.5 rounded-full text-[13px] flex items-center justify-center gap-2 active:scale-95 transition-all"
+                                className="flex-1 font-semibold py-2.5 rounded-full text-[13px] flex items-center justify-center gap-2 motion-tap active:scale-[0.98] transition-all"
                                 style={{ backgroundColor: accent, color: theme.colors.accentText }}
                             >
                                 <ShoppingCart className="w-3.5 h-3.5" />

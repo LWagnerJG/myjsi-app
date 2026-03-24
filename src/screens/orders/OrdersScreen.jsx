@@ -48,13 +48,13 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
         <div className="space-y-4">
             <GlassCard theme={theme} className="p-4" variant="elevated">
                 <div className="flex justify-between items-center mb-4">
-                    <button onClick={() => setCurrentDate(new Date(year, month - 1, 1))} className="p-2 rounded-full active:scale-95 transition" style={{ ':hover': {} }} onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                    <button onClick={() => setCurrentDate(new Date(year, month - 1, 1))} className={`p-2 rounded-full motion-tap active:scale-[0.98] transition-colors ${isDark ? 'hover:bg-white/[0.08]' : 'hover:bg-black/[0.05]'}`}>
                         <ChevronLeft style={{ color: theme.colors.textSecondary }} />
                     </button>
                     <h3 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>
                         {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
                     </h3>
-                    <button onClick={() => setCurrentDate(new Date(year, month + 1, 1))} className="p-2 rounded-full active:scale-95 transition" style={{ ':hover': {} }} onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                    <button onClick={() => setCurrentDate(new Date(year, month + 1, 1))} className={`p-2 rounded-full motion-tap active:scale-[0.98] transition-colors ${isDark ? 'hover:bg-white/[0.08]' : 'hover:bg-black/[0.05]'}`}>
                         <ChevronRight style={{ color: theme.colors.textSecondary }} />
                     </button>
                 </div>
@@ -73,12 +73,10 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
                             <button
                                 key={day}
                                 onClick={() => setSelectedDate(date)}
-                                className={`h-12 rounded-xl flex flex-col items-center justify-center transition active:scale-95 ${isSelected ? 'ring-2 ring-offset-2' : ''}`}
+                                className={`h-12 rounded-xl flex flex-col items-center justify-center transition motion-tap active:scale-[0.98] ${isSelected ? '' : (isDark ? 'hover:bg-white/[0.06]' : 'hover:bg-black/[0.04]')}`}
                                 style={{
                                     ...(isSelected ? { boxShadow: `0 0 0 2px ${theme.colors.accent}` } : {}),
                                 }}
-                                onMouseEnter={e => { if (!isSelected) e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'; }}
-                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; }}
                             >
                                 <span className="text-sm" style={{ color: theme.colors.textPrimary }}>{day}</span>
                                 {has && <span className="text-[11px]" style={{ color: theme.colors.textSecondary }}>{currency0(total)}</span>}
@@ -129,9 +127,7 @@ const OrderRow = ({ order, theme, onNavigate, isLast }) => {
     return (
         <button
             onClick={() => onNavigate(`orders/${order.orderNumber}`)}
-            className="w-full text-left transition active:scale-[0.99]"
-            onMouseEnter={e => e.currentTarget.style.backgroundColor = dark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.015)'}
-            onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+            className={`w-full text-left transition active:scale-[0.99] ${dark ? 'hover:bg-white/[0.03]' : 'hover:bg-black/[0.015]'}`}
         >
             <div className="flex items-center gap-3.5 px-4 py-3.5">
                 <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.06)' }}>
@@ -257,7 +253,7 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                                         style={{ transformOrigin: 'top right', backgroundColor: theme.colors.surface, border: dark ? '1px solid rgba(255,255,255,0.12)' : `1px solid ${theme.colors.border}`, boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }}>
                                         {dealers.map(d => {
                                             const active = d === selectedDealer;
-                                            return <button key={d} onClick={() => { setSelectedDealer(d); setDealerMenuOpen(false); }} className={`w-full text-left px-3 py-2 rounded-xl text-sm transition active:scale-95 ${active ? 'font-semibold' : ''}`} style={{ backgroundColor: active ? theme.colors.subtle : 'transparent', color: theme.colors.textPrimary }} onMouseEnter={e => { if (!active) e.currentTarget.style.backgroundColor = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'; }} onMouseLeave={e => { if (!active) e.currentTarget.style.backgroundColor = 'transparent'; }}>{formatCompanyName(d)}</button>;
+                                            return <button key={d} onClick={() => { setSelectedDealer(d); setDealerMenuOpen(false); }} className={`w-full text-left px-3 py-2 rounded-xl text-sm transition motion-tap active:scale-[0.98] ${active ? 'font-semibold' : (dark ? 'hover:bg-white/[0.06]' : 'hover:bg-black/[0.04]')}`} style={{ backgroundColor: active ? theme.colors.subtle : 'transparent', color: theme.colors.textPrimary }}>{formatCompanyName(d)}</button>;
                                         })}
                                     </motion.div>
                                 )}

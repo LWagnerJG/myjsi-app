@@ -724,6 +724,19 @@ h6 {
     pointer-events: auto;
 }
 
+/* ── Focus ring ── */
+/* Used by FormInput, TagInput, PortalNativeSelect, and any interactive element
+   that needs a visible keyboard-focus indicator. Relies on --theme-focus-ring
+   which is set per-theme in :root and [data-theme="dark"]. */
+.focus-ring:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--theme-focus-ring);
+}
+
+.focus-ring:focus:not(:focus-visible) {
+    outline: none;
+}
+
 /* Shared motion utility classes */
 .motion-tap {
     transition: transform var(--motion-duration-fast) var(--motion-ease-standard);

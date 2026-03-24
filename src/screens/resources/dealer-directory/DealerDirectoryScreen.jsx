@@ -16,7 +16,7 @@ const CarouselCard = React.memo(({ dealer, colors, isDark, onTap, isCenter }) =>
     return (
         <div
             onClick={onTap}
-            className="rounded-[20px] overflow-hidden select-none cursor-pointer transition-all duration-300"
+            className="rounded-[22px] overflow-hidden select-none cursor-pointer transition-all duration-300"
             style={{
                 backgroundColor: isDark ? colors.surface : '#FFFFFF',
                 border: isDark ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(0,0,0,0.05)',
@@ -226,7 +226,7 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, onNavigate }) =>
                     </div>
                     <button
                         onClick={() => onNavigate?.('new-dealer-signup')}
-                        className="flex items-center gap-1.5 px-3.5 rounded-xl transition-all active:scale-95 flex-shrink-0"
+                        className="flex items-center gap-1.5 px-3.5 rounded-full transition-all motion-tap active:scale-[0.98] flex-shrink-0"
                         style={{
                             height: 40,
                             backgroundColor: colors.accent,
@@ -240,7 +240,7 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, onNavigate }) =>
 
                 {/* Dealer list */}
                 <div className="flex-1 overflow-y-auto scrollbar-hide px-4 pb-24">
-                    <GlassCard theme={theme} className="p-0 overflow-hidden" style={{ borderRadius: 16 }}>
+                    <GlassCard theme={theme} className="p-0 overflow-hidden">
                         {sorted.map((d, i) => {
                             const isActive = i === centerIdx;
                             const goalPct = d.ytdGoal ? Math.round((d.sales / d.ytdGoal) * 100) : null;
@@ -249,7 +249,7 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, onNavigate }) =>
                                 <button
                                     key={d.id}
                                     onClick={() => onNavigate?.(`resources/dealer-directory/${d.id}`)}
-                                    className="w-full text-left flex items-center gap-3 px-4 py-3 transition-colors active:opacity-80"
+                                    className="w-full text-left flex items-center gap-3 px-4 py-3 transition-all motion-tap active:scale-[0.99]"
                                     style={{
                                         borderBottom: i < sorted.length - 1 ? `1px solid ${divider}` : 'none',
                                         backgroundColor: isActive ? `${colors.accent}06` : 'transparent',
