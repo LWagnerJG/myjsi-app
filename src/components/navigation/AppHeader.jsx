@@ -17,8 +17,12 @@ export const AppHeader = React.memo(({
     const isHome = !showBack;
     const dark = isDarkMode || isDarkTheme(theme);
 
-    const glassBg = dark ? '#2A2A2A' : '#FFFFFF';
-    const glassShadow = 'none';
+    // Semi-transparent so blurred background content shows through (frosted glass)
+    const glassBg = dark ? 'rgba(42,42,42,0.88)' : 'rgba(255,255,255,0.88)';
+    // Scrim gradient: background color fading to transparent — grounds the blur zone
+    const scrimGradient = dark
+        ? 'linear-gradient(to bottom, rgba(26,26,26,0.72) 0%, transparent 100%)'
+        : 'linear-gradient(to bottom, rgba(240,237,232,0.72) 0%, transparent 100%)';
 
     const getTimeGreeting = () => {
         const hour = new Date().getHours();
@@ -28,13 +32,22 @@ export const AppHeader = React.memo(({
     };
 
     return (
-        <div className="px-4 sm:px-5 pt-3 pb-1 fixed top-0 left-0 right-0 z-30 pointer-events-none bg-transparent">
+        <div
+            className="px-4 sm:px-5 pt-3 fixed top-0 left-0 right-0 z-30 pointer-events-none"
+            style={{
+                paddingBottom: '60px',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                WebkitMaskImage: 'linear-gradient(to bottom, black 55%, transparent 85%)',
+                maskImage: 'linear-gradient(to bottom, black 55%, transparent 85%)',
+                background: scrimGradient,
+            }}
+        >
             <div
                 className="max-w-5xl mx-auto w-full flex items-center justify-between px-4 sm:px-5 h-14 pointer-events-auto transition-all duration-300 overflow-hidden"
                 style={{
                     borderRadius: 9999,
                     backgroundColor: glassBg,
-                    boxShadow: glassShadow,
                     border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)'
                 }}
             >
