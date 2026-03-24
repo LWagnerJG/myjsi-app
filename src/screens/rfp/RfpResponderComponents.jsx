@@ -292,11 +292,11 @@ export const ClarificationStage = ({
         </div>
       </div>
 
-      {/* Fixed-height content area — prevents layout shift */}
-      <div className="flex-1 w-full flex items-center justify-center" style={{ minHeight: 0 }}>
+      {/* Content — anchored below progress bar, not vertically centered */}
+      <div className="flex-1 w-full flex items-start justify-center" style={{ minHeight: 0 }}>
         {/* Thinking state */}
         {isThinking && (
-          <div className="flex flex-col items-center gap-3" style={{ animation: 'rfp-fade-in 300ms ease' }}>
+          <div className="flex flex-col items-center gap-3 pt-12" style={{ animation: 'rfp-fade-in 300ms ease' }}>
             <ElliottAvatar size={36} />
             <p className="text-sm font-medium" style={{ color: c.textSecondary }}>
               Thinking…
@@ -415,7 +415,7 @@ const DocLabel = ({ children, theme }) => (
   </div>
 );
 
-const DocField = ({ value, onChange, multiline = false, className = '', theme }) => {
+const DocField = ({ value, onChange, multiline = false, className = '', style: styleProp, theme }) => {
   const ref = useRef(null);
   const isDark = isDarkTheme(theme);
   const c = theme?.colors || {};
@@ -429,14 +429,16 @@ const DocField = ({ value, onChange, multiline = false, className = '', theme })
   }, [value, multiline]);
 
   const Tag = multiline ? 'textarea' : 'input';
+  const readOnly = !onChange;
 
   return (
     <Tag
       ref={ref}
       {...(multiline ? {} : { type: 'text' })}
       value={value}
-      onChange={(e) => onChange(e.target.value)}
-      onFocus={() => setFocused(true)}
+      readOnly={readOnly}
+      onChange={readOnly ? undefined : (e) => onChange(e.target.value)}
+      onFocus={() => !readOnly && setFocused(true)}
       onBlur={() => setFocused(false)}
       className={`w-full outline-none resize-none text-[13px] leading-relaxed cursor-text rfp-editable-field ${className}`}
       style={{
@@ -447,34 +449,19 @@ const DocField = ({ value, onChange, multiline = false, className = '', theme })
         padding: '4px 6px',
         margin: '0 -6px',
         borderRadius: '6px',
-        borderBottom: focused
-          ? `1.5px solid ${c.accent || '#353535'}`
-          : `1px dashed ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'}`,
+        borderBottom: readOnly
+          ? 'none'
+          : focused
+            ? `1.5px solid ${c.accent || '#353535'}`
+            : `1px dashed ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'}`,
         transition: 'background-color 150ms ease, border-color 150ms ease, border-bottom-style 150ms ease',
         wordBreak: 'break-word',
         overflowWrap: 'break-word',
         overflow: 'hidden',
         whiteSpace: multiline ? 'pre-wrap' : undefined,
+        ...styleProp,
       }}
     />
-  );
-};
-
-/* ── Blockquote for original RFP question ── */
-const RfpQuote = ({ text, theme }) => {
-  const c = theme?.colors || {};
-  return (
-    <div
-      className="text-[12px] italic leading-relaxed my-2 pl-4 py-2"
-      style={{
-        color: c.textSecondary,
-        borderLeft: `3px solid ${c.border || '#E3E0D8'}`,
-        wordBreak: 'break-word',
-        overflowWrap: 'break-word',
-      }}
-    >
-      &ldquo;{text}&rdquo;
-    </div>
   );
 };
 
@@ -521,7 +508,7 @@ const PdfPage = ({ children, pageNumber, totalPages, footerTitle, theme, classNa
   );
 };
 
-export const ResponseBuilder = ({ data, onChange, onExport, onSave, theme }) => {
+export const ResponseBuilder = ({ data, onChange, partnerItems, onPartnerItemChange, onExport, onSave, theme }) => {
   const c = theme?.colors || {};
   const isDark = isDarkTheme(theme);
   const docRef = useRef(null);
@@ -580,6 +567,22 @@ export const ResponseBuilder = ({ data, onChange, onExport, onSave, theme }) => 
     });
   };
 
+  const updateFaqItem = (idx, key, value) => {
+    onChange((prev) => {
+      const items = [...prev.businessFaqs.items];
+      items[idx] = { ...items[idx], [key]: value };
+      return { ...prev, businessFaqs: { ...prev.businessFaqs, items } };
+    });
+  };
+
+  const updateTypical = (idx, key, value) => {
+    onChange((prev) => {
+      const typicals = [...prev.productFit.typicals];
+      typicals[idx] = { ...typicals[idx], [key]: value };
+      return { ...prev, productFit: { ...prev.productFit, typicals } };
+    });
+  };
+
   const updateVisual = (key, value) => {
     onChange((prev) => ({
       ...prev,
@@ -601,18 +604,42 @@ export const ResponseBuilder = ({ data, onChange, onExport, onSave, theme }) => 
     }));
   };
 
-  /* ── PDF Export — renders from hidden stacked container ── */
+  /* ── PDF Export — clones the hidden container so the live UI never moves ── */
   const handlePdfExport = useCallback(async () => {
     if (!docRef.current || exporting) return;
     setExporting(true);
 
-    try {
-      const el = docRef.current;
-      // Temporarily make visible for rendering
-      el.style.position = 'static';
-      el.style.left = 'auto';
-      el.classList.add('pdf-exporting');
+    // Clone the off-screen container so we never touch the live element's position.
+    const clone = docRef.current.cloneNode(true);
+    clone.classList.add('pdf-exporting');
+    clone.style.cssText = `position:fixed;top:0;left:-9999px;width:${PDF_PAGE_W}px;z-index:-1;`;
 
+    // html2canvas doesn't render React-controlled textarea/input values reliably
+    // because React sets the DOM *property*, not the HTML *attribute*.
+    // Fix: copy live values from the original, then swap every form element for a
+    // plain <div> whose textContent is the real value.
+    const liveFields = Array.from(docRef.current.querySelectorAll('textarea, input'));
+    const cloneFields = Array.from(clone.querySelectorAll('textarea, input'));
+    cloneFields.forEach((field, i) => {
+      const liveValue = liveFields[i]?.value ?? field.value ?? '';
+      const div = document.createElement('div');
+      div.textContent = liveValue;
+      // Preserve inline styles (font-size, font-weight, etc.) set by DocField's style prop
+      if (field.getAttribute('style')) div.setAttribute('style', field.getAttribute('style'));
+      // Preserve class-based colour / font rules
+      div.className = field.className;
+      div.style.whiteSpace = 'pre-wrap';
+      div.style.wordBreak = 'break-word';
+      div.style.overflowWrap = 'break-word';
+      div.style.padding = '4px 6px';
+      div.style.background = 'transparent';
+      div.style.borderBottom = 'none';
+      field.parentNode.replaceChild(div, field);
+    });
+
+    document.body.appendChild(clone);
+
+    try {
       await html2pdf()
         .set({
           margin: [0.5, 0.5, 0.5, 0.5],
@@ -622,21 +649,13 @@ export const ResponseBuilder = ({ data, onChange, onExport, onSave, theme }) => 
           jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
           pagebreak: { mode: ['css', 'legacy'], before: '.pdf-page-break' },
         })
-        .from(el)
+        .from(clone)
         .save();
-
-      el.classList.remove('pdf-exporting');
-      el.style.position = 'absolute';
-      el.style.left = '-9999px';
       onExport?.();
     } catch {
-      if (docRef.current) {
-        docRef.current.classList.remove('pdf-exporting');
-        docRef.current.style.position = 'absolute';
-        docRef.current.style.left = '-9999px';
-      }
       onExport?.();
     } finally {
+      document.body.removeChild(clone);
       setExporting(false);
     }
   }, [data, exporting, onExport]);
@@ -699,7 +718,7 @@ export const ResponseBuilder = ({ data, onChange, onExport, onSave, theme }) => 
           }}
         >
           {/* Visible single page */}
-          {renderPage(currentPage, { data, onChange, theme, c, updateField, updateFaq, updateVisual, updateProductFit, updateDealerField, pr, bfaq, vi, pf, dn, footerTitle })}
+          {renderPage(currentPage, { data, onChange, theme, c, updateField, updateFaq, updateFaqItem, updateTypical, updateVisual, updateProductFit, updateDealerField, pr, bfaq, vi, pf, dn, footerTitle, partnerItems, onPartnerItemChange })}
         </div>
 
         {/* Hidden doc for PDF export — all pages stacked */}
@@ -708,7 +727,7 @@ export const ResponseBuilder = ({ data, onChange, onExport, onSave, theme }) => 
           className="pdf-export-container"
           style={{ position: 'absolute', left: '-9999px', top: 0, width: PDF_PAGE_W }}
         >
-          {renderAllPages({ data, onChange, theme, c, updateField, updateFaq, updateVisual, updateProductFit, updateDealerField, pr, bfaq, vi, pf, dn, footerTitle })}
+          {renderAllPages({ data, onChange, theme, c, updateField, updateFaq, updateFaqItem, updateTypical, updateVisual, updateProductFit, updateDealerField, pr, bfaq, vi, pf, dn, footerTitle, partnerItems, onPartnerItemChange })}
         </div>
 
         {/* Right arrow */}
@@ -800,14 +819,7 @@ export const ResponseBuilder = ({ data, onChange, onExport, onSave, theme }) => 
         .pdf-exporting .rfp-editable-field {
           background: transparent !important;
           border-bottom-color: transparent !important;
-        }
-        .pdf-exporting textarea,
-        .pdf-exporting input {
-          background: transparent !important;
-          white-space: pre-wrap !important;
-          word-break: break-word !important;
-          overflow-wrap: break-word !important;
-          overflow: hidden !important;
+          border-bottom-style: none !important;
         }
         .pdf-exporting table {
           table-layout: fixed !important;
@@ -829,7 +841,7 @@ export const ResponseBuilder = ({ data, onChange, onExport, onSave, theme }) => 
 
 /* ── Page render helpers ── */
 function renderPage(index, ctx) {
-  const { theme, c, updateField, updateFaq, updateVisual, updateProductFit, updateDealerField, pr, bfaq, vi, pf, dn, footerTitle } = ctx;
+  const { theme, c, updateField, updateFaq, updateFaqItem, updateTypical, updateVisual, updateProductFit, updateDealerField, pr, bfaq, vi, pf, dn, footerTitle, partnerItems, onPartnerItemChange } = ctx;
   const isDark = isDarkTheme(theme);
   const T = 8;
   switch (index) {
@@ -837,9 +849,15 @@ function renderPage(index, ctx) {
       <PdfPage theme={theme} pageNumber={1} totalPages={T} footerTitle={footerTitle}>
         <div style={{ marginBottom: '24px' }}>
           <DocField value={pr.fields.projectName} onChange={(v) => updateField('projectRequirements', 'projectName', v)} className="font-bold tracking-tight" style={{ fontSize: '20px', lineHeight: '1.3' }} theme={theme} />
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-1 mt-2" style={{ color: c.textSecondary, fontSize: '12px' }}>
-            <span>Response due <strong style={{ color: c.textPrimary }}>{pr.fields.dueDate}</strong></span>
-            <span>Solicitation 47QSMA25Q0082</span>
+          <div style={{ display: 'flex', gap: '40px', marginTop: '10px' }}>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: c.textSecondary, opacity: 0.4, marginBottom: '2px' }}>Response due</div>
+              <DocField value={pr.fields.dueDate} onChange={(v) => updateField('projectRequirements', 'dueDate', v)} theme={theme} style={{ fontSize: '13px', fontWeight: 600 }} />
+            </div>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: c.textSecondary, opacity: 0.4, marginBottom: '2px' }}>Solicitation</div>
+              <DocField value={pr.fields.solicitation || ''} onChange={(v) => updateField('projectRequirements', 'solicitation', v)} theme={theme} style={{ fontSize: '13px' }} />
+            </div>
           </div>
         </div>
         <div style={{ borderTop: `1px solid ${c.border}`, paddingTop: '1.25rem' }}>
@@ -858,8 +876,10 @@ function renderPage(index, ctx) {
         <DocSectionHeading number={2} title="Qualifications & Compliance" theme={theme} />
         {bfaq.items.slice(0, 3).map((item, idx) => (
           <div key={idx} className={idx > 0 ? 'mt-5' : 'mt-2'}>
-            <DocLabel theme={theme}>{item.question}</DocLabel>
-            {item.rfpQuestion && <RfpQuote text={item.rfpQuestion} theme={theme} />}
+            <DocField value={item.question} onChange={(v) => updateFaqItem(idx, 'question', v)} theme={theme} style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', opacity: 0.45, marginBottom: '2px' }} />
+            {item.rfpQuestion != null && (
+              <DocField value={item.rfpQuestion} onChange={(v) => updateFaqItem(idx, 'rfpQuestion', v)} multiline theme={theme} style={{ fontSize: '11px', fontStyle: 'italic', lineHeight: '1.6', borderLeft: `3px solid ${c.border}`, borderBottom: 'none', paddingLeft: '12px', marginBottom: '4px' }} />
+            )}
             <DocField value={item.answer} onChange={(v) => updateFaq(idx, v)} multiline theme={theme} />
           </div>
         ))}
@@ -870,8 +890,10 @@ function renderPage(index, ctx) {
         <DocSectionHeading number={2} title="Qualifications & Compliance (continued)" theme={theme} />
         {bfaq.items.slice(3).map((item, idx) => (
           <div key={idx + 3} className={idx > 0 ? 'mt-5' : 'mt-2'}>
-            <DocLabel theme={theme}>{item.question}</DocLabel>
-            {item.rfpQuestion && <RfpQuote text={item.rfpQuestion} theme={theme} />}
+            <DocField value={item.question} onChange={(v) => updateFaqItem(idx + 3, 'question', v)} theme={theme} style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', opacity: 0.45, marginBottom: '2px' }} />
+            {item.rfpQuestion != null && (
+              <DocField value={item.rfpQuestion} onChange={(v) => updateFaqItem(idx + 3, 'rfpQuestion', v)} multiline theme={theme} style={{ fontSize: '11px', fontStyle: 'italic', lineHeight: '1.6', borderLeft: `3px solid ${c.border}`, borderBottom: 'none', paddingLeft: '12px', marginBottom: '4px' }} />
+            )}
             <DocField value={item.answer} onChange={(v) => updateFaq(idx + 3, v)} multiline theme={theme} />
           </div>
         ))}
@@ -889,25 +911,26 @@ function renderPage(index, ctx) {
     case 4: return (
       <PdfPage theme={theme} pageNumber={5} totalPages={T} footerTitle={footerTitle} className="pdf-page-break">
         <DocSectionHeading number={4} title="Product Recommendations" theme={theme} />
-        {renderProductCards(pf.typicals.slice(0, 3), { theme, c, isDark })}
+        {renderProductCards(pf.typicals.slice(0, 3), { theme, c, isDark, updateTypical, startIdx: 0 })}
       </PdfPage>
     );
     case 5: return (
       <PdfPage theme={theme} pageNumber={6} totalPages={T} footerTitle={footerTitle} className="pdf-page-break">
         <div style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: c.textSecondary, opacity: 0.4, marginBottom: '14px' }}>Product Recommendations (continued)</div>
-        {renderProductCards(pf.typicals.slice(3, 5), { theme, c, isDark })}
+        {renderProductCards(pf.typicals.slice(3, 7), { theme, c, isDark, compact: true, updateTypical, startIdx: 3 })}
       </PdfPage>
     );
     case 6: return (
       <PdfPage theme={theme} pageNumber={7} totalPages={T} footerTitle={footerTitle} className="pdf-page-break">
         <div style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: c.textSecondary, opacity: 0.4, marginBottom: '14px' }}>Product Recommendations (continued)</div>
-        {renderProductCards(pf.typicals.slice(5, 7), { theme, c, isDark })}
-        <div style={{ marginTop: '16px' }}>
+        <div style={{ marginBottom: '14px' }}>
           <DocLabel theme={theme}>Planning Assumptions</DocLabel>
           <DocField value={pf.assumptions} onChange={(v) => updateProductFit('assumptions', v)} multiline theme={theme} />
-          <DocLabel theme={theme}>Coverage Gaps</DocLabel>
-          <DocField value={pf.gaps} onChange={(v) => updateProductFit('gaps', v)} multiline theme={theme} />
         </div>
+        <div style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: c.textSecondary, opacity: 0.45, marginBottom: '6px' }}>
+          Partner Items — Enter Manufacturer &amp; Product below
+        </div>
+        {(partnerItems || []).map((item) => renderPartnerItemCard(item, { c, isDark, onPartnerItemChange, theme }))}
       </PdfPage>
     );
     case 7: return (
@@ -918,7 +941,22 @@ function renderPage(index, ctx) {
         <DocLabel theme={theme}>Items Outside JSI Scope</DocLabel>
         <DocField value={dn.fields.nonJsiScope} onChange={(v) => updateDealerField('nonJsiScope', v)} multiline theme={theme} />
         <DocLabel theme={theme}>Teaming Partners</DocLabel>
-        <DocField value={dn.fields.otherManufacturers} onChange={(v) => updateDealerField('otherManufacturers', v)} multiline theme={theme} />
+        <div style={{ fontSize: '10px', fontStyle: 'italic', color: c.textSecondary, opacity: 0.45, marginBottom: '6px' }}>
+          Derived from Product Matrix — page 7
+        </div>
+        {(partnerItems || []).map((item) => (
+          <div key={item.itemCode} style={{ display: 'flex', gap: '8px', fontSize: '12px', lineHeight: '1.8', color: c.textPrimary }}>
+            <span style={{ fontWeight: 700, flexShrink: 0, minWidth: '52px' }}>{item.itemCode}</span>
+            <span style={{ color: c.textSecondary, flexShrink: 0 }}>{item.category}:</span>
+            <span>
+              {item.manufacturer && item.productModel
+                ? `${item.manufacturer} — ${item.productModel}`
+                : item.manufacturer || item.productModel || (
+                    <span style={{ color: c.textSecondary, opacity: 0.4, fontStyle: 'italic' }}>TBD</span>
+                  )}
+            </span>
+          </div>
+        ))}
         <DocLabel theme={theme}>Commercial Exceptions</DocLabel>
         <DocField value={dn.fields.commercialExceptions} onChange={(v) => updateDealerField('commercialExceptions', v)} multiline theme={theme} />
       </PdfPage>
@@ -928,95 +966,201 @@ function renderPage(index, ctx) {
 }
 
 /* ── Product card renderer — shared between pages ── */
-function renderProductCards(items, { c, isDark }) {
+function renderProductCards(items, { c, isDark, compact = false, theme, updateTypical, startIdx = 0 }) {
+  const imgW = compact ? 84 : 110;
+  const imgH = compact ? 60 : 80;
+  const cardPad = compact ? '8px 0' : '12px 0';
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
       {items.map((t, i) => {
+        const absoluteIdx = startIdx + i;
         const isLast = i === items.length - 1;
+        const update = updateTypical ? (key, v) => updateTypical(absoluteIdx, key, v) : null;
         return (
           <div
             key={t.itemCode}
-            style={{
-              padding: '12px 0',
-              borderBottom: isLast ? 'none' : `1px solid ${c.border}`,
-            }}
+            style={{ padding: cardPad, borderBottom: isLast ? 'none' : `1px solid ${c.border}` }}
           >
-            {/* Header row: code + series + image */}
+            {/* Header row: image + meta */}
             <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
               {/* Product image */}
-              <div
-                style={{
-                  width: 110,
-                  height: 80,
-                  borderRadius: 6,
-                  border: `1px solid ${c.border}`,
-                  flexShrink: 0,
-                  overflow: 'hidden',
-                  backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)',
-                }}
-              >
-                {t.image ? (
-                  <img src={t.image} alt={t.series} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                ) : (
-                  <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: c.textSecondary, opacity: 0.2, fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                    {t.series}
-                  </div>
-                )}
+              <div style={{
+                width: imgW, height: imgH, borderRadius: 6,
+                border: `1px solid ${c.border}`, flexShrink: 0,
+                overflow: 'hidden',
+                backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)',
+              }}>
+                {t.image
+                  ? <img src={t.image} alt={t.series} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: c.textSecondary, opacity: 0.2, fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t.series}</div>
+                }
               </div>
-              {/* Title + solution */}
+
+              {/* Title block */}
               <div style={{ flex: 1, minWidth: 0 }}>
+                {/* Item code + category — structural identifiers, kept as labels */}
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '2px' }}>
                   <span style={{ fontSize: '14px', fontWeight: 700, color: c.textPrimary }}>{t.itemCode}</span>
                   <span style={{ fontSize: '11px', color: c.textSecondary }}>{t.category}</span>
                 </div>
-                <div style={{ fontSize: '12px', fontWeight: 600, color: c.textPrimary, marginBottom: '5px' }}>
-                  JSI {t.series}
+
+                {/* Series — editable */}
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '4px' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 600, color: c.textSecondary, flexShrink: 0 }}>JSI</span>
+                  <DocField
+                    value={t.series}
+                    onChange={update ? (v) => update('series', v) : undefined}
+                    theme={theme}
+                    style={{ fontSize: '12px', fontWeight: 600 }}
+                  />
                 </div>
-                {/* RFP requirement callout */}
-                {t.rfpRequirement && (
-                  <div
-                    style={{
-                      fontSize: '10px',
-                      lineHeight: '1.5',
-                      color: c.textSecondary,
-                      backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(53,53,53,0.03)',
-                      border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
-                      borderRadius: 4,
-                      padding: '6px 8px',
-                      fontStyle: 'italic',
-                    }}
-                  >
-                    <span style={{ fontWeight: 600, fontStyle: 'normal', opacity: 0.6 }}>RFP: </span>
-                    {t.rfpRequirement}
-                  </div>
-                )}
+
+                {/* RFP requirement — editable */}
+                <div style={{
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(53,53,53,0.03)',
+                  border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+                  borderRadius: 4, padding: '5px 8px',
+                }}>
+                  <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: c.textSecondary, opacity: 0.5 }}>RFP</span>
+                  <DocField
+                    value={t.rfpRequirement || ''}
+                    onChange={update ? (v) => update('rfpRequirement', v) : undefined}
+                    multiline
+                    theme={theme}
+                    style={{ fontSize: '10px', fontStyle: 'italic', lineHeight: '1.5' }}
+                  />
+                </div>
               </div>
             </div>
-            {/* Rationale */}
-            <div style={{ fontSize: '11px', lineHeight: '1.6', color: c.textSecondary, marginTop: '6px' }}>
-              {t.rationale}
-            </div>
-            {/* Component list (for PO-1 etc.) */}
-            {t.components && (
-              <div
+
+            {/* Rationale — editable */}
+            <DocField
+              value={t.rationale || ''}
+              onChange={update ? (v) => update('rationale', v) : undefined}
+              multiline
+              theme={theme}
+              style={{ fontSize: '11px', lineHeight: '1.6', marginTop: '6px' }}
+            />
+
+            {/* Component list — editable (monospace) */}
+            {t.components != null && (
+              <DocField
+                value={t.components}
+                onChange={update ? (v) => update('components', v) : undefined}
+                multiline
+                theme={theme}
                 style={{
-                  fontSize: '10px',
-                  lineHeight: '1.65',
-                  color: c.textPrimary,
+                  fontSize: '10px', lineHeight: '1.65', fontFamily: 'monospace',
                   marginTop: '6px',
                   backgroundColor: isDark ? 'rgba(255,255,255,0.025)' : 'rgba(53,53,53,0.02)',
-                  borderRadius: 4,
-                  padding: '6px 8px',
-                  fontFamily: 'monospace',
-                  whiteSpace: 'pre-wrap',
+                  borderRadius: 4, padding: '6px 8px',
                 }}
-              >
-                {t.components}
-              </div>
+              />
             )}
           </div>
         );
       })}
+    </div>
+  );
+}
+
+/* ── Partner item card — non-JSI items with editable manufacturer fields ── */
+function renderPartnerItemCard(item, { c, isDark, onPartnerItemChange, theme }) {
+  const PARTNER_AMBER = '#B45309';
+  const PARTNER_AMBER_BG = isDark ? 'rgba(251,191,36,0.10)' : 'rgba(180,83,9,0.07)';
+
+  return (
+    <div
+      key={item.itemCode}
+      style={{
+        padding: '8px 0',
+        borderBottom: `1px solid ${c.border}`,
+        display: 'flex',
+        gap: '14px',
+        alignItems: 'flex-start',
+      }}
+    >
+      {/* Amber placeholder box */}
+      <div
+        style={{
+          width: 84,
+          height: 60,
+          borderRadius: 6,
+          border: `1px solid ${PARTNER_AMBER}30`,
+          flexShrink: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: PARTNER_AMBER_BG,
+          gap: '3px',
+        }}
+      >
+        <span style={{ fontSize: '8px', fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: PARTNER_AMBER }}>
+          PARTNER
+        </span>
+        <span style={{ fontSize: '9px', color: c.textSecondary, opacity: 0.5 }}>
+          {item.itemCode}
+        </span>
+      </div>
+
+      {/* Content */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '3px', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '13px', fontWeight: 700, color: c.textPrimary }}>{item.itemCode}</span>
+          <DocField
+            value={item.category}
+            onChange={(v) => onPartnerItemChange(item.itemCode, 'category', v)}
+            theme={theme}
+            style={{ fontSize: '11px', color: c.textSecondary }}
+          />
+          <span style={{
+            fontSize: '9px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase',
+            color: PARTNER_AMBER, backgroundColor: PARTNER_AMBER_BG,
+            border: `1px solid ${PARTNER_AMBER}40`, borderRadius: '4px', padding: '1px 5px',
+            flexShrink: 0,
+          }}>
+            Partner Item
+          </span>
+        </div>
+        <div style={{
+          backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(53,53,53,0.03)',
+          border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+          borderRadius: 4, padding: '5px 7px', marginBottom: '6px',
+        }}>
+          <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: c.textSecondary, opacity: 0.5 }}>RFP</span>
+          <DocField
+            value={item.rfpRequirement || ''}
+            onChange={(v) => onPartnerItemChange(item.itemCode, 'rfpRequirement', v)}
+            multiline
+            theme={theme}
+            style={{ fontSize: '10px', fontStyle: 'italic', lineHeight: '1.5' }}
+          />
+        </div>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: '9px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: c.textSecondary, opacity: 0.45, marginBottom: '2px' }}>
+              Manufacturer
+            </div>
+            <DocField
+              value={item.manufacturer}
+              onChange={(v) => onPartnerItemChange(item.itemCode, 'manufacturer', v)}
+              theme={theme}
+            />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: '9px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: c.textSecondary, opacity: 0.45, marginBottom: '2px' }}>
+              Product / Model
+            </div>
+            <DocField
+              value={item.productModel}
+              onChange={(v) => onPartnerItemChange(item.itemCode, 'productModel', v)}
+              theme={theme}
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
