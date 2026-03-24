@@ -395,8 +395,42 @@ export const HomeScreen = React.memo(({
                 lampOn={lampOn}
             />
 
+            {/* Mobile sticky feedback bar — fixed to viewport bottom, hidden on sm+ */}
+            {!isEditMode && (
+                <div
+                    className="sm:hidden fixed bottom-0 left-0 right-0 z-40 flex items-center justify-center px-4"
+                    style={{
+                        paddingBottom: 'max(16px, env(safe-area-inset-bottom))',
+                        paddingTop: 12,
+                        background: isDark
+                            ? 'linear-gradient(to top, rgba(26,26,26,0.94) 60%, rgba(26,26,26,0))'
+                            : 'linear-gradient(to top, rgba(240,237,232,0.96) 60%, rgba(240,237,232,0))',
+                        pointerEvents: 'none',
+                    }}
+                >
+                    <button
+                        onClick={() => onNavigate('feedback')}
+                        className="flex items-center gap-2 px-5 py-3 rounded-full transition-all active:scale-[0.97]"
+                        style={{
+                            backdropFilter: 'blur(20px) saturate(1.6)',
+                            WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
+                            backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.60)',
+                            border: isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(255,255,255,0.80)',
+                            boxShadow: isDark
+                                ? '0 4px 20px rgba(0,0,0,0.30)'
+                                : '0 4px 20px rgba(53,53,53,0.10)',
+                            color: colors.textSecondary,
+                            pointerEvents: 'auto',
+                        }}
+                    >
+                        <MessageSquarePlus className="w-4 h-4" />
+                        <span className="text-[13px] font-semibold">Share Feedback</span>
+                    </button>
+                </div>
+            )}
+
             <div
-                className="px-4 sm:px-6 lg:px-8 flex flex-col max-w-5xl mx-auto w-full gap-4 sm:gap-6 py-4 sm:py-6"
+                className="px-4 sm:px-6 lg:px-8 flex flex-col max-w-5xl mx-auto w-full gap-4 sm:gap-6 py-4 sm:py-6 pb-20 sm:pb-6"
                 style={{
                     position: 'relative',
                     zIndex: 2,
@@ -467,25 +501,21 @@ export const HomeScreen = React.memo(({
                     hoverBg={hoverBg}
                 />
 
-                {/* Feedback CTA — warm accent to stand out */}
+                {/* Feedback CTA — desktop inline only; mobile uses sticky bar below */}
                 {!isEditMode && (
-                    <div className="flex flex-col items-center gap-2 pb-2">
+                    <div className="hidden sm:flex flex-col items-center gap-2 pb-2">
                         <button
                             onClick={() => onNavigate('feedback')}
-                            className="flex items-center gap-2.5 px-6 py-3 rounded-full transition-all active:scale-[0.97] hover:brightness-105 hover:shadow-lg"
+                            className="flex items-center gap-2 px-5 py-2.5 rounded-full transition-all active:scale-[0.97] hover:opacity-80"
                             style={{
-                                background: 'linear-gradient(135deg, #C4956A 0%, #B8824F 100%)',
-                                color: '#FAF8F5',
-                                boxShadow: '0 4px 14px rgba(196,149,106,0.35)',
+                                backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.06)',
+                                color: colors.textSecondary,
+                                border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(53,53,53,0.08)',
                             }}
                         >
-                            <MessageSquarePlus className="w-4 h-4" />
-                            <span className="text-[13px] font-semibold tracking-wide">Share Feedback</span>
-                            <ChevronRight className="w-3.5 h-3.5 opacity-70" />
+                            <MessageSquarePlus className="w-3.5 h-3.5" />
+                            <span className="text-[12px] font-semibold">Share Feedback</span>
                         </button>
-                        <p className="text-[11px] font-medium" style={{ color: colors.textSecondary, opacity: 0.45 }}>
-                            Help us improve myJSI
-                        </p>
                     </div>
                 )}
             </div>
