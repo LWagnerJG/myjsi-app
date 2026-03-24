@@ -516,7 +516,7 @@ export const ResponseBuilder = ({ data, onChange, onExport, onSave, theme }) => 
   const [currentPage, setCurrentPage] = useState(0);
   const viewerRef = useRef(null);
   const [scale, setScale] = useState(1);
-  const TOTAL_PAGES = 6;
+  const TOTAL_PAGES = 8;
 
   /* Compute scale so the fixed-size page fits the available viewport */
   useEffect(() => {
@@ -804,7 +804,7 @@ export const ResponseBuilder = ({ data, onChange, onExport, onSave, theme }) => 
 function renderPage(index, ctx) {
   const { theme, c, updateField, updateFaq, updateVisual, updateProductFit, updateDealerField, pr, bfaq, vi, pf, dn, footerTitle } = ctx;
   const isDark = isDarkTheme(theme);
-  const T = 6;
+  const T = 8;
   switch (index) {
     case 0: return (
       <PdfPage theme={theme} pageNumber={1} totalPages={T} footerTitle={footerTitle}>
@@ -862,65 +862,29 @@ function renderPage(index, ctx) {
     case 4: return (
       <PdfPage theme={theme} pageNumber={5} totalPages={T} footerTitle={footerTitle} className="pdf-page-break">
         <DocSectionHeading number={4} title="Product Recommendations" theme={theme} />
-        <div style={{ marginTop: '12px' }}>
-          {pf.typicals.map((t, i) => {
-            const isLast = i === pf.typicals.length - 1;
-            return (
-              <div
-                key={i}
-                style={{
-                  display: 'flex',
-                  gap: '14px',
-                  padding: '10px 0',
-                  borderBottom: isLast ? 'none' : `1px solid ${c.border}`,
-                  alignItems: 'flex-start',
-                }}
-              >
-                {/* Product image or placeholder */}
-                <div
-                  style={{
-                    width: 72,
-                    height: 72,
-                    borderRadius: 6,
-                    border: `1px solid ${c.border}`,
-                    flexShrink: 0,
-                    overflow: 'hidden',
-                    backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)',
-                  }}
-                >
-                  {t.image ? (
-                    <img src={t.image} alt={t.series} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  ) : (
-                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: c.textSecondary, opacity: 0.25, fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                      {t.series}
-                    </div>
-                  )}
-                </div>
-                {/* Content */}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '2px' }}>
-                    <span style={{ fontSize: '13px', fontWeight: 700, color: c.textPrimary }}>{t.itemCode}</span>
-                    <span style={{ fontSize: '11px', color: c.textSecondary }}>{t.category}</span>
-                  </div>
-                  <div style={{ fontSize: '12px', fontWeight: 600, color: c.textPrimary, marginBottom: '3px' }}>
-                    JSI {t.series}
-                  </div>
-                  <div style={{ fontSize: '11px', lineHeight: '1.5', color: c.textSecondary }}>
-                    {t.rationale}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-        <DocLabel theme={theme}>Planning Assumptions</DocLabel>
-        <DocField value={pf.assumptions} onChange={(v) => updateProductFit('assumptions', v)} multiline theme={theme} />
-        <DocLabel theme={theme}>Coverage Gaps</DocLabel>
-        <DocField value={pf.gaps} onChange={(v) => updateProductFit('gaps', v)} multiline theme={theme} />
+        {renderProductCards(pf.typicals.slice(0, 3), { theme, c, isDark })}
       </PdfPage>
     );
     case 5: return (
       <PdfPage theme={theme} pageNumber={6} totalPages={T} footerTitle={footerTitle} className="pdf-page-break">
+        <div style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: c.textSecondary, opacity: 0.4, marginBottom: '14px' }}>Product Recommendations (continued)</div>
+        {renderProductCards(pf.typicals.slice(3, 5), { theme, c, isDark })}
+      </PdfPage>
+    );
+    case 6: return (
+      <PdfPage theme={theme} pageNumber={7} totalPages={T} footerTitle={footerTitle} className="pdf-page-break">
+        <div style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: c.textSecondary, opacity: 0.4, marginBottom: '14px' }}>Product Recommendations (continued)</div>
+        {renderProductCards(pf.typicals.slice(5, 7), { theme, c, isDark })}
+        <div style={{ marginTop: '16px' }}>
+          <DocLabel theme={theme}>Planning Assumptions</DocLabel>
+          <DocField value={pf.assumptions} onChange={(v) => updateProductFit('assumptions', v)} multiline theme={theme} />
+          <DocLabel theme={theme}>Coverage Gaps</DocLabel>
+          <DocField value={pf.gaps} onChange={(v) => updateProductFit('gaps', v)} multiline theme={theme} />
+        </div>
+      </PdfPage>
+    );
+    case 7: return (
+      <PdfPage theme={theme} pageNumber={8} totalPages={T} footerTitle={footerTitle} className="pdf-page-break">
         <DocSectionHeading number={5} title="Dealer & Commercial Notes" theme={theme} />
         <DocLabel theme={theme}>Project Administration</DocLabel>
         <DocField value={dn.fields.projectNotes} onChange={(v) => updateDealerField('projectNotes', v)} multiline theme={theme} />
@@ -936,11 +900,104 @@ function renderPage(index, ctx) {
   }
 }
 
+/* ── Product card renderer — shared between pages ── */
+function renderProductCards(items, { c, isDark }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
+      {items.map((t, i) => {
+        const isLast = i === items.length - 1;
+        return (
+          <div
+            key={t.itemCode}
+            style={{
+              padding: '12px 0',
+              borderBottom: isLast ? 'none' : `1px solid ${c.border}`,
+            }}
+          >
+            {/* Header row: code + series + image */}
+            <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
+              {/* Product image */}
+              <div
+                style={{
+                  width: 110,
+                  height: 80,
+                  borderRadius: 6,
+                  border: `1px solid ${c.border}`,
+                  flexShrink: 0,
+                  overflow: 'hidden',
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)',
+                }}
+              >
+                {t.image ? (
+                  <img src={t.image} alt={t.series} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: c.textSecondary, opacity: 0.2, fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    {t.series}
+                  </div>
+                )}
+              </div>
+              {/* Title + solution */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '2px' }}>
+                  <span style={{ fontSize: '14px', fontWeight: 700, color: c.textPrimary }}>{t.itemCode}</span>
+                  <span style={{ fontSize: '11px', color: c.textSecondary }}>{t.category}</span>
+                </div>
+                <div style={{ fontSize: '12px', fontWeight: 600, color: c.textPrimary, marginBottom: '5px' }}>
+                  JSI {t.series}
+                </div>
+                {/* RFP requirement callout */}
+                {t.rfpRequirement && (
+                  <div
+                    style={{
+                      fontSize: '10px',
+                      lineHeight: '1.5',
+                      color: c.textSecondary,
+                      backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(53,53,53,0.03)',
+                      border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+                      borderRadius: 4,
+                      padding: '6px 8px',
+                      fontStyle: 'italic',
+                    }}
+                  >
+                    <span style={{ fontWeight: 600, fontStyle: 'normal', opacity: 0.6 }}>RFP: </span>
+                    {t.rfpRequirement}
+                  </div>
+                )}
+              </div>
+            </div>
+            {/* Rationale */}
+            <div style={{ fontSize: '11px', lineHeight: '1.6', color: c.textSecondary, marginTop: '6px' }}>
+              {t.rationale}
+            </div>
+            {/* Component list (for PO-1 etc.) */}
+            {t.components && (
+              <div
+                style={{
+                  fontSize: '10px',
+                  lineHeight: '1.65',
+                  color: c.textPrimary,
+                  marginTop: '6px',
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.025)' : 'rgba(53,53,53,0.02)',
+                  borderRadius: 4,
+                  padding: '6px 8px',
+                  fontFamily: 'monospace',
+                  whiteSpace: 'pre-wrap',
+                }}
+              >
+                {t.components}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function renderAllPages(ctx) {
-  const { theme, c, updateField, updateFaq, updateVisual, updateProductFit, updateDealerField, pr, bfaq, vi, pf, dn } = ctx;
   return (
     <div className="flex flex-col">
-      {[0, 1, 2, 3, 4, 5].map((i) => (
+      {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
         <div key={i}>{renderPage(i, ctx)}</div>
       ))}
     </div>
