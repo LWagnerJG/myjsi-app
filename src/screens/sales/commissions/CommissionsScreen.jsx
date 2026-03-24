@@ -3,8 +3,7 @@ import { GlassCard } from '../../../components/common/GlassCard';
 import { ChevronDown, TrendingUp } from 'lucide-react';
 import { COMMISSIONS_DATA, COMMISSION_YEARS } from './data.js';
 import { isDarkTheme } from '../../../design-system/tokens.js';
-
-const fmtMoney = (n) => `$${Number(n || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+import { formatCurrency } from '../../../utils/format.js';
 
 const getMonthDateRange = (year, monthIndex) => {
   const startDate = new Date(year, monthIndex, 1);
@@ -32,7 +31,7 @@ export const CommissionsScreen = ({ theme }) => {
             <div>
               <div className="flex items-baseline gap-2.5">
                 <span className="text-3xl sm:text-4xl font-black tracking-tight" style={{ color: theme.colors.textPrimary }}>
-                  {fmtMoney(total)}
+                  {formatCurrency(total)}
                 </span>
                 <span className="text-xs font-bold uppercase tracking-widest opacity-40">YTD</span>
               </div>
@@ -103,7 +102,7 @@ export const CommissionsScreen = ({ theme }) => {
                   </div>
                 </div>
                 <span className="text-lg font-black tabular-nums shrink-0" style={{ color: theme.colors.textPrimary }}>
-                  {fmtMoney(m.amount)}
+                  {formatCurrency(m.amount)}
                 </span>
                 <ChevronDown
                   className={`w-4 h-4 shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
@@ -163,15 +162,15 @@ export const CommissionsScreen = ({ theme }) => {
                         >
                           <div>
                             <div className="text-[10px] font-semibold uppercase tracking-wider mb-1 opacity-50" style={{ color: theme.colors.textSecondary }}>Invoiced</div>
-                            <div className="text-sm font-semibold tabular-nums" style={{ color: theme.colors.textSecondary }}>{fmtMoney(inv.invoicedAmount)}</div>
+                            <div className="text-sm font-semibold tabular-nums" style={{ color: theme.colors.textSecondary }}>{formatCurrency(inv.invoicedAmount)}</div>
                           </div>
                           <div className="text-center">
                             <div className="text-[10px] font-semibold uppercase tracking-wider mb-1 opacity-50" style={{ color: theme.colors.textSecondary }}>Net</div>
-                            <div className="text-sm font-bold tabular-nums" style={{ color: theme.colors.textPrimary }}>{fmtMoney(inv.netAmount)}</div>
+                            <div className="text-sm font-bold tabular-nums" style={{ color: theme.colors.textPrimary }}>{formatCurrency(inv.netAmount)}</div>
                           </div>
                           <div className="text-right">
                             <div className="text-[10px] font-semibold uppercase tracking-wider mb-1 opacity-50" style={{ color: theme.colors.textSecondary }}>Earned</div>
-                            <div className="text-[15px] font-black tabular-nums" style={{ color: theme.colors.textPrimary }}>{fmtMoney(inv.commission)}</div>
+                            <div className="text-[15px] font-black tabular-nums" style={{ color: theme.colors.textPrimary }}>{formatCurrency(inv.commission)}</div>
                           </div>
                         </div>
                       </div>
@@ -189,15 +188,15 @@ export const CommissionsScreen = ({ theme }) => {
                     >
                       <div>
                         <div className="text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-50" style={{ color: theme.colors.textSecondary }}>Invoiced</div>
-                        <div className="text-sm font-bold tabular-nums" style={{ color: theme.colors.textSecondary }}>{fmtMoney(m.details[1].listTotal)}</div>
+                        <div className="text-sm font-bold tabular-nums" style={{ color: theme.colors.textSecondary }}>{formatCurrency(m.details[1].listTotal)}</div>
                       </div>
                       <div>
                         <div className="text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-50" style={{ color: theme.colors.textSecondary }}>Net</div>
-                        <div className="text-sm font-bold tabular-nums" style={{ color: theme.colors.textPrimary }}>{fmtMoney(m.details[1].netTotal)}</div>
+                        <div className="text-sm font-bold tabular-nums" style={{ color: theme.colors.textPrimary }}>{formatCurrency(m.details[1].netTotal)}</div>
                       </div>
                       <div>
                         <div className="text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-50" style={{ color: theme.colors.textSecondary }}>Total Earned</div>
-                        <div className="text-base font-black tabular-nums" style={{ color: theme.colors.textPrimary }}>{fmtMoney(m.details[1].commissionTotal)}</div>
+                        <div className="text-base font-black tabular-nums" style={{ color: theme.colors.textPrimary }}>{formatCurrency(m.details[1].commissionTotal)}</div>
                       </div>
                     </div>
                   )}

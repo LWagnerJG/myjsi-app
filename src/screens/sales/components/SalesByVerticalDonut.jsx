@@ -1,10 +1,6 @@
 import React, { useMemo } from 'react';
 import { ResponsiveContainer, PieChart, Pie, Cell, Text } from 'recharts';
-
-// Money formatter (compact)
-function fmtMoney(n){
-  const abs=Math.abs(n); if(abs>=1e9)return `$${(n/1e9).toFixed(1)}B`; if(abs>=1e6)return `$${(n/1e6).toFixed(1)}M`; if(abs>=1e3)return `$${(n/1e3).toFixed(1)}K`; return `$${n.toFixed(0)}`;
-}
+import { formatCurrencyCompact } from '../../../utils/format.js';
 
 // Prepare / aggregate data
 function usePrepared(raw){
@@ -34,7 +30,7 @@ export const SalesByVerticalDonut = ({ data, theme, showHeader=true }) => {
   }));
 
   return (
-    <div className="w-full" aria-label={`Sales by Vertical total ${fmtMoney(total)}`}>      
+    <div className="w-full" aria-label={`Sales by Vertical total ${formatCurrencyCompact(total)}`}>      
       {showHeader && (
         <div className="flex items-center justify-between mb-2">
           <h3 className="font-bold text-xl tracking-tight" style={{ color: theme.colors.textPrimary }}>Sales by Vertical</h3>
@@ -61,7 +57,7 @@ export const SalesByVerticalDonut = ({ data, theme, showHeader=true }) => {
               </Pie>
               {/* Center total */}
               <Text x="50%" y="48%" textAnchor="middle" verticalAnchor="end" style={{fontSize:12,fontWeight:600, fill: theme.colors.textSecondary}}>Total</Text>
-              <Text x="50%" y="56%" textAnchor="middle" verticalAnchor="start" style={{fontSize:24,fontWeight:800, fill: theme.colors.textPrimary}}>{fmtMoney(total)}</Text>
+              <Text x="50%" y="56%" textAnchor="middle" verticalAnchor="start" style={{fontSize:24,fontWeight:800, fill: theme.colors.textPrimary}}>{formatCurrencyCompact(total)}</Text>
             </PieChart>
           </ResponsiveContainer>
         </div>
@@ -78,7 +74,7 @@ export const SalesByVerticalDonut = ({ data, theme, showHeader=true }) => {
       </div>
       {/* Accessible slice descriptions (visually hidden) */}
       <div className="sr-only" aria-live="polite">
-        {legend.map(l=> `${l.name} ${l.pct.toFixed(1)}% ${fmtMoney(l.value)}`).join('. ')}
+        {legend.map(l=> `${l.name} ${l.pct.toFixed(1)}% ${formatCurrencyCompact(l.value)}`).join('. ')}
       </div>
     </div>
   );

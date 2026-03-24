@@ -1,4 +1,12 @@
-import React, { useEffect, useLayoutEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState, useCallback, Component } from 'react';
+
+// Silently swallows errors in the exit panel — a crash in the outgoing screen
+// must never propagate to the incoming screen's ErrorBoundary.
+class SilentErrorBoundary extends Component {
+    constructor(props) { super(props); this.state = { dead: false }; }
+    static getDerivedStateFromError() { return { dead: true }; }
+    render() { return this.state.dead ? null : this.props.children; }
+}
 import './AnimatedScreenWrapper.css';
 import { MOTION_DURATIONS_MS, MOTION_EASINGS, toCssBezier } from '../../design-system/motion.js';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion.js';
@@ -183,7 +191,7 @@ export const AnimatedScreenWrapper = ({
         >
             {prevNode && (
                 <div data-role="previous" className="panel" aria-hidden="true">
-                    {prevNode}
+                    <SilentErrorBoundary>{prevNode}</SilentErrorBoundary>
                 </div>
             )}
             <div data-role="current" className="panel">
