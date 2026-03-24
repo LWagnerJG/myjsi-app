@@ -37,6 +37,7 @@ export const MOCK_RESPONSE = {
     fields: {
       projectName: 'GSA Large Furniture Projects BPA — Office Furniture & Related Services',
       dueDate: 'November 14, 2025',
+      solicitation: '47QSMA25Q0082',
       deliverables:
         'Solicitation 47QSMA25Q0082 — Blanket Purchase Agreement for workstations, benching, private offices, technical work benches, high-density storage, demountable walls, seating, tables, meeting & touchdown spaces, open area storage, and ancillary items. Includes design, project management, and installation services across GSA National Regions. 1 base year + 4 option years. Estimated BPA value: $50M.',
       alternates:
@@ -163,8 +164,45 @@ export const MOCK_RESPONSE = {
       projectNotes: 'BPA period: 1 base year + 4 option years. Respond to multiple concurrent RFQs. Dealer network must be educated on SOW requirements per Section 4.0(E). Proof of insurance required 72 hours prior to deliveries. HSPD-12 security adjudication required for all personnel entering Government facilities.',
       nonJsiScope:
         'Demountable walls (DW-1 typical — solid and glass panels, swing doors, STC 39/35 acoustic, UL classified).\nHigh-density storage systems (HDS-1 typical — electric, floor track + carriages, seismic features, 1,000 lbs/carriage foot).\nTechnical work benches (TWB-1 typical — welded frame, ESD laminate, butcher block options).\nPhone booths (PB — freestanding, enclosed, sprinkler provision).',
-      otherManufacturers: 'Demountable walls: TBD teaming partner\nHigh-density storage: TBD teaming partner\nTechnical work benches: TBD teaming partner',
       commercialExceptions: 'Hourly rates for design, PM, and installation shall not exceed GSA MAS contract terms.\nWarehousing included at no charge for first 30 days; extended storage negotiated per BPA call.\nUnion/prevailing wage rates excluded from BPA-level pricing — addressed at call level.',
     },
   },
 };
+
+export const NON_JSI_ITEMS = [
+  {
+    itemCode: 'DW-1',
+    category: 'Demountable Walls',
+    rfpRequirement: 'Section 8.0: Demountable wall system — STC 39 full-height solid panels, STC 35 glass panels, swing doors, UL classified, field-reconfigurable without replacement of primary structure.',
+    manufacturer: '',
+    productModel: '',
+  },
+  {
+    itemCode: 'HDS-1',
+    category: 'High-Density Storage',
+    rfpRequirement: 'Section 8.0: Electric high-density mobile storage — floor track with carriages, seismic features, minimum 1,000 lbs per carriage foot, mechanically assisted or motorized drive.',
+    manufacturer: '',
+    productModel: '',
+  },
+  {
+    itemCode: 'TWB-1',
+    category: 'Technical Work Benches',
+    rfpRequirement: 'Section 8.0: Welded steel frame work bench — ESD laminate and butcher block worksurface options, adjustable height, rated load per applicable federal standards.',
+    manufacturer: '',
+    productModel: '',
+  },
+  {
+    itemCode: 'LSS-1',
+    category: 'Lounge Serpentine Seating',
+    rfpRequirement: 'Section 8.0(L): Modular serpentine lounge — inside and outside wedge seat modules for concave/convex configurations, coordinating straight modules, COM/COL upholstery.',
+    manufacturer: '',
+    productModel: '',
+  },
+  {
+    itemCode: 'PB',
+    category: 'Phone Booth / Focus Pod',
+    rfpRequirement: 'Section 8.0: Freestanding enclosed phone booth — acoustic-rated, ventilated, integrated power/data, sprinkler provision, suitable for open-plan deployment.',
+    manufacturer: '',
+    productModel: '',
+  },
+];

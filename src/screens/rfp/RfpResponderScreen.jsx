@@ -11,6 +11,7 @@ import {
   PROCESSING_STEPS,
   CLARIFICATION_QUESTIONS,
   MOCK_RESPONSE,
+  NON_JSI_ITEMS,
 } from './rfpMockData.js';
 
 const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20 MB
@@ -28,6 +29,7 @@ const RfpResponderScreen = ({ theme, screenParams, onNavigate, setSuccessMessage
 
   /* Stage 3 state */
   const [responseData, setResponseData] = useState(null);
+  const [partnerItems, setPartnerItems] = useState(null);
 
   /* ── Handle preloaded file from home screen drop ── */
   useEffect(() => {
@@ -78,9 +80,16 @@ const RfpResponderScreen = ({ theme, screenParams, onNavigate, setSuccessMessage
     } else {
       // All answered — build response
       setResponseData(structuredClone(MOCK_RESPONSE));
+      setPartnerItems(structuredClone(NON_JSI_ITEMS));
       setStage(3);
     }
   }, [questionIndex]);
+
+  const handlePartnerItemChange = useCallback((itemCode, field, value) => {
+    setPartnerItems((prev) =>
+      prev.map((item) => item.itemCode === itemCode ? { ...item, [field]: value } : item)
+    );
+  }, []);
 
   /* ── Stage 3: Export actions ── */
   const handleExport = useCallback(() => {
@@ -132,6 +141,8 @@ const RfpResponderScreen = ({ theme, screenParams, onNavigate, setSuccessMessage
             <ResponseBuilder
               data={responseData}
               onChange={setResponseData}
+              partnerItems={partnerItems}
+              onPartnerItemChange={handlePartnerItemChange}
               onExport={handleExport}
               onSave={handleSaveOpportunity}
               theme={theme}
