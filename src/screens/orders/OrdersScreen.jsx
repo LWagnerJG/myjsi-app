@@ -6,10 +6,7 @@ import { SearchInput } from '../../components/common/SearchInput.jsx';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 import { isDarkTheme } from '../../design-system/tokens.js';
 import { ORDER_DATA, STATUS_COLORS } from './data.js';
-
-/* ---- Helpers ---- */
-const formatCompanyName = (name) => (name ? name.toLowerCase().replace(/\b(\w)/g, (s) => s.toUpperCase()) : '');
-const currency0 = (n = 0) => `$${Number(n).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+import { formatCurrency, formatCompanyName } from '../../utils/format.js';
 
 /* ---------------------- Calendar View ---------------------- */
 export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => {
@@ -81,7 +78,7 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
                                 onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; }}
                             >
                                 <span className="text-sm" style={{ color: theme.colors.textPrimary }}>{day}</span>
-                                {has && <span className="text-[11px]" style={{ color: theme.colors.textSecondary }}>{currency0(total)}</span>}
+                                {has && <span className="text-[11px]" style={{ color: theme.colors.textSecondary }}>{formatCurrency(total)}</span>}
                             </button>
                         );
                     })}
@@ -111,7 +108,7 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
                                             <span className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: sc }}>{o.status}</span>
                                         </div>
                                     </div>
-                                    <p className="font-bold text-base tabular-nums flex-shrink-0" style={{ color: theme.colors.textPrimary }}>{currency0(o.net)}</p>
+                                    <p className="font-bold text-base tabular-nums flex-shrink-0" style={{ color: theme.colors.textPrimary }}>{formatCurrency(o.net)}</p>
                                 </div>
                             </div>
                         );
@@ -145,7 +142,7 @@ const OrderRow = ({ order, theme, onNavigate, isLast }) => {
                         <span className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: statusColor }}>{order.status}</span>
                     </div>
                 </div>
-                <p className="font-bold text-base tabular-nums flex-shrink-0" style={{ color: theme.colors.textPrimary }}>{currency0(order.net)}</p>
+                <p className="font-bold text-base tabular-nums flex-shrink-0" style={{ color: theme.colors.textPrimary }}>{formatCurrency(order.net)}</p>
             </div>
             {!isLast && <div className="mx-4" style={{ borderTop: `1px solid ${dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}` }} />}
         </button>
@@ -173,7 +170,7 @@ const DateGroupCard = ({ theme, dateKey, group, onNavigate }) => {
                 }}
             >
                 <h2 className="text-xs font-bold tracking-wider" style={{ color: theme.colors.accent }}>{label}</h2>
-                <p className="text-[11px] font-medium" style={{ color: theme.colors.textSecondary, opacity: 0.7 }}>{group.orders.length} {group.orders.length === 1 ? 'order' : 'orders'} &middot; {currency0(group.total)}</p>
+                <p className="text-[11px] font-medium" style={{ color: theme.colors.textSecondary, opacity: 0.7 }}>{group.orders.length} {group.orders.length === 1 ? 'order' : 'orders'} &middot; {formatCurrency(group.total)}</p>
             </div>
             <div>
                 {group.orders.map((o, idx) => (

@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { formatCurrencyCompact } from '../../../utils/format.js';
 
 // Simplified / clean vertical breakdown (no inline chips, consistent layout)
 export const SalesByVerticalBreakdown = ({ data = [], theme, palette }) => {
@@ -23,7 +24,7 @@ export const SalesByVerticalBreakdown = ({ data = [], theme, palette }) => {
   const maxValue = useMemo(() => prepared.reduce((m, r) => Math.max(m, r.value || 0), 0) || 1, [prepared]);
 
   return (
-    <div className="w-full" aria-label={`Sales by vertical total ${fmtMoney(grandTotal)}`}>
+    <div className="w-full" aria-label={`Sales by vertical total ${formatCurrencyCompact(grandTotal)}`}>
       <ol className="w-full">
         {prepared.map((row, idx) => {
           const rel = (row.value / maxValue) * 100; // relative to max for bar length
@@ -42,7 +43,7 @@ export const SalesByVerticalBreakdown = ({ data = [], theme, palette }) => {
               </div>
               {/* Value */}
               <div className="text-xs font-semibold tabular-nums text-right" style={{ color: theme.colors.textPrimary }}>
-                {fmtMoney(row.value)}
+                {formatCurrencyCompact(row.value)}
               </div>
               {/* Percent */}
               <div className="text-xs font-medium tabular-nums text-right" style={{ color: theme.colors.textSecondary }}>
@@ -52,13 +53,13 @@ export const SalesByVerticalBreakdown = ({ data = [], theme, palette }) => {
           );
         })}
       </ol>
-      <div className="sr-only" aria-live="polite">{prepared.map(r => `${r.name} ${fmtMoney(r.value)} ${r.pct.toFixed(1)} percent`).join('. ')}</div>
+      <div className="sr-only" aria-live="polite">{prepared.map(r => `${r.name} ${formatCurrencyCompact(r.value)} ${r.pct.toFixed(1)} percent`).join('. ')}</div>
     </div>
   );
 };
 
 // Helpers
-function fmtMoney(n) { const abs = Math.abs(n); if (abs >= 1e9) return `$${(n / 1e9).toFixed(abs >= 10e9 ? 0 : 1)}B`; if (abs >= 1e6) return `$${(n / 1e6).toFixed(abs >= 10e6 ? 0 : 1)}M`; if (abs >= 1e3) return `$${(n / 1e3).toFixed(abs >= 10e3 ? 0 : 1)}K`; return `$${n.toFixed(0)}`; }
+
 const BASE_PALETTE = ['#55A868', '#C44E52', '#8172B2', '#CCB04C', '#4C72B0', '#8C8C8C'];
 function hashColor(name = '', override) { if (name === 'Other') return '#8C8C8C'; const palette = (override && override.length) ? override : BASE_PALETTE; let h = 0; for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0; return palette[h % (palette.length - 1)]; }
 export default SalesByVerticalBreakdown;

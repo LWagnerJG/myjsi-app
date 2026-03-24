@@ -242,7 +242,6 @@ function App() {
     const [myProjects, setMyProjects] = useState(MY_PROJECTS_DATA);
     const [projectsTabOverride, setProjectsTabOverride] = useState(null);
     const [projectsStageOverride, setProjectsStageOverride] = useState(null);
-    const [, setSelectedProject] = useState(null);
     const [members, setMembers] = useState(INITIAL_MEMBERS);
     const [currentUserId] = useState(1);
 
@@ -446,7 +445,6 @@ function App() {
         setOpportunities,
         myProjects,
         setMyProjects,
-        setSelectedProject,
         members,
         setMembers,
         currentUserId,
