@@ -410,17 +410,17 @@ export const HomeScreen = React.memo(({
                 >
                     <button
                         onClick={() => onNavigate('feedback')}
-                        className="flex items-center gap-2 px-5 py-3 rounded-full transition-all active:scale-[0.97]"
+                        className="flex items-center gap-2 px-5 py-3 rounded-full transition-all motion-tap active:scale-[0.97]"
                         style={{
-                            backdropFilter: 'blur(20px) saturate(1.6)',
-                            WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
-                            backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.60)',
-                            border: isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(255,255,255,0.80)',
-                            boxShadow: isDark
-                                ? '0 4px 20px rgba(0,0,0,0.30)'
-                                : '0 4px 20px rgba(53,53,53,0.10)',
-                            color: colors.textSecondary,
-                            pointerEvents: 'auto',
+                            backdropFilter:       'blur(24px) saturate(1.8)',
+                            WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
+                            backgroundColor:      isDark ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.72)',
+                            border:               isDark ? '1px solid rgba(255,255,255,0.16)' : '1px solid rgba(255,255,255,0.92)',
+                            boxShadow:            isDark
+                                ? '0 4px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08)'
+                                : '0 4px 20px rgba(53,53,53,0.10), inset 0 1px 0 rgba(255,255,255,1)',
+                            color:                isDark ? 'rgba(255,255,255,0.82)' : '#353535',
+                            pointerEvents:        'auto',
                         }}
                     >
                         <MessageSquarePlus className="w-4 h-4" />

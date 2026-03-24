@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
+import { FrostButton } from '../../components/common/JSIButtons.jsx';
 import { Package, Plus, Info } from 'lucide-react';
 import { PRODUCT_DATA } from './data.js';
 import { COMPETITION_METRICS } from './comparison-data.js';
@@ -100,10 +101,16 @@ export const CompetitiveAnalysisScreen = ({ categoryId, productId, theme }) => {
                     <VersusList jsiProduct={product} competitors={perProductList.length ? perProductList : categoryCompetitors} theme={theme} title={perProductList.length ? 'Versus Competitors' : 'Versus Competitors (Category)'} />
                 </div>
             </div>
-            <div className="fixed bottom-0 left-0 right-0 px-4 pb-5 pt-2" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.12), rgba(0,0,0,0))' }}>
-                <button onClick={()=>setShowRequest(true)} className="w-full flex items-center justify-center gap-2 h-14 rounded-full font-semibold active:scale-95 transition-all shadow-lg" style={{ background: theme.colors.accent, color: theme.colors.accentText, boxShadow: `0 4px 12px ${theme.colors.shadow}` }}>
-                    <Plus className="w-5 h-5" /> Request Competitor
-                </button>
+            <div className="fixed bottom-0 left-0 right-0 px-4 pb-5 pt-3" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.14) 60%, transparent)' }}>
+                <FrostButton
+                    onClick={() => setShowRequest(true)}
+                    variant="dark"
+                    size="large"
+                    icon={<Plus className="w-5 h-5" />}
+                    className="w-full"
+                >
+                    Request Competitor
+                </FrostButton>
             </div>
             <Modal show={showRequest} onClose={()=>setShowRequest(false)} title="Request Competitor" theme={theme}>
                 <form onSubmit={handleSubmit} className="space-y-4">

@@ -164,10 +164,14 @@ export const ProductCard = React.memo(
           {onLearnClick && (
             <button
               onClick={(e) => { e.stopPropagation(); onLearnClick(); }}
-              className="px-5 py-2.5 rounded-full font-semibold text-sm transition-all hover:scale-105 active:scale-95"
+              className="px-5 py-2.5 rounded-full font-semibold text-sm transition-all motion-tap hover:scale-[1.03] active:scale-[0.98]"
               style={{
-                backgroundColor: JSI_COLORS.white,
-                color: JSI_COLORS.charcoal,
+                backdropFilter:       'blur(12px) saturate(1.4)',
+                WebkitBackdropFilter: 'blur(12px) saturate(1.4)',
+                backgroundColor:      'rgba(255, 252, 248, 0.88)',
+                color:                JSI_COLORS.charcoal,
+                border:               '1px solid rgba(255, 255, 255, 0.70)',
+                boxShadow:            'inset 0 1px 0 rgba(255,255,255,0.95)',
               }}
             >
               Learn
@@ -176,11 +180,14 @@ export const ProductCard = React.memo(
           {onProductsClick && (
             <button
               onClick={(e) => { e.stopPropagation(); onProductsClick(); }}
-              className="px-5 py-2.5 rounded-full font-semibold text-sm transition-all hover:scale-105 active:scale-95"
+              className="px-5 py-2.5 rounded-full font-semibold text-sm transition-all motion-tap hover:scale-[1.03] active:scale-[0.98]"
               style={{
-                backgroundColor: 'transparent',
-                color: JSI_COLORS.white,
-                border: `1.5px solid ${JSI_COLORS.white}`,
+                backdropFilter:       'blur(12px) saturate(1.4)',
+                WebkitBackdropFilter: 'blur(12px) saturate(1.4)',
+                backgroundColor:      'rgba(255, 255, 255, 0.10)',
+                color:                JSI_COLORS.white,
+                border:               '1.5px solid rgba(255, 255, 255, 0.50)',
+                boxShadow:            'inset 0 1px 0 rgba(255,255,255,0.15)',
               }}
             >
               Products
