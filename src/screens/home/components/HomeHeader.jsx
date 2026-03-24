@@ -59,8 +59,12 @@ export const HomeHeader = ({
             {/* Dashboard label + search bar on one row */}
             <div className="flex items-center gap-4">
                 <div className="shrink-0 hidden sm:block min-w-[120px]">
-                    <h2 className="text-[28px] font-semibold tracking-tight leading-none" style={{ color: colors.textPrimary }}>Dashboard</h2>
-                    <div className="text-[12px] font-medium whitespace-nowrap mt-1.5" style={{ color: colors.textSecondary, opacity: 0.5 }}>{todayLabel}</div>
+                    <div className="flex items-center gap-1.5 mb-1">
+                        <img src="/myjsi-icon.png" alt="myJSI" className="w-4 h-4 rounded-[5px] opacity-70" />
+                        <span className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: colors.textSecondary, opacity: 0.45 }}>myJSI</span>
+                    </div>
+                    <h2 className="text-[26px] font-bold tracking-tight leading-none" style={{ color: colors.textPrimary }}>Dashboard</h2>
+                    <div className="text-[11px] font-medium whitespace-nowrap mt-1.5" style={{ color: colors.textSecondary, opacity: 0.45 }}>{todayLabel}</div>
                 </div>
 
                 <GlassCard

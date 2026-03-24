@@ -158,30 +158,39 @@ export const QuickActionDropdown = ({ theme, onActionSelect, className = '' }) =
 
                     {/* Actions List */}
                     <div className="py-2">
-                        {QUICK_ACTIONS.map((action, index) => (
-                            <button
-                                key={action.id}
-                                ref={el => itemRefs.current[index] = el}
-                                role="menuitem"
-                                onClick={() => handleActionClick(action.id)}
-                                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-black/[0.03] dark:hover:bg-white/[0.03] transition-colors text-left group outline-none focus:bg-black/[0.03] dark:focus:bg-white/[0.03]"
-                            >
-                                <div 
-                                    className="w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-105"
-                                    style={{ backgroundColor: `${colors.accent}0D` }}
+                        {QUICK_ACTIONS.map((action, index) => {
+                            const isFeedback = action.id === 'feedback';
+                            return (
+                                <button
+                                    key={action.id}
+                                    ref={el => itemRefs.current[index] = el}
+                                    role="menuitem"
+                                    onClick={() => handleActionClick(action.id)}
+                                    className={`w-full flex items-center gap-3 px-4 py-3 transition-colors text-left group outline-none ${
+                                        isFeedback
+                                            ? 'hover:bg-[#C4956A]/[0.06] focus:bg-[#C4956A]/[0.06]'
+                                            : 'hover:bg-black/[0.03] dark:hover:bg-white/[0.03] focus:bg-black/[0.03] dark:focus:bg-white/[0.03]'
+                                    }`}
                                 >
-                                    <action.icon className="w-5 h-5" aria-hidden="true" style={{ color: colors.accent }} />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <div className="text-sm font-semibold" style={{ color: colors.textPrimary }}>
-                                        {action.label}
+                                    <div
+                                        className="w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-105"
+                                        style={{
+                                            backgroundColor: isFeedback ? 'rgba(196,149,106,0.12)' : `${colors.accent}0D`,
+                                        }}
+                                    >
+                                        <action.icon className="w-5 h-5" aria-hidden="true" style={{ color: isFeedback ? '#C4956A' : colors.accent }} />
                                     </div>
-                                    <div className="text-xs truncate" style={{ color: colors.textSecondary }}>
-                                        {action.description}
+                                    <div className="flex-1 min-w-0">
+                                        <div className="text-sm font-semibold" style={{ color: isFeedback ? '#C4956A' : colors.textPrimary }}>
+                                            {action.label}
+                                        </div>
+                                        <div className="text-xs truncate" style={{ color: colors.textSecondary }}>
+                                            {action.description}
+                                        </div>
                                     </div>
-                                </div>
-                            </button>
-                        ))}
+                                </button>
+                            );
+                        })}
                     </div>
                 </motion.div>
             )}
