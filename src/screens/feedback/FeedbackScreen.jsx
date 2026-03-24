@@ -3,6 +3,19 @@ import { Send, Paperclip, X, MessageSquare, Bug, Lightbulb, Sparkles, CheckCircl
 import { isDarkTheme } from '../../design-system/tokens.js';
 import { hapticSuccess } from '../../utils/haptics.js';
 
+const FEEDBACK_TYPES = [
+    { value: 'general',     label: 'General',     icon: MessageSquare },
+    { value: 'bug',         label: 'Bug',          icon: Bug           },
+    { value: 'feature',     label: 'Feature',      icon: Lightbulb     },
+    { value: 'improvement', label: 'Improvement',  icon: Sparkles      },
+];
+
+const formatFileSize = (bytes = 0) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
+
 export const FeedbackScreen = ({ theme }) => {
     const [feedbackType, setFeedbackType] = useState('general');
     const [message, setMessage] = useState('');
@@ -11,19 +24,6 @@ export const FeedbackScreen = ({ theme }) => {
 
     const isDark = isDarkTheme(theme);
     const colors = theme.colors;
-
-    const feedbackTypes = [
-        { value: 'general', label: 'General', icon: MessageSquare },
-        { value: 'bug', label: 'Bug Report', icon: Bug },
-        { value: 'feature', label: 'Feature', icon: Lightbulb },
-        { value: 'improvement', label: 'Improvement', icon: Sparkles },
-    ];
-
-    const formatFileSize = (bytes = 0) => {
-        if (bytes < 1024) return `${bytes} B`;
-        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-        return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-    };
 
     function onAttach(e) {
         const list = Array.from(e.target.files || []);
@@ -41,25 +41,34 @@ export const FeedbackScreen = ({ theme }) => {
         setSubmitted(true);
     }
 
-    const cardBg = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.72)';
-    const cardBorder = isDark ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(0,0,0,0.06)';
-    const subtleBg = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.025)';
-    const subtleBorder = isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)';
+    const surface = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.80)';
+    const surfaceBorder = isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)';
+    const inputBg = isDark ? 'rgba(0,0,0,0.20)' : 'rgba(0,0,0,0.025)';
 
+    /* ── Success ── */
     if (submitted) {
         return (
             <div className="flex flex-col h-full app-header-offset items-center justify-center px-6" style={{ backgroundColor: colors.background }}>
-                <div className="text-center space-y-4 max-w-xs">
+                <div className="text-center max-w-xs space-y-5">
                     <div
-                        className="w-16 h-16 rounded-full flex items-center justify-center mx-auto"
-                        style={{ backgroundColor: isDark ? 'rgba(74,124,89,0.15)' : 'rgba(74,124,89,0.08)' }}
+                        className="w-14 h-14 rounded-full flex items-center justify-center mx-auto"
+                        style={{ backgroundColor: isDark ? 'rgba(74,124,89,0.18)' : 'rgba(74,124,89,0.10)' }}
                     >
-                        <CheckCircle2 className="w-7 h-7" style={{ color: '#4A7C59' }} />
+                        <CheckCircle2 className="w-6 h-6" style={{ color: '#4A7C59' }} />
                     </div>
-                    <div className="space-y-1.5">
-                        <h2 className="text-xl font-semibold tracking-tight" style={{ color: colors.textPrimary }}>Thank you</h2>
-                        <p className="text-[13px] leading-relaxed" style={{ color: colors.textSecondary }}>Your feedback has been submitted. We read every message and use it to improve MyJSI.</p>
+                    <div className="space-y-2">
+                        <h2 className="text-[22px] font-bold tracking-tight" style={{ color: colors.textPrimary }}>Thank you</h2>
+                        <p className="text-[13px] leading-relaxed" style={{ color: colors.textSecondary }}>
+                            Your feedback has been received. We read every message and use it to improve myJSI.
+                        </p>
                     </div>
+                    <button
+                        onClick={() => { setSubmitted(false); setMessage(''); setFiles([]); setFeedbackType('general'); }}
+                        className="text-[12px] font-semibold px-4 py-2 rounded-full transition-all hover:opacity-70"
+                        style={{ color: colors.textSecondary, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }}
+                    >
+                        Send another
+                    </button>
                 </div>
             </div>
         );
@@ -69,19 +78,25 @@ export const FeedbackScreen = ({ theme }) => {
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: colors.background }}>
             <div className="flex-1 overflow-y-auto scrollbar-hide">
                 <form onSubmit={handleSubmit}>
-                    <div className="px-4 sm:px-6 pb-10 max-w-2xl mx-auto pt-2">
+                    <div className="px-4 sm:px-6 pt-6 pb-10 max-w-lg mx-auto space-y-6">
 
-                        {/* Header */}
-                        <div className="pt-2 pb-5">
-                            <h1 className="text-[22px] font-semibold tracking-tight" style={{ color: colors.textPrimary }}>Share Feedback</h1>
-                            <p className="text-[13px] mt-1" style={{ color: colors.textSecondary, opacity: 0.7 }}>Help us build a better MyJSI — we read every message.</p>
+                        {/* ── Page header ── */}
+                        <div>
+                            <h1 className="text-[24px] font-bold tracking-tight leading-tight" style={{ color: colors.textPrimary }}>
+                                Share Feedback
+                            </h1>
+                            <p className="mt-1.5 text-[13px] leading-relaxed" style={{ color: colors.textSecondary, opacity: 0.65 }}>
+                                Help us build a better myJSI — we read every message.
+                            </p>
                         </div>
 
-                        {/* Type selector — grid of equal-width tiles */}
-                        <div className="mb-4">
-                            <span className="text-xs font-semibold uppercase tracking-widest mb-2.5 block" style={{ color: colors.textSecondary, opacity: 0.6 }}>Category</span>
-                            <div className="grid grid-cols-4 gap-2">
-                                {feedbackTypes.map(t => {
+                        {/* ── Category ── */}
+                        <div className="space-y-2.5">
+                            <span className="text-[11px] font-bold uppercase tracking-[0.10em]" style={{ color: colors.textSecondary, opacity: 0.5 }}>
+                                Category
+                            </span>
+                            <div className="flex gap-2 flex-wrap">
+                                {FEEDBACK_TYPES.map(t => {
                                     const active = feedbackType === t.value;
                                     const Icon = t.icon;
                                     return (
@@ -89,19 +104,20 @@ export const FeedbackScreen = ({ theme }) => {
                                             key={t.value}
                                             type="button"
                                             onClick={() => setFeedbackType(t.value)}
-                                            className="flex flex-col items-center justify-center gap-1.5 py-3 rounded-2xl text-xs font-semibold transition-all"
+                                            className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[12px] font-semibold transition-all active:scale-95"
                                             style={{
                                                 backgroundColor: active
-                                                    ? (isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)')
-                                                    : cardBg,
+                                                    ? (isDark ? 'rgba(255,255,255,0.12)' : colors.textPrimary)
+                                                    : (isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'),
+                                                color: active
+                                                    ? (isDark ? colors.textPrimary : '#fff')
+                                                    : colors.textSecondary,
                                                 border: active
-                                                    ? (isDark ? '1px solid rgba(255,255,255,0.14)' : '1px solid rgba(0,0,0,0.10)')
-                                                    : cardBorder,
-                                                color: active ? colors.textPrimary : colors.textSecondary,
-                                                borderRadius: 16,
+                                                    ? (isDark ? '1px solid rgba(255,255,255,0.15)' : 'none')
+                                                    : surfaceBorder,
                                             }}
                                         >
-                                            <Icon className="w-4 h-4" style={{ opacity: active ? 1 : 0.5 }} />
+                                            <Icon className="w-3.5 h-3.5" />
                                             {t.label}
                                         </button>
                                     );
@@ -109,85 +125,87 @@ export const FeedbackScreen = ({ theme }) => {
                             </div>
                         </div>
 
-                        {/* Message */}
-                        <div className="mb-4">
-                            <div className="flex items-center justify-between mb-2.5">
-                                <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: colors.textSecondary, opacity: 0.6 }}>Message</span>
+                        {/* ── Message ── */}
+                        <div className="space-y-2.5">
+                            <div className="flex items-baseline justify-between">
+                                <span className="text-[11px] font-bold uppercase tracking-[0.10em]" style={{ color: colors.textSecondary, opacity: 0.5 }}>
+                                    Message
+                                </span>
                                 {message.length > 0 && (
-                                    <span className="text-[11px] tabular-nums" style={{ color: colors.textSecondary, opacity: 0.35 }}>{message.length}</span>
+                                    <span className="text-[11px] tabular-nums" style={{ color: colors.textSecondary, opacity: 0.30 }}>
+                                        {message.length}
+                                    </span>
                                 )}
                             </div>
-                            <div style={{ backgroundColor: cardBg, border: cardBorder, borderRadius: 20 }} className="p-1">
-                                <textarea
-                                    value={message}
-                                    onChange={(e) => setMessage(e.target.value)}
-                                    placeholder="What's on your mind — bugs, ideas, anything..."
-                                    rows={5}
-                                    className="resize-none text-[13px] leading-relaxed w-full rounded-2xl px-4 py-3"
-                                    style={{
-                                        backgroundColor: subtleBg,
-                                        border: 'none',
-                                        color: colors.textPrimary,
-                                        outline: 'none',
-                                    }}
-                                    required
-                                />
-                            </div>
+                            <textarea
+                                value={message}
+                                onChange={(e) => setMessage(e.target.value)}
+                                placeholder="What's on your mind — bugs, ideas, anything..."
+                                rows={6}
+                                required
+                                className="w-full resize-none text-[14px] leading-relaxed px-4 py-3.5 rounded-2xl transition-all outline-none"
+                                style={{
+                                    backgroundColor: surface,
+                                    border: surfaceBorder,
+                                    color: colors.textPrimary,
+                                    caretColor: colors.textPrimary,
+                                }}
+                            />
                         </div>
 
-                        {/* Attachments */}
-                        <div className="mb-6">
-                            <div className="flex items-center justify-between mb-2.5">
-                                <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: colors.textSecondary, opacity: 0.6 }}>Attachments</span>
+                        {/* ── Attachments ── */}
+                        <div className="space-y-2.5">
+                            <div className="flex items-center justify-between">
+                                <span className="text-[11px] font-bold uppercase tracking-[0.10em]" style={{ color: colors.textSecondary, opacity: 0.5 }}>
+                                    Attachments
+                                </span>
                                 <label
-                                    className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium cursor-pointer transition-all active:scale-95"
+                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold cursor-pointer transition-all active:scale-95 hover:opacity-70"
                                     style={{
                                         backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
                                         color: colors.textSecondary,
-                                        border: subtleBorder,
+                                        border: surfaceBorder,
                                     }}
                                 >
                                     <Paperclip className="w-3 h-3" />
-                                    Add files
+                                    Attach files
                                     <input type="file" multiple className="hidden" onChange={onAttach} />
                                 </label>
                             </div>
+
                             {files.length > 0 && (
-                                <div style={{ backgroundColor: cardBg, border: cardBorder, borderRadius: 16 }} className="p-2">
-                                    <ul className="space-y-1">
-                                        {files.map((f, i) => (
-                                            <li
-                                                key={`${f.name}-${i}`}
-                                                className="flex items-center justify-between px-3 py-2 rounded-xl"
-                                                style={{ backgroundColor: subtleBg }}
-                                            >
-                                                <div className="min-w-0">
-                                                    <div className="truncate text-xs font-medium" style={{ color: colors.textPrimary }}>{f.name}</div>
-                                                    <div className="text-[11px]" style={{ color: colors.textSecondary, opacity: 0.45 }}>{formatFileSize(f.size)}</div>
-                                                </div>
-                                                <button type="button" onClick={() => removeFile(i)} className="ml-3 p-1 rounded-full transition-opacity hover:opacity-60">
-                                                    <X className="w-3.5 h-3.5" style={{ color: colors.textSecondary }} />
-                                                </button>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
+                                <ul className="space-y-1.5">
+                                    {files.map((f, i) => (
+                                        <li
+                                            key={`${f.name}-${i}`}
+                                            className="flex items-center justify-between px-3.5 py-2.5 rounded-xl"
+                                            style={{ backgroundColor: surface, border: surfaceBorder }}
+                                        >
+                                            <div className="min-w-0 flex-1">
+                                                <div className="truncate text-[13px] font-medium" style={{ color: colors.textPrimary }}>{f.name}</div>
+                                                <div className="text-[11px] mt-0.5" style={{ color: colors.textSecondary, opacity: 0.45 }}>{formatFileSize(f.size)}</div>
+                                            </div>
+                                            <button type="button" onClick={() => removeFile(i)} className="ml-3 p-1.5 rounded-full transition-opacity hover:opacity-60 shrink-0">
+                                                <X className="w-3.5 h-3.5" style={{ color: colors.textSecondary }} />
+                                            </button>
+                                        </li>
+                                    ))}
+                                </ul>
                             )}
                         </div>
 
-                        {/* Submit */}
+                        {/* ── Submit ── */}
                         <button
                             type="submit"
                             disabled={!message.trim()}
-                            className="w-full flex items-center justify-center gap-2 py-3.5 text-[13px] font-semibold rounded-2xl transition-all active:scale-[0.98] disabled:opacity-25"
+                            className="w-full flex items-center justify-center gap-2 py-4 text-[13px] font-bold tracking-wide rounded-2xl transition-all active:scale-[0.98] disabled:opacity-30"
                             style={{
                                 backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : colors.textPrimary,
                                 color: isDark ? colors.textPrimary : '#fff',
-                                border: 'none',
                             }}
                         >
-                            <Send className="w-4 h-4" />
-                            Submit Feedback
+                            <Send className="w-3.5 h-3.5" />
+                            Send Feedback
                         </button>
 
                     </div>
