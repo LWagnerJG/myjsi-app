@@ -212,19 +212,45 @@ export const DESIGN_TOKENS = {
     frost44: '44px',
   },
 
-  // Frost glass button presets (simplified)
+  // Glass button presets — spread directly into inline style props.
+  // Three blur tiers: overlay (12px/tight), standard (20px/floating), heavy (24px/prominent).
+  // JSI warm-tinted backgrounds match charcoal (#353535) and warm-beige palette.
   frost: {
-    dark: {
-      background: '#2A2A2A',
-      color: '#FFFFFF',
-      backdropFilter: 'none',
-      boxShadow: 'none',
-    },
-    light: {
-      background: '#FFFFFF',
-      color: '#353535',
-      backdropFilter: 'none',
-      boxShadow: 'none',
+    // FrostButton: floating footers, sticky bars, fixed CTAs over scrolling content
+    button: {
+      dark: {
+        backdropFilter:       'blur(20px) saturate(1.6)',
+        WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
+        backgroundColor:      'rgba(40, 38, 36, 0.84)',
+        color:                '#FFFFFF',
+        border:               '1px solid rgba(255, 255, 255, 0.13)',
+        boxShadow:            '0 4px 24px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.09)',
+      },
+      light: {
+        backdropFilter:       'blur(20px) saturate(1.6)',
+        WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
+        backgroundColor:      'rgba(255, 252, 248, 0.74)',
+        color:                '#353535',
+        border:               '1px solid rgba(255, 255, 255, 0.90)',
+        boxShadow:            '0 4px 24px rgba(53, 53, 53, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.95)',
+      },
+      // Lighter blur for buttons floating over dark image overlays (e.g. ProductCard)
+      overlayLearn: {
+        backdropFilter:       'blur(12px) saturate(1.4)',
+        WebkitBackdropFilter: 'blur(12px) saturate(1.4)',
+        backgroundColor:      'rgba(255, 252, 248, 0.88)',
+        color:                '#353535',
+        border:               '1px solid rgba(255, 255, 255, 0.70)',
+        boxShadow:            'inset 0 1px 0 rgba(255, 255, 255, 0.95)',
+      },
+      overlayGhost: {
+        backdropFilter:       'blur(12px) saturate(1.4)',
+        WebkitBackdropFilter: 'blur(12px) saturate(1.4)',
+        backgroundColor:      'rgba(255, 255, 255, 0.10)',
+        color:                '#FFFFFF',
+        border:               '1.5px solid rgba(255, 255, 255, 0.50)',
+        boxShadow:            'inset 0 1px 0 rgba(255, 255, 255, 0.15)',
+      },
     },
   },
 };

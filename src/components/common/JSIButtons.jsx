@@ -2,19 +2,21 @@ import React from 'react';
 import { DESIGN_TOKENS, isDarkTheme } from '../../design-system/tokens.js';
 
 /**
- * JSI Frost Button — Frosted glass CTA
- *
- * Intended for floating/overlay contexts where there is visual depth behind
- * the button: fixed footers, sticky bars, buttons over imagery or gradients.
- * Uses real backdrop-filter blur so the surface beneath shows through warmly.
- *
- * Variants:
- *   dark  — warm charcoal glass (primary action, dark overlay contexts)
- *   light — warm white glass (over light backgrounds, secondary floating contexts)
- *
- * JSI brand note: backgrounds are warm-tinted (brown-charcoal / warm-white),
- * not cold black or pure white, to match the JSI Neue Haas / warm-beige palette.
+ * JSI Frost Button — Frosted glass CTA for floating/overlay contexts
+ * (fixed footers, sticky bars, buttons over imagery or gradients).
+ * Style presets live in DESIGN_TOKENS.frost.button.
  */
+const FROST_SIZES = {
+    compact: 'px-4 py-2.5 text-xs gap-2',
+    default: 'px-5 py-3 text-sm gap-2.5',
+    large:   'px-6 py-4 text-base gap-3',
+};
+
+const FROST_STYLE = {
+    dark:  { ...DESIGN_TOKENS.frost.button.dark,  letterSpacing: '-0.01em' },
+    light: { ...DESIGN_TOKENS.frost.button.light, letterSpacing: '-0.01em' },
+};
+
 export const FrostButton = ({
     children,
     onClick,
@@ -24,54 +26,20 @@ export const FrostButton = ({
     variant = 'dark',
     size = 'default',
     icon = null,
-    theme = null,  // retained for API compat; glass is inherently theme-agnostic
     ...props
-}) => {
-    const sizeClasses = {
-        compact: 'px-4 py-2.5 text-xs gap-2',
-        default: 'px-5 py-3 text-sm gap-2.5',
-        large:   'px-6 py-4 text-base gap-3',
-    };
-
-    // Warm charcoal glass — primary floating CTA
-    const darkStyle = {
-        backdropFilter:         'blur(20px) saturate(1.6)',
-        WebkitBackdropFilter:   'blur(20px) saturate(1.6)',
-        backgroundColor:        'rgba(40, 38, 36, 0.84)',
-        color:                  '#FFFFFF',
-        border:                 '1px solid rgba(255, 255, 255, 0.13)',
-        boxShadow:              '0 4px 24px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.09)',
-    };
-
-    // Warm white glass — secondary / light-surface floating CTA
-    const lightStyle = {
-        backdropFilter:         'blur(20px) saturate(1.6)',
-        WebkitBackdropFilter:   'blur(20px) saturate(1.6)',
-        backgroundColor:        'rgba(255, 252, 248, 0.74)',
-        color:                  '#353535',
-        border:                 '1px solid rgba(255, 255, 255, 0.90)',
-        boxShadow:              '0 4px 24px rgba(53, 53, 53, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.95)',
-    };
-
-    const variantStyle = variant === 'dark' ? darkStyle : lightStyle;
-
-    return (
-        <button
-            type={type}
-            onClick={onClick}
-            disabled={disabled}
-            className={`${sizeClasses[size]} font-semibold rounded-full transition-all flex items-center justify-center motion-tap hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed ${className}`}
-            style={{
-                ...variantStyle,
-                letterSpacing: '-0.01em',
-            }}
-            {...props}
-        >
-            {icon && <span className="inline-flex">{icon}</span>}
-            {children}
-        </button>
-    );
-};
+}) => (
+    <button
+        type={type}
+        onClick={onClick}
+        disabled={disabled}
+        className={`${FROST_SIZES[size]} font-semibold rounded-full transition-all flex items-center justify-center motion-tap hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed ${className}`}
+        style={FROST_STYLE[variant] ?? FROST_STYLE.dark}
+        {...props}
+    >
+        {icon && <span className="inline-flex">{icon}</span>}
+        {children}
+    </button>
+);
 
 /**
  * JSI Pill Button - Selection button with pill shape
