@@ -19,12 +19,11 @@ export const AppHeader = React.memo(({
 
     // Semi-transparent so blurred background content shows through (frosted glass)
     const glassBg = dark ? 'rgba(42,42,42,0.88)' : 'rgba(255,255,255,0.88)';
-    // Gradient overlay for the blur scrim: most opaque at very top (near status bar clock),
-    // still semi-opaque through the pill, then fades to fully transparent below.
-    // This sits on top of the backdrop-filter layer to give the "fades as it descends" look.
+    // Subtle tint at top, fully transparent just past the pill — keeps the
+    // scrim from creating a visible dead zone below the header.
     const scrimGradient = dark
-        ? 'linear-gradient(to bottom, rgba(26,26,26,0.92) 0%, rgba(26,26,26,0.55) 50%, transparent 100%)'
-        : 'linear-gradient(to bottom, rgba(240,237,232,0.92) 0%, rgba(240,237,232,0.55) 50%, transparent 100%)';
+        ? 'linear-gradient(to bottom, rgba(26,26,26,0.55) 0%, transparent 100%)'
+        : 'linear-gradient(to bottom, rgba(240,237,232,0.55) 0%, transparent 100%)';
 
     const getTimeGreeting = () => {
         const hour = new Date().getHours();
@@ -33,8 +32,8 @@ export const AppHeader = React.memo(({
         return 'Good Evening';
     };
 
-    // Blur scrim zone height: safe-area + pt-3 + pill + fade below pill
-    const scrimHeight = 140;
+    // Scrim covers status bar + pill only — tight zone, no bleed below the header
+    const scrimHeight = 88;
 
     return (
         <>
