@@ -20,9 +20,9 @@ export const CLARIFICATION_QUESTIONS = [
     choices: ['Prioritize our best 2–3 lines', 'Max out the allowance where possible', 'I\'ll decide per code later', 'Not sure yet'],
   },
   {
-    question: 'Which JSI task seating line should we lead with?',
-    rfpExcerpt: 'Section 8.0(H): Task chair (TC), heavy-duty task chair (THD), and task stool (TST) must be offered from the same product line family.',
-    choices: ['Protocol', 'Ansen', 'Flux', 'Not sure yet'],
+    question: 'What discount tier should we quote for seating?',
+    rfpExcerpt: 'Section 3.0: Sample project pricing shall reflect the Offeror\'s best commercial pricing. Pricing will be evaluated on a per-zone basis. Volume discount schedules may be submitted as part of the pricing proposal.',
+    choices: ['Aggressive — win on price', 'Standard GSA contract pricing', 'Premium — justify with service value', 'Not sure yet'],
   },
   {
     question: 'How should we handle the items JSI doesn\'t manufacture?',

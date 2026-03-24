@@ -275,9 +275,9 @@ export const ClarificationStage = ({
   const isExit = phase === 'exit';
 
   return (
-    <div className="flex flex-col items-center justify-center w-full max-w-lg mx-auto flex-1" style={{ minHeight: 0 }}>
-      {/* Subtle progress bar — no numbered dots */}
-      <div className="w-full max-w-[200px] mb-8">
+    <div className="flex flex-col items-center w-full max-w-lg mx-auto flex-1" style={{ minHeight: 0 }}>
+      {/* Subtle progress bar — pinned at top */}
+      <div className="w-full max-w-[200px] mt-6 mb-6 flex-shrink-0">
         <div
           className="w-full h-[3px] rounded-full overflow-hidden"
           style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }}
@@ -292,57 +292,73 @@ export const ClarificationStage = ({
         </div>
       </div>
 
-      {/* Thinking state */}
-      {isThinking && (
-        <div className="flex flex-col items-center gap-3" style={{ animation: 'rfp-fade-in 300ms ease' }}>
-          <ElliottAvatar size={36} />
-          <p className="text-sm font-medium" style={{ color: c.textSecondary }}>
-            Thinking…
-          </p>
-          <ThinkingDots color={c.accent || '#353535'} />
-          <style>{`
-            @keyframes rfp-fade-in {
-              from { opacity: 0; transform: translateY(6px); }
-              to { opacity: 1; transform: translateY(0); }
-            }
-          `}</style>
-        </div>
-      )}
-
-      {/* Question card */}
-      {!isThinking && (
-        <div
-          className="w-full"
-          style={{
-            opacity: isVisible ? 1 : 0,
-            transform: isVisible
-              ? 'translateY(0)'
-              : isExit
-                ? 'translateY(-20px)'
-                : 'translateY(16px)',
-            transition: 'opacity 350ms ease, transform 350ms ease',
-          }}
-        >
-          {/* Question */}
-          <h2
-            className="text-[28px] font-bold tracking-tight leading-snug mb-4"
-            style={{ color: c.textPrimary }}
-          >
-            {q.question}
-          </h2>
-
-          {/* RFP excerpt — small contextual hint */}
-          {q.rfpExcerpt && (
-            <p
-              className="text-xs leading-relaxed mb-6"
-              style={{ color: c.textSecondary, opacity: 0.6 }}
-            >
-              From RFP: &ldquo;{q.rfpExcerpt}&rdquo;
+      {/* Fixed-height content area — prevents layout shift */}
+      <div className="flex-1 w-full flex items-center justify-center" style={{ minHeight: 0 }}>
+        {/* Thinking state */}
+        {isThinking && (
+          <div className="flex flex-col items-center gap-3" style={{ animation: 'rfp-fade-in 300ms ease' }}>
+            <ElliottAvatar size={36} />
+            <p className="text-sm font-medium" style={{ color: c.textSecondary }}>
+              Thinking…
             </p>
-          )}
+            <ThinkingDots color={c.accent || '#353535'} />
+            <style>{`
+              @keyframes rfp-fade-in {
+                from { opacity: 0; transform: translateY(6px); }
+                to { opacity: 1; transform: translateY(0); }
+              }
+            `}</style>
+          </div>
+        )}
 
-          {/* Choices */}
-          <div className="flex flex-col gap-2.5">
+        {/* Question card */}
+        {!isThinking && (
+          <div
+            className="w-full"
+            style={{
+              opacity: isVisible ? 1 : 0,
+              transform: isVisible
+                ? 'translateY(0)'
+                : isExit
+                  ? 'translateY(-20px)'
+                  : 'translateY(16px)',
+              transition: 'opacity 350ms ease, transform 350ms ease',
+            }}
+          >
+            {/* RFP excerpt — the primary visual element */}
+            {q.rfpExcerpt && (
+              <div
+                className="rounded-xl mb-5 px-5 py-4"
+                style={{
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(53,53,53,0.03)',
+                  border: `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'}`,
+                }}
+              >
+                <div
+                  className="text-[10px] font-semibold tracking-[0.1em] uppercase mb-2"
+                  style={{ color: c.textSecondary, opacity: 0.45 }}
+                >
+                  From the RFP
+                </div>
+                <p
+                  className="text-[15px] leading-relaxed"
+                  style={{ color: c.textPrimary, opacity: 0.85 }}
+                >
+                  &ldquo;{q.rfpExcerpt}&rdquo;
+                </p>
+              </div>
+            )}
+
+            {/* Question */}
+            <h2
+              className="text-xl font-bold tracking-tight leading-snug mb-5"
+              style={{ color: c.textPrimary }}
+            >
+              {q.question}
+            </h2>
+
+            {/* Choices */}
+            <div className="flex flex-col gap-2.5">
             {q.choices.map((choice, idx) => {
               const isSelected = selected === idx;
               const isNotSure = choice.toLowerCase().includes('not sure');
@@ -370,6 +386,7 @@ export const ClarificationStage = ({
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };
