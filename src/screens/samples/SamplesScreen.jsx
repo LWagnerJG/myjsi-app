@@ -67,7 +67,7 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
         const toggleSet = () => onUpdateCart({ id: setId, name: `All ${currentCategoryName} Finishes`, isSet: true }, setQty > 0 ? -setQty : 1);
 
         return (
-            <div className="grid gap-3 pb-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))' }}>
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-3 pb-4">
                 {/* ── Category Set Tile ── */}
                 <div
                     onClick={toggleSet}
@@ -82,9 +82,9 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                         <Package className="w-7 h-7" style={{ color: setQty > 0 ? theme.colors.accentText : theme.colors.textSecondary }} />
                         {setQty > 0 && <CheckCircle className="w-4 h-4" style={{ color: theme.colors.accentText }} />}
                     </div>
-                    <div className="px-3 py-2 text-center" style={{ backgroundColor: setQty > 0 ? theme.colors.accent : theme.colors.surface }}>
-                        <p className="text-xs font-bold" style={{ color: setQty > 0 ? theme.colors.accentText : theme.colors.textPrimary }}>All {currentCategoryName}</p>
-                        <p className="text-[11px] mt-0.5 font-medium" style={{ color: setQty > 0 ? 'rgba(255,255,255,0.7)' : theme.colors.textSecondary }}>{products.length} {categoryItemLabel}</p>
+                    <div className="px-2 sm:px-3 py-1.5 sm:py-2 text-center" style={{ backgroundColor: setQty > 0 ? theme.colors.accent : theme.colors.surface }}>
+                        <p className="text-[11px] sm:text-xs font-bold truncate" style={{ color: setQty > 0 ? theme.colors.accentText : theme.colors.textPrimary }}>All {currentCategoryName}</p>
+                        <p className="text-[10px] sm:text-[11px] mt-0.5 font-medium" style={{ color: setQty > 0 ? 'rgba(255,255,255,0.7)' : theme.colors.textSecondary }}>{products.length} {categoryItemLabel}</p>
                     </div>
                 </div>
 
@@ -109,21 +109,21 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                             }}
                         >
                             {qty > 0 && (
-                                <div className="absolute top-2 left-2 z-10 min-w-[28px] h-7 px-2 rounded-full text-sm font-bold flex items-center justify-center shadow-md" style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}>{qty}</div>
+                                <div className="absolute top-1.5 left-1.5 z-10 min-w-[20px] sm:min-w-[28px] h-5 sm:h-7 px-1.5 sm:px-2 rounded-full text-[11px] sm:text-sm font-bold flex items-center justify-center shadow-md" style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}>{qty}</div>
                             )}
                             <div role="button" tabIndex={0} onClick={addOne} onKeyPress={e => { if (e.key === 'Enter') addOne(e); }} className="aspect-[4/3] flex items-center justify-center overflow-hidden" style={{ backgroundColor: bg }}>
                                 {hasImage && <img loading="lazy" width="600" height="600" src={product.image} alt={product.name} className="object-cover w-full h-full select-none pointer-events-none" draggable={false} />}
                             </div>
-                            <div className="px-3 py-2 flex items-center justify-between gap-2" style={{ backgroundColor: theme.colors.surface }}>
-                                <p className="text-sm truncate flex-1" style={{ color: theme.colors.textPrimary }}>{cleanName(product.name)}</p>
-                                <div className="flex items-center gap-1">
+                            <div className="px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-between gap-1" style={{ backgroundColor: theme.colors.surface }}>
+                                <p className="text-[11px] sm:text-sm truncate flex-1" style={{ color: theme.colors.textPrimary }}>{cleanName(product.name)}</p>
+                                <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
                                     {qty > 0 && (
-                                        <button type="button" onClick={removeOne} className="w-8 h-8 rounded-full flex items-center justify-center active:scale-90 transition-all" style={{ backgroundColor: qty === 1 ? theme.colors.destructiveLight : theme.colors.subtle, border: qty === 1 ? `1px solid ${theme.colors.destructiveBorder}` : `1px solid ${theme.colors.border}` }} aria-label={qty === 1 ? `Remove ${product.name}` : `Decrease ${product.name} quantity`}>
-                                            {qty === 1 ? <Trash2 className="w-4 h-4" style={{ color: '#B85C5C' }} /> : <Minus className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />}
+                                        <button type="button" onClick={removeOne} className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center active:scale-90 transition-all" style={{ backgroundColor: qty === 1 ? theme.colors.destructiveLight : theme.colors.subtle, border: qty === 1 ? `1px solid ${theme.colors.destructiveBorder}` : `1px solid ${theme.colors.border}` }} aria-label={qty === 1 ? `Remove ${product.name}` : `Decrease ${product.name} quantity`}>
+                                            {qty === 1 ? <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" style={{ color: '#B85C5C' }} /> : <Minus className="w-3 h-3 sm:w-4 sm:h-4" style={{ color: theme.colors.textSecondary }} />}
                                         </button>
                                     )}
-                                    <button type="button" onClick={addOne} className="w-8 h-8 rounded-full flex items-center justify-center active:scale-95 border" style={{ borderColor: theme.colors.border, backgroundColor: theme.colors.inputBackground }} aria-label={`Add ${product.name}`}>
-                                        <Plus className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
+                                    <button type="button" onClick={addOne} className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center active:scale-95 border" style={{ borderColor: theme.colors.border, backgroundColor: theme.colors.inputBackground }} aria-label={`Add ${product.name}`}>
+                                        <Plus className="w-3 h-3 sm:w-4 sm:h-4" style={{ color: theme.colors.textSecondary }} />
                                     </button>
                                 </div>
                             </div>
