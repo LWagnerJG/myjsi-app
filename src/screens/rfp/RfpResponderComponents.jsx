@@ -5,7 +5,7 @@ import { PrimaryButton } from '../../components/common/JSIButtons.jsx';
 import { isDarkTheme, DESIGN_TOKENS } from '../../design-system/tokens.js';
 import {
   FileText, Upload, CheckCircle2, Loader2, X,
-  ArrowUp, Download, ChevronLeft, ChevronRight,
+  ArrowUp, Download, ChevronLeft, ChevronRight, Pencil,
 } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 
@@ -431,13 +431,15 @@ const DocField = ({ value, onChange, multiline = false, className = '', theme })
       style={{
         color: c.textPrimary,
         background: focused
-          ? (isDark ? 'rgba(255,255,255,0.04)' : 'rgba(53,53,53,0.03)')
+          ? (isDark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.035)')
           : 'transparent',
         padding: '4px 6px',
         margin: '0 -6px',
         borderRadius: '6px',
-        borderBottom: focused ? `1.5px solid ${c.accent || '#353535'}` : '1.5px solid transparent',
-        transition: 'background-color 150ms ease, border-color 150ms ease',
+        borderBottom: focused
+          ? `1.5px solid ${c.accent || '#353535'}`
+          : `1px dashed ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'}`,
+        transition: 'background-color 150ms ease, border-color 150ms ease, border-bottom-style 150ms ease',
         wordBreak: 'break-word',
         overflowWrap: 'break-word',
         overflow: 'hidden',
@@ -643,13 +645,22 @@ export const ResponseBuilder = ({ data, onChange, onExport, onSave, theme }) => 
   return (
     <div className="w-full flex flex-col items-center flex-1" style={{ minHeight: 0 }}>
       {/* ── Top bar ── */}
-      <div className="w-full flex items-center justify-between mb-2 px-2" style={{ maxWidth: Math.min(PDF_PAGE_W * scale + 96, PDF_PAGE_W + 96) }}>
+      <div className="w-full flex items-center justify-between mb-3 px-2" style={{ maxWidth: Math.min(PDF_PAGE_W * scale + 96, PDF_PAGE_W + 96) }}>
         <div
-          style={{ color: c.textSecondary, opacity: 0.4, fontSize: '10px', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase' }}
+          style={{ color: c.textSecondary, opacity: 0.5, fontSize: '11px', fontWeight: 600, letterSpacing: '0.06em' }}
         >
           {footerTitle}
         </div>
-        <div style={{ color: c.textSecondary, opacity: 0.35, fontSize: '10px', letterSpacing: '0.03em' }}>
+        <div
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
+          style={{
+            backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.05)',
+            color: c.textSecondary,
+            fontSize: '11px',
+            fontWeight: 500,
+          }}
+        >
+          <Pencil className="w-3 h-3" style={{ opacity: 0.55 }} />
           Click any text to edit
         </div>
       </div>
@@ -660,8 +671,8 @@ export const ResponseBuilder = ({ data, onChange, onExport, onSave, theme }) => 
         <button
           onClick={() => goTo(currentPage - 1)}
           disabled={currentPage === 0}
-          className="absolute left-1 z-10 w-9 h-9 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95 disabled:opacity-0 disabled:pointer-events-none"
-          style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)', color: c.textPrimary }}
+          className="absolute left-2 z-10 w-10 h-10 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95 disabled:opacity-0 disabled:pointer-events-none"
+          style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)', color: c.textPrimary, backdropFilter: 'blur(8px)' }}
           aria-label="Previous page"
         >
           <ChevronLeft className="w-5 h-5" />
@@ -693,8 +704,8 @@ export const ResponseBuilder = ({ data, onChange, onExport, onSave, theme }) => 
         <button
           onClick={() => goTo(currentPage + 1)}
           disabled={currentPage === TOTAL_PAGES - 1}
-          className="absolute right-1 z-10 w-9 h-9 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95 disabled:opacity-0 disabled:pointer-events-none"
-          style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)', color: c.textPrimary }}
+          className="absolute right-2 z-10 w-10 h-10 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95 disabled:opacity-0 disabled:pointer-events-none"
+          style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)', color: c.textPrimary, backdropFilter: 'blur(8px)' }}
           aria-label="Next page"
         >
           <ChevronRight className="w-5 h-5" />
@@ -703,7 +714,7 @@ export const ResponseBuilder = ({ data, onChange, onExport, onSave, theme }) => 
 
       {/* ── Bottom bar: page dots + download ── */}
       <div className="w-full flex items-center justify-between mt-3 px-2 pb-3" style={{ maxWidth: Math.min(PDF_PAGE_W * scale + 96, PDF_PAGE_W + 96) }}>
-        {/* Page dots */}
+        {/* Page navigation */}
         <div className="flex items-center gap-1.5">
           {Array.from({ length: TOTAL_PAGES }).map((_, i) => (
             <button
@@ -711,18 +722,18 @@ export const ResponseBuilder = ({ data, onChange, onExport, onSave, theme }) => 
               onClick={() => goTo(i)}
               className="transition-all duration-200"
               style={{
-                width: i === currentPage ? 20 : 7,
+                width: i === currentPage ? 22 : 7,
                 height: 7,
                 borderRadius: 4,
                 backgroundColor: i === currentPage
                   ? (c.accent || '#353535')
-                  : (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)'),
+                  : (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)'),
               }}
               aria-label={`Go to page ${i + 1}`}
             />
           ))}
           <span
-            className="text-[11px] font-medium ml-2 tabular-nums"
+            className="text-[11px] font-medium ml-1.5 tabular-nums"
             style={{ color: c.textSecondary, opacity: 0.5 }}
           >
             {currentPage + 1} / {TOTAL_PAGES}
@@ -733,14 +744,14 @@ export const ResponseBuilder = ({ data, onChange, onExport, onSave, theme }) => 
         <button
           onClick={handlePdfExport}
           disabled={exporting}
-          className="h-10 px-6 rounded-full flex items-center gap-2 text-[13px] font-semibold transition-all hover:scale-[1.03] active:scale-[0.97] disabled:opacity-50"
+          className="h-9 px-5 rounded-full flex items-center gap-2 text-[12px] font-semibold transition-all hover:scale-[1.02] active:scale-[0.97] disabled:opacity-50"
           style={{
             backgroundColor: c.accent || '#353535',
             color: c.accentText || '#fff',
-            boxShadow: '0 2px 10px rgba(0,0,0,0.12)',
+            boxShadow: '0 1px 8px rgba(0,0,0,0.10)',
           }}
         >
-          <Download className="w-4 h-4" />
+          <Download className="w-3.5 h-3.5" />
           {exporting ? 'Exporting…' : 'Download PDF'}
         </button>
       </div>
@@ -748,7 +759,12 @@ export const ResponseBuilder = ({ data, onChange, onExport, onSave, theme }) => 
       {/* ── Print / export styles ── */}
       <style>{`
         .rfp-editable-field:hover {
-          background: ${isDark ? 'rgba(255,255,255,0.025)' : 'rgba(53,53,53,0.015)'} !important;
+          background: ${isDark ? 'rgba(255,255,255,0.04)' : 'rgba(53,53,53,0.025)'} !important;
+          border-bottom-color: ${isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)'} !important;
+          border-bottom-style: dashed !important;
+        }
+        .rfp-editable-field:focus {
+          border-bottom-style: solid !important;
         }
         .pdf-export-container.pdf-exporting {
           position: static !important;
