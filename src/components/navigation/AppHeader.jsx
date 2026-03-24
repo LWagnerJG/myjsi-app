@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArrowLeft, User, Search } from 'lucide-react';
 import { logoLight } from '../../data/theme/themeData.js';
 import { isDarkTheme } from '../../design-system/tokens.js';
@@ -17,13 +17,22 @@ export const AppHeader = React.memo(({
     const isHome = !showBack;
     const dark = isDarkMode || isDarkTheme(theme);
 
+    // Show scrim only when page has been scrolled — avoids any visible overlay at rest
+    const [scrolled, setScrolled] = useState(false);
+    useEffect(() => {
+        const onScroll = () => setScrolled(window.scrollY > 8);
+        window.addEventListener('scroll', onScroll, { passive: true });
+        return () => window.removeEventListener('scroll', onScroll);
+    }, []);
+
     // Semi-transparent so blurred background content shows through (frosted glass)
     const glassBg = dark ? 'rgba(42,42,42,0.88)' : 'rgba(255,255,255,0.88)';
-    // Bell-curve gradient: starts at 0% opacity, peaks around the pill, returns to 0%.
-    // Both edges are fully transparent so there are no visible top/bottom borders.
+
+    // Gradient starts at top of screen (hidden under iOS status bar), fades to
+    // nothing by 80% of the scrim height — no visible bottom edge.
     const scrimGradient = dark
-        ? 'linear-gradient(to bottom, rgba(26,26,26,0) 0%, rgba(26,26,26,0.22) 45%, rgba(26,26,26,0) 100%)'
-        : 'linear-gradient(to bottom, rgba(240,237,232,0) 0%, rgba(240,237,232,0.22) 45%, rgba(240,237,232,0) 100%)';
+        ? 'linear-gradient(to bottom, rgba(26,26,26,0.5) 0%, rgba(26,26,26,0.18) 50%, rgba(26,26,26,0) 80%)'
+        : 'linear-gradient(to bottom, rgba(240,237,232,0.5) 0%, rgba(240,237,232,0.18) 50%, rgba(240,237,232,0) 80%)';
 
     const getTimeGreeting = () => {
         const hour = new Date().getHours();
@@ -32,39 +41,25 @@ export const AppHeader = React.memo(({
         return 'Good Evening';
     };
 
-    // Taller zone so the bell-curve gradient has room to fade in and out smoothly
-    const scrimHeight = 120;
-
     return (
         <>
-            {/* Layer 1: backdrop-filter blur — covers the full scrim zone.
-                mask-image is intentionally NOT used here; iOS Safari drops backdrop-filter
-                when mask-image is applied to the same element. */}
+            {/* Blur + gradient scrim — only visible when scrolled so it doesn't
+                create a box at rest. backdrop-filter and gradient both fade via
+                opacity transition, driven by scroll position. */}
             <div
                 aria-hidden="true"
-                className="fixed top-0 left-0 right-0 pointer-events-none"
+                className="fixed top-0 left-0 right-0 pointer-events-none transition-opacity duration-300"
                 style={{
-                    height: scrimHeight,
+                    height: 130,
                     zIndex: 28,
-                    backdropFilter: 'blur(24px)',
-                    WebkitBackdropFilter: 'blur(24px)',
-                }}
-            />
-
-            {/* Layer 2: gradient overlay — sits on top of the blur layer and fades it out
-                from mostly-opaque at the very top (strongest visual "grounding" near the
-                status bar) to fully transparent below the pill. */}
-            <div
-                aria-hidden="true"
-                className="fixed top-0 left-0 right-0 pointer-events-none"
-                style={{
-                    height: scrimHeight,
-                    zIndex: 29,
+                    opacity: scrolled ? 1 : 0,
+                    backdropFilter: 'blur(20px)',
+                    WebkitBackdropFilter: 'blur(20px)',
                     background: scrimGradient,
                 }}
             />
 
-            {/* Layer 3: pill header */}
+            {/* Pill header */}
             <div className="px-4 sm:px-5 pt-3 pb-1 fixed top-0 left-0 right-0 z-30 pointer-events-none">
             <div
                 className="max-w-5xl mx-auto w-full flex items-center justify-between px-4 sm:px-5 h-14 pointer-events-auto transition-all duration-300 overflow-hidden"
@@ -121,4 +116,3 @@ export const AppHeader = React.memo(({
         </>
     );
 });
-
