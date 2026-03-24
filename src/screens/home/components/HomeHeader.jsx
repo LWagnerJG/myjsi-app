@@ -3,13 +3,8 @@ import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import { HomeSearchInput } from '../../../components/common/SearchInput.jsx';
 import { QuickActionDropdown } from '../../../components/common/QuickActionDropdown.jsx';
 
-/* ── Elliott avatar URL (same as ChatOverlay) ──────────────────────── */
-const ELLIOTT_AVATAR_URL =
-    'https://api.dicebear.com/9.x/avataaars/svg?seed=Elliott&top=shortFlat&hairColor=e8e1e1' +
-    '&accessories=round&accessoriesProbability=100&accessoriesColor=262e33' +
-    '&eyebrows=defaultNatural&eyes=happy&mouth=smile' +
-    '&clothing=blazerAndShirt&clothesColor=25557c' +
-    '&skinColor=ffdbb4&facialHairProbability=0';
+/* ── Elliott avatar URL ────────────────────────────────────────────── */
+const ELLIOTT_AVATAR_URL = '/elliott-avatar.png';
 
 export const HomeHeader = ({
     colors,
@@ -158,8 +153,7 @@ export const HomeHeader = ({
                                             alt="Elliott"
                                             width={32}
                                             height={32}
-                                            className="w-full h-full"
-                                            style={{ transform: 'scale(1.15) translateY(1px)' }}
+                                            className="w-full h-full object-cover"
                                             loading="eager"
                                         />
                                     </div>

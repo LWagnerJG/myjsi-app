@@ -1,13 +1,8 @@
 import React, { useState, useCallback } from 'react';
 import { X, Paperclip, Sparkles, ArrowUp, Clock, Package, BarChart3, FileText, ChevronRight, Copy, Share2, Check } from 'lucide-react';
 
-/* ── Elliott's avatar – distinguished old gentleman via DiceBear ──── */
-const ELLIOTT_AVATAR_URL =
-    'https://api.dicebear.com/9.x/avataaars/svg?seed=Elliott&top=shortFlat&hairColor=e8e1e1' +
-    '&accessories=round&accessoriesProbability=100&accessoriesColor=262e33' +
-    '&eyebrows=defaultNatural&eyes=happy&mouth=smile' +
-    '&clothing=blazerAndShirt&clothesColor=25557c' +
-    '&skinColor=ffdbb4&facialHairProbability=0';
+/* ── Elliott's avatar ────────────────────────────────────────────── */
+const ELLIOTT_AVATAR_URL = '/elliott-avatar.png';
 
 const ElliottAvatar = ({ size = 36 }) => (
     <div
@@ -24,8 +19,7 @@ const ElliottAvatar = ({ size = 36 }) => (
             alt="Elliott"
             width={size}
             height={size}
-            className="w-full h-full"
-            style={{ transform: 'scale(1.15) translateY(1px)' }}
+            className="w-full h-full object-cover"
             loading="eager"
         />
     </div>
