@@ -93,13 +93,13 @@ export const MOCK_RESPONSE = {
   productFit: {
     confidence: 'Medium',
     typicals: [
-      { series: 'Vision', type: 'Benching Workstations (BFS/BWS)', fitScore: 93, rationale: 'Covers BCH-1 typical: 60" single-sided benching with privacy screen, base in-feed, and power/data at worksurface. Meets 24"–26" depth requirement.' },
-      { series: 'Knox', type: 'Private Office Casegoods (PWS/PLF/PWC)', fitScore: 95, rationale: 'Veneer L-shape typical PO-1: 72"×24" worksurface + 60"×24" adjustable height + lateral file + wardrobe combination + closed overhead. Full veneer finish available.' },
-      { series: 'Moto', type: 'Nesting Tables (NT)', fitScore: 91, rationale: 'Flip-top nesting table, 72"×24"×28"–30"H with laminate top, modesty panel, power module with daisy chaining, and wire management per NT-1 typical.' },
-      { series: 'Indie', type: 'Lounge Seating (LG/HLG/BAN)', fitScore: 86, rationale: 'Transitional style lounge chairs, sofas, and high-back configurations. Power/USB options. Matches dimensional requirements for LG-1, LG-2, LG-3, HLG-3.' },
-      { series: 'Protocol', type: 'Task Seating (TC/THD/TST)', fitScore: 88, rationale: 'Same product line family across task chair, heavy-duty, and stool per Section 8.0(H) requirements. Mesh back, adjustable lumbar, 5-star base with hard/soft casters.' },
-      { series: 'Ansen', type: 'Guest & Stacking Chairs (SHC/SC/NC)', fitScore: 84, rationale: 'Standard height chair with plywood back + upholstered seat pad on molded plastic per SHC-1 typical. Armless configuration. Same family for CHS and BHS.' },
-      { series: 'Wellington', type: 'Conference Tables (CFT)', fitScore: 90, rationale: 'Laminate and veneer options for CFT-1: 96"×36" ellipse/oval/racetrack with panel base, recessed power module (3 power + 2 USB + HDMI + data).' },
+      { itemCode: 'BCH-1', category: 'Benching Workstation', series: 'Vision', rationale: '60" single-sided benching with privacy screen, base in-feed, and power/data at worksurface. Meets 24"–26" depth requirement.' },
+      { itemCode: 'PO-1', category: 'Private Office', series: 'Knox', image: 'https://res.cloudinary.com/jasper-jsi-furniture/image/upload/t_large/c_limit,w_1200/f_auto/q_auto/v1/jsi_vision_config_000009_bi3fmy', rationale: 'Veneer L-shape: 72"×24" worksurface + 60"×24" adjustable height + lateral file + wardrobe combination + closed overhead. Full veneer finish available.' },
+      { itemCode: 'NT-1', category: 'Nesting Table', series: 'Moto', rationale: 'Flip-top nesting table, 72"×24"×28"–30"H with laminate top, modesty panel, power module with daisy chaining, and wire management.' },
+      { itemCode: 'LG-1', category: 'Lounge Seating', series: 'Indie', rationale: 'Transitional style lounge chairs, sofas, and high-back configurations. Power/USB options. Matches dimensional requirements for LG-1, LG-2, LG-3, HLG-3.' },
+      { itemCode: 'TC-1', category: 'Task Seating', series: 'Protocol', rationale: 'Same product line family across task chair, heavy-duty, and stool per Section 8.0(H). Mesh back, adjustable lumbar, 5-star base with hard/soft casters.' },
+      { itemCode: 'SHC-1', category: 'Guest & Stacking Chair', series: 'Ansen', rationale: 'Plywood back + upholstered seat pad on molded plastic per SHC-1 typical. Armless configuration. Same family for CHS and BHS.' },
+      { itemCode: 'CFT-1', category: 'Conference Table', series: 'Wellington', rationale: 'Laminate and veneer options: 96"×36" ellipse/oval/racetrack with panel base, recessed power module (3 power + 2 USB + HDMI + data).' },
     ],
     assumptions:
       '• Sample project quantities per Section 3.0 used for pricing basis (20 WK-1, 10 BCH-1, 10 PO-1, etc.).\n• Task seating (TC, THD, TST) quoted from single product line family as required.\n• Standard height chair (SHC), counter height stool (CHS), and bar height stool (BHS) from same product line.\n• All lateral files and bookcases quoted to match heights/depths within each category.\n• Power modules quoted separately from product line count per Section 4.0(G).',

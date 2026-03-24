@@ -862,33 +862,56 @@ function renderPage(index, ctx) {
     case 4: return (
       <PdfPage theme={theme} pageNumber={5} totalPages={T} footerTitle={footerTitle} className="pdf-page-break">
         <DocSectionHeading number={4} title="Product Recommendations" theme={theme} />
-        <div className="mt-3">
-          <table className="w-full text-[12px]" style={{ color: c.textPrimary, tableLayout: 'fixed' }}>
-            <colgroup>
-              <col style={{ width: '14%' }} />
-              <col style={{ width: '24%' }} />
-              <col style={{ width: '62%' }} />
-            </colgroup>
-            <thead>
-              <tr>
-                {['Series', 'Application', 'Rationale'].map((h) => (
-                  <th key={h} className="text-left text-[10px] font-bold tracking-[0.1em] uppercase py-2 pr-2 pl-1" style={{ color: c.textSecondary, borderBottom: `1px solid ${c.border}` }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {pf.typicals.map((t, i) => {
-                const isLast = i === pf.typicals.length - 1;
-                return (
-                  <tr key={i}>
-                    <td className="py-2 pr-2 pl-1 font-semibold text-[12px] align-top" style={{ borderBottom: isLast ? 'none' : `1px solid ${c.border}` }}>{t.series}</td>
-                    <td className="py-2 pr-2 text-[12px] align-top" style={{ borderBottom: isLast ? 'none' : `1px solid ${c.border}`, wordBreak: 'break-word' }}>{t.type}</td>
-                    <td className="py-2 pl-1 text-[11px] leading-relaxed align-top" style={{ color: c.textSecondary, borderBottom: isLast ? 'none' : `1px solid ${c.border}`, wordBreak: 'break-word' }}>{t.rationale}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+        <div style={{ marginTop: '12px' }}>
+          {pf.typicals.map((t, i) => {
+            const isLast = i === pf.typicals.length - 1;
+            return (
+              <div
+                key={i}
+                style={{
+                  display: 'flex',
+                  gap: '14px',
+                  padding: '10px 0',
+                  borderBottom: isLast ? 'none' : `1px solid ${c.border}`,
+                  alignItems: 'flex-start',
+                }}
+              >
+                {/* Product image or placeholder */}
+                <div
+                  style={{
+                    width: 72,
+                    height: 72,
+                    borderRadius: 6,
+                    border: `1px solid ${c.border}`,
+                    flexShrink: 0,
+                    overflow: 'hidden',
+                    backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)',
+                  }}
+                >
+                  {t.image ? (
+                    <img src={t.image} alt={t.series} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: c.textSecondary, opacity: 0.25, fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      {t.series}
+                    </div>
+                  )}
+                </div>
+                {/* Content */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '2px' }}>
+                    <span style={{ fontSize: '13px', fontWeight: 700, color: c.textPrimary }}>{t.itemCode}</span>
+                    <span style={{ fontSize: '11px', color: c.textSecondary }}>{t.category}</span>
+                  </div>
+                  <div style={{ fontSize: '12px', fontWeight: 600, color: c.textPrimary, marginBottom: '3px' }}>
+                    JSI {t.series}
+                  </div>
+                  <div style={{ fontSize: '11px', lineHeight: '1.5', color: c.textSecondary }}>
+                    {t.rationale}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
         <DocLabel theme={theme}>Planning Assumptions</DocLabel>
         <DocField value={pf.assumptions} onChange={(v) => updateProductFit('assumptions', v)} multiline theme={theme} />
