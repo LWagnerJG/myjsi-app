@@ -19,11 +19,11 @@ export const AppHeader = React.memo(({
 
     // Semi-transparent so blurred background content shows through (frosted glass)
     const glassBg = dark ? 'rgba(42,42,42,0.88)' : 'rgba(255,255,255,0.88)';
-    // Subtle tint at top, fully transparent just past the pill — keeps the
-    // scrim from creating a visible dead zone below the header.
+    // Bell-curve gradient: starts at 0% opacity, peaks around the pill, returns to 0%.
+    // Both edges are fully transparent so there are no visible top/bottom borders.
     const scrimGradient = dark
-        ? 'linear-gradient(to bottom, rgba(26,26,26,0.55) 0%, transparent 100%)'
-        : 'linear-gradient(to bottom, rgba(240,237,232,0.55) 0%, transparent 100%)';
+        ? 'linear-gradient(to bottom, rgba(26,26,26,0) 0%, rgba(26,26,26,0.22) 45%, rgba(26,26,26,0) 100%)'
+        : 'linear-gradient(to bottom, rgba(240,237,232,0) 0%, rgba(240,237,232,0.22) 45%, rgba(240,237,232,0) 100%)';
 
     const getTimeGreeting = () => {
         const hour = new Date().getHours();
@@ -32,8 +32,8 @@ export const AppHeader = React.memo(({
         return 'Good Evening';
     };
 
-    // Scrim covers status bar + pill only — tight zone, no bleed below the header
-    const scrimHeight = 88;
+    // Taller zone so the bell-curve gradient has room to fade in and out smoothly
+    const scrimHeight = 120;
 
     return (
         <>
