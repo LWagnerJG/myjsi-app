@@ -35,8 +35,8 @@ export const formatCurrencyCompact = (n = 0) => {
  * @param {string} name - Company name to format
  * @returns {string} Title-cased company name
  */
-export const formatCompanyName = (name = '') =>
-  name.toLowerCase().replace(/\b(\w)/g, (s) => s.toUpperCase());
+export const formatCompanyName = (name) =>
+  name ? name.toLowerCase().replace(/\b(\w)/g, (s) => s.toUpperCase()) : '';
 
 /**
  * Smart title-case: respects acronyms (LLC, INC, MSD, LECC, etc.),
