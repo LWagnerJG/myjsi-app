@@ -802,9 +802,9 @@ export const ResponseBuilder = ({ data, onChange, onExport, onSave, theme }) => 
 
 /* ── Page render helpers ── */
 function renderPage(index, ctx) {
-  const { theme, c, updateField, updateFaq, updateVisual, updateProductFit, updateDealerField, pr, bfaq, vi, pf, dn } = ctx;
+  const { theme, c, updateField, updateFaq, updateVisual, updateProductFit, updateDealerField, pr, bfaq, vi, pf, dn, footerTitle } = ctx;
+  const isDark = isDarkTheme(theme);
   const T = 6;
-  const { footerTitle } = ctx;
   switch (index) {
     case 0: return (
       <PdfPage theme={theme} pageNumber={1} totalPages={T} footerTitle={footerTitle}>
