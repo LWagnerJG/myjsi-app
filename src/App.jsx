@@ -206,7 +206,7 @@ function App() {
 
     // Migrate previously stored 6-app selection to new 8-app default
     useEffect(() => {
-        if (!Array.isArray(homeApps) || homeApps.length !== 8) {
+        if (!Array.isArray(homeApps) || homeApps.length !== DEFAULT_HOME_APPS.length) {
             setHomeApps(DEFAULT_HOME_APPS);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
