@@ -1,13 +1,12 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import StandardSearchBar from '../../../components/common/StandardSearchBar.jsx';
+import { isDarkTheme } from '../../../design-system/tokens.js';
 import {
     ArrowLeft,
-    ChevronRight,
     Download,
     ExternalLink,
-    Scale,
-    Share2
+    Share2,
 } from 'lucide-react';
 import {
     WEIGHT_LIMIT_LBS,
@@ -53,7 +52,10 @@ export const WeightRatingsScreen = ({
     setSuccessMessage
 }) => {
     const safeTheme = ensureTheme(theme);
+    const dark = isDarkTheme(theme);
     const [searchTerm, setSearchTerm] = useState('');
+
+    const dividerColor = dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)';
 
     const feedback = useCallback((message) => {
         if (!setSuccessMessage) return;
@@ -153,60 +155,59 @@ ${WEIGHT_RATINGS_BIFMA_POINTS.map((point) => `<li>${point}</li>`).join('')}
         setTimeout(() => onePagerWindow.print(), 250);
     }, [feedback]);
 
+    /* ── Detail View ──────────────────────────────────── */
     const DetailView = ({ series }) => (
         <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-3 scrollbar-hide">
             <button
                 type="button"
                 onClick={goToList}
-                className="mt-2 mb-1 inline-flex items-center gap-2 text-sm font-semibold"
+                className="mt-2 mb-1 inline-flex items-center gap-1.5 text-[13px] font-medium"
                 style={{ color: safeTheme.colors.textSecondary }}
             >
-                <ArrowLeft className="w-4 h-4" />
-                Back to Weight Ratings
+                <ArrowLeft className="w-3.5 h-3.5" />
+                Weight Ratings
             </button>
 
-            <GlassCard theme={safeTheme} className="p-4 rounded-3xl">
-                <div className="flex items-center gap-4">
+            {/* Series header */}
+            <GlassCard theme={safeTheme} className="rounded-[22px] overflow-hidden">
+                <div className="flex items-center gap-3.5 px-4 py-3.5">
                     <img
                         src={series.image || WEIGHT_RATINGS_FALLBACK_IMAGE}
                         onError={imageFallback}
                         alt={series.series}
-                        className="w-24 h-24 rounded-2xl object-cover"
+                        className="w-16 h-16 rounded-xl object-cover flex-shrink-0"
                     />
                     <div className="min-w-0">
-                        <h2 className="text-2xl font-bold leading-tight" style={{ color: safeTheme.colors.textPrimary }}>
+                        <h2 className="text-[17px] font-bold leading-tight" style={{ color: safeTheme.colors.textPrimary }}>
                             {series.series}
                         </h2>
-                        <div
-                            className="mt-2 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold"
-                            style={{ backgroundColor: safeTheme.colors.subtle, color: safeTheme.colors.textPrimary }}
-                        >
-                            <Scale className="w-3.5 h-3.5" />
-                            {WEIGHT_LIMIT_LBS} lbs (seating)
-                        </div>
+                        <p className="mt-0.5 text-[13px]" style={{ color: safeTheme.colors.textSecondary }}>
+                            Rated to {WEIGHT_LIMIT_LBS} lbs
+                        </p>
                     </div>
                 </div>
 
-                <p className="mt-4 text-sm leading-relaxed" style={{ color: safeTheme.colors.textSecondary }}>
-                    JSI tests seating to applicable ANSI/BIFMA requirements for commercial durability and safety.
-                </p>
+                <div style={{ borderTop: `1px solid ${dividerColor}` }} className="px-4 py-3.5">
+                    <p className="text-[12px] uppercase font-bold tracking-[0.07em] mb-2" style={{ color: safeTheme.colors.textSecondary, opacity: 0.5 }}>
+                        ANSI/BIFMA Testing
+                    </p>
+                    <ul className="space-y-1.5">
+                        {WEIGHT_RATINGS_BIFMA_POINTS.map((point) => (
+                            <li key={point} className="text-[13px] leading-snug" style={{ color: safeTheme.colors.textSecondary }}>
+                                • {point}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
 
-                <ul className="mt-3 space-y-1.5">
-                    {WEIGHT_RATINGS_BIFMA_POINTS.map((point) => (
-                        <li key={point} className="text-sm" style={{ color: safeTheme.colors.textSecondary }}>
-                            • {point}
-                        </li>
-                    ))}
-                </ul>
-
-                <div className="mt-4 flex flex-wrap gap-2">
+                <div style={{ borderTop: `1px solid ${dividerColor}` }} className="px-4 py-3 flex flex-wrap gap-2">
                     {WEIGHT_RATINGS_SOURCE_LINKS.map((link) => (
                         <a
                             key={link.url}
                             href={link.url}
                             target="_blank"
                             rel="noreferrer"
-                            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium"
+                            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] font-medium"
                             style={{
                                 backgroundColor: safeTheme.colors.subtle,
                                 color: safeTheme.colors.textSecondary,
@@ -214,37 +215,37 @@ ${WEIGHT_RATINGS_BIFMA_POINTS.map((point) => `<li>${point}</li>`).join('')}
                             }}
                         >
                             {link.label}
-                            <ExternalLink className="w-3.5 h-3.5" />
+                            <ExternalLink className="w-3 h-3" />
                         </a>
                     ))}
                 </div>
             </GlassCard>
 
-            <GlassCard theme={safeTheme} className="p-4 rounded-3xl">
-                <h3 className="text-sm font-semibold" style={{ color: safeTheme.colors.textPrimary }}>
-                    Share One-Pager
-                </h3>
-                <p className="mt-1 text-xs leading-relaxed" style={{ color: safeTheme.colors.textSecondary }}>
-                    Share now and print/save as PDF until a downloadable PDF is finalized.
-                </p>
-                <div className="mt-3 flex flex-wrap gap-2">
+            {/* Actions */}
+            <GlassCard theme={safeTheme} className="rounded-[22px] overflow-hidden">
+                <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: `1px solid ${dividerColor}` }}>
+                    <span className="text-[11px] font-bold uppercase tracking-[0.08em]" style={{ color: safeTheme.colors.textSecondary, opacity: 0.5 }}>
+                        One-Pager
+                    </span>
+                </div>
+                <div className="px-4 py-3 flex flex-wrap gap-2">
                     <button
                         type="button"
                         onClick={() => shareOnePager(series)}
-                        className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold"
+                        className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-[12px] font-semibold"
                         style={{ backgroundColor: safeTheme.colors.accent, color: safeTheme.colors.accentText }}
                     >
                         <Share2 className="w-3.5 h-3.5" />
-                        Share One-Pager
+                        Share
                     </button>
                     <button
                         type="button"
                         onClick={() => openPrintableOnePager(series)}
-                        className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold border"
+                        className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-[12px] font-semibold"
                         style={{
-                            borderColor: safeTheme.colors.border,
+                            border: `1px solid ${safeTheme.colors.border}`,
                             color: safeTheme.colors.textPrimary,
-                            backgroundColor: safeTheme.colors.surface
+                            backgroundColor: safeTheme.colors.subtle
                         }}
                     >
                         <Download className="w-3.5 h-3.5" />
@@ -259,14 +260,14 @@ ${WEIGHT_RATINGS_BIFMA_POINTS.map((point) => `<li>${point}</li>`).join('')}
         return (
             <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: safeTheme.colors.background }}>
                 <div className="flex-1 overflow-y-auto px-4 pb-6">
-                    <GlassCard theme={safeTheme} className="mt-4 p-6 rounded-3xl text-center">
-                        <p className="text-sm font-semibold" style={{ color: safeTheme.colors.textPrimary }}>
+                    <GlassCard theme={safeTheme} className="mt-4 rounded-[22px] overflow-hidden p-6 text-center">
+                        <p className="text-[13px] font-semibold" style={{ color: safeTheme.colors.textPrimary }}>
                             Series not found
                         </p>
                         <button
                             type="button"
                             onClick={goToList}
-                            className="mt-3 inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold"
+                            className="mt-3 inline-flex items-center gap-2 rounded-full px-4 py-2 text-[12px] font-semibold"
                             style={{ backgroundColor: safeTheme.colors.accent, color: safeTheme.colors.accentText }}
                         >
                             <ArrowLeft className="w-3.5 h-3.5" />
@@ -278,6 +279,7 @@ ${WEIGHT_RATINGS_BIFMA_POINTS.map((point) => `<li>${point}</li>`).join('')}
         );
     }
 
+    /* ── List View ────────────────────────────────────── */
     return (
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: safeTheme.colors.background }}>
             {!selectedSeries && (
@@ -296,52 +298,50 @@ ${WEIGHT_RATINGS_BIFMA_POINTS.map((point) => `<li>${point}</li>`).join('')}
                 <DetailView series={selectedSeries} />
             ) : (
                 <div className="flex-1 overflow-y-auto px-4 pb-6 pt-1 space-y-3 scrollbar-hide">
-                    <GlassCard theme={safeTheme} className="p-4 rounded-3xl">
-                        <h2 className="text-base font-bold" style={{ color: safeTheme.colors.textPrimary }}>
-                            Seating Weight Ratings
-                        </h2>
-                        <p className="mt-1 text-xs" style={{ color: safeTheme.colors.textSecondary }}>
-                            All listed seating series are rated to {WEIGHT_LIMIT_LBS} lbs. Casegoods are not included.
-                        </p>
-                    </GlassCard>
 
-                    {filteredSeries.map((entry) => (
-                        <button
-                            key={entry.slug}
-                            type="button"
-                            onClick={() => openSeries(entry.slug)}
-                            className="w-full"
-                        >
-                            <GlassCard theme={safeTheme} className="w-full px-4 py-3 rounded-3xl text-left">
-                                <div className="flex items-center gap-3">
-                                    <img
-                                        src={entry.image || WEIGHT_RATINGS_FALLBACK_IMAGE}
-                                        onError={imageFallback}
-                                        alt={entry.series}
-                                        className="w-14 h-14 rounded-xl object-cover flex-shrink-0"
-                                    />
-                                    <div className="flex-1 min-w-0">
-                                        <h3 className="text-sm font-semibold truncate" style={{ color: safeTheme.colors.textPrimary }}>
+                    {filteredSeries.length > 0 ? (
+                        <GlassCard theme={safeTheme} className="rounded-[22px] overflow-hidden mt-1">
+                            {/* Column headers */}
+                            <div
+                                className="flex items-center px-4 py-2.5"
+                                style={{ borderBottom: `1px solid ${safeTheme.colors.border}` }}
+                            >
+                                <span className="flex-1 text-[11px] font-bold uppercase tracking-[0.08em]" style={{ color: safeTheme.colors.textSecondary, opacity: 0.5 }}>
+                                    Series
+                                </span>
+                                <span className="text-[11px] font-bold uppercase tracking-[0.08em]" style={{ color: safeTheme.colors.textSecondary, opacity: 0.5 }}>
+                                    Limit
+                                </span>
+                            </div>
+
+                            {filteredSeries.map((entry, i) => (
+                                <button
+                                    key={entry.slug}
+                                    type="button"
+                                    onClick={() => openSeries(entry.slug)}
+                                    className="w-full text-left"
+                                    style={{ borderBottom: i < filteredSeries.length - 1 ? `1px solid ${dividerColor}` : 'none' }}
+                                >
+                                    <div className="flex items-center gap-3 px-4 py-2.5">
+                                        <img
+                                            src={entry.image || WEIGHT_RATINGS_FALLBACK_IMAGE}
+                                            onError={imageFallback}
+                                            alt={entry.series}
+                                            className="w-9 h-9 rounded-lg object-cover flex-shrink-0"
+                                        />
+                                        <span className="flex-1 text-[13px] font-semibold truncate" style={{ color: safeTheme.colors.textPrimary }}>
                                             {entry.series}
-                                        </h3>
-                                    </div>
-                                    <div className="text-right mr-1">
-                                        <p className="text-[10px] uppercase tracking-wide" style={{ color: safeTheme.colors.textSecondary }}>
-                                            Limit
-                                        </p>
-                                        <p className="text-sm font-semibold" style={{ color: safeTheme.colors.textPrimary }}>
+                                        </span>
+                                        <span className="text-[13px] font-bold tabular-nums" style={{ color: safeTheme.colors.accent }}>
                                             {entry.weightLimit} lbs
-                                        </p>
+                                        </span>
                                     </div>
-                                    <ChevronRight className="w-4 h-4 flex-shrink-0" style={{ color: safeTheme.colors.textSecondary }} />
-                                </div>
-                            </GlassCard>
-                        </button>
-                    ))}
-
-                    {filteredSeries.length === 0 && (
-                        <GlassCard theme={safeTheme} className="p-6 rounded-3xl text-center">
-                            <p className="text-sm font-medium" style={{ color: safeTheme.colors.textPrimary }}>
+                                </button>
+                            ))}
+                        </GlassCard>
+                    ) : (
+                        <GlassCard theme={safeTheme} className="mt-1 rounded-[22px] p-6 text-center">
+                            <p className="text-[13px] font-medium" style={{ color: safeTheme.colors.textPrimary }}>
                                 No matching series
                             </p>
                         </GlassCard>
