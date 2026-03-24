@@ -19,10 +19,12 @@ export const AppHeader = React.memo(({
 
     // Semi-transparent so blurred background content shows through (frosted glass)
     const glassBg = dark ? 'rgba(42,42,42,0.88)' : 'rgba(255,255,255,0.88)';
-    // Scrim gradient: background color fading to transparent — grounds the blur zone
+    // Gradient overlay for the blur scrim: most opaque at very top (near status bar clock),
+    // still semi-opaque through the pill, then fades to fully transparent below.
+    // This sits on top of the backdrop-filter layer to give the "fades as it descends" look.
     const scrimGradient = dark
-        ? 'linear-gradient(to bottom, rgba(26,26,26,0.72) 0%, transparent 100%)'
-        : 'linear-gradient(to bottom, rgba(240,237,232,0.72) 0%, transparent 100%)';
+        ? 'linear-gradient(to bottom, rgba(26,26,26,0.92) 0%, rgba(26,26,26,0.55) 50%, transparent 100%)'
+        : 'linear-gradient(to bottom, rgba(240,237,232,0.92) 0%, rgba(240,237,232,0.55) 50%, transparent 100%)';
 
     const getTimeGreeting = () => {
         const hour = new Date().getHours();
@@ -31,24 +33,48 @@ export const AppHeader = React.memo(({
         return 'Good Evening';
     };
 
+    // Blur scrim zone height: safe-area + pt-3 + pill + fade below pill
+    const scrimHeight = 140;
+
     return (
-        <div
-            className="px-4 sm:px-5 pt-3 fixed top-0 left-0 right-0 z-30 pointer-events-none"
-            style={{
-                paddingBottom: '60px',
-                backdropFilter: 'blur(20px)',
-                WebkitBackdropFilter: 'blur(20px)',
-                WebkitMaskImage: 'linear-gradient(to bottom, black 55%, transparent 85%)',
-                maskImage: 'linear-gradient(to bottom, black 55%, transparent 85%)',
-                background: scrimGradient,
-            }}
-        >
+        <>
+            {/* Layer 1: backdrop-filter blur — covers the full scrim zone.
+                mask-image is intentionally NOT used here; iOS Safari drops backdrop-filter
+                when mask-image is applied to the same element. */}
+            <div
+                aria-hidden="true"
+                className="fixed top-0 left-0 right-0 pointer-events-none"
+                style={{
+                    height: scrimHeight,
+                    zIndex: 28,
+                    backdropFilter: 'blur(24px)',
+                    WebkitBackdropFilter: 'blur(24px)',
+                }}
+            />
+
+            {/* Layer 2: gradient overlay — sits on top of the blur layer and fades it out
+                from mostly-opaque at the very top (strongest visual "grounding" near the
+                status bar) to fully transparent below the pill. */}
+            <div
+                aria-hidden="true"
+                className="fixed top-0 left-0 right-0 pointer-events-none"
+                style={{
+                    height: scrimHeight,
+                    zIndex: 29,
+                    background: scrimGradient,
+                }}
+            />
+
+            {/* Layer 3: pill header */}
+            <div className="px-4 sm:px-5 pt-3 pb-1 fixed top-0 left-0 right-0 z-30 pointer-events-none">
             <div
                 className="max-w-5xl mx-auto w-full flex items-center justify-between px-4 sm:px-5 h-14 pointer-events-auto transition-all duration-300 overflow-hidden"
                 style={{
                     borderRadius: 9999,
                     backgroundColor: glassBg,
-                    border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)'
+                    backdropFilter: 'blur(24px)',
+                    WebkitBackdropFilter: 'blur(24px)',
+                    border: dark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)',
                 }}
             >
                 <div className="flex items-center">
@@ -92,7 +118,8 @@ export const AppHeader = React.memo(({
                     </button>
                 </div>
             </div>
-        </div>
+            </div>
+        </>
     );
 });
 
