@@ -1157,9 +1157,14 @@ export const NewLeadScreen = ({
                 />
               </Row>
 
-              <Row label="Competition" theme={theme} inline>
-                <div>
-                  <div className="flex items-center gap-2.5 py-0.5">
+              {/* Competition — always-inline: label left, toggle right */}
+              <div className="py-3">
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-[13px] font-semibold" style={{ color: c.textSecondary }}>Competition</span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-[12px]" style={{ color: c.textSecondary }}>
+                      {newLeadData.competitionPresent ? 'Active' : 'None'}
+                    </span>
                     <ToggleSwitch
                       checked={!!newLeadData.competitionPresent}
                       onChange={(event) => {
@@ -1169,45 +1174,42 @@ export const NewLeadScreen = ({
                       }}
                       theme={theme}
                     />
-                    <span className="text-[13px]" style={{ color: c.textSecondary }}>
-                      {newLeadData.competitionPresent ? 'Competitors present' : 'None identified'}
-                    </span>
                   </div>
-                  <Reveal show={!!newLeadData.competitionPresent}>
-                    <div className="mt-2.5">
-                      <SpotlightMultiSelect
-                        selectedItems={newLeadData.competitors || []}
-                        onAddItem={(competitor) => {
-                          const norm = competitor.trim();
-                          const current = newLeadData.competitors || [];
-                          if (!current.some((c) => c.toLowerCase() === norm.toLowerCase())) upd('competitors', [...current, norm]);
-                          markTouched('competitors');
-                        }}
-                        onRemoveItem={(competitor) => { upd('competitors', (newLeadData.competitors || []).filter((item) => item !== competitor)); markTouched('competitors'); }}
-                        options={COMPETITORS.filter((name) => name !== 'None')}
-                        onAddNew={(name) => { const norm = name.trim(); upd('competitors', [...new Set([...(newLeadData.competitors || []), norm])]); }}
-                        placeholder="Search or add competitor"
-                        theme={theme}
-                        compact={false}
-                        integratedChips
-                        bordered={false}
-                      />
-                      <FieldError show={!!visibleError('competitors')} message={visibleError('competitors')} />
-                    </div>
-                  </Reveal>
                 </div>
-              </Row>
+                <Reveal show={!!newLeadData.competitionPresent}>
+                  <div className="mt-2.5 rounded-2xl overflow-hidden border" style={{ borderColor: subtleBorder }}>
+                    <SpotlightMultiSelect
+                      selectedItems={newLeadData.competitors || []}
+                      onAddItem={(competitor) => {
+                        const norm = competitor.trim();
+                        const current = newLeadData.competitors || [];
+                        if (!current.some((co) => co.toLowerCase() === norm.toLowerCase())) upd('competitors', [...current, norm]);
+                        markTouched('competitors');
+                      }}
+                      onRemoveItem={(competitor) => { upd('competitors', (newLeadData.competitors || []).filter((item) => item !== competitor)); markTouched('competitors'); }}
+                      options={COMPETITORS.filter((name) => name !== 'None')}
+                      onAddNew={(name) => { const norm = name.trim(); upd('competitors', [...new Set([...(newLeadData.competitors || []), norm])]); }}
+                      placeholder="Search or add competitor"
+                      theme={theme}
+                      compact={false}
+                      integratedChips
+                      bordered={false}
+                    />
+                  </div>
+                  <FieldError show={!!visibleError('competitors')} message={visibleError('competitors')} />
+                </Reveal>
+              </div>
 
-              <Row label="Rewards" theme={theme} inline>
-                <div className="flex flex-wrap gap-2">
+              {/* Rewards — always-inline: label left, both toggles right */}
+              <div className="flex items-center justify-between gap-4 py-3">
+                <span className="text-[13px] font-semibold shrink-0" style={{ color: c.textSecondary }}>Rewards</span>
+                <div className="flex items-center gap-5 shrink-0">
                   <button
                     type="button"
+                    className="flex items-center gap-2"
                     onClick={() => { upd('salesReward', !salesRewardEnabled); markTouched('salesReward'); }}
-                    className="inline-flex items-center gap-2 rounded-full border px-2.5 py-1"
-                    style={{ backgroundColor: 'transparent', borderColor: subtleBorder }}
                   >
-                    <span className="text-[12px] font-semibold" style={{ color: c.textPrimary }}>Sales</span>
-                    <span className="text-[11px] font-medium" style={{ color: c.textSecondary }}>3%</span>
+                    <span className="text-[12px] font-medium" style={{ color: salesRewardEnabled ? c.textPrimary : c.textSecondary }}>Sales 3%</span>
                     <span onClick={(e) => e.stopPropagation()}>
                       <ToggleSwitch
                         checked={salesRewardEnabled}
@@ -1218,12 +1220,10 @@ export const NewLeadScreen = ({
                   </button>
                   <button
                     type="button"
+                    className="flex items-center gap-2"
                     onClick={() => { upd('designerReward', !designerRewardEnabled); markTouched('designerReward'); }}
-                    className="inline-flex items-center gap-2 rounded-full border px-2.5 py-1"
-                    style={{ backgroundColor: 'transparent', borderColor: subtleBorder }}
                   >
-                    <span className="text-[12px] font-semibold" style={{ color: c.textPrimary }}>Designer</span>
-                    <span className="text-[11px] font-medium" style={{ color: c.textSecondary }}>1%</span>
+                    <span className="text-[12px] font-medium" style={{ color: designerRewardEnabled ? c.textPrimary : c.textSecondary }}>Designer 1%</span>
                     <span onClick={(e) => e.stopPropagation()}>
                       <ToggleSwitch
                         checked={designerRewardEnabled}
@@ -1233,7 +1233,7 @@ export const NewLeadScreen = ({
                     </span>
                   </button>
                 </div>
-              </Row>
+              </div>
 
             </Section>
           </>
