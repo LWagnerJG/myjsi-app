@@ -48,11 +48,6 @@ const FILE_MAX_SIZE = 20 * 1024 * 1024;
 const FILE_EXTENSIONS = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'png', 'jpg', 'jpeg', 'heic'];
 const FILE_ACCEPT = '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.png,.jpg,.jpeg,.heic';
 const STEP_LABELS = ['Basics', 'Scope', 'Review'];
-const STEP_DESCRIPTIONS = [
-  'Capture required project context.',
-  'Define commercial scope and stakeholders.',
-  'Confirm details before submission.',
-];
 const getSubtleBorder = (theme) => (isDarkTheme(theme) ? 'rgba(255,255,255,0.11)' : 'rgba(0,0,0,0.07)');
 
 const parseCurrency = (raw) => {
@@ -592,11 +587,6 @@ export const NewLeadScreen = ({
     add('End User', newLeadData.endUser, 1);
     if ((newLeadData.dealers || []).length) add('Dealers', (newLeadData.dealers || []).join(', '), 1);
     if ((newLeadData.designFirms || []).length) add('A&D Firms', (newLeadData.designFirms || []).join(', '), 1);
-    if (quoteMode === 'existing' && newLeadData.jsiQuoteNumber) add('JSI Quote #', newLeadData.jsiQuoteNumber, 1);
-    if (quoteMode === 'needed') add('Quote', 'Quote needed', 1);
-    if (quoteMode === 'not-needed') add('Quote', 'No quote needed', 1);
-    if (selectedSeriesNames.length) add('JSI Series', selectedSeriesNames.join(', '), 1);
-    if (seriesCount) add('Series Intake', `${intakeReadyCount}/${seriesCount} ready`, 1);
     if (newLeadData.competitionPresent) {
       add('Competition', 'Present', 1);
       if ((newLeadData.competitors || []).length) add('Competitors', (newLeadData.competitors || []).join(', '), 1);
@@ -604,8 +594,13 @@ export const NewLeadScreen = ({
       add('Competition', 'None', 1);
     }
     add('Rewards', [salesRewardEnabled ? 'Sales 3%' : null, designerRewardEnabled ? 'Designer 1%' : null].filter(Boolean).join(' · ') || 'None', 1);
-    if (notesPreview) add('Notes', notesPreview);
-    if ((newLeadData.attachments || []).length) add('Attachments', `${(newLeadData.attachments || []).length} file(s)`);
+    if (quoteMode === 'existing' && newLeadData.jsiQuoteNumber) add('JSI Quote #', newLeadData.jsiQuoteNumber, 2);
+    if (quoteMode === 'needed') add('Quote', 'Quote needed', 2);
+    if (quoteMode === 'not-needed') add('Quote', 'No quote needed', 2);
+    if (selectedSeriesNames.length) add('JSI Series', selectedSeriesNames.join(', '), 2);
+    if (seriesCount) add('Series Intake', `${intakeReadyCount}/${seriesCount} ready`, 2);
+    if (notesPreview) add('Notes', notesPreview, 2);
+    if ((newLeadData.attachments || []).length) add('Attachments', `${(newLeadData.attachments || []).length} file(s)`, 2);
 
     return items;
   }, [
@@ -684,8 +679,10 @@ export const NewLeadScreen = ({
 
   const stepValid = useMemo(() => {
     if (step === 0) return !errors.project && !errors.projectStatus && !errors.vertical && !errors.otherVertical;
-    if (step === 1) return !errors.estimatedList && !errors.endUser && !errors.dealers && !errors.poTimeframe && !errors.competitors && !errors.jsiQuoteNumber;
-    return !errors.project && !errors.projectStatus && !errors.vertical && !errors.otherVertical && !errors.estimatedList && !errors.endUser && !errors.dealers && !errors.poTimeframe && !errors.competitors && !errors.jsiQuoteNumber;
+    if (step === 1) return !errors.estimatedList && !errors.endUser && !errors.dealers && !errors.poTimeframe && !errors.competitors;
+    return !errors.project && !errors.projectStatus && !errors.vertical && !errors.otherVertical
+      && !errors.estimatedList && !errors.endUser && !errors.dealers && !errors.poTimeframe
+      && !errors.competitors && !errors.jsiQuoteNumber;
   }, [errors, step]);
 
   const canSubmit = useMemo(() => {
@@ -695,7 +692,8 @@ export const NewLeadScreen = ({
 
   const markStepFieldsTouched = useCallback((stepIdx) => {
     if (stepIdx === 0) setTouched((prev) => ({ ...prev, project: true, projectStatus: true, vertical: true, otherVertical: true }));
-    if (stepIdx === 1) setTouched((prev) => ({ ...prev, estimatedList: true, endUser: true, dealers: true, poTimeframe: true, competitors: true, jsiQuoteNumber: true }));
+    if (stepIdx === 1) setTouched((prev) => ({ ...prev, estimatedList: true, endUser: true, dealers: true, poTimeframe: true, competitors: true }));
+    if (stepIdx === 2) setTouched((prev) => ({ ...prev, jsiQuoteNumber: true }));
   }, []);
 
   const goNext = useCallback(() => {
@@ -782,10 +780,11 @@ export const NewLeadScreen = ({
     setSubmitAttempted(true);
     markStepFieldsTouched(0);
     markStepFieldsTouched(1);
+    markStepFieldsTouched(2);
     if (!canSubmit) {
-      // Navigate to the first step that has errors so user sees them
       const step0Valid = !errors.project && !errors.projectStatus && !errors.vertical && !errors.otherVertical;
-      animateToStep(step0Valid ? 1 : 0);
+      const step1Valid = !errors.estimatedList && !errors.endUser && !errors.dealers && !errors.poTimeframe && !errors.competitors;
+      animateToStep(!step0Valid ? 0 : !step1Valid ? 1 : 2);
       const panel = document.querySelector('.panel-content');
       if (panel) panel.scrollTop = 0;
       return;
@@ -1179,7 +1178,11 @@ export const NewLeadScreen = ({
               </Row>
 
             </Section>
+          </>
+        )}
 
+        {step === 2 && (
+          <>
             <Section title="Quote & JSI Series" subtitle="Attach a quote and specify product lines." theme={theme}>
               <Row label="JSI Quote" theme={theme} inline noSep>
                 <div>
@@ -1234,14 +1237,16 @@ export const NewLeadScreen = ({
                     available={JSI_SERIES}
                     theme={theme}
                   />
-                  <p className="text-[11px] px-1" style={{ color: c.textSecondary }}>
-                    {(newLeadData.products || []).length} selected • complete intake below.
-                  </p>
+                  {(newLeadData.products || []).length > 0 && (
+                    <p className="text-[11px] px-1" style={{ color: c.textSecondary }}>
+                      {(newLeadData.products || []).length} selected • complete intake below.
+                    </p>
+                  )}
                 </div>
               </Row>
 
               {(newLeadData.products || []).length > 0 && (
-                <div className="space-y-2.5">
+                <div className="space-y-2.5 mt-1">
                   {(newLeadData.products || []).map((product, idx) => (
                     <div key={`${product.series}-${idx}`} className="rounded-[22px] border overflow-hidden" style={{ borderColor: subtleBorder, backgroundColor: c.surface }}>
                       <ProductCard
@@ -1297,11 +1302,7 @@ export const NewLeadScreen = ({
                 </div>
               )}
             </Section>
-          </>
-        )}
 
-        {step === 2 && (
-          <>
             <Section title="Notes & Attachments" subtitle="Optional context and support files." theme={theme}>
               <textarea
                 value={newLeadData.notes || ''}
@@ -1387,7 +1388,7 @@ export const NewLeadScreen = ({
               </div>
             </Section>
 
-            <Section title="Submission Review" subtitle="Filled details ready for routing." theme={theme}>
+            <Section title="Review & Submit" subtitle="Confirm all details before routing this lead." theme={theme}>
               <DiscreteHealthMeter health={health} theme={theme} />
 
               <div className="mt-3 rounded-2xl border px-3 py-2.5" style={{ borderColor: subtleBorder, backgroundColor: c.surface }}>
@@ -1434,7 +1435,7 @@ export const NewLeadScreen = ({
                 }}
               >
                 {canSubmit ? <CheckCircle2 className="w-4 h-4 shrink-0" /> : <AlertTriangle className="w-4 h-4 shrink-0" />}
-                {canSubmit ? 'Lead is ready to submit.' : 'Complete required fields in Basics and Scope before submitting.'}
+                {canSubmit ? 'Lead is ready to submit.' : 'Some required fields are incomplete. Review each step before submitting.'}
               </div>
             </Section>
           </>
