@@ -6,7 +6,7 @@ import { RequestQuoteModal } from '../../components/common/RequestQuoteModal.jsx
 import { SpecCheckRequestModal } from '../../components/common/SpecCheckRequestModal.jsx';
 import { isDarkTheme } from '../../design-system/tokens.js';
 import { usePersistentState } from '../../hooks/usePersistentState.js';
-import { ChevronRight, MessageSquarePlus } from 'lucide-react';
+import { MessageSquarePlus } from 'lucide-react';
 import { LEAD_TIMES_DATA } from '../resources/lead-times/data.js';
 import {
     PointerSensor,
@@ -501,27 +501,6 @@ export const HomeScreen = React.memo(({
                     hoverBg={hoverBg}
                 />
 
-                {/* Feedback CTA — desktop inline only; mobile uses sticky bar below */}
-                {!isEditMode && (
-                    <div className="flex flex-col items-center gap-2 pb-2">
-                        <button
-                            onClick={() => onNavigate('feedback')}
-                            className="flex items-center gap-2.5 px-6 py-3 rounded-full transition-all active:scale-[0.97] hover:brightness-105 hover:shadow-lg"
-                            style={{
-                                background: 'linear-gradient(135deg, #C4956A 0%, #B8824F 100%)',
-                                color: '#FAF8F5',
-                                boxShadow: '0 4px 14px rgba(196,149,106,0.35)',
-                            }}
-                        >
-                            <MessageSquarePlus className="w-4 h-4" />
-                            <span className="text-[13px] font-semibold tracking-wide">Share Feedback</span>
-                            <ChevronRight className="w-3.5 h-3.5 opacity-70" />
-                        </button>
-                        <p className="text-[11px] font-medium" style={{ color: colors.textSecondary, opacity: 0.45 }}>
-                            Help us improve myJSI
-                        </p>
-                    </div>
-                )}
             </div>
 
             {/* Request Quote Modal */}
