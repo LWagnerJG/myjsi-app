@@ -158,7 +158,7 @@ export const PortalNativeSelect = ({
   const c = theme.colors;
   const subtleBorder = dark ? 'rgba(255,255,255,0.11)' : 'rgba(0,0,0,0.07)';
   const isSm = size === 'sm';
-  const triggerH = isSm ? 34 : 44;
+  const triggerH = 40; // unified with FormInput sm and AutoCompleteCombobox
 
   return (
     <div className="relative w-full">
@@ -180,12 +180,12 @@ export const PortalNativeSelect = ({
         className="w-full text-left flex items-center justify-between transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-offset-1"
         style={{
           height: triggerH,
-          padding: isSm ? '0 12px' : '0 16px',
-          borderRadius: bordered ? (isSm ? 9999 : 16) : 0,
+          padding: '0 16px',
+          borderRadius: bordered ? 9999 : 0,
           backgroundColor: bordered ? (dark ? c.background : c.surface) : 'transparent',
           border: bordered ? `1px solid ${isOpen ? c.accent : subtleBorder}` : '1px solid transparent',
           color: (isPlaceholder || isMuted) ? c.textSecondary : c.textPrimary,
-          fontSize: isSm ? 14 : 15,
+          fontSize: 14,
           boxShadow: bordered && isOpen ? `0 0 0 3px ${c.accent}18` : 'none',
         }}
       >

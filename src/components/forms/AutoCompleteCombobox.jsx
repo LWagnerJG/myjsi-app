@@ -103,7 +103,7 @@ export const AutoCompleteCombobox = React.memo(({
                         height: 40,
                         paddingLeft: compact ? 34 : 38,
                         paddingRight: 16,
-                        fontSize: 13,
+                        fontSize: 14,
                         backgroundColor: inputBg,
                         borderColor: subtleBorder,
                         color: theme.colors.textPrimary,

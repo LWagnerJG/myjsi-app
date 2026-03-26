@@ -271,6 +271,10 @@ export const NewLeadScreen = ({
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [fileNotice, setFileNotice] = useState('');
+  // Custom discount mode — true when the stored value isn't in the predefined list
+  const [discountCustom, setDiscountCustom] = useState(
+    () => !!(newLeadData.discount && !DISCOUNT_OPTIONS_WITH_UNKNOWN.includes(newLeadData.discount)),
+  );
   const fileInputRef = useRef(null);
   const installDateInputRef = useRef(null);
   const [endUserOptions, setEndUserOptions] = useState(() => mergeUnique(
@@ -935,7 +939,7 @@ export const NewLeadScreen = ({
                     value={newLeadData.expectedInstallDate || ''}
                     onChange={(e) => upd('expectedInstallDate', e.target.value)}
                     onClick={openInstallDatePicker}
-                    className="w-full h-10 rounded-full border px-4 pr-10 text-[13px] text-left focus:outline-none focus:ring-0 jsi-date-input"
+                    className="w-full h-10 rounded-full border px-4 pr-10 text-[14px] text-left focus:outline-none focus:ring-0 jsi-date-input"
                     style={{
                       backgroundColor: dark ? c.background : c.surface,
                       borderColor: subtleBorder,
@@ -1072,15 +1076,48 @@ export const NewLeadScreen = ({
               </Row>
 
               <Row label="Discount" theme={theme} inline>
-                <PortalNativeSelect
-                  value={newLeadData.discount || ''}
-                  onChange={(e) => upd('discount', e.target.value)}
-                  options={DISCOUNT_OPTIONS_WITH_UNKNOWN.map((d) => ({ label: d, value: d }))}
-                  placeholder="Select discount"
-                  theme={theme}
-                  size="sm"
-                  mutedValues={['Unknown']}
-                />
+                {discountCustom ? (
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 min-w-0">
+                      <FormInput
+                        value={newLeadData.discount || ''}
+                        onChange={(e) => upd('discount', e.target.value)}
+                        placeholder="e.g. 54/12 or 65%"
+                        theme={theme}
+                        size="sm"
+                        surfaceBg
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => { setDiscountCustom(false); upd('discount', ''); }}
+                      className="shrink-0 text-[12px] font-medium px-2.5 py-1.5 rounded-full border transition-colors"
+                      style={{ color: c.textSecondary, borderColor: subtleBorder }}
+                    >
+                      ← List
+                    </button>
+                  </div>
+                ) : (
+                  <PortalNativeSelect
+                    value={newLeadData.discount || ''}
+                    onChange={(e) => {
+                      if (e.target.value === '__discount_other__') {
+                        setDiscountCustom(true);
+                        upd('discount', '');
+                      } else {
+                        upd('discount', e.target.value);
+                      }
+                    }}
+                    options={[
+                      ...DISCOUNT_OPTIONS_WITH_UNKNOWN.map((d) => ({ label: d, value: d })),
+                      { label: 'Other (type custom)…', value: '__discount_other__' },
+                    ]}
+                    placeholder="Select discount"
+                    theme={theme}
+                    size="sm"
+                    mutedValues={['Unknown', '__discount_other__']}
+                  />
+                )}
               </Row>
 
               <Row label="Contract" theme={theme} inline>
