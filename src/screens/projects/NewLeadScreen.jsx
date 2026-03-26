@@ -46,7 +46,7 @@ const STEP_REQUIRED_FIELDS = {
     { key: 'jsiQuoteNumber', label: 'JSI Quote Number' },
   ],
 };
-const getSubtleBorder = (theme) => (isDarkTheme(theme) ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)');
+const getSubtleBorder = (theme) => (isDarkTheme(theme) ? 'rgba(255,255,255,0.11)' : 'rgba(0,0,0,0.07)');
 
 const parseCurrency = (raw) => {
   const n = Number(String(raw ?? '').replace(/[^0-9.]/g, ''));
@@ -175,11 +175,12 @@ const StrengthCircle = ({ percent, tone, size = 44, stroke = 4, textSize = '11px
 
 const InlineStepHealth = ({ health, theme }) => {
   const c = theme.colors;
+  const dark = isDarkTheme(theme);
   const subtleBorder = getSubtleBorder(theme);
   return (
     <div
       className="inline-flex items-center gap-2 rounded-full border pl-1.5 pr-2.5 py-1"
-      style={{ borderColor: subtleBorder, backgroundColor: c.surface }}
+      style={{ borderColor: subtleBorder, backgroundColor: dark ? c.background : c.surface }}
     >
       <StrengthCircle percent={health.percent} tone={health.tone} size={30} stroke={3} textSize="10px" />
       <span className="text-[11px] font-semibold" style={{ color: health.tone }}>
@@ -970,8 +971,8 @@ export const NewLeadScreen = ({
                     onClick={openInstallDatePicker}
                     className="w-full h-10 rounded-full border px-4 pr-10 text-[13px] text-left focus:outline-none focus:ring-0 jsi-date-input"
                     style={{
-                      backgroundColor: c.surface,
-                      borderColor: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+                      backgroundColor: dark ? c.background : c.surface,
+                      borderColor: subtleBorder,
                       color: c.textPrimary,
                     }}
                   />
@@ -1362,7 +1363,7 @@ export const NewLeadScreen = ({
                 rows={4}
                 placeholder="Add context, timing risks, or requirements..."
                 className="mt-2.5 w-full px-4 py-3 text-[13px] rounded-2xl border focus:outline-none resize-none placeholder-theme-secondary transition-shadow"
-                style={{ backgroundColor: c.surface, borderColor: subtleBorder, color: c.textPrimary }}
+                style={{ backgroundColor: dark ? c.background : c.surface, borderColor: subtleBorder, color: c.textPrimary }}
                 onFocus={(e) => { e.target.style.boxShadow = `0 0 0 3px ${c.accent}33`; e.target.style.borderColor = c.accent || subtleBorder; }}
                 onBlur={(e) => { e.target.style.boxShadow = 'none'; e.target.style.borderColor = subtleBorder; }}
               />

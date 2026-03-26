@@ -17,14 +17,16 @@ export const FormInput = React.memo(({
     surfaceBg = false, // when true uses surface (lighter) instead of subtle
 }) => {
     const controlledValue = value === undefined || value === null ? '' : value;
-    const subtleBorder = isDarkTheme(theme) ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+    const dark = isDarkTheme(theme);
+    const subtleBorder = dark ? 'rgba(255,255,255,0.11)' : 'rgba(0,0,0,0.07)';
 
     const textSizeClass = size === 'sm' ? 'text-[13px]' : 'text-base';
     const paddingClass = size === 'sm' ? 'px-4' : 'px-4 py-3';
-    const dateDarkClass = type === 'date' && isDarkTheme(theme) ? 'jsi-date-dark' : '';
+    const dateDarkClass = type === 'date' && dark ? 'jsi-date-dark' : '';
     const inputClass = `w-full ${paddingClass} border rounded-full focus:outline-none focus:ring-0 ${textSizeClass} ${dateDarkClass} ${icon ? 'pr-10' : ''} ${className}`;
 
-    const backgroundColor = surfaceBg ? theme.colors.surface : theme.colors.subtle;
+    // On dark: always use background color so inputs appear as inset wells below the card surface
+    const backgroundColor = dark ? theme.colors.background : (surfaceBg ? theme.colors.surface : theme.colors.subtle);
 
     const styles = {
         backgroundColor,

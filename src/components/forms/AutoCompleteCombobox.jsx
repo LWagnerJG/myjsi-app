@@ -37,30 +37,17 @@ export const AutoCompleteCombobox = React.memo(({
         return showAddButton && onAddNew && value && value.trim() && !options.some(o => o.toLowerCase() === value.toLowerCase());
     }, [showAddButton, onAddNew, value, options]);
 
-    const subtleBorder = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+    const subtleBorder = dark ? 'rgba(255,255,255,0.11)' : 'rgba(0,0,0,0.07)';
 
-    // Use centralized theme detection to keep dark/light behavior consistent across screens
-    const getDropdownStyles = () => {
-        if (dark) {
-            return {
-                backgroundColor: theme.colors.surface,
-                color: theme.colors.textPrimary,
-                borderColor: subtleBorder,
-                '--dropdown-bg': theme.colors.surface,
-                '--dropdown-border': subtleBorder
-            };
-        } else {
-            return {
-                backgroundColor: theme.colors.surface,
-                color: theme.colors.textPrimary,
-                borderColor: subtleBorder,
-                '--dropdown-bg': theme.colors.surface,
-                '--dropdown-border': subtleBorder
-            };
-        }
+    // Input field uses background on dark (inset-well), dropdown floats at surface level
+    const inputBg = dark ? theme.colors.background : theme.colors.surface;
+    const dropdownStyles = {
+        backgroundColor: theme.colors.surface,
+        color: theme.colors.textPrimary,
+        borderColor: subtleBorder,
+        '--dropdown-bg': theme.colors.surface,
+        '--dropdown-border': subtleBorder,
     };
-
-    const dropdownStyles = getDropdownStyles();
 
     const calcPos = useCallback(() => {
         if (!inputWrapperRef.current) return;
@@ -185,8 +172,8 @@ export const AutoCompleteCombobox = React.memo(({
                     onChange={handleInputChange}
                     placeholder={placeholder}
                     className={`w-full border rounded-full transition-all duration-200 focus:outline-none focus:ring-0 ${compact ? 'pl-10 pr-4 text-[13px]' : 'pl-12 pr-4 py-3 text-base'}`}
-                    style={{ 
-                        backgroundColor: dropdownStyles.backgroundColor,
+                    style={{
+                        backgroundColor: inputBg,
                         borderColor: dropdownStyles.borderColor, 
                         color: dropdownStyles.color,
                         borderWidth: '1px',

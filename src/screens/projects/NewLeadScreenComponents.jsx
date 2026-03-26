@@ -12,7 +12,7 @@ import { VisionOptions, KnoxOptions, WinkHoopzOptions } from './product-options.
 /* Section card */
 export const Section = ({ title, subtitle, titleRight, children, theme, className = '' }) => {
   const dark = isDarkTheme(theme);
-  const divider = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+  const divider = dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.07)';
   return (
     <div className={`rounded-[28px] ${className}`} style={{
       padding: '20px',
@@ -126,13 +126,14 @@ export const ProductSpotlight = ({ selectedSeries, onAdd, available, theme }) =>
     else if (e.key === 'Escape') { e.preventDefault(); setOpen(false); }
   }, [open, filtered, hlIdx, pick, doOpen]);
 
-  const subtleBorder = isDarkTheme(theme) ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+  const dark = isDarkTheme(theme);
+  const subtleBorder = dark ? 'rgba(255,255,255,0.11)' : 'rgba(0,0,0,0.07)';
 
   return (
     <div ref={anchorRef}>
       <div onClick={doOpen}
         className="flex items-center gap-2 px-3.5 cursor-text"
-        style={{ height: 40, borderRadius: 9999, background: theme.colors.surface, border: `1px solid ${subtleBorder}` }}>
+        style={{ height: 40, borderRadius: 9999, background: dark ? theme.colors.background : theme.colors.surface, border: `1px solid ${subtleBorder}` }}>
         <Search className="w-3.5 h-3.5 flex-shrink-0" style={{ color: theme.colors.textSecondary }} />
         <input ref={inputRef} value={q}
           onChange={e => { setQ(e.target.value); if (!open) doOpen(); }}
