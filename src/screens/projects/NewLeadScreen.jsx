@@ -277,6 +277,9 @@ export const NewLeadScreen = ({
 
   useEffect(() => {
     setHasReachedBottomOfStep(false);
+    // Scroll back to top so each step feels like a fresh page
+    const panel = document.querySelector('.panel-content');
+    if (panel) panel.scrollTop = 0;
   }, [step]);
 
   // Register back handler so AppHeader arrow navigates between wizard steps
@@ -833,6 +836,8 @@ export const NewLeadScreen = ({
 
   return (
     <form onSubmit={handleSubmit} className="min-h-full app-header-offset flex flex-col" style={{ backgroundColor: c.background }}>
+      {/* Invisible focus sink — prevents AnimatedScreenWrapper from focusing the "New Lead" h3 heading on mount */}
+      <div data-autofocus tabIndex={-1} aria-hidden="true" style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden', outline: 'none' }} />
       <div className="px-4 sm:px-5 pt-5 pb-32 max-w-3xl mx-auto w-full">
         <Section
           title="New Lead"
