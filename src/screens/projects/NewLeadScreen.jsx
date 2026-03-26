@@ -12,7 +12,7 @@ import { STAGES, VERTICALS, COMPETITORS } from './data.js';
 import { DISCOUNT_OPTIONS_WITH_UNKNOWN } from '../../constants/discounts.js';
 import { JSI_SERIES } from '../products/data.js';
 import { CONTRACTS_DATA } from '../resources/contracts/data.js';
-import { ProductCard, ProductSpotlight, Row, Section } from './NewLeadScreenComponents.jsx';
+import { ProductCard, ProductSpotlight, Reveal, Row, Section } from './NewLeadScreenComponents.jsx';
 
 const PO_OPTIONS = ['Unknown', '<30 Days', '30-60 Days', '60-180 Days', '180+ Days', 'Next Year'];
 const END_USER_OPTIONS = [
@@ -321,17 +321,6 @@ export const NewLeadScreen = ({
     const idx = stageOptions.indexOf(newLeadData.projectStatus);
     return idx >= 0 ? idx : 0;
   }, [newLeadData.projectStatus, stageOptions]);
-
-  const stageThumbPercent = useMemo(() => {
-    if (stageOptions.length <= 1) return 0;
-    return (stageIndex / (stageOptions.length - 1)) * 100;
-  }, [stageIndex, stageOptions.length]);
-
-  const stageLabelTransform = useMemo(() => {
-    if (stageThumbPercent <= 6) return 'translateX(0)';
-    if (stageThumbPercent >= 94) return 'translateX(-100%)';
-    return 'translateX(-50%)';
-  }, [stageThumbPercent]);
 
   const setStageByIndex = useCallback((index) => {
     if (!stageOptions.length) return;
@@ -814,17 +803,7 @@ export const NewLeadScreen = ({
         <Section
           title="New Lead"
           subtitle={STEP_DESCRIPTIONS[step]}
-          titleRight={(
-            <div className="flex items-center gap-1.5">
-              <InlineStepHealth health={health} theme={theme} />
-              <span
-                className="inline-flex h-8 items-center rounded-full px-3 text-[11px] font-semibold"
-                style={{ backgroundColor: c.subtle, color: c.textSecondary }}
-              >
-                Step {step + 1} of 3
-              </span>
-            </div>
-          )}
+          titleRight={<InlineStepHealth health={health} theme={theme} />}
           theme={theme}
         >
           <div className="grid grid-cols-3 gap-1.5 pt-0.5">
@@ -856,7 +835,7 @@ export const NewLeadScreen = ({
 
         {step === 0 && (
           <>
-            <Section title="Project Basics" theme={theme}>
+            <Section title="Project Basics" subtitle="Required project context to register this lead." theme={theme}>
               <Row label="Project Name" theme={theme} inline noSep>
                 <div>
                   <FormInput
@@ -874,42 +853,18 @@ export const NewLeadScreen = ({
 
               <Row label="Stage" theme={theme} inline>
                 <div>
-                  <div className="relative px-1 pt-5 pb-1">
-                    <p
-                      className="absolute text-[11px] font-semibold whitespace-nowrap leading-none"
-                      style={{
-                        left: `${stageThumbPercent}%`,
-                        top: 2,
-                        transform: stageLabelTransform,
-                        color: c.textPrimary,
-                      }}
-                    >
-                      {stageOptions[stageIndex] || 'Not selected'}
-                    </p>
-                    <input
-                      type="range"
-                      min={0}
-                      max={Math.max(stageOptions.length - 1, 0)}
-                      step={1}
-                      value={stageIndex}
-                      onChange={(e) => setStageByIndex(Number(e.target.value))}
-                      className="w-full jsi-range"
-                    />
-                    <div className="mt-1.5 flex items-center justify-between px-0.5">
-                      {stageOptions.map((stage, idx) => (
-                        <span
-                          key={stage}
-                          className="text-[10px] leading-none"
-                          style={{
-                            color: c.textSecondary,
-                            opacity: idx === stageIndex ? 0.95 : 0.45,
-                            fontWeight: idx === stageIndex ? 600 : 500,
-                          }}
-                        >
-                          {stage}
-                        </span>
-                      ))}
-                    </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {stageOptions.map((stage) => (
+                      <PillButton
+                        key={stage}
+                        size="xs"
+                        isSelected={newLeadData.projectStatus === stage}
+                        onClick={() => { upd('projectStatus', stage); markTouched('projectStatus'); }}
+                        theme={theme}
+                      >
+                        {stage}
+                      </PillButton>
+                    ))}
                   </div>
                   <FieldError show={!!visibleError('projectStatus')} message={visibleError('projectStatus')} />
                 </div>
@@ -984,34 +939,36 @@ export const NewLeadScreen = ({
               </Row>
             </Section>
 
-            {!!duplicateMatches.length && (
-              <Section title="Potential Duplicates" theme={theme}>
-                <div className="space-y-2 pt-2">
-                  <div className="flex items-center gap-2 text-xs font-medium" style={{ color: '#B85C5C' }}>
-                    <AlertTriangle className="w-4 h-4" />
-                    Similar opportunities already exist.
+            <Reveal show={!!duplicateMatches.length}>
+              <div style={{ paddingTop: '1rem' }}>
+                <Section title="Potential Duplicates" theme={theme}>
+                  <div className="space-y-2 pt-2">
+                    <div className="flex items-center gap-2 text-xs font-medium" style={{ color: '#B85C5C' }}>
+                      <AlertTriangle className="w-4 h-4" />
+                      Similar opportunities already exist.
+                    </div>
+                    {duplicateMatches.map((opp) => (
+                      <button
+                        key={opp.id}
+                        type="button"
+                        onClick={() => onNavigate?.(`projects/${opp.id}`)}
+                        className="w-full rounded-xl border px-3 py-2 text-left transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                        style={{ borderColor: subtleBorder }}
+                      >
+                        <div className="text-sm font-semibold" style={{ color: c.textPrimary }}>{opp.name}</div>
+                        <div className="text-xs" style={{ color: c.textSecondary }}>{opp.company || 'Unknown company'}</div>
+                      </button>
+                    ))}
                   </div>
-                  {duplicateMatches.map((opp) => (
-                    <button
-                      key={opp.id}
-                      type="button"
-                      onClick={() => onNavigate?.(`projects/${opp.id}`)}
-                      className="w-full rounded-xl border px-3 py-2 text-left transition-colors hover:bg-black/5 dark:hover:bg-white/5"
-                      style={{ borderColor: subtleBorder }}
-                    >
-                      <div className="text-sm font-semibold" style={{ color: c.textPrimary }}>{opp.name}</div>
-                      <div className="text-xs" style={{ color: c.textSecondary }}>{opp.company || 'Unknown company'}</div>
-                    </button>
-                  ))}
-                </div>
-              </Section>
-            )}
+                </Section>
+              </div>
+            </Reveal>
           </>
         )}
 
         {step === 1 && (
           <>
-            <Section title="Commercial Scope" theme={theme}>
+            <Section title="Commercial Scope" subtitle="Sizing, timeline, and discount details." theme={theme}>
               <Row label="Estimated List" theme={theme} inline noSep>
                 <div>
                   <FormInput
@@ -1029,20 +986,18 @@ export const NewLeadScreen = ({
               </Row>
 
               <Row label="Win Probability" theme={theme} inline>
-                <div className="flex items-center gap-2.5">
-                  <input
-                    type="range"
-                    min={10}
-                    max={100}
-                    step={10}
-                    value={newLeadData.winProbability || 50}
-                    onChange={(e) => upd('winProbability', Number(e.target.value))}
-                    className="flex-1 jsi-range"
-                    style={{ minWidth: 0 }}
-                  />
-                  <span className="text-xs font-semibold w-[36px] text-right" style={{ color: c.textPrimary }}>
-                    {newLeadData.winProbability || 50}%
-                  </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {[10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map((pct) => (
+                    <PillButton
+                      key={pct}
+                      size="xs"
+                      isSelected={(newLeadData.winProbability || 50) === pct}
+                      onClick={() => upd('winProbability', pct)}
+                      theme={theme}
+                    >
+                      {pct}%
+                    </PillButton>
+                  ))}
                 </div>
               </Row>
 
@@ -1094,10 +1049,10 @@ export const NewLeadScreen = ({
               </Row>
             </Section>
 
-            <Section title="Stakeholders & Competition" theme={theme}>
+            <Section title="Stakeholders & Competition" subtitle="Who's involved and who you're up against." theme={theme}>
               <div className="grid gap-3 lg:grid-cols-3">
                 <div>
-                  <p className="text-[11px] font-semibold mb-1" style={{ color: c.textSecondary }}>End User</p>
+                  <p className="text-xs font-semibold mb-1" style={{ color: c.textSecondary }}>End User</p>
                   <AutoCompleteCombobox
                     value={newLeadData.endUser || ''}
                     onChange={(val) => { upd('endUser', val); markTouched('endUser'); }}
@@ -1113,7 +1068,7 @@ export const NewLeadScreen = ({
                 </div>
 
                 <div>
-                  <p className="text-[11px] font-semibold mb-1" style={{ color: c.textSecondary }}>Dealer(s)</p>
+                  <p className="text-xs font-semibold mb-1" style={{ color: c.textSecondary }}>Dealer(s)</p>
                   <SpotlightMultiSelect
                     selectedItems={newLeadData.dealers || []}
                     onAddItem={(dealer) => {
@@ -1133,7 +1088,7 @@ export const NewLeadScreen = ({
                 </div>
 
                 <div>
-                  <p className="text-[11px] font-semibold mb-1" style={{ color: c.textSecondary }}>A&D Firm(s)</p>
+                  <p className="text-xs font-semibold mb-1" style={{ color: c.textSecondary }}>A&D Firm(s)</p>
                   <SpotlightMultiSelect
                     selectedItems={newLeadData.designFirms || []}
                     onAddItem={(firm) => {
@@ -1161,22 +1116,33 @@ export const NewLeadScreen = ({
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <p className="text-[11px] font-semibold" style={{ color: c.textPrimary }}>Competition</p>
-                      <p className="text-[11px] mt-0.5" style={{ color: c.textSecondary }}>Is competition active?</p>
+                      <p className="text-xs font-semibold" style={{ color: c.textPrimary }}>Competition</p>
+                      <p className="text-xs mt-0.5" style={{ color: c.textSecondary }}>Is competition active?</p>
                     </div>
-                    <div className="inline-flex items-center gap-2 rounded-full px-2.5 py-1" style={{ backgroundColor: c.subtle }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        upd('competitionPresent', !newLeadData.competitionPresent);
+                        markTouched('competitionPresent');
+                        markTouched('competitors');
+                      }}
+                      className="inline-flex items-center gap-2 rounded-full px-2.5 py-1"
+                      style={{ backgroundColor: c.subtle }}
+                    >
                       <span className="text-[11px] font-semibold" style={{ color: newLeadData.competitionPresent ? c.textSecondary : c.textPrimary }}>No</span>
-                      <ToggleSwitch
-                        checked={!!newLeadData.competitionPresent}
-                        onChange={(event) => {
-                          upd('competitionPresent', event.target.checked);
-                          markTouched('competitionPresent');
-                          markTouched('competitors');
-                        }}
-                        theme={theme}
-                      />
+                      <span onClick={(e) => e.stopPropagation()}>
+                        <ToggleSwitch
+                          checked={!!newLeadData.competitionPresent}
+                          onChange={(event) => {
+                            upd('competitionPresent', event.target.checked);
+                            markTouched('competitionPresent');
+                            markTouched('competitors');
+                          }}
+                          theme={theme}
+                        />
+                      </span>
                       <span className="text-[11px] font-semibold" style={{ color: newLeadData.competitionPresent ? c.textPrimary : c.textSecondary }}>Yes</span>
-                    </div>
+                    </button>
                   </div>
 
                   {newLeadData.competitionPresent && (
@@ -1203,31 +1169,45 @@ export const NewLeadScreen = ({
                 </div>
 
                 <div className="h-full rounded-2xl border px-3 py-2.5" style={{ borderColor: subtleBorder, backgroundColor: c.surface }}>
-                  <p className="text-[11px] font-semibold" style={{ color: c.textPrimary }}>Incentive Rewards</p>
+                  <p className="text-xs font-semibold" style={{ color: c.textPrimary }}>Incentive Rewards</p>
                   <div className="mt-2 grid grid-cols-2 gap-2">
-                    <div className="rounded-full px-2 py-1 inline-flex items-center justify-between gap-2" style={{ backgroundColor: c.subtle }}>
+                    <button
+                      type="button"
+                      onClick={() => { upd('salesReward', !salesRewardEnabled); markTouched('salesReward'); }}
+                      className="rounded-full px-2 py-1 inline-flex items-center justify-between gap-2 w-full"
+                      style={{ backgroundColor: c.subtle }}
+                    >
                       <span className="text-[11px] font-semibold" style={{ color: c.textPrimary }}>Sales</span>
-                      <ToggleSwitch
-                        checked={salesRewardEnabled}
-                        onChange={(event) => { upd('salesReward', event.target.checked); markTouched('salesReward'); }}
-                        theme={theme}
-                      />
-                    </div>
-                    <div className="rounded-full px-2 py-1 inline-flex items-center justify-between gap-2" style={{ backgroundColor: c.subtle }}>
+                      <span onClick={(e) => e.stopPropagation()}>
+                        <ToggleSwitch
+                          checked={salesRewardEnabled}
+                          onChange={(event) => { upd('salesReward', event.target.checked); markTouched('salesReward'); }}
+                          theme={theme}
+                        />
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { upd('designerReward', !designerRewardEnabled); markTouched('designerReward'); }}
+                      className="rounded-full px-2 py-1 inline-flex items-center justify-between gap-2 w-full"
+                      style={{ backgroundColor: c.subtle }}
+                    >
                       <span className="text-[11px] font-semibold" style={{ color: c.textPrimary }}>Designer</span>
-                      <ToggleSwitch
-                        checked={designerRewardEnabled}
-                        onChange={(event) => { upd('designerReward', event.target.checked); markTouched('designerReward'); }}
-                        theme={theme}
-                      />
-                    </div>
+                      <span onClick={(e) => e.stopPropagation()}>
+                        <ToggleSwitch
+                          checked={designerRewardEnabled}
+                          onChange={(event) => { upd('designerReward', event.target.checked); markTouched('designerReward'); }}
+                          theme={theme}
+                        />
+                      </span>
+                    </button>
                   </div>
                 </div>
               </div>
 
             </Section>
 
-            <Section title="Quote & JSI Series" theme={theme}>
+            <Section title="Quote & JSI Series" subtitle="Attach a quote and specify product lines." theme={theme}>
               <Row label="JSI Quote" theme={theme} inline noSep>
                 <div>
                   <div className="flex flex-wrap items-center gap-1.5">
@@ -1309,7 +1289,7 @@ export const NewLeadScreen = ({
                             return (
                               <>
                                 <div className="rounded-xl border p-2" style={{ borderColor: subtleBorder, backgroundColor: c.background }}>
-                                  <p className="text-[11px] font-semibold mb-1.5" style={{ color: c.textSecondary }}>
+                                  <p className="text-xs font-semibold mb-1.5" style={{ color: c.textSecondary }}>
                                     {prompts.first.label}
                                   </p>
                                   <PortalNativeSelect
@@ -1322,7 +1302,7 @@ export const NewLeadScreen = ({
                                   />
                                 </div>
                                 <div className="rounded-xl border p-2" style={{ borderColor: subtleBorder, backgroundColor: c.background }}>
-                                  <p className="text-[11px] font-semibold mb-1.5" style={{ color: c.textSecondary }}>
+                                  <p className="text-xs font-semibold mb-1.5" style={{ color: c.textSecondary }}>
                                     {prompts.second.label}
                                   </p>
                                   <PortalNativeSelect
@@ -1355,8 +1335,10 @@ export const NewLeadScreen = ({
                 onChange={(e) => upd('notes', e.target.value)}
                 rows={4}
                 placeholder="Add context, timing risks, or requirements..."
-                className="mt-2.5 w-full px-4 py-3 text-[13px] rounded-2xl border focus:outline-none resize-none"
+                className="mt-2.5 w-full px-4 py-3 text-[13px] rounded-2xl border focus:outline-none resize-none placeholder-theme-secondary transition-shadow"
                 style={{ backgroundColor: c.surface, borderColor: subtleBorder, color: c.textPrimary }}
+                onFocus={(e) => { e.target.style.boxShadow = `0 0 0 3px ${c.accent}33`; e.target.style.borderColor = c.accent || subtleBorder; }}
+                onBlur={(e) => { e.target.style.boxShadow = 'none'; e.target.style.borderColor = subtleBorder; }}
               />
 
               <div className="mt-3 space-y-2">
@@ -1387,7 +1369,7 @@ export const NewLeadScreen = ({
                   </div>
                   <button
                     type="button"
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
                     className="mt-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold border transition-colors hover:bg-black/5 dark:hover:bg-white/5"
                     style={{ borderColor: subtleBorder, color: c.textPrimary }}
                   >
@@ -1435,11 +1417,13 @@ export const NewLeadScreen = ({
             <Section title="Submission Review" subtitle="Filled details ready for routing." theme={theme}>
               <DiscreteHealthMeter health={health} theme={theme} />
 
-              <div className="mt-3 rounded-2xl border px-3 py-2.5" style={{ borderColor: subtleBorder, backgroundColor: c.surface }}>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.03em]" style={{ color: c.textSecondary }}>
-                  AI Summary
-                </p>
-                <p className="text-xs mt-1.5 leading-relaxed" style={{ color: c.textPrimary }}>
+              <div className="mt-3 rounded-2xl border overflow-hidden" style={{ borderColor: subtleBorder, backgroundColor: c.surface }}>
+                <div className="px-3 py-2 border-b" style={{ borderColor: subtleBorder }}>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.05em]" style={{ color: c.textSecondary }}>
+                    AI Summary
+                  </p>
+                </div>
+                <p className="px-3 py-2.5 text-xs leading-relaxed" style={{ color: c.textPrimary }}>
                   {reviewAiSummary}
                 </p>
               </div>
@@ -1449,7 +1433,7 @@ export const NewLeadScreen = ({
                   <div className="grid gap-2 md:grid-cols-2">
                     {filledReviewItems.map((item) => (
                       <div key={item.label} className="grid grid-cols-[104px_minmax(0,1fr)] gap-2">
-                        <span className="text-[10px] font-semibold uppercase tracking-[0.02em]" style={{ color: c.textSecondary }}>
+                        <span className="text-[11px] font-semibold uppercase tracking-[0.02em]" style={{ color: c.textSecondary }}>
                           {item.label}
                         </span>
                         <span className="text-[12px] font-medium break-words" style={{ color: c.textPrimary }}>
@@ -1466,14 +1450,14 @@ export const NewLeadScreen = ({
               </div>
 
               <div
-                className="mt-3 rounded-2xl border px-3 py-2.5 flex items-center gap-2 text-xs"
+                className="mt-3 rounded-2xl border px-3 py-2.5 flex items-center gap-2 text-xs font-medium"
                 style={{
-                  borderColor: canSubmit ? '#4A7C5933' : '#B85C5C33',
+                  borderColor: canSubmit ? '#4A7C5940' : '#B85C5C40',
                   color: canSubmit ? '#4A7C59' : '#B85C5C',
-                  backgroundColor: canSubmit ? '#4A7C5912' : '#B85C5C12',
+                  backgroundColor: canSubmit ? '#4A7C5914' : '#B85C5C14',
                 }}
               >
-                {canSubmit ? <CheckCircle2 className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}
+                {canSubmit ? <CheckCircle2 className="w-4 h-4 shrink-0" /> : <AlertTriangle className="w-4 h-4 shrink-0" />}
                 {canSubmit ? 'Lead is ready to submit.' : 'Complete required fields in Basics and Scope before submitting.'}
               </div>
             </Section>

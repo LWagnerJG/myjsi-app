@@ -28,7 +28,7 @@ export const Section = ({ title, subtitle, titleRight, children, theme, classNam
                 letterSpacing: '-0.005em',
               }}>{title}</h3>
               {subtitle && (
-                <p className="text-[11px] mt-1 leading-snug" style={{ color: theme.colors.textSecondary }}>
+                <p className="text-xs mt-1 leading-snug" style={{ color: theme.colors.textSecondary }}>
                   {subtitle}
                 </p>
               )}
@@ -51,7 +51,7 @@ export const Row = ({ label, children, theme, tip, noSep, inline }) => {
     style={{ borderColor: noSep ? undefined : divider }}>
     {label && (
       <div className={`flex items-center gap-1.5 ${inline ? 'md:min-h-[36px] md:pt-1.5' : 'mb-1.5'}`}>
-        <label className={`text-[11px] font-semibold ${inline ? 'whitespace-nowrap' : ''}`}
+        <label className={`text-xs font-semibold ${inline ? 'whitespace-nowrap' : ''}`}
           style={{ color: theme.colors.textSecondary }}>{label}</label>
         {tip && <InfoTooltip content={tip} theme={theme} position="right" size="sm" />}
       </div>
