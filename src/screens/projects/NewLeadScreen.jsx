@@ -104,16 +104,16 @@ const getSeriesProcurementPrompts = (series) => {
   if (isWorksurface) {
     return {
       first: {
-        label: 'Power / Data Package',
+        label: 'Power / Data',
         key: 'procurementCheckpoint',
-        placeholder: 'Select power/data status',
-        options: ['Defined', 'Likely Needed', 'Not Needed', 'Unknown'],
+        placeholder: 'Unknown',
+        options: ['Unknown', 'Defined', 'Likely Needed', 'Not Needed'],
       },
       second: {
         label: 'Finish Readiness',
         key: 'productionReadiness',
-        placeholder: 'Select finish readiness',
-        options: ['Standard Finishes Finalized', 'Custom Finish Pending', 'Needs Design Review'],
+        placeholder: 'Unknown',
+        options: ['Unknown', 'Standard Finishes Finalized', 'Custom Finish Pending', 'Needs Design Review'],
       },
     };
   }
@@ -121,14 +121,14 @@ const getSeriesProcurementPrompts = (series) => {
     first: {
       label: 'Upholstery / Textile',
       key: 'procurementCheckpoint',
-      placeholder: 'Select textile status',
-      options: ['Grade Selected', 'COM/COL Required', 'Needs Dealer Input', 'Unknown'],
+      placeholder: 'Unknown',
+      options: ['Unknown', 'Grade Selected', 'COM/COL Required', 'Needs Dealer Input'],
     },
     second: {
       label: 'Production Priority',
       key: 'productionReadiness',
-      placeholder: 'Select production priority',
-      options: ['Standard Lead Time', 'Expedite Request', 'Phased Delivery', 'Unknown'],
+      placeholder: 'Unknown',
+      options: ['Unknown', 'Standard Lead Time', 'Expedite Request', 'Phased Delivery'],
     },
   };
 };
@@ -1287,78 +1287,67 @@ export const NewLeadScreen = ({
                 </div>
               </Row>
 
-              <Row label="JSI Series" theme={theme} inline>
-                <div className="space-y-2">
-                  <ProductSpotlight
-                    selectedSeries={(newLeadData.products || []).map((p) => p.series)}
-                    onAdd={addProduct}
-                    available={JSI_SERIES}
-                    theme={theme}
-                  />
+              {/* JSI Series — full-width, search + cards unified */}
+              <div className="py-3">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[13px] font-semibold" style={{ color: c.textSecondary }}>JSI Series</span>
                   {(newLeadData.products || []).length > 0 && (
-                    <p className="text-[11px] px-1" style={{ color: c.textSecondary }}>
-                      {(newLeadData.products || []).length} selected • complete intake below.
-                    </p>
+                    <span className="text-[11px]" style={{ color: c.textSecondary }}>
+                      {(newLeadData.products || []).length} added
+                    </span>
                   )}
                 </div>
-              </Row>
-
-              {(newLeadData.products || []).length > 0 && (
-                <div className="space-y-2.5 mt-1">
-                  {(newLeadData.products || []).map((product, idx) => (
-                    <div key={`${product.series}-${idx}`} className="rounded-[22px] border overflow-hidden" style={{ borderColor: subtleBorder, backgroundColor: c.surface }}>
-                      <ProductCard
-                        product={product}
-                        idx={idx}
-                        onRemove={removeProduct}
-                        onUpdate={updateProductOption}
-                        theme={theme}
-                        showBorder={false}
-                      />
-                      <div className="border-t px-4 py-3" style={{ borderColor: subtleBorder }}>
-                        <p className="text-xs font-semibold" style={{ color: c.textPrimary }}>
-                          Intake Details
-                        </p>
-                        <div className="grid gap-2 mt-2 md:grid-cols-2">
-                          {(() => {
-                            const prompts = getSeriesProcurementPrompts(product.series);
-                            return (
-                              <>
-                                <div className="rounded-xl border p-2" style={{ borderColor: subtleBorder, backgroundColor: c.background }}>
-                                  <p className="text-xs font-semibold mb-1.5" style={{ color: c.textSecondary }}>
-                                    {prompts.first.label}
-                                  </p>
+                <ProductSpotlight
+                  selectedSeries={(newLeadData.products || []).map((p) => p.series)}
+                  onAdd={addProduct}
+                  available={JSI_SERIES}
+                  theme={theme}
+                />
+                {(newLeadData.products || []).length > 0 && (
+                  <div className="mt-3 space-y-2">
+                    {(newLeadData.products || []).map((product, idx) => {
+                      const prompts = getSeriesProcurementPrompts(product.series);
+                      return (
+                        <div key={`${product.series}-${idx}`} className="rounded-[22px] border overflow-hidden" style={{ borderColor: subtleBorder, backgroundColor: c.surface }}>
+                          <ProductCard
+                            product={product}
+                            idx={idx}
+                            onRemove={removeProduct}
+                            onUpdate={updateProductOption}
+                            theme={theme}
+                            showBorder={false}
+                          />
+                          {/* Intake — compact inline rows, no heavy inner borders */}
+                          <div className="border-t" style={{ borderColor: subtleBorder }}>
+                            <p className="px-4 pt-2.5 pb-1 text-[10px] font-semibold uppercase tracking-[0.06em]" style={{ color: c.textSecondary, opacity: 0.5 }}>
+                              Manufacturing context <span className="normal-case tracking-normal font-normal opacity-100">· optional</span>
+                            </p>
+                            {[prompts.first, prompts.second].map((prompt) => (
+                              <div key={prompt.key} className="flex items-center gap-3 px-4 py-1.5">
+                                <span className="text-[12px] flex-1 leading-tight" style={{ color: c.textSecondary }}>
+                                  {prompt.label}
+                                </span>
+                                <div className="w-[52%] shrink-0">
                                   <PortalNativeSelect
-                                    value={product[prompts.first.key] || ''}
-                                    onChange={(e) => updateProductOption(idx, prompts.first.key, e.target.value)}
-                                    options={prompts.first.options.map((option) => ({ label: option, value: option }))}
-                                    placeholder={prompts.first.placeholder}
+                                    value={product[prompt.key] || ''}
+                                    onChange={(e) => updateProductOption(idx, prompt.key, e.target.value)}
+                                    options={prompt.options.map((option) => ({ label: option, value: option }))}
+                                    placeholder="Unknown"
                                     theme={theme}
                                     size="sm"
+                                    mutedValues={['Unknown']}
                                   />
                                 </div>
-                                <div className="rounded-xl border p-2" style={{ borderColor: subtleBorder, backgroundColor: c.background }}>
-                                  <p className="text-xs font-semibold mb-1.5" style={{ color: c.textSecondary }}>
-                                    {prompts.second.label}
-                                  </p>
-                                  <PortalNativeSelect
-                                    value={product[prompts.second.key] || ''}
-                                    onChange={(e) => updateProductOption(idx, prompts.second.key, e.target.value)}
-                                    options={prompts.second.options.map((option) => ({ label: option, value: option }))}
-                                    placeholder={prompts.second.placeholder}
-                                    theme={theme}
-                                    size="sm"
-                                  />
-                                </div>
-                              </>
-                            );
-                          })()}
+                              </div>
+                            ))}
+                            <div className="h-2" />
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             </Section>
 
             <Section title="Notes & Attachments" subtitle="Optional context and support files." theme={theme}>
