@@ -145,7 +145,7 @@ const getHealthBand = (ratio) => {
 
 const FieldError = ({ show, message }) => {
   if (!show || !message) return null;
-  return <p className="text-xs mt-1.5" style={{ color: '#B85C5C' }}>{message}</p>;
+  return <p className="nl-field-error text-xs mt-1.5" style={{ color: '#B85C5C' }}>{message}</p>;
 };
 
 const StrengthCircle = ({ percent, tone, size = 44, stroke = 4, textSize = '11px' }) => {
@@ -794,8 +794,16 @@ export const NewLeadScreen = ({
   const goNext = useCallback(() => {
     markStepFieldsTouched(step);
     if (!stepValid) {
-      const panel = document.querySelector('.panel-content');
-      if (panel) panel.scrollTop = 0;
+      // Wait one frame for the error elements to render after state update, then scroll to the first one
+      setTimeout(() => {
+        const firstErr = document.querySelector('.nl-field-error');
+        if (firstErr) {
+          firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+          const panel = document.querySelector('.panel-content');
+          if (panel) panel.scrollTop = 0;
+        }
+      }, 30);
       return;
     }
     animateToStep(Math.min(step + 1, 2));
@@ -1632,16 +1640,18 @@ export const NewLeadScreen = ({
         {/* Action button */}
         <div className="max-w-3xl mx-auto px-4 sm:px-5 pb-2.5" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 10px)' }}>
           {step < 2 ? (
-            <PrimaryButton
-              type="button"
-              onClick={goNext}
-              theme={theme}
-              size="default"
-              fullWidth
-              icon={<ArrowRight className="w-4 h-4" />}
-            >
-              Continue
-            </PrimaryButton>
+            <div style={{ opacity: stepValid ? 1 : 0.45, transition: 'opacity 0.2s ease' }}>
+              <PrimaryButton
+                type="button"
+                onClick={goNext}
+                theme={theme}
+                size="default"
+                fullWidth
+                icon={<ArrowRight className="w-4 h-4" />}
+              >
+                Continue
+              </PrimaryButton>
+            </div>
           ) : (
             <PrimaryButton
               type="submit"
