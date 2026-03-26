@@ -15,6 +15,14 @@ import { CONTRACTS_DATA } from '../resources/contracts/data.js';
 import { ProductCard, ProductSpotlight, Reveal, Row, Section } from './NewLeadScreenComponents.jsx';
 
 const PO_OPTIONS = ['Unknown', '<30 Days', '30-60 Days', '60-180 Days', '180+ Days', 'Next Year'];
+const WIN_PRESETS = [10, 25, 50, 75, 90];
+const getWinBand = (pct) => {
+  if (pct <= 15) return { label: 'Unlikely', tone: '#B85C5C' };
+  if (pct <= 35) return { label: 'Possible', tone: '#C4956A' };
+  if (pct <= 55) return { label: 'Even Odds', tone: '#5B7B8C' };
+  if (pct <= 75) return { label: 'Likely', tone: '#4A7C59' };
+  return { label: 'Strong', tone: '#4A7C59' };
+};
 
 const TOP_100_CITIES = [
   'New York, NY', 'Los Angeles, CA', 'Chicago, IL', 'Houston, TX', 'Phoenix, AZ',
@@ -317,6 +325,13 @@ export const NewLeadScreen = ({
         @keyframes nl-slide-in-left  { from { opacity:0; transform:translateX(-18px); } to { opacity:1; transform:translateX(0); } }
         .nl-fwd  { animation: nl-slide-in-right .25s cubic-bezier(.25,.46,.45,.94) both; }
         .nl-back { animation: nl-slide-in-left  .25s cubic-bezier(.25,.46,.45,.94) both; }
+
+        .win-slider { -webkit-appearance:none; appearance:none; height:5px; border-radius:99px; outline:none; cursor:pointer; display:block; width:100%; }
+        .win-slider::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:22px; height:22px; border-radius:50%; background:#fff; border:2.5px solid var(--ws-accent,#666); box-shadow:0 1px 6px rgba(0,0,0,0.18); cursor:pointer; transition:transform .12s ease, box-shadow .12s ease; }
+        .win-slider::-webkit-slider-thumb:active { transform:scale(1.18); box-shadow:0 2px 12px rgba(0,0,0,0.22); }
+        .win-slider::-moz-range-thumb { width:22px; height:22px; border-radius:50%; background:#fff; border:2.5px solid var(--ws-accent,#666); box-shadow:0 1px 6px rgba(0,0,0,0.18); cursor:pointer; box-sizing:border-box; }
+        .win-slider:focus { outline:none; }
+        .win-slider:focus-visible::-webkit-slider-thumb { box-shadow:0 0 0 4px var(--ws-accent-ring,rgba(0,0,0,0.15)), 0 1px 6px rgba(0,0,0,0.18); }
       `;
       document.head.appendChild(s);
     }
@@ -977,20 +992,63 @@ export const NewLeadScreen = ({
                 </div>
               </Row>
 
-              <Row label="Win Probability" theme={theme} inline>
-                <div className="flex flex-wrap gap-1.5">
-                  {[10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map((pct) => (
-                    <PillButton
-                      key={pct}
-                      size="xs"
-                      isSelected={(newLeadData.winProbability || 50) === pct}
-                      onClick={() => upd('winProbability', pct)}
-                      theme={theme}
-                    >
-                      {pct}%
-                    </PillButton>
-                  ))}
-                </div>
+              <Row label="Win %" theme={theme} inline>
+                {(() => {
+                  const winProb = newLeadData.winProbability ?? 50;
+                  const winBand = getWinBand(winProb);
+                  const trackBg = dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.09)';
+                  return (
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="tabular-nums leading-none" style={{ color: c.textPrimary, fontSize: 26, fontWeight: 700, letterSpacing: '-0.02em' }}>
+                          {winProb}<span style={{ fontSize: 15, fontWeight: 600, color: c.textSecondary, marginLeft: 2 }}>%</span>
+                        </span>
+                        <span
+                          className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
+                          style={{ backgroundColor: `${winBand.tone}1A`, color: winBand.tone, transition: 'color .15s, background-color .15s' }}
+                        >
+                          {winBand.label}
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min={5}
+                        max={100}
+                        step={5}
+                        value={winProb}
+                        onChange={(e) => upd('winProbability', Number(e.target.value))}
+                        className="win-slider"
+                        style={{
+                          '--ws-accent': c.accent,
+                          '--ws-accent-ring': `${c.accent}44`,
+                          background: `linear-gradient(to right, ${c.accent} ${winProb}%, ${trackBg} ${winProb}%)`,
+                        }}
+                      />
+                      <div className="flex gap-1.5 mt-3">
+                        {WIN_PRESETS.map((pct) => {
+                          const active = winProb === pct;
+                          return (
+                            <button
+                              key={pct}
+                              type="button"
+                              onClick={() => upd('winProbability', pct)}
+                              className="flex-1 rounded-full py-1.5 border transition-all"
+                              style={{
+                                fontSize: 11,
+                                fontWeight: 600,
+                                backgroundColor: active ? c.accent : 'transparent',
+                                borderColor: active ? c.accent : subtleBorder,
+                                color: active ? c.accentText : c.textSecondary,
+                              }}
+                            >
+                              {pct}%
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })()}
               </Row>
 
               <Row label="PO Timeframe" theme={theme} inline>
