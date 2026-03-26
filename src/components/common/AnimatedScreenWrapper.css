@@ -24,6 +24,8 @@
     overflow-y: auto;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
+    /* Ensure focused inputs scroll into view below the fixed AppHeader */
+    scroll-padding-top: calc(var(--app-header-offset, 72px) + var(--safe-area-inset-top, 0px) + 12px);
 }
 
 /* Shadow that dims the previous screen during swipe */
