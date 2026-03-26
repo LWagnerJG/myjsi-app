@@ -45,10 +45,11 @@ export function SpotlightMultiSelect({
     setActiveIndex(-1);
   }, [q, open]);
 
+  const darkMode = isDarkTheme(theme);
   const palette = {
     bg: theme.colors.surface,
-    field: theme.colors.surface,
-    border: isDarkTheme(theme) ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+    field: darkMode ? theme.colors.background : theme.colors.surface,
+    border: darkMode ? 'rgba(255,255,255,0.11)' : 'rgba(0,0,0,0.07)',
     text: theme.colors.textPrimary,
     hint: theme.colors.textSecondary,
     accent: theme.colors.accent,

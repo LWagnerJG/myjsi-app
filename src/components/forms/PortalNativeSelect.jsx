@@ -154,8 +154,9 @@ export const PortalNativeSelect = ({
   }, [isOpen, normOptions, focusIdx, typeAhead, open, close, select]);
 
   // ── Style tokens ──────────────────────────────────────────────
+  const dark = isDarkTheme(theme);
   const c = theme.colors;
-  const subtleBorder = isDarkTheme(theme) ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+  const subtleBorder = dark ? 'rgba(255,255,255,0.11)' : 'rgba(0,0,0,0.07)';
   const isSm = size === 'sm';
   const triggerH = isSm ? 34 : 44;
 
@@ -181,10 +182,10 @@ export const PortalNativeSelect = ({
           height: triggerH,
           padding: isSm ? '0 12px' : '0 16px',
           borderRadius: bordered ? (isSm ? 9999 : 16) : 0,
-          backgroundColor: bordered ? c.surface : 'transparent',
+          backgroundColor: bordered ? (dark ? c.background : c.surface) : 'transparent',
           border: bordered ? `1px solid ${isOpen ? c.accent : subtleBorder}` : '1px solid transparent',
           color: (isPlaceholder || isMuted) ? c.textSecondary : c.textPrimary,
-          fontSize: isSm ? 13 : 14,
+          fontSize: isSm ? 14 : 15,
           boxShadow: bordered && isOpen ? `0 0 0 3px ${c.accent}18` : 'none',
         }}
       >
@@ -210,9 +211,9 @@ export const PortalNativeSelect = ({
                 bottom: openAbove ? window.innerHeight - position.top : undefined,
                 left: position.left,
                 width: position.width,
-                backgroundColor: c.surface,
+                backgroundColor: dark ? c.surface : c.surface,
                 border: `1px solid ${subtleBorder}`,
-                boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                boxShadow: dark ? '0 8px 32px rgba(0,0,0,0.45)' : '0 8px 24px rgba(0,0,0,0.12)',
                 zIndex: DESIGN_TOKENS.zIndex.popover,
                 transformOrigin: openAbove ? 'bottom center' : 'top center',
               }}

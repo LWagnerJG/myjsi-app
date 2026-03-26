@@ -48,16 +48,16 @@ export const lightTheme = {
 export const darkTheme = {
     colors: {
         // Core colors
-        background: '#1A1A1A',
-        surface: '#262626',
+        background: '#161616',
+        surface: '#242424',
         primary: '#F5F0EB',
         accent: '#F5F0EB',
         secondary: '#C0B9B0',
         textPrimary: '#EDE8E3',
-        textSecondary: '#958E85',
+        textSecondary: '#908880',
         border: 'rgba(255, 255, 255, 0.12)',
         shadow: 'rgba(0, 0, 0, 0.5)',
-        subtle: 'rgba(255, 255, 255, 0.07)',
+        subtle: 'rgba(255, 255, 255, 0.06)',
 
         // Semantic colors - for consistent usage across components
         accentText: '#1A1A1A', // Text on accent/primary buttons (dark on light)
