@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArrowLeft, User } from 'lucide-react';
 import { logoLight } from '../../data/theme/themeData.js';
 import { isDarkTheme } from '../../design-system/tokens.js';
@@ -17,18 +17,23 @@ export const AppHeader = React.memo(({
     const isHome = !showBack;
     const dark = isDarkMode || isDarkTheme(theme);
 
+    // Only show scrim when content has scrolled behind the header.
+    // At rest the backdrop-filter blurs whatever is visually behind it — including
+    // the colourful app-tile icons — so it must stay hidden until needed.
+    const [scrolled, setScrolled] = useState(false);
+    useEffect(() => {
+        const onScroll = () => setScrolled(window.scrollY > 8);
+        window.addEventListener('scroll', onScroll, { passive: true });
+        return () => window.removeEventListener('scroll', onScroll);
+    }, []);
+
     // Semi-transparent so blurred background content shows through (frosted glass)
     const glassBg = dark ? 'rgba(42,42,42,0.88)' : 'rgba(255,255,255,0.88)';
 
     // Background colour values used for the gradient overlay
     const bgR = dark ? '26,26,26' : '240,237,232';
 
-    // Two-layer gradient blur covering the full header + search bar zone (~165px):
-    //   Layer 1 — backdrop-filter blur: invisible at rest (blurring a flat bg = same bg),
-    //             shows blurred content as the page scrolls.
-    //   Layer 2 — gradient overlay: transparent at top (lets blurred content show) and
-    //             fades to solid background-colour at the bottom edge so you never see
-    //             a hard rectangle — content appears to melt into the background.
+    // 165px covers the myJSI pill + the HomeHeader search bar zone below it.
     const SCRIM_H = 165;
 
     const getTimeGreeting = () => {
@@ -41,28 +46,31 @@ export const AppHeader = React.memo(({
     return (
         <>
             {/* Layer 1 — blur. No gradient here (iOS Safari drops backdrop-filter when
-                mask-image is on the same element). Covers AppHeader + HomeHeader zone. */}
+                mask-image is on the same element). Covers AppHeader + HomeHeader zone.
+                Hidden at rest so it never blurs the app tiles sitting below. */}
             <div
                 aria-hidden="true"
-                className="fixed top-0 left-0 right-0 pointer-events-none"
+                className="fixed top-0 left-0 right-0 pointer-events-none transition-opacity duration-300"
                 style={{
                     height: SCRIM_H,
                     zIndex: 27,
+                    opacity: scrolled ? 1 : 0,
                     backdropFilter: 'blur(20px)',
                     WebkitBackdropFilter: 'blur(20px)',
                 }}
             />
 
             {/* Layer 2 — gradient overlay. Transparent at top (shows blurred content),
-                fades to solid background-colour at the bottom so the blur zone has no
-                visible bottom edge. At rest this is invisible since the overlay colour
-                equals the page background. */}
+                fades to solid background-colour at the bottom edge so content scrolling
+                upward smoothly dissolves before it blurs — no hard bottom line.
+                Also scroll-triggered so it stays invisible at rest. */}
             <div
                 aria-hidden="true"
-                className="fixed top-0 left-0 right-0 pointer-events-none"
+                className="fixed top-0 left-0 right-0 pointer-events-none transition-opacity duration-300"
                 style={{
                     height: SCRIM_H,
                     zIndex: 28,
+                    opacity: scrolled ? 1 : 0,
                     background: `linear-gradient(to bottom,
                         rgba(${bgR},0)    0%,
                         rgba(${bgR},0)    28%,
