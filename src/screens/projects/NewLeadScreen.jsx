@@ -247,6 +247,15 @@ export const NewLeadScreen = ({
   const [step, setStep] = useState(0);
   const [stepAnimClass, setStepAnimClass] = useState('');
   const prevStepRef = useRef(0);
+
+  // Declared early so effects that depend on it don't hit the temporal dead zone
+  const animateToStep = useCallback((nextStep) => {
+    const dir = nextStep > prevStepRef.current ? 'nl-fwd' : 'nl-back';
+    prevStepRef.current = nextStep;
+    setStepAnimClass(dir);
+    setStep(nextStep);
+  }, []);
+
   const [touched, setTouched] = useState({});
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [dragActive, setDragActive] = useState(false);
@@ -737,13 +746,6 @@ export const NewLeadScreen = ({
   const markStepFieldsTouched = useCallback((stepIdx) => {
     if (stepIdx === 0) setTouched((prev) => ({ ...prev, project: true, projectStatus: true, vertical: true, otherVertical: true }));
     if (stepIdx === 1) setTouched((prev) => ({ ...prev, estimatedList: true, endUser: true, dealers: true, poTimeframe: true, competitors: true, jsiQuoteNumber: true }));
-  }, []);
-
-  const animateToStep = useCallback((nextStep) => {
-    const dir = nextStep > prevStepRef.current ? 'nl-fwd' : 'nl-back';
-    prevStepRef.current = nextStep;
-    setStepAnimClass(dir); // applied when new key div mounts
-    setStep(nextStep);
   }, []);
 
   const goNext = useCallback(() => {
