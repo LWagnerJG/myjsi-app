@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AlertTriangle, ArrowRight, CheckCircle2, FileText, Paperclip, UploadCloud, X } from 'lucide-react';
+import { AlertTriangle, ArrowRight, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, FileText, Paperclip, UploadCloud, X } from 'lucide-react';
 import { FormInput } from '../../components/forms/FormInput.jsx';
 import { AutoCompleteCombobox } from '../../components/forms/AutoCompleteCombobox.jsx';
 import { PortalNativeSelect } from '../../components/forms/PortalNativeSelect.jsx';
@@ -57,6 +57,9 @@ const FILE_EXTENSIONS = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'pn
 const FILE_ACCEPT = '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.png,.jpg,.jpeg,.heic';
 const STEP_LABELS = ['Basics', 'Scope', 'Review'];
 const getSubtleBorder = (theme) => (isDarkTheme(theme) ? 'rgba(255,255,255,0.11)' : 'rgba(0,0,0,0.07)');
+
+const MONTHS_LONG = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const CAL_WEEKDAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
 const parseCurrency = (raw) => {
   const n = Number(String(raw ?? '').replace(/[^0-9.]/g, ''));
@@ -200,6 +203,164 @@ const InlineStepHealth = ({ health, theme }) => {
   );
 };
 
+const DatePickerInput = ({ value, onChange, theme, placeholder = 'Select date' }) => {
+  const dark = isDarkTheme(theme);
+  const c = theme.colors;
+  const subtleBorder = getSubtleBorder(theme);
+  const [isOpen, setIsOpen] = useState(false);
+  const wrapperRef = useRef(null);
+  const today = new Date();
+  const parsed = value ? new Date(value + 'T00:00:00') : null;
+  const [viewYear, setViewYear] = useState(() => parsed ? parsed.getFullYear() : today.getFullYear());
+  const [viewMonth, setViewMonth] = useState(() => parsed ? parsed.getMonth() : today.getMonth());
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const close = (e) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) setIsOpen(false);
+    };
+    document.addEventListener('mousedown', close);
+    document.addEventListener('touchstart', close, { passive: true });
+    return () => {
+      document.removeEventListener('mousedown', close);
+      document.removeEventListener('touchstart', close);
+    };
+  }, [isOpen]);
+
+  const displayText = parsed
+    ? `${MONTHS_LONG[parsed.getMonth()]} ${parsed.getDate()}, ${parsed.getFullYear()}`
+    : null;
+
+  const prevMonth = () => {
+    if (viewMonth === 0) { setViewYear((y) => y - 1); setViewMonth(11); }
+    else setViewMonth((m) => m - 1);
+  };
+  const nextMonth = () => {
+    if (viewMonth === 11) { setViewYear((y) => y + 1); setViewMonth(0); }
+    else setViewMonth((m) => m + 1);
+  };
+
+  const selectDay = (day) => {
+    const mm = String(viewMonth + 1).padStart(2, '0');
+    const dd = String(day).padStart(2, '0');
+    onChange(`${viewYear}-${mm}-${dd}`);
+    setIsOpen(false);
+  };
+
+  const isSelected = (day) => parsed && parsed.getFullYear() === viewYear && parsed.getMonth() === viewMonth && parsed.getDate() === day;
+  const isToday = (day) => today.getFullYear() === viewYear && today.getMonth() === viewMonth && today.getDate() === day;
+
+  const firstDow = new Date(viewYear, viewMonth, 1).getDay();
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+  const cells = [...Array(firstDow).fill(null), ...Array.from({ length: daysInMonth }, (_, i) => i + 1)];
+
+  return (
+    <div className="relative" ref={wrapperRef}>
+      <button
+        type="button"
+        onClick={() => setIsOpen((o) => !o)}
+        className="w-full h-10 rounded-full border flex items-center justify-between px-4 text-[14px] focus:outline-none transition-colors"
+        style={{
+          backgroundColor: dark ? c.background : c.surface,
+          borderColor: isOpen ? c.accent : subtleBorder,
+          color: displayText ? c.textPrimary : c.textSecondary,
+          boxShadow: isOpen ? `0 0 0 3px ${c.accent}18` : 'none',
+        }}
+      >
+        <span>{displayText || placeholder}</span>
+        <CalendarDays className="w-4 h-4 shrink-0" style={{ color: c.textSecondary }} />
+      </button>
+
+      {isOpen && (
+        <div
+          className="absolute left-0 right-0 z-50 rounded-2xl border overflow-hidden"
+          style={{
+            top: 'calc(100% + 6px)',
+            backgroundColor: c.surface,
+            borderColor: subtleBorder,
+            boxShadow: dark ? '0 8px 32px rgba(0,0,0,0.45)' : '0 8px 24px rgba(0,0,0,0.11)',
+          }}
+        >
+          {/* Month nav */}
+          <div className="flex items-center justify-between px-4 py-2.5 border-b" style={{ borderColor: subtleBorder }}>
+            <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={prevMonth}
+              className="p-1.5 rounded-full transition-colors hover:bg-black/[0.05]">
+              <ChevronLeft className="w-4 h-4" style={{ color: c.textSecondary }} />
+            </button>
+            <span className="text-[13px] font-semibold" style={{ color: c.textPrimary }}>
+              {MONTHS_LONG[viewMonth]} {viewYear}
+            </span>
+            <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={nextMonth}
+              className="p-1.5 rounded-full transition-colors hover:bg-black/[0.05]">
+              <ChevronRight className="w-4 h-4" style={{ color: c.textSecondary }} />
+            </button>
+          </div>
+
+          {/* Calendar grid */}
+          <div className="px-3 pt-2 pb-1">
+            <div className="grid grid-cols-7 mb-0.5">
+              {CAL_WEEKDAYS.map((d) => (
+                <div key={d} className="text-center text-[10px] font-semibold py-1" style={{ color: c.textSecondary, opacity: 0.6 }}>{d}</div>
+              ))}
+            </div>
+            <div className="grid grid-cols-7 gap-y-0.5">
+              {cells.map((day, idx) => (
+                <div key={idx} className="flex items-center justify-center">
+                  {day !== null ? (
+                    <button
+                      type="button"
+                      onMouseDown={(e) => { e.preventDefault(); selectDay(day); }}
+                      onClick={() => selectDay(day)}
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-[13px] transition-all"
+                      style={{
+                        backgroundColor: isSelected(day) ? c.accent : 'transparent',
+                        color: isSelected(day) ? c.accentText : isToday(day) ? c.accent : c.textPrimary,
+                        fontWeight: isSelected(day) || isToday(day) ? 700 : 400,
+                        outline: isToday(day) && !isSelected(day) ? `1.5px solid ${c.accent}55` : 'none',
+                        outlineOffset: '-1.5px',
+                      }}
+                    >
+                      {day}
+                    </button>
+                  ) : <div className="w-8 h-8" />}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="border-t px-4 py-2.5 flex justify-between items-center" style={{ borderColor: subtleBorder }}>
+            <button
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => { onChange(''); setIsOpen(false); }}
+              className="text-[12px] font-medium"
+              style={{ color: c.textSecondary }}
+            >
+              Clear
+            </button>
+            <button
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => {
+                const d = today;
+                const mm = String(d.getMonth() + 1).padStart(2, '0');
+                const dd = String(d.getDate()).padStart(2, '0');
+                onChange(`${d.getFullYear()}-${mm}-${dd}`);
+                setIsOpen(false);
+              }}
+              className="text-[12px] font-semibold"
+              style={{ color: c.accent }}
+            >
+              Today
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const DiscreteHealthMeter = ({ health, theme, compact = false }) => {
   const c = theme.colors;
   const subtleBorder = getSubtleBorder(theme);
@@ -276,7 +437,6 @@ export const NewLeadScreen = ({
     () => !!(newLeadData.discount && !DISCOUNT_OPTIONS_WITH_UNKNOWN.includes(newLeadData.discount)),
   );
   const fileInputRef = useRef(null);
-  const installDateInputRef = useRef(null);
   const [endUserOptions, setEndUserOptions] = useState(() => mergeUnique(
     END_USER_OPTIONS,
     (opportunities || []).map((opp) => opp.company),
@@ -370,17 +530,6 @@ export const NewLeadScreen = ({
     [newLeadData.projectStatus, stageOptions],
   );
 
-  const openInstallDatePicker = useCallback(() => {
-    const input = installDateInputRef.current;
-    if (!input) return;
-    if (typeof input.showPicker === 'function') {
-      input.showPicker();
-      return;
-    }
-    input.focus();
-    input.click();
-  }, []);
-
   const quoteMode = newLeadData.jsiQuoteExists ? 'existing' : newLeadData.quoteNeeded ? 'needed' : (newLeadData.noQuoteNeeded ? 'not-needed' : null);
   const setQuoteMode = useCallback((mode) => {
     onNewLeadChange({
@@ -396,14 +545,15 @@ export const NewLeadScreen = ({
     const endUser = normalizeText(newLeadData.endUser);
     const projectQuery = project.length >= 3 ? project : '';
     const endUserQuery = endUser.length >= 3 ? endUser : '';
-    if (!projectQuery && !endUserQuery) return [];
+    // Require BOTH project and end user to have enough characters and BOTH to match
+    if (!projectQuery || !endUserQuery) return [];
     return (opportunities || [])
       .filter((opp) => {
         const name = normalizeText(opp.name || opp.project);
         const company = normalizeText(opp.company);
-        const projectHit = projectQuery && (name.includes(projectQuery) || projectQuery.includes(name));
-        const companyHit = endUserQuery && (company.includes(endUserQuery) || endUserQuery.includes(company));
-        return projectHit || companyHit;
+        const projectHit = name.includes(projectQuery) || projectQuery.includes(name);
+        const companyHit = company.includes(endUserQuery) || endUserQuery.includes(company);
+        return projectHit && companyHit;
       })
       .slice(0, 3);
   }, [newLeadData.project, newLeadData.endUser, opportunities]);
@@ -849,7 +999,7 @@ export const NewLeadScreen = ({
                           key={stage}
                           type="button"
                           onClick={() => { upd('projectStatus', stage); markTouched('projectStatus'); }}
-                          className="flex items-center gap-2.5 rounded-2xl border transition-all text-left px-3 py-2.5"
+                          className="flex items-center gap-2.5 rounded-full border transition-all text-left px-3 py-2.5"
                           style={{
                             backgroundColor: isSelected ? c.accent : isPast ? `${c.accent}14` : 'transparent',
                             borderColor: isSelected ? c.accent : isPast ? `${c.accent}50` : subtleBorder,
@@ -932,21 +1082,12 @@ export const NewLeadScreen = ({
               </Row>
 
               <Row label="Install Date" theme={theme} inline>
-                <div className="relative">
-                  <input
-                    ref={installDateInputRef}
-                    type="date"
-                    value={newLeadData.expectedInstallDate || ''}
-                    onChange={(e) => upd('expectedInstallDate', e.target.value)}
-                    onClick={openInstallDatePicker}
-                    className="w-full h-10 rounded-full border px-4 pr-10 text-[14px] text-left focus:outline-none focus:ring-0 jsi-date-input"
-                    style={{
-                      backgroundColor: dark ? c.background : c.surface,
-                      borderColor: subtleBorder,
-                      color: c.textPrimary,
-                    }}
-                  />
-                </div>
+                <DatePickerInput
+                  value={newLeadData.expectedInstallDate || ''}
+                  onChange={(v) => upd('expectedInstallDate', v)}
+                  theme={theme}
+                  placeholder="Select date"
+                />
               </Row>
             </Section>
 
@@ -1094,7 +1235,7 @@ export const NewLeadScreen = ({
                       className="shrink-0 text-[12px] font-medium px-2.5 py-1.5 rounded-full border transition-colors"
                       style={{ color: c.textSecondary, borderColor: subtleBorder }}
                     >
-                      ← List
+                      ← Discounts
                     </button>
                   </div>
                 ) : (
@@ -1237,37 +1378,44 @@ export const NewLeadScreen = ({
                 </Reveal>
               </div>
 
-              {/* Rewards — always-inline: label left, both toggles right */}
+              {/* Rewards — pill toggle style, consistent with PO Timeframe / Win% presets */}
               <div className="flex items-center justify-between gap-4 py-3">
-                <span className="text-[13px] font-semibold shrink-0" style={{ color: c.textSecondary }}>Rewards</span>
-                <div className="flex items-center gap-5 shrink-0">
+                <div className="shrink-0">
+                  <span className="text-[13px] font-semibold" style={{ color: c.textSecondary }}>Rewards</span>
+                  <span className="block text-[11px] mt-0.5" style={{ color: c.textSecondary, opacity: 0.6 }}>
+                    {[salesRewardEnabled ? 'Sales 3%' : null, designerRewardEnabled ? 'Designer 1%' : null].filter(Boolean).join(' · ') || 'None active'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
                   <button
                     type="button"
-                    className="flex items-center gap-2"
                     onClick={() => { upd('salesReward', !salesRewardEnabled); markTouched('salesReward'); }}
+                    className="rounded-full border transition-all px-3.5 py-2"
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 600,
+                      lineHeight: 1,
+                      backgroundColor: salesRewardEnabled ? c.accent : 'transparent',
+                      borderColor: salesRewardEnabled ? c.accent : subtleBorder,
+                      color: salesRewardEnabled ? c.accentText : c.textSecondary,
+                    }}
                   >
-                    <span className="text-[12px] font-medium" style={{ color: salesRewardEnabled ? c.textPrimary : c.textSecondary }}>Sales 3%</span>
-                    <span onClick={(e) => e.stopPropagation()}>
-                      <ToggleSwitch
-                        checked={salesRewardEnabled}
-                        onChange={(event) => { upd('salesReward', event.target.checked); markTouched('salesReward'); }}
-                        theme={theme}
-                      />
-                    </span>
+                    Sales 3%
                   </button>
                   <button
                     type="button"
-                    className="flex items-center gap-2"
                     onClick={() => { upd('designerReward', !designerRewardEnabled); markTouched('designerReward'); }}
+                    className="rounded-full border transition-all px-3.5 py-2"
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 600,
+                      lineHeight: 1,
+                      backgroundColor: designerRewardEnabled ? c.accent : 'transparent',
+                      borderColor: designerRewardEnabled ? c.accent : subtleBorder,
+                      color: designerRewardEnabled ? c.accentText : c.textSecondary,
+                    }}
                   >
-                    <span className="text-[12px] font-medium" style={{ color: designerRewardEnabled ? c.textPrimary : c.textSecondary }}>Designer 1%</span>
-                    <span onClick={(e) => e.stopPropagation()}>
-                      <ToggleSwitch
-                        checked={designerRewardEnabled}
-                        onChange={(event) => { upd('designerReward', event.target.checked); markTouched('designerReward'); }}
-                        theme={theme}
-                      />
-                    </span>
+                    Designer 1%
                   </button>
                 </div>
               </div>
