@@ -15,6 +15,29 @@ import { CONTRACTS_DATA } from '../resources/contracts/data.js';
 import { ProductCard, ProductSpotlight, Reveal, Row, Section } from './NewLeadScreenComponents.jsx';
 
 const PO_OPTIONS = ['Unknown', '<30 Days', '30-60 Days', '60-180 Days', '180+ Days', 'Next Year'];
+
+const TOP_100_CITIES = [
+  'New York, NY', 'Los Angeles, CA', 'Chicago, IL', 'Houston, TX', 'Phoenix, AZ',
+  'Philadelphia, PA', 'San Antonio, TX', 'San Diego, CA', 'Dallas, TX', 'San Jose, CA',
+  'Austin, TX', 'Jacksonville, FL', 'Fort Worth, TX', 'Columbus, OH', 'Charlotte, NC',
+  'Indianapolis, IN', 'San Francisco, CA', 'Seattle, WA', 'Denver, CO', 'Nashville, TN',
+  'Oklahoma City, OK', 'El Paso, TX', 'Washington, DC', 'Las Vegas, NV', 'Louisville, KY',
+  'Memphis, TN', 'Portland, OR', 'Baltimore, MD', 'Milwaukee, WI', 'Albuquerque, NM',
+  'Tucson, AZ', 'Fresno, CA', 'Sacramento, CA', 'Kansas City, MO', 'Mesa, AZ',
+  'Atlanta, GA', 'Omaha, NE', 'Colorado Springs, CO', 'Raleigh, NC', 'Long Beach, CA',
+  'Virginia Beach, VA', 'Minneapolis, MN', 'Tampa, FL', 'New Orleans, LA', 'Arlington, TX',
+  'Bakersfield, CA', 'Honolulu, HI', 'Anaheim, CA', 'Aurora, CO', 'Santa Ana, CA',
+  'Corpus Christi, TX', 'Riverside, CA', 'Lexington, KY', 'St. Louis, MO', 'Pittsburgh, PA',
+  'Stockton, CA', 'Anchorage, AK', 'Cincinnati, OH', 'St. Paul, MN', 'Greensboro, NC',
+  'Toledo, OH', 'Newark, NJ', 'Plano, TX', 'Henderson, NV', 'Orlando, FL',
+  'Lincoln, NE', 'Jersey City, NJ', 'Chandler, AZ', 'Fort Wayne, IN', 'St. Petersburg, FL',
+  'Laredo, TX', 'Norfolk, VA', 'Madison, WI', 'Durham, NC', 'Lubbock, TX',
+  'Winston-Salem, NC', 'Garland, TX', 'Glendale, AZ', 'Hialeah, FL', 'Reno, NV',
+  'Baton Rouge, LA', 'Irvine, CA', 'Chesapeake, VA', 'Irving, TX', 'Scottsdale, AZ',
+  'North Las Vegas, NV', 'Fremont, CA', 'Gilbert, AZ', 'San Bernardino, CA', 'Birmingham, AL',
+  'Boise, ID', 'Rochester, NY', 'Richmond, VA', 'Spokane, WA', 'Des Moines, IA',
+  'Montgomery, AL', 'Modesto, CA', 'Fayetteville, NC', 'Tacoma, WA', 'Akron, OH',
+];
 const END_USER_OPTIONS = [
   'ABC Corporation', 'GlobalTech', 'Midwest Health', 'State University', 'Metro Hospitality',
   'Innovate Labs', 'XYZ Industries', 'Acme Corp', 'TechVentures', 'Summit Partners',
@@ -328,10 +351,10 @@ export const NewLeadScreen = ({
     markTouched('endUser');
   }, [markTouched, upd]);
 
-  const stageIndex = useMemo(() => {
-    const idx = stageOptions.indexOf(newLeadData.projectStatus);
-    return idx >= 0 ? idx : 0;
-  }, [newLeadData.projectStatus, stageOptions]);
+  const stageIndex = useMemo(
+    () => stageOptions.indexOf(newLeadData.projectStatus), // -1 when nothing selected
+    [newLeadData.projectStatus, stageOptions],
+  );
 
   const openInstallDatePicker = useCallback(() => {
     const input = installDateInputRef.current;
@@ -798,18 +821,40 @@ export const NewLeadScreen = ({
 
               <Row label="Stage" theme={theme} inline>
                 <div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {stageOptions.map((stage) => (
-                      <PillButton
-                        key={stage}
-                        size="xs"
-                        isSelected={newLeadData.projectStatus === stage}
-                        onClick={() => { upd('projectStatus', stage); markTouched('projectStatus'); }}
-                        theme={theme}
-                      >
-                        {stage}
-                      </PillButton>
-                    ))}
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {stageOptions.map((stage, idx) => {
+                      const num = idx + 1;
+                      const isSelected = newLeadData.projectStatus === stage;
+                      const isPast = stageIndex > idx;
+                      return (
+                        <button
+                          key={stage}
+                          type="button"
+                          onClick={() => { upd('projectStatus', stage); markTouched('projectStatus'); }}
+                          className="flex items-center gap-2.5 rounded-2xl border transition-all text-left px-3 py-2.5"
+                          style={{
+                            backgroundColor: isSelected ? c.accent : isPast ? `${c.accent}14` : 'transparent',
+                            borderColor: isSelected ? c.accent : isPast ? `${c.accent}50` : subtleBorder,
+                          }}
+                        >
+                          <span
+                            className="text-[11px] font-bold w-5 h-5 rounded-full flex items-center justify-center shrink-0"
+                            style={{
+                              backgroundColor: isSelected ? 'rgba(255,255,255,0.2)' : isPast ? `${c.accent}20` : dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)',
+                              color: isSelected ? c.accentText : isPast ? c.accent : c.textSecondary,
+                            }}
+                          >
+                            {num}
+                          </span>
+                          <span
+                            className="text-[13px] font-semibold leading-tight"
+                            style={{ color: isSelected ? c.accentText : c.textPrimary }}
+                          >
+                            {stage}
+                          </span>
+                        </button>
+                      );
+                    })}
                   </div>
                   <FieldError show={!!visibleError('projectStatus')} message={visibleError('projectStatus')} />
                 </div>
@@ -855,13 +900,16 @@ export const NewLeadScreen = ({
               </Row>
 
               <Row label="Location" theme={theme} inline>
-                <FormInput
+                <AutoCompleteCombobox
                   value={newLeadData.installationLocation || ''}
-                  onChange={(e) => { upd('installationLocation', e.target.value); markTouched('installationLocation'); }}
-                  placeholder="City, State"
+                  onChange={(val) => { upd('installationLocation', val); markTouched('installationLocation'); }}
+                  onSelect={(val) => { upd('installationLocation', val); markTouched('installationLocation'); }}
+                  onAddNew={(val) => { upd('installationLocation', val.trim()); markTouched('installationLocation'); }}
+                  options={TOP_100_CITIES}
+                  placeholder="Search city..."
                   theme={theme}
-                  size="sm"
-                  surfaceBg
+                  compact
+                  resetOnSelect={false}
                 />
               </Row>
 
