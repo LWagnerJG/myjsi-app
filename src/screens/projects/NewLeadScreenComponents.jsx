@@ -47,8 +47,8 @@ export const Row = ({ label, children, theme, tip, noSep, inline }) => {
   const divider = isDarkTheme(theme) ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)';
   const rowLayout = inline ? 'grid items-start gap-2 md:grid-cols-[132px_minmax(0,1fr)] md:gap-3' : '';
   return (
-  <div className={`${rowLayout} py-3 ${noSep ? '' : 'border-t'}`}
-    style={{ borderColor: noSep ? undefined : divider }}>
+  <div className={`${rowLayout} py-3`}
+    style={{ borderColor: undefined }}>
     {label && (
       <div className={`flex items-center gap-1.5 ${inline ? 'md:min-h-[36px] md:pt-1.5' : 'mb-1.5'}`}>
         <label className={`text-xs font-semibold ${inline ? 'whitespace-nowrap' : ''}`}

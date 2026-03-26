@@ -182,8 +182,8 @@ const InlineStepHealth = ({ health, theme }) => {
       style={{ borderColor: subtleBorder, backgroundColor: c.surface }}
     >
       <StrengthCircle percent={health.percent} tone={health.tone} size={30} stroke={3} textSize="10px" />
-      <span className="text-[11px] font-semibold" style={{ color: c.textSecondary }}>
-        {health.percent}/100
+      <span className="text-[11px] font-semibold" style={{ color: health.tone }}>
+        {health.label}
       </span>
     </div>
   );
@@ -855,9 +855,10 @@ export const NewLeadScreen = ({
                   key={label}
                   type="button"
                   onClick={() => animateToStep(idx)}
-                  className="rounded-full px-3 py-2 text-left transition-colors"
+                  className="rounded-full px-3 py-2 text-left transition-colors border"
                   style={{
-                    backgroundColor: active ? c.accent : c.subtle,
+                    backgroundColor: active ? c.accent : 'transparent',
+                    borderColor: active ? c.accent : subtleBorder,
                     color: active ? c.accentText : c.textPrimary,
                   }}
                 >
@@ -967,7 +968,7 @@ export const NewLeadScreen = ({
                     value={newLeadData.expectedInstallDate || ''}
                     onChange={(e) => upd('expectedInstallDate', e.target.value)}
                     onClick={openInstallDatePicker}
-                    className="w-full h-10 rounded-full border px-4 pr-10 text-[13px] focus:outline-none focus:ring-0 jsi-date-input"
+                    className="w-full h-10 rounded-full border px-4 pr-10 text-[13px] text-left focus:outline-none focus:ring-0 jsi-date-input"
                     style={{
                       backgroundColor: c.surface,
                       borderColor: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
@@ -991,7 +992,7 @@ export const NewLeadScreen = ({
                         key={opp.id}
                         type="button"
                         onClick={() => onNavigate?.(`projects/${opp.id}`)}
-                        className="w-full rounded-xl border px-3 py-2 text-left transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                        className="w-full rounded-2xl border px-3 py-2.5 text-left transition-colors hover:bg-black/5 dark:hover:bg-white/5"
                         style={{ borderColor: subtleBorder }}
                       >
                         <div className="text-sm font-semibold" style={{ color: c.textPrimary }}>{opp.name}</div>
@@ -1154,8 +1155,8 @@ export const NewLeadScreen = ({
                       markTouched('competitionPresent');
                       markTouched('competitors');
                     }}
-                    className="inline-flex items-center gap-2 rounded-full px-2.5 py-1"
-                    style={{ backgroundColor: c.subtle }}
+                    className="inline-flex items-center gap-2 rounded-full border px-2.5 py-1"
+                    style={{ backgroundColor: 'transparent', borderColor: subtleBorder }}
                   >
                     <span className="text-[11px] font-semibold" style={{ color: newLeadData.competitionPresent ? c.textSecondary : c.textPrimary }}>No</span>
                     <span onClick={(e) => e.stopPropagation()}>
@@ -1200,8 +1201,8 @@ export const NewLeadScreen = ({
                   <button
                     type="button"
                     onClick={() => { upd('salesReward', !salesRewardEnabled); markTouched('salesReward'); }}
-                    className="inline-flex items-center gap-2 rounded-full px-2.5 py-1"
-                    style={{ backgroundColor: c.subtle }}
+                    className="inline-flex items-center gap-2 rounded-full border px-2.5 py-1"
+                    style={{ backgroundColor: 'transparent', borderColor: subtleBorder }}
                   >
                     <span className="text-[11px] font-semibold" style={{ color: c.textPrimary }}>Sales</span>
                     <span onClick={(e) => e.stopPropagation()}>
@@ -1215,8 +1216,8 @@ export const NewLeadScreen = ({
                   <button
                     type="button"
                     onClick={() => { upd('designerReward', !designerRewardEnabled); markTouched('designerReward'); }}
-                    className="inline-flex items-center gap-2 rounded-full px-2.5 py-1"
-                    style={{ backgroundColor: c.subtle }}
+                    className="inline-flex items-center gap-2 rounded-full border px-2.5 py-1"
+                    style={{ backgroundColor: 'transparent', borderColor: subtleBorder }}
                   >
                     <span className="text-[11px] font-semibold" style={{ color: c.textPrimary }}>Designer</span>
                     <span onClick={(e) => e.stopPropagation()}>
@@ -1442,13 +1443,11 @@ export const NewLeadScreen = ({
             <Section title="Submission Review" subtitle="Filled details ready for routing." theme={theme}>
               <DiscreteHealthMeter health={health} theme={theme} />
 
-              <div className="mt-3 rounded-2xl border overflow-hidden" style={{ borderColor: subtleBorder, backgroundColor: c.surface }}>
-                <div className="px-3 py-2 border-b" style={{ borderColor: subtleBorder }}>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.05em]" style={{ color: c.textSecondary }}>
-                    AI Summary
-                  </p>
-                </div>
-                <p className="px-3 py-2.5 text-xs leading-relaxed" style={{ color: c.textPrimary }}>
+              <div className="mt-3 rounded-2xl border px-3 py-2.5" style={{ borderColor: subtleBorder, backgroundColor: c.surface }}>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.06em] mb-1.5" style={{ color: c.textSecondary }}>
+                  AI Summary
+                </p>
+                <p className="text-xs leading-relaxed" style={{ color: c.textPrimary }}>
                   {reviewAiSummary}
                 </p>
               </div>
