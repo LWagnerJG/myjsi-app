@@ -361,43 +361,6 @@ const DatePickerInput = ({ value, onChange, theme, placeholder = 'Select date' }
   );
 };
 
-const DiscreteHealthMeter = ({ health, theme, compact = false }) => {
-  const c = theme.colors;
-  const subtleBorder = getSubtleBorder(theme);
-  return (
-    <div
-      className={`rounded-[20px] border ${compact ? 'px-3 py-2.5' : 'px-3.5 py-3'}`}
-      style={{ borderColor: subtleBorder, backgroundColor: c.surface }}
-    >
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.03em]" style={{ color: c.textSecondary }}>
-            Lead Score
-          </p>
-          <div className="mt-0.5 flex items-center gap-2">
-            <p className="text-lg font-bold leading-none" style={{ color: c.textPrimary }}>
-              {health.percent}/100
-            </p>
-            <span
-              className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold"
-              style={{ color: health.tone, backgroundColor: `${health.tone}1A` }}
-            >
-              {health.label}
-            </span>
-          </div>
-        </div>
-        {!compact && <StrengthCircle percent={health.percent} tone={health.tone} size={50} stroke={4} textSize="11px" />}
-      </div>
-      <div className="mt-2 h-2 rounded-full overflow-hidden" style={{ backgroundColor: c.subtle }}>
-        <div
-          className="h-full rounded-full"
-          style={{ width: `${health.percent}%`, backgroundColor: health.tone, transition: 'width 240ms ease' }}
-        />
-      </div>
-    </div>
-  );
-};
-
 export const NewLeadScreen = ({
   theme,
   onNavigate,
@@ -462,6 +425,14 @@ export const NewLeadScreen = ({
     const panel = document.querySelector('.panel-content');
     if (panel) panel.scrollTop = 0;
   }, [step]);
+
+  // Auto-disable rewards when discount is 64%+ off
+  useEffect(() => {
+    const discountPercent = parseDiscountPercent(newLeadData.discount);
+    if (discountPercent !== null && discountPercent >= 64) {
+      onNewLeadChange({ salesReward: false, designerReward: false });
+    }
+  }, [newLeadData.discount, onNewLeadChange]);
 
   // Register back handler so AppHeader arrow navigates between wizard steps
   useEffect(() => {
@@ -797,51 +768,6 @@ export const NewLeadScreen = ({
     newLeadData.attachments,
   ]);
 
-  const reviewAiSummary = useMemo(() => {
-    const stageLabel = stageOptions[stageIndex] || 'unknown stage';
-    const winProb = newLeadData.winProbability || 50;
-    const estimatedText = parsedEstimatedList > 0 ? `$${parsedEstimatedList.toLocaleString()}` : null;
-
-    const risks = [];
-    if (winProb < 30) risks.push(`low win probability at ${winProb}%`);
-    if (newLeadData.poTimeframe === 'Next Year' || newLeadData.poTimeframe === '180+ Days') risks.push('long PO timeline');
-    if (!estimatedText) risks.push('no estimated list value');
-    if (newLeadData.competitionPresent && !(newLeadData.competitors || []).length) risks.push('competition flagged but no competitors named');
-    if (!(newLeadData.dealers || []).length) risks.push('no dealer assigned');
-    if ((newLeadData.products || []).length && intakeReadyCount < (newLeadData.products || []).length) risks.push('product intake incomplete');
-
-    const positives = [];
-    if (winProb >= 70) positives.push(`strong ${winProb}% win probability`);
-    if (parsedEstimatedList >= 100000) positives.push(`significant opportunity at ${estimatedText}`);
-    if (quoteMode === 'existing') positives.push('existing quote attached');
-    if ((newLeadData.designFirms || []).length) positives.push('A&D firm engaged');
-
-    let summary = `${health.label} lead (${health.percent}/100) — ${stageLabel} stage`;
-    if (estimatedText) summary += `, estimated list ${estimatedText}`;
-    summary += '.';
-    if (risks.length) summary += ` Watch: ${risks.join('; ')}.`;
-    if (positives.length) summary += ` Strong signals: ${positives.join(', ')}.`;
-    if (health.missing[0]) summary += ` Biggest score lift: complete ${health.missing[0]}.`;
-
-    return summary;
-  }, [
-    health.label,
-    health.percent,
-    health.missing,
-    intakeReadyCount,
-    newLeadData.competitionPresent,
-    newLeadData.competitors,
-    newLeadData.dealers,
-    newLeadData.designFirms,
-    newLeadData.poTimeframe,
-    newLeadData.products,
-    newLeadData.winProbability,
-    parsedEstimatedList,
-    quoteMode,
-    stageIndex,
-    stageOptions,
-  ]);
-
   const visibleError = useCallback((field) => {
     return (submitAttempted || touched[field]) ? errors[field] : null;
   }, [errors, submitAttempted, touched]);
@@ -1082,12 +1008,28 @@ export const NewLeadScreen = ({
               </Row>
 
               <Row label="Install Date" theme={theme} inline>
-                <DatePickerInput
-                  value={newLeadData.expectedInstallDate || ''}
-                  onChange={(v) => upd('expectedInstallDate', v)}
-                  theme={theme}
-                  placeholder="Select date"
-                />
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => upd('expectedInstallDate', '')}
+                    className="shrink-0 rounded-full border transition-all px-3.5 py-2 text-[12px] font-semibold"
+                    style={{
+                      backgroundColor: !newLeadData.expectedInstallDate ? c.accent : 'transparent',
+                      borderColor: !newLeadData.expectedInstallDate ? c.accent : subtleBorder,
+                      color: !newLeadData.expectedInstallDate ? c.accentText : c.textSecondary,
+                    }}
+                  >
+                    Unknown
+                  </button>
+                  <div className="flex-1 min-w-0">
+                    <DatePickerInput
+                      value={newLeadData.expectedInstallDate || ''}
+                      onChange={(v) => upd('expectedInstallDate', v)}
+                      theme={theme}
+                      placeholder="Set date..."
+                    />
+                  </div>
+                </div>
               </Row>
             </Section>
 
@@ -1355,7 +1297,7 @@ export const NewLeadScreen = ({
                   </div>
                 </div>
                 <Reveal show={!!newLeadData.competitionPresent}>
-                  <div className="mt-2.5 rounded-2xl overflow-hidden border" style={{ borderColor: subtleBorder }}>
+                  <div className="mt-2.5">
                     <SpotlightMultiSelect
                       selectedItems={newLeadData.competitors || []}
                       onAddItem={(competitor) => {
@@ -1370,53 +1312,34 @@ export const NewLeadScreen = ({
                       placeholder="Search or add competitor"
                       theme={theme}
                       compact={false}
-                      integratedChips
-                      bordered={false}
+                      integratedChips={false}
+                      bordered
                     />
                   </div>
                   <FieldError show={!!visibleError('competitors')} message={visibleError('competitors')} />
                 </Reveal>
               </div>
 
-              {/* Rewards — pill toggle style, consistent with PO Timeframe / Win% presets */}
+              {/* Rewards — label left, toggles right */}
               <div className="flex items-center justify-between gap-4 py-3">
-                <div className="shrink-0">
-                  <span className="text-[13px] font-semibold" style={{ color: c.textSecondary }}>Rewards</span>
-                  <span className="block text-[11px] mt-0.5" style={{ color: c.textSecondary, opacity: 0.6 }}>
-                    {[salesRewardEnabled ? 'Sales 3%' : null, designerRewardEnabled ? 'Designer 1%' : null].filter(Boolean).join(' · ') || 'None active'}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => { upd('salesReward', !salesRewardEnabled); markTouched('salesReward'); }}
-                    className="rounded-full border transition-all px-3.5 py-2"
-                    style={{
-                      fontSize: 12,
-                      fontWeight: 600,
-                      lineHeight: 1,
-                      backgroundColor: salesRewardEnabled ? c.accent : 'transparent',
-                      borderColor: salesRewardEnabled ? c.accent : subtleBorder,
-                      color: salesRewardEnabled ? c.accentText : c.textSecondary,
-                    }}
-                  >
-                    Sales 3%
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { upd('designerReward', !designerRewardEnabled); markTouched('designerReward'); }}
-                    className="rounded-full border transition-all px-3.5 py-2"
-                    style={{
-                      fontSize: 12,
-                      fontWeight: 600,
-                      lineHeight: 1,
-                      backgroundColor: designerRewardEnabled ? c.accent : 'transparent',
-                      borderColor: designerRewardEnabled ? c.accent : subtleBorder,
-                      color: designerRewardEnabled ? c.accentText : c.textSecondary,
-                    }}
-                  >
-                    Designer 1%
-                  </button>
+                <span className="text-[13px] font-semibold shrink-0" style={{ color: c.textSecondary }}>Rewards</span>
+                <div className="flex items-center gap-5 shrink-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[12px] font-medium" style={{ color: salesRewardEnabled ? c.textPrimary : c.textSecondary }}>Sales 3%</span>
+                    <ToggleSwitch
+                      checked={salesRewardEnabled}
+                      onChange={(event) => { upd('salesReward', event.target.checked); markTouched('salesReward'); }}
+                      theme={theme}
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[12px] font-medium" style={{ color: designerRewardEnabled ? c.textPrimary : c.textSecondary }}>Designer 1%</span>
+                    <ToggleSwitch
+                      checked={designerRewardEnabled}
+                      onChange={(event) => { upd('designerReward', event.target.checked); markTouched('designerReward'); }}
+                      theme={theme}
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -1474,13 +1397,8 @@ export const NewLeadScreen = ({
 
               {/* JSI Series — full-width, search + cards unified */}
               <div className="py-3">
-                <div className="flex items-center justify-between mb-2">
+                <div className="mb-2">
                   <span className="text-[13px] font-semibold" style={{ color: c.textSecondary }}>JSI Series</span>
-                  {(newLeadData.products || []).length > 0 && (
-                    <span className="text-[11px]" style={{ color: c.textSecondary }}>
-                      {(newLeadData.products || []).length} added
-                    </span>
-                  )}
                 </div>
                 <ProductSpotlight
                   selectedSeries={(newLeadData.products || []).map((p) => p.series)}
@@ -1620,54 +1538,59 @@ export const NewLeadScreen = ({
               </div>
             </Section>
 
-            <Section title="Review & Submit" subtitle="Confirm all details before routing this lead." theme={theme}>
-              <DiscreteHealthMeter health={health} theme={theme} />
-
-              <div className="mt-3 rounded-2xl border px-3 py-2.5" style={{ borderColor: subtleBorder, backgroundColor: c.surface }}>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.06em] mb-1.5" style={{ color: c.textSecondary }}>
-                  AI Summary
-                </p>
-                <p className="text-xs leading-relaxed" style={{ color: c.textPrimary }}>
-                  {reviewAiSummary}
-                </p>
+            <Section title="Review & Submit" subtitle="Confirm details then submit." theme={theme}>
+              {/* Compact health row */}
+              <div className="flex items-center gap-3 rounded-2xl border px-3 py-2.5 mb-2" style={{ borderColor: subtleBorder, backgroundColor: c.surface }}>
+                <StrengthCircle percent={health.percent} tone={health.tone} size={40} stroke={3.5} textSize="10px" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[13px] font-bold tabular-nums" style={{ color: c.textPrimary }}>{health.percent}/100</span>
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ color: health.tone, backgroundColor: `${health.tone}1A` }}>{health.label}</span>
+                  </div>
+                  <div className="mt-1.5 h-1 rounded-full overflow-hidden" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)' }}>
+                    <div className="h-full rounded-full" style={{ width: `${health.percent}%`, backgroundColor: health.tone, transition: 'width 240ms ease' }} />
+                  </div>
+                </div>
+                {health.missing[0] && (
+                  <span className="text-[11px] shrink-0 text-right" style={{ color: c.textSecondary }}>
+                    +pts: {health.missing[0]}
+                  </span>
+                )}
               </div>
 
-              <div className="mt-3 rounded-2xl border overflow-hidden" style={{ borderColor: subtleBorder, backgroundColor: c.surface }}>
-                {filledReviewItems.length > 0 ? (
+              {/* Condensed review items */}
+              {filledReviewItems.filter((item) => item.label !== 'Notes').length > 0 && (
+                <div className="rounded-2xl border overflow-hidden mb-2" style={{ borderColor: subtleBorder, backgroundColor: c.surface }}>
                   <div className="divide-y" style={{ borderColor: subtleBorder }}>
-                    {filledReviewItems.map((item) => (
+                    {filledReviewItems.filter((item) => item.label !== 'Notes').map((item) => (
                       <button
                         key={item.label}
                         type="button"
                         onClick={() => animateToStep(item.step)}
-                        className="w-full grid grid-cols-[100px_minmax(0,1fr)] gap-3 px-3 py-2.5 text-left transition-colors hover:bg-black/[0.03] dark:hover:bg-white/[0.03] active:bg-black/[0.05]"
+                        className="w-full flex items-start gap-3 px-3 py-1.5 text-left transition-colors hover:bg-black/[0.03] dark:hover:bg-white/[0.03]"
                       >
-                        <span className="text-[11px] font-semibold uppercase tracking-[0.04em] pt-px" style={{ color: c.textSecondary }}>
+                        <span className="text-[11px] font-medium shrink-0 pt-px w-[88px]" style={{ color: c.textSecondary }}>
                           {item.label}
                         </span>
-                        <span className="text-[13px] font-medium break-words leading-snug" style={{ color: c.textPrimary }}>
+                        <span className="text-[12px] font-medium break-words leading-snug flex-1 text-right" style={{ color: c.textPrimary }}>
                           {item.value}
                         </span>
                       </button>
                     ))}
                   </div>
-                ) : (
-                  <p className="px-3 py-2.5 text-[13px]" style={{ color: c.textSecondary }}>
-                    No lead details entered yet.
-                  </p>
-                )}
-              </div>
+                </div>
+              )}
 
               <div
-                className="mt-3 rounded-2xl border px-3 py-2.5 flex items-center gap-2 text-xs font-medium"
+                className="rounded-2xl border px-3 py-2 flex items-center gap-2 text-[12px] font-medium"
                 style={{
                   borderColor: canSubmit ? '#4A7C5940' : '#B85C5C40',
                   color: canSubmit ? '#4A7C59' : '#B85C5C',
                   backgroundColor: canSubmit ? '#4A7C5914' : '#B85C5C14',
                 }}
               >
-                {canSubmit ? <CheckCircle2 className="w-4 h-4 shrink-0" /> : <AlertTriangle className="w-4 h-4 shrink-0" />}
-                {canSubmit ? 'Lead is ready to submit.' : 'Some required fields are incomplete. Review each step before submitting.'}
+                {canSubmit ? <CheckCircle2 className="w-3.5 h-3.5 shrink-0" /> : <AlertTriangle className="w-3.5 h-3.5 shrink-0" />}
+                {canSubmit ? 'Ready to submit.' : 'Some required fields are incomplete.'}
               </div>
             </Section>
           </>
