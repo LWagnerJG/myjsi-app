@@ -56,7 +56,7 @@ export const Row = ({ label, children, theme, tip, noSep, inline }) => {
         {tip && <InfoTooltip content={tip} theme={theme} position="right" size="sm" />}
       </div>
     )}
-    {inline ? <div className="min-w-0 overflow-hidden">{children}</div> : children}
+    {inline ? <div className="min-w-0">{children}</div> : children}
   </div>
   );
 };

@@ -1,7 +1,5 @@
-import React, { useState, useRef, useMemo, useCallback, useLayoutEffect, useEffect } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { Search } from 'lucide-react';
-import { DropdownPortal } from '../../DropdownPortal.jsx';
-import { DROPDOWN_MIN_WIDTH, DROPDOWN_SIDE_PADDING, DROPDOWN_GAP } from '../../constants/dropdown.js';
 import { isDarkTheme } from '../../design-system/tokens.js';
 
 export const AutoCompleteCombobox = React.memo(({
@@ -20,9 +18,7 @@ export const AutoCompleteCombobox = React.memo(({
     showAddButton = true,
 }) => {
     const [isOpen, setIsOpen] = useState(false);
-    const [pos, setPos] = useState({ top: 0, left: 0, width: 0, height: 'auto' });
-    const inputWrapperRef = useRef(null);
-    const dropRef = useRef(null);
+    const wrapperRef = useRef(null);
     const inputRef = useRef(null);
     const dark = isDarkTheme(theme);
 
@@ -34,101 +30,34 @@ export const AutoCompleteCombobox = React.memo(({
     }, [showDropdown, value, options]);
 
     const shouldShowAddButton = useMemo(() => {
-        return showAddButton && onAddNew && value && value.trim() && !options.some(o => o.toLowerCase() === value.toLowerCase());
+        return showAddButton && onAddNew && value && value.trim()
+            && !options.some(o => o.toLowerCase() === value.toLowerCase());
     }, [showAddButton, onAddNew, value, options]);
 
     const subtleBorder = dark ? 'rgba(255,255,255,0.11)' : 'rgba(0,0,0,0.07)';
-
-    // Input field uses background on dark (inset-well), dropdown floats at surface level
     const inputBg = dark ? theme.colors.background : theme.colors.surface;
-    const dropdownStyles = {
-        backgroundColor: theme.colors.surface,
-        color: theme.colors.textPrimary,
-        borderColor: subtleBorder,
-        '--dropdown-bg': theme.colors.surface,
-        '--dropdown-border': subtleBorder,
-    };
 
-    const calcPos = useCallback(() => {
-        if (!inputWrapperRef.current) return;
-        const r = inputWrapperRef.current.getBoundingClientRect();
-        const vw = window.innerWidth;
-        const vh = window.innerHeight;
-
-        const itemHeight = 44;
-        const padding = 8;
-        const maxItems = 6;
-        const totalItems = filtered.length;
-        const visibleItems = Math.min(totalItems, maxItems);
-        const contentHeight = totalItems > 0 ? Math.max(60, visibleItems * itemHeight + padding) : 0;
-
-        const spaceBelow = vh - r.bottom;
-        const spaceAbove = r.top;
-        const w = Math.max(r.width, DROPDOWN_MIN_WIDTH);
-
-        let top;
-        let finalHeight;
-
-        // Decide if dropdown should appear above or below
-        if (spaceBelow >= contentHeight || spaceBelow >= spaceAbove) {
-            // Position below
-            top = r.bottom + DROPDOWN_GAP;
-            finalHeight = Math.min(contentHeight, spaceBelow - DROPDOWN_GAP * 2, 280);
-        } else {
-            // Position above
-            finalHeight = Math.min(contentHeight, spaceAbove - DROPDOWN_GAP * 2, 280);
-            top = r.top - finalHeight - DROPDOWN_GAP;
-        }
-
-        // Horizontal positioning
-        let left = r.left;
-        if (left + w > vw - DROPDOWN_SIDE_PADDING) {
-            left = vw - w - DROPDOWN_SIDE_PADDING;
-        }
-        if (left < DROPDOWN_SIDE_PADDING) {
-            left = DROPDOWN_SIDE_PADDING;
-        }
-
-        setPos({ top, left, width: w, height: finalHeight });
-    }, [filtered.length]);
-
-    useLayoutEffect(() => {
-        if (showDropdown && isOpen) {
-            calcPos();
-        }
-    }, [showDropdown, isOpen, calcPos]);
-
+    // Close on outside click/tap — option buttons are inside wrapperRef so they won't trigger this
     useEffect(() => {
-        if (!showDropdown || !isOpen) return;
-        const handler = () => calcPos();
-        window.addEventListener('resize', handler);
-        window.addEventListener('scroll', handler, true);
-        return () => {
-            window.removeEventListener('resize', handler);
-            window.removeEventListener('scroll', handler, true);
-        };
-    }, [showDropdown, isOpen, calcPos]);
-
-    useEffect(() => {
-        const away = (e) => {
-            if (inputWrapperRef.current && !inputWrapperRef.current.contains(e.target) && 
-                dropRef.current && !dropRef.current.contains(e.target)) {
+        if (!isOpen) return;
+        const close = (e) => {
+            if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
                 setIsOpen(false);
             }
         };
-        document.addEventListener('mousedown', away);
-        return () => document.removeEventListener('mousedown', away);
-    }, []);
+        document.addEventListener('mousedown', close);
+        document.addEventListener('touchstart', close, { passive: true });
+        return () => {
+            document.removeEventListener('mousedown', close);
+            document.removeEventListener('touchstart', close);
+        };
+    }, [isOpen]);
 
-    const handleSelectOption = (opt) => {
+    const handleSelect = (opt) => {
         onSelect?.(opt);
         setIsOpen(false);
         inputRef.current?.blur();
-        if (resetOnSelect) {
-            onChange('');
-        } else {
-            onChange(opt);
-        }
+        onChange(resetOnSelect ? '' : opt);
     };
 
     const handleAdd = () => {
@@ -140,26 +69,21 @@ export const AutoCompleteCombobox = React.memo(({
         inputRef.current?.blur();
     };
 
-    const handleInputFocus = () => {
-        if (showDropdown) setIsOpen(true);
-    };
-
-    const handleInputChange = (e) => {
-        onChange(e.target.value);
-        if (showDropdown && !isOpen) {
-            setIsOpen(true);
-        }
-    };
+    const showList = showDropdown && isOpen && filtered.length > 0;
 
     return (
         <div className="space-y-2">
             {label && (
-                <label className="block text-sm font-semibold px-3" style={{ color: theme.colors.textSecondary }}>
+                <label className="block text-[13px] font-semibold px-1" style={{ color: theme.colors.textSecondary }}>
                     {label}
                 </label>
             )}
-            <div className="relative" ref={inputWrapperRef}>
-                <Search className={`absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none ${compact ? 'w-3.5 h-3.5' : 'w-5 h-5'}`} style={{ color: theme.colors.textSecondary }} />
+            {/* Wrapper is position:relative so the dropdown anchors to it — no portal needed */}
+            <div className="relative" ref={wrapperRef}>
+                <Search
+                    className={`absolute top-1/2 -translate-y-1/2 pointer-events-none ${compact ? 'left-3 w-3.5 h-3.5' : 'left-3.5 w-4 h-4'}`}
+                    style={{ color: theme.colors.textSecondary }}
+                />
                 <input
                     ref={inputRef}
                     type="text"
@@ -168,101 +92,69 @@ export const AutoCompleteCombobox = React.memo(({
                     autoCapitalize="off"
                     autoComplete="off"
                     value={value || ''}
-                    onFocus={handleInputFocus}
-                    onChange={handleInputChange}
+                    onFocus={() => { if (showDropdown) setIsOpen(true); }}
+                    onChange={(e) => {
+                        onChange(e.target.value);
+                        if (showDropdown) setIsOpen(true);
+                    }}
                     placeholder={placeholder}
-                    className={`w-full border rounded-full transition-all duration-200 focus:outline-none focus:ring-0 ${compact ? 'pl-10 pr-4 text-[13px]' : 'pl-12 pr-4 py-3 text-base'}`}
+                    className="w-full border rounded-full focus:outline-none focus:ring-0"
                     style={{
+                        height: 40,
+                        paddingLeft: compact ? 34 : 38,
+                        paddingRight: 16,
+                        fontSize: 13,
                         backgroundColor: inputBg,
-                        borderColor: dropdownStyles.borderColor, 
-                        color: dropdownStyles.color,
-                        borderWidth: '1px',
-                        ...(compact ? { height: 40 } : {})
+                        borderColor: subtleBorder,
+                        color: theme.colors.textPrimary,
                     }}
                 />
-            </div>
 
-            {/* Inline "+ Add" button that appears next to the input field */}
-            {shouldShowAddButton && (
-                <div className="animate-fade-in">
-                    <button 
-                        type="button" 
-                        onClick={handleAdd} 
-                        className="inline-flex items-center space-x-1 px-3 py-2 text-sm font-semibold rounded-full transition-colors hover:bg-black/5 dark:hover:bg-white/5 dark:hover:bg-white/5"
-                        style={{ 
-                            color: theme.colors.accent,
-                            backgroundColor: 'transparent'
+                {/* Inline dropdown — position:absolute, anchored directly below input, no flickering */}
+                {showList && (
+                    <div
+                        className={`absolute left-0 right-0 z-50 rounded-2xl border overflow-hidden ${dropdownClassName}`}
+                        style={{
+                            top: 'calc(100% + 6px)',
+                            backgroundColor: theme.colors.surface,
+                            borderColor: subtleBorder,
+                            boxShadow: dark
+                                ? '0 8px 32px rgba(0,0,0,0.45)'
+                                : '0 8px 24px rgba(0,0,0,0.11)',
                         }}
                     >
-                        <span>+ Add "{value}"</span>
-                    </button>
-                </div>
-            )}
-
-            {/* Dropdown portal for filtered options */}
-            {showDropdown && isOpen && filtered.length > 0 && (
-                <DropdownPortal>
-                    <div 
-                        ref={dropRef} 
-                        className={`fixed z-[10000] pointer-events-auto select-none dropdown-container ${dropdownClassName}`} 
-                        style={{ 
-                            top: pos.top, 
-                            left: pos.left, 
-                            width: pos.width,
-                            ...dropdownStyles
-                        }}
-                    >
-                        <div 
-                            className="overflow-y-auto scrollbar-hide rounded-2xl border autocomplete-dropdown"
-                            style={{ 
-                                maxHeight: `${pos.height}px`,
-                                backgroundColor: dropdownStyles.backgroundColor,
-                                borderColor: dropdownStyles.borderColor,
-                                color: dropdownStyles.color,
-                                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.12)',
-                                backdropFilter: 'none',
-                                WebkitBackdropFilter: 'none',
-                                padding: '8px',
-                                background: dropdownStyles.backgroundColor,
-                                border: `1px solid ${dropdownStyles.borderColor}`
-                            }}
-                        >
+                        <div className="overflow-y-auto py-1" style={{ maxHeight: 216 }}>
                             {filtered.map((opt) => (
-                                <button 
-                                    key={opt} 
-                                    type="button" 
-                                    onClick={() => handleSelectOption(opt)} 
-                                    className="block w-full text-left py-3 px-4 text-sm rounded-xl transition-colors duration-150 font-medium focus:outline-none" 
-                                    style={{ 
-                                        color: dropdownStyles.color,
-                                        backgroundColor: 'transparent',
-                                        border: 'none',
-                                        cursor: 'pointer'
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        e.target.style.backgroundColor = theme.colors.accent + '15';
-                                        e.target.style.color = theme.colors.accent;
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.target.style.backgroundColor = 'transparent';
-                                        e.target.style.color = dropdownStyles.color;
-                                    }}
-                                    onFocus={(e) => {
-                                        e.target.style.backgroundColor = theme.colors.accent + '15';
-                                        e.target.style.color = theme.colors.accent;
-                                    }}
-                                    onBlur={(e) => {
-                                        e.target.style.backgroundColor = 'transparent';
-                                        e.target.style.color = dropdownStyles.color;
-                                    }}
-                                    tabIndex={0}
+                                <button
+                                    key={opt}
+                                    type="button"
+                                    // onMouseDown prevents input blur before click fires on desktop
+                                    onMouseDown={(e) => { e.preventDefault(); handleSelect(opt); }}
+                                    // onClick handles touch tap on mobile
+                                    onClick={() => handleSelect(opt)}
+                                    className="w-full text-left px-4 py-2.5 text-[13px] font-medium transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.05] active:bg-black/[0.06]"
+                                    style={{ color: theme.colors.textPrimary }}
                                 >
                                     {opt}
                                 </button>
                             ))}
                         </div>
                     </div>
-                </DropdownPortal>
+                )}
+            </div>
+
+            {shouldShowAddButton && (
+                <button
+                    type="button"
+                    onClick={handleAdd}
+                    className="inline-flex items-center px-3 py-1.5 text-[12px] font-semibold rounded-full transition-colors"
+                    style={{
+                        color: theme.colors.accent,
+                        backgroundColor: `${theme.colors.accent}14`,
+                    }}
+                >
+                    + Add "{value}"
+                </button>
             )}
         </div>
     );
