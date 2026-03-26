@@ -20,7 +20,7 @@ export const FormInput = React.memo(({
     const dark = isDarkTheme(theme);
     const subtleBorder = dark ? 'rgba(255,255,255,0.11)' : 'rgba(0,0,0,0.07)';
 
-    const textSizeClass = size === 'sm' ? 'text-[13px]' : 'text-base';
+    const textSizeClass = size === 'sm' ? 'text-[14px]' : 'text-base';
     const paddingClass = size === 'sm' ? 'px-4' : 'px-4 py-3';
     const dateDarkClass = type === 'date' && dark ? 'jsi-date-dark' : '';
     const inputClass = `w-full ${paddingClass} border rounded-full focus:outline-none focus:ring-0 ${textSizeClass} ${dateDarkClass} ${icon ? 'pr-10' : ''} ${className}`;

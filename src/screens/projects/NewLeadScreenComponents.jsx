@@ -23,12 +23,12 @@ export const Section = ({ title, subtitle, titleRight, children, theme, classNam
         <div className="mb-3">
           <div className="flex items-start gap-3">
             <div className="min-w-0">
-              <h3 className="text-[14px] font-semibold leading-tight" style={{
+              <h3 className="text-[15px] font-semibold leading-tight" style={{
                 color: theme.colors.textPrimary,
-                letterSpacing: '-0.005em',
+                letterSpacing: '-0.01em',
               }}>{title}</h3>
               {subtitle && (
-                <p className="text-xs mt-1 leading-snug" style={{ color: theme.colors.textSecondary }}>
+                <p className="text-[13px] mt-1 leading-snug" style={{ color: theme.colors.textSecondary }}>
                   {subtitle}
                 </p>
               )}
@@ -51,7 +51,7 @@ export const Row = ({ label, children, theme, tip, noSep, inline }) => {
     style={{ borderColor: undefined }}>
     {label && (
       <div className={`flex items-center gap-1.5 ${inline ? 'md:min-h-[36px] md:pt-1.5' : 'mb-1.5'}`}>
-        <label className={`text-xs font-semibold ${inline ? 'whitespace-nowrap' : ''}`}
+        <label className={`text-[13px] font-semibold ${inline ? 'whitespace-nowrap' : ''}`}
           style={{ color: theme.colors.textSecondary }}>{label}</label>
         {tip && <InfoTooltip content={tip} theme={theme} position="right" size="sm" />}
       </div>

@@ -185,7 +185,7 @@ export const PortalNativeSelect = ({
           backgroundColor: bordered ? (dark ? c.background : c.surface) : 'transparent',
           border: bordered ? `1px solid ${isOpen ? c.accent : subtleBorder}` : '1px solid transparent',
           color: (isPlaceholder || isMuted) ? c.textSecondary : c.textPrimary,
-          fontSize: isSm ? 13 : 14,
+          fontSize: isSm ? 14 : 15,
           boxShadow: bordered && isOpen ? `0 0 0 3px ${c.accent}18` : 'none',
         }}
       >

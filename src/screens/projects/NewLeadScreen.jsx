@@ -30,22 +30,6 @@ const STEP_DESCRIPTIONS = [
   'Define commercial scope and stakeholders.',
   'Confirm details before submission.',
 ];
-const STEP_REQUIRED_FIELDS = {
-  0: [
-    { key: 'project', label: 'Project Name' },
-    { key: 'projectStatus', label: 'Stage' },
-    { key: 'vertical', label: 'Vertical' },
-    { key: 'otherVertical', label: 'Vertical Detail' },
-  ],
-  1: [
-    { key: 'estimatedList', label: 'Estimated List' },
-    { key: 'endUser', label: 'End User' },
-    { key: 'dealers', label: 'Dealer' },
-    { key: 'poTimeframe', label: 'PO Timeframe' },
-    { key: 'competitors', label: 'Competitor' },
-    { key: 'jsiQuoteNumber', label: 'JSI Quote Number' },
-  ],
-};
 const getSubtleBorder = (theme) => (isDarkTheme(theme) ? 'rgba(255,255,255,0.11)' : 'rgba(0,0,0,0.07)');
 
 const parseCurrency = (raw) => {
@@ -252,10 +236,8 @@ export const NewLeadScreen = ({
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [fileNotice, setFileNotice] = useState('');
-  const [hasReachedBottomOfStep, setHasReachedBottomOfStep] = useState(false);
   const fileInputRef = useRef(null);
   const installDateInputRef = useRef(null);
-  const bottomSentinelRef = useRef(null);
   const [endUserOptions, setEndUserOptions] = useState(() => mergeUnique(
     END_USER_OPTIONS,
     (opportunities || []).map((opp) => opp.company),
@@ -277,7 +259,6 @@ export const NewLeadScreen = ({
   }, [opportunities]);
 
   useEffect(() => {
-    setHasReachedBottomOfStep(false);
     // Scroll back to top so each step feels like a fresh page
     const panel = document.querySelector('.panel-content');
     if (panel) panel.scrollTop = 0;
@@ -313,23 +294,6 @@ export const NewLeadScreen = ({
       document.head.appendChild(s);
     }
   }, []);
-
-  useEffect(() => {
-    const node = bottomSentinelRef.current;
-    if (!node) return undefined;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) {
-          setHasReachedBottomOfStep(true);
-        }
-      },
-      { threshold: 0.4 },
-    );
-
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [step]);
 
   const upd = useCallback((field, value) => {
     if (field === 'vertical' && value !== 'Other (Please specify)') {
@@ -432,52 +396,6 @@ export const NewLeadScreen = ({
     newLeadData.jsiQuoteNumber,
   ]);
 
-  const completion = useMemo(() => {
-    const basicChecks = [
-      !!String(newLeadData.project || '').trim(),
-      !!newLeadData.projectStatus,
-      !!newLeadData.vertical && (newLeadData.vertical !== 'Other (Please specify)' || !!String(newLeadData.otherVertical || '').trim()),
-      !!String(newLeadData.installationLocation || '').trim() || !!String(newLeadData.expectedInstallDate || '').trim(),
-    ];
-    const scopeChecks = [
-      parseCurrency(newLeadData.estimatedList) > 0,
-      !!String(newLeadData.endUser || '').trim(),
-      !!(newLeadData.dealers || []).length,
-      !!newLeadData.poTimeframe,
-      !!(newLeadData.products || []).length,
-      !newLeadData.competitionPresent || !!(newLeadData.competitors || []).length,
-    ];
-    const reviewChecks = [
-      !newLeadData.jsiQuoteExists || !!String(newLeadData.jsiQuoteNumber || '').trim(),
-      !duplicateMatches.length,
-      !(newLeadData.products || []).length || (newLeadData.products || []).every((product) => {
-        const prompts = getSeriesProcurementPrompts(product.series);
-        return !!product[prompts.first.key] && !!product[prompts.second.key];
-      }),
-    ];
-    return [
-      { done: basicChecks.filter(Boolean).length, total: basicChecks.length },
-      { done: scopeChecks.filter(Boolean).length, total: scopeChecks.length },
-      { done: reviewChecks.filter(Boolean).length, total: reviewChecks.length },
-    ];
-  }, [
-    duplicateMatches.length,
-    newLeadData.competitionPresent,
-    newLeadData.competitors,
-    newLeadData.dealers,
-    newLeadData.endUser,
-    newLeadData.estimatedList,
-    newLeadData.expectedInstallDate,
-    newLeadData.installationLocation,
-    newLeadData.jsiQuoteExists,
-    newLeadData.jsiQuoteNumber,
-    newLeadData.otherVertical,
-    newLeadData.poTimeframe,
-    newLeadData.products,
-    newLeadData.project,
-    newLeadData.projectStatus,
-    newLeadData.vertical,
-  ]);
 
   const health = useMemo(() => {
     const products = newLeadData.products || [];
@@ -625,35 +543,35 @@ export const NewLeadScreen = ({
   );
   const filledReviewItems = useMemo(() => {
     const items = [];
-    const add = (label, value) => {
+    const add = (label, value, itemStep = 1) => {
       if (value == null) return;
       const text = String(value).trim();
       if (!text) return;
-      items.push({ label, value: text });
+      items.push({ label, value: text, step: itemStep });
     };
 
-    add('Project', newLeadData.project);
-    add('Stage', newLeadData.projectStatus);
-    add('Vertical', newLeadData.vertical === 'Other (Please specify)' ? newLeadData.otherVertical : newLeadData.vertical);
-    if (parsedEstimatedList > 0) add('Estimated List', `$${parsedEstimatedList.toLocaleString()}`);
-    add('PO Timeframe', newLeadData.poTimeframe);
-    add('End User', newLeadData.endUser);
-    if ((newLeadData.dealers || []).length) add('Dealers', (newLeadData.dealers || []).join(', '));
-    if ((newLeadData.designFirms || []).length) add('A&D Firms', (newLeadData.designFirms || []).join(', '));
-    if (newLeadData.installationLocation) add('Location', newLeadData.installationLocation);
-    if (newLeadData.expectedInstallDate) add('Install Date', newLeadData.expectedInstallDate);
-    if (quoteMode === 'existing' && newLeadData.jsiQuoteNumber) add('JSI Quote #', newLeadData.jsiQuoteNumber);
-    if (quoteMode === 'needed') add('Quote', 'Quote needed');
-    if (quoteMode === 'not-needed') add('Quote', 'No quote needed');
-    if (selectedSeriesNames.length) add('JSI Series', selectedSeriesNames.join(', '));
-    if (seriesCount) add('Series Intake', `${intakeReadyCount}/${seriesCount} ready`);
+    add('Project', newLeadData.project, 0);
+    add('Stage', newLeadData.projectStatus, 0);
+    add('Vertical', newLeadData.vertical === 'Other (Please specify)' ? newLeadData.otherVertical : newLeadData.vertical, 0);
+    if (newLeadData.installationLocation) add('Location', newLeadData.installationLocation, 0);
+    if (newLeadData.expectedInstallDate) add('Install Date', newLeadData.expectedInstallDate, 0);
+    if (parsedEstimatedList > 0) add('Estimated List', `$${parsedEstimatedList.toLocaleString()}`, 1);
+    add('PO Timeframe', newLeadData.poTimeframe, 1);
+    add('End User', newLeadData.endUser, 1);
+    if ((newLeadData.dealers || []).length) add('Dealers', (newLeadData.dealers || []).join(', '), 1);
+    if ((newLeadData.designFirms || []).length) add('A&D Firms', (newLeadData.designFirms || []).join(', '), 1);
+    if (quoteMode === 'existing' && newLeadData.jsiQuoteNumber) add('JSI Quote #', newLeadData.jsiQuoteNumber, 1);
+    if (quoteMode === 'needed') add('Quote', 'Quote needed', 1);
+    if (quoteMode === 'not-needed') add('Quote', 'No quote needed', 1);
+    if (selectedSeriesNames.length) add('JSI Series', selectedSeriesNames.join(', '), 1);
+    if (seriesCount) add('Series Intake', `${intakeReadyCount}/${seriesCount} ready`, 1);
     if (newLeadData.competitionPresent) {
-      add('Competition', 'Yes');
-      if ((newLeadData.competitors || []).length) add('Competitors', (newLeadData.competitors || []).join(', '));
+      add('Competition', 'Present', 1);
+      if ((newLeadData.competitors || []).length) add('Competitors', (newLeadData.competitors || []).join(', '), 1);
     } else {
-      add('Competition', 'No');
+      add('Competition', 'None', 1);
     }
-    add('Rewards', `Sales ${salesRewardEnabled ? 'On' : 'Off'} | Designer ${designerRewardEnabled ? 'On' : 'Off'}`);
+    add('Rewards', [salesRewardEnabled ? 'Sales 3%' : null, designerRewardEnabled ? 'Designer 1%' : null].filter(Boolean).join(' · ') || 'None', 1);
     if (notesPreview) add('Notes', notesPreview);
     if ((newLeadData.attachments || []).length) add('Attachments', `${(newLeadData.attachments || []).length} file(s)`);
 
@@ -684,24 +602,43 @@ export const NewLeadScreen = ({
   ]);
 
   const reviewAiSummary = useMemo(() => {
-    const stageLabel = stageOptions[stageIndex] || 'an early stage';
-    const estimatedText = parsedEstimatedList > 0 ? `$${parsedEstimatedList.toLocaleString()}` : 'no estimated list yet';
-    const compText = newLeadData.competitionPresent
-      ? `${(newLeadData.competitors || []).length || 0} competitor${(newLeadData.competitors || []).length === 1 ? '' : 's'} tracked`
-      : 'no active competition logged';
-    const quoteText = quoteMode === 'existing'
-      ? 'an existing JSI quote is already attached'
-      : quoteMode === 'needed'
-        ? 'a quote is marked as needed'
-        : quoteMode === 'not-needed'
-          ? 'no quote is needed'
-          : 'quote status is still open';
-    return `This lead is ${health.percent}/100 (${health.label.toLowerCase()}) with ${newLeadData.winProbability || 50}% win probability, stage set to ${stageLabel}, and estimated list at ${estimatedText}. Positioning shows ${compText}, ${quoteText}, and stronger completion in plant intake and stakeholder coverage will lift the score fastest.`;
+    const stageLabel = stageOptions[stageIndex] || 'unknown stage';
+    const winProb = newLeadData.winProbability || 50;
+    const estimatedText = parsedEstimatedList > 0 ? `$${parsedEstimatedList.toLocaleString()}` : null;
+
+    const risks = [];
+    if (winProb < 30) risks.push(`low win probability at ${winProb}%`);
+    if (newLeadData.poTimeframe === 'Next Year' || newLeadData.poTimeframe === '180+ Days') risks.push('long PO timeline');
+    if (!estimatedText) risks.push('no estimated list value');
+    if (newLeadData.competitionPresent && !(newLeadData.competitors || []).length) risks.push('competition flagged but no competitors named');
+    if (!(newLeadData.dealers || []).length) risks.push('no dealer assigned');
+    if ((newLeadData.products || []).length && intakeReadyCount < (newLeadData.products || []).length) risks.push('product intake incomplete');
+
+    const positives = [];
+    if (winProb >= 70) positives.push(`strong ${winProb}% win probability`);
+    if (parsedEstimatedList >= 100000) positives.push(`significant opportunity at ${estimatedText}`);
+    if (quoteMode === 'existing') positives.push('existing quote attached');
+    if ((newLeadData.designFirms || []).length) positives.push('A&D firm engaged');
+
+    let summary = `${health.label} lead (${health.percent}/100) — ${stageLabel} stage`;
+    if (estimatedText) summary += `, estimated list ${estimatedText}`;
+    summary += '.';
+    if (risks.length) summary += ` Watch: ${risks.join('; ')}.`;
+    if (positives.length) summary += ` Strong signals: ${positives.join(', ')}.`;
+    if (health.missing[0]) summary += ` Biggest score lift: complete ${health.missing[0]}.`;
+
+    return summary;
   }, [
     health.label,
     health.percent,
+    health.missing,
+    intakeReadyCount,
     newLeadData.competitionPresent,
     newLeadData.competitors,
+    newLeadData.dealers,
+    newLeadData.designFirms,
+    newLeadData.poTimeframe,
+    newLeadData.products,
     newLeadData.winProbability,
     parsedEstimatedList,
     quoteMode,
@@ -718,17 +655,6 @@ export const NewLeadScreen = ({
     if (step === 1) return !errors.estimatedList && !errors.endUser && !errors.dealers && !errors.poTimeframe && !errors.competitors && !errors.jsiQuoteNumber;
     return !errors.project && !errors.projectStatus && !errors.vertical && !errors.otherVertical && !errors.estimatedList && !errors.endUser && !errors.dealers && !errors.poTimeframe && !errors.competitors && !errors.jsiQuoteNumber;
   }, [errors, step]);
-
-  const stepRequirementHint = useMemo(() => {
-    if (step >= 2 || stepValid) return null;
-    const requiredFields = STEP_REQUIRED_FIELDS[step] || [];
-    const missing = requiredFields.find((field) => !!errors[field.key]);
-    if (!missing) return null;
-    return {
-      fieldLabel: missing.label,
-      stageLabel: STEP_LABELS[step],
-    };
-  }, [errors, step, stepValid]);
 
   const canSubmit = useMemo(() => {
     return !errors.project && !errors.projectStatus && !errors.vertical && !errors.otherVertical
@@ -749,13 +675,14 @@ export const NewLeadScreen = ({
 
   const goNext = useCallback(() => {
     markStepFieldsTouched(step);
-    if (!stepValid) return;
+    if (!stepValid) {
+      const panel = document.querySelector('.panel-content');
+      if (panel) panel.scrollTop = 0;
+      return;
+    }
     animateToStep(Math.min(step + 1, 2));
   }, [animateToStep, markStepFieldsTouched, step, stepValid]);
 
-  const goBack = useCallback(() => {
-    animateToStep(Math.max(step - 1, 0));
-  }, [animateToStep, step]);
 
   const addProduct = useCallback((series) => {
     if (!series || (newLeadData.products || []).some((p) => p.series === series)) return;
@@ -830,50 +757,25 @@ export const NewLeadScreen = ({
     setSubmitAttempted(true);
     markStepFieldsTouched(0);
     markStepFieldsTouched(1);
-    if (!canSubmit) return;
+    if (!canSubmit) {
+      // Navigate to the first step that has errors so user sees them
+      const step0Valid = !errors.project && !errors.projectStatus && !errors.vertical && !errors.otherVertical;
+      animateToStep(step0Valid ? 1 : 0);
+      const panel = document.querySelector('.panel-content');
+      if (panel) panel.scrollTop = 0;
+      return;
+    }
     hapticSuccess();
     onSuccess(newLeadData);
-  }, [canSubmit, markStepFieldsTouched, newLeadData, onSuccess]);
+  }, [animateToStep, canSubmit, errors, markStepFieldsTouched, newLeadData, onSuccess]);
 
   return (
     <form onSubmit={handleSubmit} className="min-h-full app-header-offset flex flex-col" style={{ backgroundColor: c.background }}>
-      {/* Invisible focus sink — prevents AnimatedScreenWrapper from focusing the "New Lead" h3 heading on mount */}
+      {/* Invisible focus sink — prevents AnimatedScreenWrapper from focusing a heading on mount */}
       <div data-autofocus tabIndex={-1} aria-hidden="true" style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden', outline: 'none' }} />
-      <div className="px-4 sm:px-5 pt-5 pb-32 max-w-3xl mx-auto w-full">
-        <Section
-          title="New Lead"
-          subtitle={STEP_DESCRIPTIONS[step]}
-          titleRight={<InlineStepHealth health={health} theme={theme} />}
-          theme={theme}
-        >
-          <div className="grid grid-cols-3 gap-1.5 pt-0.5">
-            {STEP_LABELS.map((label, idx) => {
-              const active = step === idx;
-              const done = completion[idx].done;
-              const total = completion[idx].total;
-              return (
-                <button
-                  key={label}
-                  type="button"
-                  onClick={() => animateToStep(idx)}
-                  className="rounded-full px-3 py-2 text-left transition-colors border"
-                  style={{
-                    backgroundColor: active ? c.accent : 'transparent',
-                    borderColor: active ? c.accent : subtleBorder,
-                    color: active ? c.accentText : c.textPrimary,
-                  }}
-                >
-                  <div className="text-[11px] leading-none font-semibold tracking-[0.01em]">{label}</div>
-                  <div className="text-[10px] mt-1 leading-none" style={{ opacity: active ? 0.85 : 0.55 }}>
-                    {done}/{total}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </Section>
+      <div className="px-4 sm:px-5 pt-5 pb-40 max-w-3xl mx-auto w-full">
 
-        <div key={step} className={`mt-4 space-y-4 ${stepAnimClass}`}>
+        <div key={step} className={`space-y-4 ${stepAnimClass}`}>
         {step === 0 && (
           <>
             <Section title="Project Basics" subtitle="Required project context to register this lead." theme={theme}>
@@ -1091,9 +993,8 @@ export const NewLeadScreen = ({
             </Section>
 
             <Section title="Stakeholders & Competition" subtitle="Who's involved and who you're up against." theme={theme}>
-              <div className="grid gap-3 lg:grid-cols-3">
+              <Row label="End User" theme={theme} inline noSep>
                 <div>
-                  <p className="text-xs font-semibold mb-1" style={{ color: c.textSecondary }}>End User</p>
                   <AutoCompleteCombobox
                     value={newLeadData.endUser || ''}
                     onChange={(val) => { upd('endUser', val); markTouched('endUser'); }}
@@ -1107,19 +1008,21 @@ export const NewLeadScreen = ({
                   />
                   <FieldError show={!!visibleError('endUser')} message={visibleError('endUser')} />
                 </div>
+              </Row>
 
+              <Row label="Dealer(s)" theme={theme} inline>
                 <div>
-                  <p className="text-xs font-semibold mb-1" style={{ color: c.textSecondary }}>Dealer(s)</p>
                   <SpotlightMultiSelect
                     selectedItems={newLeadData.dealers || []}
                     onAddItem={(dealer) => {
+                      const norm = dealer.trim();
                       const current = newLeadData.dealers || [];
-                      if (!current.includes(dealer)) upd('dealers', [...current, dealer]);
+                      if (!current.some((d) => d.toLowerCase() === norm.toLowerCase())) upd('dealers', [...current, norm]);
                       markTouched('dealers');
                     }}
                     onRemoveItem={(dealer) => { upd('dealers', (newLeadData.dealers || []).filter((item) => item !== dealer)); markTouched('dealers'); }}
                     options={(newLeadData.dealers || []).length > 0 ? (dealers || []).filter((item) => item !== 'Undecided') : (dealers || [])}
-                    onAddNew={(dealer) => setDealers((prev) => [...new Set([dealer, ...prev])])}
+                    onAddNew={(dealer) => { const norm = dealer.trim(); setDealers((prev) => prev.some((d) => d.toLowerCase() === norm.toLowerCase()) ? prev : [norm, ...prev]); }}
                     placeholder="Search or create dealer"
                     theme={theme}
                     compact={false}
@@ -1127,65 +1030,56 @@ export const NewLeadScreen = ({
                   />
                   <FieldError show={!!visibleError('dealers')} message={visibleError('dealers')} />
                 </div>
+              </Row>
 
-                <div>
-                  <p className="text-xs font-semibold mb-1" style={{ color: c.textSecondary }}>A&D Firm(s)</p>
-                  <SpotlightMultiSelect
-                    selectedItems={newLeadData.designFirms || []}
-                    onAddItem={(firm) => {
-                      const current = newLeadData.designFirms || [];
-                      if (!current.includes(firm)) upd('designFirms', [...current, firm]);
-                    }}
-                    onRemoveItem={(firm) => upd('designFirms', (newLeadData.designFirms || []).filter((item) => item !== firm))}
-                    options={designFirms || []}
-                    onAddNew={(firm) => setDesignFirms((prev) => [...new Set([firm, ...prev])])}
-                    placeholder="Search or create firm"
-                    theme={theme}
-                    compact={false}
-                    integratedChips
-                  />
-                </div>
-              </div>
+              <Row label="A&D Firm(s)" theme={theme} inline>
+                <SpotlightMultiSelect
+                  selectedItems={newLeadData.designFirms || []}
+                  onAddItem={(firm) => {
+                    const norm = firm.trim();
+                    const current = newLeadData.designFirms || [];
+                    if (!current.some((f) => f.toLowerCase() === norm.toLowerCase())) upd('designFirms', [...current, norm]);
+                  }}
+                  onRemoveItem={(firm) => upd('designFirms', (newLeadData.designFirms || []).filter((item) => item !== firm))}
+                  options={designFirms || []}
+                  onAddNew={(firm) => { const norm = firm.trim(); setDesignFirms((prev) => prev.some((f) => f.toLowerCase() === norm.toLowerCase()) ? prev : [norm, ...prev]); }}
+                  placeholder="Search or create firm"
+                  theme={theme}
+                  compact={false}
+                  integratedChips
+                />
+              </Row>
 
               <Row label="Competition" theme={theme} inline>
                 <div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      upd('competitionPresent', !newLeadData.competitionPresent);
-                      markTouched('competitionPresent');
-                      markTouched('competitors');
-                    }}
-                    className="inline-flex items-center gap-2 rounded-full border px-2.5 py-1"
-                    style={{ backgroundColor: 'transparent', borderColor: subtleBorder }}
-                  >
-                    <span className="text-[11px] font-semibold" style={{ color: newLeadData.competitionPresent ? c.textSecondary : c.textPrimary }}>No</span>
-                    <span onClick={(e) => e.stopPropagation()}>
-                      <ToggleSwitch
-                        checked={!!newLeadData.competitionPresent}
-                        onChange={(event) => {
-                          upd('competitionPresent', event.target.checked);
-                          markTouched('competitionPresent');
-                          markTouched('competitors');
-                        }}
-                        theme={theme}
-                      />
+                  <div className="flex items-center gap-2.5 py-0.5">
+                    <ToggleSwitch
+                      checked={!!newLeadData.competitionPresent}
+                      onChange={(event) => {
+                        upd('competitionPresent', event.target.checked);
+                        markTouched('competitionPresent');
+                        markTouched('competitors');
+                      }}
+                      theme={theme}
+                    />
+                    <span className="text-[13px]" style={{ color: c.textSecondary }}>
+                      {newLeadData.competitionPresent ? 'Competitors present' : 'None identified'}
                     </span>
-                    <span className="text-[11px] font-semibold" style={{ color: newLeadData.competitionPresent ? c.textPrimary : c.textSecondary }}>Yes</span>
-                  </button>
+                  </div>
                   <Reveal show={!!newLeadData.competitionPresent}>
                     <div className="mt-2.5">
                       <SpotlightMultiSelect
                         selectedItems={newLeadData.competitors || []}
                         onAddItem={(competitor) => {
+                          const norm = competitor.trim();
                           const current = newLeadData.competitors || [];
-                          if (!current.includes(competitor)) upd('competitors', [...current, competitor]);
+                          if (!current.some((c) => c.toLowerCase() === norm.toLowerCase())) upd('competitors', [...current, norm]);
                           markTouched('competitors');
                         }}
                         onRemoveItem={(competitor) => { upd('competitors', (newLeadData.competitors || []).filter((item) => item !== competitor)); markTouched('competitors'); }}
                         options={COMPETITORS.filter((name) => name !== 'None')}
-                        onAddNew={(name) => upd('competitors', [...new Set([...(newLeadData.competitors || []), name])])}
-                        placeholder="Search or create competitor"
+                        onAddNew={(name) => { const norm = name.trim(); upd('competitors', [...new Set([...(newLeadData.competitors || []), norm])]); }}
+                        placeholder="Search or add competitor"
                         theme={theme}
                         compact={false}
                         integratedChips
@@ -1205,7 +1099,8 @@ export const NewLeadScreen = ({
                     className="inline-flex items-center gap-2 rounded-full border px-2.5 py-1"
                     style={{ backgroundColor: 'transparent', borderColor: subtleBorder }}
                   >
-                    <span className="text-[11px] font-semibold" style={{ color: c.textPrimary }}>Sales</span>
+                    <span className="text-[12px] font-semibold" style={{ color: c.textPrimary }}>Sales</span>
+                    <span className="text-[11px] font-medium" style={{ color: c.textSecondary }}>3%</span>
                     <span onClick={(e) => e.stopPropagation()}>
                       <ToggleSwitch
                         checked={salesRewardEnabled}
@@ -1220,7 +1115,8 @@ export const NewLeadScreen = ({
                     className="inline-flex items-center gap-2 rounded-full border px-2.5 py-1"
                     style={{ backgroundColor: 'transparent', borderColor: subtleBorder }}
                   >
-                    <span className="text-[11px] font-semibold" style={{ color: c.textPrimary }}>Designer</span>
+                    <span className="text-[12px] font-semibold" style={{ color: c.textPrimary }}>Designer</span>
+                    <span className="text-[11px] font-medium" style={{ color: c.textSecondary }}>1%</span>
                     <span onClick={(e) => e.stopPropagation()}>
                       <ToggleSwitch
                         checked={designerRewardEnabled}
@@ -1268,7 +1164,7 @@ export const NewLeadScreen = ({
                           value={newLeadData.jsiQuoteNumber || ''}
                           onChange={(e) => { upd('jsiQuoteNumber', e.target.value); markTouched('jsiQuoteNumber'); }}
                           onBlur={() => markTouched('jsiQuoteNumber')}
-                          placeholder="Enter quote number"
+                          placeholder="e.g. Q-12345"
                           theme={theme}
                           size="sm"
                           surfaceBg
@@ -1453,22 +1349,27 @@ export const NewLeadScreen = ({
                 </p>
               </div>
 
-              <div className="mt-3 rounded-2xl border px-3 py-2.5" style={{ borderColor: subtleBorder, backgroundColor: c.surface }}>
+              <div className="mt-3 rounded-2xl border overflow-hidden" style={{ borderColor: subtleBorder, backgroundColor: c.surface }}>
                 {filledReviewItems.length > 0 ? (
-                  <div className="grid gap-2 md:grid-cols-2">
+                  <div className="divide-y" style={{ borderColor: subtleBorder }}>
                     {filledReviewItems.map((item) => (
-                      <div key={item.label} className="grid grid-cols-[104px_minmax(0,1fr)] gap-2">
-                        <span className="text-[11px] font-semibold uppercase tracking-[0.02em]" style={{ color: c.textSecondary }}>
+                      <button
+                        key={item.label}
+                        type="button"
+                        onClick={() => animateToStep(item.step)}
+                        className="w-full grid grid-cols-[100px_minmax(0,1fr)] gap-3 px-3 py-2.5 text-left transition-colors hover:bg-black/[0.03] dark:hover:bg-white/[0.03] active:bg-black/[0.05]"
+                      >
+                        <span className="text-[11px] font-semibold uppercase tracking-[0.04em] pt-px" style={{ color: c.textSecondary }}>
                           {item.label}
                         </span>
-                        <span className="text-[12px] font-medium break-words" style={{ color: c.textPrimary }}>
+                        <span className="text-[13px] font-medium break-words leading-snug" style={{ color: c.textPrimary }}>
                           {item.value}
                         </span>
-                      </div>
+                      </button>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-xs" style={{ color: c.textSecondary }}>
+                  <p className="px-3 py-2.5 text-[13px]" style={{ color: c.textSecondary }}>
                     No lead details entered yet.
                   </p>
                 )}
@@ -1488,33 +1389,42 @@ export const NewLeadScreen = ({
             </Section>
           </>
         )}
-        <div ref={bottomSentinelRef} className="h-px" aria-hidden="true" />
         </div>{/* end animated step wrapper */}
       </div>
 
+      {/* ── Integrated bottom bar: step nav + lead score + action ── */}
       <div
         className="sticky bottom-0 z-20 border-t"
-        style={{
-          borderColor: subtleBorder,
-          backgroundColor: c.background,
-          backdropFilter: 'none',
-          WebkitBackdropFilter: 'none',
-        }}
+        style={{ borderColor: subtleBorder, backgroundColor: c.background }}
       >
-        <div className="max-w-3xl mx-auto px-4 sm:px-5 py-2.5" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 8px)' }}>
-          {stepRequirementHint && hasReachedBottomOfStep && (
-            <div
-              className="mb-2 rounded-xl px-2.5 py-2 flex items-center gap-2"
-              style={{
-                backgroundColor: dark ? 'rgba(184,92,92,0.12)' : 'rgba(184,92,92,0.08)',
-              }}
-            >
-              <AlertTriangle className="w-3.5 h-3.5 shrink-0" style={{ color: '#B85C5C' }} />
-              <p className="text-[11px] leading-snug" style={{ color: c.textSecondary }}>
-                Complete the <span className="font-bold" style={{ color: '#B85C5C' }}>{stepRequirementHint.fieldLabel}</span> field to continue.
-              </p>
-            </div>
-          )}
+        {/* Step pills + score row */}
+        <div className="max-w-3xl mx-auto px-4 sm:px-5 pt-3 pb-2 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-1.5">
+            {STEP_LABELS.map((label, idx) => {
+              const active = step === idx;
+              return (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => animateToStep(idx)}
+                  className="rounded-full px-3 py-1.5 text-[12px] font-semibold transition-all border"
+                  style={{
+                    backgroundColor: active ? c.accent : 'transparent',
+                    borderColor: active ? c.accent : subtleBorder,
+                    color: active ? c.accentText : c.textSecondary,
+                    letterSpacing: '0.01em',
+                  }}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+          <InlineStepHealth health={health} theme={theme} />
+        </div>
+
+        {/* Action button */}
+        <div className="max-w-3xl mx-auto px-4 sm:px-5 pb-2.5" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 10px)' }}>
           {step < 2 ? (
             <PrimaryButton
               type="button"
@@ -1522,7 +1432,6 @@ export const NewLeadScreen = ({
               theme={theme}
               size="default"
               fullWidth
-              disabled={!stepValid}
               icon={<ArrowRight className="w-4 h-4" />}
             >
               Continue
@@ -1533,7 +1442,6 @@ export const NewLeadScreen = ({
               theme={theme}
               size="default"
               fullWidth
-              disabled={!canSubmit}
               icon={<ArrowRight className="w-4 h-4" />}
             >
               Submit Lead
