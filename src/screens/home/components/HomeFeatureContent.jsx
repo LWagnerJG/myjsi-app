@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronRight, Package, DollarSign, Calendar, Zap, Gift, Megaphone } from 'lucide-react';
+import { ChevronRight, Package, DollarSign, Calendar, Zap, Gift, Megaphone, Clock, Users, Star } from 'lucide-react';
 import { ANNOUNCEMENTS } from '../../community/data.js';
 import { MARKETPLACE_PRODUCTS, INITIAL_BALANCE, formatElliottBucks } from '../../marketplace/data.js';
 import { PRODUCTS_CATEGORIES_DATA, PRODUCT_DATA } from '../../products/data.js';
@@ -61,8 +61,19 @@ export const HomeFeatureContent = ({
                         </button>
                     ))
                 ) : (
-                    <div className="text-sm" style={{ color: colors.textSecondary }}>
-                        No community posts yet.
+                    <div className="flex flex-col items-center justify-center py-5 text-center gap-2">
+                        <div
+                            className="w-10 h-10 rounded-xl flex items-center justify-center"
+                            style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}
+                        >
+                            <Users className="w-5 h-5" style={{ color: colors.textSecondary, opacity: 0.45 }} />
+                        </div>
+                        <p className="text-sm font-semibold" style={{ color: colors.textPrimary }}>
+                            No posts yet
+                        </p>
+                        <p className="text-xs leading-relaxed" style={{ color: colors.textSecondary, opacity: 0.65 }}>
+                            Community activity will show up here
+                        </p>
                     </div>
                 )}
             </div>
@@ -88,8 +99,23 @@ export const HomeFeatureContent = ({
                         </button>
                     ))
                 ) : (
-                    <div className="text-sm" style={{ color: colors.textSecondary }}>
-                        Select lead time favorites in Settings to see them here.
+                    <div className="flex flex-col items-center justify-center py-5 text-center gap-2">
+                        <div
+                            className="w-10 h-10 rounded-xl flex items-center justify-center"
+                            style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}
+                        >
+                            <Clock className="w-5 h-5" style={{ color: colors.textSecondary, opacity: 0.45 }} />
+                        </div>
+                        <p className="text-sm font-semibold" style={{ color: colors.textPrimary }}>
+                            No favorites yet
+                        </p>
+                        <button
+                            onClick={() => onNavigate('resources/lead-times')}
+                            className="text-xs font-medium underline underline-offset-2 transition-opacity hover:opacity-70"
+                            style={{ color: colors.accent }}
+                        >
+                            Star series in Lead Times →
+                        </button>
                     </div>
                 )}
             </div>
@@ -268,6 +294,24 @@ export const HomeFeatureContent = ({
                         <ChevronRight className="w-3.5 h-3.5 flex-shrink-0 opacity-30" style={{ color: colors.textSecondary }} />
                     </button>
                 ))}
+            </div>
+        );
+    }
+
+    // activity / recent orders (default mode)
+    if (!recentOrders.length) {
+        return (
+            <div className="flex flex-col items-center justify-center py-5 text-center gap-2">
+                <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center"
+                    style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}
+                >
+                    <Package className="w-5 h-5" style={{ color: colors.textSecondary, opacity: 0.45 }} />
+                </div>
+                <p className="text-sm font-semibold" style={{ color: colors.textPrimary }}>No recent orders</p>
+                <p className="text-xs" style={{ color: colors.textSecondary, opacity: 0.65 }}>
+                    Orders will appear here as they come in
+                </p>
             </div>
         );
     }

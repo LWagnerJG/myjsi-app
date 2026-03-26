@@ -31,12 +31,12 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
       clearProjectsInitialStage && clearProjectsInitialStage();
     }
   }, [projectsInitialStage, clearProjectsInitialStage, setSelectedPipelineStage]);
-  const [selectedOpportunity,setSelectedOpportunity] = useState(null);
-  const [selectedInstall,setSelectedInstall] = useState(null);
+  const [selectedOpportunity, setSelectedOpportunity] = useState(null);
+  const [selectedInstall, setSelectedInstall] = useState(null);
   const scrollContainerRef = useRef(null);
   const stagesScrollRef = useRef(null);
-  const [showStageFadeLeft,setShowStageFadeLeft]=useState(false);
-  const [showStageFadeRight,setShowStageFadeRight]=useState(false);
+  const [showStageFadeLeft, setShowStageFadeLeft] = useState(false);
+  const [showStageFadeRight, setShowStageFadeRight] = useState(false);
 
   // Deep link: auto-select opportunity by ID from URL
   useEffect(() => {
@@ -46,15 +46,85 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
     }
   }, [deepLinkOppId, opportunities]);
 
-  useImperativeHandle(ref,()=>({ clearSelection:()=>{ let cleared=false; if(selectedOpportunity){ setSelectedOpportunity(null); cleared=true;} if(selectedInstall){ setSelectedInstall(null); cleared=true;} return cleared; } }));
-  const updateStageFade = useCallback(()=>{ const el=stagesScrollRef.current; if(!el) return; const {scrollLeft,scrollWidth,clientWidth}=el; setShowStageFadeLeft(scrollLeft>4); setShowStageFadeRight(scrollLeft+clientWidth<scrollWidth-4); },[]);
-  useEffect(()=>{ updateStageFade(); const onResize=()=>updateStageFade(); window.addEventListener('resize',onResize); const ro=typeof ResizeObserver!=='undefined'&&stagesScrollRef.current? new ResizeObserver(onResize):null; if(ro&&stagesScrollRef.current) ro.observe(stagesScrollRef.current); return ()=>{ window.removeEventListener('resize',onResize); if(ro) ro.disconnect(); }; },[projectsTab, updateStageFade]);
-  const filteredOpportunities = useMemo(()=> (opportunities||[]).filter(o=>o.stage===selectedPipelineStage),[selectedPipelineStage, opportunities]);
-  const stageTotals = useMemo(()=>{ const totalValue = filteredOpportunities.reduce((sum,o)=>{ const raw= typeof o.value==='string'? o.value.replace(/[^0-9.]/g,''): o.value; const num=parseFloat(raw)||0; return sum+num; },0); return { totalValue }; },[filteredOpportunities]);
-  const updateOpportunity = updated => setOpportunities(prev=> prev.map(o=> o.id===updated.id? updated:o));
-  const addInstallPhotos = files => { if(!files||!selectedInstall) return; const arr=Array.from(files); setMyProjects(prev=> prev.map(p=> p.id===selectedInstall.id? {...p, photos:[...(p.photos||[]), ...arr]}:p)); setSelectedInstall(prev=> prev? {...prev, photos:[...(prev.photos||[]), ...arr]}: prev); };
-  if(selectedOpportunity) return <OpportunityDetail opp={selectedOpportunity} theme={theme} members={members} currentUserId={currentUserId} onUpdate={u=>{ updateOpportunity(u); setSelectedOpportunity(u); }} />;
-  if(selectedInstall) return <InstallationDetail project={selectedInstall} theme={theme} onAddPhotoFiles={addInstallPhotos} />;
+  useImperativeHandle(ref, () => ({
+    clearSelection: () => {
+      let cleared = false;
+      if (selectedOpportunity) { setSelectedOpportunity(null); cleared = true; }
+      if (selectedInstall)     { setSelectedInstall(null);     cleared = true; }
+      return cleared;
+    },
+  }));
+
+  const updateStageFade = useCallback(() => {
+    const el = stagesScrollRef.current;
+    if (!el) return;
+    const { scrollLeft, scrollWidth, clientWidth } = el;
+    setShowStageFadeLeft(scrollLeft > 4);
+    setShowStageFadeRight(scrollLeft + clientWidth < scrollWidth - 4);
+  }, []);
+
+  useEffect(() => {
+    updateStageFade();
+    const onResize = () => updateStageFade();
+    window.addEventListener('resize', onResize);
+    const ro =
+      typeof ResizeObserver !== 'undefined' && stagesScrollRef.current
+        ? new ResizeObserver(onResize)
+        : null;
+    if (ro && stagesScrollRef.current) ro.observe(stagesScrollRef.current);
+    return () => {
+      window.removeEventListener('resize', onResize);
+      if (ro) ro.disconnect();
+    };
+  }, [projectsTab, updateStageFade]);
+
+  const filteredOpportunities = useMemo(
+    () => (opportunities || []).filter(o => o.stage === selectedPipelineStage),
+    [selectedPipelineStage, opportunities]
+  );
+
+  const stageTotals = useMemo(() => {
+    const totalValue = filteredOpportunities.reduce((sum, o) => {
+      const raw = typeof o.value === 'string' ? o.value.replace(/[^0-9.]/g, '') : o.value;
+      const num = parseFloat(raw) || 0;
+      return sum + num;
+    }, 0);
+    return { totalValue };
+  }, [filteredOpportunities]);
+
+  const updateOpportunity = useCallback(updated => {
+    setOpportunities(prev => prev.map(o => o.id === updated.id ? updated : o));
+  }, [setOpportunities]);
+
+  const addInstallPhotos = useCallback(files => {
+    if (!files || !selectedInstall) return;
+    const arr = Array.from(files);
+    setMyProjects(prev =>
+      prev.map(p =>
+        p.id === selectedInstall.id ? { ...p, photos: [...(p.photos || []), ...arr] } : p
+      )
+    );
+    setSelectedInstall(prev =>
+      prev ? { ...prev, photos: [...(prev.photos || []), ...arr] } : prev
+    );
+  }, [selectedInstall, setMyProjects]);
+
+  if (selectedOpportunity) return (
+    <OpportunityDetail
+      opp={selectedOpportunity}
+      theme={theme}
+      members={members}
+      currentUserId={currentUserId}
+      onUpdate={u => { updateOpportunity(u); setSelectedOpportunity(u); }}
+    />
+  );
+  if (selectedInstall) return (
+    <InstallationDetail
+      project={selectedInstall}
+      theme={theme}
+      onAddPhotoFiles={addInstallPhotos}
+    />
+  );
   return (
     <div className="h-full flex flex-col app-header-offset relative" style={{ backgroundColor: theme.colors.background }}>
       {/* Controls - fixed below app header */}

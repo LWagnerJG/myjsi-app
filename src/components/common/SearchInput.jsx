@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { Search, Mic } from 'lucide-react';
 
-// HomeSearchInput (unchanged)
+// HomeSearchInput
 export const HomeSearchInput = React.memo(function HomeSearchInput({
     theme,
     value = '',
@@ -11,6 +11,10 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
     className = '',
     onFocus,
     onBlur,
+    onKeyDown,
+    ariaExpanded,
+    ariaActiveDescendant,
+    ariaControls,
 }) {
     const [focused, setFocused] = useState(false);
     const [tick, setTick] = useState(0);
@@ -56,7 +60,6 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
             }}
             className={`flex items-center flex-1 ${className}`}
             autoComplete="off"
-            role="search"
         >
             <style>{`
         @keyframes siFadeIn { from { opacity: 0 } to { opacity: .52 } }
@@ -74,6 +77,7 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
                     onChange={(e) => onChange && onChange(e.target.value)}
                     onFocus={handleFocus}
                     onBlur={handleBlur}
+                    onKeyDown={onKeyDown}
                     placeholder=""
                     className="w-full bg-transparent outline-none text-[15px]"
                     style={{
@@ -83,7 +87,14 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
                         fontWeight: 400,
                         WebkitFontSmoothing: 'antialiased',
                     }}
-                    aria-label="Search"
+                    role="combobox"
+                    aria-label="Search or ask Elliott"
+                    aria-autocomplete="list"
+                    aria-haspopup="listbox"
+                    aria-expanded={ariaExpanded}
+                    aria-activedescendant={ariaActiveDescendant}
+                    aria-controls={ariaControls}
+                    autoComplete="off"
                 />
 
                 {showHint && (

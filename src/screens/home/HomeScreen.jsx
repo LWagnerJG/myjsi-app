@@ -1,5 +1,5 @@
 // Enhanced HomeScreen with Dealer Dashboard design and reconfiguration functionality
-import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, useRef, useDeferredValue } from 'react';
 import { allApps, DEFAULT_HOME_APPS } from '../../constants/apps.js';
 import { ORDER_DATA } from '../orders/data.js';
 import { RequestQuoteModal } from '../../components/common/RequestQuoteModal.jsx';
@@ -232,8 +232,10 @@ export const HomeScreen = React.memo(({
         );
     }, [safeHomeApps]);
 
+    // Defer the filter so keystrokes feel instant even on slow devices
+    const deferredSearchQuery = useDeferredValue(searchQuery);
     const spotlightResults = useMemo(() => {
-        const query = searchQuery.trim().toLowerCase();
+        const query = deferredSearchQuery.trim().toLowerCase();
         if (!query) return [];
         return allApps
             .filter(app => {
@@ -242,7 +244,7 @@ export const HomeScreen = React.memo(({
                 return name.includes(query) || route.includes(query);
             })
             .slice(0, 6);
-    }, [searchQuery]);
+    }, [deferredSearchQuery]);
 
     const toggleApp = useCallback((route) => {
         if (!onUpdateHomeApps) return; // Guard against missing prop
