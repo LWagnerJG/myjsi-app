@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { ArrowLeft, User, Search } from 'lucide-react';
+import React from 'react';
+import { ArrowLeft, User } from 'lucide-react';
 import { logoLight } from '../../data/theme/themeData.js';
 import { isDarkTheme } from '../../design-system/tokens.js';
 
@@ -17,22 +17,19 @@ export const AppHeader = React.memo(({
     const isHome = !showBack;
     const dark = isDarkMode || isDarkTheme(theme);
 
-    // Show scrim only when page has been scrolled — avoids any visible overlay at rest
-    const [scrolled, setScrolled] = useState(false);
-    useEffect(() => {
-        const onScroll = () => setScrolled(window.scrollY > 8);
-        window.addEventListener('scroll', onScroll, { passive: true });
-        return () => window.removeEventListener('scroll', onScroll);
-    }, []);
-
     // Semi-transparent so blurred background content shows through (frosted glass)
     const glassBg = dark ? 'rgba(42,42,42,0.88)' : 'rgba(255,255,255,0.88)';
 
-    // Gradient starts at top of screen (hidden under iOS status bar), fades to
-    // nothing by 80% of the scrim height — no visible bottom edge.
-    const scrimGradient = dark
-        ? 'linear-gradient(to bottom, rgba(26,26,26,0.5) 0%, rgba(26,26,26,0.18) 50%, rgba(26,26,26,0) 80%)'
-        : 'linear-gradient(to bottom, rgba(240,237,232,0.5) 0%, rgba(240,237,232,0.18) 50%, rgba(240,237,232,0) 80%)';
+    // Background colour values used for the gradient overlay
+    const bgR = dark ? '26,26,26' : '240,237,232';
+
+    // Two-layer gradient blur covering the full header + search bar zone (~165px):
+    //   Layer 1 — backdrop-filter blur: invisible at rest (blurring a flat bg = same bg),
+    //             shows blurred content as the page scrolls.
+    //   Layer 2 — gradient overlay: transparent at top (lets blurred content show) and
+    //             fades to solid background-colour at the bottom edge so you never see
+    //             a hard rectangle — content appears to melt into the background.
+    const SCRIM_H = 165;
 
     const getTimeGreeting = () => {
         const hour = new Date().getHours();
@@ -43,19 +40,35 @@ export const AppHeader = React.memo(({
 
     return (
         <>
-            {/* Blur + gradient scrim — only visible when scrolled so it doesn't
-                create a box at rest. backdrop-filter and gradient both fade via
-                opacity transition, driven by scroll position. */}
+            {/* Layer 1 — blur. No gradient here (iOS Safari drops backdrop-filter when
+                mask-image is on the same element). Covers AppHeader + HomeHeader zone. */}
             <div
                 aria-hidden="true"
-                className="fixed top-0 left-0 right-0 pointer-events-none transition-opacity duration-300"
+                className="fixed top-0 left-0 right-0 pointer-events-none"
                 style={{
-                    height: 130,
-                    zIndex: 28,
-                    opacity: scrolled ? 1 : 0,
+                    height: SCRIM_H,
+                    zIndex: 27,
                     backdropFilter: 'blur(20px)',
                     WebkitBackdropFilter: 'blur(20px)',
-                    background: scrimGradient,
+                }}
+            />
+
+            {/* Layer 2 — gradient overlay. Transparent at top (shows blurred content),
+                fades to solid background-colour at the bottom so the blur zone has no
+                visible bottom edge. At rest this is invisible since the overlay colour
+                equals the page background. */}
+            <div
+                aria-hidden="true"
+                className="fixed top-0 left-0 right-0 pointer-events-none"
+                style={{
+                    height: SCRIM_H,
+                    zIndex: 28,
+                    background: `linear-gradient(to bottom,
+                        rgba(${bgR},0)    0%,
+                        rgba(${bgR},0)    28%,
+                        rgba(${bgR},0.35) 55%,
+                        rgba(${bgR},0.75) 78%,
+                        rgba(${bgR},1)    100%)`,
                 }}
             />
 
@@ -116,3 +129,4 @@ export const AppHeader = React.memo(({
         </>
     );
 });
+
