@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AlertTriangle, ArrowLeft, ArrowRight, CheckCircle2, FileText, Paperclip, UploadCloud, X } from 'lucide-react';
+import { AlertTriangle, ArrowRight, CheckCircle2, FileText, Paperclip, UploadCloud, X } from 'lucide-react';
 import { FormInput } from '../../components/forms/FormInput.jsx';
 import { AutoCompleteCombobox } from '../../components/forms/AutoCompleteCombobox.jsx';
 import { PortalNativeSelect } from '../../components/forms/PortalNativeSelect.jsx';
@@ -237,6 +237,7 @@ export const NewLeadScreen = ({
   opportunities = [],
   newLeadData = {},
   onNewLeadChange,
+  setBackHandler,
 }) => {
   const c = theme.colors;
   const dark = isDarkTheme(theme);
@@ -244,6 +245,8 @@ export const NewLeadScreen = ({
   const stageOptions = useMemo(() => STAGES.filter((stage) => stage !== 'Won' && stage !== 'Lost'), []);
 
   const [step, setStep] = useState(0);
+  const [stepAnimClass, setStepAnimClass] = useState('');
+  const prevStepRef = useRef(0);
   const [touched, setTouched] = useState({});
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [dragActive, setDragActive] = useState(false);
@@ -275,6 +278,37 @@ export const NewLeadScreen = ({
   useEffect(() => {
     setHasReachedBottomOfStep(false);
   }, [step]);
+
+  // Register back handler so AppHeader arrow navigates between wizard steps
+  useEffect(() => {
+    if (!setBackHandler) return undefined;
+    if (step === 0) {
+      // On first step, clear any custom handler — default back exits the screen
+      setBackHandler(null);
+      return () => setBackHandler(null);
+    }
+    setBackHandler(() => {
+      animateToStep(Math.max(step - 1, 0));
+      return true; // consumed — prevent screen-level navigation
+    });
+    return () => setBackHandler(null);
+  }, [step, setBackHandler, animateToStep]);
+
+  // Inject step-transition keyframes once
+  useEffect(() => {
+    const id = 'nl-step-transitions';
+    if (!document.getElementById(id)) {
+      const s = document.createElement('style');
+      s.id = id;
+      s.textContent = `
+        @keyframes nl-slide-in-right { from { opacity:0; transform:translateX(18px); } to { opacity:1; transform:translateX(0); } }
+        @keyframes nl-slide-in-left  { from { opacity:0; transform:translateX(-18px); } to { opacity:1; transform:translateX(0); } }
+        .nl-fwd  { animation: nl-slide-in-right .25s cubic-bezier(.25,.46,.45,.94) both; }
+        .nl-back { animation: nl-slide-in-left  .25s cubic-bezier(.25,.46,.45,.94) both; }
+      `;
+      document.head.appendChild(s);
+    }
+  }, []);
 
   useEffect(() => {
     const node = bottomSentinelRef.current;
@@ -321,13 +355,6 @@ export const NewLeadScreen = ({
     const idx = stageOptions.indexOf(newLeadData.projectStatus);
     return idx >= 0 ? idx : 0;
   }, [newLeadData.projectStatus, stageOptions]);
-
-  const setStageByIndex = useCallback((index) => {
-    if (!stageOptions.length) return;
-    const bounded = Math.max(0, Math.min(stageOptions.length - 1, index));
-    upd('projectStatus', stageOptions[bounded]);
-    markTouched('projectStatus');
-  }, [markTouched, stageOptions, upd]);
 
   const openInstallDatePicker = useCallback(() => {
     const input = installDateInputRef.current;
@@ -709,15 +736,22 @@ export const NewLeadScreen = ({
     if (stepIdx === 1) setTouched((prev) => ({ ...prev, estimatedList: true, endUser: true, dealers: true, poTimeframe: true, competitors: true, jsiQuoteNumber: true }));
   }, []);
 
+  const animateToStep = useCallback((nextStep) => {
+    const dir = nextStep > prevStepRef.current ? 'nl-fwd' : 'nl-back';
+    prevStepRef.current = nextStep;
+    setStepAnimClass(dir); // applied when new key div mounts
+    setStep(nextStep);
+  }, []);
+
   const goNext = useCallback(() => {
     markStepFieldsTouched(step);
     if (!stepValid) return;
-    setStep((prev) => Math.min(prev + 1, 2));
-  }, [markStepFieldsTouched, step, stepValid]);
+    animateToStep(Math.min(step + 1, 2));
+  }, [animateToStep, markStepFieldsTouched, step, stepValid]);
 
   const goBack = useCallback(() => {
-    setStep((prev) => Math.max(prev - 1, 0));
-  }, []);
+    animateToStep(Math.max(step - 1, 0));
+  }, [animateToStep, step]);
 
   const addProduct = useCallback((series) => {
     if (!series || (newLeadData.products || []).some((p) => p.series === series)) return;
@@ -799,7 +833,7 @@ export const NewLeadScreen = ({
 
   return (
     <form onSubmit={handleSubmit} className="min-h-full app-header-offset flex flex-col" style={{ backgroundColor: c.background }}>
-      <div className="px-4 sm:px-5 pt-5 pb-32 max-w-3xl mx-auto w-full space-y-4">
+      <div className="px-4 sm:px-5 pt-5 pb-32 max-w-3xl mx-auto w-full">
         <Section
           title="New Lead"
           subtitle={STEP_DESCRIPTIONS[step]}
@@ -815,16 +849,15 @@ export const NewLeadScreen = ({
                 <button
                   key={label}
                   type="button"
-                  onClick={() => setStep(idx)}
-                  className="rounded-xl px-2.5 py-1.5 text-left transition-colors"
+                  onClick={() => animateToStep(idx)}
+                  className="rounded-full px-3 py-2 text-left transition-colors"
                   style={{
-                    backgroundColor: active ? c.accent : c.background,
+                    backgroundColor: active ? c.accent : c.subtle,
                     color: active ? c.accentText : c.textPrimary,
-                    border: `1px solid ${active ? c.accent : 'transparent'}`,
                   }}
                 >
                   <div className="text-[11px] leading-none font-semibold tracking-[0.01em]">{label}</div>
-                  <div className="text-[10px] mt-1 leading-none" style={{ opacity: active ? 0.9 : 0.7 }}>
+                  <div className="text-[10px] mt-1 leading-none" style={{ opacity: active ? 0.85 : 0.55 }}>
                     {done}/{total}
                   </div>
                 </button>
@@ -833,6 +866,7 @@ export const NewLeadScreen = ({
           </div>
         </Section>
 
+        <div key={step} className={`mt-4 space-y-4 ${stepAnimClass}`}>
         {step === 0 && (
           <>
             <Section title="Project Basics" subtitle="Required project context to register this lead." theme={theme}>
@@ -1106,46 +1140,33 @@ export const NewLeadScreen = ({
                 </div>
               </div>
 
-              <div className="mt-3 grid gap-2.5 md:grid-cols-[1.2fr_1fr]">
-                <div
-                  className="h-full rounded-2xl border px-3 py-2.5"
-                  style={{
-                    backgroundColor: c.surface,
-                    borderColor: subtleBorder,
-                  }}
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-xs font-semibold" style={{ color: c.textPrimary }}>Competition</p>
-                      <p className="text-xs mt-0.5" style={{ color: c.textSecondary }}>Is competition active?</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        upd('competitionPresent', !newLeadData.competitionPresent);
-                        markTouched('competitionPresent');
-                        markTouched('competitors');
-                      }}
-                      className="inline-flex items-center gap-2 rounded-full px-2.5 py-1"
-                      style={{ backgroundColor: c.subtle }}
-                    >
-                      <span className="text-[11px] font-semibold" style={{ color: newLeadData.competitionPresent ? c.textSecondary : c.textPrimary }}>No</span>
-                      <span onClick={(e) => e.stopPropagation()}>
-                        <ToggleSwitch
-                          checked={!!newLeadData.competitionPresent}
-                          onChange={(event) => {
-                            upd('competitionPresent', event.target.checked);
-                            markTouched('competitionPresent');
-                            markTouched('competitors');
-                          }}
-                          theme={theme}
-                        />
-                      </span>
-                      <span className="text-[11px] font-semibold" style={{ color: newLeadData.competitionPresent ? c.textPrimary : c.textSecondary }}>Yes</span>
-                    </button>
-                  </div>
-
-                  {newLeadData.competitionPresent && (
+              <Row label="Competition" theme={theme} inline>
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      upd('competitionPresent', !newLeadData.competitionPresent);
+                      markTouched('competitionPresent');
+                      markTouched('competitors');
+                    }}
+                    className="inline-flex items-center gap-2 rounded-full px-2.5 py-1"
+                    style={{ backgroundColor: c.subtle }}
+                  >
+                    <span className="text-[11px] font-semibold" style={{ color: newLeadData.competitionPresent ? c.textSecondary : c.textPrimary }}>No</span>
+                    <span onClick={(e) => e.stopPropagation()}>
+                      <ToggleSwitch
+                        checked={!!newLeadData.competitionPresent}
+                        onChange={(event) => {
+                          upd('competitionPresent', event.target.checked);
+                          markTouched('competitionPresent');
+                          markTouched('competitors');
+                        }}
+                        theme={theme}
+                      />
+                    </span>
+                    <span className="text-[11px] font-semibold" style={{ color: newLeadData.competitionPresent ? c.textPrimary : c.textSecondary }}>Yes</span>
+                  </button>
+                  <Reveal show={!!newLeadData.competitionPresent}>
                     <div className="mt-2.5">
                       <SpotlightMultiSelect
                         selectedItems={newLeadData.competitors || []}
@@ -1165,45 +1186,44 @@ export const NewLeadScreen = ({
                       />
                       <FieldError show={!!visibleError('competitors')} message={visibleError('competitors')} />
                     </div>
-                  )}
+                  </Reveal>
                 </div>
+              </Row>
 
-                <div className="h-full rounded-2xl border px-3 py-2.5" style={{ borderColor: subtleBorder, backgroundColor: c.surface }}>
-                  <p className="text-xs font-semibold" style={{ color: c.textPrimary }}>Incentive Rewards</p>
-                  <div className="mt-2 grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => { upd('salesReward', !salesRewardEnabled); markTouched('salesReward'); }}
-                      className="rounded-full px-2 py-1 inline-flex items-center justify-between gap-2 w-full"
-                      style={{ backgroundColor: c.subtle }}
-                    >
-                      <span className="text-[11px] font-semibold" style={{ color: c.textPrimary }}>Sales</span>
-                      <span onClick={(e) => e.stopPropagation()}>
-                        <ToggleSwitch
-                          checked={salesRewardEnabled}
-                          onChange={(event) => { upd('salesReward', event.target.checked); markTouched('salesReward'); }}
-                          theme={theme}
-                        />
-                      </span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => { upd('designerReward', !designerRewardEnabled); markTouched('designerReward'); }}
-                      className="rounded-full px-2 py-1 inline-flex items-center justify-between gap-2 w-full"
-                      style={{ backgroundColor: c.subtle }}
-                    >
-                      <span className="text-[11px] font-semibold" style={{ color: c.textPrimary }}>Designer</span>
-                      <span onClick={(e) => e.stopPropagation()}>
-                        <ToggleSwitch
-                          checked={designerRewardEnabled}
-                          onChange={(event) => { upd('designerReward', event.target.checked); markTouched('designerReward'); }}
-                          theme={theme}
-                        />
-                      </span>
-                    </button>
-                  </div>
+              <Row label="Rewards" theme={theme} inline>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => { upd('salesReward', !salesRewardEnabled); markTouched('salesReward'); }}
+                    className="inline-flex items-center gap-2 rounded-full px-2.5 py-1"
+                    style={{ backgroundColor: c.subtle }}
+                  >
+                    <span className="text-[11px] font-semibold" style={{ color: c.textPrimary }}>Sales</span>
+                    <span onClick={(e) => e.stopPropagation()}>
+                      <ToggleSwitch
+                        checked={salesRewardEnabled}
+                        onChange={(event) => { upd('salesReward', event.target.checked); markTouched('salesReward'); }}
+                        theme={theme}
+                      />
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { upd('designerReward', !designerRewardEnabled); markTouched('designerReward'); }}
+                    className="inline-flex items-center gap-2 rounded-full px-2.5 py-1"
+                    style={{ backgroundColor: c.subtle }}
+                  >
+                    <span className="text-[11px] font-semibold" style={{ color: c.textPrimary }}>Designer</span>
+                    <span onClick={(e) => e.stopPropagation()}>
+                      <ToggleSwitch
+                        checked={designerRewardEnabled}
+                        onChange={(event) => { upd('designerReward', event.target.checked); markTouched('designerReward'); }}
+                        theme={theme}
+                      />
+                    </span>
+                  </button>
                 </div>
-              </div>
+              </Row>
 
             </Section>
 
@@ -1464,6 +1484,7 @@ export const NewLeadScreen = ({
           </>
         )}
         <div ref={bottomSentinelRef} className="h-px" aria-hidden="true" />
+        </div>{/* end animated step wrapper */}
       </div>
 
       <div
@@ -1489,17 +1510,6 @@ export const NewLeadScreen = ({
               </p>
             </div>
           )}
-          <div className={`grid items-center gap-2 ${step > 0 ? 'grid-cols-[auto_minmax(0,1fr)]' : 'grid-cols-1'}`}>
-          {step > 0 && (
-            <button
-              type="button"
-              onClick={goBack}
-              className="h-11 min-w-[118px] px-3.5 rounded-full border text-[13px] font-semibold inline-flex items-center justify-center gap-1.5 transition-colors hover:bg-black/5 dark:hover:bg-white/5"
-              style={{ borderColor: subtleBorder, color: c.textPrimary }}
-            >
-              <ArrowLeft className="w-4 h-4" /> {STEP_LABELS[step - 1]}
-            </button>
-          )}
           {step < 2 ? (
             <PrimaryButton
               type="button"
@@ -1524,7 +1534,6 @@ export const NewLeadScreen = ({
               Submit Lead
             </PrimaryButton>
           )}
-          </div>
         </div>
       </div>
     </form>

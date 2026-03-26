@@ -15,7 +15,7 @@ export const Section = ({ title, subtitle, titleRight, children, theme, classNam
   const divider = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
   return (
     <div className={`rounded-[28px] ${className}`} style={{
-      padding: '16px',
+      padding: '20px',
       backgroundColor: dark ? theme.colors.surface : '#fff',
       border: `1px solid ${divider}`,
     }}>
@@ -44,10 +44,10 @@ export const Section = ({ title, subtitle, titleRight, children, theme, classNam
 
 /* Compact field row */
 export const Row = ({ label, children, theme, tip, noSep, inline }) => {
-  const divider = isDarkTheme(theme) ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+  const divider = isDarkTheme(theme) ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)';
   const rowLayout = inline ? 'grid items-start gap-2 md:grid-cols-[132px_minmax(0,1fr)] md:gap-3' : '';
   return (
-  <div className={`${rowLayout} py-2.5 ${noSep ? '' : 'border-t'}`}
+  <div className={`${rowLayout} py-3 ${noSep ? '' : 'border-t'}`}
     style={{ borderColor: noSep ? undefined : divider }}>
     {label && (
       <div className={`flex items-center gap-1.5 ${inline ? 'md:min-h-[36px] md:pt-1.5' : 'mb-1.5'}`}>
