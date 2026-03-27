@@ -19,15 +19,22 @@ export function SpotlightMultiSelect({
   const [dropUp, setDropUp] = useState(false);
   const [q, setQ] = useState("");
 
-  useLayoutEffect(() => {
-    if (!open || !wrapperRef.current) return;
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const wrapperRef = useRef(null);
+
+  const calcDropUp = () => {
+    if (!wrapperRef.current) return;
     const rect = wrapperRef.current.getBoundingClientRect();
     const chrome = document.querySelector('[data-bottom-chrome]');
     const bottomOccupied = chrome ? (window.innerHeight - chrome.getBoundingClientRect().top) : 0;
     setDropUp(window.innerHeight - rect.bottom - bottomOccupied < 300);
+  };
+  useLayoutEffect(() => { if (open) calcDropUp(); }, [open]);
+  useEffect(() => {
+    if (!open) return;
+    window.addEventListener('resize', calcDropUp);
+    return () => window.removeEventListener('resize', calcDropUp);
   }, [open]);
-  const [activeIndex, setActiveIndex] = useState(-1);
-  const wrapperRef = useRef(null);
   const inputRef = useRef(null);
   const menuRef = useRef(null);
   const listboxId = useMemo(() => `listbox-${Math.random().toString(36).substr(2, 9)}`, []);

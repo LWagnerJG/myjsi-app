@@ -213,13 +213,20 @@ const DatePickerInput = ({ value, onChange, theme, placeholder = 'Select date' }
   const today = new Date();
   const parsed = value ? new Date(value + 'T00:00:00') : null;
 
-  // Flip calendar above trigger when there isn't enough space below
-  useLayoutEffect(() => {
-    if (!isOpen || !wrapperRef.current) return;
+  // Flip calendar above trigger when there isn't enough space below.
+  // Re-checks on resize so iOS keyboard open/close (which changes innerHeight) is handled.
+  const calcDropUp = () => {
+    if (!wrapperRef.current) return;
     const rect = wrapperRef.current.getBoundingClientRect();
     const chrome = document.querySelector('[data-bottom-chrome]');
     const bottomOccupied = chrome ? (window.innerHeight - chrome.getBoundingClientRect().top) : 0;
     setDropUp(window.innerHeight - rect.bottom - bottomOccupied < 380);
+  };
+  useLayoutEffect(() => { if (isOpen) calcDropUp(); }, [isOpen]);
+  useEffect(() => {
+    if (!isOpen) return;
+    window.addEventListener('resize', calcDropUp);
+    return () => window.removeEventListener('resize', calcDropUp);
   }, [isOpen]);
   const [viewYear, setViewYear] = useState(() => parsed ? parsed.getFullYear() : today.getFullYear());
   const [viewMonth, setViewMonth] = useState(() => parsed ? parsed.getMonth() : today.getMonth());

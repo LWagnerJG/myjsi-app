@@ -23,13 +23,23 @@ export const AutoCompleteCombobox = React.memo(({
     const inputRef = useRef(null);
     const dark = isDarkTheme(theme);
 
-    // Flip dropdown above the input when there isn't enough space below
-    useLayoutEffect(() => {
-        if (!isOpen || !wrapperRef.current) return;
+    // Flip dropdown above the input when there isn't enough space below.
+    // Also re-checks on resize so the iOS keyboard opening (which shrinks innerHeight) is handled.
+    const calcDropUp = () => {
+        if (!wrapperRef.current) return;
         const rect = wrapperRef.current.getBoundingClientRect();
         const chrome = document.querySelector('[data-bottom-chrome]');
         const bottomOccupied = chrome ? (window.innerHeight - chrome.getBoundingClientRect().top) : 0;
         setDropUp(window.innerHeight - rect.bottom - bottomOccupied < 260);
+    };
+    useLayoutEffect(() => {
+        if (!isOpen) return;
+        calcDropUp();
+    }, [isOpen]);
+    useEffect(() => {
+        if (!isOpen) return;
+        window.addEventListener('resize', calcDropUp);
+        return () => window.removeEventListener('resize', calcDropUp);
     }, [isOpen]);
 
     const filtered = useMemo(() => {
@@ -96,7 +106,7 @@ export const AutoCompleteCombobox = React.memo(({
                 />
                 <input
                     ref={inputRef}
-                    type="text"
+                    type="search"
                     spellCheck={false}
                     autoCorrect="off"
                     autoCapitalize="off"
