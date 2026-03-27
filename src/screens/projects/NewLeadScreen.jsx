@@ -1670,59 +1670,73 @@ export const NewLeadScreen = ({
               </div>
             </Section>
 
-            <Section title="Review & Submit" subtitle="Confirm details then submit." theme={theme}>
+            <Section title="Review & Submit" subtitle="Tap any row to edit." theme={theme}>
               {/* Score card */}
               <div
-                className="flex items-center gap-3.5 rounded-2xl px-4 py-3 mb-3"
-                style={{ backgroundColor: c.surface, border: `1px solid ${subtleBorder}` }}
+                className="rounded-2xl px-4 py-4 mb-3 flex items-center gap-4"
+                style={{
+                  backgroundColor: `${health.tone}0D`,
+                  border: `1.5px solid ${health.tone}30`,
+                }}
               >
-                <StrengthCircle percent={health.percent} tone={health.tone} size={48} stroke={3.5} textSize="11px" />
+                <StrengthCircle percent={health.percent} tone={health.tone} size={60} stroke={4} textSize="12px" />
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className="text-[16px] font-bold tabular-nums leading-none" style={{ color: c.textPrimary }}>{health.percent}</span>
-                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ color: health.tone, backgroundColor: `${health.tone}1A` }}>{health.label}</span>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider mb-0.5" style={{ color: health.tone, opacity: 0.7 }}>Lead Score</p>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[22px] font-bold tabular-nums leading-none" style={{ color: health.tone }}>{health.percent}</span>
+                    <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full" style={{ color: health.tone, backgroundColor: `${health.tone}20` }}>{health.label}</span>
                     {canSubmit
-                      ? <CheckCircle2 className="w-3.5 h-3.5 ml-auto shrink-0" style={{ color: '#4A7C59' }} />
-                      : <AlertTriangle className="w-3.5 h-3.5 ml-auto shrink-0" style={{ color: '#B85C5C' }} />
+                      ? <CheckCircle2 className="w-4 h-4 ml-auto shrink-0" style={{ color: health.tone }} />
+                      : <AlertTriangle className="w-4 h-4 ml-auto shrink-0" style={{ color: health.tone }} />
                     }
                   </div>
-                  <span className="text-[11px]" style={{ color: c.textSecondary }}>
-                    {health.missing[0] ? `Add ${health.missing[0]} to boost score` : 'All key fields filled in'}
-                  </span>
+                  <p className="text-[11px] mt-1" style={{ color: health.tone, opacity: 0.7 }}>
+                    {health.missing[0] ? `+ ${health.missing[0]} will boost your score` : 'All key fields complete'}
+                  </p>
                 </div>
               </div>
 
-              {/* Review items grouped by step */}
-              {[0, 1, 2].map((stepIdx) => {
-                const stepLabel = ['Basics', 'Scope', 'Details'][stepIdx];
-                const stepItems = filledReviewItems.filter((item) => item.step === stepIdx && item.label !== 'Notes');
-                if (!stepItems.length) return null;
+              {/* Single unified review card */}
+              {filledReviewItems.filter((item) => item.label !== 'Notes').length > 0 && (() => {
+                const groups = [0, 1, 2].map((stepIdx) => ({
+                  stepIdx,
+                  items: filledReviewItems.filter((i) => i.step === stepIdx && i.label !== 'Notes'),
+                })).filter((g) => g.items.length > 0);
                 return (
-                  <div key={stepIdx} className="mb-2">
-                    <p className="text-[10px] font-semibold uppercase tracking-widest px-1 pb-1.5" style={{ color: c.textSecondary, opacity: 0.45 }}>
-                      {stepLabel}
-                    </p>
-                    <div className="rounded-2xl border overflow-hidden" style={{ borderColor: subtleBorder, backgroundColor: c.surface }}>
-                      {stepItems.map((item, i) => (
-                        <button
-                          key={item.label}
-                          type="button"
-                          onClick={() => animateToStep(item.step)}
-                          className="w-full flex items-center justify-between gap-3 px-3.5 text-left transition-colors hover:bg-black/[0.03] dark:hover:bg-white/[0.03]"
-                          style={{
-                            paddingTop: 10,
-                            paddingBottom: 10,
-                            borderTop: i > 0 ? `1px solid ${subtleBorder}` : 'none',
-                          }}
-                        >
-                          <span className="text-[12px] font-medium shrink-0" style={{ color: c.textSecondary }}>{item.label}</span>
-                          <span className="text-[12px] font-medium text-right truncate max-w-[58%]" style={{ color: c.textPrimary }}>{item.value}</span>
-                        </button>
-                      ))}
-                    </div>
+                  <div className="rounded-2xl border overflow-hidden" style={{ borderColor: subtleBorder, backgroundColor: c.surface }}>
+                    {groups.map((group, gi) => (
+                      <React.Fragment key={group.stepIdx}>
+                        {gi > 0 && (
+                          <div className="flex items-center gap-2 px-3.5 py-1" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.025)' }}>
+                            <div className="flex-1 h-px" style={{ backgroundColor: subtleBorder }} />
+                            <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: c.textSecondary, opacity: 0.4 }}>
+                              {['Basics', 'Scope', 'Details'][group.stepIdx]}
+                            </span>
+                            <div className="flex-1 h-px" style={{ backgroundColor: subtleBorder }} />
+                          </div>
+                        )}
+                        {group.items.map((item, i) => (
+                          <button
+                            key={item.label}
+                            type="button"
+                            onClick={() => animateToStep(item.step)}
+                            className="w-full flex items-center gap-3 px-3.5 text-left active:bg-black/[0.04] dark:active:bg-white/[0.04] transition-colors"
+                            style={{
+                              paddingTop: 11,
+                              paddingBottom: 11,
+                              borderTop: (gi === 0 && i === 0) ? 'none' : (i > 0 ? `1px solid ${subtleBorder}` : 'none'),
+                            }}
+                          >
+                            <span className="text-[12px] font-medium shrink-0 w-[96px]" style={{ color: c.textSecondary }}>{item.label}</span>
+                            <span className="text-[13px] font-semibold flex-1 text-right truncate" style={{ color: c.textPrimary }}>{item.value}</span>
+                            <ChevronRight className="w-3.5 h-3.5 shrink-0 opacity-25" style={{ color: c.textSecondary }} />
+                          </button>
+                        ))}
+                      </React.Fragment>
+                    ))}
                   </div>
                 );
-              })}
+              })()}
             </Section>
           </>
         )}
