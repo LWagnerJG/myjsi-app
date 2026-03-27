@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Search, Plus, X } from "lucide-react";
 import { isDarkTheme } from "../../design-system/tokens.js";
 
@@ -16,7 +16,14 @@ export function SpotlightMultiSelect({
   bordered = true,
 }) {
   const [open, setOpen] = useState(false);
+  const [dropUp, setDropUp] = useState(false);
   const [q, setQ] = useState("");
+
+  useLayoutEffect(() => {
+    if (!open || !wrapperRef.current) return;
+    const rect = wrapperRef.current.getBoundingClientRect();
+    setDropUp(window.innerHeight - rect.bottom < 300);
+  }, [open]);
   const [activeIndex, setActiveIndex] = useState(-1);
   const wrapperRef = useRef(null);
   const inputRef = useRef(null);
@@ -182,7 +189,7 @@ export function SpotlightMultiSelect({
             role="listbox"
             className="absolute left-0 right-0 z-50 rounded-2xl border overflow-y-auto"
             style={{
-              top: "calc(100% + 6px)",
+              ...(dropUp ? { bottom: "calc(100% + 6px)" } : { top: "calc(100% + 6px)" }),
               backgroundColor: palette.bg,
               borderColor: palette.border,
               boxShadow: dark ? "0 8px 32px rgba(0,0,0,0.45)" : "0 8px 24px rgba(0,0,0,0.11)",

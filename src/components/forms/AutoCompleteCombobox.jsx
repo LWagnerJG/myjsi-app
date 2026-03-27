@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo, useEffect } from 'react';
+import React, { useState, useRef, useMemo, useEffect, useLayoutEffect } from 'react';
 import { Search } from 'lucide-react';
 import { isDarkTheme } from '../../design-system/tokens.js';
 
@@ -18,9 +18,17 @@ export const AutoCompleteCombobox = React.memo(({
     showAddButton = true,
 }) => {
     const [isOpen, setIsOpen] = useState(false);
+    const [dropUp, setDropUp] = useState(false);
     const wrapperRef = useRef(null);
     const inputRef = useRef(null);
     const dark = isDarkTheme(theme);
+
+    // Flip dropdown above the input when there isn't enough space below
+    useLayoutEffect(() => {
+        if (!isOpen || !wrapperRef.current) return;
+        const rect = wrapperRef.current.getBoundingClientRect();
+        setDropUp(window.innerHeight - rect.bottom < 260);
+    }, [isOpen]);
 
     const filtered = useMemo(() => {
         if (!showDropdown) return [];
@@ -110,12 +118,12 @@ export const AutoCompleteCombobox = React.memo(({
                     }}
                 />
 
-                {/* Inline dropdown — position:absolute, anchored directly below input, no flickering */}
+                {/* Inline dropdown — flips above when near bottom of viewport */}
                 {showList && (
                     <div
                         className={`absolute left-0 right-0 z-50 rounded-2xl border overflow-hidden ${dropdownClassName}`}
                         style={{
-                            top: 'calc(100% + 6px)',
+                            ...(dropUp ? { bottom: 'calc(100% + 6px)' } : { top: 'calc(100% + 6px)' }),
                             backgroundColor: theme.colors.surface,
                             borderColor: subtleBorder,
                             boxShadow: dark

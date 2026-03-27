@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { AlertTriangle, ArrowRight, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, FileText, Paperclip, UploadCloud, X } from 'lucide-react';
 import { FormInput } from '../../components/forms/FormInput.jsx';
 import { AutoCompleteCombobox } from '../../components/forms/AutoCompleteCombobox.jsx';
@@ -208,9 +208,17 @@ const DatePickerInput = ({ value, onChange, theme, placeholder = 'Select date' }
   const c = theme.colors;
   const subtleBorder = getSubtleBorder(theme);
   const [isOpen, setIsOpen] = useState(false);
+  const [dropUp, setDropUp] = useState(false);
   const wrapperRef = useRef(null);
   const today = new Date();
   const parsed = value ? new Date(value + 'T00:00:00') : null;
+
+  // Flip calendar above trigger when there isn't enough space below
+  useLayoutEffect(() => {
+    if (!isOpen || !wrapperRef.current) return;
+    const rect = wrapperRef.current.getBoundingClientRect();
+    setDropUp(window.innerHeight - rect.bottom < 380);
+  }, [isOpen]);
   const [viewYear, setViewYear] = useState(() => parsed ? parsed.getFullYear() : today.getFullYear());
   const [viewMonth, setViewMonth] = useState(() => parsed ? parsed.getMonth() : today.getMonth());
 
@@ -275,7 +283,7 @@ const DatePickerInput = ({ value, onChange, theme, placeholder = 'Select date' }
         <div
           className="absolute left-0 right-0 z-50 rounded-2xl border overflow-hidden"
           style={{
-            top: 'calc(100% + 6px)',
+            ...(dropUp ? { bottom: 'calc(100% + 6px)' } : { top: 'calc(100% + 6px)' }),
             backgroundColor: c.surface,
             borderColor: subtleBorder,
             boxShadow: dark ? '0 8px 32px rgba(0,0,0,0.45)' : '0 8px 24px rgba(0,0,0,0.11)',
