@@ -1671,59 +1671,58 @@ export const NewLeadScreen = ({
             </Section>
 
             <Section title="Review & Submit" subtitle="Confirm details then submit." theme={theme}>
-              {/* Compact health row */}
-              <div className="flex items-center gap-3 rounded-2xl border px-3 py-2.5 mb-2" style={{ borderColor: subtleBorder, backgroundColor: c.surface }}>
-                <StrengthCircle percent={health.percent} tone={health.tone} size={40} stroke={3.5} textSize="10px" />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[13px] font-bold tabular-nums" style={{ color: c.textPrimary }}>{health.percent}/100</span>
-                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ color: health.tone, backgroundColor: `${health.tone}1A` }}>{health.label}</span>
-                  </div>
-                  <div className="mt-1.5 h-1 rounded-full overflow-hidden" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)' }}>
-                    <div className="h-full rounded-full" style={{ width: `${health.percent}%`, backgroundColor: health.tone, transition: 'width 240ms ease' }} />
-                  </div>
-                </div>
-                {health.missing[0] && (
-                  <span className="text-[11px] shrink-0 text-right" style={{ color: c.textSecondary }}>
-                    +pts: {health.missing[0]}
-                  </span>
-                )}
-              </div>
-
-              {/* Condensed review items */}
-              {filledReviewItems.filter((item) => item.label !== 'Notes').length > 0 && (
-                <div className="rounded-2xl border overflow-hidden mb-2" style={{ borderColor: subtleBorder, backgroundColor: c.surface }}>
-                  <div className="divide-y" style={{ borderColor: subtleBorder }}>
-                    {filledReviewItems.filter((item) => item.label !== 'Notes').map((item) => (
-                      <button
-                        key={item.label}
-                        type="button"
-                        onClick={() => animateToStep(item.step)}
-                        className="w-full flex items-start gap-3 px-3 py-1.5 text-left transition-colors hover:bg-black/[0.03] dark:hover:bg-white/[0.03]"
-                      >
-                        <span className="text-[11px] font-medium shrink-0 pt-px w-[88px]" style={{ color: c.textSecondary }}>
-                          {item.label}
-                        </span>
-                        <span className="text-[12px] font-medium break-words leading-snug flex-1 text-right" style={{ color: c.textPrimary }}>
-                          {item.value}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
+              {/* Score card */}
               <div
-                className="rounded-2xl border px-3 py-2 flex items-center gap-2 text-[12px] font-medium"
-                style={{
-                  borderColor: canSubmit ? '#4A7C5940' : '#B85C5C40',
-                  color: canSubmit ? '#4A7C59' : '#B85C5C',
-                  backgroundColor: canSubmit ? '#4A7C5914' : '#B85C5C14',
-                }}
+                className="flex items-center gap-3.5 rounded-2xl px-4 py-3 mb-3"
+                style={{ backgroundColor: c.surface, border: `1px solid ${subtleBorder}` }}
               >
-                {canSubmit ? <CheckCircle2 className="w-3.5 h-3.5 shrink-0" /> : <AlertTriangle className="w-3.5 h-3.5 shrink-0" />}
-                {canSubmit ? 'Ready to submit.' : 'Some required fields are incomplete.'}
+                <StrengthCircle percent={health.percent} tone={health.tone} size={48} stroke={3.5} textSize="11px" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-[16px] font-bold tabular-nums leading-none" style={{ color: c.textPrimary }}>{health.percent}</span>
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ color: health.tone, backgroundColor: `${health.tone}1A` }}>{health.label}</span>
+                    {canSubmit
+                      ? <CheckCircle2 className="w-3.5 h-3.5 ml-auto shrink-0" style={{ color: '#4A7C59' }} />
+                      : <AlertTriangle className="w-3.5 h-3.5 ml-auto shrink-0" style={{ color: '#B85C5C' }} />
+                    }
+                  </div>
+                  <span className="text-[11px]" style={{ color: c.textSecondary }}>
+                    {health.missing[0] ? `Add ${health.missing[0]} to boost score` : 'All key fields filled in'}
+                  </span>
+                </div>
               </div>
+
+              {/* Review items grouped by step */}
+              {[0, 1, 2].map((stepIdx) => {
+                const stepLabel = ['Basics', 'Scope', 'Details'][stepIdx];
+                const stepItems = filledReviewItems.filter((item) => item.step === stepIdx && item.label !== 'Notes');
+                if (!stepItems.length) return null;
+                return (
+                  <div key={stepIdx} className="mb-2">
+                    <p className="text-[10px] font-semibold uppercase tracking-widest px-1 pb-1.5" style={{ color: c.textSecondary, opacity: 0.45 }}>
+                      {stepLabel}
+                    </p>
+                    <div className="rounded-2xl border overflow-hidden" style={{ borderColor: subtleBorder, backgroundColor: c.surface }}>
+                      {stepItems.map((item, i) => (
+                        <button
+                          key={item.label}
+                          type="button"
+                          onClick={() => animateToStep(item.step)}
+                          className="w-full flex items-center justify-between gap-3 px-3.5 text-left transition-colors hover:bg-black/[0.03] dark:hover:bg-white/[0.03]"
+                          style={{
+                            paddingTop: 10,
+                            paddingBottom: 10,
+                            borderTop: i > 0 ? `1px solid ${subtleBorder}` : 'none',
+                          }}
+                        >
+                          <span className="text-[12px] font-medium shrink-0" style={{ color: c.textSecondary }}>{item.label}</span>
+                          <span className="text-[12px] font-medium text-right truncate max-w-[58%]" style={{ color: c.textPrimary }}>{item.value}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
             </Section>
           </>
         )}
