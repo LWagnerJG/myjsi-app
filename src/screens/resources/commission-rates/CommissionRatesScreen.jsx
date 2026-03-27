@@ -4,80 +4,120 @@ import { InfoTooltip } from '../../../components/common/InfoTooltip.jsx';
 import { isDarkTheme } from '../../../design-system/tokens.js';
 import * as Data from './data.js';
 
-/* ── helpers ─────────────────────────────────────────── */
 const CONTRACT_NAMES = new Set(['GSA', 'Omnia', 'Premier', 'TIPS']);
 
 const standardRates = Data.COMMISSION_RATES_DATA.standard.filter(r => !CONTRACT_NAMES.has(r.discount));
 const contractRates = Data.COMMISSION_RATES_DATA.standard.filter(r => CONTRACT_NAMES.has(r.discount));
 
-/* ── single rate row ─────────────────────────────────── */
+/* ── Column header row inside a card ─────────────────────────── */
+const CardHeader = ({ title, extra, theme, dark }) => (
+    <div
+        className="flex items-center justify-between px-5 py-3"
+        style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'}` }}
+    >
+        <div className="flex items-center gap-2">
+            <span className="text-[13px] font-bold uppercase tracking-[0.07em]"
+                style={{ color: theme.colors.textSecondary, opacity: 0.65 }}>
+                {title}
+            </span>
+            {extra}
+        </div>
+        <div className="flex items-center gap-6">
+            <span className="text-[11px] font-bold uppercase tracking-[0.06em] min-w-[48px] text-right"
+                style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>
+                Rep
+            </span>
+            <span className="text-[11px] font-bold uppercase tracking-[0.06em] min-w-[40px] text-right"
+                style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>
+                Spiff
+            </span>
+        </div>
+    </div>
+);
+
+/* ── Individual rate row ─────────────────────────────────────── */
 const RateRow = ({ rate, theme, dark, isLast }) => (
     <div
-        className="flex items-center justify-between px-4 py-[11px]"
-        style={{ borderBottom: isLast ? 'none' : `1px solid ${dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'}` }}
+        className="flex items-center justify-between px-5"
+        style={{
+            paddingTop: 13,
+            paddingBottom: 13,
+            borderBottom: isLast ? 'none' : `1px solid ${dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.045)'}`,
+        }}
     >
-        <span className="text-[13px] font-semibold tabular-nums" style={{ color: theme.colors.textPrimary }}>
+        <span className="text-[15px] font-semibold tabular-nums" style={{ color: theme.colors.textPrimary }}>
             {rate.discount}
         </span>
-        <div className="flex items-center gap-5">
-            <span className="text-[13px] font-bold tabular-nums min-w-[52px] text-right" style={{ color: theme.colors.accent }}>
+        <div className="flex items-center gap-6">
+            <span className="text-[15px] font-bold tabular-nums min-w-[48px] text-right"
+                style={{ color: theme.colors.accent }}>
                 {rate.rep}
             </span>
-            <span
-                className="text-[13px] tabular-nums min-w-[36px] text-right"
-                style={{ color: rate.spiff === 'N/A' ? theme.colors.textSecondary : theme.colors.textPrimary, opacity: rate.spiff === 'N/A' ? 0.4 : 0.7 }}
-            >
+            <span className="text-[14px] tabular-nums min-w-[40px] text-right font-medium"
+                style={{
+                    color: rate.spiff === 'N/A' ? theme.colors.textSecondary : theme.colors.textPrimary,
+                    opacity: rate.spiff === 'N/A' ? 0.35 : 0.6,
+                }}>
                 {rate.spiff}
             </span>
         </div>
     </div>
 );
 
-/* ── section heading inside card ─────────────────────── */
-const SectionLabel = ({ children, theme, extra }) => (
-    <div className="flex items-center justify-between px-4 py-2.5"
-        style={{ borderBottom: `1px solid ${theme.colors.border}` }}>
-        <div className="flex items-center gap-2">
-            <span className="text-[11px] font-bold uppercase tracking-[0.08em]" style={{ color: theme.colors.textSecondary, opacity: 0.55 }}>
-                {children}
-            </span>
-            {extra}
-        </div>
-        <div className="flex items-center gap-5">
-            <span className="text-[10px] font-bold uppercase tracking-[0.06em] min-w-[52px] text-right" style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>Rep</span>
-            <span className="text-[10px] font-bold uppercase tracking-[0.06em] min-w-[36px] text-right" style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>Spiff</span>
-        </div>
-    </div>
-);
-
+/* ── Main screen ─────────────────────────────────────────────── */
 export const CommissionRatesScreen = ({ theme }) => {
     const dark = isDarkTheme(theme);
     const split = Data.COMMISSION_RATES_DATA.split;
+    const subtleBorder = dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
 
     return (
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
-            <div className="flex-1 overflow-y-auto scrollbar-hide px-4 pb-6 space-y-3.5">
+            <div className="flex-1 overflow-y-auto scrollbar-hide px-4 pb-8 space-y-4">
 
-                {/* ── Standard Rates ── */}
-                <GlassCard theme={theme} className="rounded-[22px] overflow-hidden mt-2">
-                    <SectionLabel theme={theme}>Standard Discounts</SectionLabel>
+                {/* ── Page title ── */}
+                <div className="pt-5 pb-1 px-1">
+                    <h1 className="text-[22px] font-bold leading-tight" style={{ color: theme.colors.textPrimary }}>
+                        Commission Rates
+                    </h1>
+                    <p className="text-[14px] mt-0.5" style={{ color: theme.colors.textSecondary }}>
+                        Current rep rates and spiff structure.
+                    </p>
+                </div>
+
+                {/* ── Standard Discounts ── */}
+                <GlassCard theme={theme} className="rounded-[22px] overflow-hidden">
+                    <CardHeader title="Standard Discounts" theme={theme} dark={dark} />
                     {standardRates.map((rate, i) => (
-                        <RateRow key={rate.discount} rate={rate} theme={theme} dark={dark} isLast={i === standardRates.length - 1} />
+                        <RateRow
+                            key={rate.discount}
+                            rate={rate}
+                            theme={theme}
+                            dark={dark}
+                            isLast={i === standardRates.length - 1}
+                        />
                     ))}
                 </GlassCard>
 
-                {/* ── Contract Rates ── */}
+                {/* ── Contract Pricing ── */}
                 <GlassCard theme={theme} className="rounded-[22px] overflow-hidden">
-                    <SectionLabel theme={theme}>Contract Pricing</SectionLabel>
+                    <CardHeader title="Contract Pricing" theme={theme} dark={dark} />
                     {contractRates.map((rate, i) => (
-                        <RateRow key={rate.discount} rate={rate} theme={theme} dark={dark} isLast={i === contractRates.length - 1} />
+                        <RateRow
+                            key={rate.discount}
+                            rate={rate}
+                            theme={theme}
+                            dark={dark}
+                            isLast={i === contractRates.length - 1}
+                        />
                     ))}
                 </GlassCard>
 
                 {/* ── Commission Split ── */}
                 <GlassCard theme={theme} className="rounded-[22px] overflow-hidden">
-                    <div className="flex items-center justify-between px-4 pt-3.5 pb-2">
-                        <span className="text-[11px] font-bold uppercase tracking-[0.08em]" style={{ color: theme.colors.textSecondary, opacity: 0.55 }}>
+                    <div className="flex items-center justify-between px-5 py-3.5"
+                        style={{ borderBottom: `1px solid ${subtleBorder}` }}>
+                        <span className="text-[13px] font-bold uppercase tracking-[0.07em]"
+                            style={{ color: theme.colors.textSecondary, opacity: 0.65 }}>
                             Commission Split
                         </span>
                         <InfoTooltip
@@ -87,28 +127,37 @@ export const CommissionRatesScreen = ({ theme }) => {
                             content="When two reps are involved in a sale, the specifying rep (who spec'd the product) receives 70% of the commission and the ordering rep (who placed the order) receives 30%."
                         />
                     </div>
-                    <div className="px-4 pb-3">
-                        <div className="flex h-8 rounded-xl overflow-hidden">
+
+                    {/* Bar */}
+                    <div className="px-5 pt-4 pb-2">
+                        <div className="flex h-11 rounded-2xl overflow-hidden">
                             {split.map((seg, i) => (
                                 <div
                                     key={i}
                                     className="h-full flex items-center justify-center"
                                     style={{ width: `${seg.value}%`, backgroundColor: seg.color }}
                                 >
-                                    <span className="text-[11px] font-bold text-white drop-shadow-sm">
+                                    <span className="text-[13px] font-bold text-white" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.25)' }}>
                                         {seg.value}%
                                     </span>
                                 </div>
                             ))}
                         </div>
                     </div>
-                    <div className="flex items-center justify-center gap-5 px-4 pb-3.5">
+
+                    {/* Legend */}
+                    <div className="flex items-center justify-center gap-6 px-5 pb-4 pt-2">
                         {split.map((seg, i) => (
-                            <div key={i} className="flex items-center gap-1.5">
-                                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: seg.color }} />
-                                <span className="text-[12px] font-medium" style={{ color: theme.colors.textSecondary }}>
-                                    {seg.label}
-                                </span>
+                            <div key={i} className="flex items-center gap-2">
+                                <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: seg.color }} />
+                                <div>
+                                    <span className="text-[14px] font-semibold" style={{ color: theme.colors.textPrimary }}>
+                                        {seg.value}%
+                                    </span>
+                                    <span className="text-[13px] font-medium ml-1.5" style={{ color: theme.colors.textSecondary }}>
+                                        {seg.label}
+                                    </span>
+                                </div>
                             </div>
                         ))}
                     </div>
