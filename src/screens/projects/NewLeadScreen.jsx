@@ -418,6 +418,8 @@ export const NewLeadScreen = ({
   const [dateInputOpen, setDateInputOpen] = useState(() => !!newLeadData.expectedInstallDate);
   // Dealers "Out to Bid" state — collapses search area to a single pill
   const [dealerOutToBid, setDealerOutToBid] = useState(() => (newLeadData.dealers || []).includes('Out to Bid'));
+  // Competition expanded state — goes full-width once first competitor added; resets only when toggle turned off
+  const [compExpanded, setCompExpanded] = useState(() => (newLeadData.competitors || []).length > 0);
 
   // Custom discount mode — true when the stored value isn't in the predefined list
   const [discountCustom, setDiscountCustom] = useState(
@@ -1409,46 +1411,93 @@ export const NewLeadScreen = ({
                 </div>
               </Row>
 
-              {/* Competition — search bar inline left of toggle, chips/error below */}
+              {/* Competition */}
               <div className="py-2.5 border-t" style={{ borderColor: subtleBorder }}>
-                <div className="flex items-center gap-2 min-h-[40px]">
-                  <span className="text-[13px] font-semibold shrink-0" style={{ color: c.textSecondary }}>Competition</span>
-                  {newLeadData.competitionPresent && (
-                    <div className="flex-1 min-w-0">
-                      <SpotlightMultiSelect
-                        selectedItems={newLeadData.competitors || []}
-                        onAddItem={(competitor) => {
-                          const norm = competitor.trim();
-                          const current = newLeadData.competitors || [];
-                          if (!current.some((co) => co.toLowerCase() === norm.toLowerCase())) upd('competitors', [...current, norm]);
-                          markTouched('competitors');
-                        }}
-                        onRemoveItem={(competitor) => { upd('competitors', (newLeadData.competitors || []).filter((item) => item !== competitor)); markTouched('competitors'); }}
-                        options={['Unknown', ...COMPETITORS.filter((name) => name !== 'None' && name !== 'Unknown')]}
-                        onAddNew={(name) => { const norm = name.trim(); upd('competitors', [...new Set([...(newLeadData.competitors || []), norm])]); }}
-                        placeholder="Search or add"
-                        theme={theme}
-                        compact={false}
-                        integratedChips
-                        bordered
-                      />
+                {compExpanded && newLeadData.competitionPresent ? (
+                  /* ── Expanded: label+toggle header, full-width search+chips below ── */
+                  <>
+                    <div className="flex items-center justify-between mb-2.5">
+                      <span className="text-[13px] font-semibold" style={{ color: c.textSecondary }}>Competition</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[12px]" style={{ color: c.textSecondary }}>Active</span>
+                        <ToggleSwitch
+                          checked
+                          onChange={() => {
+                            upd('competitionPresent', false);
+                            upd('competitors', []);
+                            setCompExpanded(false);
+                            markTouched('competitionPresent');
+                            markTouched('competitors');
+                          }}
+                          theme={theme}
+                        />
+                      </div>
                     </div>
-                  )}
-                  <div className="flex items-center gap-2 shrink-0 ml-auto">
-                    <span className="text-[12px]" style={{ color: c.textSecondary }}>
-                      {newLeadData.competitionPresent ? 'Active' : 'None'}
-                    </span>
-                    <ToggleSwitch
-                      checked={!!newLeadData.competitionPresent}
-                      onChange={(event) => {
-                        upd('competitionPresent', event.target.checked);
-                        markTouched('competitionPresent');
+                    <SpotlightMultiSelect
+                      selectedItems={newLeadData.competitors || []}
+                      onAddItem={(competitor) => {
+                        const norm = competitor.trim();
+                        const current = newLeadData.competitors || [];
+                        if (!current.some((co) => co.toLowerCase() === norm.toLowerCase())) upd('competitors', [...current, norm]);
                         markTouched('competitors');
                       }}
+                      onRemoveItem={(competitor) => { upd('competitors', (newLeadData.competitors || []).filter((item) => item !== competitor)); markTouched('competitors'); }}
+                      options={['Unknown', ...COMPETITORS.filter((name) => name !== 'None' && name !== 'Unknown')]}
+                      onAddNew={(name) => { const norm = name.trim(); upd('competitors', [...new Set([...(newLeadData.competitors || []), norm])]); }}
+                      placeholder="Search or add competitor"
                       theme={theme}
+                      compact={false}
+                      integratedChips={false}
+                      bordered
                     />
+                  </>
+                ) : (
+                  /* ── Compact: all inline — label | search (if active) | None/Active | toggle ── */
+                  <div className="flex items-center gap-2 min-h-[40px]">
+                    <span className="text-[13px] font-semibold shrink-0" style={{ color: c.textSecondary }}>Competition</span>
+                    {newLeadData.competitionPresent && (
+                      <div className="flex-1 min-w-0">
+                        <SpotlightMultiSelect
+                          selectedItems={[]}
+                          onAddItem={(competitor) => {
+                            const norm = competitor.trim();
+                            upd('competitors', [norm]);
+                            setCompExpanded(true);
+                            markTouched('competitors');
+                          }}
+                          onRemoveItem={() => {}}
+                          options={['Unknown', ...COMPETITORS.filter((name) => name !== 'None' && name !== 'Unknown')]}
+                          onAddNew={(name) => {
+                            const norm = name.trim();
+                            upd('competitors', [norm]);
+                            setCompExpanded(true);
+                            markTouched('competitors');
+                          }}
+                          placeholder="Search or add competitor"
+                          theme={theme}
+                          compact={false}
+                          integratedChips={false}
+                          bordered
+                        />
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2 shrink-0 ml-auto">
+                      <span className="text-[12px]" style={{ color: c.textSecondary }}>
+                        {newLeadData.competitionPresent ? 'Active' : 'None'}
+                      </span>
+                      <ToggleSwitch
+                        checked={!!newLeadData.competitionPresent}
+                        onChange={(event) => {
+                          upd('competitionPresent', event.target.checked);
+                          if (!event.target.checked) { upd('competitors', []); setCompExpanded(false); }
+                          markTouched('competitionPresent');
+                          markTouched('competitors');
+                        }}
+                        theme={theme}
+                      />
+                    </div>
                   </div>
-                </div>
+                )}
                 <FieldError show={!!visibleError('competitors')} message={visibleError('competitors')} />
               </div>
 
