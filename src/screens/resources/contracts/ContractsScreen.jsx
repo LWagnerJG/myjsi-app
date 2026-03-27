@@ -10,6 +10,7 @@ const TABS = [
     { label: 'TIPS',    value: 'tips'    },
     { label: 'Premier', value: 'premier' },
     { label: 'GSA',     value: 'gsa'     },
+    { label: 'State',   value: 'state'   },
 ];
 
 const DOC_VERSIONS = [
@@ -64,7 +65,8 @@ export const ContractsScreen = ({ theme, setSuccessMessage }) => {
     const [active, setActive] = useState('omnia');
     const dark = isDarkTheme(theme);
     const contract = CONTRACTS_DATA[active];
-    const hasMargins = contract.discounts?.some(r => r.margin);
+    const isState = active === 'state';
+    const hasMargins = !isState && contract.discounts?.some(r => r.margin);
 
     const feedback = useCallback((msg) => {
         setSuccessMessage?.(msg);
@@ -132,104 +134,161 @@ export const ContractsScreen = ({ theme, setSuccessMessage }) => {
                             )}
                         </div>
 
-                        {/* ── Pricing tiers ── */}
-                        <GlassCard theme={theme} className="rounded-[22px] overflow-hidden">
-                            <CardHeader theme={theme} dark={dark} right={
-                                <div className="flex items-center gap-5">
-                                    <span className="text-[11px] font-bold uppercase tracking-[0.06em] w-[52px] text-center"
-                                        style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>Dlr</span>
-                                    <span className="text-[11px] font-bold uppercase tracking-[0.06em] w-[52px] text-center"
-                                        style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>Rep</span>
-                                    {hasMargins && (
-                                        <span className="text-[11px] font-bold uppercase tracking-[0.06em] w-[56px] text-center"
-                                            style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>Margin</span>
-                                    )}
-                                </div>
-                            }>
-                                Pricing Tiers
-                            </CardHeader>
-
-                            {contract.discounts?.map((row, idx) => (
-                                <motion.div
-                                    key={idx}
-                                    {...stagger(idx)}
-                                    className="flex items-center px-5"
-                                    style={{
-                                        paddingTop: 13,
-                                        paddingBottom: 13,
-                                        borderBottom: idx < contract.discounts.length - 1 ? `1px solid ${subtleBorder}` : 'none',
-                                    }}
-                                >
-                                    <div className="flex-1 min-w-0 flex items-baseline gap-2.5">
-                                        <span className="text-[16px] font-extrabold tabular-nums shrink-0" style={{ color: theme.colors.accent }}>
-                                            {row.discount}
-                                        </span>
-                                        <span className="text-[14px] font-medium truncate" style={{ color: theme.colors.textPrimary }}>
-                                            {row.label}
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center shrink-0 gap-5">
-                                        <span className="text-[14px] font-semibold tabular-nums w-[52px] text-center" style={{ color: theme.colors.textPrimary }}>
-                                            {row.dealerCommission}
-                                        </span>
-                                        <span className="text-[14px] tabular-nums w-[52px] text-center" style={{ color: theme.colors.textSecondary }}>
-                                            {row.repCommission}
-                                        </span>
-                                        {hasMargins && (
-                                            <span className="text-[13px] tabular-nums w-[56px] text-center font-medium"
-                                                style={{ color: theme.colors.textSecondary, opacity: row.margin ? 0.65 : 0.3 }}>
-                                                {row.margin || '—'}
-                                            </span>
-                                        )}
-                                    </div>
-                                </motion.div>
-                            ))}
-                        </GlassCard>
-
-                        {/* Disclaimer */}
-                        {contract.disclaimer && (
-                            <p className="text-[13px] italic px-1 leading-relaxed" style={{ color: theme.colors.textSecondary, opacity: 0.7 }}>
-                                {contract.disclaimer}
-                            </p>
-                        )}
-
-                        {/* ── Documents ── */}
-                        <GlassCard theme={theme} className="rounded-[22px] overflow-hidden">
-                            <CardHeader theme={theme} dark={dark}>Documents</CardHeader>
-                            {DOC_VERSIONS.map((ver, idx) => {
-                                const url = contract[ver.key];
-                                if (!url) return null;
-                                return (
+                        {isState ? (
+                            /* ── State contracts list ── */
+                            <GlassCard theme={theme} className="rounded-[22px] overflow-hidden">
+                                <CardHeader theme={theme} dark={dark} right={
+                                    <span className="text-[11px] font-bold uppercase tracking-[0.06em]"
+                                        style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>
+                                        {contract.entries.length} States
+                                    </span>
+                                }>
+                                    Active Contracts
+                                </CardHeader>
+                                {contract.entries.map((entry, idx) => (
                                     <motion.div
-                                        key={ver.key}
-                                        {...stagger(idx, 0.06)}
-                                        className="px-5 flex items-center justify-between"
+                                        key={entry.state}
+                                        {...stagger(idx, 0.025)}
+                                        className="flex items-start px-5 gap-4"
                                         style={{
                                             paddingTop: 13,
                                             paddingBottom: 13,
-                                            borderBottom: idx < DOC_VERSIONS.length - 1 ? `1px solid ${subtleBorder}` : 'none',
+                                            borderBottom: idx < contract.entries.length - 1 ? `1px solid ${subtleBorder}` : 'none',
                                         }}
                                     >
-                                        <div className="flex items-center gap-3 min-w-0">
-                                            <div
-                                                className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
-                                                style={{ backgroundColor: dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)' }}
-                                            >
-                                                <FileText className="w-4 h-4" style={{ color: theme.colors.textSecondary, opacity: 0.6 }} />
-                                            </div>
-                                            <span className="text-[14px] font-medium" style={{ color: theme.colors.textPrimary }}>
-                                                {ver.label}
-                                            </span>
-                                        </div>
-                                        <div className="flex items-center gap-1.5 shrink-0">
-                                            <IconBtn icon={ExternalLink} title="Open"       onClick={() => window.open(url, '_blank')}                             theme={theme} dark={dark} />
-                                            <IconBtn icon={Link2}        title="Copy link"  onClick={() => copyUrl(url, ver.short)}                               theme={theme} dark={dark} />
-                                            <IconBtn icon={Share2}       title="Share"      onClick={() => shareUrl(url, `${contract.name} — ${ver.label}`)}      theme={theme} dark={dark} />
+                                        {/* State name */}
+                                        <span
+                                            className="text-[14px] font-semibold shrink-0 w-[118px]"
+                                            style={{ color: theme.colors.textPrimary }}
+                                        >
+                                            {entry.state}
+                                        </span>
+                                        {/* Contract numbers */}
+                                        <div className="flex-1 flex flex-col gap-[5px]">
+                                            {entry.contracts.map((c, ci) => (
+                                                <div key={ci} className="flex flex-col">
+                                                    <span
+                                                        className="text-[13px] font-mono font-medium leading-snug"
+                                                        style={{ color: theme.colors.accent }}
+                                                    >
+                                                        {c.number}
+                                                    </span>
+                                                    {c.label && (
+                                                        <span
+                                                            className="text-[11px] leading-snug"
+                                                            style={{ color: theme.colors.textSecondary, opacity: 0.6 }}
+                                                        >
+                                                            {c.label}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            ))}
                                         </div>
                                     </motion.div>
-                                );
-                            })}
-                        </GlassCard>
+                                ))}
+                            </GlassCard>
+                        ) : (
+                            <>
+                                {/* ── Pricing tiers ── */}
+                                <GlassCard theme={theme} className="rounded-[22px] overflow-hidden">
+                                    <CardHeader theme={theme} dark={dark} right={
+                                        <div className="flex items-center gap-5">
+                                            <span className="text-[11px] font-bold uppercase tracking-[0.06em] w-[52px] text-center"
+                                                style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>Dlr</span>
+                                            <span className="text-[11px] font-bold uppercase tracking-[0.06em] w-[52px] text-center"
+                                                style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>Rep</span>
+                                            {hasMargins && (
+                                                <span className="text-[11px] font-bold uppercase tracking-[0.06em] w-[56px] text-center"
+                                                    style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>Margin</span>
+                                            )}
+                                        </div>
+                                    }>
+                                        Pricing Tiers
+                                    </CardHeader>
+
+                                    {contract.discounts?.map((row, idx) => (
+                                        <motion.div
+                                            key={idx}
+                                            {...stagger(idx)}
+                                            className="flex items-center px-5"
+                                            style={{
+                                                paddingTop: 13,
+                                                paddingBottom: 13,
+                                                borderBottom: idx < contract.discounts.length - 1 ? `1px solid ${subtleBorder}` : 'none',
+                                            }}
+                                        >
+                                            <div className="flex-1 min-w-0 flex items-baseline gap-2.5">
+                                                <span className="text-[16px] font-extrabold tabular-nums shrink-0" style={{ color: theme.colors.accent }}>
+                                                    {row.discount}
+                                                </span>
+                                                <span className="text-[14px] font-medium truncate" style={{ color: theme.colors.textPrimary }}>
+                                                    {row.label}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center shrink-0 gap-5">
+                                                <span className="text-[14px] font-semibold tabular-nums w-[52px] text-center" style={{ color: theme.colors.textPrimary }}>
+                                                    {row.dealerCommission}
+                                                </span>
+                                                <span className="text-[14px] tabular-nums w-[52px] text-center" style={{ color: theme.colors.textSecondary }}>
+                                                    {row.repCommission}
+                                                </span>
+                                                {hasMargins && (
+                                                    <span className="text-[13px] tabular-nums w-[56px] text-center font-medium"
+                                                        style={{ color: theme.colors.textSecondary, opacity: row.margin ? 0.65 : 0.3 }}>
+                                                        {row.margin || '—'}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </motion.div>
+                                    ))}
+                                </GlassCard>
+
+                                {/* Disclaimer */}
+                                {contract.disclaimer && (
+                                    <p className="text-[13px] italic px-1 leading-relaxed" style={{ color: theme.colors.textSecondary, opacity: 0.7 }}>
+                                        {contract.disclaimer}
+                                    </p>
+                                )}
+
+                                {/* ── Documents ── */}
+                                <GlassCard theme={theme} className="rounded-[22px] overflow-hidden">
+                                    <CardHeader theme={theme} dark={dark}>Documents</CardHeader>
+                                    {DOC_VERSIONS.map((ver, idx) => {
+                                        const url = contract[ver.key];
+                                        if (!url) return null;
+                                        return (
+                                            <motion.div
+                                                key={ver.key}
+                                                {...stagger(idx, 0.06)}
+                                                className="px-5 flex items-center justify-between"
+                                                style={{
+                                                    paddingTop: 13,
+                                                    paddingBottom: 13,
+                                                    borderBottom: idx < DOC_VERSIONS.length - 1 ? `1px solid ${subtleBorder}` : 'none',
+                                                }}
+                                            >
+                                                <div className="flex items-center gap-3 min-w-0">
+                                                    <div
+                                                        className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
+                                                        style={{ backgroundColor: dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)' }}
+                                                    >
+                                                        <FileText className="w-4 h-4" style={{ color: theme.colors.textSecondary, opacity: 0.6 }} />
+                                                    </div>
+                                                    <span className="text-[14px] font-medium" style={{ color: theme.colors.textPrimary }}>
+                                                        {ver.label}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center gap-1.5 shrink-0">
+                                                    <IconBtn icon={ExternalLink} title="Open"       onClick={() => window.open(url, '_blank')}                             theme={theme} dark={dark} />
+                                                    <IconBtn icon={Link2}        title="Copy link"  onClick={() => copyUrl(url, ver.short)}                               theme={theme} dark={dark} />
+                                                    <IconBtn icon={Share2}       title="Share"      onClick={() => shareUrl(url, `${contract.name} — ${ver.label}`)}      theme={theme} dark={dark} />
+                                                </div>
+                                            </motion.div>
+                                        );
+                                    })}
+                                </GlassCard>
+                            </>
+                        )}
 
                     </motion.div>
                 </AnimatePresence>
