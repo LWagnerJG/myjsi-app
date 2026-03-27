@@ -27,7 +27,9 @@ export const AutoCompleteCombobox = React.memo(({
     useLayoutEffect(() => {
         if (!isOpen || !wrapperRef.current) return;
         const rect = wrapperRef.current.getBoundingClientRect();
-        setDropUp(window.innerHeight - rect.bottom < 260);
+        const chrome = document.querySelector('[data-bottom-chrome]');
+        const bottomOccupied = chrome ? (window.innerHeight - chrome.getBoundingClientRect().top) : 0;
+        setDropUp(window.innerHeight - rect.bottom - bottomOccupied < 260);
     }, [isOpen]);
 
     const filtered = useMemo(() => {

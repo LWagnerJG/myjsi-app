@@ -22,7 +22,9 @@ export function SpotlightMultiSelect({
   useLayoutEffect(() => {
     if (!open || !wrapperRef.current) return;
     const rect = wrapperRef.current.getBoundingClientRect();
-    setDropUp(window.innerHeight - rect.bottom < 300);
+    const chrome = document.querySelector('[data-bottom-chrome]');
+    const bottomOccupied = chrome ? (window.innerHeight - chrome.getBoundingClientRect().top) : 0;
+    setDropUp(window.innerHeight - rect.bottom - bottomOccupied < 300);
   }, [open]);
   const [activeIndex, setActiveIndex] = useState(-1);
   const wrapperRef = useRef(null);

@@ -217,7 +217,9 @@ const DatePickerInput = ({ value, onChange, theme, placeholder = 'Select date' }
   useLayoutEffect(() => {
     if (!isOpen || !wrapperRef.current) return;
     const rect = wrapperRef.current.getBoundingClientRect();
-    setDropUp(window.innerHeight - rect.bottom < 380);
+    const chrome = document.querySelector('[data-bottom-chrome]');
+    const bottomOccupied = chrome ? (window.innerHeight - chrome.getBoundingClientRect().top) : 0;
+    setDropUp(window.innerHeight - rect.bottom - bottomOccupied < 380);
   }, [isOpen]);
   const [viewYear, setViewYear] = useState(() => parsed ? parsed.getFullYear() : today.getFullYear());
   const [viewMonth, setViewMonth] = useState(() => parsed ? parsed.getMonth() : today.getMonth());
@@ -1652,6 +1654,7 @@ export const NewLeadScreen = ({
 
       {/* ── Integrated bottom bar: step nav + lead score + action ── */}
       <div
+        data-bottom-chrome=""
         className="sticky bottom-0 z-20 border-t"
         style={{ borderColor: subtleBorder, backgroundColor: c.background }}
       >
