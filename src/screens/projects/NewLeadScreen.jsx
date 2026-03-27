@@ -1002,33 +1002,37 @@ export const NewLeadScreen = ({
               </Row>
 
               <Row label="Location" theme={theme} inline>
-                <AutoCompleteCombobox
-                  value={newLeadData.installationLocation || ''}
-                  onChange={(val) => { upd('installationLocation', val); markTouched('installationLocation'); }}
-                  onSelect={(val) => { upd('installationLocation', val); markTouched('installationLocation'); }}
-                  onAddNew={(val) => { upd('installationLocation', val.trim()); markTouched('installationLocation'); }}
-                  options={TOP_100_CITIES}
-                  placeholder="Search city..."
-                  theme={theme}
-                  compact
-                  resetOnSelect={false}
-                />
-              </Row>
-
-              <Row label="Install Date" theme={theme} inline>
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 min-w-0">
+                    <AutoCompleteCombobox
+                      value={newLeadData.installationLocation || ''}
+                      onChange={(val) => { upd('installationLocation', val); markTouched('installationLocation'); }}
+                      onSelect={(val) => { upd('installationLocation', val); markTouched('installationLocation'); }}
+                      onAddNew={(val) => { upd('installationLocation', val.trim()); markTouched('installationLocation'); }}
+                      options={TOP_100_CITIES}
+                      placeholder="Search city..."
+                      theme={theme}
+                      compact
+                      resetOnSelect={false}
+                    />
+                  </div>
                   <button
                     type="button"
-                    onClick={() => upd('expectedInstallDate', '')}
-                    className="shrink-0 rounded-full border transition-all px-3.5 py-2 text-[12px] font-semibold"
+                    onClick={() => upd('installationLocation', '')}
+                    className="shrink-0 rounded-full border px-2.5 py-1.5 text-[11px] font-medium transition-all"
                     style={{
-                      backgroundColor: !newLeadData.expectedInstallDate ? c.accent : 'transparent',
-                      borderColor: !newLeadData.expectedInstallDate ? c.accent : subtleBorder,
-                      color: !newLeadData.expectedInstallDate ? c.accentText : c.textSecondary,
+                      borderColor: !newLeadData.installationLocation ? `${c.accent}55` : subtleBorder,
+                      color: !newLeadData.installationLocation ? c.accent : c.textSecondary,
+                      backgroundColor: !newLeadData.installationLocation ? `${c.accent}0f` : 'transparent',
                     }}
                   >
                     Unknown
                   </button>
+                </div>
+              </Row>
+
+              <Row label="Install Date" theme={theme} inline>
+                <div className="flex items-center gap-2">
                   <div className="flex-1 min-w-0">
                     <DatePickerInput
                       value={newLeadData.expectedInstallDate || ''}
@@ -1037,6 +1041,18 @@ export const NewLeadScreen = ({
                       placeholder="Set date..."
                     />
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => upd('expectedInstallDate', '')}
+                    className="shrink-0 rounded-full border px-2.5 py-1.5 text-[11px] font-medium transition-all"
+                    style={{
+                      borderColor: !newLeadData.expectedInstallDate ? `${c.accent}55` : subtleBorder,
+                      color: !newLeadData.expectedInstallDate ? c.accent : c.textSecondary,
+                      backgroundColor: !newLeadData.expectedInstallDate ? `${c.accent}0f` : 'transparent',
+                    }}
+                  >
+                    Unknown
+                  </button>
                 </div>
               </Row>
             </Section>
