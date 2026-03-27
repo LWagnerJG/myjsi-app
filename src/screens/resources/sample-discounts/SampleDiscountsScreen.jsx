@@ -1,84 +1,201 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
-import { Copy } from 'lucide-react';
+import { isDarkTheme } from '../../../design-system/tokens.js';
+import { Copy, Check } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { SAMPLE_POLICIES } from './data.js';
 
-export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
-    const text = theme.colors.textPrimary;
-    const sub = theme.colors.textSecondary;
-    const accent = theme.colors.accent;
+const stagger = (i) => ({
+    initial: { opacity: 0, y: 6 },
+    animate: { opacity: 1, y: 0, transition: { duration: 0.2, delay: i * 0.05, ease: [0.25, 0.1, 0.25, 1] } },
+});
 
-    const handleCopy = useCallback((ssa) => {
-        const full = `SSA ${ssa}`;
-        const doSet = (msg) => { setSuccessMessage(msg); setTimeout(() => setSuccessMessage(''), 1200); };
-        if (!navigator.clipboard) {
-            try { const ta = document.createElement('textarea'); ta.value = full; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); doSet('SSA# Copied!'); } catch { doSet('Copy failed'); }
-            return;
+/* Notes that are specific to a policy (the "commission not paid" is universal,
+   so it's surfaced in the subtitle instead of repeated per-row) */
+const POLICY_NOTE = {
+    'dealer-project':  'Max qty 1 per model number',
+    'rep-showroom':    'Max qty 1 per model number',
+    'dealer-showroom': 'Treated as a standard order',
+};
+
+export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
+    const isDark = isDarkTheme(theme);
+    const colors = theme.colors;
+    const [copiedId, setCopiedId] = useState(null);
+
+    const subtleBorder = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)';
+    const headerBorder = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+
+    const handleCopy = useCallback((policy) => {
+        const val = `SSA ${policy.ssa}`;
+        const finish = (ok) => {
+            if (ok) {
+                setCopiedId(policy.id);
+                setTimeout(() => setCopiedId(null), 1800);
+                setSuccessMessage?.('SSA# Copied!');
+                setTimeout(() => setSuccessMessage?.(''), 1400);
+            } else {
+                setSuccessMessage?.('Copy failed');
+                setTimeout(() => setSuccessMessage?.(''), 1200);
+            }
+        };
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(val).then(() => finish(true)).catch(() => finish(false));
+        } else {
+            try {
+                const ta = document.createElement('textarea');
+                ta.value = val; document.body.appendChild(ta); ta.select();
+                document.execCommand('copy'); document.body.removeChild(ta);
+                finish(true);
+            } catch { finish(false); }
         }
-        navigator.clipboard.writeText(full).then(() => doSet('SSA# Copied!')).catch(() => doSet('Copy failed'));
     }, [setSuccessMessage]);
 
     return (
-        <div className="flex flex-col h-full app-header-offset">
-            {/* Header */}
-            <div className="px-5 pt-5 pb-3">
-                <h1
-                    className="text-3xl font-bold tracking-tight"
-                    style={{ color: text, letterSpacing: '-0.02em' }}
-                >
+        <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: colors.background }}>
+
+            {/* ── Header ── */}
+            <div className="flex-shrink-0 px-4 pt-3 pb-3">
+                <h1 className="text-[22px] font-black tracking-tight leading-tight" style={{ color: colors.textPrimary }}>
                     Sample Policies
                 </h1>
+                <p className="text-[14px] mt-0.5" style={{ color: colors.textSecondary }}>
+                    Effective May 1, 2021 &middot; Commission not paid
+                </p>
             </div>
 
-            {/* Policy cards */}
-            <div className="flex-1 overflow-y-auto scrollbar-hide px-5 pb-8">
-                <div className="space-y-2.5">
-                    {SAMPLE_POLICIES.map((policy) => (
-                        <GlassCard key={policy.id} theme={theme}>
-                            <div className="flex items-center gap-4 px-4 py-3.5">
-                                {/* Discount badge — fixed width for alignment */}
-                                <div
-                                    className="flex-shrink-0 w-[62px] py-2 rounded-2xl text-center"
-                                    style={{ backgroundColor: accent + '0A' }}
-                                >
-                                    <span className="text-[22px] font-extrabold leading-none" style={{ color: accent }}>
+            {/* ── Policy list ── */}
+            <div className="flex-1 overflow-y-auto scrollbar-hide px-4 pb-10">
+                <GlassCard theme={theme} className="rounded-[22px] overflow-hidden p-0">
+
+                    {/* Column headers */}
+                    <div
+                        className="flex items-center px-5 py-3"
+                        style={{ borderBottom: `1px solid ${headerBorder}` }}
+                    >
+                        <span
+                            className="text-[11px] font-bold uppercase tracking-[0.07em]"
+                            style={{ color: colors.textSecondary, opacity: 0.5 }}
+                        >
+                            Policy
+                        </span>
+                        <span
+                            className="ml-auto text-[11px] font-bold uppercase tracking-[0.07em]"
+                            style={{ color: colors.textSecondary, opacity: 0.5 }}
+                        >
+                            SSA #
+                        </span>
+                    </div>
+
+                    {/* Rows */}
+                    {SAMPLE_POLICIES.map((policy, i) => {
+                        const isCopied   = copiedId === policy.id;
+                        const note       = POLICY_NOTE[policy.id];
+                        const isTop      = policy.discount === 85; // highest — subtle highlight
+
+                        return (
+                            <motion.div
+                                key={policy.id}
+                                {...stagger(i)}
+                                className="flex items-center gap-4 px-5"
+                                style={{
+                                    paddingTop: 14,
+                                    paddingBottom: 14,
+                                    borderBottom: i < SAMPLE_POLICIES.length - 1 ? `1px solid ${subtleBorder}` : 'none',
+                                    backgroundColor: isTop ? `${colors.accent}07` : 'transparent',
+                                }}
+                            >
+                                {/* Discount badge */}
+                                <div className="flex-shrink-0 w-[46px] flex flex-col items-center">
+                                    <span
+                                        className="text-[21px] font-black leading-none tabular-nums"
+                                        style={{ color: isTop ? colors.accent : colors.textPrimary }}
+                                    >
                                         {policy.discount}%
                                     </span>
-                                    <p className="text-[7px] font-bold uppercase tracking-[0.1em] mt-0.5" style={{ color: accent, opacity: 0.45 }}>
-                                        Off List
-                                    </p>
+                                    <span
+                                        className="text-[8px] font-bold uppercase tracking-[0.09em] mt-[3px]"
+                                        style={{ color: colors.textSecondary, opacity: 0.4 }}
+                                    >
+                                        off list
+                                    </span>
                                 </div>
 
-                                {/* Title + SSA + notes */}
+                                {/* Hairline vertical divider */}
+                                <div
+                                    className="self-stretch flex-shrink-0"
+                                    style={{ width: 1, backgroundColor: subtleBorder }}
+                                />
+
+                                {/* Title + subtitle + specific note */}
                                 <div className="flex-1 min-w-0">
-                                    <h3 className="font-bold text-[15px] leading-snug" style={{ color: text }}>
+                                    <p
+                                        className="text-[14px] font-bold leading-snug"
+                                        style={{ color: colors.textPrimary }}
+                                    >
                                         {policy.title}
-                                    </h3>
+                                    </p>
                                     {policy.subtitle && (
-                                        <p className="text-[11px] mt-px font-medium leading-snug" style={{ color: sub, opacity: 0.65 }}>
+                                        <p
+                                            className="text-[12px] mt-[3px] leading-snug"
+                                            style={{ color: colors.textSecondary, opacity: 0.65 }}
+                                        >
                                             {policy.subtitle}
                                         </p>
                                     )}
-                                    <div className="flex items-center gap-2 mt-1.5">
-                                        <button
-                                            onClick={() => handleCopy(policy.ssa)}
-                                            className="inline-flex items-center gap-1 px-2 py-[3px] rounded-md text-[11px] font-semibold transition-all active:scale-95"
-                                            style={{ backgroundColor: theme.colors.subtle, color: text }}
+                                    {note && (
+                                        <p
+                                            className="text-[12px] mt-[3px] leading-snug"
+                                            style={{ color: colors.textSecondary, opacity: 0.5 }}
                                         >
-                                            {policy.ssa}
-                                            <Copy className="w-2.5 h-2.5" style={{ color: sub, opacity: 0.4 }} />
-                                        </button>
-                                        {policy.notes.length > 0 && (
-                                            <span className="text-[10px] font-medium" style={{ color: sub, opacity: 0.5 }}>
-                                                {policy.notes.join('  ·  ')}
-                                            </span>
-                                        )}
-                                    </div>
+                                            {note}
+                                        </p>
+                                    )}
                                 </div>
-                            </div>
-                        </GlassCard>
-                    ))}
-                </div>
+
+                                {/* SSA copy chip */}
+                                <button
+                                    onClick={() => handleCopy(policy)}
+                                    className="flex-shrink-0 flex items-center gap-1.5 px-2.5 py-[7px] rounded-xl transition-all active:scale-[0.93]"
+                                    style={{
+                                        backgroundColor: isCopied
+                                            ? `${colors.accent}15`
+                                            : (isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.04)'),
+                                        border: `1px solid ${isCopied ? colors.accent + '35' : subtleBorder}`,
+                                    }}
+                                >
+                                    <span
+                                        className="text-[11px] font-mono font-semibold"
+                                        style={{ color: isCopied ? colors.accent : colors.textPrimary }}
+                                    >
+                                        {policy.ssa}
+                                    </span>
+                                    <AnimatePresence mode="wait" initial={false}>
+                                        {isCopied ? (
+                                            <motion.span key="check"
+                                                initial={{ scale: 0, opacity: 0 }}
+                                                animate={{ scale: 1, opacity: 1 }}
+                                                exit={{ scale: 0, opacity: 0 }}
+                                                transition={{ duration: 0.15 }}
+                                            >
+                                                <Check className="w-[11px] h-[11px]" style={{ color: colors.accent }} />
+                                            </motion.span>
+                                        ) : (
+                                            <motion.span key="copy"
+                                                initial={{ scale: 0, opacity: 0 }}
+                                                animate={{ scale: 1, opacity: 1 }}
+                                                exit={{ scale: 0, opacity: 0 }}
+                                                transition={{ duration: 0.15 }}
+                                            >
+                                                <Copy className="w-[11px] h-[11px]" style={{ color: colors.textSecondary, opacity: 0.4 }} />
+                                            </motion.span>
+                                        )}
+                                    </AnimatePresence>
+                                </button>
+                            </motion.div>
+                        );
+                    })}
+                </GlassCard>
             </div>
         </div>
     );
