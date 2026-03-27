@@ -1126,16 +1126,24 @@ export const NewLeadScreen = ({
             <Section title="Commercial Scope" subtitle="Sizing, timeline, and discount details." theme={theme}>
               <Row label="Estimated List" theme={theme} inline noSep>
                 <div>
-                  <FormInput
+                  <input
                     type="text"
                     inputMode="decimal"
+                    pattern="[0-9.,]*"
                     value={newLeadData.estimatedList || ''}
                     onChange={(e) => { upd('estimatedList', e.target.value); markTouched('estimatedList'); }}
                     onBlur={() => markTouched('estimatedList')}
                     placeholder="Estimated list amount"
-                    theme={theme}
-                    size="sm"
-                    surfaceBg
+                    className="w-full outline-none"
+                    style={{
+                      height: 40,
+                      borderRadius: 24,
+                      border: `1px solid ${getSubtleBorder(theme)}`,
+                      backgroundColor: theme.colors.surface,
+                      color: theme.colors.textPrimary,
+                      fontSize: 14,
+                      padding: '0 14px',
+                    }}
                   />
                   <FieldError show={!!visibleError('estimatedList')} message={visibleError('estimatedList')} />
                 </div>
