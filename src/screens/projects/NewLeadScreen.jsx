@@ -395,6 +395,10 @@ export const NewLeadScreen = ({
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [fileNotice, setFileNotice] = useState('');
+  // Location/date "Unknown" collapsed state — show input only when user explicitly opens it
+  const [locationInputOpen, setLocationInputOpen] = useState(() => !!newLeadData.installationLocation);
+  const [dateInputOpen, setDateInputOpen] = useState(() => !!newLeadData.expectedInstallDate);
+
   // Custom discount mode — true when the stored value isn't in the predefined list
   const [discountCustom, setDiscountCustom] = useState(
     () => !!(newLeadData.discount && !DISCOUNT_OPTIONS_WITH_UNKNOWN.includes(newLeadData.discount)),
@@ -1002,58 +1006,74 @@ export const NewLeadScreen = ({
               </Row>
 
               <Row label="Location" theme={theme} inline>
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 min-w-0">
-                    <AutoCompleteCombobox
-                      value={newLeadData.installationLocation || ''}
-                      onChange={(val) => { upd('installationLocation', val); markTouched('installationLocation'); }}
-                      onSelect={(val) => { upd('installationLocation', val); markTouched('installationLocation'); }}
-                      onAddNew={(val) => { upd('installationLocation', val.trim()); markTouched('installationLocation'); }}
-                      options={TOP_100_CITIES}
-                      placeholder="Search city..."
-                      theme={theme}
-                      compact
-                      resetOnSelect={false}
-                    />
+                {(locationInputOpen || newLeadData.installationLocation) ? (
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 min-w-0">
+                      <AutoCompleteCombobox
+                        value={newLeadData.installationLocation || ''}
+                        onChange={(val) => { upd('installationLocation', val); markTouched('installationLocation'); }}
+                        onSelect={(val) => { upd('installationLocation', val); markTouched('installationLocation'); }}
+                        onAddNew={(val) => { upd('installationLocation', val.trim()); markTouched('installationLocation'); }}
+                        options={TOP_100_CITIES}
+                        placeholder="Search city..."
+                        theme={theme}
+                        compact
+                        resetOnSelect={false}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => { upd('installationLocation', ''); setLocationInputOpen(false); }}
+                      className="shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-all"
+                      style={{ borderColor: subtleBorder, color: c.textSecondary, backgroundColor: 'transparent' }}
+                    >
+                      Unknown
+                    </button>
                   </div>
+                ) : (
                   <button
                     type="button"
-                    onClick={() => upd('installationLocation', '')}
-                    className="shrink-0 rounded-full border px-2.5 py-1.5 text-[11px] font-medium transition-all"
-                    style={{
-                      borderColor: !newLeadData.installationLocation ? `${c.accent}55` : subtleBorder,
-                      color: !newLeadData.installationLocation ? c.accent : c.textSecondary,
-                      backgroundColor: !newLeadData.installationLocation ? `${c.accent}0f` : 'transparent',
-                    }}
+                    onClick={() => setLocationInputOpen(true)}
+                    className="w-full h-10 rounded-full border flex items-center justify-between px-4 text-[14px] transition-colors"
+                    style={{ borderColor: subtleBorder, backgroundColor: dark ? c.background : c.surface, color: c.textSecondary }}
                   >
-                    Unknown
+                    <span className="text-[13px] font-medium">Unknown</span>
+                    <span className="text-[11px]" style={{ color: c.textSecondary, opacity: 0.55 }}>Set location</span>
                   </button>
-                </div>
+                )}
               </Row>
 
               <Row label="Install Date" theme={theme} inline>
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 min-w-0">
-                    <DatePickerInput
-                      value={newLeadData.expectedInstallDate || ''}
-                      onChange={(v) => upd('expectedInstallDate', v)}
-                      theme={theme}
-                      placeholder="Set date..."
-                    />
+                {(dateInputOpen || newLeadData.expectedInstallDate) ? (
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 min-w-0">
+                      <DatePickerInput
+                        value={newLeadData.expectedInstallDate || ''}
+                        onChange={(v) => upd('expectedInstallDate', v)}
+                        theme={theme}
+                        placeholder="Set date..."
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => { upd('expectedInstallDate', ''); setDateInputOpen(false); }}
+                      className="shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-all"
+                      style={{ borderColor: subtleBorder, color: c.textSecondary, backgroundColor: 'transparent' }}
+                    >
+                      Unknown
+                    </button>
                   </div>
+                ) : (
                   <button
                     type="button"
-                    onClick={() => upd('expectedInstallDate', '')}
-                    className="shrink-0 rounded-full border px-2.5 py-1.5 text-[11px] font-medium transition-all"
-                    style={{
-                      borderColor: !newLeadData.expectedInstallDate ? `${c.accent}55` : subtleBorder,
-                      color: !newLeadData.expectedInstallDate ? c.accent : c.textSecondary,
-                      backgroundColor: !newLeadData.expectedInstallDate ? `${c.accent}0f` : 'transparent',
-                    }}
+                    onClick={() => setDateInputOpen(true)}
+                    className="w-full h-10 rounded-full border flex items-center justify-between px-4 transition-colors"
+                    style={{ borderColor: subtleBorder, backgroundColor: dark ? c.background : c.surface, color: c.textSecondary }}
                   >
-                    Unknown
+                    <span className="text-[13px] font-medium">Unknown</span>
+                    <span className="text-[11px]" style={{ color: c.textSecondary, opacity: 0.55 }}>Set date</span>
                   </button>
-                </div>
+                )}
               </Row>
             </Section>
 
