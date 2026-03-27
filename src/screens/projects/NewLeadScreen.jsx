@@ -47,6 +47,7 @@ const TOP_100_CITIES = [
   'Montgomery, AL', 'Modesto, CA', 'Fayetteville, NC', 'Tacoma, WA', 'Akron, OH',
 ];
 const END_USER_OPTIONS = [
+  'Unknown',
   'ABC Corporation', 'GlobalTech', 'Midwest Health', 'State University', 'Metro Hospitality',
   'Innovate Labs', 'XYZ Industries', 'Acme Corp', 'TechVentures', 'Summit Partners',
 ];
@@ -415,6 +416,8 @@ export const NewLeadScreen = ({
   // Location/date "Unknown" collapsed state — show input only when user explicitly opens it
   const [locationInputOpen, setLocationInputOpen] = useState(() => !!newLeadData.installationLocation);
   const [dateInputOpen, setDateInputOpen] = useState(() => !!newLeadData.expectedInstallDate);
+  // Dealers "Out to Bid" state — collapses search area to a single pill
+  const [dealerOutToBid, setDealerOutToBid] = useState(() => (newLeadData.dealers || []).includes('Out to Bid'));
 
   // Custom discount mode — true when the stored value isn't in the predefined list
   const [discountCustom, setDiscountCustom] = useState(
@@ -1292,59 +1295,118 @@ export const NewLeadScreen = ({
             <Section title="Stakeholders & Competition" subtitle="Who's involved and who you're up against." theme={theme}>
               <Row label="End User" theme={theme} inline noSep>
                 <div>
-                  <AutoCompleteCombobox
-                    value={newLeadData.endUser || ''}
-                    onChange={(val) => { upd('endUser', val); markTouched('endUser'); }}
-                    onSelect={(val) => { upd('endUser', val); markTouched('endUser'); }}
-                    onAddNew={addEndUserOption}
-                    options={endUserOptions}
-                    placeholder="Search or add end user"
-                    theme={theme}
-                    compact
-                    resetOnSelect={false}
-                  />
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 min-w-0">
+                      <AutoCompleteCombobox
+                        value={newLeadData.endUser || ''}
+                        onChange={(val) => { upd('endUser', val); markTouched('endUser'); }}
+                        onSelect={(val) => { upd('endUser', val); markTouched('endUser'); }}
+                        onAddNew={addEndUserOption}
+                        options={endUserOptions}
+                        placeholder="Search or add end user"
+                        theme={theme}
+                        compact
+                        resetOnSelect={false}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => { upd('endUser', 'Unknown'); markTouched('endUser'); }}
+                      className="shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-all"
+                      style={{
+                        borderColor: newLeadData.endUser === 'Unknown' ? theme.colors.accent : subtleBorder,
+                        color: newLeadData.endUser === 'Unknown' ? theme.colors.accent : c.textSecondary,
+                        backgroundColor: newLeadData.endUser === 'Unknown' ? `${theme.colors.accent}12` : 'transparent',
+                      }}
+                    >
+                      Unknown
+                    </button>
+                  </div>
                   <FieldError show={!!visibleError('endUser')} message={visibleError('endUser')} />
                 </div>
               </Row>
 
               <Row label="Dealer(s)" theme={theme} inline>
                 <div>
-                  <SpotlightMultiSelect
-                    selectedItems={newLeadData.dealers || []}
-                    onAddItem={(dealer) => {
-                      const norm = dealer.trim();
-                      const current = newLeadData.dealers || [];
-                      if (!current.some((d) => d.toLowerCase() === norm.toLowerCase())) upd('dealers', [...current, norm]);
-                      markTouched('dealers');
-                    }}
-                    onRemoveItem={(dealer) => { upd('dealers', (newLeadData.dealers || []).filter((item) => item !== dealer)); markTouched('dealers'); }}
-                    options={(newLeadData.dealers || []).length > 0 ? (dealers || []).filter((item) => item !== 'Undecided') : (dealers || [])}
-                    onAddNew={(dealer) => { const norm = dealer.trim(); setDealers((prev) => prev.some((d) => d.toLowerCase() === norm.toLowerCase()) ? prev : [norm, ...prev]); }}
-                    placeholder="Search or create dealer"
-                    theme={theme}
-                    compact={false}
-                    integratedChips
-                  />
+                  {dealerOutToBid ? (
+                    <button
+                      type="button"
+                      onClick={() => { setDealerOutToBid(false); upd('dealers', []); markTouched('dealers'); }}
+                      className="w-full h-10 rounded-full border flex items-center justify-between px-4 transition-colors"
+                      style={{ borderColor: theme.colors.accent, backgroundColor: `${theme.colors.accent}12`, color: c.textPrimary }}
+                    >
+                      <span className="text-[13px] font-medium" style={{ color: theme.colors.accent }}>Out to Bid</span>
+                      <span className="text-[11px]" style={{ color: c.textSecondary, opacity: 0.55 }}>Add dealers</span>
+                    </button>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 min-w-0">
+                        <SpotlightMultiSelect
+                          selectedItems={newLeadData.dealers || []}
+                          onAddItem={(dealer) => {
+                            const norm = dealer.trim();
+                            const current = newLeadData.dealers || [];
+                            if (!current.some((d) => d.toLowerCase() === norm.toLowerCase())) upd('dealers', [...current, norm]);
+                            markTouched('dealers');
+                          }}
+                          onRemoveItem={(dealer) => { upd('dealers', (newLeadData.dealers || []).filter((item) => item !== dealer)); markTouched('dealers'); }}
+                          options={(newLeadData.dealers || []).length > 0 ? (dealers || []).filter((item) => item !== 'Undecided') : (dealers || [])}
+                          onAddNew={(dealer) => { const norm = dealer.trim(); setDealers((prev) => prev.some((d) => d.toLowerCase() === norm.toLowerCase()) ? prev : [norm, ...prev]); }}
+                          placeholder="Search or create dealer"
+                          theme={theme}
+                          compact={false}
+                          integratedChips
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => { setDealerOutToBid(true); upd('dealers', ['Out to Bid']); markTouched('dealers'); }}
+                        className="shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-all"
+                        style={{ borderColor: subtleBorder, color: c.textSecondary, backgroundColor: 'transparent' }}
+                      >
+                        Out to Bid
+                      </button>
+                    </div>
+                  )}
                   <FieldError show={!!visibleError('dealers')} message={visibleError('dealers')} />
                 </div>
               </Row>
 
               <Row label="A&D Firm(s)" theme={theme} inline>
-                <SpotlightMultiSelect
-                  selectedItems={newLeadData.designFirms || []}
-                  onAddItem={(firm) => {
-                    const norm = firm.trim();
-                    const current = newLeadData.designFirms || [];
-                    if (!current.some((f) => f.toLowerCase() === norm.toLowerCase())) upd('designFirms', [...current, norm]);
-                  }}
-                  onRemoveItem={(firm) => upd('designFirms', (newLeadData.designFirms || []).filter((item) => item !== firm))}
-                  options={designFirms || []}
-                  onAddNew={(firm) => { const norm = firm.trim(); setDesignFirms((prev) => prev.some((f) => f.toLowerCase() === norm.toLowerCase()) ? prev : [norm, ...prev]); }}
-                  placeholder="Search or create firm"
-                  theme={theme}
-                  compact={false}
-                  integratedChips
-                />
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 min-w-0">
+                    <SpotlightMultiSelect
+                      selectedItems={newLeadData.designFirms || []}
+                      onAddItem={(firm) => {
+                        const norm = firm.trim();
+                        const current = newLeadData.designFirms || [];
+                        if (!current.some((f) => f.toLowerCase() === norm.toLowerCase())) upd('designFirms', [...current, norm]);
+                      }}
+                      onRemoveItem={(firm) => upd('designFirms', (newLeadData.designFirms || []).filter((item) => item !== firm))}
+                      options={['Unknown', ...(designFirms || []).filter((f) => f !== 'Unknown')]}
+                      onAddNew={(firm) => { const norm = firm.trim(); setDesignFirms((prev) => prev.some((f) => f.toLowerCase() === norm.toLowerCase()) ? prev : [norm, ...prev]); }}
+                      placeholder="Search or create firm"
+                      theme={theme}
+                      compact={false}
+                      integratedChips
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const current = newLeadData.designFirms || [];
+                      if (!current.includes('Unknown')) upd('designFirms', ['Unknown', ...current]);
+                    }}
+                    className="shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-all"
+                    style={{
+                      borderColor: (newLeadData.designFirms || []).includes('Unknown') ? theme.colors.accent : subtleBorder,
+                      color: (newLeadData.designFirms || []).includes('Unknown') ? theme.colors.accent : c.textSecondary,
+                      backgroundColor: (newLeadData.designFirms || []).includes('Unknown') ? `${theme.colors.accent}12` : 'transparent',
+                    }}
+                  >
+                    Unknown
+                  </button>
+                </div>
               </Row>
 
               {/* Competition — always-inline: label left, toggle right */}
