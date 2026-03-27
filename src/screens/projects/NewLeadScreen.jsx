@@ -1409,11 +1409,32 @@ export const NewLeadScreen = ({
                 </div>
               </Row>
 
-              {/* Competition — always-inline: label left, toggle right */}
-              <div className="py-3">
-                <div className="flex items-center justify-between gap-4">
-                  <span className="text-[13px] font-semibold" style={{ color: c.textSecondary }}>Competition</span>
-                  <div className="flex items-center gap-2 shrink-0">
+              {/* Competition — search bar inline left of toggle, chips/error below */}
+              <div className="py-2.5 border-t" style={{ borderColor: subtleBorder }}>
+                <div className="flex items-center gap-2 min-h-[40px]">
+                  <span className="text-[13px] font-semibold shrink-0" style={{ color: c.textSecondary }}>Competition</span>
+                  {newLeadData.competitionPresent && (
+                    <div className="flex-1 min-w-0">
+                      <SpotlightMultiSelect
+                        selectedItems={newLeadData.competitors || []}
+                        onAddItem={(competitor) => {
+                          const norm = competitor.trim();
+                          const current = newLeadData.competitors || [];
+                          if (!current.some((co) => co.toLowerCase() === norm.toLowerCase())) upd('competitors', [...current, norm]);
+                          markTouched('competitors');
+                        }}
+                        onRemoveItem={(competitor) => { upd('competitors', (newLeadData.competitors || []).filter((item) => item !== competitor)); markTouched('competitors'); }}
+                        options={['Unknown', ...COMPETITORS.filter((name) => name !== 'None' && name !== 'Unknown')]}
+                        onAddNew={(name) => { const norm = name.trim(); upd('competitors', [...new Set([...(newLeadData.competitors || []), norm])]); }}
+                        placeholder="Search or add"
+                        theme={theme}
+                        compact={false}
+                        integratedChips
+                        bordered
+                      />
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2 shrink-0 ml-auto">
                     <span className="text-[12px]" style={{ color: c.textSecondary }}>
                       {newLeadData.competitionPresent ? 'Active' : 'None'}
                     </span>
@@ -1428,28 +1449,7 @@ export const NewLeadScreen = ({
                     />
                   </div>
                 </div>
-                <Reveal show={!!newLeadData.competitionPresent}>
-                  <div className="mt-2.5">
-                    <SpotlightMultiSelect
-                      selectedItems={newLeadData.competitors || []}
-                      onAddItem={(competitor) => {
-                        const norm = competitor.trim();
-                        const current = newLeadData.competitors || [];
-                        if (!current.some((co) => co.toLowerCase() === norm.toLowerCase())) upd('competitors', [...current, norm]);
-                        markTouched('competitors');
-                      }}
-                      onRemoveItem={(competitor) => { upd('competitors', (newLeadData.competitors || []).filter((item) => item !== competitor)); markTouched('competitors'); }}
-                      options={COMPETITORS.filter((name) => name !== 'None')}
-                      onAddNew={(name) => { const norm = name.trim(); upd('competitors', [...new Set([...(newLeadData.competitors || []), norm])]); }}
-                      placeholder="Search or add competitor"
-                      theme={theme}
-                      compact={false}
-                      integratedChips={false}
-                      bordered
-                    />
-                  </div>
-                  <FieldError show={!!visibleError('competitors')} message={visibleError('competitors')} />
-                </Reveal>
+                <FieldError show={!!visibleError('competitors')} message={visibleError('competitors')} />
               </div>
 
               {/* Rewards — label left, toggles right */}

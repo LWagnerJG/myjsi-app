@@ -22,13 +22,6 @@ export function SpotlightMultiSelect({
   const [activeIndex, setActiveIndex] = useState(-1);
   const wrapperRef = useRef(null);
 
-  const calcDropUp = () => {
-    if (!wrapperRef.current) return;
-    const rect = wrapperRef.current.getBoundingClientRect();
-    const chrome = document.querySelector('[data-bottom-chrome]');
-    const bottomOccupied = chrome ? (window.innerHeight - chrome.getBoundingClientRect().top) : 0;
-    setDropUp(window.innerHeight - rect.bottom - bottomOccupied < 300);
-  };
   useLayoutEffect(() => { if (open) calcDropUp(); }, [open]);
   useEffect(() => {
     if (!open) return;
@@ -37,6 +30,7 @@ export function SpotlightMultiSelect({
   }, [open]);
   const inputRef = useRef(null);
   const menuRef = useRef(null);
+  const triggerRef = useRef(null); // inner .relative div — anchors dropUp calc to input bar only
   const listboxId = useMemo(() => `listbox-${Math.random().toString(36).substr(2, 9)}`, []);
 
   const norm = (s) => (s || "").trim().toLowerCase();
@@ -139,7 +133,7 @@ export function SpotlightMultiSelect({
       ) : null}
 
       {/* Input bar + inline absolute dropdown */}
-      <div className="relative">
+      <div className="relative" ref={triggerRef}>
         <div
           className="flex items-center gap-2 px-4 cursor-text"
           style={{
