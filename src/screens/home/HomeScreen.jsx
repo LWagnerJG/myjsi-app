@@ -397,10 +397,10 @@ export const HomeScreen = React.memo(({
                 lampOn={lampOn}
             />
 
-            {/* Mobile sticky feedback bar — fixed to viewport bottom, hidden on sm+ */}
+            {/* Sticky feedback bar — fixed to viewport bottom across mobile and desktop */}
             {!isEditMode && (
                 <div
-                    className="sm:hidden fixed bottom-0 left-0 right-0 z-40 flex items-center justify-center px-4"
+                    className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-center px-4"
                     style={{
                         paddingBottom: 'max(16px, env(safe-area-inset-bottom))',
                         paddingTop: 12,
@@ -432,7 +432,7 @@ export const HomeScreen = React.memo(({
             )}
 
             <div
-                className="px-4 sm:px-6 lg:px-8 flex flex-col max-w-5xl mx-auto w-full gap-4 sm:gap-6 py-4 sm:py-6 pb-20 sm:pb-6"
+                className="px-4 sm:px-6 lg:px-8 flex flex-col max-w-5xl mx-auto w-full gap-4 sm:gap-6 py-4 sm:py-6 pb-20 sm:pb-20"
                 style={{
                     position: 'relative',
                     zIndex: 2,
