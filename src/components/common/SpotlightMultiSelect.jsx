@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Search, Plus, X } from "lucide-react";
 import { isDarkTheme } from "../../design-system/tokens.js";
 
@@ -18,21 +18,59 @@ export function SpotlightMultiSelect({
   const [open, setOpen] = useState(false);
   const [dropUp, setDropUp] = useState(false);
   const [q, setQ] = useState("");
-
   const [activeIndex, setActiveIndex] = useState(-1);
-  const wrapperRef = useRef(null);
 
-  useLayoutEffect(() => { if (open) calcDropUp(); }, [open]);
-  useEffect(() => {
-    if (!open) return;
-    window.addEventListener('resize', calcDropUp);
-    return () => window.removeEventListener('resize', calcDropUp);
-  }, [open]);
+  const wrapperRef = useRef(null);  // outside-click detection (whole component)
+  const triggerRef = useRef(null);  // inner input bar — used for dropUp measurement only
   const inputRef = useRef(null);
   const menuRef = useRef(null);
-  const triggerRef = useRef(null); // inner .relative div — anchors dropUp calc to input bar only
   const listboxId = useMemo(() => `listbox-${Math.random().toString(36).substr(2, 9)}`, []);
 
+  const dark = isDarkTheme(theme);
+  const palette = {
+    bg: theme.colors.surface,
+    field: dark ? theme.colors.background : theme.colors.surface,
+    border: dark ? "rgba(255,255,255,0.11)" : "rgba(0,0,0,0.07)",
+    text: theme.colors.textPrimary,
+    hint: theme.colors.textSecondary,
+    accent: theme.colors.accent,
+    chipBg: theme.colors.surface,
+  };
+
+  // ── Drop-direction ────────────────────────────────────────────────────────
+  // Anchors to triggerRef (input bar) not wrapperRef (input + chips below)
+  // so chip height doesn't skew the available-space calculation.
+  const calcDropUp = useCallback(() => {
+    if (!triggerRef.current) return;
+    const rect = triggerRef.current.getBoundingClientRect();
+    const chrome = document.querySelector("[data-bottom-chrome]");
+    const bottomOccupied = chrome ? window.innerHeight - chrome.getBoundingClientRect().top : 0;
+    setDropUp(window.innerHeight - rect.bottom - bottomOccupied < 300);
+  }, []);
+
+  useLayoutEffect(() => { if (open) calcDropUp(); }, [open, calcDropUp]);
+
+  useEffect(() => {
+    if (!open) return;
+    window.addEventListener("resize", calcDropUp);
+    return () => window.removeEventListener("resize", calcDropUp);
+  }, [open, calcDropUp]);
+
+  // ── Outside-click close ───────────────────────────────────────────────────
+  useEffect(() => {
+    if (!open) return;
+    const close = (e) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener("mousedown", close);
+    document.addEventListener("touchstart", close, { passive: true });
+    return () => {
+      document.removeEventListener("mousedown", close);
+      document.removeEventListener("touchstart", close);
+    };
+  }, [open]);
+
+  // ── Options filtering ─────────────────────────────────────────────────────
   const norm = (s) => (s || "").trim().toLowerCase();
 
   const available = useMemo(
@@ -52,31 +90,15 @@ export function SpotlightMultiSelect({
 
   useEffect(() => { setActiveIndex(-1); }, [q, open]);
 
-  const dark = isDarkTheme(theme);
-  const palette = {
-    bg: theme.colors.surface,
-    field: dark ? theme.colors.background : theme.colors.surface,
-    border: dark ? "rgba(255,255,255,0.11)" : "rgba(0,0,0,0.07)",
-    text: theme.colors.textPrimary,
-    hint: theme.colors.textSecondary,
-    accent: theme.colors.accent,
-    chipBg: theme.colors.surface,
-  };
-
-  // Outside-click closes dropdown — wrapperRef contains both input and inline menu
+  // Scroll active item into view
   useEffect(() => {
-    if (!open) return;
-    const close = (e) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) setOpen(false);
-    };
-    document.addEventListener("mousedown", close);
-    document.addEventListener("touchstart", close, { passive: true });
-    return () => {
-      document.removeEventListener("mousedown", close);
-      document.removeEventListener("touchstart", close);
-    };
-  }, [open]);
+    if (open && activeIndex >= 0 && menuRef.current) {
+      const el = menuRef.current.querySelector(`[data-index="${activeIndex}"]`);
+      if (el) el.scrollIntoView({ block: "nearest" });
+    }
+  }, [activeIndex, open]);
 
+  // ── Actions ───────────────────────────────────────────────────────────────
   const pick = (val) => {
     if (!val) return;
     onAddItem?.(val);
@@ -112,18 +134,13 @@ export function SpotlightMultiSelect({
         break;
       case "Escape": e.preventDefault(); setOpen(false); inputRef.current?.blur(); break;
       case "Tab": setOpen(false); break;
+      default: break;
     }
   };
 
-  useEffect(() => {
-    if (open && activeIndex >= 0 && menuRef.current) {
-      const el = menuRef.current.querySelector(`[data-index="${activeIndex}"]`);
-      if (el) el.scrollIntoView({ block: "nearest" });
-    }
-  }, [activeIndex, open]);
-
   const showMenu = open && (filtered.length > 0 || canCreate);
 
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="w-full" ref={wrapperRef}>
       {label ? (
@@ -132,7 +149,7 @@ export function SpotlightMultiSelect({
         </label>
       ) : null}
 
-      {/* Input bar + inline absolute dropdown */}
+      {/* Input bar + inline absolute dropdown — triggerRef anchors the dropdown position */}
       <div className="relative" ref={triggerRef}>
         <div
           className="flex items-center gap-2 px-4 cursor-text"
@@ -148,6 +165,11 @@ export function SpotlightMultiSelect({
           <Search className="w-3.5 h-3.5 flex-shrink-0" style={{ color: palette.hint }} />
           <input
             ref={inputRef}
+            type="search"
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
             value={q}
             onChange={(e) => { setQ(e.target.value); setOpen(true); }}
             onFocus={() => setOpen(true)}
@@ -172,6 +194,7 @@ export function SpotlightMultiSelect({
                 >
                   <span className="truncate max-w-[180px]">{s}</span>
                   <button
+                    type="button"
                     onClick={(e) => { e.stopPropagation(); onRemoveItem?.(s); }}
                     className="w-4 h-4 flex items-center justify-center rounded-full"
                     aria-label={`Remove ${s}`}
@@ -184,7 +207,7 @@ export function SpotlightMultiSelect({
           )}
         </div>
 
-        {/* Inline dropdown — position:absolute, no portal, no scroll-close, no position recalc */}
+        {/* Dropdown — inline absolute, no portal, no scroll-close */}
         {showMenu && (
           <div
             ref={menuRef}
@@ -195,7 +218,7 @@ export function SpotlightMultiSelect({
               ...(dropUp ? { bottom: "calc(100% + 6px)" } : { top: "calc(100% + 6px)" }),
               backgroundColor: palette.bg,
               borderColor: palette.border,
-              boxShadow: dark ? "0 8px 32px rgba(0,0,0,0.45)" : "0 8px 24px rgba(0,0,0,0.11)",
+              boxShadow: dark ? "0 8px 32px rgba(0,0,0,0.45)" : "0 8px 24px rgba(0,0,0,0.12)",
               maxHeight: 260,
             }}
           >
@@ -205,10 +228,11 @@ export function SpotlightMultiSelect({
                   key={opt}
                   id={`${listboxId}-option-${idx}`}
                   data-index={idx}
+                  type="button"
                   role="option"
                   aria-selected={activeIndex === idx}
                   className={`w-full text-left px-4 py-2.5 text-[13px] font-medium transition-colors ${
-                    activeIndex === idx ? "bg-black/[0.08] dark:bg-white/[0.08]" : "hover:bg-black/[0.04] dark:hover:bg-white/[0.04]"
+                    activeIndex === idx ? "bg-black/[0.07] dark:bg-white/[0.07]" : "hover:bg-black/[0.04] dark:hover:bg-white/[0.04]"
                   }`}
                   style={{ color: palette.text }}
                   onMouseDown={(e) => { e.preventDefault(); pick(opt); }}
@@ -219,20 +243,21 @@ export function SpotlightMultiSelect({
               ))}
               {canCreate && (
                 <>
-                  {filtered.length > 0 && <div className="h-px my-1" style={{ background: palette.border }} />}
+                  {filtered.length > 0 && <div className="h-px mx-2 my-1" style={{ background: palette.border }} />}
                   <button
                     id={`${listboxId}-option-${filtered.length}`}
                     data-index={filtered.length}
+                    type="button"
                     role="option"
                     aria-selected={activeIndex === filtered.length}
                     className={`w-full text-left px-4 py-2.5 text-[13px] font-semibold flex items-center gap-2 transition-colors ${
-                      activeIndex === filtered.length ? "bg-black/[0.08] dark:bg-white/[0.08]" : "hover:bg-black/[0.04] dark:hover:bg-white/[0.04]"
+                      activeIndex === filtered.length ? "bg-black/[0.07] dark:bg-white/[0.07]" : "hover:bg-black/[0.04] dark:hover:bg-white/[0.04]"
                     }`}
                     style={{ color: palette.accent }}
                     onMouseDown={(e) => { e.preventDefault(); create(); }}
                     onMouseEnter={() => setActiveIndex(filtered.length)}
                   >
-                    <Plus className="w-4 h-4" /> Create "{q.trim()}"
+                    <Plus className="w-4 h-4 flex-shrink-0" /> Create "{q.trim()}"
                   </button>
                 </>
               )}
@@ -249,34 +274,33 @@ export function SpotlightMultiSelect({
         <div
           className={
             showIntegratedChips
-              ? `flex flex-wrap gap-2 px-3 pb-2.5 pt-1.5${bordered ? " border border-t-0 rounded-b-2xl" : ""}`
-              : "flex flex-wrap gap-2 pt-2"
+              ? `flex flex-wrap gap-1.5 px-3 pb-2.5 pt-1.5${bordered ? " border border-t-0 rounded-b-2xl" : ""}`
+              : "flex flex-wrap gap-1.5 pt-2"
           }
           style={
             showIntegratedChips
-              ? bordered
-                ? { borderColor: palette.border, background: palette.field }
-                : { background: palette.field }
+              ? { borderColor: palette.border, background: palette.field }
               : undefined
           }
         >
           {selectedItems.map((s) => (
             <span
               key={s}
-              className={`inline-flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-full text-[13px]${bordered ? " border" : ""}`}
+              className={`inline-flex items-center gap-1.5 pl-3 pr-2 py-1 rounded-full text-[12px] font-medium${bordered ? " border" : ""}`}
               style={{
-                background: showIntegratedChips ? theme.colors.subtle : palette.chipBg,
+                background: showIntegratedChips ? (dark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)") : palette.chipBg,
                 borderColor: palette.border,
                 color: palette.text,
               }}
             >
               {s}
               <button
+                type="button"
                 onClick={() => onRemoveItem?.(s)}
-                className="w-5 h-5 flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                className="w-4 h-4 flex items-center justify-center rounded-full hover:bg-black/[0.08] dark:hover:bg-white/[0.08] transition-colors"
                 aria-label={`Remove ${s}`}
               >
-                <X className="w-3.5 h-3.5" style={{ color: palette.hint }} />
+                <X className="w-3 h-3" style={{ color: palette.hint }} />
               </button>
             </span>
           ))}
