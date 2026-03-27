@@ -16,6 +16,7 @@ import {
     isAdminRole,
     PERMISSION_LABELS,
 } from './data.js';
+import { isDarkTheme } from '../../design-system/tokens.js';
 
 import { MembersErrorBoundary } from './components/members/MembersErrorBoundary.jsx';
 import { ConfirmModal } from './components/members/SharedComponents.jsx';
@@ -43,6 +44,7 @@ const useMediaQuery = (query) => {
    Main Screen
    ================== */
 const MembersScreenContent = ({ theme }) => {
+    const dark = isDarkTheme(theme);
     const [tab, setTab] = useState('team');
     const [original, setOriginal] = useState(INITIAL_MEMBERS);
     const [members, setMembers] = useState(INITIAL_MEMBERS);
@@ -147,61 +149,80 @@ const MembersScreenContent = ({ theme }) => {
                 <div className="px-4 sm:px-6 lg:px-8 pb-24 lg:pb-12 max-w-2xl lg:max-w-5xl mx-auto w-full">
 
                     {/* Header */}
-                    <div className="pt-6 pb-3 sm:pt-8">
-                        <div className="flex items-center justify-between gap-4">
-                            <h1 className="text-2xl font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>
-                                App Users
+                    <div className="pt-5 pb-4 sm:pt-7 flex items-center justify-between gap-4">
+                        <div>
+                            <h1 className="text-[22px] font-bold leading-tight tracking-tight" style={{ color: theme.colors.textPrimary }}>
+                                Members
                             </h1>
-                            {tab === 'team' && (
-                                <button onClick={() => setShowInvite(true)}
-                                    className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold transition-transform duration-100 active:scale-95"
-                                    style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}>
-                                    <UserPlus className="w-3.5 h-3.5" />
-                                    <span className="hidden sm:inline">Invite</span>
-                                </button>
-                            )}
+                            <p className="text-[14px] mt-0.5" style={{ color: theme.colors.textSecondary }}>
+                                {tab === 'team' ? 'Your rep team and permissions.' : 'Dealer companies and contacts.'}
+                            </p>
                         </div>
+                        {tab === 'team' && (
+                            <button
+                                onClick={() => setShowInvite(true)}
+                                className="flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-semibold transition-all active:scale-95 shrink-0"
+                                style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
+                            >
+                                <UserPlus className="w-3.5 h-3.5" />
+                                Invite
+                            </button>
+                        )}
                     </div>
 
-                    {/* Tabs */}
-                    <div className="flex items-center gap-1 mb-4"
-                        style={{ borderBottom: `1.5px solid ${theme.colors.border}` }}>
-                        {tabs.map(t => (
-                            <button
-                                key={t.key}
-                                onClick={() => switchTab(t.key)}
-                                className="relative px-4 py-2.5 text-sm font-medium transition-colors duration-150"
-                                style={{ color: tab === t.key ? theme.colors.textPrimary : theme.colors.textSecondary }}
-                            >
-                                <span className="flex items-center gap-1.5">
+                    {/* Pill tabs */}
+                    <div
+                        className="flex items-center gap-1 p-1 rounded-full mb-5"
+                        style={{ backgroundColor: dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)' }}
+                    >
+                        {tabs.map(t => {
+                            const active = tab === t.key;
+                            return (
+                                <button
+                                    key={t.key}
+                                    onClick={() => switchTab(t.key)}
+                                    className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-semibold transition-all duration-150"
+                                    style={{
+                                        backgroundColor: active ? (dark ? theme.colors.surface : '#fff') : 'transparent',
+                                        color: active ? theme.colors.textPrimary : theme.colors.textSecondary,
+                                        boxShadow: active ? '0 1px 5px rgba(0,0,0,0.09)' : 'none',
+                                    }}
+                                >
                                     {t.label}
-                                    <span className="text-xs font-semibold px-1.5 py-0.5 rounded-full"
+                                    <span
+                                        className="text-[11px] font-bold px-1.5 py-0.5 rounded-full"
                                         style={{
-                                            backgroundColor: tab === t.key ? `${theme.colors.accent}12` : theme.colors.subtle,
-                                            color: tab === t.key ? theme.colors.accent : theme.colors.textSecondary,
-                                        }}>
+                                            backgroundColor: active ? `${theme.colors.accent}18` : 'transparent',
+                                            color: active ? theme.colors.accent : theme.colors.textSecondary,
+                                        }}
+                                    >
                                         {t.count}
                                     </span>
-                                </span>
-                                {tab === t.key && (
-                                    <div className="absolute bottom-0 left-2 right-2 h-[2px] rounded-full"
-                                        style={{ backgroundColor: theme.colors.accent }} />
-                                )}
-                            </button>
-                        ))}
+                                </button>
+                            );
+                        })}
                     </div>
 
-                    {/* Search — only on dealers tab */}
+                    {/* Search — dealers tab only */}
                     {tab === 'dealers' && (
                         <div className="relative mb-4">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: theme.colors.textSecondary }} />
-                            <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search dealers..."
-                                className="w-full pl-9 pr-9 py-2 rounded-full text-sm outline-none transition-all duration-150"
-                                style={{ backgroundColor: theme.colors.surface, color: theme.colors.textPrimary, border: `1.5px solid ${theme.colors.border}` }}
-                                onFocus={e => e.target.style.borderColor = theme.colors.accent}
-                                onBlur={e => e.target.style.borderColor = theme.colors.border} />
+                            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: theme.colors.textSecondary }} />
+                            <input
+                                type="search"
+                                autoComplete="off"
+                                value={searchQuery}
+                                onChange={e => setSearchQuery(e.target.value)}
+                                placeholder="Search dealers or contacts…"
+                                className="w-full pl-10 pr-10 outline-none rounded-full text-[14px]"
+                                style={{
+                                    height: 42,
+                                    backgroundColor: dark ? theme.colors.surface : '#fff',
+                                    color: theme.colors.textPrimary,
+                                    border: `1.5px solid ${dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.09)'}`,
+                                }}
+                            />
                             {searchQuery && (
-                                <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2">
+                                <button onClick={() => setSearchQuery('')} className="absolute right-3.5 top-1/2 -translate-y-1/2">
                                     <X className="w-3.5 h-3.5" style={{ color: theme.colors.textSecondary }} />
                                 </button>
                             )}
@@ -211,9 +232,12 @@ const MembersScreenContent = ({ theme }) => {
                     {/* Tab content */}
                     {tab === 'team' ? (
                         members.length > 0 ? (
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5">
                                 {members.map(u => (
-                                    <MemberCard key={u.id} theme={theme} user={u}
+                                    <MemberCard
+                                        key={u.id}
+                                        theme={theme}
+                                        user={u}
                                         expanded={expandedId === u.id}
                                         onToggle={() => toggle(u.id)}
                                         onChangeRole={(role) => onChangeRole(u.id, role)}
@@ -221,38 +245,40 @@ const MembersScreenContent = ({ theme }) => {
                                         onRequestDelete={() => requestDelete(u)}
                                         isDesktop={isDesktop}
                                         isDirty={isUserDirty(u)}
-                                        onSave={() => saveUser(u.id)} />
+                                        onSave={() => saveUser(u.id)}
+                                    />
                                 ))}
                             </div>
                         ) : (
-                            <div className="py-16 text-center" style={{ color: theme.colors.textSecondary }}>
-                                <Users className="w-10 h-10 mx-auto mb-3 opacity-25" />
-                                <p className="text-sm">No team members yet</p>
+                            <div className="py-20 text-center" style={{ color: theme.colors.textSecondary }}>
+                                <Users className="w-10 h-10 mx-auto mb-3 opacity-20" />
+                                <p className="text-[14px]">No team members yet</p>
                             </div>
                         )
                     ) : (
                         filteredDealers.length > 0 ? (
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5">
                                 {filteredDealers.map(d => (
-                                    <DealerCompanyCard key={d.id} company={d}
+                                    <DealerCompanyCard
+                                        key={d.id}
+                                        company={d}
                                         expanded={expandedId === d.id}
                                         onToggle={() => toggle(d.id)}
-                                        theme={theme} />
+                                        theme={theme}
+                                    />
                                 ))}
                             </div>
                         ) : (
-                            <div className="py-16 text-center" style={{ color: theme.colors.textSecondary }}>
-                                <Building2 className="w-10 h-10 mx-auto mb-3 opacity-25" />
-                                <p className="text-sm">{searchQuery ? 'No dealers match' : 'No dealers signed up yet'}</p>
+                            <div className="py-20 text-center" style={{ color: theme.colors.textSecondary }}>
+                                <Building2 className="w-10 h-10 mx-auto mb-3 opacity-20" />
+                                <p className="text-[14px]">{searchQuery ? 'No dealers match your search' : 'No dealers signed up yet'}</p>
                             </div>
                         )
                     )}
 
-
                 </div>
             </div>
 
-            {/* Remove confirmation modal */}
             <ConfirmModal
                 open={!!confirmDelete}
                 title="Remove team member"
@@ -263,7 +289,6 @@ const MembersScreenContent = ({ theme }) => {
                 theme={theme}
             />
 
-            {/* Invite modal */}
             <InviteModal
                 open={showInvite}
                 onClose={() => setShowInvite(false)}
