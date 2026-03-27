@@ -1022,7 +1022,7 @@ export const NewLeadScreen = ({
                 </div>
               </Row>
 
-              <Row label="Location" theme={theme} inline>
+              <Row label="Install Location" theme={theme} inline>
                 {(locationInputOpen || newLeadData.installationLocation) ? (
                   <div className="flex items-center gap-2">
                     <div className="flex-1 min-w-0">
@@ -1127,7 +1127,8 @@ export const NewLeadScreen = ({
               <Row label="Estimated List" theme={theme} inline noSep>
                 <div>
                   <FormInput
-                    type="currency"
+                    type="text"
+                    inputMode="decimal"
                     value={newLeadData.estimatedList || ''}
                     onChange={(e) => { upd('estimatedList', e.target.value); markTouched('estimatedList'); }}
                     onBlur={() => markTouched('estimatedList')}
