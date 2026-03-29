@@ -25,7 +25,8 @@ const sublabelMap = {
     'Presentations': 'Slide deck library',
     'Tradeshows': 'Select and view show info',
     'New Dealer Sign-Up': 'Sign up new dealers',
-    'LWYD Marketplace': 'ElliottBucks rewards shop'
+    'LWYD Marketplace': 'ElliottBucks rewards shop',
+    'New Project': 'Start a new project or lead',
 };
 
 const CORE_LABELS = {
@@ -33,6 +34,7 @@ const CORE_LABELS = {
     sales: 'Sales',
     products: 'Products',
     projects: 'Projects',
+    'new-lead': 'New Project',
     community: 'Community',
     samples: 'Samples',
     replacements: 'Replacements'
@@ -43,6 +45,7 @@ const CORE_APP_CATEGORY_MAP = {
     orders: 'Sales & Rep Tools',
     sales: 'Sales & Rep Tools',
     projects: 'Sales & Rep Tools',
+    'new-lead': 'Sales & Rep Tools',
     community: 'Marketing & Communication',
     products: 'Product & Finish Resources',
     samples: 'Dealer & Field Support',
@@ -54,6 +57,7 @@ const CORE_APP_SUBLABELS = {
     sales: 'Revenue and performance view',
     products: 'Main product application',
     projects: 'Pipeline and project management',
+    'new-lead': 'Start a new project or lead',
     community: 'Team and dealer conversations',
     samples: 'Sample ordering workflow',
     replacements: 'Replacement request workflow',
