@@ -89,16 +89,17 @@ export const Chk = ({ clr }) => (
 );
 
 /* ── timeline stage ──────────────────────────────────────────── */
-export const Stage = React.memo(({ stage, state, isLast, subtitle, actions, progress, dark, c, idx }) => {
+export const Stage = React.memo(({ stage, state, isLast, subtitle, statusColor, progress, dark, c, idx }) => {
   const done = state === 'completed', now = state === 'current', later = state === 'future';
   const { Icon } = stage;
   const ref = useFadeUp(idx * 45);
 
-  const cirBg     = done ? `${c.accent}12` : now ? `${c.accent}18` : dark ? 'rgba(255,255,255,0.04)' : 'rgba(53,53,53,0.04)';
-  const cirBorder = done ? `${c.accent}35` : now ? `${c.accent}55` : 'transparent';
-  const icClr     = (done || now) ? c.accent : dark ? 'rgba(255,255,255,0.18)' : 'rgba(53,53,53,0.18)';
-  const lineClr   = done ? `${c.accent}28` : dark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.05)';
-  const txtClr    = later ? (dark ? 'rgba(255,255,255,0.22)' : 'rgba(53,53,53,0.22)') : c.textPrimary;
+  const sc        = statusColor || c.accent;
+  const cirBg     = done ? `${c.accent}10` : now ? `${sc}18` : dark ? 'rgba(255,255,255,0.04)' : 'rgba(53,53,53,0.04)';
+  const cirBorder = done ? `${c.accent}30` : now ? `${sc}55`  : 'transparent';
+  const icClr     = done ? c.accent        : now ? sc          : dark ? 'rgba(255,255,255,0.18)' : 'rgba(53,53,53,0.18)';
+  const lineClr   = done ? `${c.accent}25` : dark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.05)';
+  const txtClr    = later ? (dark ? 'rgba(255,255,255,0.2)' : 'rgba(53,53,53,0.2)') : c.textPrimary;
 
   return (
     <div ref={ref} className="flex" style={{ gap: 12 }}>
@@ -111,35 +112,27 @@ export const Stage = React.memo(({ stage, state, isLast, subtitle, actions, prog
         {!isLast && <div className="flex-1 w-px mt-1" style={{ minHeight: 8, backgroundColor: lineClr }} />}
       </div>
 
-      {/* content column */}
+      {/* content */}
       <div className={`flex-1 min-w-0 ${isLast ? 'pb-1' : 'pb-3'}`} style={{ paddingTop: 4 }}>
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-bold text-[14px] leading-snug" style={{ color: txtClr }}>{stage.label}</span>
-              {now && (
-                <span className="text-[10px] font-bold uppercase tracking-[0.07em] px-2 py-0.5 rounded-full"
-                  style={{ backgroundColor: `${c.accent}18`, color: c.accent }}>
-                  Current
-                </span>
-              )}
-            </div>
-            {subtitle && !later && (
-              <p className="text-[12px] mt-0.5 leading-snug" style={{ color: c.textSecondary, opacity: 0.75 }}>{subtitle}</p>
-            )}
-          </div>
-          {actions?.length > 0 && !later && (
-            <div className="flex items-center gap-1.5 flex-shrink-0">
-              {actions.map((a, i) => <Pill key={i} icon={a.Icon} label={a.label} onClick={a.onClick} dark={dark} />)}
-            </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className={`font-bold text-[14px] leading-snug ${later ? '' : ''}`} style={{ color: txtClr }}>
+            {stage.label}
+          </span>
+          {now && (
+            <span className="text-[10px] font-bold uppercase tracking-[0.07em] px-2 py-0.5 rounded-full"
+              style={{ backgroundColor: `${sc}18`, color: sc }}>
+              Current
+            </span>
           )}
         </div>
-
+        {subtitle && !later && (
+          <p className="text-[12px] mt-0.5 leading-snug" style={{ color: c.textSecondary, opacity: 0.7 }}>
+            {subtitle}
+          </p>
+        )}
         {now && progress != null && (
-          <div className="mt-2">
-            <div className="h-[5px] rounded-full overflow-hidden" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.07)' : 'rgba(53,53,53,0.06)' }}>
-              <div className="h-full rounded-full" style={{ width: `${progress}%`, backgroundColor: c.accent, transition: 'width .8s cubic-bezier(.4,0,.2,1)' }} />
-            </div>
+          <div className="mt-2 h-[4px] rounded-full overflow-hidden" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.07)' }}>
+            <div className="h-full rounded-full" style={{ width: `${progress}%`, backgroundColor: sc, transition: 'width .8s cubic-bezier(.4,0,.2,1)' }} />
           </div>
         )}
       </div>
