@@ -1,19 +1,11 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import {
-  ChevronDown, Share2, X, Eye, FileText, BarChart3,
-  Truck, PackageCheck, ClipboardCheck, Film, Play, Download,
+  Share2, Eye, FileText, BarChart3,
+  Truck, PackageCheck, ClipboardCheck, Film,
 } from 'lucide-react';
-import { isDarkTheme, JSI_COLORS } from '../../design-system/tokens.js';
-import { ORDER_DATA } from './data.js';
-
-/* ── helpers ────────────────────────────────────────────────── */
-const ABBR = /\b(llc|inc|msd|lecc)\b/gi;
-const tc = s => s?.toLowerCase().replace(/\b\w/g, c => c.toUpperCase()).replace(ABBR, m => m.toUpperCase()) ?? '';
-const $ = (n, cents) => cents
-  ? `$${Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-  : `$${Number(n).toLocaleString()}`;
-const fd = d => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
-const fs = d => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+import { isDarkTheme } from '../../design-system/tokens.js';
+import { ORDER_DATA, STATUS_COLORS } from './data.js';
+import { useFadeUp, tc, fmt$, fd, fs, Card, Pill, Stage, LineItem, AckModal, ClipsModal } from './OrderDetailScreenComponents.jsx';
 
 /* ── timeline config ────────────────────────────────────────── */
 const STAGES = [
@@ -26,15 +18,6 @@ const STAGES = [
 ];
 const IDX = { 'Order Entry': 1, 'Acknowledged': 2, 'In Production': 3, 'Shipping': 4, 'Delivered': 5 };
 const PCT = { 1: 20, 2: 35, 3: 60, 4: 85, 5: 100 };
-
-const PROD_CLIPS = [
-  { id: 1, title: 'Panel Cutting & Shaping', duration: '0:32', thumb: 'https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=320&h=180&fit=crop' },
-  { id: 2, title: 'Edge Banding Line',       duration: '0:18', thumb: 'https://images.unsplash.com/photo-1565793298595-6a879b1d9492?w=320&h=180&fit=crop' },
-  { id: 3, title: 'Upholstery Station',      duration: '0:45', thumb: 'https://images.unsplash.com/photo-1581783898377-1c85bf937427?w=320&h=180&fit=crop' },
-  { id: 4, title: 'Final Assembly & QC',      duration: '0:27', thumb: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=320&h=180&fit=crop' },
-];
-
-import { useFadeUp, Portal, Card, Pill, Chk, Stage, LineItem, AckModal, ClipsModal } from './OrderDetailScreenComponents.jsx';
 
 export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
   const [xLine, setXLine] = useState(null);
@@ -62,20 +45,21 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
     </div>
   );
 
+  const sc = STATUS_COLORS[order.status] || '#8B8680';
   const cur = IDX[order.status] ?? 0;
   const pct = PCT[cur];
   const qty = order.lineItems.reduce((s, li) => s + li.quantity, 0);
   const state = i => i < cur ? 'completed' : i === cur ? 'current' : 'future';
 
   const share = () => {
-    const payload = { title: `Order ${order.orderNumber}`, text: `${tc(order.details)} — ${$(order.net, true)}` };
+    const payload = { title: `Order ${order.orderNumber}`, text: `${tc(order.details)} — ${fmt$(order.net, true)}` };
     if (order.ackUrl) payload.url = order.ackUrl;
     navigator.share?.(payload).catch(() => {});
   };
 
   const subs = {
     0: `${order.po}  ·  ${fs(order.date)}`,
-    1: `${$(order.net, true)}  ·  ${qty} items`,
+    1: `${fmt$(order.net, true)}  ·  ${qty} items`,
     2: order.ackDate ? fd(order.ackDate) : null,
     4: order.shipDate ? fd(order.shipDate) : null,
   };
@@ -100,9 +84,9 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
                 <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md" style={{ backgroundColor: panelSubtle }}>
                   <span className="text-xs font-bold tracking-wide" style={{ color: c.textSecondary }}>ORDER #{order.orderNumber}</span>
                 </div>
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ backgroundColor: dark ? 'rgba(74, 124, 89, 0.2)' : 'rgba(74, 124, 89, 0.1)' }}>
-                  <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#4A7C59' }} />
-                  <span className="text-xs font-bold" style={{ color: dark ? '#81C784' : '#4A7C59' }}>{order.status}</span>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ backgroundColor: `${sc}20` }}>
+                  <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: sc }} />
+                  <span className="text-xs font-bold" style={{ color: sc }}>{order.status}</span>
                 </div>
               </div>
 
@@ -114,7 +98,7 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
               <div className="grid grid-cols-3 gap-3 pt-3 border-t" style={{ borderColor: panelBorder }}>
                 <div>
                   <p className="text-[11px] font-bold uppercase tracking-wider mb-0.5" style={{ color: c.textSecondary, opacity: 0.7 }}>Net Total</p>
-                  <p className="text-xl font-bold" style={{ color: c.textPrimary }}>{$(order.net, true)}</p>
+                  <p className="text-xl font-bold" style={{ color: c.textPrimary }}>{fmt$(order.net, true)}</p>
                 </div>
                 <div>
                   <p className="text-[11px] font-bold uppercase tracking-wider mb-0.5" style={{ color: c.textSecondary, opacity: 0.7 }}>Est. Ship</p>
@@ -133,7 +117,7 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
           <div ref={tlRef} className="mb-6 rounded-3xl border p-4 sm:p-5" style={{ backgroundColor: panelBg, borderColor: panelBorder }}>
             <div className="flex items-center justify-between mb-3 px-1">
               <h3 className="font-bold text-[15px]" style={{ color: c.textPrimary }}>Order Progress</h3>
-              <span className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: c.textSecondary }}>Timeline</span>
+              {pct != null && <span className="text-[11px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: `${sc}18`, color: sc }}>{pct}% complete</span>}
             </div>
             {STAGES.map((s, i) => (
               <Stage key={s.key} stage={s} state={state(i)} isLast={i === 5} subtitle={subs[i] ?? null}
@@ -143,7 +127,7 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
 
           {/* ── order details card ── */}
           <div ref={detRef}>
-            <Card dark={dark} className="mb-5">
+            <Card dark={dark} c={c} className="mb-5">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-bold text-[15px]" style={{ color: c.textPrimary }}>Order Details</h3>
                 <Pill icon={Share2} label="Share" onClick={share} dark={dark} />

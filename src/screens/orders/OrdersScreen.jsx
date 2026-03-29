@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { Calendar, List, Building2, ChevronLeft, ChevronRight, Package } from 'lucide-react';
+import { Calendar, List, Building2, ChevronLeft, ChevronRight, Package, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { SearchInput } from '../../components/common/SearchInput.jsx';
@@ -7,6 +7,9 @@ import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 import { isDarkTheme } from '../../design-system/tokens.js';
 import { ORDER_DATA, STATUS_COLORS } from './data.js';
 import { formatCurrency, formatCompanyName } from '../../utils/format.js';
+
+const initials = (company) =>
+    (company || '').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('') || '?';
 
 /* ---------------------- Calendar View ---------------------- */
 export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => {
@@ -95,15 +98,19 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
                                 style={{ backgroundColor: theme.colors.surface, border: isDark ? '1px solid rgba(255,255,255,0.06)' : 'none', boxShadow: isDark ? 'none' : '0 1px 4px rgba(0,0,0,0.06)' }}
                                 onClick={() => onOrderClick(o)}>
                                 <div className="flex items-center gap-3.5 px-4 py-3.5">
-                                    <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.06)' }}>
-                                        <Package className="w-[18px] h-[18px]" style={{ color: theme.colors.textSecondary }} />
+                                    <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-[12px] font-black"
+                                        style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : `${theme.colors.accent}15`, color: theme.colors.accent }}>
+                                        {initials(o.company)}
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <p className="font-semibold text-[15px] leading-snug truncate" style={{ color: theme.colors.textPrimary }}>{o.details}</p>
                                         <p className="text-xs mt-0.5 truncate" style={{ color: theme.colors.textSecondary }}>{formatCompanyName(o.company)}</p>
                                         <div className="flex items-center gap-2 mt-1.5">
-                                            <span className="text-[11px] font-medium px-1.5 py-px rounded" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)', color: theme.colors.textSecondary }}>SO {o.orderNumber}</span>
-                                            <span className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: sc }}>{o.status}</span>
+                                            <span className="text-[11px] font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)', color: theme.colors.textSecondary }}>SO {o.orderNumber}</span>
+                                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold" style={{ color: sc }}>
+                                                <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: sc }} />
+                                                {o.status}
+                                            </span>
                                         </div>
                                     </div>
                                     <p className="font-bold text-base tabular-nums flex-shrink-0" style={{ color: theme.colors.textPrimary }}>{formatCurrency(o.net)}</p>
@@ -127,15 +134,19 @@ const OrderRow = ({ order, theme, onNavigate, isLast }) => {
             className={`w-full text-left transition active:scale-[0.99] ${dark ? 'hover:bg-white/[0.03]' : 'hover:bg-black/[0.015]'}`}
         >
             <div className="flex items-center gap-3.5 px-4 py-3.5">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.06)' }}>
-                    <Package className="w-[18px] h-[18px]" style={{ color: theme.colors.textSecondary }} />
+                <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-[12px] font-black"
+                    style={{ backgroundColor: dark ? 'rgba(255,255,255,0.08)' : `${theme.colors.accent}15`, color: theme.colors.accent }}>
+                    {initials(order.company)}
                 </div>
                 <div className="flex-1 min-w-0">
                     <p className="font-semibold text-[15px] leading-snug truncate" style={{ color: theme.colors.textPrimary }}>{order.details}</p>
                     <p className="text-xs mt-0.5 truncate" style={{ color: theme.colors.textSecondary }}>{formatCompanyName(order.company)}</p>
                     <div className="flex items-center gap-2 mt-1.5">
-                        <span className="text-[11px] font-medium px-1.5 py-px rounded" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)', color: theme.colors.textSecondary }}>SO {order.orderNumber}</span>
-                        <span className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: statusColor }}>{order.status}</span>
+                        <span className="text-[11px] font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)', color: theme.colors.textSecondary }}>SO {order.orderNumber}</span>
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold" style={{ color: statusColor }}>
+                            <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: statusColor }} />
+                            {order.status}
+                        </span>
                     </div>
                 </div>
                 <p className="font-bold text-base tabular-nums flex-shrink-0" style={{ color: theme.colors.textPrimary }}>{formatCurrency(order.net)}</p>
@@ -281,9 +292,21 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                                 ))}
                             </div>
                           ) : (
-                            <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3 }} className="flex flex-col items-center justify-center py-16 text-center">
-                                <Package className="w-10 h-10 mb-3" style={{ color: theme.colors.textSecondary, opacity: 0.4 }} />
-                                <p className="text-sm font-medium" style={{ color: theme.colors.textSecondary }}>No orders found</p>
+                            <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3 }} className="flex flex-col items-center justify-center py-16 text-center gap-1">
+                                <Package className="w-10 h-10 mb-2" style={{ color: theme.colors.textSecondary, opacity: 0.3 }} />
+                                <p className="text-[15px] font-semibold" style={{ color: theme.colors.textPrimary }}>
+                                    {searchTerm || selectedDealer !== 'All Dealers' ? 'No matching orders' : 'No orders'}
+                                </p>
+                                <p className="text-xs" style={{ color: theme.colors.textSecondary }}>
+                                    {searchTerm || selectedDealer !== 'All Dealers' ? 'Try adjusting your filters' : 'Orders will appear here'}
+                                </p>
+                                {(searchTerm || selectedDealer !== 'All Dealers') && (
+                                    <button onClick={() => { setSearchTerm(''); setSelectedDealer('All Dealers'); }}
+                                        className="inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 rounded-full text-xs font-semibold transition active:scale-95"
+                                        style={{ backgroundColor: `${theme.colors.accent}15`, color: theme.colors.accent }}>
+                                        <X className="w-3 h-3" /> Clear filters
+                                    </button>
+                                )}
                             </motion.div>
                           )}
                         </motion.div>

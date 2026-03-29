@@ -1,22 +1,26 @@
 import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronDown, Share2, X, Play, Download } from 'lucide-react';
-import { JSI_COLORS } from '../../design-system/tokens.js';
 import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z } from '../../components/common/modalUtils.js';
 
 /* ── helpers ────────────────────────────────────────────────── */
 const ABBR = /\b(llc|inc|msd|lecc)\b/gi;
-const tc = s => s?.toLowerCase().replace(/\b\w/g, c => c.toUpperCase()).replace(ABBR, m => m.toUpperCase()) ?? '';
-const $ = (n, cents) => cents
+// eslint-disable-next-line react-refresh/only-export-components
+export const tc = s => s?.toLowerCase().replace(/\b\w/g, c => c.toUpperCase()).replace(ABBR, m => m.toUpperCase()) ?? '';
+// eslint-disable-next-line react-refresh/only-export-components
+export const fmt$ = (n, cents) => cents
   ? `$${Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
   : `$${Number(n).toLocaleString()}`;
-const fd = d => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+// eslint-disable-next-line react-refresh/only-export-components
+export const fd = d => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+// eslint-disable-next-line react-refresh/only-export-components
+export const fs = d => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
 
 const PROD_CLIPS = [
   { id: 1, title: 'Panel Cutting & Shaping', duration: '0:32', thumb: 'https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=320&h=180&fit=crop' },
   { id: 2, title: 'Edge Banding Line',       duration: '0:18', thumb: 'https://images.unsplash.com/photo-1565793298595-6a879b1d9492?w=320&h=180&fit=crop' },
   { id: 3, title: 'Upholstery Station',      duration: '0:45', thumb: 'https://images.unsplash.com/photo-1581783898377-1c85bf937427?w=320&h=180&fit=crop' },
-  { id: 4, title: 'Final Assembly & QC',      duration: '0:27', thumb: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=320&h=180&fit=crop' },
+  { id: 4, title: 'Final Assembly & QC',     duration: '0:27', thumb: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=320&h=180&fit=crop' },
 ];
 
 /* ── entrance animation ─────────────────────────────────────── */
@@ -43,10 +47,13 @@ export const useFadeUp = (delay = 0) => {
 export const Portal = ({ children }) => createPortal(children, document.body);
 
 /* ── card ────────────────────────────────────────────────────── */
-export const Card = ({ children, dark, className = '', style }) => (
+export const Card = ({ children, dark, c, className = '', style }) => (
   <div className={className} style={{
-    padding: 20, backgroundColor: dark ? '#2A2A2A' : '#fff',
-    borderRadius: 24, border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)', ...style,
+    padding: 20,
+    backgroundColor: c?.surface || (dark ? 'rgba(255,255,255,0.04)' : '#fff'),
+    borderRadius: 24,
+    border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
+    ...style,
   }}>{children}</div>
 );
 
@@ -76,12 +83,12 @@ export const Stage = React.memo(({ stage, state, isLast, subtitle, actions, prog
   const { Icon } = stage;
   const ref = useFadeUp(idx * 50);
 
-  const cirBg = done ? (dark ? 'rgba(255,255,255,0.12)' : 'rgba(53,53,53,0.08)')
-    : now ? JSI_COLORS.charcoal
+  const cirBg = done ? (dark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.06)')
+    : now ? c.accent
     : dark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.04)';
-  const cirBorder = done ? (dark ? 'rgba(255,255,255,0.2)' : 'rgba(53,53,53,0.15)') : 'transparent';
-  const icClr = done ? (dark ? '#fff' : JSI_COLORS.charcoal)
-    : now ? '#fff'
+  const cirBorder = done ? (dark ? 'rgba(255,255,255,0.18)' : 'rgba(53,53,53,0.12)') : 'transparent';
+  const icClr = done ? (dark ? 'rgba(255,255,255,0.7)' : 'rgba(53,53,53,0.6)')
+    : now ? (c.accentText || '#fff')
     : dark ? 'rgba(255,255,255,0.2)' : 'rgba(53,53,53,0.2)';
   const lineClr = done ? (dark ? 'rgba(255,255,255,0.15)' : 'rgba(53,53,53,0.12)')
     : dark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.06)';
@@ -101,7 +108,7 @@ export const Stage = React.memo(({ stage, state, isLast, subtitle, actions, prog
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="font-semibold text-[15px] leading-tight" style={{ color: txtClr }}>{stage.label}</span>
-              {now && <span className="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.12)' : JSI_COLORS.charcoal, color: dark ? c.textPrimary : '#fff' }}>Current</span>}
+              {now && <span className="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style={{ backgroundColor: `${c.accent}20`, color: c.accent }}>Current</span>}
             </div>
             {subtitle && !later && <p className="text-[13px] mt-0.5" style={{ color: c.textSecondary }}>{subtitle}</p>}
           </div>
@@ -114,7 +121,7 @@ export const Stage = React.memo(({ stage, state, isLast, subtitle, actions, prog
         {now && progress != null && (
           <div className="mt-2.5">
             <div className="h-[7px] rounded-full overflow-hidden" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.07)' : 'rgba(53,53,53,0.07)' }}>
-              <div className="h-full rounded-full" style={{ width: `${progress}%`, backgroundColor: JSI_COLORS.charcoal, transition: 'width .8s cubic-bezier(.4,0,.2,1)' }} />
+              <div className="h-full rounded-full" style={{ width: `${progress}%`, backgroundColor: c.accent, transition: 'width .8s cubic-bezier(.4,0,.2,1)' }} />
             </div>
             <p className="text-xs font-medium mt-1 text-right" style={{ color: c.textSecondary }}>{progress}%</p>
           </div>
@@ -144,7 +151,7 @@ export const LineItem = React.memo(({ item, open, onToggle, c, dark }) => (
         <p className="text-xs mt-0.5" style={{ color: c.textSecondary }}>{item.model}</p>
       </div>
       <div className="text-right flex-shrink-0 mr-1">
-        <p className="font-semibold text-sm" style={{ color: c.textPrimary }}>{$(item.extNet, true)}</p>
+        <p className="font-semibold text-sm" style={{ color: c.textPrimary }}>{fmt$(item.extNet, true)}</p>
         <p className="text-xs" style={{ color: c.textSecondary }}>Qty {item.quantity}</p>
       </div>
       <ChevronDown className="w-4 h-4 flex-shrink-0 transition-transform" style={{
@@ -157,7 +164,7 @@ export const LineItem = React.memo(({ item, open, onToggle, c, dark }) => (
           <div className="ml-10 pt-1 space-y-3">
             {/* pricing grid */}
             <div className="grid grid-cols-3 gap-3">
-              {[['Unit Price', $(item.net, true)], ['Extended', $(item.extNet, true)], ['Quantity', item.quantity]].map(([l, v]) => (
+              {[['Unit Price', fmt$(item.net, true)], ['Extended', fmt$(item.extNet, true)], ['Quantity', item.quantity]].map(([l, v]) => (
                 <div key={l}>
                   <p className="text-[11px] uppercase tracking-wider font-medium" style={{ color: c.textSecondary }}>{l}</p>
                   <p className="text-[13px] font-semibold mt-0.5" style={{ color: c.textPrimary }}>{v}</p>
@@ -188,7 +195,7 @@ export const AckModal = ({ order, onClose, onShare, dark, c }) => (
     <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: UNIFIED_MODAL_Z }} role="dialog" aria-label="Acknowledgment">
       <div className="absolute inset-0" style={getUnifiedBackdropStyle(true)} onClick={onClose} />
       <div className="relative w-full max-w-md rounded-2xl overflow-hidden flex flex-col" style={{
-        maxHeight: '85vh', backgroundColor: dark ? '#2A2A2A' : '#fff',
+        maxHeight: '85vh', backgroundColor: c?.surface || (dark ? 'rgba(40,40,40,1)' : '#fff'),
         border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
       }}>
         <div className="flex items-center justify-between px-5 py-3.5" style={{ borderBottom: `1px solid ${c.border}` }}>
@@ -229,14 +236,14 @@ export const AckModal = ({ order, onClose, onShare, dark, c }) => (
                   <p className="text-[13px] font-medium" style={{ color: c.textPrimary }}>{tc(li.name)}</p>
                   <p className="text-xs mt-0.5" style={{ color: c.textSecondary }}>{li.model} · Qty {li.quantity}</p>
                 </div>
-                <p className="text-[13px] font-semibold whitespace-nowrap" style={{ color: c.textPrimary }}>{$(li.extNet, true)}</p>
+                <p className="text-[13px] font-semibold whitespace-nowrap" style={{ color: c.textPrimary }}>{fmt$(li.extNet, true)}</p>
               </div>
             ))}
           </div>
           {/* total */}
           <div className="flex items-center justify-between pt-1" style={{ borderTop: `1px solid ${c.border}` }}>
             <p className="text-sm font-bold" style={{ color: c.textPrimary }}>Total</p>
-            <p className="text-lg font-bold" style={{ color: c.textPrimary }}>{$(order.net, true)}</p>
+            <p className="text-lg font-bold" style={{ color: c.textPrimary }}>{fmt$(order.net, true)}</p>
           </div>
           {/* download pdf link */}
           {order.ackUrl && (
