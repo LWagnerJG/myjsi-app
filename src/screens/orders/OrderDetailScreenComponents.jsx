@@ -64,7 +64,7 @@ export const Pill = ({ icon: Ic, label, onClick, dark }) => (
     style={{
       backgroundColor: dark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.04)',
       borderColor: dark ? 'rgba(255,255,255,0.1)' : 'rgba(53,53,53,0.1)',
-      color: dark ? '#fff' : JSI_COLORS.charcoal,
+      color: dark ? '#fff' : '#353535',
     }}>
     <Ic className="w-3.5 h-3.5" /> {label}
   </button>
