@@ -2,6 +2,7 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import { HomeSearchInput } from '../../../components/common/SearchInput.jsx';
 import { QuickActionDropdown } from '../../../components/common/QuickActionDropdown.jsx';
+import { getHomeChromePillStyles } from '../../../design-system/homeChrome.js';
 
 /* ── Elliott avatar URL ────────────────────────────────────────────── */
 const ELLIOTT_AVATAR_URL = '/elliott-avatar.png';
@@ -24,11 +25,8 @@ export const HomeHeader = ({
     onRfpFileDrop,
 }) => {
     const [fileDragOver, setFileDragOver] = useState(false);
-    // Index of the keyboard-highlighted option in the dropdown.
-    // 0 .. spotlightResults.length-1 → app results
-    // spotlightResults.length         → "Ask Elliott" row
-    // null → nothing highlighted
     const [focusedIndex, setFocusedIndex] = useState(null);
+    const searchPillStyles = getHomeChromePillStyles(isDark);
 
     const totalItems = spotlightResults.length + 1; // +1 for Elliott row
     const isOpen = Boolean(searchQuery.trim());
@@ -109,18 +107,8 @@ export const HomeHeader = ({
             {/* Dashboard label + search bar on one row */}
             <div className="flex items-center gap-4">
                 <div className="shrink-0 hidden sm:block min-w-[120px]">
-                    <h2
-                        className="text-[26px] font-bold tracking-tight leading-none"
-                        style={{ color: colors.textPrimary }}
-                    >
-                        Dashboard
-                    </h2>
-                    <div
-                        className="text-[11px] font-medium whitespace-nowrap mt-1.5"
-                        style={{ color: colors.textSecondary, opacity: 0.45 }}
-                    >
-                        {todayLabel}
-                    </div>
+                    <h2 className="text-[26px] font-bold tracking-tight leading-none" style={{ color: colors.textPrimary }}>Dashboard</h2>
+                    <div className="text-[11px] font-medium whitespace-nowrap mt-1.5" style={{ color: colors.textSecondary, opacity: 0.45 }}>{todayLabel}</div>
                 </div>
 
                 <GlassCard
@@ -131,15 +119,13 @@ export const HomeHeader = ({
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
                     style={{
-                        borderRadius: 9999,
-                        height: 56,
+                        ...searchPillStyles,
                         paddingTop: 0,
                         paddingBottom: 0,
-                        backgroundColor: colors.tileSurface,
-                        border: fileDragOver ? `2px solid ${colors.accent}` : 'none',
+                        border: fileDragOver ? `2px solid ${colors.accent}` : searchPillStyles.border,
                         boxShadow: fileDragOver
-                            ? `0 0 0 4px ${colors.accent}22, ${colors.tileShadow || 'none'}`
-                            : colors.tileShadow,
+                            ? `0 0 0 4px ${colors.accent}22, ${searchPillStyles.boxShadow}`
+                            : searchPillStyles.boxShadow,
                         transition: 'border 200ms ease, box-shadow 200ms ease',
                     }}
                 >

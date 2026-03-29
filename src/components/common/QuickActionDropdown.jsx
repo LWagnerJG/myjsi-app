@@ -3,6 +3,8 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import { Plus, FileText, Upload, FileSpreadsheet, MessageSquarePlus, Presentation, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getHomeChromeIconButtonStyles } from '../../design-system/homeChrome.js';
+import { isDarkTheme } from '../../design-system/tokens.js';
 
 const QUICK_ACTIONS = [
     { id: 'presentation-builder', label: 'Presentation Builder', icon: Presentation, description: 'AI-generate a custom deck' },
@@ -27,6 +29,8 @@ export const QuickActionDropdown = ({ theme, onActionSelect, className = '' }) =
         border: theme?.colors?.border || '#E3E0D8',
         accent: theme?.colors?.accent || '#353535',
     };
+    const isDark = isDarkTheme(theme);
+    const triggerStyles = getHomeChromeIconButtonStyles(isDark, { active: isOpen });
 
     useEffect(() => {
         if (isOpen && buttonRef.current) {
@@ -203,8 +207,8 @@ export const QuickActionDropdown = ({ theme, onActionSelect, className = '' }) =
                 ref={buttonRef}
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all hover:bg-black/5 dark:hover:bg-white/5 ${isOpen ? 'bg-black/5 dark:bg-white/5 rotate-45' : ''} ${className}`}
-                style={{ color: colors.textSecondary }}
+                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all hover:opacity-90 ${isOpen ? 'rotate-45' : ''} ${className}`}
+                style={{ ...triggerStyles, color: colors.textSecondary }}
                 aria-label="Quick actions"
                 aria-expanded={isOpen}
                 aria-haspopup="menu"

@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { Search, Mic } from 'lucide-react';
+import { getHomeChromeIconButtonStyles } from '../../design-system/homeChrome.js';
+import { isDarkTheme } from '../../design-system/tokens.js';
 
 // HomeSearchInput
 export const HomeSearchInput = React.memo(function HomeSearchInput({
@@ -50,6 +52,8 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
     const isAskCycle = currentText === 'Ask me anything...';
     const shouldPulse = isAskCycle && tick !== 0;
     const showHint = !value && !focused;
+    const isDark = isDarkTheme(theme);
+    const iconButtonStyles = getHomeChromeIconButtonStyles(isDark);
     const handleFocus = (e) => { setFocused(true); onFocus && onFocus(e); };
     const handleBlur = (e) => { setFocused(false); onBlur && onBlur(e); };
     return (
@@ -137,8 +141,8 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
             <button
                 type="button"
                 onClick={onVoiceClick}
-                className="ml-3 w-10 h-10 rounded-full flex items-center justify-center transition-colors hover:bg-black/5 dark:hover:bg-white/5 dark:hover:bg-white/5"
-                style={{ color: theme.colors.textSecondary }}
+                className="ml-3 w-10 h-10 rounded-full flex items-center justify-center transition-colors hover:opacity-90"
+                style={{ ...iconButtonStyles, color: theme.colors.textSecondary }}
                 aria-label="Voice input"
             >
                 <Mic className="w-5 h-5" />

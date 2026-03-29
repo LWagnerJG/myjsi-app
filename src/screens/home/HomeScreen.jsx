@@ -4,6 +4,7 @@ import { allApps, DEFAULT_HOME_APPS } from '../../constants/apps.js';
 import { ORDER_DATA } from '../orders/data.js';
 import { RequestQuoteModal } from '../../components/common/RequestQuoteModal.jsx';
 import { SpecCheckRequestModal } from '../../components/common/SpecCheckRequestModal.jsx';
+import { getHomeChromePillStyles, HOME_CHROME_PILL_HEIGHT } from '../../design-system/homeChrome.js';
 import { isDarkTheme } from '../../design-system/tokens.js';
 import { usePersistentState } from '../../hooks/usePersistentState.js';
 import { MessageSquarePlus } from 'lucide-react';
@@ -381,11 +382,12 @@ export const HomeScreen = React.memo(({
     }, [currentApps.length]);
 
     const hoverBg = isDark ? 'hover:bg-white/[0.06]' : 'hover:bg-black/[0.03] dark:hover:bg-white/[0.03]';
+    const chromePillStyles = getHomeChromePillStyles(isDark);
 
 
 
     return (
-        <div className="flex flex-col h-full scrollbar-hide app-header-offset overflow-y-auto" style={{ backgroundColor: colors.background, position: 'relative', overflowX: 'hidden' }}>
+        <div data-home-scroll-container="true" className="flex flex-col h-full scrollbar-hide app-header-offset overflow-y-auto" style={{ backgroundColor: colors.background, position: 'relative', overflowX: 'hidden' }}>
 
             {/* ── Indie Sconce – only visible in dark mode, portalled to body ── */}
             <IndieSconce
@@ -397,10 +399,10 @@ export const HomeScreen = React.memo(({
                 lampOn={lampOn}
             />
 
-            {/* Sticky feedback bar — fixed to viewport bottom across mobile and desktop */}
+            {/* Mobile sticky feedback bar — fixed to viewport bottom, hidden on sm+ */}
             {!isEditMode && (
                 <div
-                    className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-center px-4"
+                    className="sm:hidden fixed bottom-0 left-0 right-0 z-40 flex items-center justify-center px-4"
                     style={{
                         paddingBottom: 'max(16px, env(safe-area-inset-bottom))',
                         paddingTop: 12,
@@ -412,17 +414,12 @@ export const HomeScreen = React.memo(({
                 >
                     <button
                         onClick={() => onNavigate('feedback')}
-                        className="flex items-center gap-2 px-5 py-3 rounded-full transition-all motion-tap active:scale-[0.97]"
+                        className="flex items-center gap-2 px-5 rounded-full transition-all active:scale-[0.97]"
                         style={{
-                            backdropFilter:       'blur(24px) saturate(1.8)',
-                            WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
-                            backgroundColor:      isDark ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.72)',
-                            border:               isDark ? '1px solid rgba(255,255,255,0.16)' : '1px solid rgba(255,255,255,0.92)',
-                            boxShadow:            isDark
-                                ? '0 4px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08)'
-                                : '0 4px 20px rgba(53,53,53,0.10), inset 0 1px 0 rgba(255,255,255,1)',
-                            color:                isDark ? 'rgba(255,255,255,0.82)' : '#353535',
-                            pointerEvents:        'auto',
+                            ...chromePillStyles,
+                            height: HOME_CHROME_PILL_HEIGHT,
+                            color: colors.textSecondary,
+                            pointerEvents: 'auto',
                         }}
                     >
                         <MessageSquarePlus className="w-4 h-4" />
@@ -432,7 +429,7 @@ export const HomeScreen = React.memo(({
             )}
 
             <div
-                className="px-4 sm:px-6 lg:px-8 flex flex-col max-w-5xl mx-auto w-full gap-4 sm:gap-6 py-4 sm:py-6 pb-20 sm:pb-20"
+                className="px-4 sm:px-6 lg:px-8 flex flex-col max-w-5xl mx-auto w-full gap-4 sm:gap-6 py-4 sm:py-6 pb-20 sm:pb-6"
                 style={{
                     position: 'relative',
                     zIndex: 2,
@@ -503,6 +500,23 @@ export const HomeScreen = React.memo(({
                     hoverBg={hoverBg}
                 />
 
+                {/* Feedback CTA — desktop inline only; mobile uses sticky bar below */}
+                {!isEditMode && (
+                    <div className="hidden sm:flex flex-col items-center gap-2 pb-2">
+                        <button
+                            onClick={() => onNavigate('feedback')}
+                            className="flex items-center gap-2 px-5 rounded-full transition-all active:scale-[0.97] hover:opacity-80"
+                            style={{
+                                ...chromePillStyles,
+                                height: HOME_CHROME_PILL_HEIGHT,
+                                color: colors.textSecondary,
+                            }}
+                        >
+                            <MessageSquarePlus className="w-4 h-4" />
+                            <span className="text-[13px] font-semibold">Share Feedback</span>
+                        </button>
+                    </div>
+                )}
             </div>
 
             {/* Request Quote Modal */}

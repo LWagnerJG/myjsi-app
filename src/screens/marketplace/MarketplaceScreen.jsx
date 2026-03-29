@@ -1,38 +1,66 @@
-// src/screens/marketplace/MarketplaceScreen.jsx
-// LWYD Marketplace — ElliottBucks rewards shop
 import React, { useState, useMemo, useCallback } from 'react';
+import {
+  Award,
+  CheckCircle,
+  Clock,
+  Gift,
+  History,
+  Package,
+  Search,
+  Sparkles,
+  Tag,
+  Truck,
+  Wallet,
+  X,
+} from 'lucide-react';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { isDarkTheme } from '../../design-system/tokens.js';
+import { hapticLight, hapticMedium, hapticSuccess } from '../../utils/haptics.js';
 import {
-  Package, Truck, CheckCircle, Clock,
-  ShoppingBag, Search, Wallet,
-  Tag, TrendingUp, History, Gift,
-  Award, X
-} from 'lucide-react';
-import { hapticMedium, hapticSuccess, hapticLight } from '../../utils/haptics.js';
-import {
-  MARKETPLACE_PRODUCTS, MARKETPLACE_CATEGORIES,
-  INITIAL_BALANCE, BALANCE_HISTORY, INITIAL_ORDERS,
+  BALANCE_HISTORY,
+  INITIAL_BALANCE,
+  INITIAL_ORDERS,
+  MARKETPLACE_CATEGORIES,
+  MARKETPLACE_PRODUCTS,
   formatElliottBucks,
 } from './data.js';
-
-import { ProductCard } from './components/marketplace/ProductCard.jsx';
-import { CartDrawer } from './components/marketplace/CartDrawer.jsx';
-import { OrderCard } from './components/marketplace/OrderCard.jsx';
 import { BalanceCard } from './components/marketplace/BalanceCard.jsx';
-import { TransactionRow } from './components/marketplace/TransactionRow.jsx';
+import { CartDrawer } from './components/marketplace/CartDrawer.jsx';
 import { CheckoutSuccess } from './components/marketplace/CheckoutSuccess.jsx';
+import { OrderCard } from './components/marketplace/OrderCard.jsx';
+import { ProductCard } from './components/marketplace/ProductCard.jsx';
+import { TransactionRow } from './components/marketplace/TransactionRow.jsx';
 
-// ============================================
-// MAIN SCREEN
-// ============================================
+const EARNING_PROGRAMS = [
+  { title: 'Sign up new dealers', desc: 'Earn a larger bonus for each new dealer successfully onboarded.', amount: 'EB 750' },
+  { title: 'Stay active in the community', desc: 'Helpful replies, content sharing, and consistent engagement all add up.', amount: 'EB 50-250' },
+  { title: 'Complete product training', desc: 'Finish learning modules to keep product knowledge fresh and current.', amount: 'EB 100' },
+  { title: 'Send platform feedback', desc: 'Thoughtful product feedback helps sharpen the experience for everyone.', amount: 'EB 100' },
+];
+
+const EmptyState = ({ icon: Icon, title, description, actionLabel, onAction, theme, isDark }) => (
+  <GlassCard theme={theme} className="py-14 px-6 text-center">
+    <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.04)' }}>
+      <Icon className="w-7 h-7" style={{ color: theme.colors.textSecondary }} />
+    </div>
+    <p className="text-sm font-semibold mb-1" style={{ color: theme.colors.textPrimary }}>{title}</p>
+    <p className="text-xs max-w-xs mx-auto" style={{ color: theme.colors.textSecondary }}>{description}</p>
+    {actionLabel && onAction && (
+      <button
+        onClick={onAction}
+        className="mt-5 px-5 py-2.5 rounded-full text-xs font-bold transition-all active:scale-95"
+        style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
+      >
+        {actionLabel}
+      </button>
+    )}
+  </GlassCard>
+);
+
 export const MarketplaceScreen = ({ theme, userSettings }) => {
   const isDark = isDarkTheme(theme);
-
-  // Default shirt size from user's settings (Settings screen stores as shirtSize)
   const defaultShirtSize = userSettings?.shirtSize || 'M';
 
-  // Tabs: shop | orders | wallet
   const [activeTab, setActiveTab] = useState('shop');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -42,53 +70,119 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
   const [txnHistory, setTxnHistory] = useState(BALANCE_HISTORY);
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
 
-  // Cart helpers
+  const tabs = [
+    { id: 'shop', label: 'Shop', icon: Tag },
+    { id: 'orders', label: 'Orders', icon: Package },
+    { id: 'wallet', label: 'Wallet', icon: Wallet },
+  ];
+
   const addToCart = useCallback((product, size) => {
     hapticMedium();
-    setCart(prev => {
-      const existing = prev.find(i => i.productId === product.id && i.size === size);
+
+    setCart((previous) => {
+      const existing = previous.find((item) => item.productId === product.id && item.size === size);
+
       if (existing) {
-        return prev.map(i => i.cartId === existing.cartId ? { ...i, qty: i.qty + 1 } : i);
+        return previous.map((item) => (
+          item.cartId === existing.cartId
+            ? { ...item, qty: item.qty + 1 }
+            : item
+        ));
       }
-      return [...prev, {
-        cartId: `cart-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-        productId: product.id,
-        name: product.name,
-        image: product.image,
-        price: product.price,
-        size,
-        qty: 1,
-      }];
+
+      return [
+        ...previous,
+        {
+          cartId: `cart-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+          productId: product.id,
+          name: product.name,
+          image: product.image,
+          price: product.price,
+          size,
+          qty: 1,
+        },
+      ];
     });
   }, []);
 
   const updateCartQty = useCallback((cartId, delta) => {
-    setCart(prev => prev.map(i => i.cartId === cartId ? { ...i, qty: Math.max(1, i.qty + delta) } : i));
+    setCart((previous) => previous.map((item) => (
+      item.cartId === cartId
+        ? { ...item, qty: Math.max(1, item.qty + delta) }
+        : item
+    )));
   }, []);
 
   const removeFromCart = useCallback((cartId) => {
-    setCart(prev => prev.filter(i => i.cartId !== cartId));
+    setCart((previous) => previous.filter((item) => item.cartId !== cartId));
   }, []);
 
-  const totalCartPrice = useMemo(() => cart.reduce((s, i) => s + i.qty * i.price, 0), [cart]);
+  const removeOneFromCart = useCallback((productId, size) => {
+    setCart((previous) => {
+      const existing = previous.find((item) => item.productId === productId && item.size === size);
+
+      if (!existing) return previous;
+      if (existing.qty === 1) return previous.filter((item) => item.cartId !== existing.cartId);
+
+      return previous.map((item) => (
+        item.cartId === existing.cartId
+          ? { ...item, qty: item.qty - 1 }
+          : item
+      ));
+    });
+  }, []);
+
+  const totalCartPrice = useMemo(() => cart.reduce((sum, item) => sum + item.qty * item.price, 0), [cart]);
+  const cartItemCount = useMemo(() => cart.reduce((sum, item) => sum + item.qty, 0), [cart]);
+
+  const filteredProducts = useMemo(() => {
+    let list = MARKETPLACE_PRODUCTS;
+
+    if (selectedCategory !== 'all') {
+      list = list.filter((product) => product.category === selectedCategory);
+    }
+
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      list = list.filter((product) => (
+        product.name.toLowerCase().includes(query)
+        || product.description.toLowerCase().includes(query)
+      ));
+    }
+
+    return list;
+  }, [searchQuery, selectedCategory]);
+
+  const cartQtyByProduct = useMemo(() => {
+    const map = {};
+    cart.forEach((item) => {
+      map[item.productId] = (map[item.productId] || 0) + item.qty;
+    });
+    return map;
+  }, [cart]);
 
   const handleCheckout = useCallback(() => {
     if (balance < totalCartPrice || cart.length === 0) return;
+
     hapticSuccess();
 
-    // Create order
     const newOrder = {
       id: `MKT-${1005 + orders.length}`,
       date: new Date().toISOString().split('T')[0],
       status: 'processing',
       total: totalCartPrice,
-      items: cart.map(i => ({ productId: i.productId, name: i.name, qty: i.qty, size: i.size, price: i.price * i.qty })),
+      items: cart.map((item) => ({
+        productId: item.productId,
+        name: item.name,
+        qty: item.qty,
+        size: item.size,
+        price: item.price * item.qty,
+      })),
       tracking: null,
       estimatedDelivery: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
       deliveredDate: null,
     };
 
-    // Debit balance
     const newTxn = {
       id: `txn-${Date.now()}`,
       type: 'debit',
@@ -98,78 +192,77 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
       icon: 'shopping-bag',
     };
 
-    setOrders(prev => [newOrder, ...prev]);
-    setBalance(prev => prev - totalCartPrice);
-    setTxnHistory(prev => [newTxn, ...prev]);
+    setOrders((previous) => [newOrder, ...previous]);
+    setBalance((previous) => previous - totalCartPrice);
+    setTxnHistory((previous) => [newTxn, ...previous]);
     setCart([]);
     setCheckoutSuccess(true);
     setTimeout(() => setCheckoutSuccess(false), 2200);
-  }, [balance, totalCartPrice, cart, orders.length]);
+  }, [balance, cart, orders.length, totalCartPrice]);
 
-  // Filtered products
-  const filteredProducts = useMemo(() => {
-    let list = MARKETPLACE_PRODUCTS;
-    if (selectedCategory !== 'all') list = list.filter(p => p.category === selectedCategory);
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      list = list.filter(p => p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q));
-    }
-    return list;
-  }, [selectedCategory, searchQuery]);
+  const totalEarned = useMemo(() => txnHistory.filter((txn) => txn.type === 'credit').reduce((sum, txn) => sum + txn.amount, 0), [txnHistory]);
+  const totalSpent = useMemo(() => Math.abs(txnHistory.filter((txn) => txn.type === 'debit').reduce((sum, txn) => sum + txn.amount, 0)), [txnHistory]);
+  const filteredCategoryCount = selectedCategory === 'all' ? MARKETPLACE_CATEGORIES.length - 1 : 1;
 
-  // Cart qty per product id (for qty badges on tiles)
-  const cartQtyByProduct = useMemo(() => {
-    const map = {};
-    cart.forEach(i => { map[i.productId] = (map[i.productId] || 0) + i.qty; });
-    return map;
-  }, [cart]);
+  const orderSummary = useMemo(() => ([
+    { label: 'Processing', key: 'processing', icon: Clock, color: theme.colors.warning, bg: theme.colors.warningLight },
+    { label: 'Shipped', key: 'shipped', icon: Truck, color: theme.colors.info, bg: theme.colors.infoLight },
+    { label: 'Delivered', key: 'delivered', icon: CheckCircle, color: theme.colors.success, bg: theme.colors.successLight },
+  ]), [theme]);
 
-  // Add removeOneFromCart for tile minus/trash
-  const removeOneFromCart = useCallback((productId, size) => {
-    setCart(prev => {
-      const existing = prev.find(i => i.productId === productId && i.size === size);
-      if (!existing) return prev;
-      if (existing.qty === 1) return prev.filter(i => i.cartId !== existing.cartId);
-      return prev.map(i => i.cartId === existing.cartId ? { ...i, qty: i.qty - 1 } : i);
-    });
-  }, []);
+  const shopStats = useMemo(() => ([
+    { label: 'Collection', value: `${MARKETPLACE_PRODUCTS.length} picks` },
+    { label: 'Categories', value: `${filteredCategoryCount} active` },
+    { label: 'In cart', value: cartItemCount ? `${cartItemCount} item${cartItemCount !== 1 ? 's' : ''}` : 'Nothing yet' },
+  ]), [cartItemCount, filteredCategoryCount]);
 
-
-  const tabs = [
-    { id: 'shop', label: 'Shop', icon: Tag },
-    { id: 'orders', label: 'Orders', icon: Package },
-    { id: 'wallet', label: 'Wallet', icon: Wallet },
-  ];
-
-  const cartItemCount = useMemo(() => cart.reduce((s, i) => s + i.qty, 0), [cart]);
+  const walletStats = useMemo(() => ([
+    { label: 'Earned', value: formatElliottBucks(totalEarned) },
+    { label: 'Spent', value: formatElliottBucks(totalSpent) },
+    { label: 'Orders', value: `${orders.length} total` },
+  ]), [orders.length, totalEarned, totalSpent]);
 
   return (
     <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
-      {/* Tab bar */}
       <div className="flex-shrink-0 px-4 pt-1" style={{ background: theme.colors.background }}>
         <div className="max-w-2xl mx-auto w-full">
-          <div className="flex gap-1 border-b" style={{ borderColor: theme.colors.border }}>
-            {tabs.map(tab => {
+          <div
+            className="flex gap-1 p-1.5 rounded-[24px] border"
+            style={{
+              borderColor: theme.colors.border,
+              backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.76)',
+            }}
+          >
+            {tabs.map((tab) => {
               const isActive = activeTab === tab.id;
               const TabIcon = tab.icon;
+
               return (
                 <button
                   key={tab.id}
-                  onClick={() => { hapticLight(); setActiveTab(tab.id); }}
-                  className="relative flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-all"
-                  style={{ color: isActive ? theme.colors.accent : theme.colors.textSecondary, background: 'transparent' }}
+                  onClick={() => {
+                    hapticLight();
+                    setActiveTab(tab.id);
+                  }}
+                  className="relative flex-1 flex items-center justify-center gap-2 px-3 py-3 text-sm font-medium rounded-[18px] transition-all"
+                  style={{
+                    color: isActive ? theme.colors.textPrimary : theme.colors.textSecondary,
+                    background: isActive ? theme.colors.surface : 'transparent',
+                    boxShadow: isActive ? (isDark ? '0 10px 24px rgba(0,0,0,0.18)' : '0 10px 20px rgba(53,53,53,0.08)') : 'none',
+                  }}
                 >
                   <TabIcon className="w-4 h-4" />
                   {tab.label}
-                  {tab.id === 'orders' && orders.some(o => o.status === 'shipped') && (
-                    <span className="w-2 h-2 rounded-full bg-blue-400 absolute top-2 right-1" />
+
+                  {tab.id === 'orders' && orders.some((order) => order.status === 'shipped') && (
+                    <span className="w-2 h-2 rounded-full bg-blue-400 absolute top-2 right-2" />
                   )}
+
                   {tab.id === 'shop' && cartItemCount > 0 && (
                     <span className="ml-1 min-w-[18px] h-[18px] px-1 rounded-full text-[11px] font-bold flex items-center justify-center" style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}>
                       {cartItemCount}
                     </span>
                   )}
-                  {isActive && <span className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full" style={{ backgroundColor: theme.colors.accent }} />}
                 </button>
               );
             })}
@@ -177,68 +270,98 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
         </div>
       </div>
 
-      {/* Content */}
       <div className="flex-1 overflow-y-auto scrollbar-hide" style={{ backgroundColor: theme.colors.background }}>
         <div className="max-w-2xl mx-auto w-full px-4 pb-8">
-
-          {/* ===================== SHOP TAB ===================== */}
           {activeTab === 'shop' && (
             <div className="pt-4 space-y-4">
-              {/* Balance mini card */}
-              <BalanceCard balance={balance} theme={theme} />
+              <BalanceCard
+                balance={balance}
+                theme={theme}
+                eyebrow="Curated rewards"
+                title="LWYD Marketplace"
+                subtitle="Redeem ElliottBucks for a cleaner lineup of everyday gear, apparel, and team favorites that actually feels on-brand."
+                stats={shopStats}
+              />
 
-              {/* Search — pill-shaped to match app header */}
-              <div className="relative">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  placeholder="Search LWYD merch..."
-                  className="w-full pl-10 pr-10 py-3 text-[13px] outline-none transition"
-                  style={{
-                    borderRadius: 9999,
-                    background: isDark ? 'rgba(255,255,255,0.07)' : theme.colors.inputBackground,
-                    border: `1px solid ${theme.colors.border}`,
-                    color: theme.colors.textPrimary,
-                  }}
-                />
-                <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: theme.colors.textSecondary }} />
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full"
-                    style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.07)' }}
-                  >
-                    <X className="w-3 h-3" style={{ color: theme.colors.textSecondary }} />
-                  </button>
-                )}
-              </div>
+              <GlassCard theme={theme} className="p-4 sm:p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: theme.colors.textSecondary }}>
+                      Browse collection
+                    </p>
+                    <h3 className="text-lg font-semibold mt-2" style={{ color: theme.colors.textPrimary }}>
+                      Find something worth redeeming
+                    </h3>
+                    <p className="text-xs mt-1 max-w-md" style={{ color: theme.colors.textSecondary }}>
+                      Search across apparel, drinkware, and headwear, then refine with quick filters instead of digging through clutter.
+                    </p>
+                  </div>
 
-              {/* Category pills */}
-              <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
-                {MARKETPLACE_CATEGORIES.map(cat => {
-                  const active = selectedCategory === cat.id;
-                  return (
+                  <div className="text-right shrink-0">
+                    <p className="text-2xl font-semibold tracking-[-0.03em]" style={{ color: theme.colors.textPrimary }}>
+                      {filteredProducts.length}
+                    </p>
+                    <p className="text-[11px]" style={{ color: theme.colors.textSecondary }}>
+                      item{filteredProducts.length !== 1 ? 's' : ''} shown
+                    </p>
+                  </div>
+                </div>
+
+                <div className="relative mt-4">
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                    placeholder="Search LWYD merch..."
+                    className="w-full pl-10 pr-10 py-3 text-[13px] outline-none transition"
+                    style={{
+                      borderRadius: 9999,
+                      background: isDark ? 'rgba(255,255,255,0.05)' : theme.colors.inputBackground,
+                      border: `1px solid ${theme.colors.border}`,
+                      color: theme.colors.textPrimary,
+                    }}
+                  />
+                  <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: theme.colors.textSecondary }} />
+
+                  {searchQuery && (
                     <button
-                      key={cat.id}
-                      onClick={() => setSelectedCategory(cat.id)}
-                      className="px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all active:scale-95 flex-shrink-0"
-                      style={{
-                        backgroundColor: active ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.04)'),
-                        color: active ? theme.colors.accentText : theme.colors.textSecondary,
-                        border: `1.5px solid ${active ? theme.colors.accent : theme.colors.border}`,
-                      }}
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full"
+                      style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.07)' }}
                     >
-                      {cat.name}
+                      <X className="w-3 h-3" style={{ color: theme.colors.textSecondary }} />
                     </button>
-                  );
-                })}
-              </div>
+                  )}
+                </div>
 
-              {/* Product grid */}
+                <div className="flex gap-2 overflow-x-auto scrollbar-hide pt-4">
+                  {MARKETPLACE_CATEGORIES.map((category) => {
+                    const active = selectedCategory === category.id;
+                    const count = category.id === 'all'
+                      ? MARKETPLACE_PRODUCTS.length
+                      : MARKETPLACE_PRODUCTS.filter((product) => product.category === category.id).length;
+
+                    return (
+                      <button
+                        key={category.id}
+                        onClick={() => setSelectedCategory(category.id)}
+                        className="px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all active:scale-95 flex-shrink-0"
+                        style={{
+                          backgroundColor: active ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.04)' : 'rgba(53,53,53,0.03)'),
+                          color: active ? theme.colors.accentText : theme.colors.textSecondary,
+                          border: `1px solid ${active ? theme.colors.accent : theme.colors.border}`,
+                        }}
+                      >
+                        {category.name} <span className="opacity-70">{count}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </GlassCard>
+
               {filteredProducts.length > 0 ? (
-                <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))' }}>
-                  {filteredProducts.map(product => (
+                <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))' }}>
+                  {filteredProducts.map((product) => (
                     <ProductCard
                       key={product.id}
                       product={product}
@@ -251,124 +374,136 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
                   ))}
                 </div>
               ) : (
-                <div className="flex flex-col items-center py-16">
-                  <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.04)' }}>
-                    <Search className="w-7 h-7" style={{ color: theme.colors.textSecondary }} />
-                  </div>
-                  <p className="text-sm font-semibold mb-1" style={{ color: theme.colors.textPrimary }}>No products found</p>
-                  <p className="text-xs" style={{ color: theme.colors.textSecondary }}>Try adjusting your search or category filter.</p>
-                </div>
+                <EmptyState
+                  icon={Search}
+                  title="No products found"
+                  description="Try adjusting your search or switch categories to bring the collection back into view."
+                  theme={theme}
+                  isDark={isDark}
+                />
               )}
 
-              {/* Bottom spacer for cart pill */}
               {cart.length > 0 && <div className="h-24" />}
             </div>
           )}
 
-          {/* ===================== ORDERS TAB ===================== */}
           {activeTab === 'orders' && (
-            <div className="pt-4 space-y-3">
-              {/* Status summary */}
-              <div className="grid grid-cols-3 gap-3">
-                {[
-                  { label: 'Processing', key: 'processing', icon: Clock, color: '#C4956A', bg: 'rgba(196,149,106,0.12)' },
-                  { label: 'Shipped', key: 'shipped', icon: Truck, color: '#5B7B8C', bg: 'rgba(91,123,140,0.12)' },
-                  { label: 'Delivered', key: 'delivered', icon: CheckCircle, color: '#4A7C59', bg: 'rgba(74,124,89,0.12)' },
-                ].map(s => {
-                  const count = orders.filter(o => o.status === s.key).length;
-                  const SIcon = s.icon;
-                  return (
-                    <GlassCard key={s.key} theme={theme} className="p-3 text-center">
-                      <div className="w-8 h-8 rounded-full mx-auto mb-2 flex items-center justify-center" style={{ backgroundColor: s.bg }}>
-                        <SIcon className="w-4 h-4" style={{ color: s.color }} />
-                      </div>
-                      <p className="text-xl font-bold" style={{ color: theme.colors.textPrimary }}>{count}</p>
-                      <p className="text-[11px] font-medium" style={{ color: theme.colors.textSecondary }}>{s.label}</p>
-                    </GlassCard>
-                  );
-                })}
-              </div>
+            <div className="pt-4 space-y-4">
+              <GlassCard theme={theme} className="p-5 sm:p-6">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: theme.colors.textSecondary }}>
+                      Order tracking
+                    </p>
+                    <h3 className="text-lg font-semibold mt-2" style={{ color: theme.colors.textPrimary }}>
+                      Keep every redemption easy to follow
+                    </h3>
+                    <p className="text-xs mt-1 max-w-md" style={{ color: theme.colors.textSecondary }}>
+                      A cleaner order history makes it easier to see what is processing, what is on the way, and what already landed.
+                    </p>
+                  </div>
 
-              {/* Order list */}
+                  <div className="rounded-2xl px-4 py-3" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(53,53,53,0.03)' }}>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.16em]" style={{ color: theme.colors.textSecondary }}>
+                      Orders placed
+                    </p>
+                    <p className="text-2xl font-semibold mt-1" style={{ color: theme.colors.textPrimary }}>{orders.length}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-3 mt-5">
+                  {orderSummary.map((summary) => {
+                    const count = orders.filter((order) => order.status === summary.key).length;
+                    const SummaryIcon = summary.icon;
+
+                    return (
+                      <div key={summary.key} className="rounded-2xl p-3 text-center" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(53,53,53,0.02)' }}>
+                        <div className="w-9 h-9 rounded-2xl mx-auto mb-2 flex items-center justify-center" style={{ backgroundColor: summary.bg }}>
+                          <SummaryIcon className="w-4 h-4" style={{ color: summary.color }} />
+                        </div>
+                        <p className="text-xl font-bold" style={{ color: theme.colors.textPrimary }}>{count}</p>
+                        <p className="text-[11px] font-medium" style={{ color: theme.colors.textSecondary }}>{summary.label}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </GlassCard>
+
               {orders.length > 0 ? (
                 <div className="space-y-3">
-                  {orders.map(order => <OrderCard key={order.id} order={order} theme={theme} />)}
+                  {orders.map((order) => <OrderCard key={order.id} order={order} theme={theme} />)}
                 </div>
               ) : (
-                <div className="flex flex-col items-center py-16">
-                  <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.04)' }}>
-                    <Package className="w-7 h-7" style={{ color: theme.colors.textSecondary }} />
-                  </div>
-                  <p className="text-sm font-semibold mb-1" style={{ color: theme.colors.textPrimary }}>No orders yet</p>
-                  <p className="text-xs" style={{ color: theme.colors.textSecondary }}>Shop the LWYD collection to place your first order.</p>
-                  <button
-                    onClick={() => setActiveTab('shop')}
-                    className="mt-4 px-5 py-2.5 rounded-full text-xs font-bold transition-all active:scale-95"
-                    style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
-                  >
-                    Start Shopping
-                  </button>
-                </div>
+                <EmptyState
+                  icon={Package}
+                  title="No orders yet"
+                  description="Shop the LWYD collection to place your first order and start a cleaner redemption history."
+                  actionLabel="Start shopping"
+                  onAction={() => setActiveTab('shop')}
+                  theme={theme}
+                  isDark={isDark}
+                />
               )}
             </div>
           )}
 
-          {/* ===================== WALLET TAB ===================== */}
           {activeTab === 'wallet' && (
             <div className="pt-4 space-y-4">
-              <BalanceCard balance={balance} theme={theme} />
+              <BalanceCard
+                balance={balance}
+                theme={theme}
+                eyebrow="Rewards account"
+                title="Your ElliottBucks wallet"
+                subtitle="Track what you have earned, what you have redeemed, and where the next rewards are most likely to come from."
+                stats={walletStats}
+              />
 
-              {/* Quick stats */}
-              <div className="grid grid-cols-2 gap-3">
-                <GlassCard theme={theme} className="p-4 text-center">
-                  <TrendingUp className="w-5 h-5 mx-auto mb-2" style={{ color: theme.colors.success }} />
-                  <p className="text-lg font-bold" style={{ color: theme.colors.textPrimary }}>
-                    {formatElliottBucks(txnHistory.filter(t => t.type === 'credit').reduce((s, t) => s + t.amount, 0))}
-                  </p>
-                  <p className="text-[11px] font-medium" style={{ color: theme.colors.textSecondary }}>Total Earned</p>
-                </GlassCard>
-                <GlassCard theme={theme} className="p-4 text-center">
-                  <ShoppingBag className="w-5 h-5 mx-auto mb-2" style={{ color: theme.colors.error }} />
-                  <p className="text-lg font-bold" style={{ color: theme.colors.textPrimary }}>
-                    {formatElliottBucks(Math.abs(txnHistory.filter(t => t.type === 'debit').reduce((s, t) => s + t.amount, 0)))}
-                  </p>
-                  <p className="text-[11px] font-medium" style={{ color: theme.colors.textSecondary }}>Total Spent</p>
-                </GlassCard>
-              </div>
+              <GlassCard theme={theme} className="px-4 py-4 sm:px-5">
+                <div className="flex items-start justify-between gap-3 mb-4">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <History className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
+                      <p className="text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: theme.colors.textSecondary }}>Recent activity</p>
+                    </div>
+                    <p className="text-sm font-semibold mt-2" style={{ color: theme.colors.textPrimary }}>Every reward movement in one place</p>
+                  </div>
 
-              {/* Transaction history */}
-              <GlassCard theme={theme} className="px-4 py-3">
-                <div className="flex items-center gap-2 mb-3">
-                  <History className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
-                  <p className="text-xs font-bold uppercase tracking-widest" style={{ color: theme.colors.textSecondary }}>Transaction History</p>
+                  <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.03)', color: theme.colors.textSecondary }}>
+                    {txnHistory.length} entries
+                  </span>
                 </div>
-                {txnHistory.map((txn, i) => (
-                  <TransactionRow key={txn.id} txn={txn} theme={theme} isLast={i === txnHistory.length - 1} />
+
+                {txnHistory.map((txn, index) => (
+                  <TransactionRow key={txn.id} txn={txn} theme={theme} isLast={index === txnHistory.length - 1} />
                 ))}
               </GlassCard>
 
-              {/* How to earn */}
-              <GlassCard theme={theme} className="p-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <Gift className="w-4 h-4" style={{ color: theme.colors.accent }} />
-                  <p className="text-[13px] font-bold" style={{ color: theme.colors.textPrimary }}>How to Earn ElliottBucks</p>
+              <GlassCard theme={theme} className="p-5 sm:p-6">
+                <div className="flex items-start justify-between gap-3 mb-4">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4" style={{ color: theme.colors.warning }} />
+                      <p className="text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: theme.colors.textSecondary }}>Ways to earn</p>
+                    </div>
+                    <p className="text-sm font-semibold mt-2" style={{ color: theme.colors.textPrimary }}>A cleaner path to your next reward</p>
+                  </div>
+
+                  <Gift className="w-5 h-5 flex-shrink-0" style={{ color: theme.colors.accent }} />
                 </div>
-                <div className="space-y-2.5">
-                  {[
-                    { title: 'Sign Up New Dealers', desc: 'Bonus for each new dealer onboarded', amount: 'EB 750 each' },
-                    { title: 'Community Engagement', desc: 'Share content, help teammates, stay active', amount: 'EB 50–250' },
-                    { title: 'Complete Training', desc: 'Finish product training modules', amount: 'EB 100 each' },
-                    { title: 'Submit Feedback', desc: 'Help improve the platform', amount: 'EB 100' },
-                  ].map((item, i) => (
-                    <div key={i} className="flex items-start gap-3 py-1">
-                      <div className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center mt-0.5" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.04)' }}>
+
+                <div className="space-y-0">
+                  {EARNING_PROGRAMS.map((item, index) => (
+                    <div key={item.title} className={`flex items-start gap-3 py-3 ${index !== EARNING_PROGRAMS.length - 1 ? 'border-b' : ''}`} style={{ borderColor: theme.colors.border }}>
+                      <div className="w-8 h-8 rounded-2xl flex-shrink-0 flex items-center justify-center mt-0.5" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.04)' }}>
                         <Award className="w-3 h-3" style={{ color: theme.colors.accent }} />
                       </div>
+
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-semibold" style={{ color: theme.colors.textPrimary }}>{item.title}</p>
                         <p className="text-[11px]" style={{ color: theme.colors.textSecondary }}>{item.desc}</p>
                       </div>
-                      <span className="text-[11px] font-bold flex-shrink-0 px-2 py-1 rounded-full" style={{ backgroundColor: isDark ? 'rgba(74,124,89,0.15)' : 'rgba(74,124,89,0.08)', color: theme.colors.success }}>
+
+                      <span className="text-[11px] font-bold flex-shrink-0 px-2.5 py-1.5 rounded-full" style={{ backgroundColor: isDark ? 'rgba(74,124,89,0.15)' : 'rgba(74,124,89,0.08)', color: theme.colors.success }}>
                         {item.amount}
                       </span>
                     </div>
@@ -380,7 +515,6 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
         </div>
       </div>
 
-      {/* Cart drawer (shop tab only) */}
       {activeTab === 'shop' && (
         <CartDrawer
           cart={cart}
@@ -392,7 +526,6 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
         />
       )}
 
-      {/* Checkout success overlay */}
       <CheckoutSuccess show={checkoutSuccess} theme={theme} />
     </div>
   );
