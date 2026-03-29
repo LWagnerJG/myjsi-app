@@ -33,9 +33,9 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
   const panelBorder = dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
 
   const hdrRef = useFadeUp(0);
-  const tlRef  = useFadeUp(80);
-  const detRef = useFadeUp(160);
-  const liRef  = useFadeUp(220);
+  const tlRef  = useFadeUp(60);
+  const detRef = useFadeUp(110);
+  const liRef  = useFadeUp(150);
 
   if (!order) return (
     <div className="flex flex-col h-full items-center justify-center gap-3 app-header-offset" style={{ backgroundColor: c.background }}>
@@ -73,24 +73,24 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
 
   return (
     <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: c.background }}>
-      <div className="flex-1 overflow-y-auto px-4 sm:px-6 pb-8 scrollbar-hide">
+      <div className="flex-1 overflow-y-auto px-5 pb-10 scrollbar-hide">
         <div className="max-w-xl mx-auto w-full">
 
           {/* ── header snapshot card ── */}
-          <div ref={hdrRef} className="mb-4 mt-2">
+          <div ref={hdrRef} className="mb-3 mt-3">
             <div className="rounded-[22px] overflow-hidden" style={{ backgroundColor: panelBg, border: `1px solid ${panelBorder}` }}>
               {/* order number + status */}
               <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: `1px solid ${panelBorder}` }}>
-                <span className="text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: c.textSecondary, opacity: 0.5 }}>SO {order.orderNumber}</span>
+                <span className="text-[10px] font-bold tracking-[0.07em] uppercase" style={{ color: c.textSecondary, opacity: 0.5 }}>Order · SO {order.orderNumber}</span>
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ backgroundColor: `${sc}15` }}>
                   <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: sc }} />
                   <span className="text-[11px] font-bold" style={{ color: sc }}>{order.status}</span>
                 </div>
               </div>
               {/* title + company */}
-              <div className="px-5 pt-4 pb-3">
-                <h1 className="text-[21px] font-black leading-tight tracking-tight" style={{ color: c.textPrimary }}>{tc(order.details)}</h1>
-                <p className="text-[13px] font-medium mt-0.5" style={{ color: c.textSecondary }}>{tc(order.company)}</p>
+              <div className="px-5 pt-3.5 pb-3">
+                <h1 className="text-[20px] font-black leading-tight tracking-tight" style={{ color: c.textPrimary }}>{tc(order.details)}</h1>
+                <p className="text-[13px] font-medium mt-0.5" style={{ color: c.textSecondary, opacity: 0.8 }}>{tc(order.company)}</p>
               </div>
               {/* stat row — explicit borders, no divide-x */}
               <div className="grid grid-cols-3" style={{ borderTop: `1px solid ${panelBorder}` }}>
@@ -109,12 +109,12 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
           </div>
 
           {/* ── timeline ── */}
-          <div ref={tlRef} className="mb-4 rounded-[22px] overflow-hidden" style={{ backgroundColor: panelBg, border: `1px solid ${panelBorder}` }}>
+          <div ref={tlRef} className="mb-3 rounded-[22px] overflow-hidden" style={{ backgroundColor: panelBg, border: `1px solid ${panelBorder}` }}>
             <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: `1px solid ${panelBorder}` }}>
               <span className="text-[12px] font-bold uppercase tracking-[0.07em]" style={{ color: c.textSecondary, opacity: 0.55 }}>Order Progress</span>
               {pct != null && <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ backgroundColor: `${sc}15`, color: sc }}>{pct}% complete</span>}
             </div>
-            <div className="px-4 pt-3 pb-2">
+            <div className="px-4 pt-2.5 pb-1.5">
               {STAGES.map((s, i) => (
                 <Stage key={s.key} stage={s} state={state(i)} isLast={i === 5} subtitle={subs[i] ?? null}
                   actions={acts[i] ?? null} progress={i === cur ? pct : null} dark={dark} c={c} idx={i} />
@@ -123,7 +123,7 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
           </div>
 
           {/* ── order details card ── */}
-          <div ref={detRef} className="mb-4">
+          <div ref={detRef} className="mb-3">
             <div className="rounded-[22px] overflow-hidden" style={{ backgroundColor: panelBg, border: `1px solid ${panelBorder}` }}>
               <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: `1px solid ${panelBorder}` }}>
                 <span className="text-[12px] font-bold uppercase tracking-[0.07em]" style={{ color: c.textSecondary, opacity: 0.55 }}>Order Details</span>
