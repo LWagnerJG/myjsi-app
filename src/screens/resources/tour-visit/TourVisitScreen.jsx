@@ -3,6 +3,7 @@ import {
     ArrowRight,
     Check,
     ChevronDown,
+    ChevronRight,
     Info,
     MapPin,
     Plus,
@@ -13,6 +14,7 @@ import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import { FormInput } from '../../../components/common/FormComponents.jsx';
 import { SearchableSelect } from '../../../components/forms/SearchableSelect.jsx';
 import { hapticLight, hapticSuccess, hapticWarning } from '../../../utils/haptics.js';
+import { isDarkTheme } from '../../../design-system/tokens.js';
 import { DEALER_DIRECTORY_DATA } from '../dealer-directory/data.js';
 import {
     TOUR_VISIT_AIRLINES,
@@ -35,13 +37,29 @@ const buildDefaultExperienceSelections = () =>
         ])
     );
 
-const sectionLabelStyle = {
-    fontSize: '0.72rem',
-    letterSpacing: '0.18em',
-    textTransform: 'uppercase',
-    fontWeight: 700,
-};
+/* ── Shared sub-components matching app design system ── */
 
+const CardHeader = ({ children, right, theme, dark }) => (
+    <div
+        className="flex items-center justify-between px-5 py-3 flex-shrink-0"
+        style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'}` }}
+    >
+        <span
+            className="text-[12px] font-bold uppercase tracking-[0.07em]"
+            style={{ color: theme.colors.textSecondary, opacity: 0.6 }}
+        >
+            {children}
+        </span>
+        {right}
+    </div>
+);
+
+const fieldSurface   = (dark) => dark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.80)';
+const panelSurface   = (dark) => dark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.78)';
+const subtleDivider  = (dark) => dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)';
+const surfaceBorder  = (dark) => `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'}`;
+
+/* legacy constants kept for internal component compatibility */
 const TOUR_VISIT_PANEL_SURFACE = 'rgba(255, 255, 255, 0.78)';
 const TOUR_VISIT_PANEL_SURFACE_COLLAPSED = 'rgba(255, 255, 255, 0.66)';
 const TOUR_VISIT_FIELD_SURFACE = 'rgba(255, 255, 255, 0.72)';
@@ -212,7 +230,7 @@ const TourVisitSelectField = ({ label, value, onChange, options, placeholder, th
 
 const TripMenuHeader = ({ title, theme }) => (
     <div className="pb-3">
-        <h2 className="text-[22px] font-semibold leading-tight" style={{ color: theme.colors.textPrimary }}>
+        <h2 className="text-[20px] font-black leading-tight tracking-tight" style={{ color: theme.colors.textPrimary }}>
             {title}
         </h2>
     </div>
@@ -422,40 +440,55 @@ const DateRangeDropdown = ({
     );
 };
 
-const FacilityOption = ({ facility, selected, onClick, theme, isInList = false, showTopDivider = false }) => (
-    <button
-        type="button"
-        onClick={onClick}
-        className={`w-full px-4 py-3.5 text-left transition-all motion-card ${isInList ? '' : 'rounded-[16px]'}`}
-        style={{
-            backgroundColor: isInList ? 'transparent' : TOUR_VISIT_FIELD_SURFACE,
-            border: selected ? `1px solid ${theme.colors.accent}55` : 'none',
-            borderTop: isInList && showTopDivider ? '1px solid rgba(0, 0, 0, 0.06)' : undefined,
-            color: theme.colors.textPrimary,
-            boxShadow: 'none',
-        }}
-    >
-        <div className="flex items-center justify-between gap-4">
-            <div className="min-w-0">
-                <h3 className="text-[15px] font-semibold leading-5">{facility.name}</h3>
-                <div className="mt-1 flex items-center gap-2 text-sm" style={{ color: theme.colors.textSecondary }}>
-                    <MapPin className="h-4 w-4 shrink-0" />
-                    <span>{facility.location}</span>
+const FacilityOption = ({ facility, selected, onClick, theme, isInList = false, showTopDivider = false }) => {
+    const dark = isDarkTheme(theme);
+    return (
+        <button
+            type="button"
+            onClick={onClick}
+            className="w-full px-5 text-left transition-all active:scale-[0.99]"
+            style={{
+                paddingTop: 14,
+                paddingBottom: 14,
+                borderTop: isInList && showTopDivider ? `1px solid ${subtleDivider(dark)}` : undefined,
+                backgroundColor: selected ? `${theme.colors.accent}09` : 'transparent',
+            }}
+        >
+            <div className="flex items-center gap-4">
+                {/* Location icon avatar */}
+                <div
+                    className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0"
+                    style={{ backgroundColor: selected ? `${theme.colors.accent}18` : (dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)') }}
+                >
+                    <MapPin className="w-4 h-4" style={{ color: selected ? theme.colors.accent : theme.colors.textSecondary, opacity: selected ? 1 : 0.5 }} />
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.08em] mb-0.5" style={{ color: theme.colors.accent, opacity: selected ? 1 : 0.55 }}>
+                        {facility.eyebrow}
+                    </p>
+                    <h3 className="text-[15px] font-bold leading-snug tracking-tight" style={{ color: theme.colors.textPrimary }}>
+                        {facility.name}
+                    </h3>
+                    <p className="text-[12px] mt-[2px] leading-snug" style={{ color: theme.colors.textSecondary, opacity: 0.65 }}>
+                        {facility.blurb}
+                    </p>
+                </div>
+
+                {/* Indicator */}
+                <div
+                    className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
+                    style={{ backgroundColor: selected ? theme.colors.accent : (dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)') }}
+                >
+                    {selected
+                        ? <Check className="w-3.5 h-3.5" style={{ color: theme.colors.accentText }} />
+                        : <ChevronRight className="w-3.5 h-3.5" style={{ color: theme.colors.textSecondary, opacity: 0.4 }} />}
                 </div>
             </div>
-            <span
-                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
-                style={{
-                    backgroundColor: theme.colors.surface,
-                    color: selected ? theme.colors.accentText : theme.colors.textSecondary,
-                    border: 'none',
-                }}
-            >
-                {selected ? <Check className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
-            </span>
-        </div>
-    </button>
-);
+        </button>
+    );
+};
 
 const TourVisitBooleanField = ({ label, value, onChange, theme }) => (
     <div
