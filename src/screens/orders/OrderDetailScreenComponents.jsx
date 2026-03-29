@@ -120,10 +120,9 @@ export const Stage = React.memo(({ stage, state, isLast, subtitle, actions, prog
         </div>
         {now && progress != null && (
           <div className="mt-2.5">
-            <div className="h-[7px] rounded-full overflow-hidden" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.07)' : 'rgba(53,53,53,0.07)' }}>
+            <div className="h-[6px] rounded-full overflow-hidden" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.07)' : 'rgba(53,53,53,0.06)' }}>
               <div className="h-full rounded-full" style={{ width: `${progress}%`, backgroundColor: c.accent, transition: 'width .8s cubic-bezier(.4,0,.2,1)' }} />
             </div>
-            <p className="text-xs font-medium mt-1 text-right" style={{ color: c.textSecondary }}>{progress}%</p>
           </div>
         )}
       </div>
@@ -132,10 +131,10 @@ export const Stage = React.memo(({ stage, state, isLast, subtitle, actions, prog
 });
 
 /* ── line item row (redesigned) ──────────────────────────────── */
-export const LineItem = React.memo(({ item, open, onToggle, c, dark, panelBorder }) => (
+export const LineItem = React.memo(({ item, open, onToggle, c, dark, panelBorder, isFirst }) => (
   <div className="transition-colors" style={{
-    backgroundColor: open ? (dark ? 'rgba(255,255,255,0.03)' : `${c.accent}06`) : 'transparent',
-    borderTop: panelBorder ? `1px solid ${panelBorder}` : undefined,
+    backgroundColor: open ? (dark ? 'rgba(255,255,255,0.03)' : `${c.accent}05`) : 'transparent',
+    borderTop: (!isFirst && panelBorder) ? `1px solid ${panelBorder}` : undefined,
   }}>
     <button onClick={onToggle}
       className="w-full text-left px-5 py-3.5 flex items-center gap-3 select-none focus:outline-none">

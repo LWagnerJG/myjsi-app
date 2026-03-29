@@ -725,6 +725,11 @@ h6 {
 }
 
 /* ── Focus ring ── */
+/* Remove tap-focus outline globally on touch/pointer — keeps keyboard nav intact */
+*:focus:not(:focus-visible) {
+    outline: none !important;
+}
+
 /* Used by FormInput, TagInput, PortalNativeSelect, and any interactive element
    that needs a visible keyboard-focus indicator. Relies on --theme-focus-ring
    which is set per-theme in :root and [data-theme="dark"]. */
@@ -735,6 +740,11 @@ h6 {
 
 .focus-ring:focus:not(:focus-visible) {
     outline: none;
+}
+
+/* iOS Safari: suppress the default -webkit-tap-highlight-color blue flash */
+button, a, [role="button"] {
+    -webkit-tap-highlight-color: transparent;
 }
 
 /* Shared motion utility classes */

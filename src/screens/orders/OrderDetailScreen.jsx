@@ -29,9 +29,8 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
 
   const dark = isDarkTheme(theme);
   const c = theme.colors;
-  const panelBg = dark ? 'rgba(255,255,255,0.03)' : '#FFFFFF';
-  const panelBorder = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
-  const panelSubtle = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)';
+  const panelBg  = c.surface;
+  const panelBorder = dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
 
   const hdrRef = useFadeUp(0);
   const tlRef  = useFadeUp(80);
@@ -78,31 +77,31 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
         <div className="max-w-xl mx-auto w-full">
 
           {/* ── header snapshot card ── */}
-          <div ref={hdrRef} className="mb-5 mt-2">
+          <div ref={hdrRef} className="mb-4 mt-2">
             <div className="rounded-[22px] overflow-hidden" style={{ backgroundColor: panelBg, border: `1px solid ${panelBorder}` }}>
-              {/* top row: order number + status */}
-              <div className="flex items-center justify-between px-5 pt-4 pb-3" style={{ borderBottom: `1px solid ${panelBorder}` }}>
-                <span className="text-[11px] font-bold tracking-[0.07em] uppercase px-2.5 py-1 rounded-full" style={{ backgroundColor: panelSubtle, color: c.textSecondary }}>#{order.orderNumber}</span>
+              {/* order number + status */}
+              <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: `1px solid ${panelBorder}` }}>
+                <span className="text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: c.textSecondary, opacity: 0.5 }}>SO {order.orderNumber}</span>
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ backgroundColor: `${sc}15` }}>
                   <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: sc }} />
                   <span className="text-[11px] font-bold" style={{ color: sc }}>{order.status}</span>
                 </div>
               </div>
-              {/* title block */}
-              <div className="px-5 py-4">
-                <h1 className="text-[22px] font-black leading-tight tracking-tight mb-0.5" style={{ color: c.textPrimary }}>{tc(order.details)}</h1>
-                <p className="text-[14px] font-medium" style={{ color: c.textSecondary }}>{tc(order.company)}</p>
+              {/* title + company */}
+              <div className="px-5 pt-4 pb-3">
+                <h1 className="text-[21px] font-black leading-tight tracking-tight" style={{ color: c.textPrimary }}>{tc(order.details)}</h1>
+                <p className="text-[13px] font-medium mt-0.5" style={{ color: c.textSecondary }}>{tc(order.company)}</p>
               </div>
-              {/* stat row */}
-              <div className="grid grid-cols-3 divide-x px-0" style={{ borderTop: `1px solid ${panelBorder}`, borderColor: panelBorder }}>
+              {/* stat row — explicit borders, no divide-x */}
+              <div className="grid grid-cols-3" style={{ borderTop: `1px solid ${panelBorder}` }}>
                 {[
-                  { label: 'Net Total', value: fmt$(order.net, true), bold: true },
-                  { label: 'Est. Ship', value: fs(order.shipDate) || '—', bold: false },
-                  { label: 'Items', value: qty, bold: false },
-                ].map(({ label, value, bold }) => (
-                  <div key={label} className="px-4 py-3" style={{ borderColor: panelBorder }}>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.07em] mb-0.5" style={{ color: c.textSecondary, opacity: 0.6 }}>{label}</p>
-                    <p className={`${bold ? 'text-[17px] font-black' : 'text-[15px] font-semibold'} tabular-nums leading-tight`} style={{ color: c.textPrimary }}>{value}</p>
+                  { label: 'Net Total', value: fmt$(order.net, true), large: true },
+                  { label: 'Est. Ship', value: fs(order.shipDate) || '—', large: false },
+                  { label: 'Items',     value: String(qty),            large: false },
+                ].map(({ label, value, large }, i) => (
+                  <div key={label} className="px-4 py-3" style={{ borderLeft: i > 0 ? `1px solid ${panelBorder}` : 'none' }}>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.07em] mb-0.5" style={{ color: c.textSecondary, opacity: 0.55 }}>{label}</p>
+                    <p className={`${large ? 'text-[16px] font-black' : 'text-[14px] font-semibold'} tabular-nums leading-tight`} style={{ color: c.textPrimary }}>{value}</p>
                   </div>
                 ))}
               </div>
@@ -110,12 +109,12 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
           </div>
 
           {/* ── timeline ── */}
-          <div ref={tlRef} className="mb-5 rounded-[22px] overflow-hidden" style={{ backgroundColor: panelBg, border: `1px solid ${panelBorder}` }}>
+          <div ref={tlRef} className="mb-4 rounded-[22px] overflow-hidden" style={{ backgroundColor: panelBg, border: `1px solid ${panelBorder}` }}>
             <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: `1px solid ${panelBorder}` }}>
-              <span className="text-[12px] font-bold uppercase tracking-[0.07em]" style={{ color: c.textSecondary, opacity: 0.6 }}>Order Progress</span>
+              <span className="text-[12px] font-bold uppercase tracking-[0.07em]" style={{ color: c.textSecondary, opacity: 0.55 }}>Order Progress</span>
               {pct != null && <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ backgroundColor: `${sc}15`, color: sc }}>{pct}% complete</span>}
             </div>
-            <div className="px-4 py-3">
+            <div className="px-4 pt-3 pb-2">
               {STAGES.map((s, i) => (
                 <Stage key={s.key} stage={s} state={state(i)} isLast={i === 5} subtitle={subs[i] ?? null}
                   actions={acts[i] ?? null} progress={i === cur ? pct : null} dark={dark} c={c} idx={i} />
@@ -124,13 +123,13 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
           </div>
 
           {/* ── order details card ── */}
-          <div ref={detRef} className="mb-5">
+          <div ref={detRef} className="mb-4">
             <div className="rounded-[22px] overflow-hidden" style={{ backgroundColor: panelBg, border: `1px solid ${panelBorder}` }}>
               <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: `1px solid ${panelBorder}` }}>
-                <span className="text-[12px] font-bold uppercase tracking-[0.07em]" style={{ color: c.textSecondary, opacity: 0.6 }}>Order Details</span>
+                <span className="text-[12px] font-bold uppercase tracking-[0.07em]" style={{ color: c.textSecondary, opacity: 0.55 }}>Order Details</span>
                 <Pill icon={Share2} label="Share" onClick={share} dark={dark} />
               </div>
-              <div className="grid grid-cols-2 gap-y-4 gap-x-5 px-5 py-4">
+              <div className="grid grid-cols-2 gap-y-4 gap-x-4 px-5 py-4">
                 {[
                   ['PO Number', order.po],
                   ['Est. Ship', fd(order.shipDate)],
@@ -138,14 +137,14 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
                   ['Discount', order.discount],
                 ].map(([l, v]) => (
                   <div key={l}>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.07em] mb-0.5" style={{ color: c.textSecondary, opacity: 0.6 }}>{l}</p>
-                    <p className="text-[14px] font-semibold" style={{ color: c.textPrimary }}>{v}</p>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.07em] mb-0.5" style={{ color: c.textSecondary, opacity: 0.55 }}>{l}</p>
+                    <p className="text-[14px] font-semibold leading-snug" style={{ color: c.textPrimary }}>{v}</p>
                   </div>
                 ))}
               </div>
               {order.shipTo && (
-                <div className="px-5 pb-4 pt-1" style={{ borderTop: `1px solid ${panelBorder}` }}>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.07em] mb-1 mt-3" style={{ color: c.textSecondary, opacity: 0.6 }}>Ship To</p>
+                <div className="px-5 py-4" style={{ borderTop: `1px solid ${panelBorder}` }}>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.07em] mb-1.5" style={{ color: c.textSecondary, opacity: 0.55 }}>Ship To</p>
                   <p className="text-[13px] leading-relaxed whitespace-pre-line" style={{ color: c.textPrimary }}>{tc(order.shipTo)}</p>
                 </div>
               )}
@@ -153,19 +152,17 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
           </div>
 
           {/* ── line items ── */}
-          <div ref={liRef}>
+          <div ref={liRef} className="mb-2">
             <div className="rounded-[22px] overflow-hidden" style={{ backgroundColor: panelBg, border: `1px solid ${panelBorder}` }}>
               <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: `1px solid ${panelBorder}` }}>
-                <span className="text-[12px] font-bold uppercase tracking-[0.07em]" style={{ color: c.textSecondary, opacity: 0.6 }}>Line Items</span>
-                <span className="text-[11px] font-medium" style={{ color: c.textSecondary }}>
+                <span className="text-[12px] font-bold uppercase tracking-[0.07em]" style={{ color: c.textSecondary, opacity: 0.55 }}>Line Items</span>
+                <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)', color: c.textSecondary }}>
                   {order.lineItems.length} {order.lineItems.length === 1 ? 'product' : 'products'}
                 </span>
               </div>
-              <div className="py-2">
-                {order.lineItems.map((li) => (
-                  <LineItem key={li.line} item={li} open={xLine === li.line} onToggle={() => toggle(li.line)} c={c} dark={dark} panelBorder={panelBorder} />
-                ))}
-              </div>
+              {order.lineItems.map((li, idx) => (
+                <LineItem key={li.line} item={li} open={xLine === li.line} onToggle={() => toggle(li.line)} c={c} dark={dark} panelBorder={panelBorder} isFirst={idx === 0} />
+              ))}
             </div>
           </div>
 
