@@ -83,27 +83,27 @@ export const Stage = React.memo(({ stage, state, isLast, subtitle, actions, prog
   const { Icon } = stage;
   const ref = useFadeUp(idx * 50);
 
-  const cirBg = done ? (dark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.06)')
+  const cirBg = done ? (dark ? 'rgba(255,255,255,0.08)' : `${c.accent}12`)
+    : now ? `${c.accent}18`
+    : dark ? 'rgba(255,255,255,0.04)' : 'rgba(53,53,53,0.04)';
+  const cirBorder = done ? `${c.accent}30` : now ? `${c.accent}50` : 'transparent';
+  const icClr = done ? c.accent
     : now ? c.accent
-    : dark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.04)';
-  const cirBorder = done ? (dark ? 'rgba(255,255,255,0.18)' : 'rgba(53,53,53,0.12)') : 'transparent';
-  const icClr = done ? (dark ? 'rgba(255,255,255,0.7)' : 'rgba(53,53,53,0.6)')
-    : now ? (c.accentText || '#fff')
-    : dark ? 'rgba(255,255,255,0.2)' : 'rgba(53,53,53,0.2)';
-  const lineClr = done ? (dark ? 'rgba(255,255,255,0.15)' : 'rgba(53,53,53,0.12)')
-    : dark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.06)';
-  const txtClr = later ? (dark ? 'rgba(255,255,255,0.25)' : 'rgba(53,53,53,0.25)') : c.textPrimary;
+    : dark ? 'rgba(255,255,255,0.18)' : 'rgba(53,53,53,0.18)';
+  const lineClr = done ? `${c.accent}30`
+    : dark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.05)';
+  const txtClr = later ? (dark ? 'rgba(255,255,255,0.22)' : 'rgba(53,53,53,0.22)') : c.textPrimary;
 
   return (
-    <div ref={ref} className="flex" style={{ gap: 14 }}>
-      <div className="flex flex-col items-center" style={{ width: 40, flexShrink: 0 }}>
-        <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+    <div ref={ref} className="flex" style={{ gap: 12 }}>
+      <div className="flex flex-col items-center" style={{ width: 34, flexShrink: 0 }}>
+        <div className="w-[34px] h-[34px] rounded-full flex items-center justify-center flex-shrink-0"
           style={{ backgroundColor: cirBg, border: `1.5px solid ${cirBorder}` }}>
-          {done ? <Chk clr={icClr} /> : <Icon className="w-[18px] h-[18px]" style={{ color: icClr }} />}
+          {done ? <Chk clr={icClr} /> : <Icon className="w-4 h-4" style={{ color: icClr }} />}
         </div>
-        {!isLast && <div className="flex-1 w-px" style={{ minHeight: 14, backgroundColor: lineClr }} />}
+        {!isLast && <div className="flex-1 w-px" style={{ minHeight: 10, backgroundColor: lineClr }} />}
       </div>
-      <div className={`flex-1 min-w-0 ${isLast ? '' : 'pb-4'}`} style={{ paddingTop: 7 }}>
+      <div className={`flex-1 min-w-0 ${isLast ? '' : 'pb-3.5'}`} style={{ paddingTop: 6 }}>
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
@@ -132,13 +132,13 @@ export const Stage = React.memo(({ stage, state, isLast, subtitle, actions, prog
 });
 
 /* ── line item row (redesigned) ──────────────────────────────── */
-export const LineItem = React.memo(({ item, open, onToggle, c, dark }) => (
-  <div className="rounded-2xl mb-2 transition-colors" style={{
-    backgroundColor: open ? (dark ? 'rgba(255,255,255,0.03)' : '#fff') : 'transparent',
-    border: open ? (dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)') : '1px solid transparent',
+export const LineItem = React.memo(({ item, open, onToggle, c, dark, panelBorder }) => (
+  <div className="transition-colors" style={{
+    backgroundColor: open ? (dark ? 'rgba(255,255,255,0.03)' : `${c.accent}06`) : 'transparent',
+    borderTop: panelBorder ? `1px solid ${panelBorder}` : undefined,
   }}>
     <button onClick={onToggle}
-      className="w-full text-left px-4 py-3 flex items-center gap-3 select-none focus:outline-none">
+      className="w-full text-left px-5 py-3.5 flex items-center gap-3 select-none focus:outline-none">
       <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-bold"
         style={{
           backgroundColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.05)',
@@ -160,8 +160,8 @@ export const LineItem = React.memo(({ item, open, onToggle, c, dark }) => (
     </button>
     <div style={{ display: 'grid', gridTemplateRows: open ? '1fr' : '0fr', opacity: open ? 1 : 0, transition: 'grid-template-rows .25s ease, opacity .2s ease' }}>
       <div style={{ overflow: 'hidden' }}>
-        <div className="px-4 pb-4">
-          <div className="ml-10 pt-1 space-y-3">
+        <div className="px-5 pb-4">
+          <div className="ml-[46px] pt-0.5 space-y-3">
             {/* pricing grid */}
             <div className="grid grid-cols-3 gap-3">
               {[['Unit Price', fmt$(item.net, true)], ['Extended', fmt$(item.extNet, true)], ['Quantity', item.quantity]].map(([l, v]) => (
