@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { ArrowUp, ArrowDown, TrendingUp, ChevronRight, Target, Trophy, Calendar, DollarSign } from 'lucide-react';
+import { ArrowUp, ArrowDown, TrendingUp, ChevronRight, Trophy, Calendar, DollarSign } from 'lucide-react';
 import { MONTHLY_SALES_DATA, SALES_VERTICALS_DATA, CUSTOMER_RANK_DATA, INCENTIVE_REWARDS_DATA } from './data.js';
 import { ORDER_DATA, STATUS_COLORS } from '../orders/data.js';
 import { SalesByVerticalBreakdown } from './components/SalesByVerticalBreakdown.jsx';
@@ -169,7 +169,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
 
           {/* Main KPI card */}
           <GlassCard theme={theme} className="p-5 h-full" variant="elevated">
-            <div className="h-full flex flex-col gap-4">
+            <div className="h-full flex flex-col gap-3">
               {/* Header */}
               <div className="flex items-start justify-between gap-3">
                 <div className="space-y-1 min-w-0">
@@ -188,11 +188,9 @@ export const SalesScreen = ({ theme, onNavigate }) => {
               </div>
 
               {/* Progress to goal */}
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-xs font-semibold opacity-50">
-                    <Target className="w-3.5 h-3.5" /> Progress to Goal
-                  </div>
+                  <span className="text-xs font-semibold opacity-40">Progress to Goal</span>
                   <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-widest"
                     style={{
                       backgroundColor: aheadOfPace ? (isDark ? 'rgba(107,155,122,0.15)' : 'rgba(74,124,89,0.08)') : (isDark ? 'rgba(200,112,112,0.15)' : 'rgba(184,92,92,0.08)'),
@@ -223,14 +221,14 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                             ${(val / 1000).toFixed(0)}k
                           </div>
                         )}
-                        <div className="w-full rounded" style={{
-                          height: ready ? `${Math.max(6, pct)}%` : '0%',
+                        <div className="w-full rounded-md" style={{
+                          height: ready ? `${Math.max(8, pct)}%` : '0%',
                           backgroundColor: colors.accent,
-                          opacity: isHovered ? (isDark ? 0.65 : 0.45) : (isDark ? 0.35 : 0.22),
+                          opacity: isHovered ? (isDark ? 0.7 : 0.5) : (isDark ? 0.4 : 0.3),
                           transition: `height 0.4s ease-out ${0.1 + i * 0.025}s, opacity 0.15s`,
                         }} />
                       </div>
-                      <span className="text-[11px] font-semibold" style={{ opacity: isHovered ? 0.7 : 0.3, transition: 'opacity 0.15s' }}>{m.month}</span>
+                      <span className="text-[11px] font-semibold" style={{ opacity: isHovered ? 0.8 : 0.4, transition: 'opacity 0.15s' }}>{m.month}</span>
                     </div>
                   );
                 })}
@@ -333,15 +331,9 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                         opacity: ready ? 1 : 0,
                         transition: `opacity 0.25s ease ${0.08 + i * 0.03}s`,
                       }}>
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs shrink-0"
-                          style={{ backgroundColor: subtle(isDark, 2) }}>
-                          PO
-                        </div>
-                        <div className="text-left min-w-0">
-                          <p className="text-sm font-semibold truncate max-w-[170px]">{formatCompanyName(order.company)}</p>
-                          <p className="text-xs opacity-40 tabular-nums">{new Date(order.date).toLocaleDateString()}</p>
-                        </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold truncate">{formatCompanyName(order.company)}</p>
+                        <p className="text-xs opacity-40 tabular-nums">{new Date(order.date).toLocaleDateString()}</p>
                       </div>
                       <div className="text-right shrink-0 ml-2 space-y-0.5">
                         <p className="text-sm font-bold tabular-nums">${order.net.toLocaleString()}</p>

@@ -38,7 +38,7 @@ export const SalesByVerticalBreakdown = ({ data = [], theme, palette }) => {
                 <span className="text-xs font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{row.name}</span>
               </div>
               {/* Bar track */}
-              <div className="relative h-1.5 rounded-full overflow-hidden" style={{ background: theme.colors.subtle }} aria-hidden="true">
+              <div className="relative h-2 rounded-full overflow-hidden" style={{ background: theme.colors.subtle }} aria-hidden="true">
                 <div className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${rel}%`, background: row.color, opacity: barOpacity, transition: 'width 480ms cubic-bezier(.4,.2,.2,1)' }} />
               </div>
               {/* Value */}
