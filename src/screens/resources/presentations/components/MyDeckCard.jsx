@@ -42,17 +42,17 @@ export const MyDeckCard = ({ deck, theme, onDownload, onShare, onDelete }) => {
                 </div>
                 <div className="flex gap-2">
                     <button onClick={onDownload}
-                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-2xl text-sm font-semibold transition-all active:scale-[0.97]"
+                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-sm font-semibold transition-all active:scale-[0.97]"
                         style={{ background: theme.colors.accent, color: theme.colors.accentText || (isDark ? '#1A1A1A' : '#FFFFFF') }}>
                         <Download className="w-3.5 h-3.5" /> Download
                     </button>
                     <button onClick={onShare}
-                        className="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-semibold transition-all active:scale-[0.97]"
+                        className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold transition-all active:scale-[0.97]"
                         style={{ border: `1.5px solid ${theme.colors.border}`, color: theme.colors.textPrimary }}>
                         <Share2 className="w-3.5 h-3.5" />
                     </button>
                     <button onClick={onDelete}
-                        className="flex items-center justify-center w-10 rounded-2xl transition-all active:scale-[0.97]"
+                        className="flex items-center justify-center w-10 rounded-full transition-all active:scale-[0.97]"
                         style={{ border: `1.5px solid ${theme.colors.border}`, color: theme.colors.textSecondary }}>
                         <Trash2 className="w-3.5 h-3.5" />
                     </button>

@@ -16,7 +16,7 @@ export const DrawerItem = React.memo(({ item, onUpdateCart, theme, isLast = fals
                     {item.code && <p className="text-xs opacity-70" style={{ color: theme.colors.textSecondary }}>{item.code}</p>}
                 </div>
                 <div className="flex items-center gap-1">
-                    <button onClick={dec} aria-label={item.quantity === 1 ? 'Remove item' : 'Decrease quantity'} className="w-6 h-6 flex items-center justify-center rounded-full active:scale-90">{item.quantity === 1 ? <Trash2 className="w-3 h-3" style={{ color: '#B85C5C' }} /> : <Minus className="w-3 h-3" style={{ color: theme.colors.textSecondary }} />}</button>
+                    <button onClick={dec} aria-label={item.quantity === 1 ? 'Remove item' : 'Decrease quantity'} className="w-6 h-6 flex items-center justify-center rounded-full active:scale-90">{item.quantity === 1 ? <Trash2 className="w-3 h-3" style={{ color: theme.colors.error }} /> : <Minus className="w-3 h-3" style={{ color: theme.colors.textSecondary }} />}</button>
                     <span className="font-bold w-4 text-center text-xs">{item.quantity}</span>
                     <button onClick={inc} aria-label="Increase quantity" className="w-6 h-6 flex items-center justify-center rounded-full active:scale-90"><Plus className="w-3 h-3" style={{ color: theme.colors.secondary }} /></button>
                 </div>

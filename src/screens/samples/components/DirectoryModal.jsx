@@ -119,7 +119,7 @@ export const DirectoryModal = ({ show, onClose, onSelect, theme, dealers = [], d
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2">
                                             <p className="font-semibold text-[13px] truncate" style={{ color: theme.colors.textPrimary }}>{it.name}</p>
-                                            {it.type === 'dealer' && <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ backgroundColor: isDark ? 'rgba(74,124,89,0.15)' : 'rgba(74,124,89,0.08)', color: '#4A7C59' }}>Dealer</span>}
+                                            {it.type === 'dealer' && <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ backgroundColor: isDark ? 'rgba(74,124,89,0.15)' : 'rgba(74,124,89,0.08)', color: theme.colors.success }}>Dealer</span>}
                                             {it.type === 'design' && <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ backgroundColor: isDark ? 'rgba(91,123,140,0.15)' : 'rgba(91,123,140,0.08)', color: '#5B7B8C' }}>Design</span>}
                                         </div>
                                         {it.address && (

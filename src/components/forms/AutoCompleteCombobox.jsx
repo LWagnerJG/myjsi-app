@@ -1,6 +1,6 @@
 import React, { useState, useRef, useMemo, useEffect, useLayoutEffect } from 'react';
 import { Search } from 'lucide-react';
-import { isDarkTheme } from '../../design-system/tokens.js';
+import { isDarkTheme, DESIGN_TOKENS } from '../../design-system/tokens.js';
 
 export const AutoCompleteCombobox = React.memo(({
     label,

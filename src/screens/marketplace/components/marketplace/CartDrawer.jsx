@@ -78,7 +78,7 @@ export const CartDrawer = ({ cart, balance, onUpdateQty, onRemove, onCheckout, t
                               onClick={() => item.qty === 1 ? onRemove(item.cartId) : onUpdateQty(item.cartId, -1)}
                               className="w-7 h-7 flex items-center justify-center rounded-full active:scale-90 transition"
                             >
-                              {item.qty === 1 ? <Trash2 className="w-3.5 h-3.5" style={{ color: '#B85C5C' }} /> : <Minus className="w-3.5 h-3.5" style={{ color: theme.colors.textSecondary }} />}
+                              {item.qty === 1 ? <Trash2 className="w-3.5 h-3.5" style={{ color: theme.colors.error }} /> : <Minus className="w-3.5 h-3.5" style={{ color: theme.colors.textSecondary }} />}
                             </button>
                             <span className="font-bold w-5 text-center text-xs" style={{ color: theme.colors.textPrimary }}>{item.qty}</span>
                             <button

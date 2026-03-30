@@ -53,7 +53,7 @@ export const RfpDropModal = ({ show, onClose, onAccept, file, theme }) => {
               border: `1px solid ${c.border}`,
             }}
           >
-            <FileText className="w-5 h-5 flex-shrink-0" style={{ color: '#B85C5C' }} />
+            <FileText className="w-5 h-5 flex-shrink-0" style={{ color: theme.colors.error }} />
             <div className="text-left flex-1 min-w-0">
               <div className="text-sm font-medium truncate" style={{ color: c.textPrimary }}>
                 {file.name}

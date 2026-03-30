@@ -138,15 +138,15 @@ const getSeriesProcurementPrompts = (series) => {
 };
 
 const getHealthBand = (ratio) => {
-  if (ratio < 0.35) return { label: 'At Risk', tone: '#B85C5C', step: 1 };
-  if (ratio < 0.6) return { label: 'Developing', tone: '#C4956A', step: 2 };
-  if (ratio < 0.85) return { label: 'Strong', tone: '#5B7B8C', step: 3 };
-  return { label: 'Ready', tone: '#4A7C59', step: 4 };
+  if (ratio < 0.35) return { label: 'At Risk', tone: 'var(--theme-error)', step: 1 };
+  if (ratio < 0.6) return { label: 'Developing', tone: 'var(--theme-warning)', step: 2 };
+  if (ratio < 0.85) return { label: 'Strong', tone: 'var(--theme-info)', step: 3 };
+  return { label: 'Ready', tone: 'var(--theme-success)', step: 4 };
 };
 
 const FieldError = ({ show, message }) => {
   if (!show || !message) return null;
-  return <p className="nl-field-error text-xs mt-1.5" style={{ color: '#B85C5C' }}>{message}</p>;
+  return <p className="nl-field-error text-xs mt-1.5" style={{ color: 'var(--theme-error)' }}>{message}</p>;
 };
 
 const StrengthCircle = ({ percent, tone, size = 44, stroke = 4, textSize = '11px' }) => {
@@ -922,6 +922,9 @@ export const NewLeadScreen = ({
     onSuccess(newLeadData);
   }, [animateToStep, canSubmit, errors, markStepFieldsTouched, newLeadData, onSuccess]);
 
+  const isOutToBid = (newLeadData.dealers || []).length === 1 && newLeadData.dealers[0] === 'Out to Bid';
+  const realDealers = (newLeadData.dealers || []).filter(d => d !== 'Out to Bid');
+
   return (
     <form onSubmit={handleSubmit} className="min-h-full app-header-offset flex flex-col" style={{ backgroundColor: c.background }}>
       {/* Invisible focus sink — prevents AnimatedScreenWrapper from focusing a heading on mount */}
@@ -1103,7 +1106,7 @@ export const NewLeadScreen = ({
               <div style={{ paddingTop: '1rem' }}>
                 <Section title="Potential Duplicates" theme={theme}>
                   <div className="space-y-2 pt-2">
-                    <div className="flex items-center gap-2 text-xs font-medium" style={{ color: '#B85C5C' }}>
+                    <div className="flex items-center gap-2 text-xs font-medium" style={{ color: c.error || 'var(--theme-error)' }}>
                       <AlertTriangle className="w-4 h-4" />
                       Similar opportunities already exist.
                     </div>
@@ -1692,7 +1695,7 @@ export const NewLeadScreen = ({
                     }}
                   />
                 </div>
-                {fileNotice && <p className="text-xs" style={{ color: '#B85C5C' }}>{fileNotice}</p>}
+                {fileNotice && <p className="text-xs" style={{ color: c.error || 'var(--theme-error)' }}>{fileNotice}</p>}
                 {(newLeadData.attachments || []).length > 0 && (
                   <div className="space-y-1.5">
                     {(newLeadData.attachments || []).map((file, idx) => (

@@ -23,7 +23,7 @@ export const RequestItem = React.memo(({ item, onRemoveFromRequest, theme, isFir
                 onClick={() => onRemoveFromRequest(item.id)}
                 className="w-6 h-6 flex items-center justify-center rounded-full transition-all duration-200 transform active:scale-90 hover:bg-black/5 dark:hover:bg-white/5 dark:hover:bg-white/5"
             >
-                <Trash2 className="w-3 h-3" style={{ color: '#B85C5C' }} />
+                <Trash2 className="w-3 h-3" style={{ color: theme.colors.error }} />
             </button>
         </div>
     </>

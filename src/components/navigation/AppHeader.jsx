@@ -73,7 +73,7 @@ export const AppHeader = React.memo(({
                         className="fixed top-0 left-0 right-0 pointer-events-none transition-opacity duration-200 ease-out"
                         style={{
                             height: scrimHeight,
-                            zIndex: 27,
+                            zIndex: 29,
                             opacity: scrimOpacity,
                             backdropFilter: 'blur(20px) saturate(1.6)',
                             WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
@@ -87,7 +87,7 @@ export const AppHeader = React.memo(({
                         className="fixed top-0 left-0 right-0 pointer-events-none transition-opacity duration-200 ease-out"
                         style={{
                             height: scrimHeight,
-                            zIndex: 28,
+                            zIndex: 29,
                             opacity: gradientOpacity,
                             background: `linear-gradient(to bottom,
                                 rgba(${bgR},0.34) 0%,
@@ -106,7 +106,7 @@ export const AppHeader = React.memo(({
                     style={{
                         ...(isHome ? homeChromePillStyles : {
                             borderRadius: 9999,
-                            backgroundColor: dark ? '#2A2A2A' : '#FFFFFF',
+                            backgroundColor: theme?.colors?.surface || (dark ? '#2A2A2A' : '#FFFFFF'),
                             boxShadow: 'none',
                             border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
                         }),

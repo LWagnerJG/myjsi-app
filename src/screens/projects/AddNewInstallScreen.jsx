@@ -195,7 +195,7 @@ export const AddNewInstallScreen = ({ theme, onAddInstall }) => {
                         <GlassCard theme={theme} className="lg:col-span-7 p-5 sm:p-6 space-y-5">
                             <div className="flex items-center justify-between">
                                 <label className="text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>
-                                    Photos <span style={{ color: '#B85C5C' }}>*</span>
+                                    Photos <span style={{ color: theme.colors.error }}>*</span>
                                 </label>
                                 <span className="text-[12px] font-semibold tabular-nums" style={{ color: theme.colors.textSecondary }}>
                                     {photos.length}/{INSTALLATION_CONSTANTS.PHOTO_REQUIREMENTS.maxPhotos}

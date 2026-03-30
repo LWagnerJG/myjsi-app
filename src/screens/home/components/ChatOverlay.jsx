@@ -114,7 +114,8 @@ export const ChatOverlay = ({
 
     return (
         <div
-            className="fixed inset-0 z-[999] flex items-center justify-center"
+            className="fixed inset-0 flex items-center justify-center"
+            style={{ zIndex: 60 }}
             role="dialog"
             aria-modal="true"
             aria-label="Elliott Bot"

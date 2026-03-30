@@ -20,7 +20,16 @@
       "Bash(cmd /c \"set PATH=C:\\Program Files\\nodejs;%PATH% && cd /d C:\\Users\\lwagner\\.claude-worktrees\\myjsi-app\\interesting-wu && npm run dev\")",
       "Bash(powershell -Command:*)",
       "Bash(powershell -NoProfile -Command \"& { [Environment]::SetEnvironmentVariable(''PATH'', ''C:\\Program Files\\nodejs;'' + [Environment]::GetEnvironmentVariable(''PATH'')); Set-Location ''C:\\Users\\lwagner\\.claude-worktrees\\myjsi-app\\interesting-wu''; & ''C:\\Program Files\\nodejs\\npm.cmd'' install 2>&1 }\")",
-      "Bash(powershell -NoProfile -Command \"& { [Environment]::SetEnvironmentVariable(''PATH'', ''C:\\Program Files\\nodejs;'' + [Environment]::GetEnvironmentVariable(''PATH'')); Set-Location ''C:\\Users\\lwagner\\.claude-worktrees\\myjsi-app\\interesting-wu''; & ''C:\\Program Files\\nodejs\\npm.cmd'' run dev 2>&1 }\")"
+      "Bash(powershell -NoProfile -Command \"& { [Environment]::SetEnvironmentVariable(''PATH'', ''C:\\Program Files\\nodejs;'' + [Environment]::GetEnvironmentVariable(''PATH'')); Set-Location ''C:\\Users\\lwagner\\.claude-worktrees\\myjsi-app\\interesting-wu''; & ''C:\\Program Files\\nodejs\\npm.cmd'' run dev 2>&1 }\")",
+      "Skill(update-config)",
+      "Skill(update-config:*)",
+      "Read(//c/Users/lwagner/OneDrive - Jasper Group/2022-2025/MyJSI/myjsi-app/**)",
+      "Bash(gh run:*)",
+      "Bash(npx vercel:*)",
+      "mcp__claude_ai_Vercel__list_projects",
+      "mcp__claude_ai_Vercel__list_deployments",
+      "mcp__claude_ai_Vercel__get_deployment",
+      "Bash(npm install:*)"
     ]
   }
 }

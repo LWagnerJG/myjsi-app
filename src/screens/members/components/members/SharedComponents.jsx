@@ -42,8 +42,8 @@ export const ConfirmModal = ({ open, title, message, confirmLabel, onConfirm, on
                 }}>
                 <div className="flex items-start gap-3">
                     <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-                        style={{ backgroundColor: '#B85C5C12' }}>
-                        <AlertTriangle className="w-4.5 h-4.5" style={{ color: '#B85C5C' }} />
+                        style={{ backgroundColor: theme.colors.errorLight }}>
+                        <AlertTriangle className="w-4.5 h-4.5" style={{ color: theme.colors.error }} />
                     </div>
                     <div>
                         <h3 className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>{title}</h3>

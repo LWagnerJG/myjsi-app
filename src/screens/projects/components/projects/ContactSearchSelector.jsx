@@ -47,7 +47,7 @@ export const ContactSearchSelector = ({ value, onChange, dealers, theme }) => {
         </div>
       )}
       {open && !value && (
-        <div className="absolute z-50 mt-1.5 left-0 right-0 rounded-2xl overflow-hidden shadow-xl" style={{ backgroundColor: isDark ? '#2a2a2a' : '#fff', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.08)' }}>
+        <div className="absolute z-50 mt-1.5 left-0 right-0 rounded-2xl overflow-hidden shadow-xl" style={{ backgroundColor: theme.colors.surface, border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.08)' }}>
           <div className="max-h-[200px] overflow-y-auto scrollbar-hide py-1">
             {filtered.length > 0 ? filtered.map(c => (
               <button key={c.name} onClick={() => { onChange(c.name); setQuery(''); setOpen(false); }} className="w-full text-left px-3 py-2.5 flex items-center gap-2.5 transition-colors" onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>

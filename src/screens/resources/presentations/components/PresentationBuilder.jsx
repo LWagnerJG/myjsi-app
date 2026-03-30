@@ -142,7 +142,7 @@ export const PresentationBuilder = ({ theme, onDeckGenerated }) => {
                         <button
                             onClick={handleGenerate}
                             disabled={!prompt.trim() || prompt.length > 500}
-                            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-semibold text-[15px] transition-all active:scale-[0.98] disabled:opacity-40"
+                            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-full font-semibold text-[15px] transition-all active:scale-[0.98] disabled:opacity-40"
                             style={{ background: theme.colors.accent, color: theme.colors.accentText || (isDark ? '#1A1A1A' : '#FFFFFF') }}>
                             <Sparkles className="w-4.5 h-4.5" />
                             Generate Presentation
@@ -198,12 +198,12 @@ export const PresentationBuilder = ({ theme, onDeckGenerated }) => {
                                 </div>
                                 <div className="flex gap-2">
                                     <button onClick={handleDownload}
-                                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-2xl text-[13px] font-semibold transition-all active:scale-[0.97]"
+                                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-[13px] font-semibold transition-all active:scale-[0.97]"
                                         style={{ background: theme.colors.accent, color: theme.colors.accentText || (isDark ? '#1A1A1A' : '#FFF') }}>
                                         <Download className="w-3.5 h-3.5" /> Download {generatedDeck.format.toUpperCase()}
                                     </button>
                                     <button onClick={handleSaveToMyDecks}
-                                        className="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-[13px] font-semibold transition-all active:scale-[0.97]"
+                                        className="flex items-center gap-1.5 px-4 py-2.5 rounded-full text-[13px] font-semibold transition-all active:scale-[0.97]"
                                         style={{ border: `1.5px solid ${borderColor}`, color: theme.colors.textPrimary }}>
                                         <FolderOpen className="w-3.5 h-3.5" /> Save
                                     </button>
@@ -212,7 +212,7 @@ export const PresentationBuilder = ({ theme, onDeckGenerated }) => {
                         </div>
 
                         <button onClick={handleReset}
-                            className="w-full py-3 rounded-2xl text-[13px] font-semibold transition-all active:scale-[0.97]"
+                            className="w-full py-3 rounded-full text-[13px] font-semibold transition-all active:scale-[0.97]"
                             style={{ border: `1.5px solid ${borderColor}`, color: theme.colors.textSecondary }}>
                             Build Another
                         </button>

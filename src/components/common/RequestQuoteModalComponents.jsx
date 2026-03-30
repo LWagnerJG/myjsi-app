@@ -102,7 +102,7 @@ export const MiniAvatar = ({ member, selected, onToggle, isDark, colors }) => {
             </div>
             {selected && (
                 <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full flex items-center justify-center"
-                    style={{ backgroundColor: '#4A7C59' }}>
+                    style={{ backgroundColor: 'var(--theme-success)' }}>
                     <CheckCircle2 className="w-2.5 h-2.5 text-white" />
                 </div>
             )}

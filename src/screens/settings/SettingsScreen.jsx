@@ -55,7 +55,7 @@ const Select = ({ value, onChange, options, theme }) => {
       {open && rect && createPortal(
         <div ref={portalRef} style={{ position: 'fixed', top: rect.bottom + 6, left: rect.left, width: rect.width, zIndex: DESIGN_TOKENS.zIndex.popover }}>
           <div className="py-1.5 rounded-2xl overflow-hidden" style={{
-            backgroundColor: isDark ? '#282828' : '#FFFFFF',
+            backgroundColor: theme.colors.surface,
             border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.06)',
             boxShadow: DESIGN_TOKENS.shadows.modal
           }}>

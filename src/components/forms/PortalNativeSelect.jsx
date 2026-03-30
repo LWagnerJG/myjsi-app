@@ -164,7 +164,7 @@ export const PortalNativeSelect = ({
     <div className="relative w-full">
       {label && (
         <label className="block text-sm font-medium mb-1 px-1" style={{ color: c.textSecondary }}>
-          {label} {required && <span style={{ color: '#B85C5C' }}>*</span>}
+          {label} {required && <span style={{ color: c.error || 'var(--theme-error)' }}>*</span>}
         </label>
       )}
 

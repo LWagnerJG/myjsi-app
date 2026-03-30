@@ -50,7 +50,7 @@ export const ProductCard = React.memo(({ product, cartQty, onAdd, onRemoveOne, d
       className="overflow-hidden flex flex-col transition-all duration-200"
       style={{
         borderRadius: 24,
-        backgroundColor: isDark ? '#2A2A2A' : '#FFFFFF',
+        backgroundColor: theme.colors.surface,
         border: inCart
           ? `1.5px solid ${theme.colors.accent}`
           : (isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)'),
@@ -170,8 +170,8 @@ export const ProductCard = React.memo(({ product, cartQty, onAdd, onRemoveOne, d
               aria-label={cartQty === 1 ? 'Remove from cart' : 'Remove one'}
             >
               {cartQty === 1
-                ? <Trash2 className="w-3.5 h-3.5" style={{ color: '#B85C5C' }} />
-                : <Minus className="w-3.5 h-3.5" style={{ color: '#B85C5C' }} />}
+                ? <Trash2 className="w-3.5 h-3.5" style={{ color: theme.colors.error }} />
+                : <Minus className="w-3.5 h-3.5" style={{ color: theme.colors.error }} />}
             </button>
 
             <button

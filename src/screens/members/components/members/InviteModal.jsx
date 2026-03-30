@@ -59,8 +59,8 @@ export const InviteModal = ({ open, onClose, onInvite, theme, roles }) => {
 
                 {sent ? (
                     <div className="py-12 text-center">
-                        <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3" style={{ backgroundColor: '#4A7C5915' }}>
-                            <Check className="w-6 h-6" style={{ color: '#4A7C59' }} />
+                        <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3" style={{ backgroundColor: theme.colors.successLight }}>
+                            <Check className="w-6 h-6" style={{ color: theme.colors.success }} />
                         </div>
                         <p className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>Invite sent!</p>
                         <p className="text-xs mt-1" style={{ color: theme.colors.textSecondary }}>{email}</p>

@@ -101,7 +101,7 @@ export const SegmentedToggle = ({
               {badge != null && badge > 0 && (
                 <span 
                   className={`${s.badgeSize} rounded-full flex items-center justify-center font-bold ml-1`}
-                  style={{ backgroundColor: '#B85C5C', color: 'white' }}
+                  style={{ backgroundColor: 'var(--theme-error)', color: 'white' }}
                 >
                   {badge > 99 ? '99+' : badge}
                 </span>

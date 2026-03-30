@@ -82,10 +82,10 @@ const MultiPillSelect = ({ options, value = [], onToggle, theme }) => {
 
 /* ---- quote tracker ---- */
 const QUOTE_STAGES = [
-  { key: 'requested', label: 'Requested', icon: Clock, color: '#C4956A' },
-  { key: 'in-progress', label: 'In Progress', icon: Loader2, color: '#5B7B8C' },
-  { key: 'review', label: 'Review', icon: Eye, color: '#5B7B8C' },
-  { key: 'complete', label: 'Complete', icon: CheckCircle, color: '#4A7C59' },
+  { key: 'requested', label: 'Requested', icon: Clock, color: 'var(--theme-warning)' },
+  { key: 'in-progress', label: 'In Progress', icon: Loader2, color: 'var(--theme-info)' },
+  { key: 'review', label: 'Review', icon: Eye, color: 'var(--theme-info)' },
+  { key: 'complete', label: 'Complete', icon: CheckCircle, color: 'var(--theme-success)' },
 ];
 
 const QuoteTracker = ({ quotes = [], theme, onRequestQuote }) => {
@@ -105,7 +105,7 @@ const QuoteTracker = ({ quotes = [], theme, onRequestQuote }) => {
             <div className="flex items-center gap-3 mb-4">
               <FileText className="w-4 h-4 flex-shrink-0" style={{ color: theme.colors.accent }} />
               <span className="text-[13px] font-bold flex-1 truncate" style={{ color: theme.colors.textPrimary }}>{q.fileName || `Quote #${qi + 1}`}</span>
-              {(q.status === 'complete' || !q.status) && <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ backgroundColor: 'rgba(74,124,89,0.12)', color: '#4A7C59' }}>Ready</span>}
+              {(q.status === 'complete' || !q.status) && <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ backgroundColor: 'var(--theme-success-light)', color: 'var(--theme-success)' }}>Ready</span>}
             </div>
             <div className="flex items-center gap-0">
               {QUOTE_STAGES.map((stage, si) => {
@@ -140,7 +140,7 @@ const QuoteTracker = ({ quotes = [], theme, onRequestQuote }) => {
         </div>
       </div>
 
-      <button onClick={onRequestQuote} className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl text-[13px] font-bold transition-all active:scale-[0.98] hover:opacity-90"
+      <button onClick={onRequestQuote} className="w-full flex items-center justify-center gap-2 py-3 rounded-full text-[13px] font-bold transition-all active:scale-[0.98] hover:opacity-90"
         style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}>
         <Send className="w-4 h-4" /> Request New Quote
       </button>
@@ -293,8 +293,8 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
             </div>
             {showSpiffWarning && (
               <div className="flex items-center gap-2 px-3 py-2 rounded-xl mt-1" style={{ backgroundColor: isDark ? 'rgba(196,149,106,0.08)' : 'rgba(196,149,106,0.06)' }}>
-                <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#C4956A' }} />
-                <span className="text-[11px] font-medium" style={{ color: '#C4956A' }}>No spiff eligible: 50/20/10 with list value under $10K.</span>
+                <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" style={{ color: theme.colors.warning }} />
+                <span className="text-[11px] font-medium" style={{ color: theme.colors.warning }}>No spiff eligible: 50/20/10 with list value under $10K.</span>
               </div>
             )}
           </Section>
@@ -460,7 +460,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
           {/* AUTOSAVE */}
           <div className="flex justify-center pt-1 pb-4">
             <div className="flex items-center gap-1.5">
-              <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#4A7C59', opacity: 0.5 }} />
+              <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: 'var(--theme-success)', opacity: 0.5 }} />
               <span className="text-[11px] font-medium tracking-wide" style={{ color: c.textSecondary, opacity: 0.35 }}>Changes saved automatically</span>
             </div>
           </div>
@@ -471,7 +471,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
       {/* discount dropdown */}
       {discountOpen && (
         <div ref={discMenu} className="fixed rounded-2xl overflow-hidden"
-          style={{ top: discPos.top, left: discPos.left, width: discPos.width, background: isDark ? '#2a2a2a' : '#fff', border: `1px solid ${divider}`, boxShadow: '0 8px 32px rgba(0,0,0,0.12)', zIndex: DESIGN_TOKENS.zIndex.popover }}>
+          style={{ top: discPos.top, left: discPos.left, width: discPos.width, background: theme?.colors?.surface || (isDark ? '#2a2a2a' : '#fff'), border: `1px solid ${divider}`, boxShadow: DESIGN_TOKENS.shadows.modal, zIndex: DESIGN_TOKENS.zIndex.popover }}>
           <div className="max-h-[360px] overflow-y-auto scrollbar-hide py-1">
             {DISCOUNT_OPTIONS.map(opt => (
               <button key={opt} onClick={() => { update('discount', opt); setDiscountOpen(false); }}

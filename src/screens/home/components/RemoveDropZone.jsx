@@ -19,7 +19,7 @@ export const RemoveDropZone = ({ children, isDark, isActive }) => {
             }}
         >
             {highlight && (
-                <p className="text-xs font-semibold text-center mb-2" style={{ color: '#B85C5C' }}>
+                <p className="text-xs font-semibold text-center mb-2" style={{ color: 'var(--theme-error)' }}>
                     Drop here to remove
                 </p>
             )}

@@ -128,7 +128,7 @@ export const InfoTooltip = ({
       {show && createPortal(
         <div
           ref={tooltipRef}
-          className="fixed z-[1000] px-3 py-2 rounded-xl text-xs leading-relaxed shadow-2xl animate-fade-in"
+          className="fixed px-3 py-2 rounded-xl text-xs leading-relaxed shadow-2xl animate-fade-in"
           style={{
             top: tooltipPos.top,
             left: tooltipPos.left,

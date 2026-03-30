@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, ExternalLink, Share2, CheckCircle2, Link2, Megaphone } from 'lucide-react';
 import { ANNOUNCEMENT_COLORS, ANNOUNCEMENT_ICONS } from './utils.js';
 import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z } from '../../../../components/common/modalUtils.js';
+import { DESIGN_TOKENS } from '../../../../design-system/tokens.js';
 
 export const AnnouncementDetailModal = ({ announcement, theme, dark, onClose, onNavigate }) => {
   const [copied, setCopied] = useState(false);
@@ -63,7 +64,7 @@ export const AnnouncementDetailModal = ({ announcement, theme, dark, onClose, on
           transition={{ type: 'spring', stiffness: 380, damping: 34 }}
           onClick={e => e.stopPropagation()}
           className="relative w-full max-w-md mx-4 sm:mx-auto rounded-2xl overflow-hidden"
-          style={{ backgroundColor: dark ? '#282828' : '#FFFFFF', boxShadow: '0 24px 64px rgba(0,0,0,0.22)' }}
+          style={{ backgroundColor: theme?.colors?.surface || (dark ? '#282828' : '#FFFFFF'), boxShadow: DESIGN_TOKENS.shadows.modal }}
         >
           {/* Header band */}
           <div className="px-5 pt-5 pb-3">

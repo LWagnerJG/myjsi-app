@@ -71,7 +71,7 @@ export const ProfileMenu = ({ show, onClose, onNavigate, theme, anchorRef, isDar
                 style={{
                     top: pos.top,
                     right: pos.right,
-                    backgroundColor: isDark ? '#282828' : '#FFFFFF',
+                    backgroundColor: theme?.colors?.surface || (isDark ? '#282828' : '#FFFFFF'),
                     border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.06)',
                     boxShadow: DESIGN_TOKENS.shadows.modal,
                     animation: 'profileMenuSlideIn 200ms cubic-bezier(0.16,1,0.3,1)',
@@ -84,11 +84,11 @@ export const ProfileMenu = ({ show, onClose, onNavigate, theme, anchorRef, isDar
                         role="menuitem"
                         onClick={item.action} 
                         className="w-full text-left flex items-center px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
-                        style={{ color: item.danger ? '#B85C5C' : theme.colors.textPrimary, animation: `profileMenuItemStagger 250ms cubic-bezier(0.16,1,0.3,1) ${idx * 30}ms both` }}
+                        style={{ color: item.danger ? theme.colors.error : theme.colors.textPrimary, animation: `profileMenuItemStagger 250ms cubic-bezier(0.16,1,0.3,1) ${idx * 30}ms both` }}
                         onMouseEnter={e => e.currentTarget.style.backgroundColor = hoverBg}
                         onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                     >
-                        <item.icon className="w-4 h-4 mr-3 flex-shrink-0" style={{ color: item.danger ? '#B85C5C' : theme.colors.textSecondary }} />
+                        <item.icon className="w-4 h-4 mr-3 flex-shrink-0" style={{ color: item.danger ? theme.colors.error : theme.colors.textSecondary }} />
                         <span className="flex-1">{item.label}</span>
                         {item.toggle && (
                             <div className="w-9 h-5 rounded-full relative transition-colors duration-200 flex-shrink-0"

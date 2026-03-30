@@ -623,7 +623,7 @@ export const DealerDetailScreen = ({
                                         <button
                                             onClick={() => handleRemovePerson(menuState.person?.name)}
                                             className="w-full flex items-center gap-2 text-left py-2 px-2 text-[13px] font-semibold rounded-xl"
-                                            style={{ color: '#B85C5C' }}
+                                            style={{ color: theme.colors.error }}
                                         >
                                             <Trash2 className="w-3.5 h-3.5" /> Remove
                                         </button>

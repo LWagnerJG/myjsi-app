@@ -54,7 +54,7 @@ export const SortableAppTile = React.memo(({ id, app, colors, onRemove, isRemove
                         if (!isRemoveDisabled) onRemove(app.route);
                     }}
                     className={`absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full text-white flex items-center justify-center shadow-sm z-10 transition-all ${isRemoveDisabled ? 'bg-gray-300 cursor-not-allowed' : 'hover:scale-110'}`}
-                    style={!isRemoveDisabled ? { backgroundColor: '#B85C5C' } : undefined}
+                    style={!isRemoveDisabled ? { backgroundColor: 'var(--theme-error)' } : undefined}
                     aria-label={`Remove ${app.name}`}
                     aria-disabled={isRemoveDisabled}
                 >

@@ -27,7 +27,7 @@ export const GlassCard = React.memo(
     const radius = DESIGN_TOKENS.borderRadius.xl; // 24px for JSI
 
     // Opaque backgrounds — clean and simple
-    const cardBg = isDark ? '#2A2A2A' : '#FFFFFF';
+    const cardBg = theme?.colors?.surface || (isDark ? '#2A2A2A' : '#FFFFFF');
 
     // Subtle border for edge definition
     const cardBorder = isDark

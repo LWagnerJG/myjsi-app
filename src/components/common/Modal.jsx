@@ -104,7 +104,7 @@ export const Modal = ({ show, onClose, title, children, theme, maxWidth = 'max-w
                         tabIndex={-1}
                         className={`w-full ${maxWidth} rounded-3xl flex flex-col relative outline-none`}
                         style={{
-                            backgroundColor: isDark ? '#282828' : '#FFFFFF',
+                            backgroundColor: theme?.colors?.surface || (isDark ? '#282828' : '#FFFFFF'),
                             border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(255,255,255,0.6)',
                             boxShadow: DESIGN_TOKENS.shadows.modal,
                             maxHeight: '85vh',

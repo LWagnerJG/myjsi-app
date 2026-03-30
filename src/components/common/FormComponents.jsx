@@ -10,7 +10,7 @@ const Label = ({ children, theme, required }) => (
         className="block text-sm font-medium mb-1 px-1"
         style={{ color: theme.colors.textSecondary }}
     >
-        {children} {required ? <span style={{ color: '#B85C5C' }}>*</span> : null}
+        {children} {required ? <span style={{ color: theme.colors.error }}>*</span> : null}
     </label>
 );
 
@@ -76,7 +76,7 @@ export const FormInput = ({
         <div className={insetLabel ? "relative" : undefined}>
             {label && !insetLabel ? (
                 <label className="block text-sm font-medium mb-1 px-1" style={{ color: theme.colors.textSecondary }}>
-                    {label} {required ? <span style={{ color: '#B85C5C' }}>*</span> : null}
+                    {label} {required ? <span style={{ color: theme.colors.error }}>*</span> : null}
                 </label>
             ) : null}
 
@@ -85,7 +85,7 @@ export const FormInput = ({
                     className="absolute left-[14px] top-[8px] z-[1] text-[11px] font-medium leading-none"
                     style={{ color: theme.colors.textSecondary }}
                 >
-                    {label} {required ? <span style={{ color: '#B85C5C' }}>*</span> : null}
+                    {label} {required ? <span style={{ color: theme.colors.error }}>*</span> : null}
                 </label>
             ) : null}
 
@@ -206,7 +206,7 @@ export const PortalNativeSelect = ({
                     className="pointer-events-none absolute left-4 top-2 z-[1] text-[11px] font-medium leading-none"
                     style={{ color: theme.colors.textSecondary }}
                 >
-                    {label} {required ? <span style={{ color: '#B85C5C' }}>*</span> : null}
+                    {label} {required ? <span style={{ color: theme.colors.error }}>*</span> : null}
                 </label>
             ) : null}
             <div className="relative">

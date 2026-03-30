@@ -177,7 +177,7 @@ export const RequestComYardageScreen = ({ theme, showAlert, onNavigate, userSett
                                                 aria-label={item.quantity <= 1 ? 'Remove item' : 'Decrease quantity'}
                                             >
                                                 {item.quantity <= 1
-                                                    ? <Trash2 className="w-3.5 h-3.5" style={{ color: '#B85C5C' }} />
+                                                    ? <Trash2 className="w-3.5 h-3.5" style={{ color: theme.colors.error }} />
                                                     : <Minus className="w-3.5 h-3.5" style={{ color: theme.colors.textSecondary }} />
                                                 }
                                             </button>

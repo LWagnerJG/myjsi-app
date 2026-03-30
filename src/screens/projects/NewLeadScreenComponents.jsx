@@ -189,7 +189,7 @@ export const ProductCard = React.memo(({ product, idx, onRemove, onUpdate, theme
         <span className="text-[13px] font-semibold" style={{ color: theme.colors.textPrimary }}>{product.series}</span>
         <button type="button" onClick={() => onRemove(idx)}
           className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-all active:scale-[0.97]"
-          style={{ color: '#B85C5C', backgroundColor: 'rgba(184,92,92,0.08)' }}>
+            style={{ color: theme.colors.error, backgroundColor: theme.colors.errorLight }}>
           <X className="w-3 h-3" /> Remove
         </button>
       </div>

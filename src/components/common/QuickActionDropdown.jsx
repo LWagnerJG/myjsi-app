@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom';
 import { Plus, FileText, Upload, FileSpreadsheet, MessageSquarePlus, Presentation, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getHomeChromeIconButtonStyles } from '../../design-system/homeChrome.js';
-import { isDarkTheme } from '../../design-system/tokens.js';
+import { isDarkTheme, DESIGN_TOKENS, JSI_COLORS } from '../../design-system/tokens.js';
 
 const QUICK_ACTIONS = [
     { id: 'presentation-builder', label: 'Presentation Builder', icon: Presentation, description: 'AI-generate a custom deck' },
@@ -128,13 +128,14 @@ export const QuickActionDropdown = ({ theme, onActionSelect, className = '' }) =
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -8, scale: 0.96 }}
                     transition={{ duration: 0.15, ease: [0.23, 1, 0.32, 1] }}
-                    className="fixed z-[1000] w-[280px] rounded-2xl overflow-hidden"
+                    className={`fixed w-[280px] rounded-2xl overflow-hidden`}
                     style={{
                         top: position.top,
                         left: position.left,
                         backgroundColor: colors.surface,
-                        boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                        boxShadow: DESIGN_TOKENS.shadows.modal,
                         border: `1px solid ${colors.border}`,
+                        zIndex: DESIGN_TOKENS.zIndex.popover,
                     }}
                     id={menuId}
                     role="menu"
@@ -182,10 +183,10 @@ export const QuickActionDropdown = ({ theme, onActionSelect, className = '' }) =
                                             backgroundColor: isFeedback ? 'rgba(196,149,106,0.12)' : `${colors.accent}0D`,
                                         }}
                                     >
-                                        <action.icon className="w-5 h-5" aria-hidden="true" style={{ color: isFeedback ? '#C4956A' : colors.accent }} />
+                                        <action.icon className="w-5 h-5" aria-hidden="true" style={{ color: isFeedback ? (theme?.colors?.warning || JSI_COLORS.warning) : colors.accent }} />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <div className="text-sm font-semibold" style={{ color: isFeedback ? '#C4956A' : colors.textPrimary }}>
+                                        <div className="text-sm font-semibold" style={{ color: isFeedback ? (theme?.colors?.warning || JSI_COLORS.warning) : colors.textPrimary }}>
                                             {action.label}
                                         </div>
                                         <div className="text-xs truncate" style={{ color: colors.textSecondary }}>

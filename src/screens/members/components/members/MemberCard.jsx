@@ -45,7 +45,7 @@ export const MemberCard = ({ theme, user, expanded, onToggle, onChangeRole, onTo
                                 type="button"
                                 onClick={(e) => { e.stopPropagation(); onRequestDelete(); }}
                                 className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[12px] font-medium transition-opacity hover:opacity-70"
-                                style={{ color: '#B85C5C', backgroundColor: '#B85C5C0E' }}
+                                style={{ color: theme.colors.error, backgroundColor: `${theme.colors.error}0E` }}
                                 title="Remove user"
                             >
                                 <Trash2 className="w-3 h-3" /> Remove

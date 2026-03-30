@@ -120,7 +120,7 @@ export const UploadStage = ({ file, onFileSelect, onFileRemove, onAnalyze, theme
       {/* File preview */}
       {file && (
         <GlassCard theme={theme} className="w-full px-4 py-3 flex items-center gap-3">
-          <FileText className="w-5 h-5 flex-shrink-0" style={{ color: '#B85C5C' }} />
+          <FileText className="w-5 h-5 flex-shrink-0" style={{ color: theme.colors.error }} />
           <div className="flex-1 min-w-0">
             <div className="text-sm font-medium truncate" style={{ color: c.textPrimary }}>{file.name}</div>
             <div className="text-xs" style={{ color: c.textSecondary }}>{formatFileSize(file.size)}</div>
@@ -176,7 +176,7 @@ export const ProcessingStage = ({ steps, completedCount, theme }) => {
           return (
             <div key={step.id} className="flex items-center gap-3 px-5 py-4" style={{ borderColor: c.border }}>
               {done ? (
-                <CheckCircle2 className="w-5 h-5 flex-shrink-0" style={{ color: '#4A7C59' }} />
+                <CheckCircle2 className="w-5 h-5 flex-shrink-0" style={{ color: theme.colors.success }} />
               ) : active ? (
                 <Loader2
                   className="w-5 h-5 flex-shrink-0 animate-spin"

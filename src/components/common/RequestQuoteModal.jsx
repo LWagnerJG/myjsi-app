@@ -65,8 +65,8 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
     const isDark = theme?.name === 'dark';
     const colors = useMemo(() => ({
         background:      theme?.colors?.background   || '#F0EDE8',
-        surface:         isDark ? '#1e1e1e' : (theme?.colors?.surface || '#FFFFFF'),
-        surfaceElevated: isDark ? '#282828' : (theme?.colors?.surface || '#FFFFFF'),
+        surface:         theme?.colors?.surface || (isDark ? '#1e1e1e' : '#FFFFFF'),
+        surfaceElevated: theme?.colors?.surface || (isDark ? '#282828' : '#FFFFFF'),
         textPrimary:     theme?.colors?.textPrimary   || '#353535',
         textSecondary:   theme?.colors?.textSecondary || '#666666',
         border:          isDark ? 'rgba(255,255,255,0.10)' : (theme?.colors?.border || 'rgba(0,0,0,0.08)'),
@@ -75,8 +75,8 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
         fieldBg:         isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.025)',
         fieldBorder:     isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)',
         hoverBg:         isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)',
-        success: '#4A7C59',
-        error:   '#B85C5C',
+        success: theme?.colors?.success || '#4A7C59',
+        error:   theme?.colors?.error || '#B85C5C',
     }), [theme, isDark]);
 
     const teamMembers = useMemo(() => {
@@ -498,14 +498,14 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                     <div className="flex items-center justify-end gap-3 px-7 py-4"
                         style={{ borderTop: `1px solid ${colors.border}`, backgroundColor: colors.subtle }}>
                         <button type="button" onClick={onClose}
-                            className="px-5 h-11 rounded-2xl text-[13px] font-semibold transition-colors"
+                            className="px-5 h-11 rounded-full text-[13px] font-semibold transition-colors"
                             style={{ color: colors.textPrimary }}
                             onMouseEnter={e => e.currentTarget.style.backgroundColor = colors.hoverBg}
                             onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
                             Cancel
                         </button>
                         <button type="submit" disabled={isSubmitting}
-                            className="px-6 h-11 rounded-2xl text-[13px] font-bold transition-all active:scale-[0.98] disabled:opacity-60"
+                            className="px-6 h-11 rounded-full text-[13px] font-bold transition-all active:scale-[0.98] disabled:opacity-60"
                             style={{ backgroundColor: colors.accent, color: isDark ? '#1a1a1a' : '#FFFFFF' }}>
                             {isSubmitting ? (
                                 <span className="flex items-center gap-2">

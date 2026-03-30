@@ -119,7 +119,7 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                                 <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
                                     {qty > 0 && (
                                         <button type="button" onClick={removeOne} className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center active:scale-90 transition-all" style={{ backgroundColor: qty === 1 ? theme.colors.destructiveLight : theme.colors.subtle, border: qty === 1 ? `1px solid ${theme.colors.destructiveBorder}` : `1px solid ${theme.colors.border}` }} aria-label={qty === 1 ? `Remove ${product.name}` : `Decrease ${product.name} quantity`}>
-                                            {qty === 1 ? <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" style={{ color: '#B85C5C' }} /> : <Minus className="w-3 h-3 sm:w-4 sm:h-4" style={{ color: theme.colors.textSecondary }} />}
+                                            {qty === 1 ? <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" style={{ color: theme.colors.error }} /> : <Minus className="w-3 h-3 sm:w-4 sm:h-4" style={{ color: theme.colors.textSecondary }} />}
                                         </button>
                                     )}
                                     <button type="button" onClick={addOne} className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center active:scale-95 border" style={{ borderColor: theme.colors.border, backgroundColor: theme.colors.inputBackground }} aria-label={`Add ${product.name}`}>

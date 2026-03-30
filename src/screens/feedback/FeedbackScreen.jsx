@@ -54,7 +54,7 @@ export const FeedbackScreen = ({ theme }) => {
                         className="w-14 h-14 rounded-full flex items-center justify-center mx-auto"
                         style={{ backgroundColor: isDark ? 'rgba(74,124,89,0.18)' : 'rgba(74,124,89,0.10)' }}
                     >
-                        <CheckCircle2 className="w-6 h-6" style={{ color: '#4A7C59' }} />
+                        <CheckCircle2 className="w-6 h-6" style={{ color: colors.success }} />
                     </div>
                     <div className="space-y-2">
                         <h2 className="text-[22px] font-bold tracking-tight" style={{ color: colors.textPrimary }}>Thank you</h2>
