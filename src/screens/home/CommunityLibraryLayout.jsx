@@ -4,6 +4,7 @@ import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
 import { isDarkTheme } from '../../design-system/tokens.js';
 import { ChannelAwareFeed } from './components/community/ChannelAwareFeed.jsx';
 import { MyBoardView } from './components/community/MyBoardView.jsx';
+import { MakersStudioTab } from './components/community/MakersStudioTab.jsx';
 
 // ─── Main Layout ───────────────────────────────────────────────────────────────
 export const CommunityLibraryLayout = ({
@@ -22,7 +23,7 @@ export const CommunityLibraryLayout = ({
     return savedImageIds.length > 0 || Object.keys(likedPosts || {}).length > 0 || hasComments;
   }, [savedImageIds, likedPosts, posts]);
 
-  const TABS = useMemo(() => hasBoardContent ? ['Community', 'Library', 'My Board'] : ['Community', 'Library'], [hasBoardContent]);
+  const TABS = useMemo(() => hasBoardContent ? ['Community', 'Library', 'Makers Studio', 'My Board'] : ['Community', 'Library', 'Makers Studio'], [hasBoardContent]);
 
   const [activeTab, setActiveTab] = useState('community');
   const [activeSubreddit, setActiveSubreddit] = useState(null);
@@ -135,8 +136,8 @@ export const CommunityLibraryLayout = ({
           </div>
 
           {/* Search + Post inline */}
-          {activeTab !== 'my board' && (
-            <div className="flex items-center gap-2 mt-2 mb-2">
+          {activeTab !== 'my board' && activeTab !== 'makers studio' && (
+            <div className="flex items-center gap-2 mt-1.5 mb-1.5">
               <div className="flex-1">
                 <StandardSearchBar
                   id="community-main-search"
@@ -146,12 +147,12 @@ export const CommunityLibraryLayout = ({
                   theme={theme}
                 />
               </div>
-              <button onClick={activeTab === 'library' ? openLibraryUploadModal : openCreateContentModal} className="h-12 px-5 rounded-full text-xs font-semibold transition-all active:scale-95 flex-shrink-0" style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}>
+              <button onClick={activeTab === 'library' ? openLibraryUploadModal : openCreateContentModal} className="h-10 px-4 rounded-full text-xs font-semibold transition-all active:scale-95 flex-shrink-0" style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}>
                 {activeTab === 'library' ? '+ Upload' : '+ Post'}
               </button>
             </div>
           )}
-          {activeTab === 'my board' && <div className="mb-2" />}
+          {(activeTab === 'my board' || activeTab === 'makers studio') && <div className="mb-1.5" />}
         </div>
       </div>
 
@@ -171,6 +172,10 @@ export const CommunityLibraryLayout = ({
 
             <div style={paneStyle('library')}>
               <LibraryGrid theme={theme} query={query} savedImageIds={savedImageIds} onToggleSaveImage={onToggleSaveImage} assetsOverride={libraryAssets} />
+            </div>
+
+            <div style={paneStyle('makers studio')}>
+              <MakersStudioTab theme={theme} />
             </div>
 
             {hasBoardContent && (
