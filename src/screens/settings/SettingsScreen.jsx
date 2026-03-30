@@ -101,8 +101,12 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
   const addressRequestRef = useRef(null);
   const addressCacheRef = useRef(new Map());
   const [notif, setNotif] = useState({ newOrder: true, samplesShipped: true, leadTimeChange: true, communityPost: false, replacementApproved: true, commissionPosted: true, orderUpdate: true });
+  const notifGroups = [
+    { label: 'Orders & Shipping', keys: ['newOrder', 'orderUpdate', 'samplesShipped'] },
+    { label: 'Projects & Revenue', keys: ['replacementApproved', 'commissionPosted'] },
+    { label: 'Products & Community', keys: ['leadTimeChange', 'communityPost'] },
+  ];
   const notifLabels = { newOrder:'New order placed', orderUpdate:'Order status update', samplesShipped:'Samples shipped', leadTimeChange:'Lead time change', replacementApproved:'Replacement approved', commissionPosted:'Commission posted', communityPost:'New JSI community post' };
-  const notifKeys = Object.keys(notif);
   const [leadTimeFavorites, setLeadTimeFavorites] = useState(() => {
     try { const raw = localStorage.getItem('leadTimeFavorites'); const parsed = raw ? JSON.parse(raw) : []; return Array.isArray(parsed) ? parsed : []; } catch { return []; }
   });
@@ -293,43 +297,50 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
           <GlassCard theme={theme} className="overflow-hidden">
             <SectionHeader icon={Bell} title="Push Notifications" subtitle="Choose which alerts you want to receive." theme={theme} />
             <div className="p-3">
-              {notifKeys.map((k, i) => (
-                <div key={k}>
-                  <div className="flex items-center justify-between px-3 py-3.5 rounded-2xl transition-colors" style={{}} onMouseEnter={e => e.currentTarget.style.backgroundColor = hoverBg} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                    <span className="text-sm font-medium" style={{ color: theme.colors.textPrimary }}>{notifLabels[k]}</span>
-                    <Toggle checked={!!notif[k]} onChange={v=>setNotif(p=>({...p,[k]:v}))} theme={theme} />
+              {notifGroups.map((group, gi) => (
+                <div key={group.label}>
+                  {gi > 0 && <div className="mx-3 my-1" style={{ borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}` }} />}
+                  <div className="px-3 pt-3 pb-1">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>{group.label}</span>
                   </div>
-                  {k === 'leadTimeChange' && notif.leadTimeChange && (
-                    <div className="px-3 pb-3 -mt-1">
-                      <div className="p-4 rounded-2xl" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)' }}>
-                        <div className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: theme.colors.textSecondary }}>Favorite lead time series</div>
-                        <div className="flex flex-wrap gap-2">
-                          {leadTimeOptions.map((series) => {
-                            const active = leadTimeFavorites.includes(series);
-                            return (
-                              <button
-                                key={series}
-                                type="button"
-                                onClick={() => setLeadTimeFavorites(prev => active ? prev.filter(s => s !== series) : [...prev, series])}
-                                className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95"
-                                style={{
-                                  backgroundColor: active ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.06)' : theme.colors.subtle),
-                                  color: active ? (isDark ? '#1A1A1A' : '#FFFFFF') : theme.colors.textSecondary,
-                                  border: `1px solid ${active ? 'transparent' : theme.colors.border}`
-                                }}
-                              >
-                                {series}
-                              </button>
-                            );
-                          })}
-                        </div>
-                        <div className="text-[11px] mt-3 font-medium" style={{ color: theme.colors.textSecondary }}>
-                          {leadTimeFavorites.length} selected
-                        </div>
+                  {group.keys.map((k) => (
+                    <div key={k}>
+                      <div className="flex items-center justify-between px-3 py-3 rounded-2xl transition-colors" onMouseEnter={e => e.currentTarget.style.backgroundColor = hoverBg} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                        <span className="text-sm font-medium" style={{ color: theme.colors.textPrimary }}>{notifLabels[k]}</span>
+                        <Toggle checked={!!notif[k]} onChange={v=>setNotif(p=>({...p,[k]:v}))} theme={theme} />
                       </div>
+                      {k === 'leadTimeChange' && notif.leadTimeChange && (
+                        <div className="px-3 pb-3 -mt-1">
+                          <div className="p-4 rounded-2xl" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)' }}>
+                            <div className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: theme.colors.textSecondary }}>Favorite lead time series</div>
+                            <div className="flex flex-wrap gap-2">
+                              {leadTimeOptions.map((series) => {
+                                const active = leadTimeFavorites.includes(series);
+                                return (
+                                  <button
+                                    key={series}
+                                    type="button"
+                                    onClick={() => setLeadTimeFavorites(prev => active ? prev.filter(s => s !== series) : [...prev, series])}
+                                    className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95"
+                                    style={{
+                                      backgroundColor: active ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.06)' : theme.colors.subtle),
+                                      color: active ? (isDark ? '#1A1A1A' : '#FFFFFF') : theme.colors.textSecondary,
+                                      border: `1px solid ${active ? 'transparent' : theme.colors.border}`
+                                    }}
+                                  >
+                                    {series}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                            <div className="text-[11px] mt-3 font-medium" style={{ color: theme.colors.textSecondary }}>
+                              {leadTimeFavorites.length} selected
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  )}
-                  {i < notifKeys.length - 1 && <div className="mx-3" style={{ borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}` }} />}
+                  ))}
                 </div>
               ))}
             </div>
@@ -345,7 +356,7 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
             </div>
           </GlassCard>
 
-          <div className="pt-1 pb-4 text-center text-[11px] font-medium" style={{ color: theme.colors.textSecondary }}>v0.9.3</div>
+          <div className="pt-1 pb-4 text-center text-[11px] font-medium" style={{ color: theme.colors.textSecondary }}>v0.9.4</div>
         </div>
       </div>
     </div>
