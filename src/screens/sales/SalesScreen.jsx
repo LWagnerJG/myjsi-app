@@ -209,24 +209,24 @@ export const SalesScreen = ({ theme, onNavigate }) => {
               </div>
 
               {/* Mini sparkline */}
-              <div className="h-20 sm:h-24 flex items-end gap-1">
+              <div className="h-28 sm:h-32 flex items-end gap-1.5">
                 {MONTHLY_SALES_DATA.map((m, i) => {
                   const val = chartDataType === 'bookings' ? m.bookings : m.sales;
                   const pct = (val / chartMax) * 100;
                   const isHovered = hoveredBar === `mini-${i}`;
                   return (
-                    <div key={m.month} className="flex-1 flex flex-col items-center gap-1 cursor-default"
+                    <div key={m.month} className="flex-1 flex flex-col items-center gap-1.5 cursor-default"
                       onMouseEnter={() => setHoveredBar(`mini-${i}`)} onMouseLeave={() => setHoveredBar(null)}>
                       <div className="w-full relative">
                         {isHovered && (
-                          <div className="absolute -top-4 left-1/2 -translate-x-1/2 text-[11px] font-bold whitespace-nowrap" style={{ color: colors.textPrimary }}>
+                          <div className="absolute -top-5 left-1/2 -translate-x-1/2 text-[11px] font-bold whitespace-nowrap" style={{ color: colors.textPrimary }}>
                             ${(val / 1000).toFixed(0)}k
                           </div>
                         )}
-                        <div className="w-full rounded-sm" style={{
-                          height: ready ? `${Math.max(4, (pct / 100) * 72)}px` : '0px',
+                        <div className="w-full rounded" style={{
+                          height: ready ? `${Math.max(6, (pct / 100) * 96)}px` : '0px',
                           backgroundColor: colors.accent,
-                          opacity: isHovered ? (isDark ? 0.6 : 0.4) : (isDark ? 0.3 : 0.18),
+                          opacity: isHovered ? (isDark ? 0.65 : 0.45) : (isDark ? 0.35 : 0.22),
                           transition: `height 0.4s ease-out ${0.1 + i * 0.025}s, opacity 0.15s`,
                         }} />
                       </div>
