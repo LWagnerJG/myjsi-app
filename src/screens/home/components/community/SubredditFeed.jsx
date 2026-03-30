@@ -1,8 +1,9 @@
 import React, { useMemo } from 'react';
 import { FeedDivider } from './FeedDivider.jsx';
 import { SubredditPostCard } from './SubredditPostCard.jsx';
+import { ChannelChips } from './ChannelChips.jsx';
 
-export const SubredditFeed = ({ subreddit, allPosts, theme, dark, likedPosts, postUpvotes, onToggleLike, onUpvote, onAddComment }) => {
+export const SubredditFeed = ({ subreddit, allPosts, theme, dark, likedPosts, postUpvotes, onToggleLike, onUpvote, onAddComment, onSelectSubreddit }) => {
 
   // Sort all posts by upvotes (highest first), then by recency as tiebreaker
   const { topPosts, latestPosts } = useMemo(() => {
@@ -25,6 +26,9 @@ export const SubredditFeed = ({ subreddit, allPosts, theme, dark, likedPosts, po
 
   return (
     <div>
+      {/* Channel chips with active subreddit highlighted */}
+      <ChannelChips theme={theme} dark={dark} onSelect={onSelectSubreddit} activeId={subreddit.id} />
+
       {/* Posts — Trending pinned up top, Latest below */}
       {!allVisible.length ? (
         <div className="flex flex-col items-center py-12 gap-3">

@@ -32,8 +32,8 @@ export const SubredditPostCard = ({ post, idx, isTop, dark, theme, isLiked, isUp
       <div className="p-3.5 pb-2">
         <div className="flex items-center gap-2 mb-1.5">
           {isTop && typeof idx === 'number' && (
-            <span className="text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0"
-              style={{ backgroundColor: dark ? 'rgba(249,115,22,0.18)' : 'rgba(249,115,22,0.10)', color: '#f97316' }}>
+            <span className="text-[10px] font-bold w-4.5 h-4.5 rounded-full flex items-center justify-center flex-shrink-0"
+              style={{ backgroundColor: dark ? 'rgba(53,53,53,0.25)' : 'rgba(53,53,53,0.08)', color: theme.colors.accent }}>
               {idx + 1}
             </span>
           )}
@@ -56,19 +56,19 @@ export const SubredditPostCard = ({ post, idx, isTop, dark, theme, isLiked, isUp
       </div>
 
       {/* Action bar */}
-      <div className="px-3 py-2 flex items-center gap-2 border-t" style={{ borderColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}>
-        <button onClick={() => onUpvote?.(post.id)} className="flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full transition-all" style={{ color: isUpvoted ? '#f97316' : theme.colors.textSecondary, backgroundColor: isUpvoted ? (dark ? 'rgba(249,115,22,0.12)' : 'rgba(249,115,22,0.08)') : 'transparent' }}>
-          <ChevronUp className="w-3 h-3" /> {post.upvotes || 0}
+      <div className="px-3.5 py-1.5 flex items-center gap-1 border-t" style={{ borderColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}>
+        <button onClick={() => onUpvote?.(post.id)} className="flex items-center gap-1 text-xs font-semibold px-2 py-1.5 rounded-full transition-all" style={{ color: isUpvoted ? theme.colors.accent : theme.colors.textSecondary, backgroundColor: isUpvoted ? (dark ? 'rgba(255,255,255,0.08)' : `${theme.colors.accent}10`) : 'transparent' }}>
+          <ChevronUp className="w-3.5 h-3.5" /> {post.upvotes || 0}
         </button>
-        <button onClick={() => onToggleLike?.(post.id)} className="flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full transition-all" style={{ color: isLiked ? theme.colors.accent : theme.colors.textSecondary, backgroundColor: isLiked ? (dark ? 'rgba(255,255,255,0.08)' : `${theme.colors.accent}10`) : 'transparent' }}>
-          <Heart className="w-3 h-3" style={isLiked ? { fill: theme.colors.accent } : undefined} /> {post.likes || 0}
+        <button onClick={() => onToggleLike?.(post.id)} className="flex items-center gap-1 text-xs font-medium px-2 py-1.5 rounded-full transition-all" style={{ color: isLiked ? theme.colors.accent : theme.colors.textSecondary, backgroundColor: isLiked ? (dark ? 'rgba(255,255,255,0.08)' : `${theme.colors.accent}10`) : 'transparent' }}>
+          <Heart className="w-3.5 h-3.5" style={isLiked ? { fill: theme.colors.accent } : undefined} /> {post.likes || 0}
         </button>
         <button
           onClick={() => setShowComments(v => !v)}
-          className="flex items-center gap-1 text-xs ml-auto px-2 py-1 rounded-full transition-all"
+          className="flex items-center gap-1 text-xs ml-auto px-2 py-1.5 rounded-full transition-all"
           style={{ color: showComments ? theme.colors.accent : theme.colors.textSecondary, backgroundColor: showComments ? (dark ? 'rgba(255,255,255,0.06)' : `${theme.colors.accent}08`) : 'transparent' }}
         >
-          <MessageSquare className="w-3 h-3" /> {commentCount}
+          <MessageSquare className="w-3.5 h-3.5" /> {commentCount}
         </button>
       </div>
 

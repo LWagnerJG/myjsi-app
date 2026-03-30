@@ -123,10 +123,10 @@ export const CommunityLibraryLayout = ({
             />
 
             {/* Tabs — start left, shift right as sub-community title expands */}
-            <div className="flex items-center gap-0.5 transition-all duration-300 ease-in-out">
+            <div className="flex items-center gap-0 overflow-x-auto no-scrollbar transition-all duration-300 ease-in-out">
               {TABS.map(tab => (
                 <button key={tab} onClick={() => switchTab(tab.toLowerCase())}
-                  className="text-[13px] px-2.5 py-2 transition-all whitespace-nowrap"
+                  className="text-[13px] px-2 py-2 transition-all whitespace-nowrap"
                   style={tabStyle(activeTab === tab.toLowerCase())}
                 >
                   {tab}

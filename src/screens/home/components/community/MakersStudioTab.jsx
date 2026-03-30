@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { GlassCard } from '../../../../components/common/GlassCard.jsx';
 import { isDarkTheme } from '../../../../design-system/tokens.js';
 import {
   GraduationCap, Eye, MessageCircle, Trophy, Gem,
-  Lock, ChevronRight, Star, Palette, BookOpen,
-  Lightbulb, Zap, Award, Users, Sparkles,
+  Lock, ChevronRight, ChevronDown, Star, Palette, BookOpen,
+  Lightbulb, Zap, Award, Users, Sparkles, CheckCircle2,
 } from 'lucide-react';
 
 /* ── static data ── */
@@ -69,7 +69,10 @@ const PILLARS = [
 export const MakersStudioTab = ({ theme }) => {
   const dark = isDarkTheme(theme);
   const [ready, setReady] = useState(false);
+  const [expanded, setExpanded] = useState({ academy: true });
   useEffect(() => { const t = setTimeout(() => setReady(true), 200); return () => clearTimeout(t); }, []);
+
+  const toggleExpand = useCallback((id) => setExpanded(prev => ({ ...prev, [id]: !prev[id] })), []);
 
   const subtle = (strength = 1) =>
     dark ? `rgba(255,255,255,${(0.04 * strength).toFixed(3)})` : `rgba(0,0,0,${(0.025 * strength).toFixed(4)})`;
@@ -132,56 +135,78 @@ export const MakersStudioTab = ({ theme }) => {
       {/* ── Pillars ── */}
       {PILLARS.map((pillar, idx) => {
         const Icon = pillar.icon;
+        const isOpen = !!expanded[pillar.id];
+        const hasContent = pillar.courses || pillar.items;
         return (
-          <GlassCard key={pillar.id} theme={theme} className="p-5 sm:p-6" variant="elevated">
+          <GlassCard key={pillar.id} theme={theme} className="overflow-hidden" variant="elevated">
             <div style={{
               opacity: ready ? 1 : 0,
               transition: `opacity 0.3s ease ${0.15 + idx * 0.08}s`,
             }}>
-              {/* Header */}
-              <div className="flex items-center gap-2.5 mb-3">
-                <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${pillar.color}14`, color: pillar.color }}>
+              {/* Header — clickable to expand/collapse */}
+              <button
+                onClick={() => hasContent && toggleExpand(pillar.id)}
+                className="w-full flex items-center gap-2.5 p-5 sm:p-6 text-left transition-colors"
+                style={{ cursor: hasContent ? 'pointer' : 'default' }}
+              >
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${pillar.color}14`, color: pillar.color }}>
                   <Icon className="w-4 h-4" />
                 </div>
-                <h2 className="text-[15px] font-bold" style={{ color: theme.colors.textPrimary }}>{pillar.title}</h2>
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-[15px] font-bold" style={{ color: theme.colors.textPrimary }}>{pillar.title}</h2>
+                  <p className={`text-sm leading-relaxed mt-0.5 ${isOpen ? '' : 'line-clamp-1'}`} style={{ color: theme.colors.textSecondary }}>{pillar.desc}</p>
+                </div>
+                {hasContent && (
+                  <ChevronDown
+                    className="w-4 h-4 flex-shrink-0 transition-transform duration-200"
+                    style={{ color: theme.colors.textSecondary, opacity: 0.35, transform: isOpen ? 'rotate(180deg)' : 'none' }}
+                  />
+                )}
+              </button>
+
+              {/* Expandable content */}
+              <div
+                className="transition-all duration-300 ease-in-out overflow-hidden"
+                style={{ maxHeight: isOpen ? 500 : 0, opacity: isOpen ? 1 : 0 }}
+              >
+                <div className="px-5 pb-5 sm:px-6 sm:pb-6">
+                  {/* Academy courses */}
+                  {pillar.courses && (
+                    <div className="space-y-2">
+                      {pillar.courses.map((c) => (
+                        <button key={c.title} className="w-full flex items-center justify-between py-2.5 px-3.5 rounded-xl transition-all active:scale-[0.99] text-left group"
+                          style={{ backgroundColor: subtle() }}>
+                          <div className="min-w-0 flex-1">
+                            <div className="text-sm font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{c.title}</div>
+                            <div className="text-[11px] font-medium mt-0.5" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>{c.tag}</div>
+                          </div>
+                          <ChevronRight className="w-3.5 h-3.5 opacity-20 group-hover:opacity-50 transition-opacity flex-shrink-0 ml-2" />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Preview items */}
+                  {pillar.items && (
+                    <div className="space-y-2">
+                      {pillar.items.map((item) => (
+                        <button key={item.title} className="w-full flex items-center justify-between py-2.5 px-3.5 rounded-xl transition-all active:scale-[0.99] text-left group"
+                          style={{ backgroundColor: subtle() }}>
+                          <div className="min-w-0 flex-1">
+                            <div className="text-sm font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{item.title}</div>
+                            <div className="text-xs mt-0.5 line-clamp-1" style={{ color: theme.colors.textSecondary, opacity: 0.6 }}>{item.detail}</div>
+                          </div>
+                          <Lock className="w-3 h-3 opacity-20 flex-shrink-0 ml-2" />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-              <p className="text-sm leading-relaxed mb-4" style={{ color: theme.colors.textSecondary }}>{pillar.desc}</p>
-
-              {/* Academy courses */}
-              {pillar.courses && (
-                <div className="space-y-2">
-                  {pillar.courses.map((c) => (
-                    <button key={c.title} className="w-full flex items-center justify-between py-2.5 px-3.5 rounded-xl transition-all active:scale-[0.99] text-left group"
-                      style={{ backgroundColor: subtle() }}>
-                      <div className="min-w-0 flex-1">
-                        <div className="text-sm font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{c.title}</div>
-                        <div className="text-[11px] font-medium mt-0.5" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>{c.tag}</div>
-                      </div>
-                      <ChevronRight className="w-3.5 h-3.5 opacity-20 group-hover:opacity-50 transition-opacity flex-shrink-0 ml-2" />
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {/* Preview items */}
-              {pillar.items && (
-                <div className="space-y-2">
-                  {pillar.items.map((item) => (
-                    <button key={item.title} className="w-full flex items-center justify-between py-2.5 px-3.5 rounded-xl transition-all active:scale-[0.99] text-left group"
-                      style={{ backgroundColor: subtle() }}>
-                      <div className="min-w-0 flex-1">
-                        <div className="text-sm font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{item.title}</div>
-                        <div className="text-xs mt-0.5 line-clamp-1" style={{ color: theme.colors.textSecondary, opacity: 0.6 }}>{item.detail}</div>
-                      </div>
-                      <Lock className="w-3 h-3 opacity-20 flex-shrink-0 ml-2" />
-                    </button>
-                  ))}
-                </div>
-              )}
 
               {/* Placeholder for community / challenges / rewards */}
               {!pillar.courses && !pillar.items && (
-                <div className="flex items-center gap-2 py-3 px-3.5 rounded-xl" style={{ backgroundColor: subtle() }}>
+                <div className="flex items-center gap-2 py-3 px-3.5 mx-5 mb-5 sm:mx-6 sm:mb-6 rounded-xl" style={{ backgroundColor: subtle() }}>
                   <Lock className="w-3.5 h-3.5 opacity-25 flex-shrink-0" />
                   <span className="text-xs font-medium" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Coming soon — invitation only</span>
                 </div>

@@ -60,15 +60,15 @@ export const PostCard = React.memo(({ post, theme, dark, isLiked, isUpvoted, isE
       )}
 
       {/* Action bar */}
-      <div className="px-2 py-1.5 flex items-center gap-0.5 border-t" style={{ borderColor: subtleBorder(dark) }}>
+      <div className="px-3.5 py-1.5 flex items-center gap-0.5 border-t" style={{ borderColor: subtleBorder(dark) }}>
         {/* Upvote */}
         <button
           onClick={() => onUpvote?.(post.id)}
           aria-label="Upvote"
           className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-full transition-all active:scale-95"
           style={{
-            color: isUpvoted ? '#f97316' : theme.colors.textSecondary,
-            backgroundColor: isUpvoted ? (dark ? 'rgba(249,115,22,0.12)' : 'rgba(249,115,22,0.08)') : 'transparent',
+            color: isUpvoted ? theme.colors.accent : theme.colors.textSecondary,
+            backgroundColor: isUpvoted ? (dark ? 'rgba(255,255,255,0.08)' : `${theme.colors.accent}10`) : 'transparent',
           }}
         >
           <ChevronUp className="w-3.5 h-3.5" style={isUpvoted ? { strokeWidth: 2.5 } : undefined} />
