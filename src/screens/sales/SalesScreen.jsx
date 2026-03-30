@@ -168,8 +168,8 @@ export const SalesScreen = ({ theme, onNavigate }) => {
         <div className="grid grid-cols-1 lg:grid-cols-[1.65fr_1fr] xl:grid-cols-[1.8fr_1fr] gap-4 lg:gap-5 items-stretch">
 
           {/* Main KPI card */}
-          <GlassCard theme={theme} className="p-5" variant="elevated">
-            <div className="space-y-4">
+          <GlassCard theme={theme} className="p-5 h-full" variant="elevated">
+            <div className="space-y-4 h-full flex flex-col">
               {/* Header */}
               <div className="flex items-start justify-between gap-3">
                 <div className="space-y-1 min-w-0">
@@ -196,7 +196,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                   <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-widest"
                     style={{
                       backgroundColor: aheadOfPace ? (isDark ? 'rgba(107,155,122,0.15)' : 'rgba(74,124,89,0.08)') : (isDark ? 'rgba(200,112,112,0.15)' : 'rgba(184,92,92,0.08)'),
-                      color: aheadOfPace ? (isDark ? '#6B9B7A' : '#4A7C59') : (isDark ? '#C87070' : '#B85C5C'),
+                      color: aheadOfPace ? theme.colors.success : theme.colors.error,
                     }}>
                     {aheadOfPace ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
                     {deltaLabel} {aheadOfPace ? 'Ahead' : 'Behind'}
@@ -209,28 +209,28 @@ export const SalesScreen = ({ theme, onNavigate }) => {
               </div>
 
               {/* Mini sparkline */}
-              <div className="h-14 flex items-end gap-1">
+              <div className="min-h-[56px] flex-1 flex items-end gap-1">
                 {MONTHLY_SALES_DATA.map((m, i) => {
                   const val = chartDataType === 'bookings' ? m.bookings : m.sales;
                   const pct = (val / chartMax) * 100;
                   const isHovered = hoveredBar === `mini-${i}`;
                   return (
-                    <div key={m.month} className="flex-1 flex flex-col items-center gap-1 cursor-default"
+                    <div key={m.month} className="flex-1 flex flex-col items-center gap-1 cursor-default h-full"
                       onMouseEnter={() => setHoveredBar(`mini-${i}`)} onMouseLeave={() => setHoveredBar(null)}>
-                      <div className="w-full relative">
+                      <div className="w-full relative flex-1 flex items-end">
                         {isHovered && (
                           <div className="absolute -top-4 left-1/2 -translate-x-1/2 text-[11px] font-bold whitespace-nowrap" style={{ color: colors.textPrimary }}>
                             ${(val / 1000).toFixed(0)}k
                           </div>
                         )}
                         <div className="w-full rounded-sm" style={{
-                          height: ready ? `${Math.max(4, (pct / 100) * 48)}px` : '0px',
+                          height: ready ? `${Math.max(8, pct)}%` : '0%',
                           backgroundColor: colors.accent,
                           opacity: isHovered ? (isDark ? 0.6 : 0.4) : (isDark ? 0.3 : 0.18),
                           transition: `height 0.4s ease-out ${0.1 + i * 0.025}s, opacity 0.15s`,
                         }} />
                       </div>
-                      <span className="text-[11px] font-semibold" style={{ opacity: isHovered ? 0.7 : 0.3, transition: 'opacity 0.15s' }}>{m.month}</span>
+                      <span className="text-[11px] font-semibold shrink-0" style={{ opacity: isHovered ? 0.7 : 0.3, transition: 'opacity 0.15s' }}>{m.month}</span>
                     </div>
                   );
                 })}
