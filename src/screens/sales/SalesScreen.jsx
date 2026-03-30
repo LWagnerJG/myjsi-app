@@ -165,11 +165,11 @@ export const SalesScreen = ({ theme, onNavigate }) => {
       <div className="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-5 pb-4 space-y-4 lg:space-y-5 max-w-5xl mx-auto w-full">
 
         {/* ── Hero KPI + sidebar ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1.65fr_1fr] xl:grid-cols-[1.8fr_1fr] gap-4 lg:gap-5 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.65fr_1fr] xl:grid-cols-[1.8fr_1fr] gap-4 lg:gap-5 items-start">
 
           {/* Main KPI card */}
-          <GlassCard theme={theme} className="p-5 h-full" variant="elevated">
-            <div className="space-y-4 h-full flex flex-col">
+          <GlassCard theme={theme} className="p-5" variant="elevated">
+            <div className="space-y-4">
               {/* Header */}
               <div className="flex items-start justify-between gap-3">
                 <div className="space-y-1 min-w-0">
@@ -209,28 +209,28 @@ export const SalesScreen = ({ theme, onNavigate }) => {
               </div>
 
               {/* Mini sparkline */}
-              <div className="min-h-[56px] flex-1 flex items-end gap-1">
+              <div className="h-20 sm:h-24 flex items-end gap-1">
                 {MONTHLY_SALES_DATA.map((m, i) => {
                   const val = chartDataType === 'bookings' ? m.bookings : m.sales;
                   const pct = (val / chartMax) * 100;
                   const isHovered = hoveredBar === `mini-${i}`;
                   return (
-                    <div key={m.month} className="flex-1 flex flex-col items-center gap-1 cursor-default h-full"
+                    <div key={m.month} className="flex-1 flex flex-col items-center gap-1 cursor-default"
                       onMouseEnter={() => setHoveredBar(`mini-${i}`)} onMouseLeave={() => setHoveredBar(null)}>
-                      <div className="w-full relative flex-1 flex items-end">
+                      <div className="w-full relative">
                         {isHovered && (
                           <div className="absolute -top-4 left-1/2 -translate-x-1/2 text-[11px] font-bold whitespace-nowrap" style={{ color: colors.textPrimary }}>
                             ${(val / 1000).toFixed(0)}k
                           </div>
                         )}
                         <div className="w-full rounded-sm" style={{
-                          height: ready ? `${Math.max(8, pct)}%` : '0%',
+                          height: ready ? `${Math.max(4, (pct / 100) * 72)}px` : '0px',
                           backgroundColor: colors.accent,
                           opacity: isHovered ? (isDark ? 0.6 : 0.4) : (isDark ? 0.3 : 0.18),
                           transition: `height 0.4s ease-out ${0.1 + i * 0.025}s, opacity 0.15s`,
                         }} />
                       </div>
-                      <span className="text-[11px] font-semibold shrink-0" style={{ opacity: isHovered ? 0.7 : 0.3, transition: 'opacity 0.15s' }}>{m.month}</span>
+                      <span className="text-[11px] font-semibold" style={{ opacity: isHovered ? 0.7 : 0.3, transition: 'opacity 0.15s' }}>{m.month}</span>
                     </div>
                   );
                 })}
