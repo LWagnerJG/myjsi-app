@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Check, Plus, Settings2, Info } from 'lucide-react';
 import {
     DndContext,
@@ -64,6 +64,24 @@ export const AppGrid = ({
                     </div>
                 </SortableContext>
 
+                {/* Done CTA — compact, right-aligned */}
+                {onUpdateHomeApps && (
+                    <div className="flex justify-end pt-2 pb-0 pr-0.5">
+                        <button
+                            onClick={() => setIsEditMode(false)}
+                            aria-label="Done customizing"
+                            className="flex items-center gap-1.5 px-4 py-1.5 rounded-full transition-all active:scale-95"
+                            style={{
+                                backgroundColor: colors.accent,
+                                color: colors.accentText || (isDark ? '#000' : '#fff'),
+                            }}
+                        >
+                            <Check className="w-3.5 h-3.5" />
+                            <span className="text-[11px] font-bold tracking-wide">Done</span>
+                        </button>
+                    </div>
+                )}
+
                 {/* Available apps — discrete list */}
                 <AvailableAppsList
                     availableApps={availableApps}
@@ -100,24 +118,6 @@ export const AppGrid = ({
                     ) : null}
                 </DragOverlay>
             </DndContext>
-
-            {/* Done CTA */}
-            {onUpdateHomeApps && (
-                <div className="flex justify-center pt-3 pb-1">
-                    <button
-                        onClick={() => setIsEditMode(false)}
-                        aria-label="Done customizing"
-                        className="flex items-center gap-2 px-6 py-2.5 rounded-full transition-all active:scale-95"
-                        style={{
-                            backgroundColor: colors.accent,
-                            color: isDark ? '#000' : '#fff',
-                        }}
-                    >
-                        <Check className="w-4 h-4" />
-                        <span className="text-xs font-bold tracking-wide">Done</span>
-                    </button>
-                </div>
-            )}
             </>
         );
     }
@@ -186,9 +186,16 @@ export const AppGrid = ({
     );
 };
 
-/* ── Compact 3-col grid of available apps with info tooltips ──── */
+/* ── Available apps to add ──── */
 const AvailableAppsList = ({ availableApps, toggleApp, colors, isDark }) => {
-    const [tooltipId, setTooltipId] = useState(null);
+    const [activeRoute, setActiveRoute] = useState(null);
+
+    // Auto-dismiss after 3s
+    useEffect(() => {
+        if (!activeRoute) return;
+        const t = setTimeout(() => setActiveRoute(null), 3000);
+        return () => clearTimeout(t);
+    }, [activeRoute]);
 
     if (availableApps.length === 0) {
         return (
@@ -199,45 +206,71 @@ const AvailableAppsList = ({ availableApps, toggleApp, colors, isDark }) => {
     }
 
     return (
-        <div className="pt-3">
+        <div className="pt-0.5">
+            <div
+                className="flex items-center gap-1.5 px-1 mb-1"
+                style={{ color: colors.textSecondary, opacity: 0.56 }}
+            >
+                <div
+                    className="w-4 h-4 rounded-full flex items-center justify-center shrink-0"
+                    style={{
+                        backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
+                        border: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.04)',
+                    }}
+                >
+                    <Plus className="w-2.5 h-2.5" style={{ opacity: 0.7 }} />
+                </div>
+                <p className="text-[10px] font-semibold tracking-[0.02em]">
+                    Tap an app below to add it to Home
+                </p>
+            </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
-                {availableApps.map((app) => (
-                    <div key={app.route} className="relative">
-                        <button
-                            onClick={() => toggleApp(app.route)}
-                            className="w-full flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-xs font-semibold transition-all active:scale-95"
-                            style={{
-                                backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.05)',
-                                color: colors.textSecondary,
-                                border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.05)',
-                            }}
-                        >
-                            <Plus className="w-3 h-3 opacity-40 shrink-0" />
-                            <span className="truncate text-left flex-1">{app.name}</span>
-                            <span
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    e.preventDefault();
-                                    setTooltipId(tooltipId === app.route ? null : app.route);
-                                }}
-                                className="shrink-0 opacity-25 hover:opacity-60 transition-opacity"
-                            >
-                                <Info className="w-3 h-3" style={{ color: colors.textSecondary }} />
-                            </span>
-                        </button>
-                        {tooltipId === app.route && app.desc && (
-                            <div
-                                className="absolute left-0 right-0 top-full mt-1 px-3 py-1.5 rounded-lg text-[11px] font-medium z-20 shadow-lg text-center"
+                {availableApps.map((app) => {
+                    const isActive = activeRoute === app.route;
+                    return (
+                        <div key={app.route}>
+                            <button
+                                onClick={() => toggleApp(app.route)}
+                                className="w-full flex items-center gap-2 px-3 py-2.5 rounded-2xl text-[12px] font-semibold transition-all active:scale-[0.97]"
                                 style={{
-                                    backgroundColor: isDark ? '#3A3A3A' : '#353535',
-                                    color: '#fff',
+                                    backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
+                                    color: colors.textSecondary,
+                                    border: isActive
+                                        ? `1px solid ${colors.accent}30`
+                                        : `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'}`,
                                 }}
                             >
-                                {app.desc}
+                                <Plus className="w-3.5 h-3.5 opacity-30 shrink-0" />
+                                <span className="truncate text-left flex-1">{app.name}</span>
+                                {app.desc && (
+                                    <span
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            e.preventDefault();
+                                            setActiveRoute(isActive ? null : app.route);
+                                        }}
+                                        className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center transition-all"
+                                        style={{
+                                            opacity: isActive ? 0.6 : 0.18,
+                                            backgroundColor: isActive ? `${colors.accent}12` : 'transparent',
+                                        }}
+                                    >
+                                        <Info className="w-2.5 h-2.5" style={{ color: isActive ? colors.accent : colors.textSecondary }} />
+                                    </span>
+                                )}
+                            </button>
+                            {/* Inline description — slides open under this specific pill */}
+                            <div
+                                className="overflow-hidden transition-all duration-200 ease-out"
+                                style={{ maxHeight: isActive ? 28 : 0, opacity: isActive ? 1 : 0 }}
+                            >
+                                <p className="text-[10px] font-medium px-3 pt-1 pb-0.5 truncate" style={{ color: colors.textSecondary, opacity: 0.6 }}>
+                                    {app.desc}
+                                </p>
                             </div>
-                        )}
-                    </div>
-                ))}
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );

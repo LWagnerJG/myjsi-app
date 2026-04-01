@@ -49,7 +49,7 @@ export const APP_ICON_COLORS = {
 export const MIN_PINNED_APPS = 3;
 export const MAX_PINNED_APPS = 9;
 export const NON_REMOVABLE_APPS = new Set(['resources']);
-export const EXCLUDED_ROUTES = new Set(['settings', 'feedback', 'help', 'contracts', 'members', 'resources/dealer_registration']);
+export const EXCLUDED_ROUTES = new Set(['settings', 'feedback', 'help', 'contracts', 'members', 'resources/dealer_registration', 'resources/discontinued-finishes']);
 
 /**
  * Shallow equality check for two arrays (by reference per element).

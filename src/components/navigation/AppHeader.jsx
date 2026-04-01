@@ -106,9 +106,11 @@ export const AppHeader = React.memo(({
                     style={{
                         ...(isHome ? homeChromePillStyles : {
                             borderRadius: 9999,
-                            backgroundColor: theme?.colors?.surface || (dark ? '#2A2A2A' : '#FFFFFF'),
-                            boxShadow: 'none',
-                            border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
+                            backgroundColor: dark ? 'rgba(26,26,26,0.72)' : 'rgba(255,255,255,0.72)',
+                            backdropFilter: 'blur(20px) saturate(1.6)',
+                            WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
+                            boxShadow: dark ? '0 4px 20px rgba(0,0,0,0.25)' : '0 4px 20px rgba(53,53,53,0.08)',
+                            border: dark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(255,255,255,0.70)',
                         }),
                     }}
                 >

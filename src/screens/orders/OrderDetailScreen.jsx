@@ -30,7 +30,8 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
   const dark        = isDarkTheme(theme);
   const c           = theme.colors;
   const border      = dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
-  const actionBg    = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)';
+  const actionBg    = dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.025)';
+  const actionBorder = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)';
 
   const hdrRef = useFadeUp(0);
   const tlRef  = useFadeUp(55);
@@ -66,9 +67,9 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
 
   /* top-level action buttons */
   const actions = [
-    order.ackUrl && { label: 'View ACK',  Icon: Eye,    onClick: () => setModal('ack') },
-    { label: 'Share',     Icon: Share2, onClick: share },
-    { label: 'Clips',     Icon: Film,   onClick: () => setModal('clips') },
+    order.ackUrl && { label: 'View Ack', Icon: Eye,    onClick: () => setModal('ack') },
+    { label: 'Share Order', Icon: Share2, onClick: share },
+    { label: 'View Clips', Icon: Film,   onClick: () => setModal('clips') },
   ].filter(Boolean);
 
   return (
@@ -80,25 +81,24 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
           <div ref={hdrRef} className="mt-3 mb-3">
             <div className="rounded-[22px] overflow-hidden" style={{ backgroundColor: c.surface, border: `1px solid ${border}` }}>
 
-              {/* eyebrow + status */}
-              <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: `1px solid ${border}` }}>
-                <span className="text-[10px] font-bold uppercase tracking-[0.07em]" style={{ color: c.textSecondary, opacity: 0.5 }}>
-                  SO {order.orderNumber}
-                </span>
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ backgroundColor: `${sc}15` }}>
-                  <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: sc }} />
-                  <span className="text-[11px] font-bold" style={{ color: sc }}>{order.status}</span>
+              {/* title + metadata + status */}
+              <div className="px-5 pt-4 pb-3.5">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-semibold" style={{ color: c.textSecondary, opacity: 0.72 }}>
+                      <span className="truncate max-w-full">{tc(order.company)}</span>
+                      <span style={{ opacity: 0.35 }}>•</span>
+                      <span>SO {order.orderNumber}</span>
+                    </div>
+                    <h1 className="mt-2 text-[20px] font-black leading-tight tracking-tight" style={{ color: c.textPrimary }}>
+                      {tc(order.details)}
+                    </h1>
+                  </div>
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full shrink-0" style={{ backgroundColor: `${sc}15` }}>
+                    <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: sc }} />
+                    <span className="text-[11px] font-bold" style={{ color: sc }}>{order.status}</span>
+                  </div>
                 </div>
-              </div>
-
-              {/* title + company */}
-              <div className="px-5 pt-3.5 pb-3">
-                <h1 className="text-[20px] font-black leading-tight tracking-tight" style={{ color: c.textPrimary }}>
-                  {tc(order.details)}
-                </h1>
-                <p className="text-[13px] font-medium mt-0.5" style={{ color: c.textSecondary, opacity: 0.75 }}>
-                  {tc(order.company)}
-                </p>
               </div>
 
               {/* stats */}
@@ -108,20 +108,20 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
                   { label: 'Est. Ship', value: fs(order.shipDate) || '—' },
                   { label: 'Items',     value: String(qty) },
                 ].map(({ label, value, large }, i) => (
-                  <div key={label} className="px-4 py-3" style={{ borderLeft: i > 0 ? `1px solid ${border}` : 'none' }}>
+                  <div key={label} className="px-5 py-3.5" style={{ borderLeft: i > 0 ? `1px solid ${border}` : 'none' }}>
                     <p className="text-[10px] font-bold uppercase tracking-[0.07em] mb-0.5" style={{ color: c.textSecondary, opacity: 0.5 }}>{label}</p>
-                    <p className={`${large ? 'text-[15px] font-black' : 'text-[14px] font-semibold'} tabular-nums leading-tight`} style={{ color: c.textPrimary }}>{value}</p>
+                    <p className={`${large ? 'text-[15px] font-black' : 'text-[15px] font-semibold'} tabular-nums leading-tight`} style={{ color: c.textPrimary }}>{value}</p>
                   </div>
                 ))}
               </div>
 
               {/* action buttons */}
-              <div className="flex items-center gap-2 px-4 py-3" style={{ borderTop: `1px solid ${border}` }}>
+              <div className="grid grid-cols-3 gap-2 px-5 pt-3 pb-4">
                 {actions.map(({ label, Icon, onClick }) => (
                   <button key={label} onClick={onClick}
-                    className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-full text-[12px] font-semibold transition active:scale-[0.97]"
-                    style={{ backgroundColor: actionBg, color: c.textPrimary }}>
-                    <Icon className="w-3.5 h-3.5" style={{ opacity: 0.7 }} />
+                    className="flex items-center justify-center gap-1.5 py-2 rounded-full text-[11px] font-semibold transition active:scale-[0.97]"
+                    style={{ backgroundColor: actionBg, border: `1px solid ${actionBorder}`, color: c.textSecondary }}>
+                    <Icon className="w-3.5 h-3.5" style={{ opacity: 0.68 }} />
                     {label}
                   </button>
                 ))}
