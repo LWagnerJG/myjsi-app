@@ -22,7 +22,8 @@ export const AppHeader = React.memo(({
     const homeChromeIconButtonStyles = getHomeChromeIconButtonStyles(dark);
 
     const bgR = dark ? '26,26,26' : '240,237,232';
-    const scrimHeight = 104;
+    const homeScrimHeight = 88;
+    const innerScrimHeight = 96;
     const scrimProgress = isHome ? Math.min(Math.max((scrollDepth - 2) / 36, 0), 1) : 0;
     const scrimOpacity = scrimProgress * 0.92;
     const gradientOpacity = scrimProgress * 0.9;
@@ -35,24 +36,46 @@ export const AppHeader = React.memo(({
 
         let removeListener = () => {};
         let rafId = 0;
-        const frame = window.requestAnimationFrame(() => {
+        let attachFrame = 0;
+        let observer = null;
+
+        const attachScrollListener = () => {
             const scrollContainer = document.querySelector('[data-home-scroll-container="true"]');
-            const getScrollTop = () => scrollContainer ? scrollContainer.scrollTop : window.scrollY;
+            if (!scrollContainer) return false;
+
+            const getScrollTop = () => scrollContainer.scrollTop;
             const onScroll = () => {
                 const nextDepth = getScrollTop();
                 if (rafId) window.cancelAnimationFrame(rafId);
                 rafId = window.requestAnimationFrame(() => setScrollDepth(nextDepth));
             };
-            const scrollTarget = scrollContainer || window;
 
             onScroll();
-            scrollTarget.addEventListener('scroll', onScroll, { passive: true });
-            removeListener = () => scrollTarget.removeEventListener('scroll', onScroll);
-        });
+            scrollContainer.addEventListener('scroll', onScroll, { passive: true });
+            removeListener = () => scrollContainer.removeEventListener('scroll', onScroll);
+            return true;
+        };
+
+        const startListening = () => {
+            if (attachScrollListener()) return;
+
+            observer = new MutationObserver(() => {
+                if (!attachScrollListener()) return;
+                observer?.disconnect();
+                observer = null;
+            });
+
+            if (document.body) {
+                observer.observe(document.body, { childList: true, subtree: true });
+            }
+        };
+
+        attachFrame = window.requestAnimationFrame(startListening);
 
         return () => {
-            window.cancelAnimationFrame(frame);
+            window.cancelAnimationFrame(attachFrame);
             if (rafId) window.cancelAnimationFrame(rafId);
+            observer?.disconnect();
             removeListener();
         };
     }, [isHome]);
@@ -72,13 +95,13 @@ export const AppHeader = React.memo(({
                         aria-hidden="true"
                         className="fixed top-0 left-0 right-0 pointer-events-none transition-opacity duration-200 ease-out"
                         style={{
-                            height: scrimHeight,
+                            height: homeScrimHeight,
                             zIndex: 29,
                             opacity: scrimOpacity,
                             backdropFilter: 'blur(20px) saturate(1.6)',
                             WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
-                            maskImage: 'linear-gradient(to bottom, black 0%, black 68%, transparent 100%)',
-                            WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 68%, transparent 100%)',
+                            maskImage: 'linear-gradient(to bottom, black 0%, black 58%, rgba(0,0,0,0.42) 74%, transparent 100%)',
+                            WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 58%, rgba(0,0,0,0.42) 74%, transparent 100%)',
                         }}
                     />
 
@@ -86,14 +109,47 @@ export const AppHeader = React.memo(({
                         aria-hidden="true"
                         className="fixed top-0 left-0 right-0 pointer-events-none transition-opacity duration-200 ease-out"
                         style={{
-                            height: scrimHeight,
+                            height: homeScrimHeight,
                             zIndex: 29,
                             opacity: gradientOpacity,
                             background: `linear-gradient(to bottom,
-                                rgba(${bgR},0.34) 0%,
-                                rgba(${bgR},0.18) 36%,
-                                rgba(${bgR},0.08) 66%,
-                                rgba(${bgR},0.02) 86%,
+                                rgba(${bgR},0.30) 0%,
+                                rgba(${bgR},0.16) 30%,
+                                rgba(${bgR},0.06) 56%,
+                                rgba(${bgR},0.015) 74%,
+                                rgba(${bgR},0) 100%)`,
+                        }}
+                    />
+                </>
+            )}
+
+            {!isHome && (
+                <>
+                    <div
+                        aria-hidden="true"
+                        className="fixed top-0 left-0 right-0 pointer-events-none"
+                        style={{
+                            height: innerScrimHeight,
+                            zIndex: 29,
+                            backgroundColor: `rgba(${bgR},0.15)`,
+                            backdropFilter: 'blur(20px) saturate(1.6)',
+                            WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
+                            maskImage: 'linear-gradient(to bottom, black 0%, black 60%, rgba(0,0,0,0.42) 76%, transparent 100%)',
+                            WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 60%, rgba(0,0,0,0.42) 76%, transparent 100%)',
+                        }}
+                    />
+
+                    <div
+                        aria-hidden="true"
+                        className="fixed top-0 left-0 right-0 pointer-events-none"
+                        style={{
+                            height: innerScrimHeight,
+                            zIndex: 29,
+                            background: `linear-gradient(to bottom,
+                                rgba(${bgR},0.38) 0%,
+                                rgba(${bgR},0.22) 34%,
+                                rgba(${bgR},0.09) 60%,
+                                rgba(${bgR},0.018) 80%,
                                 rgba(${bgR},0) 100%)`,
                         }}
                     />
