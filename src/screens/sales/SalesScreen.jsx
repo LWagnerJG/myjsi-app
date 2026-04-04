@@ -4,7 +4,6 @@ import { MONTHLY_SALES_DATA, SALES_VERTICALS_DATA, CUSTOMER_RANK_DATA, INCENTIVE
 import { ORDER_DATA, STATUS_COLORS } from '../orders/data.js';
 import { SalesByVerticalBreakdown } from './components/SalesByVerticalBreakdown.jsx';
 import { CountUp } from '../../components/common/CountUp.jsx';
-import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { isDarkTheme } from '../../design-system/tokens.js';
 import { formatCurrency, formatCompanyName } from '../../utils/format.js';
 
@@ -52,6 +51,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
   const [chartDataType, setChartDataType] = useState('bookings');
   const [hoveredBar, setHoveredBar] = useState(null);
   const isDark = isDarkTheme(theme);
+  const bdr = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
 
   const colors = useMemo(() => ({
     background: theme?.colors?.background || '#F0EDE8',
@@ -144,12 +144,12 @@ export const SalesScreen = ({ theme, onNavigate }) => {
         {Icon && <Icon className="w-4 h-4 opacity-40" />}
         <h3 className="text-[15px] font-bold">{title}</h3>
         {badge && (
-          <span className="text-[11px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
+          <span className="text-[11px] font-bold uppercase tracking-[0.07em] px-2 py-0.5 rounded-full"
             style={{ backgroundColor: subtle(isDark, 1.5), color: colors.textSecondary }}>{badge}</span>
         )}
       </div>
       {action && (
-        <span className="text-xs font-bold uppercase tracking-widest opacity-30 group-hover:opacity-60 flex items-center gap-0.5 transition-opacity">
+        <span className="text-xs font-bold uppercase tracking-[0.07em] opacity-30 group-hover:opacity-60 flex items-center gap-0.5 transition-opacity">
           {action} <ChevronRight className="w-3.5 h-3.5" />
         </span>
       )}
@@ -157,23 +157,23 @@ export const SalesScreen = ({ theme, onNavigate }) => {
   );
 
   /* shared content row */
-  const tileRowCls = "flex items-center justify-between py-2.5 px-3.5 rounded-xl";
+  const tileRowCls = "flex items-center justify-between py-2.5 px-3.5 rounded-[12px]";
   const tileRowBg = subtle(isDark);
 
   return (
-    <div className="min-h-full app-header-offset" style={{ backgroundColor: colors.background }}>
-      <div className="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-5 pb-4 space-y-4 lg:space-y-5 max-w-5xl mx-auto w-full">
+    <div className="min-h-full" style={{ backgroundColor: colors.background }}>
+      <div className="px-4 sm:px-6 lg:px-8 pb-4 space-y-4 lg:space-y-5 max-w-5xl mx-auto w-full" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 16px)' }}>
 
         {/* ── Hero KPI + sidebar ── */}
         <div className="grid grid-cols-1 lg:grid-cols-[1.65fr_1fr] xl:grid-cols-[1.8fr_1fr] gap-4 lg:gap-5">
 
           {/* Main KPI card */}
-          <GlassCard theme={theme} className="p-5 h-full" variant="elevated">
+          <div className="rounded-[22px] overflow-hidden p-5 h-full" style={{ backgroundColor: colors.surface, border: `1px solid ${bdr}` }}>
             <div className="h-full flex flex-col gap-3">
               {/* Header */}
               <div className="flex items-start justify-between gap-3">
                 <div className="space-y-1 min-w-0">
-                  <p className="text-xs font-bold uppercase tracking-widest opacity-40">
+                  <p className="text-xs font-bold uppercase tracking-[0.07em] opacity-40">
                     {chartDataType === 'bookings' ? 'Total Bookings' : 'Total Sales'}
                   </p>
                   <div className="text-4xl sm:text-[42px] font-black tracking-tight leading-none" style={{ opacity: ready ? 1 : 0, transition: 'opacity 0.4s ease' }}>
@@ -191,7 +191,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold opacity-40">Progress to Goal</span>
-                  <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-widest"
+                  <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-[0.07em]"
                     style={{
                       backgroundColor: aheadOfPace ? (isDark ? 'rgba(107,155,122,0.15)' : 'rgba(74,124,89,0.08)') : (isDark ? 'rgba(200,112,112,0.15)' : 'rgba(184,92,92,0.08)'),
                       color: aheadOfPace ? theme.colors.success : theme.colors.error,
@@ -234,13 +234,13 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                 })}
               </div>
             </div>
-          </GlassCard>
+          </div>
 
           {/* Sidebar cards */}
           <div className="grid grid-cols-1 grid-rows-2 gap-4">
             {/* Leaderboard */}
             <button onClick={() => onNavigate('customer-rank')} className="w-full h-full text-left group">
-              <GlassCard theme={theme} className="p-5 h-full flex flex-col" variant="elevated">
+              <div className="rounded-[22px] overflow-hidden p-5 h-full flex flex-col" style={{ backgroundColor: colors.surface, border: `1px solid ${bdr}` }}>
                 <TileHeader icon={TrendingUp} title="Leaderboard" action="View All" />
                 <div className="space-y-1.5 flex-1 flex flex-col justify-center">
                   {topLeaders.map((leader, idx) => (
@@ -262,12 +262,12 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                     </div>
                   ))}
                 </div>
-              </GlassCard>
+              </div>
             </button>
 
             {/* Dealer Rewards */}
             <button onClick={() => onNavigate('incentive-rewards')} className="w-full h-full text-left group">
-              <GlassCard theme={theme} className="p-5 h-full flex flex-col" variant="elevated">
+              <div className="rounded-[22px] overflow-hidden p-5 h-full flex flex-col" style={{ backgroundColor: colors.surface, border: `1px solid ${bdr}` }}>
                 <TileHeader icon={Trophy} title="Dealer Rewards" action="Details" />
                 {rewardsSnapshot ? (
                   <div className="flex-1 flex flex-col justify-center space-y-1.5">
@@ -280,7 +280,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                     </div>
                     <div className="grid grid-cols-2 gap-2 pt-1">
                       {rewardsSnapshot.topSales.length > 0 && (
-                        <div className="py-2 px-3.5 rounded-xl" style={{ backgroundColor: tileRowBg }}>
+                        <div className="py-2 px-3.5 rounded-[12px]" style={{ backgroundColor: tileRowBg }}>
                           <div className="text-[11px] font-bold uppercase tracking-wider opacity-30 mb-1.5">Top Sales</div>
                           <div className="space-y-1.5">
                             {rewardsSnapshot.topSales.map((p) => (
@@ -293,7 +293,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                         </div>
                       )}
                       {rewardsSnapshot.topDesigners.length > 0 && (
-                        <div className="py-2 px-3.5 rounded-xl" style={{ backgroundColor: tileRowBg }}>
+                        <div className="py-2 px-3.5 rounded-[12px]" style={{ backgroundColor: tileRowBg }}>
                           <div className="text-[11px] font-bold uppercase tracking-wider opacity-30 mb-1.5">Top Design</div>
                           <div className="space-y-1.5">
                             {rewardsSnapshot.topDesigners.map((p) => (
@@ -310,7 +310,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                 ) : (
                   <p className="text-sm opacity-40 flex-1 flex items-center">No rewards data yet.</p>
                 )}
-              </GlassCard>
+              </div>
             </button>
           </div>
         </div>
@@ -319,7 +319,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
         <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-4 lg:gap-5">
           {/* Recent Activity */}
           <button onClick={() => onNavigate('orders')} className="w-full text-left group">
-            <GlassCard theme={theme} className="p-5" variant="elevated">
+            <div className="rounded-[22px] overflow-hidden p-5" style={{ backgroundColor: colors.surface, border: `1px solid ${bdr}` }}>
               <TileHeader title="Recent Activity" action="All Orders" />
               <div className="space-y-1.5">
                 {recentOrders.map((order, i) => {
@@ -346,20 +346,20 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                   );
                 })}
               </div>
-            </GlassCard>
+            </div>
           </button>
 
           {/* Invoiced by Vertical */}
-          <GlassCard theme={theme} className="p-5" variant="elevated">
+          <div className="rounded-[22px] overflow-hidden p-5" style={{ backgroundColor: colors.surface, border: `1px solid ${bdr}` }}>
             <TileHeader title="Invoiced by Vertical" badge="YTD" />
             <SalesByVerticalBreakdown theme={theme} data={SALES_VERTICALS_DATA.map(v => ({ name: v.label, value: v.value, color: v.color }))} />
-          </GlassCard>
+          </div>
         </div>
 
         {/* ── Commissions Preview ── */}
         {commissionsSnapshot && (
           <button onClick={() => onNavigate('commissions')} className="w-full text-left group">
-            <GlassCard theme={theme} className="p-5" variant="elevated">
+            <div className="rounded-[22px] overflow-hidden p-5" style={{ backgroundColor: colors.surface, border: `1px solid ${bdr}` }}>
               <TileHeader icon={DollarSign} title="Commissions" action="View All" />
               <div className="space-y-2.5">
                 <div className={tileRowCls} style={{ backgroundColor: tileRowBg }}>
@@ -372,7 +372,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                 {commissionsSnapshot.topEarners.length > 0 && (
                   <div className="grid grid-cols-3 gap-1.5">
                     {commissionsSnapshot.topEarners.map(([name, amount]) => (
-                      <div key={name} className="py-2 px-3.5 rounded-xl min-w-0" style={{ backgroundColor: tileRowBg }}>
+                      <div key={name} className="py-2 px-3.5 rounded-[12px] min-w-0" style={{ backgroundColor: tileRowBg }}>
                         <div className="text-xs opacity-35 truncate mb-0.5">{name}</div>
                         <div className="text-sm font-bold tabular-nums">{formatCurrency(amount)}</div>
                       </div>
@@ -380,7 +380,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                   </div>
                 )}
               </div>
-            </GlassCard>
+            </div>
           </button>
         )}
       </div>
@@ -388,4 +388,3 @@ export const SalesScreen = ({ theme, onNavigate }) => {
     </div>
   );
 };
-
