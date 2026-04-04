@@ -26,7 +26,7 @@ export const PollCard = React.memo(({ poll, theme, dark, votedOption, onPollVote
     <div className="rounded-2xl overflow-hidden p-3.5 space-y-2.5" style={{ backgroundColor: cardBg(dark) }}>
       <div className="flex items-center gap-1.5">
         <BarChart3 className="w-3 h-3" style={{ color: theme.colors.textSecondary }} />
-        <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: theme.colors.textSecondary }}>Poll</span>
+        <span className="text-[11px] font-bold uppercase tracking-[0.07em]" style={{ color: theme.colors.textSecondary }}>Poll</span>
         {timeLeft && (
           <span
             className="ml-auto text-[11px] font-semibold px-2 py-0.5 rounded-full"
@@ -34,7 +34,7 @@ export const PollCard = React.memo(({ poll, theme, dark, votedOption, onPollVote
               backgroundColor: isClosed
                 ? (dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)')
                 : (dark ? 'rgba(74,124,89,0.18)' : 'rgba(74,124,89,0.10)'),
-              color: isClosed ? theme.colors.textSecondary : '#4A7C59',
+              color: isClosed ? theme.colors.textSecondary : (theme.colors.success || '#4A7C59'),
             }}
           >
             {timeLeft}

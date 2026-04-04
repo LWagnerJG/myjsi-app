@@ -4,7 +4,7 @@ import { Users } from 'lucide-react';
 export const Avatar = React.memo(({ src, alt, size = 36, dark, theme }) => (
   <div
     className="rounded-full overflow-hidden flex items-center justify-center flex-shrink-0"
-    style={{ width: size, height: size, backgroundColor: dark ? '#444' : '#E3E0D8' }}
+    style={{ width: size, height: size, backgroundColor: dark ? theme.colors.subtle : theme.colors.border }}
   >
     {src
       ? <img src={src} alt={alt} className="w-full h-full object-cover" />
