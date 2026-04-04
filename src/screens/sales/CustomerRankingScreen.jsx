@@ -1,5 +1,4 @@
 import React, { useMemo, useState } from 'react';
-import { GlassCard } from '../../components/common/GlassCard';
 import { SegmentedToggle } from '../../components/common/GroupedToggle';
 import { CountUp } from '../../components/common/CountUp';
 import { CUSTOMER_RANK_DATA } from './data.js';
@@ -32,6 +31,7 @@ export const CustomerRankingScreen = ({ theme, onNavigate }) => {
     const [search, setSearch] = useState('');
     const [showSearch, setShowSearch] = useState(false);
     const isDark = isDarkTheme(theme);
+    const bdr = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
 
     const allRows = useMemo(() => {
         const list = [...CUSTOMER_RANK_DATA].sort((a, b) => (b[tab] || 0) - (a[tab] || 0));
@@ -139,10 +139,10 @@ export const CustomerRankingScreen = ({ theme, onNavigate }) => {
             {/* Summary Header */}
             <div className="px-4 sm:px-6 lg:px-8 pt-4 pb-2 max-w-5xl mx-auto w-full space-y-4">
                 {/* Aggregate KPI */}
-                <GlassCard theme={theme} className="px-5 py-4" variant="elevated">
+                <div className="rounded-[22px] overflow-hidden px-5 py-4" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${bdr}` }}>
                     <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
-                            <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color: theme.colors.textSecondary }}>
+                            <p className="text-[11px] font-bold uppercase tracking-[0.07em]" style={{ color: theme.colors.textSecondary }}>
                                 Total {tab === 'sales' ? 'Sales' : 'Bookings'} — {allRows.length} Dealers
                             </p>
                             <div className="text-2xl sm:text-3xl font-black tracking-tight" style={{ color: theme.colors.textPrimary }}>
@@ -177,7 +177,7 @@ export const CustomerRankingScreen = ({ theme, onNavigate }) => {
                                         onChange={e => setSearch(e.target.value)}
                                         placeholder="Search dealers..."
                                         autoFocus
-                                        className="w-full px-4 py-2.5 rounded-xl text-sm outline-none transition-all"
+                                        className="w-full px-4 py-2.5 rounded-[14px] text-sm outline-none transition-all"
                                         style={{
                                             backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
                                             border: `1px solid ${theme.colors.border}`,
@@ -188,7 +188,7 @@ export const CustomerRankingScreen = ({ theme, onNavigate }) => {
                             </motion.div>
                         )}
                     </AnimatePresence>
-                </GlassCard>
+                </div>
 
                 {/* Tab Toggle */}
                 <SegmentedToggle
@@ -208,11 +208,11 @@ export const CustomerRankingScreen = ({ theme, onNavigate }) => {
                             <p className="text-sm font-medium" style={{ color: theme.colors.textSecondary }}>No dealers match "{search}"</p>
                         </div>
                     ) : (
-                        <GlassCard theme={theme} className="rounded-2xl overflow-hidden" variant="elevated">
+                        <div className="rounded-[22px] overflow-hidden" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${bdr}` }}>
                             {rows.map((c, i) => (
                                 <Row key={c.id} c={c} i={i} />
                             ))}
-                        </GlassCard>
+                        </div>
                     )}
                 </div>
             </div>
