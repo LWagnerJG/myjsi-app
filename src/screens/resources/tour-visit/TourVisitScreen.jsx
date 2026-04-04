@@ -3,18 +3,16 @@ import {
     ArrowRight,
     Check,
     ChevronDown,
-    ChevronRight,
     Info,
     MapPin,
     Plus,
     Send,
     X,
 } from 'lucide-react';
-import { GlassCard } from '../../../components/common/GlassCard.jsx';
+import { isDarkTheme } from '../../../design-system/tokens.js';
 import { FormInput } from '../../../components/common/FormComponents.jsx';
 import { SearchableSelect } from '../../../components/forms/SearchableSelect.jsx';
 import { hapticLight, hapticSuccess, hapticWarning } from '../../../utils/haptics.js';
-import { isDarkTheme } from '../../../design-system/tokens.js';
 import { DEALER_DIRECTORY_DATA } from '../dealer-directory/data.js';
 import {
     TOUR_VISIT_AIRLINES,
@@ -37,33 +35,9 @@ const buildDefaultExperienceSelections = () =>
         ])
     );
 
-/* ── Shared sub-components matching app design system ── */
-
-const CardHeader = ({ children, right, theme, dark }) => (
-    <div
-        className="flex items-center justify-between px-5 py-3 flex-shrink-0"
-        style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'}` }}
-    >
-        <span
-            className="text-[12px] font-bold uppercase tracking-[0.07em]"
-            style={{ color: theme.colors.textSecondary, opacity: 0.6 }}
-        >
-            {children}
-        </span>
-        {right}
-    </div>
-);
-
-const fieldSurface   = (dark) => dark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.80)';
-const panelSurface   = (dark) => dark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.78)';
-const subtleDivider  = (dark) => dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)';
-const surfaceBorder  = (dark) => `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'}`;
-
-/* legacy constants kept for internal component compatibility */
-const TOUR_VISIT_PANEL_SURFACE = 'rgba(255, 255, 255, 0.78)';
-const TOUR_VISIT_PANEL_SURFACE_COLLAPSED = 'rgba(255, 255, 255, 0.66)';
-const TOUR_VISIT_FIELD_SURFACE = 'rgba(255, 255, 255, 0.72)';
-const TOUR_VISIT_SURFACE_BORDER = '1px solid rgba(0, 0, 0, 0.02)';
+const fieldSurf = (dark) => dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)';
+const bdr       = (dark) => dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+const eyebrow   = (c) => ({ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: c.textSecondary, opacity: 0.55 });
 
 const isRepAttendee = (guest) => guest.isSelf || Boolean(guest.linkedMemberId);
 
@@ -201,7 +175,9 @@ const buildSubmittedUpcomingVisit = ({
     agenda: buildTripAgenda(experienceSelections),
 });
 
-const TourVisitSelectField = ({ label, value, onChange, options, placeholder, theme, searchable = true }) => (
+const TourVisitSelectField = ({ label, value, onChange, options, placeholder, theme, searchable = true }) => {
+    const dark = isDarkTheme(theme);
+    return (
     <div className="relative">
         <label
             className="pointer-events-none absolute left-4 top-2 z-[1] text-[11px] font-medium leading-none"
@@ -220,21 +196,24 @@ const TourVisitSelectField = ({ label, value, onChange, options, placeholder, th
             searchPlaceholder={`Search ${label.toLowerCase()}`}
             buttonClassName="!h-[56px] !rounded-[16px] !px-4 !pr-11 !pb-[6px] !pt-[18px] !text-sm"
             buttonStyle={{
-                backgroundColor: TOUR_VISIT_FIELD_SURFACE,
-                border: TOUR_VISIT_SURFACE_BORDER,
+                backgroundColor: fieldSurf(dark),
+                border: `1px solid ${bdr(dark)}`,
                 color: value ? theme.colors.textPrimary : theme.colors.textSecondary,
             }}
         />
     </div>
-);
+    );
+};
 
-const TripMenuHeader = ({ title, theme }) => (
-    <div className="pb-3">
-        <h2 className="text-[20px] font-black leading-tight tracking-tight" style={{ color: theme.colors.textPrimary }}>
-            {title}
-        </h2>
-    </div>
-);
+const CardHeader = ({ title, right, theme }) => {
+    const dark = isDarkTheme(theme);
+    return (
+        <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: `1px solid ${bdr(dark)}` }}>
+            <span style={eyebrow(theme.colors)}>{title}</span>
+            {right || null}
+        </div>
+    );
+};
 
 const DATE_WEEKDAY_LABELS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
@@ -248,6 +227,7 @@ const DateRangeDropdown = ({
     compact = false,
     showChevron = true,
 }) => {
+    const dark = isDarkTheme(theme);
     const containerRef = useRef(null);
     const [open, setOpen] = useState(false);
     const [visibleMonth, setVisibleMonth] = useState(() => {
@@ -321,7 +301,7 @@ const DateRangeDropdown = ({
                 }}
                 className={`w-full text-left ${compact ? 'rounded-none px-0.5 py-0.5' : 'rounded-[16px] px-3.5 py-2.5'}`}
                 style={{
-                    backgroundColor: compact ? 'transparent' : TOUR_VISIT_FIELD_SURFACE,
+                    backgroundColor: compact ? 'transparent' : fieldSurf(dark),
                     border: 'none',
                     color: theme.colors.textPrimary,
                 }}
@@ -358,7 +338,7 @@ const DateRangeDropdown = ({
                             type="button"
                             onClick={() => goToMonth(-1)}
                             className="inline-flex h-8 w-8 items-center justify-center rounded-full"
-                            style={{ color: theme.colors.textSecondary, backgroundColor: TOUR_VISIT_FIELD_SURFACE }}
+                            style={{ color: theme.colors.textSecondary, backgroundColor: fieldSurf(dark) }}
                             aria-label="Previous month"
                         >
                             <ArrowRight className="h-4 w-4 rotate-180" />
@@ -368,7 +348,7 @@ const DateRangeDropdown = ({
                             type="button"
                             onClick={() => goToMonth(1)}
                             className="inline-flex h-8 w-8 items-center justify-center rounded-full"
-                            style={{ color: theme.colors.textSecondary, backgroundColor: TOUR_VISIT_FIELD_SURFACE }}
+                            style={{ color: theme.colors.textSecondary, backgroundColor: fieldSurf(dark) }}
                             aria-label="Next month"
                         >
                             <ArrowRight className="h-4 w-4" />
@@ -443,59 +423,49 @@ const DateRangeDropdown = ({
 const FacilityOption = ({ facility, selected, onClick, theme, isInList = false, showTopDivider = false }) => {
     const dark = isDarkTheme(theme);
     return (
-        <button
-            type="button"
-            onClick={onClick}
-            className="w-full px-5 text-left transition-all active:scale-[0.99]"
-            style={{
-                paddingTop: 14,
-                paddingBottom: 14,
-                borderTop: isInList && showTopDivider ? `1px solid ${subtleDivider(dark)}` : undefined,
-                backgroundColor: selected ? `${theme.colors.accent}09` : 'transparent',
-            }}
-        >
-            <div className="flex items-center gap-4">
-                {/* Location icon avatar */}
-                <div
-                    className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0"
-                    style={{ backgroundColor: selected ? `${theme.colors.accent}18` : (dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)') }}
-                >
-                    <MapPin className="w-4 h-4" style={{ color: selected ? theme.colors.accent : theme.colors.textSecondary, opacity: selected ? 1 : 0.5 }} />
-                </div>
-
-                {/* Content */}
-                <div className="flex-1 min-w-0">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.08em] mb-0.5" style={{ color: theme.colors.accent, opacity: selected ? 1 : 0.55 }}>
-                        {facility.eyebrow}
-                    </p>
-                    <h3 className="text-[15px] font-bold leading-snug tracking-tight" style={{ color: theme.colors.textPrimary }}>
-                        {facility.name}
-                    </h3>
-                    <p className="text-[12px] mt-[2px] leading-snug" style={{ color: theme.colors.textSecondary, opacity: 0.65 }}>
-                        {facility.blurb}
-                    </p>
-                </div>
-
-                {/* Indicator */}
-                <div
-                    className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
-                    style={{ backgroundColor: selected ? theme.colors.accent : (dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)') }}
-                >
-                    {selected
-                        ? <Check className="w-3.5 h-3.5" style={{ color: theme.colors.accentText }} />
-                        : <ChevronRight className="w-3.5 h-3.5" style={{ color: theme.colors.textSecondary, opacity: 0.4 }} />}
+    <button
+        type="button"
+        onClick={onClick}
+        className={`w-full px-4 py-3.5 text-left transition-all motion-card ${isInList ? '' : 'rounded-[16px]'}`}
+        style={{
+            backgroundColor: isInList ? 'transparent' : fieldSurf(dark),
+            border: selected ? `1px solid ${theme.colors.accent}55` : 'none',
+            borderTop: isInList && showTopDivider ? `1px solid ${bdr(dark)}` : undefined,
+            color: theme.colors.textPrimary,
+            boxShadow: 'none',
+        }}
+    >
+        <div className="flex items-center justify-between gap-4">
+            <div className="min-w-0">
+                <h3 className="text-[15px] font-semibold leading-5">{facility.name}</h3>
+                <div className="mt-1 flex items-center gap-2 text-sm" style={{ color: theme.colors.textSecondary }}>
+                    <MapPin className="h-4 w-4 shrink-0" />
+                    <span>{facility.location}</span>
                 </div>
             </div>
-        </button>
+            <span
+                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
+                style={{
+                    backgroundColor: theme.colors.surface,
+                    color: selected ? theme.colors.accentText : theme.colors.textSecondary,
+                    border: 'none',
+                }}
+            >
+                {selected ? <Check className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
+            </span>
+        </div>
+    </button>
     );
 };
 
-const TourVisitBooleanField = ({ label, value, onChange, theme }) => (
+const TourVisitBooleanField = ({ label, value, onChange, theme }) => {
+    const dark = isDarkTheme(theme);
+    return (
     <div
         className="rounded-[16px] px-3.5 py-2.5"
         style={{
-            backgroundColor: TOUR_VISIT_FIELD_SURFACE,
-            border: TOUR_VISIT_SURFACE_BORDER,
+            backgroundColor: fieldSurf(dark),
+            border: `1px solid ${bdr(dark)}`,
         }}
     >
         <div className="flex min-h-[36px] items-center justify-between gap-3">
@@ -530,13 +500,17 @@ const TourVisitBooleanField = ({ label, value, onChange, theme }) => (
             </div>
         </div>
     </div>
-);
+    );
+};
 
-const UpcomingVisitDirectory = ({ visits, expandedVisitId, onToggleVisit, theme }) => (
-    <GlassCard theme={theme} className="p-5 md:p-6">
-        <TripMenuHeader title="Upcoming Trips" theme={theme} />
+const UpcomingVisitDirectory = ({ visits, expandedVisitId, onToggleVisit, theme }) => {
+    const dark = isDarkTheme(theme);
+    const border = bdr(dark);
+    return (
+    <div className="rounded-[22px] overflow-hidden" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${border}` }}>
+        <CardHeader title="Upcoming Trips" theme={theme} />
 
-        <div className="overflow-hidden rounded-[16px]" style={{ backgroundColor: TOUR_VISIT_FIELD_SURFACE }}>
+        <div>
             {visits.map((visit, visitIndex) => {
                 const isExpanded = expandedVisitId === visit.id;
                 const isPendingApproval = visit.approvalStatus === 'pending';
@@ -546,9 +520,8 @@ const UpcomingVisitDirectory = ({ visits, expandedVisitId, onToggleVisit, theme 
                         key={visit.id}
                         className="overflow-hidden"
                         style={{
-                            backgroundColor: isExpanded ? 'rgba(255, 255, 255, 0.82)' : 'transparent',
-                            border: 'none',
-                            borderTop: visitIndex > 0 ? '1px solid rgba(0, 0, 0, 0.06)' : 'none',
+                            backgroundColor: isExpanded ? fieldSurf(dark) : 'transparent',
+                            borderTop: visitIndex > 0 ? `1px solid ${border}` : 'none',
                         }}
                     >
                         <button
@@ -615,7 +588,7 @@ const UpcomingVisitDirectory = ({ visits, expandedVisitId, onToggleVisit, theme 
                                             key={`${visit.id}-${day.dayLabel}`}
                                             className="rounded-[14px] px-3.5 py-3"
                                             style={{
-                                                backgroundColor: TOUR_VISIT_FIELD_SURFACE,
+                                                backgroundColor: fieldSurf(dark),
                                                 border: 'none',
                                             }}
                                         >
@@ -678,13 +651,16 @@ const UpcomingVisitDirectory = ({ visits, expandedVisitId, onToggleVisit, theme 
                 );
             })}
         </div>
-    </GlassCard>
-);
+    </div>
+    );
+};
 
-const ExperienceTrackCard = ({ track, selectedOptions, expanded, onToggleExpanded, onToggleOption, onOpenInfo, theme }) => (
+const ExperienceTrackCard = ({ track, selectedOptions, expanded, onToggleExpanded, onToggleOption, onOpenInfo, theme }) => {
+    const dark = isDarkTheme(theme);
+    return (
     <div className="rounded-[16px] px-4 py-3.5" style={{
-        backgroundColor: TOUR_VISIT_FIELD_SURFACE,
-        border: '1px solid rgba(0, 0, 0, 0.04)',
+        backgroundColor: fieldSurf(dark),
+        border: `1px solid ${bdr(dark)}`,
     }}>
         <div className="flex items-start gap-3">
             <button
@@ -753,7 +729,8 @@ const ExperienceTrackCard = ({ track, selectedOptions, expanded, onToggleExpande
             </div>
         ) : null}
     </div>
-);
+    );
+};
 
 const GuestPanel = ({
     guest,
@@ -770,6 +747,8 @@ const GuestPanel = ({
     onChange,
     onRemove,
 }) => {
+    const dark = isDarkTheme(theme);
+    const border = bdr(dark);
     const repAttendee = isRepAttendee(guest);
     const showNameError = submitAttempted && (!guest.legalFirstName.trim() || !guest.legalLastName.trim());
     const handleToggle = () => onToggleExpanded();
@@ -788,13 +767,8 @@ const GuestPanel = ({
         <div
             className={`rounded-[18px] px-3 py-2.5 ${embedded && !isFirst ? 'pt-3' : ''}`}
             style={{
-                backgroundColor: embedded
-                    ? 'transparent'
-                    : expanded
-                        ? TOUR_VISIT_PANEL_SURFACE
-                        : TOUR_VISIT_PANEL_SURFACE_COLLAPSED,
-                border: 'none',
-                borderTop: embedded && !isFirst ? '1px solid rgba(0, 0, 0, 0.06)' : undefined,
+                backgroundColor: embedded ? 'transparent' : theme.colors.surface,
+                borderTop: embedded && !isFirst ? `1px solid ${border}` : undefined,
                 borderRadius: embedded ? 0 : 18,
             }}
         >
@@ -875,7 +849,7 @@ const GuestPanel = ({
                             pointerEvents: expanded ? 'auto' : 'none',
                         }}
                     >
-                    <div className="rounded-[14px] p-2.5" style={{ backgroundColor: 'rgba(0, 0, 0, 0.02)', border: 'none' }}>
+                    <div className="rounded-[14px] p-2.5" style={{ backgroundColor: fieldSurf(dark) }}>
                     <div className="grid grid-cols-2 gap-2">
                         <FormInput
                             label="First Name"
@@ -886,8 +860,8 @@ const GuestPanel = ({
                             theme={theme}
                             required
                             insetLabel
-                            surfaceBackground={TOUR_VISIT_FIELD_SURFACE}
-                            surfaceBorder={TOUR_VISIT_SURFACE_BORDER}
+                            surfaceBackground={fieldSurf(dark)}
+                            surfaceBorder={`1px solid ${bdr(dark)}`}
                         />
                         <FormInput
                             label="Last Name"
@@ -897,8 +871,8 @@ const GuestPanel = ({
                             theme={theme}
                             required
                             insetLabel
-                            surfaceBackground={TOUR_VISIT_FIELD_SURFACE}
-                            surfaceBorder={TOUR_VISIT_SURFACE_BORDER}
+                            surfaceBackground={fieldSurf(dark)}
+                            surfaceBorder={`1px solid ${bdr(dark)}`}
                         />
 
                         {!repAttendee ? (
@@ -910,8 +884,8 @@ const GuestPanel = ({
                                 theme={theme}
                                 insetLabel
                                 softChrome
-                                surfaceBackground={TOUR_VISIT_FIELD_SURFACE}
-                                surfaceBorder={TOUR_VISIT_SURFACE_BORDER}
+                                surfaceBackground={fieldSurf(dark)}
+                                surfaceBorder={`1px solid ${bdr(dark)}`}
                             />
                         ) : null}
 
@@ -944,8 +918,8 @@ const GuestPanel = ({
                             theme={theme}
                             insetLabel
                             softChrome
-                            surfaceBackground={TOUR_VISIT_FIELD_SURFACE}
-                            surfaceBorder={TOUR_VISIT_SURFACE_BORDER}
+                            surfaceBackground={fieldSurf(dark)}
+                            surfaceBorder={`1px solid ${bdr(dark)}`}
                         />
                     </div>
 
@@ -976,8 +950,8 @@ const GuestPanel = ({
                                     <div
                                         className="rounded-[16px] px-3.5 py-3"
                                         style={{
-                                            backgroundColor: TOUR_VISIT_FIELD_SURFACE,
-                                            border: TOUR_VISIT_SURFACE_BORDER,
+                                            backgroundColor: fieldSurf(dark),
+                                            border: `1px solid ${bdr(dark)}`,
                                         }}
                                     >
                                         <label className="text-[11px] font-medium leading-none" style={{ color: theme.colors.textSecondary }}>
@@ -1024,8 +998,8 @@ const GuestPanel = ({
                                 theme={theme}
                                 insetLabel
                                 softChrome
-                                surfaceBackground={TOUR_VISIT_FIELD_SURFACE}
-                                surfaceBorder={TOUR_VISIT_SURFACE_BORDER}
+                                surfaceBackground={fieldSurf(dark)}
+                                surfaceBorder={`1px solid ${bdr(dark)}`}
                                 maxLength={60}
                             />
 
@@ -1040,8 +1014,8 @@ const GuestPanel = ({
                                         theme={theme}
                                         insetLabel
                                         softChrome
-                                        surfaceBackground={TOUR_VISIT_FIELD_SURFACE}
-                                        surfaceBorder={TOUR_VISIT_SURFACE_BORDER}
+                                        surfaceBackground={fieldSurf(dark)}
+                                        surfaceBorder={`1px solid ${bdr(dark)}`}
                                         maxLength={140}
                                     />
                                 </div>
@@ -1101,6 +1075,7 @@ const TourVisitSuccessOverlay = ({ theme, facilityName, customerName }) => (
 );
 
 const ExperienceTrackInfoOverlay = ({ theme, track, onClose }) => {
+    const dark = isDarkTheme(theme);
     if (!track) return null;
 
     return (
@@ -1124,14 +1099,14 @@ const ExperienceTrackInfoOverlay = ({ theme, track, onClose }) => {
             >
                 <div className="flex items-start justify-between gap-3">
                     <div>
-                        <p style={{ ...sectionLabelStyle, color: theme.colors.textSecondary }}>Experience Detail</p>
-                        <h3 className="mt-1 text-lg font-semibold" style={{ color: theme.colors.textPrimary }}>{track.title}</h3>
+                        <p style={eyebrow(theme.colors)}>Experience Detail</p>
+                        <h3 className="mt-1 text-[17px] font-bold" style={{ color: theme.colors.textPrimary }}>{track.title}</h3>
                     </div>
                     <button
                         type="button"
                         onClick={onClose}
                         className="inline-flex h-8 w-8 items-center justify-center rounded-full"
-                        style={{ backgroundColor: TOUR_VISIT_FIELD_SURFACE, color: theme.colors.textSecondary }}
+                        style={{ backgroundColor: fieldSurf(dark), color: theme.colors.textSecondary }}
                     >
                         <X className="h-4 w-4" />
                     </button>
@@ -1152,8 +1127,8 @@ const ExperienceTrackInfoOverlay = ({ theme, track, onClose }) => {
                                 key={`${track.id}-${label}`}
                                 className="rounded-[16px] px-3.5 py-3"
                                 style={{
-                                    backgroundColor: TOUR_VISIT_FIELD_SURFACE,
-                                    border: 'none',
+                                    backgroundColor: fieldSurf(dark),
+                                    border: `1px solid ${bdr(dark)}`,
                                 }}
                             >
                                 <p className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>{label}</p>
@@ -1177,6 +1152,7 @@ const AddAttendeeActions = ({
     onOpenRepPicker,
     onSelectRep,
 }) => {
+    const dark = isDarkTheme(theme);
     const repPickerRef = useRef(null);
 
     useEffect(() => {
@@ -1214,8 +1190,8 @@ const AddAttendeeActions = ({
             className="grid overflow-hidden rounded-[16px]"
             style={{
                 gridTemplateColumns: availableTeamMembers.length ? '1fr 1fr' : '1fr',
-                backgroundColor: TOUR_VISIT_FIELD_SURFACE,
-                border: 'none',
+                backgroundColor: fieldSurf(dark),
+                border: `1px solid ${bdr(dark)}`,
             }}
         >
             <button
@@ -1728,23 +1704,24 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                     <div className="mx-auto w-full max-w-[760px] space-y-3">
                         {entryMode === 'home' ? (
                             <>
-                                <GlassCard theme={theme} className="p-5 md:p-6">
-                                    <TripMenuHeader title="Schedule Trip" theme={theme} />
-
-                                    <div className="overflow-hidden rounded-[16px]" style={{ backgroundColor: TOUR_VISIT_FIELD_SURFACE }}>
-                                        {TOUR_VISIT_FACILITIES.map((facility, facilityIndex) => (
-                                            <FacilityOption
-                                                key={facility.id}
-                                                facility={facility}
-                                                selected={false}
-                                                onClick={() => handleFacilitySelect(facility.id)}
-                                                theme={theme}
-                                                isInList
-                                                showTopDivider={facilityIndex > 0}
-                                            />
-                                        ))}
+                                <div className="rounded-[22px] overflow-hidden" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${border}` }}>
+                                    <CardHeader title="Schedule Trip" theme={theme} />
+                                    <div className="p-3">
+                                        <div className="overflow-hidden rounded-[14px]" style={{ backgroundColor: fieldSurf(dark) }}>
+                                            {TOUR_VISIT_FACILITIES.map((facility, facilityIndex) => (
+                                                <FacilityOption
+                                                    key={facility.id}
+                                                    facility={facility}
+                                                    selected={false}
+                                                    onClick={() => handleFacilitySelect(facility.id)}
+                                                    theme={theme}
+                                                    isInList
+                                                    showTopDivider={facilityIndex > 0}
+                                                />
+                                            ))}
+                                        </div>
                                     </div>
-                                </GlassCard>
+                                </div>
 
                                 <UpcomingVisitDirectory
                                     visits={upcomingVisits}
@@ -1781,11 +1758,11 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                         {entryMode === 'new' ? (
                             <>
                                 <div ref={topSectionRef}>
-                                    <GlassCard theme={theme} className="p-5 md:p-6">
+                                    <div className="rounded-[22px] overflow-hidden" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${border}` }}>
                                     {selectedFacility && !showFacilityOptions ? (
                                         <div>
-                                            <div className="pb-3">
-                                                <p style={{ ...sectionLabelStyle, color: theme.colors.textSecondary }}>Customer</p>
+                                            <div className="px-5 pt-4 pb-3">
+                                                <p style={eyebrow(theme.colors)}>Customer</p>
                                                 <div className="mt-2">
                                                     <SearchableSelect
                                                         value={selectedCustomerId}
@@ -1825,8 +1802,8 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                                 </div>
                                             </div>
 
-                                            <div className="border-t py-3" style={{ borderColor: 'rgba(0, 0, 0, 0.08)' }}>
-                                                <p style={{ ...sectionLabelStyle, color: theme.colors.textSecondary }}>Dates</p>
+                                            <div className="px-5 py-3" style={{ borderTop: `1px solid ${border}` }}>
+                                                <p style={eyebrow(theme.colors)}>Dates</p>
                                                 <div className="mt-2">
                                                     <DateRangeDropdown
                                                         theme={theme}
@@ -1841,13 +1818,13 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                                 </div>
                                             </div>
 
-                                            <div className="border-t py-3" style={{ borderColor: 'rgba(0, 0, 0, 0.08)' }}>
+                                            <div className="px-5 py-3" style={{ borderTop: `1px solid ${border}` }}>
                                                 <button
                                                     type="button"
                                                     onClick={() => setShowFacilityOptions(true)}
                                                     className="w-full text-left"
                                                 >
-                                                    <p style={{ ...sectionLabelStyle, color: theme.colors.textSecondary }}>Location</p>
+                                                    <p style={eyebrow(theme.colors)}>Location</p>
                                                     <div className="mt-2 flex items-center justify-between gap-4">
                                                         <p className="text-[14px] font-medium" style={{ color: theme.colors.textPrimary }}>
                                                             {selectedFacility.name}
@@ -1859,7 +1836,7 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                                 </button>
                                             </div>
 
-                                            <div className="border-t pt-3" style={{ borderColor: 'rgba(0, 0, 0, 0.08)' }}>
+                                            <div className="px-5 py-3" style={{ borderTop: `1px solid ${border}` }}>
                                                 <button
                                                     type="button"
                                                     onClick={handleNativeShare}
@@ -1873,9 +1850,9 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                         </div>
                                     ) : (
                                         <>
-                                            <div>
-                                                <p style={{ ...sectionLabelStyle, color: theme.colors.textSecondary }}>Location</p>
-                                                <div className="mt-2.5 overflow-hidden rounded-[16px]" style={{ backgroundColor: TOUR_VISIT_FIELD_SURFACE }}>
+                                            <div className="p-4">
+                                                <p style={eyebrow(theme.colors)}>Location</p>
+                                                <div className="mt-2.5 overflow-hidden rounded-[14px]" style={{ backgroundColor: fieldSurf(dark) }}>
                                                     {TOUR_VISIT_FACILITIES.map((facility, facilityIndex) => (
                                                         <FacilityOption
                                                             key={facility.id}
@@ -1890,10 +1867,10 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                                 </div>
                                             </div>
 
-                                            <div className="mt-3 border-t pt-2" style={{ borderColor: 'rgba(0, 0, 0, 0.06)' }}>
+                                            <div className="mt-3 pt-2" style={{ borderTop: `1px solid ${border}` }}>
                                                 <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2">
-                                                    <div className="rounded-[14px] px-3 py-2" style={{ backgroundColor: TOUR_VISIT_FIELD_SURFACE, border: 'none' }}>
-                                                        <p style={{ ...sectionLabelStyle, color: theme.colors.textSecondary }}>Customer</p>
+                                                    <div className="rounded-[14px] px-3 py-2" style={{ backgroundColor: fieldSurf(dark) }}>
+                                                        <p style={eyebrow(theme.colors)}>Customer</p>
                                                         <div className="mt-1">
                                                             <SearchableSelect
                                                                 value={selectedCustomerId}
@@ -1933,8 +1910,8 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                                         </div>
                                                     </div>
 
-                                                    <div className="rounded-[14px] px-3 py-2" style={{ backgroundColor: TOUR_VISIT_FIELD_SURFACE, border: 'none' }}>
-                                                        <p style={{ ...sectionLabelStyle, color: theme.colors.textSecondary }}>Dates</p>
+                                                    <div className="rounded-[14px] px-3 py-2" style={{ backgroundColor: fieldSurf(dark) }}>
+                                                        <p style={eyebrow(theme.colors)}>Dates</p>
                                                         <div className="mt-1">
                                                             <DateRangeDropdown
                                                                 theme={theme}
@@ -1948,7 +1925,7 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                                 </div>
                                             </div>
 
-                                            <div className="mt-2 flex items-center justify-between border-t pt-2" style={{ borderColor: 'rgba(0, 0, 0, 0.06)' }}>
+                                            <div className="mt-2 flex items-center justify-between pt-2" style={{ borderTop: `1px solid ${border}` }}>
                                                 <button
                                                     type="button"
                                                     onClick={handleNativeShare}
@@ -1961,22 +1938,19 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                             </div>
                                         </>
                                     )}
-                                    </GlassCard>
+                                    </div>
                                 </div>
                             </>
                         ) : null}
 
                         {entryMode === 'new' && selectedFacility ? (
                             <div className="space-y-2.5 animate-fade-in">
-                                <GlassCard theme={theme} className="p-5 md:p-6">
-                                    <p style={{ ...sectionLabelStyle, color: theme.colors.textSecondary }}>Attendees</p>
-
+                                <div className="rounded-[22px] overflow-hidden" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${border}` }}>
+                                    <CardHeader title="Attendees" theme={theme} />
+                                    <div className="p-3">
                                     <div
-                                        className="mt-2.5 overflow-hidden rounded-[18px]"
-                                        style={{
-                                            backgroundColor: TOUR_VISIT_PANEL_SURFACE_COLLAPSED,
-                                            border: 'none',
-                                        }}
+                                        className="overflow-hidden rounded-[16px]"
+                                        style={{ backgroundColor: fieldSurf(dark) }}
                                     >
                                         {guests.map((guest, index) => {
                                             const isLastGuest = index === guests.length - 1;
@@ -2011,16 +1985,20 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                             </div>
                                         ) : null}
                                     </div>
-                                </GlassCard>
-
-                                <GlassCard theme={theme} className="p-5 md:p-6">
-                                    <div className="flex items-center justify-between gap-3">
-                                        <p style={{ ...sectionLabelStyle, color: theme.colors.textSecondary }}>Experience Plan</p>
-                                        <span className="rounded-full px-2.5 py-1 text-[11px] font-medium" style={{ color: theme.colors.textSecondary, backgroundColor: TOUR_VISIT_FIELD_SURFACE }}>
-                                            {selectedExperienceCount} selected
-                                        </span>
                                     </div>
-                                    <div className="mt-3 grid grid-cols-1 gap-2.5 md:grid-cols-2">
+                                </div>
+
+                                <div className="rounded-[22px] overflow-hidden" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${border}` }}>
+                                    <CardHeader
+                                        title="Experience Plan"
+                                        theme={theme}
+                                        right={
+                                            <span className="rounded-full px-2.5 py-1 text-[11px] font-semibold" style={{ color: theme.colors.textSecondary, backgroundColor: fieldSurf(dark) }}>
+                                                {selectedExperienceCount} selected
+                                            </span>
+                                        }
+                                    />
+                                    <div className="p-3 grid grid-cols-1 gap-2.5 md:grid-cols-2">
                                         {TOUR_VISIT_EXPERIENCE_TRACKS.map((track) => (
                                             <ExperienceTrackCard
                                                 key={track.id}
@@ -2047,11 +2025,11 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                             Select at least one option in each experience track.
                                         </div>
                                     ) : null}
-                                </GlassCard>
+                                </div>
 
-                                <GlassCard theme={theme} className="p-5 md:p-6">
-                                    <div className="flex flex-col gap-3">
-                                        <p style={{ ...sectionLabelStyle, color: theme.colors.textSecondary }}>Summary</p>
+                                <div className="rounded-[22px] overflow-hidden" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${border}` }}>
+                                    <CardHeader title="Summary" theme={theme} />
+                                    <div className="flex flex-col gap-3 p-5">
 
                                         <div className="grid grid-cols-[auto,1fr] gap-x-3 gap-y-2 md:hidden">
                                             {summaryRows.map((item) => (
@@ -2121,7 +2099,7 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                             {formMessage}
                                         </div>
                                     ) : null}
-                                </GlassCard>
+                                </div>
                             </div>
                         ) : null}
                     </div>
