@@ -39,8 +39,8 @@ const Row = ({ label, children, theme, noSep }) => {
   const isDark = isDarkTheme(theme);
   const divider = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
   return (
-    <div className={`flex items-start gap-3 py-3 ${noSep ? '' : 'border-t'}`} style={{ borderColor: noSep ? undefined : divider }}>
-      {label && <label className="text-[11px] font-bold uppercase tracking-[0.07em] whitespace-nowrap flex-shrink-0 pt-1 w-[100px]" style={{ color: theme.colors.textSecondary, opacity: 0.55 }}>{label}</label>}
+    <div className={`flex items-center gap-3 py-3 ${noSep ? '' : 'border-t'}`} style={{ borderColor: noSep ? undefined : divider }}>
+      {label && <label className="text-[11px] font-bold uppercase tracking-[0.07em] whitespace-nowrap flex-shrink-0 w-[90px]" style={{ color: theme.colors.textSecondary, opacity: 0.55 }}>{label}</label>}
       <div className="flex-1 min-w-0">{children}</div>
     </div>
   );
@@ -241,58 +241,63 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
   return (
     <div className="flex flex-col h-full app-header-offset" style={{ background: c.background }}>
       <div className="flex-1 overflow-y-auto scrollbar-hide">
-        <div className="px-4 sm:px-5 pt-5 pb-10 max-w-4xl mx-auto w-full space-y-4">
+        <div className="px-4 sm:px-5 pt-4 pb-16 max-w-4xl mx-auto w-full space-y-3">
 
           {/* HERO */}
-          <div className="pt-1 pb-1">
+          <div className="pt-2 pb-2">
             <input value={draft.project || draft.name || ''} onChange={e => update(draft.project !== undefined ? 'project' : 'name', e.target.value)}
-              className="w-full bg-transparent outline-none text-[26px] font-bold tracking-tight leading-tight" style={{ color: c.textPrimary }} placeholder="Project name" />
-            <div className="flex items-center gap-2 mt-1.5">
-              <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: c.textSecondary, opacity: 0.4 }} />
-              <input value={draft.company || ''} onChange={e => update('company', e.target.value)}
-                className="bg-transparent outline-none text-[13px] font-semibold flex-1" style={{ color: c.textSecondary, opacity: 0.75 }} placeholder="Company / End User" />
+              className="w-full bg-transparent outline-none text-[30px] font-black tracking-tight leading-tight" style={{ color: c.textPrimary }} placeholder="Project name" />
+            <input value={draft.company || ''} onChange={e => update('company', e.target.value)}
+              className="bg-transparent outline-none text-[14px] font-medium mt-1 w-full" style={{ color: c.textSecondary, opacity: 0.7 }} placeholder="Company / End User" />
+            <div className="mt-3">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold"
+                style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)', color: c.textSecondary }}>
+                {draft.stage || 'No Stage'}
+              </span>
             </div>
           </div>
 
           {/* 1. FINANCIALS */}
           <Section title="Financials" theme={theme}>
-            <div className="pb-3">
-              <div className="flex items-baseline gap-2">
-                <span className="text-[24px] font-bold tracking-tight leading-none" style={{ color: c.textSecondary, opacity: 0.3 }}>$</span>
-                <input inputMode="numeric"
-                  value={(() => { const raw = ('' + (draft.value || '')).replace(/[^0-9]/g, ''); return raw ? parseInt(raw, 10).toLocaleString() : ''; })()}
-                  onChange={e => { const val = e.target.value.replace(/[^0-9]/g, ''); update('value', val ? ('$' + parseInt(val, 10).toLocaleString()) : ''); }}
-                  className="bg-transparent outline-none text-[28px] font-bold tracking-tight w-full leading-none" style={{ color: c.textPrimary }} placeholder="0" />
-              </div>
+            {/* List Value */}
+            <div className="mb-1">
+              <span className="text-[11px] font-bold uppercase tracking-[0.07em]" style={{ color: c.textSecondary, opacity: 0.5 }}>List Value</span>
             </div>
-            <div className="h-px" style={{ backgroundColor: divider }} />
-            <div className="pt-3 grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_1px_minmax(0,1fr)] gap-3 sm:gap-0 items-stretch">
-              <div className="flex flex-col justify-center cursor-pointer min-w-0" onClick={() => discountOpen ? setDiscountOpen(false) : openDiscount()} ref={discBtn}>
-                <span className="text-[11px] font-bold uppercase tracking-[0.07em] mb-1" style={{ color: c.textSecondary, opacity: 0.55 }}>Discount</span>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-sm font-bold tracking-tight truncate" style={{ color: c.textPrimary }}>{draft.discount || '\u2014'}</span>
-                  <ChevronDown className="w-3.5 h-3.5 flex-shrink-0" style={{ color: c.textSecondary, opacity: 0.4 }} />
+            <div className="flex items-baseline gap-1.5 pb-4">
+              <span className="text-[22px] font-bold tracking-tight leading-none" style={{ color: c.textSecondary, opacity: 0.22 }}>$</span>
+              <input inputMode="numeric"
+                value={(() => { const raw = ('' + (draft.value || '')).replace(/[^0-9]/g, ''); return raw ? parseInt(raw, 10).toLocaleString() : ''; })()}
+                onChange={e => { const val = e.target.value.replace(/[^0-9]/g, ''); update('value', val ? ('$' + parseInt(val, 10).toLocaleString()) : ''); }}
+                className="bg-transparent outline-none text-[36px] font-black tracking-tight w-full leading-none" style={{ color: c.textPrimary }} placeholder="0" />
+            </div>
+            {/* Discount + Net row */}
+            <div className="flex items-stretch border-t" style={{ borderColor: divider }}>
+              <div className="flex-1 py-3.5 cursor-pointer" onClick={() => discountOpen ? setDiscountOpen(false) : openDiscount()} ref={discBtn}>
+                <span className="text-[11px] font-bold uppercase tracking-[0.07em] block mb-1" style={{ color: c.textSecondary, opacity: 0.5 }}>Discount</span>
+                <div className="flex items-center gap-1">
+                  <span className="text-[15px] font-bold tracking-tight" style={{ color: c.textPrimary }}>{draft.discount || '—'}</span>
+                  <ChevronDown className="w-3.5 h-3.5" style={{ color: c.textSecondary, opacity: 0.4 }} />
                 </div>
               </div>
-              <div className="hidden sm:block w-px self-stretch mx-4" style={{ backgroundColor: divider }} />
-              <div className="flex flex-col justify-center sm:pl-0">
-                <span className="text-[11px] font-bold uppercase tracking-[0.07em] mb-1" style={{ color: c.textSecondary, opacity: 0.55 }}>Net Value</span>
-                <span className="text-lg font-bold tracking-tight leading-none whitespace-nowrap" style={{ color: c.accent }}>{netValue > 0 && discountPct > 0 ? fmtCurrency(netValue) : '\u2014'}</span>
+              <div className="w-px self-stretch my-2" style={{ backgroundColor: divider }} />
+              <div className="flex-1 py-3.5 pl-4">
+                <span className="text-[11px] font-bold uppercase tracking-[0.07em] block mb-1" style={{ color: c.textSecondary, opacity: 0.5 }}>Net Value</span>
+                <span className="text-[15px] font-bold tracking-tight" style={{ color: netValue > 0 && discountPct > 0 ? c.accent : c.textSecondary, opacity: netValue > 0 && discountPct > 0 ? 1 : 0.3 }}>
+                  {netValue > 0 && discountPct > 0 ? fmtCurrency(netValue) : '—'}
+                </span>
               </div>
             </div>
-            <div className="h-px mt-3" style={{ backgroundColor: divider }} />
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-3">
-              <div className="rounded-[14px] border px-3 py-2 flex items-center justify-between" style={{ borderColor: divider, backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.015)' }}>
-                <span className="text-[12px] font-semibold" style={{ color: c.textPrimary }}>Sales Reward</span>
-                <ToggleSwitch checked={draft.salesReward !== false} onChange={e => update('salesReward', e.target.checked)} theme={theme} />
-              </div>
-              <div className="rounded-[14px] border px-3 py-2 flex items-center justify-between" style={{ borderColor: divider, backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.015)' }}>
-                <span className="text-[12px] font-semibold" style={{ color: c.textPrimary }}>Designer Reward</span>
-                <ToggleSwitch checked={draft.designerReward !== false} onChange={e => update('designerReward', e.target.checked)} theme={theme} />
-              </div>
+            {/* Reward toggles — flat rows */}
+            <div className="flex items-center justify-between py-3 border-t" style={{ borderColor: divider }}>
+              <span className="text-[14px] font-semibold" style={{ color: c.textPrimary }}>Sales Reward</span>
+              <ToggleSwitch checked={draft.salesReward !== false} onChange={e => update('salesReward', e.target.checked)} theme={theme} />
+            </div>
+            <div className="flex items-center justify-between py-3 border-t" style={{ borderColor: divider }}>
+              <span className="text-[14px] font-semibold" style={{ color: c.textPrimary }}>Designer Reward</span>
+              <ToggleSwitch checked={draft.designerReward !== false} onChange={e => update('designerReward', e.target.checked)} theme={theme} />
             </div>
             {showSpiffWarning && (
-              <div className="flex items-center gap-2 px-3 py-2 rounded-[14px] mt-1" style={{ backgroundColor: isDark ? 'rgba(196,149,106,0.08)' : 'rgba(196,149,106,0.06)' }}>
+              <div className="flex items-center gap-2 px-3 py-2 rounded-[14px] mt-2" style={{ backgroundColor: isDark ? 'rgba(196,149,106,0.08)' : 'rgba(196,149,106,0.06)' }}>
                 <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" style={{ color: theme.colors.warning }} />
                 <span className="text-[11px] font-medium" style={{ color: theme.colors.warning }}>No spiff eligible: 50/20/10 with list value under $10K.</span>
               </div>
@@ -301,33 +306,46 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
 
           {/* 2. PIPELINE STAGE */}
           <Section title="Pipeline Stage" theme={theme}>
-            <div className="relative px-5 select-none" ref={stageTrackRef}
+            {/* Drag track — dots only, no cramped labels */}
+            <div className="relative select-none py-2" ref={stageTrackRef}
               style={{ cursor: stageDragging ? 'grabbing' : 'pointer', touchAction: 'none' }}
               onMouseDown={e => onStagePointerDown(e.clientX)} onTouchStart={e => onStagePointerDown(e.touches[0].clientX)}>
-              <div className="absolute top-[7px] left-5 right-5 h-[3px] rounded-full" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)' }} />
-              <div className="absolute top-[7px] left-5 h-[3px] rounded-full transition-all" style={{ backgroundColor: c.accent, width: `calc(${stagePct / 100} * (100% - 40px))`, transitionDuration: stageDragging ? '0ms' : '300ms' }} />
+              <div className="absolute top-[13px] left-0 right-0 h-[3px] rounded-full" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)' }} />
+              <div className="absolute top-[13px] left-0 h-[3px] rounded-full transition-all" style={{ backgroundColor: c.accent, width: `${stagePct}%`, transitionDuration: stageDragging ? '0ms' : '300ms' }} />
               <div className="relative flex justify-between">
                 {STAGES.map((s, i) => {
                   const reached = i <= stageIdx;
                   const isCurrent = s === draft.stage;
                   return (
-                    <div key={s} className="flex flex-col items-center" style={{ width: 0, position: 'relative' }}>
+                    <div key={s} style={{ width: 0, position: 'relative' }} className="flex flex-col items-center">
                       <div className="rounded-full flex-shrink-0 transition-all"
-                        style={{ width: isCurrent ? 17 : 11, height: isCurrent ? 17 : 11, backgroundColor: reached ? c.accent : (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.10)'), border: isCurrent ? `3px solid ${isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.08)'}` : 'none', marginTop: isCurrent ? -1 : 2, transitionDuration: stageDragging ? '0ms' : '300ms' }} />
-                      <span className="absolute top-6 text-[10px] font-semibold whitespace-nowrap transition-all pointer-events-none"
-                        style={{ color: isCurrent ? c.textPrimary : c.textSecondary, opacity: isCurrent ? 1 : 0.45, fontWeight: isCurrent ? 700 : 500, left: '50%', transform: i === 0 ? 'translateX(-10%)' : i === STAGES.length - 1 ? 'translateX(-90%)' : 'translateX(-50%)' }}>
-                        {s}
-                      </span>
+                        style={{ width: isCurrent ? 18 : 10, height: isCurrent ? 18 : 10, backgroundColor: reached ? c.accent : (isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)'), border: isCurrent ? `3px solid ${c.surface}` : 'none', boxShadow: isCurrent ? `0 0 0 2px ${c.accent}` : 'none', marginTop: isCurrent ? -1 : 4, transitionDuration: stageDragging ? '0ms' : '300ms' }} />
                     </div>
                   );
                 })}
               </div>
             </div>
-            <div className="h-8" />
-            <div className="pt-2 border-t" style={{ borderColor: divider }}>
-              <div className="flex items-center justify-between mb-1">
+            {/* Current stage label */}
+            <div className="mt-4 mb-1 flex items-center justify-between">
+              <div>
+                <p className="text-[18px] font-black tracking-tight" style={{ color: c.textPrimary }}>{draft.stage || '—'}</p>
+                <p className="text-[12px] font-medium mt-0.5" style={{ color: c.textSecondary, opacity: 0.55 }}>Step {Math.max(stageIdx + 1, 1)} of {STAGES.length}</p>
+              </div>
+              <div className="flex flex-wrap gap-1.5 justify-end max-w-[55%]">
+                {STAGES.map(s => (
+                  <button key={s} onClick={() => update('stage', s)}
+                    className="px-2.5 py-1 rounded-full text-[10px] font-bold transition-all"
+                    style={{ backgroundColor: s === draft.stage ? c.accent : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'), color: s === draft.stage ? c.accentText : c.textSecondary }}>
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {/* Win probability */}
+            <div className="pt-3 mt-2 border-t" style={{ borderColor: divider }}>
+              <div className="flex items-center justify-between mb-2">
                 <span className="text-[11px] font-bold uppercase tracking-[0.07em]" style={{ color: c.textSecondary, opacity: 0.55 }}>Win Probability</span>
-                <span className="text-xs font-bold tabular-nums" style={{ color: c.textPrimary }}>{draft.winProbability || 0}%</span>
+                <span className="text-[13px] font-black tabular-nums" style={{ color: c.textPrimary }}>{draft.winProbability || 0}%</span>
               </div>
               <ProbabilitySlider value={draft.winProbability || 0} onChange={v => update('winProbability', v)} theme={theme} showLabel={false} />
             </div>
@@ -451,10 +469,10 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
 
           {/* 9. NOTES */}
           <Section title="Notes" theme={theme}>
-            <textarea value={draft.notes || ''} onChange={e => update('notes', e.target.value)} rows={3}
-              className="w-full resize-none rounded-[14px] p-3.5 text-[13px] leading-relaxed outline-none"
-              style={{ background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)', border: `1px solid ${divider}`, color: c.textPrimary }}
-              placeholder="Add project notes, context, or special instructions..." />
+            <textarea value={draft.notes || ''} onChange={e => update('notes', e.target.value)} rows={4}
+              className="w-full resize-none bg-transparent outline-none text-[14px] leading-relaxed"
+              style={{ color: c.textPrimary }}
+              placeholder="Add notes, context, or special instructions..." />
           </Section>
 
           {/* AUTOSAVE */}
