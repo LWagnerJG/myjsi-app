@@ -49,7 +49,7 @@ export const AppGrid = ({
                 onDragCancel={() => setActiveDragId(null)}
             >
                 <SortableContext items={safeHomeApps} strategy={rectSortingStrategy}>
-                    <div className={`grid gap-2.5 sm:gap-3 ${appGridCols.view}`}>
+                    <div className={`grid gap-[10px] sm:gap-[12px] ${appGridCols.view}`}>
                         {currentApps.map((app) => (
                             <SortableAppTile
                                 key={app.route}
@@ -95,8 +95,10 @@ export const AppGrid = ({
                     {activeApp ? (
                         <div style={{ width: 88 }}>
                             <div
-                                className="relative flex flex-col items-center justify-center gap-1.5 p-2.5 sm:p-3 rounded-2xl"
+                                className="relative flex flex-col items-center justify-center rounded-[16px]"
                                 style={{
+                                    gap: 6,
+                                    padding: '10px 10px',
                                     backgroundColor: colors.tileSurface,
                                     backdropFilter: 'blur(16px) saturate(1.5)',
                                     WebkitBackdropFilter: 'blur(16px) saturate(1.5)',
@@ -106,14 +108,14 @@ export const AppGrid = ({
                                 }}
                             >
                                 <div
-                                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center"
-                                    style={{ backgroundColor: `${(APP_ICON_COLORS[activeApp.route] || colors.accent)}10` }}
+                                    className="rounded-[10px] flex items-center justify-center"
+                                    style={{ width: 40, height: 40, backgroundColor: `${(APP_ICON_COLORS[activeApp.route] || colors.accent)}10` }}
                                 >
-                                    <activeApp.icon className="w-[18px] h-[18px] sm:w-5 sm:h-5" style={{ color: APP_ICON_COLORS[activeApp.route] || colors.accent }} />
+                                    <activeApp.icon style={{ width: 20, height: 20, color: APP_ICON_COLORS[activeApp.route] || colors.accent }} />
                                 </div>
                                 <span
-                                    className="text-xs sm:text-[13px] font-semibold tracking-tight text-center leading-tight line-clamp-2 w-full px-0.5"
-                                    style={{ color: colors.textPrimary }}
+                                    className="font-semibold tracking-tight text-center leading-tight line-clamp-2 w-full px-0.5"
+                                    style={{ color: colors.textPrimary, fontSize: 13 }}
                                 >
                                     {activeApp.name}
                                 </span>
@@ -128,7 +130,7 @@ export const AppGrid = ({
 
     return (
         <>
-            <div className={`grid gap-2.5 sm:gap-3 ${appGridCols.view}`}>
+            <div className={`grid gap-[10px] sm:gap-[12px] ${appGridCols.view}`}>
                 {currentApps.map((app) => {
                     const badge = getAppBadge(app.route, recentOrders, posts, leadTimeFavoritesData, samplesCartCount);
                     const iconColor = APP_ICON_COLORS[app.route] || colors.accent;
@@ -137,9 +139,11 @@ export const AppGrid = ({
                             key={app.route}
                             onClick={() => onNavigate(app.route)}
                             aria-label={`Open ${app.name}`}
-                            className="relative flex flex-col items-center justify-center rounded-2xl transition-all active:scale-95 group gap-1.5 p-2.5 sm:p-3"
+                            className="relative flex flex-col items-center justify-center rounded-[16px] transition-all active:scale-95 group"
                             style={{
                                 minHeight: 88,
+                                gap: 6,
+                                padding: '10px 10px',
                                 backgroundColor: colors.tileSurface,
                                 backdropFilter: 'blur(16px) saturate(1.5)',
                                 WebkitBackdropFilter: 'blur(16px) saturate(1.5)',
@@ -147,18 +151,22 @@ export const AppGrid = ({
                             }}
                         >
                             <div
-                                className="rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 w-9 h-9 sm:w-10 sm:h-10"
-                                style={{ backgroundColor: `${iconColor}10` }}
+                                className="rounded-[10px] flex items-center justify-center transition-transform group-hover:scale-105"
+                                style={{ width: 40, height: 40, backgroundColor: `${iconColor}10`, flexShrink: 0 }}
                             >
-                                <app.icon className="w-[18px] h-[18px] sm:w-5 sm:h-5" style={{ color: iconColor }} />
+                                <app.icon style={{ width: 20, height: 20, color: iconColor }} />
                             </div>
-                            <span className="text-xs sm:text-[13px] font-semibold tracking-tight text-center leading-tight line-clamp-2 px-0.5" style={{ color: colors.textPrimary }}>
+                            <span className="font-semibold tracking-tight text-center leading-tight line-clamp-2 w-full px-0.5"
+                                style={{ color: colors.textPrimary, fontSize: 13 }}>
                                 {app.name}
                             </span>
                             {badge && (
                                 <div
-                                    className="absolute top-1.5 right-1.5 px-1.5 py-[1px] rounded-full text-[10px] font-bold"
+                                    className="absolute rounded-full font-bold"
                                     style={{
+                                        top: 6, right: 6,
+                                        padding: '1px 6px',
+                                        fontSize: 10,
                                         backgroundColor: `${badge.color}18`,
                                         color: badge.color,
                                         border: `1px solid ${badge.color}30`,

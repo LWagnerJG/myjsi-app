@@ -30,7 +30,10 @@ export const SortableAppTile = React.memo(({ id, app, colors, isDark = false, on
         touchAction: 'none',
         width: '100%',
         minWidth: 0,
-        minHeight: 88
+        minHeight: 88,
+        // Fixed px values so tile size never scales with Dynamic Type
+        gap: 6,
+        padding: '10px 10px',
     };
 
     const iconColor = APP_ICON_COLORS[app.route] || colors.accent;
@@ -41,7 +44,7 @@ export const SortableAppTile = React.memo(({ id, app, colors, isDark = false, on
             style={style}
             {...attributes}
             {...listeners}
-            className="relative flex flex-col items-center justify-center gap-1.5 p-2.5 sm:p-3 rounded-2xl cursor-grab active:cursor-grabbing"
+            className="relative flex flex-col items-center justify-center rounded-[16px] cursor-grab active:cursor-grabbing"
             role="listitem"
             aria-label={`${app.name} app tile${isDragging ? ', dragging' : ''}`}
         >
@@ -79,15 +82,15 @@ export const SortableAppTile = React.memo(({ id, app, colors, isDark = false, on
             )}
 
             <div
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center"
-                style={{ backgroundColor: `${iconColor}10` }}
+                className="rounded-[10px] flex items-center justify-center"
+                style={{ width: 40, height: 40, backgroundColor: `${iconColor}10`, flexShrink: 0 }}
             >
-                <app.icon className="w-[18px] h-[18px] sm:w-5 sm:h-5" style={{ color: iconColor }} />
+                <app.icon style={{ width: 20, height: 20, color: iconColor }} />
             </div>
 
             <span
-                className="text-xs sm:text-[13px] font-semibold tracking-tight text-center leading-tight line-clamp-2 w-full px-0.5"
-                style={{ color: colors.textPrimary }}
+                className="font-semibold tracking-tight text-center leading-tight line-clamp-2 w-full px-0.5"
+                style={{ color: colors.textPrimary, fontSize: 13 }}
             >
                 {app.name}
             </span>

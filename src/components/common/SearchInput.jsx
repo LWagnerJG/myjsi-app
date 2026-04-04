@@ -71,8 +71,8 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
         @keyframes siPulseSlow { 0% { transform: scale(1) } 50% { transform: scale(1.01) } 100% { transform: scale(1) } }
       `}</style>
 
-            <div className="flex items-center justify-center mr-3" style={{ width: 24, height: 24 }}>
-                <Search className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
+            <div className="flex items-center justify-center mr-3" style={{ width: 20, height: 20 }}>
+                <Search style={{ width: 18, height: 18, color: theme.colors.textSecondary }} />
             </div>
 
             <div className="flex-1 relative">
@@ -141,11 +141,11 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
             <button
                 type="button"
                 onClick={onVoiceClick}
-                className="ml-3 w-10 h-10 rounded-full flex items-center justify-center transition-colors hover:opacity-90"
-                style={{ ...iconButtonStyles, color: theme.colors.textSecondary }}
+                className="ml-2 rounded-full flex items-center justify-center transition-colors hover:opacity-90"
+                style={{ ...iconButtonStyles, width: 36, height: 36, color: theme.colors.textSecondary }}
                 aria-label="Voice input"
             >
-                <Mic className="w-5 h-5" />
+                <Mic style={{ width: 16, height: 16 }} />
             </button>
         </form>
     );
