@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
-import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { Briefcase, Plus } from 'lucide-react';
 import { RequestQuoteModal } from '../../components/common/RequestQuoteModal.jsx';
 import { STAGES, VERTICALS, COMPETITORS, DISCOUNT_OPTIONS, PO_TIMEFRAMES, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS } from './data.js';
@@ -128,31 +127,30 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
   );
   return (
     <div className="h-full flex flex-col app-header-offset relative" style={{ backgroundColor: theme.colors.background }}>
-      {/* Controls - fixed below app header */}
+      {/* Controls */}
       <div className="flex-shrink-0" style={{ backgroundColor: theme.colors.background }}>
-        <div className="px-4 sm:px-6 lg:px-8 pt-2 pb-2 max-w-5xl mx-auto w-full">
-          {/* Tab row: two tab pills + action button */}
+        <div className="px-4 sm:px-6 lg:px-8 pt-4 pb-3 max-w-5xl mx-auto w-full">
           <div className="flex items-center justify-between gap-3">
-                <SegmentedToggle
-                  value={projectsTab}
-                  onChange={setProjectsTab}
-                  options={PROJECTS_TAB_OPTIONS}
-                  size="sm"
-                  theme={theme}
-                />
-            {projectsTab==='pipeline' && (
+            <SegmentedToggle
+              value={projectsTab}
+              onChange={setProjectsTab}
+              options={PROJECTS_TAB_OPTIONS}
+              size="sm"
+              theme={theme}
+            />
+            {projectsTab === 'pipeline' && (
               <button
-                onClick={()=>onNavigate('new-lead')}
-                className="h-9 inline-flex items-center justify-center gap-1.5 rounded-xl text-[13px] font-semibold transition-all px-4 whitespace-nowrap active:scale-[0.97]"
+                onClick={() => onNavigate('new-lead')}
+                className="h-9 inline-flex items-center justify-center gap-1.5 rounded-full text-[13px] font-semibold transition-all px-4 whitespace-nowrap active:scale-[0.97]"
                 style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
               >
                 <Plus size={15} strokeWidth={2.5} /> New Project
               </button>
             )}
-            {projectsTab==='my-projects' && (
+            {projectsTab === 'my-projects' && (
               <button
-                onClick={()=>onNavigate('add-new-install')}
-                className="h-9 inline-flex items-center justify-center gap-1.5 rounded-xl text-[13px] font-semibold transition-all px-4 whitespace-nowrap active:scale-[0.97]"
+                onClick={() => onNavigate('add-new-install')}
+                className="h-9 inline-flex items-center justify-center gap-1.5 rounded-full text-[13px] font-semibold transition-all px-4 whitespace-nowrap active:scale-[0.97]"
                 style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
               >
                 <Plus size={15} strokeWidth={2.5} /> New Install
@@ -160,28 +158,32 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
             )}
           </div>
         </div>
-        {projectsTab==='pipeline' && (
-          <div className="px-4 sm:px-6 lg:px-8 pb-2 relative max-w-5xl mx-auto w-full">
+        {projectsTab === 'pipeline' && (
+          <div className="px-4 sm:px-6 lg:px-8 pb-3 relative max-w-5xl mx-auto w-full">
             <div ref={stagesScrollRef} onScroll={updateStageFade} className="overflow-x-auto scrollbar-hide">
-              <div className="flex items-center gap-1 py-1 whitespace-nowrap">
-                {STAGES.map((stage,i)=>{ const active= selectedPipelineStage===stage; const showIndex= stage!=='Won' && stage!=='Lost'; return (
+              <div className="flex items-center gap-1.5 py-0.5 whitespace-nowrap">
+                {STAGES.map((stage, i) => {
+                  const active = selectedPipelineStage === stage;
+                  const showIndex = stage !== 'Won' && stage !== 'Lost';
+                  return (
                     <button
                       key={stage}
-                      onClick={()=>setSelectedPipelineStage(stage)}
-                      className="text-[13px] font-semibold transition-all px-3.5 py-1.5 rounded-xl"
+                      onClick={() => setSelectedPipelineStage(stage)}
+                      className="text-[13px] font-semibold transition-all px-3.5 py-1.5 rounded-full"
                       style={{
                         color: active ? theme.colors.accentText : theme.colors.textSecondary,
-                        backgroundColor: active ? theme.colors.textPrimary : 'transparent',
-                        opacity: active ? 1 : 0.65,
+                        backgroundColor: active ? theme.colors.textPrimary : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'),
+                        opacity: active ? 1 : 0.8,
                       }}
                     >
-                      {showIndex && <span className="opacity-50 mr-0.5">{i+1}</span>} {stage}
+                      {showIndex && <span className="opacity-50 mr-0.5">{i + 1}</span>} {stage}
                     </button>
-                ); })}
+                  );
+                })}
               </div>
             </div>
-            {showStageFadeLeft && <div className="pointer-events-none absolute inset-y-0 left-0 w-8" style={{ background:`linear-gradient(to right, ${theme.colors.background}, ${theme.colors.background}00)` }} />}
-            {showStageFadeRight && <div className="pointer-events-none absolute inset-y-0 right-0 w-10" style={{ background:`linear-gradient(to left, ${theme.colors.background}, ${theme.colors.background}00)` }} />}
+            {showStageFadeLeft && <div className="pointer-events-none absolute inset-y-0 left-0 w-8" style={{ background: `linear-gradient(to right, ${theme.colors.background}, ${theme.colors.background}00)` }} />}
+            {showStageFadeRight && <div className="pointer-events-none absolute inset-y-0 right-0 w-10" style={{ background: `linear-gradient(to left, ${theme.colors.background}, ${theme.colors.background}00)` }} />}
           </div>
         )}
       </div>
