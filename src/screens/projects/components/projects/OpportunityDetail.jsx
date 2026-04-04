@@ -329,12 +329,12 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
               <p className="text-[20px] font-black tracking-tight" style={{ color: c.textPrimary }}>{draft.stage || '—'}</p>
               <p className="text-[12px] font-medium mt-0.5" style={{ color: c.textSecondary, opacity: 0.5 }}>Step {Math.max(stageIdx + 1, 1)} of {STAGES.length}</p>
             </div>
-            {/* Stage grid — 2 columns, all visible */}
-            <div className="grid grid-cols-2 gap-2 mt-1">
+            {/* Stage pills — all visible, consistent pill style */}
+            <div className="flex flex-wrap gap-2 mt-1">
               {STAGES.map(s => (
                 <button key={s} onClick={() => update('stage', s)}
-                  className="py-2 px-3 rounded-[14px] text-[12px] font-bold text-left transition-all"
-                  style={{ backgroundColor: s === draft.stage ? c.accent : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'), color: s === draft.stage ? c.accentText : c.textSecondary }}>
+                  className="px-4 py-2 rounded-full text-[12px] font-semibold transition-all"
+                  style={{ backgroundColor: s === draft.stage ? c.accent : (isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)'), color: s === draft.stage ? c.accentText : c.textSecondary, border: s === draft.stage ? 'none' : `1.5px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}` }}>
                   {s}
                 </button>
               ))}
@@ -370,13 +370,13 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
             {/* PO Timeframe */}
             <div className="pt-4 pb-4 border-t" style={{ borderColor: divider }}>
               <span className="text-[11px] font-bold uppercase tracking-[0.07em] block mb-3" style={{ color: c.textSecondary, opacity: 0.55 }}>PO Timeframe</span>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="flex flex-wrap gap-2">
                 {PO_TIMEFRAMES.map(opt => {
                   const active = opt === draft.poTimeframe;
                   return (
                     <button key={opt} onClick={() => update('poTimeframe', opt)}
-                      className="px-3 py-2 rounded-[14px] text-[12px] font-semibold text-center transition-all"
-                      style={{ backgroundColor: active ? c.accent : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'), color: active ? c.accentText : c.textSecondary, border: active ? 'none' : `1.5px solid ${isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)'}` }}>
+                      className="px-4 py-2 rounded-full text-[12px] font-semibold transition-all"
+                      style={{ backgroundColor: active ? c.accent : (isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)'), color: active ? c.accentText : c.textSecondary, border: active ? 'none' : `1.5px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}` }}>
                       {opt}
                     </button>
                   );
@@ -405,9 +405,9 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                 <SuggestInputPill placeholder="Add dealer" suggestions={INITIAL_DEALERS} onAdd={v => addUnique('dealers', v)} theme={theme} />
               </div>
             </Row>
-            <div className="flex items-center justify-between py-3 border-t" style={{ borderColor: divider }}>
-              <span className="text-[14px] font-semibold" style={{ color: c.textPrimary }}>Bid Project</span>
-              <ToggleSwitch checked={!!draft.isBid} onChange={e => update('isBid', e.target.checked)} theme={theme} />
+            <div className="flex items-center gap-3 py-3 border-t" style={{ borderColor: divider }}>
+              <span className="text-[11px] font-bold uppercase tracking-[0.07em] whitespace-nowrap flex-shrink-0 w-[90px]" style={{ color: c.textSecondary, opacity: 0.55 }}>Bid?</span>
+              <div className="flex-1 flex justify-end"><ToggleSwitch checked={!!draft.isBid} onChange={e => update('isBid', e.target.checked)} theme={theme} /></div>
             </div>
             <Row label="A&D Firm(s)" theme={theme}>
               <div className="flex flex-wrap gap-1.5">
