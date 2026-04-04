@@ -157,21 +157,26 @@ export const AppHeader = React.memo(({
             )}
 
             {/* ── Universal top-blur backing ──────────────────────────────────────────
-                Single blur surface from the very top of the phone (behind the iOS
-                status bar / safe-area) continuously through the header pill.
-                z-27 = behind the per-screen scrims (z-29) and the pill (z-30).
-                The mask gradient fades it out below the header so content shows. */}
+                Fills from absolute top of viewport (or safe-area on PWA) down through
+                the header pill with one continuous blurred surface — no seam.
+                Key: on non-home screens the background matches the PILL colour
+                (white-frosted / dark-glass) so the gap above the pill is the same
+                material as the pill itself. Home uses the page background since the
+                pill floats over it naturally.
+                z-27 sits behind everything (scrims z-29, pill z-30). */}
             <div
                 aria-hidden="true"
                 className="fixed top-0 left-0 right-0 pointer-events-none"
                 style={{
-                    height: 'calc(env(safe-area-inset-top, 0px) + 80px)',
+                    height: 'calc(env(safe-area-inset-top, 0px) + 84px)',
                     zIndex: 27,
-                    backgroundColor: dark ? 'rgba(22,22,22,0.80)' : 'rgba(240,237,232,0.80)',
+                    backgroundColor: isHome
+                        ? (dark ? 'rgba(22,22,22,0.70)'  : 'rgba(240,237,232,0.70)')
+                        : (dark ? 'rgba(24,24,24,0.86)'  : 'rgba(255,255,255,0.86)'),
                     backdropFilter: 'blur(28px) saturate(1.8)',
                     WebkitBackdropFilter: 'blur(28px) saturate(1.8)',
-                    maskImage: 'linear-gradient(to bottom, black 0%, black 58%, rgba(0,0,0,0.18) 82%, transparent 100%)',
-                    WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 58%, rgba(0,0,0,0.18) 82%, transparent 100%)',
+                    maskImage: 'linear-gradient(to bottom, black 0%, black 62%, rgba(0,0,0,0.15) 86%, transparent 100%)',
+                    WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 62%, rgba(0,0,0,0.15) 86%, transparent 100%)',
                 }}
             />
 
