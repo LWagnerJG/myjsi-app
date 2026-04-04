@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { Calendar, List, Building2, ChevronLeft, ChevronRight, Package, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { SearchInput } from '../../components/common/SearchInput.jsx';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 import { isDarkTheme } from '../../design-system/tokens.js';
@@ -46,7 +45,7 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
 
     return (
         <div className="space-y-4">
-            <GlassCard theme={theme} className="p-4" variant="elevated">
+            <div className="rounded-[22px] overflow-hidden p-4" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'}` }}>
                 <div className="flex justify-between items-center mb-4">
                     <button onClick={() => setCurrentDate(new Date(year, month - 1, 1))} className={`p-2 rounded-full motion-tap active:scale-[0.98] transition-colors ${isDark ? 'hover:bg-white/[0.08]' : 'hover:bg-black/[0.05]'}`}>
                         <ChevronLeft style={{ color: theme.colors.textSecondary }} />
@@ -73,7 +72,7 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
                             <button
                                 key={day}
                                 onClick={() => setSelectedDate(date)}
-                                className={`h-12 rounded-xl flex flex-col items-center justify-center transition motion-tap active:scale-[0.98] ${isSelected ? '' : (isDark ? 'hover:bg-white/[0.06]' : 'hover:bg-black/[0.04]')}`}
+                                className={`h-12 rounded-[10px] flex flex-col items-center justify-center transition motion-tap active:scale-[0.98] ${isSelected ? '' : (isDark ? 'hover:bg-white/[0.06]' : 'hover:bg-black/[0.04]')}`}
                                 style={{
                                     ...(isSelected ? { boxShadow: `0 0 0 2px ${theme.colors.accent}` } : {}),
                                 }}
@@ -84,7 +83,7 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
                         );
                     })}
                 </div>
-            </GlassCard>
+            </div>
 
             {selectedDate && selectedOrders.length > 0 && (
                 <div className="space-y-3 animate-fade-in">
@@ -94,8 +93,8 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
                     {selectedOrders.map((o) => {
                         const sc = STATUS_COLORS[o.status] || '#8B8680';
                         return (
-                            <div key={o.orderNumber} className="rounded-2xl overflow-hidden cursor-pointer active:scale-[0.99] transition"
-                                style={{ backgroundColor: theme.colors.surface, border: isDark ? '1px solid rgba(255,255,255,0.06)' : 'none', boxShadow: isDark ? 'none' : '0 1px 4px rgba(0,0,0,0.06)' }}
+                            <div key={o.orderNumber} className="rounded-[22px] overflow-hidden cursor-pointer active:scale-[0.99] transition"
+                                style={{ backgroundColor: theme.colors.surface, border: `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'}` }}
                                 onClick={() => onOrderClick(o)}>
                                 <div className="flex items-center gap-3.5 px-4 py-3.5">
                                     <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-[12px] font-black"
@@ -164,10 +163,9 @@ const DateGroupCard = ({ theme, dateKey, group, onNavigate }) => {
     const label = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }).toUpperCase();
 
     return (
-        <div className="rounded-2xl overflow-hidden" style={{
+        <div className="rounded-[22px] overflow-hidden" style={{
             backgroundColor: theme.colors.surface,
-            border: dark ? '1px solid rgba(255,255,255,0.06)' : 'none',
-            boxShadow: dark ? 'none' : '0 1px 4px rgba(0,0,0,0.06)',
+            border: `1px solid ${dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'}`,
         }}>
             <div
                 className="flex items-baseline justify-between px-4 pt-3 pb-2"
@@ -257,11 +255,11 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                                         initial={{ opacity: 0, scale: 0.95, y: -4 }}
                                         animate={{ opacity: 1, scale: 1, y: 0 }}
                                         transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
-                                        className="absolute right-0 mt-2 w-56 max-h-72 overflow-y-auto p-2 z-20 rounded-2xl"
+                                        className="absolute right-0 mt-2 w-56 max-h-72 overflow-y-auto p-2 z-20 rounded-[18px]"
                                         style={{ transformOrigin: 'top right', backgroundColor: theme.colors.surface, border: dark ? '1px solid rgba(255,255,255,0.12)' : `1px solid ${theme.colors.border}`, boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }}>
                                         {dealers.map(d => {
                                             const active = d === selectedDealer;
-                                            return <button key={d} onClick={() => { setSelectedDealer(d); setDealerMenuOpen(false); }} className={`w-full text-left px-3 py-2 rounded-xl text-sm transition motion-tap active:scale-[0.98] ${active ? 'font-semibold' : (dark ? 'hover:bg-white/[0.06]' : 'hover:bg-black/[0.04]')}`} style={{ backgroundColor: active ? theme.colors.subtle : 'transparent', color: theme.colors.textPrimary }}>{formatCompanyName(d)}</button>;
+                                            return <button key={d} onClick={() => { setSelectedDealer(d); setDealerMenuOpen(false); }} className={`w-full text-left px-3 py-2 rounded-[10px] text-sm transition motion-tap active:scale-[0.98] ${active ? 'font-semibold' : (dark ? 'hover:bg-white/[0.06]' : 'hover:bg-black/[0.04]')}`} style={{ backgroundColor: active ? theme.colors.subtle : 'transparent', color: theme.colors.textPrimary }}>{formatCompanyName(d)}</button>;
                                         })}
                                     </motion.div>
                                 )}
