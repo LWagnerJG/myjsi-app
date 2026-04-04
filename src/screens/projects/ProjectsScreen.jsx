@@ -126,10 +126,10 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
     />
   );
   return (
-    <div className="h-full flex flex-col app-header-offset relative" style={{ backgroundColor: theme.colors.background }}>
+    <div className="min-h-full relative" style={{ backgroundColor: theme.colors.background }}>
       {/* Controls */}
-      <div className="flex-shrink-0" style={{ backgroundColor: theme.colors.background }}>
-        <div className="px-4 sm:px-6 lg:px-8 pt-4 pb-3 max-w-5xl mx-auto w-full">
+      <div className="flex-shrink-0" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 12px)', backgroundColor: theme.colors.background }}>
+        <div className="px-4 sm:px-6 lg:px-8 pb-3 max-w-5xl mx-auto w-full">
           <div className="flex items-center justify-between gap-3">
             <SegmentedToggle
               value={projectsTab}
@@ -187,7 +187,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
           </div>
         )}
       </div>
-      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto scrollbar-hide">
+      <div ref={scrollContainerRef}>
         <div className="px-4 sm:px-6 lg:px-8 pt-3 pb-40 max-w-5xl mx-auto w-full">
           {projectsTab==='pipeline' && (
             filteredOpportunities.length ? (
