@@ -5,6 +5,23 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── iOS Dynamic Type support ─────────────────────────────────────────────────
+   Tailwind's preflight locks -webkit-text-size-adjust to 100%, which prevents
+   iOS from applying Dynamic Type preferences. Override it here so the system
+   can scale text. The JS initDynamicType() utility (main.jsx) also sets
+   --font-scale and adjusts html font-size so rem values track iOS preferences.
+   ──────────────────────────────────────────────────────────────────────────── */
+html {
+    -webkit-text-size-adjust: auto;
+    text-size-adjust: auto;
+    /* font-size is set dynamically by initDynamicType() on iOS */
+}
+
+:root {
+    --font-scale: 1;        /* updated by initDynamicType() */
+    --font-scale-pct: 100%; /* CSS percentage form */
+}
+
 :root {
     --app-height: 100vh;
     --app-header-offset: 72px;
