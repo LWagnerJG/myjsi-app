@@ -7,7 +7,6 @@ import { ProbabilitySlider } from '../../../../components/forms/ProbabilitySlide
 import { RequestQuoteModal } from '../../../../components/common/RequestQuoteModal.jsx';
 import { ToggleSwitch } from '../../../../components/forms/ToggleSwitch.jsx';
 import { SuggestInputPill } from './SuggestInputPill.jsx';
-import { ContactSearchSelector } from './ContactSearchSelector.jsx';
 
 /* helpers */
 const parseCurrency = (raw) => {
@@ -330,12 +329,12 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
               <p className="text-[20px] font-black tracking-tight" style={{ color: c.textPrimary }}>{draft.stage || '—'}</p>
               <p className="text-[12px] font-medium mt-0.5" style={{ color: c.textSecondary, opacity: 0.5 }}>Step {Math.max(stageIdx + 1, 1)} of {STAGES.length}</p>
             </div>
-            {/* Horizontal scroll stage pills */}
-            <div className="flex gap-1.5 overflow-x-auto scrollbar-hide pb-1 -mx-5 px-5">
+            {/* Stage grid — 2 columns, all visible */}
+            <div className="grid grid-cols-2 gap-2 mt-1">
               {STAGES.map(s => (
                 <button key={s} onClick={() => update('stage', s)}
-                  className="flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold transition-all"
-                  style={{ backgroundColor: s === draft.stage ? c.accent : (isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)'), color: s === draft.stage ? c.accentText : c.textSecondary }}>
+                  className="py-2 px-3 rounded-[14px] text-[12px] font-bold text-left transition-all"
+                  style={{ backgroundColor: s === draft.stage ? c.accent : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'), color: s === draft.stage ? c.accentText : c.textSecondary }}>
                   {s}
                 </button>
               ))}
@@ -352,12 +351,39 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
 
           {/* 3. PROJECT DETAILS */}
           <Section title="Project Details" theme={theme}>
-            <Row label="Vertical" theme={theme} noSep>
-              <PillSelect options={VERTICALS.filter(v => v !== 'Other (Please specify)')} value={draft.vertical} onChange={v => update('vertical', v)} theme={theme} />
-            </Row>
-            <Row label="PO Timeframe" theme={theme}>
-              <PillSelect options={PO_TIMEFRAMES} value={draft.poTimeframe} onChange={v => update('poTimeframe', v)} theme={theme} />
-            </Row>
+            {/* Vertical */}
+            <div className="pb-4">
+              <span className="text-[11px] font-bold uppercase tracking-[0.07em] block mb-3" style={{ color: c.textSecondary, opacity: 0.55 }}>Vertical</span>
+              <div className="flex flex-wrap gap-2">
+                {VERTICALS.filter(v => v !== 'Other (Please specify)').map(opt => {
+                  const active = opt === draft.vertical;
+                  return (
+                    <button key={opt} onClick={() => update('vertical', opt)}
+                      className="px-4 py-2 rounded-full text-[12px] font-semibold transition-all"
+                      style={{ backgroundColor: active ? c.accent : (isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)'), color: active ? c.accentText : c.textSecondary, border: active ? 'none' : `1.5px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}` }}>
+                      {opt}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            {/* PO Timeframe */}
+            <div className="pt-4 pb-4 border-t" style={{ borderColor: divider }}>
+              <span className="text-[11px] font-bold uppercase tracking-[0.07em] block mb-3" style={{ color: c.textSecondary, opacity: 0.55 }}>PO Timeframe</span>
+              <div className="grid grid-cols-2 gap-2">
+                {PO_TIMEFRAMES.map(opt => {
+                  const active = opt === draft.poTimeframe;
+                  return (
+                    <button key={opt} onClick={() => update('poTimeframe', opt)}
+                      className="px-3 py-2 rounded-[14px] text-[12px] font-semibold text-center transition-all"
+                      style={{ backgroundColor: active ? c.accent : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'), color: active ? c.accentText : c.textSecondary, border: active ? 'none' : `1.5px solid ${isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)'}` }}>
+                      {opt}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            {/* Install Date + Location */}
             <Row label="Install Date" theme={theme}>
               <input type="date" value={draft.expectedInstallDate || ''} onChange={e => update('expectedInstallDate', e.target.value)}
                 className="w-full bg-transparent outline-none text-[13px] font-medium" style={{ color: c.textPrimary }} />
@@ -366,18 +392,11 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
               <input value={draft.installationLocation || ''} onChange={e => update('installationLocation', e.target.value)}
                 className="w-full bg-transparent outline-none text-[13px] font-medium" style={{ color: c.textPrimary }} placeholder="City, State" />
             </Row>
-            <div className="flex items-center gap-3 py-3 border-t" style={{ borderColor: divider }}>
-              <label className="text-[11px] font-bold uppercase tracking-[0.07em] whitespace-nowrap flex-shrink-0 w-[90px]" style={{ color: c.textSecondary, opacity: 0.55 }}>Bid?</label>
-              <div className="flex-1 flex justify-end"><ToggleSwitch checked={!!draft.isBid} onChange={e => update('isBid', e.target.checked)} theme={theme} /></div>
-            </div>
           </Section>
 
           {/* 4. STAKEHOLDERS */}
           <Section title="Stakeholders" theme={theme}>
-            <Row label="Contact" theme={theme} noSep>
-              <ContactSearchSelector value={draft.contact || ''} onChange={v => update('contact', v)} dealers={draft.dealers || []} theme={theme} />
-            </Row>
-            <Row label="Dealer(s)" theme={theme}>
+            <Row label="Dealer(s)" theme={theme} noSep>
               <div className="flex flex-wrap gap-1.5">
                 {(draft.dealers || []).map(f => (
                   <button key={f} onClick={() => removeFrom('dealers', f)} className="px-3 h-7 rounded-full text-[12px] font-semibold flex items-center gap-1 transition-all"
@@ -386,6 +405,10 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                 <SuggestInputPill placeholder="Add dealer" suggestions={INITIAL_DEALERS} onAdd={v => addUnique('dealers', v)} theme={theme} />
               </div>
             </Row>
+            <div className="flex items-center justify-between py-3 border-t" style={{ borderColor: divider }}>
+              <span className="text-[14px] font-semibold" style={{ color: c.textPrimary }}>Bid Project</span>
+              <ToggleSwitch checked={!!draft.isBid} onChange={e => update('isBid', e.target.checked)} theme={theme} />
+            </div>
             <Row label="A&D Firm(s)" theme={theme}>
               <div className="flex flex-wrap gap-1.5">
                 {(draft.designFirms || []).map(f => (

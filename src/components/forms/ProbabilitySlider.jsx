@@ -22,14 +22,14 @@ export const ProbabilitySlider = ({ value, onChange, theme, showLabel = true }) 
     const onTouchStart = useCallback((e) => pointerDown(e.touches[0].clientX), [pointerDown]);
     const onMove = useCallback((clientX) => { if (isDragging) updateFromClientX(clientX); }, [isDragging, updateFromClientX]);
     const onMouseMove = useCallback((e) => onMove(e.clientX), [onMove]);
-    const onTouchMove = useCallback((e) => onMove(e.touches[0].clientX), [onMove]);
+    const onTouchMove = useCallback((e) => { e.preventDefault(); onMove(e.touches[0].clientX); }, [onMove]);
     const endDrag = useCallback(() => setIsDragging(false), []);
 
     useEffect(() => {
         if (!isDragging) return;
         window.addEventListener('mousemove', onMouseMove, { passive: true });
         window.addEventListener('mouseup', endDrag, { passive: true });
-        window.addEventListener('touchmove', onTouchMove, { passive: true });
+        window.addEventListener('touchmove', onTouchMove, { passive: false });
         window.addEventListener('touchend', endDrag, { passive: true });
         return () => {
             window.removeEventListener('mousemove', onMouseMove);
@@ -48,7 +48,7 @@ export const ProbabilitySlider = ({ value, onChange, theme, showLabel = true }) 
                     Win Probability
                 </label>
             )}
-            <div className="relative pt-4 pb-2 px-2" onMouseDown={onMouseDown} onTouchStart={onTouchStart}>
+            <div className="relative pt-4 pb-2 px-2" style={{ touchAction: 'none' }} onMouseDown={onMouseDown} onTouchStart={onTouchStart}>
                 <div ref={sliderRef} className="relative h-2 rounded-full" style={{ backgroundColor: theme.colors.border }}>
                     <div className="absolute top-0 left-0 h-full rounded-full" style={{ backgroundColor: theme.colors.accent, width: `${safeValue}%` }} />
                     <div className="absolute top-1/2 transform -translate-x-1/2 -translate-y-1/2" style={{ left: `${safeValue}%` }}>
