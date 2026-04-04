@@ -926,10 +926,10 @@ export const NewLeadScreen = ({
   const realDealers = (newLeadData.dealers || []).filter(d => d !== 'Out to Bid');
 
   return (
-    <form onSubmit={handleSubmit} className="min-h-full app-header-offset flex flex-col" style={{ backgroundColor: c.background }}>
+    <form onSubmit={handleSubmit} className="min-h-full flex flex-col" style={{ backgroundColor: c.background }}>
       {/* Invisible focus sink — prevents AnimatedScreenWrapper from focusing a heading on mount */}
       <div data-autofocus tabIndex={-1} aria-hidden="true" style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden', outline: 'none' }} />
-      <div className="px-4 sm:px-5 pt-5 pb-40 max-w-3xl mx-auto w-full">
+      <div className="px-4 sm:px-5 pb-40 max-w-3xl mx-auto w-full" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 16px)' }}>
 
         <div key={step} className={`space-y-4 ${stepAnimClass}`}>
         {step === 0 && (
@@ -1761,7 +1761,7 @@ export const NewLeadScreen = ({
                         {gi > 0 && (
                           <div className="flex items-center gap-2 px-3.5 py-1" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.025)' }}>
                             <div className="flex-1 h-px" style={{ backgroundColor: subtleBorder }} />
-                            <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: c.textSecondary, opacity: 0.4 }}>
+                            <span className="text-[9px] font-bold uppercase tracking-[0.07em]" style={{ color: c.textSecondary, opacity: 0.4 }}>
                               {['Basics', 'Scope', 'Details'][group.stepIdx]}
                             </span>
                             <div className="flex-1 h-px" style={{ backgroundColor: subtleBorder }} />

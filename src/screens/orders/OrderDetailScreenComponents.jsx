@@ -59,7 +59,7 @@ export const Portal = ({ children }) => createPortal(children, document.body);
 export const Card = ({ children, dark, c, className = '', style }) => (
   <div className={className} style={{
     padding: 20,
-    backgroundColor: c?.surface || (dark ? 'rgba(255,255,255,0.04)' : '#fff'),
+    backgroundColor: c?.surface,
     borderRadius: 22,
     border: `1px solid ${dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'}`,
     ...style,
@@ -74,7 +74,7 @@ export const Pill = ({ icon: Ic, label, onClick, dark }) => (
     style={{
       backgroundColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.04)',
       borderColor: dark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.09)',
-      color: dark ? 'rgba(255,255,255,0.8)' : '#353535',
+      color: dark ? 'rgba(255,255,255,0.8)' : 'rgba(53,53,53,1)',
     }}
   >
     <Ic className="w-3 h-3" /> {label}
@@ -212,7 +212,7 @@ export const AckModal = ({ order, onClose, onShare, dark, c }) => (
     <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: UNIFIED_MODAL_Z }} role="dialog" aria-label="Acknowledgment">
       <div className="absolute inset-0" style={getUnifiedBackdropStyle(true)} onClick={onClose} />
       <div className="relative w-full max-w-md rounded-[22px] overflow-hidden flex flex-col"
-        style={{ maxHeight: '85vh', backgroundColor: c?.surface || '#fff', border: `1px solid ${dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'}` }}>
+        style={{ maxHeight: '85vh', backgroundColor: c?.surface, border: `1px solid ${dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'}` }}>
 
         {/* header */}
         <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'}` }}>
@@ -288,7 +288,7 @@ export const ClipsModal = ({ onClose, dark, c }) => (
     <div className="fixed inset-0 flex items-end sm:items-center justify-center" style={{ zIndex: UNIFIED_MODAL_Z }} role="dialog" aria-label="Production clips">
       <div className="absolute inset-0" style={getUnifiedBackdropStyle(true)} onClick={onClose} />
       <div className="relative w-full max-w-lg rounded-t-[22px] sm:rounded-[22px] overflow-hidden flex flex-col"
-        style={{ maxHeight: '80vh', backgroundColor: c?.surface || '#fff', border: `1px solid ${dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'}` }}>
+        style={{ maxHeight: '80vh', backgroundColor: c?.surface, border: `1px solid ${dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'}` }}>
 
         <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'}` }}>
           <div>
@@ -304,11 +304,11 @@ export const ClipsModal = ({ onClose, dark, c }) => (
           {PROD_CLIPS.map(clip => (
             <div key={clip.id} className="flex gap-3 items-center rounded-[14px] p-2 transition active:opacity-70 cursor-pointer"
               style={{ backgroundColor: dark ? 'rgba(255,255,255,0.04)' : 'rgba(53,53,53,0.03)' }}>
-              <div className="relative flex-shrink-0 w-24 h-14 rounded-xl overflow-hidden" style={{ backgroundColor: dark ? '#333' : '#eee' }}>
+              <div className="relative flex-shrink-0 w-24 h-14 rounded-xl overflow-hidden" style={{ backgroundColor: dark ? c.surface : c.border }}>
                 <img src={clip.thumb} alt="" className="w-full h-full object-cover" loading="lazy" />
                 <div className="absolute inset-0 flex items-center justify-center bg-black/25">
                   <div className="w-7 h-7 rounded-full bg-white/90 flex items-center justify-center">
-                    <Play className="w-3 h-3 fill-current" style={{ color: '#353535', marginLeft: 1 }} />
+                    <Play className="w-3 h-3 fill-current" style={{ color: c.textPrimary, marginLeft: 1 }} />
                   </div>
                 </div>
               </div>
