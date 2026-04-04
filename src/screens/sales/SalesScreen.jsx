@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { ArrowUp, ArrowDown, TrendingUp, ChevronRight, Trophy, Calendar, DollarSign } from 'lucide-react';
+import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 import { MONTHLY_SALES_DATA, SALES_VERTICALS_DATA, CUSTOMER_RANK_DATA, INCENTIVE_REWARDS_DATA } from './data.js';
 import { ORDER_DATA, STATUS_COLORS } from '../orders/data.js';
 import { SalesByVerticalBreakdown } from './components/SalesByVerticalBreakdown.jsx';
@@ -22,28 +23,6 @@ const sortQuarterEntries = (entries) =>
     const pa = parseQuarterKey(a[0]), pb = parseQuarterKey(b[0]);
     return pa.y === pb.y ? pa.q - pb.q : pa.y - pb.y;
   });
-
-/* ── Inline text toggle (discrete) ───────────────────────────── */
-
-const InlineToggle = ({ options, value, onChange, colors }) => (
-  <div className="inline-flex items-center gap-0.5 rounded-full p-[2px]" style={{ backgroundColor: colors.border }}>
-    {options.map(opt => (
-      <button
-        key={opt.value}
-        onClick={() => onChange(opt.value)}
-        className="rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-wider transition-all"
-        style={{
-          backgroundColor: value === opt.value ? colors.surface : 'transparent',
-          color: value === opt.value ? colors.textPrimary : colors.textSecondary,
-          opacity: value === opt.value ? 1 : 0.5,
-          boxShadow: value === opt.value ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
-        }}
-      >
-        {opt.label}
-      </button>
-    ))}
-  </div>
-);
 
 /* ── Main Screen ─────────────────────────────────────────────── */
 
@@ -184,7 +163,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                     )}
                   </div>
                 </div>
-                <InlineToggle options={toggleOpts} value={chartDataType} onChange={setChartDataType} colors={colors} />
+                <SegmentedToggle options={toggleOpts} value={chartDataType} onChange={setChartDataType} theme={theme} size="sm" />
               </div>
 
               {/* Progress to goal */}
@@ -281,7 +260,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                     <div className="grid grid-cols-2 gap-2 pt-1">
                       {rewardsSnapshot.topSales.length > 0 && (
                         <div className="py-2 px-3.5 rounded-[12px]" style={{ backgroundColor: tileRowBg }}>
-                          <div className="text-[11px] font-bold uppercase tracking-wider opacity-30 mb-1.5">Top Sales</div>
+                          <div className="text-[11px] font-bold uppercase tracking-[0.07em] opacity-30 mb-1.5">Top Sales</div>
                           <div className="space-y-1.5">
                             {rewardsSnapshot.topSales.map((p) => (
                               <div key={p.name}>
@@ -294,7 +273,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                       )}
                       {rewardsSnapshot.topDesigners.length > 0 && (
                         <div className="py-2 px-3.5 rounded-[12px]" style={{ backgroundColor: tileRowBg }}>
-                          <div className="text-[11px] font-bold uppercase tracking-wider opacity-30 mb-1.5">Top Design</div>
+                          <div className="text-[11px] font-bold uppercase tracking-[0.07em] opacity-30 mb-1.5">Top Design</div>
                           <div className="space-y-1.5">
                             {rewardsSnapshot.topDesigners.map((p) => (
                               <div key={p.name}>
@@ -337,7 +316,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                       </div>
                       <div className="text-right shrink-0 ml-2 space-y-0.5">
                         <p className="text-sm font-bold tabular-nums">${order.net.toLocaleString()}</p>
-                        <span className="inline-block text-[11px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
+                        <span className="inline-block text-[11px] font-bold uppercase tracking-[0.07em] px-1.5 py-0.5 rounded-full"
                           style={{ backgroundColor: sc + '14', color: sc }}>
                           {order.status}
                         </span>
