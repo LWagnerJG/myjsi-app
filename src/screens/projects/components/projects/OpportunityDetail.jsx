@@ -23,14 +23,14 @@ const Section = ({ title, children, theme, right }) => {
   const isDark = isDarkTheme(theme);
   const divider = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
   return (
-    <div className="rounded-2xl" style={{ padding: '18px 20px', backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : '#fff', border: `1px solid ${divider}` }}>
+    <div className="rounded-[22px] overflow-hidden" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${divider}` }}>
       {title && (
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: theme.colors.textSecondary, opacity: 0.55 }}>{title}</span>
+        <div className="flex items-center justify-between px-5 py-3.5" style={{ borderBottom: `1px solid ${divider}` }}>
+          <span className="text-[12px] font-bold uppercase tracking-[0.07em]" style={{ color: theme.colors.textSecondary, opacity: 0.55 }}>{title}</span>
           {right}
         </div>
       )}
-      {children}
+      <div className="px-5 py-4">{children}</div>
     </div>
   );
 };
@@ -39,8 +39,8 @@ const Row = ({ label, children, theme, noSep }) => {
   const isDark = isDarkTheme(theme);
   const divider = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
   return (
-    <div className={`flex items-center gap-3 py-3.5 ${noSep ? '' : 'border-t'}`} style={{ borderColor: noSep ? undefined : divider }}>
-      {label && <label className="text-[13px] font-semibold whitespace-nowrap flex-shrink-0 w-[105px]" style={{ color: theme.colors.textPrimary, letterSpacing: '-0.01em' }}>{label}</label>}
+    <div className={`flex items-start gap-3 py-3 ${noSep ? '' : 'border-t'}`} style={{ borderColor: noSep ? undefined : divider }}>
+      {label && <label className="text-[11px] font-bold uppercase tracking-[0.07em] whitespace-nowrap flex-shrink-0 pt-1 w-[100px]" style={{ color: theme.colors.textSecondary, opacity: 0.55 }}>{label}</label>}
       <div className="flex-1 min-w-0">{children}</div>
     </div>
   );
@@ -101,7 +101,7 @@ const QuoteTracker = ({ quotes = [], theme, onRequestQuote }) => {
         const stageIdx = QUOTE_STAGES.findIndex(s => s.key === (q.status || 'complete'));
         const activeStage = stageIdx >= 0 ? stageIdx : QUOTE_STAGES.length - 1;
         return (
-          <div key={q.id || qi} className="rounded-2xl p-4" style={{ backgroundColor: fieldBg, border: `1px solid ${divider}` }}>
+          <div key={q.id || qi} className="rounded-[18px] p-4" style={{ backgroundColor: fieldBg, border: `1px solid ${divider}` }}>
             <div className="flex items-center gap-3 mb-4">
               <FileText className="w-4 h-4 flex-shrink-0" style={{ color: theme.colors.accent }} />
               <span className="text-[13px] font-bold flex-1 truncate" style={{ color: theme.colors.textPrimary }}>{q.fileName || `Quote #${qi + 1}`}</span>
@@ -130,7 +130,7 @@ const QuoteTracker = ({ quotes = [], theme, onRequestQuote }) => {
         );
       })}
 
-      <div className="rounded-2xl p-4 flex items-center gap-3" style={{ backgroundColor: isDark ? 'rgba(91,123,140,0.08)' : 'rgba(91,123,140,0.06)', border: `1px solid ${isDark ? 'rgba(91,123,140,0.15)' : 'rgba(91,123,140,0.10)'}` }}>
+      <div className="rounded-[18px] p-4 flex items-center gap-3" style={{ backgroundColor: isDark ? 'rgba(91,123,140,0.08)' : 'rgba(91,123,140,0.06)', border: `1px solid ${isDark ? 'rgba(91,123,140,0.15)' : 'rgba(91,123,140,0.10)'}` }}>
         <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: isDark ? 'rgba(91,123,140,0.15)' : 'rgba(91,123,140,0.10)' }}>
           <Users className="w-4 h-4" style={{ color: '#5B7B8C' }} />
         </div>
@@ -248,9 +248,9 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
             <input value={draft.project || draft.name || ''} onChange={e => update(draft.project !== undefined ? 'project' : 'name', e.target.value)}
               className="w-full bg-transparent outline-none text-[26px] font-bold tracking-tight leading-tight" style={{ color: c.textPrimary }} placeholder="Project name" />
             <div className="flex items-center gap-2 mt-1.5">
-              <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: c.accent, opacity: 0.6 }} />
+              <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: c.textSecondary, opacity: 0.4 }} />
               <input value={draft.company || ''} onChange={e => update('company', e.target.value)}
-                className="bg-transparent outline-none text-[13px] font-semibold flex-1" style={{ color: c.accent, opacity: 0.7 }} placeholder="Company / End User" />
+                className="bg-transparent outline-none text-[13px] font-semibold flex-1" style={{ color: c.textSecondary, opacity: 0.75 }} placeholder="Company / End User" />
             </div>
           </div>
 
@@ -268,7 +268,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
             <div className="h-px" style={{ backgroundColor: divider }} />
             <div className="pt-3 grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_1px_minmax(0,1fr)] gap-3 sm:gap-0 items-stretch">
               <div className="flex flex-col justify-center cursor-pointer min-w-0" onClick={() => discountOpen ? setDiscountOpen(false) : openDiscount()} ref={discBtn}>
-                <span className="text-[11px] font-semibold uppercase tracking-widest mb-1" style={{ color: c.textSecondary, opacity: 0.5 }}>Discount</span>
+                <span className="text-[11px] font-bold uppercase tracking-[0.07em] mb-1" style={{ color: c.textSecondary, opacity: 0.55 }}>Discount</span>
                 <div className="flex items-center gap-1.5">
                   <span className="text-sm font-bold tracking-tight truncate" style={{ color: c.textPrimary }}>{draft.discount || '\u2014'}</span>
                   <ChevronDown className="w-3.5 h-3.5 flex-shrink-0" style={{ color: c.textSecondary, opacity: 0.4 }} />
@@ -276,23 +276,23 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
               </div>
               <div className="hidden sm:block w-px self-stretch mx-4" style={{ backgroundColor: divider }} />
               <div className="flex flex-col justify-center sm:pl-0">
-                <span className="text-[11px] font-semibold uppercase tracking-widest mb-1" style={{ color: c.textSecondary, opacity: 0.5 }}>Net Value</span>
+                <span className="text-[11px] font-bold uppercase tracking-[0.07em] mb-1" style={{ color: c.textSecondary, opacity: 0.55 }}>Net Value</span>
                 <span className="text-lg font-bold tracking-tight leading-none whitespace-nowrap" style={{ color: c.accent }}>{netValue > 0 && discountPct > 0 ? fmtCurrency(netValue) : '\u2014'}</span>
               </div>
             </div>
             <div className="h-px mt-3" style={{ backgroundColor: divider }} />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-3">
-              <div className="rounded-xl border px-3 py-2 flex items-center justify-between" style={{ borderColor: divider, backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.015)' }}>
+              <div className="rounded-[14px] border px-3 py-2 flex items-center justify-between" style={{ borderColor: divider, backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.015)' }}>
                 <span className="text-[12px] font-semibold" style={{ color: c.textPrimary }}>Sales Reward</span>
                 <ToggleSwitch checked={draft.salesReward !== false} onChange={e => update('salesReward', e.target.checked)} theme={theme} />
               </div>
-              <div className="rounded-xl border px-3 py-2 flex items-center justify-between" style={{ borderColor: divider, backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.015)' }}>
+              <div className="rounded-[14px] border px-3 py-2 flex items-center justify-between" style={{ borderColor: divider, backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.015)' }}>
                 <span className="text-[12px] font-semibold" style={{ color: c.textPrimary }}>Designer Reward</span>
                 <ToggleSwitch checked={draft.designerReward !== false} onChange={e => update('designerReward', e.target.checked)} theme={theme} />
               </div>
             </div>
             {showSpiffWarning && (
-              <div className="flex items-center gap-2 px-3 py-2 rounded-xl mt-1" style={{ backgroundColor: isDark ? 'rgba(196,149,106,0.08)' : 'rgba(196,149,106,0.06)' }}>
+              <div className="flex items-center gap-2 px-3 py-2 rounded-[14px] mt-1" style={{ backgroundColor: isDark ? 'rgba(196,149,106,0.08)' : 'rgba(196,149,106,0.06)' }}>
                 <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" style={{ color: theme.colors.warning }} />
                 <span className="text-[11px] font-medium" style={{ color: theme.colors.warning }}>No spiff eligible: 50/20/10 with list value under $10K.</span>
               </div>
@@ -326,7 +326,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
             <div className="h-8" />
             <div className="pt-2 border-t" style={{ borderColor: divider }}>
               <div className="flex items-center justify-between mb-1">
-                <span className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: c.textSecondary, opacity: 0.5 }}>Win Probability</span>
+                <span className="text-[11px] font-bold uppercase tracking-[0.07em]" style={{ color: c.textSecondary, opacity: 0.55 }}>Win Probability</span>
                 <span className="text-xs font-bold tabular-nums" style={{ color: c.textPrimary }}>{draft.winProbability || 0}%</span>
               </div>
               <ProbabilitySlider value={draft.winProbability || 0} onChange={v => update('winProbability', v)} theme={theme} showLabel={false} />
@@ -423,7 +423,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
             {(draft.documents || []).length > 0 ? (
               <div className="space-y-2">
                 {(draft.documents || []).map(doc => (
-                  <div key={doc.id} className="group flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors"
+                  <div key={doc.id} className="group flex items-center gap-3 px-3 py-2.5 rounded-[14px] transition-colors"
                     style={{ background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)', border: `1px solid ${divider}` }}>
                     <FileText className="w-4 h-4 flex-shrink-0" style={{ color: c.accent }} />
                     <div className="flex-1 min-w-0">
@@ -438,7 +438,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                 ))}
               </div>
             ) : (
-              <button onClick={() => fileInputRef.current?.click()} className="w-full flex flex-col items-center justify-center gap-2 py-6 rounded-2xl transition-all hover:opacity-80"
+              <button onClick={() => fileInputRef.current?.click()} className="w-full flex flex-col items-center justify-center gap-2 py-6 rounded-[18px] transition-all hover:opacity-80"
                 style={{ border: `2px dashed ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}`, color: c.textSecondary }}>
                 <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}>
                   <Paperclip className="w-4 h-4" style={{ opacity: 0.5 }} />
@@ -452,7 +452,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
           {/* 9. NOTES */}
           <Section title="Notes" theme={theme}>
             <textarea value={draft.notes || ''} onChange={e => update('notes', e.target.value)} rows={3}
-              className="w-full resize-none rounded-xl p-3.5 text-[13px] leading-relaxed outline-none"
+              className="w-full resize-none rounded-[14px] p-3.5 text-[13px] leading-relaxed outline-none"
               style={{ background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)', border: `1px solid ${divider}`, color: c.textPrimary }}
               placeholder="Add project notes, context, or special instructions..." />
           </Section>
@@ -470,7 +470,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
 
       {/* discount dropdown */}
       {discountOpen && (
-        <div ref={discMenu} className="fixed rounded-2xl overflow-hidden"
+        <div ref={discMenu} className="fixed rounded-[18px] overflow-hidden"
           style={{ top: discPos.top, left: discPos.left, width: discPos.width, background: theme?.colors?.surface || (isDark ? '#2a2a2a' : '#fff'), border: `1px solid ${divider}`, boxShadow: DESIGN_TOKENS.shadows.modal, zIndex: DESIGN_TOKENS.zIndex.popover }}>
           <div className="max-h-[360px] overflow-y-auto scrollbar-hide py-1">
             {DISCOUNT_OPTIONS.map(opt => (
