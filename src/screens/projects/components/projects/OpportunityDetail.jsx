@@ -39,8 +39,8 @@ const Row = ({ label, children, theme, noSep }) => {
   const isDark = isDarkTheme(theme);
   const divider = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
   return (
-    <div className={`flex items-center gap-3 py-3 ${noSep ? '' : 'border-t'}`} style={{ borderColor: noSep ? undefined : divider }}>
-      {label && <label className="text-[11px] font-bold uppercase tracking-[0.07em] whitespace-nowrap flex-shrink-0 w-[90px]" style={{ color: theme.colors.textSecondary, opacity: 0.55 }}>{label}</label>}
+    <div className={`flex items-start gap-3 py-3 ${noSep ? '' : 'border-t'}`} style={{ borderColor: noSep ? undefined : divider }}>
+      {label && <label className="text-[11px] font-bold uppercase tracking-[0.07em] whitespace-nowrap flex-shrink-0 pt-1 w-[90px]" style={{ color: theme.colors.textSecondary, opacity: 0.55 }}>{label}</label>}
       <div className="flex-1 min-w-0">{children}</div>
     </div>
   );
@@ -239,9 +239,9 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
   const divider = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
 
   return (
-    <div className="flex flex-col h-full app-header-offset" style={{ background: c.background }}>
+    <div className="flex flex-col h-full" style={{ background: c.background }}>
       <div className="flex-1 overflow-y-auto scrollbar-hide">
-        <div className="px-4 sm:px-5 pt-4 pb-16 max-w-4xl mx-auto w-full space-y-3">
+        <div className="px-4 sm:px-5 pb-16 max-w-4xl mx-auto w-full space-y-3" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 12px)' }}>
 
           {/* HERO */}
           <div className="pt-2 pb-2">
@@ -326,20 +326,19 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
               </div>
             </div>
             {/* Current stage label */}
-            <div className="mt-4 mb-1 flex items-center justify-between">
-              <div>
-                <p className="text-[18px] font-black tracking-tight" style={{ color: c.textPrimary }}>{draft.stage || '—'}</p>
-                <p className="text-[12px] font-medium mt-0.5" style={{ color: c.textSecondary, opacity: 0.55 }}>Step {Math.max(stageIdx + 1, 1)} of {STAGES.length}</p>
-              </div>
-              <div className="flex flex-wrap gap-1.5 justify-end max-w-[55%]">
-                {STAGES.map(s => (
-                  <button key={s} onClick={() => update('stage', s)}
-                    className="px-2.5 py-1 rounded-full text-[10px] font-bold transition-all"
-                    style={{ backgroundColor: s === draft.stage ? c.accent : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'), color: s === draft.stage ? c.accentText : c.textSecondary }}>
-                    {s}
-                  </button>
-                ))}
-              </div>
+            <div className="mt-4 mb-3">
+              <p className="text-[20px] font-black tracking-tight" style={{ color: c.textPrimary }}>{draft.stage || '—'}</p>
+              <p className="text-[12px] font-medium mt-0.5" style={{ color: c.textSecondary, opacity: 0.5 }}>Step {Math.max(stageIdx + 1, 1)} of {STAGES.length}</p>
+            </div>
+            {/* Horizontal scroll stage pills */}
+            <div className="flex gap-1.5 overflow-x-auto scrollbar-hide pb-1 -mx-5 px-5">
+              {STAGES.map(s => (
+                <button key={s} onClick={() => update('stage', s)}
+                  className="flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold transition-all"
+                  style={{ backgroundColor: s === draft.stage ? c.accent : (isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)'), color: s === draft.stage ? c.accentText : c.textSecondary }}>
+                  {s}
+                </button>
+              ))}
             </div>
             {/* Win probability */}
             <div className="pt-3 mt-2 border-t" style={{ borderColor: divider }}>
@@ -367,9 +366,10 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
               <input value={draft.installationLocation || ''} onChange={e => update('installationLocation', e.target.value)}
                 className="w-full bg-transparent outline-none text-[13px] font-medium" style={{ color: c.textPrimary }} placeholder="City, State" />
             </Row>
-            <Row label="Bid?" theme={theme}>
-              <div className="flex justify-end"><ToggleSwitch checked={!!draft.isBid} onChange={e => update('isBid', e.target.checked)} theme={theme} /></div>
-            </Row>
+            <div className="flex items-center gap-3 py-3 border-t" style={{ borderColor: divider }}>
+              <label className="text-[11px] font-bold uppercase tracking-[0.07em] whitespace-nowrap flex-shrink-0 w-[90px]" style={{ color: c.textSecondary, opacity: 0.55 }}>Bid?</label>
+              <div className="flex-1 flex justify-end"><ToggleSwitch checked={!!draft.isBid} onChange={e => update('isBid', e.target.checked)} theme={theme} /></div>
+            </div>
           </Section>
 
           {/* 4. STAKEHOLDERS */}
