@@ -5,7 +5,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, X, Lock } from 'lucide-react';
 import { APP_ICON_COLORS } from '../utils/homeUtils.js';
 
-export const SortableAppTile = React.memo(({ id, app, colors, onRemove, isRemoveDisabled = false, isRemoveLocked = false, isOverlay = false }) => {
+export const SortableAppTile = React.memo(({ id, app, colors, isDark = false, onRemove, isRemoveDisabled = false, isRemoveLocked = false, isOverlay = false }) => {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
         id,
         animateLayoutChanges: (args) => {
@@ -17,12 +17,13 @@ export const SortableAppTile = React.memo(({ id, app, colors, onRemove, isRemove
         }
     });
 
-    const isDark = colors.tileSurface === '#2A2A2A';
     const style = {
         transform: CSS.Transform.toString(transform),
         transition: isDragging ? undefined : transition,
-        backgroundColor: `${colors.tileSurface || colors.surface}`,
-        border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
+        backgroundColor: colors.tileSurface || colors.surface,
+        backdropFilter: 'blur(16px) saturate(1.5)',
+        WebkitBackdropFilter: 'blur(16px) saturate(1.5)',
+        border: isDark ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(255,255,255,0.60)',
         boxShadow: isOverlay ? '0 8px 24px rgba(0,0,0,0.1)' : (isDragging ? '0 4px 12px rgba(0,0,0,0.08)' : 'none'),
         opacity: isDragging ? 0.9 : 1,
         zIndex: isDragging ? 20 : 'auto',

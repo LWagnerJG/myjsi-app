@@ -56,6 +56,7 @@ export const AppGrid = ({
                                 id={app.route}
                                 app={app}
                                 colors={colors}
+                                isDark={isDark}
                                 onRemove={toggleApp}
                                 isRemoveDisabled={safeHomeApps.length <= MIN_PINNED_APPS}
                                 isRemoveLocked={NON_REMOVABLE_APPS.has(app.route)}
@@ -97,6 +98,9 @@ export const AppGrid = ({
                                 className="relative flex flex-col items-center justify-center gap-1.5 p-2.5 sm:p-3 rounded-2xl"
                                 style={{
                                     backgroundColor: colors.tileSurface,
+                                    backdropFilter: 'blur(16px) saturate(1.5)',
+                                    WebkitBackdropFilter: 'blur(16px) saturate(1.5)',
+                                    border: isDark ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(255,255,255,0.60)',
                                     boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
                                     minHeight: 88,
                                 }}
@@ -137,7 +141,9 @@ export const AppGrid = ({
                             style={{
                                 minHeight: 88,
                                 backgroundColor: colors.tileSurface,
-                                border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
+                                backdropFilter: 'blur(16px) saturate(1.5)',
+                                WebkitBackdropFilter: 'blur(16px) saturate(1.5)',
+                                border: isDark ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(255,255,255,0.60)',
                             }}
                         >
                             <div

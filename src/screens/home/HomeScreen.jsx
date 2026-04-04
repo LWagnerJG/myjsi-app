@@ -166,7 +166,7 @@ export const HomeScreen = React.memo(({
     const colors = useMemo(() => ({
         background: theme?.colors?.background || '#F0EDE8',
         surface: theme?.colors?.surface || '#FFFFFF',
-        tileSurface: isDark ? '#2A2A2A' : (theme?.colors?.surface || '#FFFFFF'),
+        tileSurface: isDark ? 'rgba(42,42,42,0.82)' : 'rgba(255,255,255,0.78)',
         tileShadow: 'none',
         accent: theme?.colors?.accent || '#353535',
         textPrimary: theme?.colors?.textPrimary || '#353535',
