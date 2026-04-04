@@ -1,22 +1,19 @@
-﻿import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { GlassCard } from '../../components/common/GlassCard.jsx';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Modal } from '../../components/common/Modal.jsx';
 import { Camera, Image, AlertCircle, CheckCircle, Clock, XCircle } from 'lucide-react';
 import { REPLACEMENT_REQUESTS_DATA } from './data.js';
 import jsQR from 'jsqr';
 import { hapticSuccess } from '../../utils/haptics.js';
+import { isDarkTheme } from '../../design-system/tokens.js';
 
 function RequestCard({ r, theme, getStatusColor, getStatusText, getIcon, onClick }) {
     const dateText = new Date(r.date).toLocaleDateString();
     const dealerText = r.dealer || 'Unknown Dealer';
+    const dark = isDarkTheme(theme);
+    const bdr = dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
     return (
         <button onClick={onClick} className="w-full text-left">
-            <GlassCard
-                theme={theme}
-                variant="minimal"
-                interactive
-                className="p-4 flex items-center justify-between gap-3"
-            >
+            <div className="rounded-[22px] overflow-hidden p-4 flex items-center justify-between gap-3 transition-all active:scale-[0.99]" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${bdr}` }}>
                 <div className="min-w-0">
                     <div className="font-semibold truncate" style={{ color: theme.colors.textPrimary }}>
                         {r.name}
@@ -31,7 +28,7 @@ function RequestCard({ r, theme, getStatusColor, getStatusText, getIcon, onClick
                 >
                     {getIcon(r.status)} {r.status}
                 </div>
-            </GlassCard>
+            </div>
         </button>
     );
 }
@@ -45,10 +42,12 @@ function ReplacementForm({
     onPickPhotos,
     openPhotoPicker,
 }) {
+    const dark = theme?.name === 'dark';
+    const bdr = dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
     return (
         <div className="px-4 sm:px-6 lg:px-8 pt-8 pb-6">
             <div className="max-w-5xl mx-auto w-full space-y-4">
-            <GlassCard theme={theme} className="p-4 space-y-4" variant="minimal">
+            <div className="rounded-[22px] overflow-hidden p-5 space-y-5" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${bdr}` }}>
                 <div>
                     <label className="block text-sm mb-1" style={{ color: theme.colors.textSecondary }}>
                         Sales Order
@@ -56,7 +55,7 @@ function ReplacementForm({
                     <input
                         value={formData.salesOrder}
                         onChange={(e) => onChange('salesOrder', e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+                        className="w-full px-3 py-2 rounded-[14px] text-sm outline-none"
                         style={{ backgroundColor: theme.colors.surface, border: `1px solid ${theme.colors.border}`, color: theme.colors.textPrimary }}
                         autoComplete="off"
                     />
@@ -69,7 +68,7 @@ function ReplacementForm({
                     <input
                         value={formData.lineItem}
                         onChange={(e) => onChange('lineItem', e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+                        className="w-full px-3 py-2 rounded-[14px] text-sm outline-none"
                         style={{ backgroundColor: theme.colors.surface, border: `1px solid ${theme.colors.border}`, color: theme.colors.textPrimary }}
                         autoComplete="off"
                     />
@@ -82,7 +81,7 @@ function ReplacementForm({
                     <input
                         value={formData.dealer}
                         onChange={(e) => onChange('dealer', e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+                        className="w-full px-3 py-2 rounded-[14px] text-sm outline-none"
                         placeholder="e.g., Acme Office Solutions"
                         style={{ backgroundColor: theme.colors.surface, border: `1px solid ${theme.colors.border}`, color: theme.colors.textPrimary }}
                         autoComplete="off"
@@ -97,7 +96,7 @@ function ReplacementForm({
                         rows={3}
                         value={formData.notes}
                         onChange={(e) => onChange('notes', e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg text-sm outline-none resize-none"
+                        className="w-full px-3 py-2 rounded-[14px] text-sm outline-none resize-none"
                         style={{ backgroundColor: theme.colors.surface, border: `1px solid ${theme.colors.border}`, color: theme.colors.textPrimary }}
                         placeholder="Describe the issue or parts needed..."
                     />
@@ -112,7 +111,7 @@ function ReplacementForm({
                     {Array.isArray(formData.photos) && formData.photos.length > 0 && (
                         <div className="mb-3 grid grid-cols-3 gap-2">
                             {formData.photos.map((src, idx) => (
-                                <div key={idx} className="relative rounded-lg overflow-hidden" style={{ border: `1px solid ${theme.colors.border}` }}>
+                                <div key={idx} className="relative rounded-[14px] overflow-hidden" style={{ border: `1px solid ${theme.colors.border}` }}>
                                     <img src={src} alt={`Uploaded ${idx + 1}`} className="w-full h-24 object-cover" />
                                 </div>
                             ))}
@@ -134,14 +133,14 @@ function ReplacementForm({
                     <button
                         type="button"
                         onClick={openPhotoPicker}
-                        className="w-full rounded-xl p-4 text-center"
+                        className="w-full rounded-[14px] p-4 text-center"
                         style={{ border: `2px dashed ${theme.colors.border}`, color: theme.colors.textSecondary, backgroundColor: 'transparent' }}
                     >
                         <Image className="mx-auto mb-2 w-6 h-6" />
                         {formData.photos?.length ? 'Add More Photos' : 'Add Photo'}
                     </button>
                 </div>
-            </GlassCard>
+            </div>
 
             <div className="flex">
                 <button
@@ -166,6 +165,9 @@ export const ReplacementsScreen = ({ theme }) => {
     const videoRef = useRef(null); const canvasRef = useRef(null); const intervalRef = useRef(null); const streamRef = useRef(null); const fileInputRef = useRef(null); const inFormRef = useRef(false);
     const [replacementRequests, setReplacementRequests] = useState((REPLACEMENT_REQUESTS_DATA || []).map(r => ({ name: r.name, dealer: r.dealer || '', date: r.date, status: r.status, photos: Array.isArray(r.photos)? r.photos: [] })));
 
+    const dark = isDarkTheme(theme);
+    const bdr = dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+
     useEffect(() => { const onPop = () => { if (inFormRef.current) { setView('list'); setIsScanning(false); inFormRef.current = false; } }; window.addEventListener('popstate', onPop); return () => window.removeEventListener('popstate', onPop); }, []);
     const goToForm = useCallback(() => { if (!inFormRef.current) { window.history.pushState({ jsiReplacements: 'form' }, ''); inFormRef.current = true; } setView('form'); }, []);
     const onChange = useCallback((k,v)=> setFormData(p => (p[k]===v? p : { ...p, [k]:v })), []);
@@ -180,21 +182,21 @@ export const ReplacementsScreen = ({ theme }) => {
     const startScanning = useCallback(async()=> { setCameraError(null); try { if(!navigator.mediaDevices?.getUserMedia) throw new Error('Camera not supported on this device'); const stream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:{ ideal:'environment' }, width:{ ideal:1280 }, height:{ ideal:720 } }, audio:false }); streamRef.current=stream; if(videoRef.current){ const v=videoRef.current; v.srcObject=stream; v.muted=true; v.playsInline=true; v.onloadedmetadata=()=>{ v.play().then(()=>{ setIsScanning(true); detectLoop(); }); }; } } catch(e){ setCameraError((e && e.message) || 'Unable to access camera.'); setIsScanning(false); } }, [detectLoop]);
     useEffect(()=> () => stopScanning(), [stopScanning]);
 
-    const filesToDataURLs = files => Promise.all(files.map(file => new Promise(resolve => { const reader=new FileReader(); reader.onload=()=>resolve(reader.result); reader.readAsDataURL(file); }))); 
+    const filesToDataURLs = files => Promise.all(files.map(file => new Promise(resolve => { const reader=new FileReader(); reader.onload=()=>resolve(reader.result); reader.readAsDataURL(file); })));
     const onPickPhotos = useCallback(async e => { const files=Array.from(e.target.files||[]); if(!files.length) return; const urls = await filesToDataURLs(files); setFormData(p=> ({ ...p, photos:[...(p.photos||[]), ...urls] })); e.target.value=''; }, []);
     const openPhotoPicker = useCallback(()=> { if(fileInputRef.current) fileInputRef.current.click(); }, []);
 
     /* -------------------------------- UI ---------------------------------- */
     return (
-        <div className="flex flex-col h-full app-header-offset">
+        <div className="flex flex-col h-full">
             <div className="flex-1 overflow-y-auto scrollbar-hide">
                 {view === 'list' ? (
                     <div className="px-4 sm:px-6 lg:px-8 pt-4 pb-6 space-y-6">
                         <div className="max-w-5xl mx-auto w-full space-y-6">
-                        <GlassCard theme={theme} className="p-4" variant="minimal">
+                        <div className="rounded-[22px] overflow-hidden p-4" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${bdr}` }}>
                             <div className="grid grid-cols-1 gap-4">
-                                <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: theme.colors.surface }}>
-                                    <div className="relative rounded-2xl overflow-hidden" style={{ border: `2px dashed ${isScanning ? theme.colors.accent : theme.colors.border}` }}>
+                                <div className="rounded-[22px] overflow-hidden" style={{ backgroundColor: theme.colors.surface }}>
+                                    <div className="relative rounded-[22px] overflow-hidden" style={{ border: `2px dashed ${isScanning ? theme.colors.accent : theme.colors.border}` }}>
                                         <video ref={videoRef} className="block w-full h-[340px] object-cover" playsInline muted autoPlay />
                                         {!isScanning && (
                                             <button onClick={startScanning} className="absolute inset-0 flex flex-col items-center justify-center">
@@ -202,7 +204,7 @@ export const ReplacementsScreen = ({ theme }) => {
                                                 <div className="font-semibold" style={{ color: theme.colors.textPrimary }}>Scan QR Code</div>
                                                 <div className="text-sm mt-1" style={{ color: theme.colors.textSecondary }}>Tap to open camera</div>
                                                 {cameraError && (
-                                                    <div className="mt-3 text-xs px-3 py-2 rounded-lg" style={{ backgroundColor: '#fee2e2', color: '#991b1b' }}>
+                                                    <div className="mt-3 text-xs px-3 py-2 rounded-[14px]" style={{ backgroundColor: '#fee2e2', color: '#991b1b' }}>
                                                         {cameraError}
                                                     </div>
                                                 )}
@@ -224,7 +226,7 @@ export const ReplacementsScreen = ({ theme }) => {
 
                                 <button
                                     onClick={() => { setFormData({ salesOrder: '', lineItem: '', dealer: '', notes: '', photos: [] }); goToForm(); }}
-                                    className="rounded-2xl p-6 text-center active:scale-[0.99]"
+                                    className="rounded-[22px] p-6 text-center active:scale-[0.99]"
                                     style={{ border: `2px dashed ${theme.colors.border}`, backgroundColor: theme.colors.surface, color: theme.colors.textSecondary }}
                                 >
                                     <div className="font-semibold" style={{ color: theme.colors.textPrimary }}>
@@ -233,7 +235,7 @@ export const ReplacementsScreen = ({ theme }) => {
                                     <div className="text-sm mt-1">Fill out the form without scanning</div>
                                 </button>
                             </div>
-                        </GlassCard>
+                        </div>
 
                         <div>
                             <div className="font-semibold mb-2" style={{ color: theme.colors.textPrimary }}>
@@ -253,14 +255,14 @@ export const ReplacementsScreen = ({ theme }) => {
                                         />
                                     ))
                                 ) : (
-                                    <GlassCard theme={theme} className="p-8 text-center" variant="minimal">
+                                    <div className="rounded-[22px] overflow-hidden p-8 text-center" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${bdr}` }}>
                                         <div className="font-semibold mb-1" style={{ color: theme.colors.textPrimary }}>
                                             No Previous Requests
                                         </div>
                                         <div className="text-sm" style={{ color: theme.colors.textSecondary }}>
                                             Submit your first replacement request.
                                         </div>
-                                    </GlassCard>
+                                    </div>
                                 )}
                             </div>
                         </div>
@@ -314,7 +316,7 @@ export const ReplacementsScreen = ({ theme }) => {
                                 </div>
                                 <div className="grid grid-cols-3 gap-2">
                                     {selectedRequest.photos.map((src, idx) => (
-                                        <div key={idx} className="rounded-lg overflow-hidden" style={{ border: `1px solid ${theme.colors.border}` }}>
+                                        <div key={idx} className="rounded-[14px] overflow-hidden" style={{ border: `1px solid ${theme.colors.border}` }}>
                                             <img src={src} alt={`Request photo ${idx + 1}`} className="w-full h-24 object-cover" />
                                         </div>
                                     ))}
