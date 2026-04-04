@@ -156,17 +156,25 @@ export const AppHeader = React.memo(({
                 </>
             )}
 
-            <div className="px-4 sm:px-5 pt-3 pb-1 fixed top-0 left-0 right-0 z-30 pointer-events-none bg-transparent">
+            {/* ── Seamless header band ── */}
+            {/* On non-home screens the outer wrapper provides the blur from top-0 so
+                no page content bleeds through above the pill. On home the scrim layers
+                handle it scroll-reactively; the outer wrapper stays transparent. */}
+            <div
+                className="px-4 sm:px-5 pt-3 pb-1 fixed top-0 left-0 right-0 z-30 pointer-events-none"
+                style={!isHome ? {
+                    backgroundColor: dark ? 'rgba(20,20,20,0.82)' : 'rgba(238,235,230,0.82)',
+                    backdropFilter: 'blur(24px) saturate(1.8)',
+                    WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
+                } : undefined}
+            >
                 <div
                     className="max-w-5xl mx-auto w-full flex items-center justify-between px-4 sm:px-5 h-14 pointer-events-auto transition-all duration-300 overflow-hidden"
                     style={{
                         ...(isHome ? homeChromePillStyles : {
+                            // Pill is now shape+border only — background comes from parent
                             borderRadius: 9999,
-                            backgroundColor: dark ? 'rgba(26,26,26,0.72)' : 'rgba(255,255,255,0.72)',
-                            backdropFilter: 'blur(20px) saturate(1.6)',
-                            WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
-                            boxShadow: dark ? '0 4px 20px rgba(0,0,0,0.25)' : '0 4px 20px rgba(53,53,53,0.08)',
-                            border: dark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(255,255,255,0.70)',
+                            border: dark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)',
                         }),
                     }}
                 >
