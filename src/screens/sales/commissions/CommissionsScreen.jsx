@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { GlassCard } from '../../../components/common/GlassCard';
 import { ChevronDown, TrendingUp } from 'lucide-react';
 import { COMMISSIONS_DATA, COMMISSION_YEARS } from './data.js';
 import { isDarkTheme } from '../../../design-system/tokens.js';
@@ -21,19 +20,21 @@ export const CommissionsScreen = ({ theme }) => {
   const total = useMemo(() => data.reduce((s, m) => s + m.amount, 0), [data]);
   const toggle = useCallback((id) => setOpenId(p => p === id ? null : id), []);
 
-  return (
-    <div className="h-full flex flex-col app-header-offset" style={{ backgroundColor: theme.colors.background }}>
+  const bdr = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
 
-      {/* Summary header */}
-      <div className="px-4 sm:px-6 pt-5 pb-4">
-        <GlassCard theme={theme} className="p-5 sm:p-6" variant="elevated">
+  return (
+    <div className="min-h-full" style={{ backgroundColor: theme.colors.background }}>
+      <div className="px-4 sm:px-6 pb-8 space-y-3 max-w-2xl mx-auto w-full" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 16px)' }}>
+
+        {/* Summary card */}
+        <div className="rounded-[22px] overflow-hidden p-5 sm:p-6" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${bdr}` }}>
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <div className="flex items-baseline gap-2.5">
                 <span className="text-3xl sm:text-4xl font-black tracking-tight" style={{ color: theme.colors.textPrimary }}>
                   {formatCurrency(total)}
                 </span>
-                <span className="text-xs font-bold uppercase tracking-widest opacity-40">YTD</span>
+                <span className="text-xs font-bold uppercase tracking-[0.07em] opacity-40">YTD</span>
               </div>
               <div className="flex items-center gap-1.5 mt-1.5">
                 <TrendingUp className="w-3.5 h-3.5 opacity-40" style={{ color: theme.colors.textPrimary }} />
@@ -57,11 +58,9 @@ export const CommissionsScreen = ({ theme }) => {
               <ChevronDown className="w-4 h-4 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none opacity-40" style={{ color: theme.colors.textPrimary }} />
             </div>
           </div>
-        </GlassCard>
-      </div>
+        </div>
 
-      {/* Monthly rows */}
-      <div className="flex-1 overflow-y-auto scrollbar-hide px-4 sm:px-6 pb-8 space-y-2.5">
+        {/* Monthly rows */}
         {data.map((m) => {
           const isOpen = openId === m.id;
           const paidDate = new Date(m.issuedDate);
@@ -71,11 +70,10 @@ export const CommissionsScreen = ({ theme }) => {
           const paidStr = paidDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 
           return (
-            <GlassCard
+            <div
               key={m.id}
-              theme={theme}
-              className="overflow-hidden"
-              variant="elevated"
+              className="rounded-[22px] overflow-hidden"
+              style={{ backgroundColor: theme.colors.surface, border: `1px solid ${bdr}` }}
             >
               {/* Row header */}
               <button
@@ -128,7 +126,7 @@ export const CommissionsScreen = ({ theme }) => {
                     return (
                       <div
                         key={ii}
-                        className="rounded-2xl p-4 space-y-3"
+                        className="rounded-[18px] p-4 space-y-3"
                         style={{
                           backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.025)',
                           border: `1px solid ${theme.colors.border}`,
@@ -161,15 +159,15 @@ export const CommissionsScreen = ({ theme }) => {
                           style={{ borderTop: `1px solid ${theme.colors.border}` }}
                         >
                           <div>
-                            <div className="text-[10px] font-semibold uppercase tracking-wider mb-1 opacity-50" style={{ color: theme.colors.textSecondary }}>Invoiced</div>
+                            <div className="text-[10px] font-semibold uppercase tracking-[0.07em] mb-1 opacity-50" style={{ color: theme.colors.textSecondary }}>Invoiced</div>
                             <div className="text-sm font-semibold tabular-nums" style={{ color: theme.colors.textSecondary }}>{formatCurrency(inv.invoicedAmount)}</div>
                           </div>
                           <div className="text-center">
-                            <div className="text-[10px] font-semibold uppercase tracking-wider mb-1 opacity-50" style={{ color: theme.colors.textSecondary }}>Net</div>
+                            <div className="text-[10px] font-semibold uppercase tracking-[0.07em] mb-1 opacity-50" style={{ color: theme.colors.textSecondary }}>Net</div>
                             <div className="text-sm font-bold tabular-nums" style={{ color: theme.colors.textPrimary }}>{formatCurrency(inv.netAmount)}</div>
                           </div>
                           <div className="text-right">
-                            <div className="text-[10px] font-semibold uppercase tracking-wider mb-1 opacity-50" style={{ color: theme.colors.textSecondary }}>Earned</div>
+                            <div className="text-[10px] font-semibold uppercase tracking-[0.07em] mb-1 opacity-50" style={{ color: theme.colors.textSecondary }}>Earned</div>
                             <div className="text-[15px] font-black tabular-nums" style={{ color: theme.colors.textPrimary }}>{formatCurrency(inv.commission)}</div>
                           </div>
                         </div>
@@ -180,29 +178,29 @@ export const CommissionsScreen = ({ theme }) => {
                   {/* Monthly totals row */}
                   {m.details?.[1]?.brandTotal && (
                     <div
-                      className="rounded-2xl p-4 grid grid-cols-3 gap-3 text-center"
+                      className="rounded-[18px] p-4 grid grid-cols-3 gap-3 text-center"
                       style={{
                         backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.025)',
                         border: `1px solid ${theme.colors.border}`,
                       }}
                     >
                       <div>
-                        <div className="text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-50" style={{ color: theme.colors.textSecondary }}>Invoiced</div>
+                        <div className="text-[10px] font-semibold uppercase tracking-[0.07em] mb-1.5 opacity-50" style={{ color: theme.colors.textSecondary }}>Invoiced</div>
                         <div className="text-sm font-bold tabular-nums" style={{ color: theme.colors.textSecondary }}>{formatCurrency(m.details[1].listTotal)}</div>
                       </div>
                       <div>
-                        <div className="text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-50" style={{ color: theme.colors.textSecondary }}>Net</div>
+                        <div className="text-[10px] font-semibold uppercase tracking-[0.07em] mb-1.5 opacity-50" style={{ color: theme.colors.textSecondary }}>Net</div>
                         <div className="text-sm font-bold tabular-nums" style={{ color: theme.colors.textPrimary }}>{formatCurrency(m.details[1].netTotal)}</div>
                       </div>
                       <div>
-                        <div className="text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-50" style={{ color: theme.colors.textSecondary }}>Total Earned</div>
+                        <div className="text-[10px] font-semibold uppercase tracking-[0.07em] mb-1.5 opacity-50" style={{ color: theme.colors.textSecondary }}>Total Earned</div>
                         <div className="text-base font-black tabular-nums" style={{ color: theme.colors.textPrimary }}>{formatCurrency(m.details[1].commissionTotal)}</div>
                       </div>
                     </div>
                   )}
                 </div>
               </div>
-            </GlassCard>
+            </div>
           );
         })}
       </div>

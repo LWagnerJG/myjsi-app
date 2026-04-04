@@ -48,7 +48,7 @@ export const FeedbackScreen = ({ theme }) => {
     /* ── Success ── */
     if (submitted) {
         return (
-            <div className="flex flex-col h-full app-header-offset items-center justify-center px-6" style={{ backgroundColor: colors.background }}>
+            <div className="min-h-full flex items-center justify-center px-6" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 0px)', backgroundColor: colors.background }}>
                 <div className="text-center max-w-xs space-y-5">
                     <div
                         className="w-14 h-14 rounded-full flex items-center justify-center mx-auto"
@@ -75,10 +75,10 @@ export const FeedbackScreen = ({ theme }) => {
     }
 
     return (
-        <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: colors.background }}>
-            <div className="flex-1 overflow-y-auto scrollbar-hide">
+        <div className="min-h-full" style={{ backgroundColor: colors.background }}>
+            <div className="flex-1 overflow-y-auto scrollbar-hide" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 16px)' }}>
                 <form onSubmit={handleSubmit}>
-                    <div className="px-4 sm:px-6 pt-6 pb-10 max-w-lg mx-auto space-y-6">
+                    <div className="px-4 sm:px-6 pb-10 max-w-lg mx-auto space-y-6">
 
                         {/* ── Page header ── */}
                         <div>
