@@ -156,25 +156,36 @@ export const AppHeader = React.memo(({
                 </>
             )}
 
-            {/* ── Seamless header band ── */}
-            {/* On non-home screens the outer wrapper provides the blur from top-0 so
-                no page content bleeds through above the pill. On home the scrim layers
-                handle it scroll-reactively; the outer wrapper stays transparent. */}
+            {/* ── Universal top-blur backing ──────────────────────────────────────────
+                Single blur surface from the very top of the phone (behind the iOS
+                status bar / safe-area) continuously through the header pill.
+                z-27 = behind the per-screen scrims (z-29) and the pill (z-30).
+                The mask gradient fades it out below the header so content shows. */}
             <div
-                className="px-4 sm:px-5 pt-3 pb-1 fixed top-0 left-0 right-0 z-30 pointer-events-none"
-                style={!isHome ? {
-                    backgroundColor: dark ? 'rgba(20,20,20,0.82)' : 'rgba(238,235,230,0.82)',
-                    backdropFilter: 'blur(24px) saturate(1.8)',
-                    WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
-                } : undefined}
-            >
+                aria-hidden="true"
+                className="fixed top-0 left-0 right-0 pointer-events-none"
+                style={{
+                    height: 'calc(env(safe-area-inset-top, 0px) + 80px)',
+                    zIndex: 27,
+                    backgroundColor: dark ? 'rgba(22,22,22,0.80)' : 'rgba(240,237,232,0.80)',
+                    backdropFilter: 'blur(28px) saturate(1.8)',
+                    WebkitBackdropFilter: 'blur(28px) saturate(1.8)',
+                    maskImage: 'linear-gradient(to bottom, black 0%, black 58%, rgba(0,0,0,0.18) 82%, transparent 100%)',
+                    WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 58%, rgba(0,0,0,0.18) 82%, transparent 100%)',
+                }}
+            />
+
+            <div className="px-4 sm:px-5 pt-3 pb-1 fixed top-0 left-0 right-0 z-30 pointer-events-none bg-transparent">
                 <div
                     className="max-w-5xl mx-auto w-full flex items-center justify-between px-4 sm:px-5 h-14 pointer-events-auto transition-all duration-300 overflow-hidden"
                     style={{
                         ...(isHome ? homeChromePillStyles : {
-                            // Pill is now shape+border only — background comes from parent
                             borderRadius: 9999,
-                            border: dark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)',
+                            backgroundColor: dark ? 'rgba(26,26,26,0.72)' : 'rgba(255,255,255,0.72)',
+                            backdropFilter: 'blur(20px) saturate(1.6)',
+                            WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
+                            boxShadow: dark ? '0 4px 20px rgba(0,0,0,0.25)' : '0 4px 20px rgba(53,53,53,0.08)',
+                            border: dark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(255,255,255,0.70)',
                         }),
                     }}
                 >
