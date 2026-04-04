@@ -14,6 +14,7 @@ import {
   X,
 } from 'lucide-react';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
+import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 import { isDarkTheme } from '../../design-system/tokens.js';
 import { hapticLight, hapticMedium, hapticSuccess } from '../../utils/haptics.js';
 import {
@@ -32,10 +33,10 @@ import { ProductCard } from './components/marketplace/ProductCard.jsx';
 import { TransactionRow } from './components/marketplace/TransactionRow.jsx';
 
 const EARNING_PROGRAMS = [
-  { title: 'Sign up new dealers', desc: 'Earn a larger bonus for each new dealer successfully onboarded.', amount: 'EB 750' },
-  { title: 'Stay active in the community', desc: 'Helpful replies, content sharing, and consistent engagement all add up.', amount: 'EB 50-250' },
-  { title: 'Complete product training', desc: 'Finish learning modules to keep product knowledge fresh and current.', amount: 'EB 100' },
-  { title: 'Send platform feedback', desc: 'Thoughtful product feedback helps sharpen the experience for everyone.', amount: 'EB 100' },
+  { title: 'Sign up new dealers', desc: 'Bonus for each new dealer onboarded.', amount: '✦ 750' },
+  { title: 'Stay active in community', desc: 'Replies, shares, and consistent engagement.', amount: '✦ 50–250' },
+  { title: 'Complete product training', desc: 'Finish learning modules for product knowledge.', amount: '✦ 100' },
+  { title: 'Send platform feedback', desc: 'Thoughtful feedback that improves the app.', amount: '✦ 100' },
 ];
 
 const EmptyState = ({ icon: Icon, title, description, actionLabel, onAction, theme, isDark }) => (
@@ -70,11 +71,11 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
   const [txnHistory, setTxnHistory] = useState(BALANCE_HISTORY);
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
 
-  const tabs = [
-    { id: 'shop', label: 'Shop', icon: Tag },
-    { id: 'orders', label: 'Orders', icon: Package },
-    { id: 'wallet', label: 'Wallet', icon: Wallet },
-  ];
+  const tabOptions = useMemo(() => [
+    { value: 'shop', label: 'Shop', icon: Tag, badge: cartItemCount || undefined },
+    { value: 'orders', label: 'Orders', icon: Package },
+    { value: 'wallet', label: 'Wallet', icon: Wallet },
+  ], [cartItemCount]);
 
   const addToCart = useCallback((product, size) => {
     hapticMedium();
@@ -224,49 +225,15 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
 
   return (
     <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
-      <div className="flex-shrink-0 px-4 pt-1" style={{ background: theme.colors.background }}>
-        <div className="max-w-2xl mx-auto w-full">
-          <div
-            className="flex gap-1 p-1.5 rounded-[24px] border"
-            style={{
-              borderColor: theme.colors.border,
-              backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.76)',
-            }}
-          >
-            {tabs.map((tab) => {
-              const isActive = activeTab === tab.id;
-              const TabIcon = tab.icon;
-
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => {
-                    hapticLight();
-                    setActiveTab(tab.id);
-                  }}
-                  className="relative flex-1 flex items-center justify-center gap-2 px-3 py-3 text-sm font-medium rounded-[18px] transition-all"
-                  style={{
-                    color: isActive ? theme.colors.textPrimary : theme.colors.textSecondary,
-                    background: isActive ? theme.colors.surface : 'transparent',
-                    boxShadow: isActive ? (isDark ? '0 10px 24px rgba(0,0,0,0.18)' : '0 10px 20px rgba(53,53,53,0.08)') : 'none',
-                  }}
-                >
-                  <TabIcon className="w-4 h-4" />
-                  {tab.label}
-
-                  {tab.id === 'orders' && orders.some((order) => order.status === 'shipped') && (
-                    <span className="w-2 h-2 rounded-full bg-blue-400 absolute top-2 right-2" />
-                  )}
-
-                  {tab.id === 'shop' && cartItemCount > 0 && (
-                    <span className="ml-1 min-w-[18px] h-[18px] px-1 rounded-full text-[11px] font-bold flex items-center justify-center" style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}>
-                      {cartItemCount}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
+      <div className="flex-shrink-0 px-4 pt-2 pb-1" style={{ background: theme.colors.background }}>
+        <div className="max-w-2xl mx-auto w-full flex justify-center">
+          <SegmentedToggle
+            value={activeTab}
+            onChange={(val) => { hapticLight(); setActiveTab(val); }}
+            options={tabOptions}
+            size="md"
+            theme={theme}
+          />
         </div>
       </div>
 
@@ -277,42 +244,20 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
               <BalanceCard
                 balance={balance}
                 theme={theme}
-                eyebrow="Curated rewards"
-                title="LWYD Marketplace"
-                subtitle="Redeem ElliottBucks for a cleaner lineup of everyday gear, apparel, and team favorites that actually feels on-brand."
+                eyebrow="LWYD Rewards"
+                title="Marketplace"
+                subtitle="Redeem ElliottBucks for branded gear, apparel, and team favorites."
                 stats={shopStats}
               />
 
-              <GlassCard theme={theme} className="p-4 sm:p-5">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: theme.colors.textSecondary }}>
-                      Browse collection
-                    </p>
-                    <h3 className="text-lg font-semibold mt-2" style={{ color: theme.colors.textPrimary }}>
-                      Find something worth redeeming
-                    </h3>
-                    <p className="text-xs mt-1 max-w-md" style={{ color: theme.colors.textSecondary }}>
-                      Search across apparel, drinkware, and headwear, then refine with quick filters instead of digging through clutter.
-                    </p>
-                  </div>
-
-                  <div className="text-right shrink-0">
-                    <p className="text-2xl font-semibold tracking-[-0.03em]" style={{ color: theme.colors.textPrimary }}>
-                      {filteredProducts.length}
-                    </p>
-                    <p className="text-[11px]" style={{ color: theme.colors.textSecondary }}>
-                      item{filteredProducts.length !== 1 ? 's' : ''} shown
-                    </p>
-                  </div>
-                </div>
-
-                <div className="relative mt-4">
+              {/* Search & filters — no wrapper card, lives directly in the flow */}
+              <div className="space-y-3">
+                <div className="relative">
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(event) => setSearchQuery(event.target.value)}
-                    placeholder="Search LWYD merch..."
+                    placeholder="Search merch..."
                     className="w-full pl-10 pr-10 py-3 text-[13px] outline-none transition"
                     style={{
                       borderRadius: 9999,
@@ -334,7 +279,7 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
                   )}
                 </div>
 
-                <div className="flex gap-2 overflow-x-auto scrollbar-hide pt-4">
+                <div className="flex gap-2 overflow-x-auto scrollbar-hide">
                   {MARKETPLACE_CATEGORIES.map((category) => {
                     const active = selectedCategory === category.id;
                     const count = category.id === 'all'
@@ -357,7 +302,7 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
                     );
                   })}
                 </div>
-              </GlassCard>
+              </div>
 
               {filteredProducts.length > 0 ? (
                 <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))' }}>
@@ -396,11 +341,8 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
                       Order tracking
                     </p>
                     <h3 className="text-lg font-semibold mt-2" style={{ color: theme.colors.textPrimary }}>
-                      Keep every redemption easy to follow
+                      Your orders
                     </h3>
-                    <p className="text-xs mt-1 max-w-md" style={{ color: theme.colors.textSecondary }}>
-                      A cleaner order history makes it easier to see what is processing, what is on the way, and what already landed.
-                    </p>
                   </div>
 
                   <div className="rounded-2xl px-4 py-3" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(53,53,53,0.03)' }}>
@@ -452,9 +394,9 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
               <BalanceCard
                 balance={balance}
                 theme={theme}
-                eyebrow="Rewards account"
-                title="Your ElliottBucks wallet"
-                subtitle="Track what you have earned, what you have redeemed, and where the next rewards are most likely to come from."
+                eyebrow="LWYD Wallet"
+                title="Rewards balance"
+                subtitle="Track earnings, redemptions, and upcoming rewards."
                 stats={walletStats}
               />
 
@@ -465,7 +407,7 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
                       <History className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
                       <p className="text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: theme.colors.textSecondary }}>Recent activity</p>
                     </div>
-                    <p className="text-sm font-semibold mt-2" style={{ color: theme.colors.textPrimary }}>Every reward movement in one place</p>
+                    <p className="text-sm font-semibold mt-2" style={{ color: theme.colors.textPrimary }}>Recent activity</p>
                   </div>
 
                   <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.03)', color: theme.colors.textSecondary }}>
@@ -485,7 +427,7 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
                       <Sparkles className="w-4 h-4" style={{ color: theme.colors.warning }} />
                       <p className="text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: theme.colors.textSecondary }}>Ways to earn</p>
                     </div>
-                    <p className="text-sm font-semibold mt-2" style={{ color: theme.colors.textPrimary }}>A cleaner path to your next reward</p>
+                    <p className="text-sm font-semibold mt-2" style={{ color: theme.colors.textPrimary }}>Ways to earn</p>
                   </div>
 
                   <Gift className="w-5 h-5 flex-shrink-0" style={{ color: theme.colors.accent }} />

@@ -17,6 +17,7 @@ import {
     PERMISSION_LABELS,
 } from './data.js';
 import { isDarkTheme } from '../../design-system/tokens.js';
+import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 
 import { MembersErrorBoundary } from './components/members/MembersErrorBoundary.jsx';
 import { ConfirmModal } from './components/members/SharedComponents.jsx';
@@ -138,10 +139,10 @@ const MembersScreenContent = ({ theme }) => {
         );
     }, [searchQuery]);
 
-    const tabs = [
-        { key: 'team', label: 'My Team', count: members.length },
-        { key: 'dealers', label: 'Dealers', count: INITIAL_DEALER_COMPANIES.length },
-    ];
+    const tabOptions = useMemo(() => [
+        { value: 'team', label: 'My Team', badge: members.length },
+        { value: 'dealers', label: 'Dealers', badge: INITIAL_DEALER_COMPANIES.length },
+    ], [members.length]);
 
     return (
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
@@ -171,36 +172,15 @@ const MembersScreenContent = ({ theme }) => {
                     </div>
 
                     {/* Pill tabs */}
-                    <div
-                        className="flex items-center gap-1 p-1 rounded-full mb-5"
-                        style={{ backgroundColor: dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)' }}
-                    >
-                        {tabs.map(t => {
-                            const active = tab === t.key;
-                            return (
-                                <button
-                                    key={t.key}
-                                    onClick={() => switchTab(t.key)}
-                                    className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-semibold transition-all duration-150"
-                                    style={{
-                                        backgroundColor: active ? (dark ? theme.colors.surface : '#fff') : 'transparent',
-                                        color: active ? theme.colors.textPrimary : theme.colors.textSecondary,
-                                        boxShadow: active ? '0 1px 5px rgba(0,0,0,0.09)' : 'none',
-                                    }}
-                                >
-                                    {t.label}
-                                    <span
-                                        className="text-[11px] font-bold px-1.5 py-0.5 rounded-full"
-                                        style={{
-                                            backgroundColor: active ? `${theme.colors.accent}18` : 'transparent',
-                                            color: active ? theme.colors.accent : theme.colors.textSecondary,
-                                        }}
-                                    >
-                                        {t.count}
-                                    </span>
-                                </button>
-                            );
-                        })}
+                    <div className="mb-5">
+                        <SegmentedToggle
+                            value={tab}
+                            onChange={switchTab}
+                            options={tabOptions}
+                            size="sm"
+                            theme={theme}
+                            fullWidth
+                        />
                     </div>
 
                     {/* Search — dealers tab only */}

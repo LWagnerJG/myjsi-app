@@ -54,19 +54,17 @@ export const ProductCard = React.memo(({ product, cartQty, onAdd, onRemoveOne, d
         border: inCart
           ? `1.5px solid ${theme.colors.accent}`
           : (isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)'),
-        boxShadow: inCart
-          ? (isDark ? '0 18px 34px rgba(0,0,0,0.28)' : '0 18px 36px rgba(53,53,53,0.10)')
-          : (isDark ? '0 10px 24px rgba(0,0,0,0.18)' : '0 10px 24px rgba(0,0,0,0.05)'),
+        boxShadow: isDark ? '0 2px 8px rgba(0,0,0,0.18)' : '0 2px 8px rgba(0,0,0,0.04)',
       }}
     >
-      <div className="relative aspect-[4/4.2] overflow-hidden" style={{ borderRadius: '24px 24px 0 0' }}>
+      {/* Image — clean, no gradient overlay */}
+      <div className="relative aspect-square overflow-hidden" style={{ borderRadius: '24px 24px 0 0' }}>
         <img
           src={product.image}
           alt={product.name}
           loading="lazy"
-          className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+          className="w-full h-full object-cover"
         />
-        <div className="absolute inset-x-0 bottom-0 h-24" style={{ background: 'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.45) 100%)' }} />
 
         {product.badge && (
           <span
@@ -82,7 +80,7 @@ export const ProductCard = React.memo(({ product, cartQty, onAdd, onRemoveOne, d
 
         {inCart && (
           <div
-            className="absolute top-3 right-3 min-w-[34px] h-8 px-2.5 flex items-center justify-center font-bold text-sm shadow-lg"
+            className="absolute top-3 right-3 min-w-[28px] h-7 px-2 flex items-center justify-center font-bold text-xs"
             style={{
               borderRadius: 9999,
               backgroundColor: theme.colors.accent,
@@ -94,72 +92,35 @@ export const ProductCard = React.memo(({ product, cartQty, onAdd, onRemoveOne, d
         )}
       </div>
 
-      <div className="flex-1 flex flex-col p-4 gap-3">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: theme.colors.textSecondary }}>
-              {categoryLabel}
-            </p>
-            <h4 className="text-[15px] font-semibold leading-tight mt-1" style={{ color: theme.colors.textPrimary }}>
-              {product.name}
-            </h4>
-          </div>
-
-          <span
-            className="shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold"
-            style={{
-              backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.05)',
-              color: theme.colors.textPrimary,
-            }}
-          >
-            {formatElliottBucks(product.price)}
-          </span>
+      {/* Content */}
+      <div className="flex-1 flex flex-col p-3.5 gap-2.5">
+        <div>
+          <h4 className="text-sm font-semibold leading-tight" style={{ color: theme.colors.textPrimary }}>
+            {product.name}
+          </h4>
+          <p className="text-xs mt-0.5" style={{ color: theme.colors.textSecondary }}>
+            {categoryLabel} · {formatElliottBucks(product.price)}
+          </p>
         </div>
 
-        <p
-          className="text-xs leading-relaxed flex-1"
-          style={{
-            color: theme.colors.textSecondary,
-            display: '-webkit-box',
-            WebkitLineClamp: 3,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-            minHeight: 54,
-          }}
-        >
-          {product.description}
-        </p>
-
-        <div className="flex flex-wrap items-center gap-2">
+        {lowStock && (
           <span
-            className="px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-[0.12em]"
+            className="self-start px-2.5 py-1 rounded-full text-[10px] font-semibold"
             style={{
-              backgroundColor: lowStock ? theme.colors.warningLight : (isDark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.03)'),
-              color: lowStock ? theme.colors.warning : theme.colors.textSecondary,
+              backgroundColor: theme.colors.warningLight,
+              color: theme.colors.warning,
             }}
           >
             {stockLabel}
           </span>
-
-          {product.hasSizes && (
-            <span
-              className="px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-[0.12em]"
-              style={{
-                backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.03)',
-                color: theme.colors.textSecondary,
-              }}
-            >
-              {product.sizeType === 'hat' ? 'Multiple fits' : 'Full size run'}
-            </span>
-          )}
-        </div>
+        )}
 
         {sizes && (
           <SizePicker sizes={sizes} selected={selectedSize} onSelect={setSelectedSize} theme={theme} />
         )}
 
         {inCart ? (
-          <div className="mt-1 flex items-center gap-2">
+          <div className="flex items-center gap-2 mt-auto">
             <button
               onClick={handleRemoveOne}
               className="flex items-center justify-center w-9 h-9 rounded-full transition-all active:scale-90"
@@ -181,7 +142,6 @@ export const ProductCard = React.memo(({ product, cartQty, onAdd, onRemoveOne, d
               style={{
                 backgroundColor: theme.colors.accent,
                 color: theme.colors.accentText,
-                border: `1px solid ${theme.colors.accent}`,
               }}
             >
               <Plus className="w-3.5 h-3.5" />
@@ -192,11 +152,10 @@ export const ProductCard = React.memo(({ product, cartQty, onAdd, onRemoveOne, d
           <button
             onClick={handleAdd}
             disabled={sizes && !selectedSize}
-            className="mt-1 w-full py-3 rounded-full text-xs font-bold transition-all active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="mt-auto w-full py-2.5 rounded-full text-xs font-bold transition-all active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             style={{
               backgroundColor: theme.colors.accent,
               color: theme.colors.accentText,
-              border: `1px solid ${theme.colors.accent}`,
             }}
           >
             <Plus className="w-3.5 h-3.5" />

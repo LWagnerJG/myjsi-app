@@ -25,7 +25,7 @@ const sublabelMap = {
     'Presentations': 'Slide deck library',
     'Tradeshows': 'Select and view show info',
     'New Dealer Sign-Up': 'Sign up new dealers',
-    'LWYD Marketplace': 'ElliottBucks rewards shop',
+    'LWYD Marketplace': 'Rewards shop',
     'New Project': 'Start a new project or lead',
 };
 

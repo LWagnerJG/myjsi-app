@@ -64,14 +64,15 @@ export const SegmentedToggle = ({
   const selectedBg = dark ? 'rgba(255,255,255,0.14)' : '#FFFFFF';
   const selectedText = theme?.colors?.textPrimary || '#1a1a1a';
   const unselectedText = dark ? 'rgba(240,240,240,0.78)' : '#6A6762';
-  const selectedShadow = dark ? '0 1px 2px rgba(0,0,0,0.45)' : '0 1px 2px rgba(0,0,0,0.08)';
+
+  const selectedIndex = options.findIndex((opt) => opt.value === value);
 
   return (
     <div 
       className={`${fullWidth ? 'flex w-full' : 'inline-flex'} rounded-full p-[3px] ${className}`} 
       style={{ backgroundColor: containerBg }}
     >
-      {options.map((opt) => {
+      {options.map((opt, i) => {
         const isSelected = opt.value === value;
         const Icon = opt.icon;
         const badge = opt.badge;
@@ -80,22 +81,20 @@ export const SegmentedToggle = ({
           <button
             key={opt.value}
             onClick={() => onChange(opt.value)}
-            className={`relative rounded-full ${s.px} ${s.py} ${s.text} transition-all whitespace-nowrap ${fullWidth ? 'flex-1' : ''}`}
-            style={{
-              color: isSelected ? selectedText : unselectedText,
-              fontWeight: isSelected ? 600 : 500
-            }}
-            aria-pressed={isSelected}
+            className={`relative rounded-full ${s.px} ${s.py} ${s.text} transition whitespace-nowrap ${fullWidth ? 'flex-1' : ''}`}
+            style={{ color: isSelected ? selectedText : unselectedText }}
           >
             {isSelected && (
               <motion.span
                 layoutId={`toggle-pill-${id}`}
-                className="absolute inset-0 rounded-full"
-                style={{ backgroundColor: selectedBg, boxShadow: selectedShadow }}
+                className="absolute inset-[-3px] rounded-full"
+                style={{ backgroundColor: selectedBg }}
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
               />
             )}
-            <span className={`relative z-10 flex items-center justify-center ${s.gap}`}>
+            <span className={`relative z-10 flex items-center justify-center ${s.gap}`}
+              style={{ fontWeight: isSelected ? 600 : 500 }}
+            >
               {Icon && <Icon className={s.iconSize} />}
               {opt.label}
               {badge != null && badge > 0 && (

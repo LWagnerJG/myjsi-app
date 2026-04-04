@@ -1,7 +1,7 @@
 import React from 'react';
-import { ChevronRight, Package, DollarSign, Calendar, Zap, Gift, Megaphone, Clock, Users, Star } from 'lucide-react';
+import { ChevronRight, Package, DollarSign, Calendar, Zap, Megaphone, Clock, Users } from 'lucide-react';
 import { ANNOUNCEMENTS } from '../../community/data.js';
-import { MARKETPLACE_PRODUCTS, INITIAL_BALANCE, formatElliottBucks } from '../../marketplace/data.js';
+import { MARKETPLACE_PRODUCTS, INITIAL_BALANCE } from '../../marketplace/data.js';
 import { PRODUCTS_CATEGORIES_DATA, PRODUCT_DATA } from '../../products/data.js';
 import { getCommunityAuthorSafe, getCommunityTextSafe } from '../utils/homeUtils.js';
 import { smartTitleCase } from '../../../utils/format.js';
@@ -254,42 +254,37 @@ export const HomeFeatureContent = ({
     if (mode === 'marketplace') {
         const featured = MARKETPLACE_PRODUCTS.slice(0, 3);
         return (
-            <div className="space-y-3">
-                {/* Balance hero */}
+            <div className="space-y-2">
+                {/* Balance row — warm-tinted, same shape as every other row */}
                 <button
                     onClick={() => onNavigate('marketplace')}
-                    className={`w-full flex items-center gap-3 p-3 rounded-2xl ${hoverBg} transition-colors`}
+                    className={`w-full flex items-center justify-between p-3 rounded-2xl ${hoverBg} transition-colors`}
                     style={{
-                        background: isDark
-                            ? 'linear-gradient(135deg, rgba(53,53,53,0.6) 0%, rgba(60,60,60,0.6) 100%)'
-                            : 'linear-gradient(135deg, #353535 0%, #494949 100%)',
+                        border: isDark ? '1px solid rgba(196,149,106,0.20)' : '1px solid rgba(196,149,106,0.16)',
+                        backgroundColor: isDark ? 'rgba(196,149,106,0.08)' : 'rgba(196,149,106,0.06)',
                     }}
                 >
-                    <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'rgba(255,255,255,0.14)' }}>
-                        <Gift className="w-4 h-4 text-white" />
-                    </div>
                     <div className="text-left">
-                        <div className="text-sm font-bold text-white">{formatElliottBucks(INITIAL_BALANCE)} available</div>
-                        <div className="text-[11px] text-white/60">ElliottBucks balance</div>
+                        <div className="text-[11px] uppercase tracking-widest" style={{ color: colors.textSecondary, opacity: 0.6 }}>Available balance</div>
+                        <div className="text-lg font-bold tabular-nums" style={{ color: colors.textPrimary }}>✦ {INITIAL_BALANCE.toLocaleString()}</div>
                     </div>
-                    <ChevronRight className="w-4 h-4 ml-auto text-white/40" />
+                    <div className="text-xs font-medium" style={{ color: '#C4956A' }}>Redeem →</div>
                 </button>
-                {/* Featured products */}
+
+                {/* Product rows — same pattern as products mode */}
                 {featured.map(p => (
                     <button
                         key={p.id}
                         onClick={() => onNavigate('marketplace')}
-                        className={`w-full flex items-center justify-between p-3 rounded-2xl ${hoverBg} transition-colors`}
+                        className={`w-full flex items-center gap-3 p-3 rounded-2xl text-left ${hoverBg} transition-colors`}
                         style={{ border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)' }}
                     >
-                        <div className="flex items-center gap-3 min-w-0">
-                            <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0" style={{ border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)' }}>
-                                <img src={p.image} alt={p.name} className="w-full h-full object-cover" />
-                            </div>
-                            <div className="text-left min-w-0">
-                                <div className="text-sm font-semibold truncate" style={{ color: colors.textPrimary }}>{p.name}</div>
-                                <div className="text-[11px]" style={{ color: colors.textSecondary }}>{formatElliottBucks(p.price)}</div>
-                            </div>
+                        <div className="w-11 h-11 rounded-xl overflow-hidden flex-shrink-0" style={{ border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)' }}>
+                            <img src={p.image} alt={p.name} className="w-full h-full object-cover" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <div className="text-sm font-semibold truncate" style={{ color: colors.textPrimary }}>{p.name}</div>
+                            <div className="text-xs" style={{ color: colors.textSecondary }}>✦ {p.price.toLocaleString()}</div>
                         </div>
                         <ChevronRight className="w-3.5 h-3.5 flex-shrink-0 opacity-30" style={{ color: colors.textSecondary }} />
                     </button>

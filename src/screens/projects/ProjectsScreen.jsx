@@ -5,6 +5,7 @@ import { RequestQuoteModal } from '../../components/common/RequestQuoteModal.jsx
 import { STAGES, VERTICALS, COMPETITORS, DISCOUNT_OPTIONS, PO_TIMEFRAMES, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS } from './data.js';
 import { ProbabilitySlider } from '../../components/forms/ProbabilitySlider.jsx';
 import { PillButton } from '../../components/common/JSIButtons.jsx';
+import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 import { JSI_SERIES } from '../products/data.js';
 import { DESIGN_TOKENS, isDarkTheme } from '../../design-system/tokens.js';
 import { usePersistentState } from '../../hooks/usePersistentState.js';
@@ -132,27 +133,13 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
         <div className="px-4 sm:px-6 lg:px-8 pt-2 pb-2 max-w-5xl mx-auto w-full">
           {/* Tab row: two tab pills + action button */}
           <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-1 p-1 rounded-xl" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.04)' }}>
-              {PROJECTS_TAB_OPTIONS.map(tab => {
-                const active = projectsTab === tab.value;
-                return (
-                  <button
-                    key={tab.value}
-                    onClick={() => setProjectsTab(tab.value)}
-                    className="px-4 py-2 rounded-[10px] text-[13px] font-semibold transition-all"
-                    style={{
-                      backgroundColor: active
-                        ? (isDark ? 'rgba(255,255,255,0.14)' : '#fff')
-                        : 'transparent',
-                      color: active ? theme.colors.textPrimary : theme.colors.textSecondary,
-                      boxShadow: active ? '0 1px 4px rgba(0,0,0,0.08)' : 'none',
-                    }}
-                  >
-                    {tab.label}
-                  </button>
-                );
-              })}
-            </div>
+                <SegmentedToggle
+                  value={projectsTab}
+                  onChange={setProjectsTab}
+                  options={PROJECTS_TAB_OPTIONS}
+                  size="sm"
+                  theme={theme}
+                />
             {projectsTab==='pipeline' && (
               <button
                 onClick={()=>onNavigate('new-lead')}

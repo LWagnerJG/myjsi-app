@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
 import { isDarkTheme } from '../../design-system/tokens.js';
+import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 import { ANNOUNCEMENTS } from './data.js';
 import { Sparkles, Image } from 'lucide-react';
 
@@ -95,27 +96,16 @@ export const CommunityScreen = ({
       {/* Standalone mode header (non-embed) */}
       {!embedMode && (
         <div className="flex-shrink-0 space-y-1.5 px-4 pt-2 pb-0">
-          <div className="flex gap-1.5 p-1 rounded-full" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.06)' : '#E3E0D8' }}>
-            {[
-              { id: 'feed', label: 'Feed', icon: Sparkles },
-              { id: 'library', label: 'Library', icon: Image },
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setViewMode(tab.id)}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold transition-all flex-1 justify-center"
-                style={{
-                  backgroundColor: viewMode === tab.id
-                    ? (dark ? 'rgba(255,255,255,0.12)' : '#FFFFFF')
-                    : 'transparent',
-                  color: viewMode === tab.id ? theme.colors.textPrimary : theme.colors.textSecondary,
-                }}
-              >
-                <tab.icon className="w-3.5 h-3.5" />
-                {tab.label}
-              </button>
-            ))}
-          </div>
+          <SegmentedToggle
+            value={viewMode}
+            onChange={setViewMode}
+            options={[
+              { value: 'feed', label: 'Feed', icon: Sparkles },
+              { value: 'library', label: 'Library', icon: Image },
+            ]}
+            size="sm"
+            theme={theme}
+          />
           <div className="flex gap-2 items-center mt-1">
             <div className="flex-1">
               <StandardSearchBar

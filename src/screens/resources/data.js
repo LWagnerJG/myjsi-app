@@ -35,7 +35,7 @@ export const RESOURCES_DATA = [
             { label: "Presentations", nav: "resources/presentations" },
             { label: "Social Media", nav: "resources/social-media" },
             { label: "Tradeshows", nav: "resources/tradeshows" },
-            { label: "LWYD Marketplace", nav: "marketplace", sublabel: "ElliottBucks rewards shop" },
+            { label: "LWYD Marketplace", nav: "marketplace", sublabel: "Rewards shop" },
         ].sort((a, b) => a.label.localeCompare(b.label))
     },
 ];

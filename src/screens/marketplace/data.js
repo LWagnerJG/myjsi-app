@@ -211,10 +211,12 @@ export const INITIAL_ORDERS = [
 // ============================================
 export const getProductById = (id) => MARKETPLACE_PRODUCTS.find(p => p.id === id) || null;
 
+export const ELLIOTT_BUCKS_SYMBOL = '✦';
+
 export const formatElliottBucks = (amount) => {
   const abs = Math.abs(amount);
   const prefix = amount < 0 ? '-' : '';
-  return `${prefix}EB ${abs.toLocaleString()}`;
+  return `${prefix}${ELLIOTT_BUCKS_SYMBOL} ${abs.toLocaleString()}`;
 };
 
 export const ORDER_STATUS_CONFIG = {

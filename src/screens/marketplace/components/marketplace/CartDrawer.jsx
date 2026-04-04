@@ -124,7 +124,7 @@ export const CartDrawer = ({ cart, balance, onUpdateQty, onRemove, onCheckout, t
                 }}
               >
                 <CreditCard className="w-4 h-4" />
-                {canAfford ? `Redeem ${formatElliottBucks(totalPrice)}` : 'Not Enough ElliottBucks'}
+                {canAfford ? `Redeem ${formatElliottBucks(totalPrice)}` : 'Insufficient balance'}
               </button>
             </div>
           </div>
