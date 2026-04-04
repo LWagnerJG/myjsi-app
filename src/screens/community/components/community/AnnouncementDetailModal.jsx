@@ -63,8 +63,8 @@ export const AnnouncementDetailModal = ({ announcement, theme, dark, onClose, on
           exit={{ y: 40, opacity: 0, scale: 0.97 }}
           transition={{ type: 'spring', stiffness: 380, damping: 34 }}
           onClick={e => e.stopPropagation()}
-          className="relative w-full max-w-md mx-4 sm:mx-auto rounded-2xl overflow-hidden"
-          style={{ backgroundColor: theme?.colors?.surface || (dark ? '#282828' : '#FFFFFF'), boxShadow: DESIGN_TOKENS.shadows.modal }}
+          className="relative w-full max-w-md mx-4 sm:mx-auto rounded-[22px] overflow-hidden"
+          style={{ backgroundColor: theme?.colors?.surface, boxShadow: DESIGN_TOKENS.shadows.modal }}
         >
           {/* Header band */}
           <div className="px-5 pt-5 pb-3">
@@ -77,7 +77,7 @@ export const AnnouncementDetailModal = ({ announcement, theme, dark, onClose, on
                   <Icon className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-widest" style={{ color }}>{announcement.category?.replace('-', ' ')}</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.07em]" style={{ color }}>{announcement.category?.replace('-', ' ')}</p>
                   {formattedDate && (
                     <p className="text-xs mt-0.5" style={{ color: theme.colors.textSecondary }}>{formattedDate}</p>
                   )}
@@ -98,7 +98,7 @@ export const AnnouncementDetailModal = ({ announcement, theme, dark, onClose, on
             <h3 className="text-lg font-bold leading-snug" style={{ color: theme.colors.textPrimary }}>{announcement.title}</h3>
             <p className="text-[13px] font-medium" style={{ color: theme.colors.textSecondary }}>{announcement.subtitle}</p>
             {announcement.text && (
-              <p className="text-[13px] leading-relaxed" style={{ color: dark ? '#C0C0C0' : '#555555' }}>{announcement.text}</p>
+              <p className="text-[13px] leading-relaxed" style={{ color: theme.colors.textSecondary }}>{announcement.text}</p>
             )}
             {announcement.image && (
               <div className="rounded-xl overflow-hidden mt-2">
@@ -135,7 +135,7 @@ export const AnnouncementDetailModal = ({ announcement, theme, dark, onClose, on
               className="flex items-center gap-2 px-4 py-2.5 rounded-full text-[13px] font-semibold transition-all active:scale-95"
               style={{
                 backgroundColor: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
-                color: copied ? '#4A7C59' : theme.colors.textPrimary,
+                color: copied ? theme.colors.success : theme.colors.textPrimary,
               }}
             >
               {copied ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Link2 className="w-3.5 h-3.5" />}
