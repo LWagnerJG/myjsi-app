@@ -152,7 +152,7 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
 });
 
 // SearchInput — universal search pill used across all non-home screens.
-// Consistent 44px height, subtle fill, soft border, X clear button.
+// Uses the same frosted-glass language as the home screen pill and app header.
 // `variant` prop is accepted for backwards-compat but no longer changes styling.
 export const SearchInput = React.memo(function SearchInput({
     id,
@@ -166,8 +166,12 @@ export const SearchInput = React.memo(function SearchInput({
     inputClassName = '',
 }) {
     const dark = isDarkTheme(theme);
-    const bg  = dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.05)';
-    const bdr = dark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.08)';
+    // Match homeChrome primary palette — frosted glass pill
+    const bg  = dark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.72)';
+    const bdr = dark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(255,255,255,0.80)';
+    const shadow = dark
+      ? '0 2px 10px rgba(0,0,0,0.25)'
+      : '0 2px 10px rgba(53,53,53,0.08)';
     const iconColor = theme?.colors?.textSecondary || '#666';
 
     return (
@@ -179,10 +183,13 @@ export const SearchInput = React.memo(function SearchInput({
                 height: 44,
                 borderRadius: 9999,
                 backgroundColor: bg,
-                border: `1px solid ${bdr}`,
+                border: bdr,
+                boxShadow: shadow,
+                backdropFilter: 'blur(12px) saturate(1.4)',
+                WebkitBackdropFilter: 'blur(12px) saturate(1.4)',
                 paddingLeft: 14,
                 paddingRight: value ? 8 : 14,
-                transition: 'border-color 150ms ease',
+                transition: 'border-color 150ms ease, box-shadow 150ms ease',
                 ...style,
             }}
         >
