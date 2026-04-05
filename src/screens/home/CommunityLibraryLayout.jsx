@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { ChevronLeft } from 'lucide-react';
 import { LibraryGrid } from '../library/LibraryGrid.jsx';
 import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
 import { isDarkTheme } from '../../design-system/tokens.js';
@@ -39,7 +40,7 @@ export const CommunityLibraryLayout = ({
     if (tab === activeTab) return;
     if (containerRef.current) scrollPositions.current[activeTab] = containerRef.current.scrollTop;
     setActiveTab(tab);
-    setActiveSubreddit(null); // going to a tab resets sub-community
+    setActiveSubreddit(null);
     requestAnimationFrame(() => { if (containerRef.current) containerRef.current.scrollTop = scrollPositions.current[tab] || 0; });
   }, [activeTab]);
 
@@ -47,6 +48,8 @@ export const CommunityLibraryLayout = ({
     if (containerRef.current) containerRef.current.scrollTop = 0;
     setActiveSubreddit(sub);
   }, []);
+
+  const exitSubreddit = useCallback(() => setActiveSubreddit(null), []);
 
   useEffect(() => {
     const handler = (e) => {
@@ -56,20 +59,7 @@ export const CommunityLibraryLayout = ({
     return () => window.removeEventListener('keydown', handler);
   }, []);
 
-  const tr = prefersReducedMotion ? 'none' : 'opacity 200ms ease, transform 200ms ease';
-  const tabStyle = (isActive) => ({
-    color: isActive ? theme.colors.textPrimary : (dark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.4)'),
-    fontWeight: isActive ? 700 : 500,
-    borderBottom: isActive ? `2px solid ${theme.colors.accent}` : '2px solid transparent',
-  });
-  const paneStyle = (name) => activeTab === name
-    ? { position: 'relative', opacity: 1, transform: 'translateX(0)', transition: tr, pointerEvents: 'auto' }
-    : { position: 'absolute', inset: 0, opacity: 0, transform: 'translateX(16px)', transition: tr, pointerEvents: 'none' };
-
-  const inSubCommunity = activeTab === 'community' && !!activeSubreddit;
-  const SubIcon = activeSubreddit?.icon;
-
-  // Patch the global back handler while we're in a sub-community
+  // Patch the global back handler while in a sub-community
   useEffect(() => {
     if (!activeSubreddit) return;
     const onPopState = (e) => {
@@ -82,62 +72,75 @@ export const CommunityLibraryLayout = ({
     return () => window.removeEventListener('popstate', onPopState);
   }, [activeSubreddit]);
 
+  const tr = prefersReducedMotion ? 'none' : 'opacity 200ms ease, transform 200ms ease';
+  const paneStyle = (name) => activeTab === name
+    ? { position: 'relative', opacity: 1, transform: 'translateX(0)', transition: tr, pointerEvents: 'auto' }
+    : { position: 'absolute', inset: 0, opacity: 0, transform: 'translateX(16px)', transition: tr, pointerEvents: 'none' };
+
+  const chipStyle = (isActive) => ({
+    color: isActive ? theme.colors.accentText : (dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.45)'),
+    borderColor: isActive ? theme.colors.accent : (dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)'),
+    backgroundColor: isActive ? theme.colors.accent : 'transparent',
+  });
+
+  const inSubCommunity = activeTab === 'community' && !!activeSubreddit;
+  const SubIcon = activeSubreddit?.icon;
+  const showSearch = activeTab !== 'my board' && activeTab !== 'makers studio';
+
   return (
-    <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
-      {/* ── Header ── */}
+    <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
+
+      {/* ── Controls header ── */}
       <div className="flex-shrink-0 px-4 pt-2" style={{ backgroundColor: theme.colors.background }}>
         <div className="max-w-3xl mx-auto w-full">
-          {/* Tabs row — sub-community name slides in from left, tabs shift right */}
-          <div className="flex items-center h-10">
-            {/* Sub-community title (left — expands to push tabs right) */}
-            <div
-              className="flex items-center gap-2 flex-shrink-0 overflow-hidden transition-all duration-300 ease-in-out"
-              style={{
-                maxWidth: inSubCommunity ? 300 : 0,
-                opacity: inSubCommunity ? 1 : 0,
-                marginRight: inSubCommunity ? 10 : 0,
-              }}
-            >
-              {SubIcon && (
-                <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${activeSubreddit?.color}18`, color: activeSubreddit?.color }}>
-                  <SubIcon className="w-3 h-3" />
-                </div>
-              )}
-              <span className="text-[15px] font-bold whitespace-nowrap" style={{ color: theme.colors.textPrimary }}>
-                {activeSubreddit?.name}
-              </span>
-              <span className="text-[11px] font-medium whitespace-nowrap" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>
-                {activeSubreddit?.members}
-              </span>
-            </div>
 
-            {/* Divider dot */}
-            <div
-              className="w-1 h-1 rounded-full flex-shrink-0 transition-all duration-300 ease-in-out"
-              style={{
-                backgroundColor: theme.colors.textSecondary,
-                opacity: inSubCommunity ? 0.2 : 0,
-                transform: inSubCommunity ? 'scale(1)' : 'scale(0)',
-                marginRight: inSubCommunity ? 8 : 0,
-              }}
-            />
-
-            {/* Tabs — start left, shift right as sub-community title expands */}
-            <div className="flex items-center gap-0 overflow-x-auto no-scrollbar transition-all duration-300 ease-in-out">
-              {TABS.map(tab => (
-                <button key={tab} onClick={() => switchTab(tab.toLowerCase())}
-                  className="text-[13px] px-2 py-2 transition-all whitespace-nowrap"
-                  style={tabStyle(activeTab === tab.toLowerCase())}
+          {/* Tab row — chips or sub-community back bar */}
+          <div className="h-9 flex items-center">
+            {inSubCommunity ? (
+              /* Sub-community back bar */
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={exitSubreddit}
+                  className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-full transition-all active:scale-95 border"
+                  style={{
+                    color: theme.colors.textSecondary,
+                    borderColor: dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)',
+                    backgroundColor: 'transparent',
+                  }}
                 >
-                  {tab}
+                  <ChevronLeft className="w-3 h-3" />
+                  Back
                 </button>
-              ))}
-            </div>
+                {SubIcon && (
+                  <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${activeSubreddit?.color}18`, color: activeSubreddit?.color }}>
+                    <SubIcon className="w-3 h-3" />
+                  </div>
+                )}
+                <span className="text-[15px] font-bold" style={{ color: theme.colors.textPrimary }}>{activeSubreddit?.name}</span>
+                {activeSubreddit?.members && (
+                  <span className="text-[11px]" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>{activeSubreddit.members}</span>
+                )}
+              </div>
+            ) : (
+              /* Tab chip pills */
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+                {TABS.map(tab => (
+                  <button
+                    key={tab}
+                    onClick={() => switchTab(tab.toLowerCase())}
+                    className="text-[11px] font-semibold px-3 py-1.5 rounded-full flex-shrink-0 whitespace-nowrap transition-all active:scale-95 border"
+                    style={chipStyle(activeTab === tab.toLowerCase())}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Search + Post inline */}
-          {activeTab !== 'my board' && activeTab !== 'makers studio' && (
-            <div className="flex items-center gap-2 mt-1.5 mb-1.5">
+          {/* Search + action button */}
+          {showSearch && (
+            <div className="flex items-center gap-2 mt-2 mb-1.5">
               <div className="flex-1">
                 <StandardSearchBar
                   id="community-main-search"
@@ -147,15 +150,20 @@ export const CommunityLibraryLayout = ({
                   theme={theme}
                 />
               </div>
-              <button onClick={activeTab === 'library' ? openLibraryUploadModal : openCreateContentModal} className="h-10 px-4 rounded-full text-xs font-semibold transition-all active:scale-95 flex-shrink-0" style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}>
+              <button
+                onClick={activeTab === 'library' ? openLibraryUploadModal : openCreateContentModal}
+                className="h-10 px-4 rounded-full text-xs font-semibold transition-all active:scale-95 flex-shrink-0"
+                style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
+              >
                 {activeTab === 'library' ? '+ Upload' : '+ Post'}
               </button>
             </div>
           )}
-          {(activeTab === 'my board' || activeTab === 'makers studio') && <div className="mb-1.5" />}
+          {!showSearch && <div className="mb-1.5" />}
         </div>
       </div>
 
+      {/* ── Content panes ── */}
       <div ref={containerRef} className="flex-1 overflow-y-auto pb-10 scrollbar-hide">
         <div className="mx-auto w-full max-w-3xl px-4" style={{ position: 'relative' }}>
           <div style={{ position: 'relative' }}>
