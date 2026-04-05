@@ -170,8 +170,8 @@ const DateGroupCard = ({ theme, dateKey, group, onNavigate }) => {
             <div
                 className="flex items-baseline justify-between px-4 pt-3 pb-2"
                 style={{
-                    backgroundColor: dark ? 'rgba(255,255,255,0.03)' : 'rgba(53,53,53,0.025)',
-                    borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'}`,
+                    backgroundColor: dark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.04)',
+                    borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'}`,
                 }}
             >
                 <h2 className="text-xs font-bold tracking-wider" style={{ color: theme.colors.accent }}>{label}</h2>
@@ -259,7 +259,7 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                                         style={{ transformOrigin: 'top right', backgroundColor: theme.colors.surface, border: dark ? '1px solid rgba(255,255,255,0.12)' : `1px solid ${theme.colors.border}`, boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }}>
                                         {dealers.map(d => {
                                             const active = d === selectedDealer;
-                                            return <button key={d} onClick={() => { setSelectedDealer(d); setDealerMenuOpen(false); }} className={`w-full text-left px-3 py-2 rounded-[10px] text-sm transition motion-tap active:scale-[0.98] ${active ? 'font-semibold' : (dark ? 'hover:bg-white/[0.06]' : 'hover:bg-black/[0.04]')}`} style={{ backgroundColor: active ? theme.colors.subtle : 'transparent', color: theme.colors.textPrimary }}>{formatCompanyName(d)}</button>;
+                                            return <button key={d} onClick={() => { setSelectedDealer(d); setDealerMenuOpen(false); }} className={`w-full text-left px-3 py-2 rounded-[12px] text-sm transition motion-tap active:scale-[0.98] ${active ? 'font-semibold' : (dark ? 'hover:bg-white/[0.06]' : 'hover:bg-black/[0.04]')}`} style={{ backgroundColor: active ? (dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)') : 'transparent', color: theme.colors.textPrimary }}>{formatCompanyName(d)}</button>;
                                         })}
                                     </motion.div>
                                 )}

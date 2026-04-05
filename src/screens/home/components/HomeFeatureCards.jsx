@@ -34,8 +34,8 @@ export const HomeFeatureCards = ({
                     padding: 0,
                     border: isEditMode
                         ? `2px dashed ${isDark ? 'rgba(255,255,255,0.25)' : 'rgba(53,53,53,0.20)'}`
-                        : 'none',
-                    boxShadow: isEditMode ? 'none' : colors.tileShadow,
+                        : `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'}`,
+                    boxShadow: 'none',
                 }}
                 onClick={(e) => {
                     if (isEditMode) return;
@@ -58,15 +58,10 @@ export const HomeFeatureCards = ({
                     ) : (
                         <button
                             onClick={() => navigateFeature(homeFeatureMode)}
-                            className="text-[10px] font-semibold flex items-center gap-1 px-2.5 py-1 rounded-full transition-all hover:opacity-80"
-                            style={{
-                                color: colors.textSecondary,
-                                opacity: 0.6,
-                                backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
-                            }}
+                            className="text-xs font-bold uppercase tracking-[0.07em] flex items-center gap-0.5 opacity-50 hover:opacity-70 transition-opacity"
+                            style={{ color: colors.textSecondary }}
                         >
-                            Open
-                            <ChevronRight className="w-3 h-3" />
+                            Open <ChevronRight className="w-3.5 h-3.5" />
                         </button>
                     )}
                 </div>
@@ -109,8 +104,8 @@ export const HomeFeatureCards = ({
                     padding: 0,
                     border: isEditMode
                         ? `2px dashed ${isDark ? 'rgba(255,255,255,0.25)' : 'rgba(53,53,53,0.20)'}`
-                        : 'none',
-                    boxShadow: isEditMode ? 'none' : colors.tileShadow,
+                        : `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'}`,
+                    boxShadow: 'none',
                 }}
                 onClick={(e) => {
                     if (isEditMode) return;
@@ -133,15 +128,10 @@ export const HomeFeatureCards = ({
                     ) : (
                         <button
                             onClick={() => navigateFeature(secondaryFeatureMode)}
-                            className="text-[10px] font-semibold flex items-center gap-1 px-2.5 py-1 rounded-full transition-all hover:opacity-80"
-                            style={{
-                                color: colors.textSecondary,
-                                opacity: 0.6,
-                                backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
-                            }}
+                            className="text-xs font-bold uppercase tracking-[0.07em] flex items-center gap-0.5 opacity-50 hover:opacity-70 transition-opacity"
+                            style={{ color: colors.textSecondary }}
                         >
-                            Open
-                            <ChevronRight className="w-3 h-3" />
+                            Open <ChevronRight className="w-3.5 h-3.5" />
                         </button>
                     )}
                 </div>
