@@ -26,18 +26,21 @@ const sortQuarterEntries = (entries) =>
 
 /* ── Inline text toggle (discrete) ───────────────────────────── */
 
-const InlineToggle = ({ options, value, onChange, colors }) => (
-  <div className="inline-flex items-center gap-0.5 rounded-full p-[2px]" style={{ backgroundColor: colors.border }}>
+const InlineToggle = ({ options, value, onChange, colors, isDark }) => (
+  <div className="inline-flex items-center gap-0.5 rounded-full p-[2px]"
+    style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : colors.border }}>
     {options.map(opt => (
       <button
         key={opt.value}
         onClick={() => onChange(opt.value)}
         className="rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-wider transition-all"
         style={{
-          backgroundColor: value === opt.value ? colors.surface : 'transparent',
-          color: value === opt.value ? colors.textPrimary : colors.textSecondary,
-          opacity: value === opt.value ? 1 : 0.5,
-          boxShadow: value === opt.value ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
+          backgroundColor: value === opt.value
+            ? (isDark ? 'rgba(255,255,255,0.22)' : colors.surface)
+            : 'transparent',
+          color: colors.textPrimary,
+          opacity: value === opt.value ? 1 : 0.45,
+          boxShadow: value === opt.value ? (isDark ? '0 1px 3px rgba(0,0,0,0.3)' : '0 1px 2px rgba(0,0,0,0.06)') : 'none',
         }}
       >
         {opt.label}
@@ -185,7 +188,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                     )}
                   </div>
                 </div>
-                <InlineToggle options={toggleOpts} value={chartDataType} onChange={setChartDataType} colors={colors} />
+                <InlineToggle options={toggleOpts} value={chartDataType} onChange={setChartDataType} colors={colors} isDark={isDark} />
               </div>
 
               {/* Progress to goal */}
