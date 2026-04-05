@@ -21,9 +21,9 @@ const SPIFF_502010_MIN_LIST = 10000;
 /* ---- section primitives ---- */
 const Section = ({ title, children, theme, right }) => {
   const isDark = isDarkTheme(theme);
-  const divider = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+  const divider = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)';
   return (
-    <div className="rounded-2xl" style={{ padding: '18px 20px', backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : '#fff', border: `1px solid ${divider}` }}>
+    <div className="rounded-2xl" style={{ padding: '18px 20px', backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : '#fff', border: `1px solid ${divider}` }}>
       {title && (
         <div className="flex items-center justify-between mb-3">
           <span className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: theme.colors.textSecondary, opacity: 0.55 }}>{title}</span>
@@ -37,7 +37,7 @@ const Section = ({ title, children, theme, right }) => {
 
 const Row = ({ label, children, theme, noSep }) => {
   const isDark = isDarkTheme(theme);
-  const divider = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+  const divider = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)';
   return (
     <div className={`flex items-center gap-3 py-3.5 ${noSep ? '' : 'border-t'}`} style={{ borderColor: noSep ? undefined : divider }}>
       {label && <label className="text-[13px] font-semibold whitespace-nowrap flex-shrink-0 w-[105px]" style={{ color: theme.colors.textPrimary, letterSpacing: '-0.01em' }}>{label}</label>}
@@ -90,8 +90,8 @@ const QUOTE_STAGES = [
 
 const QuoteTracker = ({ quotes = [], theme, onRequestQuote }) => {
   const isDark = isDarkTheme(theme);
-  const divider = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
-  const fieldBg = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)';
+  const divider = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)';
+  const fieldBg = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.02)';
   const queueAhead = 3;
   const estTime = '~2 business days';
 
@@ -116,12 +116,12 @@ const QuoteTracker = ({ quotes = [], theme, onRequestQuote }) => {
                   <React.Fragment key={stage.key}>
                     <div className="flex flex-col items-center" style={{ flex: '0 0 auto' }}>
                       <div className="w-7 h-7 rounded-full flex items-center justify-center transition-all"
-                        style={{ backgroundColor: reached ? `${stage.color}20` : (isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'), border: isCurrent ? `2px solid ${stage.color}` : 'none' }}>
+                        style={{ backgroundColor: reached ? `${stage.color}20` : (isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.04)'), border: isCurrent ? `2px solid ${stage.color}` : 'none' }}>
                         <StIcon className="w-3.5 h-3.5" style={{ color: reached ? stage.color : theme.colors.textSecondary, opacity: reached ? 1 : 0.3 }} />
                       </div>
                       <span className="text-[9px] font-semibold mt-1.5 whitespace-nowrap" style={{ color: isCurrent ? theme.colors.textPrimary : theme.colors.textSecondary, opacity: isCurrent ? 1 : 0.5 }}>{stage.label}</span>
                     </div>
-                    {si < QUOTE_STAGES.length - 1 && <div className="flex-1 h-[2px] mx-1 rounded-full" style={{ backgroundColor: si < activeStage ? stage.color : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'), minWidth: 12 }} />}
+                    {si < QUOTE_STAGES.length - 1 && <div className="flex-1 h-[2px] mx-1 rounded-full" style={{ backgroundColor: si < activeStage ? stage.color : (isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)'), minWidth: 12 }} />}
                   </React.Fragment>
                 );
               })}
@@ -236,7 +236,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
 
   const [quoteModalOpen, setQuoteModalOpen] = useState(false);
   const enrichedQuotes = useMemo(() => (draft.quotes || []).map((q, i) => ({ ...q, status: q.status || (i === 0 ? 'complete' : 'in-progress') })), [draft.quotes]);
-  const divider = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+  const divider = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)';
 
   return (
     <div className="flex flex-col h-full app-header-offset" style={{ background: c.background }}>
@@ -282,11 +282,11 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
             </div>
             <div className="h-px mt-3" style={{ backgroundColor: divider }} />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-3">
-              <div className="rounded-xl border px-3 py-2 flex items-center justify-between" style={{ borderColor: divider, backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.015)' }}>
+              <div className="rounded-xl border px-3 py-2 flex items-center justify-between" style={{ borderColor: divider, backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.015)' }}>
                 <span className="text-[12px] font-semibold" style={{ color: c.textPrimary }}>Sales Reward</span>
                 <ToggleSwitch checked={draft.salesReward !== false} onChange={e => update('salesReward', e.target.checked)} theme={theme} />
               </div>
-              <div className="rounded-xl border px-3 py-2 flex items-center justify-between" style={{ borderColor: divider, backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.015)' }}>
+              <div className="rounded-xl border px-3 py-2 flex items-center justify-between" style={{ borderColor: divider, backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.015)' }}>
                 <span className="text-[12px] font-semibold" style={{ color: c.textPrimary }}>Designer Reward</span>
                 <ToggleSwitch checked={draft.designerReward !== false} onChange={e => update('designerReward', e.target.checked)} theme={theme} />
               </div>
@@ -424,7 +424,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
               <div className="space-y-2">
                 {(draft.documents || []).map(doc => (
                   <div key={doc.id} className="group flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors"
-                    style={{ background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)', border: `1px solid ${divider}` }}>
+                    style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.02)', border: `1px solid ${divider}` }}>
                     <FileText className="w-4 h-4 flex-shrink-0" style={{ color: c.accent }} />
                     <div className="flex-1 min-w-0">
                       <div className="text-[12px] font-semibold truncate" style={{ color: c.textPrimary }}>{doc.fileName}</div>
@@ -440,7 +440,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
             ) : (
               <button onClick={() => fileInputRef.current?.click()} className="w-full flex flex-col items-center justify-center gap-2 py-6 rounded-2xl transition-all hover:opacity-80"
                 style={{ border: `2px dashed ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}`, color: c.textSecondary }}>
-                <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}>
+                <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)' }}>
                   <Paperclip className="w-4 h-4" style={{ opacity: 0.5 }} />
                 </div>
                 <span className="text-[12px] font-semibold">Drop files or click to upload</span>
@@ -453,7 +453,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
           <Section title="Notes" theme={theme}>
             <textarea value={draft.notes || ''} onChange={e => update('notes', e.target.value)} rows={3}
               className="w-full resize-none rounded-xl p-3.5 text-[13px] leading-relaxed outline-none"
-              style={{ background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)', border: `1px solid ${divider}`, color: c.textPrimary }}
+              style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.02)', border: `1px solid ${divider}`, color: c.textPrimary }}
               placeholder="Add project notes, context, or special instructions..." />
           </Section>
 
@@ -477,7 +477,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
               <button key={opt} onClick={() => { update('discount', opt); setDiscountOpen(false); }}
                 className={`w-full text-left px-4 py-2.5 text-xs transition-colors ${opt === draft.discount ? 'font-bold' : 'font-medium'}`}
                 style={{ color: c.textPrimary }}
-                onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)'}
+                onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.03)'}
                 onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>{opt}</button>
             ))}
           </div>

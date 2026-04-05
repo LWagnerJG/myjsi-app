@@ -71,8 +71,8 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
         textSecondary:   theme?.colors?.textSecondary || '#666666',
         border:          isDark ? 'rgba(255,255,255,0.10)' : (theme?.colors?.border || 'rgba(0,0,0,0.08)'),
         accent:          theme?.colors?.accent        || '#353535',
-        subtle:          isDark ? 'rgba(255,255,255,0.06)' : (theme?.colors?.subtle || '#F5F3EF'),
-        fieldBg:         isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.025)',
+        subtle:          isDark ? 'rgba(255,255,255,0.10)' : (theme?.colors?.subtle || '#F5F3EF'),
+        fieldBg:         isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.025)',
         fieldBorder:     isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)',
         hoverBg:         isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)',
         success: theme?.colors?.success || '#4A7C59',
@@ -216,7 +216,7 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                     <div className="flex items-center justify-between px-7 py-5" style={{ borderBottom: `1px solid ${colors.border}` }}>
                         <div className="flex items-center gap-3">
                             <div className="w-11 h-11 rounded-2xl flex items-center justify-center"
-                                style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}>
+                                style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)' }}>
                                 <FileText className="w-5 h-5" style={{ color: colors.textPrimary }} />
                             </div>
                             <h2 className="text-lg font-bold tracking-tight" style={{ color: colors.textPrimary }}>Request a Quote</h2>

@@ -99,7 +99,7 @@ export const SpecCheckRequestModal = ({
                     <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        className="w-full rounded-2xl border px-4 py-4 text-left transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.03]"
+                        className="w-full rounded-2xl border px-4 py-4 text-left transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.08]"
                         style={{ borderColor: colors.border, backgroundColor: colors.subtle }}
                     >
                         <div className="flex items-center gap-3">
@@ -177,7 +177,7 @@ export const SpecCheckRequestModal = ({
                                     key={project.id}
                                     type="button"
                                     onClick={() => handleProjectPick(project)}
-                                    className="w-full text-left px-3 py-2.5 text-sm transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.03]"
+                                    className="w-full text-left px-3 py-2.5 text-sm transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.08]"
                                     style={{
                                         color: colors.textPrimary,
                                         backgroundColor: String(project.id) === String(selectedProjectId) ? colors.subtle : colors.surface,
@@ -199,7 +199,7 @@ export const SpecCheckRequestModal = ({
                     <button
                         type="button"
                         onClick={handleClose}
-                        className="flex-1 h-11 rounded-full text-sm font-semibold border transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.03]"
+                        className="flex-1 h-11 rounded-full text-sm font-semibold border transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.08]"
                         style={{ borderColor: colors.border, color: colors.textPrimary }}
                     >
                         Cancel

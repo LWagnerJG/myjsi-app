@@ -10,7 +10,7 @@ export const MemberCard = ({ theme, user, expanded, onToggle, onChangeRole, onTo
     const admin = isAdminRole(user.role);
     const roleLabel = getRoleLabel(user.role);
     const dark = isDarkTheme(theme);
-    const subtleBorder = dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+    const subtleBorder = dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)';
 
     return (
         <GlassCard theme={theme} className="p-0 overflow-hidden">
@@ -33,7 +33,7 @@ export const MemberCard = ({ theme, user, expanded, onToggle, onChangeRole, onTo
                             <span
                                 className="text-[12px] font-medium px-2.5 py-1 rounded-full"
                                 style={{
-                                    backgroundColor: admin ? `${theme.colors.accent}12` : (dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'),
+                                    backgroundColor: admin ? `${theme.colors.accent}12` : (dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.05)'),
                                     color: admin ? theme.colors.accent : theme.colors.textSecondary,
                                 }}
                             >

@@ -48,7 +48,7 @@ const Select = ({ value, onChange, options, theme }) => {
 
   return (
     <div className="relative" ref={triggerRef}>
-      <button type="button" onClick={() => setOpen(o => !o)} className="w-full px-4 py-2.5 rounded-2xl flex items-center justify-between text-sm font-medium transition-all" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : theme.colors.surface, border: `1px solid ${theme.colors.border}`, color: theme.colors.textPrimary }}>
+      <button type="button" onClick={() => setOpen(o => !o)} className="w-full px-4 py-2.5 rounded-2xl flex items-center justify-between text-sm font-medium transition-all" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : theme.colors.surface, border: `1px solid ${theme.colors.border}`, color: theme.colors.textPrimary }}>
         <span>{current}</span>
         <ChevronDown className={`w-4 h-4 transition-transform ${open ? 'rotate-180' : ''}`} style={{ color: theme.colors.textSecondary }} />
       </button>
@@ -60,8 +60,8 @@ const Select = ({ value, onChange, options, theme }) => {
             boxShadow: DESIGN_TOKENS.shadows.modal
           }}>
             {options.map(o => (
-              <button key={o.value} onClick={() => { onChange(o.value); setOpen(false); }} className="w-full text-left px-4 py-2.5 text-sm font-medium transition-colors active:scale-[0.99]" style={{ color: o.value === value ? theme.colors.accent : theme.colors.textPrimary, backgroundColor: o.value === value ? (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)') : 'transparent' }}
-                onMouseEnter={e => { if (o.value !== value) e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'; }}
+              <button key={o.value} onClick={() => { onChange(o.value); setOpen(false); }} className="w-full text-left px-4 py-2.5 text-sm font-medium transition-colors active:scale-[0.99]" style={{ color: o.value === value ? theme.colors.accent : theme.colors.textPrimary, backgroundColor: o.value === value ? (isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.03)') : 'transparent' }}
+                onMouseEnter={e => { if (o.value !== value) e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)'; }}
                 onMouseLeave={e => { if (o.value !== value) e.currentTarget.style.backgroundColor = 'transparent'; }}
               >
                 {o.label}
@@ -76,7 +76,7 @@ const Select = ({ value, onChange, options, theme }) => {
 
 // Section header
 const SectionHeader = ({ icon: Icon, title, subtitle, theme }) => (
-  <div className="px-5 py-4" style={{ borderBottom: `1px solid ${isDarkTheme(theme) ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'}` }}>
+  <div className="px-5 py-4" style={{ borderBottom: `1px solid ${isDarkTheme(theme) ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.05)'}` }}>
     <div className="flex items-center gap-2.5">
       <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ backgroundColor: isDarkTheme(theme) ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.06)' }}>
         <Icon className="w-4 h-4" style={{ color: theme.colors.accent }} />
@@ -133,7 +133,7 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
     ];
     return Array.from(new Set(candidates.filter(Boolean).map((item) => String(item).trim()))).slice(0, 6);
   }, [userSettings?.homeAddress, userSettings?.streetAddress]);
-  const hoverBg = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)';
+  const hoverBg = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.02)';
 
   useEffect(() => {
     setFirstName(userSettings?.firstName || 'Luke');
@@ -215,7 +215,7 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
                     }}
                     autoComplete="given-name"
                     className="w-full px-4 h-10 rounded-2xl text-sm font-medium outline-none transition-all focus:ring-2 focus:ring-offset-1"
-                    style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : theme.colors.surface, border:`1px solid ${theme.colors.border}`, color:theme.colors.textPrimary, focusRingColor: theme.colors.accent }}
+                    style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : theme.colors.surface, border:`1px solid ${theme.colors.border}`, color:theme.colors.textPrimary, focusRingColor: theme.colors.accent }}
                   />
                 </div>
                 <div>
@@ -229,7 +229,7 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
                     }}
                     autoComplete="family-name"
                     className="w-full px-4 h-10 rounded-2xl text-sm font-medium outline-none transition-all focus:ring-2 focus:ring-offset-1"
-                    style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : theme.colors.surface, border:`1px solid ${theme.colors.border}`, color:theme.colors.textPrimary }}
+                    style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : theme.colors.surface, border:`1px solid ${theme.colors.border}`, color:theme.colors.textPrimary }}
                   />
                 </div>
               </div>
@@ -245,7 +245,7 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
                     inputMode="text"
                     placeholder="Start typing full street address"
                     className="w-full pl-10 pr-4 h-10 rounded-2xl text-sm font-medium outline-none transition-all focus:ring-2 focus:ring-offset-1"
-                    style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : theme.colors.surface, border:`1px solid ${theme.colors.border}`, color:theme.colors.textPrimary }}
+                    style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : theme.colors.surface, border:`1px solid ${theme.colors.border}`, color:theme.colors.textPrimary }}
                   />
                   <MapPin className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: theme.colors.textSecondary }} />
                   {showAddressSuggestions && (
@@ -299,7 +299,7 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
             <div className="p-3">
               {notifGroups.map((group, gi) => (
                 <div key={group.label}>
-                  {gi > 0 && <div className="mx-3 my-1" style={{ borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}` }} />}
+                  {gi > 0 && <div className="mx-3 my-1" style={{ borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)'}` }} />}
                   <div className="px-3 pt-3 pb-1">
                     <span className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>{group.label}</span>
                   </div>
@@ -311,7 +311,7 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
                       </div>
                       {k === 'leadTimeChange' && notif.leadTimeChange && (
                         <div className="px-3 pb-3 -mt-1">
-                          <div className="p-4 rounded-2xl" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)' }}>
+                          <div className="p-4 rounded-2xl" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.02)' }}>
                             <div className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: theme.colors.textSecondary }}>Favorite lead time series</div>
                             <div className="flex flex-wrap gap-2">
                               {leadTimeOptions.map((series) => {
@@ -323,7 +323,7 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
                                     onClick={() => setLeadTimeFavorites(prev => active ? prev.filter(s => s !== series) : [...prev, series])}
                                     className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95"
                                     style={{
-                                      backgroundColor: active ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.06)' : theme.colors.subtle),
+                                      backgroundColor: active ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.10)' : theme.colors.subtle),
                                       color: active ? (isDark ? '#1A1A1A' : '#FFFFFF') : theme.colors.textSecondary,
                                       border: `1px solid ${active ? 'transparent' : theme.colors.border}`
                                     }}

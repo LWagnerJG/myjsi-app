@@ -11,7 +11,7 @@ import { formatCurrency, formatCompanyName } from '../../utils/format.js';
 /* ── helpers ─────────────────────────────────────────────────── */
 
 const subtle = (isDark, strength = 1) =>
-  isDark ? `rgba(255,255,255,${(0.04 * strength).toFixed(3)})` : `rgba(0,0,0,${(0.025 * strength).toFixed(4)})`;
+  isDark ? `rgba(255,255,255,${(0.07 * strength).toFixed(3)})` : `rgba(0,0,0,${(0.025 * strength).toFixed(4)})`;
 
 const parseQuarterKey = (key = '') => {
   const [y, q] = key.split('-Q');
@@ -224,7 +224,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                         <div className="w-full rounded-md" style={{
                           height: ready ? `${Math.max(8, pct)}%` : '0%',
                           backgroundColor: colors.accent,
-                          opacity: isHovered ? (isDark ? 0.7 : 0.5) : (isDark ? 0.4 : 0.3),
+                          opacity: isHovered ? (isDark ? 0.90 : 0.70) : (isDark ? 0.58 : 0.32),
                           transition: `height 0.4s ease-out ${0.1 + i * 0.025}s, opacity 0.15s`,
                         }} />
                       </div>

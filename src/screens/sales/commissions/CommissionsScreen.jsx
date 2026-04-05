@@ -47,7 +47,7 @@ export const CommissionsScreen = ({ theme }) => {
                 onChange={e => setYear(e.target.value)}
                 className="appearance-none text-sm font-bold pl-4 pr-8 py-2.5 rounded-full focus:outline-none transition-all cursor-pointer"
                 style={{
-                  backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)',
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.05)',
                   color: theme.colors.textPrimary,
                   border: `1px solid ${theme.colors.border}`,
                 }}
@@ -81,7 +81,7 @@ export const CommissionsScreen = ({ theme }) => {
               <button
                 onClick={() => toggle(m.id)}
                 className="w-full px-5 py-4 flex items-center gap-3 text-left"
-                onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.015)'}
+                onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.015)'}
                 onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
               >
                 <div className="flex-1 min-w-0">
@@ -90,7 +90,7 @@ export const CommissionsScreen = ({ theme }) => {
                     <span
                       className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
                       style={{
-                        backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)',
+                        backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.05)',
                         color: theme.colors.textSecondary,
                       }}
                     >
@@ -130,7 +130,7 @@ export const CommissionsScreen = ({ theme }) => {
                         key={ii}
                         className="rounded-2xl p-4 space-y-3"
                         style={{
-                          backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.025)',
+                          backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.025)',
                           border: `1px solid ${theme.colors.border}`,
                         }}
                       >
@@ -145,7 +145,7 @@ export const CommissionsScreen = ({ theme }) => {
                             <div
                               className="text-xs font-bold px-2.5 py-1 rounded-full tabular-nums"
                               style={{
-                                backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)',
+                                backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.05)',
                                 color: theme.colors.textSecondary,
                               }}
                             >
@@ -182,7 +182,7 @@ export const CommissionsScreen = ({ theme }) => {
                     <div
                       className="rounded-2xl p-4 grid grid-cols-3 gap-3 text-center"
                       style={{
-                        backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.025)',
+                        backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.025)',
                         border: `1px solid ${theme.colors.border}`,
                       }}
                     >

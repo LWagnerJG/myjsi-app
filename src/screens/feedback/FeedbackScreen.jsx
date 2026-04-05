@@ -41,7 +41,7 @@ export const FeedbackScreen = ({ theme }) => {
         setSubmitted(true);
     }
 
-    const surface = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.80)';
+    const surface = isDark ? 'rgba(255,255,255,0.09)' : 'rgba(255,255,255,0.80)';
     const surfaceBorder = isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)';
     const inputBg = isDark ? 'rgba(0,0,0,0.20)' : 'rgba(0,0,0,0.025)';
 
@@ -65,7 +65,7 @@ export const FeedbackScreen = ({ theme }) => {
                     <button
                         onClick={() => { setSubmitted(false); setMessage(''); setFiles([]); setFeedbackType('general'); }}
                         className="text-[12px] font-semibold px-4 py-2 rounded-full transition-all hover:opacity-70"
-                        style={{ color: colors.textSecondary, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }}
+                        style={{ color: colors.textSecondary, backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.05)' }}
                     >
                         Send another
                     </button>
@@ -108,7 +108,7 @@ export const FeedbackScreen = ({ theme }) => {
                                             style={{
                                                 backgroundColor: active
                                                     ? (isDark ? 'rgba(255,255,255,0.12)' : colors.textPrimary)
-                                                    : (isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'),
+                                                    : (isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.04)'),
                                                 color: active
                                                     ? (isDark ? colors.textPrimary : '#fff')
                                                     : colors.textSecondary,
@@ -162,7 +162,7 @@ export const FeedbackScreen = ({ theme }) => {
                                 <label
                                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold cursor-pointer transition-all active:scale-95 hover:opacity-70"
                                     style={{
-                                        backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                                        backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)',
                                         color: colors.textSecondary,
                                         border: surfaceBorder,
                                     }}

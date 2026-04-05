@@ -22,7 +22,7 @@ export const SortableAppTile = React.memo(({ id, app, colors, onRemove, isRemove
         transform: CSS.Transform.toString(transform),
         transition: isDragging ? undefined : transition,
         backgroundColor: `${colors.tileSurface || colors.surface}`,
-        border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
+        border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)',
         boxShadow: isOverlay ? '0 8px 24px rgba(0,0,0,0.1)' : (isDragging ? '0 4px 12px rgba(0,0,0,0.08)' : 'none'),
         opacity: isDragging ? 0.9 : 1,
         zIndex: isDragging ? 20 : 'auto',
@@ -70,7 +70,7 @@ export const SortableAppTile = React.memo(({ id, app, colors, onRemove, isRemove
             {!isOverlay && isRemoveLocked && (
                 <div
                     className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center z-10"
-                    style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)', border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)' }}
+                    style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)', border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)' }}
                     aria-label={`${app.name} is pinned`}
                 >
                     <Lock className="w-2 h-2" style={{ color: colors.textSecondary, opacity: 0.4 }} />

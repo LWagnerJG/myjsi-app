@@ -92,9 +92,9 @@ export const InstallInstructionsScreen = ({ theme }) => {
     });
   }, [instructions, selectedType, searchTerm]);
 
-  const divider = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
-  const cardBg = isDark ? 'rgba(255,255,255,0.04)' : '#fff';
-  const subtleBg = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)';
+  const divider = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)';
+  const cardBg = isDark ? 'rgba(255,255,255,0.08)' : '#fff';
+  const subtleBg = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.03)';
   const typeCount = useMemo(() => new Set(instructions.map(i => i.type)).size, [instructions]);
 
   useEffect(() => {

@@ -15,7 +15,7 @@ export const PresentationBuilder = ({ theme, onDeckGenerated }) => {
     const [showSuggestions, setShowSuggestions] = useState(false);
     const textRef = useRef(null);
 
-    const accentBg = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.04)';
+    const accentBg = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.04)';
     const borderColor = theme.colors.border;
 
     const handleGenerate = useCallback(() => {
@@ -57,7 +57,7 @@ export const PresentationBuilder = ({ theme, onDeckGenerated }) => {
         <div className="px-4 pb-32 pt-1 space-y-4">
             {/* Header card */}
             <div className="rounded-3xl p-5 space-y-1"
-                style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.04)', border: `1px solid ${borderColor}` }}>
+                style={{ background: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.04)', border: `1px solid ${borderColor}` }}>
                 <div className="flex items-center gap-2.5">
                     <div className="w-9 h-9 rounded-[11px] flex items-center justify-center" style={{ background: theme.colors.accent }}>
                         <Sparkles className="w-4.5 h-4.5" style={{ color: theme.colors.accentText || (isDark ? '#1A1A1A' : '#FFF') }} />
@@ -77,7 +77,7 @@ export const PresentationBuilder = ({ theme, onDeckGenerated }) => {
                 {phase === 'idle' && (
                     <motion.div key="idle" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }} className="space-y-3">
                         {/* Textarea */}
-                        <div className="relative rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${prompt.length > 0 ? theme.colors.accent : borderColor}`, transition: 'border-color 0.2s', background: isDark ? 'rgba(255,255,255,0.04)' : '#FFFFFF', boxShadow: CARD_SHADOW }}>
+                        <div className="relative rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${prompt.length > 0 ? theme.colors.accent : borderColor}`, transition: 'border-color 0.2s', background: isDark ? 'rgba(255,255,255,0.08)' : '#FFFFFF', boxShadow: CARD_SHADOW }}>
                             <textarea
                                 ref={textRef}
                                 value={prompt}
@@ -153,7 +153,7 @@ export const PresentationBuilder = ({ theme, onDeckGenerated }) => {
                 {phase === 'generating' && (
                     <motion.div key="generating" initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.96 }} transition={{ duration: 0.25 }}
                         className="rounded-3xl p-10 flex flex-col items-center gap-5 text-center"
-                        style={{ background: isDark ? 'rgba(255,255,255,0.04)' : '#FFFFFF', border: `1px solid ${borderColor}`, boxShadow: CARD_SHADOW }}>
+                        style={{ background: isDark ? 'rgba(255,255,255,0.08)' : '#FFFFFF', border: `1px solid ${borderColor}`, boxShadow: CARD_SHADOW }}>
                         <div className="relative w-16 h-16">
                             <div className="absolute inset-0 rounded-full animate-ping opacity-20" style={{ background: theme.colors.accent }} />
                             <div className="relative w-16 h-16 rounded-full flex items-center justify-center" style={{ background: `${theme.colors.accent}22` }}>
@@ -185,7 +185,7 @@ export const PresentationBuilder = ({ theme, onDeckGenerated }) => {
 
                         {/* Generated deck preview */}
                         <div className="rounded-3xl overflow-hidden" style={{ background: isDark ? theme.colors.surface : '#FFFFFF', border: `1px solid ${borderColor}`, boxShadow: CARD_SHADOW }}>
-                            <div className="aspect-video w-full overflow-hidden" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : '#f0ede8' }}>
+                            <div className="aspect-video w-full overflow-hidden" style={{ background: isDark ? 'rgba(255,255,255,0.09)' : '#f0ede8' }}>
                                 <img src={generatedDeck.thumbnailUrl} alt={generatedDeck.title} className="w-full h-full object-cover" />
                             </div>
                             <div className="px-4 py-4 space-y-3">

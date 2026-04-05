@@ -21,7 +21,7 @@ import { usePersistentState } from '../../hooks/usePersistentState.js';
 // ─── Clean card helpers ───────────────────────────────────────────────────────────────
 const cardStyle = (dark) => ({
     backgroundColor: dark ? '#2A2A2A' : '#FFFFFF',
-    border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
+    border: dark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)',
     boxShadow: 'none',
 });
 
@@ -154,7 +154,7 @@ const CategoryCard = React.memo(({
                         className="px-5 py-2.5 text-xs font-medium"
                         style={{
                             color: theme.colors.textSecondary,
-                            borderTop: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.05)',
+                            borderTop: dark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.05)',
                         }}
                     >
                         {category.description}
@@ -360,7 +360,7 @@ const FamiliesView = React.memo(({ groupedSeries, theme, onSeriesClick, searchTe
                     <div
                         className="px-4 py-1.5"
                         style={{
-                            backgroundColor: dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
+                            backgroundColor: dark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.04)',
                             borderBottom: `1px solid ${theme.colors.border}`,
                         }}
                     >

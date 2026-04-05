@@ -381,7 +381,7 @@ export const HomeScreen = React.memo(({
         };
     }, [currentApps.length]);
 
-    const hoverBg = isDark ? 'hover:bg-white/[0.06]' : 'hover:bg-black/[0.03] dark:hover:bg-white/[0.03]';
+    const hoverBg = isDark ? 'hover:bg-white/[0.06]' : 'hover:bg-black/[0.03] dark:hover:bg-white/[0.08]';
     const chromePillStyles = getHomeChromePillStyles(isDark);
 
 

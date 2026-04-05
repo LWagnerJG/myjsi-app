@@ -29,8 +29,8 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
 
   const dark        = isDarkTheme(theme);
   const c           = theme.colors;
-  const border      = dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
-  const actionBg    = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)';
+  const border      = dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)';
+  const actionBg    = dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)';
 
   const hdrRef = useFadeUp(0);
   const tlRef  = useFadeUp(55);
@@ -177,7 +177,7 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
               <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: `1px solid ${border}` }}>
                 <span className="text-[12px] font-bold uppercase tracking-[0.07em]" style={{ color: c.textSecondary, opacity: 0.55 }}>Line Items</span>
                 <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
-                  style={{ backgroundColor: dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)', color: c.textSecondary }}>
+                  style={{ backgroundColor: dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.05)', color: c.textSecondary }}>
                   {order.lineItems.length} {order.lineItems.length === 1 ? 'product' : 'products'}
                 </span>
               </div>

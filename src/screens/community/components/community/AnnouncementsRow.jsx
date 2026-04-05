@@ -96,7 +96,7 @@ export const AnnouncementsRow = ({ announcements, theme, dark, onNavigate, onDis
                 transition={{ duration: 0.2 }}
                 className="relative flex-shrink-0 rounded-xl"
                 style={{
-                  backgroundColor: dark ? 'rgba(255,255,255,0.05)' : theme.colors.surface,
+                  backgroundColor: dark ? 'rgba(255,255,255,0.09)' : theme.colors.surface,
                   border: `1px solid ${dark ? 'rgba(255,255,255,0.1)' : theme.colors.border}`,
                   minWidth: 172,
                   maxWidth: 232,

@@ -49,7 +49,7 @@ export const RfpDropModal = ({ show, onClose, onAccept, file, theme }) => {
           <div
             className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl w-full"
             style={{
-              backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+              backgroundColor: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.03)',
               border: `1px solid ${c.border}`,
             }}
           >

@@ -76,7 +76,7 @@ export const DirectoryModal = ({ show, onClose, onSelect, theme, dealers = [], d
                     {/* Header */}
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.04)' }}>
+                            <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.04)' }}>
                                 <Building2 className="w-4.5 h-4.5" style={{ color: theme.colors.accent }} />
                             </div>
                             <div>
@@ -84,7 +84,7 @@ export const DirectoryModal = ({ show, onClose, onSelect, theme, dealers = [], d
                                 <p className="text-xs" style={{ color: theme.colors.textSecondary }}>Select a saved address</p>
                             </div>
                         </div>
-                        <button onClick={onClose} aria-label="Close" className="w-8 h-8 rounded-full flex items-center justify-center active:scale-95 transition" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}>
+                        <button onClick={onClose} aria-label="Close" className="w-8 h-8 rounded-full flex items-center justify-center active:scale-95 transition" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)' }}>
                             <X className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
                         </button>
                     </div>
@@ -96,7 +96,7 @@ export const DirectoryModal = ({ show, onClose, onSelect, theme, dealers = [], d
                             onChange={(e) => setQ(e.target.value)}
                             placeholder="Search by name or address..."
                             className="w-full rounded-2xl pl-10 pr-4 py-3 text-[13px] outline-none border transition focus:ring-2"
-                            style={{ background: isDark ? 'rgba(255,255,255,0.04)' : theme.colors.inputBackground, border: `1px solid ${theme.colors.border}`, color: theme.colors.textPrimary, focusRingColor: theme.colors.accent }}
+                            style={{ background: isDark ? 'rgba(255,255,255,0.08)' : theme.colors.inputBackground, border: `1px solid ${theme.colors.border}`, color: theme.colors.textPrimary, focusRingColor: theme.colors.accent }}
                         />
                         <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: theme.colors.textSecondary }} />
                     </div>
@@ -109,11 +109,11 @@ export const DirectoryModal = ({ show, onClose, onSelect, theme, dealers = [], d
                                 onClick={() => { onSelect({ name: it.name, address1: it.address || '' }); onClose(); }}
                                 className="w-full text-left px-4 py-3 rounded-2xl group transition-all active:scale-[0.99]"
                                 style={{ backgroundColor: 'transparent' }}
-                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.025)'; }}
+                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.025)'; }}
                                 onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; }}
                             >
                                 <div className="flex items-start gap-3">
-                                    <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center mt-0.5" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.04)' }}>
+                                    <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center mt-0.5" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.04)' }}>
                                         <Building2 className="w-3.5 h-3.5" style={{ color: theme.colors.textSecondary }} />
                                     </div>
                                     <div className="flex-1 min-w-0">
@@ -134,7 +134,7 @@ export const DirectoryModal = ({ show, onClose, onSelect, theme, dealers = [], d
                         ))}
                         {items.length === 0 && (
                             <div className="flex flex-col items-center py-8">
-                                <div className="w-12 h-12 rounded-full flex items-center justify-center mb-3" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.04)' }}>
+                                <div className="w-12 h-12 rounded-full flex items-center justify-center mb-3" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(53,53,53,0.04)' }}>
                                     <Search className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
                                 </div>
                                 <p className="text-[13px] font-medium" style={{ color: theme.colors.textSecondary }}>No companies found</p>

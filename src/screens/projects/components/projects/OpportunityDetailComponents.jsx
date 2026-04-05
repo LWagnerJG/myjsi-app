@@ -7,8 +7,8 @@ import { JSI_SERIES } from '../../../../products/data.js';
 import { STAGES, VERTICALS, COMPETITORS, PO_TIMEFRAMES, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS } from '../../../data.js';
 
 export const SectionCard = ({ children, isDark, className = '' }) => {
-  const cardBg = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.72)';
-  const cardBorder = isDark ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(0,0,0,0.06)';
+  const cardBg = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.72)';
+  const cardBorder = isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(0,0,0,0.06)';
   return (
     <div className={className} style={{ backgroundColor: cardBg, border: cardBorder, borderRadius: 24, padding: '20px' }}>
       {children}

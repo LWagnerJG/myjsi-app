@@ -171,7 +171,7 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                             onClick={toggleFull}
                             className="w-full rounded-2xl transition-all duration-200 active:scale-[0.99] overflow-hidden group"
                             style={{
-                                backgroundColor: fullQty > 0 ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.04)' : theme.colors.surface),
+                                backgroundColor: fullQty > 0 ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.08)' : theme.colors.surface),
                                 border: fullQty > 0 ? `2px solid ${theme.colors.accent}` : `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : theme.colors.border}`,
                                 boxShadow: fullQty > 0 ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
                             }}
@@ -180,7 +180,7 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                                 <div
                                     className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
                                     style={{
-                                        backgroundColor: fullQty > 0 ? 'rgba(255,255,255,0.15)' : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.04)'),
+                                        backgroundColor: fullQty > 0 ? 'rgba(255,255,255,0.15)' : (isDark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.04)'),
                                     }}
                                 >
                                     <Layers className="w-5 h-5" style={{ color: fullQty > 0 ? theme.colors.accentText : theme.colors.accent }} />
@@ -197,7 +197,7 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                                     {fullQty > 0 ? (
                                         <CheckCircle className="w-5 h-5" style={{ color: theme.colors.accentText }} />
                                     ) : (
-                                        <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.04)' }}>
+                                        <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.04)' }}>
                                             <Plus className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
                                         </div>
                                     )}

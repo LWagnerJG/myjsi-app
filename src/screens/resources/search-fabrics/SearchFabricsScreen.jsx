@@ -459,7 +459,7 @@ export const SearchFabricsScreen = ({ theme, onNavigate, onUpdateCart }) => {
 
               {results.length === 0 ? (
                 <div className="flex items-center gap-3 px-4 py-4">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.04)' }}>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(53,53,53,0.04)' }}>
                     <SearchX className="w-5 h-5" style={{ color: theme.colors.textSecondary, opacity: 0.5 }} />
                   </div>
                   <div>

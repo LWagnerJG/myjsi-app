@@ -181,7 +181,7 @@ export const AddNewInstallScreen = ({ theme, onAddInstall }) => {
                                                 onClick={() => handleSelectPrediction(p)}
                                                 className="block w-full text-left px-3 py-2 rounded-xl transition-colors"
                                                 style={{ color: theme.colors.textPrimary }}
-                                                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'; }}
+                                                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)'; }}
                                                 onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
                                             >
                                                 {p.description}
@@ -209,11 +209,11 @@ export const AddNewInstallScreen = ({ theme, onAddInstall }) => {
                                     className="w-full min-h-[220px] rounded-3xl border-2 border-dashed flex flex-col items-center justify-center gap-3 transition-colors motion-tap"
                                     style={{
                                         borderColor: theme.colors.border,
-                                        backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : theme.colors.subtle,
+                                        backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : theme.colors.subtle,
                                         color: theme.colors.textSecondary,
                                     }}
                                 >
-                                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)' }}>
+                                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.05)' }}>
                                         <Upload className="w-6 h-6" />
                                     </div>
                                     <span className="font-semibold text-[14px]" style={{ color: theme.colors.textPrimary }}>Add Photos</span>
@@ -249,7 +249,7 @@ export const AddNewInstallScreen = ({ theme, onAddInstall }) => {
                                             style={{
                                                 borderColor: theme.colors.border,
                                                 color: theme.colors.textSecondary,
-                                                backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : theme.colors.subtle,
+                                                backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : theme.colors.subtle,
                                             }}
                                         >
                                             <ImageIcon className="w-5 h-5" />

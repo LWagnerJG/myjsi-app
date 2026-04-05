@@ -89,7 +89,7 @@ export const MakersStudioTab = ({ theme }) => {
               JSI Makers Studio
             </span>
             <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
-              style={{ backgroundColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)', color: theme.colors.textSecondary }}>
+              style={{ backgroundColor: dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.05)', color: theme.colors.textSecondary }}>
               Quiet Prestige
             </span>
           </div>

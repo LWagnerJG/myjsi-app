@@ -160,7 +160,7 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
 
                 {/* Divider */}
                 {!isLast && (
-                    <div className="mx-4" style={{ height: 1, backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)' }} />
+                    <div className="mx-4" style={{ height: 1, backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)' }} />
                 )}
             </button>
         );
@@ -243,7 +243,7 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
                             <button
                                 onClick={() => setSelectedFinish(null)}
                                 className="flex-1 font-semibold py-2.5 rounded-full text-[13px] motion-tap active:scale-[0.98] transition-all"
-                                style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : theme.colors.subtle, color: text }}
+                                style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : theme.colors.subtle, color: text }}
                             >
                                 Cancel
                             </button>

@@ -33,7 +33,7 @@ export const HomeFeatureContent = ({
                                 onNavigate(`community/post/${post.id}`);
                             }}
                             className={`w-full p-3 rounded-2xl text-left ${hoverBg} transition-colors`}
-                            style={{ border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)' }}
+                            style={{ border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)' }}
                         >
                             <div className="flex items-start gap-3">
                                 {(() => {
@@ -64,7 +64,7 @@ export const HomeFeatureContent = ({
                     <div className="flex flex-col items-center justify-center py-5 text-center gap-2">
                         <div
                             className="w-10 h-10 rounded-xl flex items-center justify-center"
-                            style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}
+                            style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)' }}
                         >
                             <Users className="w-5 h-5" style={{ color: colors.textSecondary, opacity: 0.45 }} />
                         </div>
@@ -89,7 +89,7 @@ export const HomeFeatureContent = ({
                             key={`${item.series}-${item.type}`}
                             onClick={() => onNavigate('resources/lead-times')}
                             className={`w-full flex items-center justify-between p-3 rounded-2xl ${hoverBg} transition-colors`}
-                            style={{ border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)' }}
+                            style={{ border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)' }}
                         >
                             <div className="text-left">
                                 <div className="text-sm font-semibold" style={{ color: colors.textPrimary }}>{item.series}</div>
@@ -102,7 +102,7 @@ export const HomeFeatureContent = ({
                     <div className="flex flex-col items-center justify-center py-5 text-center gap-2">
                         <div
                             className="w-10 h-10 rounded-xl flex items-center justify-center"
-                            style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}
+                            style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)' }}
                         >
                             <Clock className="w-5 h-5" style={{ color: colors.textSecondary, opacity: 0.45 }} />
                         </div>
@@ -135,7 +135,7 @@ export const HomeFeatureContent = ({
                             key={ann.id}
                             onClick={() => ann.actionRoute ? onNavigate(ann.actionRoute) : onNavigate('community')}
                             className={`w-full flex items-start gap-3 p-3 rounded-2xl text-left ${hoverBg} transition-colors`}
-                            style={{ border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)', borderLeft: `3px solid ${accentColor}` }}
+                            style={{ border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)', borderLeft: `3px solid ${accentColor}` }}
                         >
                             <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${accentColor}15`, color: accentColor }}>
                                 <Icon className="w-3.5 h-3.5" />
@@ -166,7 +166,7 @@ export const HomeFeatureContent = ({
                                 key={category.nav}
                                 onClick={() => onNavigate(category.nav)}
                                 className={`w-full flex items-center gap-3 p-3 rounded-2xl text-left ${hoverBg} transition-colors`}
-                                style={{ border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)' }}
+                                style={{ border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)' }}
                             >
                                 <div className="w-11 h-11 rounded-xl overflow-hidden flex-shrink-0">
                                     <img
@@ -212,7 +212,7 @@ export const HomeFeatureContent = ({
                                 key={project.id}
                                 onClick={() => onNavigate(`projects/${project.id}`)}
                                 className={`w-full flex items-center gap-3 p-3 rounded-2xl text-left ${hoverBg} transition-colors`}
-                                style={{ border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)' }}
+                                style={{ border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)' }}
                             >
                                 <div className="flex-1 min-w-0">
                                     <div className="text-sm font-semibold truncate" style={{ color: colors.textPrimary }}>
@@ -241,7 +241,7 @@ export const HomeFeatureContent = ({
                     <button
                         onClick={() => onNavigate('projects')}
                         className={`w-full p-3 rounded-2xl text-left ${hoverBg} transition-colors`}
-                        style={{ border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)' }}
+                        style={{ border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)' }}
                     >
                         <div className="text-sm font-semibold" style={{ color: colors.textPrimary }}>No active projects yet</div>
                         <div className="text-xs" style={{ color: colors.textSecondary }}>Tap to open Projects and create one</div>
@@ -277,9 +277,9 @@ export const HomeFeatureContent = ({
                         key={p.id}
                         onClick={() => onNavigate('marketplace')}
                         className={`w-full flex items-center gap-3 p-3 rounded-2xl text-left ${hoverBg} transition-colors`}
-                        style={{ border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)' }}
+                        style={{ border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)' }}
                     >
-                        <div className="w-11 h-11 rounded-xl overflow-hidden flex-shrink-0" style={{ border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)' }}>
+                        <div className="w-11 h-11 rounded-xl overflow-hidden flex-shrink-0" style={{ border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)' }}>
                             <img src={p.image} alt={p.name} className="w-full h-full object-cover" />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -299,7 +299,7 @@ export const HomeFeatureContent = ({
             <div className="flex flex-col items-center justify-center py-5 text-center gap-2">
                 <div
                     className="w-10 h-10 rounded-xl flex items-center justify-center"
-                    style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}
+                    style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)' }}
                 >
                     <Package className="w-5 h-5" style={{ color: colors.textSecondary, opacity: 0.45 }} />
                 </div>
@@ -327,7 +327,7 @@ export const HomeFeatureContent = ({
                     key={order.orderNumber}
                     onClick={() => onNavigate(`orders/${order.orderNumber}`)}
                     className={`w-full ${hiddenOnMobile} items-center gap-3 py-3.5 px-1 ${hoverBg} transition-colors`}
-                    style={i > 0 ? { borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'}` } : undefined}
+                    style={i > 0 ? { borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.05)'}` } : undefined}
                 >
                     {/* Status dot */}
                     <div className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${statusColor}14` }}>

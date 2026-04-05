@@ -15,7 +15,7 @@ const TYPICAL_MULTIPLIERS = { 'U-Shape': 1, 'L-Shape': 0.92, 'Single Ped Desk': 
 // ─── Clean card helpers (consistent surfaces) ───────────────────────────────
 const glassStyle = (theme, dark) => ({
   backgroundColor: dark ? '#2A2A2A' : '#FFFFFF',
-  border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
+  border: dark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)',
   boxShadow: 'none',
 });
 
@@ -198,7 +198,7 @@ const GlassSegmentedToggle = React.memo(({ options, value, onChange, theme }) =>
     <div
       className="relative flex h-10 rounded-xl p-0.5 overflow-hidden"
       style={{
-        backgroundColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+        backgroundColor: dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)',
       }}
     >
       {/* Sliding indicator */}
@@ -332,7 +332,7 @@ const PricingTable = React.memo(({
       )}
 
       {/* Divider */}
-      <div className="mx-4" style={{ height: 1, backgroundColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }} />
+      <div className="mx-4" style={{ height: 1, backgroundColor: dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)' }} />
 
       {/* Column headers */}
       <div className="px-4 pt-3 pb-1 flex items-center justify-between">
@@ -357,11 +357,11 @@ const PricingTable = React.memo(({
               style={{
                 cursor: active ? 'default' : 'pointer',
                 backgroundColor: active
-                  ? (dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)')
+                  ? (dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.03)')
                   : 'transparent',
               }}
               onMouseEnter={(e) => {
-                if (!active) e.currentTarget.style.backgroundColor = dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)';
+                if (!active) e.currentTarget.style.backgroundColor = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.02)';
               }}
               onMouseLeave={(e) => {
                 if (!active) e.currentTarget.style.backgroundColor = 'transparent';

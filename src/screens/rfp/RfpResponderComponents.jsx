@@ -86,7 +86,7 @@ export const UploadStage = ({ file, onFileSelect, onFileRemove, onAnalyze, theme
             ? `2px dashed ${c.accent || '#353535'}`
             : `2px dashed ${c.border || '#E3E0D8'}`,
           backgroundColor: dragOver
-            ? (isDark ? 'rgba(255,255,255,0.04)' : 'rgba(53,53,53,0.03)')
+            ? (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.03)')
             : 'transparent',
           transition: 'border-color 200ms ease, background-color 200ms ease',
         }}
@@ -330,8 +330,8 @@ export const ClarificationStage = ({
               <div
                 className="rounded-xl mb-5 px-5 py-4"
                 style={{
-                  backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(53,53,53,0.03)',
-                  border: `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'}`,
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.03)',
+                  border: `1px solid ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)'}`,
                 }}
               >
                 <div
@@ -370,7 +370,7 @@ export const ClarificationStage = ({
                   style={{
                     backgroundColor: isSelected
                       ? (c.accent || '#353535')
-                      : (isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)'),
+                      : (isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.03)'),
                     border: `1.5px solid ${isSelected ? (c.accent || '#353535') : (c.border || '#E3E0D8')}`,
                     color: isSelected
                       ? (c.accentText || '#fff')
@@ -444,7 +444,7 @@ const DocField = ({ value, onChange, multiline = false, className = '', style: s
       style={{
         color: c.textPrimary,
         background: focused
-          ? (isDark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.035)')
+          ? (isDark ? 'rgba(255,255,255,0.09)' : 'rgba(53,53,53,0.035)')
           : 'transparent',
         padding: '4px 6px',
         margin: '0 -6px',
@@ -684,7 +684,7 @@ export const ResponseBuilder = ({ data, onChange, partnerItems, onPartnerItemCha
         <div
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
           style={{
-            backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.05)',
+            backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.05)',
             color: c.textSecondary,
             fontSize: '11px',
             fontWeight: 500,
@@ -789,7 +789,7 @@ export const ResponseBuilder = ({ data, onChange, partnerItems, onPartnerItemCha
       {/* ── Print / export styles ── */}
       <style>{`
         .rfp-editable-field:hover {
-          background: ${isDark ? 'rgba(255,255,255,0.04)' : 'rgba(53,53,53,0.025)'} !important;
+          background: ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.025)'} !important;
           border-bottom-color: ${isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)'} !important;
           border-bottom-style: dashed !important;
         }
@@ -989,7 +989,7 @@ function renderProductCards(items, { c, isDark, compact = false, theme, updateTy
                 width: imgW, height: imgH, borderRadius: 6,
                 border: `1px solid ${c.border}`, flexShrink: 0,
                 overflow: 'hidden',
-                backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)',
+                backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.02)',
               }}>
                 {t.image
                   ? <img src={t.image} alt={t.series} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -1018,8 +1018,8 @@ function renderProductCards(items, { c, isDark, compact = false, theme, updateTy
 
                 {/* RFP requirement — editable */}
                 <div style={{
-                  backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(53,53,53,0.03)',
-                  border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(53,53,53,0.03)',
+                  border: `1px solid ${isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)'}`,
                   borderRadius: 4, padding: '5px 8px',
                 }}>
                   <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: c.textSecondary, opacity: 0.5 }}>RFP</span>
@@ -1125,8 +1125,8 @@ function renderPartnerItemCard(item, { c, isDark, onPartnerItemChange, theme }) 
           </span>
         </div>
         <div style={{
-          backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(53,53,53,0.03)',
-          border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+          backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(53,53,53,0.03)',
+          border: `1px solid ${isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)'}`,
           borderRadius: 4, padding: '5px 7px', marginBottom: '6px',
         }}>
           <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: c.textSecondary, opacity: 0.5 }}>RFP</span>

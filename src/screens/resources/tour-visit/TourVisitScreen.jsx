@@ -35,8 +35,8 @@ const buildDefaultExperienceSelections = () =>
         ])
     );
 
-const fieldSurf = (dark) => dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)';
-const bdr       = (dark) => dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+const fieldSurf = (dark) => dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.03)';
+const bdr       = (dark) => dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)';
 const eyebrow   = (c) => ({ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: c.textSecondary, opacity: 0.55 });
 
 const isRepAttendee = (guest) => guest.isSelf || Boolean(guest.linkedMemberId);

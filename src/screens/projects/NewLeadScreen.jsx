@@ -971,7 +971,7 @@ export const NewLeadScreen = ({
                           <span
                             className="text-[11px] font-bold w-5 h-5 rounded-full flex items-center justify-center shrink-0"
                             style={{
-                              backgroundColor: isSelected ? 'rgba(255,255,255,0.2)' : isPast ? `${c.accent}20` : dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)',
+                              backgroundColor: isSelected ? 'rgba(255,255,255,0.2)' : isPast ? `${c.accent}20` : dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)',
                               color: isSelected ? c.accentText : isPast ? c.accent : c.textSecondary,
                             }}
                           >
@@ -1659,7 +1659,7 @@ export const NewLeadScreen = ({
                   className="rounded-2xl border border-dashed px-4 py-4 transition-colors cursor-pointer"
                   style={{
                     borderColor: dragActive ? c.accent : subtleBorder,
-                    backgroundColor: dragActive ? `${c.accent}12` : (dark ? 'rgba(255,255,255,0.03)' : 'transparent'),
+                    backgroundColor: dragActive ? `${c.accent}12` : (dark ? 'rgba(255,255,255,0.12)' : 'transparent'),
                   }}
                 >
                   <div className="flex items-center gap-3">
@@ -1759,7 +1759,7 @@ export const NewLeadScreen = ({
                     {groups.map((group, gi) => (
                       <React.Fragment key={group.stepIdx}>
                         {gi > 0 && (
-                          <div className="flex items-center gap-2 px-3.5 py-1" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.025)' }}>
+                          <div className="flex items-center gap-2 px-3.5 py-1" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.025)' }}>
                             <div className="flex-1 h-px" style={{ backgroundColor: subtleBorder }} />
                             <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: c.textSecondary, opacity: 0.4 }}>
                               {['Basics', 'Scope', 'Details'][group.stepIdx]}
@@ -1772,7 +1772,7 @@ export const NewLeadScreen = ({
                             key={item.label}
                             type="button"
                             onClick={() => animateToStep(item.step)}
-                            className="w-full flex items-center gap-3 px-3.5 text-left active:bg-black/[0.04] dark:active:bg-white/[0.04] transition-colors"
+                            className="w-full flex items-center gap-3 px-3.5 text-left active:bg-black/[0.04] dark:active:bg-white/[0.08] transition-colors"
                             style={{
                               paddingTop: 11,
                               paddingBottom: 11,

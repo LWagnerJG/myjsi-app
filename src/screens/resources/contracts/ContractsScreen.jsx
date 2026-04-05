@@ -38,7 +38,7 @@ const IconBtn = ({ icon: Icon, title, onClick, theme, dark }) => (
         onClick={onClick}
         title={title}
         className="w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-90"
-        style={{ backgroundColor: dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)' }}
+        style={{ backgroundColor: dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.05)' }}
     >
         <Icon className="w-[15px] h-[15px]" style={{ color: theme.colors.textSecondary }} />
     </button>
@@ -48,7 +48,7 @@ const IconBtn = ({ icon: Icon, title, onClick, theme, dark }) => (
 const CardHeader = ({ children, theme, dark, right }) => (
     <div
         className="flex items-center justify-between px-5 py-3"
-        style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'}` }}
+        style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)'}` }}
     >
         <span
             className="text-[13px] font-bold uppercase tracking-[0.07em]"
@@ -82,7 +82,7 @@ export const ContractsScreen = ({ theme, setSuccessMessage }) => {
         else { await navigator.clipboard.writeText(url); feedback('Link copied'); }
     }, [feedback]);
 
-    const subtleBorder = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)';
+    const subtleBorder = dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.05)';
 
     return (
         <div className="flex h-full flex-col app-header-offset" style={{ backgroundColor: theme.colors.background }}>
@@ -91,7 +91,7 @@ export const ContractsScreen = ({ theme, setSuccessMessage }) => {
             <div className="px-4 pt-3 pb-3">
                 <div
                     className="flex rounded-full p-1"
-                    style={{ backgroundColor: dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)' }}
+                    style={{ backgroundColor: dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.05)' }}
                 >
                     {TABS.map(t => {
                         const on = active === t.value;
@@ -270,7 +270,7 @@ export const ContractsScreen = ({ theme, setSuccessMessage }) => {
                                                 <div className="flex items-center gap-3 min-w-0">
                                                     <div
                                                         className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
-                                                        style={{ backgroundColor: dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)' }}
+                                                        style={{ backgroundColor: dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.05)' }}
                                                     >
                                                         <FileText className="w-4 h-4" style={{ color: theme.colors.textSecondary, opacity: 0.6 }} />
                                                     </div>

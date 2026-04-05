@@ -105,7 +105,7 @@ export const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, d
                             {/* Items section */}
                             <div>
                                 <p className="text-xs font-bold uppercase tracking-widest mb-2 px-1" style={{ color: theme.colors.textSecondary, letterSpacing: '0.06em' }}>Items</p>
-                                <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.015)', border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'}` }}>
+                                <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.015)', border: `1px solid ${isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)'}` }}>
                                     <div className="px-2 py-1">
                                         {cartItems.map((item, idx) => (<DrawerItem key={item.id} item={item} onUpdateCart={onUpdateCart} theme={theme} isLast={idx === 0} />))}
                                     </div>
@@ -120,9 +120,9 @@ export const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, d
                                         <button
                                             onClick={() => setShowDir(true)}
                                             className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full active:scale-95 transition-all"
-                                            style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.04)', color: theme.colors.textPrimary }}
+                                            style={{ background: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.04)', color: theme.colors.textPrimary }}
                                             onMouseEnter={e => { e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)'; }}
-                                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.04)'; }}
+                                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.04)'; }}
                                         >
                                             <Building2 className="w-3 h-3" style={{ color: theme.colors.accent }} />
                                             Directory
@@ -130,9 +130,9 @@ export const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, d
                                         <button
                                             onClick={() => { safeSetShipTo('Home'); safeSetAddress1(userSettings?.homeAddress || ''); safeSetAddress2(''); }}
                                             className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full active:scale-95 transition-all"
-                                            style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.04)', color: theme.colors.textPrimary }}
+                                            style={{ background: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.04)', color: theme.colors.textPrimary }}
                                             onMouseEnter={e => { e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)'; }}
-                                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.04)'; }}
+                                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.04)'; }}
                                         >
                                             <Home className="w-3 h-3" style={{ color: theme.colors.accent }} />
                                             Home
@@ -142,15 +142,15 @@ export const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, d
                                 <div className="space-y-2">
                                     <div className="relative">
                                         <label className="absolute left-4 top-1.5 text-[10px] font-bold uppercase tracking-wider" style={{ color: theme.colors.textSecondary }}>Recipient / Company</label>
-                                        <input value={shipToName || ''} onChange={(e) => safeSetShipTo(e.target.value)} className="w-full rounded-2xl px-4 pt-5 pb-2.5 text-[13px] outline-none border transition focus:ring-2" style={{ background: isDark ? 'rgba(255,255,255,0.04)' : theme.colors.inputBackground, borderColor: theme.colors.border, color: theme.colors.textPrimary }} />
+                                        <input value={shipToName || ''} onChange={(e) => safeSetShipTo(e.target.value)} className="w-full rounded-2xl px-4 pt-5 pb-2.5 text-[13px] outline-none border transition focus:ring-2" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : theme.colors.inputBackground, borderColor: theme.colors.border, color: theme.colors.textPrimary }} />
                                     </div>
                                     <div className="relative">
                                         <label className="absolute left-4 top-1.5 text-[10px] font-bold uppercase tracking-wider" style={{ color: theme.colors.textSecondary }}>Street Address</label>
-                                        <input value={address1 || ''} onChange={(e) => safeSetAddress1(e.target.value)} className="w-full rounded-2xl px-4 pt-5 pb-2.5 text-[13px] outline-none border transition focus:ring-2" style={{ background: isDark ? 'rgba(255,255,255,0.04)' : theme.colors.inputBackground, borderColor: theme.colors.border, color: theme.colors.textPrimary }} />
+                                        <input value={address1 || ''} onChange={(e) => safeSetAddress1(e.target.value)} className="w-full rounded-2xl px-4 pt-5 pb-2.5 text-[13px] outline-none border transition focus:ring-2" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : theme.colors.inputBackground, borderColor: theme.colors.border, color: theme.colors.textPrimary }} />
                                     </div>
                                     <div className="relative">
                                         <label className="absolute left-4 top-1.5 text-[10px] font-bold uppercase tracking-wider" style={{ color: theme.colors.textSecondary }}>Suite / Unit (optional)</label>
-                                        <input value={address2 || ''} onChange={(e) => safeSetAddress2(e.target.value)} className="w-full rounded-2xl px-4 pt-5 pb-2.5 text-[13px] outline-none border transition focus:ring-2" style={{ background: isDark ? 'rgba(255,255,255,0.04)' : theme.colors.inputBackground, borderColor: theme.colors.border, color: theme.colors.textPrimary }} />
+                                        <input value={address2 || ''} onChange={(e) => safeSetAddress2(e.target.value)} className="w-full rounded-2xl px-4 pt-5 pb-2.5 text-[13px] outline-none border transition focus:ring-2" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : theme.colors.inputBackground, borderColor: theme.colors.border, color: theme.colors.textPrimary }} />
                                     </div>
                                 </div>
                             </div>
@@ -161,7 +161,7 @@ export const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, d
                                 onClick={submit}
                                 className="w-full px-5 py-3.5 rounded-full text-[13px] font-bold transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
                                 style={{
-                                    backgroundColor: canSubmit ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.06)' : theme.colors.border),
+                                    backgroundColor: canSubmit ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.10)' : theme.colors.border),
                                     color: canSubmit ? theme.colors.accentText : theme.colors.textSecondary,
                                     boxShadow: 'none',
                                 }}

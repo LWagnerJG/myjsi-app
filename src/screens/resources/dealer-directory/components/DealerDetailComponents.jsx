@@ -27,7 +27,7 @@ export const HBar = ({ label, value, maxValue, color, isDark, colors, rank }) =>
             </span>
             <div
                 className="flex-1 rounded-full overflow-hidden"
-                style={{ height: 5, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }}
+                style={{ height: 5, backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.05)' }}
             >
                 <div
                     className="h-full rounded-full transition-all duration-500"

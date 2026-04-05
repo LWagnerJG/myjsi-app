@@ -137,7 +137,7 @@ export const AppGrid = ({
                             style={{
                                 minHeight: 88,
                                 backgroundColor: colors.tileSurface,
-                                border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
+                                border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)',
                             }}
                         >
                             <div
@@ -173,7 +173,7 @@ export const AppGrid = ({
                         aria-label="Customize home apps"
                         className="flex items-center gap-2 px-5 py-2 rounded-full transition-all active:scale-95"
                         style={{
-                            backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                            backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)',
                             color: colors.textSecondary,
                         }}
                     >
@@ -214,8 +214,8 @@ const AvailableAppsList = ({ availableApps, toggleApp, colors, isDark }) => {
                 <div
                     className="w-4 h-4 rounded-full flex items-center justify-center shrink-0"
                     style={{
-                        backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
-                        border: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.04)',
+                        backgroundColor: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.04)',
+                        border: isDark ? '1px solid rgba(255,255,255,0.09)' : '1px solid rgba(0,0,0,0.04)',
                     }}
                 >
                     <Plus className="w-2.5 h-2.5" style={{ opacity: 0.7 }} />
@@ -233,11 +233,11 @@ const AvailableAppsList = ({ availableApps, toggleApp, colors, isDark }) => {
                                 onClick={() => toggleApp(app.route)}
                                 className="w-full flex items-center gap-2 px-3 py-2.5 rounded-2xl text-[12px] font-semibold transition-all active:scale-[0.97]"
                                 style={{
-                                    backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
+                                    backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.03)',
                                     color: colors.textSecondary,
                                     border: isActive
                                         ? `1px solid ${colors.accent}30`
-                                        : `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'}`,
+                                        : `1px solid ${isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.04)'}`,
                                 }}
                             >
                                 <Plus className="w-3.5 h-3.5 opacity-30 shrink-0" />

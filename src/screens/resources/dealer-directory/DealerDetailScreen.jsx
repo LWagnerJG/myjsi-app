@@ -28,7 +28,7 @@ const initials  = (name) => name.split(' ').slice(0, 2).map(w => w[0]).join('').
 const CardHeader = ({ children, right, dark, colors }) => (
     <div
         className="flex items-center justify-between px-5 py-3"
-        style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'}` }}
+        style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)'}` }}
     >
         <span
             className="text-[12px] font-bold uppercase tracking-[0.07em]"
@@ -179,7 +179,7 @@ export const DealerDetailScreen = ({
     const maxSeriesAmt  = dealer.seriesSales?.[0]?.amount || 1;
     const totalVert     = dealer.verticalSales?.reduce((s, v) => s + v.value, 0) || 0;
     const discountShort = dealer.dailyDiscount?.split(' ')?.[0] || dealer.dailyDiscount || '—';
-    const subtleBorder  = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)';
+    const subtleBorder  = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.05)';
 
     return (
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: colors.background }}>
@@ -308,7 +308,7 @@ export const DealerDetailScreen = ({
                         </div>
                         <div
                             className="w-full rounded-full overflow-hidden"
-                            style={{ height: 10, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }}
+                            style={{ height: 10, backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.05)' }}
                         >
                             <div
                                 className="h-full rounded-full transition-all duration-700"
@@ -338,7 +338,7 @@ export const DealerDetailScreen = ({
                                     <p
                                         className="text-[12px] leading-relaxed mb-3 px-3 py-2.5 rounded-xl"
                                         style={{
-                                            backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(91,123,140,0.05)',
+                                            backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(91,123,140,0.05)',
                                             color: colors.textSecondary,
                                         }}
                                     >
@@ -347,7 +347,7 @@ export const DealerDetailScreen = ({
                                 )}
                                 <div
                                     className="w-full rounded-full overflow-hidden"
-                                    style={{ height: 6, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)' }}
+                                    style={{ height: 6, backgroundColor: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.04)' }}
                                 >
                                     <div
                                         className="h-full rounded-full transition-all duration-700"

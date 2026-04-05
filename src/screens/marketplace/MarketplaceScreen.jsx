@@ -41,7 +41,7 @@ const EARNING_PROGRAMS = [
 
 const EmptyState = ({ icon: Icon, title, description, actionLabel, onAction, theme, isDark }) => (
   <GlassCard theme={theme} className="py-14 px-6 text-center">
-    <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.04)' }}>
+    <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(53,53,53,0.04)' }}>
       <Icon className="w-7 h-7" style={{ color: theme.colors.textSecondary }} />
     </div>
     <p className="text-sm font-semibold mb-1" style={{ color: theme.colors.textPrimary }}>{title}</p>
@@ -261,7 +261,7 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
                     className="w-full pl-10 pr-10 py-3 text-[13px] outline-none transition"
                     style={{
                       borderRadius: 9999,
-                      background: isDark ? 'rgba(255,255,255,0.05)' : theme.colors.inputBackground,
+                      background: isDark ? 'rgba(255,255,255,0.09)' : theme.colors.inputBackground,
                       border: `1px solid ${theme.colors.border}`,
                       color: theme.colors.textPrimary,
                     }}
@@ -292,7 +292,7 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
                         onClick={() => setSelectedCategory(category.id)}
                         className="px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all active:scale-95 flex-shrink-0"
                         style={{
-                          backgroundColor: active ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.04)' : 'rgba(53,53,53,0.03)'),
+                          backgroundColor: active ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.03)'),
                           color: active ? theme.colors.accentText : theme.colors.textSecondary,
                           border: `1px solid ${active ? theme.colors.accent : theme.colors.border}`,
                         }}
@@ -345,7 +345,7 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
                     </h3>
                   </div>
 
-                  <div className="rounded-2xl px-4 py-3" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(53,53,53,0.03)' }}>
+                  <div className="rounded-2xl px-4 py-3" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.03)' }}>
                     <p className="text-[10px] font-bold uppercase tracking-[0.16em]" style={{ color: theme.colors.textSecondary }}>
                       Orders placed
                     </p>
@@ -359,7 +359,7 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
                     const SummaryIcon = summary.icon;
 
                     return (
-                      <div key={summary.key} className="rounded-2xl p-3 text-center" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(53,53,53,0.02)' }}>
+                      <div key={summary.key} className="rounded-2xl p-3 text-center" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(53,53,53,0.02)' }}>
                         <div className="w-9 h-9 rounded-2xl mx-auto mb-2 flex items-center justify-center" style={{ backgroundColor: summary.bg }}>
                           <SummaryIcon className="w-4 h-4" style={{ color: summary.color }} />
                         </div>
@@ -410,7 +410,7 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
                     <p className="text-sm font-semibold mt-2" style={{ color: theme.colors.textPrimary }}>Recent activity</p>
                   </div>
 
-                  <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.03)', color: theme.colors.textSecondary }}>
+                  <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(53,53,53,0.03)', color: theme.colors.textSecondary }}>
                     {txnHistory.length} entries
                   </span>
                 </div>
@@ -436,7 +436,7 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
                 <div className="space-y-0">
                   {EARNING_PROGRAMS.map((item, index) => (
                     <div key={item.title} className={`flex items-start gap-3 py-3 ${index !== EARNING_PROGRAMS.length - 1 ? 'border-b' : ''}`} style={{ borderColor: theme.colors.border }}>
-                      <div className="w-8 h-8 rounded-2xl flex-shrink-0 flex items-center justify-center mt-0.5" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.04)' }}>
+                      <div className="w-8 h-8 rounded-2xl flex-shrink-0 flex items-center justify-center mt-0.5" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(53,53,53,0.04)' }}>
                         <Award className="w-3 h-3" style={{ color: theme.colors.accent }} />
                       </div>
 

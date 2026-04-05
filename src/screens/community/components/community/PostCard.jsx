@@ -105,7 +105,7 @@ export const PostCard = React.memo(({ post, theme, dark, isLiked, isUpvoted, isE
                 >
                   {c.name?.[0] || '?'}
                 </div>
-                <div className="flex-1 rounded-xl px-2.5 py-1.5" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }}>
+                <div className="flex-1 rounded-xl px-2.5 py-1.5" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.03)' }}>
                   <p className="text-xs font-semibold" style={{ color: theme.colors.textPrimary }}>{c.name}</p>
                   <p className="text-xs mt-0.5" style={{ color: theme.colors.textSecondary }}>{c.text}</p>
                 </div>
