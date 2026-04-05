@@ -172,7 +172,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
                       className="text-[13px] font-semibold transition-all px-3.5 py-1.5 rounded-full"
                       style={{
                         color: active ? theme.colors.accentText : theme.colors.textSecondary,
-                        backgroundColor: active ? theme.colors.textPrimary : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'),
+                        backgroundColor: active ? theme.colors.textPrimary : (isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)'),
                         opacity: active ? 1 : 0.8,
                       }}
                     >

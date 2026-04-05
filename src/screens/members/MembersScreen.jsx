@@ -189,7 +189,7 @@ const MembersScreenContent = ({ theme }) => {
                             style={{
                                 height: 44,
                                 borderRadius: 9999,
-                                backgroundColor: dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)',
+                                backgroundColor: dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.05)',
                                 border: `1px solid ${dark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.08)'}`,
                                 paddingLeft: 14,
                                 paddingRight: searchQuery ? 8 : 14,

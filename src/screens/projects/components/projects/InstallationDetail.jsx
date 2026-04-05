@@ -4,7 +4,7 @@ import { isDarkTheme } from '../../../../design-system/tokens.js';
 export const InstallationDetail = ({ project, theme, onAddPhotoFiles }) => {
   const fileRef = useRef(null);
   const isDark = isDarkTheme(theme);
-  const bdr = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+  const bdr = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)';
   return (
     <div className="min-h-full" style={{ backgroundColor: theme.colors.background }}>
       <div className="px-4 sm:px-6 lg:px-8 pb-32 scrollbar-hide" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 16px)' }}>

@@ -51,8 +51,8 @@ function RequestCard({ r, onClick, dark, bdr }) {
 /* ── Manual entry form ── */
 function ReplacementForm({ theme, formData, onChange, onSubmit, fileInputRef, onPickPhotos, openPhotoPicker }) {
     const dark = isDarkTheme(theme);
-    const bdr = dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
-    const fieldBg = dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)';
+    const bdr = dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)';
+    const fieldBg = dark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.03)';
 
     const Field = ({ label, children }) => (
         <div>
@@ -149,7 +149,7 @@ export const ReplacementsScreen = ({ theme }) => {
     );
 
     const dark = isDarkTheme(theme);
-    const bdr  = dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+    const bdr  = dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)';
 
     /* back-button handling */
     useEffect(() => {
@@ -287,7 +287,7 @@ export const ReplacementsScreen = ({ theme }) => {
                         <button onClick={startScanning}
                             className="w-full flex flex-col items-center justify-center gap-2 py-10 transition-opacity active:opacity-70">
                             <div className="w-14 h-14 rounded-[18px] flex items-center justify-center mb-1"
-                                style={{ backgroundColor: dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)' }}>
+                                style={{ backgroundColor: dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.05)' }}>
                                 <Camera className="w-7 h-7" style={{ color: theme.colors.textSecondary }} />
                             </div>
                             <div className="font-bold text-[15px]" style={{ color: theme.colors.textPrimary }}>
@@ -312,7 +312,7 @@ export const ReplacementsScreen = ({ theme }) => {
                     className="w-full text-left rounded-[22px] px-5 py-4 flex items-center gap-4 active:scale-[0.99] transition-transform"
                     style={{ backgroundColor: theme.colors.surface, border: `1px solid ${bdr}` }}>
                     <div className="w-10 h-10 rounded-[13px] flex items-center justify-center shrink-0"
-                        style={{ backgroundColor: dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)' }}>
+                        style={{ backgroundColor: dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.05)' }}>
                         <FileText className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
                     </div>
                     <div className="flex-1 min-w-0">

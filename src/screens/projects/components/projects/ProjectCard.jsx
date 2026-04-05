@@ -3,7 +3,7 @@ import { isDarkTheme } from '../../../../design-system/tokens.js';
 
 export const ProjectCard = ({ opp, theme, onClick }) => {
   const dark = isDarkTheme(theme);
-  const border = dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+  const border = dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)';
 
   let displayValue = opp.value;
   if (displayValue != null) {

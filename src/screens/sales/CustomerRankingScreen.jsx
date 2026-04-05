@@ -31,7 +31,7 @@ export const CustomerRankingScreen = ({ theme, onNavigate }) => {
     const [search, setSearch] = useState('');
     const [showSearch, setShowSearch] = useState(false);
     const isDark = isDarkTheme(theme);
-    const bdr = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+    const bdr = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)';
 
     const allRows = useMemo(() => {
         const list = [...CUSTOMER_RANK_DATA].sort((a, b) => (b[tab] || 0) - (a[tab] || 0));
@@ -88,7 +88,7 @@ export const CustomerRankingScreen = ({ theme, onNavigate }) => {
                 <div
                     className="flex items-center gap-3 px-4 py-4 transition-colors"
                     style={{ borderTop: i === 0 ? 'none' : `1px solid ${isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.04)'}` }}
-                    onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.015)'}
+                    onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.015)'}
                     onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
                     <RankBadge rank={c.rank} />

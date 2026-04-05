@@ -20,7 +20,7 @@ export const CommissionsScreen = ({ theme }) => {
   const total = useMemo(() => data.reduce((s, m) => s + m.amount, 0), [data]);
   const toggle = useCallback((id) => setOpenId(p => p === id ? null : id), []);
 
-  const bdr = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+  const bdr = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)';
 
   return (
     <div className="min-h-full" style={{ backgroundColor: theme.colors.background }}>
@@ -79,7 +79,7 @@ export const CommissionsScreen = ({ theme }) => {
               <button
                 onClick={() => toggle(m.id)}
                 className="w-full px-5 py-4 flex items-center gap-3 text-left"
-                onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.015)'}
+                onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.015)'}
                 onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
               >
                 <div className="flex-1 min-w-0">

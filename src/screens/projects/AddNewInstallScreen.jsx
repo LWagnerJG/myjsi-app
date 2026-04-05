@@ -143,7 +143,7 @@ export const AddNewInstallScreen = ({ theme, onAddInstall }) => {
             <div className="scrollbar-hide">
                 <div className="max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 pb-24" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 16px)' }}>
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5">
-                        <div className="lg:col-span-5 rounded-[22px] overflow-hidden p-5 sm:p-6 space-y-5" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'}` }}>
+                        <div className="lg:col-span-5 rounded-[22px] overflow-hidden p-5 sm:p-6 space-y-5" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)'}` }}>
                             <div>
                                 <h2 className="text-[18px] font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>Install Details</h2>
                             </div>
@@ -191,7 +191,7 @@ export const AddNewInstallScreen = ({ theme, onAddInstall }) => {
                             </div>
                         </div>
 
-                        <div className="lg:col-span-7 rounded-[22px] overflow-hidden p-5 sm:p-6 space-y-5" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'}` }}>
+                        <div className="lg:col-span-7 rounded-[22px] overflow-hidden p-5 sm:p-6 space-y-5" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)'}` }}>
                             <div className="flex items-center justify-between">
                                 <label className="text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>
                                     Photos <span style={{ color: theme.colors.error }}>*</span>
@@ -208,7 +208,7 @@ export const AddNewInstallScreen = ({ theme, onAddInstall }) => {
                                     className="w-full min-h-[220px] rounded-3xl border-2 border-dashed flex flex-col items-center justify-center gap-3 transition-colors motion-tap"
                                     style={{
                                         borderColor: theme.colors.border,
-                                        backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : theme.colors.subtle,
+                                        backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : theme.colors.subtle,
                                         color: theme.colors.textSecondary,
                                     }}
                                 >
@@ -248,7 +248,7 @@ export const AddNewInstallScreen = ({ theme, onAddInstall }) => {
                                             style={{
                                                 borderColor: theme.colors.border,
                                                 color: theme.colors.textSecondary,
-                                                backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : theme.colors.subtle,
+                                                backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : theme.colors.subtle,
                                             }}
                                         >
                                             <ImageIcon className="w-5 h-5" />

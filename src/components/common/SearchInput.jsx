@@ -166,7 +166,7 @@ export const SearchInput = React.memo(function SearchInput({
     inputClassName = '',
 }) {
     const dark = isDarkTheme(theme);
-    const bg  = dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)';
+    const bg  = dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.05)';
     const bdr = dark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.08)';
     const iconColor = theme?.colors?.textSecondary || '#666';
 

@@ -172,7 +172,7 @@ const DateGroupCard = ({ theme, dateKey, group, onNavigate }) => {
             <div
                 className="flex items-baseline justify-between px-4 pt-3 pb-2"
                 style={{
-                    backgroundColor: dark ? 'rgba(255,255,255,0.07)' : 'rgba(53,53,53,0.025)',
+                    backgroundColor: dark ? 'rgba(255,255,255,0.12)' : 'rgba(53,53,53,0.025)',
                     borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.04)'}`,
                 }}
             >

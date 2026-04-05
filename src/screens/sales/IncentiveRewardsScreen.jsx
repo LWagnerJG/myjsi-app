@@ -56,7 +56,7 @@ const Row = ({ rank, name, amount, theme }) => (
 
 const Leaderboard = ({ title, people, emptyLabel, theme }) => {
     const isDark = theme?.name === 'dark';
-    const bdr = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+    const bdr = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)';
     return (
         <div className="rounded-[22px] overflow-hidden p-5" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${bdr}` }}>
             <p className="text-[11px] font-bold uppercase tracking-[0.07em] opacity-55 mb-1" style={{ color: theme.colors.textSecondary }}>{title}</p>

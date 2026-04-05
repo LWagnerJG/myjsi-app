@@ -282,11 +282,11 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
             </div>
             <div className="h-px mt-3" style={{ backgroundColor: divider }} />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-3">
-              <div className="rounded-xl border px-3 py-2 flex items-center justify-between" style={{ borderColor: divider, backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.015)' }}>
+              <div className="rounded-xl border px-3 py-2 flex items-center justify-between" style={{ borderColor: divider, backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.015)' }}>
                 <span className="text-[12px] font-semibold" style={{ color: c.textPrimary }}>Sales Reward</span>
                 <ToggleSwitch checked={draft.salesReward !== false} onChange={e => update('salesReward', e.target.checked)} theme={theme} />
               </div>
-              <div className="rounded-xl border px-3 py-2 flex items-center justify-between" style={{ borderColor: divider, backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.015)' }}>
+              <div className="rounded-xl border px-3 py-2 flex items-center justify-between" style={{ borderColor: divider, backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.015)' }}>
                 <span className="text-[12px] font-semibold" style={{ color: c.textPrimary }}>Designer Reward</span>
                 <ToggleSwitch checked={draft.designerReward !== false} onChange={e => update('designerReward', e.target.checked)} theme={theme} />
               </div>
