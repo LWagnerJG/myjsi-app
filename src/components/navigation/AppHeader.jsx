@@ -40,8 +40,12 @@ export const AppHeader = React.memo(({
         let observer = null;
 
         const attachScrollListener = () => {
-            const scrollContainer = document.querySelector('[data-home-scroll-container="true"]');
-            if (!scrollContainer) return false;
+            // The actual scroll happens in .panel-content (AnimatedScreenWrapper).
+            // data-home-scroll-container is only a marker to confirm the home screen is mounted.
+            const marker = document.querySelector('[data-home-scroll-container="true"]');
+            if (!marker) return false;
+            // Walk up to the nearest .panel-content ancestor which is the real scroll container.
+            const scrollContainer = marker.closest('.panel-content') || marker;
 
             const getScrollTop = () => scrollContainer.scrollTop;
             const onScroll = () => {

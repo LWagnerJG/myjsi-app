@@ -387,7 +387,7 @@ export const HomeScreen = React.memo(({
 
 
     return (
-        <div data-home-scroll-container="true" className="flex flex-col h-full scrollbar-hide app-header-offset overflow-y-auto" style={{ backgroundColor: colors.background, position: 'relative', overflowX: 'hidden' }}>
+        <div data-home-scroll-container="true" className="flex flex-col min-h-full scrollbar-hide app-header-offset" style={{ backgroundColor: colors.background, position: 'relative', overflowX: 'hidden' }}>
 
             {/* ── Indie Sconce – only visible in dark mode, portalled to body ── */}
             <IndieSconce

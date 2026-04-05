@@ -61,6 +61,7 @@ export const GlassCard = React.memo(
         className={`${interactiveClasses} ${className}`}
         style={{
           backgroundColor: cardBg,
+          color: theme?.colors?.textPrimary,
           boxShadow: 'none',
           borderRadius: radius,
           border: outlinedBorder,
