@@ -145,7 +145,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
   );
 
   /* shared content row */
-  const tileRowCls = "flex items-center justify-between py-2.5 px-3.5 rounded-[12px]";
+  const tileRowCls = "flex items-center justify-between py-2.5 px-3.5 rounded-[14px]";
   const tileRowBg = subtle(isDark, 2);
 
   return (
@@ -195,52 +195,47 @@ export const SalesScreen = ({ theme, onNavigate }) => {
               </div>
 
               {/* Sparkline — flex-1 fills remaining card height on desktop */}
-              <div className="flex flex-col gap-1.5 flex-1 min-h-[112px]">
-                {/* Chart caption — shows hovered bar value, otherwise the peak bar value */}
-                <div className="flex items-baseline justify-between" style={{ minHeight: 18 }}>
-                  <span className="text-[12px] font-bold tabular-nums" style={{ color: colors.textPrimary, opacity: hoveredBar != null ? 1 : 0.45, transition: 'opacity 0.15s' }}>
-                    {(() => {
-                      if (hoveredBar != null) {
-                        const idx = parseInt(hoveredBar.replace('mini-', ''), 10);
-                        const m = MONTHLY_SALES_DATA[idx];
-                        if (!m) return null;
-                        const val = chartDataType === 'bookings' ? m.bookings : m.sales;
-                        return `${m.month}  $${(val / 1000).toFixed(0)}k`;
-                      }
-                      const peakIdx = MONTHLY_SALES_DATA.reduce((best, m, i) => {
-                        const v = chartDataType === 'bookings' ? m.bookings : m.sales;
-                        const bv = chartDataType === 'bookings' ? MONTHLY_SALES_DATA[best].bookings : MONTHLY_SALES_DATA[best].sales;
-                        return v > bv ? i : best;
-                      }, 0);
-                      const peak = MONTHLY_SALES_DATA[peakIdx];
-                      const val = chartDataType === 'bookings' ? peak.bookings : peak.sales;
-                      return `${peak.month}  $${(val / 1000).toFixed(0)}k`;
-                    })()}
-                  </span>
-                  <span className="text-[11px] font-semibold opacity-30">
-                    {hoveredBar != null ? 'selected' : 'peak'}
-                  </span>
-                </div>
-                {/* Bars */}
-                <div className="flex items-end gap-1.5 flex-1">
-                  {MONTHLY_SALES_DATA.map((m, i) => {
-                    const val = chartDataType === 'bookings' ? m.bookings : m.sales;
-                    const pct = (val / chartMax) * 100;
-                    const isHovered = hoveredBar === `mini-${i}`;
-                    return (
-                      <div key={m.month} className="flex-1 flex flex-col items-center justify-end gap-1 cursor-default h-full"
-                        onMouseEnter={() => setHoveredBar(`mini-${i}`)} onMouseLeave={() => setHoveredBar(null)}>
-                        <div className="w-full rounded-md" style={{
-                          height: ready ? `${Math.max(8, pct)}%` : '0%',
-                          backgroundColor: colors.accent,
-                          opacity: isHovered ? (isDark ? 0.8 : 0.65) : (isDark ? 0.4 : 0.28),
-                          transition: `height 0.4s ease-out ${0.1 + i * 0.025}s, opacity 0.15s`,
-                        }} />
-                        <span className="text-[11px] font-semibold" style={{ opacity: isHovered ? 0.8 : 0.35, transition: 'opacity 0.15s' }}>{m.month}</span>
+              <div className="flex items-end gap-1.5 flex-1 min-h-[112px]">
+                {MONTHLY_SALES_DATA.map((m, i) => {
+                  const val = chartDataType === 'bookings' ? m.bookings : m.sales;
+                  const pct = (val / chartMax) * 100;
+                  const barPct = Math.max(8, pct);
+                  const isHovered = hoveredBar === `mini-${i}`;
+                  const labelInside = barPct > 30;
+                  return (
+                    <div key={m.month} className="flex-1 flex flex-col items-center justify-end gap-1 cursor-default h-full"
+                      onMouseEnter={() => setHoveredBar(`mini-${i}`)} onMouseLeave={() => setHoveredBar(null)}>
+                      {/* bar + positioned label */}
+                      <div className="w-full relative flex-1 flex items-end">
+                        {/* label above the bar — for short bars */}
+                        {isHovered && !labelInside && (
+                          <div className="absolute left-0 right-0 text-center text-[10px] font-bold pointer-events-none"
+                            style={{ bottom: `${barPct}%`, paddingBottom: 3, color: colors.textPrimary }}>
+                            ${(val / 1000).toFixed(0)}k
+                          </div>
+                        )}
+                        {/* bar itself */}
+                        <div className="w-full rounded-[6px] relative overflow-hidden"
+                          style={{
+                            height: ready ? `${barPct}%` : '0%',
+                            backgroundColor: colors.accent,
+                            opacity: isHovered ? (isDark ? 0.85 : 0.7) : (isDark ? 0.4 : 0.28),
+                            transition: `height 0.4s ease-out ${0.1 + i * 0.025}s, opacity 0.15s`,
+                          }}>
+                          {/* label inside the bar — for tall bars */}
+                          {isHovered && labelInside && (
+                            <div className="absolute top-1 left-0 right-0 text-center text-[10px] font-bold"
+                              style={{ color: isDark ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)' }}>
+                              ${(val / 1000).toFixed(0)}k
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    );
-                  })}
-                </div>
+                      <span className="text-[11px] font-semibold shrink-0"
+                        style={{ opacity: isHovered ? 0.8 : 0.35, transition: 'opacity 0.15s' }}>{m.month}</span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -289,7 +284,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                     </div>
                     <div className="grid grid-cols-2 gap-2 pt-1">
                       {rewardsSnapshot.topSales.length > 0 && (
-                        <div className="py-2 px-3.5 rounded-[12px]" style={{ backgroundColor: tileRowBg }}>
+                        <div className="py-2 px-3.5 rounded-[14px]" style={{ backgroundColor: tileRowBg }}>
                           <div className="text-[11px] font-bold uppercase tracking-[0.07em] opacity-30 mb-1.5">Top Sales</div>
                           <div className="space-y-1.5">
                             {rewardsSnapshot.topSales.map((p) => (
@@ -302,7 +297,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                         </div>
                       )}
                       {rewardsSnapshot.topDesigners.length > 0 && (
-                        <div className="py-2 px-3.5 rounded-[12px]" style={{ backgroundColor: tileRowBg }}>
+                        <div className="py-2 px-3.5 rounded-[14px]" style={{ backgroundColor: tileRowBg }}>
                           <div className="text-[11px] font-bold uppercase tracking-[0.07em] opacity-30 mb-1.5">Top Design</div>
                           <div className="space-y-1.5">
                             {rewardsSnapshot.topDesigners.map((p) => (
@@ -381,7 +376,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                 {commissionsSnapshot.topEarners.length > 0 && (
                   <div className="grid grid-cols-3 gap-1.5">
                     {commissionsSnapshot.topEarners.map(([name, amount]) => (
-                      <div key={name} className="py-2 px-3.5 rounded-[12px] min-w-0" style={{ backgroundColor: tileRowBg }}>
+                      <div key={name} className="py-2 px-3.5 rounded-[14px] min-w-0" style={{ backgroundColor: tileRowBg }}>
                         <div className="text-xs opacity-35 truncate mb-0.5">{name}</div>
                         <div className="text-sm font-bold tabular-nums">{formatCurrency(amount)}</div>
                       </div>
