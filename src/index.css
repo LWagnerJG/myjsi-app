@@ -169,6 +169,12 @@ body {
     color: var(--jsi-charcoal);
 }
 
+/* Universal search input placeholder — consistent muted style */
+input[type="search"]::placeholder,
+input::placeholder {
+    opacity: 0.45;
+}
+
 /* New Lead form: inline label/control rows for compact layout */
 .lead-form-inline .settings-row {
     display: grid;

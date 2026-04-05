@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
-import { Search, Mic } from 'lucide-react';
+import { Search, Mic, X } from 'lucide-react';
 import { getHomeChromeIconButtonStyles } from '../../design-system/homeChrome.js';
 import { isDarkTheme } from '../../design-system/tokens.js';
 
-// HomeSearchInput
+// HomeSearchInput — lives inside the home screen search pill (56px pill, animated placeholder)
 export const HomeSearchInput = React.memo(function HomeSearchInput({
     theme,
     value = '',
@@ -151,7 +151,9 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
     );
 });
 
-// Standard search input with header variant EXACT match to AppHeader pill
+// SearchInput — universal search pill used across all non-home screens.
+// Consistent 44px height, subtle fill, soft border, X clear button.
+// `variant` prop is accepted for backwards-compat but no longer changes styling.
 export const SearchInput = React.memo(function SearchInput({
     id,
     value = '',
@@ -160,48 +162,55 @@ export const SearchInput = React.memo(function SearchInput({
     theme,
     className = '',
     style = {},
-    variant = 'default', // 'default' | 'header'
-    inputClassName = ''
+    variant,        // kept for backwards-compat, ignored
+    inputClassName = '',
 }) {
-    const isHeader = variant === 'header';
-
-    // Pill style — lightweight border, no heavy shadow or beige bg
-    const pill = isHeader ? {
-        height: 48,
-        backgroundColor: theme?.colors?.surface === 'transparent' ? 'transparent' : (theme?.colors?.surface || 'transparent'),
-        border: theme?.colors?.surface === 'transparent' ? 'none' : `1px solid ${theme?.colors?.border || 'rgba(0,0,0,0.08)'}`,
-        boxShadow: 'none',
-        borderRadius: 9999,
-        paddingLeft: 16,
-        paddingRight: 16,
-        transition: 'border-color 160ms ease'
-    } : {
-        height: 40,
-        backgroundColor: theme?.colors?.surface === 'transparent' ? 'transparent' : (theme?.colors?.surface || 'transparent'),
-        border: theme?.colors?.surface === 'transparent' ? 'none' : `1px solid ${theme?.colors?.border || 'rgba(0,0,0,0.08)'}`,
-        boxShadow: 'none',
-        borderRadius: 9999,
-        paddingLeft: 14,
-        paddingRight: 14,
-        transition: 'border-color 160ms ease'
-    };
-
+    const dark = isDarkTheme(theme);
+    const bg  = dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)';
+    const bdr = dark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.08)';
     const iconColor = theme?.colors?.textSecondary || '#666';
 
     return (
-        <div id={id} className={`flex items-center flex-1 ${isHeader ? 'gap-2' : 'gap-2'} ${className}`}
-             role="search"
-             style={{ ...pill, ...style }}>
-            <Search className="w-5 h-5" aria-hidden="true" style={{ color: iconColor }} />
+        <div
+            id={id}
+            className={`flex items-center gap-2.5 ${className}`}
+            role="search"
+            style={{
+                height: 44,
+                borderRadius: 9999,
+                backgroundColor: bg,
+                border: `1px solid ${bdr}`,
+                paddingLeft: 14,
+                paddingRight: value ? 8 : 14,
+                transition: 'border-color 150ms ease',
+                ...style,
+            }}
+        >
+            <Search
+                aria-hidden="true"
+                style={{ width: 16, height: 16, color: iconColor, opacity: 0.6, flexShrink: 0 }}
+            />
             <input
                 type="search"
                 value={value}
                 onChange={(e) => onChange && onChange(e.target.value)}
                 placeholder={placeholder}
-                className={`flex-1 h-full bg-transparent outline-none text-[15px] placeholder:opacity-70 ${inputClassName}`}
+                className={`flex-1 h-full bg-transparent outline-none text-[14px] ${inputClassName}`}
                 style={{ color: theme?.colors?.textPrimary || '#111' }}
                 aria-label={placeholder}
+                autoComplete="off"
             />
+            {value && onChange && (
+                <button
+                    type="button"
+                    onClick={() => onChange('')}
+                    className="flex-shrink-0 w-[22px] h-[22px] rounded-full flex items-center justify-center transition-opacity hover:opacity-80 active:scale-90"
+                    style={{ backgroundColor: dark ? 'rgba(255,255,255,0.13)' : 'rgba(0,0,0,0.10)' }}
+                    aria-label="Clear search"
+                >
+                    <X style={{ width: 11, height: 11, color: iconColor }} />
+                </button>
+            )}
         </div>
     );
 });

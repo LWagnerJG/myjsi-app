@@ -185,25 +185,30 @@ const MembersScreenContent = ({ theme }) => {
 
                     {/* Search — dealers tab only */}
                     {tab === 'dealers' && (
-                        <div className="relative mb-4">
-                            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: theme.colors.textSecondary }} />
+                        <div className="relative mb-4 flex items-center gap-2.5"
+                            style={{
+                                height: 44,
+                                borderRadius: 9999,
+                                backgroundColor: dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)',
+                                border: `1px solid ${dark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.08)'}`,
+                                paddingLeft: 14,
+                                paddingRight: searchQuery ? 8 : 14,
+                            }}>
+                            <Search className="w-4 h-4 flex-shrink-0" style={{ color: theme.colors.textSecondary, opacity: 0.6 }} />
                             <input
                                 type="search"
                                 autoComplete="off"
                                 value={searchQuery}
                                 onChange={e => setSearchQuery(e.target.value)}
                                 placeholder="Search dealers or contacts…"
-                                className="w-full pl-10 pr-10 outline-none rounded-full text-[14px]"
-                                style={{
-                                    height: 42,
-                                    backgroundColor: dark ? theme.colors.surface : '#fff',
-                                    color: theme.colors.textPrimary,
-                                    border: `1.5px solid ${dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.09)'}`,
-                                }}
+                                className="flex-1 h-full bg-transparent outline-none text-[14px]"
+                                style={{ color: theme.colors.textPrimary }}
                             />
                             {searchQuery && (
-                                <button onClick={() => setSearchQuery('')} className="absolute right-3.5 top-1/2 -translate-y-1/2">
-                                    <X className="w-3.5 h-3.5" style={{ color: theme.colors.textSecondary }} />
+                                <button onClick={() => setSearchQuery('')}
+                                    className="flex-shrink-0 w-[22px] h-[22px] rounded-full flex items-center justify-center"
+                                    style={{ backgroundColor: dark ? 'rgba(255,255,255,0.13)' : 'rgba(0,0,0,0.10)' }}>
+                                    <X className="w-[11px] h-[11px]" style={{ color: theme.colors.textSecondary }} />
                                 </button>
                             )}
                         </div>

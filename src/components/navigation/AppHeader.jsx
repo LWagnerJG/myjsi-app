@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ArrowLeft, User } from 'lucide-react';
 import { logoLight } from '../../data/theme/themeData.js';
-import { getHomeChromeIconButtonStyles, getHomeChromePillStyles } from '../../design-system/homeChrome.js';
+import { getHomeChromeIconButtonStyles, getHomeChromePillStyles, HOME_CHROME_PILL_HEIGHT } from '../../design-system/homeChrome.js';
 import { isDarkTheme } from '../../design-system/tokens.js';
 
 export const AppHeader = React.memo(({
@@ -166,8 +166,10 @@ export const AppHeader = React.memo(({
 
             <div className="px-4 sm:px-5 pt-3 pb-1 fixed top-0 left-0 right-0 z-30 pointer-events-none bg-transparent">
                 <div
-                    className="max-w-5xl mx-auto w-full flex items-center justify-between px-4 sm:px-5 h-14 pointer-events-auto transition-all duration-300 overflow-hidden"
+                    className="max-w-5xl mx-auto w-full flex items-center justify-between px-4 sm:px-5 pointer-events-auto transition-all duration-300 overflow-hidden"
                     style={{
+                        // px-locked — must not scale with Dynamic Type (rem would change h-14)
+                        height: HOME_CHROME_PILL_HEIGHT,
                         ...(isHome ? homeChromePillStyles : {
                             borderRadius: 9999,
                             backgroundColor: dark ? 'rgba(26,26,26,0.72)' : 'rgba(255,255,255,0.72)',
