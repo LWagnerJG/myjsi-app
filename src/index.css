@@ -167,6 +167,10 @@ body {
     -moz-osx-font-smoothing: grayscale;
     background-color: var(--jsi-warm-beige);
     color: var(--jsi-charcoal);
+    /* Prevent pull-to-refresh and over-scroll rubber-band on mobile */
+    overscroll-behavior: none;
+    /* Remove iOS tap flash on all interactive elements */
+    -webkit-tap-highlight-color: transparent;
 }
 
 /* Universal search input placeholder — consistent muted style */

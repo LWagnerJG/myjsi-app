@@ -2,6 +2,8 @@ const EASINGS = Object.freeze({
   standard: [0.4, 0, 0.2, 1],
   emphasized: [0.23, 1, 0.32, 1],
   springOut: [0.3, 1, 0.3, 1],
+  // iOS-style screen push — fast start, silky settle (same curve used by Safari)
+  screenPush: [0.22, 1, 0.36, 1],
 });
 
 const DURATIONS_MS = Object.freeze({
@@ -11,7 +13,7 @@ const DURATIONS_MS = Object.freeze({
   standard: 220,
   medium: 260,
   slow: 320,
-  screen: 250,
+  screen: 320,        // slightly longer than before — the new curve feels faster anyway
   modalSpringFallback: 280,
 });
 

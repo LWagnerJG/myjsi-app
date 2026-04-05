@@ -184,7 +184,7 @@ export const AnimatedScreenWrapper = ({
             aria-live="polite"
             style={{
                 '--screen-motion-duration': `${screenAnimationMs}ms`,
-                '--screen-motion-ease': toCssBezier(MOTION_EASINGS.emphasized),
+                '--screen-motion-ease': toCssBezier(MOTION_EASINGS.screenPush),
                 '--screen-shadow-duration': `${prefersReducedMotion ? 1 : MOTION_DURATIONS_MS.medium}ms`,
                 '--screen-shadow-ease': toCssBezier(MOTION_EASINGS.standard),
             }}
