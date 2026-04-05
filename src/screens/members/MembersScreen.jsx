@@ -150,7 +150,7 @@ const MembersScreenContent = ({ theme }) => {
                 <div className="px-4 sm:px-6 lg:px-8 pb-24 lg:pb-12 max-w-2xl lg:max-w-5xl mx-auto w-full">
 
                     {/* Header */}
-                    <div className="pt-5 pb-4 sm:pt-7 flex items-center justify-between gap-4">
+                    <div className="pt-4 pb-4 flex items-center justify-between gap-4">
                         <div>
                             <h1 className="text-[22px] font-bold leading-tight tracking-tight" style={{ color: theme.colors.textPrimary }}>
                                 Members

@@ -91,7 +91,7 @@ export const CommunityLibraryLayout = ({
     <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
 
       {/* ── Controls header ── */}
-      <div className="flex-shrink-0 px-4 pt-2" style={{ backgroundColor: theme.colors.background }}>
+      <div className="flex-shrink-0 px-4 pt-4" style={{ backgroundColor: theme.colors.background }}>
         <div className="max-w-3xl mx-auto w-full">
 
           {/* Tab row — chips or sub-community back bar */}

@@ -238,7 +238,7 @@ const StickyHeader = React.memo(({
     showViewToggle,
 }) => (
     <div
-        className="flex-shrink-0 px-4 sm:px-5 pt-2 pb-3"
+        className="flex-shrink-0 px-4 sm:px-5 pt-4 pb-3"
         style={{ backgroundColor: theme.colors.background }}
     >
         <div className="flex items-center gap-3">

@@ -96,7 +96,7 @@ export const HelpScreen = ({ theme }) => {
             <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-4 scrollbar-hide">
                 
                 {/* Search */}
-                <div className="pt-1">
+                <div className="pt-4">
                     <StandardSearchBar
                         value={query}
                         onChange={setQuery}

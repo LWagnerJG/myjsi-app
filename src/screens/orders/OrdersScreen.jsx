@@ -236,10 +236,8 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
             {/* Controls */}
             <div className="flex-shrink-0 max-w-2xl mx-auto w-full">
-                <div className="px-5 pt-2 pb-3 flex flex-col gap-3">
-                    <div style={{ height: 56 }}>
-                        <SearchInput value={searchTerm} onChange={setSearchTerm} placeholder="Search orders..." theme={theme} variant="header" />
-                    </div>
+                <div className="px-5 pt-4 pb-3 flex flex-col gap-3">
+                    <SearchInput value={searchTerm} onChange={setSearchTerm} placeholder="Search orders..." theme={theme} variant="header" />
                     <div className="flex items-center justify-between gap-3">
                         <div className="min-w-0">
                             <SegmentedToggle value={dateType} onChange={setDateType} options={[{ value: 'shipDate', label: 'Ship Date' }, { value: 'date', label: 'PO Date' }]} theme={theme} size="sm" />

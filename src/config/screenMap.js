@@ -78,3 +78,25 @@ export {
   SamplesScreen,
   MarketplaceScreen,
 };
+
+// Preload the most-visited screens during browser idle time so first navigation
+// never hits a Suspense fallback and flickers.
+const preloadMainScreens = () => {
+  import('../screens/sales/index.js');
+  import('../screens/orders/index.js');
+  import('../screens/products/index.js');
+  import('../screens/members/index.js');
+  import('../screens/community/index.js');
+  import('../screens/home/CommunityLibraryLayout.jsx');
+  import('../screens/settings/index.js');
+  import('../screens/samples/index.js');
+  import('../screens/marketplace/index.js');
+};
+
+if (typeof window !== 'undefined') {
+  if ('requestIdleCallback' in window) {
+    requestIdleCallback(preloadMainScreens, { timeout: 3000 });
+  } else {
+    setTimeout(preloadMainScreens, 1500);
+  }
+}
