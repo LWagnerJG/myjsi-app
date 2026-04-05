@@ -83,9 +83,10 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
                     onBlur={handleBlur}
                     onKeyDown={onKeyDown}
                     placeholder=""
-                    className="w-full bg-transparent outline-none text-[15px]"
+                    className="w-full bg-transparent outline-none"
                     style={{
                         color: theme.colors.textPrimary,
+                        fontSize: 16,
                         height: 56,
                         lineHeight: '56px',
                         fontWeight: 400,
@@ -180,7 +181,7 @@ export const SearchInput = React.memo(function SearchInput({
             className={`flex items-center gap-2.5 ${className}`}
             role="search"
             style={{
-                height: 44,
+                height: 56,
                 borderRadius: 9999,
                 backgroundColor: bg,
                 border: bdr,
@@ -195,15 +196,15 @@ export const SearchInput = React.memo(function SearchInput({
         >
             <Search
                 aria-hidden="true"
-                style={{ width: 16, height: 16, color: iconColor, opacity: 0.6, flexShrink: 0 }}
+                style={{ width: 18, height: 18, color: iconColor, opacity: 0.6, flexShrink: 0 }}
             />
             <input
                 type="search"
                 value={value}
                 onChange={(e) => onChange && onChange(e.target.value)}
                 placeholder={placeholder}
-                className={`flex-1 h-full bg-transparent outline-none text-[14px] ${inputClassName}`}
-                style={{ color: theme?.colors?.textPrimary || '#111' }}
+                className={`flex-1 h-full bg-transparent outline-none ${inputClassName}`}
+                style={{ color: theme?.colors?.textPrimary || '#111', fontSize: 16 }}
                 aria-label={placeholder}
                 autoComplete="off"
             />
