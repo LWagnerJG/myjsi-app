@@ -33,7 +33,7 @@ export const LibraryGrid = ({ theme, query, parentHeaderRef, savedImageIds = [],
 
   // Proper 2-column grid (masonry-style with auto rows)
   return (
-    <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
+    <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
       <div className="flex-1 overflow-y-auto pb-10">
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 px-4 pt-2">
           {filtered.map(a => {

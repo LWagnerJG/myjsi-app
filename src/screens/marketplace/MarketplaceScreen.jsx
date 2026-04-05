@@ -224,7 +224,7 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
   ]), [orders.length, totalEarned, totalSpent]);
 
   return (
-    <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
+    <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
       <div className="flex-shrink-0 px-4 pt-2 pb-1" style={{ background: theme.colors.background }}>
         <div className="max-w-2xl mx-auto w-full flex justify-center">
           <SegmentedToggle

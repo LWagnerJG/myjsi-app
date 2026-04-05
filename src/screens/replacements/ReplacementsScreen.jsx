@@ -186,7 +186,7 @@ export const ReplacementsScreen = ({ theme }) => {
 
     /* -------------------------------- UI ---------------------------------- */
     return (
-        <div className="flex flex-col h-full app-header-offset">
+        <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
             <div className="flex-1 overflow-y-auto scrollbar-hide">
                 {view === 'list' ? (
                     <div className="px-4 sm:px-6 lg:px-8 pt-4 pb-6 space-y-6">

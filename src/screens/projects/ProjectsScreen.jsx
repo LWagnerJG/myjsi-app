@@ -127,7 +127,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
     />
   );
   return (
-    <div className="h-full flex flex-col app-header-offset relative" style={{ backgroundColor: theme.colors.background }}>
+    <div className="h-full flex flex-col app-header-offset relative" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
       {/* Controls - fixed below app header */}
       <div className="flex-shrink-0" style={{ backgroundColor: theme.colors.background }}>
         <div className="px-4 sm:px-6 lg:px-8 pt-2 pb-2 max-w-5xl mx-auto w-full">

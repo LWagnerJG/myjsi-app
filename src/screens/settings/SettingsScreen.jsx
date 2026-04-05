@@ -195,7 +195,7 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
   }, [streetAddress, fallbackAddressHints]);
 
   return (
-    <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
+    <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
       <div className="flex-1 overflow-y-auto scrollbar-hide">
         <div className="px-4 sm:px-6 lg:px-8 pb-24 lg:pb-12 space-y-5 max-w-xl mx-auto w-full pt-2">
 

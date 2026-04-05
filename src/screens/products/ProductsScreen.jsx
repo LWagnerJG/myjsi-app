@@ -453,7 +453,7 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
     const clearSearch = useCallback(() => setSearchTerm(''), []);
 
     return (
-        <div className="flex flex-col h-full app-header-offset">
+        <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
             <div className="max-w-5xl mx-auto w-full">
                 <StickyHeader
                     theme={theme}
