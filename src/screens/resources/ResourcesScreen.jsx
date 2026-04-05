@@ -199,7 +199,7 @@ export const ResourcesScreen = ({ theme, onNavigate, homeApps }) => {
     }, [measure]);
 
     return (
-        <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
+        <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
             <div className="flex-1 overflow-y-auto scrollbar-hide px-6 pb-6">
                 <div ref={containerRef} className="max-w-4xl mx-auto w-full">
                     <div

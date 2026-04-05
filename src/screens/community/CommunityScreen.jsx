@@ -92,7 +92,7 @@ export const CommunityScreen = ({
 
   /* ── Layout ── */
   return (
-    <div className="flex flex-col h-full" style={{ backgroundColor: 'transparent' }}>
+    <div className="flex flex-col h-full" style={{ backgroundColor: 'transparent', color: theme?.colors?.textPrimary }}>
       {/* Standalone mode header (non-embed) */}
       {!embedMode && (
         <div className="flex-shrink-0 space-y-1.5 px-4 pt-2 pb-0">

@@ -233,7 +233,7 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
     const groupKeys = useMemo(() => Object.keys(grouped).sort((a, b) => new Date(b) - new Date(a)), [grouped]);
 
     return (
-        <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
+        <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
             {/* Controls */}
             <div className="flex-shrink-0 max-w-2xl mx-auto w-full">
                 <div className="px-5 pt-2 pb-3 flex flex-col gap-3">

@@ -107,7 +107,7 @@ const RfpResponderScreen = ({ theme, screenParams, onNavigate, setSuccessMessage
     <AnimatedScreenWrapper>
       <div
         className="flex flex-col h-full scrollbar-hide app-header-offset"
-        style={{ backgroundColor: theme?.colors?.background, overflowY: (stage === 2 || stage === 3) ? 'hidden' : 'auto' }}
+        style={{ backgroundColor: theme?.colors?.background, color: theme?.colors?.textPrimary, overflowY: (stage === 2 || stage === 3) ? 'hidden' : 'auto' }}
       >
         <div className="px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto w-full py-4 sm:py-6 flex-1 flex flex-col">
           {stage === 0 && (

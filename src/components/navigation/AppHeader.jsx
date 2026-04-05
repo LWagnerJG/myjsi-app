@@ -40,8 +40,12 @@ export const AppHeader = React.memo(({
         let observer = null;
 
         const attachScrollListener = () => {
-            const scrollContainer = document.querySelector('[data-home-scroll-container="true"]');
-            if (!scrollContainer) return false;
+            // The actual scroll happens in .panel-content (AnimatedScreenWrapper).
+            // data-home-scroll-container is only a marker to confirm the home screen is mounted.
+            const marker = document.querySelector('[data-home-scroll-container="true"]');
+            if (!marker) return false;
+            // Walk up to the nearest .panel-content ancestor which is the real scroll container.
+            const scrollContainer = marker.closest('.panel-content') || marker;
 
             const getScrollTop = () => scrollContainer.scrollTop;
             const onScroll = () => {
@@ -168,18 +172,8 @@ export const AppHeader = React.memo(({
                 <div
                     className="max-w-5xl mx-auto w-full flex items-center justify-between px-4 sm:px-5 pointer-events-auto overflow-hidden"
                     style={{
-                        // px-locked — must not scale with Dynamic Type (rem would change h-14)
-                        height: HOME_CHROME_PILL_HEIGHT,
-                        // Transition only the back-button width/opacity, NOT background (instant theme switch)
                         transition: 'border-radius 200ms ease',
-                        ...(isHome ? homeChromePillStyles : {
-                            borderRadius: 9999,
-                            backgroundColor: dark ? 'rgba(26,26,26,0.72)' : 'rgba(255,255,255,0.72)',
-                            backdropFilter: 'blur(20px) saturate(1.6)',
-                            WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
-                            boxShadow: dark ? '0 4px 20px rgba(0,0,0,0.25)' : '0 4px 20px rgba(53,53,53,0.08)',
-                            border: dark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(255,255,255,0.70)',
-                        }),
+                        ...homeChromePillStyles,
                     }}
                 >
                     <div className="flex items-center">

@@ -40,7 +40,7 @@ const InlineToggle = ({ options, value, onChange, colors, isDark }) => (
             : 'transparent',
           color: colors.textPrimary,
           opacity: value === opt.value ? 1 : 0.45,
-          boxShadow: value === opt.value ? (isDark ? 'none' : '0 1px 2px rgba(0,0,0,0.08)') : 'none',
+          boxShadow: value === opt.value ? (isDark ? '0 1px 3px rgba(0,0,0,0.3)' : '0 1px 2px rgba(0,0,0,0.06)') : 'none',
         }}
       >
         {opt.label}
@@ -144,15 +144,16 @@ export const SalesScreen = ({ theme, onNavigate }) => {
   const TileHeader = ({ icon: Icon, title, action, badge }) => (
     <div className="flex items-center justify-between mb-3">
       <div className="flex items-center gap-2">
-        {Icon && <Icon className="w-4 h-4 opacity-40" />}
-        <h3 className="text-[15px] font-bold">{title}</h3>
+        {Icon && <Icon className="w-4 h-4" style={{ color: colors.textSecondary, opacity: 0.6 }} />}
+        <h3 className="text-[15px] font-bold" style={{ color: colors.textPrimary }}>{title}</h3>
         {badge && (
           <span className="text-[11px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
             style={{ backgroundColor: subtle(isDark, 1.5), color: colors.textSecondary }}>{badge}</span>
         )}
       </div>
       {action && (
-        <span className="text-xs font-bold uppercase tracking-widest opacity-30 group-hover:opacity-60 flex items-center gap-0.5 transition-opacity">
+        <span className="text-xs font-bold uppercase tracking-widest flex items-center gap-0.5 transition-opacity"
+          style={{ color: colors.textSecondary, opacity: 0.5 }}>
           {action} <ChevronRight className="w-3.5 h-3.5" />
         </span>
       )}

@@ -238,7 +238,7 @@ export const ReplacementsScreen = ({ theme }) => {
     /* ── Render ── */
     if (view === 'form') {
         return (
-            <div className="min-h-full" style={{ backgroundColor: theme.colors.background }}>
+            <div className="min-h-full" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
                 <ReplacementForm
                     theme={theme} formData={formData} onChange={onChange} onSubmit={submit}
                     fileInputRef={fileInputRef} onPickPhotos={onPickPhotos} openPhotoPicker={openPhotoPicker}
@@ -248,7 +248,7 @@ export const ReplacementsScreen = ({ theme }) => {
     }
 
     return (
-        <div className="min-h-full" style={{ backgroundColor: theme.colors.background }}>
+        <div className="min-h-full" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
             <div className="px-4 sm:px-6 lg:px-8 pb-8 max-w-5xl mx-auto w-full space-y-4"
                 style={{ paddingTop: CONTENT_PT }}>
 

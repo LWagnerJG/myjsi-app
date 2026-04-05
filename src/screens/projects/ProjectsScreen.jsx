@@ -126,7 +126,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
     />
   );
   return (
-    <div className="min-h-full relative" style={{ backgroundColor: theme.colors.background }}>
+    <div className="min-h-full relative" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
       {/* Controls */}
       <div className="flex-shrink-0" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 12px)', backgroundColor: theme.colors.background }}>
         <div className="px-4 sm:px-6 lg:px-8 pb-3 max-w-5xl mx-auto w-full">
