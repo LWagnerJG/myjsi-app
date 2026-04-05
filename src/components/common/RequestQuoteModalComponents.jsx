@@ -13,7 +13,7 @@ export const SearchSelect = ({ value, onChange, options, placeholder, theme, onA
     }, [options, query]);
     const canCreate = query && !options.some(o => o.toLowerCase() === query.toLowerCase());
 
-    const fieldBg = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.025)';
+    const fieldBg = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.025)';
     const fieldBrd = isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.08)';
     const hoverBg = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)';
     const dropBg  = isDark ? '#2a2a2a' : '#fff';
@@ -66,7 +66,7 @@ export const SearchSelect = ({ value, onChange, options, placeholder, theme, onA
                             {canCreate && onAddNew && (
                                 <>
                                     <div className="h-px mx-2"
-                                        style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }} />
+                                        style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)' }} />
                                     <button className="w-full text-left px-3 py-2.5 text-[13px] font-semibold flex items-center gap-2 transition-colors"
                                         style={{ color: c.accent }}
                                         onClick={() => { onAddNew(query); onChange(query); setQuery(''); setOpen(false); }}

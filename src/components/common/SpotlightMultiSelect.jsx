@@ -232,7 +232,7 @@ export function SpotlightMultiSelect({
                   role="option"
                   aria-selected={activeIndex === idx}
                   className={`w-full text-left px-4 py-2.5 text-[13px] font-medium transition-colors ${
-                    activeIndex === idx ? "bg-black/[0.07] dark:bg-white/[0.07]" : "hover:bg-black/[0.04] dark:hover:bg-white/[0.04]"
+                    activeIndex === idx ? "bg-black/[0.07] dark:bg-white/[0.07]" : "hover:bg-black/[0.04] dark:hover:bg-white/[0.08]"
                   }`}
                   style={{ color: palette.text }}
                   onMouseDown={(e) => { e.preventDefault(); pick(opt); }}
@@ -251,7 +251,7 @@ export function SpotlightMultiSelect({
                     role="option"
                     aria-selected={activeIndex === filtered.length}
                     className={`w-full text-left px-4 py-2.5 text-[13px] font-semibold flex items-center gap-2 transition-colors ${
-                      activeIndex === filtered.length ? "bg-black/[0.07] dark:bg-white/[0.07]" : "hover:bg-black/[0.04] dark:hover:bg-white/[0.04]"
+                      activeIndex === filtered.length ? "bg-black/[0.07] dark:bg-white/[0.07]" : "hover:bg-black/[0.04] dark:hover:bg-white/[0.08]"
                     }`}
                     style={{ color: palette.accent }}
                     onMouseDown={(e) => { e.preventDefault(); create(); }}
@@ -288,7 +288,7 @@ export function SpotlightMultiSelect({
               key={s}
               className={`inline-flex items-center gap-1.5 pl-3 pr-2 py-1 rounded-full text-[12px] font-medium${bordered ? " border" : ""}`}
               style={{
-                background: showIntegratedChips ? (dark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)") : palette.chipBg,
+                background: showIntegratedChips ? (dark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.04)") : palette.chipBg,
                 borderColor: palette.border,
                 color: palette.text,
               }}

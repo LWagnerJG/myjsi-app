@@ -110,7 +110,7 @@ export const ChatOverlay = ({
 
     if (!isChatOpen) return null;
 
-    const accentBg = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)';
+    const accentBg = isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.03)';
 
     return (
         <div
@@ -220,7 +220,7 @@ export const ChatOverlay = ({
                                             msg.role === 'user' ? 'rounded-2xl rounded-br-md' : 'rounded-2xl rounded-bl-md'
                                         }`}
                                         style={{
-                                            backgroundColor: msg.role === 'user' ? colors.textPrimary : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'),
+                                            backgroundColor: msg.role === 'user' ? colors.textPrimary : (isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)'),
                                             color: msg.role === 'user' ? '#FFFFFF' : colors.textPrimary,
                                             border: msg.role === 'user' ? 'none' : `1px solid ${colors.border}`,
                                         }}
@@ -324,7 +324,7 @@ export const ChatOverlay = ({
                                     <div
                                         className="px-4 py-3 rounded-2xl rounded-bl-md"
                                         style={{
-                                            backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                                            backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)',
                                             border: `1px solid ${colors.border}`,
                                         }}
                                     >
@@ -356,7 +356,7 @@ export const ChatOverlay = ({
                                     key={file.id}
                                     className="flex items-center gap-2 px-2.5 py-1 rounded-full text-xs"
                                     style={{
-                                        backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                                        backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)',
                                         border: `1px solid ${colors.border}`,
                                         color: colors.textSecondary,
                                     }}
@@ -398,7 +398,7 @@ export const ChatOverlay = ({
                             placeholder="Ask Elliott anything..."
                             className="flex-1 px-4 py-2.5 rounded-full text-sm outline-none"
                             style={{
-                                backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                                backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)',
                                 color: colors.textPrimary,
                                 border: `1px solid ${colors.border}`,
                             }}

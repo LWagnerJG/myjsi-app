@@ -1,7 +1,7 @@
 // RequestQuoteModal — Clean, dark-mode-ready quote request form
 import React, { useState, useCallback, useMemo } from 'react';
 import ReactDOM from 'react-dom';
-import { X, FileText, CheckCircle2, Upload, ChevronDown } from 'lucide-react';
+import { X, FileText, Calendar, CheckCircle2, Upload, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { hapticMedium, hapticSuccess } from '../../utils/haptics.js';
 import { INITIAL_MEMBERS } from '../../screens/members/data.js';
@@ -71,8 +71,8 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
         textSecondary:   theme?.colors?.textSecondary || '#666666',
         border:          isDark ? 'rgba(255,255,255,0.10)' : (theme?.colors?.border || 'rgba(0,0,0,0.08)'),
         accent:          theme?.colors?.accent        || '#353535',
-        subtle:          isDark ? 'rgba(255,255,255,0.06)' : (theme?.colors?.subtle || '#F5F3EF'),
-        fieldBg:         isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.025)',
+        subtle:          isDark ? 'rgba(255,255,255,0.10)' : (theme?.colors?.subtle || '#F5F3EF'),
+        fieldBg:         isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.025)',
         fieldBorder:     isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)',
         hoverBg:         isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)',
         success: theme?.colors?.success || '#4A7C59',
@@ -165,11 +165,11 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
     };
 
     const selectionStyle = {
-        selectedBg: colors.accent,
-        selectedBorder: colors.accent,
-        selectedText: colors.accentText || '#fff',
+        selectedBg: isDark ? 'rgba(255,255,255,0.14)' : 'rgba(0,0,0,0.08)',
+        selectedBorder: isDark ? 'rgba(255,255,255,0.26)' : 'rgba(0,0,0,0.18)',
+        selectedText: colors.textPrimary,
         unselectedBg: 'transparent',
-        unselectedBorder: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.09)',
+        unselectedBorder: colors.border,
         unselectedText: colors.textSecondary,
         selectedShadow: 'none',
     };
@@ -215,9 +215,9 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                     {/* ── Header ── */}
                     <div className="flex items-center justify-between px-7 py-5" style={{ borderBottom: `1px solid ${colors.border}` }}>
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-[14px] flex items-center justify-center"
-                                style={{ backgroundColor: `${colors.accent}18` }}>
-                                <FileText className="w-4.5 h-4.5" style={{ color: colors.accent }} />
+                            <div className="w-11 h-11 rounded-2xl flex items-center justify-center"
+                                style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)' }}>
+                                <FileText className="w-5 h-5" style={{ color: colors.textPrimary }} />
                             </div>
                             <h2 className="text-lg font-bold tracking-tight" style={{ color: colors.textPrimary }}>Request a Quote</h2>
                         </div>
@@ -229,7 +229,7 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                     </div>
 
                     {/* ── Form ── */}
-                    <form onSubmit={handleSubmit} className="px-6 py-5 space-y-5 max-h-[72vh] overflow-y-auto scrollbar-hide">
+                    <form onSubmit={handleSubmit} className="px-7 py-6 space-y-4 max-h-[72vh] overflow-y-auto scrollbar-hide">
 
                         {/* Project Name */}
                         <div>
@@ -245,12 +245,12 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label style={labelCls}>Type</label>
-                                <div className="rounded-[18px] p-1" style={connectedGroupStyle}>
+                                <div className="rounded-2xl p-1" style={connectedGroupStyle}>
                                     <div className="flex gap-1">
                                         {['new', 'revision'].map(type => (
                                             <button key={type} type="button"
                                                 onClick={() => updateField('quoteType', type)}
-                                                className="flex-1 h-10 rounded-[14px] text-xs font-bold transition-all"
+                                                className="flex-1 h-10 rounded-xl text-xs font-bold transition-all"
                                                 style={{
                                                     backgroundColor: formData.quoteType === type ? selectionStyle.selectedBg : selectionStyle.unselectedBg,
                                                     color: formData.quoteType === type ? selectionStyle.selectedText : selectionStyle.unselectedText,
@@ -292,7 +292,10 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                                 </div>
                             </div>
                             <div>
-                                <label style={labelCls}>Needed By</label>
+                                <label style={labelCls}>
+                                    <Calendar className="w-3 h-3 inline mr-1 opacity-60" style={{ marginBottom: 1 }} />
+                                    Needed By
+                                </label>
                                 <input type="date" value={formData.neededByDate}
                                     onChange={e => updateField('neededByDate', e.target.value)}
                                     style={inputBase} />
@@ -302,42 +305,44 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                         {/* Team Members */}
                         <div>
                             <label style={labelCls}>Include Team Members</label>
-                            <div className="flex flex-wrap gap-2">
+                            <div className="flex flex-wrap gap-2 justify-center">
                                 {teamMembers.map((member) => {
                                     const selected = formData.selectedTeamMembers.includes(member.id);
-                                    const firstName = member?.firstName || '';
-                                    const lastName = member?.lastName || '';
-                                    const initials = `${firstName[0] || ''}${lastName[0] || ''}`.toUpperCase();
-                                    const displayName = `${firstName} ${lastName}`.trim() || member.email;
+                                    const fullName = `${member?.firstName || ''} ${member?.lastName || ''}`.trim();
                                     return (
-                                        <button key={member.id} type="button" onClick={() => toggleTeamMember(member.id)}
-                                            className="flex items-center gap-2 pl-1 pr-3.5 h-9 rounded-full text-[12px] font-semibold transition-all"
+                                        <button
+                                            key={member.id}
+                                            type="button"
+                                            onClick={() => toggleTeamMember(member.id)}
+                                            className="w-[150px] px-3 h-9 rounded-full text-xs font-semibold transition-all inline-flex items-center justify-center"
                                             style={{
-                                                backgroundColor: selected ? selectionStyle.selectedBg : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'),
-                                                color: selected ? selectionStyle.selectedText : colors.textPrimary,
-                                                border: `1.5px solid ${selected ? selectionStyle.selectedBorder : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)')}`,
-                                            }}>
-                                            <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0"
-                                                style={{ backgroundColor: selected ? 'rgba(255,255,255,0.2)' : (isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)'), color: selected ? selectionStyle.selectedText : colors.textPrimary }}>
-                                                {initials}
-                                            </div>
-                                            {displayName.split(' ')[0]}
+                                                backgroundColor: selected ? selectionStyle.selectedBg : selectionStyle.unselectedBg,
+                                                color: selected ? selectionStyle.selectedText : selectionStyle.unselectedText,
+                                                border: `1px solid ${selected ? selectionStyle.selectedBorder : selectionStyle.unselectedBorder}`,
+                                                boxShadow: selected ? selectionStyle.selectedShadow : 'none',
+                                            }}
+                                        >
+                                            <span className="truncate block w-full">{fullName || member.email}</span>
                                         </button>
                                     );
                                 })}
-                                {teamMembers.length === 0 && <p className="text-xs" style={{ color: colors.textSecondary }}>No team members available.</p>}
+                                {teamMembers.length === 0 && (
+                                    <p className="text-xs" style={{ color: colors.textSecondary }}>
+                                        No team members available.
+                                    </p>
+                                )}
                             </div>
                         </div>
 
                         {/* Project Type */}
                         <div>
                             <label style={labelCls}>Project Type</label>
-                            <div className="rounded-[18px] p-1" style={connectedGroupStyle}>
+                            <div className="rounded-2xl p-1" style={connectedGroupStyle}>
                                 <div className="flex gap-1">
                                     {['commercial', 'contract'].map(type => (
                                         <button key={type} type="button"
                                             onClick={() => { updateField('projectType', type); if (type === 'commercial') updateField('contractName', ''); }}
-                                            className="flex-1 h-10 rounded-[14px] text-xs font-bold transition-all"
+                                            className="flex-1 h-10 rounded-xl text-xs font-bold transition-all"
                                             style={{
                                                 backgroundColor: formData.projectType === type ? selectionStyle.selectedBg : selectionStyle.unselectedBg,
                                                 color: formData.projectType === type ? selectionStyle.selectedText : selectionStyle.unselectedText,
@@ -455,7 +460,10 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
 
                         {/* Attachments */}
                         <div>
-                            <label style={labelCls}>Attachments</label>
+                            <label style={labelCls}>
+                                <Upload className="w-3 h-3 inline mr-1 opacity-60" style={{ marginBottom: 1 }} />
+                                Attachments
+                            </label>
                             <button type="button"
                                 onClick={() => document.getElementById('rfq-file-upload')?.click()}
                                 className="w-full rounded-2xl p-4 text-center transition-colors"
@@ -488,7 +496,7 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
 
                     {/* ── Footer ── */}
                     <div className="flex items-center justify-end gap-3 px-7 py-4"
-                        style={{ borderTop: `1px solid ${colors.border}` }}>
+                        style={{ borderTop: `1px solid ${colors.border}`, backgroundColor: colors.subtle }}>
                         <button type="button" onClick={onClose}
                             className="px-5 h-11 rounded-full text-[13px] font-semibold transition-colors"
                             style={{ color: colors.textPrimary }}
@@ -498,7 +506,7 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                         </button>
                         <button type="submit" disabled={isSubmitting}
                             className="px-6 h-11 rounded-full text-[13px] font-bold transition-all active:scale-[0.98] disabled:opacity-60"
-                            style={{ backgroundColor: colors.accent, color: colors.accentText || '#fff' }}>
+                            style={{ backgroundColor: colors.accent, color: isDark ? '#1a1a1a' : '#FFFFFF' }}>
                             {isSubmitting ? (
                                 <span className="flex items-center gap-2">
                                     <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">

@@ -152,7 +152,7 @@ export const AutoCompleteCombobox = React.memo(({
                                     onMouseDown={(e) => { e.preventDefault(); handleSelect(opt); }}
                                     // onClick handles touch tap on mobile
                                     onClick={() => handleSelect(opt)}
-                                    className="w-full text-left px-4 py-2.5 text-[13px] font-medium transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.05] active:bg-black/[0.06]"
+                                    className="w-full text-left px-4 py-2.5 text-[13px] font-medium transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.09] active:bg-black/[0.06]"
                                     style={{ color: theme.colors.textPrimary }}
                                 >
                                     {opt}

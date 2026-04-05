@@ -59,9 +59,9 @@ export const Portal = ({ children }) => createPortal(children, document.body);
 export const Card = ({ children, dark, c, className = '', style }) => (
   <div className={className} style={{
     padding: 20,
-    backgroundColor: c?.surface,
+    backgroundColor: c?.surface || (dark ? 'rgba(255,255,255,0.08)' : '#fff'),
     borderRadius: 22,
-    border: `1px solid ${dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'}`,
+    border: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)'}`,
     ...style,
   }}>{children}</div>
 );
@@ -72,9 +72,9 @@ export const Pill = ({ icon: Ic, label, onClick, dark }) => (
     onClick={onClick}
     className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-semibold border transition active:scale-[0.97] flex-shrink-0"
     style={{
-      backgroundColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.04)',
+      backgroundColor: dark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.04)',
       borderColor: dark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.09)',
-      color: dark ? 'rgba(255,255,255,0.8)' : 'rgba(53,53,53,1)',
+      color: dark ? 'rgba(255,255,255,0.8)' : '#353535',
     }}
   >
     <Ic className="w-3 h-3" /> {label}
@@ -95,10 +95,10 @@ export const Stage = React.memo(({ stage, state, isLast, subtitle, statusColor, 
   const ref = useFadeUp(idx * 45);
 
   const sc        = statusColor || c.accent;
-  const cirBg     = done ? `${c.accent}10` : now ? `${sc}18` : dark ? 'rgba(255,255,255,0.04)' : 'rgba(53,53,53,0.04)';
+  const cirBg     = done ? `${c.accent}10` : now ? `${sc}18` : dark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.04)';
   const cirBorder = done ? `${c.accent}30` : now ? `${sc}55`  : 'transparent';
   const icClr     = done ? c.accent        : now ? sc          : dark ? 'rgba(255,255,255,0.18)' : 'rgba(53,53,53,0.18)';
-  const lineClr   = done ? `${c.accent}25` : dark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.05)';
+  const lineClr   = done ? `${c.accent}25` : dark ? 'rgba(255,255,255,0.09)' : 'rgba(53,53,53,0.05)';
   const txtClr    = later ? (dark ? 'rgba(255,255,255,0.2)' : 'rgba(53,53,53,0.2)') : c.textPrimary;
 
   return (
@@ -143,7 +143,7 @@ export const Stage = React.memo(({ stage, state, isLast, subtitle, statusColor, 
 /* ── line item row ───────────────────────────────────────────── */
 export const LineItem = React.memo(({ item, open, onToggle, c, dark, panelBorder, isFirst }) => (
   <div className="transition-colors" style={{
-    backgroundColor: open ? (dark ? 'rgba(255,255,255,0.03)' : `${c.accent}05`) : 'transparent',
+    backgroundColor: open ? (dark ? 'rgba(255,255,255,0.07)' : `${c.accent}05`) : 'transparent',
     borderTop: !isFirst ? `1px solid ${panelBorder}` : undefined,
   }}>
     <button
@@ -152,7 +152,7 @@ export const LineItem = React.memo(({ item, open, onToggle, c, dark, panelBorder
     >
       {/* line number badge */}
       <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-[11px] font-bold tabular-nums"
-        style={{ backgroundColor: dark ? 'rgba(255,255,255,0.07)' : `${c.accent}10`, color: c.accent }}>
+        style={{ backgroundColor: dark ? 'rgba(255,255,255,0.12)' : `${c.accent}10`, color: c.accent }}>
         {item.line}
       </div>
 
@@ -190,7 +190,7 @@ export const LineItem = React.memo(({ item, open, onToggle, c, dark, panelBorder
 
             {/* specs */}
             {item.specs?.length > 0 && (
-              <div className="rounded-xl py-2 px-3 space-y-1.5" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.03)' : 'rgba(53,53,53,0.025)' }}>
+              <div className="rounded-xl py-2 px-3 space-y-1.5" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.07)' : 'rgba(53,53,53,0.025)' }}>
                 {item.specs.map((s, i) => (
                   <div key={i} className="flex items-center justify-between gap-4">
                     <p style={fieldLabel(c)}>{s.label}</p>
@@ -212,19 +212,19 @@ export const AckModal = ({ order, onClose, onShare, dark, c }) => (
     <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: UNIFIED_MODAL_Z }} role="dialog" aria-label="Acknowledgment">
       <div className="absolute inset-0" style={getUnifiedBackdropStyle(true)} onClick={onClose} />
       <div className="relative w-full max-w-md rounded-[22px] overflow-hidden flex flex-col"
-        style={{ maxHeight: '85vh', backgroundColor: c?.surface, border: `1px solid ${dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'}` }}>
+        style={{ maxHeight: '85vh', backgroundColor: c?.surface || '#fff', border: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)'}` }}>
 
         {/* header */}
-        <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'}` }}>
+        <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)'}` }}>
           <div>
             <p style={fieldLabel(c)}>Acknowledgment</p>
             <p className="text-[14px] font-bold" style={{ color: c.textPrimary }}>SO {order.orderNumber}</p>
           </div>
           <div className="flex items-center gap-1.5">
-            <button onClick={onShare} className="w-8 h-8 rounded-full flex items-center justify-center transition active:scale-95" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)' }} aria-label="Share">
+            <button onClick={onShare} className="w-8 h-8 rounded-full flex items-center justify-center transition active:scale-95" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.05)' }} aria-label="Share">
               <Share2 className="w-4 h-4" style={{ color: c.textSecondary }} />
             </button>
-            <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center transition active:scale-95" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)' }} aria-label="Close">
+            <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center transition active:scale-95" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.05)' }} aria-label="Close">
               <X className="w-4 h-4" style={{ color: c.textSecondary }} />
             </button>
           </div>
@@ -253,7 +253,7 @@ export const AckModal = ({ order, onClose, onShare, dark, c }) => (
             <div className="mt-1.5">
               {order.lineItems.map((li, i) => (
                 <div key={li.line} className="flex items-start justify-between gap-3 py-2.5"
-                  style={{ borderBottom: i < order.lineItems.length - 1 ? `1px solid ${dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'}` : 'none' }}>
+                  style={{ borderBottom: i < order.lineItems.length - 1 ? `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)'}` : 'none' }}>
                   <div className="flex-1 min-w-0">
                     <p className="text-[13px] font-semibold" style={{ color: c.textPrimary }}>{tc(li.name)}</p>
                     <p className="text-[12px] mt-0.5" style={{ color: c.textSecondary, opacity: 0.7 }}>{li.model} · Qty {li.quantity}</p>
@@ -264,7 +264,7 @@ export const AckModal = ({ order, onClose, onShare, dark, c }) => (
             </div>
           </div>
 
-          <div className="flex items-center justify-between pt-0.5" style={{ borderTop: `1px solid ${dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'}` }}>
+          <div className="flex items-center justify-between pt-0.5" style={{ borderTop: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)'}` }}>
             <p className="text-[13px] font-bold" style={{ color: c.textSecondary }}>Total</p>
             <p className="text-[17px] font-black" style={{ color: c.textPrimary }}>{fmt$(order.net, true)}</p>
           </div>
@@ -272,7 +272,7 @@ export const AckModal = ({ order, onClose, onShare, dark, c }) => (
           {order.ackUrl && (
             <a href={order.ackUrl} target="_blank" rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 w-full py-2.5 rounded-full text-[13px] font-semibold transition active:scale-[0.97]"
-              style={{ backgroundColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.05)', border: `1px solid ${dark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.09)'}`, color: c.textPrimary }}>
+              style={{ backgroundColor: dark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.05)', border: `1px solid ${dark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.09)'}`, color: c.textPrimary }}>
               <Download className="w-4 h-4" /> Download PDF
             </a>
           )}
@@ -288,14 +288,14 @@ export const ClipsModal = ({ onClose, dark, c }) => (
     <div className="fixed inset-0 flex items-end sm:items-center justify-center" style={{ zIndex: UNIFIED_MODAL_Z }} role="dialog" aria-label="Production clips">
       <div className="absolute inset-0" style={getUnifiedBackdropStyle(true)} onClick={onClose} />
       <div className="relative w-full max-w-lg rounded-t-[22px] sm:rounded-[22px] overflow-hidden flex flex-col"
-        style={{ maxHeight: '80vh', backgroundColor: c?.surface, border: `1px solid ${dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'}` }}>
+        style={{ maxHeight: '80vh', backgroundColor: c?.surface || '#fff', border: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)'}` }}>
 
-        <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'}` }}>
+        <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)'}` }}>
           <div>
             <p style={fieldLabel(c)}>JSI Factory</p>
             <p className="text-[14px] font-bold" style={{ color: c.textPrimary }}>Production Clips</p>
           </div>
-          <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center transition active:scale-95" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)' }} aria-label="Close">
+          <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center transition active:scale-95" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.05)' }} aria-label="Close">
             <X className="w-4 h-4" style={{ color: c.textSecondary }} />
           </button>
         </div>
@@ -303,12 +303,12 @@ export const ClipsModal = ({ onClose, dark, c }) => (
         <div className="flex-1 overflow-y-auto p-4 space-y-2">
           {PROD_CLIPS.map(clip => (
             <div key={clip.id} className="flex gap-3 items-center rounded-[14px] p-2 transition active:opacity-70 cursor-pointer"
-              style={{ backgroundColor: dark ? 'rgba(255,255,255,0.04)' : 'rgba(53,53,53,0.03)' }}>
-              <div className="relative flex-shrink-0 w-24 h-14 rounded-xl overflow-hidden" style={{ backgroundColor: dark ? c.surface : c.border }}>
+              style={{ backgroundColor: dark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.03)' }}>
+              <div className="relative flex-shrink-0 w-24 h-14 rounded-xl overflow-hidden" style={{ backgroundColor: dark ? '#333' : '#eee' }}>
                 <img src={clip.thumb} alt="" className="w-full h-full object-cover" loading="lazy" />
                 <div className="absolute inset-0 flex items-center justify-center bg-black/25">
                   <div className="w-7 h-7 rounded-full bg-white/90 flex items-center justify-center">
-                    <Play className="w-3 h-3 fill-current" style={{ color: c.textPrimary, marginLeft: 1 }} />
+                    <Play className="w-3 h-3 fill-current" style={{ color: '#353535', marginLeft: 1 }} />
                   </div>
                 </div>
               </div>

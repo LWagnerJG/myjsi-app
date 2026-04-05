@@ -107,7 +107,7 @@ export const PresentationsScreen = ({ theme, screenParams }) => {
                         <button key={id} onClick={() => setActiveTab(id)}
                             className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-2xl text-xs font-semibold transition-all"
                             style={{
-                                background: active ? colors.accent : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.05)'),
+                                background: active ? colors.accent : (isDark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.05)'),
                                 color: active ? (colors.accentText || (isDark ? '#1A1A1A' : '#FFFFFF')) : colors.textSecondary,
                                 border: `1px solid ${active ? colors.accent : borderColor}`,
                             }}>

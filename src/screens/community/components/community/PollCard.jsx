@@ -32,7 +32,7 @@ export const PollCard = React.memo(({ poll, theme, dark, votedOption, onPollVote
             className="ml-auto text-[11px] font-semibold px-2 py-0.5 rounded-full"
             style={{
               backgroundColor: isClosed
-                ? (dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)')
+                ? (dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.05)')
                 : (dark ? 'rgba(74,124,89,0.18)' : 'rgba(74,124,89,0.10)'),
               color: isClosed ? theme.colors.textSecondary : (theme.colors.success || '#4A7C59'),
             }}
@@ -64,8 +64,8 @@ export const PollCard = React.memo(({ poll, theme, dark, votedOption, onPollVote
                   onClick={() => { if (!votedOption) onPollVote?.(poll.id, opt.id); }}
                   className="w-full text-left px-3 py-2 rounded-xl relative overflow-hidden transition-all active:scale-[0.98]"
                   style={{
-                    backgroundColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)',
-                    border: active ? `1px solid ${theme.colors.accent}` : `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+                    backgroundColor: dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.03)',
+                    border: active ? `1px solid ${theme.colors.accent}` : `1px solid ${dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)'}`,
                     color: active ? theme.colors.accent : votedOption ? theme.colors.textSecondary : theme.colors.textPrimary,
                     cursor: votedOption ? 'default' : 'pointer',
                     opacity: votedOption && !active ? 0.65 : 1,

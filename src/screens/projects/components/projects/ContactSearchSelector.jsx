@@ -18,7 +18,7 @@ export const ContactSearchSelector = ({ value, onChange, dealers, theme }) => {
   }, [dealers]);
   const filtered = useMemo(() => !query ? contacts : contacts.filter(c => c.name.toLowerCase().includes(query.toLowerCase()) || c.title.toLowerCase().includes(query.toLowerCase())), [contacts, query]);
   useEffect(() => { if (!open) return; const close = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); }; window.addEventListener('mousedown', close); return () => window.removeEventListener('mousedown', close); }, [open]);
-  const fieldBg = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.025)';
+  const fieldBg = isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.025)';
   const fieldBorder = isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)';
   return (
     <div className="relative" ref={ref}>
@@ -50,7 +50,7 @@ export const ContactSearchSelector = ({ value, onChange, dealers, theme }) => {
         <div className="absolute z-50 mt-1.5 left-0 right-0 rounded-2xl overflow-hidden shadow-xl" style={{ backgroundColor: theme.colors.surface, border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.08)' }}>
           <div className="max-h-[200px] overflow-y-auto scrollbar-hide py-1">
             {filtered.length > 0 ? filtered.map(c => (
-              <button key={c.name} onClick={() => { onChange(c.name); setQuery(''); setOpen(false); }} className="w-full text-left px-3 py-2.5 flex items-center gap-2.5 transition-colors" onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+              <button key={c.name} onClick={() => { onChange(c.name); setQuery(''); setOpen(false); }} className="w-full text-left px-3 py-2.5 flex items-center gap-2.5 transition-colors" onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.03)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
                 <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0" style={{ backgroundColor: theme.colors.accent + '18', color: theme.colors.accent }}>
                   {c.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
                 </div>
@@ -66,7 +66,7 @@ export const ContactSearchSelector = ({ value, onChange, dealers, theme }) => {
             )}
           </div>
           {query.trim() && !contacts.some(c => c.name.toLowerCase() === query.toLowerCase()) && (
-            <button onClick={() => { onChange(query.trim()); setQuery(''); setOpen(false); }} className="w-full text-left px-3 py-2.5 flex items-center gap-2 border-t transition-colors" style={{ borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }} onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+            <button onClick={() => { onChange(query.trim()); setQuery(''); setOpen(false); }} className="w-full text-left px-3 py-2.5 flex items-center gap-2 border-t transition-colors" style={{ borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }} onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.02)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
               <UserPlus size={14} style={{ color: theme.colors.accent }} />
               <span className="text-xs font-semibold" style={{ color: theme.colors.accent }}>Add "{query.trim()}"</span>
             </button>

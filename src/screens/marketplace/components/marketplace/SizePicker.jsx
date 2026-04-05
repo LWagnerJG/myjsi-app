@@ -22,7 +22,7 @@ export const SizePicker = ({ sizes, selected, onSelect, theme }) => {
               }}
               className="min-w-[42px] px-3 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95"
               style={{
-                backgroundColor: active ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.03)'),
+                backgroundColor: active ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.09)' : 'rgba(53,53,53,0.03)'),
                 color: active ? theme.colors.accentText : theme.colors.textSecondary,
                 border: `1px solid ${active ? theme.colors.accent : theme.colors.border}`,
               }}

@@ -12,7 +12,7 @@ export const RemoveDropZone = ({ children, isDark, isActive }) => {
                 padding: highlight ? 12 : 8,
                 backgroundColor: highlight
                     ? (isDark ? 'rgba(184,92,92,0.15)' : 'rgba(184,92,92,0.08)')
-                    : (isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)'),
+                    : (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.02)'),
                 border: highlight
                     ? '2px dashed rgba(184,92,92,0.5)'
                     : `1px dashed ${isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)'}`,

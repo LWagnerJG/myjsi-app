@@ -4,6 +4,7 @@ import React, {
     useCallback,
     useRef
 } from 'react';
+import { GlassCard } from '../../components/common/GlassCard.jsx';
 import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 import { isDarkTheme } from '../../design-system/tokens.js';
@@ -18,11 +19,10 @@ import { PRODUCTS_CATEGORIES_DATA, PRODUCT_DATA, FABRICS_DATA, JSI_MODELS, JSI_S
 import { usePersistentState } from '../../hooks/usePersistentState.js';
 
 // ─── Clean card helpers ───────────────────────────────────────────────────────────────
-const bdrFor = (dark) => dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
-
-const cardStyle = (dark, surface) => ({
-    backgroundColor: surface,
-    border: `1px solid ${bdrFor(dark)}`,
+const cardStyle = (dark) => ({
+    backgroundColor: dark ? '#2A2A2A' : '#FFFFFF',
+    border: dark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)',
+    boxShadow: 'none',
 });
 
 const normalizeSeriesKey = (value) => String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
@@ -105,7 +105,7 @@ const getSeriesThumbnail = (series) => (
     SERIES_THUMBNAILS[normalizeSeriesKey(series)] || '/category-images/casegood-images/api_vision.jpg'
 );
 
-// ─── Category Card ───────────────────────────────────────────────────────────
+// ─── Category Card — glass surface ──────────────────────────────────────────
 const CategoryCard = React.memo(({
     category,
     theme,
@@ -114,16 +114,15 @@ const CategoryCard = React.memo(({
     className = ''
 }) => {
     const dark = isDarkTheme(theme);
-    const bdr = bdrFor(dark);
     const handleClick = useCallback(() => onClick(category), [category, onClick]);
 
     if (viewMode === 'grid') {
         return (
             <div
                 onClick={handleClick}
-                className={`rounded-[22px] overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] ${className}`}
+                className={`rounded-[24px] overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] ${className}`}
                 style={{
-                    ...cardStyle(dark, theme.colors.surface),
+                    ...cardStyle(dark),
                     padding: 0,
                 }}
             >
@@ -138,7 +137,7 @@ const CategoryCard = React.memo(({
                         {category.images?.map((img, i) => (
                             <div
                                 key={i}
-                                className="w-full h-[86px] rounded-[14px] overflow-hidden"
+                                className="w-full h-[86px] rounded-2xl overflow-hidden"
                             >
                                 <img
                                     src={img}
@@ -155,7 +154,7 @@ const CategoryCard = React.memo(({
                         className="px-5 py-2.5 text-xs font-medium"
                         style={{
                             color: theme.colors.textSecondary,
-                            borderTop: `1px solid ${bdr}`,
+                            borderTop: dark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.05)',
                         }}
                     >
                         {category.description}
@@ -169,13 +168,13 @@ const CategoryCard = React.memo(({
     return (
         <div
             onClick={handleClick}
-            className={`rounded-[22px] overflow-hidden cursor-pointer transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] ${className}`}
-            style={{ ...cardStyle(dark, theme.colors.surface) }}
+            className={`rounded-2xl overflow-hidden cursor-pointer transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] ${className}`}
+            style={{ ...cardStyle(dark) }}
         >
             <div className="p-3.5 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                     <div
-                        className="w-12 h-12 rounded-[14px] overflow-hidden flex-shrink-0"
+                        className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0"
                         style={{ backgroundColor: 'transparent' }}
                     >
                         <img
@@ -203,7 +202,7 @@ const CategoryCard = React.memo(({
 });
 CategoryCard.displayName = 'CategoryCard';
 
-// ─── View mode toggle ────────────────────────────────────────────────────────
+// ─── View mode toggle — glass button ─────────────────────────────────────────
 const ViewModeToggle = React.memo(({ viewMode, onToggle, theme }) => {
     const dark = isDarkTheme(theme);
     const isGrid = viewMode === 'grid';
@@ -213,7 +212,7 @@ const ViewModeToggle = React.memo(({ viewMode, onToggle, theme }) => {
             onClick={onToggle}
             className="h-12 px-4 rounded-full transition-all duration-200 active:scale-95 hover:scale-[1.02] inline-flex items-center gap-2.5"
             style={{
-                ...cardStyle(dark, theme.colors.surface),
+                ...cardStyle(dark),
                 minWidth: 156,
             }}
             aria-label={actionLabel}
@@ -238,7 +237,10 @@ const StickyHeader = React.memo(({
     placeholder,
     showViewToggle,
 }) => (
-    <div className="flex-shrink-0 pt-2 pb-3">
+    <div
+        className="flex-shrink-0 px-4 sm:px-5 pt-2 pb-3"
+        style={{ backgroundColor: theme.colors.background }}
+    >
         <div className="flex items-center gap-3">
             <StandardSearchBar
                 value={searchTerm}
@@ -262,9 +264,8 @@ StickyHeader.displayName = 'StickyHeader';
 // ─── Empty state ────────────────────────────────────────────────────────────
 const EmptyState = React.memo(({ searchTerm, theme, onClearSearch }) => {
     const dark = isDarkTheme(theme);
-    const bdr = bdrFor(dark);
     return (
-        <div className="rounded-[22px] p-10 text-center" style={{ ...cardStyle(dark, theme.colors.surface) }}>
+        <div className="rounded-[24px] p-10 text-center" style={{ ...cardStyle(dark) }}>
             <Package className="w-12 h-12 mx-auto mb-4" style={{ color: theme.colors.textSecondary }} />
             <p className="font-semibold text-lg mb-2" style={{ color: theme.colors.textPrimary }}>
                 No Products Found
@@ -278,7 +279,7 @@ const EmptyState = React.memo(({ searchTerm, theme, onClearSearch }) => {
                 className="mt-4 px-4 py-2 rounded-full text-xs font-semibold transition-colors hover:bg-black/5 dark:hover:bg-white/5"
                 style={{
                     color: theme.colors.textPrimary,
-                    border: `1px solid ${bdr}`,
+                    border: `1px solid ${theme.colors.border}`,
                 }}
             >
                 Clear Search
@@ -289,16 +290,13 @@ const EmptyState = React.memo(({ searchTerm, theme, onClearSearch }) => {
 EmptyState.displayName = 'EmptyState';
 
 // ─── Series Row ─────────────────────────────────────────────────────────────
-const SeriesRow = React.memo(({ series, theme, isLast, onClick }) => {
-    const dark = isDarkTheme(theme);
-    const bdr = bdrFor(dark);
-    return (
+const SeriesRow = React.memo(({ series, theme, isLast, onClick }) => (
     <button
         onClick={() => onClick(series)}
         className="w-full flex items-center justify-between px-4 md:px-5 py-3.5 md:py-4 text-left transition-colors hover:opacity-80 active:opacity-60"
         style={{
             backgroundColor: 'transparent',
-            borderBottom: isLast ? 'none' : `1px solid ${bdr}`,
+            borderBottom: isLast ? 'none' : `1px solid ${theme.colors.border}`,
         }}
     >
         <div className="flex items-center gap-3 min-w-0">
@@ -316,18 +314,16 @@ const SeriesRow = React.memo(({ series, theme, isLast, onClick }) => {
         </div>
         <ChevronRight className="w-4 h-4 flex-shrink-0" style={{ color: theme.colors.textSecondary }} />
     </button>
-    );
-});
+));
 SeriesRow.displayName = 'SeriesRow';
 
 // ─── Families (series) view ──────────────────────────────────────────────────
 const FamiliesView = React.memo(({ groupedSeries, theme, onSeriesClick, searchTerm, onClearSearch }) => {
     const dark = isDarkTheme(theme);
-    const bdr = bdrFor(dark);
 
     if (groupedSeries.length === 0) {
         return (
-            <div className="rounded-[22px] p-10 text-center" style={{ ...cardStyle(dark, theme.colors.surface) }}>
+            <div className="rounded-[24px] p-10 text-center" style={{ ...cardStyle(dark) }}>
                 <Package className="w-12 h-12 mx-auto mb-4" style={{ color: theme.colors.textSecondary }} />
                 <p className="font-semibold text-lg mb-2" style={{ color: theme.colors.textPrimary }}>
                     No Series Found
@@ -341,7 +337,7 @@ const FamiliesView = React.memo(({ groupedSeries, theme, onSeriesClick, searchTe
                     className="mt-4 px-4 py-2 rounded-full text-xs font-semibold transition-colors hover:bg-black/5 dark:hover:bg-white/5"
                     style={{
                         color: theme.colors.textPrimary,
-                        border: `1px solid ${bdr}`,
+                        border: `1px solid ${theme.colors.border}`,
                     }}
                 >
                     Clear Search
@@ -352,10 +348,10 @@ const FamiliesView = React.memo(({ groupedSeries, theme, onSeriesClick, searchTe
 
     return (
         <div
-            className="rounded-[22px] overflow-hidden"
+            className="rounded-[20px] overflow-hidden"
             style={{
                 backgroundColor: theme.colors.surface,
-                border: `1px solid ${bdr}`,
+                border: `1px solid ${theme.colors.border}`,
             }}
         >
             {groupedSeries.map(([letter, seriesList], gi) => (
@@ -364,13 +360,13 @@ const FamiliesView = React.memo(({ groupedSeries, theme, onSeriesClick, searchTe
                     <div
                         className="px-4 py-1.5"
                         style={{
-                            backgroundColor: dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
-                            borderBottom: `1px solid ${bdr}`,
+                            backgroundColor: dark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.04)',
+                            borderBottom: `1px solid ${theme.colors.border}`,
                         }}
                     >
                         <span
-                            className="text-[11px] font-bold tracking-[0.07em] uppercase"
-                            style={{ color: theme.colors.accent, opacity: 0.8 }}
+                            className="text-xs font-bold tracking-widest uppercase"
+                            style={{ color: theme.colors.accent }}
                         >
                             {letter}
                         </span>
@@ -457,36 +453,32 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
     const clearSearch = useCallback(() => setSearchTerm(''), []);
 
     return (
-        <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
+        <div className="flex flex-col h-full app-header-offset">
+            <div className="max-w-5xl mx-auto w-full">
+                <StickyHeader
+                    theme={theme}
+                    viewMode={activeViewMode}
+                    onToggleViewMode={toggleViewMode}
+                    searchTerm={searchTerm}
+                    onSearchChange={handleSearchChange}
+                    placeholder={activeProductView === 'families' ? 'Search series...' : 'Search products...'}
+                    showViewToggle={activeProductView !== 'families'}
+                />
+                <div className="px-4 sm:px-5 pb-3">
+                    <SegmentedToggle
+                        value={activeProductView}
+                        onChange={handleViewChange}
+                        options={productViewOptions}
+                        theme={theme}
+                        size="md"
+                    />
+                </div>
+            </div>
             <div
                 ref={scrollContainerRef}
-                className="flex-1 overflow-y-auto scrollbar-hide"
+                className="flex-1 overflow-y-auto px-4 sm:px-5 lg:px-8 pb-8 scrollbar-hide"
             >
-                <div
-                    className="max-w-5xl mx-auto w-full"
-                    style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 16px)' }}
-                >
-                <div className="px-4 sm:px-5">
-                    <StickyHeader
-                        theme={theme}
-                        viewMode={activeViewMode}
-                        onToggleViewMode={toggleViewMode}
-                        searchTerm={searchTerm}
-                        onSearchChange={handleSearchChange}
-                        placeholder={activeProductView === 'families' ? 'Search series...' : 'Search products...'}
-                        showViewToggle={activeProductView !== 'families'}
-                    />
-                    <div className="pb-3">
-                        <SegmentedToggle
-                            value={activeProductView}
-                            onChange={handleViewChange}
-                            options={productViewOptions}
-                            theme={theme}
-                            size="md"
-                        />
-                    </div>
-                </div>
-                <div className="px-4 sm:px-5 lg:px-8 pb-8">
+                <div className="max-w-5xl mx-auto w-full">
                     {activeProductView === 'families' ? (
                         <div className="w-full mx-auto xl:max-w-[980px] 2xl:max-w-[920px]">
                             <FamiliesView
@@ -513,7 +505,6 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
                             ))}
                         </div>
                     )}
-                </div>
                 </div>
             </div>
         </div>

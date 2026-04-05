@@ -13,6 +13,7 @@ import {
   Wallet,
   X,
 } from 'lucide-react';
+import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 import { isDarkTheme } from '../../design-system/tokens.js';
 import { hapticLight, hapticMedium, hapticSuccess } from '../../utils/haptics.js';
@@ -38,34 +39,27 @@ const EARNING_PROGRAMS = [
   { title: 'Send platform feedback', desc: 'Thoughtful feedback that improves the app.', amount: '✦ 100' },
 ];
 
-const EmptyState = ({ icon: Icon, title, description, actionLabel, onAction, theme, isDark }) => {
-  const bdr = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
-  return (
-    <div
-      className="rounded-[22px] py-14 px-6 text-center"
-      style={{ backgroundColor: theme.colors.surface, border: `1px solid ${bdr}` }}
-    >
-      <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.04)' }}>
-        <Icon className="w-7 h-7" style={{ color: theme.colors.textSecondary }} />
-      </div>
-      <p className="text-sm font-semibold mb-1" style={{ color: theme.colors.textPrimary }}>{title}</p>
-      <p className="text-xs max-w-xs mx-auto" style={{ color: theme.colors.textSecondary }}>{description}</p>
-      {actionLabel && onAction && (
-        <button
-          onClick={onAction}
-          className="mt-5 px-5 py-2.5 rounded-full text-xs font-bold transition-all active:scale-95"
-          style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
-        >
-          {actionLabel}
-        </button>
-      )}
+const EmptyState = ({ icon: Icon, title, description, actionLabel, onAction, theme, isDark }) => (
+  <GlassCard theme={theme} className="py-14 px-6 text-center">
+    <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(53,53,53,0.04)' }}>
+      <Icon className="w-7 h-7" style={{ color: theme.colors.textSecondary }} />
     </div>
-  );
-};
+    <p className="text-sm font-semibold mb-1" style={{ color: theme.colors.textPrimary }}>{title}</p>
+    <p className="text-xs max-w-xs mx-auto" style={{ color: theme.colors.textSecondary }}>{description}</p>
+    {actionLabel && onAction && (
+      <button
+        onClick={onAction}
+        className="mt-5 px-5 py-2.5 rounded-full text-xs font-bold transition-all active:scale-95"
+        style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
+      >
+        {actionLabel}
+      </button>
+    )}
+  </GlassCard>
+);
 
 export const MarketplaceScreen = ({ theme, userSettings }) => {
   const isDark = isDarkTheme(theme);
-  const bdr = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
   const defaultShirtSize = userSettings?.shirtSize || 'M';
 
   const [activeTab, setActiveTab] = useState('shop');
@@ -230,21 +224,21 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
   ]), [orders.length, totalEarned, totalSpent]);
 
   return (
-    <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
+    <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
+      <div className="flex-shrink-0 px-4 pt-2 pb-1" style={{ background: theme.colors.background }}>
+        <div className="max-w-2xl mx-auto w-full flex justify-center">
+          <SegmentedToggle
+            value={activeTab}
+            onChange={(val) => { hapticLight(); setActiveTab(val); }}
+            options={tabOptions}
+            size="md"
+            theme={theme}
+          />
+        </div>
+      </div>
+
       <div className="flex-1 overflow-y-auto scrollbar-hide" style={{ backgroundColor: theme.colors.background }}>
-        <div
-          className="max-w-2xl mx-auto w-full px-4 pb-8"
-          style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 16px)' }}
-        >
-          <div className="pb-3 flex justify-center">
-            <SegmentedToggle
-              value={activeTab}
-              onChange={(val) => { hapticLight(); setActiveTab(val); }}
-              options={tabOptions}
-              size="md"
-              theme={theme}
-            />
-          </div>
+        <div className="max-w-2xl mx-auto w-full px-4 pb-8">
           {activeTab === 'shop' && (
             <div className="pt-4 space-y-4">
               <BalanceCard
@@ -267,8 +261,8 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
                     className="w-full pl-10 pr-10 py-3 text-[13px] outline-none transition"
                     style={{
                       borderRadius: 9999,
-                      background: isDark ? 'rgba(255,255,255,0.05)' : theme.colors.inputBackground,
-                      border: `1px solid ${bdr}`,
+                      background: isDark ? 'rgba(255,255,255,0.09)' : theme.colors.inputBackground,
+                      border: `1px solid ${theme.colors.border}`,
                       color: theme.colors.textPrimary,
                     }}
                   />
@@ -298,9 +292,9 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
                         onClick={() => setSelectedCategory(category.id)}
                         className="px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all active:scale-95 flex-shrink-0"
                         style={{
-                          backgroundColor: active ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.04)' : 'rgba(53,53,53,0.03)'),
+                          backgroundColor: active ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.03)'),
                           color: active ? theme.colors.accentText : theme.colors.textSecondary,
-                          border: `1px solid ${active ? theme.colors.accent : bdr}`,
+                          border: `1px solid ${active ? theme.colors.accent : theme.colors.border}`,
                         }}
                       >
                         {category.name} <span className="opacity-70">{count}</span>
@@ -340,13 +334,10 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
 
           {activeTab === 'orders' && (
             <div className="pt-4 space-y-4">
-              <div
-                className="rounded-[22px] overflow-hidden p-5 sm:p-6"
-                style={{ backgroundColor: theme.colors.surface, border: `1px solid ${bdr}` }}
-              >
+              <GlassCard theme={theme} className="p-5 sm:p-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                   <div>
-                    <p className="text-[11px] font-bold uppercase tracking-[0.07em]" style={{ color: theme.colors.textSecondary, opacity: 0.55 }}>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: theme.colors.textSecondary }}>
                       Order tracking
                     </p>
                     <h3 className="text-lg font-semibold mt-2" style={{ color: theme.colors.textPrimary }}>
@@ -354,8 +345,8 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
                     </h3>
                   </div>
 
-                  <div className="rounded-[14px] px-4 py-3" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(53,53,53,0.03)' }}>
-                    <p className="text-[11px] font-bold uppercase tracking-[0.07em]" style={{ color: theme.colors.textSecondary, opacity: 0.55 }}>
+                  <div className="rounded-2xl px-4 py-3" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.03)' }}>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.16em]" style={{ color: theme.colors.textSecondary }}>
                       Orders placed
                     </p>
                     <p className="text-2xl font-semibold mt-1" style={{ color: theme.colors.textPrimary }}>{orders.length}</p>
@@ -368,8 +359,8 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
                     const SummaryIcon = summary.icon;
 
                     return (
-                      <div key={summary.key} className="rounded-[14px] p-3 text-center" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(53,53,53,0.02)' }}>
-                        <div className="w-9 h-9 rounded-[14px] mx-auto mb-2 flex items-center justify-center" style={{ backgroundColor: summary.bg }}>
+                      <div key={summary.key} className="rounded-2xl p-3 text-center" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(53,53,53,0.02)' }}>
+                        <div className="w-9 h-9 rounded-2xl mx-auto mb-2 flex items-center justify-center" style={{ backgroundColor: summary.bg }}>
                           <SummaryIcon className="w-4 h-4" style={{ color: summary.color }} />
                         </div>
                         <p className="text-xl font-bold" style={{ color: theme.colors.textPrimary }}>{count}</p>
@@ -378,7 +369,7 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
                     );
                   })}
                 </div>
-              </div>
+              </GlassCard>
 
               {orders.length > 0 ? (
                 <div className="space-y-3">
@@ -409,20 +400,17 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
                 stats={walletStats}
               />
 
-              <div
-                className="rounded-[22px] overflow-hidden px-4 py-4 sm:px-5"
-                style={{ backgroundColor: theme.colors.surface, border: `1px solid ${bdr}` }}
-              >
+              <GlassCard theme={theme} className="px-4 py-4 sm:px-5">
                 <div className="flex items-start justify-between gap-3 mb-4">
                   <div>
                     <div className="flex items-center gap-2">
                       <History className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
-                      <p className="text-[11px] font-bold uppercase tracking-[0.07em]" style={{ color: theme.colors.textSecondary, opacity: 0.55 }}>Recent activity</p>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: theme.colors.textSecondary }}>Recent activity</p>
                     </div>
                     <p className="text-sm font-semibold mt-2" style={{ color: theme.colors.textPrimary }}>Recent activity</p>
                   </div>
 
-                  <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.03)', color: theme.colors.textSecondary }}>
+                  <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(53,53,53,0.03)', color: theme.colors.textSecondary }}>
                     {txnHistory.length} entries
                   </span>
                 </div>
@@ -430,17 +418,14 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
                 {txnHistory.map((txn, index) => (
                   <TransactionRow key={txn.id} txn={txn} theme={theme} isLast={index === txnHistory.length - 1} />
                 ))}
-              </div>
+              </GlassCard>
 
-              <div
-                className="rounded-[22px] overflow-hidden p-5 sm:p-6"
-                style={{ backgroundColor: theme.colors.surface, border: `1px solid ${bdr}` }}
-              >
+              <GlassCard theme={theme} className="p-5 sm:p-6">
                 <div className="flex items-start justify-between gap-3 mb-4">
                   <div>
                     <div className="flex items-center gap-2">
                       <Sparkles className="w-4 h-4" style={{ color: theme.colors.warning }} />
-                      <p className="text-[11px] font-bold uppercase tracking-[0.07em]" style={{ color: theme.colors.textSecondary, opacity: 0.55 }}>Ways to earn</p>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: theme.colors.textSecondary }}>Ways to earn</p>
                     </div>
                     <p className="text-sm font-semibold mt-2" style={{ color: theme.colors.textPrimary }}>Ways to earn</p>
                   </div>
@@ -450,8 +435,8 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
 
                 <div className="space-y-0">
                   {EARNING_PROGRAMS.map((item, index) => (
-                    <div key={item.title} className={`flex items-start gap-3 py-3 ${index !== EARNING_PROGRAMS.length - 1 ? 'border-b' : ''}`} style={{ borderColor: bdr }}>
-                      <div className="w-8 h-8 rounded-[14px] flex-shrink-0 flex items-center justify-center mt-0.5" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.04)' }}>
+                    <div key={item.title} className={`flex items-start gap-3 py-3 ${index !== EARNING_PROGRAMS.length - 1 ? 'border-b' : ''}`} style={{ borderColor: theme.colors.border }}>
+                      <div className="w-8 h-8 rounded-2xl flex-shrink-0 flex items-center justify-center mt-0.5" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(53,53,53,0.04)' }}>
                         <Award className="w-3 h-3" style={{ color: theme.colors.accent }} />
                       </div>
 
@@ -466,7 +451,7 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
                     </div>
                   ))}
                 </div>
-              </div>
+              </GlassCard>
             </div>
           )}
         </div>

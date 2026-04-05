@@ -12,7 +12,7 @@ export const MyDeckCard = ({ deck, theme, onDownload, onShare, onDelete }) => {
             style={{ background: isDark ? theme.colors.surface : '#FFFFFF', border: `1px solid ${theme.colors.border}`, boxShadow: CARD_SHADOW }}>
             {/* Thumbnail */}
             <div className="aspect-video w-full overflow-hidden relative"
-                style={{ background: isDark ? 'rgba(255,255,255,0.05)' : '#f0ede8' }}>
+                style={{ background: isDark ? 'rgba(255,255,255,0.09)' : '#f0ede8' }}>
                 {deck.thumbnailUrl
                     ? <img src={deck.thumbnailUrl} alt={deck.title} className="w-full h-full object-cover" loading="lazy" />
                     : <div className="w-full h-full flex items-center justify-center"><LayoutGrid className="w-8 h-8 opacity-20" style={{ color: theme.colors.textPrimary }} /></div>

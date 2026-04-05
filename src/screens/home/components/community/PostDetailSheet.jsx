@@ -79,7 +79,7 @@ export const PostDetailSheet = ({ post, theme, dark, isLiked, isUpvoted, onToggl
           )}
 
           {/* Engagement row */}
-          <div className="flex items-center gap-1 py-2 border-t" style={{ borderColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }}>
+          <div className="flex items-center gap-1 py-2 border-t" style={{ borderColor: dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.05)' }}>
             <button
               onClick={() => { hapticMedium(); onUpvote?.(post.id); }}
               className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full transition-all active:scale-95"
@@ -106,7 +106,7 @@ export const PostDetailSheet = ({ post, theme, dark, isLiked, isUpvoted, onToggl
                 <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0" style={{ backgroundColor: dark ? '#333' : '#EDEAE4', color: theme.colors.textSecondary }}>
                   {c.name?.[0] || '?'}
                 </div>
-                <div className="flex-1 rounded-xl px-2.5 py-1.5" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }}>
+                <div className="flex-1 rounded-xl px-2.5 py-1.5" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.03)' }}>
                   <p className="text-xs font-semibold" style={{ color: theme.colors.textPrimary }}>{c.name}</p>
                   <p className="text-xs mt-0.5" style={{ color: theme.colors.textSecondary }}>{c.text}</p>
                 </div>
@@ -119,7 +119,7 @@ export const PostDetailSheet = ({ post, theme, dark, isLiked, isUpvoted, onToggl
         </div>
 
         {/* Comment input */}
-        <form onSubmit={submit} className="flex items-center gap-2 px-4 py-3 border-t flex-shrink-0" style={{ borderColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }}>
+        <form onSubmit={submit} className="flex items-center gap-2 px-4 py-3 border-t flex-shrink-0" style={{ borderColor: dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.05)' }}>
           <input
             value={draft}
             onChange={e => setDraft(e.target.value)}

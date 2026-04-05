@@ -129,7 +129,7 @@ export const RoleDropdown = ({ value, roles, onChange, theme }) => {
                             <button
                                 key={r.value}
                                 onClick={() => { onChange(r.value); setOpen(false); }}
-                                className="w-full text-left px-3.5 py-2 text-sm transition-colors flex items-center justify-between hover:bg-black/[0.03] dark:hover:bg-white/[0.03]"
+                                className="w-full text-left px-3.5 py-2 text-sm transition-colors flex items-center justify-between hover:bg-black/[0.03] dark:hover:bg-white/[0.08]"
                                 style={{ color: theme.colors.textPrimary }}
                             >
                                 <span className="flex items-center gap-2">

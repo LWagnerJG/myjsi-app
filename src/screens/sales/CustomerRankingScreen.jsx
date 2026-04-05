@@ -68,7 +68,7 @@ export const CustomerRankingScreen = ({ theme, onNavigate }) => {
         }
         return (
             <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
-                style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)', color: theme.colors.textSecondary }}>
+                style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)', color: theme.colors.textSecondary }}>
                 {rank}
             </div>
         );
@@ -87,8 +87,8 @@ export const CustomerRankingScreen = ({ theme, onNavigate }) => {
             >
                 <div
                     className="flex items-center gap-3 px-4 py-4 transition-colors"
-                    style={{ borderTop: i === 0 ? 'none' : `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'}` }}
-                    onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.015)'}
+                    style={{ borderTop: i === 0 ? 'none' : `1px solid ${isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.04)'}` }}
+                    onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.015)'}
                     onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
                     <RankBadge rank={c.rank} />
@@ -105,7 +105,7 @@ export const CustomerRankingScreen = ({ theme, onNavigate }) => {
 
                         <div className="flex items-center gap-3">
                             {/* Progress bar */}
-                            <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }}>
+                            <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.05)' }}>
                                 <motion.div
                                     initial={{ width: 0 }}
                                     animate={{ width: `${pct}%` }}
@@ -154,7 +154,7 @@ export const CustomerRankingScreen = ({ theme, onNavigate }) => {
                             <button
                                 onClick={() => { setShowSearch(!showSearch); if (showSearch) setSearch(''); }}
                                 className="w-9 h-9 rounded-full flex items-center justify-center transition-colors"
-                                style={{ backgroundColor: showSearch ? (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)') : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)') }}
+                                style={{ backgroundColor: showSearch ? (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)') : (isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)') }}
                             >
                                 {showSearch ? <X className="w-4 h-4" /> : <Search className="w-4 h-4" />}
                             </button>
@@ -179,7 +179,7 @@ export const CustomerRankingScreen = ({ theme, onNavigate }) => {
                                         autoFocus
                                         className="w-full px-4 py-2.5 rounded-[14px] text-sm outline-none transition-all"
                                         style={{
-                                            backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                                            backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)',
                                             border: `1px solid ${theme.colors.border}`,
                                             color: theme.colors.textPrimary,
                                         }}

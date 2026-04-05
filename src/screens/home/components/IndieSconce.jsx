@@ -72,7 +72,7 @@ export const IndieSconce = ({ isDarkMode, lampRight, handleLampClick, lampAnim, 
 
                             {/* Metal ferrule collar at hook-dowel junction */}
                             <ellipse cx="82.5" cy="8" rx="6.5" ry="2.2" fill="#4A4E54"/>
-                            <ellipse cx="82.5" cy="8" rx="6.5" ry="2.2" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="0.4"/>
+                            <ellipse cx="82.5" cy="8" rx="6.5" ry="2.2" fill="none" stroke="rgba(255,255,255,0.10)" strokeWidth="0.4"/>
 
                             {/* Shade — straight trapezoid, tilted down-left */}
                             <g transform="rotate(3, 76, 60)">

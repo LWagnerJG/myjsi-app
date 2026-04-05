@@ -174,7 +174,7 @@ export const QuickActionDropdown = ({ theme, onActionSelect, className = '' }) =
                                     className={`w-full flex items-center gap-3 px-4 py-3 transition-colors text-left group outline-none ${
                                         isFeedback
                                             ? 'hover:bg-[#C4956A]/[0.06] focus:bg-[#C4956A]/[0.06]'
-                                            : 'hover:bg-black/[0.03] dark:hover:bg-white/[0.03] focus:bg-black/[0.03] dark:focus:bg-white/[0.03]'
+                                            : 'hover:bg-black/[0.03] dark:hover:bg-white/[0.08] focus:bg-black/[0.03] dark:focus:bg-white/[0.08]'
                                     }`}
                                 >
                                     <div

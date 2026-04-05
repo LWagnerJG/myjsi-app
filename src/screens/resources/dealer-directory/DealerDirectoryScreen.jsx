@@ -31,7 +31,7 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, onNavigate }) =>
     [dealers, searchTerm]);
 
     const totalSales = useMemo(() => dealers.reduce((s, d) => s + (d.sales || 0), 0), [dealers]);
-    const subtleBorder = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)';
+    const subtleBorder = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.05)';
 
     return (
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: colors.background }}>
@@ -52,7 +52,7 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, onNavigate }) =>
                     className="flex-1 flex items-center gap-2.5 px-3.5 rounded-full"
                     style={{
                         height: 42,
-                        backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                        backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)',
                         border: `1px solid ${subtleBorder}`,
                     }}
                 >
@@ -160,7 +160,7 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, onNavigate }) =>
                     <div className="py-16 flex flex-col items-center justify-center text-center gap-3">
                         <div
                             className="w-14 h-14 rounded-full flex items-center justify-center"
-                            style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)' }}
+                            style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.04)' }}
                         >
                             <Building2 className="w-6 h-6" style={{ color: colors.textSecondary, opacity: 0.35 }} />
                         </div>

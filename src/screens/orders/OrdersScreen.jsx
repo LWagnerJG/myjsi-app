@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { Calendar, List, Building2, ChevronLeft, ChevronRight, Package, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { SearchInput } from '../../components/common/SearchInput.jsx';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 import { isDarkTheme } from '../../design-system/tokens.js';
@@ -45,7 +46,7 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
 
     return (
         <div className="space-y-4">
-            <div className="rounded-[22px] overflow-hidden p-4" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'}` }}>
+            <GlassCard theme={theme} className="p-4" variant="elevated">
                 <div className="flex justify-between items-center mb-4">
                     <button onClick={() => setCurrentDate(new Date(year, month - 1, 1))} className={`p-2 rounded-full motion-tap active:scale-[0.98] transition-colors ${isDark ? 'hover:bg-white/[0.08]' : 'hover:bg-black/[0.05]'}`}>
                         <ChevronLeft style={{ color: theme.colors.textSecondary }} />
@@ -72,7 +73,7 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
                             <button
                                 key={day}
                                 onClick={() => setSelectedDate(date)}
-                                className={`h-12 rounded-[10px] flex flex-col items-center justify-center transition motion-tap active:scale-[0.98] ${isSelected ? '' : (isDark ? 'hover:bg-white/[0.06]' : 'hover:bg-black/[0.04]')}`}
+                                className={`h-12 rounded-xl flex flex-col items-center justify-center transition motion-tap active:scale-[0.98] ${isSelected ? '' : (isDark ? 'hover:bg-white/[0.06]' : 'hover:bg-black/[0.04]')}`}
                                 style={{
                                     ...(isSelected ? { boxShadow: `0 0 0 2px ${theme.colors.accent}` } : {}),
                                 }}
@@ -83,7 +84,7 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
                         );
                     })}
                 </div>
-            </div>
+            </GlassCard>
 
             {selectedDate && selectedOrders.length > 0 && (
                 <div className="space-y-3 animate-fade-in">
@@ -93,8 +94,8 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
                     {selectedOrders.map((o) => {
                         const sc = STATUS_COLORS[o.status] || '#8B8680';
                         return (
-                            <div key={o.orderNumber} className="rounded-[22px] overflow-hidden cursor-pointer active:scale-[0.99] transition"
-                                style={{ backgroundColor: theme.colors.surface, border: `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'}` }}
+                            <div key={o.orderNumber} className="rounded-2xl overflow-hidden cursor-pointer active:scale-[0.99] transition"
+                                style={{ backgroundColor: theme.colors.surface, border: isDark ? '1px solid rgba(255,255,255,0.10)' : 'none', boxShadow: isDark ? 'none' : '0 1px 4px rgba(0,0,0,0.06)' }}
                                 onClick={() => onOrderClick(o)}>
                                 <div className="flex items-center gap-3.5 px-4 py-3.5">
                                     <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-[12px] font-black"
@@ -105,7 +106,7 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
                                         <p className="font-semibold text-[15px] leading-snug truncate" style={{ color: theme.colors.textPrimary }}>{o.details}</p>
                                         <p className="text-xs mt-0.5 truncate" style={{ color: theme.colors.textSecondary }}>{formatCompanyName(o.company)}</p>
                                         <div className="flex items-center gap-2 mt-1.5">
-                                            <span className="text-[11px] font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)', color: theme.colors.textSecondary }}>SO {o.orderNumber}</span>
+                                            <span className="text-[11px] font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.04)', color: theme.colors.textSecondary }}>SO {o.orderNumber}</span>
                                             <span className="inline-flex items-center gap-1 text-[11px] font-semibold" style={{ color: sc }}>
                                                 <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: sc }} />
                                                 {o.status}
@@ -130,7 +131,7 @@ const OrderRow = ({ order, theme, onNavigate, isLast }) => {
     return (
         <button
             onClick={() => onNavigate(`orders/${order.orderNumber}`)}
-            className={`w-full text-left transition active:scale-[0.99] ${dark ? 'hover:bg-white/[0.03]' : 'hover:bg-black/[0.015]'}`}
+            className={`w-full text-left transition active:scale-[0.99] ${dark ? 'hover:bg-white/[0.08]' : 'hover:bg-black/[0.015]'}`}
         >
             <div className="flex items-center gap-3.5 px-4 py-3.5">
                 <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-[12px] font-black"
@@ -141,7 +142,7 @@ const OrderRow = ({ order, theme, onNavigate, isLast }) => {
                     <p className="font-semibold text-[15px] leading-snug truncate" style={{ color: theme.colors.textPrimary }}>{order.details}</p>
                     <p className="text-xs mt-0.5 truncate" style={{ color: theme.colors.textSecondary }}>{formatCompanyName(order.company)}</p>
                     <div className="flex items-center gap-2 mt-1.5">
-                        <span className="text-[11px] font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)', color: theme.colors.textSecondary }}>SO {order.orderNumber}</span>
+                        <span className="text-[11px] font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.04)', color: theme.colors.textSecondary }}>SO {order.orderNumber}</span>
                         <span className="inline-flex items-center gap-1 text-[11px] font-semibold" style={{ color: statusColor }}>
                             <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: statusColor }} />
                             {order.status}
@@ -150,7 +151,7 @@ const OrderRow = ({ order, theme, onNavigate, isLast }) => {
                 </div>
                 <p className="font-bold text-base tabular-nums flex-shrink-0" style={{ color: theme.colors.textPrimary }}>{formatCurrency(order.net)}</p>
             </div>
-            {!isLast && <div className="mx-4" style={{ borderTop: `1px solid ${dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}` }} />}
+            {!isLast && <div className="mx-4" style={{ borderTop: `1px solid ${dark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.05)'}` }} />}
         </button>
     );
 };
@@ -163,15 +164,16 @@ const DateGroupCard = ({ theme, dateKey, group, onNavigate }) => {
     const label = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }).toUpperCase();
 
     return (
-        <div className="rounded-[22px] overflow-hidden" style={{
+        <div className="rounded-2xl overflow-hidden" style={{
             backgroundColor: theme.colors.surface,
-            border: `1px solid ${dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'}`,
+            border: dark ? '1px solid rgba(255,255,255,0.10)' : 'none',
+            boxShadow: dark ? 'none' : '0 1px 4px rgba(0,0,0,0.06)',
         }}>
             <div
                 className="flex items-baseline justify-between px-4 pt-3 pb-2"
                 style={{
-                    backgroundColor: dark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.04)',
-                    borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'}`,
+                    backgroundColor: dark ? 'rgba(255,255,255,0.07)' : 'rgba(53,53,53,0.025)',
+                    borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.04)'}`,
                 }}
             >
                 <h2 className="text-xs font-bold tracking-wider" style={{ color: theme.colors.accent }}>{label}</h2>
@@ -235,14 +237,16 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
             {/* Controls */}
             <div className="flex-shrink-0 max-w-2xl mx-auto w-full">
                 <div className="px-5 pt-2 pb-3 flex flex-col gap-3">
-                    <SearchInput value={searchTerm} onChange={setSearchTerm} placeholder="Search orders..." theme={theme} />
+                    <div style={{ height: 56 }}>
+                        <SearchInput value={searchTerm} onChange={setSearchTerm} placeholder="Search orders..." theme={theme} variant="header" />
+                    </div>
                     <div className="flex items-center justify-between gap-3">
                         <div className="min-w-0">
                             <SegmentedToggle value={dateType} onChange={setDateType} options={[{ value: 'shipDate', label: 'Ship Date' }, { value: 'date', label: 'PO Date' }]} theme={theme} size="sm" />
                         </div>
                         <div className="flex items-center gap-2.5">
                             <div ref={dealerRef} className="relative flex-shrink-0">
-                                <button onClick={() => setDealerMenuOpen(o => !o)} className="h-10 rounded-full flex items-center justify-center active:scale-95 transition border w-10 md:w-auto md:px-4 md:gap-2" style={{ backgroundColor: selectedDealer !== 'All Dealers' ? `${theme.colors.accent}12` : dark ? 'rgba(255,255,255,0.06)' : theme.colors.surface, borderColor: selectedDealer !== 'All Dealers' ? `${theme.colors.accent}30` : dark ? 'rgba(255,255,255,0.12)' : theme.colors.border }} title={selectedDealer}>
+                                <button onClick={() => setDealerMenuOpen(o => !o)} className="h-10 rounded-full flex items-center justify-center active:scale-95 transition border w-10 md:w-auto md:px-4 md:gap-2" style={{ backgroundColor: selectedDealer !== 'All Dealers' ? `${theme.colors.accent}12` : dark ? 'rgba(255,255,255,0.10)' : theme.colors.surface, borderColor: selectedDealer !== 'All Dealers' ? `${theme.colors.accent}30` : dark ? 'rgba(255,255,255,0.12)' : theme.colors.border }} title={selectedDealer}>
                                     <Building2 className="w-[18px] h-[18px] flex-shrink-0" style={{ color: theme.colors.textPrimary }} />
                                     <span className="hidden md:inline text-[13px] font-medium whitespace-nowrap" style={{ color: theme.colors.textPrimary }}>
                                         {selectedDealer === 'All Dealers' ? 'Dealers' : formatCompanyName(selectedDealer)}
@@ -253,16 +257,16 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                                         initial={{ opacity: 0, scale: 0.95, y: -4 }}
                                         animate={{ opacity: 1, scale: 1, y: 0 }}
                                         transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
-                                        className="absolute right-0 mt-2 w-56 max-h-72 overflow-y-auto p-2 z-20 rounded-[18px]"
+                                        className="absolute right-0 mt-2 w-56 max-h-72 overflow-y-auto p-2 z-20 rounded-2xl"
                                         style={{ transformOrigin: 'top right', backgroundColor: theme.colors.surface, border: dark ? '1px solid rgba(255,255,255,0.12)' : `1px solid ${theme.colors.border}`, boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }}>
                                         {dealers.map(d => {
                                             const active = d === selectedDealer;
-                                            return <button key={d} onClick={() => { setSelectedDealer(d); setDealerMenuOpen(false); }} className={`w-full text-left px-3 py-2 rounded-[12px] text-sm transition motion-tap active:scale-[0.98] ${active ? 'font-semibold' : (dark ? 'hover:bg-white/[0.06]' : 'hover:bg-black/[0.04]')}`} style={{ backgroundColor: active ? (dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)') : 'transparent', color: theme.colors.textPrimary }}>{formatCompanyName(d)}</button>;
+                                            return <button key={d} onClick={() => { setSelectedDealer(d); setDealerMenuOpen(false); }} className={`w-full text-left px-3 py-2 rounded-xl text-sm transition motion-tap active:scale-[0.98] ${active ? 'font-semibold' : (dark ? 'hover:bg-white/[0.06]' : 'hover:bg-black/[0.04]')}`} style={{ backgroundColor: active ? theme.colors.subtle : 'transparent', color: theme.colors.textPrimary }}>{formatCompanyName(d)}</button>;
                                         })}
                                     </motion.div>
                                 )}
                             </div>
-                            <button onClick={() => setViewMode(v => v === 'list' ? 'calendar' : 'list')} className="h-10 rounded-full flex items-center justify-center active:scale-95 transition border w-10 md:w-auto md:px-4 md:gap-2" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.06)' : theme.colors.surface, borderColor: dark ? 'rgba(255,255,255,0.12)' : theme.colors.border }} title={viewMode === 'list' ? 'Calendar View' : 'List View'}>
+                            <button onClick={() => setViewMode(v => v === 'list' ? 'calendar' : 'list')} className="h-10 rounded-full flex items-center justify-center active:scale-95 transition border w-10 md:w-auto md:px-4 md:gap-2" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.10)' : theme.colors.surface, borderColor: dark ? 'rgba(255,255,255,0.12)' : theme.colors.border }} title={viewMode === 'list' ? 'Calendar View' : 'List View'}>
                                 {viewMode === 'list' ? <Calendar className="w-[18px] h-[18px] flex-shrink-0" style={{ color: theme.colors.textPrimary }} /> : <List className="w-[18px] h-[18px] flex-shrink-0" style={{ color: theme.colors.textPrimary }} />}
                                 <span className="hidden md:inline text-[13px] font-medium whitespace-nowrap" style={{ color: theme.colors.textPrimary }}>
                                     {viewMode === 'list' ? 'Calendar' : 'List'}

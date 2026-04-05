@@ -26,7 +26,7 @@ export const SubredditPostCard = ({ post, idx, isTop, dark, theme, isLiked, isUp
   return (
     <div
       className="rounded-2xl overflow-hidden"
-      style={{ backgroundColor: dark ? '#2A2A2A' : '#FFFFFF', border: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'}` }}
+      style={{ backgroundColor: dark ? '#2A2A2A' : '#FFFFFF', border: `1px solid ${dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.05)'}` }}
     >
       {/* Post body */}
       <div className="p-3.5 pb-2">
@@ -56,7 +56,7 @@ export const SubredditPostCard = ({ post, idx, isTop, dark, theme, isLiked, isUp
       </div>
 
       {/* Action bar */}
-      <div className="px-3.5 py-1.5 flex items-center gap-1 border-t" style={{ borderColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}>
+      <div className="px-3.5 py-1.5 flex items-center gap-1 border-t" style={{ borderColor: dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)' }}>
         <button onClick={() => onUpvote?.(post.id)} className="flex items-center gap-1 text-xs font-semibold px-2 py-1.5 rounded-full transition-all" style={{ color: isUpvoted ? theme.colors.accent : theme.colors.textSecondary, backgroundColor: isUpvoted ? (dark ? 'rgba(255,255,255,0.08)' : `${theme.colors.accent}10`) : 'transparent' }}>
           <ChevronUp className="w-3.5 h-3.5" /> {post.upvotes || 0}
         </button>
@@ -66,7 +66,7 @@ export const SubredditPostCard = ({ post, idx, isTop, dark, theme, isLiked, isUp
         <button
           onClick={() => setShowComments(v => !v)}
           className="flex items-center gap-1 text-xs ml-auto px-2 py-1.5 rounded-full transition-all"
-          style={{ color: showComments ? theme.colors.accent : theme.colors.textSecondary, backgroundColor: showComments ? (dark ? 'rgba(255,255,255,0.06)' : `${theme.colors.accent}08`) : 'transparent' }}
+          style={{ color: showComments ? theme.colors.accent : theme.colors.textSecondary, backgroundColor: showComments ? (dark ? 'rgba(255,255,255,0.10)' : `${theme.colors.accent}08`) : 'transparent' }}
         >
           <MessageSquare className="w-3.5 h-3.5" /> {commentCount}
         </button>
@@ -74,7 +74,7 @@ export const SubredditPostCard = ({ post, idx, isTop, dark, theme, isLiked, isUp
 
       {/* Inline comments */}
       {showComments && (
-        <div className="px-3.5 pb-3 border-t" style={{ borderColor: dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)' }}>
+        <div className="px-3.5 pb-3 border-t" style={{ borderColor: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.03)' }}>
           {localComments.length > 0 ? (
             <div className="space-y-1.5 pt-2.5">
               {localComments.map(c => (
@@ -98,7 +98,7 @@ export const SubredditPostCard = ({ post, idx, isTop, dark, theme, isLiked, isUp
               onChange={e => setDraft(e.target.value)}
               placeholder="Reply\u2026"
               className="flex-1 text-xs h-8 px-3 rounded-full outline-none"
-              style={{ backgroundColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)', color: theme.colors.textPrimary }}
+              style={{ backgroundColor: dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.03)', color: theme.colors.textPrimary }}
             />
             <button disabled={!draft.trim()} className="h-7 w-7 rounded-full flex items-center justify-center disabled:opacity-25 transition-opacity flex-shrink-0" style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}>
               <Send className="w-3 h-3" />

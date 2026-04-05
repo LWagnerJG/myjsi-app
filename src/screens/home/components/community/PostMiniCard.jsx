@@ -11,7 +11,7 @@ export const PostMiniCard = ({ post, theme, dark, isLiked, isUpvoted, onToggleLi
       <button
         onClick={() => setOpen(true)}
         className="w-full text-left rounded-2xl p-3.5 active:scale-[0.98] transition-transform"
-        style={{ backgroundColor: dark ? '#222' : '#fff', border: `1px solid ${dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)'}` }}
+        style={{ backgroundColor: dark ? '#222' : '#fff', border: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.07)'}` }}
       >
         <div className="flex items-center gap-2 mb-1.5">
           <MiniAvatar src={post.user?.avatar} name={post.user?.name} dark={dark} size={24} />

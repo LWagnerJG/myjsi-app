@@ -49,14 +49,13 @@ export const AppGrid = ({
                 onDragCancel={() => setActiveDragId(null)}
             >
                 <SortableContext items={safeHomeApps} strategy={rectSortingStrategy}>
-                    <div className={`grid gap-[10px] sm:gap-[12px] ${appGridCols.view}`}>
+                    <div className={`grid gap-2.5 sm:gap-3 ${appGridCols.view}`}>
                         {currentApps.map((app) => (
                             <SortableAppTile
                                 key={app.route}
                                 id={app.route}
                                 app={app}
                                 colors={colors}
-                                isDark={isDark}
                                 onRemove={toggleApp}
                                 isRemoveDisabled={safeHomeApps.length <= MIN_PINNED_APPS}
                                 isRemoveLocked={NON_REMOVABLE_APPS.has(app.route)}
@@ -95,27 +94,22 @@ export const AppGrid = ({
                     {activeApp ? (
                         <div style={{ width: 88 }}>
                             <div
-                                className="relative flex flex-col items-center justify-center rounded-[16px]"
+                                className="relative flex flex-col items-center justify-center gap-1.5 p-2.5 sm:p-3 rounded-2xl"
                                 style={{
-                                    gap: 6,
-                                    padding: '10px 10px',
                                     backgroundColor: colors.tileSurface,
-                                    backdropFilter: 'blur(16px) saturate(1.5)',
-                                    WebkitBackdropFilter: 'blur(16px) saturate(1.5)',
-                                    border: isDark ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(255,255,255,0.60)',
                                     boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
                                     minHeight: 88,
                                 }}
                             >
                                 <div
-                                    className="rounded-[10px] flex items-center justify-center"
-                                    style={{ width: 40, height: 40, backgroundColor: `${(APP_ICON_COLORS[activeApp.route] || colors.accent)}10` }}
+                                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center"
+                                    style={{ backgroundColor: `${(APP_ICON_COLORS[activeApp.route] || colors.accent)}10` }}
                                 >
-                                    <activeApp.icon style={{ width: 20, height: 20, color: APP_ICON_COLORS[activeApp.route] || colors.accent }} />
+                                    <activeApp.icon className="w-[18px] h-[18px] sm:w-5 sm:h-5" style={{ color: APP_ICON_COLORS[activeApp.route] || colors.accent }} />
                                 </div>
                                 <span
-                                    className="font-semibold tracking-tight text-center leading-tight line-clamp-2 w-full px-0.5"
-                                    style={{ color: colors.textPrimary, fontSize: 13 }}
+                                    className="text-xs sm:text-[13px] font-semibold tracking-tight text-center leading-tight line-clamp-2 w-full px-0.5"
+                                    style={{ color: colors.textPrimary }}
                                 >
                                     {activeApp.name}
                                 </span>
@@ -130,7 +124,7 @@ export const AppGrid = ({
 
     return (
         <>
-            <div className={`grid gap-[10px] sm:gap-[12px] ${appGridCols.view}`}>
+            <div className={`grid gap-2.5 sm:gap-3 ${appGridCols.view}`}>
                 {currentApps.map((app) => {
                     const badge = getAppBadge(app.route, recentOrders, posts, leadTimeFavoritesData, samplesCartCount);
                     const iconColor = APP_ICON_COLORS[app.route] || colors.accent;
@@ -139,34 +133,26 @@ export const AppGrid = ({
                             key={app.route}
                             onClick={() => onNavigate(app.route)}
                             aria-label={`Open ${app.name}`}
-                            className="relative flex flex-col items-center justify-center rounded-[16px] transition-all active:scale-95 group"
+                            className="relative flex flex-col items-center justify-center rounded-2xl transition-all active:scale-95 group gap-1.5 p-2.5 sm:p-3"
                             style={{
                                 minHeight: 88,
-                                gap: 6,
-                                padding: '10px 10px',
                                 backgroundColor: colors.tileSurface,
-                                backdropFilter: 'blur(16px) saturate(1.5)',
-                                WebkitBackdropFilter: 'blur(16px) saturate(1.5)',
-                                border: isDark ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(255,255,255,0.60)',
+                                border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)',
                             }}
                         >
                             <div
-                                className="rounded-[10px] flex items-center justify-center transition-transform group-hover:scale-105"
-                                style={{ width: 40, height: 40, backgroundColor: `${iconColor}10`, flexShrink: 0 }}
+                                className="rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 w-9 h-9 sm:w-10 sm:h-10"
+                                style={{ backgroundColor: `${iconColor}10` }}
                             >
-                                <app.icon style={{ width: 20, height: 20, color: iconColor }} />
+                                <app.icon className="w-[18px] h-[18px] sm:w-5 sm:h-5" style={{ color: iconColor }} />
                             </div>
-                            <span className="font-semibold tracking-tight text-center leading-tight line-clamp-2 w-full px-0.5"
-                                style={{ color: colors.textPrimary, fontSize: 13 }}>
+                            <span className="text-xs sm:text-[13px] font-semibold tracking-tight text-center leading-tight line-clamp-2 px-0.5" style={{ color: colors.textPrimary }}>
                                 {app.name}
                             </span>
                             {badge && (
                                 <div
-                                    className="absolute rounded-full font-bold"
+                                    className="absolute top-1.5 right-1.5 px-1.5 py-[1px] rounded-full text-[10px] font-bold"
                                     style={{
-                                        top: 6, right: 6,
-                                        padding: '1px 6px',
-                                        fontSize: 10,
                                         backgroundColor: `${badge.color}18`,
                                         color: badge.color,
                                         border: `1px solid ${badge.color}30`,
@@ -187,7 +173,7 @@ export const AppGrid = ({
                         aria-label="Customize home apps"
                         className="flex items-center gap-2 px-5 py-2 rounded-full transition-all active:scale-95"
                         style={{
-                            backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                            backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)',
                             color: colors.textSecondary,
                         }}
                     >
@@ -228,8 +214,8 @@ const AvailableAppsList = ({ availableApps, toggleApp, colors, isDark }) => {
                 <div
                     className="w-4 h-4 rounded-full flex items-center justify-center shrink-0"
                     style={{
-                        backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
-                        border: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.04)',
+                        backgroundColor: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.04)',
+                        border: isDark ? '1px solid rgba(255,255,255,0.09)' : '1px solid rgba(0,0,0,0.04)',
                     }}
                 >
                     <Plus className="w-2.5 h-2.5" style={{ opacity: 0.7 }} />
@@ -247,11 +233,11 @@ const AvailableAppsList = ({ availableApps, toggleApp, colors, isDark }) => {
                                 onClick={() => toggleApp(app.route)}
                                 className="w-full flex items-center gap-2 px-3 py-2.5 rounded-2xl text-[12px] font-semibold transition-all active:scale-[0.97]"
                                 style={{
-                                    backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
+                                    backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.03)',
                                     color: colors.textSecondary,
                                     border: isActive
                                         ? `1px solid ${colors.accent}30`
-                                        : `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'}`,
+                                        : `1px solid ${isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.04)'}`,
                                 }}
                             >
                                 <Plus className="w-3.5 h-3.5 opacity-30 shrink-0" />

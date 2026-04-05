@@ -44,7 +44,7 @@ export const Section = ({ title, subtitle, titleRight, children, theme, classNam
 
 /* Compact field row */
 export const Row = ({ label, children, theme, tip, noSep, inline }) => {
-  const divider = isDarkTheme(theme) ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)';
+  const divider = isDarkTheme(theme) ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)';
   const rowLayout = inline ? 'grid items-start gap-2 md:grid-cols-[132px_minmax(0,1fr)] md:gap-3' : '';
   return (
   <div className={`${rowLayout} py-3`}

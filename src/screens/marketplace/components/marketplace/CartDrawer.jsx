@@ -58,7 +58,7 @@ export const CartDrawer = ({ cart, balance, onUpdateQty, onRemove, onCheckout, t
               {/* Items */}
               <div>
                 <p className="text-xs font-bold uppercase tracking-widest mb-2 px-1" style={{ color: theme.colors.textSecondary }}>Items</p>
-                <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.015)', border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'}` }}>
+                <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.015)', border: `1px solid ${isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)'}` }}>
                   <div className="px-3 py-1">
                     {cart.map((item, idx) => (
                       <div key={item.cartId}>
@@ -96,7 +96,7 @@ export const CartDrawer = ({ cart, balance, onUpdateQty, onRemove, onCheckout, t
               </div>
 
               {/* Summary */}
-              <div className="rounded-2xl p-4" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(53,53,53,0.02)', border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'}` }}>
+              <div className="rounded-2xl p-4" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(53,53,53,0.02)', border: `1px solid ${isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)'}` }}>
                 <div className="flex justify-between mb-1.5">
                   <span className="text-xs" style={{ color: theme.colors.textSecondary }}>Subtotal</span>
                   <span className="text-xs font-semibold" style={{ color: theme.colors.textPrimary }}>{formatElliottBucks(totalPrice)}</span>
@@ -119,7 +119,7 @@ export const CartDrawer = ({ cart, balance, onUpdateQty, onRemove, onCheckout, t
                 onClick={onCheckout}
                 className="w-full px-5 py-3.5 rounded-full text-[13px] font-bold transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98]"
                 style={{
-                  backgroundColor: canAfford ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.06)' : theme.colors.border),
+                  backgroundColor: canAfford ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.10)' : theme.colors.border),
                   color: canAfford ? theme.colors.accentText : theme.colors.textSecondary,
                 }}
               >

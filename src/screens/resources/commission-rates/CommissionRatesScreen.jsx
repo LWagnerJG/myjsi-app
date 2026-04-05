@@ -13,7 +13,7 @@ const contractRates = Data.COMMISSION_RATES_DATA.standard.filter(r => CONTRACT_N
 const CardHeader = ({ title, extra, theme, dark }) => (
     <div
         className="flex items-center justify-between px-5 py-3"
-        style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'}` }}
+        style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)'}` }}
     >
         <div className="flex items-center gap-2">
             <span className="text-[13px] font-bold uppercase tracking-[0.07em]"
@@ -42,7 +42,7 @@ const RateRow = ({ rate, theme, dark, isLast }) => (
         style={{
             paddingTop: 13,
             paddingBottom: 13,
-            borderBottom: isLast ? 'none' : `1px solid ${dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.045)'}`,
+            borderBottom: isLast ? 'none' : `1px solid ${dark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.045)'}`,
         }}
     >
         <span className="text-[15px] font-semibold tabular-nums" style={{ color: theme.colors.textPrimary }}>
@@ -68,7 +68,7 @@ const RateRow = ({ rate, theme, dark, isLast }) => (
 export const CommissionRatesScreen = ({ theme }) => {
     const dark = isDarkTheme(theme);
     const split = Data.COMMISSION_RATES_DATA.split;
-    const subtleBorder = dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+    const subtleBorder = dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)';
 
     return (
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>

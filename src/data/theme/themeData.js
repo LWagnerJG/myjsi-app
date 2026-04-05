@@ -55,13 +55,13 @@ export const darkTheme = {
         secondary: '#C0B9B0',
         textPrimary: '#EDE8E3',
         textSecondary: '#908880',
-        border: 'rgba(255, 255, 255, 0.12)',
+        border: 'rgba(255, 255, 255, 0.14)',
         shadow: 'rgba(0, 0, 0, 0.5)',
-        subtle: 'rgba(255, 255, 255, 0.06)',
+        subtle: 'rgba(255, 255, 255, 0.10)',
 
         // Semantic colors - for consistent usage across components
         accentText: '#1A1A1A', // Text on accent/primary buttons (dark on light)
-        inputBackground: 'rgba(255, 255, 255, 0.08)', // Form input backgrounds
+        inputBackground: 'rgba(255, 255, 255, 0.10)', // Form input backgrounds
         overlay: 'rgba(0, 0, 0, 0.7)', // Modal/drawer overlays
 
         // Status colors
@@ -78,8 +78,8 @@ export const darkTheme = {
         infoLight: 'rgba(123, 155, 172, 0.2)',
 
         // Interactive states
-        hoverLight: 'rgba(255, 255, 255, 0.05)',
-        activeLight: 'rgba(255, 255, 255, 0.08)',
+        hoverLight: 'rgba(255, 255, 255, 0.09)',
+        activeLight: 'rgba(255, 255, 255, 0.13)',
         focusRing: 'rgba(255, 255, 255, 0.3)',
 
         // Special feature colors

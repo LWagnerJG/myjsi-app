@@ -20,7 +20,7 @@ const POLICY_NOTE = {
 const CardHeader = ({ children, right, dark, colors }) => (
     <div
         className="flex items-center justify-between px-5 py-3"
-        style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'}` }}
+        style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)'}` }}
     >
         <span
             className="text-[12px] font-bold uppercase tracking-[0.07em]"
@@ -36,7 +36,7 @@ export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
     const isDark = isDarkTheme(theme);
     const colors = theme.colors;
     const [copiedId, setCopiedId] = useState(null);
-    const subtleBorder = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)';
+    const subtleBorder = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.05)';
 
     const handleCopy = useCallback((policy) => {
         const val = `SSA ${policy.ssa}`;
@@ -160,7 +160,7 @@ export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
                                     style={{
                                         backgroundColor: isCopied
                                             ? `${colors.accent}15`
-                                            : (isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)'),
+                                            : (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.05)'),
                                         border: `1px solid ${isCopied
                                             ? colors.accent + '40'
                                             : subtleBorder}`,

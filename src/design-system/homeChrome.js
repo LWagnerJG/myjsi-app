@@ -20,7 +20,7 @@ const HOME_CHROME_SURFACES = {
       boxShadow: '0 4px 18px rgba(53,53,53,0.08)',
     },
     dark: {
-      backgroundColor: 'rgba(255,255,255,0.07)',
+      backgroundColor: 'rgba(255,255,255,0.12)',
       border: '1px solid rgba(255,255,255,0.11)',
       boxShadow: '0 4px 18px rgba(0,0,0,0.26)',
     },

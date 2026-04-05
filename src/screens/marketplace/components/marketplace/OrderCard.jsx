@@ -74,7 +74,7 @@ export const OrderCard = ({ order, theme }) => {
           </div>
 
           {(order.tracking || order.estimatedDelivery) && (
-            <div className="rounded-2xl p-4" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(53,53,53,0.02)' }}>
+            <div className="rounded-2xl p-4" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(53,53,53,0.02)' }}>
               <p className="text-[10px] font-bold uppercase tracking-[0.18em] mb-3" style={{ color: theme.colors.textSecondary }}>Fulfillment</p>
 
               {order.tracking && (

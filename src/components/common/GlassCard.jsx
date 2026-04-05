@@ -31,7 +31,7 @@ export const GlassCard = React.memo(
 
     // Subtle border for edge definition
     const cardBorder = isDark
-      ? '1px solid rgba(255, 255, 255, 0.06)'
+      ? '1px solid rgba(255, 255, 255, 0.12)'
       : '1px solid rgba(0, 0, 0, 0.06)';
 
     const borderColor = theme?.colors?.border || JSI_COLORS.stone;

@@ -199,7 +199,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
               </>
             ) :
             <div className="flex flex-col items-center justify-center py-16">
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }}>
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.03)' }}>
                 <Briefcase className="w-7 h-7" style={{ color: theme.colors.textSecondary, opacity: 0.5 }} />
               </div>
               <p className="text-center text-[15px] font-semibold" style={{ color: theme.colors.textPrimary }}>No projects in {selectedPipelineStage}</p>
@@ -216,7 +216,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
                       className="overflow-hidden transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
                       style={{
                         borderRadius: 18,
-                        border: isDark ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(0,0,0,0.06)',
+                        border: isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(0,0,0,0.06)',
                       }}
                     >
                       <div className="relative aspect-[4/3] w-full">
@@ -233,7 +233,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
                 ))}
               </div>
             ) : <div className="flex flex-col items-center justify-center py-16">
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }}>
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.03)' }}>
                 <Briefcase className="w-7 h-7" style={{ color: theme.colors.textSecondary, opacity: 0.5 }} />
               </div>
               <p className="text-center text-[15px] font-semibold" style={{ color: theme.colors.textPrimary }}>No installations recorded yet</p>

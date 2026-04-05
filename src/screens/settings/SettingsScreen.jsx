@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { User, Bell, Palette, ChevronDown, MapPin, Loader2 } from 'lucide-react';
 import { LEAD_TIMES_DATA } from '../resources/lead-times/data.js';
 import { isDarkTheme, DESIGN_TOKENS } from '../../design-system/tokens.js';
@@ -47,20 +48,20 @@ const Select = ({ value, onChange, options, theme }) => {
 
   return (
     <div className="relative" ref={triggerRef}>
-      <button type="button" onClick={() => setOpen(o => !o)} className="w-full px-4 py-2.5 rounded-[14px] flex items-center justify-between text-sm font-medium transition-all" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : theme.colors.surface, border: `1px solid ${theme.colors.border}`, color: theme.colors.textPrimary }}>
+      <button type="button" onClick={() => setOpen(o => !o)} className="w-full px-4 py-2.5 rounded-2xl flex items-center justify-between text-sm font-medium transition-all" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : theme.colors.surface, border: `1px solid ${theme.colors.border}`, color: theme.colors.textPrimary }}>
         <span>{current}</span>
         <ChevronDown className={`w-4 h-4 transition-transform ${open ? 'rotate-180' : ''}`} style={{ color: theme.colors.textSecondary }} />
       </button>
       {open && rect && createPortal(
         <div ref={portalRef} style={{ position: 'fixed', top: rect.bottom + 6, left: rect.left, width: rect.width, zIndex: DESIGN_TOKENS.zIndex.popover }}>
-          <div className="py-1.5 rounded-[18px] overflow-hidden" style={{
+          <div className="py-1.5 rounded-2xl overflow-hidden" style={{
             backgroundColor: theme.colors.surface,
             border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.06)',
             boxShadow: DESIGN_TOKENS.shadows.modal
           }}>
             {options.map(o => (
-              <button key={o.value} onClick={() => { onChange(o.value); setOpen(false); }} className="w-full text-left px-4 py-2.5 text-sm font-medium transition-colors active:scale-[0.99]" style={{ color: o.value === value ? theme.colors.accent : theme.colors.textPrimary, backgroundColor: o.value === value ? (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)') : 'transparent' }}
-                onMouseEnter={e => { if (o.value !== value) e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'; }}
+              <button key={o.value} onClick={() => { onChange(o.value); setOpen(false); }} className="w-full text-left px-4 py-2.5 text-sm font-medium transition-colors active:scale-[0.99]" style={{ color: o.value === value ? theme.colors.accent : theme.colors.textPrimary, backgroundColor: o.value === value ? (isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.03)') : 'transparent' }}
+                onMouseEnter={e => { if (o.value !== value) e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)'; }}
                 onMouseLeave={e => { if (o.value !== value) e.currentTarget.style.backgroundColor = 'transparent'; }}
               >
                 {o.label}
@@ -75,9 +76,9 @@ const Select = ({ value, onChange, options, theme }) => {
 
 // Section header
 const SectionHeader = ({ icon: Icon, title, subtitle, theme }) => (
-  <div className="px-5 py-4" style={{ borderBottom: `1px solid ${isDarkTheme(theme) ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'}` }}>
+  <div className="px-5 py-4" style={{ borderBottom: `1px solid ${isDarkTheme(theme) ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.05)'}` }}>
     <div className="flex items-center gap-2.5">
-      <div className="w-8 h-8 rounded-[14px] flex items-center justify-center" style={{ backgroundColor: isDarkTheme(theme) ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.06)' }}>
+      <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ backgroundColor: isDarkTheme(theme) ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.06)' }}>
         <Icon className="w-4 h-4" style={{ color: theme.colors.accent }} />
       </div>
       <div>
@@ -90,7 +91,6 @@ const SectionHeader = ({ icon: Icon, title, subtitle, theme }) => (
 
 export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings, setUserSettings }) => {
   const isDark = isDarkTheme(theme);
-  const bdr = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
   const [firstName, setFirstName] = useState(userSettings?.firstName || 'Luke');
   const [lastName, setLastName] = useState(userSettings?.lastName || 'Wagner');
   const [streetAddress, setStreetAddress] = useState(userSettings?.streetAddress || userSettings?.homeAddress || '');
@@ -133,7 +133,7 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
     ];
     return Array.from(new Set(candidates.filter(Boolean).map((item) => String(item).trim()))).slice(0, 6);
   }, [userSettings?.homeAddress, userSettings?.streetAddress]);
-  const hoverBg = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)';
+  const hoverBg = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.02)';
 
   useEffect(() => {
     setFirstName(userSettings?.firstName || 'Luke');
@@ -195,12 +195,12 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
   }, [streetAddress, fallbackAddressHints]);
 
   return (
-    <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background }}>
+    <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
       <div className="flex-1 overflow-y-auto scrollbar-hide">
-        <div className="px-4 sm:px-6 lg:px-8 pb-24 lg:pb-12 space-y-5 max-w-xl mx-auto w-full" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 12px)' }}>
+        <div className="px-4 sm:px-6 lg:px-8 pb-24 lg:pb-12 space-y-5 max-w-xl mx-auto w-full pt-2">
 
           {/* Account */}
-          <div className="rounded-[22px] overflow-hidden" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${bdr}` }}>
+          <GlassCard theme={theme} className="overflow-hidden">
             <SectionHeader icon={User} title="Account" theme={theme} />
             <div className="p-4 space-y-3.5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -214,8 +214,8 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
                       setUserSettings?.(prev => ({ ...prev, firstName: value }));
                     }}
                     autoComplete="given-name"
-                    className="w-full px-4 h-10 rounded-[14px] text-sm font-medium outline-none transition-all focus:ring-2 focus:ring-offset-1"
-                    style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : theme.colors.surface, border:`1px solid ${theme.colors.border}`, color:theme.colors.textPrimary, focusRingColor: theme.colors.accent }}
+                    className="w-full px-4 h-10 rounded-2xl text-sm font-medium outline-none transition-all focus:ring-2 focus:ring-offset-1"
+                    style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : theme.colors.surface, border:`1px solid ${theme.colors.border}`, color:theme.colors.textPrimary, focusRingColor: theme.colors.accent }}
                   />
                 </div>
                 <div>
@@ -228,8 +228,8 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
                       setUserSettings?.(prev => ({ ...prev, lastName: value }));
                     }}
                     autoComplete="family-name"
-                    className="w-full px-4 h-10 rounded-[14px] text-sm font-medium outline-none transition-all focus:ring-2 focus:ring-offset-1"
-                    style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : theme.colors.surface, border:`1px solid ${theme.colors.border}`, color:theme.colors.textPrimary }}
+                    className="w-full px-4 h-10 rounded-2xl text-sm font-medium outline-none transition-all focus:ring-2 focus:ring-offset-1"
+                    style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : theme.colors.surface, border:`1px solid ${theme.colors.border}`, color:theme.colors.textPrimary }}
                   />
                 </div>
               </div>
@@ -244,13 +244,13 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
                     autoComplete="street-address"
                     inputMode="text"
                     placeholder="Start typing full street address"
-                    className="w-full pl-10 pr-4 h-10 rounded-[14px] text-sm font-medium outline-none transition-all focus:ring-2 focus:ring-offset-1"
-                    style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : theme.colors.surface, border:`1px solid ${theme.colors.border}`, color:theme.colors.textPrimary }}
+                    className="w-full pl-10 pr-4 h-10 rounded-2xl text-sm font-medium outline-none transition-all focus:ring-2 focus:ring-offset-1"
+                    style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : theme.colors.surface, border:`1px solid ${theme.colors.border}`, color:theme.colors.textPrimary }}
                   />
                   <MapPin className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: theme.colors.textSecondary }} />
                   {showAddressSuggestions && (
                     <div
-                      className="absolute left-0 right-0 mt-1.5 rounded-[18px] border overflow-hidden z-20"
+                      className="absolute left-0 right-0 mt-1.5 rounded-2xl border overflow-hidden z-20"
                       style={{
                         borderColor: theme.colors.border,
                         backgroundColor: isDark ? '#242424' : '#FFFFFF',
@@ -291,27 +291,27 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
                 <Select value={shirtSize} onChange={(s) => { setShirtSize(s); setUserSettings?.(prev => ({ ...prev, shirtSize: s })); }} options={['XS','S','M','L','XL','XXL'].map(s=>({value:s,label:s}))} theme={theme} />
               </div>
             </div>
-          </div>
+          </GlassCard>
 
           {/* Push Notifications */}
-          <div className="rounded-[22px] overflow-hidden" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${bdr}` }}>
+          <GlassCard theme={theme} className="overflow-hidden">
             <SectionHeader icon={Bell} title="Push Notifications" subtitle="Choose which alerts you want to receive." theme={theme} />
             <div className="p-3">
               {notifGroups.map((group, gi) => (
                 <div key={group.label}>
-                  {gi > 0 && <div className="mx-3 my-1" style={{ borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}` }} />}
+                  {gi > 0 && <div className="mx-3 my-1" style={{ borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)'}` }} />}
                   <div className="px-3 pt-3 pb-1">
                     <span className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>{group.label}</span>
                   </div>
                   {group.keys.map((k) => (
                     <div key={k}>
-                      <div className="flex items-center justify-between px-3 py-3 rounded-[14px] transition-colors" onMouseEnter={e => e.currentTarget.style.backgroundColor = hoverBg} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                      <div className="flex items-center justify-between px-3 py-3 rounded-2xl transition-colors" onMouseEnter={e => e.currentTarget.style.backgroundColor = hoverBg} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
                         <span className="text-sm font-medium" style={{ color: theme.colors.textPrimary }}>{notifLabels[k]}</span>
                         <Toggle checked={!!notif[k]} onChange={v=>setNotif(p=>({...p,[k]:v}))} theme={theme} />
                       </div>
                       {k === 'leadTimeChange' && notif.leadTimeChange && (
                         <div className="px-3 pb-3 -mt-1">
-                          <div className="p-4 rounded-[18px]" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)' }}>
+                          <div className="p-4 rounded-2xl" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.02)' }}>
                             <div className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: theme.colors.textSecondary }}>Favorite lead time series</div>
                             <div className="flex flex-wrap gap-2">
                               {leadTimeOptions.map((series) => {
@@ -323,7 +323,7 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
                                     onClick={() => setLeadTimeFavorites(prev => active ? prev.filter(s => s !== series) : [...prev, series])}
                                     className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95"
                                     style={{
-                                      backgroundColor: active ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.06)' : theme.colors.subtle),
+                                      backgroundColor: active ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.10)' : theme.colors.subtle),
                                       color: active ? (isDark ? '#1A1A1A' : '#FFFFFF') : theme.colors.textSecondary,
                                       border: `1px solid ${active ? 'transparent' : theme.colors.border}`
                                     }}
@@ -344,17 +344,17 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
                 </div>
               ))}
             </div>
-          </div>
+          </GlassCard>
 
 
           {/* Appearance */}
-          <div className="rounded-[22px] overflow-hidden" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${bdr}` }}>
+          <GlassCard theme={theme} className="overflow-hidden">
             <SectionHeader icon={Palette} title="Appearance" theme={theme} />
             <div className="px-5 py-4 flex items-center justify-between">
               <span className="text-sm font-medium" style={{ color: theme.colors.textPrimary }}>Dark mode</span>
               <Toggle checked={isDarkMode} onChange={onToggleTheme} theme={theme} />
             </div>
-          </div>
+          </GlassCard>
 
           <div className="pt-1 pb-4 text-center text-[11px] font-medium" style={{ color: theme.colors.textSecondary }}>v0.9.4</div>
         </div>

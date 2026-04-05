@@ -3,7 +3,6 @@ import { ChevronRight, Package, DollarSign, Calendar, Zap, Megaphone, Clock, Use
 import { ANNOUNCEMENTS } from '../../community/data.js';
 import { MARKETPLACE_PRODUCTS, INITIAL_BALANCE } from '../../marketplace/data.js';
 import { PRODUCTS_CATEGORIES_DATA, PRODUCT_DATA } from '../../products/data.js';
-import { STATUS_COLORS } from '../../orders/data.js';
 import { getCommunityAuthorSafe, getCommunityTextSafe } from '../utils/homeUtils.js';
 import { smartTitleCase } from '../../../utils/format.js';
 
@@ -33,8 +32,8 @@ export const HomeFeatureContent = ({
                             onClick={() => {
                                 onNavigate(`community/post/${post.id}`);
                             }}
-                            className={`w-full p-3 rounded-[14px] text-left ${hoverBg} transition-colors`}
-                            style={{ border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)' }}
+                            className={`w-full p-3 rounded-2xl text-left ${hoverBg} transition-colors`}
+                            style={{ border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)' }}
                         >
                             <div className="flex items-start gap-3">
                                 {(() => {
@@ -65,7 +64,7 @@ export const HomeFeatureContent = ({
                     <div className="flex flex-col items-center justify-center py-5 text-center gap-2">
                         <div
                             className="w-10 h-10 rounded-xl flex items-center justify-center"
-                            style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}
+                            style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)' }}
                         >
                             <Users className="w-5 h-5" style={{ color: colors.textSecondary, opacity: 0.45 }} />
                         </div>
@@ -89,8 +88,8 @@ export const HomeFeatureContent = ({
                         <button
                             key={`${item.series}-${item.type}`}
                             onClick={() => onNavigate('resources/lead-times')}
-                            className={`w-full flex items-center justify-between p-3 rounded-[14px] ${hoverBg} transition-colors`}
-                            style={{ border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)' }}
+                            className={`w-full flex items-center justify-between p-3 rounded-2xl ${hoverBg} transition-colors`}
+                            style={{ border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)' }}
                         >
                             <div className="text-left">
                                 <div className="text-sm font-semibold" style={{ color: colors.textPrimary }}>{item.series}</div>
@@ -103,7 +102,7 @@ export const HomeFeatureContent = ({
                     <div className="flex flex-col items-center justify-center py-5 text-center gap-2">
                         <div
                             className="w-10 h-10 rounded-xl flex items-center justify-center"
-                            style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}
+                            style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)' }}
                         >
                             <Clock className="w-5 h-5" style={{ color: colors.textSecondary, opacity: 0.45 }} />
                         </div>
@@ -135,8 +134,8 @@ export const HomeFeatureContent = ({
                         <button
                             key={ann.id}
                             onClick={() => ann.actionRoute ? onNavigate(ann.actionRoute) : onNavigate('community')}
-                            className={`w-full flex items-start gap-3 p-3 rounded-[14px] text-left ${hoverBg} transition-colors`}
-                            style={{ border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)', borderLeft: `3px solid ${accentColor}` }}
+                            className={`w-full flex items-start gap-3 p-3 rounded-2xl text-left ${hoverBg} transition-colors`}
+                            style={{ border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)', borderLeft: `3px solid ${accentColor}` }}
                         >
                             <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${accentColor}15`, color: accentColor }}>
                                 <Icon className="w-3.5 h-3.5" />
@@ -166,8 +165,8 @@ export const HomeFeatureContent = ({
                             <button
                                 key={category.nav}
                                 onClick={() => onNavigate(category.nav)}
-                                className={`w-full flex items-center gap-3 p-3 rounded-[14px] text-left ${hoverBg} transition-colors`}
-                                style={{ border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)' }}
+                                className={`w-full flex items-center gap-3 p-3 rounded-2xl text-left ${hoverBg} transition-colors`}
+                                style={{ border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)' }}
                             >
                                 <div className="w-11 h-11 rounded-xl overflow-hidden flex-shrink-0">
                                     <img
@@ -212,8 +211,8 @@ export const HomeFeatureContent = ({
                             <button
                                 key={project.id}
                                 onClick={() => onNavigate(`projects/${project.id}`)}
-                                className={`w-full flex items-center gap-3 p-3 rounded-[14px] text-left ${hoverBg} transition-colors`}
-                                style={{ border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)' }}
+                                className={`w-full flex items-center gap-3 p-3 rounded-2xl text-left ${hoverBg} transition-colors`}
+                                style={{ border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)' }}
                             >
                                 <div className="flex-1 min-w-0">
                                     <div className="text-sm font-semibold truncate" style={{ color: colors.textPrimary }}>
@@ -241,8 +240,8 @@ export const HomeFeatureContent = ({
                 ) : (
                     <button
                         onClick={() => onNavigate('projects')}
-                        className={`w-full p-3 rounded-[14px] text-left ${hoverBg} transition-colors`}
-                        style={{ border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)' }}
+                        className={`w-full p-3 rounded-2xl text-left ${hoverBg} transition-colors`}
+                        style={{ border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)' }}
                     >
                         <div className="text-sm font-semibold" style={{ color: colors.textPrimary }}>No active projects yet</div>
                         <div className="text-xs" style={{ color: colors.textSecondary }}>Tap to open Projects and create one</div>
@@ -259,7 +258,7 @@ export const HomeFeatureContent = ({
                 {/* Balance row — warm-tinted, same shape as every other row */}
                 <button
                     onClick={() => onNavigate('marketplace')}
-                    className={`w-full flex items-center justify-between p-3 rounded-[14px] ${hoverBg} transition-colors`}
+                    className={`w-full flex items-center justify-between p-3 rounded-2xl ${hoverBg} transition-colors`}
                     style={{
                         border: isDark ? '1px solid rgba(196,149,106,0.20)' : '1px solid rgba(196,149,106,0.16)',
                         backgroundColor: isDark ? 'rgba(196,149,106,0.08)' : 'rgba(196,149,106,0.06)',
@@ -277,10 +276,10 @@ export const HomeFeatureContent = ({
                     <button
                         key={p.id}
                         onClick={() => onNavigate('marketplace')}
-                        className={`w-full flex items-center gap-3 p-3 rounded-[14px] text-left ${hoverBg} transition-colors`}
-                        style={{ border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)' }}
+                        className={`w-full flex items-center gap-3 p-3 rounded-2xl text-left ${hoverBg} transition-colors`}
+                        style={{ border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)' }}
                     >
-                        <div className="w-11 h-11 rounded-xl overflow-hidden flex-shrink-0" style={{ border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)' }}>
+                        <div className="w-11 h-11 rounded-xl overflow-hidden flex-shrink-0" style={{ border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)' }}>
                             <img src={p.image} alt={p.name} className="w-full h-full object-cover" />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -300,7 +299,7 @@ export const HomeFeatureContent = ({
             <div className="flex flex-col items-center justify-center py-5 text-center gap-2">
                 <div
                     className="w-10 h-10 rounded-xl flex items-center justify-center"
-                    style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}
+                    style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)' }}
                 >
                     <Package className="w-5 h-5" style={{ color: colors.textSecondary, opacity: 0.45 }} />
                 </div>
@@ -316,16 +315,22 @@ export const HomeFeatureContent = ({
         <div>
             {recentOrders.map((order, i) => {
                 const hiddenOnMobile = i >= 5 ? 'hidden sm:flex' : 'flex';
-                const statusColor = STATUS_COLORS[order.status] || colors.textSecondary;
+                const statusColor = {
+                    'Order Entry': '#6B7280',
+                    'Acknowledged': '#8B8685',
+                    'In Production': '#5B7B8C',
+                    'Shipping': '#5B7B8C',
+                    'Delivered': '#4A7C59',
+                }[order.status] || colors.textSecondary;
                 return (
                 <button
                     key={order.orderNumber}
                     onClick={() => onNavigate(`orders/${order.orderNumber}`)}
-                    className={`w-full ${hiddenOnMobile} items-center gap-3 py-3 px-1 rounded-[12px] ${hoverBg} transition-colors`}
-                    style={i > 0 ? { marginTop: 2 } : undefined}
+                    className={`w-full ${hiddenOnMobile} items-center gap-3 py-3.5 px-1 ${hoverBg} transition-colors`}
+                    style={i > 0 ? { borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.05)'}` } : undefined}
                 >
-                    {/* Status indicator */}
-                    <div className="flex-shrink-0 w-8 h-8 rounded-[10px] flex items-center justify-center" style={{ backgroundColor: `${statusColor}18` }}>
+                    {/* Status dot */}
+                    <div className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${statusColor}14` }}>
                         <div className="w-2 h-2 rounded-full" style={{ backgroundColor: statusColor }} />
                     </div>
                     {/* Project + Dealer */}
