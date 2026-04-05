@@ -82,10 +82,10 @@
     to   { transform: translate3d(0, 0, 0); }
 }
 
-/* Old screen stays in place but slightly recedes (scale + dim) */
+/* Old screen stays full-size but dims as new screen slides over it */
 @keyframes exitLeft {
-    from { transform: translate3d(0, 0, 0) scale(1);    opacity: 1; }
-    to   { transform: translate3d(0, 0, 0) scale(0.96); opacity: 0.7; }
+    from { opacity: 1; }
+    to   { opacity: 0.72; }
 }
 
 /* Current screen slides out to the right */
@@ -94,10 +94,10 @@
     to   { transform: translate3d(100%, 0, 0); }
 }
 
-/* Previous screen rises back up from its receded state */
+/* Previous screen brightens back up as current slides away */
 @keyframes enterLeft {
-    from { transform: translate3d(0, 0, 0) scale(0.96); opacity: 0.7; }
-    to   { transform: translate3d(0, 0, 0) scale(1);    opacity: 1; }
+    from { opacity: 0.72; }
+    to   { opacity: 1; }
 }
 
 /* ─── Swipe-back helpers ─────────────────────────────────────── */
