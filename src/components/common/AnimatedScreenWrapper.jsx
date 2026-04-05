@@ -74,17 +74,28 @@ export const AnimatedScreenWrapper = ({
         return () => clearTimeout(t);
     }, [animating, direction, screenAnimationMs]);
 
-    const gesture = useRef({ active: false, locked: false, startX: 0, startY: 0, dx: 0 });
+    const gesture = useRef({
+        active: false, locked: false,
+        startX: 0, startY: 0, dx: 0,
+        vx: 0, lastX: 0, lastTs: 0,
+        rafId: null,
+    });
 
     const onTouchStart = useCallback((e) => {
         if (!onSwipeBack) return;
         const t = e.touches?.[0]; if (!t) return;
 
-        if (t.clientX > 28 || window.innerWidth > 768) {
-            gesture.current = { active: false, locked: false, startX: 0, startY: 0, dx: 0 };
+        // Wider edge zone (44px) for easier swipe initiation; skip on desktop
+        if (t.clientX > 44 || window.innerWidth > 768) {
+            gesture.current = { active: false, locked: false, startX: 0, startY: 0, dx: 0, vx: 0, lastX: 0, lastTs: 0, rafId: null };
             return;
         }
-        gesture.current = { active: true, locked: false, startX: t.clientX, startY: t.clientY, dx: 0 };
+        gesture.current = {
+            active: true, locked: false,
+            startX: t.clientX, startY: t.clientY, dx: 0,
+            vx: 0, lastX: t.clientX, lastTs: performance.now(),
+            rafId: null,
+        };
     }, [onSwipeBack]);
 
     const onTouchMove = useCallback((e) => {
@@ -94,14 +105,29 @@ export const AnimatedScreenWrapper = ({
 
         const dx = Math.max(0, t.clientX - g.startX);
         const dy = Math.abs(t.clientY - g.startY);
+        const now = performance.now();
+
+        // Velocity tracking (pixels/ms, exponential smoothing)
+        const dt = now - g.lastTs;
+        if (dt > 0) {
+            const rawVx = (t.clientX - g.lastX) / dt;
+            g.vx = g.vx === 0 ? rawVx : g.vx * 0.6 + rawVx * 0.4;
+        }
+        g.lastX = t.clientX;
+        g.lastTs = now;
 
         if (!g.locked) {
-            if (dx > 12 && dx > dy * 1.5) {
+            // Lock when moving more horizontally than vertically (simple ratio)
+            if (dx > dy && dx > 6) {
                 g.locked = true;
                 document.body.style.overflow = 'hidden';
                 containerRef.current?.classList.add('gesture-lock');
-            } else if (dy > 12 || dx < dy) {
+            } else if (dy > dx && dy > 6) {
+                // Clearly vertical — cancel
                 g.active = false; return;
+            } else {
+                // Still ambiguous — keep tracking without preventing scroll
+                return;
             }
         }
 
@@ -109,26 +135,37 @@ export const AnimatedScreenWrapper = ({
             e.preventDefault();
             g.dx = dx;
 
-            const root = containerRef.current;
-            const cur = root?.querySelector('[data-role="current"]');
-            const shadow = root?.querySelector('.swipe-shadow');
+            // RAF-throttled style update to avoid jank
+            if (g.rafId) return;
+            g.rafId = requestAnimationFrame(() => {
+                g.rafId = null;
+                const root = containerRef.current;
+                if (!root) return;
+                const cur = root.querySelector('[data-role="current"]');
+                const shadow = root.querySelector('.swipe-shadow');
 
-            if (cur) {
-                cur.style.transition = 'none';
-                cur.style.transform = `translateX(${dx}px)`;
-            }
-            if (shadow) {
-                const w = root?.clientWidth || window.innerWidth;
-                const p = Math.min(1, dx / w);
-                shadow.style.opacity = String(0.25 * (1 - p));
-            }
+                if (cur) {
+                    cur.style.transition = 'none';
+                    cur.style.transform = `translateX(${g.dx}px)`;
+                }
+                if (shadow) {
+                    const w = root.clientWidth || window.innerWidth;
+                    const p = Math.min(1, g.dx / w);
+                    shadow.style.transition = 'none';
+                    shadow.style.opacity = String(0.25 * (1 - p));
+                }
+            });
         }
     }, [onSwipeBack]);
 
     const onTouchEnd = useCallback(() => {
         const g = gesture.current;
+
+        // Cancel any pending RAF so it doesn't fire after end
+        if (g.rafId) { cancelAnimationFrame(g.rafId); g.rafId = null; }
+
         if (!g.locked || !onSwipeBack) {
-            gesture.current = { active: false, locked: false, startX: 0, startY: 0, dx: 0 };
+            gesture.current = { active: false, locked: false, startX: 0, startY: 0, dx: 0, vx: 0, lastX: 0, lastTs: 0, rafId: null };
             return;
         }
 
@@ -136,7 +173,9 @@ export const AnimatedScreenWrapper = ({
         const cur = root?.querySelector('[data-role="current"]');
         const shadow = root?.querySelector('.swipe-shadow');
         const w = root?.clientWidth || window.innerWidth;
-        const commit = g.dx > w * 0.28;
+
+        // Commit on distance OR velocity flick (fast rightward swipe)
+        const commit = g.dx > w * 0.28 || (g.vx > 0.45 && g.dx > 32);
 
         if (cur) {
             cur.style.transition = prefersReducedMotion
@@ -155,7 +194,7 @@ export const AnimatedScreenWrapper = ({
         setTimeout(() => {
             document.body.style.overflow = '';
             root?.classList.remove('gesture-lock');
-            gesture.current = { active: false, locked: false, startX: 0, startY: 0, dx: 0 };
+            gesture.current = { active: false, locked: false, startX: 0, startY: 0, dx: 0, vx: 0, lastX: 0, lastTs: 0, rafId: null };
             if (commit) {
                 // Navigation will fire; animation useEffect handles style cleanup
                 onSwipeBack();
