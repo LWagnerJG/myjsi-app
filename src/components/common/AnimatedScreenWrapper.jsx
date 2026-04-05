@@ -22,6 +22,9 @@ export const AnimatedScreenWrapper = ({
     const [prevNode, setPrevNode] = useState(null);
     const [animating, setAnimating] = useState(false);
     const prevChildrenRef = useRef(children);
+    // Tracks whether the last back-nav was committed via swipe gesture so we
+    // can skip the duplicate exit animation (the gesture already did it).
+    const gestureCommitRef = useRef(false);
     const prefersReducedMotion = usePrefersReducedMotion();
     const screenAnimationMs = prefersReducedMotion ? 1 : MOTION_DURATIONS_MS.screen;
     const settleAnimationMs = prefersReducedMotion ? 0 : MOTION_DURATIONS_MS.standard;
@@ -41,6 +44,23 @@ export const AnimatedScreenWrapper = ({
         const root = containerRef.current;
         const cur = root.querySelector('[data-role="current"]');
         const prev = root.querySelector('[data-role="previous"]');
+
+        const done = () => { setPrevNode(null); setAnimating(false); };
+
+        // If this navigation was triggered by a committed swipe gesture, the
+        // gesture already played the exit animation. Skipping it here prevents
+        // the old panel from flashing back to position 0 when we clear the
+        // inline transform before the CSS exit-right animation can take over.
+        if (gestureCommitRef.current && direction === 'back') {
+            gestureCommitRef.current = false;
+            // Show new screen immediately, prev is already off-screen.
+            if (cur) { cur.className = 'panel'; cur.style.transform = ''; cur.style.transition = ''; cur.style.opacity = ''; }
+            const shadow = cur?.querySelector('.swipe-shadow');
+            if (shadow) { shadow.style.opacity = '0'; shadow.style.transition = ''; }
+            done();
+            return;
+        }
+        gestureCommitRef.current = false;
 
         // Clear ALL gesture-set inline styles before CSS animations run.
         // The current panel's DOM node is reused across navigations, so any
@@ -64,11 +84,6 @@ export const AnimatedScreenWrapper = ({
             prev && prev.classList.add('panel', 'exit-right');
             cur && cur.classList.add('panel', 'enter-left');
         }
-
-        const done = () => {
-            setPrevNode(null);
-            setAnimating(false);
-        };
 
         const t = setTimeout(done, screenAnimationMs + 24);
         return () => clearTimeout(t);
@@ -209,7 +224,8 @@ export const AnimatedScreenWrapper = ({
             root?.classList.remove('gesture-lock');
             gesture.current = { active: false, locked: false, startX: 0, startY: 0, dx: 0, vx: 0, lastX: 0, lastTs: 0, rafId: null };
             if (commit) {
-                // Navigation will fire; animation useEffect handles style cleanup
+                // Signal the animation effect to skip the redundant exit animation
+                gestureCommitRef.current = true;
                 onSwipeBack();
             } else {
                 // Snap-back: no navigation, clear gesture styles manually
