@@ -119,7 +119,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
     ...theme,
     colors: {
       ...theme.colors,
-      subtle: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.07)',
+      subtle: isDark ? 'rgba(255,255,255,0.13)' : (theme.colors.border || '#E3E0D8'),
     },
   }), [theme, isDark]);
 

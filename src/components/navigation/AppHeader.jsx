@@ -125,20 +125,7 @@ export const AppHeader = React.memo(({
 
             {!isHome && (
                 <>
-                    <div
-                        aria-hidden="true"
-                        className="fixed top-0 left-0 right-0 pointer-events-none"
-                        style={{
-                            height: innerScrimHeight,
-                            zIndex: 29,
-                            backgroundColor: `rgba(${bgR},0.15)`,
-                            backdropFilter: 'blur(20px) saturate(1.6)',
-                            WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
-                            maskImage: 'linear-gradient(to bottom, black 0%, black 60%, rgba(0,0,0,0.42) 76%, transparent 100%)',
-                            WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 60%, rgba(0,0,0,0.42) 76%, transparent 100%)',
-                        }}
-                    />
-
+                    {/* Single gradient fade below the pill — no separate blur layer (z-27 handles it) */}
                     <div
                         aria-hidden="true"
                         className="fixed top-0 left-0 right-0 pointer-events-none"
@@ -146,10 +133,9 @@ export const AppHeader = React.memo(({
                             height: innerScrimHeight,
                             zIndex: 29,
                             background: `linear-gradient(to bottom,
-                                rgba(${bgR},0.38) 0%,
-                                rgba(${bgR},0.22) 34%,
-                                rgba(${bgR},0.09) 60%,
-                                rgba(${bgR},0.018) 80%,
+                                rgba(${bgR},0.18) 0%,
+                                rgba(${bgR},0.08) 44%,
+                                rgba(${bgR},0.02) 70%,
                                 rgba(${bgR},0) 100%)`,
                         }}
                     />
@@ -170,13 +156,11 @@ export const AppHeader = React.memo(({
                 style={{
                     height: 'calc(env(safe-area-inset-top, 0px) + 84px)',
                     zIndex: 27,
-                    backgroundColor: isHome
-                        ? (dark ? 'rgba(22,22,22,0.70)'  : 'rgba(240,237,232,0.70)')
-                        : (dark ? 'rgba(24,24,24,0.86)'  : 'rgba(255,255,255,0.86)'),
+                    backgroundColor: dark ? 'rgba(22,22,22,0.78)' : 'rgba(240,237,232,0.78)',
                     backdropFilter: 'blur(28px) saturate(1.8)',
                     WebkitBackdropFilter: 'blur(28px) saturate(1.8)',
-                    maskImage: 'linear-gradient(to bottom, black 0%, black 62%, rgba(0,0,0,0.15) 86%, transparent 100%)',
-                    WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 62%, rgba(0,0,0,0.15) 86%, transparent 100%)',
+                    maskImage: 'linear-gradient(to bottom, black 0%, black 58%, rgba(0,0,0,0.18) 82%, transparent 100%)',
+                    WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 58%, rgba(0,0,0,0.18) 82%, transparent 100%)',
                 }}
             />
 
