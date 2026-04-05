@@ -1,12 +1,13 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { AlertTriangle, ArrowRight, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, FileText, Paperclip, UploadCloud, X } from 'lucide-react';
+import { AlertTriangle, ArrowRight, CalendarDays, CheckCircle2, ChevronRight, FileText, Paperclip, UploadCloud, X } from 'lucide-react';
 import { FormInput } from '../../components/forms/FormInput.jsx';
 import { AutoCompleteCombobox } from '../../components/forms/AutoCompleteCombobox.jsx';
 import { PortalNativeSelect } from '../../components/forms/PortalNativeSelect.jsx';
 import { ToggleSwitch } from '../../components/forms/ToggleSwitch.jsx';
 import { SpotlightMultiSelect } from '../../components/common/SpotlightMultiSelect.jsx';
 import { PillButton, PrimaryButton } from '../../components/common/JSIButtons.jsx';
-import { isDarkTheme } from '../../design-system/tokens.js';
+import SwipeCalendar from '../../components/common/SwipeCalendar.jsx';
+import { isDarkTheme, floatingBarStyle } from '../../design-system/tokens.js';
 import { hapticSuccess } from '../../utils/haptics.js';
 import { STAGES, VERTICALS, COMPETITORS } from './data.js';
 import { DISCOUNT_OPTIONS_WITH_UNKNOWN } from '../../constants/discounts.js';
@@ -60,7 +61,7 @@ const STEP_LABELS = ['Basics', 'Scope', 'Review'];
 const getSubtleBorder = (theme) => (isDarkTheme(theme) ? 'rgba(255,255,255,0.11)' : 'rgba(0,0,0,0.07)');
 
 const MONTHS_LONG = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-const CAL_WEEKDAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+
 
 const parseCurrency = (raw) => {
   const n = Number(String(raw ?? '').replace(/[^0-9.]/g, ''));
@@ -215,7 +216,6 @@ const DatePickerInput = ({ value, onChange, theme, placeholder = 'Select date' }
   const parsed = value ? new Date(value + 'T00:00:00') : null;
 
   // Flip calendar above trigger when there isn't enough space below.
-  // Re-checks on resize so iOS keyboard open/close (which changes innerHeight) is handled.
   const calcDropUp = () => {
     if (!wrapperRef.current) return;
     const rect = wrapperRef.current.getBoundingClientRect();
@@ -229,8 +229,6 @@ const DatePickerInput = ({ value, onChange, theme, placeholder = 'Select date' }
     window.addEventListener('resize', calcDropUp);
     return () => window.removeEventListener('resize', calcDropUp);
   }, [isOpen]);
-  const [viewYear, setViewYear] = useState(() => parsed ? parsed.getFullYear() : today.getFullYear());
-  const [viewMonth, setViewMonth] = useState(() => parsed ? parsed.getMonth() : today.getMonth());
 
   useEffect(() => {
     if (!isOpen) return;
@@ -249,28 +247,17 @@ const DatePickerInput = ({ value, onChange, theme, placeholder = 'Select date' }
     ? `${MONTHS_LONG[parsed.getMonth()]} ${parsed.getDate()}, ${parsed.getFullYear()}`
     : null;
 
-  const prevMonth = () => {
-    if (viewMonth === 0) { setViewYear((y) => y - 1); setViewMonth(11); }
-    else setViewMonth((m) => m - 1);
-  };
-  const nextMonth = () => {
-    if (viewMonth === 11) { setViewYear((y) => y + 1); setViewMonth(0); }
-    else setViewMonth((m) => m + 1);
-  };
-
-  const selectDay = (day) => {
-    const mm = String(viewMonth + 1).padStart(2, '0');
-    const dd = String(day).padStart(2, '0');
-    onChange(`${viewYear}-${mm}-${dd}`);
+  const handleSelect = useCallback((date) => {
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    onChange(`${date.getFullYear()}-${mm}-${dd}`);
     setIsOpen(false);
-  };
+  }, [onChange]);
 
-  const isSelected = (day) => parsed && parsed.getFullYear() === viewYear && parsed.getMonth() === viewMonth && parsed.getDate() === day;
-  const isToday = (day) => today.getFullYear() === viewYear && today.getMonth() === viewMonth && today.getDate() === day;
-
-  const firstDow = new Date(viewYear, viewMonth, 1).getDay();
-  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
-  const cells = [...Array(firstDow).fill(null), ...Array.from({ length: daysInMonth }, (_, i) => i + 1)];
+  const handleClear = useCallback(() => {
+    onChange('');
+    setIsOpen(false);
+  }, [onChange]);
 
   return (
     <div className="relative" ref={wrapperRef}>
@@ -299,80 +286,13 @@ const DatePickerInput = ({ value, onChange, theme, placeholder = 'Select date' }
             boxShadow: dark ? '0 8px 32px rgba(0,0,0,0.45)' : '0 8px 24px rgba(0,0,0,0.11)',
           }}
         >
-          {/* Month nav */}
-          <div className="flex items-center justify-between px-4 py-2.5 border-b" style={{ borderColor: subtleBorder }}>
-            <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={prevMonth}
-              className="p-1.5 rounded-full transition-colors hover:bg-black/[0.05]">
-              <ChevronLeft className="w-4 h-4" style={{ color: c.textSecondary }} />
-            </button>
-            <span className="text-[13px] font-semibold" style={{ color: c.textPrimary }}>
-              {MONTHS_LONG[viewMonth]} {viewYear}
-            </span>
-            <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={nextMonth}
-              className="p-1.5 rounded-full transition-colors hover:bg-black/[0.05]">
-              <ChevronRight className="w-4 h-4" style={{ color: c.textSecondary }} />
-            </button>
-          </div>
-
-          {/* Calendar grid */}
-          <div className="px-3 pt-2 pb-1">
-            <div className="grid grid-cols-7 mb-0.5">
-              {CAL_WEEKDAYS.map((d) => (
-                <div key={d} className="text-center text-[10px] font-semibold py-1" style={{ color: c.textSecondary, opacity: 0.6 }}>{d}</div>
-              ))}
-            </div>
-            <div className="grid grid-cols-7 gap-y-0.5">
-              {cells.map((day, idx) => (
-                <div key={idx} className="flex items-center justify-center">
-                  {day !== null ? (
-                    <button
-                      type="button"
-                      onMouseDown={(e) => { e.preventDefault(); selectDay(day); }}
-                      onClick={() => selectDay(day)}
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-[13px] transition-all"
-                      style={{
-                        backgroundColor: isSelected(day) ? c.accent : 'transparent',
-                        color: isSelected(day) ? c.accentText : isToday(day) ? c.accent : c.textPrimary,
-                        fontWeight: isSelected(day) || isToday(day) ? 700 : 400,
-                        outline: isToday(day) && !isSelected(day) ? `1.5px solid ${c.accent}55` : 'none',
-                        outlineOffset: '-1.5px',
-                      }}
-                    >
-                      {day}
-                    </button>
-                  ) : <div className="w-8 h-8" />}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div className="border-t px-4 py-2.5 flex justify-between items-center" style={{ borderColor: subtleBorder }}>
-            <button
-              type="button"
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => { onChange(''); setIsOpen(false); }}
-              className="text-[12px] font-medium"
-              style={{ color: c.textSecondary }}
-            >
-              Clear
-            </button>
-            <button
-              type="button"
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => {
-                const d = today;
-                const mm = String(d.getMonth() + 1).padStart(2, '0');
-                const dd = String(d.getDate()).padStart(2, '0');
-                onChange(`${d.getFullYear()}-${mm}-${dd}`);
-                setIsOpen(false);
-              }}
-              className="text-[12px] font-semibold"
-              style={{ color: c.accent }}
-            >
-              Today
-            </button>
-          </div>
+          <SwipeCalendar
+            theme={theme}
+            selected={parsed}
+            onSelect={handleSelect}
+            showFooter
+            onClear={handleClear}
+          />
         </div>
       )}
     </div>
@@ -1798,8 +1718,8 @@ export const NewLeadScreen = ({
       {/* ── Integrated bottom bar: step nav + lead score + action ── */}
       <div
         data-bottom-chrome=""
-        className="sticky bottom-0 z-20 border-t"
-        style={{ borderColor: subtleBorder, backgroundColor: c.background }}
+        className="sticky bottom-0 z-20 rounded-t-2xl"
+        style={floatingBarStyle(theme)}
       >
         {/* Step pills + score row */}
         <div className="max-w-3xl mx-auto px-4 sm:px-5 pt-3 pb-2 flex items-center justify-between gap-3">

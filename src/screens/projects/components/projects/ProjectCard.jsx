@@ -17,24 +17,26 @@ export const ProjectCard = ({ opp, theme, onClick }) => {
   return (
     <button onClick={onClick} className="w-full text-left" style={{ WebkitTapHighlightColor: 'transparent' }}>
       <div
-        className="rounded-[22px] overflow-hidden transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98]"
+        className="rounded-3xl overflow-hidden transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98]"
         style={{ backgroundColor: theme.colors.surface, border: `1px solid ${border}` }}
       >
-        <div className="px-4 pt-4 pb-3">
-          <p className="font-bold text-[15px] leading-snug" style={{ color: theme.colors.textPrimary }}>
-            {opp.name}
-          </p>
-          <p className="mt-0.5 text-[12px] font-medium" style={{ color: theme.colors.textSecondary, opacity: 0.7 }}>
-            {opp.company || 'Unknown'}
-          </p>
-        </div>
-        <div className="flex items-center justify-between px-4 py-3" style={{ borderTop: `1px solid ${border}` }}>
-          <span className="text-[10px] font-bold uppercase tracking-[0.07em]" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>
-            List
-          </span>
-          <p className="font-black text-[19px] tabular-nums tracking-tight" style={{ color: theme.colors.textPrimary }}>
-            {displayValue}
-          </p>
+        <div className="px-5 pt-4 pb-4 flex items-start justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-[15px] leading-snug truncate" style={{ color: theme.colors.textPrimary }}>
+              {opp.name}
+            </p>
+            <p className="mt-0.5 text-[12px] font-medium" style={{ color: theme.colors.textSecondary, opacity: 0.7 }}>
+              {opp.company || 'Unknown'}
+            </p>
+          </div>
+          <div className="text-right shrink-0 pt-0.5">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.06em] mb-0.5" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>
+              List
+            </p>
+            <p className="font-bold text-[18px] tabular-nums tracking-tight leading-none" style={{ color: theme.colors.textPrimary }}>
+              {displayValue}
+            </p>
+          </div>
         </div>
       </div>
     </button>

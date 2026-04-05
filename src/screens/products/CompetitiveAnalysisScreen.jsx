@@ -5,6 +5,7 @@ import { Package, Plus, Info } from 'lucide-react';
 import { PRODUCT_DATA } from './data.js';
 import { COMPETITION_METRICS } from './comparison-data.js';
 import { Modal } from '../../components/common/Modal.jsx';
+import { floatingBarStyle } from '../../design-system/tokens.js';
 
 const AdvantageChip = ({ value, onClick }) => (
     <button onClick={onClick} className={`min-w-[42px] inline-flex items-center justify-center px-2 py-1 text-xs font-semibold rounded-full focus:outline-none focus:ring-2 focus:ring-white/40 transition ${value > 0 ? COMPETITION_METRICS.displayFormat.advantage.positive : COMPETITION_METRICS.displayFormat.advantage.negative}`}>
@@ -101,16 +102,18 @@ export const CompetitiveAnalysisScreen = ({ categoryId, productId, theme }) => {
                     <VersusList jsiProduct={product} competitors={perProductList.length ? perProductList : categoryCompetitors} theme={theme} title={perProductList.length ? 'Versus Competitors' : 'Versus Competitors (Category)'} />
                 </div>
             </div>
-            <div className="fixed bottom-0 left-0 right-0 px-4 pb-5 pt-3" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.14) 60%, transparent)' }}>
-                <FrostButton
-                    onClick={() => setShowRequest(true)}
-                    variant="dark"
-                    size="large"
-                    icon={<Plus className="w-5 h-5" />}
-                    className="w-full"
-                >
-                    Request Competitor
-                </FrostButton>
+            <div className="fixed bottom-0 left-0 right-0 flex justify-center px-5 pb-5 pt-3">
+                <div className="w-full max-w-md rounded-2xl px-4 py-3" style={floatingBarStyle(theme)}>
+                    <FrostButton
+                        onClick={() => setShowRequest(true)}
+                        variant="dark"
+                        size="large"
+                        icon={<Plus className="w-5 h-5" />}
+                        className="w-full"
+                    >
+                        Request Competitor
+                    </FrostButton>
+                </div>
             </div>
             <Modal show={showRequest} onClose={()=>setShowRequest(false)} title="Request Competitor" theme={theme}>
                 <form onSubmit={handleSubmit} className="space-y-4">

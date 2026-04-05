@@ -6,7 +6,7 @@ import { ProbabilitySlider } from '../../components/forms/ProbabilitySlider.jsx'
 import { PillButton } from '../../components/common/JSIButtons.jsx';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 import { JSI_SERIES } from '../products/data.js';
-import { DESIGN_TOKENS, isDarkTheme } from '../../design-system/tokens.js';
+import { DESIGN_TOKENS, isDarkTheme, floatingBarStyle } from '../../design-system/tokens.js';
 import { usePersistentState } from '../../hooks/usePersistentState.js';
 
 import { PROJECTS_TAB_OPTIONS, fmtCurrency } from './components/projects/utils.js';
@@ -141,19 +141,19 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
             {projectsTab === 'pipeline' && (
               <button
                 onClick={() => onNavigate('new-lead')}
-                className="h-9 inline-flex items-center justify-center gap-1.5 rounded-full text-[13px] font-semibold transition-all px-4 whitespace-nowrap active:scale-[0.97]"
+                className="h-8 inline-flex items-center justify-center gap-1.5 rounded-full text-[13px] font-medium transition-all px-3.5 whitespace-nowrap active:scale-[0.97]"
                 style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
               >
-                <Plus size={15} strokeWidth={2.5} /> New Project
+                <Plus size={14} strokeWidth={2.5} /> New Project
               </button>
             )}
             {projectsTab === 'my-projects' && (
               <button
                 onClick={() => onNavigate('add-new-install')}
-                className="h-9 inline-flex items-center justify-center gap-1.5 rounded-full text-[13px] font-semibold transition-all px-4 whitespace-nowrap active:scale-[0.97]"
+                className="h-8 inline-flex items-center justify-center gap-1.5 rounded-full text-[13px] font-medium transition-all px-3.5 whitespace-nowrap active:scale-[0.97]"
                 style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
               >
-                <Plus size={15} strokeWidth={2.5} /> New Install
+                <Plus size={14} strokeWidth={2.5} /> New Install
               </button>
             )}
           </div>
@@ -161,7 +161,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
         {projectsTab === 'pipeline' && (
           <div className="px-4 sm:px-6 lg:px-8 pb-3 relative max-w-5xl mx-auto w-full">
             <div ref={stagesScrollRef} onScroll={updateStageFade} className="overflow-x-auto scrollbar-hide">
-              <div className="flex items-center gap-1.5 py-0.5 whitespace-nowrap">
+              <div className="inline-flex items-center gap-0 py-0.5 whitespace-nowrap rounded-full p-[3px]" style={{ backgroundColor: theme.colors?.subtle || (isDark ? 'rgba(255,255,255,0.08)' : '#E3E0D8') }}>
                 {STAGES.map((stage, i) => {
                   const active = selectedPipelineStage === stage;
                   const showIndex = stage !== 'Won' && stage !== 'Lost';
@@ -169,11 +169,11 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
                     <button
                       key={stage}
                       onClick={() => setSelectedPipelineStage(stage)}
-                      className="text-[13px] font-semibold transition-all px-3.5 py-1.5 rounded-full"
+                      className="relative text-[13px] transition-all px-4 py-1.5 rounded-full"
                       style={{
-                        color: active ? theme.colors.accentText : theme.colors.textSecondary,
-                        backgroundColor: active ? theme.colors.textPrimary : (isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)'),
-                        opacity: active ? 1 : 0.8,
+                        color: active ? theme.colors.textPrimary : (isDark ? 'rgba(240,240,240,0.78)' : '#6A6762'),
+                        backgroundColor: active ? (isDark ? 'rgba(255,255,255,0.14)' : '#FFFFFF') : 'transparent',
+                        fontWeight: active ? 600 : 500,
                       }}
                     >
                       {showIndex && <span className="opacity-50 mr-0.5">{i + 1}</span>} {stage}
@@ -246,20 +246,12 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
       {/* Sticky bottom totals bar — glassy overlay */}
       {projectsTab === 'pipeline' && filteredOpportunities.length > 0 && (
         <div
-          className="absolute bottom-0 left-0 right-0 pointer-events-none flex justify-center"
+          className="absolute bottom-0 left-0 right-0 pointer-events-none flex justify-center px-5"
           style={{ zIndex: 20, bottom: 'clamp(0.5rem, 5vh, 3.25rem)' }}
         >
           <div
-            className="pointer-events-auto inline-flex items-center gap-5 rounded-3xl px-6 py-3.5"
-            style={{
-              backgroundColor: isDark ? 'rgba(30,30,30,0.75)' : 'rgba(255,255,255,0.72)',
-              backdropFilter: 'blur(20px) saturate(1.8)',
-              WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
-              border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.08)',
-              boxShadow: isDark
-                ? '0 -4px 24px rgba(0,0,0,0.3)'
-                : '0 -2px 20px rgba(0,0,0,0.06)',
-            }}
+            className="pointer-events-auto w-full max-w-md flex items-center justify-center gap-5 rounded-3xl px-6 py-3.5"
+            style={floatingBarStyle(theme)}
           >
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: theme.colors.textSecondary }}>{selectedPipelineStage}</p>

@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Users, Briefcase, Package, Search as SearchIcon } from 'lucide-react';
 import { DESIGN_TOKENS } from '../../design-system/tokens.js';
+import { MOTION_EASINGS, toFramerSeconds, MOTION_DURATIONS_MS } from '../../design-system/motion.js';
 
 /**
  * EmptyState Component
@@ -28,7 +29,7 @@ export const EmptyState = ({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+      transition={{ duration: toFramerSeconds(MOTION_DURATIONS_MS.slow), ease: MOTION_EASINGS.standard }}
       className="flex flex-col items-center justify-center py-16 px-4 text-center"
     >
       {/* Icon or Illustration */}
@@ -60,7 +61,7 @@ export const EmptyState = ({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
-        className="font-bold text-xl mb-2"
+        className="font-bold text-[22px] mb-2"
         style={{ color: theme.colors.textPrimary }}
       >
         {title}
@@ -71,7 +72,7 @@ export const EmptyState = ({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3 }}
-        className="text-sm mb-8 max-w-sm leading-relaxed"
+        className="text-[13px] mb-8 max-w-sm leading-relaxed"
         style={{ color: theme.colors.textSecondary }}
       >
         {description}
@@ -84,7 +85,7 @@ export const EmptyState = ({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
           onClick={action.onClick}
-          className="px-6 py-3 rounded-full font-semibold shadow-lg transition-transform hover:scale-105 active:scale-95"
+          className="px-6 py-3 rounded-full font-semibold transition-all hover:scale-[1.02] active:scale-[0.98]"
           style={{
             backgroundColor: theme.colors.accent,
             color: theme.colors.accentText,

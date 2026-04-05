@@ -18,6 +18,7 @@ import {
 } from './data.js';
 import { isDarkTheme } from '../../design-system/tokens.js';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
+import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
 
 import { MembersErrorBoundary } from './components/members/MembersErrorBoundary.jsx';
 import { ConfirmModal } from './components/members/SharedComponents.jsx';
@@ -150,13 +151,16 @@ const MembersScreenContent = ({ theme }) => {
                 <div className="px-4 sm:px-6 lg:px-8 pb-24 lg:pb-12 max-w-2xl lg:max-w-5xl mx-auto w-full">
 
                     {/* Header */}
-                    <div className="pt-4 pb-4 flex items-center justify-between gap-4">
+                    <div className="pt-4 pb-3 flex items-center justify-between gap-4">
                         <div>
                             <h1 className="text-[22px] font-bold leading-tight tracking-tight" style={{ color: theme.colors.textPrimary }}>
-                                Members
+                                {tab === 'dealers' ? 'Dealers' : 'Members'}
                             </h1>
-                            <p className="text-[14px] mt-0.5" style={{ color: theme.colors.textSecondary }}>
-                                {tab === 'team' ? 'Your rep team and permissions.' : 'Dealer companies and contacts.'}
+                            <p className="text-[13px] mt-0.5" style={{ color: theme.colors.textSecondary }}>
+                                {tab === 'team'
+                                    ? `${members.length} team members`
+                                    : `${INITIAL_DEALER_COMPANIES.length} accounts`
+                                }
                             </p>
                         </div>
                         {tab === 'team' && (
@@ -172,7 +176,7 @@ const MembersScreenContent = ({ theme }) => {
                     </div>
 
                     {/* Pill tabs */}
-                    <div className="mb-5">
+                    <div className="mb-4">
                         <SegmentedToggle
                             value={tab}
                             onChange={switchTab}
@@ -185,32 +189,13 @@ const MembersScreenContent = ({ theme }) => {
 
                     {/* Search — dealers tab only */}
                     {tab === 'dealers' && (
-                        <div className="relative mb-4 flex items-center gap-2.5"
-                            style={{
-                                height: 44,
-                                borderRadius: 9999,
-                                backgroundColor: dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.05)',
-                                border: `1px solid ${dark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.08)'}`,
-                                paddingLeft: 14,
-                                paddingRight: searchQuery ? 8 : 14,
-                            }}>
-                            <Search className="w-4 h-4 flex-shrink-0" style={{ color: theme.colors.textSecondary, opacity: 0.6 }} />
-                            <input
-                                type="search"
-                                autoComplete="off"
+                        <div className="mb-4">
+                            <StandardSearchBar
                                 value={searchQuery}
-                                onChange={e => setSearchQuery(e.target.value)}
+                                onChange={setSearchQuery}
                                 placeholder="Search dealers or contacts…"
-                                className="flex-1 h-full bg-transparent outline-none text-[14px]"
-                                style={{ color: theme.colors.textPrimary }}
+                                theme={theme}
                             />
-                            {searchQuery && (
-                                <button onClick={() => setSearchQuery('')}
-                                    className="flex-shrink-0 w-[22px] h-[22px] rounded-full flex items-center justify-center"
-                                    style={{ backgroundColor: dark ? 'rgba(255,255,255,0.13)' : 'rgba(0,0,0,0.10)' }}>
-                                    <X className="w-[11px] h-[11px]" style={{ color: theme.colors.textSecondary }} />
-                                </button>
-                            )}
                         </div>
                     )}
 

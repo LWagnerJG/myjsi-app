@@ -5,13 +5,10 @@ import { ORDER_DATA, STATUS_COLORS } from '../orders/data.js';
 import { SalesByVerticalBreakdown } from './components/SalesByVerticalBreakdown.jsx';
 import { CountUp } from '../../components/common/CountUp.jsx';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
-import { isDarkTheme } from '../../design-system/tokens.js';
+import { isDarkTheme, subtleBg } from '../../design-system/tokens.js';
 import { formatCurrency, formatCompanyName } from '../../utils/format.js';
 
 /* ── helpers ─────────────────────────────────────────────────── */
-
-const subtle = (isDark, strength = 1) =>
-  isDark ? `rgba(255,255,255,${(0.07 * strength).toFixed(3)})` : `rgba(0,0,0,${(0.025 * strength).toFixed(4)})`;
 
 const parseQuarterKey = (key = '') => {
   const [y, q] = key.split('-Q');
@@ -148,7 +145,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
         <h3 className="text-[15px] font-bold" style={{ color: colors.textPrimary }}>{title}</h3>
         {badge && (
           <span className="text-[11px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
-            style={{ backgroundColor: subtle(isDark, 1.5), color: colors.textSecondary }}>{badge}</span>
+            style={{ backgroundColor: subtleBg(theme, 1.5), color: colors.textSecondary }}>{badge}</span>
         )}
       </div>
       {action && (
@@ -162,7 +159,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
 
   /* shared content row */
   const tileRowCls = "flex items-center justify-between py-2.5 px-3.5 rounded-xl";
-  const tileRowBg = subtle(isDark);
+  const tileRowBg = subtleBg(theme);
 
   return (
     <div className="min-h-full app-header-offset" style={{ backgroundColor: colors.background, color: colors.textPrimary }}>
@@ -204,7 +201,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                     {deltaLabel} {aheadOfPace ? 'Ahead' : 'Behind'}
                   </div>
                 </div>
-                <div className="h-2 w-full rounded-full overflow-hidden" style={{ backgroundColor: subtle(isDark, 1.5) }}>
+                <div className="h-2 w-full rounded-full overflow-hidden" style={{ backgroundColor: subtleBg(theme, 1.5) }}>
                   <div className="h-full rounded-full" style={{ backgroundColor: colors.accent, width: ready ? `${progressPct}%` : '0%', transition: 'width 0.7s ease-out 0.1s' }} />
                 </div>
                 <div className="text-xs font-semibold opacity-35 tabular-nums">{progressPct.toFixed(1)}% of $7M goal</div>
@@ -261,7 +258,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                       }}>
                       <div className="flex items-center gap-2.5 min-w-0">
                         <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-black shrink-0"
-                          style={{ backgroundColor: subtle(isDark, 2), color: colors.textSecondary }}>
+                          style={{ backgroundColor: subtleBg(theme, 2), color: colors.textSecondary }}>
                           {idx + 1}
                         </span>
                         <span className="text-sm font-semibold truncate">{leader.name}</span>

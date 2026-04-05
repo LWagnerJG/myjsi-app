@@ -3,7 +3,7 @@ import { FormInput } from '../../components/common/FormComponents.jsx';
 import { X, ImageIcon, Upload } from 'lucide-react';
 import { INSTALLATION_CONSTANTS, FORM_VALIDATION } from './installation-data.js';
 import { hapticSuccess } from '../../utils/haptics.js';
-import { isDarkTheme } from '../../design-system/tokens.js';
+import { isDarkTheme, floatingBarStyle } from '../../design-system/tokens.js';
 
 export const AddNewInstallScreen = ({ theme, onAddInstall }) => {
     const [projectName, setProjectName] = useState('');
@@ -269,10 +269,10 @@ export const AddNewInstallScreen = ({ theme, onAddInstall }) => {
                         </div>
                     </div>
 
-                    <div className="sticky mt-5 flex justify-center" style={{ bottom: 'clamp(0.75rem, 2.5vh, 1.5rem)' }}>
+                    <div className="sticky mt-5 flex justify-center px-4 py-3 rounded-2xl" style={{ bottom: 'clamp(0.75rem, 2.5vh, 1.5rem)', ...floatingBarStyle(theme) }}>
                         <button
                             type="submit"
-                            className="w-full max-w-xl font-bold text-[14px] h-12 px-7 rounded-full transition-all motion-tap"
+                            className="w-full max-w-md font-bold text-[14px] h-12 px-7 rounded-full transition-all motion-tap"
                             style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
                         >
                             Upload Install Photo(s)

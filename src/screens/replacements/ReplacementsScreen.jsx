@@ -4,7 +4,7 @@ import { Camera, FileText, AlertCircle, CheckCircle, Clock, XCircle, Image, Chev
 import { REPLACEMENT_REQUESTS_DATA } from './data.js';
 import jsQR from 'jsqr';
 import { hapticSuccess } from '../../utils/haptics.js';
-import { isDarkTheme } from '../../design-system/tokens.js';
+import { isDarkTheme, DESIGN_TOKENS, subtleBorder } from '../../design-system/tokens.js';
 
 /* ── Header offset shared across views ── */
 const CONTENT_PT = 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 16px)';
@@ -30,7 +30,7 @@ function RequestCard({ r, onClick, dark, bdr }) {
     const statusAccent = STATUS_FG[r.status] || '#353535';
     return (
         <button onClick={onClick} className="w-full text-left active:scale-[0.99] transition-transform">
-            <div className="rounded-[18px] overflow-hidden flex items-center gap-3 transition-all"
+            <div className="rounded-[24px] overflow-hidden flex items-center gap-3 transition-all"
                 style={{ backgroundColor: 'transparent', border: `1px solid ${bdr}`, borderLeft: `3px solid ${statusAccent}40` }}>
                 <div className="flex-1 min-w-0 px-4 py-3.5">
                     <div className="font-semibold text-[15px] truncate" style={{ color: 'var(--text-primary)' }}>
@@ -71,7 +71,7 @@ function ReplacementForm({ theme, formData, onChange, onSubmit, fileInputRef, on
         <div className="px-4 sm:px-6 lg:px-8 pb-8 max-w-5xl mx-auto w-full" style={{ paddingTop: CONTENT_PT }}>
             <div className="space-y-4">
                 {/* Form card */}
-                <div className="rounded-[22px] overflow-hidden p-5 space-y-4"
+                <div className="rounded-[24px] overflow-hidden p-5 space-y-4"
                     style={{ backgroundColor: theme.colors.surface, border: `1px solid ${bdr}` }}>
                     <Field label="Sales Order">
                         <input value={formData.salesOrder} onChange={e => onChange('salesOrder', e.target.value)}
@@ -253,7 +253,7 @@ export const ReplacementsScreen = ({ theme }) => {
                 style={{ paddingTop: CONTENT_PT }}>
 
                 {/* ── QR Scanner card ── */}
-                <div className="rounded-[22px] overflow-hidden"
+                <div className="rounded-[24px] overflow-hidden"
                     style={{ backgroundColor: theme.colors.surface, border: `1px solid ${isScanning ? theme.colors.accent + '60' : bdr}` }}>
                     {/* video always mounted so the ref is stable */}
                     <div className="relative overflow-hidden" style={{ height: isScanning ? 280 : 0, transition: 'height 0.35s ease' }}>
@@ -309,7 +309,7 @@ export const ReplacementsScreen = ({ theme }) => {
                 {/* ── Manual entry card ── */}
                 <button
                     onClick={() => { setFormData({ salesOrder: '', lineItem: '', dealer: '', notes: '', photos: [] }); goToForm(); }}
-                    className="w-full text-left rounded-[22px] px-5 py-4 flex items-center gap-4 active:scale-[0.99] transition-transform"
+                    className="w-full text-left rounded-[24px] px-5 py-4 flex items-center gap-4 active:scale-[0.99] transition-transform"
                     style={{ backgroundColor: theme.colors.surface, border: `1px solid ${bdr}` }}>
                     <div className="w-10 h-10 rounded-[13px] flex items-center justify-center shrink-0"
                         style={{ backgroundColor: dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.05)' }}>
@@ -346,7 +346,7 @@ export const ReplacementsScreen = ({ theme }) => {
                             ))}
                         </div>
                     ) : (
-                        <div className="rounded-[22px] p-8 text-center"
+                        <div className="rounded-[24px] p-8 text-center"
                             style={{ backgroundColor: theme.colors.surface, border: `1px solid ${bdr}` }}>
                             <div className="font-semibold mb-1" style={{ color: theme.colors.textPrimary }}>
                                 No Previous Requests

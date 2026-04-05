@@ -3,7 +3,7 @@
 import React from 'react';
 import { ShoppingCart } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { isDarkTheme } from '../../design-system/tokens.js';
+import { isDarkTheme, floatingBarStyle } from '../../design-system/tokens.js';
 import { getFloatingPillMotion } from '../../design-system/motion.js';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion.js';
 
@@ -36,25 +36,14 @@ export const FloatingCart = React.memo(({ itemCount = 0, label, onClick, theme, 
                     className="
                         fixed z-20
                         bottom-5 left-1/2 -translate-x-1/2
-                        flex items-center gap-3
-                        pl-4 pr-5 py-3
-                        sm:pl-5 sm:pr-6 sm:py-3.5
+                        w-[calc(100%-2.5rem)] max-w-md
+                        flex items-center justify-center gap-3
+                        px-5 py-3
+                        sm:px-6 sm:py-3.5
                         rounded-full
                         transition-shadow duration-200 active:scale-95 motion-tap
                     "
-                    style={{
-                        backdropFilter: 'blur(24px)',
-                        WebkitBackdropFilter: 'blur(24px)',
-                        backgroundColor: isDark
-                            ? 'rgba(255, 255, 255, 0.22)'
-                            : 'rgba(30, 30, 30, 0.80)',
-                        boxShadow: isDark
-                            ? '0 6px 28px rgba(0,0,0,0.45), 0 1px 0 rgba(255,255,255,0.09) inset'
-                            : '0 6px 28px rgba(0,0,0,0.28), 0 1px 0 rgba(255,255,255,0.08) inset',
-                        border: isDark
-                            ? '1px solid rgba(255,255,255,0.18)'
-                            : '1px solid rgba(255,255,255,0.14)',
-                    }}
+                    style={floatingBarStyle({ colors: { background: isDark ? '#1a1a1a' : '#f0ede8' } })}
                 >
                     {/* Icon bubble */}
                     <div
@@ -63,13 +52,13 @@ export const FloatingCart = React.memo(({ itemCount = 0, label, onClick, theme, 
                             sm:w-9 sm:h-9
                             rounded-full flex items-center justify-center flex-shrink-0
                         "
-                        style={{ backgroundColor: 'rgba(255,255,255,0.18)' }}
+                        style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.14)' : 'rgba(0,0,0,0.07)' }}
                     >
-                        <ShoppingCart className={`w-4 h-4 sm:w-[18px] sm:h-[18px] ${isDark ? 'text-gray-900' : 'text-white'}`} aria-hidden="true" />
+                        <ShoppingCart className={`w-4 h-4 sm:w-[18px] sm:h-[18px] ${isDark ? 'text-white' : 'text-gray-800'}`} aria-hidden="true" />
                     </div>
 
                     {/* Label */}
-                    <span className={`${isDark ? 'text-gray-900' : 'text-white'} font-semibold text-sm sm:text-[15px] whitespace-nowrap`}>
+                    <span className={`${isDark ? 'text-white' : 'text-gray-800'} font-semibold text-sm sm:text-[15px] whitespace-nowrap`}>
                         {label}
                     </span>
                 </motion.button>

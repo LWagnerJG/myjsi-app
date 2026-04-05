@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Send, Paperclip, X, MessageSquare, Bug, Lightbulb, Sparkles, CheckCircle2 } from 'lucide-react';
-import { isDarkTheme } from '../../design-system/tokens.js';
+import { isDarkTheme, cardSurface, subtleBorder, inputSurface } from '../../design-system/tokens.js';
 import { hapticSuccess } from '../../utils/haptics.js';
 
 const FEEDBACK_TYPES = [
@@ -42,7 +42,7 @@ export const FeedbackScreen = ({ theme }) => {
     }
 
     const surface = isDark ? 'rgba(255,255,255,0.09)' : 'rgba(255,255,255,0.80)';
-    const surfaceBorder = isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)';
+    const surfaceBorder = subtleBorder(theme);
     const inputBg = isDark ? 'rgba(0,0,0,0.20)' : 'rgba(0,0,0,0.025)';
 
     /* ── Success ── */
@@ -198,7 +198,7 @@ export const FeedbackScreen = ({ theme }) => {
                         <button
                             type="submit"
                             disabled={!message.trim()}
-                            className="w-full flex items-center justify-center gap-2 py-4 text-[13px] font-bold tracking-wide rounded-2xl transition-all active:scale-[0.98] disabled:opacity-30"
+                            className="w-full flex items-center justify-center gap-2 py-4 text-[13px] font-bold tracking-wide rounded-full transition-all active:scale-[0.98] disabled:opacity-30"
                             style={{
                                 backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : colors.textPrimary,
                                 color: isDark ? colors.textPrimary : '#fff',

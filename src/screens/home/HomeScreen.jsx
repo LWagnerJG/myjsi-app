@@ -5,7 +5,7 @@ import { ORDER_DATA } from '../orders/data.js';
 import { RequestQuoteModal } from '../../components/common/RequestQuoteModal.jsx';
 import { SpecCheckRequestModal } from '../../components/common/SpecCheckRequestModal.jsx';
 import { getHomeChromePillStyles, HOME_CHROME_PILL_HEIGHT } from '../../design-system/homeChrome.js';
-import { isDarkTheme } from '../../design-system/tokens.js';
+import { isDarkTheme, floatingBarStyle } from '../../design-system/tokens.js';
 import { usePersistentState } from '../../hooks/usePersistentState.js';
 import { MessageSquarePlus } from 'lucide-react';
 import { LEAD_TIMES_DATA } from '../resources/lead-times/data.js';
@@ -402,21 +402,18 @@ export const HomeScreen = React.memo(({
             {/* Mobile sticky feedback bar — fixed to viewport bottom, hidden on sm+ */}
             {!isEditMode && (
                 <div
-                    className="sm:hidden fixed bottom-0 left-0 right-0 z-40 flex items-center justify-center px-4"
+                    className="sm:hidden fixed bottom-0 left-0 right-0 z-40 flex items-center justify-center px-5"
                     style={{
                         paddingBottom: 'max(16px, env(safe-area-inset-bottom))',
                         paddingTop: 12,
-                        background: isDark
-                            ? 'linear-gradient(to top, rgba(26,26,26,0.94) 60%, rgba(26,26,26,0))'
-                            : 'linear-gradient(to top, rgba(240,237,232,0.96) 60%, rgba(240,237,232,0))',
                         pointerEvents: 'none',
                     }}
                 >
                     <button
                         onClick={() => onNavigate('feedback')}
-                        className="flex items-center gap-2 px-5 rounded-full transition-all active:scale-[0.97]"
+                        className="w-full max-w-md flex items-center justify-center gap-2 px-5 rounded-full transition-all active:scale-[0.97]"
                         style={{
-                            ...chromePillStyles,
+                            ...floatingBarStyle(theme),
                             height: HOME_CHROME_PILL_HEIGHT,
                             color: colors.textSecondary,
                             pointerEvents: 'auto',

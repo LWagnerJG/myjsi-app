@@ -4,6 +4,7 @@ import { FormInput } from '../../../../components/common/FormComponents.jsx';
 import { LOAN_DURATIONS } from '../data.js';
 import { hapticSuccess } from '../../../../utils/haptics.js';
 import { createProjectDraft, getProjectDisplayName, projectNameMatches } from '../../../../utils/projectHelpers.js';
+import { floatingBarStyle } from '../../../../design-system/tokens.js';
 
 export const RequestItem = React.memo(({ item, onRemoveFromRequest, theme, isFirst = false }) => (
     <>
@@ -115,10 +116,9 @@ export const RequestDrawer = ({
 
     return (
         <div
-            className="fixed bottom-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out shadow-2xl"
+            className="fixed bottom-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out rounded-t-2xl"
             style={{
-                backgroundColor: theme.colors.surface,
-                borderTop: `1px solid ${theme.colors.border}`,
+                ...floatingBarStyle(theme),
                 transform: `translateY(${isExpanded ? '0' : 'calc(100% - 64px)'})`,
                 paddingBottom: 'env(safe-area-inset-bottom)'
             }}

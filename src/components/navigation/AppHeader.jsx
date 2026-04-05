@@ -129,42 +129,32 @@ export const AppHeader = React.memo(({
 
             {!isHome && (
                 <>
-                    {/* Single gradient fade below the pill — no separate blur layer (z-27 handles it) */}
+                    {/* Subtle fade below the pill — blur-only, no color fill */}
                     <div
                         aria-hidden="true"
                         className="fixed top-0 left-0 right-0 pointer-events-none"
                         style={{
                             height: innerScrimHeight,
                             zIndex: 29,
-                            background: `linear-gradient(to bottom,
-                                rgba(${bgR},0.18) 0%,
-                                rgba(${bgR},0.08) 44%,
-                                rgba(${bgR},0.02) 70%,
-                                rgba(${bgR},0) 100%)`,
+                            background: 'transparent',
                         }}
                     />
                 </>
             )}
 
             {/* ── Universal top-blur backing ──────────────────────────────────────────
-                Fills from absolute top of viewport (or safe-area on PWA) down through
-                the header pill with one continuous blurred surface — no seam.
-                Key: on non-home screens the background matches the PILL colour
-                (white-frosted / dark-glass) so the gap above the pill is the same
-                material as the pill itself. Home uses the page background since the
-                pill floats over it naturally.
-                z-27 sits behind everything (scrims z-29, pill z-30). */}
+                Pure blur layer — no background color. Lets the blur effect alone
+                soften content scrolling behind the header pill on all screens. */}
             <div
                 aria-hidden="true"
                 className="fixed top-0 left-0 right-0 pointer-events-none"
                 style={{
-                    height: 'calc(env(safe-area-inset-top, 0px) + 84px)',
+                    height: 'calc(env(safe-area-inset-top, 0px) + 96px)',
                     zIndex: 27,
-                    backgroundColor: dark ? 'rgba(22,22,22,0.78)' : 'rgba(240,237,232,0.78)',
-                    backdropFilter: 'blur(28px) saturate(1.8)',
-                    WebkitBackdropFilter: 'blur(28px) saturate(1.8)',
-                    maskImage: 'linear-gradient(to bottom, black 0%, black 58%, rgba(0,0,0,0.18) 82%, transparent 100%)',
-                    WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 58%, rgba(0,0,0,0.18) 82%, transparent 100%)',
+                    backdropFilter: 'blur(32px) saturate(1.8)',
+                    WebkitBackdropFilter: 'blur(32px) saturate(1.8)',
+                    maskImage: 'linear-gradient(to bottom, black 0%, black 52%, rgba(0,0,0,0.5) 72%, rgba(0,0,0,0.12) 88%, transparent 100%)',
+                    WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 52%, rgba(0,0,0,0.5) 72%, rgba(0,0,0,0.12) 88%, transparent 100%)',
                 }}
             />
 
@@ -177,6 +167,16 @@ export const AppHeader = React.memo(({
                     }}
                 >
                     <div className="flex items-center">
+                        {/* Expanded back-button hit area — covers top-left corner for fat-finger taps */}
+                        {showBack && (
+                            <button
+                                aria-hidden="true"
+                                tabIndex={-1}
+                                onClick={handleBack}
+                                className="fixed top-0 left-0 z-40"
+                                style={{ width: 56, height: 56, background: 'transparent', border: 'none', cursor: 'pointer', WebkitTapHighlightColor: 'transparent' }}
+                            />
+                        )}
                         <button
                             aria-label="Go back"
                             aria-hidden={!showBack}

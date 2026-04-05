@@ -5,6 +5,7 @@ import { FrostButton, PrimaryButton } from '../../../components/common/JSIButton
 import { X, Plus, Minus, Trash2 } from 'lucide-react';
 import { FABRICS_DATA, JSI_MODELS } from '../../products/data.js';
 import { hapticSuccess } from '../../../utils/haptics.js';
+import { floatingBarStyle } from '../../../design-system/tokens.js';
 
 /* Inline editable qty — tap the number to type directly (opens numpad on mobile) */
 const QtyValue = ({ value, onChange, theme }) => {
@@ -204,12 +205,9 @@ export const RequestComYardageScreen = ({ theme, showAlert, onNavigate, userSett
 
             {/* Sticky frost-glass submit bar at bottom */}
             <div
-                className="flex-shrink-0 px-4 sm:px-6 pb-5 pt-3"
-                style={{
-                    background: 'linear-gradient(to top, rgba(240,237,232,1) 60%, rgba(240,237,232,0))',
-                }}
+                className="flex-shrink-0 flex justify-center px-5 pb-5 pt-3"
             >
-                <div className="max-w-2xl mx-auto">
+                <div className="w-full max-w-md rounded-2xl px-4 py-3" style={floatingBarStyle(theme)}>
                     <FrostButton
                         onClick={handleSubmit}
                         disabled={!canSubmit}
