@@ -285,6 +285,9 @@ export const AnimatedScreenWrapper = ({
             )}
             <div data-role="current" className="panel">
                 <div className="swipe-shadow" />
+                {/* Transparent overlay: touch-action:none forces iOS to hand
+                    left-edge touches to JS instead of UIScrollView */}
+                {onSwipeBack && <div className="swipe-edge-zone" aria-hidden="true" />}
                 <div className="panel-content">{children}</div>
             </div>
         </div>

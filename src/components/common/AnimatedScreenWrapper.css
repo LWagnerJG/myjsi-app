@@ -34,10 +34,23 @@
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: contain;
     scroll-padding-top: calc(var(--app-header-offset, 72px) + var(--safe-area-inset-top, 0px) + 12px);
-    /* Only allow vertical pan. Without this, iOS's UIScrollView (created by
-       -webkit-overflow-scrolling:touch) intercepts horizontal left-edge swipes
-       and our JS gesture handlers never get clean ownership of the touch. */
-    touch-action: pan-y;
+}
+
+/* ─── Left-edge gesture capture zone ────────────────────────── */
+/* Transparent overlay that sits above panel-content in the left 44px.
+   touch-action:none tells iOS not to start ANY native gesture (scroll,
+   pan, zoom) for touches that begin here — so our JS handlers get the
+   touch sequence without competing with UIScrollView. */
+.swipe-edge-zone {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 44px;
+    z-index: 20;
+    touch-action: none;
+    background: transparent;
+    /* pointer-events must remain 'auto' (default) for touch-action to work */
 }
 
 /* ─── Swipe gesture shadow (dims the screen being revealed) ─── */
