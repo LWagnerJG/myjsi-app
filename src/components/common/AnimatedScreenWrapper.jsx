@@ -42,7 +42,20 @@ export const AnimatedScreenWrapper = ({
         const cur = root.querySelector('[data-role="current"]');
         const prev = root.querySelector('[data-role="previous"]');
 
-        [cur, prev].forEach(el => el && (el.className = 'panel'));
+        // Clear ALL gesture-set inline styles before CSS animations run.
+        // The current panel's DOM node is reused across navigations, so any
+        // transform/transition/opacity left by the swipe gesture must be wiped
+        // or they will override the CSS animation keyframes.
+        [cur, prev].forEach(el => {
+            if (!el) return;
+            el.className = 'panel';
+            el.style.transform = '';
+            el.style.transition = '';
+            el.style.opacity = '';
+        });
+        // Also reset the shadow on the incoming panel
+        const shadow = cur?.querySelector('.swipe-shadow');
+        if (shadow) { shadow.style.opacity = '0'; shadow.style.transition = ''; }
 
         if (direction === 'forward') {
             prev && prev.classList.add('panel', 'exit-left');
@@ -135,14 +148,22 @@ export const AnimatedScreenWrapper = ({
             shadow.style.transition = prefersReducedMotion
                 ? 'none'
                 : `opacity ${settleAnimationMs}ms ${toCssBezier(MOTION_EASINGS.standard)}`;
-            shadow.style.opacity = commit ? '0' : '0.25';
+            // Always animate shadow back to 0 — commit slides away, snap-back restores
+            shadow.style.opacity = '0';
         }
 
         setTimeout(() => {
             document.body.style.overflow = '';
             root?.classList.remove('gesture-lock');
             gesture.current = { active: false, locked: false, startX: 0, startY: 0, dx: 0 };
-            if (commit) onSwipeBack();
+            if (commit) {
+                // Navigation will fire; animation useEffect handles style cleanup
+                onSwipeBack();
+            } else {
+                // Snap-back: no navigation, clear gesture styles manually
+                if (cur) { cur.style.transform = ''; cur.style.transition = ''; }
+                if (shadow) { shadow.style.opacity = ''; shadow.style.transition = ''; }
+            }
         }, settleAnimationMs + 20);
     }, [onSwipeBack, prefersReducedMotion, settleAnimationMs]);
 
