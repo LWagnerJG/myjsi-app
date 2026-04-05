@@ -166,17 +166,19 @@ export const AppHeader = React.memo(({
 
             <div className="px-4 sm:px-5 pt-3 pb-1 fixed top-0 left-0 right-0 z-30 pointer-events-none bg-transparent">
                 <div
-                    className="max-w-5xl mx-auto w-full flex items-center justify-between px-4 sm:px-5 pointer-events-auto transition-all duration-300 overflow-hidden"
+                    className="max-w-5xl mx-auto w-full flex items-center justify-between px-4 sm:px-5 pointer-events-auto overflow-hidden"
                     style={{
                         // px-locked — must not scale with Dynamic Type (rem would change h-14)
                         height: HOME_CHROME_PILL_HEIGHT,
+                        // Transition only the back-button width/opacity, NOT background (instant theme switch)
+                        transition: 'border-radius 200ms ease',
                         ...(isHome ? homeChromePillStyles : {
                             borderRadius: 9999,
                             backgroundColor: dark ? 'rgba(26,26,26,0.72)' : 'rgba(255,255,255,0.72)',
                             backdropFilter: 'blur(20px) saturate(1.6)',
                             WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
                             boxShadow: dark ? '0 4px 20px rgba(0,0,0,0.25)' : '0 4px 20px rgba(53,53,53,0.08)',
-                            border: dark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(255,255,255,0.70)',
+                            border: dark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(255,255,255,0.70)',
                         }),
                     }}
                 >

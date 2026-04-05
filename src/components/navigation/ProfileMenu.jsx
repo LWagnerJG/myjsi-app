@@ -47,7 +47,7 @@ export const ProfileMenu = ({ show, onClose, onNavigate, theme, anchorRef, isDar
     const menuItems = [
         { label: 'Settings', action: () => { onNavigate('settings'); onClose(); }, icon: Settings },
         { label: 'App Users', action: () => { onNavigate('members'); onClose(); }, icon: User },
-        { label: 'Dark Mode', action: onToggleTheme, icon: isDarkMode ? Sun : Moon, toggle: true },
+        { label: 'Dark Mode', action: () => { onToggleTheme(); setTimeout(onClose, 120); }, icon: isDarkMode ? Sun : Moon, toggle: true },
         { label: 'Help', action: () => { onNavigate('help'); onClose(); }, icon: HelpCircle },
         { label: 'Log Out', action: () => { onNavigate('logout'); onClose(); }, icon: LogOut, danger: true },
     ];

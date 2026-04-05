@@ -164,7 +164,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
   const tileRowBg = subtle(isDark);
 
   return (
-    <div className="min-h-full app-header-offset" style={{ backgroundColor: colors.background }}>
+    <div className="min-h-full app-header-offset" style={{ backgroundColor: colors.background, color: colors.textPrimary }}>
       <div className="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-5 pb-4 space-y-4 lg:space-y-5 max-w-5xl mx-auto w-full">
 
         {/* ── Hero KPI + sidebar ── */}
@@ -226,9 +226,13 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                         )}
                         <div className="w-full rounded-md" style={{
                           height: ready ? `${Math.max(8, pct)}%` : '0%',
-                          backgroundColor: colors.accent,
-                          opacity: isHovered ? (isDark ? 0.90 : 0.70) : (isDark ? 0.58 : 0.32),
-                          transition: `height 0.4s ease-out ${0.1 + i * 0.025}s, opacity 0.15s`,
+                          // In dark mode, semi-transparent accent blends grey with the surface.
+                          // Use explicit rgba so bars appear as warm cream, not muddy grey.
+                          backgroundColor: isDark
+                            ? (isHovered ? 'rgba(245,240,235,1.0)' : 'rgba(245,240,235,0.70)')
+                            : colors.accent,
+                          opacity: isDark ? 1 : (isHovered ? 0.75 : 0.32),
+                          transition: `height 0.4s ease-out ${0.1 + i * 0.025}s, background-color 0.15s, opacity 0.15s`,
                         }} />
                       </div>
                       <span className="text-[11px] font-semibold" style={{ opacity: isHovered ? 0.8 : 0.4, transition: 'opacity 0.15s' }}>{m.month}</span>
