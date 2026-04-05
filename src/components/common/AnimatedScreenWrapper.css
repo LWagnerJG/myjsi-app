@@ -3,7 +3,7 @@
     width: 100%;
     height: 100%;
     overflow: hidden;
-    touch-action: manipulation;
+    touch-action: pan-y;
     background-color: inherit;
     /* Prevent pull-to-refresh and over-scroll bounce interfering with transitions */
     overscroll-behavior: none;

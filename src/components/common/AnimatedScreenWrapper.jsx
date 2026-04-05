@@ -116,46 +116,59 @@ export const AnimatedScreenWrapper = ({
         g.lastX = t.clientX;
         g.lastTs = now;
 
-        if (!g.locked) {
-            // Lock when moving more horizontally than vertically (simple ratio)
-            if (dx > dy && dx > 6) {
-                g.locked = true;
-                document.body.style.overflow = 'hidden';
-                containerRef.current?.classList.add('gesture-lock');
-            } else if (dy > dx && dy > 6) {
-                // Clearly vertical — cancel
-                g.active = false; return;
-            } else {
-                // Still ambiguous — keep tracking without preventing scroll
-                return;
-            }
-        }
-
-        if (g.locked) {
-            e.preventDefault();
-            g.dx = dx;
-
-            // RAF-throttled style update to avoid jank
-            if (g.rafId) return;
-            g.rafId = requestAnimationFrame(() => {
-                g.rafId = null;
-                const root = containerRef.current;
-                if (!root) return;
-                const cur = root.querySelector('[data-role="current"]');
-                const shadow = root.querySelector('.swipe-shadow');
-
+        // Cancel only if the gesture is clearly vertical (scrolling, not swiping).
+        // Use a generous threshold so a slight diagonal doesn't kill a real swipe.
+        if (dy > Math.max(dx, 4) * 2.5 && dy > 10) {
+            g.active = false;
+            // If the panel already moved a bit, spring it back
+            if (g.dx > 0) {
+                if (g.rafId) { cancelAnimationFrame(g.rafId); g.rafId = null; }
+                const cur = containerRef.current?.querySelector('[data-role="current"]');
                 if (cur) {
-                    cur.style.transition = 'none';
-                    cur.style.transform = `translateX(${g.dx}px)`;
+                    cur.style.transition = 'transform 120ms ease';
+                    cur.style.transform = 'translateX(0)';
+                    setTimeout(() => { if (cur) { cur.style.transform = ''; cur.style.transition = ''; } }, 140);
                 }
-                if (shadow) {
-                    const w = root.clientWidth || window.innerWidth;
-                    const p = Math.min(1, g.dx / w);
-                    shadow.style.transition = 'none';
-                    shadow.style.opacity = String(0.25 * (1 - p));
-                }
-            });
+            }
+            document.body.style.overflow = '';
+            containerRef.current?.classList.remove('gesture-lock');
+            return;
         }
+
+        // CRITICAL: prevent browser scroll/pull-to-refresh BEFORE direction is
+        // confirmed. If we wait until g.locked is true, iOS has already committed
+        // to a native scroll gesture and ignores subsequent preventDefault calls.
+        e.preventDefault();
+
+        if (!g.locked && dx > 2) {
+            g.locked = true;
+            document.body.style.overflow = 'hidden';
+            containerRef.current?.classList.add('gesture-lock');
+        }
+
+        g.dx = dx;
+
+        // RAF-throttled style update — always uses latest g.dx value
+        if (g.rafId) return;
+        g.rafId = requestAnimationFrame(() => {
+            g.rafId = null;
+            if (!g.active) return;
+            const root = containerRef.current;
+            if (!root) return;
+            const cur = root.querySelector('[data-role="current"]');
+            const shadow = root.querySelector('.swipe-shadow');
+
+            if (cur) {
+                cur.style.transition = 'none';
+                cur.style.transform = `translateX(${g.dx}px)`;
+            }
+            if (shadow) {
+                const w = root.clientWidth || window.innerWidth;
+                const p = Math.min(1, g.dx / w);
+                shadow.style.transition = 'none';
+                shadow.style.opacity = String(0.25 * (1 - p));
+            }
+        });
     }, [onSwipeBack]);
 
     const onTouchEnd = useCallback(() => {
