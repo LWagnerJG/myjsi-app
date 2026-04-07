@@ -23,9 +23,9 @@ const Section = ({ title, children, theme, right }) => {
   const isDark = isDarkTheme(theme);
   const divider = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)';
   return (
-    <div className="rounded-2xl" style={{ padding: '16px 18px', backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : '#fff', border: `1px solid ${divider}` }}>
+    <div className="rounded-2xl" style={{ padding: '12px 14px', backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : '#fff', border: `1px solid ${divider}` }}>
       {title && (
-        <div className="flex items-center justify-between mb-2.5">
+        <div className="flex items-center justify-between mb-2">
           <span className="text-[10px] font-bold uppercase tracking-[0.08em]" style={{ color: theme.colors.accent, opacity: 0.7 }}>{title}</span>
           {right}
         </div>
@@ -39,8 +39,8 @@ const Row = ({ label, children, theme, noSep }) => {
   const isDark = isDarkTheme(theme);
   const divider = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
   return (
-    <div className={`flex items-center gap-3 py-3 ${noSep ? '' : 'border-t'}`} style={{ borderColor: noSep ? undefined : divider }}>
-      {label && <label className="text-[12px] font-semibold whitespace-nowrap flex-shrink-0 w-[100px]" style={{ color: theme.colors.textSecondary }}>{label}</label>}
+    <div className={`flex items-center gap-2.5 py-2.5 ${noSep ? '' : 'border-t'}`} style={{ borderColor: noSep ? undefined : divider }}>
+      {label && <label className="text-[11px] font-semibold whitespace-nowrap flex-shrink-0" style={{ color: theme.colors.textSecondary, minWidth: 72 }}>{label}</label>}
       <div className="flex-1 min-w-0">{children}</div>
     </div>
   );
@@ -49,11 +49,11 @@ const Row = ({ label, children, theme, noSep }) => {
 const PillSelect = ({ options, value, onChange, theme }) => {
   const isDark = isDarkTheme(theme);
   return (
-    <div className="flex flex-wrap gap-1.5">
+    <div className="flex flex-wrap gap-1">
       {options.map(opt => {
         const active = opt === value;
         return (
-          <button key={opt} onClick={() => onChange(opt)} className="px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all"
+          <button key={opt} onClick={() => onChange(opt)} className="px-2.5 py-[5px] rounded-full text-[11px] font-semibold transition-all active:scale-[0.97]"
             style={{ backgroundColor: active ? theme.colors.accent : 'transparent', color: active ? theme.colors.accentText : theme.colors.textSecondary, border: active ? `1.5px solid ${theme.colors.accent}` : `1.5px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}` }}>
             {opt}
           </button>
@@ -66,11 +66,11 @@ const PillSelect = ({ options, value, onChange, theme }) => {
 const MultiPillSelect = ({ options, value = [], onToggle, theme }) => {
   const isDark = isDarkTheme(theme);
   return (
-    <div className="flex flex-wrap gap-1.5">
+    <div className="flex flex-wrap gap-1">
       {options.map(opt => {
         const active = value.includes(opt);
         return (
-          <button key={opt} onClick={() => onToggle(opt)} className="px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all"
+          <button key={opt} onClick={() => onToggle(opt)} className="px-2.5 py-[5px] rounded-full text-[11px] font-semibold transition-all active:scale-[0.97]"
             style={{ backgroundColor: active ? theme.colors.accent : 'transparent', color: active ? theme.colors.accentText : theme.colors.textSecondary, border: active ? `1.5px solid ${theme.colors.accent}` : `1.5px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}` }}>
             {opt}
           </button>
@@ -103,12 +103,12 @@ const QuoteTracker = ({ quotes = [], theme, onRequestQuote }) => {
       {/* ── Queue status bar ── */}
       {pending.length > 0 && (
         <div className="flex items-center gap-3 px-3.5 py-3 rounded-xl" style={{ backgroundColor: isDark ? 'rgba(91,123,140,0.10)' : 'rgba(91,123,140,0.06)', border: `1px solid ${isDark ? 'rgba(91,123,140,0.15)' : 'rgba(91,123,140,0.08)'}` }}>
-          <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: isDark ? 'rgba(91,123,140,0.18)' : 'rgba(91,123,140,0.12)' }}>
-            <Users className="w-3.5 h-3.5" style={{ color: '#5B7B8C' }} />
+          <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: isDark ? 'rgba(91,123,140,0.18)' : 'rgba(91,123,140,0.12)' }}>
+            <Users className="w-3 h-3" style={{ color: '#5B7B8C' }} />
           </div>
           <div className="flex-1 min-w-0">
-            <span className="text-[12px] font-bold block leading-tight" style={{ color: c.textPrimary }}>{queueAhead} quote{queueAhead !== 1 ? 's' : ''} in queue</span>
-            <span className="text-[11px] leading-tight" style={{ color: c.textSecondary }}>Est. {estDays} business day{estDays !== 1 ? 's' : ''}</span>
+            <span className="text-[11px] font-bold block leading-tight" style={{ color: c.textPrimary }}>{queueAhead} quote{queueAhead !== 1 ? 's' : ''} in queue</span>
+            <span className="text-[10px] leading-tight" style={{ color: c.textSecondary }}>Est. {estDays} business day{estDays !== 1 ? 's' : ''}</span>
           </div>
         </div>
       )}
@@ -119,12 +119,12 @@ const QuoteTracker = ({ quotes = [], theme, onRequestQuote }) => {
         const StIcon = meta.icon;
         return (
           <div key={q.id || qi} className="flex items-center gap-3 px-3.5 py-3 rounded-xl" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)', border: `1px solid ${divider}` }}>
-            <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: meta.bg }}>
-              <StIcon className="w-3.5 h-3.5" style={{ color: meta.color }} />
+            <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: meta.bg }}>
+              <StIcon className="w-3 h-3" style={{ color: meta.color }} />
             </div>
             <div className="flex-1 min-w-0">
-              <span className="text-[12px] font-bold truncate block" style={{ color: c.textPrimary }}>{q.fileName || `Quote #${qi + 1}`}</span>
-              <span className="text-[11px]" style={{ color: meta.color, fontWeight: 600 }}>{meta.label}</span>
+              <span className="text-[11px] font-bold truncate block" style={{ color: c.textPrimary }}>{q.fileName || `Quote #${qi + 1}`}</span>
+              <span className="text-[10px]" style={{ color: meta.color, fontWeight: 600 }}>{meta.label}</span>
             </div>
           </div>
         );
@@ -134,32 +134,32 @@ const QuoteTracker = ({ quotes = [], theme, onRequestQuote }) => {
       {completed.map((q, qi) => (
         <div key={q.id || `c${qi}`} className="rounded-xl overflow-hidden" style={{ border: `1px solid ${isDark ? 'rgba(74,124,89,0.20)' : 'rgba(74,124,89,0.15)'}`, backgroundColor: isDark ? 'rgba(74,124,89,0.06)' : 'rgba(74,124,89,0.04)' }}>
           <div className="flex items-center gap-3 px-3.5 py-3">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'rgba(74,124,89,0.12)' }}>
-              <CheckCircle className="w-3.5 h-3.5" style={{ color: '#4A7C59' }} />
+            <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'rgba(74,124,89,0.12)' }}>
+              <CheckCircle className="w-3 h-3" style={{ color: '#4A7C59' }} />
             </div>
             <div className="flex-1 min-w-0">
-              <span className="text-[12px] font-bold truncate block" style={{ color: c.textPrimary }}>{q.fileName || `Quote #${qi + 1}`}</span>
-              <span className="text-[11px] font-semibold" style={{ color: '#4A7C59' }}>Ready to view</span>
+              <span className="text-[11px] font-bold truncate block" style={{ color: c.textPrimary }}>{q.fileName || `Quote #${qi + 1}`}</span>
+              <span className="text-[10px] font-semibold" style={{ color: '#4A7C59' }}>Ready to view</span>
             </div>
           </div>
           <div className="flex border-t" style={{ borderColor: isDark ? 'rgba(74,124,89,0.15)' : 'rgba(74,124,89,0.10)' }}>
-            <button className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-[11px] font-semibold transition-colors hover:bg-black/[0.03] active:scale-[0.98]" style={{ color: c.textPrimary }}>
-              <Eye className="w-3.5 h-3.5" /> View
+            <button className="flex-1 flex items-center justify-center gap-1.5 py-2 text-[10px] font-semibold transition-colors hover:bg-black/[0.03] active:scale-[0.98]" style={{ color: c.textPrimary }}>
+              <Eye className="w-3 h-3" /> View
             </button>
             <div className="w-px" style={{ backgroundColor: isDark ? 'rgba(74,124,89,0.15)' : 'rgba(74,124,89,0.10)' }} />
-            <button className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-[11px] font-semibold transition-colors hover:bg-black/[0.03] active:scale-[0.98]" style={{ color: c.textPrimary }}>
-              <Share2 className="w-3.5 h-3.5" /> Share
+            <button className="flex-1 flex items-center justify-center gap-1.5 py-2 text-[10px] font-semibold transition-colors hover:bg-black/[0.03] active:scale-[0.98]" style={{ color: c.textPrimary }}>
+              <Share2 className="w-3 h-3" /> Share
             </button>
             <div className="w-px" style={{ backgroundColor: isDark ? 'rgba(74,124,89,0.15)' : 'rgba(74,124,89,0.10)' }} />
-            <button className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-[11px] font-semibold transition-colors hover:bg-black/[0.03] active:scale-[0.98]" style={{ color: c.textPrimary }}>
-              <Download className="w-3.5 h-3.5" /> Save
+            <button className="flex-1 flex items-center justify-center gap-1.5 py-2 text-[10px] font-semibold transition-colors hover:bg-black/[0.03] active:scale-[0.98]" style={{ color: c.textPrimary }}>
+              <Download className="w-3 h-3" /> Save
             </button>
           </div>
         </div>
       ))}
 
       {/* ── Request new quote CTA ── */}
-      <button onClick={onRequestQuote} className="w-full flex items-center justify-center gap-2 py-3 rounded-full text-[13px] font-bold transition-all active:scale-[0.98] hover:opacity-90"
+      <button onClick={onRequestQuote} className="w-full flex items-center justify-center gap-2 py-2.5 rounded-full text-[12px] font-bold transition-all active:scale-[0.98] hover:opacity-90"
         style={{ backgroundColor: c.accent, color: c.accentText }}>
         <Send className="w-3.5 h-3.5" /> Request Quote
       </button>
@@ -260,51 +260,51 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
   return (
     <div className="flex flex-col h-full app-header-offset" style={{ background: c.background }}>
       <div className="flex-1 overflow-y-auto scrollbar-hide">
-        <div className="px-4 sm:px-5 pt-4 pb-8 max-w-3xl mx-auto w-full space-y-3">
+        <div className="px-4 sm:px-5 pt-3 pb-6 max-w-3xl mx-auto w-full space-y-2.5">
 
           {/* HERO */}
-          <div className="pb-1">
+          <div className="pb-0.5">
             <input value={draft.project || draft.name || ''} onChange={e => update(draft.project !== undefined ? 'project' : 'name', e.target.value)}
-              className="w-full bg-transparent outline-none text-[24px] font-bold tracking-tight leading-tight" style={{ color: c.textPrimary }} placeholder="Project name" />
-            <div className="flex items-center gap-2 mt-1">
+              className="w-full bg-transparent outline-none text-[20px] font-bold tracking-tight leading-tight" style={{ color: c.textPrimary }} placeholder="Project name" />
+            <div className="flex items-center gap-2 mt-0.5">
               <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: c.accent, opacity: 0.5 }} />
               <input value={draft.company || ''} onChange={e => update('company', e.target.value)}
-                className="bg-transparent outline-none text-[12px] font-semibold flex-1" style={{ color: c.textSecondary }} placeholder="Company / End User" />
+                className="bg-transparent outline-none text-[11px] font-semibold flex-1" style={{ color: c.textSecondary }} placeholder="Company / End User" />
             </div>
           </div>
 
           {/* 1. FINANCIALS */}
           <Section title="Financials" theme={theme}>
-            <div className="flex items-baseline gap-1.5 pb-2.5">
-              <span className="text-[22px] font-bold tracking-tight leading-none" style={{ color: c.textSecondary, opacity: 0.25 }}>$</span>
+            <div className="flex items-baseline gap-1.5 pb-2">
+              <span className="text-[18px] font-bold tracking-tight leading-none" style={{ color: c.textSecondary, opacity: 0.25 }}>$</span>
               <input inputMode="numeric"
                 value={(() => { const raw = ('' + (draft.value || '')).replace(/[^0-9]/g, ''); return raw ? parseInt(raw, 10).toLocaleString() : ''; })()}
                 onChange={e => { const val = e.target.value.replace(/[^0-9]/g, ''); update('value', val ? ('$' + parseInt(val, 10).toLocaleString()) : ''); }}
-                className="bg-transparent outline-none text-[26px] font-bold tracking-tight w-full leading-none" style={{ color: c.textPrimary }} placeholder="0" />
+                className="bg-transparent outline-none text-[22px] font-bold tracking-tight w-full leading-none" style={{ color: c.textPrimary }} placeholder="0" />
             </div>
             <div className="h-px" style={{ backgroundColor: divider }} />
-            <div className="pt-2.5 flex items-center gap-4">
+            <div className="pt-2 flex items-center gap-4">
               <div className="flex-1 min-w-0 cursor-pointer" onClick={() => discountOpen ? setDiscountOpen(false) : openDiscount()} ref={discBtn}>
                 <span className="text-[10px] font-bold uppercase tracking-[0.08em] block mb-0.5" style={{ color: c.accent, opacity: 0.7 }}>Discount</span>
                 <div className="flex items-center gap-1">
-                  <span className="text-[13px] font-bold tracking-tight truncate" style={{ color: c.textPrimary }}>{draft.discount || '\u2014'}</span>
+                  <span className="text-[12px] font-bold tracking-tight truncate" style={{ color: c.textPrimary }}>{draft.discount || '\u2014'}</span>
                   <ChevronDown className="w-3 h-3 flex-shrink-0" style={{ color: c.textSecondary, opacity: 0.35 }} />
                 </div>
               </div>
-              <div className="w-px h-8 flex-shrink-0" style={{ backgroundColor: divider }} />
+              <div className="w-px h-7 flex-shrink-0" style={{ backgroundColor: divider }} />
               <div className="flex-1 min-w-0">
                 <span className="text-[10px] font-bold uppercase tracking-[0.08em] block mb-0.5" style={{ color: c.accent, opacity: 0.7 }}>Net Value</span>
-                <span className="text-[15px] font-bold tracking-tight leading-none" style={{ color: c.textPrimary }}>{netValue > 0 && discountPct > 0 ? fmtCurrency(netValue) : '\u2014'}</span>
+                <span className="text-[13px] font-bold tracking-tight leading-none" style={{ color: c.textPrimary }}>{netValue > 0 && discountPct > 0 ? fmtCurrency(netValue) : '\u2014'}</span>
               </div>
             </div>
-            <div className="h-px mt-2.5" style={{ backgroundColor: divider }} />
-            <div className="flex gap-2 pt-2.5">
-              <div className="flex-1 rounded-lg px-3 py-2 flex items-center justify-between" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.015)' }}>
-                <span className="text-[11px] font-semibold" style={{ color: c.textPrimary }}>Sales Reward</span>
+            <div className="h-px mt-2" style={{ backgroundColor: divider }} />
+            <div className="flex gap-1.5 pt-2">
+              <div className="flex-1 rounded-lg px-2.5 py-1.5 flex items-center justify-between" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.015)' }}>
+                <span className="text-[10px] font-semibold" style={{ color: c.textPrimary }}>Sales Reward</span>
                 <ToggleSwitch checked={draft.salesReward !== false} onChange={e => update('salesReward', e.target.checked)} theme={theme} />
               </div>
-              <div className="flex-1 rounded-lg px-3 py-2 flex items-center justify-between" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.015)' }}>
-                <span className="text-[11px] font-semibold" style={{ color: c.textPrimary }}>Designer Reward</span>
+              <div className="flex-1 rounded-lg px-2.5 py-1.5 flex items-center justify-between" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.015)' }}>
+                <span className="text-[10px] font-semibold" style={{ color: c.textPrimary }}>Designer Reward</span>
                 <ToggleSwitch checked={draft.designerReward !== false} onChange={e => update('designerReward', e.target.checked)} theme={theme} />
               </div>
             </div>
@@ -340,7 +340,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                 })}
               </div>
             </div>
-            <div className="h-6" />
+            <div className="h-4" />
             <div className="pt-2 border-t" style={{ borderColor: divider }}>
               <div className="flex items-center justify-between mb-0.5">
                 <span className="text-[10px] font-bold uppercase tracking-[0.08em]" style={{ color: c.accent, opacity: 0.7 }}>Win Probability</span>
@@ -360,11 +360,11 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
             </Row>
             <Row label="Install Date" theme={theme}>
               <input type="date" value={draft.expectedInstallDate || ''} onChange={e => update('expectedInstallDate', e.target.value)}
-                className="w-full bg-transparent outline-none text-[13px] font-medium" style={{ color: c.textPrimary }} />
+                className="w-full bg-transparent outline-none text-[12px] font-medium" style={{ color: c.textPrimary }} />
             </Row>
             <Row label="Location" theme={theme}>
               <input value={draft.installationLocation || ''} onChange={e => update('installationLocation', e.target.value)}
-                className="w-full bg-transparent outline-none text-[13px] font-medium" style={{ color: c.textPrimary }} placeholder="City, State" />
+                className="w-full bg-transparent outline-none text-[12px] font-medium" style={{ color: c.textPrimary }} placeholder="City, State" />
             </Row>
             <Row label="Bid?" theme={theme}>
               <div className="flex justify-end"><ToggleSwitch checked={!!draft.isBid} onChange={e => update('isBid', e.target.checked)} theme={theme} /></div>
@@ -377,26 +377,26 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
               <ContactSearchSelector value={draft.contact || ''} onChange={v => update('contact', v)} dealers={draft.dealers || []} theme={theme} />
             </Row>
             <Row label="Dealer(s)" theme={theme}>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-1">
                 {(draft.dealers || []).map(f => (
-                  <button key={f} onClick={() => removeFrom('dealers', f)} className="px-3 h-7 rounded-full text-[12px] font-semibold flex items-center gap-1 transition-all"
-                    style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)', color: c.textPrimary }}>{f}<span className="opacity-40 text-[11px]">{'\u00d7'}</span></button>
+                  <button key={f} onClick={() => removeFrom('dealers', f)} className="px-2.5 h-6 rounded-full text-[11px] font-semibold flex items-center gap-1 transition-all"
+                    style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)', color: c.textPrimary }}>{f}<span className="opacity-40 text-[10px]">{'×'}</span></button>
                 ))}
                 <SuggestInputPill placeholder="Add dealer" suggestions={INITIAL_DEALERS} onAdd={v => addUnique('dealers', v)} theme={theme} />
               </div>
             </Row>
             <Row label="A&D Firm(s)" theme={theme}>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-1">
                 {(draft.designFirms || []).map(f => (
-                  <button key={f} onClick={() => removeFrom('designFirms', f)} className="px-3 h-7 rounded-full text-[12px] font-semibold flex items-center gap-1 transition-all"
-                    style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)', color: c.textPrimary }}>{f}<span className="opacity-40 text-[11px]">{'\u00d7'}</span></button>
+                  <button key={f} onClick={() => removeFrom('designFirms', f)} className="px-2.5 h-6 rounded-full text-[11px] font-semibold flex items-center gap-1 transition-all"
+                    style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)', color: c.textPrimary }}>{f}<span className="opacity-40 text-[10px]">{'×'}</span></button>
                 ))}
                 <SuggestInputPill placeholder="Add firm" suggestions={INITIAL_DESIGN_FIRMS} onAdd={v => addUnique('designFirms', v)} theme={theme} />
               </div>
             </Row>
             <Row label="End User" theme={theme}>
               <input value={draft.endUser || draft.company || ''} onChange={e => update('endUser', e.target.value)}
-                className="w-full bg-transparent outline-none text-[13px] font-medium" style={{ color: c.textPrimary }} placeholder="Company name" />
+                className="w-full bg-transparent outline-none text-[12px] font-medium" style={{ color: c.textPrimary }} placeholder="Company name" />
             </Row>
           </Section>
 
@@ -405,16 +405,16 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
             {draft.competitionPresent !== false ? (
               <MultiPillSelect options={COMPETITORS.filter(x => x !== 'None')} value={draft.competitors || []} onToggle={toggleCompetitor} theme={theme} />
             ) : (
-              <p className="text-[12px]" style={{ color: c.textSecondary, opacity: 0.6 }}>No competition noted</p>
+              <p className="text-[11px]" style={{ color: c.textSecondary, opacity: 0.6 }}>No competition noted</p>
             )}
           </Section>
 
           {/* 6. PRODUCTS */}
           <Section title="Products" theme={theme}>
-            <div className="flex flex-wrap gap-2 mb-3">
+            <div className="flex flex-wrap gap-1.5 mb-2.5">
               {(draft.products || []).map(p => (
-                <button key={p.series} onClick={() => removeProductSeries(p.series)} className="px-3.5 h-8 rounded-full text-[12px] font-semibold flex items-center gap-1.5 transition-all"
-                  style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)', color: c.textPrimary }}>{p.series}<span className="opacity-40 text-[11px]">{'\u00d7'}</span></button>
+                <button key={p.series} onClick={() => removeProductSeries(p.series)} className="px-3 h-7 rounded-full text-[11px] font-semibold flex items-center gap-1.5 transition-all"
+                  style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)', color: c.textPrimary }}>{p.series}<span className="opacity-40 text-[10px]">{'×'}</span></button>
               ))}
             </div>
             <SuggestInputPill placeholder="Add series..." suggestions={JSI_SERIES} onAdd={addProductSeries} theme={theme} />
@@ -440,12 +440,12 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
             {(draft.documents || []).length > 0 ? (
               <div className="space-y-2">
                 {(draft.documents || []).map(doc => (
-                  <div key={doc.id} className="group flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors"
+                  <div key={doc.id} className="group flex items-center gap-2.5 px-2.5 py-2 rounded-xl transition-colors"
                     style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.02)', border: `1px solid ${divider}` }}>
-                    <FileText className="w-4 h-4 flex-shrink-0" style={{ color: c.accent }} />
+                    <FileText className="w-3.5 h-3.5 flex-shrink-0" style={{ color: c.accent }} />
                     <div className="flex-1 min-w-0">
-                      <div className="text-[12px] font-semibold truncate" style={{ color: c.textPrimary }}>{doc.fileName}</div>
-                      <div className="text-[11px]" style={{ color: c.textSecondary, opacity: 0.6 }}>{doc.type} {'\u00b7'} {doc.size} {'\u00b7'} {doc.date}</div>
+                      <div className="text-[11px] font-semibold truncate" style={{ color: c.textPrimary }}>{doc.fileName}</div>
+                      <div className="text-[10px]" style={{ color: c.textSecondary, opacity: 0.6 }}>{doc.type} {'\u00b7'} {doc.size} {'\u00b7'} {doc.date}</div>
                     </div>
                     <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button className="p-1 rounded-full" style={{ color: c.textSecondary }} title="Preview"><Eye className="w-3.5 h-3.5" /></button>
@@ -455,14 +455,14 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                 ))}
               </div>
             ) : (
-              <button onClick={() => fileInputRef.current?.click()} className="w-full flex items-center gap-3 py-4 px-3 rounded-xl transition-all hover:opacity-80"
+              <button onClick={() => fileInputRef.current?.click()} className="w-full flex items-center gap-2.5 py-3 px-3 rounded-xl transition-all hover:opacity-80"
                 style={{ border: `1.5px dashed ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}`, color: c.textSecondary }}>
-                <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.03)' }}>
-                  <Paperclip className="w-3.5 h-3.5" style={{ opacity: 0.45 }} />
+                <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.03)' }}>
+                  <Paperclip className="w-3 h-3" style={{ opacity: 0.45 }} />
                 </div>
                 <div className="text-left">
-                  <span className="text-[12px] font-semibold block">Drop files or click to upload</span>
-                  <span className="text-[10px]" style={{ opacity: 0.5 }}>PDF, DOC, images & more</span>
+                  <span className="text-[11px] font-semibold block">Drop files or click to upload</span>
+                  <span className="text-[9px]" style={{ opacity: 0.5 }}>PDF, DOC, images & more</span>
                 </div>
               </button>
             )}
@@ -471,7 +471,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
           {/* 9. NOTES */}
           <Section title="Notes" theme={theme}>
             <textarea value={draft.notes || ''} onChange={e => update('notes', e.target.value)} rows={2}
-              className="w-full resize-none rounded-lg p-3 text-[12px] leading-relaxed outline-none"
+              className="w-full resize-none rounded-lg p-2.5 text-[11px] leading-relaxed outline-none"
               style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.02)', border: `1px solid ${divider}`, color: c.textPrimary }}
               placeholder="Add project notes, context, or special instructions..." />
           </Section>
