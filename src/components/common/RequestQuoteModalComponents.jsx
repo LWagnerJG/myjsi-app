@@ -1,10 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { Search, X, Plus, CheckCircle2 } from 'lucide-react';
+import { isDarkTheme } from '../../design-system/tokens.js';
 
 export const SearchSelect = ({ value, onChange, options, placeholder, theme, onAddNew }) => {
     const [open, setOpen] = useState(false);
     const [query, setQuery] = useState('');
-    const isDark = theme?.name === 'dark';
+    const isDark = isDarkTheme(theme);
     const c = theme?.colors || {};
 
     const filtered = useMemo(() => {
@@ -13,27 +14,24 @@ export const SearchSelect = ({ value, onChange, options, placeholder, theme, onA
     }, [options, query]);
     const canCreate = query && !options.some(o => o.toLowerCase() === query.toLowerCase());
 
-    const fieldBg = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.025)';
-    const fieldBrd = isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.08)';
+    const fieldBg = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.025)';
+    const fieldBrd = `1px solid ${isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)'}`;
     const hoverBg = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)';
     const dropBg  = isDark ? '#2a2a2a' : '#fff';
-    const controlHeight = 46;
-    const controlRadius = 16;
 
     return (
         <div className="relative">
             <div
                 className="flex items-center gap-2 px-3 cursor-text"
-                style={{ height: controlHeight, borderRadius: controlRadius, background: fieldBg, border: fieldBrd }}
+                style={{ height: 40, borderRadius: 12, background: fieldBg, border: fieldBrd }}
                 onClick={() => setOpen(true)}
             >
-                <Search className="w-4 h-4 flex-shrink-0" style={{ color: c.textSecondary, opacity: 0.4 }} />
+                <Search className="w-3.5 h-3.5 flex-shrink-0" style={{ color: c.textSecondary, opacity: 0.4 }} />
                 {value ? (
                     <div className="flex-1 flex items-center justify-between min-w-0">
-                        <span className="text-[13px] font-medium truncate" style={{ color: c.textPrimary }}>{value}</span>
-                        <button onClick={e => { e.stopPropagation(); onChange(''); }} className="p-1 rounded-full flex-shrink-0 transition-colors" style={{ color: c.textSecondary }}
-                            onMouseEnter={e => e.currentTarget.style.backgroundColor = hoverBg}
-                            onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                        <span className="text-[12px] font-medium truncate" style={{ color: c.textPrimary }}>{value}</span>
+                        <button onClick={e => { e.stopPropagation(); onChange(''); }} className="p-0.5 rounded-full flex-shrink-0 transition-opacity opacity-40 hover:opacity-80"
+                            style={{ color: c.textSecondary }}>
                             <X className="w-3 h-3" />
                         </button>
                     </div>
@@ -42,7 +40,7 @@ export const SearchSelect = ({ value, onChange, options, placeholder, theme, onA
                         value={query}
                         onChange={e => { setQuery(e.target.value); setOpen(true); }}
                         placeholder={placeholder}
-                        className="flex-1 bg-transparent outline-none text-[13px] font-medium"
+                        className="flex-1 bg-transparent outline-none text-[12px] font-medium"
                         style={{ color: c.textPrimary }}
                         onFocus={() => setOpen(true)}
                     />
@@ -51,11 +49,11 @@ export const SearchSelect = ({ value, onChange, options, placeholder, theme, onA
             {open && !value && (
                 <>
                     <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-                    <div className="absolute top-full left-0 right-0 mt-1.5 rounded-2xl overflow-hidden shadow-lg z-50"
+                    <div className="absolute top-full left-0 right-0 mt-1 rounded-xl overflow-hidden shadow-lg z-50"
                         style={{ backgroundColor: dropBg, border: fieldBrd }}>
-                        <div className="max-h-[200px] overflow-y-auto scrollbar-hide py-1">
+                        <div className="max-h-[180px] overflow-y-auto scrollbar-hide py-0.5">
                             {filtered.map(opt => (
-                                <button key={opt} className="w-full text-left px-3 py-2.5 text-[13px] font-medium transition-colors"
+                                <button key={opt} className="w-full text-left px-3 py-2 text-[12px] font-medium transition-colors"
                                     style={{ color: c.textPrimary }}
                                     onClick={() => { onChange(opt); setQuery(''); setOpen(false); }}
                                     onMouseEnter={e => e.currentTarget.style.backgroundColor = hoverBg}
@@ -66,18 +64,18 @@ export const SearchSelect = ({ value, onChange, options, placeholder, theme, onA
                             {canCreate && onAddNew && (
                                 <>
                                     <div className="h-px mx-2"
-                                        style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)' }} />
-                                    <button className="w-full text-left px-3 py-2.5 text-[13px] font-semibold flex items-center gap-2 transition-colors"
+                                        style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }} />
+                                    <button className="w-full text-left px-3 py-2 text-[12px] font-semibold flex items-center gap-2 transition-colors"
                                         style={{ color: c.accent }}
                                         onClick={() => { onAddNew(query); onChange(query); setQuery(''); setOpen(false); }}
                                         onMouseEnter={e => e.currentTarget.style.backgroundColor = hoverBg}
                                         onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                                        <Plus className="w-3.5 h-3.5" /> Add "{query}"
+                                        <Plus className="w-3 h-3" /> Add "{query}"
                                     </button>
                                 </>
                             )}
                             {!filtered.length && !canCreate && (
-                                <div className="px-3 py-3 text-xs text-center" style={{ color: c.textSecondary }}>No results</div>
+                                <div className="px-3 py-2.5 text-[11px] text-center" style={{ color: c.textSecondary }}>No results</div>
                             )}
                         </div>
                     </div>
