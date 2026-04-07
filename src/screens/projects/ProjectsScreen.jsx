@@ -14,7 +14,7 @@ import { PROJECTS_TAB_OPTIONS, fmtCurrency } from './components/projects/utils.j
 import { OpportunityDetail } from './components/projects/OpportunityDetail.jsx';
 import { ProjectCard } from './components/projects/ProjectCard.jsx';
 import { InstallationDetail } from './components/projects/InstallationDetail.jsx';
-import { MOCK_CUSTOMERS, VERTICAL_COLORS } from './customers/customerData.js';
+import { MOCK_CUSTOMERS, VERTICAL_COLORS, getAllProjectsWithMeta } from './customers/customerData.js';
 import { CustomerMicrositeScreen } from './customers/CustomerMicrositeScreen.jsx';
 
 // Exported main ProjectsScreen (restored)
@@ -153,19 +153,28 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
             {projectsTab === 'pipeline' && (
               <button
                 onClick={() => onNavigate('new-lead')}
-                className="h-8 inline-flex items-center justify-center gap-1.5 rounded-full text-[13px] font-medium transition-all px-3.5 whitespace-nowrap active:scale-[0.97]"
+                className="h-8 inline-flex items-center justify-center gap-1 rounded-full text-[12px] font-semibold transition-all px-3 whitespace-nowrap active:scale-[0.97]"
                 style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
               >
-                <Plus size={14} strokeWidth={2.5} /> New Project
+                <Plus size={13} strokeWidth={2.5} /> Project
+              </button>
+            )}
+            {projectsTab === 'customers' && (
+              <button
+                onClick={() => {}}
+                className="h-8 inline-flex items-center justify-center gap-1 rounded-full text-[12px] font-semibold transition-all px-3 whitespace-nowrap active:scale-[0.97]"
+                style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
+              >
+                <Plus size={13} strokeWidth={2.5} /> Customer
               </button>
             )}
             {projectsTab === 'my-projects' && (
               <button
                 onClick={() => onNavigate('add-new-install')}
-                className="h-8 inline-flex items-center justify-center gap-1.5 rounded-full text-[13px] font-medium transition-all px-3.5 whitespace-nowrap active:scale-[0.97]"
+                className="h-8 inline-flex items-center justify-center gap-1 rounded-full text-[12px] font-semibold transition-all px-3 whitespace-nowrap active:scale-[0.97]"
                 style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
               >
-                <Plus size={14} strokeWidth={2.5} /> New Install
+                <Plus size={13} strokeWidth={2.5} /> Install
               </button>
             )}
           </div>
@@ -273,40 +282,56 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
               </div>
             )
           )}
-          {projectsTab==='my-projects' && (
-            (myProjects||[]).length ? (
+          {projectsTab==='my-projects' && (() => {
+            const allProjects = getAllProjectsWithMeta();
+            return allProjects.length ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-                {(myProjects||[]).map((p)=> (
-                  <div key={p.id}>
-                  <button onClick={()=>setSelectedInstall(p)} className="w-full text-left group" style={{ WebkitTapHighlightColor:'transparent' }}>
-                    <div
-                      className="overflow-hidden transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
-                      style={{
-                        borderRadius: 18,
-                        border: isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(0,0,0,0.06)',
-                      }}
-                    >
-                      <div className="relative aspect-[4/3] w-full">
-                        <img src={p.image} alt={p.name} className="absolute h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-                        <div className="absolute bottom-0 left-0 p-3.5">
-                          <h3 className="text-[15px] font-bold text-white tracking-tight leading-snug">{p.name}</h3>
-                          <p className="text-white/80 font-medium text-xs mt-0.5">{p.location}</p>
+                {allProjects.map((p) => {
+                  const ownerCustomer = MOCK_CUSTOMERS.find(c => c.id === p.customerId);
+                  return (
+                    <div key={p.id}>
+                    <button onClick={() => setSelectedCustomer(ownerCustomer)} className="w-full text-left group" style={{ WebkitTapHighlightColor:'transparent' }}>
+                      <div
+                        className="overflow-hidden transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
+                        style={{
+                          borderRadius: 18,
+                          border: isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(0,0,0,0.06)',
+                        }}
+                      >
+                        <div className="relative aspect-[4/3] w-full">
+                          <img src={p.image} alt={p.name} className="absolute h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent" />
+                          <div className="absolute bottom-0 left-0 right-0 p-3.5">
+                            <h3 className="text-[15px] font-bold text-white tracking-tight leading-snug">{p.name}</h3>
+                            <p className="text-white/80 font-medium text-xs mt-0.5">{p.customerName}</p>
+                            <div className="flex items-center gap-1.5 mt-1.5">
+                              {p.installCount > 0 && (
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: 'rgba(46,107,138,0.25)', color: '#7BBAD4' }}>
+                                  {p.installCount} photo{p.installCount !== 1 ? 's' : ''}
+                                </span>
+                              )}
+                              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.7)' }}>
+                                {p.location}
+                              </span>
+                            </div>
+                          </div>
                         </div>
                       </div>
+                    </button>
                     </div>
-                  </button>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
-            ) : <div className="flex flex-col items-center justify-center py-16">
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.03)' }}>
-                <Briefcase className="w-7 h-7" style={{ color: theme.colors.textSecondary, opacity: 0.5 }} />
+            ) : (
+              <div className="flex flex-col items-center justify-center py-16">
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.03)' }}>
+                  <Briefcase className="w-7 h-7" style={{ color: theme.colors.textSecondary, opacity: 0.5 }} />
+                </div>
+                <p className="text-center text-[15px] font-semibold" style={{ color: theme.colors.textPrimary }}>No installations recorded yet</p>
+                <p className="text-center text-[13px] mt-1" style={{ color: theme.colors.textSecondary }}>Add install photos and details to build your portfolio</p>
               </div>
-              <p className="text-center text-[15px] font-semibold" style={{ color: theme.colors.textPrimary }}>No installations recorded yet</p>
-              <p className="text-center text-[13px] mt-1" style={{ color: theme.colors.textSecondary }}>Add install photos and details to build your portfolio</p>
-            </div>
-          )}
+            );
+          })()}
         </div>
       </div>
 

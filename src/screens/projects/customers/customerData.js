@@ -86,11 +86,23 @@ export const MOCK_CUSTOMERS = [
       { id: 't3', name: 'Guest Chair - Bariatric', dimensions: '26"W × 24"D × 33"H', startingPrice: 780, image: 'https://webresources.jsifurniture.com/production/uploads/original_images/jsi_finn_enviro_00004_aOu5872.jpg' },
     ],
 
-    installs: [
-      { id: 'i1', url: 'https://webresources.jsifurniture.com/production/uploads/jsi_vision_install_0000010.jpg', caption: 'Main lobby reception', spaceType: 'Lobby', date: '2025-06-14' },
-      { id: 'i2', url: 'https://webresources.jsifurniture.com/production/uploads/jsi_caav_install_00024_pldPbiW.jpg', caption: 'Patient room 4th floor', spaceType: 'Patient', date: '2025-08-20' },
-      { id: 'i3', url: 'https://webresources.jsifurniture.com/production/uploads/original_images/jsi_finn_enviro_00004_aOu5872.jpg', caption: 'Waiting area 2nd floor', spaceType: 'Lobby', date: '2025-09-05' },
-      { id: 'i4', url: 'https://webresources.jsifurniture.com/production/uploads/jsi_coldjet_install_00001.jpg', caption: 'Nurse station B wing', spaceType: 'Office', date: '2025-11-03' },
+    projects: [
+      {
+        id: 'proj-1-1', name: 'Main Lobby & Reception', location: 'Building A',
+        image: 'https://webresources.jsifurniture.com/production/uploads/jsi_vision_install_0000010.jpg',
+        installs: [
+          { id: 'i1', url: 'https://webresources.jsifurniture.com/production/uploads/jsi_vision_install_0000010.jpg', caption: 'Main lobby reception', spaceType: 'Lobby', date: '2025-06-14' },
+          { id: 'i3', url: 'https://webresources.jsifurniture.com/production/uploads/original_images/jsi_finn_enviro_00004_aOu5872.jpg', caption: 'Waiting area 2nd floor', spaceType: 'Lobby', date: '2025-09-05' },
+        ],
+      },
+      {
+        id: 'proj-1-2', name: 'Patient Wing 4th Floor', location: 'Building B',
+        image: 'https://webresources.jsifurniture.com/production/uploads/jsi_caav_install_00024_pldPbiW.jpg',
+        installs: [
+          { id: 'i2', url: 'https://webresources.jsifurniture.com/production/uploads/jsi_caav_install_00024_pldPbiW.jpg', caption: 'Patient room 4th floor', spaceType: 'Patient', date: '2025-08-20' },
+          { id: 'i4', url: 'https://webresources.jsifurniture.com/production/uploads/jsi_coldjet_install_00001.jpg', caption: 'Nurse station B wing', spaceType: 'Office', date: '2025-11-03' },
+        ],
+      },
     ],
 
     documents: [
@@ -156,9 +168,15 @@ export const MOCK_CUSTOMERS = [
       { id: 't5', name: 'Collaboration Table 96"', dimensions: '96"W × 42"D × 29"H', startingPrice: 4200, image: 'https://webresources.jsifurniture.com/production/uploads/jsi_caav_install_00024_pldPbiW.jpg' },
     ],
 
-    installs: [
-      { id: 'i5', url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&q=80', caption: 'Floor 12 open plan', spaceType: 'Office', date: '2025-10-11' },
-      { id: 'i6', url: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=600&q=80', caption: 'Executive conference room', spaceType: 'Conference', date: '2025-11-22' },
+    projects: [
+      {
+        id: 'proj-2-1', name: 'Floor 12 Renovation', location: 'Main Tower',
+        image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&q=80',
+        installs: [
+          { id: 'i5', url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&q=80', caption: 'Floor 12 open plan', spaceType: 'Office', date: '2025-10-11' },
+          { id: 'i6', url: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=600&q=80', caption: 'Executive conference room', spaceType: 'Conference', date: '2025-11-22' },
+        ],
+      },
     ],
 
     documents: [
@@ -221,8 +239,22 @@ export const MOCK_CUSTOMERS = [
 
     typicals: [],
 
-    installs: [
-      { id: 'i7', url: 'https://images.unsplash.com/photo-1562774053-701939374585?w=600&q=80', caption: 'Main library 1st floor', spaceType: 'Classroom', date: '2025-09-30' },
+    projects: [
+      {
+        id: 'proj-3-1', name: 'Swain Hall', location: 'Main Campus',
+        image: 'https://images.unsplash.com/photo-1562774053-701939374585?w=600&q=80',
+        installs: [
+          { id: 'i7', url: 'https://images.unsplash.com/photo-1562774053-701939374585?w=600&q=80', caption: 'Main library 1st floor', spaceType: 'Classroom', date: '2025-09-30' },
+          { id: 'i8', url: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=600&q=80', caption: 'Swain Hall lecture room', spaceType: 'Classroom', date: '2025-10-15' },
+        ],
+      },
+      {
+        id: 'proj-3-2', name: 'Student Commons', location: 'East Campus',
+        image: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&q=80',
+        installs: [
+          { id: 'i9', url: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&q=80', caption: 'Student lounge area', spaceType: 'Lobby', date: '2025-11-20' },
+        ],
+      },
     ],
 
     documents: [],
@@ -264,7 +296,13 @@ export const MOCK_CUSTOMERS = [
       { id: 't6', name: 'Council Chamber Desk', dimensions: '72"W × 24"D × 30"H', startingPrice: 2800, image: 'https://webresources.jsifurniture.com/production/uploads/jsi_coldjet_install_00001.jpg' },
     ],
 
-    installs: [],
+    projects: [
+      {
+        id: 'proj-4-1', name: 'Council Chambers', location: 'City Hall',
+        image: 'https://webresources.jsifurniture.com/production/uploads/jsi_coldjet_install_00001.jpg',
+        installs: [],
+      },
+    ],
     documents: [],
     contacts: [],
 
@@ -298,3 +336,23 @@ export const MATERIAL_CATEGORIES = [
 ];
 
 export const INSTALL_SPACE_TYPES = ['All', 'Office', 'Lobby', 'Patient', 'Classroom', 'Conference', 'Other'];
+
+/* ── Hierarchy helpers ── */
+export const getAllInstalls = (customer) =>
+  (customer.projects || []).flatMap(p =>
+    (p.installs || []).map(i => ({ ...i, projectId: p.id, projectName: p.name }))
+  );
+
+export const getAllProjectsWithMeta = () =>
+  MOCK_CUSTOMERS.flatMap(c =>
+    (c.projects || []).map(p => ({
+      ...p,
+      customerId: c.id, customerName: c.name, customerImage: c.image, vertical: c.vertical,
+      installCount: (p.installs || []).length,
+    }))
+  );
+
+export const getAllInstallsFlat = () =>
+  MOCK_CUSTOMERS.flatMap(c =>
+    getAllInstalls(c).map(i => ({ ...i, customerId: c.id, customerName: c.name }))
+  );

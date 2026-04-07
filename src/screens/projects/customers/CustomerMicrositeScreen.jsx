@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { isDarkTheme, DESIGN_TOKENS } from '../../../design-system/tokens.js';
 import { getModalMotion } from '../../../design-system/motion.js';
 import {
-  VERTICAL_COLORS, ORDER_STATUS_COLORS, MATERIAL_CATEGORIES, INSTALL_SPACE_TYPES,
+  VERTICAL_COLORS, ORDER_STATUS_COLORS, MATERIAL_CATEGORIES, INSTALL_SPACE_TYPES, getAllInstalls,
 } from './customerData.js';
 
 /* ═══════════════════════════════════════════════════════════════
@@ -189,6 +189,7 @@ export const CustomerMicrositeScreen = ({ customer, theme, onBack }) => {
   const [materialTab, setMaterialTab] = useState('laminates');
   const [spaceFilter, setSpaceFilter] = useState('All');
   const [selectedProgram, setSelectedProgram] = useState(null);
+  const [selectedProjectFilter, setSelectedProjectFilter] = useState('All');
   const [lightboxImg, setLightboxImg] = useState(null);
 
   /* ── Logo with fallback chain ── */
@@ -209,11 +210,15 @@ export const CustomerMicrositeScreen = ({ customer, theme, onBack }) => {
     return { programs: progs, contracts: contr, dimmed: dim };
   }, [customer.standardsPrograms]);
 
-  /* ── Install filter ── */
+  /* ── Install filter (project-aware) ── */
+  const allInstalls = useMemo(() => getAllInstalls(customer), [customer]);
+
   const filteredInstalls = useMemo(() => {
-    if (spaceFilter === 'All') return customer.installs || [];
-    return (customer.installs || []).filter(i => i.spaceType === spaceFilter);
-  }, [customer.installs, spaceFilter]);
+    let list = allInstalls;
+    if (selectedProjectFilter !== 'All') list = list.filter(i => i.projectId === selectedProjectFilter);
+    if (spaceFilter !== 'All') list = list.filter(i => i.spaceType === spaceFilter);
+    return list;
+  }, [allInstalls, selectedProjectFilter, spaceFilter]);
 
   const fmtMoney = v => (v ?? 0).toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
   const fmtDate = d => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
@@ -225,7 +230,7 @@ export const CustomerMicrositeScreen = ({ customer, theme, onBack }) => {
 
   const activeStandards = (customer.standardsPrograms || []).filter(p => p.status === 'Active' || p.status === 'Expiring').length;
   const currentOrders = (customer.orders?.current || []).length;
-  const lastInstall = (customer.installs || []).sort((a, b) => b.date.localeCompare(a.date))[0]?.date;
+  const lastInstall = [...allInstalls].sort((a, b) => b.date.localeCompare(a.date))[0]?.date;
 
   const renderProgramRow = useCallback((prog, dim = false) => (
     <button key={prog.id} type="button" onClick={() => setSelectedProgram(prog)}
@@ -355,10 +360,38 @@ export const CustomerMicrositeScreen = ({ customer, theme, onBack }) => {
               </Sect>
             )}
 
+            {/* Projects */}
+            {(customer.projects || []).length > 0 && (
+              <Sect title="Projects" theme={theme}>
+                <div className="space-y-0">
+                  {(customer.projects || []).map(proj => {
+                    const photoCount = (proj.installs || []).length;
+                    return (
+                      <button key={proj.id} type="button" onClick={() => setSelectedProjectFilter(selectedProjectFilter === proj.id ? 'All' : proj.id)}
+                        className="w-full flex items-center gap-2.5 py-2.5 text-left transition-colors active:bg-black/[0.03] dark:active:bg-white/[0.05] border-t"
+                        style={{ borderColor: border, backgroundColor: selectedProjectFilter === proj.id ? `${c.accent}08` : 'transparent' }}>
+                        <div className="w-9 h-9 rounded-lg overflow-hidden shrink-0">
+                          <img src={proj.image} alt={proj.name} className="w-full h-full object-cover" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[12px] font-semibold truncate" style={{ color: c.textPrimary }}>{proj.name}</p>
+                          <p className="text-[10px]" style={{ color: c.textSecondary }}>{proj.location}{photoCount > 0 ? ` · ${photoCount} photo${photoCount !== 1 ? 's' : ''}` : ''}</p>
+                        </div>
+                        <ChevronRight className="w-3.5 h-3.5 shrink-0 opacity-30" style={{ color: c.textSecondary }} />
+                      </button>
+                    );
+                  })}
+                </div>
+              </Sect>
+            )}
+
             {/* Install Gallery */}
-            {(customer.installs || []).length > 0 && (
-              <Sect title="Install Gallery" theme={theme}>
-                <TabBar tabs={INSTALL_SPACE_TYPES.filter(t => t === 'All' || (customer.installs || []).some(i => i.spaceType === t))}
+            {allInstalls.length > 0 && (
+              <Sect title={selectedProjectFilter !== 'All' ? `Installs · ${(customer.projects || []).find(p => p.id === selectedProjectFilter)?.name || ''}` : 'Install Gallery'} theme={theme}
+                right={selectedProjectFilter !== 'All' && (
+                  <button onClick={() => setSelectedProjectFilter('All')} className="text-[10px] font-semibold" style={{ color: c.accent }}>Show All</button>
+                )}>
+                <TabBar tabs={INSTALL_SPACE_TYPES.filter(t => t === 'All' || allInstalls.some(i => i.spaceType === t))}
                   value={spaceFilter} onChange={setSpaceFilter} theme={theme} />
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
                   {filteredInstalls.map(i => (
@@ -459,6 +492,7 @@ export const CustomerMicrositeScreen = ({ customer, theme, onBack }) => {
           <img src={lightboxImg.url} alt={lightboxImg.caption} className="max-w-full max-h-[85vh] rounded-xl object-contain" onClick={e => e.stopPropagation()} />
           <div className="absolute bottom-6 left-0 right-0 text-center">
             <p className="text-white text-[13px] font-medium">{lightboxImg.caption}</p>
+            {lightboxImg.projectName && <p className="text-white/60 text-[11px] mt-0.5">{lightboxImg.projectName}</p>}
             {lightboxImg.date && <p className="text-white/50 text-[11px] mt-0.5">{fmtDate(lightboxImg.date)}</p>}
           </div>
         </div>,
