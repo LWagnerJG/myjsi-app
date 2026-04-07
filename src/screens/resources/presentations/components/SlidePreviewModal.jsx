@@ -11,7 +11,7 @@ export const SlidePreviewModal = ({ preview, theme, onClose, onDownload, onShare
     return createPortal(
         <div className="fixed inset-0 flex items-center justify-center p-4" style={{ ...getUnifiedBackdropStyle(true), zIndex: UNIFIED_MODAL_Z }} onClick={onClose}>
             <motion.div initial={{ opacity: 0, scale: 0.94 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.94 }} transition={{ duration: 0.2 }}
-                className="max-w-3xl w-full rounded-3xl overflow-hidden"
+                className="max-w-3xl w-full rounded-2xl overflow-hidden"
                 style={{ background: isDark ? theme.colors.surface : '#FFFFFF', border: `1px solid ${theme.colors.border}`, boxShadow: '0 24px 60px rgba(0,0,0,0.35)' }}
                 onClick={e => e.stopPropagation()}>
                 <div className="px-5 py-4 flex justify-between items-center" style={{ borderBottom: `1px solid ${theme.colors.border}` }}>

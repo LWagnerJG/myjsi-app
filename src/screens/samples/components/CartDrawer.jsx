@@ -82,7 +82,7 @@ export const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, d
                             animate={sheetMotion.animate}
                             exit={sheetMotion.exit}
                             transition={sheetMotion.transition}
-                            className="absolute bottom-4 left-4 right-4 max-w-md mx-auto rounded-3xl overflow-hidden"
+                            className="absolute bottom-4 left-4 right-4 max-w-md mx-auto rounded-2xl overflow-hidden"
                             style={{ backgroundColor: theme.colors.surface, boxShadow: '0 4px 20px rgba(0,0,0,0.1)', maxHeight: '75vh' }}
                             onClick={(e) => e.stopPropagation()}
                         >
@@ -168,7 +168,7 @@ export const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, d
                                 transition: prefersReduced ? 'none' : UNIFIED_BACKDROP_TRANSITION
                             }}
                         />
-                        <div className="relative px-10 py-8 rounded-3xl text-center" style={{ background: theme.colors.surface, color: theme.colors.textPrimary, border: `1px solid ${theme.colors.border}`, transform: overlayPhase==='enter' ? 'scale(1)' : 'scale(.9)', opacity: overlayPhase==='enter' ? 1 : 0.9, transition: prefersReduced ? 'none' : [buildCssTransition('transform', MOTION_DURATIONS_MS.slow, MOTION_EASINGS.springOut), buildCssTransition('opacity', MOTION_DURATIONS_MS.medium, MOTION_EASINGS.standard)].join(', '), boxShadow:'0 6px 24px -4px rgba(0,0,0,0.12)' }}>
+                        <div className="relative px-10 py-8 rounded-2xl text-center" style={{ background: theme.colors.surface, color: theme.colors.textPrimary, border: `1px solid ${theme.colors.border}`, transform: overlayPhase==='enter' ? 'scale(1)' : 'scale(.9)', opacity: overlayPhase==='enter' ? 1 : 0.9, transition: prefersReduced ? 'none' : [buildCssTransition('transform', MOTION_DURATIONS_MS.slow, MOTION_EASINGS.springOut), buildCssTransition('opacity', MOTION_DURATIONS_MS.medium, MOTION_EASINGS.standard)].join(', '), boxShadow:'0 6px 24px -4px rgba(0,0,0,0.12)' }}>
                             <CheckCircle className="w-10 h-10 mx-auto mb-3" style={{ color: theme.colors.success }} />
                             <p className="font-bold text-[15px]">Sample Request Submitted</p>
                             <p className="text-xs mt-1" style={{ color: theme.colors.textSecondary }}>You'll receive a confirmation email shortly.</p>

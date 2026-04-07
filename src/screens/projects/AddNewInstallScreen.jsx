@@ -206,7 +206,7 @@ export const AddNewInstallScreen = ({ theme, onAddInstall }) => {
                                 <button
                                     type="button"
                                     onClick={() => fileInputRef.current?.click()}
-                                    className="w-full min-h-[220px] rounded-3xl border-2 border-dashed flex flex-col items-center justify-center gap-3 transition-colors motion-tap"
+                                    className="w-full min-h-[220px] rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-3 transition-colors motion-tap"
                                     style={{
                                         borderColor: theme.colors.border,
                                         backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : theme.colors.subtle,

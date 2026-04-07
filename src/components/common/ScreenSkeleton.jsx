@@ -41,7 +41,7 @@ export const ScreenSkeleton = ({ theme }) => {
             {/* Card skeletons */}
             <div className="space-y-4">
                 <div
-                    className="rounded-3xl p-5 space-y-3"
+                    className="rounded-2xl p-5 space-y-3"
                     style={{ backgroundColor: cardSurface, border: `1px solid ${borderColor}` }}
                 >
                     <div className="h-4 w-1/3 rounded-full" style={shimmer} />
@@ -53,7 +53,7 @@ export const ScreenSkeleton = ({ theme }) => {
                     {[1, 2, 3, 4].map(i => (
                         <div
                             key={i}
-                            className="rounded-3xl p-4 space-y-2.5"
+                            className="rounded-2xl p-4 space-y-2.5"
                             style={{ backgroundColor: cardSurface, border: `1px solid ${borderColor}` }}
                         >
                             <div className="h-5 w-1/2 rounded-full" style={shimmer} />

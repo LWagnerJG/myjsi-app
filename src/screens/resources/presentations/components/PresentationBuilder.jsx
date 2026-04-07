@@ -56,7 +56,7 @@ export const PresentationBuilder = ({ theme, onDeckGenerated }) => {
     return (
         <div className="px-4 pb-32 pt-1 space-y-4">
             {/* Header card */}
-            <div className="rounded-3xl p-5 space-y-1"
+            <div className="rounded-2xl p-5 space-y-1"
                 style={{ background: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.04)', border: `1px solid ${borderColor}` }}>
                 <div className="flex items-center gap-2.5">
                     <div className="w-9 h-9 rounded-[11px] flex items-center justify-center" style={{ background: theme.colors.accent }}>
@@ -152,7 +152,7 @@ export const PresentationBuilder = ({ theme, onDeckGenerated }) => {
 
                 {phase === 'generating' && (
                     <motion.div key="generating" initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.96 }} transition={{ duration: 0.25 }}
-                        className="rounded-3xl p-10 flex flex-col items-center gap-5 text-center"
+                        className="rounded-2xl p-10 flex flex-col items-center gap-5 text-center"
                         style={{ background: isDark ? 'rgba(255,255,255,0.08)' : '#FFFFFF', border: `1px solid ${borderColor}`, boxShadow: CARD_SHADOW }}>
                         <div className="relative w-16 h-16">
                             <div className="absolute inset-0 rounded-full animate-ping opacity-20" style={{ background: theme.colors.accent }} />
@@ -184,7 +184,7 @@ export const PresentationBuilder = ({ theme, onDeckGenerated }) => {
                         </div>
 
                         {/* Generated deck preview */}
-                        <div className="rounded-3xl overflow-hidden" style={{ background: isDark ? theme.colors.surface : '#FFFFFF', border: `1px solid ${borderColor}`, boxShadow: CARD_SHADOW }}>
+                        <div className="rounded-2xl overflow-hidden" style={{ background: isDark ? theme.colors.surface : '#FFFFFF', border: `1px solid ${borderColor}`, boxShadow: CARD_SHADOW }}>
                             <div className="aspect-video w-full overflow-hidden" style={{ background: isDark ? 'rgba(255,255,255,0.09)' : '#f0ede8' }}>
                                 <img src={generatedDeck.thumbnailUrl} alt={generatedDeck.title} className="w-full h-full object-cover" />
                             </div>

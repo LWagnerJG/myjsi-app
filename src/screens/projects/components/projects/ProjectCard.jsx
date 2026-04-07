@@ -17,7 +17,7 @@ export const ProjectCard = ({ opp, theme, onClick }) => {
   return (
     <button onClick={onClick} className="w-full text-left" style={{ WebkitTapHighlightColor: 'transparent' }}>
       <div
-        className="rounded-3xl overflow-hidden transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98]"
+        className="rounded-2xl overflow-hidden transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98]"
         style={{ backgroundColor: theme.colors.surface, border: `1px solid ${border}` }}
       >
         <div className="px-5 pt-4 pb-4 flex items-start justify-between gap-3">

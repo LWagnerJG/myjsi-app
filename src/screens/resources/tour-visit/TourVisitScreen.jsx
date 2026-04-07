@@ -1046,7 +1046,7 @@ const TourVisitSuccessOverlay = ({ theme, facilityName, customerName }) => (
         }}
     >
         <div
-            className="w-full max-w-sm rounded-[28px] px-6 py-7 text-center"
+            className="w-full max-w-sm rounded-2xl px-6 py-7 text-center"
             style={{
                 backgroundColor: theme.colors.surface,
                 border: `1px solid ${theme.colors.border}`,

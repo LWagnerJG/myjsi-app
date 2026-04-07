@@ -74,7 +74,7 @@ export const LibraryGrid = ({ theme, query, parentHeaderRef, savedImageIds = [],
           onMouseDown={(e) => { if (e.target === e.currentTarget) closeDetail(); }}
         >
           <div
-            className="relative w-full max-w-2xl sm:mx-4 rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden"
+            className="relative w-full max-w-2xl sm:mx-4 rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden"
             style={{ background: theme.colors.surface, border: `1px solid ${theme.colors.border}`, maxHeight: '92dvh' }}
           >
             {/* Close */}

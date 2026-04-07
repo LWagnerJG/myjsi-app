@@ -9,7 +9,7 @@ export const PresentationCard = ({ p, theme, onAddToMyDecks, myDeckIds, onDownlo
     const isDark = isDarkTheme(theme);
     const inMyDecks = myDeckIds.has(String(p.id));
     return (
-        <div className="rounded-3xl overflow-hidden transition-all duration-300"
+        <div className="rounded-2xl overflow-hidden transition-all duration-300"
             style={{ background: isDark ? theme.colors.surface : '#FFFFFF', border: `1px solid ${theme.colors.border}`, boxShadow: CARD_SHADOW }}>
             <div className="p-4">
                 <SlideCarousel pres={p} theme={theme} onViewFull={() => onViewFull(p)} />

@@ -32,7 +32,7 @@ export const CartDrawer = ({ cart, balance, onUpdateQty, onRemove, onCheckout, t
         <div className="fixed inset-0" style={{ zIndex: UNIFIED_MODAL_Z }} onClick={() => setExpanded(false)}>
           <div className="absolute inset-0" style={getUnifiedBackdropStyle(true)} />
           <div
-            className="absolute bottom-4 left-4 right-4 max-w-md mx-auto rounded-3xl overflow-hidden"
+            className="absolute bottom-4 left-4 right-4 max-w-md mx-auto rounded-2xl overflow-hidden"
             style={{ backgroundColor: theme.colors.surface, boxShadow: '0 4px 20px rgba(0,0,0,0.1)', maxHeight: '80vh' }}
             onClick={e => e.stopPropagation()}
           >

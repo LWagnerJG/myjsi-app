@@ -61,7 +61,7 @@ export const ComColRequest = ({ theme, showAlert }) => {
   return (
     <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
       <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-5">
-        <GlassCard theme={theme} className="rounded-3xl">
+        <GlassCard theme={theme} className="rounded-2xl">
           <div className="p-6 space-y-6">
             <div className="space-y-2">
               <h2 className="text-xl font-bold leading-tight" style={{ color: theme.colors.textPrimary }}>COM / COL Pattern Submission</h2>
@@ -165,7 +165,7 @@ export const ComColRequest = ({ theme, showAlert }) => {
           </div>
         </GlassCard>
         {/* Helpful Links */}
-        <GlassCard theme={theme} className="rounded-3xl">
+        <GlassCard theme={theme} className="rounded-2xl">
           <div className="p-5 sm:p-6 space-y-3">
             <h3 className="font-semibold text-sm" style={{ color: theme.colors.textPrimary }}>Helpful References</h3>
             <div className="grid sm:grid-cols-3 gap-3">

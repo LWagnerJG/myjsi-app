@@ -12,7 +12,7 @@ export const CheckoutSuccess = ({ show, theme }) => {
     <div className="fixed inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: UNIFIED_MODAL_Z + 100 }}>
       <div className="absolute inset-0" style={{ ...getUnifiedBackdropStyle(show, prefersReduced), transition: prefersReduced ? 'none' : UNIFIED_BACKDROP_TRANSITION }} />
       <div
-        className="relative px-10 py-8 rounded-3xl text-center"
+        className="relative px-10 py-8 rounded-2xl text-center"
         style={{
           background: theme.colors.surface,
           color: theme.colors.textPrimary,

@@ -185,25 +185,4 @@ export const SecondaryButton = ({
     );
 };
 
-/**
- * JSI Button Grid — Grid container for pill buttons
- */
-export const PillButtonGrid = ({
-    children,
-    columns = 3,
-    gap = 3,
-    className = '',
-}) => {
-    const gapClasses = {
-        2:   'gap-2',
-        2.5: 'gap-2.5',
-        3:   'gap-3',
-        4:   'gap-4',
-    };
 
-    return (
-        <div className={`grid grid-cols-${columns} ${gapClasses[gap] || 'gap-3'} ${className}`}>
-            {children}
-        </div>
-    );
-};

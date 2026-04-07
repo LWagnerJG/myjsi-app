@@ -107,7 +107,7 @@ const ProductHero = React.memo(({ product, theme, categoryId, onNavigate, catego
 
   return (
     <motion.div
-      className={`relative w-full ${aspectClass} rounded-[28px] overflow-hidden group`}
+      className={`relative w-full ${aspectClass} rounded-2xl overflow-hidden group`}
       style={{
         backgroundColor: dark ? '#1E1E1E' : '#F0EDE8',
         boxShadow: dark
