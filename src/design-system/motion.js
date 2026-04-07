@@ -67,9 +67,9 @@ export const getBottomSheetMotion = (prefersReducedMotion = false) => ({
 });
 
 export const getFloatingPillMotion = (prefersReducedMotion = false) => ({
-  initial: prefersReducedMotion ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 24, scale: 0.92 },
-  animate: { opacity: 1, y: 0, scale: 1 },
-  exit: prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 24, scale: 0.92 },
+  initial: prefersReducedMotion ? { opacity: 1, x: '-50%', y: 0, scale: 1 } : { opacity: 0, x: '-50%', y: 24, scale: 0.92 },
+  animate: { opacity: 1, x: '-50%', y: 0, scale: 1 },
+  exit: prefersReducedMotion ? { opacity: 0, x: '-50%' } : { opacity: 0, x: '-50%', y: 24, scale: 0.92 },
   transition: prefersReducedMotion
     ? { duration: 0 }
     : { type: 'spring', stiffness: 400, damping: 30, mass: 0.8 },

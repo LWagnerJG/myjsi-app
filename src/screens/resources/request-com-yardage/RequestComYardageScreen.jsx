@@ -205,7 +205,8 @@ export const RequestComYardageScreen = ({ theme, showAlert, onNavigate, userSett
 
             {/* Sticky frost-glass submit bar at bottom */}
             <div
-                className="flex-shrink-0 flex justify-center px-5 pb-5 pt-3"
+                className="flex-shrink-0 flex justify-center px-5 pt-3"
+                style={{ paddingBottom: 'max(20px, calc(env(safe-area-inset-bottom, 0px) + 12px))' }}
             >
                 <div className="w-full max-w-md rounded-2xl px-4 py-3" style={floatingBarStyle(theme)}>
                     <FrostButton

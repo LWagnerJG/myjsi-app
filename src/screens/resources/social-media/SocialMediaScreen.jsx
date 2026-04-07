@@ -5,6 +5,7 @@ import { PillButton } from '../../../components/common/JSIButtons.jsx';
 import { Instagram, Linkedin, Copy, Info, ChevronDown, ChevronUp } from 'lucide-react';
 import { SOCIAL_MEDIA_POSTS } from './data.js';
 import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z } from '../../../components/common/modalUtils.js';
+import { useToast } from '../../../components/common/ToastHost.jsx';
 
 // Format relative / short date
 const formatDate = (dStr) => {
@@ -36,11 +37,11 @@ async function tryNativeShare(post) {
 
 export const SocialMediaScreen = ({ theme }) => {
   const posts = (SOCIAL_MEDIA_POSTS||[]).sort((a,b)=> new Date(b.createdDate)-new Date(a.createdDate));
-  const [toast, setToast] = useState(null);
+  const toastCtx = useToast();
   const [preview, setPreview] = useState(null);
   const [showHelp, setShowHelp] = useState(false);
 
-  const flash = (msg) => { setToast(msg); setTimeout(()=>setToast(null), 2400); };
+  const flash = (msg) => toastCtx?.push(msg, { ttl: 2400 });
 
   const copyCaption = (post, silent=false) => navigator.clipboard.writeText(post.caption).then(()=>!silent && flash('Caption copied'));
 
@@ -156,10 +157,6 @@ export const SocialMediaScreen = ({ theme }) => {
           </div>
         </div>,
         document.body
-      )}
-
-      {toast && (
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full text-xs font-semibold" style={{ background: theme.colors.accent, color: theme.colors.accentText, boxShadow:'0 4px 12px rgba(0,0,0,0.12)' }}>{toast}</div>
       )}
     </div>
   );

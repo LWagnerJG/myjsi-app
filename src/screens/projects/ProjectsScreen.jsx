@@ -6,8 +6,9 @@ import { ProbabilitySlider } from '../../components/forms/ProbabilitySlider.jsx'
 import { PillButton } from '../../components/common/JSIButtons.jsx';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 import { JSI_SERIES } from '../products/data.js';
-import { DESIGN_TOKENS, isDarkTheme, floatingBarStyle } from '../../design-system/tokens.js';
+import { DESIGN_TOKENS, isDarkTheme } from '../../design-system/tokens.js';
 import { usePersistentState } from '../../hooks/usePersistentState.js';
+import FloatingPill from '../../components/common/FloatingPill.jsx';
 
 import { PROJECTS_TAB_OPTIONS, fmtCurrency } from './components/projects/utils.js';
 import { OpportunityDetail } from './components/projects/OpportunityDetail.jsx';
@@ -243,25 +244,13 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
         </div>
       </div>
 
-      {/* Sticky bottom totals bar — glassy overlay */}
-      {projectsTab === 'pipeline' && filteredOpportunities.length > 0 && (
-        <div
-          className="absolute bottom-0 left-0 right-0 pointer-events-none flex justify-center px-5"
-          style={{ zIndex: 20, bottom: 'clamp(0.5rem, 5vh, 3.25rem)' }}
-        >
-          <div
-            className="pointer-events-auto w-full max-w-md flex items-center justify-center gap-5 rounded-3xl px-6 py-3.5"
-            style={floatingBarStyle(theme)}
-          >
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: theme.colors.textSecondary }}>{selectedPipelineStage}</p>
-              <p className="text-[13px] md:text-[14px] font-medium mt-0.5" style={{ color: theme.colors.textSecondary }}>{filteredOpportunities.length} {filteredOpportunities.length === 1 ? 'project' : 'projects'}</p>
-            </div>
-            <div className="w-px self-stretch" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)' }} />
-            <p className="font-bold tracking-tight leading-none" style={{ color: theme.colors.textPrimary, fontSize: 'clamp(1.5rem, 1.1rem + 0.8vw, 2rem)' }}>{fmtCurrency(stageTotals.totalValue)}</p>
-          </div>
-        </div>
-      )}
+      {/* Floating bottom totals pill */}
+      <FloatingPill
+        theme={theme}
+        visible={projectsTab === 'pipeline' && filteredOpportunities.length > 0}
+        icon={<Briefcase />}
+        label={`${selectedPipelineStage} · ${filteredOpportunities.length} ${filteredOpportunities.length === 1 ? 'project' : 'projects'} · ${fmtCurrency(stageTotals.totalValue)}`}
+      />
 
     </div>
   );

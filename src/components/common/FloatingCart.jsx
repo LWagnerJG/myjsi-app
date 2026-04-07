@@ -1,11 +1,8 @@
 // Shared FloatingCart pill — standardised across Samples, Marketplace, and any future cart-bearing screen.
-// Shows a prominent blurred pill when collapsed. Scales up on larger viewports.
+// Uses FloatingPill for consistent positioning, glass style, and animation.
 import React from 'react';
 import { ShoppingCart } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { isDarkTheme, floatingBarStyle } from '../../design-system/tokens.js';
-import { getFloatingPillMotion } from '../../design-system/motion.js';
-import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion.js';
+import FloatingPill from './FloatingPill.jsx';
 
 /**
  * FloatingCart
@@ -17,54 +14,14 @@ import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion.js'
  *   theme      {object}   – standard app theme object
  *   visible    {boolean}  – whether the pill should be shown at all (default true)
  */
-export const FloatingCart = React.memo(({ itemCount = 0, label, onClick, theme, visible = true }) => {
-    const isDark = isDarkTheme(theme);
-    const show = visible && itemCount > 0;
-    const prefersReducedMotion = usePrefersReducedMotion();
-    const floatingPillMotion = getFloatingPillMotion(prefersReducedMotion);
-
-    return (
-        <AnimatePresence>
-            {show && (
-                <motion.button
-                    initial={floatingPillMotion.initial}
-                    animate={floatingPillMotion.animate}
-                    exit={floatingPillMotion.exit}
-                    transition={floatingPillMotion.transition}
-                    onClick={onClick}
-                    aria-label={label || `Cart with ${itemCount} item${itemCount !== 1 ? 's' : ''}`}
-                    className="
-                        fixed z-20
-                        bottom-5 left-1/2 -translate-x-1/2
-                        w-[calc(100%-2.5rem)] max-w-md
-                        flex items-center justify-center gap-3
-                        px-5 py-3
-                        sm:px-6 sm:py-3.5
-                        rounded-full
-                        transition-shadow duration-200 active:scale-95 motion-tap
-                    "
-                    style={floatingBarStyle({ colors: { background: isDark ? '#1a1a1a' : '#f0ede8' } })}
-                >
-                    {/* Icon bubble */}
-                    <div
-                        className="
-                            w-8 h-8
-                            sm:w-9 sm:h-9
-                            rounded-full flex items-center justify-center flex-shrink-0
-                        "
-                        style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.14)' : 'rgba(0,0,0,0.07)' }}
-                    >
-                        <ShoppingCart className={`w-4 h-4 sm:w-[18px] sm:h-[18px] ${isDark ? 'text-white' : 'text-gray-800'}`} aria-hidden="true" />
-                    </div>
-
-                    {/* Label */}
-                    <span className={`${isDark ? 'text-white' : 'text-gray-800'} font-semibold text-sm sm:text-[15px] whitespace-nowrap`}>
-                        {label}
-                    </span>
-                </motion.button>
-            )}
-        </AnimatePresence>
-    );
-});
+export const FloatingCart = React.memo(({ itemCount = 0, label, onClick, theme, visible = true }) => (
+    <FloatingPill
+        theme={theme}
+        onClick={onClick}
+        visible={visible && itemCount > 0}
+        icon={<ShoppingCart />}
+        label={label || `View Cart (${itemCount})`}
+    />
+));
 
 FloatingCart.displayName = 'FloatingCart';

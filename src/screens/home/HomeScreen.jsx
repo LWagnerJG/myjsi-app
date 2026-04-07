@@ -5,9 +5,10 @@ import { ORDER_DATA } from '../orders/data.js';
 import { RequestQuoteModal } from '../../components/common/RequestQuoteModal.jsx';
 import { SpecCheckRequestModal } from '../../components/common/SpecCheckRequestModal.jsx';
 import { getHomeChromePillStyles, HOME_CHROME_PILL_HEIGHT } from '../../design-system/homeChrome.js';
-import { isDarkTheme, floatingBarStyle } from '../../design-system/tokens.js';
+import { isDarkTheme } from '../../design-system/tokens.js';
 import { usePersistentState } from '../../hooks/usePersistentState.js';
 import { MessageSquarePlus } from 'lucide-react';
+import FloatingPill from '../../components/common/FloatingPill.jsx';
 import { LEAD_TIMES_DATA } from '../resources/lead-times/data.js';
 import {
     PointerSensor,
@@ -399,31 +400,16 @@ export const HomeScreen = React.memo(({
                 lampOn={lampOn}
             />
 
-            {/* Mobile sticky feedback bar — fixed to viewport bottom, hidden on sm+ */}
-            {!isEditMode && (
-                <div
-                    className="sm:hidden fixed bottom-0 left-0 right-0 z-40 flex items-center justify-center px-5"
-                    style={{
-                        paddingBottom: 'max(16px, env(safe-area-inset-bottom))',
-                        paddingTop: 12,
-                        pointerEvents: 'none',
-                    }}
-                >
-                    <button
-                        onClick={() => onNavigate('feedback')}
-                        className="w-full max-w-md flex items-center justify-center gap-2 px-5 rounded-full transition-all active:scale-[0.97]"
-                        style={{
-                            ...floatingBarStyle(theme),
-                            height: HOME_CHROME_PILL_HEIGHT,
-                            color: colors.textSecondary,
-                            pointerEvents: 'auto',
-                        }}
-                    >
-                        <MessageSquarePlus className="w-4 h-4" />
-                        <span className="text-[13px] font-semibold">Share Feedback</span>
-                    </button>
-                </div>
-            )}
+            {/* Mobile sticky feedback pill — hidden on sm+ */}
+            <FloatingPill
+                theme={theme}
+                onClick={() => onNavigate('feedback')}
+                visible={!isEditMode}
+                icon={<MessageSquarePlus />}
+                label="Share Feedback"
+                className="sm:hidden"
+                zIndex={40}
+            />
 
             <div
                 className="px-4 sm:px-6 lg:px-8 flex flex-col max-w-5xl mx-auto w-full gap-4 sm:gap-6 py-4 sm:py-6 pb-20 sm:pb-6"
