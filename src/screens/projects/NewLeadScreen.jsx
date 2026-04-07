@@ -25,6 +25,19 @@ const getWinBand = (pct) => {
   return { label: 'Strong', tone: '#4A7C59' };
 };
 
+const getPoDateLabel = (option) => {
+  if (!option || option === 'Unknown') return null;
+  const now = new Date();
+  const fmt = (d) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const addDays = (n) => { const r = new Date(now); r.setDate(r.getDate() + n); return r; };
+  if (option === '<30 Days') return `By ${fmt(addDays(30))}`;
+  if (option === '30-60 Days') return `${fmt(addDays(30))} – ${fmt(addDays(60))}`;
+  if (option === '60-180 Days') return `${fmt(addDays(60))} – ${fmt(addDays(180))}`;
+  if (option === '180+ Days') return `After ${fmt(addDays(180))}`;
+  if (option === 'Next Year') return `Jan – Dec ${now.getFullYear() + 1}`;
+  return null;
+};
+
 const TOP_100_CITIES = [
   'New York, NY', 'Los Angeles, CA', 'Chicago, IL', 'Houston, TX', 'Phoenix, AZ',
   'Philadelphia, PA', 'San Antonio, TX', 'San Diego, CA', 'Dallas, TX', 'San Jose, CA',
@@ -967,7 +980,7 @@ export const NewLeadScreen = ({
                     <button
                       type="button"
                       onClick={() => { upd('installationLocation', ''); setLocationInputOpen(false); }}
-                      className="shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-all"
+                      className="shrink-0 h-10 rounded-full border px-4 text-[12px] font-semibold transition-all"
                       style={{ borderColor: subtleBorder, color: c.textSecondary, backgroundColor: 'transparent' }}
                     >
                       Unknown
@@ -1000,7 +1013,7 @@ export const NewLeadScreen = ({
                     <button
                       type="button"
                       onClick={() => { upd('expectedInstallDate', ''); setDateInputOpen(false); }}
-                      className="shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-all"
+                      className="shrink-0 h-10 rounded-full border px-4 text-[12px] font-semibold transition-all"
                       style={{ borderColor: subtleBorder, color: c.textSecondary, backgroundColor: 'transparent' }}
                     >
                       Unknown
@@ -1063,11 +1076,11 @@ export const NewLeadScreen = ({
                     className="w-full outline-none"
                     style={{
                       height: 40,
-                      borderRadius: 24,
+                      borderRadius: 9999,
                       border: `1px solid ${getSubtleBorder(theme)}`,
                       backgroundColor: theme.colors.surface,
                       color: theme.colors.textPrimary,
-                      fontSize: 14,
+                      fontSize: 13,
                       padding: '0 14px',
                     }}
                   />
@@ -1136,6 +1149,14 @@ export const NewLeadScreen = ({
 
               <Row label="PO Timeframe" theme={theme} inline>
                 <div>
+                  {newLeadData.poTimeframe && newLeadData.poTimeframe !== 'Unknown' && (
+                    <div className="flex justify-end mb-2">
+                      <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
+                        style={{ backgroundColor: `${c.accent}14`, color: c.accent, transition: 'color .15s, background-color .15s' }}>
+                        {getPoDateLabel(newLeadData.poTimeframe)}
+                      </span>
+                    </div>
+                  )}
                   <div className="grid grid-cols-3 gap-1.5">
                     {PO_OPTIONS.map((item) => (
                       <PillButton
@@ -1235,7 +1256,7 @@ export const NewLeadScreen = ({
                     <button
                       type="button"
                       onClick={() => { upd('endUser', 'Unknown'); markTouched('endUser'); }}
-                      className="shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-all"
+                      className="shrink-0 h-10 rounded-full border px-4 text-[12px] font-semibold transition-all"
                       style={{
                         borderColor: newLeadData.endUser === 'Unknown' ? theme.colors.accent : subtleBorder,
                         color: newLeadData.endUser === 'Unknown' ? theme.colors.accent : c.textSecondary,
@@ -1284,7 +1305,7 @@ export const NewLeadScreen = ({
                       <button
                         type="button"
                         onClick={() => { setDealerOutToBid(true); upd('dealers', ['Out to Bid']); markTouched('dealers'); }}
-                        className="shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-all"
+                        className="shrink-0 h-10 rounded-full border px-4 text-[12px] font-semibold transition-all"
                         style={{ borderColor: subtleBorder, color: c.textSecondary, backgroundColor: 'transparent' }}
                       >
                         Out to Bid
@@ -1320,7 +1341,7 @@ export const NewLeadScreen = ({
                       const current = newLeadData.designFirms || [];
                       if (!current.includes('Unknown')) upd('designFirms', ['Unknown', ...current]);
                     }}
-                    className="shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-all"
+                    className="shrink-0 h-10 rounded-full border px-4 text-[12px] font-semibold transition-all"
                     style={{
                       borderColor: (newLeadData.designFirms || []).includes('Unknown') ? theme.colors.accent : subtleBorder,
                       color: (newLeadData.designFirms || []).includes('Unknown') ? theme.colors.accent : c.textSecondary,
@@ -1371,7 +1392,7 @@ export const NewLeadScreen = ({
                     </div>
                   ) : (
                     <div className="flex items-center gap-2 min-h-[40px]">
-                      <span className="text-[13px]" style={{ color: c.textSecondary, opacity: 0.55 }}>None</span>
+                      <span className="text-[12px]" style={{ color: c.textSecondary, opacity: 0.55 }}>None</span>
                       <div className="flex items-center gap-1.5 shrink-0 ml-auto">
                         <ToggleSwitch
                           checked={false}
@@ -1389,8 +1410,8 @@ export const NewLeadScreen = ({
               </Row>
 
               {/* Rewards — label left, toggles right */}
-              <div className="flex items-center justify-between gap-4 py-3">
-                <span className="text-[13px] font-semibold shrink-0" style={{ color: c.textSecondary }}>Rewards</span>
+              <div className="flex items-center justify-between gap-4 py-2.5">
+                <span className="text-[12px] font-semibold shrink-0" style={{ color: c.textSecondary }}>Rewards</span>
                 <div className="flex items-center gap-5 shrink-0">
                   <div className="flex items-center gap-2">
                     <span className="text-[12px] font-medium" style={{ color: salesRewardEnabled ? c.textPrimary : c.textSecondary }}>Sales 3%</span>
@@ -1479,7 +1500,7 @@ export const NewLeadScreen = ({
                     {(newLeadData.products || []).map((product, idx) => {
                       const prompts = getSeriesProcurementPrompts(product.series);
                       return (
-                        <div key={`${product.series}-${idx}`} className="rounded-[22px] border overflow-hidden" style={{ borderColor: subtleBorder, backgroundColor: c.surface }}>
+                        <div key={`${product.series}-${idx}`} className="rounded-[20px] border overflow-hidden" style={{ borderColor: subtleBorder, backgroundColor: c.surface }}>
                           <ProductCard
                             product={product}
                             idx={idx}
