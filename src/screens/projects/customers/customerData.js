@@ -351,8 +351,3 @@ export const getAllProjectsWithMeta = () =>
       installCount: (p.installs || []).length,
     }))
   );
-
-export const getAllInstallsFlat = () =>
-  MOCK_CUSTOMERS.flatMap(c =>
-    getAllInstalls(c).map(i => ({ ...i, customerId: c.id, customerName: c.name }))
-  );

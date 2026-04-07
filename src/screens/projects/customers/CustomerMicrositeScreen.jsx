@@ -1,8 +1,8 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import {
-  MapPin, Share2, ChevronRight, FileText, Download, CheckCircle2,
-  Mail, Phone, X, Camera, AlertTriangle, ExternalLink,
+  MapPin, ChevronRight, FileText, Download, CheckCircle2,
+  Mail, Phone, X,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { isDarkTheme, DESIGN_TOKENS } from '../../../design-system/tokens.js';
@@ -10,6 +10,9 @@ import { getModalMotion } from '../../../design-system/motion.js';
 import {
   VERTICAL_COLORS, ORDER_STATUS_COLORS, MATERIAL_CATEGORIES, INSTALL_SPACE_TYPES, getAllInstalls,
 } from './customerData.js';
+
+const fmtMoney = v => (v ?? 0).toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+const fmtDate = d => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
 
 /* ═══════════════════════════════════════════════════════════════
    TINY PRIMITIVES
@@ -220,9 +223,6 @@ export const CustomerMicrositeScreen = ({ customer, theme, onBack }) => {
     return list;
   }, [allInstalls, selectedProjectFilter, spaceFilter]);
 
-  const fmtMoney = v => (v ?? 0).toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
-  const fmtDate = d => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
-
   const verticalColor = VERTICAL_COLORS[customer.vertical] || c.textSecondary;
 
   const ordersList = orderTab === 'Current' ? (customer.orders?.current || []) : (customer.orders?.history || []);
@@ -230,7 +230,10 @@ export const CustomerMicrositeScreen = ({ customer, theme, onBack }) => {
 
   const activeStandards = (customer.standardsPrograms || []).filter(p => p.status === 'Active' || p.status === 'Expiring').length;
   const currentOrders = (customer.orders?.current || []).length;
-  const lastInstall = [...allInstalls].sort((a, b) => b.date.localeCompare(a.date))[0]?.date;
+  const lastInstall = useMemo(() =>
+    [...allInstalls].sort((a, b) => b.date.localeCompare(a.date))[0]?.date,
+    [allInstalls]
+  );
 
   const renderProgramRow = useCallback((prog, dim = false) => (
     <button key={prog.id} type="button" onClick={() => setSelectedProgram(prog)}

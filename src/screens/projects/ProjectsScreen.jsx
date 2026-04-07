@@ -1,24 +1,23 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import { Briefcase, MapPin, Plus } from 'lucide-react';
-import { RequestQuoteModal } from '../../components/common/RequestQuoteModal.jsx';
-import { STAGES, VERTICALS, COMPETITORS, DISCOUNT_OPTIONS, PO_TIMEFRAMES, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS } from './data.js';
-import { ProbabilitySlider } from '../../components/forms/ProbabilitySlider.jsx';
-import { PillButton } from '../../components/common/JSIButtons.jsx';
+import { STAGES } from './data.js';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
-import { JSI_SERIES } from '../products/data.js';
-import { DESIGN_TOKENS, isDarkTheme } from '../../design-system/tokens.js';
+import { isDarkTheme } from '../../design-system/tokens.js';
 import { usePersistentState } from '../../hooks/usePersistentState.js';
 import FloatingPill from '../../components/common/FloatingPill.jsx';
-
 import { PROJECTS_TAB_OPTIONS, fmtCurrency } from './components/projects/utils.js';
 import { OpportunityDetail } from './components/projects/OpportunityDetail.jsx';
 import { ProjectCard } from './components/projects/ProjectCard.jsx';
-import { InstallationDetail } from './components/projects/InstallationDetail.jsx';
 import { MOCK_CUSTOMERS, VERTICAL_COLORS, getAllProjectsWithMeta } from './customers/customerData.js';
 import { CustomerMicrositeScreen } from './customers/CustomerMicrositeScreen.jsx';
 
-// Exported main ProjectsScreen (restored)
-export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, setOpportunities, myProjects, setMyProjects, projectsInitialTab, clearProjectsInitialTab, projectsInitialStage, clearProjectsInitialStage, deepLinkOppId, members, currentUserId }, ref) => {
+const CTA_BY_TAB = {
+  pipeline:      { label: 'Project',  route: 'new-lead' },
+  customers:     { label: 'Customer', route: null },
+  'my-projects': { label: 'Install',  route: 'add-new-install' },
+};
+
+export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, setOpportunities, projectsInitialTab, clearProjectsInitialTab, projectsInitialStage, clearProjectsInitialStage, deepLinkOppId, members, currentUserId }, ref) => {
   const isDark = isDarkTheme(theme);
   const [projectsTab, setProjectsTab] = usePersistentState('pref.projects.activeTab', 'pipeline');
   const [selectedPipelineStage, setSelectedPipelineStage] = usePersistentState('pref.projects.pipelineStage', 'Discovery');
@@ -35,9 +34,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
     }
   }, [projectsInitialStage, clearProjectsInitialStage, setSelectedPipelineStage]);
   const [selectedOpportunity, setSelectedOpportunity] = useState(null);
-  const [selectedInstall, setSelectedInstall] = useState(null);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
-  const scrollContainerRef = useRef(null);
   const stagesScrollRef = useRef(null);
   const [showStageFadeLeft, setShowStageFadeLeft] = useState(false);
   const [showStageFadeRight, setShowStageFadeRight] = useState(false);
@@ -55,7 +52,6 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
       let cleared = false;
       if (selectedCustomer)   { setSelectedCustomer(null);   cleared = true; }
       if (selectedOpportunity) { setSelectedOpportunity(null); cleared = true; }
-      if (selectedInstall)     { setSelectedInstall(null);     cleared = true; }
       return cleared;
     },
   }));
@@ -88,31 +84,17 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
     [selectedPipelineStage, opportunities]
   );
 
-  const stageTotals = useMemo(() => {
-    const totalValue = filteredOpportunities.reduce((sum, o) => {
+  const stageTotalValue = useMemo(() =>
+    filteredOpportunities.reduce((sum, o) => {
       const raw = typeof o.value === 'string' ? o.value.replace(/[^0-9.]/g, '') : o.value;
-      const num = parseFloat(raw) || 0;
-      return sum + num;
-    }, 0);
-    return { totalValue };
-  }, [filteredOpportunities]);
+      return sum + (parseFloat(raw) || 0);
+    }, 0),
+    [filteredOpportunities]
+  );
 
   const updateOpportunity = useCallback(updated => {
     setOpportunities(prev => prev.map(o => o.id === updated.id ? updated : o));
   }, [setOpportunities]);
-
-  const addInstallPhotos = useCallback(files => {
-    if (!files || !selectedInstall) return;
-    const arr = Array.from(files);
-    setMyProjects(prev =>
-      prev.map(p =>
-        p.id === selectedInstall.id ? { ...p, photos: [...(p.photos || []), ...arr] } : p
-      )
-    );
-    setSelectedInstall(prev =>
-      prev ? { ...prev, photos: [...(prev.photos || []), ...arr] } : prev
-    );
-  }, [selectedInstall, setMyProjects]);
 
   if (selectedCustomer) return (
     <CustomerMicrositeScreen
@@ -130,13 +112,6 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
       onUpdate={u => { updateOpportunity(u); setSelectedOpportunity(u); }}
     />
   );
-  if (selectedInstall) return (
-    <InstallationDetail
-      project={selectedInstall}
-      theme={theme}
-      onAddPhotoFiles={addInstallPhotos}
-    />
-  );
   return (
     <div className="min-h-full relative" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
       {/* Controls */}
@@ -150,33 +125,18 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
               size="sm"
               theme={theme}
             />
-            {projectsTab === 'pipeline' && (
-              <button
-                onClick={() => onNavigate('new-lead')}
-                className="h-8 inline-flex items-center justify-center gap-1 rounded-full text-[12px] font-semibold transition-all px-3 whitespace-nowrap active:scale-[0.97]"
-                style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
-              >
-                <Plus size={13} strokeWidth={2.5} /> Project
-              </button>
-            )}
-            {projectsTab === 'customers' && (
-              <button
-                onClick={() => {}}
-                className="h-8 inline-flex items-center justify-center gap-1 rounded-full text-[12px] font-semibold transition-all px-3 whitespace-nowrap active:scale-[0.97]"
-                style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
-              >
-                <Plus size={13} strokeWidth={2.5} /> Customer
-              </button>
-            )}
-            {projectsTab === 'my-projects' && (
-              <button
-                onClick={() => onNavigate('add-new-install')}
-                className="h-8 inline-flex items-center justify-center gap-1 rounded-full text-[12px] font-semibold transition-all px-3 whitespace-nowrap active:scale-[0.97]"
-                style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
-              >
-                <Plus size={13} strokeWidth={2.5} /> Install
-              </button>
-            )}
+            {(() => {
+              const cta = CTA_BY_TAB[projectsTab];
+              return cta && (
+                <button
+                  onClick={() => cta.route && onNavigate(cta.route)}
+                  className="h-8 inline-flex items-center justify-center gap-1 rounded-full text-[12px] font-semibold transition-all px-3 whitespace-nowrap active:scale-[0.97]"
+                  style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
+                >
+                  <Plus size={13} strokeWidth={2.5} /> {cta.label}
+                </button>
+              );
+            })()}
           </div>
         </div>
         {projectsTab === 'pipeline' && (
@@ -210,13 +170,13 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
           </div>
         )}
       </div>
-      <div ref={scrollContainerRef}>
+      <div>
         <div className="px-4 sm:px-6 lg:px-8 pt-3 pb-40 max-w-5xl mx-auto w-full">
           {projectsTab==='pipeline' && (
             filteredOpportunities.length ? (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-                  {filteredOpportunities.map((opp)=> <div key={opp.id}><ProjectCard opp={opp} theme={theme} onClick={()=>{ setSelectedOpportunity(opp); onNavigate(`projects/${opp.id}`); }} /></div>)}
+                  {filteredOpportunities.map(opp => <ProjectCard key={opp.id} opp={opp} theme={theme} onClick={() => { setSelectedOpportunity(opp); onNavigate(`projects/${opp.id}`); }} />)}
                 </div>
 
               </>
@@ -233,7 +193,6 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
             MOCK_CUSTOMERS.length ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
                 {MOCK_CUSTOMERS.map(cust => {
-                  const vertColor = VERTICAL_COLORS[cust.vertical] || theme.colors.textSecondary;
                   const activeStds = (cust.standardsPrograms || []).filter(p => p.status === 'Active' || p.status === 'Expiring').length;
                   const currentOrd = (cust.orders?.current || []).length;
                   const border = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)';
@@ -340,7 +299,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
         theme={theme}
         visible={projectsTab === 'pipeline' && filteredOpportunities.length > 0}
         icon={<Briefcase />}
-        label={`${selectedPipelineStage} · ${filteredOpportunities.length} ${filteredOpportunities.length === 1 ? 'project' : 'projects'} · ${fmtCurrency(stageTotals.totalValue)}`}
+        label={`${selectedPipelineStage} · ${filteredOpportunities.length} ${filteredOpportunities.length === 1 ? 'project' : 'projects'} · ${fmtCurrency(stageTotalValue)}`}
       />
 
     </div>
