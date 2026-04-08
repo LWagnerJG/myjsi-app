@@ -572,21 +572,19 @@ export const ProjectsScreen = forwardRef(({
       {/* ── Top controls bar ── */}
       <div className="flex-shrink-0" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 12px)', backgroundColor: theme.colors.background }}>
         <div className="px-4 sm:px-6 lg:px-8 pb-3 max-w-5xl mx-auto w-full">
-          <div className="flex items-center justify-between gap-3">
-            <div className="min-w-0 flex-1">
-              <SegmentedToggle
-                value={projectsTab}
-                onChange={setProjectsTab}
-                options={PROJECTS_TAB_OPTIONS}
-                size="sm"
-                theme={theme}
-              />
-            </div>
+          <div className="flex items-center justify-between gap-2">
+            <SegmentedToggle
+              value={projectsTab}
+              onChange={setProjectsTab}
+              options={PROJECTS_TAB_OPTIONS}
+              size="sm"
+              theme={theme}
+            />
             {cta && (
               <button
                 onClick={cta.action}
-                className="flex-shrink-0 inline-flex items-center justify-center gap-1.5 rounded-full text-[0.8125rem] font-semibold transition-all whitespace-nowrap active:scale-[0.97]"
-                style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText, paddingTop: 9, paddingBottom: 9, paddingLeft: 16, paddingRight: 16, minWidth: 110 }}
+                className="flex-shrink-0 inline-flex items-center justify-center gap-1 rounded-full text-[0.8125rem] font-semibold transition-all whitespace-nowrap active:scale-[0.97]"
+                style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText, paddingTop: 9, paddingBottom: 9, paddingLeft: 12, paddingRight: 14 }}
               >
                 <Plus size={13} strokeWidth={2.5} /> {cta.label}
               </button>

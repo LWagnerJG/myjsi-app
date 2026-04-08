@@ -93,7 +93,7 @@ export const SegmentedToggle = ({
               />
             )}
             <span className={`relative z-10 flex items-center justify-center ${s.gap}`}
-              style={{ fontWeight: isSelected ? 600 : 500 }}
+              style={{ fontWeight: 600 }}
             >
               {Icon && <Icon className={s.iconSize} />}
               {opt.label}
