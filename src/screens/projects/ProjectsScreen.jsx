@@ -1,7 +1,9 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Briefcase, MapPin, Plus, X, Building2, Upload, ImageIcon } from 'lucide-react';
+import { Briefcase, MapPin, Plus, X, Building2, Upload, ImageIcon, Search } from 'lucide-react';
 import { INSTALLATION_CONSTANTS } from './installation-data.js';
+import { CITY_OPTIONS } from '../../constants/locations.js';
+import { AutoCompleteCombobox } from '../../components/forms/AutoCompleteCombobox.jsx';
 import { STAGES } from './data.js';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 import { isDarkTheme, JSI_COLORS } from '../../design-system/tokens.js';
@@ -26,8 +28,7 @@ const AddCustomerModal = ({ theme, onClose, onAdd }) => {
   const fieldBg = isDark ? 'rgba(255,255,255,0.06)' : '#f9f9f9';
 
   const [name, setName]       = useState('');
-  const [city, setCity]       = useState('');
-  const [state, setState]     = useState('');
+  const [location, setLocation] = useState('');
   const [vertical, setVertical] = useState('');
   const [error, setError]     = useState('');
   const nameRef = useRef(null);
@@ -36,14 +37,18 @@ const AddCustomerModal = ({ theme, onClose, onAdd }) => {
 
   const handleSubmit = () => {
     if (!name.trim())     { setError('Account name is required.'); return; }
-    if (!city.trim())     { setError('City is required.'); return; }
-    if (!state.trim())    { setError('State is required.'); return; }
+    if (!location.trim()) { setError('Location is required.'); return; }
     if (!vertical)        { setError('Select a vertical.'); return; }
+
+    // Parse "City, ST" format
+    const parts = location.trim().split(',').map(s => s.trim());
+    const city = parts[0] || location.trim();
+    const state = (parts[1] || '').toUpperCase().slice(0, 2);
 
     const newCustomer = {
       id: `cust-${Date.now()}`,
       name: name.trim(),
-      location: { city: city.trim(), state: state.trim().toUpperCase().slice(0, 2) },
+      location: { city, state },
       vertical,
       image: `https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&q=80`,
       standardsPrograms: [],
@@ -61,12 +66,12 @@ const AddCustomerModal = ({ theme, onClose, onAdd }) => {
     <div className="fixed inset-0 flex items-end sm:items-center justify-center"
       style={{ zIndex: 9000, backgroundColor: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
       onClick={onClose}>
-      <div className="w-full max-w-md rounded-t-3xl sm:rounded-2xl overflow-hidden"
+      <div className="w-full max-w-md max-h-[85vh] flex flex-col rounded-t-3xl sm:rounded-2xl overflow-hidden"
         style={{ backgroundColor: c.surface, border: `1px solid ${border}` }}
         onClick={e => e.stopPropagation()}>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: border }}>
+        <div className="flex items-center justify-between px-5 py-4 border-b flex-shrink-0" style={{ borderColor: border }}>
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: `${c.accent}15` }}>
               <Building2 className="w-4 h-4" style={{ color: c.accent }} />
@@ -79,7 +84,7 @@ const AddCustomerModal = ({ theme, onClose, onAdd }) => {
           </button>
         </div>
 
-        <div className="p-5 space-y-4">
+        <div className="p-5 space-y-4 overflow-y-auto flex-1 scrollbar-hide">
           {/* Name */}
           <div>
             <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: c.textSecondary, opacity: 0.7 }}>Account Name</label>
@@ -92,27 +97,20 @@ const AddCustomerModal = ({ theme, onClose, onAdd }) => {
             />
           </div>
 
-          {/* City + State */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: c.textSecondary, opacity: 0.7 }}>City</label>
-              <input
-                value={city} onChange={e => { setCity(e.target.value); setError(''); }}
-                placeholder="Indianapolis"
-                className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-all"
-                style={{ backgroundColor: fieldBg, border: `1.5px solid ${border}`, color: c.textPrimary }}
-              />
-            </div>
-            <div>
-              <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: c.textSecondary, opacity: 0.7 }}>State</label>
-              <input
-                value={state} onChange={e => { setState(e.target.value); setError(''); }}
-                placeholder="IN"
-                maxLength={2}
-                className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-all uppercase"
-                style={{ backgroundColor: fieldBg, border: `1.5px solid ${border}`, color: c.textPrimary }}
-              />
-            </div>
+          {/* Location */}
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: c.textSecondary, opacity: 0.7 }}>Location</label>
+            <AutoCompleteCombobox
+              value={location}
+              onChange={(val) => { setLocation(val); setError(''); }}
+              onSelect={(val) => { setLocation(val); setError(''); }}
+              onAddNew={(val) => { setLocation(val.trim()); setError(''); }}
+              options={CITY_OPTIONS}
+              placeholder="Search city..."
+              theme={theme}
+              compact
+              resetOnSelect={false}
+            />
           </div>
 
           {/* Vertical */}
@@ -167,21 +165,66 @@ const AddCustomerModal = ({ theme, onClose, onAdd }) => {
 /* ═══════════════════════════════════════════════════════════════
    ADD INSTALL MODAL
    ═══════════════════════════════════════════════════════════════ */
-const AddInstallModal = ({ theme, onClose, onAdd }) => {
+const AddInstallModal = ({ theme, onClose, onAdd, customers }) => {
   const isDark = isDarkTheme(theme);
   const c = theme.colors;
   const border = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)';
   const fieldBg = isDark ? 'rgba(255,255,255,0.06)' : '#f9f9f9';
   const MAX_PHOTOS = INSTALLATION_CONSTANTS.PHOTO_REQUIREMENTS.maxPhotos;
 
-  const [projectName, setProjectName] = useState('');
-  const [location, setLocation]       = useState('');
-  const [photos, setPhotos]           = useState([]);
-  const [error, setError]             = useState('');
-  const nameRef = useRef(null);
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [projectSearch, setProjectSearch]     = useState('');
+  const [projectOpen, setProjectOpen]         = useState(false);
+  const [location, setLocation]               = useState('');
+  const [photos, setPhotos]                   = useState([]);
+  const [error, setError]                     = useState('');
+  const searchRef = useRef(null);
   const fileInputRef = useRef(null);
+  const projectDropdownRef = useRef(null);
 
-  useEffect(() => { nameRef.current?.focus(); }, []);
+  useEffect(() => { searchRef.current?.focus(); }, []);
+
+  /* ── Build searchable project options from customers → projects ── */
+  const projectOptions = useMemo(() => {
+    return (customers || []).flatMap(cust =>
+      (cust.projects || []).map(p => ({
+        id: p.id,
+        label: `${cust.name}: ${p.name}`,
+        customerName: cust.name,
+        projectName: p.name,
+        location: p.location || `${cust.location?.city || ''}, ${cust.location?.state || ''}`,
+      })),
+    );
+  }, [customers]);
+
+  const filteredProjects = useMemo(() => {
+    const q = projectSearch.toLowerCase().trim();
+    if (!q) return projectOptions;
+    return projectOptions.filter(p =>
+      p.customerName.toLowerCase().includes(q) ||
+      p.projectName.toLowerCase().includes(q),
+    );
+  }, [projectSearch, projectOptions]);
+
+  /* ── Close project dropdown on outside click ── */
+  useEffect(() => {
+    if (!projectOpen) return;
+    const close = (e) => {
+      if (projectDropdownRef.current && !projectDropdownRef.current.contains(e.target)) setProjectOpen(false);
+    };
+    document.addEventListener('mousedown', close);
+    document.addEventListener('touchstart', close, { passive: true });
+    return () => { document.removeEventListener('mousedown', close); document.removeEventListener('touchstart', close); };
+  }, [projectOpen]);
+
+  /* ── Auto-fill location when project selected ── */
+  const handleSelectProject = useCallback((proj) => {
+    setSelectedProject(proj);
+    setProjectSearch(proj.label);
+    setProjectOpen(false);
+    if (proj.location && !location) setLocation(proj.location);
+    setError('');
+  }, [location]);
 
   const photoPreviewUrls = useMemo(
     () => photos.map(file => URL.createObjectURL(file)),
@@ -210,15 +253,13 @@ const AddInstallModal = ({ theme, onClose, onAdd }) => {
   }, []);
 
   const handleSubmit = () => {
-    const name = projectName.trim();
-    const loc  = location.trim();
-    if (!name || name.length < 3) { setError('Project name must be at least 3 characters.'); return; }
-    if (!loc || loc.length < 5)   { setError('Location must be at least 5 characters.'); return; }
+    if (!selectedProject)          { setError('Select a project.'); return; }
+    if (!location.trim() || location.trim().length < 3) { setError('Location is required.'); return; }
     if (photos.length < 1)        { setError('Add at least one photo.'); return; }
 
     onAdd({
-      name,
-      location: loc,
+      name: selectedProject.projectName,
+      location: location.trim(),
       image: URL.createObjectURL(photos[0]),
       photoCount: photos.length,
       status: 'pending',
@@ -250,26 +291,71 @@ const AddInstallModal = ({ theme, onClose, onAdd }) => {
         </div>
 
         <div className="p-5 space-y-4 overflow-y-auto flex-1 scrollbar-hide">
-          {/* Project Name */}
+          {/* Project spotlight search */}
           <div>
-            <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: c.textSecondary, opacity: 0.7 }}>Project Name</label>
-            <input
-              ref={nameRef}
-              value={projectName} onChange={e => { setProjectName(e.target.value); setError(''); }}
-              placeholder="e.g. Acme Corp HQ"
-              className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-all"
-              style={{ backgroundColor: fieldBg, border: `1.5px solid ${border}`, color: c.textPrimary }}
-            />
+            <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: c.textSecondary, opacity: 0.7 }}>Project</label>
+            <div className="relative" ref={projectDropdownRef}>
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none" style={{ color: c.textSecondary }} />
+              <input
+                ref={searchRef}
+                value={projectSearch}
+                onFocus={() => setProjectOpen(true)}
+                onChange={e => { setProjectSearch(e.target.value); setSelectedProject(null); setProjectOpen(true); setError(''); }}
+                placeholder="Search customer or project..."
+                className="w-full rounded-full pl-[34px] pr-4 text-sm outline-none"
+                style={{ height: 40, backgroundColor: isDark ? c.background : c.surface, border: `1px solid ${isDark ? 'rgba(255,255,255,0.11)' : 'rgba(0,0,0,0.07)'}`, color: c.textPrimary }}
+              />
+              {projectOpen && filteredProjects.length > 0 && (
+                <div className="absolute left-0 right-0 z-50 rounded-2xl border overflow-hidden"
+                  style={{
+                    top: 'calc(100% + 6px)',
+                    backgroundColor: c.surface,
+                    borderColor: isDark ? 'rgba(255,255,255,0.11)' : 'rgba(0,0,0,0.07)',
+                    boxShadow: isDark ? '0 8px 32px rgba(0,0,0,0.45)' : '0 8px 24px rgba(0,0,0,0.11)',
+                  }}>
+                  <div className="overflow-y-auto py-1" style={{ maxHeight: 216 }}>
+                    {filteredProjects.map(proj => (
+                      <button key={proj.id} type="button"
+                        onMouseDown={e => { e.preventDefault(); handleSelectProject(proj); }}
+                        onClick={() => handleSelectProject(proj)}
+                        className="w-full text-left px-4 py-2.5 text-[0.8125rem] transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.09] active:bg-black/[0.06]"
+                        style={{ color: c.textPrimary }}>
+                        <span className="font-medium" style={{ color: c.textSecondary }}>{proj.customerName}:</span>{' '}
+                        <span className="font-semibold">{proj.projectName}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {projectOpen && filteredProjects.length === 0 && projectSearch.trim() && (
+                <div className="absolute left-0 right-0 z-50 rounded-2xl border overflow-hidden"
+                  style={{
+                    top: 'calc(100% + 6px)',
+                    backgroundColor: c.surface,
+                    borderColor: isDark ? 'rgba(255,255,255,0.11)' : 'rgba(0,0,0,0.07)',
+                    boxShadow: isDark ? '0 8px 32px rgba(0,0,0,0.45)' : '0 8px 24px rgba(0,0,0,0.11)',
+                  }}>
+                  <div className="px-4 py-3 text-[0.8125rem]" style={{ color: c.textSecondary }}>
+                    No matching projects
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Location */}
           <div>
             <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: c.textSecondary, opacity: 0.7 }}>Location</label>
-            <input
-              value={location} onChange={e => { setLocation(e.target.value); setError(''); }}
-              placeholder="e.g. Jasper, IN"
-              className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-all"
-              style={{ backgroundColor: fieldBg, border: `1.5px solid ${border}`, color: c.textPrimary }}
+            <AutoCompleteCombobox
+              value={location}
+              onChange={(val) => { setLocation(val); setError(''); }}
+              onSelect={(val) => { setLocation(val); setError(''); }}
+              onAddNew={(val) => { setLocation(val.trim()); setError(''); }}
+              options={CITY_OPTIONS}
+              placeholder="Search city..."
+              theme={theme}
+              compact
+              resetOnSelect={false}
             />
           </div>
 
@@ -487,18 +573,20 @@ export const ProjectsScreen = forwardRef(({
       <div className="flex-shrink-0" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 12px)', backgroundColor: theme.colors.background }}>
         <div className="px-4 sm:px-6 lg:px-8 pb-3 max-w-5xl mx-auto w-full">
           <div className="flex items-center justify-between gap-3">
-            <SegmentedToggle
-              value={projectsTab}
-              onChange={setProjectsTab}
-              options={PROJECTS_TAB_OPTIONS}
-              size="sm"
-              theme={theme}
-            />
+            <div className="min-w-0 flex-1">
+              <SegmentedToggle
+                value={projectsTab}
+                onChange={setProjectsTab}
+                options={PROJECTS_TAB_OPTIONS}
+                size="sm"
+                theme={theme}
+              />
+            </div>
             {cta && (
               <button
                 onClick={cta.action}
-                className="inline-flex items-center justify-center gap-1.5 rounded-full text-[0.8125rem] font-semibold transition-all px-4 whitespace-nowrap active:scale-[0.97]"
-                style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText, paddingTop: 9, paddingBottom: 9 }}
+                className="flex-shrink-0 inline-flex items-center justify-center gap-1.5 rounded-full text-[0.8125rem] font-semibold transition-all whitespace-nowrap active:scale-[0.97]"
+                style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText, paddingTop: 9, paddingBottom: 9, paddingLeft: 16, paddingRight: 16, minWidth: 110 }}
               >
                 <Plus size={13} strokeWidth={2.5} /> {cta.label}
               </button>
@@ -621,6 +709,7 @@ export const ProjectsScreen = forwardRef(({
           theme={theme}
           onClose={() => setShowAddInstall(false)}
           onAdd={onAddInstall}
+          customers={customers}
         />
       )}
     </div>

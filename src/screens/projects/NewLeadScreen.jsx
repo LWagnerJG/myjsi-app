@@ -11,6 +11,7 @@ import { isDarkTheme, floatingBarStyle } from '../../design-system/tokens.js';
 import { hapticSuccess } from '../../utils/haptics.js';
 import { STAGES, VERTICALS, COMPETITORS } from './data.js';
 import { DISCOUNT_OPTIONS_WITH_UNKNOWN } from '../../constants/discounts.js';
+import { CITY_OPTIONS } from '../../constants/locations.js';
 import { JSI_SERIES } from '../products/data.js';
 import { CONTRACTS_DATA } from '../resources/contracts/data.js';
 import { ProductCard, ProductSpotlight, Reveal, Row, Section } from './NewLeadScreenComponents.jsx';
@@ -38,28 +39,7 @@ const getPoDateLabel = (option) => {
   return null;
 };
 
-const TOP_100_CITIES = [
-  'New York, NY', 'Los Angeles, CA', 'Chicago, IL', 'Houston, TX', 'Phoenix, AZ',
-  'Philadelphia, PA', 'San Antonio, TX', 'San Diego, CA', 'Dallas, TX', 'San Jose, CA',
-  'Austin, TX', 'Jacksonville, FL', 'Fort Worth, TX', 'Columbus, OH', 'Charlotte, NC',
-  'Indianapolis, IN', 'San Francisco, CA', 'Seattle, WA', 'Denver, CO', 'Nashville, TN',
-  'Oklahoma City, OK', 'El Paso, TX', 'Washington, DC', 'Las Vegas, NV', 'Louisville, KY',
-  'Memphis, TN', 'Portland, OR', 'Baltimore, MD', 'Milwaukee, WI', 'Albuquerque, NM',
-  'Tucson, AZ', 'Fresno, CA', 'Sacramento, CA', 'Kansas City, MO', 'Mesa, AZ',
-  'Atlanta, GA', 'Omaha, NE', 'Colorado Springs, CO', 'Raleigh, NC', 'Long Beach, CA',
-  'Virginia Beach, VA', 'Minneapolis, MN', 'Tampa, FL', 'New Orleans, LA', 'Arlington, TX',
-  'Bakersfield, CA', 'Honolulu, HI', 'Anaheim, CA', 'Aurora, CO', 'Santa Ana, CA',
-  'Corpus Christi, TX', 'Riverside, CA', 'Lexington, KY', 'St. Louis, MO', 'Pittsburgh, PA',
-  'Stockton, CA', 'Anchorage, AK', 'Cincinnati, OH', 'St. Paul, MN', 'Greensboro, NC',
-  'Toledo, OH', 'Newark, NJ', 'Plano, TX', 'Henderson, NV', 'Orlando, FL',
-  'Lincoln, NE', 'Jersey City, NJ', 'Chandler, AZ', 'Fort Wayne, IN', 'St. Petersburg, FL',
-  'Laredo, TX', 'Norfolk, VA', 'Madison, WI', 'Durham, NC', 'Lubbock, TX',
-  'Winston-Salem, NC', 'Garland, TX', 'Glendale, AZ', 'Hialeah, FL', 'Reno, NV',
-  'Baton Rouge, LA', 'Irvine, CA', 'Chesapeake, VA', 'Irving, TX', 'Scottsdale, AZ',
-  'North Las Vegas, NV', 'Fremont, CA', 'Gilbert, AZ', 'San Bernardino, CA', 'Birmingham, AL',
-  'Boise, ID', 'Rochester, NY', 'Richmond, VA', 'Spokane, WA', 'Des Moines, IA',
-  'Montgomery, AL', 'Modesto, CA', 'Fayetteville, NC', 'Tacoma, WA', 'Akron, OH',
-];
+
 const END_USER_OPTIONS = [
   'Unknown',
   'ABC Corporation', 'GlobalTech', 'Midwest Health', 'State University', 'Metro Hospitality',
@@ -970,7 +950,7 @@ export const NewLeadScreen = ({
                         onChange={(val) => { upd('installationLocation', val); markTouched('installationLocation'); }}
                         onSelect={(val) => { upd('installationLocation', val); markTouched('installationLocation'); }}
                         onAddNew={(val) => { upd('installationLocation', val.trim()); markTouched('installationLocation'); }}
-                        options={TOP_100_CITIES}
+                        options={CITY_OPTIONS}
                         placeholder="Search city..."
                         theme={theme}
                         compact
