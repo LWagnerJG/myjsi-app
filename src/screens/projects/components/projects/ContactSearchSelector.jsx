@@ -16,7 +16,7 @@ export const ContactSearchSelector = ({ value, onChange, dealers, theme }) => {
     });
     return all;
   }, [dealers]);
-  const filtered = useMemo(() => !query ? contacts : contacts.filter(c => c.name.toLowerCase().includes(query.toLowerCase()) || c.title.toLowerCase().includes(query.toLowerCase())), [contacts, query]);
+  const filtered = useMemo(() => !query ? contacts : contacts.filter(c => c.name?.toLowerCase().includes(query.toLowerCase()) || c.title?.toLowerCase().includes(query.toLowerCase())), [contacts, query]);
   useEffect(() => { if (!open) return; const close = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); }; window.addEventListener('mousedown', close); return () => window.removeEventListener('mousedown', close); }, [open]);
   const fieldBg = isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.025)';
   const fieldBorder = isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)';

@@ -22,7 +22,7 @@ const fmtK = (n) => {
 };
 
 const goalTone  = (pct) => pct >= 80 ? '#4A7C59' : pct >= 50 ? '#C4956A' : '#B85C5C';
-const initials  = (name) => name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
+const initials  = (name) => (name || '').split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
 
 /* ── Card section header ─────────────────────────────── */
 const CardHeader = ({ children, right, dark, colors }) => (
