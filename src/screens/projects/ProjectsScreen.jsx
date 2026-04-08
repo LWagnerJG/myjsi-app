@@ -30,15 +30,19 @@ const AddCustomerModal = ({ theme, onClose, onAdd }) => {
   const [name, setName]       = useState('');
   const [location, setLocation] = useState('');
   const [vertical, setVertical] = useState('');
+  const [customVertical, setCustomVertical] = useState('');
   const [error, setError]     = useState('');
   const nameRef = useRef(null);
 
   useEffect(() => { nameRef.current?.focus(); }, []);
 
+  const resolvedVertical = vertical === 'Other' && customVertical.trim() ? customVertical.trim() : vertical;
+
   const handleSubmit = () => {
     if (!name.trim())     { setError('Account name is required.'); return; }
     if (!location.trim()) { setError('Location is required.'); return; }
     if (!vertical)        { setError('Select a vertical.'); return; }
+    if (vertical === 'Other' && !customVertical.trim()) { setError('Enter a custom vertical.'); return; }
 
     // Parse "City, ST" format
     const parts = location.trim().split(',').map(s => s.trim());
@@ -49,7 +53,7 @@ const AddCustomerModal = ({ theme, onClose, onAdd }) => {
       id: `cust-${Date.now()}`,
       name: name.trim(),
       location: { city, state },
-      vertical,
+      vertical: resolvedVertical,
       image: `https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&q=80`,
       standardsPrograms: [],
       orders: { current: [], history: [] },
@@ -66,12 +70,12 @@ const AddCustomerModal = ({ theme, onClose, onAdd }) => {
     <div className="fixed inset-0 flex items-end sm:items-center justify-center"
       style={{ zIndex: 9000, backgroundColor: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
       onClick={onClose}>
-      <div className="w-full max-w-md max-h-[85vh] flex flex-col rounded-t-3xl sm:rounded-2xl overflow-hidden"
-        style={{ backgroundColor: c.surface, border: `1px solid ${border}` }}
+      <div className="w-full max-w-lg max-h-[90vh] flex flex-col rounded-t-3xl sm:rounded-2xl"
+        style={{ backgroundColor: c.surface, border: `1px solid ${border}`, overflow: 'visible' }}
         onClick={e => e.stopPropagation()}>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b flex-shrink-0" style={{ borderColor: border }}>
+        <div className="flex items-center justify-between px-5 py-4 border-b flex-shrink-0 rounded-t-3xl sm:rounded-t-2xl" style={{ borderColor: border, backgroundColor: c.surface }}>
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: `${c.accent}15` }}>
               <Building2 className="w-4 h-4" style={{ color: c.accent }} />
@@ -84,7 +88,7 @@ const AddCustomerModal = ({ theme, onClose, onAdd }) => {
           </button>
         </div>
 
-        <div className="p-5 space-y-4 overflow-y-auto flex-1 scrollbar-hide">
+        <div className="p-5 space-y-4 overflow-y-auto flex-1 scrollbar-hide" style={{ backgroundColor: c.surface, borderBottomLeftRadius: 'inherit', borderBottomRightRadius: 'inherit' }}>
           {/* Name */}
           <div>
             <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: c.textSecondary, opacity: 0.7 }}>Account Name</label>
@@ -120,9 +124,36 @@ const AddCustomerModal = ({ theme, onClose, onAdd }) => {
               {VERTICAL_OPTIONS.map(v => {
                 const active = vertical === v;
                 const vColor = VERTICAL_COLORS[v] || c.accent;
+                if (v === 'Other') {
+                  return (
+                    <div key={v} className="inline-flex items-center gap-0 rounded-full transition-all"
+                      style={{
+                        backgroundColor: active ? `${vColor}20` : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'),
+                        border: active ? `1.5px solid ${vColor}60` : `1.5px solid ${border}`,
+                      }}>
+                      <button type="button"
+                        onClick={() => { setVertical('Other'); setError(''); }}
+                        className="px-3 py-1.5 text-xs font-semibold"
+                        style={{ color: active ? vColor : c.textSecondary }}>
+                        Other{active ? ':' : ''}
+                      </button>
+                      {active && (
+                        <input
+                          autoFocus
+                          value={customVertical}
+                          onChange={e => { setCustomVertical(e.target.value); setError(''); }}
+                          placeholder="type..."
+                          className="bg-transparent text-xs font-semibold outline-none w-20 pr-3 py-1.5"
+                          style={{ color: vColor }}
+                          maxLength={30}
+                        />
+                      )}
+                    </div>
+                  );
+                }
                 return (
                   <button key={v} type="button"
-                    onClick={() => { setVertical(v); setError(''); }}
+                    onClick={() => { setVertical(v); setCustomVertical(''); setError(''); }}
                     className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-[0.97]"
                     style={{
                       backgroundColor: active ? `${vColor}20` : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'),
@@ -272,12 +303,12 @@ const AddInstallModal = ({ theme, onClose, onAdd, customers }) => {
     <div className="fixed inset-0 flex items-end sm:items-center justify-center"
       style={{ zIndex: 9000, backgroundColor: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
       onClick={onClose}>
-      <div className="w-full max-w-md max-h-[85vh] flex flex-col rounded-t-3xl sm:rounded-2xl overflow-hidden"
-        style={{ backgroundColor: c.surface, border: `1px solid ${border}` }}
+      <div className="w-full max-w-lg max-h-[90vh] flex flex-col rounded-t-3xl sm:rounded-2xl"
+        style={{ backgroundColor: c.surface, border: `1px solid ${border}`, overflow: 'visible' }}
         onClick={e => e.stopPropagation()}>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b flex-shrink-0" style={{ borderColor: border }}>
+        <div className="flex items-center justify-between px-5 py-4 border-b flex-shrink-0 rounded-t-3xl sm:rounded-t-2xl" style={{ borderColor: border, backgroundColor: c.surface }}>
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: `${c.accent}15` }}>
               <ImageIcon className="w-4 h-4" style={{ color: c.accent }} />
@@ -290,7 +321,7 @@ const AddInstallModal = ({ theme, onClose, onAdd, customers }) => {
           </button>
         </div>
 
-        <div className="p-5 space-y-4 overflow-y-auto flex-1 scrollbar-hide">
+        <div className="p-5 space-y-4 overflow-y-auto flex-1 scrollbar-hide" style={{ backgroundColor: c.surface, borderBottomLeftRadius: 'inherit', borderBottomRightRadius: 'inherit' }}>
           {/* Project spotlight search */}
           <div>
             <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: c.textSecondary, opacity: 0.7 }}>Project</label>
