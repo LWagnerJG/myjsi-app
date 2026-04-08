@@ -38,13 +38,13 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
   const liRef  = useFadeUp(140);
 
   if (!order) return (
-    <div className="flex flex-col h-full items-center justify-center gap-3 app-header-offset" style={{ backgroundColor: c.background }}>
+    <div className="min-h-full flex flex-col items-center justify-center gap-3" style={{ backgroundColor: c.background }}>
       <p className="text-sm" style={{ color: c.textSecondary }}>Order not found</p>
       <button onClick={() => onNavigate('orders')} className="text-sm font-medium underline" style={{ color: c.accent }}>Back to Orders</button>
     </div>
   );
 
-  const sc  = STATUS_COLORS[order.status] || '#8B8680';
+  const sc  = STATUS_COLORS[order.status] || c.textSecondary;
   const cur = IDX[order.status] ?? 0;
   const pct = PCT[cur];
   const qty = order.lineItems.reduce((s, li) => s + li.quantity, 0);
@@ -72,8 +72,8 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
   ].filter(Boolean);
 
   return (
-    <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: c.background }}>
-      <div className="flex-1 overflow-y-auto px-5 pb-10 scrollbar-hide">
+    <div className="min-h-full" style={{ backgroundColor: c.background }}>
+      <div className="flex-1 overflow-y-auto px-5 pb-10 scrollbar-hide" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 16px)' }}>
         <div className="max-w-xl mx-auto w-full">
 
           {/* ── header card ── */}

@@ -7,7 +7,7 @@ import React, {
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
-import { isDarkTheme } from '../../design-system/tokens.js';
+import { isDarkTheme, cardSurface } from '../../design-system/tokens.js';
 import {
     List,
     Grid,
@@ -19,11 +19,7 @@ import { PRODUCTS_CATEGORIES_DATA, PRODUCT_DATA, FABRICS_DATA, JSI_MODELS, JSI_S
 import { usePersistentState } from '../../hooks/usePersistentState.js';
 
 // ─── Clean card helpers ───────────────────────────────────────────────────────────────
-const cardStyle = (dark) => ({
-    backgroundColor: dark ? '#2A2A2A' : '#FFFFFF',
-    border: dark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)',
-    boxShadow: 'none',
-});
+const cardStyle = (dark, theme) => cardSurface(theme || { colors: { surface: dark ? '#2A2A2A' : '#FFFFFF', border: dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)' } });
 
 const normalizeSeriesKey = (value) => String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 
@@ -122,87 +118,75 @@ const CategoryCard = React.memo(({
                 onClick={handleClick}
                 className={`rounded-[24px] overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] ${className}`}
                 style={{
-                    ...cardStyle(dark),
+                    ...cardStyle(dark, theme),
                     padding: 0,
                 }}
             >
-                <div className="p-5 pb-3 min-h-[148px]">
-                    <div className="flex items-center justify-between mb-3">
-                        <h2 className="text-xl font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>
+                <div className="p-4 pb-3">
+                    <div className="flex items-center justify-between mb-2.5">
+                        <h2 className="text-[0.9375rem] font-semibold tracking-tight" style={{ color: theme.colors.textPrimary }}>
                             {category.name}
                         </h2>
-                        <ChevronRight className="w-5 h-5 opacity-40" style={{ color: theme.colors.textSecondary }} />
+                        <ChevronRight className="w-4 h-4 opacity-30" style={{ color: theme.colors.textSecondary }} />
                     </div>
-                    <div className="w-full md:max-w-[430px] ml-0 md:ml-auto grid grid-cols-3 gap-3">
-                        {category.images?.map((img, i) => (
+                    <div className="grid grid-cols-2 gap-2">
+                        {category.images?.slice(0, 2).map((img, i) => (
                             <div
                                 key={i}
-                                className="w-full h-[86px] rounded-2xl overflow-hidden"
+                                className="w-full aspect-[4/3] rounded-xl overflow-hidden"
+                                style={{ backgroundColor: dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)' }}
                             >
                                 <img
                                     src={img}
                                     alt={`${category.name} ${i + 1}`}
-                                    className="w-full h-full object-contain object-center mix-blend-multiply scale-[1.04] hover:scale-[1.1] transition-transform duration-500"
+                                    className="w-full h-full object-contain object-center mix-blend-multiply hover:scale-[1.06] transition-transform duration-500"
                                     loading="lazy"
                                 />
                             </div>
                         ))}
                     </div>
                 </div>
-                {category.description && (
-                    <div
-                        className="px-5 py-2.5 text-xs font-medium"
-                        style={{
-                            color: theme.colors.textSecondary,
-                            borderTop: dark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.05)',
-                        }}
-                    >
-                        {category.description}
-                    </div>
-                )}
             </div>
         );
     }
 
-    // List view
+    // List view — taller rows with bigger thumbnail
     return (
         <div
             onClick={handleClick}
-            className={`rounded-2xl overflow-hidden cursor-pointer transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] ${className}`}
-            style={{ ...cardStyle(dark) }}
+            className={`rounded-[24px] overflow-hidden cursor-pointer transition-all duration-200 hover:scale-[1.005] active:scale-[0.99] ${className}`}
+            style={{ ...cardStyle(dark, theme) }}
         >
-            <div className="p-3.5 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <div
-                        className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0"
-                        style={{ backgroundColor: 'transparent' }}
-                    >
-                        <img
-                            src={category.images?.[0]}
-                            alt={category.name}
-                            className="w-full h-full object-contain mix-blend-multiply"
-                            loading="lazy"
-                        />
-                    </div>
-                    <div>
-                        <h3 className="font-semibold text-[0.9375rem]" style={{ color: theme.colors.textPrimary }}>
-                            {category.name}
-                        </h3>
-                        {category.description && (
-                            <p className="text-xs mt-0.5" style={{ color: theme.colors.textSecondary }}>
-                                {category.description}
-                            </p>
-                        )}
-                    </div>
+            <div className="p-3 flex items-center gap-3.5">
+                <div
+                    className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0"
+                    style={{ backgroundColor: dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)' }}
+                >
+                    <img
+                        src={category.images?.[0]}
+                        alt={category.name}
+                        className="w-full h-full object-contain mix-blend-multiply"
+                        loading="lazy"
+                    />
                 </div>
-                <ChevronRight className="w-4 h-4 flex-shrink-0 opacity-40" style={{ color: theme.colors.textSecondary }} />
+                <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-[0.9375rem]" style={{ color: theme.colors.textPrimary }}>
+                        {category.name}
+                    </h3>
+                    {category.description && (
+                        <p className="text-[0.8125rem] mt-0.5" style={{ color: theme.colors.textSecondary }}>
+                            {category.description}
+                        </p>
+                    )}
+                </div>
+                <ChevronRight className="w-4 h-4 flex-shrink-0 opacity-30" style={{ color: theme.colors.textSecondary }} />
             </div>
         </div>
     );
 });
 CategoryCard.displayName = 'CategoryCard';
 
-// ─── View mode toggle — glass button ─────────────────────────────────────────
+// ─── View mode toggle — compact icon button, same height as search bar ───────
 const ViewModeToggle = React.memo(({ viewMode, onToggle, theme }) => {
     const dark = isDarkTheme(theme);
     const isGrid = viewMode === 'grid';
@@ -210,18 +194,15 @@ const ViewModeToggle = React.memo(({ viewMode, onToggle, theme }) => {
     return (
         <button
             onClick={onToggle}
-            className="h-12 px-4 rounded-full transition-all duration-200 active:scale-95 hover:scale-[1.02] inline-flex items-center gap-2.5"
-            style={{
-                ...cardStyle(dark),
-                minWidth: 156,
-            }}
+            className="w-[44px] h-[44px] flex-shrink-0 rounded-2xl flex items-center justify-center transition-all duration-200 active:scale-90"
+            style={cardStyle(dark, theme)}
             aria-label={actionLabel}
             title={actionLabel}
         >
-            {isGrid ? <List className="w-4.5 h-4.5" style={{ color: theme.colors.textPrimary }} /> : <Grid className="w-4.5 h-4.5" style={{ color: theme.colors.textPrimary }} />}
-            <span className="text-xs font-semibold leading-none whitespace-nowrap" style={{ color: theme.colors.textPrimary }}>
-                {actionLabel}
-            </span>
+            {isGrid
+                ? <List className="w-[18px] h-[18px]" style={{ color: theme.colors.textPrimary }} />
+                : <Grid className="w-[18px] h-[18px]" style={{ color: theme.colors.textPrimary }} />
+            }
         </button>
     );
 });
@@ -238,7 +219,7 @@ const StickyHeader = React.memo(({
     showViewToggle,
 }) => (
     <div
-        className="flex-shrink-0 px-4 sm:px-5 pt-2 pb-3"
+        className="flex-shrink-0 px-4 sm:px-5 pt-4 pb-3"
         style={{ backgroundColor: theme.colors.background }}
     >
         <div className="flex items-center gap-3">
@@ -265,7 +246,7 @@ StickyHeader.displayName = 'StickyHeader';
 const EmptyState = React.memo(({ searchTerm, theme, onClearSearch }) => {
     const dark = isDarkTheme(theme);
     return (
-        <div className="rounded-[24px] p-10 text-center" style={{ ...cardStyle(dark) }}>
+        <div className="rounded-[24px] p-10 text-center" style={{ ...cardStyle(dark, theme) }}>
             <Package className="w-12 h-12 mx-auto mb-4" style={{ color: theme.colors.textSecondary }} />
             <p className="font-semibold text-lg mb-2" style={{ color: theme.colors.textPrimary }}>
                 No Products Found
@@ -323,7 +304,7 @@ const FamiliesView = React.memo(({ groupedSeries, theme, onSeriesClick, searchTe
 
     if (groupedSeries.length === 0) {
         return (
-            <div className="rounded-[24px] p-10 text-center" style={{ ...cardStyle(dark) }}>
+            <div className="rounded-[24px] p-10 text-center" style={{ ...cardStyle(dark, theme) }}>
                 <Package className="w-12 h-12 mx-auto mb-4" style={{ color: theme.colors.textSecondary }} />
                 <p className="font-semibold text-lg mb-2" style={{ color: theme.colors.textPrimary }}>
                     No Series Found
@@ -391,7 +372,7 @@ FamiliesView.displayName = 'FamiliesView';
 // ─── Main screen ────────────────────────────────────────────────────────────
 export const ProductsScreen = ({ theme, onNavigate }) => {
     const [searchTerm, setSearchTerm] = useState('');
-    const [viewMode, setViewMode] = usePersistentState('pref.products.viewMode', 'grid');
+    const [viewMode, setViewMode] = usePersistentState('pref.products.viewMode', 'list');
     const [productView, setProductView] = usePersistentState('pref.products.productView', 'categories');
     const scrollContainerRef = useRef(null);
     const activeViewMode = viewMode === 'list' ? 'list' : 'grid';
@@ -492,7 +473,7 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
                     ) : filteredCategories.length === 0 ? (
                         <EmptyState searchTerm={searchTerm} theme={theme} onClearSearch={clearSearch} />
                     ) : (
-                        <div className={activeViewMode === 'grid' ? 'grid grid-cols-1 xl:grid-cols-2 gap-4' : 'space-y-2'} style={{ paddingTop: 4 }}>
+                        <div className={activeViewMode === 'grid' ? 'grid grid-cols-2 gap-2.5' : 'space-y-2'} style={{ paddingTop: 4 }}>
                             {filteredCategories.map((category) => (
                                 <CategoryCard
                                     key={category.name}

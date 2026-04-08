@@ -5,13 +5,10 @@ import { ORDER_DATA, STATUS_COLORS } from '../orders/data.js';
 import { SalesByVerticalBreakdown } from './components/SalesByVerticalBreakdown.jsx';
 import { CountUp } from '../../components/common/CountUp.jsx';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
-import { isDarkTheme } from '../../design-system/tokens.js';
+import { isDarkTheme, subtleBg } from '../../design-system/tokens.js';
 import { formatCurrency, formatCompanyName } from '../../utils/format.js';
 
 /* ── helpers ─────────────────────────────────────────────────── */
-
-const subtle = (isDark, strength = 1) =>
-  isDark ? `rgba(255,255,255,${(0.07 * strength).toFixed(3)})` : `rgba(0,0,0,${(0.025 * strength).toFixed(4)})`;
 
 const parseQuarterKey = (key = '') => {
   const [y, q] = key.split('-Q');
@@ -148,7 +145,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
         <h3 className="text-[0.9375rem] font-bold" style={{ color: colors.textPrimary }}>{title}</h3>
         {badge && (
           <span className="text-[0.6875rem] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
-            style={{ backgroundColor: subtle(isDark, 1.5), color: colors.textSecondary }}>{badge}</span>
+            style={{ backgroundColor: subtleBg(theme, 1.5), color: colors.textSecondary }}>{badge}</span>
         )}
       </div>
       {action && (
@@ -162,11 +159,11 @@ export const SalesScreen = ({ theme, onNavigate }) => {
 
   /* shared content row */
   const tileRowCls = "flex items-center justify-between py-2.5 px-3.5 rounded-xl";
-  const tileRowBg = subtle(isDark);
+  const tileRowBg = subtleBg(theme);
 
   return (
-    <div className="min-h-full app-header-offset" style={{ backgroundColor: colors.background }}>
-      <div className="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-5 pb-4 space-y-4 lg:space-y-5 max-w-5xl mx-auto w-full">
+    <div className="min-h-full app-header-offset" style={{ backgroundColor: colors.background, color: colors.textPrimary }}>
+      <div className="px-4 sm:px-6 lg:px-8 pt-4 pb-4 space-y-4 lg:space-y-5 max-w-5xl mx-auto w-full">
 
         {/* ── Hero KPI + sidebar ── */}
         <div className="grid grid-cols-1 lg:grid-cols-[1.65fr_1fr] xl:grid-cols-[1.8fr_1fr] gap-4 lg:gap-5">
@@ -204,7 +201,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                     {deltaLabel} {aheadOfPace ? 'Ahead' : 'Behind'}
                   </div>
                 </div>
-                <div className="h-2 w-full rounded-full overflow-hidden" style={{ backgroundColor: subtle(isDark, 1.5) }}>
+                <div className="h-2 w-full rounded-full overflow-hidden" style={{ backgroundColor: subtleBg(theme, 1.5) }}>
                   <div className="h-full rounded-full" style={{ backgroundColor: colors.accent, width: ready ? `${progressPct}%` : '0%', transition: 'width 0.7s ease-out 0.1s' }} />
                 </div>
                 <div className="text-xs font-semibold opacity-35 tabular-nums">{progressPct.toFixed(1)}% of $7M goal</div>
@@ -227,9 +224,13 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                         )}
                         <div className="w-full rounded-md" style={{
                           height: ready ? `${Math.max(8, pct)}%` : '0%',
-                          backgroundColor: colors.accent,
-                          opacity: isHovered ? (isDark ? 0.90 : 0.70) : (isDark ? 0.58 : 0.32),
-                          transition: `height 0.4s ease-out ${0.1 + i * 0.025}s, opacity 0.15s`,
+                          // In dark mode, semi-transparent accent blends grey with the surface.
+                          // Use explicit rgba so bars appear as warm cream, not muddy grey.
+                          backgroundColor: isDark
+                            ? (isHovered ? 'rgba(245,240,235,1.0)' : 'rgba(245,240,235,0.70)')
+                            : colors.accent,
+                          opacity: isDark ? 1 : (isHovered ? 0.75 : 0.32),
+                          transition: `height 0.4s ease-out ${0.1 + i * 0.025}s, background-color 0.15s, opacity 0.15s`,
                         }} />
                       </div>
                       <span className="text-[0.6875rem] font-semibold" style={{ opacity: isHovered ? 0.8 : 0.4, transition: 'opacity 0.15s' }}>{m.month}</span>
@@ -257,7 +258,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                       }}>
                       <div className="flex items-center gap-2.5 min-w-0">
                         <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-black shrink-0"
-                          style={{ backgroundColor: subtle(isDark, 2), color: colors.textSecondary }}>
+                          style={{ backgroundColor: subtleBg(theme, 2), color: colors.textSecondary }}>
                           {idx + 1}
                         </span>
                         <span className="text-sm font-semibold truncate">{leader.name}</span>

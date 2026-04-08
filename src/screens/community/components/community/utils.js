@@ -1,6 +1,6 @@
 import { Package, DollarSign, Calendar, Zap } from 'lucide-react';
 
-export const cardBg = (dark) => dark ? '#2A2A2A' : '#FFFFFF';
+export const cardBg = (dark) => dark ? 'rgba(255,255,255,0.08)' : '#FFFFFF';
 export const subtleBorder = (dark) => dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.05)';
 
 export const formatTimestamp = (ts) => {

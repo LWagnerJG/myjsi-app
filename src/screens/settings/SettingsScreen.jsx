@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { User, Bell, Palette, ChevronDown, MapPin, Loader2 } from 'lucide-react';
 import { LEAD_TIMES_DATA } from '../resources/lead-times/data.js';
-import { isDarkTheme, DESIGN_TOKENS } from '../../design-system/tokens.js';
+import { isDarkTheme, DESIGN_TOKENS, inputSurface, subtleBorder } from '../../design-system/tokens.js';
 import { hapticLight } from '../../utils/haptics.js';
 
 const Toggle = ({ checked, onChange, theme }) => {
@@ -48,7 +48,7 @@ const Select = ({ value, onChange, options, theme }) => {
 
   return (
     <div className="relative" ref={triggerRef}>
-      <button type="button" onClick={() => setOpen(o => !o)} className="w-full px-4 py-2.5 rounded-2xl flex items-center justify-between text-sm font-medium transition-all" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : theme.colors.surface, border: `1px solid ${theme.colors.border}`, color: theme.colors.textPrimary }}>
+      <button type="button" onClick={() => setOpen(o => !o)} className="w-full px-4 py-2.5 rounded-2xl flex items-center justify-between text-sm font-medium transition-all" style={{ ...inputSurface(theme) }}>
         <span>{current}</span>
         <ChevronDown className={`w-4 h-4 transition-transform ${open ? 'rotate-180' : ''}`} style={{ color: theme.colors.textSecondary }} />
       </button>
@@ -56,7 +56,7 @@ const Select = ({ value, onChange, options, theme }) => {
         <div ref={portalRef} style={{ position: 'fixed', top: rect.bottom + 6, left: rect.left, width: rect.width, zIndex: DESIGN_TOKENS.zIndex.popover }}>
           <div className="py-1.5 rounded-2xl overflow-hidden" style={{
             backgroundColor: theme.colors.surface,
-            border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.06)',
+            border: subtleBorder(theme),
             boxShadow: DESIGN_TOKENS.shadows.modal
           }}>
             {options.map(o => (
@@ -76,7 +76,7 @@ const Select = ({ value, onChange, options, theme }) => {
 
 // Section header
 const SectionHeader = ({ icon: Icon, title, subtitle, theme }) => (
-  <div className="px-5 py-4" style={{ borderBottom: `1px solid ${isDarkTheme(theme) ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.05)'}` }}>
+  <div className="px-5 py-4" style={{ borderBottom: subtleBorder(theme) }}>
     <div className="flex items-center gap-2.5">
       <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ backgroundColor: isDarkTheme(theme) ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.06)' }}>
         <Icon className="w-4 h-4" style={{ color: theme.colors.accent }} />
@@ -197,7 +197,7 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
   return (
     <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
       <div className="flex-1 overflow-y-auto scrollbar-hide">
-        <div className="px-4 sm:px-6 lg:px-8 pb-24 lg:pb-12 space-y-5 max-w-xl mx-auto w-full pt-2">
+        <div className="px-4 sm:px-6 lg:px-8 pb-24 lg:pb-12 space-y-5 max-w-xl mx-auto w-full pt-4">
 
           {/* Account */}
           <GlassCard theme={theme} className="overflow-hidden">
@@ -215,7 +215,7 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
                     }}
                     autoComplete="given-name"
                     className="w-full px-4 h-10 rounded-2xl text-sm font-medium outline-none transition-all focus:ring-2 focus:ring-offset-1"
-                    style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : theme.colors.surface, border:`1px solid ${theme.colors.border}`, color:theme.colors.textPrimary, focusRingColor: theme.colors.accent }}
+                    style={{ ...inputSurface(theme) }}
                   />
                 </div>
                 <div>
@@ -229,7 +229,7 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
                     }}
                     autoComplete="family-name"
                     className="w-full px-4 h-10 rounded-2xl text-sm font-medium outline-none transition-all focus:ring-2 focus:ring-offset-1"
-                    style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : theme.colors.surface, border:`1px solid ${theme.colors.border}`, color:theme.colors.textPrimary }}
+                    style={{ ...inputSurface(theme) }}
                   />
                 </div>
               </div>
@@ -245,7 +245,7 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
                     inputMode="text"
                     placeholder="Start typing full street address"
                     className="w-full pl-10 pr-4 h-10 rounded-2xl text-sm font-medium outline-none transition-all focus:ring-2 focus:ring-offset-1"
-                    style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : theme.colors.surface, border:`1px solid ${theme.colors.border}`, color:theme.colors.textPrimary }}
+                    style={{ ...inputSurface(theme) }}
                   />
                   <MapPin className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: theme.colors.textSecondary }} />
                   {showAddressSuggestions && (
@@ -253,7 +253,7 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
                       className="absolute left-0 right-0 mt-1.5 rounded-2xl border overflow-hidden z-20"
                       style={{
                         borderColor: theme.colors.border,
-                        backgroundColor: isDark ? '#242424' : '#FFFFFF',
+                        backgroundColor: isDark ? theme.colors.surface : '#FFFFFF',
                         boxShadow: DESIGN_TOKENS.shadows.modal,
                       }}
                     >

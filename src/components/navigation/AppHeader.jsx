@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ArrowLeft, User } from 'lucide-react';
 import { logoLight } from '../../data/theme/themeData.js';
-import { getHomeChromeIconButtonStyles, getHomeChromePillStyles } from '../../design-system/homeChrome.js';
+import { getHomeChromeIconButtonStyles, getHomeChromePillStyles, HOME_CHROME_PILL_HEIGHT } from '../../design-system/homeChrome.js';
 import { isDarkTheme } from '../../design-system/tokens.js';
 
 export const AppHeader = React.memo(({
@@ -129,36 +129,34 @@ export const AppHeader = React.memo(({
 
             {!isHome && (
                 <>
+                    {/* Subtle fade below the pill — blur-only, no color fill */}
                     <div
                         aria-hidden="true"
                         className="fixed top-0 left-0 right-0 pointer-events-none"
                         style={{
                             height: innerScrimHeight,
                             zIndex: 29,
-                            backgroundColor: `rgba(${bgR},0.15)`,
-                            backdropFilter: 'blur(20px) saturate(1.6)',
-                            WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
-                            maskImage: 'linear-gradient(to bottom, black 0%, black 60%, rgba(0,0,0,0.42) 76%, transparent 100%)',
-                            WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 60%, rgba(0,0,0,0.42) 76%, transparent 100%)',
-                        }}
-                    />
-
-                    <div
-                        aria-hidden="true"
-                        className="fixed top-0 left-0 right-0 pointer-events-none"
-                        style={{
-                            height: innerScrimHeight,
-                            zIndex: 29,
-                            background: `linear-gradient(to bottom,
-                                rgba(${bgR},0.38) 0%,
-                                rgba(${bgR},0.22) 34%,
-                                rgba(${bgR},0.09) 60%,
-                                rgba(${bgR},0.018) 80%,
-                                rgba(${bgR},0) 100%)`,
+                            background: 'transparent',
                         }}
                     />
                 </>
             )}
+
+            {/* ── Universal top-blur backing ──────────────────────────────────────────
+                Pure blur layer — no background color. Lets the blur effect alone
+                soften content scrolling behind the header pill on all screens. */}
+            <div
+                aria-hidden="true"
+                className="fixed top-0 left-0 right-0 pointer-events-none"
+                style={{
+                    height: 'calc(env(safe-area-inset-top, 0px) + 96px)',
+                    zIndex: 27,
+                    backdropFilter: 'blur(32px) saturate(1.8)',
+                    WebkitBackdropFilter: 'blur(32px) saturate(1.8)',
+                    maskImage: 'linear-gradient(to bottom, black 0%, black 52%, rgba(0,0,0,0.5) 72%, rgba(0,0,0,0.12) 88%, transparent 100%)',
+                    WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 52%, rgba(0,0,0,0.5) 72%, rgba(0,0,0,0.12) 88%, transparent 100%)',
+                }}
+            />
 
             <div className="px-4 sm:px-5 pt-3 pb-1 fixed top-0 left-0 right-0 z-30 pointer-events-none bg-transparent">
                 <div
@@ -169,6 +167,16 @@ export const AppHeader = React.memo(({
                     }}
                 >
                     <div className="flex items-center">
+                        {/* Expanded back-button hit area — covers top-left corner for fat-finger taps */}
+                        {showBack && (
+                            <button
+                                aria-hidden="true"
+                                tabIndex={-1}
+                                onClick={handleBack}
+                                className="fixed top-0 left-0 z-40"
+                                style={{ width: 56, height: 56, background: 'transparent', border: 'none', cursor: 'pointer', WebkitTapHighlightColor: 'transparent' }}
+                            />
+                        )}
                         <button
                             aria-label="Go back"
                             aria-hidden={!showBack}

@@ -1,9 +1,12 @@
-// RequestQuoteModal — Clean, dark-mode-ready quote request form
-import React, { useState, useCallback, useMemo } from 'react';
+// RequestQuoteModal — On-brand quote request using shared design system
+import React, { useState, useCallback, useMemo, useId } from 'react';
 import ReactDOM from 'react-dom';
-import { X, FileText, Calendar, CheckCircle2, Upload, ChevronDown } from 'lucide-react';
+import { X, Send, CheckCircle2, Upload, FileText, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { hapticMedium, hapticSuccess } from '../../utils/haptics.js';
+import { isDarkTheme, DESIGN_TOKENS } from '../../design-system/tokens.js';
+import { getModalMotion } from '../../design-system/motion.js';
+import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion.js';
 import { INITIAL_MEMBERS } from '../../screens/members/data.js';
 import { CONTRACTS_DATA } from '../../screens/resources/contracts/data.js';
 import { SearchSelect } from './RequestQuoteModalComponents.jsx';
@@ -38,6 +41,47 @@ const AD_FIRMS_LIST = [
     'McGee Designhouse', 'Ratio', 'CSO', 'IDO', 'Studio M',
 ];
 
+/* ─── inline primitives ─── */
+
+const SectionLabel = ({ children, accent }) => (
+    <span className="text-[0.625rem] font-bold uppercase tracking-[0.08em] block mb-1.5"
+        style={{ color: accent, opacity: 0.7 }}>{children}</span>
+);
+
+const SelectPill = ({ on, onClick, children, accent, accentText, textSecondary, isDark }) => (
+    <button type="button" onClick={onClick}
+        className="px-3.5 py-[7px] rounded-full text-[0.6875rem] font-semibold transition-all active:scale-[0.97]"
+        style={{
+            backgroundColor: on ? accent : 'transparent',
+            color: on ? (accentText || '#fff') : textSecondary,
+            border: `1.5px solid ${on ? accent : (isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)')}`,
+        }}>
+        {children}
+    </button>
+);
+
+const SegToggle = ({ value, options, onChange, subtle, textPrimary, isDark, layoutId }) => (
+    <div className="inline-flex rounded-full p-[3px] w-full"
+        style={{ backgroundColor: subtle || (isDark ? 'rgba(255,255,255,0.10)' : '#E3E0D8') }}>
+        {options.map(opt => {
+            const sel = opt.value === value;
+            return (
+                <button key={opt.value} type="button" onClick={() => onChange(opt.value)}
+                    className="relative flex-1 rounded-full py-[7px] text-[0.6875rem] font-semibold transition-colors whitespace-nowrap"
+                    style={{ color: sel ? textPrimary : (isDark ? 'rgba(240,240,240,0.5)' : '#6A6762') }}>
+                    {sel && (
+                        <motion.span layoutId={layoutId} className="absolute inset-0 rounded-full"
+                            style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.14)' : '#fff' }}
+                            transition={{ type: 'spring', stiffness: 420, damping: 32 }} />
+                    )}
+                    <span className="relative z-10">{opt.label}</span>
+                </button>
+            );
+        })}
+    </div>
+);
+
+/* ─── main component ─── */
 
 export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = INITIAL_MEMBERS, initialData, currentUserId = 1 }) => {
     const [formData, setFormData] = useState({
@@ -46,7 +90,6 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
         formats: ['pdf'], projectInfo: '', files: [], selectedTeamMembers: [], previousQuoteRef: '',
     });
 
-    // Pre-fill from opportunity data
     React.useEffect(() => {
         if (show && initialData) {
             setFormData(prev => ({
@@ -61,23 +104,15 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitSuccess, setSubmitSuccess] = useState(false);
+    const isDark = isDarkTheme(theme);
+    const c = theme?.colors || {};
+    const prefersReducedMotion = usePrefersReducedMotion();
+    const modalMotion = getModalMotion(prefersReducedMotion);
+    const toggleId = useId();
 
-    const isDark = theme?.name === 'dark';
-    const colors = useMemo(() => ({
-        background:      theme?.colors?.background   || '#F0EDE8',
-        surface:         theme?.colors?.surface || (isDark ? '#1e1e1e' : '#FFFFFF'),
-        surfaceElevated: theme?.colors?.surface || (isDark ? '#282828' : '#FFFFFF'),
-        textPrimary:     theme?.colors?.textPrimary   || '#353535',
-        textSecondary:   theme?.colors?.textSecondary || '#666666',
-        border:          isDark ? 'rgba(255,255,255,0.10)' : (theme?.colors?.border || 'rgba(0,0,0,0.08)'),
-        accent:          theme?.colors?.accent        || '#353535',
-        subtle:          isDark ? 'rgba(255,255,255,0.10)' : (theme?.colors?.subtle || '#F5F3EF'),
-        fieldBg:         isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.025)',
-        fieldBorder:     isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)',
-        hoverBg:         isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)',
-        success: theme?.colors?.success || '#4A7C59',
-        error:   theme?.colors?.error || '#B85C5C',
-    }), [theme, isDark]);
+    const fieldBg = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.025)';
+    const fieldBorder = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)';
+    const divider = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
 
     const teamMembers = useMemo(() => {
         const source = Array.isArray(members) && members.length > 0 ? members : INITIAL_MEMBERS;
@@ -95,20 +130,16 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
     const toggleTeamMember = useCallback(id => {
         setFormData(prev => ({ ...prev, selectedTeamMembers: prev.selectedTeamMembers.includes(id) ? prev.selectedTeamMembers.filter(i => i !== id) : [...prev.selectedTeamMembers, id] }));
     }, []);
-
     const toggleItem = useCallback(id => {
         setFormData(prev => ({ ...prev, itemsNeeded: prev.itemsNeeded.includes(id) ? prev.itemsNeeded.filter(i => i !== id) : [...prev.itemsNeeded, id] }));
     }, []);
-
-    const toggleFormat = useCallback((id, checked) => {
-        setFormData(prev => ({ ...prev, formats: checked ? [...prev.formats, id] : prev.formats.filter(i => i !== id) }));
+    const toggleFormat = useCallback((id, on) => {
+        setFormData(prev => ({ ...prev, formats: on ? [...prev.formats, id] : prev.formats.filter(i => i !== id) }));
     }, []);
-
     const handleFileChange = useCallback(e => {
         const f = Array.from(e.target.files || []);
         setFormData(prev => ({ ...prev, files: [...prev.files, ...f] }));
     }, []);
-
     const removeFile = useCallback(idx => {
         setFormData(prev => ({ ...prev, files: prev.files.filter((_, i) => i !== idx) }));
     }, []);
@@ -118,9 +149,7 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
         if (!formData.projectName.trim()) errs.projectName = 'Required';
         if (!formData.dealerName.trim()) errs.dealerName = 'Required';
         if (formData.quoteType === 'revision') {
-            const hasRef = formData.previousQuoteRef.trim().length > 0;
-            const hasAttachment = formData.files.length > 0;
-            if (!hasRef && !hasAttachment) errs.previousQuoteRef = 'Enter previous quote # or attach previous quote';
+            if (!formData.previousQuoteRef.trim() && !formData.files.length) errs.previousQuoteRef = 'Enter previous quote # or attach file';
         }
         setErrors(errs);
         return !Object.keys(errs).length;
@@ -149,52 +178,33 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
 
     if (!show) return null;
 
-    const controlHeight = 46;
-    const controlRadius = 16;
-    const inputBase = {
-        height: controlHeight, borderRadius: controlRadius,
-        background: colors.fieldBg, border: `1px solid ${colors.fieldBorder}`,
-        color: colors.textPrimary, padding: '0 14px', fontSize: "0.8125rem", fontWeight: 500,
+    const inputStyle = {
+        height: 40, borderRadius: DESIGN_TOKENS.borderRadius.md,
+        background: fieldBg, border: `1px solid ${fieldBorder}`,
+        color: c.textPrimary, padding: '0 12px', fontSize: "0.75rem", fontWeight: 500,
         outline: 'none', width: '100%',
     };
-
-    const connectedGroupStyle = {
-        backgroundColor: colors.surface,
-        border: `1px solid ${colors.fieldBorder}`,
-        borderRadius: 16,
-    };
-
-    const selectionStyle = {
-        selectedBg: isDark ? 'rgba(255,255,255,0.14)' : 'rgba(0,0,0,0.08)',
-        selectedBorder: isDark ? 'rgba(255,255,255,0.26)' : 'rgba(0,0,0,0.18)',
-        selectedText: colors.textPrimary,
-        unselectedBg: 'transparent',
-        unselectedBorder: colors.border,
-        unselectedText: colors.textSecondary,
-        selectedShadow: 'none',
-    };
-
-    const labelCls = { color: colors.textSecondary, fontSize: "0.625rem", fontWeight: 700, marginBottom: 6, display: 'block', textTransform: 'uppercase', letterSpacing: '0.8px' };
 
     return ReactDOM.createPortal(
         <AnimatePresence>
             <motion.div
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                initial={modalMotion.backdrop.initial} animate={modalMotion.backdrop.animate} exit={modalMotion.backdrop.exit}
+                transition={modalMotion.backdrop.transition}
                 className="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto"
-                style={{ ...getUnifiedBackdropStyle(true), zIndex: UNIFIED_MODAL_Z }}
+                style={{ ...getUnifiedBackdropStyle(true, prefersReducedMotion), zIndex: UNIFIED_MODAL_Z }}
                 onClick={onClose}
             >
                 <motion.div
-                    initial={{ opacity: 0, y: 24, scale: 0.97 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 24, scale: 0.97 }}
-                    transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
+                    initial={modalMotion.card.initial} animate={modalMotion.card.animate} exit={modalMotion.card.exit}
+                    transition={modalMotion.card.transition}
                     onClick={e => e.stopPropagation()}
-                    className="w-full max-w-[620px] rounded-[34px] overflow-hidden relative my-auto"
+                    className="w-full max-w-[520px] flex flex-col relative my-auto outline-none"
                     style={{
-                        backgroundColor: colors.surfaceElevated,
-                        boxShadow: isDark ? '0 25px 60px -12px rgba(0,0,0,0.6)' : '0 25px 60px -12px rgba(0,0,0,0.20)',
-                        border: isDark ? '1px solid rgba(255,255,255,0.08)' : 'none',
+                        backgroundColor: c.surface || (isDark ? '#282828' : '#FFFFFF'),
+                        border: `1px solid ${isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)'}`,
+                        borderRadius: DESIGN_TOKENS.borderRadius.xl,
+                        boxShadow: isDark ? DESIGN_TOKENS.shadowsDark.modal : DESIGN_TOKENS.shadows.modal,
+                        maxHeight: '85vh',
                     }}
                 >
                     {/* ── Success overlay ── */}
@@ -202,320 +212,228 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                         {submitSuccess && (
                             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                                 className="absolute inset-0 z-20 flex flex-col items-center justify-center"
-                                style={{ backgroundColor: colors.surfaceElevated }}>
+                                style={{ backgroundColor: c.surface, borderRadius: DESIGN_TOKENS.borderRadius.xl }}>
                                 <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}
                                     transition={{ type: 'spring', stiffness: 300, damping: 20 }}>
-                                    <CheckCircle2 className="w-14 h-14" style={{ color: colors.success }} />
+                                    <CheckCircle2 className="w-12 h-12" style={{ color: '#4A7C59' }} />
                                 </motion.div>
-                                <p className="mt-3 text-base font-bold" style={{ color: colors.textPrimary }}>Quote Request Sent!</p>
+                                <p className="mt-2.5 text-sm font-bold" style={{ color: c.textPrimary }}>Quote Request Sent</p>
                             </motion.div>
                         )}
                     </AnimatePresence>
 
                     {/* ── Header ── */}
-                    <div className="flex items-center justify-between px-7 py-5" style={{ borderBottom: `1px solid ${colors.border}` }}>
-                        <div className="flex items-center gap-3">
-                            <div className="w-11 h-11 rounded-2xl flex items-center justify-center"
-                                style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)' }}>
-                                <FileText className="w-5 h-5" style={{ color: colors.textPrimary }} />
-                            </div>
-                            <h2 className="text-lg font-bold tracking-tight" style={{ color: colors.textPrimary }}>Request a Quote</h2>
-                        </div>
-                        <button onClick={onClose} className="w-10 h-10 rounded-full flex items-center justify-center transition-colors"
-                            onMouseEnter={e => e.currentTarget.style.backgroundColor = colors.hoverBg}
-                            onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                            <X className="w-5 h-5" style={{ color: colors.textSecondary }} />
+                    <div className="flex items-center justify-between px-5 py-4 flex-shrink-0"
+                        style={{ borderBottom: `1px solid ${divider}` }}>
+                        <h2 className="text-[0.9375rem] font-bold tracking-tight" style={{ color: c.textPrimary }}>
+                            Request Quote
+                        </h2>
+                        <button onClick={onClose} aria-label="Close"
+                            className="w-7 h-7 rounded-full flex items-center justify-center transition-colors"
+                            style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)' }}>
+                            <X className="w-3.5 h-3.5" style={{ color: c.textSecondary }} />
                         </button>
                     </div>
 
                     {/* ── Form ── */}
-                    <form onSubmit={handleSubmit} className="px-7 py-6 space-y-4 max-h-[72vh] overflow-y-auto scrollbar-hide">
+                    <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto scrollbar-hide">
+                        <div className="px-5 py-4 space-y-4">
 
-                        {/* Project Name */}
-                        <div>
-                            <label style={labelCls}>Project Name *</label>
-                            <input type="text" value={formData.projectName}
-                                onChange={e => updateField('projectName', e.target.value)}
-                                placeholder="Enter project name"
-                                style={{ ...inputBase, borderColor: errors.projectName ? colors.error : colors.fieldBorder }} />
-                            {errors.projectName && <p className="mt-1 text-xs font-medium" style={{ color: colors.error }}>{errors.projectName}</p>}
-                        </div>
-
-                        {/* Type + Needed By */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {/* Project Name */}
                             <div>
-                                <label style={labelCls}>Type</label>
-                                <div className="rounded-2xl p-1" style={connectedGroupStyle}>
-                                    <div className="flex gap-1">
-                                        {['new', 'revision'].map(type => (
-                                            <button key={type} type="button"
-                                                onClick={() => updateField('quoteType', type)}
-                                                className="flex-1 h-10 rounded-xl text-xs font-bold transition-all"
-                                                style={{
-                                                    backgroundColor: formData.quoteType === type ? selectionStyle.selectedBg : selectionStyle.unselectedBg,
-                                                    color: formData.quoteType === type ? selectionStyle.selectedText : selectionStyle.unselectedText,
-                                                    border: 'none',
-                                                    boxShadow: formData.quoteType === type ? selectionStyle.selectedShadow : 'none',
-                                                }}>
-                                                {type === 'new' ? 'New' : 'Revision'}
-                                            </button>
-                                        ))}
-                                    </div>
-                                    <AnimatePresence>
-                                        {formData.quoteType === 'revision' && (
-                                            <motion.div
-                                                initial={{ opacity: 0, height: 0 }}
-                                                animate={{ opacity: 1, height: 'auto' }}
-                                                exit={{ opacity: 0, height: 0 }}
-                                                transition={{ duration: 0.18 }}
-                                                className="overflow-hidden"
-                                            >
-                                                <div className="mt-1 pt-2 border-t" style={{ borderColor: colors.fieldBorder }}>
-                                                    <input
-                                                        type="text"
-                                                        value={formData.previousQuoteRef || ''}
-                                                        onChange={(e) => updateField('previousQuoteRef', e.target.value)}
-                                                        placeholder="Enter previous quote number"
-                                                        style={{
-                                                            ...inputBase,
-                                                            height: 40,
-                                                            borderRadius: 12,
-                                                            background: 'transparent',
-                                                            border: errors.previousQuoteRef ? `1px solid ${colors.error}` : 'none',
-                                                        }}
-                                                    />
-                                                    {errors.previousQuoteRef && <p className="mt-1 text-xs font-medium" style={{ color: colors.error }}>{errors.previousQuoteRef}</p>}
-                                                </div>
-                                            </motion.div>
-                                        )}
-                                    </AnimatePresence>
+                                <SectionLabel accent={c.accent}>Project Name *</SectionLabel>
+                                <input type="text" value={formData.projectName}
+                                    onChange={e => updateField('projectName', e.target.value)}
+                                    placeholder="Enter project name"
+                                    style={{ ...inputStyle, borderColor: errors.projectName ? (c.error || '#B85C5C') : fieldBorder }} />
+                                {errors.projectName && <p className="mt-1 text-[0.625rem] font-semibold" style={{ color: c.error || '#B85C5C' }}>{errors.projectName}</p>}
+                            </div>
+
+                            {/* Type + Needed By */}
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <SectionLabel accent={c.accent}>Type</SectionLabel>
+                                    <SegToggle value={formData.quoteType} layoutId={`qt-type-${toggleId}`}
+                                        options={[{ value: 'new', label: 'New' }, { value: 'revision', label: 'Revision' }]}
+                                        onChange={v => updateField('quoteType', v)}
+                                        subtle={c.subtle} textPrimary={c.textPrimary} isDark={isDark} />
+                                </div>
+                                <div>
+                                    <SectionLabel accent={c.accent}>Needed By</SectionLabel>
+                                    <input type="date" value={formData.neededByDate}
+                                        onChange={e => updateField('neededByDate', e.target.value)}
+                                        style={inputStyle} />
                                 </div>
                             </div>
-                            <div>
-                                <label style={labelCls}>
-                                    <Calendar className="w-3 h-3 inline mr-1 opacity-60" style={{ marginBottom: 1 }} />
-                                    Needed By
-                                </label>
-                                <input type="date" value={formData.neededByDate}
-                                    onChange={e => updateField('neededByDate', e.target.value)}
-                                    style={inputBase} />
-                            </div>
-                        </div>
 
-                        {/* Team Members */}
-                        <div>
-                            <label style={labelCls}>Include Team Members</label>
-                            <div className="flex flex-wrap gap-2 justify-center">
-                                {teamMembers.map((member) => {
-                                    const selected = formData.selectedTeamMembers.includes(member.id);
-                                    const fullName = `${member?.firstName || ''} ${member?.lastName || ''}`.trim();
-                                    return (
-                                        <button
-                                            key={member.id}
-                                            type="button"
-                                            onClick={() => toggleTeamMember(member.id)}
-                                            className="w-[150px] px-3 h-9 rounded-full text-xs font-semibold transition-all inline-flex items-center justify-center"
-                                            style={{
-                                                backgroundColor: selected ? selectionStyle.selectedBg : selectionStyle.unselectedBg,
-                                                color: selected ? selectionStyle.selectedText : selectionStyle.unselectedText,
-                                                border: `1px solid ${selected ? selectionStyle.selectedBorder : selectionStyle.unselectedBorder}`,
-                                                boxShadow: selected ? selectionStyle.selectedShadow : 'none',
-                                            }}
-                                        >
-                                            <span className="truncate block w-full">{fullName || member.email}</span>
-                                        </button>
-                                    );
-                                })}
-                                {teamMembers.length === 0 && (
-                                    <p className="text-xs" style={{ color: colors.textSecondary }}>
-                                        No team members available.
-                                    </p>
+                            {/* Revision ref (conditional) */}
+                            <AnimatePresence>
+                                {formData.quoteType === 'revision' && (
+                                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
+                                        transition={{ duration: 0.15 }} className="overflow-hidden">
+                                        <div>
+                                            <SectionLabel accent={c.accent}>Previous Quote #</SectionLabel>
+                                            <input type="text" value={formData.previousQuoteRef}
+                                                onChange={e => updateField('previousQuoteRef', e.target.value)}
+                                                placeholder="Enter quote number or attach below"
+                                                style={{ ...inputStyle, borderColor: errors.previousQuoteRef ? (c.error || '#B85C5C') : fieldBorder }} />
+                                            {errors.previousQuoteRef && <p className="mt-1 text-[0.625rem] font-semibold" style={{ color: c.error || '#B85C5C' }}>{errors.previousQuoteRef}</p>}
+                                        </div>
+                                    </motion.div>
                                 )}
-                            </div>
-                        </div>
+                            </AnimatePresence>
 
-                        {/* Project Type */}
-                        <div>
-                            <label style={labelCls}>Project Type</label>
-                            <div className="rounded-2xl p-1" style={connectedGroupStyle}>
-                                <div className="flex gap-1">
-                                    {['commercial', 'contract'].map(type => (
-                                        <button key={type} type="button"
-                                            onClick={() => { updateField('projectType', type); if (type === 'commercial') updateField('contractName', ''); }}
-                                            className="flex-1 h-10 rounded-xl text-xs font-bold transition-all"
-                                            style={{
-                                                backgroundColor: formData.projectType === type ? selectionStyle.selectedBg : selectionStyle.unselectedBg,
-                                                color: formData.projectType === type ? selectionStyle.selectedText : selectionStyle.unselectedText,
-                                                border: 'none',
-                                                boxShadow: formData.projectType === type ? selectionStyle.selectedShadow : 'none',
-                                            }}>
-                                            {type.charAt(0).toUpperCase() + type.slice(1)}
-                                        </button>
-                                    ))}
+                            {/* Team Members */}
+                            {teamMembers.length > 0 && (
+                                <div>
+                                    <SectionLabel accent={c.accent}>Team Members</SectionLabel>
+                                    <div className="flex flex-wrap gap-1.5">
+                                        {teamMembers.map(m => {
+                                            const sel = formData.selectedTeamMembers.includes(m.id);
+                                            const name = `${m?.firstName || ''} ${m?.lastName || ''}`.trim() || m?.email;
+                                            return (
+                                                <SelectPill key={m.id} on={sel} onClick={() => toggleTeamMember(m.id)}
+                                                    accent={c.accent} accentText={c.accentText} textSecondary={c.textSecondary} isDark={isDark}>
+                                                    {name}
+                                                </SelectPill>
+                                            );
+                                        })}
+                                    </div>
                                 </div>
+                            )}
+
+                            {/* Project Type */}
+                            <div>
+                                <SectionLabel accent={c.accent}>Project Type</SectionLabel>
+                                <SegToggle value={formData.projectType} layoutId={`qt-ptype-${toggleId}`}
+                                    options={[{ value: 'commercial', label: 'Commercial' }, { value: 'contract', label: 'Contract' }]}
+                                    onChange={v => { updateField('projectType', v); if (v === 'commercial') updateField('contractName', ''); }}
+                                    subtle={c.subtle} textPrimary={c.textPrimary} isDark={isDark} />
                                 <AnimatePresence>
                                     {formData.projectType === 'contract' && (
-                                        <motion.div
-                                            initial={{ height: 0, opacity: 0 }}
-                                            animate={{ height: 'auto', opacity: 1 }}
-                                            exit={{ height: 0, opacity: 0 }}
-                                            transition={{ duration: 0.2 }}
-                                            className="overflow-hidden">
-                                            <div className="mt-1 pt-2 border-t" style={{ borderColor: colors.fieldBorder }}>
-                                                <div className="relative">
-                                                    <select
-                                                        value={formData.contractName || ''}
-                                                        onChange={e => updateField('contractName', e.target.value)}
-                                                        style={{
-                                                            ...inputBase,
-                                                            appearance: 'none',
-                                                            WebkitAppearance: 'none',
-                                                            paddingRight: 36,
-                                                            cursor: 'pointer',
-                                                            border: 'none',
-                                                            background: 'transparent',
-                                                        }}>
-                                                        <option value="">Select Contract</option>
-                                                        {Object.keys(CONTRACTS_DATA).map(k => (
-                                                            <option key={k} value={k}>{CONTRACTS_DATA[k].name}</option>
-                                                        ))}
-                                                    </select>
-                                                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: colors.textSecondary }} />
-                                                </div>
+                                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
+                                            transition={{ duration: 0.15 }} className="overflow-hidden">
+                                            <div className="relative mt-2">
+                                                <select value={formData.contractName} onChange={e => updateField('contractName', e.target.value)}
+                                                    style={{ ...inputStyle, appearance: 'none', WebkitAppearance: 'none', paddingRight: 32, cursor: 'pointer' }}>
+                                                    <option value="">Select contract</option>
+                                                    {Object.keys(CONTRACTS_DATA).map(k => <option key={k} value={k}>{CONTRACTS_DATA[k].name}</option>)}
+                                                </select>
+                                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none" style={{ color: c.textSecondary }} />
                                             </div>
                                         </motion.div>
                                     )}
                                 </AnimatePresence>
                             </div>
-                        </div>
 
-                        {/* Dealer & A&D */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label style={labelCls}>Dealer *</label>
-                                <SearchSelect value={formData.dealerName} onChange={v => updateField('dealerName', v)}
-                                    options={DEALERS_LIST} placeholder="Search dealer..." theme={theme} onAddNew={() => {}} />
-                                {errors.dealerName && <p className="mt-1 text-xs font-medium" style={{ color: colors.error }}>{errors.dealerName}</p>}
-                            </div>
-                            <div>
-                                <label style={labelCls}>A&D Firm</label>
-                                <SearchSelect value={formData.adName} onChange={v => updateField('adName', v)}
-                                    options={AD_FIRMS_LIST} placeholder="Search A&D..." theme={theme} onAddNew={() => {}} />
-                            </div>
-                        </div>
-
-                        {/* Items Needed */}
-                        <div>
-                            <label style={labelCls}>Items Needed</label>
-                            <div className="flex flex-wrap gap-2">
-                                {QUOTE_ITEMS.map(item => {
-                                    const on = formData.itemsNeeded.includes(item.id);
-                                    return (
-                                        <button key={item.id} type="button" onClick={() => toggleItem(item.id)}
-                                            className="px-4 h-9 rounded-full text-xs font-semibold transition-all"
-                                            style={{
-                                                backgroundColor: on ? selectionStyle.selectedBg : selectionStyle.unselectedBg,
-                                                color: on ? selectionStyle.selectedText : selectionStyle.unselectedText,
-                                                border: `1px solid ${on ? selectionStyle.selectedBorder : selectionStyle.unselectedBorder}`,
-                                                boxShadow: on ? selectionStyle.selectedShadow : 'none',
-                                            }}>
-                                            {item.label}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        </div>
-
-                        {/* Document Formats */}
-                        <div>
-                            <label style={labelCls}>Documents Requested</label>
-                            <div className="flex flex-wrap gap-2">
-                                {FORMAT_OPTIONS.map(fmt => {
-                                    const on = formData.formats.includes(fmt.id);
-                                    return (
-                                        <button key={fmt.id} type="button" onClick={() => toggleFormat(fmt.id, !on)}
-                                            className="px-4 h-9 rounded-full text-xs font-semibold transition-all"
-                                            style={{
-                                                backgroundColor: on ? selectionStyle.selectedBg : selectionStyle.unselectedBg,
-                                                color: on ? selectionStyle.selectedText : selectionStyle.unselectedText,
-                                                border: `1px solid ${on ? selectionStyle.selectedBorder : selectionStyle.unselectedBorder}`,
-                                                boxShadow: on ? selectionStyle.selectedShadow : 'none',
-                                            }}>
-                                            {fmt.label}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        </div>
-
-                        {/* Notes */}
-                        <div>
-                            <label style={labelCls}>Notes</label>
-                            <textarea value={formData.projectInfo}
-                                onChange={e => updateField('projectInfo', e.target.value)}
-                                placeholder="Additional details or requirements..."
-                                rows={2}
-                                style={{ ...inputBase, borderRadius: 16, height: 'auto', minHeight: 84, padding: 14, resize: 'none', lineHeight: '1.5' }} />
-                        </div>
-
-                        {/* Attachments */}
-                        <div>
-                            <label style={labelCls}>
-                                <Upload className="w-3 h-3 inline mr-1 opacity-60" style={{ marginBottom: 1 }} />
-                                Attachments
-                            </label>
-                            <button type="button"
-                                onClick={() => document.getElementById('rfq-file-upload')?.click()}
-                                className="w-full rounded-2xl p-4 text-center transition-colors"
-                                style={{ border: `1px dashed ${colors.border}`, color: colors.textSecondary }}
-                                onMouseEnter={e => e.currentTarget.style.backgroundColor = colors.hoverBg}
-                                onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                                <input type="file" multiple onChange={handleFileChange} className="hidden" id="rfq-file-upload" />
-                                <p className="text-xs font-medium">Click to upload files</p>
-                            </button>
-                            {formData.files.length > 0 && (
-                                <div className="mt-2.5 flex flex-wrap gap-2">
-                                    {formData.files.map((file, idx) => (
-                                        <div key={idx} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium"
-                                            style={{ backgroundColor: colors.subtle, color: colors.textPrimary }}>
-                                            <FileText className="w-3 h-3 flex-shrink-0" style={{ color: colors.accent }} />
-                                            <span className="max-w-[100px] truncate">{file.name}</span>
-                                            <button type="button" onClick={() => removeFile(idx)}
-                                                className="p-0.5 rounded-full transition-colors"
-                                                onMouseEnter={e => e.currentTarget.style.backgroundColor = colors.hoverBg}
-                                                onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                                                <X className="w-3 h-3" style={{ color: colors.textSecondary }} />
-                                            </button>
-                                        </div>
-                                    ))}
+                            {/* Dealer & A&D */}
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <SectionLabel accent={c.accent}>Dealer *</SectionLabel>
+                                    <SearchSelect value={formData.dealerName} onChange={v => updateField('dealerName', v)}
+                                        options={DEALERS_LIST} placeholder="Search..." theme={theme} onAddNew={() => {}} />
+                                    {errors.dealerName && <p className="mt-1 text-[0.625rem] font-semibold" style={{ color: c.error || '#B85C5C' }}>{errors.dealerName}</p>}
                                 </div>
-                            )}
-                        </div>
+                                <div>
+                                    <SectionLabel accent={c.accent}>A&D Firm</SectionLabel>
+                                    <SearchSelect value={formData.adName} onChange={v => updateField('adName', v)}
+                                        options={AD_FIRMS_LIST} placeholder="Search..." theme={theme} onAddNew={() => {}} />
+                                </div>
+                            </div>
 
+                            {/* Items Needed + Formats */}
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <SectionLabel accent={c.accent}>Items Needed</SectionLabel>
+                                    <div className="flex flex-wrap gap-1.5">
+                                        {QUOTE_ITEMS.map(item => (
+                                            <SelectPill key={item.id} on={formData.itemsNeeded.includes(item.id)} onClick={() => toggleItem(item.id)}
+                                                accent={c.accent} accentText={c.accentText} textSecondary={c.textSecondary} isDark={isDark}>
+                                                {item.label}
+                                            </SelectPill>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div>
+                                    <SectionLabel accent={c.accent}>Formats</SectionLabel>
+                                    <div className="flex flex-wrap gap-1.5">
+                                        {FORMAT_OPTIONS.map(fmt => (
+                                            <SelectPill key={fmt.id} on={formData.formats.includes(fmt.id)} onClick={() => toggleFormat(fmt.id, !formData.formats.includes(fmt.id))}
+                                                accent={c.accent} accentText={c.accentText} textSecondary={c.textSecondary} isDark={isDark}>
+                                                {fmt.label}
+                                            </SelectPill>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Notes */}
+                            <div>
+                                <SectionLabel accent={c.accent}>Notes</SectionLabel>
+                                <textarea value={formData.projectInfo}
+                                    onChange={e => updateField('projectInfo', e.target.value)}
+                                    placeholder="Additional details..."
+                                    rows={2}
+                                    className="w-full resize-none outline-none text-xs leading-relaxed"
+                                    style={{ background: fieldBg, border: `1px solid ${fieldBorder}`, color: c.textPrimary,
+                                        borderRadius: DESIGN_TOKENS.borderRadius.lg, padding: '10px 12px' }} />
+                            </div>
+
+                            {/* Attachments */}
+                            <div>
+                                <SectionLabel accent={c.accent}>Attachments</SectionLabel>
+                                <button type="button"
+                                    onClick={() => document.getElementById('rfq-file-upload')?.click()}
+                                    className="w-full flex items-center gap-3 py-3 px-3 rounded-xl transition-colors hover:opacity-80"
+                                    style={{ border: `1.5px dashed ${isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)'}`, color: c.textSecondary }}>
+                                    <Upload className="w-3.5 h-3.5 flex-shrink-0" style={{ opacity: 0.4 }} />
+                                    <span className="text-[0.6875rem] font-semibold">Click to upload files</span>
+                                    <input type="file" multiple onChange={handleFileChange} className="hidden" id="rfq-file-upload" />
+                                </button>
+                                {formData.files.length > 0 && (
+                                    <div className="mt-2 flex flex-wrap gap-1.5">
+                                        {formData.files.map((file, idx) => (
+                                            <div key={idx} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[0.6875rem] font-medium"
+                                                style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)', color: c.textPrimary }}>
+                                                <FileText className="w-3 h-3 flex-shrink-0" style={{ color: c.accent }} />
+                                                <span className="max-w-[90px] truncate">{file.name}</span>
+                                                <button type="button" onClick={() => removeFile(idx)} className="ml-0.5 opacity-40 hover:opacity-80 transition-opacity">
+                                                    <X className="w-3 h-3" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     </form>
 
                     {/* ── Footer ── */}
-                    <div className="flex items-center justify-end gap-3 px-7 py-4"
-                        style={{ borderTop: `1px solid ${colors.border}`, backgroundColor: colors.subtle }}>
+                    <div className="flex items-center justify-end gap-2.5 px-5 py-3.5 flex-shrink-0"
+                        style={{ borderTop: `1px solid ${divider}` }}>
                         <button type="button" onClick={onClose}
-                            className="px-5 h-11 rounded-full text-[0.8125rem] font-semibold transition-colors"
-                            style={{ color: colors.textPrimary }}
-                            onMouseEnter={e => e.currentTarget.style.backgroundColor = colors.hoverBg}
-                            onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                            className="px-4 py-2 rounded-full text-xs font-semibold transition-colors"
+                            style={{ color: c.textSecondary }}>
                             Cancel
                         </button>
                         <button type="submit" disabled={isSubmitting}
-                            className="px-6 h-11 rounded-full text-[0.8125rem] font-bold transition-all active:scale-[0.98] disabled:opacity-60"
-                            style={{ backgroundColor: colors.accent, color: isDark ? '#1a1a1a' : '#FFFFFF' }}>
+                            onClick={handleSubmit}
+                            className="px-5 py-2.5 rounded-full text-xs font-bold transition-all active:scale-[0.98] disabled:opacity-50 flex items-center gap-2"
+                            style={{ backgroundColor: c.accent, color: c.accentText || '#fff' }}>
                             {isSubmitting ? (
-                                <span className="flex items-center gap-2">
-                                    <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                <>
+                                    <svg className="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24">
                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                                     </svg>
-                                    Sending...
-                                </span>
-                            ) : 'Submit Request'}
+                                    Sending…
+                                </>
+                            ) : (
+                                <>
+                                    <Send className="w-3.5 h-3.5" />
+                                    Submit Request
+                                </>
+                            )}
                         </button>
                     </div>
                 </motion.div>
@@ -526,6 +444,4 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
 };
 
 export default RequestQuoteModal;
-
-
 

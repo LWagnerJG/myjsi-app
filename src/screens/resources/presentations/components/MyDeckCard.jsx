@@ -8,7 +8,7 @@ export const MyDeckCard = ({ deck, theme, onDownload, onShare, onDelete }) => {
     const isDark = isDarkTheme(theme);
     const isGenerated = deck.source === 'generated';
     return (
-        <div className="rounded-3xl overflow-hidden transition-all duration-300"
+        <div className="rounded-2xl overflow-hidden transition-all duration-300"
             style={{ background: isDark ? theme.colors.surface : '#FFFFFF', border: `1px solid ${theme.colors.border}`, boxShadow: CARD_SHADOW }}>
             {/* Thumbnail */}
             <div className="aspect-video w-full overflow-hidden relative"

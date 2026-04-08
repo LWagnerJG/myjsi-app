@@ -14,21 +14,21 @@ export const Section = ({ title, subtitle, titleRight, children, theme, classNam
   const dark = isDarkTheme(theme);
   const divider = dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.07)';
   return (
-    <div className={`rounded-[28px] ${className}`} style={{
-      padding: '20px',
+    <div className={`rounded-[24px] ${className}`} style={{
+      padding: '16px',
       backgroundColor: dark ? theme.colors.surface : '#fff',
       border: `1px solid ${divider}`,
     }}>
       {title && (
-        <div className="mb-3">
+        <div className="mb-2.5">
           <div className="flex items-start gap-3">
             <div className="min-w-0">
-              <h3 className="text-[0.9375rem] font-semibold leading-tight" style={{
+              <h3 className="text-sm font-semibold leading-tight" style={{
                 color: theme.colors.textPrimary,
                 letterSpacing: '-0.01em',
               }}>{title}</h3>
               {subtitle && (
-                <p className="text-[0.8125rem] mt-1 leading-snug" style={{ color: theme.colors.textSecondary }}>
+                <p className="text-xs mt-0.5 leading-snug" style={{ color: theme.colors.textSecondary }}>
                   {subtitle}
                 </p>
               )}
@@ -45,13 +45,13 @@ export const Section = ({ title, subtitle, titleRight, children, theme, classNam
 /* Compact field row */
 export const Row = ({ label, children, theme, tip, noSep, inline }) => {
   const divider = isDarkTheme(theme) ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)';
-  const rowLayout = inline ? 'grid items-start gap-2 md:grid-cols-[132px_minmax(0,1fr)] md:gap-3' : '';
+  const rowLayout = inline ? 'grid items-start gap-2 md:grid-cols-[110px_minmax(0,1fr)] md:gap-3' : '';
   return (
-  <div className={`${rowLayout} py-3`}
+  <div className={`${rowLayout} py-2.5`}
     style={{ borderColor: undefined }}>
     {label && (
-      <div className={`flex items-center gap-1.5 ${inline ? 'md:min-h-[36px] md:pt-1.5' : 'mb-1.5'}`}>
-        <label className={`text-[0.8125rem] font-semibold ${inline ? 'whitespace-nowrap' : ''}`}
+      <div className={`flex items-center gap-1.5 ${inline ? 'md:min-h-[34px] md:pt-1' : 'mb-1.5'}`}>
+        <label className={`text-xs font-semibold ${inline ? 'whitespace-nowrap' : ''}`}
           style={{ color: theme.colors.textSecondary }}>{label}</label>
         {tip && <InfoTooltip content={tip} theme={theme} position="right" size="sm" />}
       </div>
@@ -182,7 +182,7 @@ export const ProductCard = React.memo(({ product, idx, onRemove, onUpdate, theme
   const hasOpts = ['Vision', 'Knox', 'Wink', 'Hoopz'].includes(product.series);
   return (
     <div
-      className={showBorder ? 'rounded-[22px] border' : ''}
+      className={showBorder ? 'rounded-[20px] border' : ''}
       style={{ backgroundColor: theme.colors.surface, borderColor: showBorder ? subtleBorder : 'transparent' }}
     >
       <div className="flex items-center justify-between px-4 py-3">

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Send, Paperclip, X, MessageSquare, Bug, Lightbulb, Sparkles, CheckCircle2 } from 'lucide-react';
-import { isDarkTheme } from '../../design-system/tokens.js';
+import { isDarkTheme, subtleBorder } from '../../design-system/tokens.js';
 import { hapticSuccess } from '../../utils/haptics.js';
 
 const FEEDBACK_TYPES = [
@@ -42,13 +42,13 @@ export const FeedbackScreen = ({ theme }) => {
     }
 
     const surface = isDark ? 'rgba(255,255,255,0.09)' : 'rgba(255,255,255,0.80)';
-    const surfaceBorder = isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)';
+    const surfaceBorder = subtleBorder(theme);
     const inputBg = isDark ? 'rgba(0,0,0,0.20)' : 'rgba(0,0,0,0.025)';
 
     /* ── Success ── */
     if (submitted) {
         return (
-            <div className="flex flex-col h-full app-header-offset items-center justify-center px-6" style={{ backgroundColor: colors.background }}>
+            <div className="min-h-full flex items-center justify-center px-6" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 0px)', backgroundColor: colors.background }}>
                 <div className="text-center max-w-xs space-y-5">
                     <div
                         className="w-14 h-14 rounded-full flex items-center justify-center mx-auto"
@@ -75,10 +75,10 @@ export const FeedbackScreen = ({ theme }) => {
     }
 
     return (
-        <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: colors.background }}>
-            <div className="flex-1 overflow-y-auto scrollbar-hide">
+        <div className="min-h-full" style={{ backgroundColor: colors.background }}>
+            <div className="flex-1 overflow-y-auto scrollbar-hide" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 16px)' }}>
                 <form onSubmit={handleSubmit}>
-                    <div className="px-4 sm:px-6 pt-6 pb-10 max-w-lg mx-auto space-y-6">
+                    <div className="px-4 sm:px-6 pb-10 max-w-lg mx-auto space-y-6">
 
                         {/* ── Page header ── */}
                         <div>
@@ -198,7 +198,7 @@ export const FeedbackScreen = ({ theme }) => {
                         <button
                             type="submit"
                             disabled={!message.trim()}
-                            className="w-full flex items-center justify-center gap-2 py-4 text-[0.8125rem] font-bold tracking-wide rounded-2xl transition-all active:scale-[0.98] disabled:opacity-30"
+                            className="w-full flex items-center justify-center gap-2 py-4 text-[0.8125rem] font-bold tracking-wide rounded-full transition-all active:scale-[0.98] disabled:opacity-30"
                             style={{
                                 backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : colors.textPrimary,
                                 color: isDark ? colors.textPrimary : '#fff',

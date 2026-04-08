@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { isDarkTheme } from '../../../design-system/tokens.js';
 import StandardSearchBar from '../../../components/common/StandardSearchBar.jsx';
@@ -160,7 +160,7 @@ export const InstallInstructionsScreen = ({ theme }) => {
             />
           </div>
         ) : (
-          <div className="rounded-3xl border p-4 sm:p-5 lg:p-6 space-y-4" style={{ backgroundColor: cardBg, borderColor: divider }}>
+          <div className="rounded-2xl border p-4 sm:p-5 lg:p-6 space-y-4" style={{ backgroundColor: cardBg, borderColor: divider }}>
             <div
               className="overflow-hidden transition-all duration-200"
               style={{ maxHeight: isTopCollapsed ? 0 : 120, opacity: isTopCollapsed ? 0 : 1 }}
@@ -224,7 +224,7 @@ export const InstallInstructionsScreen = ({ theme }) => {
               return (
                 <article
                   key={item.id}
-                  className="rounded-3xl overflow-hidden border transition-all duration-200 motion-card group"
+                  className="rounded-2xl overflow-hidden border transition-all duration-200 motion-card group"
                   style={{ backgroundColor: cardBg, border: `1px solid ${divider}` }}
                 >
                   <div className="relative aspect-[16/10] overflow-hidden" style={{ background: mediaBackground }}>
@@ -299,12 +299,12 @@ export const InstallInstructionsScreen = ({ theme }) => {
             onClick={() => setActiveVideo(null)}
           >
             <div
-              className="relative w-full max-w-5xl rounded-3xl overflow-hidden border"
+              className="relative w-full max-w-5xl rounded-2xl overflow-hidden border"
               style={{ backgroundColor: c.surface, borderColor: divider, boxShadow: '0 24px 60px rgba(0,0,0,0.35)' }}
               onClick={(e) => e.stopPropagation()}
             >
               <div className="h-12 px-4 flex items-center justify-between" style={{ borderBottom: `1px solid ${divider}` }}>
-                <p className="text-[0.8125rem] font-semibold" style={{ color: c.textPrimary }}>{activeVideo.title} · Video Preview</p>
+                <p className="text-[0.8125rem] font-semibold" style={{ color: c.textPrimary }}>{activeVideo.title} � Video Preview</p>
                 <button
                   onClick={() => setActiveVideo(null)}
                   className="w-8 h-8 rounded-full inline-flex items-center justify-center"

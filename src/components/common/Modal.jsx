@@ -102,10 +102,11 @@ export const Modal = ({ show, onClose, title, children, theme, maxWidth = 'max-w
                         aria-modal="true"
                         aria-labelledby={title ? titleId : undefined}
                         tabIndex={-1}
-                        className={`w-full ${maxWidth} rounded-3xl flex flex-col relative outline-none`}
+                        className={`w-full ${maxWidth} flex flex-col relative outline-none`}
                         style={{
                             backgroundColor: theme?.colors?.surface || (isDark ? '#282828' : '#FFFFFF'),
-                            border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(255,255,255,0.6)',
+                            border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)',
+                            borderRadius: DESIGN_TOKENS.borderRadius.xl,
                             boxShadow: DESIGN_TOKENS.shadows.modal,
                             maxHeight: '85vh',
                         }}
@@ -119,7 +120,7 @@ export const Modal = ({ show, onClose, title, children, theme, maxWidth = 'max-w
                                 className="flex justify-between items-center p-5 border-b flex-shrink-0"
                                 style={{ borderColor: theme?.colors?.border || 'rgba(0,0,0,0.08)' }}
                             >
-                                <h2 id={titleId} className="text-lg font-bold tracking-tight" style={{ color: theme?.colors?.textPrimary }}>
+                                <h2 id={titleId} className="text-[0.9375rem] font-bold tracking-tight" style={{ color: theme?.colors?.textPrimary }}>
                                     {title}
                                 </h2>
                                 <button

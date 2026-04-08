@@ -359,7 +359,7 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
                     const SummaryIcon = summary.icon;
 
                     return (
-                      <div key={summary.key} className="rounded-2xl p-3 text-center" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(53,53,53,0.02)' }}>
+                      <div key={summary.key} className="rounded-2xl p-3 text-center" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(53,53,53,0.02)' }}>
                         <div className="w-9 h-9 rounded-2xl mx-auto mb-2 flex items-center justify-center" style={{ backgroundColor: summary.bg }}>
                           <SummaryIcon className="w-4 h-4" style={{ color: summary.color }} />
                         </div>

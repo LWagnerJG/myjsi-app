@@ -352,3 +352,7 @@ export const PRODUCTS_CATEGORIES_DATA = [
 
 // Re-export the single-source-of-truth series list so existing imports keep working
 export { JSI_SERIES } from '../../data/jsiSeries.js';
+
+// Re-export new hierarchical data + API abstraction
+export { PRODUCT_FAMILIES, PRODUCT_SUBCATEGORIES, PRODUCT_MODELS, PRODUCT_CATEGORIES } from './productHierarchy.js';
+export * from './productApi.js';

@@ -101,7 +101,7 @@ export const PostCard = React.memo(({ post, theme, dark, isLiked, isUpvoted, isE
               <div key={c.id} className="flex items-start gap-2">
                 <div
                   className="w-6 h-6 rounded-full flex items-center justify-center text-[0.625rem] font-bold flex-shrink-0"
-                  style={{ backgroundColor: dark ? '#333' : '#EDEAE4', color: theme.colors.textSecondary }}
+                  style={{ backgroundColor: dark ? theme.colors.subtle : theme.colors.border, color: theme.colors.textSecondary }}
                 >
                   {c.name?.[0] || '?'}
                 </div>
@@ -121,7 +121,7 @@ export const PostCard = React.memo(({ post, theme, dark, isLiked, isUpvoted, isE
               onChange={e => setDraft(e.target.value)}
               placeholder="Add a comment..."
               className="flex-1 text-xs px-3 py-1.5 rounded-full outline-none"
-              style={{ backgroundColor: dark ? '#333' : '#F0EDE8', color: theme.colors.textPrimary }}
+              style={{ backgroundColor: dark ? theme.colors.subtle : theme.colors.background, color: theme.colors.textPrimary }}
             />
             <button disabled={!draft.trim()} className="p-1.5 rounded-full disabled:opacity-30" style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}>
               <Send className="w-3.5 h-3.5" />

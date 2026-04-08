@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { FormInput } from '../../components/common/FormComponents.jsx';
 import { X, ImageIcon, Upload } from 'lucide-react';
 import { INSTALLATION_CONSTANTS, FORM_VALIDATION } from './installation-data.js';
 import { hapticSuccess } from '../../utils/haptics.js';
 import { isDarkTheme } from '../../design-system/tokens.js';
+import FloatingPill from '../../components/common/FloatingPill.jsx';
 
 export const AddNewInstallScreen = ({ theme, onAddInstall }) => {
     const [projectName, setProjectName] = useState('');
@@ -140,11 +140,11 @@ export const AddNewInstallScreen = ({ theme, onAddInstall }) => {
     }, [projectName, location, photos, validateForm, onAddInstall]);
 
     return (
-        <form onSubmit={handleSubmit} className="h-full flex flex-col app-header-offset" style={{ backgroundColor: theme.colors.background }}>
-            <div className="flex-1 overflow-y-auto scrollbar-hide">
-                <div className="max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-4 pb-24">
+        <form onSubmit={handleSubmit} className="min-h-full" style={{ backgroundColor: theme.colors.background }}>
+            <div className="scrollbar-hide">
+                <div className="max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 pb-24" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 16px)' }}>
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5">
-                        <GlassCard theme={theme} className="lg:col-span-5 p-5 sm:p-6 space-y-5">
+                        <div className="lg:col-span-5 rounded-[22px] overflow-hidden p-5 sm:p-6 space-y-5" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)'}` }}>
                             <div>
                                 <h2 className="text-lg font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>Install Details</h2>
                             </div>
@@ -190,9 +190,9 @@ export const AddNewInstallScreen = ({ theme, onAddInstall }) => {
                                     </div>
                                 )}
                             </div>
-                        </GlassCard>
+                        </div>
 
-                        <GlassCard theme={theme} className="lg:col-span-7 p-5 sm:p-6 space-y-5">
+                        <div className="lg:col-span-7 rounded-[22px] overflow-hidden p-5 sm:p-6 space-y-5" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)'}` }}>
                             <div className="flex items-center justify-between">
                                 <label className="text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>
                                     Photos <span style={{ color: theme.colors.error }}>*</span>
@@ -206,10 +206,10 @@ export const AddNewInstallScreen = ({ theme, onAddInstall }) => {
                                 <button
                                     type="button"
                                     onClick={() => fileInputRef.current?.click()}
-                                    className="w-full min-h-[220px] rounded-3xl border-2 border-dashed flex flex-col items-center justify-center gap-3 transition-colors motion-tap"
+                                    className="w-full min-h-[220px] rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-3 transition-colors motion-tap"
                                     style={{
                                         borderColor: theme.colors.border,
-                                        backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : theme.colors.subtle,
+                                        backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : theme.colors.subtle,
                                         color: theme.colors.textSecondary,
                                     }}
                                 >
@@ -249,7 +249,7 @@ export const AddNewInstallScreen = ({ theme, onAddInstall }) => {
                                             style={{
                                                 borderColor: theme.colors.border,
                                                 color: theme.colors.textSecondary,
-                                                backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : theme.colors.subtle,
+                                                backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : theme.colors.subtle,
                                             }}
                                         >
                                             <ImageIcon className="w-5 h-5" />
@@ -267,18 +267,16 @@ export const AddNewInstallScreen = ({ theme, onAddInstall }) => {
                                 className="hidden"
                                 onChange={handleFileChange}
                             />
-                        </GlassCard>
+                        </div>
                     </div>
 
-                    <div className="sticky mt-5 flex justify-center" style={{ bottom: 'clamp(0.75rem, 2.5vh, 1.5rem)' }}>
-                        <button
-                            type="submit"
-                            className="w-full max-w-xl font-bold text-sm h-12 px-7 rounded-full transition-all motion-tap"
-                            style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
-                        >
-                            Upload Install Photo(s)
-                        </button>
-                    </div>
+                    <FloatingPill
+                        theme={theme}
+                        onClick={() => {}}
+                        type="submit"
+                        label="Upload Install Photo(s)"
+                        icon={<Upload />}
+                    />
                 </div>
             </div>
         </form>

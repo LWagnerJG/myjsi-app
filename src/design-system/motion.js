@@ -2,6 +2,8 @@ const EASINGS = Object.freeze({
   standard: [0.4, 0, 0.2, 1],
   emphasized: [0.23, 1, 0.32, 1],
   springOut: [0.3, 1, 0.3, 1],
+  // iOS-style screen push — fast start, silky settle (same curve used by Safari)
+  screenPush: [0.22, 1, 0.36, 1],
 });
 
 const DURATIONS_MS = Object.freeze({
@@ -11,7 +13,7 @@ const DURATIONS_MS = Object.freeze({
   standard: 220,
   medium: 260,
   slow: 320,
-  screen: 250,
+  screen: 320,        // slightly longer than before — the new curve feels faster anyway
   modalSpringFallback: 280,
 });
 
@@ -65,9 +67,9 @@ export const getBottomSheetMotion = (prefersReducedMotion = false) => ({
 });
 
 export const getFloatingPillMotion = (prefersReducedMotion = false) => ({
-  initial: prefersReducedMotion ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 24, scale: 0.92 },
-  animate: { opacity: 1, y: 0, scale: 1 },
-  exit: prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 24, scale: 0.92 },
+  initial: prefersReducedMotion ? { opacity: 1, x: '-50%', y: 0, scale: 1 } : { opacity: 0, x: '-50%', y: 24, scale: 0.92 },
+  animate: { opacity: 1, x: '-50%', y: 0, scale: 1 },
+  exit: prefersReducedMotion ? { opacity: 0, x: '-50%' } : { opacity: 0, x: '-50%', y: 24, scale: 0.92 },
   transition: prefersReducedMotion
     ? { duration: 0 }
     : { type: 'spring', stiffness: 400, damping: 30, mass: 0.8 },

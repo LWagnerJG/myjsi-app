@@ -1,14 +1,14 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useCallback } from 'react';
 import { PageTitle } from '../../../components/common/PageTitle.jsx';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import { FormInput } from '../../../components/common/FormComponents.jsx';
+import SwipeCalendar from '../../../components/common/SwipeCalendar.jsx';
 import { MapPin, Calendar, Camera, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { FIELD_VISIT_REQUIREMENTS } from './data.js';
 import { hapticSuccess } from '../../../utils/haptics.js';
 
 export const RequestFieldVisitScreen = ({ theme, setSuccessMessage, onNavigate }) => {
     // Calendar state
-    const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState(null);
     
     // Form state
@@ -25,16 +25,19 @@ export const RequestFieldVisitScreen = ({ theme, setSuccessMessage, onNavigate }
         return d;
     }, []);
 
-    // Handle picking a date (only weekdays ? two weeks away)
-    const handleDateClick = (day) => {
-        const year = currentDate.getFullYear();
-        const month = currentDate.getMonth();
-        const clicked = new Date(year, month, day);
-        const dow = clicked.getDay();
-        if (clicked >= twoWeeksFromNow && FIELD_VISIT_REQUIREMENTS.allowedDays.includes(dow)) {
-            setSelectedDate(clicked);
-        }
-    };
+    // Is a date disabled?
+    const isDateDisabled = useCallback((date) => {
+        const dow = date.getDay();
+        return date < twoWeeksFromNow || !FIELD_VISIT_REQUIREMENTS.allowedDays.includes(dow);
+    }, [twoWeeksFromNow]);
+
+    // Render green dot for available dates
+    const renderDayExtra = useCallback((date) => {
+        if (isDateDisabled(date)) return null;
+        const sel = selectedDate?.toDateString() === date.toDateString();
+        if (sel) return null;
+        return <span className="h-1 w-1 rounded-full mt-0.5" style={{ backgroundColor: '#10b981' }} />;
+    }, [isDateDisabled, selectedDate]);
 
     // File input change
     const handleFileChange = (e) => {
@@ -62,89 +65,6 @@ export const RequestFieldVisitScreen = ({ theme, setSuccessMessage, onNavigate }
         }
     };
 
-    // Render the month calendar
-    const renderCalendar = () => {
-        const year = currentDate.getFullYear();
-        const month = currentDate.getMonth();
-        const firstDay = new Date(year, month, 1).getDay();
-        const numDays = new Date(year, month + 1, 0).getDate();
-
-        const blanks = Array(firstDay).fill(null);
-        const days = Array.from({ length: numDays }, (_, i) => i + 1);
-
-        return (
-            <GlassCard theme={theme} className="p-4">
-                <div className="flex justify-between items-center mb-4">
-                    <button 
-                        onClick={() => setCurrentDate(new Date(year, month - 1, 1))} 
-                        className="p-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10"
-                    >
-                        <ChevronLeft className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
-                    </button>
-                    <h3 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>
-                        {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
-                    </h3>
-                    <button 
-                        onClick={() => setCurrentDate(new Date(year, month + 1, 1))} 
-                        className="p-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10"
-                    >
-                        <ChevronRight className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
-                    </button>
-                </div>
-                
-                {/* Day headers */}
-                <div className="grid grid-cols-7 gap-1 text-center text-xs font-semibold mb-2" style={{ color: theme.colors.textSecondary }}>
-                    {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(d => <div key={d} className="py-2">{d}</div>)}
-                </div>
-                
-                {/* Calendar grid */}
-                <div className="grid grid-cols-7 gap-1">
-                    {blanks.map((_, i) => <div key={`blank-${i}`} className="h-10" />)}
-                    {days.map(day => {
-                        const date = new Date(year, month, day);
-                        const dow = date.getDay();
-                        const isAvailable = date >= twoWeeksFromNow && FIELD_VISIT_REQUIREMENTS.allowedDays.includes(dow);
-                        const isSelected = selectedDate?.toDateString() === date.toDateString();
-                        
-                        return (
-                            <button
-                                key={day}
-                                onClick={() => handleDateClick(day)}
-                                disabled={!isAvailable}
-                                className={`relative h-10 w-10 rounded-full flex items-center justify-center transition-all ${
-                                    isSelected 
-                                        ? 'ring-2 ring-offset-2 scale-110' 
-                                        : isAvailable 
-                                            ? 'hover:bg-black/5 dark:hover:bg-white/5 dark:hover:bg-white/5' 
-                                            : 'opacity-40 cursor-not-allowed'
-                                }`}
-                                style={{
-                                    ringColor: isSelected ? theme.colors.accent : 'transparent',
-                                    backgroundColor: isSelected ? theme.colors.accent : 'transparent',
-                                    color: isSelected ? (theme.colors.accentText || '#fff') : theme.colors.textPrimary,
-                                }}
-                            >
-                                {day}
-                                {!isSelected && isAvailable && (
-                                    <span 
-                                        className="absolute bottom-1 h-1 w-1 rounded-full" 
-                                        style={{ backgroundColor: '#10b981' }}
-                                    />
-                                )}
-                            </button>
-                        );
-                    })}
-                </div>
-                
-                {/* Legend */}
-                <div className="mt-4 text-xs" style={{ color: theme.colors.textSecondary }}>
-                    <p>� Available dates are at least {FIELD_VISIT_REQUIREMENTS.minAdvanceWeeks} weeks out and on weekdays</p>
-                    <p>� Green dot indicates available dates</p>
-                </div>
-            </GlassCard>
-        );
-    };
-
     return (
         <div className="flex flex-col h-full app-header-offset">
             <PageTitle title="Request Field Visit" theme={theme} />
@@ -168,7 +88,19 @@ export const RequestFieldVisitScreen = ({ theme, setSuccessMessage, onNavigate }
                     </GlassCard>
 
                     {/* Calendar */}
-                    {renderCalendar()}
+                    <GlassCard theme={theme} className="overflow-hidden">
+                        <SwipeCalendar
+                            theme={theme}
+                            selected={selectedDate}
+                            onSelect={setSelectedDate}
+                            isDisabled={isDateDisabled}
+                            renderDayExtra={renderDayExtra}
+                        />
+                        {/* Legend */}
+                        <div className="px-4 pb-3 pt-1 text-xs" style={{ color: theme.colors.textSecondary }}>
+                            <p>Available dates are at least {FIELD_VISIT_REQUIREMENTS.minAdvanceWeeks} weeks out and on weekdays</p>
+                        </div>
+                    </GlassCard>
 
                     {/* Visit Details Form */}
                     {selectedDate && (

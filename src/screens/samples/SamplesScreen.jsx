@@ -1,19 +1,14 @@
 // src/screens/samples/SamplesScreen.jsx
 import React, { useState, useMemo, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { GlassCard } from '../../components/common/GlassCard.jsx';
-import { FloatingCart } from '../../components/common/FloatingCart.jsx';
-import { isDarkTheme } from '../../design-system/tokens.js';
+import { motion } from 'framer-motion';
+import { isDarkTheme, DESIGN_TOKENS } from '../../design-system/tokens.js';
 import { Package, Plus, Trash2, Minus, CheckCircle, Layers } from 'lucide-react';
 import { hapticMedium } from '../../utils/haptics.js';
 import { SAMPLE_PRODUCTS, SAMPLE_CATEGORIES, FINISH_CATEGORIES, FINISH_SAMPLES } from './data.js';
+import { CartDrawer } from './components/CartDrawer.jsx';
 
 const idOf = (x) => String(x);
 const COLLAPSED_HEIGHT = 96;
-
-import { DirectoryModal } from './components/DirectoryModal.jsx';
-import { DrawerItem } from './components/DrawerItem.jsx';
-import { CartDrawer } from './components/CartDrawer.jsx';
 
 export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart: onUpdateCartProp, userSettings, dealerDirectory, designFirms, initialCartOpen = false }) => {
     const [cartInternal, setCartInternal] = useState({});
@@ -74,7 +69,7 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                     className="group relative rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer"
                     style={{
                         backgroundColor: setQty > 0 ? theme.colors.accent : theme.colors.surface,
-                        boxShadow: setQty > 0 ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
+                        boxShadow: setQty > 0 ? DESIGN_TOKENS.shadows.md : 'none',
                         border: setQty > 0 ? `2px solid ${theme.colors.accent}` : `1px solid ${theme.colors.border}`,
                     }}
                 >
@@ -103,7 +98,7 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                             className="group relative rounded-2xl overflow-hidden transition-all duration-300"
                             style={{
                                 backgroundColor: theme.colors.surface,
-                                boxShadow: qty > 0 ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
+                                boxShadow: qty > 0 ? DESIGN_TOKENS.shadows.md : 'none',
                                 border: qty > 0 ? `2px solid ${theme.colors.accent}` : `1px solid ${theme.colors.border}`,
                                 transform: qty > 0 ? 'scale(1.02)' : 'scale(1)'
                             }}
@@ -173,7 +168,7 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                             style={{
                                 backgroundColor: fullQty > 0 ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.08)' : theme.colors.surface),
                                 border: fullQty > 0 ? `2px solid ${theme.colors.accent}` : `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : theme.colors.border}`,
-                                boxShadow: fullQty > 0 ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
+                                boxShadow: fullQty > 0 ? DESIGN_TOKENS.shadows.md : 'none',
                             }}
                         >
                             <div className="flex items-center gap-4 px-4 py-3.5">

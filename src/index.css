@@ -5,6 +5,23 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── iOS Dynamic Type support ─────────────────────────────────────────────────
+   Tailwind's preflight locks -webkit-text-size-adjust to 100%, which prevents
+   iOS from applying Dynamic Type preferences. Override it here so the system
+   can scale text. The JS initDynamicType() utility (main.jsx) also sets
+   --font-scale and adjusts html font-size so rem values track iOS preferences.
+   ──────────────────────────────────────────────────────────────────────────── */
+html {
+    -webkit-text-size-adjust: auto;
+    text-size-adjust: auto;
+    /* font-size is set dynamically by initDynamicType() on iOS */
+}
+
+:root {
+    --font-scale: 1;        /* updated by initDynamicType() */
+    --font-scale-pct: 100%; /* CSS percentage form */
+}
+
 :root {
     --app-height: 100vh;
     --app-header-offset: 72px;
@@ -150,6 +167,16 @@ body {
     -moz-osx-font-smoothing: grayscale;
     background-color: var(--jsi-warm-beige);
     color: var(--jsi-charcoal);
+    /* Prevent pull-to-refresh and over-scroll rubber-band on mobile */
+    overscroll-behavior: none;
+    /* Remove iOS tap flash on all interactive elements */
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Universal search input placeholder — consistent muted style */
+input[type="search"]::placeholder,
+input::placeholder {
+    opacity: 0.45;
 }
 
 /* New Lead form: inline label/control rows for compact layout */

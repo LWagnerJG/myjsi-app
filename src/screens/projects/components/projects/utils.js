@@ -1,6 +1,7 @@
 export const PROJECTS_TAB_OPTIONS = [
   { value: 'pipeline', label: 'Active Projects' },
-  { value: 'my-projects', label: 'Installations' }
+  { value: 'customers', label: 'Customers' },
+  { value: 'my-projects', label: 'Installations' },
 ];
 
 export const DEALER_CONTACTS = {

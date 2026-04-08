@@ -18,6 +18,7 @@ import {
 } from './data.js';
 import { isDarkTheme } from '../../design-system/tokens.js';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
+import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
 
 import { MembersErrorBoundary } from './components/members/MembersErrorBoundary.jsx';
 import { ConfirmModal } from './components/members/SharedComponents.jsx';
@@ -150,13 +151,16 @@ const MembersScreenContent = ({ theme }) => {
                 <div className="px-4 sm:px-6 lg:px-8 pb-24 lg:pb-12 max-w-2xl lg:max-w-5xl mx-auto w-full">
 
                     {/* Header */}
-                    <div className="pt-5 pb-4 sm:pt-7 flex items-center justify-between gap-4">
+                    <div className="pt-4 pb-3 flex items-center justify-between gap-4">
                         <div>
                             <h1 className="text-[1.375rem] font-bold leading-tight tracking-tight" style={{ color: theme.colors.textPrimary }}>
-                                Members
+                                {tab === 'dealers' ? 'Dealers' : 'Members'}
                             </h1>
-                            <p className="text-sm mt-0.5" style={{ color: theme.colors.textSecondary }}>
-                                {tab === 'team' ? 'Your rep team and permissions.' : 'Dealer companies and contacts.'}
+                            <p className="text-[0.8125rem] mt-0.5" style={{ color: theme.colors.textSecondary }}>
+                                {tab === 'team'
+                                    ? `${members.length} team members`
+                                    : `${INITIAL_DEALER_COMPANIES.length} accounts`
+                                }
                             </p>
                         </div>
                         {tab === 'team' && (
@@ -172,7 +176,7 @@ const MembersScreenContent = ({ theme }) => {
                     </div>
 
                     {/* Pill tabs */}
-                    <div className="mb-5">
+                    <div className="mb-4">
                         <SegmentedToggle
                             value={tab}
                             onChange={switchTab}
@@ -185,27 +189,13 @@ const MembersScreenContent = ({ theme }) => {
 
                     {/* Search — dealers tab only */}
                     {tab === 'dealers' && (
-                        <div className="relative mb-4">
-                            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: theme.colors.textSecondary }} />
-                            <input
-                                type="search"
-                                autoComplete="off"
+                        <div className="mb-4">
+                            <StandardSearchBar
                                 value={searchQuery}
-                                onChange={e => setSearchQuery(e.target.value)}
+                                onChange={setSearchQuery}
                                 placeholder="Search dealers or contacts…"
-                                className="w-full pl-10 pr-10 outline-none rounded-full text-sm"
-                                style={{
-                                    height: 42,
-                                    backgroundColor: dark ? theme.colors.surface : '#fff',
-                                    color: theme.colors.textPrimary,
-                                    border: `1.5px solid ${dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.09)'}`,
-                                }}
+                                theme={theme}
                             />
-                            {searchQuery && (
-                                <button onClick={() => setSearchQuery('')} className="absolute right-3.5 top-1/2 -translate-y-1/2">
-                                    <X className="w-3.5 h-3.5" style={{ color: theme.colors.textSecondary }} />
-                                </button>
-                            )}
                         </div>
                     )}
 

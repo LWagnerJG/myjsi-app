@@ -217,14 +217,15 @@ export const DESIGN_TOKENS = {
   // JSI warm-tinted backgrounds match charcoal (#353535) and warm-beige palette.
   frost: {
     // FrostButton: floating footers, sticky bars, fixed CTAs over scrolling content
+    // "dark" variant is the softer translucent-glass look used for primary CTAs.
     button: {
       dark: {
         backdropFilter:       'blur(20px) saturate(1.6)',
         WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
-        backgroundColor:      'rgba(40, 38, 36, 0.84)',
+        backgroundColor:      'rgba(50, 48, 46, 0.62)',
         color:                '#FFFFFF',
-        border:               '1px solid rgba(255, 255, 255, 0.13)',
-        boxShadow:            '0 4px 24px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.09)',
+        border:               '1px solid rgba(255, 255, 255, 0.18)',
+        boxShadow:            '0 4px 20px rgba(0, 0, 0, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.12)',
       },
       light: {
         backdropFilter:       'blur(20px) saturate(1.6)',
@@ -423,3 +424,72 @@ export const getDrawerShadow = (isExpanded) => ({
   expanded: '0 -6px 22px -4px rgba(0,0,0,0.25)',
   collapsed: '0 -6px 14px -2px rgba(0,0,0,0.18), 0 -1px 0 rgba(0,0,0,0.08)',
 })[isExpanded ? 'expanded' : 'collapsed'];
+
+// ============================================
+// SURFACE HELPERS — eliminate repeated dark/light card + input styling
+// ============================================
+
+/**
+ * Standard card/surface background for dark/light mode.
+ * Replaces the scattered pattern: `isDark ? 'rgba(255,255,255,0.08)' : theme.colors.surface`
+ * Returns { backgroundColor, border, boxShadow } ready to spread into style.
+ */
+export const cardSurface = (theme) => {
+  const dark = isDarkTheme(theme);
+  return {
+    backgroundColor: dark ? 'rgba(255,255,255,0.08)' : (theme?.colors?.surface || '#FFFFFF'),
+    border: dark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(0,0,0,0.06)',
+    boxShadow: dark ? DESIGN_TOKENS.shadowsDark.card : DESIGN_TOKENS.shadows.card,
+  };
+};
+
+/**
+ * Subtle tinted background (for hover rows, sub-panels, inline containers).
+ * Replaces: `isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.03)'`
+ */
+export const subtleBg = (theme, strength = 1) => {
+  const dark = isDarkTheme(theme);
+  return dark
+    ? `rgba(255,255,255,${(0.07 * strength).toFixed(3)})`
+    : `rgba(0,0,0,${(0.025 * strength).toFixed(4)})`;
+};
+
+/**
+ * Standard border for dark/light mode.
+ * Replaces: `isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)'`
+ */
+export const subtleBorder = (theme) => {
+  const dark = isDarkTheme(theme);
+  return dark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)';
+};
+
+/**
+ * Standard input field surface. Spread into style prop.
+ * Replaces: `{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : theme.colors.surface, border, color }`
+ */
+export const inputSurface = (theme) => {
+  const dark = isDarkTheme(theme);
+  return {
+    backgroundColor: dark ? 'rgba(255,255,255,0.10)' : (theme?.colors?.surface || '#FFFFFF'),
+    border: `1px solid ${theme?.colors?.border || JSI_COLORS.stone}`,
+    color: theme?.colors?.textPrimary || JSI_COLORS.charcoal,
+  };
+};
+
+/**
+ * Floating bar style — frosted-glass strip for sticky / fixed bottom CTA areas.
+ * Lighter than the old dark backdrop; centered-friendly.  Spread into style prop.
+ * Works for both button bars AND non-button info bars (pipeline totals, feedback, etc.).
+ */
+export const floatingBarStyle = (theme) => {
+  const dark = isDarkTheme(theme);
+  return {
+    backdropFilter: 'blur(24px) saturate(1.8)',
+    WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
+    backgroundColor: dark ? 'rgba(38, 36, 34, 0.62)' : 'rgba(255, 253, 250, 0.72)',
+    border: dark ? '1px solid rgba(255,255,255,0.14)' : '1px solid rgba(0,0,0,0.07)',
+    boxShadow: dark
+      ? '0 -4px 24px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.08)'
+      : '0 -2px 20px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.90)',
+  };
+};

@@ -82,92 +82,71 @@ export const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, d
                             animate={sheetMotion.animate}
                             exit={sheetMotion.exit}
                             transition={sheetMotion.transition}
-                            className="absolute bottom-4 left-4 right-4 max-w-md mx-auto rounded-3xl overflow-hidden"
+                            className="absolute bottom-4 left-4 right-4 max-w-md mx-auto rounded-2xl overflow-hidden"
                             style={{ backgroundColor: theme.colors.surface, boxShadow: '0 4px 20px rgba(0,0,0,0.1)', maxHeight: '75vh' }}
                             onClick={(e) => e.stopPropagation()}
                         >
                         {/* Header */}
-                        <div className="flex items-center justify-between px-5 py-4 cursor-pointer" onClick={() => setIsExpanded(false)} style={{ borderBottom: `1px solid ${theme.colors.border}` }}>
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: theme.colors.accent }}>
-                                    <ShoppingCart className="w-5 h-5" style={{ color: theme.colors.accentText || '#fff' }} />
-                                </div>
-                                <div>
-                                    <p className="font-bold text-sm" style={{ color: theme.colors.textPrimary }}>Sample Cart</p>
-                                    <p className="text-xs" style={{ color: theme.colors.textSecondary }}>{totalCartItems} sample{totalCartItems !== 1 ? 's' : ''} selected</p>
-                                </div>
+                        <div className="flex items-center justify-between px-5 py-3.5 cursor-pointer" onClick={() => setIsExpanded(false)}>
+                            <div className="flex items-center gap-2.5">
+                                <ShoppingCart className="w-[18px] h-[18px]" style={{ color: theme.colors.textSecondary }} />
+                                <p className="font-semibold text-sm" style={{ color: theme.colors.textPrimary }}>
+                                    {totalCartItems} sample{totalCartItems !== 1 ? 's' : ''}
+                                </p>
                             </div>
-                            <ChevronDown className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
+                            <ChevronDown className="w-4 h-4" style={{ color: theme.colors.textSecondary, opacity: 0.6 }} />
                         </div>
 
+                        {/* Divider */}
+                        <div className="mx-5" style={{ height: 1, backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }} />
+
                         {/* Scrollable content */}
-                        <div className="px-5 pb-5 pt-3 max-h-[60vh] overflow-y-auto scrollbar-hide flex flex-col gap-5">
-                            {/* Items section */}
-                            <div>
-                                <p className="text-xs font-bold uppercase tracking-widest mb-2 px-1" style={{ color: theme.colors.textSecondary, letterSpacing: '0.06em' }}>Items</p>
-                                <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.015)', border: `1px solid ${isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)'}` }}>
-                                    <div className="px-2 py-1">
-                                        {cartItems.map((item, idx) => (<DrawerItem key={item.id} item={item} onUpdateCart={onUpdateCart} theme={theme} isLast={idx === 0} />))}
-                                    </div>
-                                </div>
+                        <div className="px-5 pb-5 pt-2 max-h-[60vh] overflow-y-auto scrollbar-hide flex flex-col gap-4">
+                            {/* Items */}
+                            <div className="pt-1">
+                                {cartItems.map((item, idx) => (<DrawerItem key={item.id} item={item} onUpdateCart={onUpdateCart} theme={theme} isLast={idx === 0} />))}
                             </div>
 
-                            {/* Ship To section */}
-                            <div>
-                                <div className="flex items-center justify-between mb-2.5">
-                                    <p className="text-xs font-bold uppercase tracking-widest px-1" style={{ color: theme.colors.textSecondary, letterSpacing: '0.06em' }}>Ship To</p>
-                                    <div className="flex items-center gap-1.5">
-                                        <button
-                                            onClick={() => setShowDir(true)}
-                                            className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full active:scale-95 transition-all"
-                                            style={{ background: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.04)', color: theme.colors.textPrimary }}
-                                            onMouseEnter={e => { e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)'; }}
-                                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.04)'; }}
-                                        >
-                                            <Building2 className="w-3 h-3" style={{ color: theme.colors.accent }} />
-                                            Directory
-                                        </button>
-                                        <button
-                                            onClick={() => { safeSetShipTo('Home'); safeSetAddress1(userSettings?.homeAddress || ''); safeSetAddress2(''); }}
-                                            className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full active:scale-95 transition-all"
-                                            style={{ background: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.04)', color: theme.colors.textPrimary }}
-                                            onMouseEnter={e => { e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)'; }}
-                                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.04)'; }}
-                                        >
-                                            <Home className="w-3 h-3" style={{ color: theme.colors.accent }} />
-                                            Home
-                                        </button>
-                                    </div>
+                            {/* Divider */}
+                            <div style={{ height: 1, backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }} />
+
+                            {/* Ship To */}
+                            <div className="flex flex-col gap-2">
+                                <div className="flex items-center gap-1.5">
+                                    <button
+                                        onClick={() => setShowDir(true)}
+                                        className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full active:scale-95 transition-colors"
+                                        style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)', color: theme.colors.textPrimary }}
+                                    >
+                                        <Building2 className="w-3 h-3" style={{ color: theme.colors.textSecondary }} />
+                                        Directory
+                                    </button>
+                                    <button
+                                        onClick={() => { safeSetShipTo('Home'); safeSetAddress1(userSettings?.homeAddress || ''); safeSetAddress2(''); }}
+                                        className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full active:scale-95 transition-colors"
+                                        style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)', color: theme.colors.textPrimary }}
+                                    >
+                                        <Home className="w-3 h-3" style={{ color: theme.colors.textSecondary }} />
+                                        Home
+                                    </button>
                                 </div>
-                                <div className="space-y-2">
-                                    <div className="relative">
-                                        <label className="absolute left-4 top-1.5 text-[0.625rem] font-bold uppercase tracking-wider" style={{ color: theme.colors.textSecondary }}>Recipient / Company</label>
-                                        <input value={shipToName || ''} onChange={(e) => safeSetShipTo(e.target.value)} className="w-full rounded-2xl px-4 pt-5 pb-2.5 text-[0.8125rem] outline-none border transition focus:ring-2" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : theme.colors.inputBackground, borderColor: theme.colors.border, color: theme.colors.textPrimary }} />
-                                    </div>
-                                    <div className="relative">
-                                        <label className="absolute left-4 top-1.5 text-[0.625rem] font-bold uppercase tracking-wider" style={{ color: theme.colors.textSecondary }}>Street Address</label>
-                                        <input value={address1 || ''} onChange={(e) => safeSetAddress1(e.target.value)} className="w-full rounded-2xl px-4 pt-5 pb-2.5 text-[0.8125rem] outline-none border transition focus:ring-2" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : theme.colors.inputBackground, borderColor: theme.colors.border, color: theme.colors.textPrimary }} />
-                                    </div>
-                                    <div className="relative">
-                                        <label className="absolute left-4 top-1.5 text-[0.625rem] font-bold uppercase tracking-wider" style={{ color: theme.colors.textSecondary }}>Suite / Unit (optional)</label>
-                                        <input value={address2 || ''} onChange={(e) => safeSetAddress2(e.target.value)} className="w-full rounded-2xl px-4 pt-5 pb-2.5 text-[0.8125rem] outline-none border transition focus:ring-2" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : theme.colors.inputBackground, borderColor: theme.colors.border, color: theme.colors.textPrimary }} />
-                                    </div>
-                                </div>
+                                <input value={shipToName || ''} onChange={(e) => safeSetShipTo(e.target.value)} placeholder="Recipient / Company" className="w-full rounded-xl px-3.5 py-2.5 text-[0.8125rem] outline-none transition placeholder:text-current placeholder:opacity-40" style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)', color: theme.colors.textPrimary }} />
+                                <input value={address1 || ''} onChange={(e) => safeSetAddress1(e.target.value)} placeholder="Street address" className="w-full rounded-xl px-3.5 py-2.5 text-[0.8125rem] outline-none transition placeholder:text-current placeholder:opacity-40" style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)', color: theme.colors.textPrimary }} />
+                                <input value={address2 || ''} onChange={(e) => safeSetAddress2(e.target.value)} placeholder="Suite / Unit" className="w-full rounded-xl px-3.5 py-2.5 text-[0.8125rem] outline-none transition placeholder:text-current placeholder:opacity-40" style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)', color: theme.colors.textPrimary }} />
                             </div>
 
-                            {/* Submit button */}
+                            {/* Submit */}
                             <button
                                 disabled={!canSubmit}
                                 onClick={submit}
-                                className="w-full px-5 py-3.5 rounded-full text-[0.8125rem] font-bold transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                                className="w-full py-3 rounded-full text-[0.8125rem] font-semibold transition-all flex items-center justify-center gap-2 disabled:opacity-30 disabled:pointer-events-none active:scale-[0.97]"
                                 style={{
-                                    backgroundColor: canSubmit ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.10)' : theme.colors.border),
-                                    color: canSubmit ? theme.colors.accentText : theme.colors.textSecondary,
-                                    boxShadow: 'none',
+                                    backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)',
+                                    color: theme.colors.textPrimary,
                                 }}
                             >
-                                <Send className="w-4 h-4" />
-                                Submit Sample Request
+                                <Send className="w-3.5 h-3.5" />
+                                Submit Request
                             </button>
                         </div>
                         </motion.div>
@@ -189,7 +168,7 @@ export const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, d
                                 transition: prefersReduced ? 'none' : UNIFIED_BACKDROP_TRANSITION
                             }}
                         />
-                        <div className="relative px-10 py-8 rounded-3xl text-center" style={{ background: theme.colors.surface, color: theme.colors.textPrimary, border: `1px solid ${theme.colors.border}`, transform: overlayPhase==='enter' ? 'scale(1)' : 'scale(.9)', opacity: overlayPhase==='enter' ? 1 : 0.9, transition: prefersReduced ? 'none' : [buildCssTransition('transform', MOTION_DURATIONS_MS.slow, MOTION_EASINGS.springOut), buildCssTransition('opacity', MOTION_DURATIONS_MS.medium, MOTION_EASINGS.standard)].join(', '), boxShadow:'0 6px 24px -4px rgba(0,0,0,0.12)' }}>
+                        <div className="relative px-10 py-8 rounded-2xl text-center" style={{ background: theme.colors.surface, color: theme.colors.textPrimary, border: `1px solid ${theme.colors.border}`, transform: overlayPhase==='enter' ? 'scale(1)' : 'scale(.9)', opacity: overlayPhase==='enter' ? 1 : 0.9, transition: prefersReduced ? 'none' : [buildCssTransition('transform', MOTION_DURATIONS_MS.slow, MOTION_EASINGS.springOut), buildCssTransition('opacity', MOTION_DURATIONS_MS.medium, MOTION_EASINGS.standard)].join(', '), boxShadow:'0 6px 24px -4px rgba(0,0,0,0.12)' }}>
                             <CheckCircle className="w-10 h-10 mx-auto mb-3" style={{ color: theme.colors.success }} />
                             <p className="font-bold text-[0.9375rem]">Sample Request Submitted</p>
                             <p className="text-xs mt-1" style={{ color: theme.colors.textSecondary }}>You'll receive a confirmation email shortly.</p>

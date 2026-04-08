@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import { GlassCard } from '../../components/common/GlassCard';
 import { PortalNativeSelect } from '../../components/forms/PortalNativeSelect';
 import { formatCurrency } from '../../utils/format.js';
 import { INCENTIVE_REWARDS_DATA } from './data.js';
@@ -55,18 +54,22 @@ const Row = ({ rank, name, amount, theme }) => (
     </div>
 );
 
-const Leaderboard = ({ title, people, emptyLabel, theme }) => (
-    <GlassCard theme={theme} className="p-4">
-        <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: theme.colors.textSecondary }}>{title}</p>
-        {people.length > 0 ? (
-            <div className="divide-y" style={{ borderColor: theme.colors.border }}>
-                {people.map((p, i) => <Row key={p.name} rank={i + 1} name={p.name} amount={p.amount} theme={theme} />)}
-            </div>
-        ) : (
-            <p className="text-sm py-3" style={{ color: theme.colors.textSecondary }}>{emptyLabel}</p>
-        )}
-    </GlassCard>
-);
+const Leaderboard = ({ title, people, emptyLabel, theme }) => {
+    const isDark = theme?.name === 'dark';
+    const bdr = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)';
+    return (
+        <div className="rounded-[22px] overflow-hidden p-5" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${bdr}` }}>
+            <p className="text-[0.6875rem] font-bold uppercase tracking-[0.07em] opacity-55 mb-1" style={{ color: theme.colors.textSecondary }}>{title}</p>
+            {people.length > 0 ? (
+                <div className="divide-y" style={{ borderColor: bdr }}>
+                    {people.map((p, i) => <Row key={p.name} rank={i + 1} name={p.name} amount={p.amount} theme={theme} />)}
+                </div>
+            ) : (
+                <p className="text-sm py-3" style={{ color: theme.colors.textSecondary }}>{emptyLabel}</p>
+            )}
+        </div>
+    );
+};
 
 export const IncentiveRewardsScreen = ({ theme }) => {
     const timePeriods = useMemo(() => buildTimePeriods(INCENTIVE_REWARDS_DATA), []);

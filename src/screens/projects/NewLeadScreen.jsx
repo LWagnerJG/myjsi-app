@@ -1,12 +1,13 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { AlertTriangle, ArrowRight, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, FileText, Paperclip, UploadCloud, X } from 'lucide-react';
+import { AlertTriangle, ArrowRight, CalendarDays, CheckCircle2, ChevronRight, FileText, Paperclip, UploadCloud, X } from 'lucide-react';
 import { FormInput } from '../../components/forms/FormInput.jsx';
 import { AutoCompleteCombobox } from '../../components/forms/AutoCompleteCombobox.jsx';
 import { PortalNativeSelect } from '../../components/forms/PortalNativeSelect.jsx';
 import { ToggleSwitch } from '../../components/forms/ToggleSwitch.jsx';
 import { SpotlightMultiSelect } from '../../components/common/SpotlightMultiSelect.jsx';
 import { PillButton, PrimaryButton } from '../../components/common/JSIButtons.jsx';
-import { isDarkTheme } from '../../design-system/tokens.js';
+import SwipeCalendar from '../../components/common/SwipeCalendar.jsx';
+import { isDarkTheme, floatingBarStyle } from '../../design-system/tokens.js';
 import { hapticSuccess } from '../../utils/haptics.js';
 import { STAGES, VERTICALS, COMPETITORS } from './data.js';
 import { DISCOUNT_OPTIONS_WITH_UNKNOWN } from '../../constants/discounts.js';
@@ -22,6 +23,19 @@ const getWinBand = (pct) => {
   if (pct <= 55) return { label: 'Even Odds', tone: '#5B7B8C' };
   if (pct <= 75) return { label: 'Likely', tone: '#4A7C59' };
   return { label: 'Strong', tone: '#4A7C59' };
+};
+
+const getPoDateLabel = (option) => {
+  if (!option || option === 'Unknown') return null;
+  const now = new Date();
+  const fmt = (d) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const addDays = (n) => { const r = new Date(now); r.setDate(r.getDate() + n); return r; };
+  if (option === '<30 Days') return `By ${fmt(addDays(30))}`;
+  if (option === '30-60 Days') return `${fmt(addDays(30))} – ${fmt(addDays(60))}`;
+  if (option === '60-180 Days') return `${fmt(addDays(60))} – ${fmt(addDays(180))}`;
+  if (option === '180+ Days') return `After ${fmt(addDays(180))}`;
+  if (option === 'Next Year') return `Jan – Dec ${now.getFullYear() + 1}`;
+  return null;
 };
 
 const TOP_100_CITIES = [
@@ -60,7 +74,7 @@ const STEP_LABELS = ['Basics', 'Scope', 'Review'];
 const getSubtleBorder = (theme) => (isDarkTheme(theme) ? 'rgba(255,255,255,0.11)' : 'rgba(0,0,0,0.07)');
 
 const MONTHS_LONG = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-const CAL_WEEKDAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+
 
 const parseCurrency = (raw) => {
   const n = Number(String(raw ?? '').replace(/[^0-9.]/g, ''));
@@ -215,7 +229,6 @@ const DatePickerInput = ({ value, onChange, theme, placeholder = 'Select date' }
   const parsed = value ? new Date(value + 'T00:00:00') : null;
 
   // Flip calendar above trigger when there isn't enough space below.
-  // Re-checks on resize so iOS keyboard open/close (which changes innerHeight) is handled.
   const calcDropUp = () => {
     if (!wrapperRef.current) return;
     const rect = wrapperRef.current.getBoundingClientRect();
@@ -229,8 +242,6 @@ const DatePickerInput = ({ value, onChange, theme, placeholder = 'Select date' }
     window.addEventListener('resize', calcDropUp);
     return () => window.removeEventListener('resize', calcDropUp);
   }, [isOpen]);
-  const [viewYear, setViewYear] = useState(() => parsed ? parsed.getFullYear() : today.getFullYear());
-  const [viewMonth, setViewMonth] = useState(() => parsed ? parsed.getMonth() : today.getMonth());
 
   useEffect(() => {
     if (!isOpen) return;
@@ -249,28 +260,17 @@ const DatePickerInput = ({ value, onChange, theme, placeholder = 'Select date' }
     ? `${MONTHS_LONG[parsed.getMonth()]} ${parsed.getDate()}, ${parsed.getFullYear()}`
     : null;
 
-  const prevMonth = () => {
-    if (viewMonth === 0) { setViewYear((y) => y - 1); setViewMonth(11); }
-    else setViewMonth((m) => m - 1);
-  };
-  const nextMonth = () => {
-    if (viewMonth === 11) { setViewYear((y) => y + 1); setViewMonth(0); }
-    else setViewMonth((m) => m + 1);
-  };
-
-  const selectDay = (day) => {
-    const mm = String(viewMonth + 1).padStart(2, '0');
-    const dd = String(day).padStart(2, '0');
-    onChange(`${viewYear}-${mm}-${dd}`);
+  const handleSelect = useCallback((date) => {
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    onChange(`${date.getFullYear()}-${mm}-${dd}`);
     setIsOpen(false);
-  };
+  }, [onChange]);
 
-  const isSelected = (day) => parsed && parsed.getFullYear() === viewYear && parsed.getMonth() === viewMonth && parsed.getDate() === day;
-  const isToday = (day) => today.getFullYear() === viewYear && today.getMonth() === viewMonth && today.getDate() === day;
-
-  const firstDow = new Date(viewYear, viewMonth, 1).getDay();
-  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
-  const cells = [...Array(firstDow).fill(null), ...Array.from({ length: daysInMonth }, (_, i) => i + 1)];
+  const handleClear = useCallback(() => {
+    onChange('');
+    setIsOpen(false);
+  }, [onChange]);
 
   return (
     <div className="relative" ref={wrapperRef}>
@@ -299,80 +299,13 @@ const DatePickerInput = ({ value, onChange, theme, placeholder = 'Select date' }
             boxShadow: dark ? '0 8px 32px rgba(0,0,0,0.45)' : '0 8px 24px rgba(0,0,0,0.11)',
           }}
         >
-          {/* Month nav */}
-          <div className="flex items-center justify-between px-4 py-2.5 border-b" style={{ borderColor: subtleBorder }}>
-            <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={prevMonth}
-              className="p-1.5 rounded-full transition-colors hover:bg-black/[0.05]">
-              <ChevronLeft className="w-4 h-4" style={{ color: c.textSecondary }} />
-            </button>
-            <span className="text-[0.8125rem] font-semibold" style={{ color: c.textPrimary }}>
-              {MONTHS_LONG[viewMonth]} {viewYear}
-            </span>
-            <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={nextMonth}
-              className="p-1.5 rounded-full transition-colors hover:bg-black/[0.05]">
-              <ChevronRight className="w-4 h-4" style={{ color: c.textSecondary }} />
-            </button>
-          </div>
-
-          {/* Calendar grid */}
-          <div className="px-3 pt-2 pb-1">
-            <div className="grid grid-cols-7 mb-0.5">
-              {CAL_WEEKDAYS.map((d) => (
-                <div key={d} className="text-center text-[0.625rem] font-semibold py-1" style={{ color: c.textSecondary, opacity: 0.6 }}>{d}</div>
-              ))}
-            </div>
-            <div className="grid grid-cols-7 gap-y-0.5">
-              {cells.map((day, idx) => (
-                <div key={idx} className="flex items-center justify-center">
-                  {day !== null ? (
-                    <button
-                      type="button"
-                      onMouseDown={(e) => { e.preventDefault(); selectDay(day); }}
-                      onClick={() => selectDay(day)}
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-[0.8125rem] transition-all"
-                      style={{
-                        backgroundColor: isSelected(day) ? c.accent : 'transparent',
-                        color: isSelected(day) ? c.accentText : isToday(day) ? c.accent : c.textPrimary,
-                        fontWeight: isSelected(day) || isToday(day) ? 700 : 400,
-                        outline: isToday(day) && !isSelected(day) ? `1.5px solid ${c.accent}55` : 'none',
-                        outlineOffset: '-1.5px',
-                      }}
-                    >
-                      {day}
-                    </button>
-                  ) : <div className="w-8 h-8" />}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div className="border-t px-4 py-2.5 flex justify-between items-center" style={{ borderColor: subtleBorder }}>
-            <button
-              type="button"
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => { onChange(''); setIsOpen(false); }}
-              className="text-xs font-medium"
-              style={{ color: c.textSecondary }}
-            >
-              Clear
-            </button>
-            <button
-              type="button"
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => {
-                const d = today;
-                const mm = String(d.getMonth() + 1).padStart(2, '0');
-                const dd = String(d.getDate()).padStart(2, '0');
-                onChange(`${d.getFullYear()}-${mm}-${dd}`);
-                setIsOpen(false);
-              }}
-              className="text-xs font-semibold"
-              style={{ color: c.accent }}
-            >
-              Today
-            </button>
-          </div>
+          <SwipeCalendar
+            theme={theme}
+            selected={parsed}
+            onSelect={handleSelect}
+            showFooter
+            onClear={handleClear}
+          />
         </div>
       )}
     </div>
@@ -418,8 +351,6 @@ export const NewLeadScreen = ({
   const [dateInputOpen, setDateInputOpen] = useState(() => !!newLeadData.expectedInstallDate);
   // Dealers "Out to Bid" state — collapses search area to a single pill
   const [dealerOutToBid, setDealerOutToBid] = useState(() => (newLeadData.dealers || []).includes('Out to Bid'));
-  // Competition expanded state — goes full-width once first competitor added; resets only when toggle turned off
-  const [compExpanded, setCompExpanded] = useState(() => (newLeadData.competitors || []).length > 0);
 
   // Custom discount mode — true when the stored value isn't in the predefined list
   const [discountCustom, setDiscountCustom] = useState(
@@ -926,10 +857,10 @@ export const NewLeadScreen = ({
   const realDealers = (newLeadData.dealers || []).filter(d => d !== 'Out to Bid');
 
   return (
-    <form onSubmit={handleSubmit} className="min-h-full app-header-offset flex flex-col" style={{ backgroundColor: c.background }}>
+    <form onSubmit={handleSubmit} className="min-h-full flex flex-col" style={{ backgroundColor: c.background }}>
       {/* Invisible focus sink — prevents AnimatedScreenWrapper from focusing a heading on mount */}
       <div data-autofocus tabIndex={-1} aria-hidden="true" style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden', outline: 'none' }} />
-      <div className="px-4 sm:px-5 pt-5 pb-40 max-w-3xl mx-auto w-full">
+      <div className="px-4 sm:px-5 pb-40 max-w-3xl mx-auto w-full" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 16px)' }}>
 
         <div key={step} className={`space-y-4 ${stepAnimClass}`}>
         {step === 0 && (
@@ -1049,7 +980,7 @@ export const NewLeadScreen = ({
                     <button
                       type="button"
                       onClick={() => { upd('installationLocation', ''); setLocationInputOpen(false); }}
-                      className="shrink-0 rounded-full border px-2.5 py-1 text-[0.6875rem] font-medium transition-all"
+                      className="shrink-0 h-10 rounded-full border px-4 text-xs font-semibold transition-all"
                       style={{ borderColor: subtleBorder, color: c.textSecondary, backgroundColor: 'transparent' }}
                     >
                       Unknown
@@ -1082,7 +1013,7 @@ export const NewLeadScreen = ({
                     <button
                       type="button"
                       onClick={() => { upd('expectedInstallDate', ''); setDateInputOpen(false); }}
-                      className="shrink-0 rounded-full border px-2.5 py-1 text-[0.6875rem] font-medium transition-all"
+                      className="shrink-0 h-10 rounded-full border px-4 text-xs font-semibold transition-all"
                       style={{ borderColor: subtleBorder, color: c.textSecondary, backgroundColor: 'transparent' }}
                     >
                       Unknown
@@ -1145,11 +1076,11 @@ export const NewLeadScreen = ({
                     className="w-full outline-none"
                     style={{
                       height: 40,
-                      borderRadius: 24,
+                      borderRadius: 9999,
                       border: `1px solid ${getSubtleBorder(theme)}`,
                       backgroundColor: theme.colors.surface,
                       color: theme.colors.textPrimary,
-                      fontSize: "0.875rem",
+                      fontSize: "0.8125rem",
                       padding: '0 14px',
                     }}
                   />
@@ -1218,6 +1149,14 @@ export const NewLeadScreen = ({
 
               <Row label="PO Timeframe" theme={theme} inline>
                 <div>
+                  {newLeadData.poTimeframe && newLeadData.poTimeframe !== 'Unknown' && (
+                    <div className="flex justify-end mb-2">
+                      <span className="text-[0.6875rem] font-semibold px-2.5 py-1 rounded-full"
+                        style={{ backgroundColor: `${c.accent}14`, color: c.accent, transition: 'color .15s, background-color .15s' }}>
+                        {getPoDateLabel(newLeadData.poTimeframe)}
+                      </span>
+                    </div>
+                  )}
                   <div className="grid grid-cols-3 gap-1.5">
                     {PO_OPTIONS.map((item) => (
                       <PillButton
@@ -1317,7 +1256,7 @@ export const NewLeadScreen = ({
                     <button
                       type="button"
                       onClick={() => { upd('endUser', 'Unknown'); markTouched('endUser'); }}
-                      className="shrink-0 rounded-full border px-2.5 py-1 text-[0.6875rem] font-medium transition-all"
+                      className="shrink-0 h-10 rounded-full border px-4 text-xs font-semibold transition-all"
                       style={{
                         borderColor: newLeadData.endUser === 'Unknown' ? theme.colors.accent : subtleBorder,
                         color: newLeadData.endUser === 'Unknown' ? theme.colors.accent : c.textSecondary,
@@ -1366,7 +1305,7 @@ export const NewLeadScreen = ({
                       <button
                         type="button"
                         onClick={() => { setDealerOutToBid(true); upd('dealers', ['Out to Bid']); markTouched('dealers'); }}
-                        className="shrink-0 rounded-full border px-2.5 py-1 text-[0.6875rem] font-medium transition-all"
+                        className="shrink-0 h-10 rounded-full border px-4 text-xs font-semibold transition-all"
                         style={{ borderColor: subtleBorder, color: c.textSecondary, backgroundColor: 'transparent' }}
                       >
                         Out to Bid
@@ -1402,7 +1341,7 @@ export const NewLeadScreen = ({
                       const current = newLeadData.designFirms || [];
                       if (!current.includes('Unknown')) upd('designFirms', ['Unknown', ...current]);
                     }}
-                    className="shrink-0 rounded-full border px-2.5 py-1 text-[0.6875rem] font-medium transition-all"
+                    className="shrink-0 h-10 rounded-full border px-4 text-xs font-semibold transition-all"
                     style={{
                       borderColor: (newLeadData.designFirms || []).includes('Unknown') ? theme.colors.accent : subtleBorder,
                       color: (newLeadData.designFirms || []).includes('Unknown') ? theme.colors.accent : c.textSecondary,
@@ -1415,20 +1354,35 @@ export const NewLeadScreen = ({
               </Row>
 
               {/* Competition */}
-              <div className="py-2.5 border-t" style={{ borderColor: subtleBorder }}>
-                {compExpanded && newLeadData.competitionPresent ? (
-                  /* ── Expanded: label+toggle header, full-width search+chips below ── */
-                  <>
-                    <div className="flex items-center justify-between mb-2.5">
-                      <span className="text-[0.8125rem] font-semibold" style={{ color: c.textSecondary }}>Competition</span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs" style={{ color: c.textSecondary }}>Active</span>
+              <Row label="Competition" theme={theme} inline>
+                <div>
+                  {newLeadData.competitionPresent ? (
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 min-w-0">
+                        <SpotlightMultiSelect
+                          selectedItems={newLeadData.competitors || []}
+                          onAddItem={(competitor) => {
+                            const norm = competitor.trim();
+                            const current = newLeadData.competitors || [];
+                            if (!current.some((co) => co.toLowerCase() === norm.toLowerCase())) upd('competitors', [...current, norm]);
+                            markTouched('competitors');
+                          }}
+                          onRemoveItem={(competitor) => { upd('competitors', (newLeadData.competitors || []).filter((item) => item !== competitor)); markTouched('competitors'); }}
+                          options={['Unknown', ...COMPETITORS.filter((name) => name !== 'None' && name !== 'Unknown')]}
+                          onAddNew={(name) => { const norm = name.trim(); upd('competitors', [...new Set([...(newLeadData.competitors || []), norm])]); }}
+                          placeholder="Search or add competitor"
+                          theme={theme}
+                          compact={false}
+                          integratedChips
+                        />
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <span className="text-[0.6875rem] font-medium" style={{ color: c.textSecondary }}>Active</span>
                         <ToggleSwitch
                           checked
                           onChange={() => {
                             upd('competitionPresent', false);
                             upd('competitors', []);
-                            setCompExpanded(false);
                             markTouched('competitionPresent');
                             markTouched('competitors');
                           }}
@@ -1436,77 +1390,28 @@ export const NewLeadScreen = ({
                         />
                       </div>
                     </div>
-                    <SpotlightMultiSelect
-                      selectedItems={newLeadData.competitors || []}
-                      onAddItem={(competitor) => {
-                        const norm = competitor.trim();
-                        const current = newLeadData.competitors || [];
-                        if (!current.some((co) => co.toLowerCase() === norm.toLowerCase())) upd('competitors', [...current, norm]);
-                        markTouched('competitors');
-                      }}
-                      onRemoveItem={(competitor) => { upd('competitors', (newLeadData.competitors || []).filter((item) => item !== competitor)); markTouched('competitors'); }}
-                      options={['Unknown', ...COMPETITORS.filter((name) => name !== 'None' && name !== 'Unknown')]}
-                      onAddNew={(name) => { const norm = name.trim(); upd('competitors', [...new Set([...(newLeadData.competitors || []), norm])]); }}
-                      placeholder="Search or add competitor"
-                      theme={theme}
-                      compact={false}
-                      integratedChips={false}
-                      bordered
-                    />
-                  </>
-                ) : (
-                  /* ── Compact: all inline — label | search (if active) | None/Active | toggle ── */
-                  <div className="flex items-center gap-2 min-h-[40px]">
-                    <span className="text-[0.8125rem] font-semibold shrink-0" style={{ color: c.textSecondary }}>Competition</span>
-                    {newLeadData.competitionPresent && (
-                      <div className="flex-1 min-w-0">
-                        <SpotlightMultiSelect
-                          selectedItems={[]}
-                          onAddItem={(competitor) => {
-                            const norm = competitor.trim();
-                            upd('competitors', [norm]);
-                            setCompExpanded(true);
-                            markTouched('competitors');
+                  ) : (
+                    <div className="flex items-center gap-2 min-h-[40px]">
+                      <span className="text-xs" style={{ color: c.textSecondary, opacity: 0.55 }}>None</span>
+                      <div className="flex items-center gap-1.5 shrink-0 ml-auto">
+                        <ToggleSwitch
+                          checked={false}
+                          onChange={() => {
+                            upd('competitionPresent', true);
+                            markTouched('competitionPresent');
                           }}
-                          onRemoveItem={() => {}}
-                          options={['Unknown', ...COMPETITORS.filter((name) => name !== 'None' && name !== 'Unknown')]}
-                          onAddNew={(name) => {
-                            const norm = name.trim();
-                            upd('competitors', [norm]);
-                            setCompExpanded(true);
-                            markTouched('competitors');
-                          }}
-                          placeholder="Search or add competitor"
                           theme={theme}
-                          compact={false}
-                          integratedChips={false}
-                          bordered
                         />
                       </div>
-                    )}
-                    <div className="flex items-center gap-2 shrink-0 ml-auto">
-                      <span className="text-xs" style={{ color: c.textSecondary }}>
-                        {newLeadData.competitionPresent ? 'Active' : 'None'}
-                      </span>
-                      <ToggleSwitch
-                        checked={!!newLeadData.competitionPresent}
-                        onChange={(event) => {
-                          upd('competitionPresent', event.target.checked);
-                          if (!event.target.checked) { upd('competitors', []); setCompExpanded(false); }
-                          markTouched('competitionPresent');
-                          markTouched('competitors');
-                        }}
-                        theme={theme}
-                      />
                     </div>
-                  </div>
-                )}
-                <FieldError show={!!visibleError('competitors')} message={visibleError('competitors')} />
-              </div>
+                  )}
+                  <FieldError show={!!visibleError('competitors')} message={visibleError('competitors')} />
+                </div>
+              </Row>
 
               {/* Rewards — label left, toggles right */}
-              <div className="flex items-center justify-between gap-4 py-3">
-                <span className="text-[0.8125rem] font-semibold shrink-0" style={{ color: c.textSecondary }}>Rewards</span>
+              <div className="flex items-center justify-between gap-4 py-2.5">
+                <span className="text-xs font-semibold shrink-0" style={{ color: c.textSecondary }}>Rewards</span>
                 <div className="flex items-center gap-5 shrink-0">
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-medium" style={{ color: salesRewardEnabled ? c.textPrimary : c.textSecondary }}>Sales 3%</span>
@@ -1595,7 +1500,7 @@ export const NewLeadScreen = ({
                     {(newLeadData.products || []).map((product, idx) => {
                       const prompts = getSeriesProcurementPrompts(product.series);
                       return (
-                        <div key={`${product.series}-${idx}`} className="rounded-[22px] border overflow-hidden" style={{ borderColor: subtleBorder, backgroundColor: c.surface }}>
+                        <div key={`${product.series}-${idx}`} className="rounded-[20px] border overflow-hidden" style={{ borderColor: subtleBorder, backgroundColor: c.surface }}>
                           <ProductCard
                             product={product}
                             idx={idx}
@@ -1761,7 +1666,7 @@ export const NewLeadScreen = ({
                         {gi > 0 && (
                           <div className="flex items-center gap-2 px-3.5 py-1" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.025)' }}>
                             <div className="flex-1 h-px" style={{ backgroundColor: subtleBorder }} />
-                            <span className="text-[0.5625rem] font-bold uppercase tracking-widest" style={{ color: c.textSecondary, opacity: 0.4 }}>
+                            <span className="text-[0.5625rem] font-bold uppercase tracking-[0.07em]" style={{ color: c.textSecondary, opacity: 0.4 }}>
                               {['Basics', 'Scope', 'Details'][group.stepIdx]}
                             </span>
                             <div className="flex-1 h-px" style={{ backgroundColor: subtleBorder }} />
@@ -1798,8 +1703,8 @@ export const NewLeadScreen = ({
       {/* ── Integrated bottom bar: step nav + lead score + action ── */}
       <div
         data-bottom-chrome=""
-        className="sticky bottom-0 z-20 border-t"
-        style={{ borderColor: subtleBorder, backgroundColor: c.background }}
+        className="sticky bottom-0 z-20 rounded-t-2xl"
+        style={floatingBarStyle(theme)}
       >
         {/* Step pills + score row */}
         <div className="max-w-3xl mx-auto px-4 sm:px-5 pt-3 pb-2 flex items-center justify-between gap-3">

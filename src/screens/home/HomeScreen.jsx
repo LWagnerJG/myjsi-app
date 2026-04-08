@@ -8,6 +8,7 @@ import { getHomeChromePillStyles, HOME_CHROME_PILL_HEIGHT } from '../../design-s
 import { isDarkTheme } from '../../design-system/tokens.js';
 import { usePersistentState } from '../../hooks/usePersistentState.js';
 import { MessageSquarePlus } from 'lucide-react';
+import FloatingPill from '../../components/common/FloatingPill.jsx';
 import { LEAD_TIMES_DATA } from '../resources/lead-times/data.js';
 import {
     PointerSensor,
@@ -166,7 +167,7 @@ export const HomeScreen = React.memo(({
     const colors = useMemo(() => ({
         background: theme?.colors?.background || '#F0EDE8',
         surface: theme?.colors?.surface || '#FFFFFF',
-        tileSurface: isDark ? '#2A2A2A' : (theme?.colors?.surface || '#FFFFFF'),
+        tileSurface: isDark ? 'rgba(42,42,42,0.82)' : 'rgba(255,255,255,0.78)',
         tileShadow: 'none',
         accent: theme?.colors?.accent || '#353535',
         textPrimary: theme?.colors?.textPrimary || '#353535',
@@ -399,34 +400,16 @@ export const HomeScreen = React.memo(({
                 lampOn={lampOn}
             />
 
-            {/* Mobile sticky feedback bar — fixed to viewport bottom, hidden on sm+ */}
-            {!isEditMode && (
-                <div
-                    className="sm:hidden fixed bottom-0 left-0 right-0 z-40 flex items-center justify-center px-4"
-                    style={{
-                        paddingBottom: 'max(16px, env(safe-area-inset-bottom))',
-                        paddingTop: 12,
-                        background: isDark
-                            ? 'linear-gradient(to top, rgba(26,26,26,0.94) 60%, rgba(26,26,26,0))'
-                            : 'linear-gradient(to top, rgba(240,237,232,0.96) 60%, rgba(240,237,232,0))',
-                        pointerEvents: 'none',
-                    }}
-                >
-                    <button
-                        onClick={() => onNavigate('feedback')}
-                        className="flex items-center gap-2 px-5 rounded-full transition-all active:scale-[0.97]"
-                        style={{
-                            ...chromePillStyles,
-                            height: HOME_CHROME_PILL_HEIGHT,
-                            color: colors.textSecondary,
-                            pointerEvents: 'auto',
-                        }}
-                    >
-                        <MessageSquarePlus className="w-4 h-4" />
-                        <span className="text-[0.8125rem] font-semibold">Share Feedback</span>
-                    </button>
-                </div>
-            )}
+            {/* Mobile sticky feedback pill — hidden on sm+ */}
+            <FloatingPill
+                theme={theme}
+                onClick={() => onNavigate('feedback')}
+                visible={!isEditMode}
+                icon={<MessageSquarePlus />}
+                label="Share Feedback"
+                className="sm:hidden"
+                zIndex={40}
+            />
 
             <div
                 className="px-4 sm:px-6 lg:px-8 flex flex-col max-w-5xl mx-auto w-full gap-4 sm:gap-6 py-4 sm:py-6 pb-20 sm:pb-6"

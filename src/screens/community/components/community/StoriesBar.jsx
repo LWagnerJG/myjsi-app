@@ -19,7 +19,7 @@ export const StoriesBar = ({ theme, dark }) => (
         >
           <div
             className="w-full h-full rounded-full overflow-hidden flex items-center justify-center"
-            style={{ backgroundColor: dark ? '#1A1A1A' : '#F0EDE8', border: `2px solid ${dark ? '#1A1A1A' : '#F0EDE8'}` }}
+            style={{ backgroundColor: theme.colors.background, border: `2px solid ${theme.colors.background}` }}
           >
             {story.isJSI ? (
               <Megaphone className="w-4 h-4" style={{ color: theme.colors.textPrimary }} />

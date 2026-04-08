@@ -10,7 +10,18 @@ import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
 export class ErrorBoundary extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { hasError: false, error: null, errorInfo: null };
+        this.state = { hasError: false, error: null, errorInfo: null, lastScreenKey: props.screenKey };
+    }
+
+    // Reset the error boundary when the screen changes (without remounting the component)
+    static getDerivedStateFromProps(props, state) {
+        if (state.hasError && props.screenKey !== state.lastScreenKey) {
+            return { hasError: false, error: null, errorInfo: null, lastScreenKey: props.screenKey };
+        }
+        if (props.screenKey !== state.lastScreenKey) {
+            return { lastScreenKey: props.screenKey };
+        }
+        return null;
     }
 
     static getDerivedStateFromError(error) {

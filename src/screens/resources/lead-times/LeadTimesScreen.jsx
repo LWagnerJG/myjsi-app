@@ -36,7 +36,7 @@ const QuickShipModal = ({ isOpen, onClose, seriesName, theme }) => {
             onClick={onClose}
         >
             <div 
-                className="relative w-full max-w-sm rounded-3xl p-6 shadow-2xl"
+                className="relative w-full max-w-sm rounded-2xl p-6 shadow-2xl"
                 style={{ backgroundColor: theme.colors.surface }}
                 onClick={e => e.stopPropagation()}
             >
@@ -221,7 +221,7 @@ export const LeadTimesScreen = ({ theme = {} }) => {
                     <GlassCard 
                         key={series} 
                         theme={safeTheme} 
-                        className={`relative px-5 pr-6 py-4 flex items-center justify-between rounded-3xl ${idx === 0 ? 'mt-1' : ''}`}
+                        className={`relative px-5 pr-6 py-4 flex items-center justify-between rounded-2xl ${idx === 0 ? 'mt-1' : ''}`}
                         style={isDark ? { border: '1px solid rgba(255,255,255,0.08)' } : undefined}
                     >
                         <div className="flex flex-col gap-1.5 shrink-0">
@@ -298,7 +298,7 @@ export const LeadTimesScreen = ({ theme = {} }) => {
                     </GlassCard>
                 ))}
                 {rows.length === 0 && (
-                    <GlassCard theme={safeTheme} className="p-8 flex flex-col items-center justify-center text-center gap-2 rounded-3xl">
+                    <GlassCard theme={safeTheme} className="p-8 flex flex-col items-center justify-center text-center gap-2 rounded-2xl">
                         <p className="text-sm font-medium" style={{ color: safeTheme.colors.textPrimary }}>No series match your search.</p>
                         <p className="text-xs" style={{ color: safeTheme.colors.textSecondary }}>Try adjusting your search term.</p>
                     </GlassCard>

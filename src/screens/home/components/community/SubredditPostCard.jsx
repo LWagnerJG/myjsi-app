@@ -26,7 +26,7 @@ export const SubredditPostCard = ({ post, idx, isTop, dark, theme, isLiked, isUp
   return (
     <div
       className="rounded-2xl overflow-hidden"
-      style={{ backgroundColor: dark ? '#2A2A2A' : '#FFFFFF', border: `1px solid ${dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.05)'}` }}
+      style={{ backgroundColor: dark ? 'rgba(255,255,255,0.08)' : '#FFFFFF', border: `1px solid ${dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.05)'}` }}
     >
       {/* Post body */}
       <div className="p-3.5 pb-2">

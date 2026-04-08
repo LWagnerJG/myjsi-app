@@ -153,7 +153,7 @@ export const ResourcesScreen = ({ theme, onNavigate, homeApps }) => {
                         <Icon className="w-5 h-5" style={{ color: theme.colors.accent }} strokeWidth={1.5} />
                     </div>
                     <div className="flex-1 ml-6">
-                        <h4 className="font-semibold text-sm" style={{ color: theme.colors.textPrimary }}>
+                        <h4 className="font-semibold text-[0.8125rem]" style={{ color: theme.colors.textPrimary }}>
                             {item.label}
                         </h4>
                         <p className="text-xs truncate" style={{ color: theme.colors.textSecondary }}>
@@ -171,7 +171,7 @@ export const ResourcesScreen = ({ theme, onNavigate, homeApps }) => {
 
     const CategoryCard = ({ category }) => (
         <GlassCard theme={theme} className="px-6 py-4">
-            <h3 className="text-lg font-semibold text-center mb-3" style={{ color: theme.colors.textPrimary }}>
+            <h3 className="text-[0.9375rem] font-semibold text-center mb-3" style={{ color: theme.colors.textPrimary }}>
                 {category.category}
             </h3>
             <ul className="pb-1">

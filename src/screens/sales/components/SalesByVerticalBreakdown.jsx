@@ -33,8 +33,9 @@ export const SalesByVerticalBreakdown = ({ data = [], theme, palette }) => {
           const barOpacity = Math.max(0.35, 0.75 - idx * 0.07);
           return (
             <li key={row.name} className="grid grid-cols-[160px_1fr_auto_auto] gap-4 items-center py-3" style={idx > 0 ? { borderTop: `1px solid ${theme.colors.border}` } : undefined}>
-              {/* Label — no colored dot, clean text only */}
+              {/* Label with color dot */}
               <div className="flex items-center gap-2 min-w-0 pr-2">
+                <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: row.color, opacity: Math.max(0.55, barOpacity) }} />
                 <span className="text-xs font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{row.name}</span>
               </div>
               {/* Bar track */}
@@ -60,6 +61,6 @@ export const SalesByVerticalBreakdown = ({ data = [], theme, palette }) => {
 
 // Helpers
 
-const BASE_PALETTE = ['#55A868', '#C44E52', '#8172B2', '#CCB04C', '#4C72B0', '#8C8C8C'];
-function hashColor(name = '', override) { if (name === 'Other') return '#8C8C8C'; const palette = (override && override.length) ? override : BASE_PALETTE; let h = 0; for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0; return palette[h % (palette.length - 1)]; }
+const BASE_PALETTE = ['#4A7C59', '#5B7B8C', '#C4956A', '#B85C5C', '#7A8C6E', '#8B8680'];
+function hashColor(name = '', override) { if (name === 'Other') return '#8B8680'; const palette = (override && override.length) ? override : BASE_PALETTE; let h = 0; for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0; return palette[h % (palette.length - 1)]; }
 export default SalesByVerticalBreakdown;

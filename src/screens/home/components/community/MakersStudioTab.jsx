@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { GlassCard } from '../../../../components/common/GlassCard.jsx';
-import { isDarkTheme } from '../../../../design-system/tokens.js';
+import { isDarkTheme, JSI_COLORS } from '../../../../design-system/tokens.js';
 import {
   GraduationCap, Eye, MessageCircle, Trophy, Gem,
   Lock, ChevronRight, ChevronDown, Star, Palette, BookOpen,
@@ -22,7 +22,7 @@ const PILLARS = [
     icon: GraduationCap,
     title: 'Academy',
     desc: 'Learn material language, presentation techniques, and how to give product feedback that moves the needle.',
-    color: '#4A7C59',
+    color: JSI_COLORS.success,
     courses: [
       { title: 'Material Language for Dealer Designers', tag: 'Studio Lesson' },
       { title: 'Presenting JSI Through Project Story', tag: 'Guided Walkthrough' },
@@ -34,7 +34,7 @@ const PILLARS = [
     icon: Eye,
     title: 'Previews',
     desc: 'Get early access to unreleased series, concept reviews, and development-stage products before they launch.',
-    color: '#5B7B8C',
+    color: JSI_COLORS.info,
     items: [
       { title: 'Vision Focus Suite', detail: 'A refinement pass on private office, built for quiet focus, hospitality, and layered storage.' },
       { title: 'Poet Soft Geometry', detail: 'Exploring a softer collaborative footprint for lounge-forward workspaces.' },
@@ -46,21 +46,21 @@ const PILLARS = [
     icon: MessageCircle,
     title: 'Community',
     desc: 'A private conversation surface where trusted dealers share notes, influence product direction, and earn recognition.',
-    color: '#C4956A',
+    color: JSI_COLORS.warning,
   },
   {
     id: 'challenges',
     icon: Trophy,
     title: 'Challenges',
     desc: 'Monthly design challenges that sharpen skills, build portfolio pieces, and unlock studio credits.',
-    color: '#8C7B63',
+    color: JSI_COLORS.charcoal,
   },
   {
     id: 'rewards',
     icon: Gem,
     title: 'Rewards',
     desc: 'Earn merch, early product access, and influence credits by contributing to the studio ecosystem.',
-    color: '#6A6762',
+    color: JSI_COLORS.charcoal,
   },
 ];
 

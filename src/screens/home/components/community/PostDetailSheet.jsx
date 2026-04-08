@@ -36,7 +36,7 @@ export const PostDetailSheet = ({ post, theme, dark, isLiked, isUpvoted, onToggl
       onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div
-        className="relative w-full max-w-lg sm:mx-4 rounded-t-3xl sm:rounded-3xl overflow-hidden"
+        className="relative w-full max-w-lg sm:mx-4 rounded-t-2xl sm:rounded-2xl overflow-hidden"
         style={{ background: dark ? '#1e1e1e' : '#fff', border: `1px solid ${theme.colors.border}`, maxHeight: '90dvh', display: 'flex', flexDirection: 'column' }}
       >
         {/* Sheet header */}

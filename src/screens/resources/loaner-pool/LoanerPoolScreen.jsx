@@ -188,9 +188,9 @@ export const LoanerPoolScreen = ({ theme, setSuccessMessage, userSettings, myPro
     }, [setSuccessMessage]);
 
     return (
-        <div className="flex flex-col h-full app-header-offset" style={{ paddingBottom: totalRequestItems > 0 ? '88px' : '0' }}>
+        <div className="flex flex-col min-h-full" style={{ paddingBottom: totalRequestItems > 0 ? '88px' : '0', backgroundColor: theme.colors.background }}>
             {/* Tab bar - using standardized SegmentedToggle */}
-            <div className="px-4 pt-3 pb-3">
+            <div className="px-4 pb-3" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 12px)' }}>
                 <SegmentedToggle
                     value={activeTab}
                     onChange={setActiveTab}

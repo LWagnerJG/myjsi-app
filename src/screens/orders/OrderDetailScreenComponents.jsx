@@ -143,7 +143,7 @@ export const Stage = React.memo(({ stage, state, isLast, subtitle, statusColor, 
 /* ── line item row ───────────────────────────────────────────── */
 export const LineItem = React.memo(({ item, open, onToggle, c, dark, panelBorder, isFirst }) => (
   <div className="transition-colors" style={{
-    backgroundColor: open ? (dark ? 'rgba(255,255,255,0.07)' : `${c.accent}05`) : 'transparent',
+    backgroundColor: open ? (dark ? 'rgba(255,255,255,0.12)' : `${c.accent}05`) : 'transparent',
     borderTop: !isFirst ? `1px solid ${panelBorder}` : undefined,
   }}>
     <button
@@ -190,7 +190,7 @@ export const LineItem = React.memo(({ item, open, onToggle, c, dark, panelBorder
 
             {/* specs */}
             {item.specs?.length > 0 && (
-              <div className="rounded-xl py-2 px-3 space-y-1.5" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.07)' : 'rgba(53,53,53,0.025)' }}>
+              <div className="rounded-xl py-2 px-3 space-y-1.5" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.12)' : 'rgba(53,53,53,0.025)' }}>
                 {item.specs.map((s, i) => (
                   <div key={i} className="flex items-center justify-between gap-4">
                     <p style={fieldLabel(c)}>{s.label}</p>

@@ -1,10 +1,11 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { Calendar, List, Building2, ChevronLeft, ChevronRight, Package, X } from 'lucide-react';
+import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import { Calendar, List, Building2, Package, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
-import { SearchInput } from '../../components/common/SearchInput.jsx';
+import SwipeCalendar from '../../components/common/SwipeCalendar.jsx';
+import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
-import { isDarkTheme } from '../../design-system/tokens.js';
+import { isDarkTheme, DESIGN_TOKENS, cardSurface } from '../../design-system/tokens.js';
 import { ORDER_DATA, STATUS_COLORS } from './data.js';
 import { formatCurrency, formatCompanyName } from '../../utils/format.js';
 
@@ -13,7 +14,6 @@ const initials = (company) =>
 
 /* ---------------------- Calendar View ---------------------- */
 export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => {
-    const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState(null);
     const isDark = isDarkTheme(theme);
 
@@ -37,53 +37,22 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
         return ordersByDate.get(k) || [];
     }, [selectedDate, ordersByDate]);
 
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const blanks = Array(firstDay).fill(null);
-    const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+    const renderDayExtra = useCallback((date) => {
+        const key = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+        const total = (ordersByDate.get(key) || []).reduce((s, o) => s + (o.net || 0), 0);
+        if (!total) return null;
+        return <span className="text-[0.625rem] leading-none mt-0.5" style={{ color: theme.colors.textSecondary }}>{formatCurrency(total)}</span>;
+    }, [ordersByDate, theme.colors.textSecondary]);
 
     return (
         <div className="space-y-4">
-            <GlassCard theme={theme} className="p-4" variant="elevated">
-                <div className="flex justify-between items-center mb-4">
-                    <button onClick={() => setCurrentDate(new Date(year, month - 1, 1))} className={`p-2 rounded-full motion-tap active:scale-[0.98] transition-colors ${isDark ? 'hover:bg-white/[0.08]' : 'hover:bg-black/[0.05]'}`}>
-                        <ChevronLeft style={{ color: theme.colors.textSecondary }} />
-                    </button>
-                    <h3 className="font-bold text-lg" style={{ color: theme.colors.textPrimary }}>
-                        {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
-                    </h3>
-                    <button onClick={() => setCurrentDate(new Date(year, month + 1, 1))} className={`p-2 rounded-full motion-tap active:scale-[0.98] transition-colors ${isDark ? 'hover:bg-white/[0.08]' : 'hover:bg-black/[0.05]'}`}>
-                        <ChevronRight style={{ color: theme.colors.textSecondary }} />
-                    </button>
-                </div>
-                <div className="grid grid-cols-7 gap-1 text-center text-xs font-semibold" style={{ color: theme.colors.textSecondary }}>
-                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => <div key={d}>{d}</div>)}
-                </div>
-                <div className="grid grid-cols-7 gap-1 mt-2">
-                    {blanks.map((_, i) => <div key={`b-${i}`} />)}
-                    {days.map((day) => {
-                        const date = new Date(year, month, day);
-                        const isSelected = selectedDate?.toDateString() === date.toDateString();
-                        const key = `${year}-${month}-${day}`;
-                        const has = ordersByDate.has(key);
-                        const total = (ordersByDate.get(key) || []).reduce((s, o) => s + (o.net || 0), 0);
-                        return (
-                            <button
-                                key={day}
-                                onClick={() => setSelectedDate(date)}
-                                className={`h-12 rounded-xl flex flex-col items-center justify-center transition motion-tap active:scale-[0.98] ${isSelected ? '' : (isDark ? 'hover:bg-white/[0.06]' : 'hover:bg-black/[0.04]')}`}
-                                style={{
-                                    ...(isSelected ? { boxShadow: `0 0 0 2px ${theme.colors.accent}` } : {}),
-                                }}
-                            >
-                                <span className="text-sm" style={{ color: theme.colors.textPrimary }}>{day}</span>
-                                {has && <span className="text-[0.6875rem]" style={{ color: theme.colors.textSecondary }}>{formatCurrency(total)}</span>}
-                            </button>
-                        );
-                    })}
-                </div>
+            <GlassCard theme={theme} className="overflow-hidden" variant="elevated">
+                <SwipeCalendar
+                    theme={theme}
+                    selected={selectedDate}
+                    onSelect={setSelectedDate}
+                    renderDayExtra={renderDayExtra}
+                />
             </GlassCard>
 
             {selectedDate && selectedOrders.length > 0 && (
@@ -94,8 +63,8 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
                     {selectedOrders.map((o) => {
                         const sc = STATUS_COLORS[o.status] || '#8B8680';
                         return (
-                            <div key={o.orderNumber} className="rounded-2xl overflow-hidden cursor-pointer active:scale-[0.99] transition"
-                                style={{ backgroundColor: theme.colors.surface, border: isDark ? '1px solid rgba(255,255,255,0.10)' : 'none', boxShadow: isDark ? 'none' : '0 1px 4px rgba(0,0,0,0.06)' }}
+                            <div key={o.orderNumber} className="rounded-[24px] overflow-hidden cursor-pointer active:scale-[0.99] transition"
+                                style={{ ...cardSurface(theme) }}
                                 onClick={() => onOrderClick(o)}>
                                 <div className="flex items-center gap-3.5 px-4 py-3.5">
                                     <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-black"
@@ -164,15 +133,11 @@ const DateGroupCard = ({ theme, dateKey, group, onNavigate }) => {
     const label = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }).toUpperCase();
 
     return (
-        <div className="rounded-2xl overflow-hidden" style={{
-            backgroundColor: theme.colors.surface,
-            border: dark ? '1px solid rgba(255,255,255,0.10)' : 'none',
-            boxShadow: dark ? 'none' : '0 1px 4px rgba(0,0,0,0.06)',
-        }}>
+        <div className="rounded-[24px] overflow-hidden" style={{ ...cardSurface(theme) }}>
             <div
                 className="flex items-baseline justify-between px-4 pt-3 pb-2"
                 style={{
-                    backgroundColor: dark ? 'rgba(255,255,255,0.07)' : 'rgba(53,53,53,0.025)',
+                    backgroundColor: dark ? 'rgba(255,255,255,0.12)' : 'rgba(53,53,53,0.025)',
                     borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.04)'}`,
                 }}
             >
@@ -236,10 +201,8 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
             {/* Controls */}
             <div className="flex-shrink-0 max-w-2xl mx-auto w-full">
-                <div className="px-5 pt-2 pb-3 flex flex-col gap-3">
-                    <div style={{ height: 56 }}>
-                        <SearchInput value={searchTerm} onChange={setSearchTerm} placeholder="Search orders..." theme={theme} variant="header" />
-                    </div>
+                <div className="px-5 pt-4 pb-3 flex flex-col gap-3">
+                    <StandardSearchBar value={searchTerm} onChange={setSearchTerm} placeholder="Search orders..." theme={theme} />
                     <div className="flex items-center justify-between gap-3">
                         <div className="min-w-0">
                             <SegmentedToggle value={dateType} onChange={setDateType} options={[{ value: 'shipDate', label: 'Ship Date' }, { value: 'date', label: 'PO Date' }]} theme={theme} size="sm" />
@@ -258,7 +221,7 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                                         animate={{ opacity: 1, scale: 1, y: 0 }}
                                         transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
                                         className="absolute right-0 mt-2 w-56 max-h-72 overflow-y-auto p-2 z-20 rounded-2xl"
-                                        style={{ transformOrigin: 'top right', backgroundColor: theme.colors.surface, border: dark ? '1px solid rgba(255,255,255,0.12)' : `1px solid ${theme.colors.border}`, boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }}>
+                                        style={{ transformOrigin: 'top right', backgroundColor: theme.colors.surface, border: dark ? '1px solid rgba(255,255,255,0.12)' : `1px solid ${theme.colors.border}`, boxShadow: DESIGN_TOKENS.shadows.modal }}>
                                         {dealers.map(d => {
                                             const active = d === selectedDealer;
                                             return <button key={d} onClick={() => { setSelectedDealer(d); setDealerMenuOpen(false); }} className={`w-full text-left px-3 py-2 rounded-xl text-sm transition motion-tap active:scale-[0.98] ${active ? 'font-semibold' : (dark ? 'hover:bg-white/[0.06]' : 'hover:bg-black/[0.04]')}`} style={{ backgroundColor: active ? theme.colors.subtle : 'transparent', color: theme.colors.textPrimary }}>{formatCompanyName(d)}</button>;
