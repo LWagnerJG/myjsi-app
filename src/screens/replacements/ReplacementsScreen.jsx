@@ -4,14 +4,14 @@ import { Camera, FileText, AlertCircle, CheckCircle, Clock, XCircle, Image, Chev
 import { REPLACEMENT_REQUESTS_DATA } from './data.js';
 import jsQR from 'jsqr';
 import { hapticSuccess } from '../../utils/haptics.js';
-import { isDarkTheme, DESIGN_TOKENS, subtleBorder } from '../../design-system/tokens.js';
+import { isDarkTheme, JSI_COLORS } from '../../design-system/tokens.js';
 
 /* ── Header offset shared across views ── */
 const CONTENT_PT = 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 16px)';
 
 /* ── Status helpers ── */
-const STATUS_BG  = { Pending: 'rgba(53,53,53,0.10)',   Approved: 'rgba(74,124,89,0.13)',   Rejected: 'rgba(184,92,92,0.13)' };
-const STATUS_FG  = { Pending: '#353535',               Approved: '#4A7C59',                Rejected: '#B85C5C' };
+const STATUS_BG  = { Pending: `${JSI_COLORS.charcoal}1A`, Approved: `${JSI_COLORS.success}21`, Rejected: `${JSI_COLORS.error}21` };
+const STATUS_FG  = { Pending: JSI_COLORS.charcoal,        Approved: JSI_COLORS.success,      Rejected: JSI_COLORS.error };
 const STATUS_ICON = { Pending: Clock, Approved: CheckCircle, Rejected: XCircle };
 
 function StatusBadge({ status }) {

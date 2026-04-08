@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback, useEffect, useRef, useImperative
 import { Briefcase, MapPin, Plus } from 'lucide-react';
 import { STAGES } from './data.js';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
-import { isDarkTheme } from '../../design-system/tokens.js';
+import { isDarkTheme, JSI_COLORS } from '../../design-system/tokens.js';
 import { usePersistentState } from '../../hooks/usePersistentState.js';
 import FloatingPill from '../../components/common/FloatingPill.jsx';
 import { PROJECTS_TAB_OPTIONS, fmtCurrency } from './components/projects/utils.js';
@@ -211,12 +211,12 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
                             </div>
                             <div className="flex items-center gap-1.5 mt-2">
                               {activeStds > 0 && (
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: 'rgba(74,124,89,0.25)', color: '#8BC49A' }}>
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: `${JSI_COLORS.success}40`, color: JSI_COLORS.success }}>
                                   {activeStds} standard{activeStds !== 1 ? 's' : ''}
                                 </span>
                               )}
                               {currentOrd > 0 && (
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: 'rgba(46,107,138,0.25)', color: '#7BBAD4' }}>
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: `${JSI_COLORS.info}40`, color: JSI_COLORS.info }}>
                                   {currentOrd} order{currentOrd !== 1 ? 's' : ''}
                                 </span>
                               )}
@@ -265,7 +265,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
                             <p className="text-white/80 font-medium text-xs mt-0.5">{p.customerName}</p>
                             <div className="flex items-center gap-1.5 mt-1.5">
                               {p.installCount > 0 && (
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: 'rgba(46,107,138,0.25)', color: '#7BBAD4' }}>
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: `${JSI_COLORS.info}40`, color: JSI_COLORS.info }}>
                                   {p.installCount} photo{p.installCount !== 1 ? 's' : ''}
                                 </span>
                               )}

@@ -1,11 +1,11 @@
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
-import { Calendar, List, Building2, ChevronLeft, ChevronRight, Package, X } from 'lucide-react';
+import { Calendar, List, Building2, Package, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import SwipeCalendar from '../../components/common/SwipeCalendar.jsx';
 import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
-import { isDarkTheme, DESIGN_TOKENS, cardSurface, subtleBorder } from '../../design-system/tokens.js';
+import { isDarkTheme, DESIGN_TOKENS, cardSurface } from '../../design-system/tokens.js';
 import { ORDER_DATA, STATUS_COLORS } from './data.js';
 import { formatCurrency, formatCompanyName } from '../../utils/format.js';
 

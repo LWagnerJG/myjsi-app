@@ -1,19 +1,14 @@
 // src/screens/samples/SamplesScreen.jsx
 import React, { useState, useMemo, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { GlassCard } from '../../components/common/GlassCard.jsx';
-import { FloatingCart } from '../../components/common/FloatingCart.jsx';
+import { motion } from 'framer-motion';
 import { isDarkTheme, DESIGN_TOKENS } from '../../design-system/tokens.js';
 import { Package, Plus, Trash2, Minus, CheckCircle, Layers } from 'lucide-react';
 import { hapticMedium } from '../../utils/haptics.js';
 import { SAMPLE_PRODUCTS, SAMPLE_CATEGORIES, FINISH_CATEGORIES, FINISH_SAMPLES } from './data.js';
+import { CartDrawer } from './components/CartDrawer.jsx';
 
 const idOf = (x) => String(x);
 const COLLAPSED_HEIGHT = 96;
-
-import { DirectoryModal } from './components/DirectoryModal.jsx';
-import { DrawerItem } from './components/DrawerItem.jsx';
-import { CartDrawer } from './components/CartDrawer.jsx';
 
 export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart: onUpdateCartProp, userSettings, dealerDirectory, designFirms, initialCartOpen = false }) => {
     const [cartInternal, setCartInternal] = useState({});

@@ -5,7 +5,7 @@ import {
   Mail, Phone, X,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { isDarkTheme, DESIGN_TOKENS } from '../../../design-system/tokens.js';
+import { isDarkTheme, DESIGN_TOKENS, JSI_COLORS } from '../../../design-system/tokens.js';
 import { getModalMotion } from '../../../design-system/motion.js';
 import {
   VERTICAL_COLORS, ORDER_STATUS_COLORS, MATERIAL_CATEGORIES, INSTALL_SPACE_TYPES, getAllInstalls,
@@ -154,7 +154,7 @@ const StandardsProgramDetailModal = ({ program, customer, theme, onClose }) => {
                 <ul className="space-y-1">
                   {program.specialNotes.map((note, i) => (
                     <li key={i} className="flex items-start gap-2 text-[12px]" style={{ color: c.textPrimary }}>
-                      <CheckCircle2 className="w-3.5 h-3.5 shrink-0 mt-0.5" style={{ color: '#4A7C59' }} />
+                      <CheckCircle2 className="w-3.5 h-3.5 shrink-0 mt-0.5" style={{ color: JSI_COLORS.success }} />
                       {note}
                     </li>
                   ))}

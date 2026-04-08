@@ -1,6 +1,6 @@
 ﻿import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { ChevronDown, Upload, FileText, Eye, Send, Paperclip, Users, Clock, CheckCircle, AlertCircle, Loader2, Share2, Download, ExternalLink } from 'lucide-react';
-import { isDarkTheme, DESIGN_TOKENS } from '../../../../design-system/tokens.js';
+import { isDarkTheme, DESIGN_TOKENS, JSI_COLORS } from '../../../../design-system/tokens.js';
 import { STAGES, VERTICALS, COMPETITORS, DISCOUNT_OPTIONS, PO_TIMEFRAMES, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS } from '../../data.js';
 import { JSI_SERIES } from '../../../products/data.js';
 import { ProbabilitySlider } from '../../../../components/forms/ProbabilitySlider.jsx';
@@ -82,10 +82,10 @@ const MultiPillSelect = ({ options, value = [], onToggle, theme }) => {
 
 /* ---- quote tracker ---- */
 const STATUS_META = {
-  requested: { label: 'Requested', icon: Clock, color: '#C4956A', bg: 'rgba(196,149,106,0.10)' },
-  'in-progress': { label: 'In Progress', icon: Loader2, color: '#5B7B8C', bg: 'rgba(91,123,140,0.10)' },
-  review: { label: 'In Review', icon: Eye, color: '#5B7B8C', bg: 'rgba(91,123,140,0.10)' },
-  complete: { label: 'Complete', icon: CheckCircle, color: '#4A7C59', bg: 'rgba(74,124,89,0.10)' },
+  requested:    { label: 'Requested',   icon: Clock,        color: JSI_COLORS.warning, bg: `${JSI_COLORS.warning}1A` },
+  'in-progress':{ label: 'In Progress', icon: Loader2,      color: JSI_COLORS.info,    bg: `${JSI_COLORS.info}1A` },
+  review:       { label: 'In Review',   icon: Eye,          color: JSI_COLORS.info,    bg: `${JSI_COLORS.info}1A` },
+  complete:     { label: 'Complete',    icon: CheckCircle,  color: JSI_COLORS.success, bg: `${JSI_COLORS.success}1A` },
 };
 
 const QuoteTracker = ({ quotes = [], theme, onRequestQuote }) => {
@@ -104,7 +104,7 @@ const QuoteTracker = ({ quotes = [], theme, onRequestQuote }) => {
       {pending.length > 0 && (
         <div className="flex items-center gap-3 px-3.5 py-3 rounded-xl" style={{ backgroundColor: isDark ? 'rgba(91,123,140,0.10)' : 'rgba(91,123,140,0.06)', border: `1px solid ${isDark ? 'rgba(91,123,140,0.15)' : 'rgba(91,123,140,0.08)'}` }}>
           <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: isDark ? 'rgba(91,123,140,0.18)' : 'rgba(91,123,140,0.12)' }}>
-            <Users className="w-3 h-3" style={{ color: '#5B7B8C' }} />
+            <Users className="w-3 h-3" style={{ color: JSI_COLORS.info }} />
           </div>
           <div className="flex-1 min-w-0">
             <span className="text-[11px] font-bold block leading-tight" style={{ color: c.textPrimary }}>{queueAhead} quote{queueAhead !== 1 ? 's' : ''} in queue</span>
@@ -135,11 +135,11 @@ const QuoteTracker = ({ quotes = [], theme, onRequestQuote }) => {
         <div key={q.id || `c${qi}`} className="rounded-xl overflow-hidden" style={{ border: `1px solid ${isDark ? 'rgba(74,124,89,0.20)' : 'rgba(74,124,89,0.15)'}`, backgroundColor: isDark ? 'rgba(74,124,89,0.06)' : 'rgba(74,124,89,0.04)' }}>
           <div className="flex items-center gap-3 px-3.5 py-3">
             <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'rgba(74,124,89,0.12)' }}>
-              <CheckCircle className="w-3 h-3" style={{ color: '#4A7C59' }} />
+              <CheckCircle className="w-3 h-3" style={{ color: JSI_COLORS.success }} />
             </div>
             <div className="flex-1 min-w-0">
               <span className="text-[11px] font-bold truncate block" style={{ color: c.textPrimary }}>{q.fileName || `Quote #${qi + 1}`}</span>
-              <span className="text-[10px] font-semibold" style={{ color: '#4A7C59' }}>Ready to view</span>
+              <span className="text-[10px] font-semibold" style={{ color: JSI_COLORS.success }}>Ready to view</span>
             </div>
           </div>
           <div className="flex border-t" style={{ borderColor: isDark ? 'rgba(74,124,89,0.15)' : 'rgba(74,124,89,0.10)' }}>
@@ -479,7 +479,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
           {/* AUTOSAVE */}
           <div className="flex justify-center pt-0.5 pb-3">
             <div className="flex items-center gap-1.5">
-              <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#4A7C59', opacity: 0.45 }} />
+              <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: JSI_COLORS.success, opacity: 0.45 }} />
               <span className="text-[10px] font-medium tracking-wide" style={{ color: c.textSecondary, opacity: 0.3 }}>Changes saved automatically</span>
             </div>
           </div>

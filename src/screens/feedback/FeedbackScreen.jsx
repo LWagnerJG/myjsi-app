@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Send, Paperclip, X, MessageSquare, Bug, Lightbulb, Sparkles, CheckCircle2 } from 'lucide-react';
-import { isDarkTheme, cardSurface, subtleBorder, inputSurface } from '../../design-system/tokens.js';
+import { isDarkTheme, subtleBorder } from '../../design-system/tokens.js';
 import { hapticSuccess } from '../../utils/haptics.js';
 
 const FEEDBACK_TYPES = [
