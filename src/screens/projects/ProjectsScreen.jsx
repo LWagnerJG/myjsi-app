@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Briefcase, MapPin, Plus, X, Building2 } from 'lucide-react';
+import { Briefcase, MapPin, Plus, X, Building2, Upload, ImageIcon } from 'lucide-react';
+import { INSTALLATION_CONSTANTS } from './installation-data.js';
 import { STAGES } from './data.js';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 import { isDarkTheme, JSI_COLORS } from '../../design-system/tokens.js';
@@ -58,7 +59,7 @@ const AddCustomerModal = ({ theme, onClose, onAdd }) => {
 
   return createPortal(
     <div className="fixed inset-0 flex items-end sm:items-center justify-center"
-      style={{ zIndex: 9000, backgroundColor: 'rgba(0,0,0,0.5)' }}
+      style={{ zIndex: 9000, backgroundColor: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
       onClick={onClose}>
       <div className="w-full max-w-md rounded-t-3xl sm:rounded-2xl overflow-hidden"
         style={{ backgroundColor: c.surface, border: `1px solid ${border}` }}
@@ -164,6 +165,183 @@ const AddCustomerModal = ({ theme, onClose, onAdd }) => {
 };
 
 /* ═══════════════════════════════════════════════════════════════
+   ADD INSTALL MODAL
+   ═══════════════════════════════════════════════════════════════ */
+const AddInstallModal = ({ theme, onClose, onAdd }) => {
+  const isDark = isDarkTheme(theme);
+  const c = theme.colors;
+  const border = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)';
+  const fieldBg = isDark ? 'rgba(255,255,255,0.06)' : '#f9f9f9';
+  const MAX_PHOTOS = INSTALLATION_CONSTANTS.PHOTO_REQUIREMENTS.maxPhotos;
+
+  const [projectName, setProjectName] = useState('');
+  const [location, setLocation]       = useState('');
+  const [photos, setPhotos]           = useState([]);
+  const [error, setError]             = useState('');
+  const nameRef = useRef(null);
+  const fileInputRef = useRef(null);
+
+  useEffect(() => { nameRef.current?.focus(); }, []);
+
+  const photoPreviewUrls = useMemo(
+    () => photos.map(file => URL.createObjectURL(file)),
+    [photos],
+  );
+
+  useEffect(() => {
+    return () => { photoPreviewUrls.forEach(url => URL.revokeObjectURL(url)); };
+  }, [photoPreviewUrls]);
+
+  const handleFileChange = useCallback((e) => {
+    if (!e.target.files) return;
+    const valid = Array.from(e.target.files).filter(f =>
+      INSTALLATION_CONSTANTS.PHOTO_REQUIREMENTS.acceptedFormats.includes(f.type) &&
+      f.size <= INSTALLATION_CONSTANTS.PHOTO_REQUIREMENTS.maxFileSize,
+    );
+    if (photos.length + valid.length <= MAX_PHOTOS) {
+      setPhotos(p => [...p, ...valid]);
+      setError('');
+    }
+    e.target.value = '';
+  }, [photos.length, MAX_PHOTOS]);
+
+  const removePhoto = useCallback((idx) => {
+    setPhotos(p => p.filter((_, i) => i !== idx));
+  }, []);
+
+  const handleSubmit = () => {
+    const name = projectName.trim();
+    const loc  = location.trim();
+    if (!name || name.length < 3) { setError('Project name must be at least 3 characters.'); return; }
+    if (!loc || loc.length < 5)   { setError('Location must be at least 5 characters.'); return; }
+    if (photos.length < 1)        { setError('Add at least one photo.'); return; }
+
+    onAdd({
+      name,
+      location: loc,
+      image: URL.createObjectURL(photos[0]),
+      photoCount: photos.length,
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+    });
+    onClose();
+  };
+
+  return createPortal(
+    <div className="fixed inset-0 flex items-end sm:items-center justify-center"
+      style={{ zIndex: 9000, backgroundColor: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
+      onClick={onClose}>
+      <div className="w-full max-w-md max-h-[85vh] flex flex-col rounded-t-3xl sm:rounded-2xl overflow-hidden"
+        style={{ backgroundColor: c.surface, border: `1px solid ${border}` }}
+        onClick={e => e.stopPropagation()}>
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b flex-shrink-0" style={{ borderColor: border }}>
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: `${c.accent}15` }}>
+              <ImageIcon className="w-4 h-4" style={{ color: c.accent }} />
+            </div>
+            <h2 className="text-base font-bold" style={{ color: c.textPrimary }}>Add Install</h2>
+          </div>
+          <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
+            style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}>
+            <X className="w-4 h-4" style={{ color: c.textSecondary }} />
+          </button>
+        </div>
+
+        <div className="p-5 space-y-4 overflow-y-auto flex-1 scrollbar-hide">
+          {/* Project Name */}
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: c.textSecondary, opacity: 0.7 }}>Project Name</label>
+            <input
+              ref={nameRef}
+              value={projectName} onChange={e => { setProjectName(e.target.value); setError(''); }}
+              placeholder="e.g. Acme Corp HQ"
+              className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-all"
+              style={{ backgroundColor: fieldBg, border: `1.5px solid ${border}`, color: c.textPrimary }}
+            />
+          </div>
+
+          {/* Location */}
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: c.textSecondary, opacity: 0.7 }}>Location</label>
+            <input
+              value={location} onChange={e => { setLocation(e.target.value); setError(''); }}
+              placeholder="e.g. Jasper, IN"
+              className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-all"
+              style={{ backgroundColor: fieldBg, border: `1.5px solid ${border}`, color: c.textPrimary }}
+            />
+          </div>
+
+          {/* Photos */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-xs font-semibold uppercase tracking-wider" style={{ color: c.textSecondary, opacity: 0.7 }}>Photos</label>
+              <span className="text-xs font-semibold tabular-nums" style={{ color: c.textSecondary, opacity: 0.6 }}>{photos.length}/{MAX_PHOTOS}</span>
+            </div>
+            {photos.length === 0 ? (
+              <button type="button" onClick={() => fileInputRef.current?.click()}
+                className="w-full py-8 rounded-xl border-2 border-dashed flex flex-col items-center justify-center gap-2 transition-colors"
+                style={{ borderColor: border, backgroundColor: fieldBg, color: c.textSecondary }}>
+                <Upload className="w-5 h-5" style={{ opacity: 0.5 }} />
+                <span className="text-xs font-semibold" style={{ color: c.textPrimary }}>Add Photos</span>
+              </button>
+            ) : (
+              <div className="grid grid-cols-3 gap-2">
+                {photoPreviewUrls.map((url, idx) => (
+                  <div key={url} className="relative aspect-square rounded-xl overflow-hidden" style={{ border: `1px solid ${border}` }}>
+                    <img src={url} alt="" className="w-full h-full object-cover" />
+                    <button type="button" onClick={() => removePhoto(idx)}
+                      className="absolute top-1 right-1 w-6 h-6 rounded-full flex items-center justify-center"
+                      style={{ backgroundColor: 'rgba(24,24,24,0.7)', color: '#fff' }}>
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+                {photos.length < MAX_PHOTOS && (
+                  <button type="button" onClick={() => fileInputRef.current?.click()}
+                    className="aspect-square rounded-xl border-2 border-dashed flex flex-col items-center justify-center gap-1 transition-colors"
+                    style={{ borderColor: border, color: c.textSecondary, backgroundColor: fieldBg }}>
+                    <Plus className="w-4 h-4" />
+                    <span className="text-[0.625rem] font-semibold">Add</span>
+                  </button>
+                )}
+              </div>
+            )}
+            <input
+              type="file" ref={fileInputRef} multiple className="hidden"
+              accept={INSTALLATION_CONSTANTS.PHOTO_REQUIREMENTS.acceptedFormats.join(',')}
+              onChange={handleFileChange}
+            />
+          </div>
+
+          {/* Error */}
+          {error && <p className="text-xs font-medium" style={{ color: JSI_COLORS.error }}>{error}</p>}
+
+          {/* Actions */}
+          <div className="flex gap-3 pt-1">
+            <button onClick={onClose}
+              className="flex-1 py-3 rounded-xl text-sm font-semibold transition-all active:scale-[0.97]"
+              style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)', color: c.textSecondary }}>
+              Cancel
+            </button>
+            <button onClick={handleSubmit}
+              className="flex-1 py-3 rounded-xl text-sm font-bold transition-all active:scale-[0.97]"
+              style={{ backgroundColor: c.accent, color: c.accentText }}>
+              Add Install
+            </button>
+          </div>
+        </div>
+
+        {/* Safe area bottom */}
+        <div style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }} />
+      </div>
+    </div>,
+    document.body,
+  );
+};
+
+/* ═══════════════════════════════════════════════════════════════
    PROJECTS SCREEN
    ═══════════════════════════════════════════════════════════════ */
 export const ProjectsScreen = forwardRef(({
@@ -171,6 +349,7 @@ export const ProjectsScreen = forwardRef(({
   projectsInitialTab, clearProjectsInitialTab,
   projectsInitialStage, clearProjectsInitialStage,
   deepLinkOppId, members, currentUserId,
+  setBackHandler, onAddInstall,
 }, ref) => {
   const isDark = isDarkTheme(theme);
   const [projectsTab, setProjectsTab] = usePersistentState('pref.projects.activeTab', 'pipeline');
@@ -179,6 +358,7 @@ export const ProjectsScreen = forwardRef(({
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [customers, setCustomers] = useState(MOCK_CUSTOMERS);
   const [showAddCustomer, setShowAddCustomer] = useState(false);
+  const [showAddInstall, setShowAddInstall] = useState(false);
   const stagesScrollRef = useRef(null);
   const [showStageFadeLeft, setShowStageFadeLeft] = useState(false);
   const [showStageFadeRight, setShowStageFadeRight] = useState(false);
@@ -213,6 +393,20 @@ export const ProjectsScreen = forwardRef(({
       return false;
     },
   }));
+
+  /* ── Register back handler for sub-screen navigation ── */
+  useEffect(() => {
+    if (selectedCustomer || selectedOpportunity) {
+      setBackHandler?.(() => {
+        if (selectedCustomer)    { setSelectedCustomer(null);    return true; }
+        if (selectedOpportunity) { setSelectedOpportunity(null); return true; }
+        return false;
+      });
+    } else {
+      setBackHandler?.(null);
+    }
+    return () => setBackHandler?.(null);
+  }, [selectedCustomer, selectedOpportunity, setBackHandler]);
 
   /* ── Stage scroll fades ── */
   const updateStageFade = useCallback(() => {
@@ -262,7 +456,7 @@ export const ProjectsScreen = forwardRef(({
   const cta = useMemo(() => ({
     pipeline:      { label: 'Project',  action: () => onNavigate('new-lead') },
     customers:     { label: 'Customer', action: () => setShowAddCustomer(true) },
-    'my-projects': { label: 'Install',  action: () => onNavigate('add-new-install') },
+    'my-projects': { label: 'Install',  action: () => setShowAddInstall(true) },
   })[projectsTab], [projectsTab, onNavigate]);
 
   /* ── Sub-screen renders ── */
@@ -418,6 +612,15 @@ export const ProjectsScreen = forwardRef(({
           theme={theme}
           onClose={() => setShowAddCustomer(false)}
           onAdd={handleAddCustomer}
+        />
+      )}
+
+      {/* Add Install modal */}
+      {showAddInstall && (
+        <AddInstallModal
+          theme={theme}
+          onClose={() => setShowAddInstall(false)}
+          onAdd={onAddInstall}
         />
       )}
     </div>
