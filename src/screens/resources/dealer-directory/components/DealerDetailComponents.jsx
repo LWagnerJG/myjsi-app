@@ -13,14 +13,14 @@ export const HBar = ({ label, value, maxValue, color, isDark, colors, rank }) =>
         <div className="flex items-center gap-2.5 py-[9px]">
             {rank != null && (
                 <span
-                    className="text-[11px] font-black w-4 text-center flex-shrink-0 tabular-nums"
+                    className="text-[0.6875rem] font-black w-4 text-center flex-shrink-0 tabular-nums"
                     style={{ color: colors.textSecondary, opacity: 0.35 }}
                 >
                     {rank}
                 </span>
             )}
             <span
-                className="text-[13px] font-semibold w-[90px] flex-shrink-0 truncate"
+                className="text-[0.8125rem] font-semibold w-[90px] flex-shrink-0 truncate"
                 style={{ color: colors.textPrimary }}
             >
                 {label}
@@ -35,7 +35,7 @@ export const HBar = ({ label, value, maxValue, color, isDark, colors, rank }) =>
                 />
             </div>
             <span
-                className="text-[12px] font-bold w-14 text-right flex-shrink-0 tabular-nums"
+                className="text-xs font-bold w-14 text-right flex-shrink-0 tabular-nums"
                 style={{ color: colors.textSecondary }}
             >
                 {fmtK(value)}
@@ -113,7 +113,7 @@ export const SparkBars = ({ data, colors, isDark }) => {
                             />
                         </div>
                         <span
-                            className="text-[9px] font-semibold leading-none"
+                            className="text-[0.5625rem] font-semibold leading-none"
                             style={{ color: colors.textSecondary, opacity: isLast ? 0.8 : 0.5 }}
                         >
                             {d.month}

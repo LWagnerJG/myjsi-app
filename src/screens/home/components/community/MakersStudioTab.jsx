@@ -85,10 +85,10 @@ export const MakersStudioTab = ({ theme }) => {
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <Palette className="w-4 h-4" style={{ color: theme.colors.textSecondary, opacity: 0.5 }} />
-            <span className="text-[11px] font-bold uppercase tracking-[0.15em]" style={{ color: theme.colors.textSecondary }}>
+            <span className="text-[0.6875rem] font-bold uppercase tracking-[0.15em]" style={{ color: theme.colors.textSecondary }}>
               JSI Makers Studio
             </span>
-            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
+            <span className="text-[0.625rem] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
               style={{ backgroundColor: dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.05)', color: theme.colors.textSecondary }}>
               Quiet Prestige
             </span>
@@ -126,7 +126,7 @@ export const MakersStudioTab = ({ theme }) => {
             }}>
               <s.icon className="w-4 h-4 mx-auto mb-2" style={{ color: theme.colors.textSecondary, opacity: 0.4 }} />
               <div className="text-lg font-black tabular-nums" style={{ color: theme.colors.textPrimary }}>{s.value}</div>
-              <div className="text-[11px] font-semibold uppercase tracking-wider mt-0.5" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>{s.label}</div>
+              <div className="text-[0.6875rem] font-semibold uppercase tracking-wider mt-0.5" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>{s.label}</div>
             </div>
           </GlassCard>
         ))}
@@ -153,7 +153,7 @@ export const MakersStudioTab = ({ theme }) => {
                   <Icon className="w-4 h-4" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-[15px] font-bold" style={{ color: theme.colors.textPrimary }}>{pillar.title}</h2>
+                  <h2 className="text-[0.9375rem] font-bold" style={{ color: theme.colors.textPrimary }}>{pillar.title}</h2>
                   <p className={`text-sm leading-relaxed mt-0.5 ${isOpen ? '' : 'line-clamp-1'}`} style={{ color: theme.colors.textSecondary }}>{pillar.desc}</p>
                 </div>
                 {hasContent && (
@@ -178,7 +178,7 @@ export const MakersStudioTab = ({ theme }) => {
                           style={{ backgroundColor: subtle() }}>
                           <div className="min-w-0 flex-1">
                             <div className="text-sm font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{c.title}</div>
-                            <div className="text-[11px] font-medium mt-0.5" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>{c.tag}</div>
+                            <div className="text-[0.6875rem] font-medium mt-0.5" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>{c.tag}</div>
                           </div>
                           <ChevronRight className="w-3.5 h-3.5 opacity-20 group-hover:opacity-50 transition-opacity flex-shrink-0 ml-2" />
                         </button>

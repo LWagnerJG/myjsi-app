@@ -167,18 +167,18 @@ export const InstallInstructionsScreen = ({ theme }) => {
             >
               <div className="flex flex-wrap items-start justify-between gap-3 sm:gap-4">
               <div>
-                <h2 className="text-[19px] sm:text-[20px] font-bold tracking-tight" style={{ color: c.textPrimary }}>Install Instructions</h2>
-                <p className="text-[12px] mt-0.5" style={{ color: c.textSecondary }}>
+                <h2 className="text-[1.1875rem] sm:text-xl font-bold tracking-tight" style={{ color: c.textPrimary }}>Install Instructions</h2>
+                <p className="text-xs mt-0.5" style={{ color: c.textSecondary }}>
                   {instructions.length} guides organized by product type.
                 </p>
               </div>
               <div className="flex items-center gap-2">
                 <div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5" style={{ backgroundColor: subtleBg }}>
                   <FileText className="w-3.5 h-3.5" style={{ color: c.textSecondary }} />
-                  <span className="text-[11px] leading-none font-semibold" style={{ color: c.textSecondary }}>{instructions.length} Docs</span>
+                  <span className="text-[0.6875rem] leading-none font-semibold" style={{ color: c.textSecondary }}>{instructions.length} Docs</span>
                 </div>
                 <div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5" style={{ backgroundColor: subtleBg }}>
-                  <span className="text-[11px] leading-none font-semibold" style={{ color: c.textSecondary }}>{typeCount} Types</span>
+                  <span className="text-[0.6875rem] leading-none font-semibold" style={{ color: c.textSecondary }}>{typeCount} Types</span>
                 </div>
               </div>
               </div>
@@ -199,7 +199,7 @@ export const InstallInstructionsScreen = ({ theme }) => {
                 <button
                   key={type}
                   onClick={() => setSelectedType(type)}
-                  className="h-9 px-3 rounded-full text-[12px] font-semibold whitespace-nowrap transition-colors inline-flex items-center justify-center leading-none"
+                  className="h-9 px-3 rounded-full text-xs font-semibold whitespace-nowrap transition-colors inline-flex items-center justify-center leading-none"
                   style={{
                     backgroundColor: selectedType === type ? c.accent : subtleBg,
                     color: selectedType === type ? c.accentText : c.textSecondary,
@@ -245,24 +245,24 @@ export const InstallInstructionsScreen = ({ theme }) => {
                     </button>
 
                     <div className="absolute top-2.5 right-2.5 h-6 px-2.5 rounded-full inline-flex items-center pointer-events-none" style={{ backgroundColor: 'rgba(0,0,0,0.45)' }}>
-                      <span className="text-[11px] leading-none font-semibold text-white/90 tracking-wide">{item.type}</span>
+                      <span className="text-[0.6875rem] leading-none font-semibold text-white/90 tracking-wide">{item.type}</span>
                     </div>
                     <div className="absolute bottom-2.5 left-2.5 h-6 flex items-center gap-1 px-2 rounded-lg pointer-events-none" style={{ backgroundColor: 'rgba(0,0,0,0.52)' }}>
                       <Clock className="w-3 h-3 text-white/80" />
-                      <span className="text-[11px] leading-none font-semibold text-white tracking-wide">{item.duration}</span>
+                      <span className="text-[0.6875rem] leading-none font-semibold text-white tracking-wide">{item.duration}</span>
                     </div>
                   </div>
 
                   <div className="p-4 space-y-3">
                     <div>
-                      <p className="text-[11px] uppercase tracking-wide font-semibold mb-1" style={{ color: c.textSecondary }}>{item.series}</p>
-                      <h3 className="text-[15px] font-bold leading-snug tracking-tight" style={{ color: c.textPrimary }}>{item.title}</h3>
+                      <p className="text-[0.6875rem] uppercase tracking-wide font-semibold mb-1" style={{ color: c.textSecondary }}>{item.series}</p>
+                      <h3 className="text-[0.9375rem] font-bold leading-snug tracking-tight" style={{ color: c.textPrimary }}>{item.title}</h3>
                     </div>
 
                     <div>
                       <button
                         onClick={() => openLink(item.pdfUrl)}
-                        className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-[12px] font-bold transition-all motion-tap"
+                        className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition-all motion-tap"
                         style={{
                           backgroundColor: c.accent,
                           color: c.accentText,
@@ -284,8 +284,8 @@ export const InstallInstructionsScreen = ({ theme }) => {
             <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4" style={{ backgroundColor: subtleBg }}>
               <Wrench className="w-6 h-6" style={{ color: c.textSecondary, opacity: 0.4 }} />
             </div>
-            <h3 className="text-[16px] font-bold mb-1.5" style={{ color: c.textPrimary }}>No Instructions Found</h3>
-            <p className="text-[13px] max-w-xs" style={{ color: c.textSecondary, opacity: 0.7 }}>
+            <h3 className="text-base font-bold mb-1.5" style={{ color: c.textPrimary }}>No Instructions Found</h3>
+            <p className="text-[0.8125rem] max-w-xs" style={{ color: c.textSecondary, opacity: 0.7 }}>
               {searchTerm ? `No results for "${searchTerm}"` : 'No installation instructions available.'}
             </p>
           </div>
@@ -304,7 +304,7 @@ export const InstallInstructionsScreen = ({ theme }) => {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="h-12 px-4 flex items-center justify-between" style={{ borderBottom: `1px solid ${divider}` }}>
-                <p className="text-[13px] font-semibold" style={{ color: c.textPrimary }}>{activeVideo.title} · Video Preview</p>
+                <p className="text-[0.8125rem] font-semibold" style={{ color: c.textPrimary }}>{activeVideo.title} · Video Preview</p>
                 <button
                   onClick={() => setActiveVideo(null)}
                   className="w-8 h-8 rounded-full inline-flex items-center justify-center"

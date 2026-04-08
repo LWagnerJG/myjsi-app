@@ -51,7 +51,7 @@ const CardHeader = ({ children, theme, dark, right }) => (
         style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)'}` }}
     >
         <span
-            className="text-[13px] font-bold uppercase tracking-[0.07em]"
+            className="text-[0.8125rem] font-bold uppercase tracking-[0.07em]"
             style={{ color: theme.colors.textSecondary, opacity: 0.65 }}
         >
             {children}
@@ -99,7 +99,7 @@ export const ContractsScreen = ({ theme, setSuccessMessage }) => {
                             <button
                                 key={t.value}
                                 onClick={() => setActive(t.value)}
-                                className="flex-1 py-2 text-[13px] font-semibold text-center relative z-10 transition-colors duration-200"
+                                className="flex-1 py-2 text-[0.8125rem] font-semibold text-center relative z-10 transition-colors duration-200"
                                 style={{ color: on ? (theme.colors.accentText || '#fff') : theme.colors.textSecondary }}
                             >
                                 {on && (
@@ -124,11 +124,11 @@ export const ContractsScreen = ({ theme, setSuccessMessage }) => {
 
                         {/* Contract title */}
                         <div className="pt-1 px-1">
-                            <h2 className="text-[21px] font-bold leading-tight" style={{ color: theme.colors.textPrimary }}>
+                            <h2 className="text-[1.3125rem] font-bold leading-tight" style={{ color: theme.colors.textPrimary }}>
                                 {contract.name}
                             </h2>
                             {contract.subtitle && (
-                                <p className="text-[14px] mt-1" style={{ color: theme.colors.textSecondary }}>
+                                <p className="text-sm mt-1" style={{ color: theme.colors.textSecondary }}>
                                     {contract.subtitle}
                                 </p>
                             )}
@@ -138,7 +138,7 @@ export const ContractsScreen = ({ theme, setSuccessMessage }) => {
                             /* ── State contracts list ── */
                             <GlassCard theme={theme} className="rounded-[22px] overflow-hidden">
                                 <CardHeader theme={theme} dark={dark} right={
-                                    <span className="text-[11px] font-bold uppercase tracking-[0.06em]"
+                                    <span className="text-[0.6875rem] font-bold uppercase tracking-[0.06em]"
                                         style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>
                                         {contract.entries.length} States
                                     </span>
@@ -158,7 +158,7 @@ export const ContractsScreen = ({ theme, setSuccessMessage }) => {
                                     >
                                         {/* State name */}
                                         <span
-                                            className="text-[14px] font-semibold shrink-0 w-[118px]"
+                                            className="text-sm font-semibold shrink-0 w-[118px]"
                                             style={{ color: theme.colors.textPrimary }}
                                         >
                                             {entry.state}
@@ -168,14 +168,14 @@ export const ContractsScreen = ({ theme, setSuccessMessage }) => {
                                             {entry.contracts.map((c, ci) => (
                                                 <div key={ci} className="flex flex-col">
                                                     <span
-                                                        className="text-[13px] font-mono font-medium leading-snug"
+                                                        className="text-[0.8125rem] font-mono font-medium leading-snug"
                                                         style={{ color: theme.colors.accent }}
                                                     >
                                                         {c.number}
                                                     </span>
                                                     {c.label && (
                                                         <span
-                                                            className="text-[11px] leading-snug"
+                                                            className="text-[0.6875rem] leading-snug"
                                                             style={{ color: theme.colors.textSecondary, opacity: 0.6 }}
                                                         >
                                                             {c.label}
@@ -193,12 +193,12 @@ export const ContractsScreen = ({ theme, setSuccessMessage }) => {
                                 <GlassCard theme={theme} className="rounded-[22px] overflow-hidden">
                                     <CardHeader theme={theme} dark={dark} right={
                                         <div className="flex items-center gap-5">
-                                            <span className="text-[11px] font-bold uppercase tracking-[0.06em] w-[52px] text-center"
+                                            <span className="text-[0.6875rem] font-bold uppercase tracking-[0.06em] w-[52px] text-center"
                                                 style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>Dlr</span>
-                                            <span className="text-[11px] font-bold uppercase tracking-[0.06em] w-[52px] text-center"
+                                            <span className="text-[0.6875rem] font-bold uppercase tracking-[0.06em] w-[52px] text-center"
                                                 style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>Rep</span>
                                             {hasMargins && (
-                                                <span className="text-[11px] font-bold uppercase tracking-[0.06em] w-[56px] text-center"
+                                                <span className="text-[0.6875rem] font-bold uppercase tracking-[0.06em] w-[56px] text-center"
                                                     style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>Margin</span>
                                             )}
                                         </div>
@@ -218,22 +218,22 @@ export const ContractsScreen = ({ theme, setSuccessMessage }) => {
                                             }}
                                         >
                                             <div className="flex-1 min-w-0 flex items-baseline gap-2.5">
-                                                <span className="text-[16px] font-extrabold tabular-nums shrink-0" style={{ color: theme.colors.accent }}>
+                                                <span className="text-base font-extrabold tabular-nums shrink-0" style={{ color: theme.colors.accent }}>
                                                     {row.discount}
                                                 </span>
-                                                <span className="text-[14px] font-medium truncate" style={{ color: theme.colors.textPrimary }}>
+                                                <span className="text-sm font-medium truncate" style={{ color: theme.colors.textPrimary }}>
                                                     {row.label}
                                                 </span>
                                             </div>
                                             <div className="flex items-center shrink-0 gap-5">
-                                                <span className="text-[14px] font-semibold tabular-nums w-[52px] text-center" style={{ color: theme.colors.textPrimary }}>
+                                                <span className="text-sm font-semibold tabular-nums w-[52px] text-center" style={{ color: theme.colors.textPrimary }}>
                                                     {row.dealerCommission}
                                                 </span>
-                                                <span className="text-[14px] tabular-nums w-[52px] text-center" style={{ color: theme.colors.textSecondary }}>
+                                                <span className="text-sm tabular-nums w-[52px] text-center" style={{ color: theme.colors.textSecondary }}>
                                                     {row.repCommission}
                                                 </span>
                                                 {hasMargins && (
-                                                    <span className="text-[13px] tabular-nums w-[56px] text-center font-medium"
+                                                    <span className="text-[0.8125rem] tabular-nums w-[56px] text-center font-medium"
                                                         style={{ color: theme.colors.textSecondary, opacity: row.margin ? 0.65 : 0.3 }}>
                                                         {row.margin || '—'}
                                                     </span>
@@ -245,7 +245,7 @@ export const ContractsScreen = ({ theme, setSuccessMessage }) => {
 
                                 {/* Disclaimer */}
                                 {contract.disclaimer && (
-                                    <p className="text-[13px] italic px-1 leading-relaxed" style={{ color: theme.colors.textSecondary, opacity: 0.7 }}>
+                                    <p className="text-[0.8125rem] italic px-1 leading-relaxed" style={{ color: theme.colors.textSecondary, opacity: 0.7 }}>
                                         {contract.disclaimer}
                                     </p>
                                 )}
@@ -274,7 +274,7 @@ export const ContractsScreen = ({ theme, setSuccessMessage }) => {
                                                     >
                                                         <FileText className="w-4 h-4" style={{ color: theme.colors.textSecondary, opacity: 0.6 }} />
                                                     </div>
-                                                    <span className="text-[14px] font-medium" style={{ color: theme.colors.textPrimary }}>
+                                                    <span className="text-sm font-medium" style={{ color: theme.colors.textPrimary }}>
                                                         {ver.label}
                                                     </span>
                                                 </div>

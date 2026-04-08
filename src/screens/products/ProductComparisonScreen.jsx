@@ -146,7 +146,7 @@ const ProductHero = React.memo(({ product, theme, categoryId, onNavigate, catego
           <AnimatePresence mode="wait">
             <motion.h2
               key={product.name}
-              className="text-[28px] sm:text-[32px] font-bold text-white drop-shadow-md tracking-tight"
+              className="text-[1.75rem] sm:text-[2rem] font-bold text-white drop-shadow-md tracking-tight"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -172,7 +172,7 @@ const ProductHero = React.memo(({ product, theme, categoryId, onNavigate, catego
         {/* Competition CTA — frosted glass */}
         <button
           onClick={handleCompetitionClick}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-full font-semibold text-[13px] transition-all active:scale-95 hover:scale-[1.03]"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-full font-semibold text-[0.8125rem] transition-all active:scale-95 hover:scale-[1.03]"
           style={{
             backgroundColor: dark ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.6)',
             color: dark ? '#fff' : theme.colors.textPrimary,
@@ -221,7 +221,7 @@ const GlassSegmentedToggle = React.memo(({ options, value, onChange, theme }) =>
           <button
             key={label}
             onClick={() => onChange(val)}
-            className="relative z-10 flex-1 rounded-[10px] flex items-center justify-center whitespace-nowrap text-[13px] font-semibold transition-colors duration-200"
+            className="relative z-10 flex-1 rounded-[10px] flex items-center justify-center whitespace-nowrap text-[0.8125rem] font-semibold transition-colors duration-200"
             style={{ color: active ? theme.colors.textPrimary : theme.colors.textSecondary }}
           >
             {label}
@@ -244,7 +244,7 @@ const ConfigPills = React.memo(({ pills, activeValue, onSelect, theme }) => {
           <button
             key={pill}
             onClick={() => onSelect(pill)}
-            className="flex-shrink-0 px-4 py-2 rounded-xl text-[13px] font-semibold transition-all duration-200 active:scale-[0.97]"
+            className="flex-shrink-0 px-4 py-2 rounded-xl text-[0.8125rem] font-semibold transition-all duration-200 active:scale-[0.97]"
             style={{
               backgroundColor: active
                 ? (dark ? 'rgba(255,255,255,0.12)' : theme.colors.accent)
@@ -313,13 +313,13 @@ const PricingTable = React.memo(({
         <div className="px-4 pt-4 pb-3 space-y-2.5">
           {pills.length > 0 && (
             <div>
-              <p className="text-[11px] font-semibold tracking-wide uppercase mb-2" style={{ color: theme.colors.textSecondary }}>Configuration</p>
+              <p className="text-[0.6875rem] font-semibold tracking-wide uppercase mb-2" style={{ color: theme.colors.textSecondary }}>Configuration</p>
               <ConfigPills pills={pills} activeValue={activePill} onSelect={onPillSelect} theme={theme} />
             </div>
           )}
           {showMaterialToggle && (
             <div>
-              <p className="text-[11px] font-semibold tracking-wide uppercase mb-2" style={{ color: theme.colors.textSecondary }}>Material</p>
+              <p className="text-[0.6875rem] font-semibold tracking-wide uppercase mb-2" style={{ color: theme.colors.textSecondary }}>Material</p>
               <GlassSegmentedToggle
                 options={['Laminate', 'Veneer']}
                 value={materialMode}
@@ -336,10 +336,10 @@ const PricingTable = React.memo(({
 
       {/* Column headers */}
       <div className="px-4 pt-3 pb-1 flex items-center justify-between">
-        <span className="text-[11px] font-semibold tracking-wide uppercase" style={{ color: theme.colors.textSecondary }}>
+        <span className="text-[0.6875rem] font-semibold tracking-wide uppercase" style={{ color: theme.colors.textSecondary }}>
           Series
         </span>
-        <span className="text-[11px] font-semibold tracking-wide uppercase" style={{ color: theme.colors.textSecondary }}>
+        <span className="text-[0.6875rem] font-semibold tracking-wide uppercase" style={{ color: theme.colors.textSecondary }}>
           List
         </span>
       </div>
@@ -353,7 +353,7 @@ const PricingTable = React.memo(({
             <button
               key={p.id}
               onClick={() => onSelectProduct(p)}
-              className="w-full group px-4 py-3 flex items-center justify-between text-[13px] transition-all duration-200 text-left rounded-none"
+              className="w-full group px-4 py-3 flex items-center justify-between text-[0.8125rem] transition-all duration-200 text-left rounded-none"
               style={{
                 cursor: active ? 'default' : 'pointer',
                 backgroundColor: active

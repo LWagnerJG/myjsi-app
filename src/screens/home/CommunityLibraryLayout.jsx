@@ -103,10 +103,10 @@ export const CommunityLibraryLayout = ({
                   <SubIcon className="w-3 h-3" />
                 </div>
               )}
-              <span className="text-[15px] font-bold whitespace-nowrap" style={{ color: theme.colors.textPrimary }}>
+              <span className="text-[0.9375rem] font-bold whitespace-nowrap" style={{ color: theme.colors.textPrimary }}>
                 {activeSubreddit?.name}
               </span>
-              <span className="text-[11px] font-medium whitespace-nowrap" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>
+              <span className="text-[0.6875rem] font-medium whitespace-nowrap" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>
                 {activeSubreddit?.members}
               </span>
             </div>
@@ -126,7 +126,7 @@ export const CommunityLibraryLayout = ({
             <div className="flex items-center gap-0 overflow-x-auto no-scrollbar transition-all duration-300 ease-in-out">
               {TABS.map(tab => (
                 <button key={tab} onClick={() => switchTab(tab.toLowerCase())}
-                  className="text-[13px] px-2 py-2 transition-all whitespace-nowrap"
+                  className="text-[0.8125rem] px-2 py-2 transition-all whitespace-nowrap"
                   style={tabStyle(activeTab === tab.toLowerCase())}
                 >
                   {tab}

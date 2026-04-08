@@ -18,7 +18,7 @@ export const fs = d => d ? new Date(d).toLocaleDateString('en-US', { month: 'sho
 
 /* shared label style used across all expanded/detail areas */
 const fieldLabel = (c) => ({
-  fontSize: 10,
+  fontSize: "0.625rem",
   fontWeight: 700,
   textTransform: 'uppercase',
   letterSpacing: '0.07em',
@@ -70,7 +70,7 @@ export const Card = ({ children, dark, c, className = '', style }) => (
 export const Pill = ({ icon: Ic, label, onClick, dark }) => (
   <button
     onClick={onClick}
-    className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-semibold border transition active:scale-[0.97] flex-shrink-0"
+    className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border transition active:scale-[0.97] flex-shrink-0"
     style={{
       backgroundColor: dark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.04)',
       borderColor: dark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.09)',
@@ -115,18 +115,18 @@ export const Stage = React.memo(({ stage, state, isLast, subtitle, statusColor, 
       {/* content */}
       <div className={`flex-1 min-w-0 ${isLast ? 'pb-1' : 'pb-3'}`} style={{ paddingTop: 4 }}>
         <div className="flex items-center gap-2 flex-wrap">
-          <span className={`font-bold text-[14px] leading-snug ${later ? '' : ''}`} style={{ color: txtClr }}>
+          <span className={`font-bold text-sm leading-snug ${later ? '' : ''}`} style={{ color: txtClr }}>
             {stage.label}
           </span>
           {now && (
-            <span className="text-[10px] font-bold uppercase tracking-[0.07em] px-2 py-0.5 rounded-full"
+            <span className="text-[0.625rem] font-bold uppercase tracking-[0.07em] px-2 py-0.5 rounded-full"
               style={{ backgroundColor: `${sc}18`, color: sc }}>
               Current
             </span>
           )}
         </div>
         {subtitle && !later && (
-          <p className="text-[12px] mt-0.5 leading-snug" style={{ color: c.textSecondary, opacity: 0.7 }}>
+          <p className="text-xs mt-0.5 leading-snug" style={{ color: c.textSecondary, opacity: 0.7 }}>
             {subtitle}
           </p>
         )}
@@ -151,21 +151,21 @@ export const LineItem = React.memo(({ item, open, onToggle, c, dark, panelBorder
       className="w-full text-left px-5 py-3.5 flex items-center gap-3 select-none focus:outline-none active:opacity-70 transition-opacity"
     >
       {/* line number badge */}
-      <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-[11px] font-bold tabular-nums"
+      <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-[0.6875rem] font-bold tabular-nums"
         style={{ backgroundColor: dark ? 'rgba(255,255,255,0.12)' : `${c.accent}10`, color: c.accent }}>
         {item.line}
       </div>
 
       {/* name + model */}
       <div className="flex-1 min-w-0">
-        <p className="font-semibold text-[14px] leading-snug truncate" style={{ color: c.textPrimary }}>{tc(item.name)}</p>
-        <p className="text-[12px] mt-0.5" style={{ color: c.textSecondary, opacity: 0.7 }}>{item.model}</p>
+        <p className="font-semibold text-sm leading-snug truncate" style={{ color: c.textPrimary }}>{tc(item.name)}</p>
+        <p className="text-xs mt-0.5" style={{ color: c.textSecondary, opacity: 0.7 }}>{item.model}</p>
       </div>
 
       {/* price + qty */}
       <div className="text-right flex-shrink-0">
-        <p className="font-bold text-[14px]" style={{ color: c.textPrimary }}>{fmt$(item.extNet, true)}</p>
-        <p className="text-[12px] mt-0.5" style={{ color: c.textSecondary, opacity: 0.7 }}>Qty {item.quantity}</p>
+        <p className="font-bold text-sm" style={{ color: c.textPrimary }}>{fmt$(item.extNet, true)}</p>
+        <p className="text-xs mt-0.5" style={{ color: c.textSecondary, opacity: 0.7 }}>Qty {item.quantity}</p>
       </div>
 
       <ChevronDown className="w-4 h-4 flex-shrink-0 transition-transform ml-1" style={{
@@ -183,7 +183,7 @@ export const LineItem = React.memo(({ item, open, onToggle, c, dark, panelBorder
               {[['Unit Price', fmt$(item.net, true)], ['Extended', fmt$(item.extNet, true)], ['Qty', item.quantity]].map(([l, v]) => (
                 <div key={l}>
                   <p style={fieldLabel(c)}>{l}</p>
-                  <p className="text-[13px] font-semibold" style={{ color: c.textPrimary }}>{v}</p>
+                  <p className="text-[0.8125rem] font-semibold" style={{ color: c.textPrimary }}>{v}</p>
                 </div>
               ))}
             </div>
@@ -194,7 +194,7 @@ export const LineItem = React.memo(({ item, open, onToggle, c, dark, panelBorder
                 {item.specs.map((s, i) => (
                   <div key={i} className="flex items-center justify-between gap-4">
                     <p style={fieldLabel(c)}>{s.label}</p>
-                    <p className="text-[12px] font-semibold text-right" style={{ color: c.textPrimary }}>{s.value}</p>
+                    <p className="text-xs font-semibold text-right" style={{ color: c.textPrimary }}>{s.value}</p>
                   </div>
                 ))}
               </div>
@@ -218,7 +218,7 @@ export const AckModal = ({ order, onClose, onShare, dark, c }) => (
         <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)'}` }}>
           <div>
             <p style={fieldLabel(c)}>Acknowledgment</p>
-            <p className="text-[14px] font-bold" style={{ color: c.textPrimary }}>SO {order.orderNumber}</p>
+            <p className="text-sm font-bold" style={{ color: c.textPrimary }}>SO {order.orderNumber}</p>
           </div>
           <div className="flex items-center gap-1.5">
             <button onClick={onShare} className="w-8 h-8 rounded-full flex items-center justify-center transition active:scale-95" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.05)' }} aria-label="Share">
@@ -236,7 +236,7 @@ export const AckModal = ({ order, onClose, onShare, dark, c }) => (
             {[['PO Number', order.po], ['Order Date', fd(order.date)], ['Ship Date', fd(order.shipDate)], ['Discount', order.discount]].map(([l, v]) => (
               <div key={l}>
                 <p style={fieldLabel(c)}>{l}</p>
-                <p className="text-[14px] font-semibold" style={{ color: c.textPrimary }}>{v}</p>
+                <p className="text-sm font-semibold" style={{ color: c.textPrimary }}>{v}</p>
               </div>
             ))}
           </div>
@@ -244,7 +244,7 @@ export const AckModal = ({ order, onClose, onShare, dark, c }) => (
           {order.shipTo && (
             <div>
               <p style={fieldLabel(c)}>Ship To</p>
-              <p className="text-[13px] leading-relaxed whitespace-pre-line mt-0.5" style={{ color: c.textPrimary }}>{tc(order.shipTo)}</p>
+              <p className="text-[0.8125rem] leading-relaxed whitespace-pre-line mt-0.5" style={{ color: c.textPrimary }}>{tc(order.shipTo)}</p>
             </div>
           )}
 
@@ -255,23 +255,23 @@ export const AckModal = ({ order, onClose, onShare, dark, c }) => (
                 <div key={li.line} className="flex items-start justify-between gap-3 py-2.5"
                   style={{ borderBottom: i < order.lineItems.length - 1 ? `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)'}` : 'none' }}>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-semibold" style={{ color: c.textPrimary }}>{tc(li.name)}</p>
-                    <p className="text-[12px] mt-0.5" style={{ color: c.textSecondary, opacity: 0.7 }}>{li.model} · Qty {li.quantity}</p>
+                    <p className="text-[0.8125rem] font-semibold" style={{ color: c.textPrimary }}>{tc(li.name)}</p>
+                    <p className="text-xs mt-0.5" style={{ color: c.textSecondary, opacity: 0.7 }}>{li.model} · Qty {li.quantity}</p>
                   </div>
-                  <p className="text-[13px] font-bold whitespace-nowrap" style={{ color: c.textPrimary }}>{fmt$(li.extNet, true)}</p>
+                  <p className="text-[0.8125rem] font-bold whitespace-nowrap" style={{ color: c.textPrimary }}>{fmt$(li.extNet, true)}</p>
                 </div>
               ))}
             </div>
           </div>
 
           <div className="flex items-center justify-between pt-0.5" style={{ borderTop: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)'}` }}>
-            <p className="text-[13px] font-bold" style={{ color: c.textSecondary }}>Total</p>
-            <p className="text-[17px] font-black" style={{ color: c.textPrimary }}>{fmt$(order.net, true)}</p>
+            <p className="text-[0.8125rem] font-bold" style={{ color: c.textSecondary }}>Total</p>
+            <p className="text-[1.0625rem] font-black" style={{ color: c.textPrimary }}>{fmt$(order.net, true)}</p>
           </div>
 
           {order.ackUrl && (
             <a href={order.ackUrl} target="_blank" rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-full text-[13px] font-semibold transition active:scale-[0.97]"
+              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-full text-[0.8125rem] font-semibold transition active:scale-[0.97]"
               style={{ backgroundColor: dark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.05)', border: `1px solid ${dark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.09)'}`, color: c.textPrimary }}>
               <Download className="w-4 h-4" /> Download PDF
             </a>
@@ -293,7 +293,7 @@ export const ClipsModal = ({ onClose, dark, c }) => (
         <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)'}` }}>
           <div>
             <p style={fieldLabel(c)}>JSI Factory</p>
-            <p className="text-[14px] font-bold" style={{ color: c.textPrimary }}>Production Clips</p>
+            <p className="text-sm font-bold" style={{ color: c.textPrimary }}>Production Clips</p>
           </div>
           <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center transition active:scale-95" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.05)' }} aria-label="Close">
             <X className="w-4 h-4" style={{ color: c.textSecondary }} />
@@ -313,8 +313,8 @@ export const ClipsModal = ({ onClose, dark, c }) => (
                 </div>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-semibold leading-snug truncate" style={{ color: c.textPrimary }}>{clip.title}</p>
-                <p className="text-[11px] mt-0.5" style={{ color: c.textSecondary, opacity: 0.65 }}>{clip.duration}</p>
+                <p className="text-[0.8125rem] font-semibold leading-snug truncate" style={{ color: c.textPrimary }}>{clip.title}</p>
+                <p className="text-[0.6875rem] mt-0.5" style={{ color: c.textSecondary, opacity: 0.65 }}>{clip.duration}</p>
               </div>
             </div>
           ))}

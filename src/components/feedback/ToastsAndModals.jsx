@@ -21,7 +21,7 @@ export const SuccessToast = ({ message, show, theme }) => {
                     <GlassCard theme={theme} className="px-4 py-2.5 flex items-center gap-2 relative overflow-visible">
                         <span className="absolute inset-0 rounded-[inherit] pointer-events-none toast-pulse" />
                         <CheckCircle className="w-4 h-4 flex-shrink-0" style={{ color: theme.colors.accent }} />
-                        <span className="text-[13px] font-semibold" style={{ color: theme.colors.textPrimary }}>
+                        <span className="text-[0.8125rem] font-semibold" style={{ color: theme.colors.textPrimary }}>
                             {message}
                         </span>
                     </GlassCard>

@@ -69,7 +69,7 @@ export const FloatingCart = React.memo(({ itemCount = 0, label, onClick, theme, 
                     </div>
 
                     {/* Label */}
-                    <span className={`${isDark ? 'text-gray-900' : 'text-white'} font-semibold text-sm sm:text-[15px] whitespace-nowrap`}>
+                    <span className={`${isDark ? 'text-gray-900' : 'text-white'} font-semibold text-sm sm:text-[0.9375rem] whitespace-nowrap`}>
                         {label}
                     </span>
                 </motion.button>

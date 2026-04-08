@@ -77,7 +77,7 @@ export const AppGrid = ({
                             }}
                         >
                             <Check className="w-3.5 h-3.5" />
-                            <span className="text-[11px] font-bold tracking-wide">Done</span>
+                            <span className="text-[0.6875rem] font-bold tracking-wide">Done</span>
                         </button>
                     </div>
                 )}
@@ -108,7 +108,7 @@ export const AppGrid = ({
                                     <activeApp.icon className="w-[18px] h-[18px] sm:w-5 sm:h-5" style={{ color: APP_ICON_COLORS[activeApp.route] || colors.accent }} />
                                 </div>
                                 <span
-                                    className="text-xs sm:text-[13px] font-semibold tracking-tight text-center leading-tight line-clamp-2 w-full px-0.5"
+                                    className="text-xs sm:text-[0.8125rem] font-semibold tracking-tight text-center leading-tight line-clamp-2 w-full px-0.5"
                                     style={{ color: colors.textPrimary }}
                                 >
                                     {activeApp.name}
@@ -146,12 +146,12 @@ export const AppGrid = ({
                             >
                                 <app.icon className="w-[18px] h-[18px] sm:w-5 sm:h-5" style={{ color: iconColor }} />
                             </div>
-                            <span className="text-xs sm:text-[13px] font-semibold tracking-tight text-center leading-tight line-clamp-2 px-0.5" style={{ color: colors.textPrimary }}>
+                            <span className="text-xs sm:text-[0.8125rem] font-semibold tracking-tight text-center leading-tight line-clamp-2 px-0.5" style={{ color: colors.textPrimary }}>
                                 {app.name}
                             </span>
                             {badge && (
                                 <div
-                                    className="absolute top-1.5 right-1.5 px-1.5 py-[1px] rounded-full text-[10px] font-bold"
+                                    className="absolute top-1.5 right-1.5 px-1.5 py-[1px] rounded-full text-[0.625rem] font-bold"
                                     style={{
                                         backgroundColor: `${badge.color}18`,
                                         color: badge.color,
@@ -178,7 +178,7 @@ export const AppGrid = ({
                         }}
                     >
                         <Settings2 className="w-3.5 h-3.5" style={{ opacity: 0.6 }} />
-                        <span className="text-[11px] font-bold tracking-wide">Customize</span>
+                        <span className="text-[0.6875rem] font-bold tracking-wide">Customize</span>
                     </button>
                 </div>
             )}
@@ -200,7 +200,7 @@ const AvailableAppsList = ({ availableApps, toggleApp, colors, isDark }) => {
     if (availableApps.length === 0) {
         return (
             <div className="text-center py-3">
-                <span className="text-[11px] font-medium" style={{ color: colors.textSecondary, opacity: 0.5 }}>All apps added</span>
+                <span className="text-[0.6875rem] font-medium" style={{ color: colors.textSecondary, opacity: 0.5 }}>All apps added</span>
             </div>
         );
     }
@@ -220,7 +220,7 @@ const AvailableAppsList = ({ availableApps, toggleApp, colors, isDark }) => {
                 >
                     <Plus className="w-2.5 h-2.5" style={{ opacity: 0.7 }} />
                 </div>
-                <p className="text-[10px] font-semibold tracking-[0.02em]">
+                <p className="text-[0.625rem] font-semibold tracking-[0.02em]">
                     Tap an app below to add it to Home
                 </p>
             </div>
@@ -231,7 +231,7 @@ const AvailableAppsList = ({ availableApps, toggleApp, colors, isDark }) => {
                         <div key={app.route}>
                             <button
                                 onClick={() => toggleApp(app.route)}
-                                className="w-full flex items-center gap-2 px-3 py-2.5 rounded-2xl text-[12px] font-semibold transition-all active:scale-[0.97]"
+                                className="w-full flex items-center gap-2 px-3 py-2.5 rounded-2xl text-xs font-semibold transition-all active:scale-[0.97]"
                                 style={{
                                     backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.03)',
                                     color: colors.textSecondary,
@@ -264,7 +264,7 @@ const AvailableAppsList = ({ availableApps, toggleApp, colors, isDark }) => {
                                 className="overflow-hidden transition-all duration-200 ease-out"
                                 style={{ maxHeight: isActive ? 28 : 0, opacity: isActive ? 1 : 0 }}
                             >
-                                <p className="text-[10px] font-medium px-3 pt-1 pb-0.5 truncate" style={{ color: colors.textSecondary, opacity: 0.6 }}>
+                                <p className="text-[0.625rem] font-medium px-3 pt-1 pb-0.5 truncate" style={{ color: colors.textSecondary, opacity: 0.6 }}>
                                     {app.desc}
                                 </p>
                             </div>

@@ -95,9 +95,9 @@ export const CustomerRankingScreen = ({ theme, onNavigate }) => {
 
                     <div className="flex-1 min-w-0 space-y-2">
                         <div className="flex items-center justify-between gap-2">
-                            <span className="font-semibold text-[15px] truncate" style={{ color: theme.colors.textPrimary }}>{c.name}</span>
+                            <span className="font-semibold text-[0.9375rem] truncate" style={{ color: theme.colors.textPrimary }}>{c.name}</span>
                             <div className="shrink-0 text-right">
-                                <div className="text-[15px] font-extrabold tabular-nums" style={{ color: theme.colors.textPrimary }}>
+                                <div className="text-[0.9375rem] font-extrabold tabular-nums" style={{ color: theme.colors.textPrimary }}>
                                     {formatCurrency(c[tab])}
                                 </div>
                             </div>
@@ -116,11 +116,11 @@ export const CustomerRankingScreen = ({ theme, onNavigate }) => {
                             </div>
                             {/* Secondary metric */}
                             <div className="flex items-center gap-1 shrink-0">
-                                <span className="text-[11px] font-medium tabular-nums" style={{ color: theme.colors.textSecondary }}>
+                                <span className="text-[0.6875rem] font-medium tabular-nums" style={{ color: theme.colors.textSecondary }}>
                                     {formatCompact(otherVal)} {otherTab === 'sales' ? 'sold' : 'booked'}
                                 </span>
                                 {delta !== 0 && (
-                                    <span className="flex items-center text-[11px] font-bold" style={{ color: delta > 0 ? (isDark ? '#6B9B7A' : '#4A7C59') : (isDark ? '#C87070' : '#B85C5C') }}>
+                                    <span className="flex items-center text-[0.6875rem] font-bold" style={{ color: delta > 0 ? (isDark ? '#6B9B7A' : '#4A7C59') : (isDark ? '#C87070' : '#B85C5C') }}>
                                         {delta > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                                     </span>
                                 )}
@@ -142,7 +142,7 @@ export const CustomerRankingScreen = ({ theme, onNavigate }) => {
                 <GlassCard theme={theme} className="px-5 py-4" variant="elevated">
                     <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
-                            <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color: theme.colors.textSecondary }}>
+                            <p className="text-[0.6875rem] font-bold uppercase tracking-widest" style={{ color: theme.colors.textSecondary }}>
                                 Total {tab === 'sales' ? 'Sales' : 'Bookings'} — {allRows.length} Dealers
                             </p>
                             <div className="text-2xl sm:text-3xl font-black tracking-tight" style={{ color: theme.colors.textPrimary }}>

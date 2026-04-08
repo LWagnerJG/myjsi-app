@@ -68,7 +68,7 @@ export const ProductCard = React.memo(({ product, cartQty, onAdd, onRemoveOne, d
 
         {product.badge && (
           <span
-            className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.16em]"
+            className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[0.625rem] font-bold uppercase tracking-[0.16em]"
             style={{
               backgroundColor: badgeColors[product.badge]?.bg || theme.colors.accent,
               color: badgeColors[product.badge]?.text || theme.colors.accentText,
@@ -105,7 +105,7 @@ export const ProductCard = React.memo(({ product, cartQty, onAdd, onRemoveOne, d
 
         {lowStock && (
           <span
-            className="self-start px-2.5 py-1 rounded-full text-[10px] font-semibold"
+            className="self-start px-2.5 py-1 rounded-full text-[0.625rem] font-semibold"
             style={{
               backgroundColor: theme.colors.warningLight,
               color: theme.colors.warning,

@@ -243,7 +243,7 @@ export const SearchableSelect = ({
           >
             <span className="block truncate leading-5">{option.label}</span>
             {option.description ? (
-              <span className="mt-0.5 block truncate text-[11px] font-medium uppercase tracking-[0.08em]" style={{ color: theme.colors.textSecondary }}>
+              <span className="mt-0.5 block truncate text-[0.6875rem] font-medium uppercase tracking-[0.08em]" style={{ color: theme.colors.textSecondary }}>
                 {option.description}
               </span>
             ) : null}

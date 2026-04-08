@@ -79,7 +79,7 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
                                 }}
                             >
                                 <span className="text-sm" style={{ color: theme.colors.textPrimary }}>{day}</span>
-                                {has && <span className="text-[11px]" style={{ color: theme.colors.textSecondary }}>{formatCurrency(total)}</span>}
+                                {has && <span className="text-[0.6875rem]" style={{ color: theme.colors.textSecondary }}>{formatCurrency(total)}</span>}
                             </button>
                         );
                     })}
@@ -98,16 +98,16 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
                                 style={{ backgroundColor: theme.colors.surface, border: isDark ? '1px solid rgba(255,255,255,0.10)' : 'none', boxShadow: isDark ? 'none' : '0 1px 4px rgba(0,0,0,0.06)' }}
                                 onClick={() => onOrderClick(o)}>
                                 <div className="flex items-center gap-3.5 px-4 py-3.5">
-                                    <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-[12px] font-black"
+                                    <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-black"
                                         style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : `${theme.colors.accent}15`, color: theme.colors.accent }}>
                                         {initials(o.company)}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-semibold text-[15px] leading-snug truncate" style={{ color: theme.colors.textPrimary }}>{o.details}</p>
+                                        <p className="font-semibold text-[0.9375rem] leading-snug truncate" style={{ color: theme.colors.textPrimary }}>{o.details}</p>
                                         <p className="text-xs mt-0.5 truncate" style={{ color: theme.colors.textSecondary }}>{formatCompanyName(o.company)}</p>
                                         <div className="flex items-center gap-2 mt-1.5">
-                                            <span className="text-[11px] font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.04)', color: theme.colors.textSecondary }}>SO {o.orderNumber}</span>
-                                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold" style={{ color: sc }}>
+                                            <span className="text-[0.6875rem] font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.04)', color: theme.colors.textSecondary }}>SO {o.orderNumber}</span>
+                                            <span className="inline-flex items-center gap-1 text-[0.6875rem] font-semibold" style={{ color: sc }}>
                                                 <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: sc }} />
                                                 {o.status}
                                             </span>
@@ -134,16 +134,16 @@ const OrderRow = ({ order, theme, onNavigate, isLast }) => {
             className={`w-full text-left transition active:scale-[0.99] ${dark ? 'hover:bg-white/[0.08]' : 'hover:bg-black/[0.015]'}`}
         >
             <div className="flex items-center gap-3.5 px-4 py-3.5">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-[12px] font-black"
+                <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-black"
                     style={{ backgroundColor: dark ? 'rgba(255,255,255,0.08)' : `${theme.colors.accent}15`, color: theme.colors.accent }}>
                     {initials(order.company)}
                 </div>
                 <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-[15px] leading-snug truncate" style={{ color: theme.colors.textPrimary }}>{order.details}</p>
+                    <p className="font-semibold text-[0.9375rem] leading-snug truncate" style={{ color: theme.colors.textPrimary }}>{order.details}</p>
                     <p className="text-xs mt-0.5 truncate" style={{ color: theme.colors.textSecondary }}>{formatCompanyName(order.company)}</p>
                     <div className="flex items-center gap-2 mt-1.5">
-                        <span className="text-[11px] font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.04)', color: theme.colors.textSecondary }}>SO {order.orderNumber}</span>
-                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold" style={{ color: statusColor }}>
+                        <span className="text-[0.6875rem] font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.04)', color: theme.colors.textSecondary }}>SO {order.orderNumber}</span>
+                        <span className="inline-flex items-center gap-1 text-[0.6875rem] font-semibold" style={{ color: statusColor }}>
                             <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: statusColor }} />
                             {order.status}
                         </span>
@@ -177,7 +177,7 @@ const DateGroupCard = ({ theme, dateKey, group, onNavigate }) => {
                 }}
             >
                 <h2 className="text-xs font-bold tracking-wider" style={{ color: theme.colors.accent }}>{label}</h2>
-                <p className="text-[11px] font-medium" style={{ color: theme.colors.textSecondary, opacity: 0.7 }}>{group.orders.length} {group.orders.length === 1 ? 'order' : 'orders'} &middot; {formatCurrency(group.total)}</p>
+                <p className="text-[0.6875rem] font-medium" style={{ color: theme.colors.textSecondary, opacity: 0.7 }}>{group.orders.length} {group.orders.length === 1 ? 'order' : 'orders'} &middot; {formatCurrency(group.total)}</p>
             </div>
             <div>
                 {group.orders.map((o, idx) => (
@@ -248,7 +248,7 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                             <div ref={dealerRef} className="relative flex-shrink-0">
                                 <button onClick={() => setDealerMenuOpen(o => !o)} className="h-10 rounded-full flex items-center justify-center active:scale-95 transition border w-10 md:w-auto md:px-4 md:gap-2" style={{ backgroundColor: selectedDealer !== 'All Dealers' ? `${theme.colors.accent}12` : dark ? 'rgba(255,255,255,0.10)' : theme.colors.surface, borderColor: selectedDealer !== 'All Dealers' ? `${theme.colors.accent}30` : dark ? 'rgba(255,255,255,0.12)' : theme.colors.border }} title={selectedDealer}>
                                     <Building2 className="w-[18px] h-[18px] flex-shrink-0" style={{ color: theme.colors.textPrimary }} />
-                                    <span className="hidden md:inline text-[13px] font-medium whitespace-nowrap" style={{ color: theme.colors.textPrimary }}>
+                                    <span className="hidden md:inline text-[0.8125rem] font-medium whitespace-nowrap" style={{ color: theme.colors.textPrimary }}>
                                         {selectedDealer === 'All Dealers' ? 'Dealers' : formatCompanyName(selectedDealer)}
                                     </span>
                                 </button>
@@ -268,7 +268,7 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                             </div>
                             <button onClick={() => setViewMode(v => v === 'list' ? 'calendar' : 'list')} className="h-10 rounded-full flex items-center justify-center active:scale-95 transition border w-10 md:w-auto md:px-4 md:gap-2" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.10)' : theme.colors.surface, borderColor: dark ? 'rgba(255,255,255,0.12)' : theme.colors.border }} title={viewMode === 'list' ? 'Calendar View' : 'List View'}>
                                 {viewMode === 'list' ? <Calendar className="w-[18px] h-[18px] flex-shrink-0" style={{ color: theme.colors.textPrimary }} /> : <List className="w-[18px] h-[18px] flex-shrink-0" style={{ color: theme.colors.textPrimary }} />}
-                                <span className="hidden md:inline text-[13px] font-medium whitespace-nowrap" style={{ color: theme.colors.textPrimary }}>
+                                <span className="hidden md:inline text-[0.8125rem] font-medium whitespace-nowrap" style={{ color: theme.colors.textPrimary }}>
                                     {viewMode === 'list' ? 'Calendar' : 'List'}
                                 </span>
                             </button>
@@ -294,7 +294,7 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                           ) : (
                             <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3 }} className="flex flex-col items-center justify-center py-16 text-center gap-1">
                                 <Package className="w-10 h-10 mb-2" style={{ color: theme.colors.textSecondary, opacity: 0.3 }} />
-                                <p className="text-[15px] font-semibold" style={{ color: theme.colors.textPrimary }}>
+                                <p className="text-[0.9375rem] font-semibold" style={{ color: theme.colors.textPrimary }}>
                                     {searchTerm || selectedDealer !== 'All Dealers' ? 'No matching orders' : 'No orders'}
                                 </p>
                                 <p className="text-xs" style={{ color: theme.colors.textSecondary }}>

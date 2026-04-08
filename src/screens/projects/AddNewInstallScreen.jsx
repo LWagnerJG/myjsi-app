@@ -146,7 +146,7 @@ export const AddNewInstallScreen = ({ theme, onAddInstall }) => {
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5">
                         <GlassCard theme={theme} className="lg:col-span-5 p-5 sm:p-6 space-y-5">
                             <div>
-                                <h2 className="text-[18px] font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>Install Details</h2>
+                                <h2 className="text-lg font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>Install Details</h2>
                             </div>
                             <FormInput
                                 label="Project Name"
@@ -197,7 +197,7 @@ export const AddNewInstallScreen = ({ theme, onAddInstall }) => {
                                 <label className="text-sm font-semibold" style={{ color: theme.colors.textSecondary }}>
                                     Photos <span style={{ color: theme.colors.error }}>*</span>
                                 </label>
-                                <span className="text-[12px] font-semibold tabular-nums" style={{ color: theme.colors.textSecondary }}>
+                                <span className="text-xs font-semibold tabular-nums" style={{ color: theme.colors.textSecondary }}>
                                     {photos.length}/{INSTALLATION_CONSTANTS.PHOTO_REQUIREMENTS.maxPhotos}
                                 </span>
                             </div>
@@ -216,8 +216,8 @@ export const AddNewInstallScreen = ({ theme, onAddInstall }) => {
                                     <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.05)' }}>
                                         <Upload className="w-6 h-6" />
                                     </div>
-                                    <span className="font-semibold text-[14px]" style={{ color: theme.colors.textPrimary }}>Add Photos</span>
-                                    <span className="text-[12px]" style={{ color: theme.colors.textSecondary }}>
+                                    <span className="font-semibold text-sm" style={{ color: theme.colors.textPrimary }}>Add Photos</span>
+                                    <span className="text-xs" style={{ color: theme.colors.textSecondary }}>
                                         Upload one or more install photos
                                     </span>
                                 </button>
@@ -253,7 +253,7 @@ export const AddNewInstallScreen = ({ theme, onAddInstall }) => {
                                             }}
                                         >
                                             <ImageIcon className="w-5 h-5" />
-                                            <span className="text-[12px] font-semibold">Add</span>
+                                            <span className="text-xs font-semibold">Add</span>
                                         </button>
                                     )}
                                 </div>
@@ -273,7 +273,7 @@ export const AddNewInstallScreen = ({ theme, onAddInstall }) => {
                     <div className="sticky mt-5 flex justify-center" style={{ bottom: 'clamp(0.75rem, 2.5vh, 1.5rem)' }}>
                         <button
                             type="submit"
-                            className="w-full max-w-xl font-bold text-[14px] h-12 px-7 rounded-full transition-all motion-tap"
+                            className="w-full max-w-xl font-bold text-sm h-12 px-7 rounded-full transition-all motion-tap"
                             style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
                         >
                             Upload Install Photo(s)

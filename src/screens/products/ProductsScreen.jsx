@@ -185,7 +185,7 @@ const CategoryCard = React.memo(({
                         />
                     </div>
                     <div>
-                        <h3 className="font-semibold text-[15px]" style={{ color: theme.colors.textPrimary }}>
+                        <h3 className="font-semibold text-[0.9375rem]" style={{ color: theme.colors.textPrimary }}>
                             {category.name}
                         </h3>
                         {category.description && (
@@ -219,7 +219,7 @@ const ViewModeToggle = React.memo(({ viewMode, onToggle, theme }) => {
             title={actionLabel}
         >
             {isGrid ? <List className="w-4.5 h-4.5" style={{ color: theme.colors.textPrimary }} /> : <Grid className="w-4.5 h-4.5" style={{ color: theme.colors.textPrimary }} />}
-            <span className="text-[12px] font-semibold leading-none whitespace-nowrap" style={{ color: theme.colors.textPrimary }}>
+            <span className="text-xs font-semibold leading-none whitespace-nowrap" style={{ color: theme.colors.textPrimary }}>
                 {actionLabel}
             </span>
         </button>
@@ -308,7 +308,7 @@ const SeriesRow = React.memo(({ series, theme, isLast, onClick }) => (
                     loading="lazy"
                 />
             </div>
-            <span className="font-medium text-[15px] truncate" style={{ color: theme.colors.textPrimary }}>
+            <span className="font-medium text-[0.9375rem] truncate" style={{ color: theme.colors.textPrimary }}>
                 {series}
             </span>
         </div>

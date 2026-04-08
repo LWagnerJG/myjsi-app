@@ -28,7 +28,7 @@ export const SlideCarousel = ({ pres, theme, onViewFull }) => {
                         style={{ width: i === idx ? 18 : 6, height: 6, background: i === idx ? theme.colors.accent : 'rgba(255,255,255,0.55)' }} />
                 ))}
             </div>
-            <button onClick={onViewFull} className="absolute top-2 right-2 px-2.5 py-1 rounded-full text-[11px] font-semibold transition-opacity"
+            <button onClick={onViewFull} className="absolute top-2 right-2 px-2.5 py-1 rounded-full text-[0.6875rem] font-semibold transition-opacity"
                 style={{ background: theme.colors.surface, border: `1px solid ${theme.colors.border}`, color: theme.colors.textSecondary, boxShadow: '0 1px 4px rgba(0,0,0,0.12)' }}>
                 View
             </button>

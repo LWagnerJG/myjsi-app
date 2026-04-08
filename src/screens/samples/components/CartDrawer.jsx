@@ -141,16 +141,16 @@ export const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, d
                                 </div>
                                 <div className="space-y-2">
                                     <div className="relative">
-                                        <label className="absolute left-4 top-1.5 text-[10px] font-bold uppercase tracking-wider" style={{ color: theme.colors.textSecondary }}>Recipient / Company</label>
-                                        <input value={shipToName || ''} onChange={(e) => safeSetShipTo(e.target.value)} className="w-full rounded-2xl px-4 pt-5 pb-2.5 text-[13px] outline-none border transition focus:ring-2" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : theme.colors.inputBackground, borderColor: theme.colors.border, color: theme.colors.textPrimary }} />
+                                        <label className="absolute left-4 top-1.5 text-[0.625rem] font-bold uppercase tracking-wider" style={{ color: theme.colors.textSecondary }}>Recipient / Company</label>
+                                        <input value={shipToName || ''} onChange={(e) => safeSetShipTo(e.target.value)} className="w-full rounded-2xl px-4 pt-5 pb-2.5 text-[0.8125rem] outline-none border transition focus:ring-2" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : theme.colors.inputBackground, borderColor: theme.colors.border, color: theme.colors.textPrimary }} />
                                     </div>
                                     <div className="relative">
-                                        <label className="absolute left-4 top-1.5 text-[10px] font-bold uppercase tracking-wider" style={{ color: theme.colors.textSecondary }}>Street Address</label>
-                                        <input value={address1 || ''} onChange={(e) => safeSetAddress1(e.target.value)} className="w-full rounded-2xl px-4 pt-5 pb-2.5 text-[13px] outline-none border transition focus:ring-2" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : theme.colors.inputBackground, borderColor: theme.colors.border, color: theme.colors.textPrimary }} />
+                                        <label className="absolute left-4 top-1.5 text-[0.625rem] font-bold uppercase tracking-wider" style={{ color: theme.colors.textSecondary }}>Street Address</label>
+                                        <input value={address1 || ''} onChange={(e) => safeSetAddress1(e.target.value)} className="w-full rounded-2xl px-4 pt-5 pb-2.5 text-[0.8125rem] outline-none border transition focus:ring-2" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : theme.colors.inputBackground, borderColor: theme.colors.border, color: theme.colors.textPrimary }} />
                                     </div>
                                     <div className="relative">
-                                        <label className="absolute left-4 top-1.5 text-[10px] font-bold uppercase tracking-wider" style={{ color: theme.colors.textSecondary }}>Suite / Unit (optional)</label>
-                                        <input value={address2 || ''} onChange={(e) => safeSetAddress2(e.target.value)} className="w-full rounded-2xl px-4 pt-5 pb-2.5 text-[13px] outline-none border transition focus:ring-2" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : theme.colors.inputBackground, borderColor: theme.colors.border, color: theme.colors.textPrimary }} />
+                                        <label className="absolute left-4 top-1.5 text-[0.625rem] font-bold uppercase tracking-wider" style={{ color: theme.colors.textSecondary }}>Suite / Unit (optional)</label>
+                                        <input value={address2 || ''} onChange={(e) => safeSetAddress2(e.target.value)} className="w-full rounded-2xl px-4 pt-5 pb-2.5 text-[0.8125rem] outline-none border transition focus:ring-2" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : theme.colors.inputBackground, borderColor: theme.colors.border, color: theme.colors.textPrimary }} />
                                     </div>
                                 </div>
                             </div>
@@ -159,7 +159,7 @@ export const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, d
                             <button
                                 disabled={!canSubmit}
                                 onClick={submit}
-                                className="w-full px-5 py-3.5 rounded-full text-[13px] font-bold transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                                className="w-full px-5 py-3.5 rounded-full text-[0.8125rem] font-bold transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
                                 style={{
                                     backgroundColor: canSubmit ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.10)' : theme.colors.border),
                                     color: canSubmit ? theme.colors.accentText : theme.colors.textSecondary,
@@ -191,7 +191,7 @@ export const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, d
                         />
                         <div className="relative px-10 py-8 rounded-3xl text-center" style={{ background: theme.colors.surface, color: theme.colors.textPrimary, border: `1px solid ${theme.colors.border}`, transform: overlayPhase==='enter' ? 'scale(1)' : 'scale(.9)', opacity: overlayPhase==='enter' ? 1 : 0.9, transition: prefersReduced ? 'none' : [buildCssTransition('transform', MOTION_DURATIONS_MS.slow, MOTION_EASINGS.springOut), buildCssTransition('opacity', MOTION_DURATIONS_MS.medium, MOTION_EASINGS.standard)].join(', '), boxShadow:'0 6px 24px -4px rgba(0,0,0,0.12)' }}>
                             <CheckCircle className="w-10 h-10 mx-auto mb-3" style={{ color: theme.colors.success }} />
-                            <p className="font-bold text-[15px]">Sample Request Submitted</p>
+                            <p className="font-bold text-[0.9375rem]">Sample Request Submitted</p>
                             <p className="text-xs mt-1" style={{ color: theme.colors.textSecondary }}>You'll receive a confirmation email shortly.</p>
                         </div>
                     </div>

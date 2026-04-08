@@ -30,7 +30,7 @@ export const SearchSelect = ({ value, onChange, options, placeholder, theme, onA
                 <Search className="w-4 h-4 flex-shrink-0" style={{ color: c.textSecondary, opacity: 0.4 }} />
                 {value ? (
                     <div className="flex-1 flex items-center justify-between min-w-0">
-                        <span className="text-[13px] font-medium truncate" style={{ color: c.textPrimary }}>{value}</span>
+                        <span className="text-[0.8125rem] font-medium truncate" style={{ color: c.textPrimary }}>{value}</span>
                         <button onClick={e => { e.stopPropagation(); onChange(''); }} className="p-1 rounded-full flex-shrink-0 transition-colors" style={{ color: c.textSecondary }}
                             onMouseEnter={e => e.currentTarget.style.backgroundColor = hoverBg}
                             onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
@@ -42,7 +42,7 @@ export const SearchSelect = ({ value, onChange, options, placeholder, theme, onA
                         value={query}
                         onChange={e => { setQuery(e.target.value); setOpen(true); }}
                         placeholder={placeholder}
-                        className="flex-1 bg-transparent outline-none text-[13px] font-medium"
+                        className="flex-1 bg-transparent outline-none text-[0.8125rem] font-medium"
                         style={{ color: c.textPrimary }}
                         onFocus={() => setOpen(true)}
                     />
@@ -55,7 +55,7 @@ export const SearchSelect = ({ value, onChange, options, placeholder, theme, onA
                         style={{ backgroundColor: dropBg, border: fieldBrd }}>
                         <div className="max-h-[200px] overflow-y-auto scrollbar-hide py-1">
                             {filtered.map(opt => (
-                                <button key={opt} className="w-full text-left px-3 py-2.5 text-[13px] font-medium transition-colors"
+                                <button key={opt} className="w-full text-left px-3 py-2.5 text-[0.8125rem] font-medium transition-colors"
                                     style={{ color: c.textPrimary }}
                                     onClick={() => { onChange(opt); setQuery(''); setOpen(false); }}
                                     onMouseEnter={e => e.currentTarget.style.backgroundColor = hoverBg}
@@ -67,7 +67,7 @@ export const SearchSelect = ({ value, onChange, options, placeholder, theme, onA
                                 <>
                                     <div className="h-px mx-2"
                                         style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)' }} />
-                                    <button className="w-full text-left px-3 py-2.5 text-[13px] font-semibold flex items-center gap-2 transition-colors"
+                                    <button className="w-full text-left px-3 py-2.5 text-[0.8125rem] font-semibold flex items-center gap-2 transition-colors"
                                         style={{ color: c.accent }}
                                         onClick={() => { onAddNew(query); onChange(query); setQuery(''); setOpen(false); }}
                                         onMouseEnter={e => e.currentTarget.style.backgroundColor = hoverBg}
@@ -92,7 +92,7 @@ export const MiniAvatar = ({ member, selected, onToggle, isDark, colors }) => {
     return (
         <button type="button" onClick={() => onToggle(member.id)} className="relative group"
             title={`${member.firstName} ${member.lastName}`}>
-            <div className="w-9 h-9 rounded-full flex items-center justify-center text-[11px] font-bold transition-all"
+            <div className="w-9 h-9 rounded-full flex items-center justify-center text-[0.6875rem] font-bold transition-all"
                 style={{
                     backgroundColor: selected ? colors.accent : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)'),
                     color: selected ? (colors.accentText || '#FFFFFF') : colors.textPrimary,

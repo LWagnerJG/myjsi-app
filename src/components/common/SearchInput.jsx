@@ -83,7 +83,7 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
                     onBlur={handleBlur}
                     onKeyDown={onKeyDown}
                     placeholder=""
-                    className="w-full bg-transparent outline-none text-[15px]"
+                    className="w-full bg-transparent outline-none text-[0.9375rem]"
                     style={{
                         color: theme.colors.textPrimary,
                         height: 56,
@@ -198,7 +198,7 @@ export const SearchInput = React.memo(function SearchInput({
                 value={value}
                 onChange={(e) => onChange && onChange(e.target.value)}
                 placeholder={placeholder}
-                className={`flex-1 h-full bg-transparent outline-none text-[15px] placeholder:opacity-70 ${inputClassName}`}
+                className={`flex-1 h-full bg-transparent outline-none text-[0.9375rem] placeholder:opacity-70 ${inputClassName}`}
                 style={{ color: theme?.colors?.textPrimary || '#111' }}
                 aria-label={placeholder}
             />

@@ -143,7 +143,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
             {projectsTab==='pipeline' && (
               <button
                 onClick={()=>onNavigate('new-lead')}
-                className="h-9 inline-flex items-center justify-center gap-1.5 rounded-xl text-[13px] font-semibold transition-all px-4 whitespace-nowrap active:scale-[0.97]"
+                className="h-9 inline-flex items-center justify-center gap-1.5 rounded-xl text-[0.8125rem] font-semibold transition-all px-4 whitespace-nowrap active:scale-[0.97]"
                 style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
               >
                 <Plus size={15} strokeWidth={2.5} /> New Project
@@ -152,7 +152,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
             {projectsTab==='my-projects' && (
               <button
                 onClick={()=>onNavigate('add-new-install')}
-                className="h-9 inline-flex items-center justify-center gap-1.5 rounded-xl text-[13px] font-semibold transition-all px-4 whitespace-nowrap active:scale-[0.97]"
+                className="h-9 inline-flex items-center justify-center gap-1.5 rounded-xl text-[0.8125rem] font-semibold transition-all px-4 whitespace-nowrap active:scale-[0.97]"
                 style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
               >
                 <Plus size={15} strokeWidth={2.5} /> New Install
@@ -168,7 +168,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
                     <button
                       key={stage}
                       onClick={()=>setSelectedPipelineStage(stage)}
-                      className="text-[13px] font-semibold transition-all px-3.5 py-1.5 rounded-xl"
+                      className="text-[0.8125rem] font-semibold transition-all px-3.5 py-1.5 rounded-xl"
                       style={{
                         color: active ? theme.colors.accentText : theme.colors.textSecondary,
                         backgroundColor: active ? theme.colors.textPrimary : 'transparent',
@@ -200,8 +200,8 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
               <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.03)' }}>
                 <Briefcase className="w-7 h-7" style={{ color: theme.colors.textSecondary, opacity: 0.5 }} />
               </div>
-              <p className="text-center text-[15px] font-semibold" style={{ color: theme.colors.textPrimary }}>No projects in {selectedPipelineStage}</p>
-              <p className="text-center text-[13px] mt-1" style={{ color: theme.colors.textSecondary }}>Tap "+ New Project" to add one</p>
+              <p className="text-center text-[0.9375rem] font-semibold" style={{ color: theme.colors.textPrimary }}>No projects in {selectedPipelineStage}</p>
+              <p className="text-center text-[0.8125rem] mt-1" style={{ color: theme.colors.textSecondary }}>Tap "+ New Project" to add one</p>
             </div>
           )}
           {projectsTab==='my-projects' && (
@@ -221,7 +221,7 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
                         <img src={p.image} alt={p.name} className="absolute h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
                         <div className="absolute bottom-0 left-0 p-3.5">
-                          <h3 className="text-[15px] font-bold text-white tracking-tight leading-snug">{p.name}</h3>
+                          <h3 className="text-[0.9375rem] font-bold text-white tracking-tight leading-snug">{p.name}</h3>
                           <p className="text-white/80 font-medium text-xs mt-0.5">{p.location}</p>
                         </div>
                       </div>
@@ -234,8 +234,8 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
               <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.03)' }}>
                 <Briefcase className="w-7 h-7" style={{ color: theme.colors.textSecondary, opacity: 0.5 }} />
               </div>
-              <p className="text-center text-[15px] font-semibold" style={{ color: theme.colors.textPrimary }}>No installations recorded yet</p>
-              <p className="text-center text-[13px] mt-1" style={{ color: theme.colors.textSecondary }}>Add install photos and details to build your portfolio</p>
+              <p className="text-center text-[0.9375rem] font-semibold" style={{ color: theme.colors.textPrimary }}>No installations recorded yet</p>
+              <p className="text-center text-[0.8125rem] mt-1" style={{ color: theme.colors.textSecondary }}>Add install photos and details to build your portfolio</p>
             </div>
           )}
         </div>
@@ -260,8 +260,8 @@ export const ProjectsScreen = forwardRef(({ onNavigate, theme, opportunities, se
             }}
           >
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: theme.colors.textSecondary }}>{selectedPipelineStage}</p>
-              <p className="text-[13px] md:text-[14px] font-medium mt-0.5" style={{ color: theme.colors.textSecondary }}>{filteredOpportunities.length} {filteredOpportunities.length === 1 ? 'project' : 'projects'}</p>
+              <p className="text-[0.6875rem] font-semibold uppercase tracking-wide" style={{ color: theme.colors.textSecondary }}>{selectedPipelineStage}</p>
+              <p className="text-[0.8125rem] md:text-sm font-medium mt-0.5" style={{ color: theme.colors.textSecondary }}>{filteredOpportunities.length} {filteredOpportunities.length === 1 ? 'project' : 'projects'}</p>
             </div>
             <div className="w-px self-stretch" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)' }} />
             <p className="font-bold tracking-tight leading-none" style={{ color: theme.colors.textPrimary, fontSize: 'clamp(1.5rem, 1.1rem + 0.8vw, 2rem)' }}>{fmtCurrency(stageTotals.totalValue)}</p>

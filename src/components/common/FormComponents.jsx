@@ -82,7 +82,7 @@ export const FormInput = ({
 
             {label && insetLabel ? (
                 <label
-                    className="absolute left-[14px] top-[8px] z-[1] text-[11px] font-medium leading-none"
+                    className="absolute left-[14px] top-[8px] z-[1] text-[0.6875rem] font-medium leading-none"
                     style={{ color: theme.colors.textSecondary }}
                 >
                     {label} {required ? <span style={{ color: theme.colors.error }}>*</span> : null}
@@ -203,7 +203,7 @@ export const PortalNativeSelect = ({
             {label && !insetLabel ? <Label theme={theme} required={required}>{label}</Label> : null}
             {label && insetLabel ? (
                 <label
-                    className="pointer-events-none absolute left-4 top-2 z-[1] text-[11px] font-medium leading-none"
+                    className="pointer-events-none absolute left-4 top-2 z-[1] text-[0.6875rem] font-medium leading-none"
                     style={{ color: theme.colors.textSecondary }}
                 >
                     {label} {required ? <span style={{ color: theme.colors.error }}>*</span> : null}

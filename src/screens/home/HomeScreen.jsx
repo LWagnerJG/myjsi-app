@@ -423,7 +423,7 @@ export const HomeScreen = React.memo(({
                         }}
                     >
                         <MessageSquarePlus className="w-4 h-4" />
-                        <span className="text-[13px] font-semibold">Share Feedback</span>
+                        <span className="text-[0.8125rem] font-semibold">Share Feedback</span>
                     </button>
                 </div>
             )}
@@ -513,7 +513,7 @@ export const HomeScreen = React.memo(({
                             }}
                         >
                             <MessageSquarePlus className="w-4 h-4" />
-                            <span className="text-[13px] font-semibold">Share Feedback</span>
+                            <span className="text-[0.8125rem] font-semibold">Share Feedback</span>
                         </button>
                     </div>
                 )}

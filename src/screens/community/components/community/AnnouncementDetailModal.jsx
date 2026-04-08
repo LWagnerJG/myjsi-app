@@ -77,7 +77,7 @@ export const AnnouncementDetailModal = ({ announcement, theme, dark, onClose, on
                   <Icon className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-widest" style={{ color }}>{announcement.category?.replace('-', ' ')}</p>
+                  <p className="text-[0.6875rem] font-semibold uppercase tracking-widest" style={{ color }}>{announcement.category?.replace('-', ' ')}</p>
                   {formattedDate && (
                     <p className="text-xs mt-0.5" style={{ color: theme.colors.textSecondary }}>{formattedDate}</p>
                   )}
@@ -96,9 +96,9 @@ export const AnnouncementDetailModal = ({ announcement, theme, dark, onClose, on
           {/* Content */}
           <div className="px-5 pb-4 space-y-3">
             <h3 className="text-lg font-bold leading-snug" style={{ color: theme.colors.textPrimary }}>{announcement.title}</h3>
-            <p className="text-[13px] font-medium" style={{ color: theme.colors.textSecondary }}>{announcement.subtitle}</p>
+            <p className="text-[0.8125rem] font-medium" style={{ color: theme.colors.textSecondary }}>{announcement.subtitle}</p>
             {announcement.text && (
-              <p className="text-[13px] leading-relaxed" style={{ color: dark ? '#C0C0C0' : '#555555' }}>{announcement.text}</p>
+              <p className="text-[0.8125rem] leading-relaxed" style={{ color: dark ? '#C0C0C0' : '#555555' }}>{announcement.text}</p>
             )}
             {announcement.image && (
               <div className="rounded-xl overflow-hidden mt-2">
@@ -112,7 +112,7 @@ export const AnnouncementDetailModal = ({ announcement, theme, dark, onClose, on
             {announcement.actionLabel && announcement.actionRoute && (
               <button
                 onClick={() => { onClose(); onNavigate?.(announcement.actionRoute); }}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-full text-[13px] font-semibold transition-all active:scale-95"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-full text-[0.8125rem] font-semibold transition-all active:scale-95"
                 style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
               >
                 <ExternalLink className="w-3.5 h-3.5" />
@@ -121,7 +121,7 @@ export const AnnouncementDetailModal = ({ announcement, theme, dark, onClose, on
             )}
             <button
               onClick={handleShare}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-full text-[13px] font-semibold transition-all active:scale-95"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-full text-[0.8125rem] font-semibold transition-all active:scale-95"
               style={{
                 backgroundColor: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
                 color: theme.colors.textPrimary,
@@ -132,7 +132,7 @@ export const AnnouncementDetailModal = ({ announcement, theme, dark, onClose, on
             </button>
             <button
               onClick={handleCopyLink}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-full text-[13px] font-semibold transition-all active:scale-95"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-full text-[0.8125rem] font-semibold transition-all active:scale-95"
               style={{
                 backgroundColor: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
                 color: copied ? '#4A7C59' : theme.colors.textPrimary,

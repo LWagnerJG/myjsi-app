@@ -144,7 +144,7 @@ export const UploadToLibraryModal = ({ show, onClose, theme, onUpload }) => {
               style={{ borderColor: theme.colors.border, color: theme.colors.textSecondary }}
             >
               <Plus className="w-5 h-5" />
-              <span className="text-[11px]">Add</span>
+              <span className="text-[0.6875rem]">Add</span>
             </button>
           </div>
         ) : (
@@ -156,14 +156,14 @@ export const UploadToLibraryModal = ({ show, onClose, theme, onUpload }) => {
           >
             <ImageIcon className="w-8 h-8 opacity-40" />
             <span className="text-sm font-medium">Tap to select images</span>
-            <span className="text-[11px] opacity-60">JPG, PNG, HEIC</span>
+            <span className="text-[0.6875rem] opacity-60">JPG, PNG, HEIC</span>
           </button>
         )}
         <input ref={fileInputRef} type="file" multiple accept="image/*" className="hidden" onChange={handleFileChange} />
 
         {/* ── Title ── */}
         <div>
-          <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={labelStyle}>
+          <label className="block text-[0.6875rem] font-semibold uppercase tracking-wider mb-1" style={labelStyle}>
             Title <span className="text-red-400">*</span>
           </label>
           <input
@@ -177,7 +177,7 @@ export const UploadToLibraryModal = ({ show, onClose, theme, onUpload }) => {
 
         {/* ── Location ── */}
         <div>
-          <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={labelStyle}>
+          <label className="block text-[0.6875rem] font-semibold uppercase tracking-wider mb-1" style={labelStyle}>
             Location
           </label>
           <AutoCompleteCombobox
@@ -193,7 +193,7 @@ export const UploadToLibraryModal = ({ show, onClose, theme, onUpload }) => {
 
         {/* ── Series ── */}
         <div>
-          <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={labelStyle}>
+          <label className="block text-[0.6875rem] font-semibold uppercase tracking-wider mb-1" style={labelStyle}>
             Series
           </label>
           <AutoCompleteCombobox
@@ -209,7 +209,7 @@ export const UploadToLibraryModal = ({ show, onClose, theme, onUpload }) => {
 
         {/* ── Tags ── */}
         <div>
-          <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={labelStyle}>
+          <label className="block text-[0.6875rem] font-semibold uppercase tracking-wider mb-1" style={labelStyle}>
             Tags
           </label>
 
@@ -261,7 +261,7 @@ export const UploadToLibraryModal = ({ show, onClose, theme, onUpload }) => {
                   key={t}
                   type="button"
                   onClick={() => addTag(t)}
-                  className="px-2.5 py-1 rounded-full text-[11px] transition-colors"
+                  className="px-2.5 py-1 rounded-full text-[0.6875rem] transition-colors"
                   style={{ background: theme.colors.subtle, color: theme.colors.textSecondary }}
                 >
                   + {t}
@@ -276,7 +276,7 @@ export const UploadToLibraryModal = ({ show, onClose, theme, onUpload }) => {
           <button
             type="button"
             onClick={() => { reset(); onClose?.(); }}
-            className="flex-1 h-11 rounded-full text-[13px] font-semibold transition-colors"
+            className="flex-1 h-11 rounded-full text-[0.8125rem] font-semibold transition-colors"
             style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }}
           >
             Cancel
@@ -284,7 +284,7 @@ export const UploadToLibraryModal = ({ show, onClose, theme, onUpload }) => {
           <button
             type="submit"
             disabled={!canSubmit}
-            className="flex-1 h-11 rounded-full text-[13px] font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex-1 h-11 rounded-full text-[0.8125rem] font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
           >
             Upload {files.length > 1 ? `${files.length} Images` : 'Image'}

@@ -137,12 +137,12 @@ export const ChatOverlay = ({
                             />
                         </div>
                         <div className="leading-tight">
-                            <div className="text-[15px] font-semibold" style={{ color: colors.textPrimary }}>
+                            <div className="text-[0.9375rem] font-semibold" style={{ color: colors.textPrimary }}>
                                 Elliott
                             </div>
                             <div className="flex items-center gap-1.5">
                                 <Sparkles className="w-3 h-3" style={{ color: '#D3A891' }} />
-                                <span className="text-[11px]" style={{ color: colors.textSecondary }}>
+                                <span className="text-[0.6875rem]" style={{ color: colors.textSecondary }}>
                                     JSI Sales Assistant
                                 </span>
                             </div>
@@ -176,7 +176,7 @@ export const ChatOverlay = ({
                                 Hey, I&apos;m Elliott!
                             </p>
                             <p
-                                className="text-[13px] text-center mb-6 max-w-[280px]"
+                                className="text-[0.8125rem] text-center mb-6 max-w-[280px]"
                                 style={{ color: colors.textSecondary, animation: 'elliott-fade-up 0.4s ease-out 0.1s both' }}
                             >
                                 Your JSI sales assistant. I know lead times, orders, commissions, contracts&nbsp;&mdash; ask me anything.
@@ -236,7 +236,7 @@ export const ChatOverlay = ({
                                                 {msg.attachments.map((file) => (
                                                     <span
                                                         key={file.id}
-                                                        className="text-[11px] px-2 py-1 rounded-full"
+                                                        className="text-[0.6875rem] px-2 py-1 rounded-full"
                                                         style={{
                                                             backgroundColor: msg.role === 'user' ? 'rgba(255,255,255,0.2)' : `${colors.border}66`,
                                                             color: msg.role === 'user' ? '#FFFFFF' : colors.textSecondary
@@ -257,7 +257,7 @@ export const ChatOverlay = ({
                                                             setIsChatOpen(false);
                                                             onNavigate?.(action.route);
                                                         }}
-                                                        className="inline-flex items-center gap-1.5 pl-3.5 pr-2.5 py-2 rounded-full text-[12px] font-semibold tracking-tight transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]"
+                                                        className="inline-flex items-center gap-1.5 pl-3.5 pr-2.5 py-2 rounded-full text-xs font-semibold tracking-tight transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]"
                                                         style={{
                                                             background: isDark
                                                                 ? 'linear-gradient(135deg, rgba(211,168,145,0.18) 0%, rgba(211,168,145,0.08) 100%)'
@@ -286,7 +286,7 @@ export const ChatOverlay = ({
 
                                     {/* ── Timestamp + Copy/Share row ──── */}
                                     <div className={`flex items-center gap-2 mt-1 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                        <span className="text-[10px]" style={{ color: colors.textSecondary, opacity: 0.6 }}>
+                                        <span className="text-[0.625rem]" style={{ color: colors.textSecondary, opacity: 0.6 }}>
                                             {formatTimestamp(msg.timestamp)}
                                         </span>
                                         {msg.role === 'assistant' && (

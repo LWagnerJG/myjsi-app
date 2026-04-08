@@ -132,7 +132,7 @@ export const RequestDrawer = ({
                     <div className="relative">
                         <Package className="w-6 h-6" style={{ color: theme.colors.accent }} />
                         <span
-                            className="absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
+                            className="absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center text-[0.625rem] font-bold text-white"
                             style={{ backgroundColor: theme.colors.accent }}
                         >
                             {totalRequestItems}

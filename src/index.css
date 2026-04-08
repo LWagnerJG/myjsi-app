@@ -145,7 +145,7 @@ body {
     padding: 0;
     overflow: hidden;
     font-family: var(--jsi-font-family);
-    -webkit-text-size-adjust: 100%;
+    -webkit-text-size-adjust: auto;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background-color: var(--jsi-warm-beige);

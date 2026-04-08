@@ -23,7 +23,7 @@ const CardHeader = ({ children, right, dark, colors }) => (
         style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)'}` }}
     >
         <span
-            className="text-[12px] font-bold uppercase tracking-[0.07em]"
+            className="text-xs font-bold uppercase tracking-[0.07em]"
             style={{ color: colors.textSecondary, opacity: 0.6 }}
         >
             {children}
@@ -68,10 +68,10 @@ export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
 
             {/* ── Page header ── */}
             <div className="flex-shrink-0 px-4 pt-3 pb-3">
-                <h1 className="text-[22px] font-black tracking-tight leading-tight" style={{ color: colors.textPrimary }}>
+                <h1 className="text-[1.375rem] font-black tracking-tight leading-tight" style={{ color: colors.textPrimary }}>
                     Sample Policies
                 </h1>
-                <p className="text-[14px] mt-0.5" style={{ color: colors.textSecondary }}>
+                <p className="text-sm mt-0.5" style={{ color: colors.textSecondary }}>
                     Effective May 1, 2021 &middot; Commission not paid
                 </p>
             </div>
@@ -82,7 +82,7 @@ export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
 
                     <CardHeader dark={isDark} colors={colors} right={
                         <span
-                            className="text-[11px] font-bold uppercase tracking-[0.06em]"
+                            className="text-[0.6875rem] font-bold uppercase tracking-[0.06em]"
                             style={{ color: colors.textSecondary, opacity: 0.4 }}
                         >
                             {SAMPLE_POLICIES.length} policies
@@ -114,7 +114,7 @@ export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
                                     style={{ backgroundColor: `${colors.accent}${isTop ? '18' : '0D'}` }}
                                 >
                                     <span
-                                        className="text-[20px] font-black leading-none tabular-nums"
+                                        className="text-xl font-black leading-none tabular-nums"
                                         style={{ color: colors.accent }}
                                     >
                                         {policy.discount}%
@@ -130,14 +130,14 @@ export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
                                 {/* Title + subtitle + note */}
                                 <div className="flex-1 min-w-0">
                                     <p
-                                        className="text-[15px] font-bold leading-snug tracking-tight"
+                                        className="text-[0.9375rem] font-bold leading-snug tracking-tight"
                                         style={{ color: colors.textPrimary }}
                                     >
                                         {policy.title}
                                     </p>
                                     {policy.subtitle && (
                                         <p
-                                            className="text-[12px] mt-[3px] leading-snug"
+                                            className="text-xs mt-[3px] leading-snug"
                                             style={{ color: colors.textSecondary, opacity: 0.65 }}
                                         >
                                             {policy.subtitle}
@@ -145,7 +145,7 @@ export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
                                     )}
                                     {note && (
                                         <p
-                                            className="text-[12px] mt-[3px] leading-snug"
+                                            className="text-xs mt-[3px] leading-snug"
                                             style={{ color: colors.textSecondary, opacity: 0.5 }}
                                         >
                                             {note}
@@ -167,7 +167,7 @@ export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
                                     }}
                                 >
                                     <span
-                                        className="text-[11px] font-mono font-semibold"
+                                        className="text-[0.6875rem] font-mono font-semibold"
                                         style={{ color: isCopied ? colors.accent : colors.textPrimary }}
                                     >
                                         {policy.ssa}

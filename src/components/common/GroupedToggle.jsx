@@ -34,15 +34,15 @@ export const SegmentedToggle = ({
   
   const sizes = {
     sm: { 
-      text: 'text-[13px]', 
+      text: 'text-[0.8125rem]', 
       px: 'px-4', 
       py: 'py-1.5', 
       gap: 'gap-1.5',
       iconSize: 'w-3.5 h-3.5',
-      badgeSize: 'w-4 h-4 text-[11px]'
+      badgeSize: 'w-4 h-4 text-[0.6875rem]'
     },
     md: { 
-      text: 'text-[15px]', 
+      text: 'text-[0.9375rem]', 
       px: 'px-5', 
       py: 'py-2', 
       gap: 'gap-2',

@@ -197,7 +197,7 @@ const InlineStepHealth = ({ health, theme }) => {
       style={{ borderColor: subtleBorder, backgroundColor: dark ? c.background : c.surface }}
     >
       <StrengthCircle percent={health.percent} tone={health.tone} size={30} stroke={3} textSize="10px" />
-      <span className="text-[11px] font-semibold" style={{ color: health.tone }}>
+      <span className="text-[0.6875rem] font-semibold" style={{ color: health.tone }}>
         {health.label}
       </span>
     </div>
@@ -277,7 +277,7 @@ const DatePickerInput = ({ value, onChange, theme, placeholder = 'Select date' }
       <button
         type="button"
         onClick={() => setIsOpen((o) => !o)}
-        className="w-full h-10 rounded-full border flex items-center justify-between px-4 text-[14px] focus:outline-none transition-colors"
+        className="w-full h-10 rounded-full border flex items-center justify-between px-4 text-sm focus:outline-none transition-colors"
         style={{
           backgroundColor: dark ? c.background : c.surface,
           borderColor: isOpen ? c.accent : subtleBorder,
@@ -305,7 +305,7 @@ const DatePickerInput = ({ value, onChange, theme, placeholder = 'Select date' }
               className="p-1.5 rounded-full transition-colors hover:bg-black/[0.05]">
               <ChevronLeft className="w-4 h-4" style={{ color: c.textSecondary }} />
             </button>
-            <span className="text-[13px] font-semibold" style={{ color: c.textPrimary }}>
+            <span className="text-[0.8125rem] font-semibold" style={{ color: c.textPrimary }}>
               {MONTHS_LONG[viewMonth]} {viewYear}
             </span>
             <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={nextMonth}
@@ -318,7 +318,7 @@ const DatePickerInput = ({ value, onChange, theme, placeholder = 'Select date' }
           <div className="px-3 pt-2 pb-1">
             <div className="grid grid-cols-7 mb-0.5">
               {CAL_WEEKDAYS.map((d) => (
-                <div key={d} className="text-center text-[10px] font-semibold py-1" style={{ color: c.textSecondary, opacity: 0.6 }}>{d}</div>
+                <div key={d} className="text-center text-[0.625rem] font-semibold py-1" style={{ color: c.textSecondary, opacity: 0.6 }}>{d}</div>
               ))}
             </div>
             <div className="grid grid-cols-7 gap-y-0.5">
@@ -329,7 +329,7 @@ const DatePickerInput = ({ value, onChange, theme, placeholder = 'Select date' }
                       type="button"
                       onMouseDown={(e) => { e.preventDefault(); selectDay(day); }}
                       onClick={() => selectDay(day)}
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-[13px] transition-all"
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-[0.8125rem] transition-all"
                       style={{
                         backgroundColor: isSelected(day) ? c.accent : 'transparent',
                         color: isSelected(day) ? c.accentText : isToday(day) ? c.accent : c.textPrimary,
@@ -352,7 +352,7 @@ const DatePickerInput = ({ value, onChange, theme, placeholder = 'Select date' }
               type="button"
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => { onChange(''); setIsOpen(false); }}
-              className="text-[12px] font-medium"
+              className="text-xs font-medium"
               style={{ color: c.textSecondary }}
             >
               Clear
@@ -367,7 +367,7 @@ const DatePickerInput = ({ value, onChange, theme, placeholder = 'Select date' }
                 onChange(`${d.getFullYear()}-${mm}-${dd}`);
                 setIsOpen(false);
               }}
-              className="text-[12px] font-semibold"
+              className="text-xs font-semibold"
               style={{ color: c.accent }}
             >
               Today
@@ -969,7 +969,7 @@ export const NewLeadScreen = ({
                           }}
                         >
                           <span
-                            className="text-[11px] font-bold w-5 h-5 rounded-full flex items-center justify-center shrink-0"
+                            className="text-[0.6875rem] font-bold w-5 h-5 rounded-full flex items-center justify-center shrink-0"
                             style={{
                               backgroundColor: isSelected ? 'rgba(255,255,255,0.2)' : isPast ? `${c.accent}20` : dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)',
                               color: isSelected ? c.accentText : isPast ? c.accent : c.textSecondary,
@@ -978,7 +978,7 @@ export const NewLeadScreen = ({
                             {num}
                           </span>
                           <span
-                            className="text-[13px] font-semibold leading-tight"
+                            className="text-[0.8125rem] font-semibold leading-tight"
                             style={{ color: isSelected ? c.accentText : c.textPrimary }}
                           >
                             {stage}
@@ -1011,7 +1011,7 @@ export const NewLeadScreen = ({
                         onChange={(e) => { upd('otherVertical', e.target.value); markTouched('otherVertical'); }}
                         onBlur={() => markTouched('otherVertical')}
                         placeholder="Specify other vertical"
-                        className="w-full h-9 px-3.5 text-[13px] focus:outline-none focus:ring-0 placeholder-theme-secondary bg-transparent border-0"
+                        className="w-full h-9 px-3.5 text-[0.8125rem] focus:outline-none focus:ring-0 placeholder-theme-secondary bg-transparent border-0"
                         style={{ color: c.textPrimary }}
                       />
                     </div>
@@ -1049,7 +1049,7 @@ export const NewLeadScreen = ({
                     <button
                       type="button"
                       onClick={() => { upd('installationLocation', ''); setLocationInputOpen(false); }}
-                      className="shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-all"
+                      className="shrink-0 rounded-full border px-2.5 py-1 text-[0.6875rem] font-medium transition-all"
                       style={{ borderColor: subtleBorder, color: c.textSecondary, backgroundColor: 'transparent' }}
                     >
                       Unknown
@@ -1059,11 +1059,11 @@ export const NewLeadScreen = ({
                   <button
                     type="button"
                     onClick={() => setLocationInputOpen(true)}
-                    className="w-full h-10 rounded-full border flex items-center justify-between px-4 text-[14px] transition-colors"
+                    className="w-full h-10 rounded-full border flex items-center justify-between px-4 text-sm transition-colors"
                     style={{ borderColor: subtleBorder, backgroundColor: dark ? c.background : c.surface, color: c.textSecondary }}
                   >
-                    <span className="text-[13px] font-medium">Unknown</span>
-                    <span className="text-[11px]" style={{ color: c.textSecondary, opacity: 0.55 }}>Set location</span>
+                    <span className="text-[0.8125rem] font-medium">Unknown</span>
+                    <span className="text-[0.6875rem]" style={{ color: c.textSecondary, opacity: 0.55 }}>Set location</span>
                   </button>
                 )}
               </Row>
@@ -1082,7 +1082,7 @@ export const NewLeadScreen = ({
                     <button
                       type="button"
                       onClick={() => { upd('expectedInstallDate', ''); setDateInputOpen(false); }}
-                      className="shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-all"
+                      className="shrink-0 rounded-full border px-2.5 py-1 text-[0.6875rem] font-medium transition-all"
                       style={{ borderColor: subtleBorder, color: c.textSecondary, backgroundColor: 'transparent' }}
                     >
                       Unknown
@@ -1095,8 +1095,8 @@ export const NewLeadScreen = ({
                     className="w-full h-10 rounded-full border flex items-center justify-between px-4 transition-colors"
                     style={{ borderColor: subtleBorder, backgroundColor: dark ? c.background : c.surface, color: c.textSecondary }}
                   >
-                    <span className="text-[13px] font-medium">Unknown</span>
-                    <span className="text-[11px]" style={{ color: c.textSecondary, opacity: 0.55 }}>Set date</span>
+                    <span className="text-[0.8125rem] font-medium">Unknown</span>
+                    <span className="text-[0.6875rem]" style={{ color: c.textSecondary, opacity: 0.55 }}>Set date</span>
                   </button>
                 )}
               </Row>
@@ -1149,7 +1149,7 @@ export const NewLeadScreen = ({
                       border: `1px solid ${getSubtleBorder(theme)}`,
                       backgroundColor: theme.colors.surface,
                       color: theme.colors.textPrimary,
-                      fontSize: 14,
+                      fontSize: "0.875rem",
                       padding: '0 14px',
                     }}
                   />
@@ -1166,10 +1166,10 @@ export const NewLeadScreen = ({
                     <div>
                       <div className="flex items-center justify-between mb-3">
                         <span className="tabular-nums leading-none" style={{ color: c.textPrimary, fontSize: 26, fontWeight: 700, letterSpacing: '-0.02em' }}>
-                          {winProb}<span style={{ fontSize: 15, fontWeight: 600, color: c.textSecondary, marginLeft: 2 }}>%</span>
+                          {winProb}<span style={{ fontSize: "0.9375rem", fontWeight: 600, color: c.textSecondary, marginLeft: 2 }}>%</span>
                         </span>
                         <span
-                          className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
+                          className="text-[0.6875rem] font-semibold px-2.5 py-1 rounded-full"
                           style={{ backgroundColor: `${winBand.tone}1A`, color: winBand.tone, transition: 'color .15s, background-color .15s' }}
                         >
                           {winBand.label}
@@ -1199,7 +1199,7 @@ export const NewLeadScreen = ({
                               onClick={() => upd('winProbability', pct)}
                               className="flex-1 rounded-full py-1.5 border transition-all"
                               style={{
-                                fontSize: 11,
+                                fontSize: "0.6875rem",
                                 fontWeight: 600,
                                 backgroundColor: active ? c.accent : 'transparent',
                                 borderColor: active ? c.accent : subtleBorder,
@@ -1252,7 +1252,7 @@ export const NewLeadScreen = ({
                     <button
                       type="button"
                       onClick={() => { setDiscountCustom(false); upd('discount', ''); }}
-                      className="shrink-0 text-[12px] font-medium px-2.5 py-1.5 rounded-full border transition-colors"
+                      className="shrink-0 text-xs font-medium px-2.5 py-1.5 rounded-full border transition-colors"
                       style={{ color: c.textSecondary, borderColor: subtleBorder }}
                     >
                       ← Discounts
@@ -1317,7 +1317,7 @@ export const NewLeadScreen = ({
                     <button
                       type="button"
                       onClick={() => { upd('endUser', 'Unknown'); markTouched('endUser'); }}
-                      className="shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-all"
+                      className="shrink-0 rounded-full border px-2.5 py-1 text-[0.6875rem] font-medium transition-all"
                       style={{
                         borderColor: newLeadData.endUser === 'Unknown' ? theme.colors.accent : subtleBorder,
                         color: newLeadData.endUser === 'Unknown' ? theme.colors.accent : c.textSecondary,
@@ -1340,8 +1340,8 @@ export const NewLeadScreen = ({
                       className="w-full h-10 rounded-full border flex items-center justify-between px-4 transition-colors"
                       style={{ borderColor: theme.colors.accent, backgroundColor: `${theme.colors.accent}12`, color: c.textPrimary }}
                     >
-                      <span className="text-[13px] font-medium" style={{ color: theme.colors.accent }}>Out to Bid</span>
-                      <span className="text-[11px]" style={{ color: c.textSecondary, opacity: 0.55 }}>Add dealers</span>
+                      <span className="text-[0.8125rem] font-medium" style={{ color: theme.colors.accent }}>Out to Bid</span>
+                      <span className="text-[0.6875rem]" style={{ color: c.textSecondary, opacity: 0.55 }}>Add dealers</span>
                     </button>
                   ) : (
                     <div className="flex items-center gap-2">
@@ -1366,7 +1366,7 @@ export const NewLeadScreen = ({
                       <button
                         type="button"
                         onClick={() => { setDealerOutToBid(true); upd('dealers', ['Out to Bid']); markTouched('dealers'); }}
-                        className="shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-all"
+                        className="shrink-0 rounded-full border px-2.5 py-1 text-[0.6875rem] font-medium transition-all"
                         style={{ borderColor: subtleBorder, color: c.textSecondary, backgroundColor: 'transparent' }}
                       >
                         Out to Bid
@@ -1402,7 +1402,7 @@ export const NewLeadScreen = ({
                       const current = newLeadData.designFirms || [];
                       if (!current.includes('Unknown')) upd('designFirms', ['Unknown', ...current]);
                     }}
-                    className="shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-all"
+                    className="shrink-0 rounded-full border px-2.5 py-1 text-[0.6875rem] font-medium transition-all"
                     style={{
                       borderColor: (newLeadData.designFirms || []).includes('Unknown') ? theme.colors.accent : subtleBorder,
                       color: (newLeadData.designFirms || []).includes('Unknown') ? theme.colors.accent : c.textSecondary,
@@ -1420,9 +1420,9 @@ export const NewLeadScreen = ({
                   /* ── Expanded: label+toggle header, full-width search+chips below ── */
                   <>
                     <div className="flex items-center justify-between mb-2.5">
-                      <span className="text-[13px] font-semibold" style={{ color: c.textSecondary }}>Competition</span>
+                      <span className="text-[0.8125rem] font-semibold" style={{ color: c.textSecondary }}>Competition</span>
                       <div className="flex items-center gap-2">
-                        <span className="text-[12px]" style={{ color: c.textSecondary }}>Active</span>
+                        <span className="text-xs" style={{ color: c.textSecondary }}>Active</span>
                         <ToggleSwitch
                           checked
                           onChange={() => {
@@ -1457,7 +1457,7 @@ export const NewLeadScreen = ({
                 ) : (
                   /* ── Compact: all inline — label | search (if active) | None/Active | toggle ── */
                   <div className="flex items-center gap-2 min-h-[40px]">
-                    <span className="text-[13px] font-semibold shrink-0" style={{ color: c.textSecondary }}>Competition</span>
+                    <span className="text-[0.8125rem] font-semibold shrink-0" style={{ color: c.textSecondary }}>Competition</span>
                     {newLeadData.competitionPresent && (
                       <div className="flex-1 min-w-0">
                         <SpotlightMultiSelect
@@ -1485,7 +1485,7 @@ export const NewLeadScreen = ({
                       </div>
                     )}
                     <div className="flex items-center gap-2 shrink-0 ml-auto">
-                      <span className="text-[12px]" style={{ color: c.textSecondary }}>
+                      <span className="text-xs" style={{ color: c.textSecondary }}>
                         {newLeadData.competitionPresent ? 'Active' : 'None'}
                       </span>
                       <ToggleSwitch
@@ -1506,10 +1506,10 @@ export const NewLeadScreen = ({
 
               {/* Rewards — label left, toggles right */}
               <div className="flex items-center justify-between gap-4 py-3">
-                <span className="text-[13px] font-semibold shrink-0" style={{ color: c.textSecondary }}>Rewards</span>
+                <span className="text-[0.8125rem] font-semibold shrink-0" style={{ color: c.textSecondary }}>Rewards</span>
                 <div className="flex items-center gap-5 shrink-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-[12px] font-medium" style={{ color: salesRewardEnabled ? c.textPrimary : c.textSecondary }}>Sales 3%</span>
+                    <span className="text-xs font-medium" style={{ color: salesRewardEnabled ? c.textPrimary : c.textSecondary }}>Sales 3%</span>
                     <ToggleSwitch
                       checked={salesRewardEnabled}
                       onChange={(event) => { upd('salesReward', event.target.checked); markTouched('salesReward'); }}
@@ -1517,7 +1517,7 @@ export const NewLeadScreen = ({
                     />
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-[12px] font-medium" style={{ color: designerRewardEnabled ? c.textPrimary : c.textSecondary }}>Designer 1%</span>
+                    <span className="text-xs font-medium" style={{ color: designerRewardEnabled ? c.textPrimary : c.textSecondary }}>Designer 1%</span>
                     <ToggleSwitch
                       checked={designerRewardEnabled}
                       onChange={(event) => { upd('designerReward', event.target.checked); markTouched('designerReward'); }}
@@ -1582,7 +1582,7 @@ export const NewLeadScreen = ({
               {/* JSI Series — full-width, search + cards unified */}
               <div className="py-3">
                 <div className="mb-2">
-                  <span className="text-[13px] font-semibold" style={{ color: c.textSecondary }}>JSI Series</span>
+                  <span className="text-[0.8125rem] font-semibold" style={{ color: c.textSecondary }}>JSI Series</span>
                 </div>
                 <ProductSpotlight
                   selectedSeries={(newLeadData.products || []).map((p) => p.series)}
@@ -1606,12 +1606,12 @@ export const NewLeadScreen = ({
                           />
                           {/* Intake — compact inline rows, no heavy inner borders */}
                           <div className="border-t" style={{ borderColor: subtleBorder }}>
-                            <p className="px-4 pt-2.5 pb-1 text-[10px] font-semibold uppercase tracking-[0.06em]" style={{ color: c.textSecondary, opacity: 0.5 }}>
+                            <p className="px-4 pt-2.5 pb-1 text-[0.625rem] font-semibold uppercase tracking-[0.06em]" style={{ color: c.textSecondary, opacity: 0.5 }}>
                               Manufacturing context <span className="normal-case tracking-normal font-normal opacity-100">· optional</span>
                             </p>
                             {[prompts.first, prompts.second].map((prompt) => (
                               <div key={prompt.key} className="flex items-center gap-3 px-4 py-1.5">
-                                <span className="text-[12px] flex-1 leading-tight" style={{ color: c.textSecondary }}>
+                                <span className="text-xs flex-1 leading-tight" style={{ color: c.textSecondary }}>
                                   {prompt.label}
                                 </span>
                                 <div className="w-[52%] shrink-0">
@@ -1643,7 +1643,7 @@ export const NewLeadScreen = ({
                 onChange={(e) => upd('notes', e.target.value)}
                 rows={4}
                 placeholder="Add context, timing risks, or requirements..."
-                className="mt-2.5 w-full px-4 py-3 text-[13px] rounded-2xl border focus:outline-none resize-none placeholder-theme-secondary transition-shadow"
+                className="mt-2.5 w-full px-4 py-3 text-[0.8125rem] rounded-2xl border focus:outline-none resize-none placeholder-theme-secondary transition-shadow"
                 style={{ backgroundColor: dark ? c.background : c.surface, borderColor: subtleBorder, color: c.textPrimary }}
                 onFocus={(e) => { e.target.style.boxShadow = `0 0 0 3px ${c.accent}33`; e.target.style.borderColor = c.accent || subtleBorder; }}
                 onBlur={(e) => { e.target.style.boxShadow = 'none'; e.target.style.borderColor = subtleBorder; }}
@@ -1733,16 +1733,16 @@ export const NewLeadScreen = ({
               >
                 <StrengthCircle percent={health.percent} tone={health.tone} size={60} stroke={4} textSize="12px" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider mb-0.5" style={{ color: health.tone, opacity: 0.7 }}>Lead Score</p>
+                  <p className="text-[0.625rem] font-semibold uppercase tracking-wider mb-0.5" style={{ color: health.tone, opacity: 0.7 }}>Lead Score</p>
                   <div className="flex items-center gap-2">
-                    <span className="text-[22px] font-bold tabular-nums leading-none" style={{ color: health.tone }}>{health.percent}</span>
-                    <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full" style={{ color: health.tone, backgroundColor: `${health.tone}20` }}>{health.label}</span>
+                    <span className="text-[1.375rem] font-bold tabular-nums leading-none" style={{ color: health.tone }}>{health.percent}</span>
+                    <span className="text-[0.6875rem] font-semibold px-2.5 py-0.5 rounded-full" style={{ color: health.tone, backgroundColor: `${health.tone}20` }}>{health.label}</span>
                     {canSubmit
                       ? <CheckCircle2 className="w-4 h-4 ml-auto shrink-0" style={{ color: health.tone }} />
                       : <AlertTriangle className="w-4 h-4 ml-auto shrink-0" style={{ color: health.tone }} />
                     }
                   </div>
-                  <p className="text-[11px] mt-1" style={{ color: health.tone, opacity: 0.7 }}>
+                  <p className="text-[0.6875rem] mt-1" style={{ color: health.tone, opacity: 0.7 }}>
                     {health.missing[0] ? `+ ${health.missing[0]} will boost your score` : 'All key fields complete'}
                   </p>
                 </div>
@@ -1761,7 +1761,7 @@ export const NewLeadScreen = ({
                         {gi > 0 && (
                           <div className="flex items-center gap-2 px-3.5 py-1" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.025)' }}>
                             <div className="flex-1 h-px" style={{ backgroundColor: subtleBorder }} />
-                            <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: c.textSecondary, opacity: 0.4 }}>
+                            <span className="text-[0.5625rem] font-bold uppercase tracking-widest" style={{ color: c.textSecondary, opacity: 0.4 }}>
                               {['Basics', 'Scope', 'Details'][group.stepIdx]}
                             </span>
                             <div className="flex-1 h-px" style={{ backgroundColor: subtleBorder }} />
@@ -1779,8 +1779,8 @@ export const NewLeadScreen = ({
                               borderTop: (gi === 0 && i === 0) ? 'none' : (i > 0 ? `1px solid ${subtleBorder}` : 'none'),
                             }}
                           >
-                            <span className="text-[12px] font-medium shrink-0 w-[96px]" style={{ color: c.textSecondary }}>{item.label}</span>
-                            <span className="text-[13px] font-semibold flex-1 text-right truncate" style={{ color: c.textPrimary }}>{item.value}</span>
+                            <span className="text-xs font-medium shrink-0 w-[96px]" style={{ color: c.textSecondary }}>{item.label}</span>
+                            <span className="text-[0.8125rem] font-semibold flex-1 text-right truncate" style={{ color: c.textPrimary }}>{item.value}</span>
                             <ChevronRight className="w-3.5 h-3.5 shrink-0 opacity-25" style={{ color: c.textSecondary }} />
                           </button>
                         ))}
@@ -1811,7 +1811,7 @@ export const NewLeadScreen = ({
                   key={label}
                   type="button"
                   onClick={() => animateToStep(idx)}
-                  className="rounded-full px-3 py-1.5 text-[12px] font-semibold transition-all border"
+                  className="rounded-full px-3 py-1.5 text-xs font-semibold transition-all border"
                   style={{
                     backgroundColor: active ? c.accent : 'transparent',
                     borderColor: active ? c.accent : subtleBorder,

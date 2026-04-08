@@ -6,7 +6,7 @@ export const SizePicker = ({ sizes, selected, onSelect, theme }) => {
 
   return (
     <div className="mt-2.5">
-      <p className="text-[10px] font-bold uppercase tracking-[0.18em] mb-2" style={{ color: theme.colors.textSecondary }}>
+      <p className="text-[0.625rem] font-bold uppercase tracking-[0.18em] mb-2" style={{ color: theme.colors.textSecondary }}>
         Select size
       </p>
       <div className="flex flex-wrap gap-1.5">

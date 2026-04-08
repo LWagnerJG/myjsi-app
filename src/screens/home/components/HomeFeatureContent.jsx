@@ -52,7 +52,7 @@ export const HomeFeatureContent = ({
                                         {getCommunityTextSafe(post)}
                                     </div>
                                     {post.timeAgo && (
-                                        <div className="text-[11px] mt-1 opacity-50" style={{ color: colors.textSecondary }}>
+                                        <div className="text-[0.6875rem] mt-1 opacity-50" style={{ color: colors.textSecondary }}>
                                             {post.timeAgo}
                                         </div>
                                     )}
@@ -93,7 +93,7 @@ export const HomeFeatureContent = ({
                         >
                             <div className="text-left">
                                 <div className="text-sm font-semibold" style={{ color: colors.textPrimary }}>{item.series}</div>
-                                <div className="text-[11px] uppercase tracking-widest opacity-60" style={{ color: colors.textSecondary }}>{item.type}</div>
+                                <div className="text-[0.6875rem] uppercase tracking-widest opacity-60" style={{ color: colors.textSecondary }}>{item.type}</div>
                             </div>
                             <div className="text-sm font-bold" style={{ color: colors.textPrimary }}>{item.weeks} wks</div>
                         </button>
@@ -142,7 +142,7 @@ export const HomeFeatureContent = ({
                             </div>
                             <div className="flex-1 min-w-0">
                                 <div className="text-sm font-semibold truncate" style={{ color: colors.textPrimary }}>{ann.title}</div>
-                                <div className="text-[11px] mt-0.5 line-clamp-1" style={{ color: colors.textSecondary }}>{ann.subtitle || ann.text}</div>
+                                <div className="text-[0.6875rem] mt-0.5 line-clamp-1" style={{ color: colors.textSecondary }}>{ann.subtitle || ann.text}</div>
                             </div>
                             <ChevronRight className="w-3.5 h-3.5 mt-1 flex-shrink-0 opacity-30" style={{ color: colors.textSecondary }} />
                         </button>
@@ -185,7 +185,7 @@ export const HomeFeatureContent = ({
                                     </div>
                                 </div>
                                 <div className="text-right flex-shrink-0">
-                                    <div className="text-[11px] font-semibold" style={{ color: colors.textSecondary }}>
+                                    <div className="text-[0.6875rem] font-semibold" style={{ color: colors.textSecondary }}>
                                         {seriesCount} series
                                     </div>
                                 </div>
@@ -224,7 +224,7 @@ export const HomeFeatureContent = ({
                                 </div>
                                 <div className="text-right flex-shrink-0">
                                     <div
-                                        className="text-[10px] uppercase tracking-widest font-semibold"
+                                        className="text-[0.625rem] uppercase tracking-widest font-semibold"
                                         style={{ color: colors.textSecondary, opacity: 0.8 }}
                                     >
                                         {project.stage}
@@ -265,7 +265,7 @@ export const HomeFeatureContent = ({
                     }}
                 >
                     <div className="text-left">
-                        <div className="text-[11px] uppercase tracking-widest" style={{ color: colors.textSecondary, opacity: 0.6 }}>Available balance</div>
+                        <div className="text-[0.6875rem] uppercase tracking-widest" style={{ color: colors.textSecondary, opacity: 0.6 }}>Available balance</div>
                         <div className="text-lg font-bold tabular-nums" style={{ color: colors.textPrimary }}>✦ {INITIAL_BALANCE.toLocaleString()}</div>
                     </div>
                     <div className="text-xs font-medium" style={{ color: '#C4956A' }}>Redeem →</div>
@@ -341,7 +341,7 @@ export const HomeFeatureContent = ({
                     {/* Amount + Status */}
                     <div className="text-right flex-shrink-0">
                         <div className="text-sm font-bold tabular-nums" style={{ color: colors.textPrimary }}>${order.net.toLocaleString()}</div>
-                        <div className="text-[11px] font-medium" style={{ color: statusColor }}>{order.status}</div>
+                        <div className="text-[0.6875rem] font-medium" style={{ color: statusColor }}>{order.status}</div>
                     </div>
                 </button>
                 );

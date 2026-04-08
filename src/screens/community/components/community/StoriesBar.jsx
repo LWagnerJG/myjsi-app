@@ -30,7 +30,7 @@ export const StoriesBar = ({ theme, dark }) => (
             )}
           </div>
         </div>
-        <span className="text-[11px] font-medium max-w-[56px] truncate" style={{ color: theme.colors.textSecondary }}>
+        <span className="text-[0.6875rem] font-medium max-w-[56px] truncate" style={{ color: theme.colors.textSecondary }}>
           {story.label}
         </span>
       </button>

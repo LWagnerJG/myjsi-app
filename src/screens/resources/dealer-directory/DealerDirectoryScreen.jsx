@@ -38,10 +38,10 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, onNavigate }) =>
 
             {/* ── Header ── */}
             <div className="flex-shrink-0 px-4 pt-3 pb-3">
-                <h1 className="text-[22px] font-black tracking-tight leading-tight" style={{ color: colors.textPrimary }}>
+                <h1 className="text-[1.375rem] font-black tracking-tight leading-tight" style={{ color: colors.textPrimary }}>
                     Dealers
                 </h1>
-                <p className="text-[14px] mt-0.5" style={{ color: colors.textSecondary }}>
+                <p className="text-sm mt-0.5" style={{ color: colors.textSecondary }}>
                     {dealers.length} accounts &middot; {formatCurrency(totalSales)} portfolio
                 </p>
             </div>
@@ -63,13 +63,13 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, onNavigate }) =>
                         placeholder="Search dealers…"
                         type="search"
                         autoComplete="off"
-                        className="flex-1 bg-transparent text-[14px] outline-none"
+                        className="flex-1 bg-transparent text-sm outline-none"
                         style={{ color: colors.textPrimary }}
                     />
                     {searchTerm && (
                         <button
                             onClick={() => setSearchTerm('')}
-                            className="text-[12px] font-semibold"
+                            className="text-xs font-semibold"
                             style={{ color: colors.textSecondary }}
                         >
                             Clear
@@ -82,7 +82,7 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, onNavigate }) =>
                     style={{ height: 42, backgroundColor: colors.accent, color: colors.accentText }}
                 >
                     <UserPlus className="w-4 h-4" />
-                    <span className="text-[13px] font-semibold">Add</span>
+                    <span className="text-[0.8125rem] font-semibold">Add</span>
                 </button>
             </div>
 
@@ -109,7 +109,7 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, onNavigate }) =>
                                 >
                                     {/* Avatar */}
                                     <div
-                                        className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-[12px] font-black"
+                                        className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-black"
                                         style={{ backgroundColor: `${colors.accent}18`, color: colors.accent }}
                                     >
                                         {initials}
@@ -117,17 +117,17 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, onNavigate }) =>
 
                                     {/* Name + territory */}
                                     <div className="flex-1 min-w-0">
-                                        <p className="text-[15px] font-bold tracking-tight truncate leading-snug" style={{ color: colors.textPrimary }}>
+                                        <p className="text-[0.9375rem] font-bold tracking-tight truncate leading-snug" style={{ color: colors.textPrimary }}>
                                             {d.name}
                                         </p>
-                                        <p className="text-[12px] truncate mt-[3px] leading-snug" style={{ color: colors.textSecondary, opacity: 0.7 }}>
+                                        <p className="text-xs truncate mt-[3px] leading-snug" style={{ color: colors.textSecondary, opacity: 0.7 }}>
                                             {d.territory || d.address?.split(',').slice(1).join(',').trim() || d.address}
                                         </p>
                                     </div>
 
                                     {/* Sales + goal mini-bar */}
                                     <div className="flex flex-col items-end flex-shrink-0 gap-[5px] mr-0.5">
-                                        <span className="text-[14px] font-black tabular-nums leading-none" style={{ color: colors.textPrimary }}>
+                                        <span className="text-sm font-black tabular-nums leading-none" style={{ color: colors.textPrimary }}>
                                             {formatCurrency(d.sales)}
                                         </span>
                                         {pct !== null && (
@@ -142,7 +142,7 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, onNavigate }) =>
                                                     />
                                                 </div>
                                                 <span
-                                                    className="text-[11px] font-bold tabular-nums"
+                                                    className="text-[0.6875rem] font-bold tabular-nums"
                                                     style={{ color: gColor, minWidth: 30, textAlign: 'right' }}
                                                 >
                                                     {pct}%
@@ -164,8 +164,8 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, onNavigate }) =>
                         >
                             <Building2 className="w-6 h-6" style={{ color: colors.textSecondary, opacity: 0.35 }} />
                         </div>
-                        <p className="text-[15px] font-bold" style={{ color: colors.textPrimary }}>No dealers found</p>
-                        <p className="text-[13px]" style={{ color: colors.textSecondary, opacity: 0.7 }}>Try a different search term.</p>
+                        <p className="text-[0.9375rem] font-bold" style={{ color: colors.textPrimary }}>No dealers found</p>
+                        <p className="text-[0.8125rem]" style={{ color: colors.textSecondary, opacity: 0.7 }}>Try a different search term.</p>
                     </div>
                 )}
             </div>

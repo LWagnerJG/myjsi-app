@@ -24,7 +24,7 @@ export const MyBoardView = ({ theme, dark, savedImageIds, onToggleSaveImage, pos
       <Icon className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
       <span className="text-xs font-bold uppercase tracking-widest" style={{ color: theme.colors.textSecondary }}>{label}</span>
       {count > 0 && (
-        <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded-full" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)', color: theme.colors.textSecondary }}>{count}</span>
+        <span className="text-[0.6875rem] font-semibold px-1.5 py-0.5 rounded-full" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)', color: theme.colors.textSecondary }}>{count}</span>
       )}
     </div>
   );
@@ -75,7 +75,7 @@ export const MyBoardView = ({ theme, dark, savedImageIds, onToggleSaveImage, pos
           </div>
         </section>
       )}
-      <p className="text-[11px] text-center" style={{ color: theme.colors.textSecondary, opacity: 0.35 }}>
+      <p className="text-[0.6875rem] text-center" style={{ color: theme.colors.textSecondary, opacity: 0.35 }}>
         Your private activity log \u2014 only visible to you.
       </p>
     </div>

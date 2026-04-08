@@ -105,7 +105,7 @@ const BrandSelection = ({ theme, onSelect }) => {
                   {upcoming.length > 0 && (
                     <div className="absolute top-3 left-3.5">
                       <span
-                        className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide"
+                        className="px-2.5 py-1 rounded-full text-[0.625rem] font-bold uppercase tracking-wide"
                         style={{
                           backgroundColor: hasHero ? 'rgba(255,255,255,0.92)' : brand.accent,
                           color: hasHero ? '#353535' : '#fff',
@@ -119,7 +119,7 @@ const BrandSelection = ({ theme, onSelect }) => {
                     <div className="absolute bottom-3 left-3.5 flex items-center gap-1.5">
                       <Calendar className="w-3 h-3" style={{ color: hasHero ? 'rgba(255,255,255,0.8)' : brand.accent }} />
                       <span
-                        className="text-[11px] font-semibold drop-shadow-sm"
+                        className="text-[0.6875rem] font-semibold drop-shadow-sm"
                         style={{ color: hasHero ? '#fff' : brand.accent }}
                       >
                         Next: {formatDateRange(latestShow.startDate, latestShow.endDate)}
@@ -195,7 +195,7 @@ const BrandShowList = ({ theme, brandId, onSelectShow }) => {
       {/* Upcoming shows */}
       {upcoming.length > 0 && (
         <div className="space-y-3 mt-2">
-          <p className="text-[11px] font-semibold uppercase tracking-widest px-1" style={{ color: sub }}>
+          <p className="text-[0.6875rem] font-semibold uppercase tracking-widest px-1" style={{ color: sub }}>
             Upcoming
           </p>
           {upcoming.map((show) => (
@@ -213,7 +213,7 @@ const BrandShowList = ({ theme, brandId, onSelectShow }) => {
       {/* Past shows */}
       {past.length > 0 && (
         <div className="space-y-3 mt-5">
-          <p className="text-[11px] font-semibold uppercase tracking-widest px-1" style={{ color: sub }}>
+          <p className="text-[0.6875rem] font-semibold uppercase tracking-widest px-1" style={{ color: sub }}>
             Past Events
           </p>
           {past.map((show) => (
@@ -282,7 +282,7 @@ const ShowCard = ({ show, brand, theme, onClick }) => {
             </span>
             {isUpcoming && (
               <span
-                className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide"
+                className="px-2 py-0.5 rounded-full text-[0.5625rem] font-bold uppercase tracking-wide"
                 style={{ backgroundColor: brand.accent, color: '#fff' }}
               >
                 Upcoming
@@ -290,7 +290,7 @@ const ShowCard = ({ show, brand, theme, onClick }) => {
             )}
             {!isUpcoming && (
               <span
-                className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide"
+                className="px-2 py-0.5 rounded-full text-[0.5625rem] font-bold uppercase tracking-wide"
                 style={{
                   backgroundColor: hasImg ? 'rgba(255,255,255,0.2)' : theme.colors.subtle,
                   color: hasImg ? '#fff' : sub,
@@ -305,7 +305,7 @@ const ShowCard = ({ show, brand, theme, onClick }) => {
         {/* Card body */}
         <div className="px-4 py-3 space-y-1">
           <div className="flex items-center justify-between">
-            <h3 className="font-bold text-[15px]" style={{ color: text }}>
+            <h3 className="font-bold text-[0.9375rem]" style={{ color: text }}>
               {show.name}
             </h3>
             <ChevronRight
@@ -385,7 +385,7 @@ const ShowDetail = ({ theme, showId }) => {
         {/* Hero overlay content */}
         <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-6">
           <p
-            className="text-[11px] font-bold uppercase tracking-widest mb-1"
+            className="text-[0.6875rem] font-bold uppercase tracking-widest mb-1"
             style={{ color: hasHeroImg ? 'rgba(255,255,255,0.7)' : accent }}
           >
             {show.year} &middot; {show.location.city}
@@ -435,7 +435,7 @@ const ShowDetail = ({ theme, showId }) => {
               <Calendar className="w-5 h-5" style={{ color: accent }} />
             </div>
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: sub }}>
+              <p className="text-[0.6875rem] font-semibold uppercase tracking-wide" style={{ color: sub }}>
                 Dates
               </p>
               <p className="text-sm font-semibold" style={{ color: text }}>
@@ -452,7 +452,7 @@ const ShowDetail = ({ theme, showId }) => {
               <MapPin className="w-5 h-5" style={{ color: accent }} />
             </div>
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: sub }}>
+              <p className="text-[0.6875rem] font-semibold uppercase tracking-wide" style={{ color: sub }}>
                 Venue
               </p>
               <p className="text-sm font-semibold" style={{ color: text }}>
@@ -481,7 +481,7 @@ const ShowDetail = ({ theme, showId }) => {
         {show.highlights && show.highlights.length > 0 && (
           <div className="space-y-2.5">
             <h2
-              className="text-[11px] font-semibold uppercase tracking-widest px-1"
+              className="text-[0.6875rem] font-semibold uppercase tracking-widest px-1"
               style={{ color: sub }}
             >
               Highlights
@@ -505,7 +505,7 @@ const ShowDetail = ({ theme, showId }) => {
         {/* Schedule */}
         <div className="space-y-2.5">
           <h2
-            className="text-[11px] font-semibold uppercase tracking-widest px-1"
+            className="text-[0.6875rem] font-semibold uppercase tracking-widest px-1"
             style={{ color: sub }}
           >
             Schedule

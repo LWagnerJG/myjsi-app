@@ -24,8 +24,8 @@ export const SlidePreviewModal = ({ preview, theme, onClose, onDownload, onShare
                     {preview.pres.slides.map((s, i) => (
                         <div key={s.id} className="relative rounded-xl overflow-hidden" style={{ border: `1px solid ${theme.colors.border}` }}>
                             <img src={s.image} alt={s.caption} className="w-full h-28 object-cover" />
-                            <div className="px-2 py-1 text-[10px] bg-black/50 text-white absolute inset-x-0 bottom-0 truncate">{s.caption}</div>
-                            <div className="absolute top-1 left-1 w-5 h-5 rounded-full bg-black/45 text-white text-[11px] font-bold flex items-center justify-center">{i + 1}</div>
+                            <div className="px-2 py-1 text-[0.625rem] bg-black/50 text-white absolute inset-x-0 bottom-0 truncate">{s.caption}</div>
+                            <div className="absolute top-1 left-1 w-5 h-5 rounded-full bg-black/45 text-white text-[0.6875rem] font-bold flex items-center justify-center">{i + 1}</div>
                         </div>
                     ))}
                 </div>

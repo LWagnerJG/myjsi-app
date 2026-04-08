@@ -118,7 +118,7 @@ export const CommunityScreen = ({
             {(openCreateContentModal || openLibraryUploadModal) && (
               <button
                 onClick={viewMode === 'library' ? openLibraryUploadModal : openCreateContentModal}
-                className="h-10 px-4 rounded-full text-[13px] font-semibold transition-all active:scale-95 flex-shrink-0"
+                className="h-10 px-4 rounded-full text-[0.8125rem] font-semibold transition-all active:scale-95 flex-shrink-0"
                 style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
               >
                 {viewMode === 'library' ? '+ Upload' : '+ Post'}
@@ -151,7 +151,7 @@ export const CommunityScreen = ({
 
           {/* Feed */}
           {effectiveViewMode === 'feed' && !filteredContent.length && !focusedPost && (
-            <div className="text-center text-[13px] pt-16" style={{ color: theme.colors.textSecondary }}>No content found.</div>
+            <div className="text-center text-[0.8125rem] pt-16" style={{ color: theme.colors.textSecondary }}>No content found.</div>
           )}
 
           {effectiveViewMode === 'feed' && (focusedPost || filteredContent.length > 0) && (
@@ -199,11 +199,11 @@ export const CommunityScreen = ({
                 >
                   <img src={photo.src} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2">
-                    <p className="text-[11px] text-white line-clamp-2 font-medium">{photo.post.title || photo.post.text || photo.post.user?.name}</p>
+                    <p className="text-[0.6875rem] text-white line-clamp-2 font-medium">{photo.post.title || photo.post.text || photo.post.user?.name}</p>
                   </div>
                 </button>
               ))}
-              {!photoLibrary.length && <p className="col-span-full text-center text-[13px] pt-16" style={{ color: theme.colors.textSecondary }}>No photos found.</p>}
+              {!photoLibrary.length && <p className="col-span-full text-center text-[0.8125rem] pt-16" style={{ color: theme.colors.textSecondary }}>No photos found.</p>}
             </div>
           )}
         </div>

@@ -16,18 +16,18 @@ const CardHeader = ({ title, extra, theme, dark }) => (
         style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)'}` }}
     >
         <div className="flex items-center gap-2">
-            <span className="text-[13px] font-bold uppercase tracking-[0.07em]"
+            <span className="text-[0.8125rem] font-bold uppercase tracking-[0.07em]"
                 style={{ color: theme.colors.textSecondary, opacity: 0.65 }}>
                 {title}
             </span>
             {extra}
         </div>
         <div className="flex items-center gap-6">
-            <span className="text-[11px] font-bold uppercase tracking-[0.06em] min-w-[48px] text-right"
+            <span className="text-[0.6875rem] font-bold uppercase tracking-[0.06em] min-w-[48px] text-right"
                 style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>
                 Rep
             </span>
-            <span className="text-[11px] font-bold uppercase tracking-[0.06em] min-w-[40px] text-right"
+            <span className="text-[0.6875rem] font-bold uppercase tracking-[0.06em] min-w-[40px] text-right"
                 style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>
                 Spiff
             </span>
@@ -45,15 +45,15 @@ const RateRow = ({ rate, theme, dark, isLast }) => (
             borderBottom: isLast ? 'none' : `1px solid ${dark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.045)'}`,
         }}
     >
-        <span className="text-[15px] font-semibold tabular-nums" style={{ color: theme.colors.textPrimary }}>
+        <span className="text-[0.9375rem] font-semibold tabular-nums" style={{ color: theme.colors.textPrimary }}>
             {rate.discount}
         </span>
         <div className="flex items-center gap-6">
-            <span className="text-[15px] font-bold tabular-nums min-w-[48px] text-right"
+            <span className="text-[0.9375rem] font-bold tabular-nums min-w-[48px] text-right"
                 style={{ color: theme.colors.accent }}>
                 {rate.rep}
             </span>
-            <span className="text-[14px] tabular-nums min-w-[40px] text-right font-medium"
+            <span className="text-sm tabular-nums min-w-[40px] text-right font-medium"
                 style={{
                     color: rate.spiff === 'N/A' ? theme.colors.textSecondary : theme.colors.textPrimary,
                     opacity: rate.spiff === 'N/A' ? 0.35 : 0.6,
@@ -76,10 +76,10 @@ export const CommissionRatesScreen = ({ theme }) => {
 
                 {/* ── Page title ── */}
                 <div className="pt-5 pb-1 px-1">
-                    <h1 className="text-[22px] font-bold leading-tight" style={{ color: theme.colors.textPrimary }}>
+                    <h1 className="text-[1.375rem] font-bold leading-tight" style={{ color: theme.colors.textPrimary }}>
                         Commission Rates
                     </h1>
-                    <p className="text-[14px] mt-0.5" style={{ color: theme.colors.textSecondary }}>
+                    <p className="text-sm mt-0.5" style={{ color: theme.colors.textSecondary }}>
                         Current rep rates and spiff structure.
                     </p>
                 </div>
@@ -116,7 +116,7 @@ export const CommissionRatesScreen = ({ theme }) => {
                 <GlassCard theme={theme} className="rounded-[22px] overflow-hidden">
                     <div className="flex items-center justify-between px-5 py-3.5"
                         style={{ borderBottom: `1px solid ${subtleBorder}` }}>
-                        <span className="text-[13px] font-bold uppercase tracking-[0.07em]"
+                        <span className="text-[0.8125rem] font-bold uppercase tracking-[0.07em]"
                             style={{ color: theme.colors.textSecondary, opacity: 0.65 }}>
                             Commission Split
                         </span>
@@ -137,7 +137,7 @@ export const CommissionRatesScreen = ({ theme }) => {
                                     className="h-full flex items-center justify-center"
                                     style={{ width: `${seg.value}%`, backgroundColor: seg.color }}
                                 >
-                                    <span className="text-[13px] font-bold text-white" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.25)' }}>
+                                    <span className="text-[0.8125rem] font-bold text-white" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.25)' }}>
                                         {seg.value}%
                                     </span>
                                 </div>
@@ -151,10 +151,10 @@ export const CommissionRatesScreen = ({ theme }) => {
                             <div key={i} className="flex items-center gap-2">
                                 <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: seg.color }} />
                                 <div>
-                                    <span className="text-[14px] font-semibold" style={{ color: theme.colors.textPrimary }}>
+                                    <span className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>
                                         {seg.value}%
                                     </span>
-                                    <span className="text-[13px] font-medium ml-1.5" style={{ color: theme.colors.textSecondary }}>
+                                    <span className="text-[0.8125rem] font-medium ml-1.5" style={{ color: theme.colors.textSecondary }}>
                                         {seg.label}
                                     </span>
                                 </div>

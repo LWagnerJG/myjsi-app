@@ -20,10 +20,10 @@ export const MemberCard = ({ theme, user, expanded, onToggle, onChangeRole, onTo
                     <div className="flex items-center gap-3.5 min-w-0">
                         <Avatar firstName={user.firstName} lastName={user.lastName} size="md" />
                         <div className="min-w-0">
-                            <span className="text-[15px] font-semibold block truncate" style={{ color: theme.colors.textPrimary }}>
+                            <span className="text-[0.9375rem] font-semibold block truncate" style={{ color: theme.colors.textPrimary }}>
                                 {user.firstName} {user.lastName}
                             </span>
-                            <span className="text-[13px] block truncate mt-0.5" style={{ color: theme.colors.textSecondary }}>
+                            <span className="text-[0.8125rem] block truncate mt-0.5" style={{ color: theme.colors.textSecondary }}>
                                 {isDesktop ? user.email : roleLabel}
                             </span>
                         </div>
@@ -31,7 +31,7 @@ export const MemberCard = ({ theme, user, expanded, onToggle, onChangeRole, onTo
                     <div className="flex items-center gap-2 shrink-0">
                         {isDesktop && (
                             <span
-                                className="text-[12px] font-medium px-2.5 py-1 rounded-full"
+                                className="text-xs font-medium px-2.5 py-1 rounded-full"
                                 style={{
                                     backgroundColor: admin ? `${theme.colors.accent}12` : (dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.05)'),
                                     color: admin ? theme.colors.accent : theme.colors.textSecondary,
@@ -44,7 +44,7 @@ export const MemberCard = ({ theme, user, expanded, onToggle, onChangeRole, onTo
                             <button
                                 type="button"
                                 onClick={(e) => { e.stopPropagation(); onRequestDelete(); }}
-                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[12px] font-medium transition-opacity hover:opacity-70"
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-opacity hover:opacity-70"
                                 style={{ color: theme.colors.error, backgroundColor: `${theme.colors.error}0E` }}
                                 title="Remove user"
                             >
@@ -69,7 +69,7 @@ export const MemberCard = ({ theme, user, expanded, onToggle, onChangeRole, onTo
                             {user.email && (
                                 <a
                                     href={`mailto:${user.email}`}
-                                    className="inline-flex items-center gap-1.5 text-[13px] hover:opacity-70 transition-opacity"
+                                    className="inline-flex items-center gap-1.5 text-[0.8125rem] hover:opacity-70 transition-opacity"
                                     style={{ color: theme.colors.textSecondary }}
                                 >
                                     <Mail className="w-3.5 h-3.5" /> {user.email}
@@ -78,7 +78,7 @@ export const MemberCard = ({ theme, user, expanded, onToggle, onChangeRole, onTo
                             {user.phone && (
                                 <a
                                     href={`tel:${user.phone}`}
-                                    className="inline-flex items-center gap-1.5 text-[13px] hover:opacity-70 transition-opacity"
+                                    className="inline-flex items-center gap-1.5 text-[0.8125rem] hover:opacity-70 transition-opacity"
                                     style={{ color: theme.colors.textSecondary }}
                                 >
                                     <Phone className="w-3.5 h-3.5" /> {user.phone}
@@ -88,14 +88,14 @@ export const MemberCard = ({ theme, user, expanded, onToggle, onChangeRole, onTo
 
                         {/* Role */}
                         <div className="space-y-2">
-                            <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color: theme.colors.textSecondary, opacity: 0.55 }}>Role</p>
+                            <p className="text-[0.6875rem] font-bold uppercase tracking-wider" style={{ color: theme.colors.textSecondary, opacity: 0.55 }}>Role</p>
                             <RoleDropdown value={user.role} roles={REP_ROLES} onChange={onChangeRole} theme={theme} />
                         </div>
 
                         {/* Permissions */}
                         {!admin ? (
                             <div className="space-y-2">
-                                <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color: theme.colors.textSecondary, opacity: 0.55 }}>Permissions</p>
+                                <p className="text-[0.6875rem] font-bold uppercase tracking-wider" style={{ color: theme.colors.textSecondary, opacity: 0.55 }}>Permissions</p>
                                 <div className="flex flex-wrap gap-1.5">
                                     {Object.entries(PERMISSION_LABELS).map(([key, label]) => (
                                         <PermToggle
@@ -110,7 +110,7 @@ export const MemberCard = ({ theme, user, expanded, onToggle, onChangeRole, onTo
                                 </div>
                             </div>
                         ) : (
-                            <p className="text-[13px] flex items-center gap-1.5" style={{ color: theme.colors.textSecondary }}>
+                            <p className="text-[0.8125rem] flex items-center gap-1.5" style={{ color: theme.colors.textSecondary }}>
                                 <Shield className="w-3.5 h-3.5 shrink-0" style={{ color: theme.colors.accent }} />
                                 Full access to all features.
                             </p>
@@ -121,7 +121,7 @@ export const MemberCard = ({ theme, user, expanded, onToggle, onChangeRole, onTo
                             <div className="flex justify-end pt-1">
                                 <button
                                     onClick={onSave}
-                                    className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[13px] font-semibold transition-all active:scale-95"
+                                    className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[0.8125rem] font-semibold transition-all active:scale-95"
                                     style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
                                 >
                                     <Check className="w-3.5 h-3.5" /> Save Changes

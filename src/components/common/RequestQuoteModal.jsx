@@ -154,7 +154,7 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
     const inputBase = {
         height: controlHeight, borderRadius: controlRadius,
         background: colors.fieldBg, border: `1px solid ${colors.fieldBorder}`,
-        color: colors.textPrimary, padding: '0 14px', fontSize: 13, fontWeight: 500,
+        color: colors.textPrimary, padding: '0 14px', fontSize: "0.8125rem", fontWeight: 500,
         outline: 'none', width: '100%',
     };
 
@@ -174,7 +174,7 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
         selectedShadow: 'none',
     };
 
-    const labelCls = { color: colors.textSecondary, fontSize: 10, fontWeight: 700, marginBottom: 6, display: 'block', textTransform: 'uppercase', letterSpacing: '0.8px' };
+    const labelCls = { color: colors.textSecondary, fontSize: "0.625rem", fontWeight: 700, marginBottom: 6, display: 'block', textTransform: 'uppercase', letterSpacing: '0.8px' };
 
     return ReactDOM.createPortal(
         <AnimatePresence>
@@ -498,14 +498,14 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                     <div className="flex items-center justify-end gap-3 px-7 py-4"
                         style={{ borderTop: `1px solid ${colors.border}`, backgroundColor: colors.subtle }}>
                         <button type="button" onClick={onClose}
-                            className="px-5 h-11 rounded-full text-[13px] font-semibold transition-colors"
+                            className="px-5 h-11 rounded-full text-[0.8125rem] font-semibold transition-colors"
                             style={{ color: colors.textPrimary }}
                             onMouseEnter={e => e.currentTarget.style.backgroundColor = colors.hoverBg}
                             onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
                             Cancel
                         </button>
                         <button type="submit" disabled={isSubmitting}
-                            className="px-6 h-11 rounded-full text-[13px] font-bold transition-all active:scale-[0.98] disabled:opacity-60"
+                            className="px-6 h-11 rounded-full text-[0.8125rem] font-bold transition-all active:scale-[0.98] disabled:opacity-60"
                             style={{ backgroundColor: colors.accent, color: isDark ? '#1a1a1a' : '#FFFFFF' }}>
                             {isSubmitting ? (
                                 <span className="flex items-center gap-2">

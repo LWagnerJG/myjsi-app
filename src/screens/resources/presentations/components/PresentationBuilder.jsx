@@ -63,11 +63,11 @@ export const PresentationBuilder = ({ theme, onDeckGenerated }) => {
                         <Sparkles className="w-4.5 h-4.5" style={{ color: theme.colors.accentText || (isDark ? '#1A1A1A' : '#FFF') }} />
                     </div>
                     <div>
-                        <p className="font-bold text-[15px]" style={{ color: theme.colors.textPrimary }}>Presentation Builder</p>
+                        <p className="font-bold text-[0.9375rem]" style={{ color: theme.colors.textPrimary }}>Presentation Builder</p>
                         <p className="text-xs" style={{ color: theme.colors.textSecondary }}>AI-powered · exports to PPTX or PDF</p>
                     </div>
                 </div>
-                <p className="text-[13px] leading-relaxed pt-1" style={{ color: theme.colors.textSecondary }}>
+                <p className="text-[0.8125rem] leading-relaxed pt-1" style={{ color: theme.colors.textSecondary }}>
                     Describe what you need — target audience, products, message — and JSI's AI engine will generate a branded deck ready to download or save to My Decks.
                 </p>
             </div>
@@ -142,7 +142,7 @@ export const PresentationBuilder = ({ theme, onDeckGenerated }) => {
                         <button
                             onClick={handleGenerate}
                             disabled={!prompt.trim() || prompt.length > 500}
-                            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-full font-semibold text-[15px] transition-all active:scale-[0.98] disabled:opacity-40"
+                            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-full font-semibold text-[0.9375rem] transition-all active:scale-[0.98] disabled:opacity-40"
                             style={{ background: theme.colors.accent, color: theme.colors.accentText || (isDark ? '#1A1A1A' : '#FFFFFF') }}>
                             <Sparkles className="w-4.5 h-4.5" />
                             Generate Presentation
@@ -162,7 +162,7 @@ export const PresentationBuilder = ({ theme, onDeckGenerated }) => {
                         </div>
                         <div className="space-y-1.5">
                             <p className="font-bold text-base" style={{ color: theme.colors.textPrimary }}>Building your deck…</p>
-                            <p className="text-[13px] leading-relaxed max-w-[260px]" style={{ color: theme.colors.textSecondary }}>
+                            <p className="text-[0.8125rem] leading-relaxed max-w-[260px]" style={{ color: theme.colors.textSecondary }}>
                                 JSI's AI is crafting slides, selecting content & applying brand styles.
                             </p>
                         </div>
@@ -178,7 +178,7 @@ export const PresentationBuilder = ({ theme, onDeckGenerated }) => {
                                 <Check className="w-3.5 h-3.5" style={{ color: theme.colors.accent }} />
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="text-[13px] font-semibold" style={{ color: theme.colors.textPrimary }}>Deck ready</p>
+                                <p className="text-[0.8125rem] font-semibold" style={{ color: theme.colors.textPrimary }}>Deck ready</p>
                                 <p className="text-xs truncate" style={{ color: theme.colors.textSecondary }}>{generatedDeck.slideCount} slides · {generatedDeck.format.toUpperCase()}</p>
                             </div>
                         </div>
@@ -198,12 +198,12 @@ export const PresentationBuilder = ({ theme, onDeckGenerated }) => {
                                 </div>
                                 <div className="flex gap-2">
                                     <button onClick={handleDownload}
-                                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-[13px] font-semibold transition-all active:scale-[0.97]"
+                                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-[0.8125rem] font-semibold transition-all active:scale-[0.97]"
                                         style={{ background: theme.colors.accent, color: theme.colors.accentText || (isDark ? '#1A1A1A' : '#FFF') }}>
                                         <Download className="w-3.5 h-3.5" /> Download {generatedDeck.format.toUpperCase()}
                                     </button>
                                     <button onClick={handleSaveToMyDecks}
-                                        className="flex items-center gap-1.5 px-4 py-2.5 rounded-full text-[13px] font-semibold transition-all active:scale-[0.97]"
+                                        className="flex items-center gap-1.5 px-4 py-2.5 rounded-full text-[0.8125rem] font-semibold transition-all active:scale-[0.97]"
                                         style={{ border: `1.5px solid ${borderColor}`, color: theme.colors.textPrimary }}>
                                         <FolderOpen className="w-3.5 h-3.5" /> Save
                                     </button>
@@ -212,7 +212,7 @@ export const PresentationBuilder = ({ theme, onDeckGenerated }) => {
                         </div>
 
                         <button onClick={handleReset}
-                            className="w-full py-3 rounded-full text-[13px] font-semibold transition-all active:scale-[0.97]"
+                            className="w-full py-3 rounded-full text-[0.8125rem] font-semibold transition-all active:scale-[0.97]"
                             style={{ border: `1.5px solid ${borderColor}`, color: theme.colors.textSecondary }}>
                             Build Another
                         </button>

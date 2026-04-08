@@ -82,7 +82,7 @@ const SectionHeader = ({ icon: Icon, title, subtitle, theme }) => (
         <Icon className="w-4 h-4" style={{ color: theme.colors.accent }} />
       </div>
       <div>
-        <h2 className="text-[15px] font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>{title}</h2>
+        <h2 className="text-[0.9375rem] font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>{title}</h2>
         {subtitle && <p className="text-xs mt-0.5" style={{ color: theme.colors.textSecondary }}>{subtitle}</p>}
       </div>
     </div>
@@ -205,7 +205,7 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
             <div className="p-4 space-y-3.5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: theme.colors.textSecondary }}>First Name</label>
+                  <label className="block text-[0.6875rem] font-semibold uppercase tracking-wider mb-1" style={{ color: theme.colors.textSecondary }}>First Name</label>
                   <input
                     value={firstName}
                     onChange={e => {
@@ -219,7 +219,7 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: theme.colors.textSecondary }}>Last Name</label>
+                  <label className="block text-[0.6875rem] font-semibold uppercase tracking-wider mb-1" style={{ color: theme.colors.textSecondary }}>Last Name</label>
                   <input
                     value={lastName}
                     onChange={e => {
@@ -234,7 +234,7 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
                 </div>
               </div>
               <div>
-                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: theme.colors.textSecondary }}>Street Address</label>
+                <label className="block text-[0.6875rem] font-semibold uppercase tracking-wider mb-1" style={{ color: theme.colors.textSecondary }}>Street Address</label>
                 <div className="relative">
                   <input
                     value={streetAddress}
@@ -279,7 +279,7 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
                           {address}
                         </button>
                       ))}
-                      <div className="px-3 py-1.5 text-[10px] border-t" style={{ color: theme.colors.textSecondary, borderColor: theme.colors.border }}>
+                      <div className="px-3 py-1.5 text-[0.625rem] border-t" style={{ color: theme.colors.textSecondary, borderColor: theme.colors.border }}>
                         Search powered by OpenStreetMap
                       </div>
                     </div>
@@ -287,7 +287,7 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
                 </div>
               </div>
               <div>
-                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: theme.colors.textSecondary }}>T-Shirt Size</label>
+                <label className="block text-[0.6875rem] font-semibold uppercase tracking-wider mb-1" style={{ color: theme.colors.textSecondary }}>T-Shirt Size</label>
                 <Select value={shirtSize} onChange={(s) => { setShirtSize(s); setUserSettings?.(prev => ({ ...prev, shirtSize: s })); }} options={['XS','S','M','L','XL','XXL'].map(s=>({value:s,label:s}))} theme={theme} />
               </div>
             </div>
@@ -301,7 +301,7 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
                 <div key={group.label}>
                   {gi > 0 && <div className="mx-3 my-1" style={{ borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)'}` }} />}
                   <div className="px-3 pt-3 pb-1">
-                    <span className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>{group.label}</span>
+                    <span className="text-[0.625rem] font-bold uppercase tracking-[0.12em]" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>{group.label}</span>
                   </div>
                   {group.keys.map((k) => (
                     <div key={k}>
@@ -333,7 +333,7 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
                                 );
                               })}
                             </div>
-                            <div className="text-[11px] mt-3 font-medium" style={{ color: theme.colors.textSecondary }}>
+                            <div className="text-[0.6875rem] mt-3 font-medium" style={{ color: theme.colors.textSecondary }}>
                               {leadTimeFavorites.length} selected
                             </div>
                           </div>
@@ -356,7 +356,7 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
             </div>
           </GlassCard>
 
-          <div className="pt-1 pb-4 text-center text-[11px] font-medium" style={{ color: theme.colors.textSecondary }}>v0.9.4</div>
+          <div className="pt-1 pb-4 text-center text-[0.6875rem] font-medium" style={{ color: theme.colors.textSecondary }}>v0.9.4</div>
         </div>
       </div>
     </div>

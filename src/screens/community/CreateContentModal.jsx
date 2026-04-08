@@ -118,7 +118,7 @@ export const CreateContentModal = ({ show, onClose, theme, onCreatePost }) => {
                             key={m}
                             type="button"
                             onClick={() => setMode(m)}
-                            className="h-8 rounded-full text-[13px] font-semibold transition-all"
+                            className="h-8 rounded-full text-[0.8125rem] font-semibold transition-all"
                             style={{
                                 background: mode === m ? theme.colors.surface : 'transparent',
                                 color: mode === m ? theme.colors.textPrimary : theme.colors.textSecondary,
@@ -184,7 +184,7 @@ export const CreateContentModal = ({ show, onClose, theme, onCreatePost }) => {
                             <button
                                 type="button"
                                 onClick={() => setShowMoreOptions(true)}
-                                className="text-[13px] font-semibold"
+                                className="text-[0.8125rem] font-semibold"
                                 style={{ color: theme.colors.accent }}
                             >
                                 + Add more options
@@ -211,7 +211,7 @@ export const CreateContentModal = ({ show, onClose, theme, onCreatePost }) => {
                     )}
                     {/* ── Add images ── */}
                     <button type="button" onClick={() => fileInputRef.current?.click()}
-                      className="w-full flex items-center justify-center gap-2 h-11 rounded-xl text-[13px] font-medium transition-colors"
+                      className="w-full flex items-center justify-center gap-2 h-11 rounded-xl text-[0.8125rem] font-medium transition-colors"
                       style={{ background: theme.colors.subtle, color: theme.colors.textSecondary }}
                     >
                       <ImageIcon className="w-4 h-4" />Add Images
@@ -223,11 +223,11 @@ export const CreateContentModal = ({ show, onClose, theme, onCreatePost }) => {
                 {/* ── Actions ── */}
                 <div className="flex gap-3 pt-1">
                   <button type="button" onClick={() => { reset(); onClose?.(); }}
-                    className="flex-1 h-11 rounded-full text-[13px] font-semibold transition-colors"
+                    className="flex-1 h-11 rounded-full text-[0.8125rem] font-semibold transition-colors"
                     style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }}
                   >Cancel</button>
                   <button type="submit" disabled={!canSubmit}
-                    className="flex-1 h-11 rounded-full text-[13px] font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="flex-1 h-11 rounded-full text-[0.8125rem] font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
                   >{mode === 'poll' ? 'Create Poll' : 'Post'}</button>
                 </div>

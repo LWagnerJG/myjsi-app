@@ -71,7 +71,7 @@ export const ChannelAwareFeed = ({
       <ChannelChips theme={theme} dark={dark} onSelect={onSelectSubreddit} activeId={null} />
 
       {!hasAnything ? (
-        <div className="text-center text-[13px] pt-16" style={{ color: theme.colors.textSecondary }}>No content found.</div>
+        <div className="text-center text-[0.8125rem] pt-16" style={{ color: theme.colors.textSecondary }}>No content found.</div>
       ) : (
         <>
           {trendingFeed.length > 0 && (

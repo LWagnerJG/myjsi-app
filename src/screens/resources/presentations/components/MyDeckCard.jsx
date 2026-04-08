@@ -18,12 +18,12 @@ export const MyDeckCard = ({ deck, theme, onDownload, onShare, onDelete }) => {
                     : <div className="w-full h-full flex items-center justify-center"><LayoutGrid className="w-8 h-8 opacity-20" style={{ color: theme.colors.textPrimary }} /></div>
                 }
                 {isGenerated && (
-                    <span className="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold"
+                    <span className="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.6875rem] font-semibold"
                         style={{ background: `${theme.colors.accent}CC`, color: theme.colors.accentText || '#FFF' }}>
                         <Sparkles className="w-2.5 h-2.5" /> AI Generated
                     </span>
                 )}
-                <span className="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[11px] font-semibold uppercase"
+                <span className="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[0.6875rem] font-semibold uppercase"
                     style={{ background: 'rgba(0,0,0,0.45)', color: '#FFF' }}>
                     {deck.format}
                 </span>

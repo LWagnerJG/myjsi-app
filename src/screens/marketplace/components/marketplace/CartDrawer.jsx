@@ -69,7 +69,7 @@ export const CartDrawer = ({ cart, balance, onUpdateQty, onRemove, onCheckout, t
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-semibold truncate text-xs" style={{ color: theme.colors.textPrimary }}>{item.name}</p>
-                            <p className="text-[11px]" style={{ color: theme.colors.textSecondary }}>
+                            <p className="text-[0.6875rem]" style={{ color: theme.colors.textSecondary }}>
                               {item.size && `Size ${item.size} · `}{formatElliottBucks(item.price)}
                             </p>
                           </div>
@@ -117,7 +117,7 @@ export const CartDrawer = ({ cart, balance, onUpdateQty, onRemove, onCheckout, t
               <button
                 disabled={!canAfford || cart.length === 0}
                 onClick={onCheckout}
-                className="w-full px-5 py-3.5 rounded-full text-[13px] font-bold transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98]"
+                className="w-full px-5 py-3.5 rounded-full text-[0.8125rem] font-bold transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98]"
                 style={{
                   backgroundColor: canAfford ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.10)' : theme.colors.border),
                   color: canAfford ? theme.colors.accentText : theme.colors.textSecondary,

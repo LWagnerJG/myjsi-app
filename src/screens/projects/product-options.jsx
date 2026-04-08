@@ -73,7 +73,7 @@ export const VisionOptions = ({ theme, product, productIndex, onUpdate }) => {
     <div className="space-y-3 mt-3 pt-3" style={{ borderTop: `1px solid ${theme.colors.border}` }}>
       {/* glass doors */}
       <div className="flex items-center justify-between">
-        <span className="text-[13px] font-medium" style={{ color: theme.colors.textPrimary }}>Glass Doors</span>
+        <span className="text-[0.8125rem] font-medium" style={{ color: theme.colors.textPrimary }}>Glass Doors</span>
         <button type="button" onClick={() => onUpdate(productIndex, 'hasGlassDoors', !product.hasGlassDoors)}
           className="w-5 h-5 rounded flex items-center justify-center border transition-all"
           style={{
@@ -103,7 +103,7 @@ export const VisionOptions = ({ theme, product, productIndex, onUpdate }) => {
 /* ── Knox options ────────────────────────────────────────────── */
 export const KnoxOptions = ({ theme, product, productIndex, onUpdate }) => (
   <div className="mt-3 pt-3 flex items-center justify-between" style={{ borderTop: `1px solid ${theme.colors.border}` }}>
-    <span className="text-[13px] font-medium" style={{ color: theme.colors.textPrimary }}>Wood Back</span>
+    <span className="text-[0.8125rem] font-medium" style={{ color: theme.colors.textPrimary }}>Wood Back</span>
     <button type="button" onClick={() => onUpdate(productIndex, 'hasWoodBack', !product.hasWoodBack)}
       className="w-5 h-5 rounded flex items-center justify-center border transition-all"
       style={{

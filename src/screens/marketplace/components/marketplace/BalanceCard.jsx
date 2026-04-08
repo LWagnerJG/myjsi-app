@@ -15,7 +15,7 @@ export const BalanceCard = ({
       <div className="space-y-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: theme.colors.textSecondary }}>
+            <p className="text-[0.625rem] font-bold uppercase tracking-[0.18em]" style={{ color: theme.colors.textSecondary }}>
               {eyebrow}
             </p>
             <h2 className="text-lg font-semibold mt-2" style={{ color: theme.colors.textPrimary }}>
@@ -29,7 +29,7 @@ export const BalanceCard = ({
           </div>
 
           <div className="rounded-2xl px-4 py-3 shrink-0" style={{ backgroundColor: theme.colors.subtle }}>
-            <p className="text-[10px] font-bold uppercase tracking-[0.16em]" style={{ color: theme.colors.textSecondary }}>
+            <p className="text-[0.625rem] font-bold uppercase tracking-[0.16em]" style={{ color: theme.colors.textSecondary }}>
               Balance
             </p>
             <p className="text-2xl font-semibold tracking-[-0.03em] mt-1" style={{ color: theme.colors.textPrimary }}>
@@ -46,7 +46,7 @@ export const BalanceCard = ({
                 className="rounded-2xl px-4 py-3"
                 style={{ backgroundColor: theme.colors.subtle }}
               >
-                <p className="text-[10px] font-semibold uppercase tracking-[0.16em]" style={{ color: theme.colors.textSecondary }}>
+                <p className="text-[0.625rem] font-semibold uppercase tracking-[0.16em]" style={{ color: theme.colors.textSecondary }}>
                   {stat.label}
                 </p>
                 <p className="text-base sm:text-lg font-semibold mt-1" style={{ color: theme.colors.textPrimary }}>

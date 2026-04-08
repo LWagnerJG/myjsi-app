@@ -31,7 +31,7 @@ const CardHeader = ({ children, right, dark, colors }) => (
         style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)'}` }}
     >
         <span
-            className="text-[12px] font-bold uppercase tracking-[0.07em]"
+            className="text-xs font-bold uppercase tracking-[0.07em]"
             style={{ color: colors.textSecondary, opacity: 0.6 }}
         >
             {children}
@@ -194,17 +194,17 @@ export const DealerDetailScreen = ({
                         className="w-12 h-12 rounded-2xl flex-shrink-0 flex items-center justify-center"
                         style={{ backgroundColor: colors.accent }}
                     >
-                        <span className="text-[15px] font-black" style={{ color: colors.accentText }}>
+                        <span className="text-[0.9375rem] font-black" style={{ color: colors.accentText }}>
                             {initials(dealer.name)}
                         </span>
                     </div>
                     <div className="flex-1 min-w-0 pt-0.5">
-                        <h1 className="text-[21px] font-black tracking-tight leading-tight truncate" style={{ color: colors.textPrimary }}>
+                        <h1 className="text-[1.3125rem] font-black tracking-tight leading-tight truncate" style={{ color: colors.textPrimary }}>
                             {dealer.name}
                         </h1>
                         <div className="flex items-center gap-3 mt-1 flex-wrap">
                             {dealer.address && (
-                                <span className="flex items-center gap-1 text-[12px]" style={{ color: colors.textSecondary, opacity: 0.75 }}>
+                                <span className="flex items-center gap-1 text-xs" style={{ color: colors.textSecondary, opacity: 0.75 }}>
                                     <MapPin className="w-3 h-3 flex-shrink-0" style={{ color: colors.accent, opacity: 0.55 }} />
                                     <span className="truncate">{dealer.address}</span>
                                 </span>
@@ -212,7 +212,7 @@ export const DealerDetailScreen = ({
                             {dealer.phone && (
                                 <a
                                     href={`tel:${dealer.phone}`}
-                                    className="flex items-center gap-1 text-[12px] font-semibold flex-shrink-0"
+                                    className="flex items-center gap-1 text-xs font-semibold flex-shrink-0"
                                     style={{ color: colors.accent }}
                                 >
                                     <Phone className="w-3 h-3" />{dealer.phone}
@@ -235,12 +235,12 @@ export const DealerDetailScreen = ({
                             style={{ borderRight: `1px solid ${subtleBorder}` }}
                         >
                             <p
-                                className="text-[10px] font-bold uppercase tracking-[0.07em] mb-1.5"
+                                className="text-[0.625rem] font-bold uppercase tracking-[0.07em] mb-1.5"
                                 style={{ color: colors.textSecondary, opacity: 0.5 }}
                             >
                                 YTD Sales
                             </p>
-                            <p className="text-[22px] font-black tracking-tight leading-none" style={{ color: colors.textPrimary }}>
+                            <p className="text-[1.375rem] font-black tracking-tight leading-none" style={{ color: colors.textPrimary }}>
                                 {fmtK(dealer.sales)}
                             </p>
                         </div>
@@ -251,12 +251,12 @@ export const DealerDetailScreen = ({
                             style={{ borderRight: `1px solid ${subtleBorder}` }}
                         >
                             <p
-                                className="text-[10px] font-bold uppercase tracking-[0.07em] mb-1.5"
+                                className="text-[0.625rem] font-bold uppercase tracking-[0.07em] mb-1.5"
                                 style={{ color: colors.textSecondary, opacity: 0.5 }}
                             >
                                 Bookings
                             </p>
-                            <p className="text-[22px] font-black tracking-tight leading-none" style={{ color: colors.textPrimary }}>
+                            <p className="text-[1.375rem] font-black tracking-tight leading-none" style={{ color: colors.textPrimary }}>
                                 {fmtK(dealer.bookings)}
                             </p>
                         </div>
@@ -267,13 +267,13 @@ export const DealerDetailScreen = ({
                             onClick={() => setShowDiscountPicker(true)}
                         >
                             <p
-                                className="text-[10px] font-bold uppercase tracking-[0.07em] mb-1.5"
+                                className="text-[0.625rem] font-bold uppercase tracking-[0.07em] mb-1.5"
                                 style={{ color: colors.textSecondary, opacity: 0.5 }}
                             >
                                 Discount
                             </p>
                             <div className="flex items-center gap-1">
-                                <p className="text-[22px] font-black tracking-tight leading-none" style={{ color: colors.accent }}>
+                                <p className="text-[1.375rem] font-black tracking-tight leading-none" style={{ color: colors.accent }}>
                                     {discountShort}
                                 </p>
                                 <ChevronDown className="w-3.5 h-3.5 flex-shrink-0 mt-1" style={{ color: colors.accent, opacity: 0.45 }} />
@@ -285,7 +285,7 @@ export const DealerDetailScreen = ({
                 {/* ── Goal Progress ── */}
                 <GlassCard theme={theme} className="rounded-[22px] overflow-hidden p-0">
                     <CardHeader dark={isDark} colors={colors} right={
-                        <span className="text-[12px] font-semibold">
+                        <span className="text-xs font-semibold">
                             {fmt(dealer.sales)} of {fmt(dealer.ytdGoal)}
                         </span>
                     }>
@@ -295,12 +295,12 @@ export const DealerDetailScreen = ({
                         <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-1.5">
                                 <Target className="w-4 h-4" style={{ color: gColor }} />
-                                <span className="text-[13px] font-semibold" style={{ color: colors.textSecondary }}>
+                                <span className="text-[0.8125rem] font-semibold" style={{ color: colors.textSecondary }}>
                                     YTD Sales
                                 </span>
                             </div>
                             <span
-                                className="text-[18px] font-black tabular-nums px-3 py-0.5 rounded-full"
+                                className="text-lg font-black tabular-nums px-3 py-0.5 rounded-full"
                                 style={{ backgroundColor: gColor + '1A', color: gColor }}
                             >
                                 {goalPct}%
@@ -320,7 +320,7 @@ export const DealerDetailScreen = ({
                             <div className="mt-4 pt-4" style={{ borderTop: `1px solid ${subtleBorder}` }}>
                                 <div className="flex items-center justify-between mb-2">
                                     <div className="flex items-center gap-1.5">
-                                        <span className="text-[12px] font-semibold" style={{ color: colors.textSecondary, opacity: 0.65 }}>
+                                        <span className="text-xs font-semibold" style={{ color: colors.textSecondary, opacity: 0.65 }}>
                                             Rebatable
                                         </span>
                                         <button
@@ -330,13 +330,13 @@ export const DealerDetailScreen = ({
                                             <Info className="w-3.5 h-3.5" />
                                         </button>
                                     </div>
-                                    <span className="text-[14px] font-black tabular-nums" style={{ color: rColor }}>
+                                    <span className="text-sm font-black tabular-nums" style={{ color: rColor }}>
                                         {rebatePct}%
                                     </span>
                                 </div>
                                 {showRebateInfo && (
                                     <p
-                                        className="text-[12px] leading-relaxed mb-3 px-3 py-2.5 rounded-xl"
+                                        className="text-xs leading-relaxed mb-3 px-3 py-2.5 rounded-xl"
                                         style={{
                                             backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(91,123,140,0.05)',
                                             color: colors.textSecondary,
@@ -355,10 +355,10 @@ export const DealerDetailScreen = ({
                                     />
                                 </div>
                                 <div className="flex justify-between mt-1.5">
-                                    <span className="text-[11px]" style={{ color: colors.textSecondary, opacity: 0.5 }}>
+                                    <span className="text-[0.6875rem]" style={{ color: colors.textSecondary, opacity: 0.5 }}>
                                         {fmtK(dealer.rebatableSales)} sales
                                     </span>
-                                    <span className="text-[11px]" style={{ color: colors.textSecondary, opacity: 0.5 }}>
+                                    <span className="text-[0.6875rem]" style={{ color: colors.textSecondary, opacity: 0.5 }}>
                                         {fmtK(dealer.rebatableGoal)} goal
                                     </span>
                                 </div>
@@ -371,7 +371,7 @@ export const DealerDetailScreen = ({
                 {dealer.monthlySales?.length > 0 && (
                     <GlassCard theme={theme} className="rounded-[22px] overflow-hidden p-0">
                         <CardHeader dark={isDark} colors={colors} right={
-                            <span className="text-[12px] font-bold" style={{ color: colors.accent }}>
+                            <span className="text-xs font-bold" style={{ color: colors.accent }}>
                                 {fmtK(dealer.monthlySales[dealer.monthlySales.length - 1]?.amount || 0)} last mo
                             </span>
                         }>
@@ -396,8 +396,8 @@ export const DealerDetailScreen = ({
                                         return (
                                             <div key={v.label} className="flex items-center gap-2">
                                                 <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: v.color }} />
-                                                <span className="text-[12px] font-semibold flex-1 truncate" style={{ color: colors.textPrimary }}>{v.label}</span>
-                                                <span className="text-[12px] font-bold flex-shrink-0 tabular-nums" style={{ color: colors.textSecondary }}>{pct}%</span>
+                                                <span className="text-xs font-semibold flex-1 truncate" style={{ color: colors.textPrimary }}>{v.label}</span>
+                                                <span className="text-xs font-bold flex-shrink-0 tabular-nums" style={{ color: colors.textSecondary }}>{pct}%</span>
                                             </div>
                                         );
                                     })}
@@ -409,7 +409,7 @@ export const DealerDetailScreen = ({
                     {dealer.seriesSales?.length > 0 && (
                         <GlassCard theme={theme} className="rounded-[22px] overflow-hidden p-0">
                             <CardHeader dark={isDark} colors={colors} right={
-                                <span className="text-[11px] font-bold" style={{ opacity: 0.45 }}>
+                                <span className="text-[0.6875rem] font-bold" style={{ opacity: 0.45 }}>
                                     {dealer.seriesSales.length} series
                                 </span>
                             }>
@@ -450,20 +450,20 @@ export const DealerDetailScreen = ({
                                     }}
                                 >
                                     <div className="flex-1 min-w-0">
-                                        <p className="text-[14px] font-semibold truncate leading-snug" style={{ color: colors.textPrimary }}>
+                                        <p className="text-sm font-semibold truncate leading-snug" style={{ color: colors.textPrimary }}>
                                             {proj.name}
                                         </p>
-                                        <p className="text-[12px] mt-0.5 leading-snug" style={{ color: colors.textSecondary, opacity: 0.55 }}>
+                                        <p className="text-xs mt-0.5 leading-snug" style={{ color: colors.textSecondary, opacity: 0.55 }}>
                                             {new Date(proj.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                                         </p>
                                     </div>
                                     <span
-                                        className="px-2 py-0.5 rounded-md text-[11px] font-bold flex-shrink-0"
+                                        className="px-2 py-0.5 rounded-md text-[0.6875rem] font-bold flex-shrink-0"
                                         style={{ backgroundColor: statusCfg.bg, color: statusCfg.color }}
                                     >
                                         {statusCfg.label || proj.status}
                                     </span>
-                                    <span className="text-[14px] font-black flex-shrink-0 tabular-nums" style={{ color: colors.textPrimary }}>
+                                    <span className="text-sm font-black flex-shrink-0 tabular-nums" style={{ color: colors.textPrimary }}>
                                         {fmtK(proj.amount)}
                                     </span>
                                 </div>
@@ -487,17 +487,17 @@ export const DealerDetailScreen = ({
                                 }}
                             >
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-[14px] font-semibold truncate leading-snug" style={{ color: colors.textPrimary }}>
+                                    <p className="text-sm font-semibold truncate leading-snug" style={{ color: colors.textPrimary }}>
                                         {rep.name}
                                     </p>
                                     <span
-                                        className="text-[10px] font-bold uppercase tracking-wide"
+                                        className="text-[0.625rem] font-bold uppercase tracking-wide"
                                         style={{ color: rep.type === 'sales' ? '#4A7C59' : '#5B7B8C' }}
                                     >
                                         {rep.type}
                                     </span>
                                 </div>
-                                <span className="text-[15px] font-black flex-shrink-0 tabular-nums" style={{ color: colors.accent }}>
+                                <span className="text-[0.9375rem] font-black flex-shrink-0 tabular-nums" style={{ color: colors.accent }}>
                                     {fmt(rep.ytd)}
                                 </span>
                             </div>
@@ -532,7 +532,7 @@ export const DealerDetailScreen = ({
                             return (
                                 <div key={section.key} className="mt-3 first:mt-1">
                                     <p
-                                        className="text-[10px] font-bold uppercase tracking-[0.08em] mb-2"
+                                        className="text-[0.625rem] font-bold uppercase tracking-[0.08em] mb-2"
                                         style={{ color: colors.textSecondary, opacity: 0.4 }}
                                     >
                                         {section.title}
@@ -547,7 +547,7 @@ export const DealerDetailScreen = ({
                                         >
                                             {/* Avatar */}
                                             <div
-                                                className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-[11px] font-black"
+                                                className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-[0.6875rem] font-black"
                                                 style={{
                                                     backgroundColor: m.status === 'pending'
                                                         ? 'rgba(196,149,106,0.12)'
@@ -560,18 +560,18 @@ export const DealerDetailScreen = ({
 
                                             {/* Name + status */}
                                             <div className="flex-1 min-w-0">
-                                                <p className="text-[14px] font-semibold truncate leading-snug" style={{ color: colors.textPrimary }}>
+                                                <p className="text-sm font-semibold truncate leading-snug" style={{ color: colors.textPrimary }}>
                                                     {m.name}
                                                 </p>
                                                 {m.status === 'pending' ? (
                                                     <span
-                                                        className="inline-block text-[10px] font-bold px-1.5 py-0.5 rounded-md mt-0.5"
+                                                        className="inline-block text-[0.625rem] font-bold px-1.5 py-0.5 rounded-md mt-0.5"
                                                         style={{ backgroundColor: 'rgba(196,149,106,0.12)', color: '#C4956A' }}
                                                     >
                                                         Pending invite
                                                     </span>
                                                 ) : (
-                                                    <p className="text-[12px] truncate leading-snug mt-0.5" style={{ color: colors.textSecondary, opacity: 0.6 }}>
+                                                    <p className="text-xs truncate leading-snug mt-0.5" style={{ color: colors.textSecondary, opacity: 0.6 }}>
                                                         {m.email}
                                                     </p>
                                                 )}
@@ -601,7 +601,7 @@ export const DealerDetailScreen = ({
                                 <div className="absolute z-20 animate-fade-in" style={{ top: menuState.top, left: Math.max(0, menuState.left) }}>
                                     <GlassCard theme={theme} className="p-1 w-52">
                                         <div
-                                            className="px-2 py-1.5 text-[10px] font-bold uppercase tracking-[0.07em]"
+                                            className="px-2 py-1.5 text-[0.625rem] font-bold uppercase tracking-[0.07em]"
                                             style={{ color: colors.textSecondary, opacity: 0.5 }}
                                         >
                                             Change Role
@@ -610,7 +610,7 @@ export const DealerDetailScreen = ({
                                             <button
                                                 key={opt.value}
                                                 onClick={() => handleUpdatePersonRole(menuState.person, opt.value)}
-                                                className="w-full flex justify-between items-center text-left py-2 px-2 text-[13px] font-semibold rounded-xl transition-colors"
+                                                className="w-full flex justify-between items-center text-left py-2 px-2 text-[0.8125rem] font-semibold rounded-xl transition-colors"
                                                 style={{ color: menuState.person?.roleLabel === opt.value ? colors.accent : colors.textPrimary }}
                                             >
                                                 <span>{opt.label}</span>
@@ -622,7 +622,7 @@ export const DealerDetailScreen = ({
                                         <div className="border-t my-1 mx-1" style={{ borderColor: subtleBorder }} />
                                         <button
                                             onClick={() => handleRemovePerson(menuState.person?.name)}
-                                            className="w-full flex items-center gap-2 text-left py-2 px-2 text-[13px] font-semibold rounded-xl"
+                                            className="w-full flex items-center gap-2 text-left py-2 px-2 text-[0.8125rem] font-semibold rounded-xl"
                                             style={{ color: theme.colors.error }}
                                         >
                                             <Trash2 className="w-3.5 h-3.5" /> Remove
@@ -640,7 +640,7 @@ export const DealerDetailScreen = ({
 
             {/* Discount picker */}
             <Modal show={showDiscountPicker} onClose={() => setShowDiscountPicker(false)} title="Daily Discount" theme={theme}>
-                <p className="text-[13px] mb-3" style={{ color: colors.textSecondary }}>
+                <p className="text-[0.8125rem] mb-3" style={{ color: colors.textSecondary }}>
                     Current: <span className="font-black" style={{ color: colors.textPrimary }}>{dealer.dailyDiscount}</span>
                 </p>
                 <div className="max-h-64 overflow-y-auto scrollbar-hide space-y-0.5">
@@ -656,7 +656,7 @@ export const DealerDetailScreen = ({
                                     color: isActive ? colors.accent : colors.textPrimary,
                                 }}
                             >
-                                <span className="text-[14px] font-semibold">{opt}</span>
+                                <span className="text-sm font-semibold">{opt}</span>
                                 {isActive && <CheckCircle className="w-4 h-4 flex-shrink-0" style={{ color: colors.accent }} />}
                             </button>
                         );
@@ -666,7 +666,7 @@ export const DealerDetailScreen = ({
 
             {/* Confirm discount change */}
             <Modal show={!!pendingDiscount} onClose={() => setPendingDiscount(null)} title="Confirm Change" theme={theme}>
-                <p className="text-[14px]" style={{ color: colors.textPrimary }}>
+                <p className="text-sm" style={{ color: colors.textPrimary }}>
                     Update daily discount to <span className="font-black">{pendingDiscount}</span>?
                 </p>
                 <div className="flex justify-end gap-3 pt-4">
@@ -683,7 +683,7 @@ export const DealerDetailScreen = ({
                     <FormInput label="Email" type="email" value={newPerson.email} onChange={e => setNewPerson(p => ({ ...p, email: e.target.value }))} theme={theme} required />
                     <PortalNativeSelect label="Role" value={newPerson.role} onChange={e => setNewPerson(p => ({ ...p, role: e.target.value }))} theme={theme} options={ROLE_OPTIONS} />
                     <div className="pt-2 text-center">
-                        <p className="text-[12px] mb-3" style={{ color: colors.textSecondary }}>
+                        <p className="text-xs mb-3" style={{ color: colors.textSecondary }}>
                             An invitation email will be sent.
                         </p>
                         <PrimaryButton type="submit" theme={theme} size="default" fullWidth>Send Invite</PrimaryButton>

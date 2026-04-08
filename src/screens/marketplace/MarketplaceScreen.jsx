@@ -258,7 +258,7 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
                     value={searchQuery}
                     onChange={(event) => setSearchQuery(event.target.value)}
                     placeholder="Search merch..."
-                    className="w-full pl-10 pr-10 py-3 text-[13px] outline-none transition"
+                    className="w-full pl-10 pr-10 py-3 text-[0.8125rem] outline-none transition"
                     style={{
                       borderRadius: 9999,
                       background: isDark ? 'rgba(255,255,255,0.09)' : theme.colors.inputBackground,
@@ -337,7 +337,7 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
               <GlassCard theme={theme} className="p-5 sm:p-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: theme.colors.textSecondary }}>
+                    <p className="text-[0.625rem] font-bold uppercase tracking-[0.18em]" style={{ color: theme.colors.textSecondary }}>
                       Order tracking
                     </p>
                     <h3 className="text-lg font-semibold mt-2" style={{ color: theme.colors.textPrimary }}>
@@ -346,7 +346,7 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
                   </div>
 
                   <div className="rounded-2xl px-4 py-3" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.03)' }}>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.16em]" style={{ color: theme.colors.textSecondary }}>
+                    <p className="text-[0.625rem] font-bold uppercase tracking-[0.16em]" style={{ color: theme.colors.textSecondary }}>
                       Orders placed
                     </p>
                     <p className="text-2xl font-semibold mt-1" style={{ color: theme.colors.textPrimary }}>{orders.length}</p>
@@ -364,7 +364,7 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
                           <SummaryIcon className="w-4 h-4" style={{ color: summary.color }} />
                         </div>
                         <p className="text-xl font-bold" style={{ color: theme.colors.textPrimary }}>{count}</p>
-                        <p className="text-[11px] font-medium" style={{ color: theme.colors.textSecondary }}>{summary.label}</p>
+                        <p className="text-[0.6875rem] font-medium" style={{ color: theme.colors.textSecondary }}>{summary.label}</p>
                       </div>
                     );
                   })}
@@ -405,12 +405,12 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
                   <div>
                     <div className="flex items-center gap-2">
                       <History className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
-                      <p className="text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: theme.colors.textSecondary }}>Recent activity</p>
+                      <p className="text-[0.625rem] font-bold uppercase tracking-[0.18em]" style={{ color: theme.colors.textSecondary }}>Recent activity</p>
                     </div>
                     <p className="text-sm font-semibold mt-2" style={{ color: theme.colors.textPrimary }}>Recent activity</p>
                   </div>
 
-                  <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(53,53,53,0.03)', color: theme.colors.textSecondary }}>
+                  <span className="text-[0.6875rem] font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(53,53,53,0.03)', color: theme.colors.textSecondary }}>
                     {txnHistory.length} entries
                   </span>
                 </div>
@@ -425,7 +425,7 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
                   <div>
                     <div className="flex items-center gap-2">
                       <Sparkles className="w-4 h-4" style={{ color: theme.colors.warning }} />
-                      <p className="text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: theme.colors.textSecondary }}>Ways to earn</p>
+                      <p className="text-[0.625rem] font-bold uppercase tracking-[0.18em]" style={{ color: theme.colors.textSecondary }}>Ways to earn</p>
                     </div>
                     <p className="text-sm font-semibold mt-2" style={{ color: theme.colors.textPrimary }}>Ways to earn</p>
                   </div>
@@ -442,10 +442,10 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
 
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-semibold" style={{ color: theme.colors.textPrimary }}>{item.title}</p>
-                        <p className="text-[11px]" style={{ color: theme.colors.textSecondary }}>{item.desc}</p>
+                        <p className="text-[0.6875rem]" style={{ color: theme.colors.textSecondary }}>{item.desc}</p>
                       </div>
 
-                      <span className="text-[11px] font-bold flex-shrink-0 px-2.5 py-1.5 rounded-full" style={{ backgroundColor: isDark ? 'rgba(74,124,89,0.15)' : 'rgba(74,124,89,0.08)', color: theme.colors.success }}>
+                      <span className="text-[0.6875rem] font-bold flex-shrink-0 px-2.5 py-1.5 rounded-full" style={{ backgroundColor: isDark ? 'rgba(74,124,89,0.15)' : 'rgba(74,124,89,0.08)', color: theme.colors.success }}>
                         {item.amount}
                       </span>
                     </div>

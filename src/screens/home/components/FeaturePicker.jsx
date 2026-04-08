@@ -56,7 +56,7 @@ export const FeaturePicker = ({ value, onChange, options, colors, isDark }) => {
                         <button
                             key={opt.id}
                             onClick={(e) => { e.stopPropagation(); onChange(opt.id); setOpen(false); }}
-                            className="w-full text-left px-4 py-2.5 text-[13px] transition-colors"
+                            className="w-full text-left px-4 py-2.5 text-[0.8125rem] transition-colors"
                             style={{
                                 backgroundColor: opt.id === value
                                     ? (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)')

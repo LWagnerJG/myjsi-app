@@ -33,7 +33,7 @@ export const SubredditFeed = ({ subreddit, allPosts, theme, dark, likedPosts, po
       {!allVisible.length ? (
         <div className="flex flex-col items-center py-12 gap-3">
           <Icon className="w-8 h-8" style={{ color: theme.colors.textSecondary, opacity: 0.2 }} />
-          <p className="text-[13px] font-semibold" style={{ color: theme.colors.textPrimary }}>No posts yet \u2014 start the conversation.</p>
+          <p className="text-[0.8125rem] font-semibold" style={{ color: theme.colors.textPrimary }}>No posts yet \u2014 start the conversation.</p>
         </div>
       ) : (
         <>

@@ -145,9 +145,9 @@ export const SalesScreen = ({ theme, onNavigate }) => {
     <div className="flex items-center justify-between mb-3">
       <div className="flex items-center gap-2">
         {Icon && <Icon className="w-4 h-4" style={{ color: colors.textSecondary, opacity: 0.6 }} />}
-        <h3 className="text-[15px] font-bold" style={{ color: colors.textPrimary }}>{title}</h3>
+        <h3 className="text-[0.9375rem] font-bold" style={{ color: colors.textPrimary }}>{title}</h3>
         {badge && (
-          <span className="text-[11px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
+          <span className="text-[0.6875rem] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
             style={{ backgroundColor: subtle(isDark, 1.5), color: colors.textSecondary }}>{badge}</span>
         )}
       </div>
@@ -180,7 +180,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                   <p className="text-xs font-bold uppercase tracking-widest opacity-40">
                     {chartDataType === 'bookings' ? 'Total Bookings' : 'Total Sales'}
                   </p>
-                  <div className="text-4xl sm:text-[42px] font-black tracking-tight leading-none" style={{ opacity: ready ? 1 : 0, transition: 'opacity 0.4s ease' }}>
+                  <div className="text-4xl sm:text-[2.625rem] font-black tracking-tight leading-none" style={{ opacity: ready ? 1 : 0, transition: 'opacity 0.4s ease' }}>
                     {ready ? (
                       <CountUp value={activeTotal} prefix="$" duration={0.6} format={(v) => `$${Math.round(v).toLocaleString()}`} />
                     ) : (
@@ -221,7 +221,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                       onMouseEnter={() => setHoveredBar(`mini-${i}`)} onMouseLeave={() => setHoveredBar(null)}>
                       <div className="w-full relative flex items-end flex-1">
                         {isHovered && (
-                          <div className="absolute -top-5 left-1/2 -translate-x-1/2 text-[11px] font-bold whitespace-nowrap" style={{ color: colors.textPrimary }}>
+                          <div className="absolute -top-5 left-1/2 -translate-x-1/2 text-[0.6875rem] font-bold whitespace-nowrap" style={{ color: colors.textPrimary }}>
                             ${(val / 1000).toFixed(0)}k
                           </div>
                         )}
@@ -232,7 +232,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                           transition: `height 0.4s ease-out ${0.1 + i * 0.025}s, opacity 0.15s`,
                         }} />
                       </div>
-                      <span className="text-[11px] font-semibold" style={{ opacity: isHovered ? 0.8 : 0.4, transition: 'opacity 0.15s' }}>{m.month}</span>
+                      <span className="text-[0.6875rem] font-semibold" style={{ opacity: isHovered ? 0.8 : 0.4, transition: 'opacity 0.15s' }}>{m.month}</span>
                     </div>
                   );
                 })}
@@ -285,7 +285,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                     <div className="grid grid-cols-2 gap-2 pt-1">
                       {rewardsSnapshot.topSales.length > 0 && (
                         <div className="py-2 px-3.5 rounded-xl" style={{ backgroundColor: tileRowBg }}>
-                          <div className="text-[11px] font-bold uppercase tracking-wider opacity-30 mb-1.5">Top Sales</div>
+                          <div className="text-[0.6875rem] font-bold uppercase tracking-wider opacity-30 mb-1.5">Top Sales</div>
                           <div className="space-y-1.5">
                             {rewardsSnapshot.topSales.map((p) => (
                               <div key={p.name}>
@@ -298,7 +298,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                       )}
                       {rewardsSnapshot.topDesigners.length > 0 && (
                         <div className="py-2 px-3.5 rounded-xl" style={{ backgroundColor: tileRowBg }}>
-                          <div className="text-[11px] font-bold uppercase tracking-wider opacity-30 mb-1.5">Top Design</div>
+                          <div className="text-[0.6875rem] font-bold uppercase tracking-wider opacity-30 mb-1.5">Top Design</div>
                           <div className="space-y-1.5">
                             {rewardsSnapshot.topDesigners.map((p) => (
                               <div key={p.name}>
@@ -341,7 +341,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                       </div>
                       <div className="text-right shrink-0 ml-2 space-y-0.5">
                         <p className="text-sm font-bold tabular-nums">${order.net.toLocaleString()}</p>
-                        <span className="inline-block text-[11px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
+                        <span className="inline-block text-[0.6875rem] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
                           style={{ backgroundColor: sc + '14', color: sc }}>
                           {order.status}
                         </span>

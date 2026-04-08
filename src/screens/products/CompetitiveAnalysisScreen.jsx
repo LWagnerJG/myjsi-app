@@ -46,9 +46,9 @@ const VersusList = ({ jsiProduct, competitors = [], theme, title }) => {
                     return (
                         <div key={c.id} className="px-6 py-2.5">
                             <div className="flex items-center justify-between gap-4">
-                                <p className="text-[13px] font-medium leading-snug" style={{ color: theme.colors.textSecondary }}>{c.name}</p>
+                                <p className="text-[0.8125rem] font-medium leading-snug" style={{ color: theme.colors.textSecondary }}>{c.name}</p>
                                 <div className="flex items-center gap-3">
-                                    <p className="text-[13px] font-semibold tabular-nums" style={{ color: theme.colors.textPrimary }}>{c.laminate}</p>
+                                    <p className="text-[0.8125rem] font-semibold tabular-nums" style={{ color: theme.colors.textPrimary }}>{c.laminate}</p>
                                     <AdvantageChip value={val} onClick={() => setOpenAdv(o => o === c.id ? null : c.id)} />
                                 </div>
                             </div>

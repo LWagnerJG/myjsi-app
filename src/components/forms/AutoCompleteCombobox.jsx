@@ -94,7 +94,7 @@ export const AutoCompleteCombobox = React.memo(({
     return (
         <div className="space-y-2">
             {label && (
-                <label className="block text-[13px] font-semibold px-1" style={{ color: theme.colors.textSecondary }}>
+                <label className="block text-[0.8125rem] font-semibold px-1" style={{ color: theme.colors.textSecondary }}>
                     {label}
                 </label>
             )}
@@ -123,7 +123,7 @@ export const AutoCompleteCombobox = React.memo(({
                         height: 40,
                         paddingLeft: compact ? 34 : 38,
                         paddingRight: 16,
-                        fontSize: 14,
+                        fontSize: "0.875rem",
                         backgroundColor: inputBg,
                         borderColor: subtleBorder,
                         color: theme.colors.textPrimary,
@@ -152,7 +152,7 @@ export const AutoCompleteCombobox = React.memo(({
                                     onMouseDown={(e) => { e.preventDefault(); handleSelect(opt); }}
                                     // onClick handles touch tap on mobile
                                     onClick={() => handleSelect(opt)}
-                                    className="w-full text-left px-4 py-2.5 text-[13px] font-medium transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.09] active:bg-black/[0.06]"
+                                    className="w-full text-left px-4 py-2.5 text-[0.8125rem] font-medium transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.09] active:bg-black/[0.06]"
                                     style={{ color: theme.colors.textPrimary }}
                                 >
                                     {opt}
@@ -167,7 +167,7 @@ export const AutoCompleteCombobox = React.memo(({
                 <button
                     type="button"
                     onClick={handleAdd}
-                    className="inline-flex items-center px-3 py-1.5 text-[12px] font-semibold rounded-full transition-colors"
+                    className="inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-full transition-colors"
                     style={{
                         color: theme.colors.accent,
                         backgroundColor: `${theme.colors.accent}14`,

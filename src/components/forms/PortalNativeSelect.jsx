@@ -185,7 +185,7 @@ export const PortalNativeSelect = ({
           backgroundColor: bordered ? (dark ? c.background : c.surface) : 'transparent',
           border: bordered ? `1px solid ${isOpen ? c.accent : subtleBorder}` : '1px solid transparent',
           color: (isPlaceholder || isMuted) ? c.textSecondary : c.textPrimary,
-          fontSize: 14,
+          fontSize: "0.875rem",
           boxShadow: bordered && isOpen ? `0 0 0 3px ${c.accent}18` : 'none',
         }}
       >
@@ -230,7 +230,7 @@ export const PortalNativeSelect = ({
                       role="option"
                       aria-selected={isSelected}
                       type="button"
-                      className="w-full text-left flex items-center justify-between px-3.5 py-2.5 text-[13px] transition-colors cursor-pointer outline-none"
+                      className="w-full text-left flex items-center justify-between px-3.5 py-2.5 text-[0.8125rem] transition-colors cursor-pointer outline-none"
                       style={{
                         color: optMuted ? c.textSecondary : c.textPrimary,
                         fontWeight: isSelected ? 700 : 500,

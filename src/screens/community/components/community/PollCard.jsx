@@ -26,10 +26,10 @@ export const PollCard = React.memo(({ poll, theme, dark, votedOption, onPollVote
     <div className="rounded-2xl overflow-hidden p-3.5 space-y-2.5" style={{ backgroundColor: cardBg(dark) }}>
       <div className="flex items-center gap-1.5">
         <BarChart3 className="w-3 h-3" style={{ color: theme.colors.textSecondary }} />
-        <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: theme.colors.textSecondary }}>Poll</span>
+        <span className="text-[0.6875rem] font-bold uppercase tracking-widest" style={{ color: theme.colors.textSecondary }}>Poll</span>
         {timeLeft && (
           <span
-            className="ml-auto text-[11px] font-semibold px-2 py-0.5 rounded-full"
+            className="ml-auto text-[0.6875rem] font-semibold px-2 py-0.5 rounded-full"
             style={{
               backgroundColor: isClosed
                 ? (dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.05)')
@@ -45,14 +45,14 @@ export const PollCard = React.memo(({ poll, theme, dark, votedOption, onPollVote
         <Avatar src={poll.user?.avatar} alt={poll.user?.name} dark={dark} theme={theme} />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-[13px] font-semibold" style={{ color: theme.colors.textPrimary }}>{poll.user?.name}</span>
+            <span className="text-[0.8125rem] font-semibold" style={{ color: theme.colors.textPrimary }}>{poll.user?.name}</span>
             <span
               className="text-xs cursor-default"
               title={formatExactTimestamp(poll.createdAt)}
               style={{ color: theme.colors.textSecondary }}
             >{formatTimestamp(poll.createdAt)}</span>
           </div>
-          <p className="text-[13px] mt-1 font-semibold" style={{ color: theme.colors.textPrimary }}>{poll.question}</p>
+          <p className="text-[0.8125rem] mt-1 font-semibold" style={{ color: theme.colors.textPrimary }}>{poll.question}</p>
           <div className="mt-2 space-y-1.5">
             {poll.options.map(opt => {
               const percent = totalVotes ? Math.round((opt.votes || 0) / totalVotes * 100) : 0;
@@ -92,7 +92,7 @@ export const PollCard = React.memo(({ poll, theme, dark, votedOption, onPollVote
             })}
           </div>
           {totalVotes > 0 && (
-            <p className="text-[11px] mt-1.5 font-medium" style={{ color: theme.colors.textSecondary }}>
+            <p className="text-[0.6875rem] mt-1.5 font-medium" style={{ color: theme.colors.textSecondary }}>
               {totalVotes} vote{totalVotes !== 1 ? 's' : ''}
             </p>
           )}

@@ -24,7 +24,7 @@ export const ContactSearchSelector = ({ value, onChange, dealers, theme }) => {
     <div className="relative" ref={ref}>
       {value ? (
         <div className="flex items-center gap-2.5 py-2 px-3.5 rounded-xl" style={{ background: fieldBg, border: fieldBorder }}>
-          <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0" style={{ backgroundColor: theme.colors.accent + '18', color: theme.colors.accent }}>
+          <div className="w-7 h-7 rounded-full flex items-center justify-center text-[0.6875rem] font-bold flex-shrink-0" style={{ backgroundColor: theme.colors.accent + '18', color: theme.colors.accent }}>
             {value.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
           </div>
           <span className="flex-1 text-sm font-medium truncate" style={{ color: theme.colors.textPrimary }}>{value}</span>
@@ -51,12 +51,12 @@ export const ContactSearchSelector = ({ value, onChange, dealers, theme }) => {
           <div className="max-h-[200px] overflow-y-auto scrollbar-hide py-1">
             {filtered.length > 0 ? filtered.map(c => (
               <button key={c.name} onClick={() => { onChange(c.name); setQuery(''); setOpen(false); }} className="w-full text-left px-3 py-2.5 flex items-center gap-2.5 transition-colors" onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.03)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0" style={{ backgroundColor: theme.colors.accent + '18', color: theme.colors.accent }}>
+                <div className="w-7 h-7 rounded-full flex items-center justify-center text-[0.6875rem] font-bold flex-shrink-0" style={{ backgroundColor: theme.colors.accent + '18', color: theme.colors.accent }}>
                   {c.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
                 </div>
                 <div className="min-w-0">
-                  <div className="text-[13px] font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{c.name}</div>
-                  <div className="text-[11px] truncate" style={{ color: theme.colors.textSecondary, opacity: 0.6 }}>{c.title} · {c.dealer}</div>
+                  <div className="text-[0.8125rem] font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{c.name}</div>
+                  <div className="text-[0.6875rem] truncate" style={{ color: theme.colors.textSecondary, opacity: 0.6 }}>{c.title} · {c.dealer}</div>
                 </div>
               </button>
             )) : (

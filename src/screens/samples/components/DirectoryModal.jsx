@@ -80,7 +80,7 @@ export const DirectoryModal = ({ show, onClose, onSelect, theme, dealers = [], d
                                 <Building2 className="w-4.5 h-4.5" style={{ color: theme.colors.accent }} />
                             </div>
                             <div>
-                                <h3 className="font-bold text-[15px] tracking-tight" style={{ color: theme.colors.textPrimary }}>Ship to Company</h3>
+                                <h3 className="font-bold text-[0.9375rem] tracking-tight" style={{ color: theme.colors.textPrimary }}>Ship to Company</h3>
                                 <p className="text-xs" style={{ color: theme.colors.textSecondary }}>Select a saved address</p>
                             </div>
                         </div>
@@ -95,7 +95,7 @@ export const DirectoryModal = ({ show, onClose, onSelect, theme, dealers = [], d
                             value={q}
                             onChange={(e) => setQ(e.target.value)}
                             placeholder="Search by name or address..."
-                            className="w-full rounded-2xl pl-10 pr-4 py-3 text-[13px] outline-none border transition focus:ring-2"
+                            className="w-full rounded-2xl pl-10 pr-4 py-3 text-[0.8125rem] outline-none border transition focus:ring-2"
                             style={{ background: isDark ? 'rgba(255,255,255,0.08)' : theme.colors.inputBackground, border: `1px solid ${theme.colors.border}`, color: theme.colors.textPrimary, focusRingColor: theme.colors.accent }}
                         />
                         <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: theme.colors.textSecondary }} />
@@ -118,9 +118,9 @@ export const DirectoryModal = ({ show, onClose, onSelect, theme, dealers = [], d
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2">
-                                            <p className="font-semibold text-[13px] truncate" style={{ color: theme.colors.textPrimary }}>{it.name}</p>
-                                            {it.type === 'dealer' && <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ backgroundColor: isDark ? 'rgba(74,124,89,0.15)' : 'rgba(74,124,89,0.08)', color: theme.colors.success }}>Dealer</span>}
-                                            {it.type === 'design' && <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ backgroundColor: isDark ? 'rgba(91,123,140,0.15)' : 'rgba(91,123,140,0.08)', color: '#5B7B8C' }}>Design</span>}
+                                            <p className="font-semibold text-[0.8125rem] truncate" style={{ color: theme.colors.textPrimary }}>{it.name}</p>
+                                            {it.type === 'dealer' && <span className="text-[0.625rem] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ backgroundColor: isDark ? 'rgba(74,124,89,0.15)' : 'rgba(74,124,89,0.08)', color: theme.colors.success }}>Dealer</span>}
+                                            {it.type === 'design' && <span className="text-[0.625rem] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ backgroundColor: isDark ? 'rgba(91,123,140,0.15)' : 'rgba(91,123,140,0.08)', color: '#5B7B8C' }}>Design</span>}
                                         </div>
                                         {it.address && (
                                             <div className="flex items-center gap-1 mt-0.5">
@@ -137,7 +137,7 @@ export const DirectoryModal = ({ show, onClose, onSelect, theme, dealers = [], d
                                 <div className="w-12 h-12 rounded-full flex items-center justify-center mb-3" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(53,53,53,0.04)' }}>
                                     <Search className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
                                 </div>
-                                <p className="text-[13px] font-medium" style={{ color: theme.colors.textSecondary }}>No companies found</p>
+                                <p className="text-[0.8125rem] font-medium" style={{ color: theme.colors.textSecondary }}>No companies found</p>
                             </div>
                         )}
                     </div>

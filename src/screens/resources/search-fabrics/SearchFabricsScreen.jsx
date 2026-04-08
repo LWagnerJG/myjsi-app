@@ -33,7 +33,7 @@ const SectionCard = ({ title, subtitle, children, theme, className = '' }) => (
     {(title || subtitle) && (
       <div className="mb-3">
         {title && (
-          <h3 className="text-[13px] font-semibold tracking-tight" style={{ color: theme.colors.textPrimary }}>
+          <h3 className="text-[0.8125rem] font-semibold tracking-tight" style={{ color: theme.colors.textPrimary }}>
             {title}
           </h3>
         )}
@@ -142,7 +142,7 @@ const LocalSearchSelect = ({
             <button
               type="button"
               onClick={() => { onChange({ target: { value: '' } }); setOpen(false); }}
-              className="w-full text-left px-4 py-2.5 text-[13px] font-medium transition-colors"
+              className="w-full text-left px-4 py-2.5 text-[0.8125rem] font-medium transition-colors"
               style={{
                 color: !value ? theme.colors.textPrimary : theme.colors.textSecondary,
                 backgroundColor: !value ? theme.colors.subtle : 'transparent',
@@ -208,7 +208,7 @@ const LocalSearchSelect = ({
           border,
         }}
       >
-        <span className={value ? 'text-[13px]' : 'text-[13px] opacity-50'}>
+        <span className={value ? 'text-[0.8125rem]' : 'text-[0.8125rem] opacity-50'}>
           {value || placeholder}
         </span>
         <svg
@@ -450,7 +450,7 @@ export const SearchFabricsScreen = ({ theme, onNavigate, onUpdateCart }) => {
             >
               {/* Results header */}
               <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: results.length > 0 ? `1px solid ${theme.colors.border}` : 'none' }}>
-                <p className="text-[13px] font-bold" style={{ color: theme.colors.textPrimary }}>
+                <p className="text-[0.8125rem] font-bold" style={{ color: theme.colors.textPrimary }}>
                   {results.length > 0 ? (
                     <>{results.length} match{results.length !== 1 ? 'es' : ''}<span className="font-normal" style={{ color: theme.colors.textSecondary }}> — {form.supplier}, {form.jsiSeries}</span></>
                   ) : 'Results'}
@@ -463,7 +463,7 @@ export const SearchFabricsScreen = ({ theme, onNavigate, onUpdateCart }) => {
                     <SearchX className="w-5 h-5" style={{ color: theme.colors.textSecondary, opacity: 0.5 }} />
                   </div>
                   <div>
-                    <p className="text-[13px] font-semibold" style={{ color: theme.colors.textPrimary }}>No matching fabrics</p>
+                    <p className="text-[0.8125rem] font-semibold" style={{ color: theme.colors.textPrimary }}>No matching fabrics</p>
                     <p className="text-xs" style={{ color: theme.colors.textSecondary }}>Try a different supplier or series combination.</p>
                   </div>
                 </div>
@@ -476,20 +476,20 @@ export const SearchFabricsScreen = ({ theme, onNavigate, onUpdateCart }) => {
                     >
                       <CheckCircle className="w-4 h-4 flex-shrink-0" style={{ color: theme.colors.success }} />
                       <div className="flex-1 min-w-0">
-                        <p className="text-[13px] font-semibold truncate" style={{ color: theme.colors.textPrimary }}>
+                        <p className="text-[0.8125rem] font-semibold truncate" style={{ color: theme.colors.textPrimary }}>
                           {r.pattern}
                           <span className="font-normal ml-1" style={{ color: theme.colors.textSecondary }}>— {r.supplier}</span>
                         </p>
                         <div className="flex flex-wrap gap-1.5 mt-1">
-                          <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: theme.colors.subtle, color: theme.colors.textSecondary }}>Grade {r.grade}</span>
-                          {r.textile && <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: theme.colors.subtle, color: theme.colors.textSecondary }}>{r.textile}</span>}
-                          <span className="text-[10px] px-2 py-0.5 rounded-full font-medium capitalize" style={{ background: theme.colors.subtle, color: theme.colors.textSecondary }}>Tack: {r.tackable}</span>
+                          <span className="text-[0.625rem] px-2 py-0.5 rounded-full font-medium" style={{ background: theme.colors.subtle, color: theme.colors.textSecondary }}>Grade {r.grade}</span>
+                          {r.textile && <span className="text-[0.625rem] px-2 py-0.5 rounded-full font-medium" style={{ background: theme.colors.subtle, color: theme.colors.textSecondary }}>{r.textile}</span>}
+                          <span className="text-[0.625rem] px-2 py-0.5 rounded-full font-medium capitalize" style={{ background: theme.colors.subtle, color: theme.colors.textSecondary }}>Tack: {r.tackable}</span>
                         </div>
                       </div>
                       <button
                         type="button"
                         onClick={() => handleOrderSample(r)}
-                        className="px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 flex-shrink-0 active:scale-95 transition-all"
+                        className="px-3 py-1.5 rounded-full text-[0.6875rem] font-semibold flex items-center gap-1 flex-shrink-0 active:scale-95 transition-all"
                         style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
                       >
                         <Package className="w-3 h-3" />

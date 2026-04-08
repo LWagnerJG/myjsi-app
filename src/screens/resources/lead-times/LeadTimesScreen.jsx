@@ -100,7 +100,7 @@ const QuickShipBadge = ({ onClick, isDark }) => (
         title="QuickShip Available"
     >
         <Zap className="w-3 h-3" style={{ color: isDark ? '#D4AF37' : '#9A8A78' }} fill={isDark ? '#D4AF37' : '#9A8A78'} />
-        <span className="text-[10px] font-bold tracking-wide" style={{ color: isDark ? '#D4AF37' : '#9A8A78' }}>QuickShip</span>
+        <span className="text-[0.625rem] font-bold tracking-wide" style={{ color: isDark ? '#D4AF37' : '#9A8A78' }}>QuickShip</span>
     </button>
 );
 
@@ -155,7 +155,7 @@ export const LeadTimesScreen = ({ theme = {} }) => {
     }, [searchTerm, sortFastest]);
 
     const LVLabel = ({ label }) => (
-        <span className="text-[11px] font-bold" style={{ color: safeTheme.colors.textSecondary }}>{label}</span>
+        <span className="text-[0.6875rem] font-bold" style={{ color: safeTheme.colors.textSecondary }}>{label}</span>
     );
 
     const LeadTimeInfo = ({ typeData }) => (

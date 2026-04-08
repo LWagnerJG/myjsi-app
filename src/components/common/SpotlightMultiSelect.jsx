@@ -175,7 +175,7 @@ export function SpotlightMultiSelect({
             onFocus={() => setOpen(true)}
             onKeyDown={handleKeyDown}
             placeholder={selectedItems.length > 0 && compact ? "" : placeholder}
-            className={`flex-1 bg-transparent outline-none min-w-[60px] ${compact ? "text-[13px]" : "text-[14px]"}`}
+            className={`flex-1 bg-transparent outline-none min-w-[60px] ${compact ? "text-[0.8125rem]" : "text-sm"}`}
             style={{ color: palette.text }}
             role="combobox"
             aria-expanded={open}
@@ -231,7 +231,7 @@ export function SpotlightMultiSelect({
                   type="button"
                   role="option"
                   aria-selected={activeIndex === idx}
-                  className={`w-full text-left px-4 py-2.5 text-[13px] font-medium transition-colors ${
+                  className={`w-full text-left px-4 py-2.5 text-[0.8125rem] font-medium transition-colors ${
                     activeIndex === idx ? "bg-black/[0.07] dark:bg-white/[0.07]" : "hover:bg-black/[0.04] dark:hover:bg-white/[0.08]"
                   }`}
                   style={{ color: palette.text }}
@@ -250,7 +250,7 @@ export function SpotlightMultiSelect({
                     type="button"
                     role="option"
                     aria-selected={activeIndex === filtered.length}
-                    className={`w-full text-left px-4 py-2.5 text-[13px] font-semibold flex items-center gap-2 transition-colors ${
+                    className={`w-full text-left px-4 py-2.5 text-[0.8125rem] font-semibold flex items-center gap-2 transition-colors ${
                       activeIndex === filtered.length ? "bg-black/[0.07] dark:bg-white/[0.07]" : "hover:bg-black/[0.04] dark:hover:bg-white/[0.08]"
                     }`}
                     style={{ color: palette.accent }}
@@ -262,7 +262,7 @@ export function SpotlightMultiSelect({
                 </>
               )}
               {!filtered.length && !canCreate && (
-                <div className="px-4 py-3 text-[13px]" style={{ color: palette.hint }}>No matches</div>
+                <div className="px-4 py-3 text-[0.8125rem]" style={{ color: palette.hint }}>No matches</div>
               )}
             </div>
           </div>
@@ -286,7 +286,7 @@ export function SpotlightMultiSelect({
           {selectedItems.map((s) => (
             <span
               key={s}
-              className={`inline-flex items-center gap-1.5 pl-3 pr-2 py-1 rounded-full text-[12px] font-medium${bordered ? " border" : ""}`}
+              className={`inline-flex items-center gap-1.5 pl-3 pr-2 py-1 rounded-full text-xs font-medium${bordered ? " border" : ""}`}
               style={{
                 background: showIntegratedChips ? (dark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.04)") : palette.chipBg,
                 borderColor: palette.border,

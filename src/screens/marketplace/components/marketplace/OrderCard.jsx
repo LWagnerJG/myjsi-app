@@ -26,8 +26,8 @@ export const OrderCard = ({ order, theme }) => {
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <p className="text-[13px] font-bold" style={{ color: theme.colors.textPrimary }}>{order.id}</p>
-            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.12em]" style={{ backgroundColor: cfg.bg, color: cfg.color }}>
+            <p className="text-[0.8125rem] font-bold" style={{ color: theme.colors.textPrimary }}>{order.id}</p>
+            <span className="px-2.5 py-1 rounded-full text-[0.625rem] font-bold uppercase tracking-[0.12em]" style={{ backgroundColor: cfg.bg, color: cfg.color }}>
               {cfg.label}
             </span>
           </div>
@@ -45,7 +45,7 @@ export const OrderCard = ({ order, theme }) => {
       {open && (
         <div className="px-4 pb-4 space-y-4" style={{ borderTop: `1px solid ${theme.colors.border}` }}>
           <div className="pt-4">
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] mb-3" style={{ color: theme.colors.textSecondary }}>Items in this order</p>
+            <p className="text-[0.625rem] font-bold uppercase tracking-[0.18em] mb-3" style={{ color: theme.colors.textSecondary }}>Items in this order</p>
 
             {order.items.map((item, index) => {
               const product = getProductById(item.productId);
@@ -64,7 +64,7 @@ export const OrderCard = ({ order, theme }) => {
 
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{item.name}</p>
-                    <p className="text-[11px]" style={{ color: theme.colors.textSecondary }}>
+                    <p className="text-[0.6875rem]" style={{ color: theme.colors.textSecondary }}>
                       Qty {item.qty}{item.size ? ` - Size ${item.size}` : ''} - {formatElliottBucks(item.price)}
                     </p>
                   </div>
@@ -75,7 +75,7 @@ export const OrderCard = ({ order, theme }) => {
 
           {(order.tracking || order.estimatedDelivery) && (
             <div className="rounded-2xl p-4" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(53,53,53,0.02)' }}>
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] mb-3" style={{ color: theme.colors.textSecondary }}>Fulfillment</p>
+              <p className="text-[0.625rem] font-bold uppercase tracking-[0.18em] mb-3" style={{ color: theme.colors.textSecondary }}>Fulfillment</p>
 
               {order.tracking && (
                 <div className="flex items-center gap-2 mb-2">

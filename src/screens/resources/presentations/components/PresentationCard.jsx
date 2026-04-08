@@ -16,13 +16,13 @@ export const PresentationCard = ({ p, theme, onAddToMyDecks, myDeckIds, onDownlo
             </div>
             <div className="px-5 pb-5 space-y-3">
                 <div className="space-y-1.5">
-                    <h3 className="font-semibold text-[15px] leading-snug" style={{ color: theme.colors.textPrimary }}>{p.title}</h3>
+                    <h3 className="font-semibold text-[0.9375rem] leading-snug" style={{ color: theme.colors.textPrimary }}>{p.title}</h3>
                     <div className="flex flex-wrap items-center gap-1.5 text-xs font-medium">
                         <span className="px-2 py-0.5 rounded-full" style={{ background: `${theme.colors.accent}18`, color: theme.colors.accent }}>{p.category}</span>
                         <span style={{ color: theme.colors.textSecondary }}>{p.type} · {p.size}</span>
                         <span style={{ color: theme.colors.textSecondary }}>Updated {new Date(p.lastUpdated).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                     </div>
-                    <p className="text-[13px] leading-relaxed" style={{ color: theme.colors.textSecondary }}>{p.description}</p>
+                    <p className="text-[0.8125rem] leading-relaxed" style={{ color: theme.colors.textSecondary }}>{p.description}</p>
                 </div>
                 <div className="flex gap-2 pt-1">
                     <button onClick={onDownload}

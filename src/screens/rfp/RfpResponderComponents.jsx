@@ -335,13 +335,13 @@ export const ClarificationStage = ({
                 }}
               >
                 <div
-                  className="text-[10px] font-semibold tracking-[0.1em] uppercase mb-2"
+                  className="text-[0.625rem] font-semibold tracking-[0.1em] uppercase mb-2"
                   style={{ color: c.textSecondary, opacity: 0.45 }}
                 >
                   From the RFP
                 </div>
                 <p
-                  className="text-[15px] leading-relaxed"
+                  className="text-[0.9375rem] leading-relaxed"
                   style={{ color: c.textPrimary, opacity: 0.85 }}
                 >
                   &ldquo;{q.rfpExcerpt}&rdquo;
@@ -400,7 +400,7 @@ export const ClarificationStage = ({
 const DocSectionHeading = ({ number, title, theme }) => {
   const c = theme?.colors || {};
   return (
-    <h3 className="text-[11px] font-bold tracking-[0.15em] uppercase mb-1" style={{ color: c.textSecondary }}>
+    <h3 className="text-[0.6875rem] font-bold tracking-[0.15em] uppercase mb-1" style={{ color: c.textSecondary }}>
       {number}. {title}
     </h3>
   );
@@ -408,7 +408,7 @@ const DocSectionHeading = ({ number, title, theme }) => {
 
 const DocLabel = ({ children, theme }) => (
   <div
-    className="text-[10px] font-semibold tracking-[0.1em] uppercase mt-4 mb-1"
+    className="text-[0.625rem] font-semibold tracking-[0.1em] uppercase mt-4 mb-1"
     style={{ color: theme?.colors?.textSecondary, opacity: 0.45 }}
   >
     {children}
@@ -440,7 +440,7 @@ const DocField = ({ value, onChange, multiline = false, className = '', style: s
       onChange={readOnly ? undefined : (e) => onChange(e.target.value)}
       onFocus={() => !readOnly && setFocused(true)}
       onBlur={() => setFocused(false)}
-      className={`w-full outline-none resize-none text-[13px] leading-relaxed cursor-text rfp-editable-field ${className}`}
+      className={`w-full outline-none resize-none text-[0.8125rem] leading-relaxed cursor-text rfp-editable-field ${className}`}
       style={{
         color: c.textPrimary,
         background: focused
@@ -488,7 +488,7 @@ const PdfPage = ({ children, pageNumber, totalPages, footerTitle, theme, classNa
         overflow: 'hidden',
         wordBreak: 'break-word',
         overflowWrap: 'break-word',
-        fontSize: '13px',
+        fontSize: '0.8125rem',
         lineHeight: '1.6',
       }}
     >
@@ -497,7 +497,7 @@ const PdfPage = ({ children, pageNumber, totalPages, footerTitle, theme, classNa
         {pageNumber && (
           <div
             className="flex items-center justify-between pt-3 mt-auto flex-shrink-0"
-            style={{ color: c.textSecondary, opacity: 0.35, borderTop: `1px solid ${c.border || '#E3E0D8'}`, fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}
+            style={{ color: c.textSecondary, opacity: 0.35, borderTop: `1px solid ${c.border || '#E3E0D8'}`, fontSize: '0.5625rem', letterSpacing: '0.1em', textTransform: 'uppercase' }}
           >
             <span>{footerTitle || 'RFP Response Package'}</span>
             <span>Page {pageNumber} of {totalPages}</span>
@@ -677,7 +677,7 @@ export const ResponseBuilder = ({ data, onChange, partnerItems, onPartnerItemCha
       {/* ── Top bar ── */}
       <div className="w-full flex items-center justify-between mb-3 px-2" style={{ maxWidth: Math.min(PDF_PAGE_W * scale + 96, PDF_PAGE_W + 96) }}>
         <div
-          style={{ color: c.textSecondary, opacity: 0.5, fontSize: '11px', fontWeight: 600, letterSpacing: '0.06em' }}
+          style={{ color: c.textSecondary, opacity: 0.5, fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.06em' }}
         >
           {footerTitle}
         </div>
@@ -686,7 +686,7 @@ export const ResponseBuilder = ({ data, onChange, partnerItems, onPartnerItemCha
           style={{
             backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.05)',
             color: c.textSecondary,
-            fontSize: '11px',
+            fontSize: '0.6875rem',
             fontWeight: 500,
           }}
         >
@@ -763,7 +763,7 @@ export const ResponseBuilder = ({ data, onChange, partnerItems, onPartnerItemCha
             />
           ))}
           <span
-            className="text-[11px] font-medium ml-1.5 tabular-nums"
+            className="text-[0.6875rem] font-medium ml-1.5 tabular-nums"
             style={{ color: c.textSecondary, opacity: 0.5 }}
           >
             {currentPage + 1} / {TOTAL_PAGES}
@@ -774,7 +774,7 @@ export const ResponseBuilder = ({ data, onChange, partnerItems, onPartnerItemCha
         <button
           onClick={handlePdfExport}
           disabled={exporting}
-          className="h-9 px-5 rounded-full flex items-center gap-2 text-[12px] font-semibold transition-all hover:scale-[1.02] active:scale-[0.97] disabled:opacity-50"
+          className="h-9 px-5 rounded-full flex items-center gap-2 text-xs font-semibold transition-all hover:scale-[1.02] active:scale-[0.97] disabled:opacity-50"
           style={{
             backgroundColor: c.accent || '#353535',
             color: c.accentText || '#fff',
@@ -848,15 +848,15 @@ function renderPage(index, ctx) {
     case 0: return (
       <PdfPage theme={theme} pageNumber={1} totalPages={T} footerTitle={footerTitle}>
         <div style={{ marginBottom: '24px' }}>
-          <DocField value={pr.fields.projectName} onChange={(v) => updateField('projectRequirements', 'projectName', v)} className="font-bold tracking-tight" style={{ fontSize: '20px', lineHeight: '1.3' }} theme={theme} />
+          <DocField value={pr.fields.projectName} onChange={(v) => updateField('projectRequirements', 'projectName', v)} className="font-bold tracking-tight" style={{ fontSize: '1.25rem', lineHeight: '1.3' }} theme={theme} />
           <div style={{ display: 'flex', gap: '40px', marginTop: '10px' }}>
             <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: c.textSecondary, opacity: 0.4, marginBottom: '2px' }}>Response due</div>
-              <DocField value={pr.fields.dueDate} onChange={(v) => updateField('projectRequirements', 'dueDate', v)} theme={theme} style={{ fontSize: '13px', fontWeight: 600 }} />
+              <div style={{ fontSize: '0.5625rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: c.textSecondary, opacity: 0.4, marginBottom: '2px' }}>Response due</div>
+              <DocField value={pr.fields.dueDate} onChange={(v) => updateField('projectRequirements', 'dueDate', v)} theme={theme} style={{ fontSize: '0.8125rem', fontWeight: 600 }} />
             </div>
             <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: c.textSecondary, opacity: 0.4, marginBottom: '2px' }}>Solicitation</div>
-              <DocField value={pr.fields.solicitation || ''} onChange={(v) => updateField('projectRequirements', 'solicitation', v)} theme={theme} style={{ fontSize: '13px' }} />
+              <div style={{ fontSize: '0.5625rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: c.textSecondary, opacity: 0.4, marginBottom: '2px' }}>Solicitation</div>
+              <DocField value={pr.fields.solicitation || ''} onChange={(v) => updateField('projectRequirements', 'solicitation', v)} theme={theme} style={{ fontSize: '0.8125rem' }} />
             </div>
           </div>
         </div>
@@ -876,9 +876,9 @@ function renderPage(index, ctx) {
         <DocSectionHeading number={2} title="Qualifications & Compliance" theme={theme} />
         {bfaq.items.slice(0, 3).map((item, idx) => (
           <div key={idx} className={idx > 0 ? 'mt-5' : 'mt-2'}>
-            <DocField value={item.question} onChange={(v) => updateFaqItem(idx, 'question', v)} theme={theme} style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', opacity: 0.45, marginBottom: '2px' }} />
+            <DocField value={item.question} onChange={(v) => updateFaqItem(idx, 'question', v)} theme={theme} style={{ fontSize: '0.625rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', opacity: 0.45, marginBottom: '2px' }} />
             {item.rfpQuestion != null && (
-              <DocField value={item.rfpQuestion} onChange={(v) => updateFaqItem(idx, 'rfpQuestion', v)} multiline theme={theme} style={{ fontSize: '11px', fontStyle: 'italic', lineHeight: '1.6', borderLeft: `3px solid ${c.border}`, borderBottom: 'none', paddingLeft: '12px', marginBottom: '4px' }} />
+              <DocField value={item.rfpQuestion} onChange={(v) => updateFaqItem(idx, 'rfpQuestion', v)} multiline theme={theme} style={{ fontSize: '0.6875rem', fontStyle: 'italic', lineHeight: '1.6', borderLeft: `3px solid ${c.border}`, borderBottom: 'none', paddingLeft: '12px', marginBottom: '4px' }} />
             )}
             <DocField value={item.answer} onChange={(v) => updateFaq(idx, v)} multiline theme={theme} />
           </div>
@@ -890,9 +890,9 @@ function renderPage(index, ctx) {
         <DocSectionHeading number={2} title="Qualifications & Compliance (continued)" theme={theme} />
         {bfaq.items.slice(3).map((item, idx) => (
           <div key={idx + 3} className={idx > 0 ? 'mt-5' : 'mt-2'}>
-            <DocField value={item.question} onChange={(v) => updateFaqItem(idx + 3, 'question', v)} theme={theme} style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', opacity: 0.45, marginBottom: '2px' }} />
+            <DocField value={item.question} onChange={(v) => updateFaqItem(idx + 3, 'question', v)} theme={theme} style={{ fontSize: '0.625rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', opacity: 0.45, marginBottom: '2px' }} />
             {item.rfpQuestion != null && (
-              <DocField value={item.rfpQuestion} onChange={(v) => updateFaqItem(idx + 3, 'rfpQuestion', v)} multiline theme={theme} style={{ fontSize: '11px', fontStyle: 'italic', lineHeight: '1.6', borderLeft: `3px solid ${c.border}`, borderBottom: 'none', paddingLeft: '12px', marginBottom: '4px' }} />
+              <DocField value={item.rfpQuestion} onChange={(v) => updateFaqItem(idx + 3, 'rfpQuestion', v)} multiline theme={theme} style={{ fontSize: '0.6875rem', fontStyle: 'italic', lineHeight: '1.6', borderLeft: `3px solid ${c.border}`, borderBottom: 'none', paddingLeft: '12px', marginBottom: '4px' }} />
             )}
             <DocField value={item.answer} onChange={(v) => updateFaq(idx + 3, v)} multiline theme={theme} />
           </div>
@@ -916,18 +916,18 @@ function renderPage(index, ctx) {
     );
     case 5: return (
       <PdfPage theme={theme} pageNumber={6} totalPages={T} footerTitle={footerTitle} className="pdf-page-break">
-        <div style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: c.textSecondary, opacity: 0.4, marginBottom: '14px' }}>Product Recommendations (continued)</div>
+        <div style={{ fontSize: '0.5625rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: c.textSecondary, opacity: 0.4, marginBottom: '14px' }}>Product Recommendations (continued)</div>
         {renderProductCards(pf.typicals.slice(3, 7), { theme, c, isDark, compact: true, updateTypical, startIdx: 3 })}
       </PdfPage>
     );
     case 6: return (
       <PdfPage theme={theme} pageNumber={7} totalPages={T} footerTitle={footerTitle} className="pdf-page-break">
-        <div style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: c.textSecondary, opacity: 0.4, marginBottom: '14px' }}>Product Recommendations (continued)</div>
+        <div style={{ fontSize: '0.5625rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: c.textSecondary, opacity: 0.4, marginBottom: '14px' }}>Product Recommendations (continued)</div>
         <div style={{ marginBottom: '14px' }}>
           <DocLabel theme={theme}>Planning Assumptions</DocLabel>
           <DocField value={pf.assumptions} onChange={(v) => updateProductFit('assumptions', v)} multiline theme={theme} />
         </div>
-        <div style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: c.textSecondary, opacity: 0.45, marginBottom: '6px' }}>
+        <div style={{ fontSize: '0.5625rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: c.textSecondary, opacity: 0.45, marginBottom: '6px' }}>
           Partner Items — Enter Manufacturer &amp; Product below
         </div>
         {(partnerItems || []).map((item) => renderPartnerItemCard(item, { c, isDark, onPartnerItemChange, theme }))}
@@ -941,11 +941,11 @@ function renderPage(index, ctx) {
         <DocLabel theme={theme}>Items Outside JSI Scope</DocLabel>
         <DocField value={dn.fields.nonJsiScope} onChange={(v) => updateDealerField('nonJsiScope', v)} multiline theme={theme} />
         <DocLabel theme={theme}>Teaming Partners</DocLabel>
-        <div style={{ fontSize: '10px', fontStyle: 'italic', color: c.textSecondary, opacity: 0.45, marginBottom: '6px' }}>
+        <div style={{ fontSize: '0.625rem', fontStyle: 'italic', color: c.textSecondary, opacity: 0.45, marginBottom: '6px' }}>
           Derived from Product Matrix — page 7
         </div>
         {(partnerItems || []).map((item) => (
-          <div key={item.itemCode} style={{ display: 'flex', gap: '8px', fontSize: '12px', lineHeight: '1.8', color: c.textPrimary }}>
+          <div key={item.itemCode} style={{ display: 'flex', gap: '8px', fontSize: '0.75rem', lineHeight: '1.8', color: c.textPrimary }}>
             <span style={{ fontWeight: 700, flexShrink: 0, minWidth: '52px' }}>{item.itemCode}</span>
             <span style={{ color: c.textSecondary, flexShrink: 0 }}>{item.category}:</span>
             <span>
@@ -993,7 +993,7 @@ function renderProductCards(items, { c, isDark, compact = false, theme, updateTy
               }}>
                 {t.image
                   ? <img src={t.image} alt={t.series} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: c.textSecondary, opacity: 0.2, fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t.series}</div>
+                  : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: c.textSecondary, opacity: 0.2, fontSize: '0.625rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t.series}</div>
                 }
               </div>
 
@@ -1001,18 +1001,18 @@ function renderProductCards(items, { c, isDark, compact = false, theme, updateTy
               <div style={{ flex: 1, minWidth: 0 }}>
                 {/* Item code + category — structural identifiers, kept as labels */}
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '2px' }}>
-                  <span style={{ fontSize: '14px', fontWeight: 700, color: c.textPrimary }}>{t.itemCode}</span>
-                  <span style={{ fontSize: '11px', color: c.textSecondary }}>{t.category}</span>
+                  <span style={{ fontSize: '0.875rem', fontWeight: 700, color: c.textPrimary }}>{t.itemCode}</span>
+                  <span style={{ fontSize: '0.6875rem', color: c.textSecondary }}>{t.category}</span>
                 </div>
 
                 {/* Series — editable */}
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '4px' }}>
-                  <span style={{ fontSize: '12px', fontWeight: 600, color: c.textSecondary, flexShrink: 0 }}>JSI</span>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 600, color: c.textSecondary, flexShrink: 0 }}>JSI</span>
                   <DocField
                     value={t.series}
                     onChange={update ? (v) => update('series', v) : undefined}
                     theme={theme}
-                    style={{ fontSize: '12px', fontWeight: 600 }}
+                    style={{ fontSize: '0.75rem', fontWeight: 600 }}
                   />
                 </div>
 
@@ -1022,13 +1022,13 @@ function renderProductCards(items, { c, isDark, compact = false, theme, updateTy
                   border: `1px solid ${isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)'}`,
                   borderRadius: 4, padding: '5px 8px',
                 }}>
-                  <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: c.textSecondary, opacity: 0.5 }}>RFP</span>
+                  <span style={{ fontSize: '0.5625rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: c.textSecondary, opacity: 0.5 }}>RFP</span>
                   <DocField
                     value={t.rfpRequirement || ''}
                     onChange={update ? (v) => update('rfpRequirement', v) : undefined}
                     multiline
                     theme={theme}
-                    style={{ fontSize: '10px', fontStyle: 'italic', lineHeight: '1.5' }}
+                    style={{ fontSize: '0.625rem', fontStyle: 'italic', lineHeight: '1.5' }}
                   />
                 </div>
               </div>
@@ -1040,7 +1040,7 @@ function renderProductCards(items, { c, isDark, compact = false, theme, updateTy
               onChange={update ? (v) => update('rationale', v) : undefined}
               multiline
               theme={theme}
-              style={{ fontSize: '11px', lineHeight: '1.6', marginTop: '6px' }}
+              style={{ fontSize: '0.6875rem', lineHeight: '1.6', marginTop: '6px' }}
             />
 
             {/* Component list — editable (monospace) */}
@@ -1051,7 +1051,7 @@ function renderProductCards(items, { c, isDark, compact = false, theme, updateTy
                 multiline
                 theme={theme}
                 style={{
-                  fontSize: '10px', lineHeight: '1.65', fontFamily: 'monospace',
+                  fontSize: '0.625rem', lineHeight: '1.65', fontFamily: 'monospace',
                   marginTop: '6px',
                   backgroundColor: isDark ? 'rgba(255,255,255,0.025)' : 'rgba(53,53,53,0.02)',
                   borderRadius: 4, padding: '6px 8px',
@@ -1097,10 +1097,10 @@ function renderPartnerItemCard(item, { c, isDark, onPartnerItemChange, theme }) 
           gap: '3px',
         }}
       >
-        <span style={{ fontSize: '8px', fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: PARTNER_AMBER }}>
+        <span style={{ fontSize: '0.5rem', fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: PARTNER_AMBER }}>
           PARTNER
         </span>
-        <span style={{ fontSize: '9px', color: c.textSecondary, opacity: 0.5 }}>
+        <span style={{ fontSize: '0.5625rem', color: c.textSecondary, opacity: 0.5 }}>
           {item.itemCode}
         </span>
       </div>
@@ -1108,15 +1108,15 @@ function renderPartnerItemCard(item, { c, isDark, onPartnerItemChange, theme }) 
       {/* Content */}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '3px', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '13px', fontWeight: 700, color: c.textPrimary }}>{item.itemCode}</span>
+          <span style={{ fontSize: '0.8125rem', fontWeight: 700, color: c.textPrimary }}>{item.itemCode}</span>
           <DocField
             value={item.category}
             onChange={(v) => onPartnerItemChange(item.itemCode, 'category', v)}
             theme={theme}
-            style={{ fontSize: '11px', color: c.textSecondary }}
+            style={{ fontSize: '0.6875rem', color: c.textSecondary }}
           />
           <span style={{
-            fontSize: '9px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase',
+            fontSize: '0.5625rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase',
             color: PARTNER_AMBER, backgroundColor: PARTNER_AMBER_BG,
             border: `1px solid ${PARTNER_AMBER}40`, borderRadius: '4px', padding: '1px 5px',
             flexShrink: 0,
@@ -1129,18 +1129,18 @@ function renderPartnerItemCard(item, { c, isDark, onPartnerItemChange, theme }) 
           border: `1px solid ${isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)'}`,
           borderRadius: 4, padding: '5px 7px', marginBottom: '6px',
         }}>
-          <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: c.textSecondary, opacity: 0.5 }}>RFP</span>
+          <span style={{ fontSize: '0.5625rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: c.textSecondary, opacity: 0.5 }}>RFP</span>
           <DocField
             value={item.rfpRequirement || ''}
             onChange={(v) => onPartnerItemChange(item.itemCode, 'rfpRequirement', v)}
             multiline
             theme={theme}
-            style={{ fontSize: '10px', fontStyle: 'italic', lineHeight: '1.5' }}
+            style={{ fontSize: '0.625rem', fontStyle: 'italic', lineHeight: '1.5' }}
           />
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: '9px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: c.textSecondary, opacity: 0.45, marginBottom: '2px' }}>
+            <div style={{ fontSize: '0.5625rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: c.textSecondary, opacity: 0.45, marginBottom: '2px' }}>
               Manufacturer
             </div>
             <DocField
@@ -1150,7 +1150,7 @@ function renderPartnerItemCard(item, { c, isDark, onPartnerItemChange, theme }) 
             />
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: '9px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: c.textSecondary, opacity: 0.45, marginBottom: '2px' }}>
+            <div style={{ fontSize: '0.5625rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: c.textSecondary, opacity: 0.45, marginBottom: '2px' }}>
               Product / Model
             </div>
             <DocField

@@ -29,7 +29,7 @@ export const CheckoutSuccess = ({ show, theme }) => {
         }}
       >
         <CheckCircle className="w-10 h-10 mx-auto mb-3" style={{ color: theme.colors.success }} />
-        <p className="font-bold text-[15px]">Order Placed!</p>
+        <p className="font-bold text-[0.9375rem]">Order Placed!</p>
         <p className="text-xs mt-1" style={{ color: theme.colors.textSecondary }}>Your LWYD merch is on its way.</p>
       </div>
     </div>,

@@ -114,7 +114,7 @@ export const PresentationsScreen = ({ theme, screenParams }) => {
                             <Icon className="w-3.5 h-3.5" />
                             {label}
                             {id === 'my-decks' && myDecks.length > 0 && (
-                                <span className="ml-0.5 px-1.5 py-0.5 rounded-full text-[11px] font-bold"
+                                <span className="ml-0.5 px-1.5 py-0.5 rounded-full text-[0.6875rem] font-bold"
                                     style={{ background: active ? 'rgba(255,255,255,0.25)' : `${colors.accent}20`, color: active ? (isDark ? '#1A1A1A' : '#FFF') : colors.accent }}>
                                     {myDecks.length}
                                 </span>
@@ -169,7 +169,7 @@ export const PresentationsScreen = ({ theme, screenParams }) => {
                                 <p className="font-semibold" style={{ color: colors.textPrimary }}>No saved decks yet</p>
                                 <p className="text-sm mt-1 mb-4" style={{ color: colors.textSecondary }}>Generate one in the Builder or save from Browse.</p>
                                 <button onClick={() => setActiveTab('builder')}
-                                    className="px-5 py-2.5 rounded-2xl text-[13px] font-semibold"
+                                    className="px-5 py-2.5 rounded-2xl text-[0.8125rem] font-semibold"
                                     style={{ background: colors.accent, color: colors.accentText || (isDark ? '#1A1A1A' : '#FFF') }}>
                                     Open Builder
                                 </button>

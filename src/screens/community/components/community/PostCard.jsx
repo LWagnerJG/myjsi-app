@@ -31,7 +31,7 @@ export const PostCard = React.memo(({ post, theme, dark, isLiked, isUpvoted, isE
         <div className="flex items-center gap-2.5">
           <Avatar src={post.user?.avatar} alt={post.user?.name} dark={dark} theme={theme} />
           <div className="flex-1 min-w-0">
-            <span className="text-[13px] font-semibold" style={{ color: theme.colors.textPrimary }}>{post.user?.name}</span>
+            <span className="text-[0.8125rem] font-semibold" style={{ color: theme.colors.textPrimary }}>{post.user?.name}</span>
             <span
               className="text-xs font-medium ml-2 cursor-default"
               title={formatExactTimestamp(post.createdAt)}
@@ -41,8 +41,8 @@ export const PostCard = React.memo(({ post, theme, dark, isLiked, isUpvoted, isE
             </span>
           </div>
         </div>
-        {post.title && <p className="text-[13px] font-bold mt-2" style={{ color: theme.colors.textPrimary }}>{post.title}</p>}
-        {post.text && <p className="text-[13px] mt-1 whitespace-pre-line leading-relaxed" style={{ color: theme.colors.textSecondary }}>{post.text}</p>}
+        {post.title && <p className="text-[0.8125rem] font-bold mt-2" style={{ color: theme.colors.textPrimary }}>{post.title}</p>}
+        {post.text && <p className="text-[0.8125rem] mt-1 whitespace-pre-line leading-relaxed" style={{ color: theme.colors.textSecondary }}>{post.text}</p>}
       </div>
 
       {/* Images */}
@@ -100,7 +100,7 @@ export const PostCard = React.memo(({ post, theme, dark, isLiked, isUpvoted, isE
             {(post.comments || []).map(c => (
               <div key={c.id} className="flex items-start gap-2">
                 <div
-                  className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0"
+                  className="w-6 h-6 rounded-full flex items-center justify-center text-[0.625rem] font-bold flex-shrink-0"
                   style={{ backgroundColor: dark ? '#333' : '#EDEAE4', color: theme.colors.textSecondary }}
                 >
                   {c.name?.[0] || '?'}

@@ -125,10 +125,10 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
                     <div className="flex items-center gap-2.5 min-w-0 pr-2">
                         <Swatch image={oldImg} alt={finish.oldName} />
                         <div className="min-w-0">
-                            <p className="font-semibold text-[13px] leading-tight truncate" style={{ color: text }}>
+                            <p className="font-semibold text-[0.8125rem] leading-tight truncate" style={{ color: text }}>
                                 {fmt(finish.oldName)}
                             </p>
-                            <p className="text-[10px] font-medium mt-0.5" style={{ color: sub }}>
+                            <p className="text-[0.625rem] font-medium mt-0.5" style={{ color: sub }}>
                                 {finish.discontinuedDate && (
                                     <span style={{ opacity: 0.7 }}>Disc. {fmtDate(finish.discontinuedDate)}</span>
                                 )}
@@ -148,10 +148,10 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
                     <div className="flex items-center gap-2.5 min-w-0 pl-7">
                         <Swatch image={newImg} alt={finish.newName} />
                         <div className="min-w-0">
-                            <p className="font-semibold text-[13px] leading-tight truncate" style={{ color: text }}>
+                            <p className="font-semibold text-[0.8125rem] leading-tight truncate" style={{ color: text }}>
                                 {fmt(finish.newName)}
                             </p>
-                            <p className="text-[10px] font-medium mt-0.5" style={{ color: accent, opacity: 0.55 }}>
+                            <p className="text-[0.625rem] font-medium mt-0.5" style={{ color: accent, opacity: 0.55 }}>
                                 Replacement
                             </p>
                         </div>
@@ -184,7 +184,7 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
                         {grouped.map(([category, items]) => (
                             <section key={category}>
                                 <h2
-                                    className="text-[11px] font-bold uppercase tracking-[0.1em] mb-2 px-0.5"
+                                    className="text-[0.6875rem] font-bold uppercase tracking-[0.1em] mb-2 px-0.5"
                                     style={{ color: sub, opacity: 0.55 }}
                                 >
                                     {category}
@@ -220,7 +220,7 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
                                 <Swatch image={getImg(selectedFinish.oldName)} alt={selectedFinish.oldName} size={52} />
                                 <div className="text-center">
                                     <p className="text-xs font-semibold" style={{ color: sub }}>{fmt(selectedFinish.oldName)}</p>
-                                    <p className="text-[10px] mt-0.5 font-medium" style={{ color: sub, opacity: 0.5 }}>Discontinued</p>
+                                    <p className="text-[0.625rem] mt-0.5 font-medium" style={{ color: sub, opacity: 0.5 }}>Discontinued</p>
                                 </div>
                             </div>
                             <div className="flex-shrink-0 -mt-5" style={{ color: sub, opacity: 0.4 }}>
@@ -230,26 +230,26 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
                                 <Swatch image={getImg(selectedFinish.newName)} alt={selectedFinish.newName} size={52} />
                                 <div className="text-center">
                                     <p className="text-xs font-semibold" style={{ color: text }}>{fmt(selectedFinish.newName)}</p>
-                                    <p className="text-[10px] mt-0.5 font-medium" style={{ color: accent }}>Replacement</p>
+                                    <p className="text-[0.625rem] mt-0.5 font-medium" style={{ color: accent }}>Replacement</p>
                                 </div>
                             </div>
                         </div>
 
-                        <p className="text-[13px] text-center leading-relaxed" style={{ color: sub }}>
+                        <p className="text-[0.8125rem] text-center leading-relaxed" style={{ color: sub }}>
                             Add a sample of <span className="font-semibold" style={{ color: text }}>{fmt(selectedFinish.newName)}</span> to your cart?
                         </p>
 
                         <div className="flex gap-3 pt-1">
                             <button
                                 onClick={() => setSelectedFinish(null)}
-                                className="flex-1 font-semibold py-2.5 rounded-full text-[13px] motion-tap active:scale-[0.98] transition-all"
+                                className="flex-1 font-semibold py-2.5 rounded-full text-[0.8125rem] motion-tap active:scale-[0.98] transition-all"
                                 style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : theme.colors.subtle, color: text }}
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleOrderClick}
-                                className="flex-1 font-semibold py-2.5 rounded-full text-[13px] flex items-center justify-center gap-2 motion-tap active:scale-[0.98] transition-all"
+                                className="flex-1 font-semibold py-2.5 rounded-full text-[0.8125rem] flex items-center justify-center gap-2 motion-tap active:scale-[0.98] transition-all"
                                 style={{ backgroundColor: accent, color: theme.colors.accentText }}
                             >
                                 <ShoppingCart className="w-3.5 h-3.5" />

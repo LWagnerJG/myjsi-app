@@ -2,7 +2,7 @@ import React from 'react';
 
 export const MiniAvatar = ({ src, name, dark, size = 28 }) => (
   <div
-    className="rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden text-[11px] font-bold"
+    className="rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden text-[0.6875rem] font-bold"
     style={{ width: size, height: size, backgroundColor: dark ? '#444' : '#E3E0D8' }}
   >
     {src

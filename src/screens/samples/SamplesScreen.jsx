@@ -83,8 +83,8 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                         {setQty > 0 && <CheckCircle className="w-4 h-4" style={{ color: theme.colors.accentText }} />}
                     </div>
                     <div className="px-2 sm:px-3 py-1.5 sm:py-2 text-center" style={{ backgroundColor: setQty > 0 ? theme.colors.accent : theme.colors.surface }}>
-                        <p className="text-[11px] sm:text-xs font-bold truncate" style={{ color: setQty > 0 ? theme.colors.accentText : theme.colors.textPrimary }}>All {currentCategoryName}</p>
-                        <p className="text-[10px] sm:text-[11px] mt-0.5 font-medium" style={{ color: setQty > 0 ? 'rgba(255,255,255,0.7)' : theme.colors.textSecondary }}>{products.length} {categoryItemLabel}</p>
+                        <p className="text-[0.6875rem] sm:text-xs font-bold truncate" style={{ color: setQty > 0 ? theme.colors.accentText : theme.colors.textPrimary }}>All {currentCategoryName}</p>
+                        <p className="text-[0.625rem] sm:text-[0.6875rem] mt-0.5 font-medium" style={{ color: setQty > 0 ? 'rgba(255,255,255,0.7)' : theme.colors.textSecondary }}>{products.length} {categoryItemLabel}</p>
                     </div>
                 </div>
 
@@ -109,13 +109,13 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                             }}
                         >
                             {qty > 0 && (
-                                <div className="absolute top-1.5 left-1.5 z-10 min-w-[20px] sm:min-w-[28px] h-5 sm:h-7 px-1.5 sm:px-2 rounded-full text-[11px] sm:text-sm font-bold flex items-center justify-center shadow-md" style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}>{qty}</div>
+                                <div className="absolute top-1.5 left-1.5 z-10 min-w-[20px] sm:min-w-[28px] h-5 sm:h-7 px-1.5 sm:px-2 rounded-full text-[0.6875rem] sm:text-sm font-bold flex items-center justify-center shadow-md" style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}>{qty}</div>
                             )}
                             <div role="button" tabIndex={0} onClick={addOne} onKeyPress={e => { if (e.key === 'Enter') addOne(e); }} className="aspect-[4/3] flex items-center justify-center overflow-hidden" style={{ backgroundColor: bg }}>
                                 {hasImage && <img loading="lazy" width="600" height="600" src={product.image} alt={product.name} className="object-cover w-full h-full select-none pointer-events-none" draggable={false} />}
                             </div>
                             <div className="px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-between gap-1" style={{ backgroundColor: theme.colors.surface }}>
-                                <p className="text-[11px] sm:text-sm truncate flex-1" style={{ color: theme.colors.textPrimary }}>{cleanName(product.name)}</p>
+                                <p className="text-[0.6875rem] sm:text-sm truncate flex-1" style={{ color: theme.colors.textPrimary }}>{cleanName(product.name)}</p>
                                 <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
                                     {qty > 0 && (
                                         <button type="button" onClick={removeOne} className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center active:scale-90 transition-all" style={{ backgroundColor: qty === 1 ? theme.colors.destructiveLight : theme.colors.subtle, border: qty === 1 ? `1px solid ${theme.colors.destructiveBorder}` : `1px solid ${theme.colors.border}` }} aria-label={qty === 1 ? `Remove ${product.name}` : `Decrease ${product.name} quantity`}>
@@ -186,7 +186,7 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                                     <Layers className="w-5 h-5" style={{ color: fullQty > 0 ? theme.colors.accentText : theme.colors.accent }} />
                                 </div>
                                 <div className="flex-1 text-left">
-                                    <p className="text-[13px] font-bold" style={{ color: fullQty > 0 ? theme.colors.accentText : theme.colors.textPrimary }}>
+                                    <p className="text-[0.8125rem] font-bold" style={{ color: fullQty > 0 ? theme.colors.accentText : theme.colors.textPrimary }}>
                                         Full JSI Sample Set
                                     </p>
                                     <p className="text-xs mt-0.5" style={{ color: fullQty > 0 ? 'rgba(255,255,255,0.7)' : theme.colors.textSecondary }}>

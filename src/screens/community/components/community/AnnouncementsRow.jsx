@@ -116,7 +116,7 @@ export const AnnouncementsRow = ({ announcements, theme, dark, onNavigate, onDis
                   </div>
                   <div className="text-left min-w-0 flex-1">
                     <p className="text-xs font-semibold leading-tight truncate" style={{ color: theme.colors.textPrimary }}>{a.title}</p>
-                    <p className="text-[11px] leading-tight truncate mt-0.5" style={{ color: theme.colors.textSecondary }}>{a.subtitle}</p>
+                    <p className="text-[0.6875rem] leading-tight truncate mt-0.5" style={{ color: theme.colors.textSecondary }}>{a.subtitle}</p>
                   </div>
                 </button>
 

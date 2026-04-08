@@ -58,7 +58,7 @@ export const HomeFeatureCards = ({
                     ) : (
                         <button
                             onClick={() => navigateFeature(homeFeatureMode)}
-                            className="text-[10px] font-semibold flex items-center gap-1 px-2.5 py-1 rounded-full transition-all hover:opacity-80"
+                            className="text-[0.625rem] font-semibold flex items-center gap-1 px-2.5 py-1 rounded-full transition-all hover:opacity-80"
                             style={{
                                 color: colors.textSecondary,
                                 opacity: 0.6,
@@ -71,7 +71,7 @@ export const HomeFeatureCards = ({
                     )}
                 </div>
                 {isEditMode && (
-                    <p className="text-[11px] font-medium mb-3 px-6 flex items-center gap-1" style={{ color: colors.accent, opacity: 0.7 }}>
+                    <p className="text-[0.6875rem] font-medium mb-3 px-6 flex items-center gap-1" style={{ color: colors.accent, opacity: 0.7 }}>
                         <ChevronDown className="w-3 h-3" /> Use the dropdown above to change this card's content
                     </p>
                 )}
@@ -133,7 +133,7 @@ export const HomeFeatureCards = ({
                     ) : (
                         <button
                             onClick={() => navigateFeature(secondaryFeatureMode)}
-                            className="text-[10px] font-semibold flex items-center gap-1 px-2.5 py-1 rounded-full transition-all hover:opacity-80"
+                            className="text-[0.625rem] font-semibold flex items-center gap-1 px-2.5 py-1 rounded-full transition-all hover:opacity-80"
                             style={{
                                 color: colors.textSecondary,
                                 opacity: 0.6,
@@ -146,7 +146,7 @@ export const HomeFeatureCards = ({
                     )}
                 </div>
                 {isEditMode && (
-                    <p className="text-[11px] font-medium mb-3 px-6 flex items-center gap-1" style={{ color: colors.accent, opacity: 0.7 }}>
+                    <p className="text-[0.6875rem] font-medium mb-3 px-6 flex items-center gap-1" style={{ color: colors.accent, opacity: 0.7 }}>
                         <ChevronDown className="w-3 h-3" /> Use the dropdown above to change this card's content
                     </p>
                 )}

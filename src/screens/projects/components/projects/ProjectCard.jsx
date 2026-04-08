@@ -18,15 +18,15 @@ export const ProjectCard = ({ opp, theme, onClick }) => {
         className="p-4 motion-card motion-tap hover:-translate-y-0.5 active:translate-y-0"
       >
         <div className="mb-3">
-          <p className="font-semibold text-[15px] leading-snug truncate" style={{ color: theme.colors.textPrimary }}>
+          <p className="font-semibold text-[0.9375rem] leading-snug truncate" style={{ color: theme.colors.textPrimary }}>
             {opp.name}
           </p>
-          <p className="mt-1 text-[13px] font-medium truncate" style={{ color: theme.colors.accent, opacity: 0.8 }}>
+          <p className="mt-1 text-[0.8125rem] font-medium truncate" style={{ color: theme.colors.accent, opacity: 0.8 }}>
             {opp.company || 'Unknown'}
           </p>
         </div>
         <div className="flex items-baseline justify-end gap-1.5">
-          <span className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: theme.colors.textSecondary }}>
+          <span className="text-[0.6875rem] font-semibold uppercase tracking-wide" style={{ color: theme.colors.textSecondary }}>
             List
           </span>
           <p className="font-bold text-xl tracking-tight" style={{ color: theme.colors.textPrimary }}>

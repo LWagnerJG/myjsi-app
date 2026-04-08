@@ -161,7 +161,7 @@ ${WEIGHT_RATINGS_BIFMA_POINTS.map((point) => `<li>${point}</li>`).join('')}
             <button
                 type="button"
                 onClick={goToList}
-                className="mt-2 mb-1 inline-flex items-center gap-1.5 text-[13px] font-medium"
+                className="mt-2 mb-1 inline-flex items-center gap-1.5 text-[0.8125rem] font-medium"
                 style={{ color: safeTheme.colors.textSecondary }}
             >
                 <ArrowLeft className="w-3.5 h-3.5" />
@@ -178,22 +178,22 @@ ${WEIGHT_RATINGS_BIFMA_POINTS.map((point) => `<li>${point}</li>`).join('')}
                         className="w-16 h-16 rounded-xl object-cover flex-shrink-0"
                     />
                     <div className="min-w-0">
-                        <h2 className="text-[17px] font-bold leading-tight" style={{ color: safeTheme.colors.textPrimary }}>
+                        <h2 className="text-[1.0625rem] font-bold leading-tight" style={{ color: safeTheme.colors.textPrimary }}>
                             {series.series}
                         </h2>
-                        <p className="mt-0.5 text-[13px]" style={{ color: safeTheme.colors.textSecondary }}>
+                        <p className="mt-0.5 text-[0.8125rem]" style={{ color: safeTheme.colors.textSecondary }}>
                             Rated to {WEIGHT_LIMIT_LBS} lbs
                         </p>
                     </div>
                 </div>
 
                 <div style={{ borderTop: `1px solid ${dividerColor}` }} className="px-4 py-3.5">
-                    <p className="text-[12px] uppercase font-bold tracking-[0.07em] mb-2" style={{ color: safeTheme.colors.textSecondary, opacity: 0.5 }}>
+                    <p className="text-xs uppercase font-bold tracking-[0.07em] mb-2" style={{ color: safeTheme.colors.textSecondary, opacity: 0.5 }}>
                         ANSI/BIFMA Testing
                     </p>
                     <ul className="space-y-1.5">
                         {WEIGHT_RATINGS_BIFMA_POINTS.map((point) => (
-                            <li key={point} className="text-[13px] leading-snug" style={{ color: safeTheme.colors.textSecondary }}>
+                            <li key={point} className="text-[0.8125rem] leading-snug" style={{ color: safeTheme.colors.textSecondary }}>
                                 • {point}
                             </li>
                         ))}
@@ -207,7 +207,7 @@ ${WEIGHT_RATINGS_BIFMA_POINTS.map((point) => `<li>${point}</li>`).join('')}
                             href={link.url}
                             target="_blank"
                             rel="noreferrer"
-                            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] font-medium"
+                            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium"
                             style={{
                                 backgroundColor: safeTheme.colors.subtle,
                                 color: safeTheme.colors.textSecondary,
@@ -224,7 +224,7 @@ ${WEIGHT_RATINGS_BIFMA_POINTS.map((point) => `<li>${point}</li>`).join('')}
             {/* Actions */}
             <GlassCard theme={safeTheme} className="rounded-[22px] overflow-hidden">
                 <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: `1px solid ${dividerColor}` }}>
-                    <span className="text-[11px] font-bold uppercase tracking-[0.08em]" style={{ color: safeTheme.colors.textSecondary, opacity: 0.5 }}>
+                    <span className="text-[0.6875rem] font-bold uppercase tracking-[0.08em]" style={{ color: safeTheme.colors.textSecondary, opacity: 0.5 }}>
                         One-Pager
                     </span>
                 </div>
@@ -232,7 +232,7 @@ ${WEIGHT_RATINGS_BIFMA_POINTS.map((point) => `<li>${point}</li>`).join('')}
                     <button
                         type="button"
                         onClick={() => shareOnePager(series)}
-                        className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-[12px] font-semibold"
+                        className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold"
                         style={{ backgroundColor: safeTheme.colors.accent, color: safeTheme.colors.accentText }}
                     >
                         <Share2 className="w-3.5 h-3.5" />
@@ -241,7 +241,7 @@ ${WEIGHT_RATINGS_BIFMA_POINTS.map((point) => `<li>${point}</li>`).join('')}
                     <button
                         type="button"
                         onClick={() => openPrintableOnePager(series)}
-                        className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-[12px] font-semibold"
+                        className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold"
                         style={{
                             border: `1px solid ${safeTheme.colors.border}`,
                             color: safeTheme.colors.textPrimary,
@@ -261,13 +261,13 @@ ${WEIGHT_RATINGS_BIFMA_POINTS.map((point) => `<li>${point}</li>`).join('')}
             <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: safeTheme.colors.background }}>
                 <div className="flex-1 overflow-y-auto px-4 pb-6">
                     <GlassCard theme={safeTheme} className="mt-4 rounded-[22px] overflow-hidden p-6 text-center">
-                        <p className="text-[13px] font-semibold" style={{ color: safeTheme.colors.textPrimary }}>
+                        <p className="text-[0.8125rem] font-semibold" style={{ color: safeTheme.colors.textPrimary }}>
                             Series not found
                         </p>
                         <button
                             type="button"
                             onClick={goToList}
-                            className="mt-3 inline-flex items-center gap-2 rounded-full px-4 py-2 text-[12px] font-semibold"
+                            className="mt-3 inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold"
                             style={{ backgroundColor: safeTheme.colors.accent, color: safeTheme.colors.accentText }}
                         >
                             <ArrowLeft className="w-3.5 h-3.5" />
@@ -306,10 +306,10 @@ ${WEIGHT_RATINGS_BIFMA_POINTS.map((point) => `<li>${point}</li>`).join('')}
                                 className="flex items-center px-4 py-2.5"
                                 style={{ borderBottom: `1px solid ${safeTheme.colors.border}` }}
                             >
-                                <span className="flex-1 text-[11px] font-bold uppercase tracking-[0.08em]" style={{ color: safeTheme.colors.textSecondary, opacity: 0.5 }}>
+                                <span className="flex-1 text-[0.6875rem] font-bold uppercase tracking-[0.08em]" style={{ color: safeTheme.colors.textSecondary, opacity: 0.5 }}>
                                     Series
                                 </span>
-                                <span className="text-[11px] font-bold uppercase tracking-[0.08em]" style={{ color: safeTheme.colors.textSecondary, opacity: 0.5 }}>
+                                <span className="text-[0.6875rem] font-bold uppercase tracking-[0.08em]" style={{ color: safeTheme.colors.textSecondary, opacity: 0.5 }}>
                                     Limit
                                 </span>
                             </div>
@@ -329,10 +329,10 @@ ${WEIGHT_RATINGS_BIFMA_POINTS.map((point) => `<li>${point}</li>`).join('')}
                                             alt={entry.series}
                                             className="w-9 h-9 rounded-lg object-cover flex-shrink-0"
                                         />
-                                        <span className="flex-1 text-[13px] font-semibold truncate" style={{ color: safeTheme.colors.textPrimary }}>
+                                        <span className="flex-1 text-[0.8125rem] font-semibold truncate" style={{ color: safeTheme.colors.textPrimary }}>
                                             {entry.series}
                                         </span>
-                                        <span className="text-[13px] font-bold tabular-nums" style={{ color: safeTheme.colors.accent }}>
+                                        <span className="text-[0.8125rem] font-bold tabular-nums" style={{ color: safeTheme.colors.accent }}>
                                             {entry.weightLimit} lbs
                                         </span>
                                     </div>
@@ -341,7 +341,7 @@ ${WEIGHT_RATINGS_BIFMA_POINTS.map((point) => `<li>${point}</li>`).join('')}
                         </GlassCard>
                     ) : (
                         <GlassCard theme={safeTheme} className="mt-1 rounded-[22px] p-6 text-center">
-                            <p className="text-[13px] font-medium" style={{ color: safeTheme.colors.textPrimary }}>
+                            <p className="text-[0.8125rem] font-medium" style={{ color: safeTheme.colors.textPrimary }}>
                                 No matching series
                             </p>
                         </GlassCard>

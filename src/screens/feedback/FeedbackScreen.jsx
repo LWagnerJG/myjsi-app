@@ -57,14 +57,14 @@ export const FeedbackScreen = ({ theme }) => {
                         <CheckCircle2 className="w-6 h-6" style={{ color: colors.success }} />
                     </div>
                     <div className="space-y-2">
-                        <h2 className="text-[22px] font-bold tracking-tight" style={{ color: colors.textPrimary }}>Thank you</h2>
-                        <p className="text-[13px] leading-relaxed" style={{ color: colors.textSecondary }}>
+                        <h2 className="text-[1.375rem] font-bold tracking-tight" style={{ color: colors.textPrimary }}>Thank you</h2>
+                        <p className="text-[0.8125rem] leading-relaxed" style={{ color: colors.textSecondary }}>
                             Your feedback has been received. We read every message and use it to improve myJSI.
                         </p>
                     </div>
                     <button
                         onClick={() => { setSubmitted(false); setMessage(''); setFiles([]); setFeedbackType('general'); }}
-                        className="text-[12px] font-semibold px-4 py-2 rounded-full transition-all hover:opacity-70"
+                        className="text-xs font-semibold px-4 py-2 rounded-full transition-all hover:opacity-70"
                         style={{ color: colors.textSecondary, backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.05)' }}
                     >
                         Send another
@@ -82,17 +82,17 @@ export const FeedbackScreen = ({ theme }) => {
 
                         {/* ── Page header ── */}
                         <div>
-                            <h1 className="text-[24px] font-bold tracking-tight leading-tight" style={{ color: colors.textPrimary }}>
+                            <h1 className="text-2xl font-bold tracking-tight leading-tight" style={{ color: colors.textPrimary }}>
                                 Share Feedback
                             </h1>
-                            <p className="mt-1.5 text-[13px] leading-relaxed" style={{ color: colors.textSecondary, opacity: 0.65 }}>
+                            <p className="mt-1.5 text-[0.8125rem] leading-relaxed" style={{ color: colors.textSecondary, opacity: 0.65 }}>
                                 Help us build a better myJSI — we read every message.
                             </p>
                         </div>
 
                         {/* ── Category ── */}
                         <div className="space-y-2.5">
-                            <span className="text-[11px] font-bold uppercase tracking-[0.10em]" style={{ color: colors.textSecondary, opacity: 0.5 }}>
+                            <span className="text-[0.6875rem] font-bold uppercase tracking-[0.10em]" style={{ color: colors.textSecondary, opacity: 0.5 }}>
                                 Category
                             </span>
                             <div className="flex gap-2 flex-wrap">
@@ -104,7 +104,7 @@ export const FeedbackScreen = ({ theme }) => {
                                             key={t.value}
                                             type="button"
                                             onClick={() => setFeedbackType(t.value)}
-                                            className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[12px] font-semibold transition-all active:scale-95"
+                                            className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold transition-all active:scale-95"
                                             style={{
                                                 backgroundColor: active
                                                     ? (isDark ? 'rgba(255,255,255,0.12)' : colors.textPrimary)
@@ -128,11 +128,11 @@ export const FeedbackScreen = ({ theme }) => {
                         {/* ── Message ── */}
                         <div className="space-y-2.5">
                             <div className="flex items-baseline justify-between">
-                                <span className="text-[11px] font-bold uppercase tracking-[0.10em]" style={{ color: colors.textSecondary, opacity: 0.5 }}>
+                                <span className="text-[0.6875rem] font-bold uppercase tracking-[0.10em]" style={{ color: colors.textSecondary, opacity: 0.5 }}>
                                     Message
                                 </span>
                                 {message.length > 0 && (
-                                    <span className="text-[11px] tabular-nums" style={{ color: colors.textSecondary, opacity: 0.30 }}>
+                                    <span className="text-[0.6875rem] tabular-nums" style={{ color: colors.textSecondary, opacity: 0.30 }}>
                                         {message.length}
                                     </span>
                                 )}
@@ -143,7 +143,7 @@ export const FeedbackScreen = ({ theme }) => {
                                 placeholder="What's on your mind — bugs, ideas, anything..."
                                 rows={6}
                                 required
-                                className="w-full resize-none text-[14px] leading-relaxed px-4 py-3.5 rounded-2xl transition-all outline-none"
+                                className="w-full resize-none text-sm leading-relaxed px-4 py-3.5 rounded-2xl transition-all outline-none"
                                 style={{
                                     backgroundColor: surface,
                                     border: surfaceBorder,
@@ -156,11 +156,11 @@ export const FeedbackScreen = ({ theme }) => {
                         {/* ── Attachments ── */}
                         <div className="space-y-2.5">
                             <div className="flex items-center justify-between">
-                                <span className="text-[11px] font-bold uppercase tracking-[0.10em]" style={{ color: colors.textSecondary, opacity: 0.5 }}>
+                                <span className="text-[0.6875rem] font-bold uppercase tracking-[0.10em]" style={{ color: colors.textSecondary, opacity: 0.5 }}>
                                     Attachments
                                 </span>
                                 <label
-                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold cursor-pointer transition-all active:scale-95 hover:opacity-70"
+                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[0.6875rem] font-semibold cursor-pointer transition-all active:scale-95 hover:opacity-70"
                                     style={{
                                         backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)',
                                         color: colors.textSecondary,
@@ -182,8 +182,8 @@ export const FeedbackScreen = ({ theme }) => {
                                             style={{ backgroundColor: surface, border: surfaceBorder }}
                                         >
                                             <div className="min-w-0 flex-1">
-                                                <div className="truncate text-[13px] font-medium" style={{ color: colors.textPrimary }}>{f.name}</div>
-                                                <div className="text-[11px] mt-0.5" style={{ color: colors.textSecondary, opacity: 0.45 }}>{formatFileSize(f.size)}</div>
+                                                <div className="truncate text-[0.8125rem] font-medium" style={{ color: colors.textPrimary }}>{f.name}</div>
+                                                <div className="text-[0.6875rem] mt-0.5" style={{ color: colors.textSecondary, opacity: 0.45 }}>{formatFileSize(f.size)}</div>
                                             </div>
                                             <button type="button" onClick={() => removeFile(i)} className="ml-3 p-1.5 rounded-full transition-opacity hover:opacity-60 shrink-0">
                                                 <X className="w-3.5 h-3.5" style={{ color: colors.textSecondary }} />
@@ -198,7 +198,7 @@ export const FeedbackScreen = ({ theme }) => {
                         <button
                             type="submit"
                             disabled={!message.trim()}
-                            className="w-full flex items-center justify-center gap-2 py-4 text-[13px] font-bold tracking-wide rounded-2xl transition-all active:scale-[0.98] disabled:opacity-30"
+                            className="w-full flex items-center justify-center gap-2 py-4 text-[0.8125rem] font-bold tracking-wide rounded-2xl transition-all active:scale-[0.98] disabled:opacity-30"
                             style={{
                                 backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : colors.textPrimary,
                                 color: isDark ? colors.textPrimary : '#fff',

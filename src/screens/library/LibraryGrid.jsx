@@ -122,7 +122,7 @@ export const LibraryGrid = ({ theme, query, parentHeaderRef, savedImageIds = [],
                     return (
                       <button
                         onClick={() => onToggleSaveImage(selected.id)}
-                        className="flex items-center gap-2 px-4 h-10 rounded-full text-[13px] font-medium"
+                        className="flex items-center gap-2 px-4 h-10 rounded-full text-[0.8125rem] font-medium"
                         style={{ background: isSaved ? '#fee2e2' : theme.colors.subtle, color: isSaved ? '#dc2626' : theme.colors.textPrimary, border: `1px solid ${isSaved ? '#fca5a5' : theme.colors.border}` }}
                       >
                         <Heart className="w-3.5 h-3.5" fill={isSaved ? '#dc2626' : 'none'} />
@@ -132,14 +132,14 @@ export const LibraryGrid = ({ theme, query, parentHeaderRef, savedImageIds = [],
                   })()}
                   <button
                     onClick={() => { navigator.clipboard.writeText(window.location.origin + '/library#' + selected.id); }}
-                    className="flex items-center gap-2 px-4 h-10 rounded-full text-[13px] font-medium"
+                    className="flex items-center gap-2 px-4 h-10 rounded-full text-[0.8125rem] font-medium"
                     style={{ background: theme.colors.subtle, color: theme.colors.textPrimary, border: `1px solid ${theme.colors.border}` }}
                   >
                     <Share2 className="w-3.5 h-3.5" /> Share
                   </button>
                   <button
                     onClick={() => { navigator.clipboard.writeText(selected.src); }}
-                    className="flex items-center gap-2 px-4 h-10 rounded-full text-[13px] font-medium"
+                    className="flex items-center gap-2 px-4 h-10 rounded-full text-[0.8125rem] font-medium"
                     style={{ background: theme.colors.subtle, color: theme.colors.textPrimary, border: `1px solid ${theme.colors.border}` }}
                   >
                     <Copy className="w-3.5 h-3.5" /> Copy URL
@@ -149,7 +149,7 @@ export const LibraryGrid = ({ theme, query, parentHeaderRef, savedImageIds = [],
                     download
                     target="_blank"
                     rel="noreferrer"
-                    className="flex items-center gap-2 px-4 h-10 rounded-full text-[13px] font-semibold"
+                    className="flex items-center gap-2 px-4 h-10 rounded-full text-[0.8125rem] font-semibold"
                     style={{ background: theme.colors.accent, color: theme.colors.accentText }}
                   >
                     <Download className="w-3.5 h-3.5" /> Download

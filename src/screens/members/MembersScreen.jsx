@@ -152,17 +152,17 @@ const MembersScreenContent = ({ theme }) => {
                     {/* Header */}
                     <div className="pt-5 pb-4 sm:pt-7 flex items-center justify-between gap-4">
                         <div>
-                            <h1 className="text-[22px] font-bold leading-tight tracking-tight" style={{ color: theme.colors.textPrimary }}>
+                            <h1 className="text-[1.375rem] font-bold leading-tight tracking-tight" style={{ color: theme.colors.textPrimary }}>
                                 Members
                             </h1>
-                            <p className="text-[14px] mt-0.5" style={{ color: theme.colors.textSecondary }}>
+                            <p className="text-sm mt-0.5" style={{ color: theme.colors.textSecondary }}>
                                 {tab === 'team' ? 'Your rep team and permissions.' : 'Dealer companies and contacts.'}
                             </p>
                         </div>
                         {tab === 'team' && (
                             <button
                                 onClick={() => setShowInvite(true)}
-                                className="flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-semibold transition-all active:scale-95 shrink-0"
+                                className="flex items-center gap-1.5 px-4 py-2 rounded-full text-[0.8125rem] font-semibold transition-all active:scale-95 shrink-0"
                                 style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
                             >
                                 <UserPlus className="w-3.5 h-3.5" />
@@ -193,7 +193,7 @@ const MembersScreenContent = ({ theme }) => {
                                 value={searchQuery}
                                 onChange={e => setSearchQuery(e.target.value)}
                                 placeholder="Search dealers or contacts…"
-                                className="w-full pl-10 pr-10 outline-none rounded-full text-[14px]"
+                                className="w-full pl-10 pr-10 outline-none rounded-full text-sm"
                                 style={{
                                     height: 42,
                                     backgroundColor: dark ? theme.colors.surface : '#fff',
@@ -232,7 +232,7 @@ const MembersScreenContent = ({ theme }) => {
                         ) : (
                             <div className="py-20 text-center" style={{ color: theme.colors.textSecondary }}>
                                 <Users className="w-10 h-10 mx-auto mb-3 opacity-20" />
-                                <p className="text-[14px]">No team members yet</p>
+                                <p className="text-sm">No team members yet</p>
                             </div>
                         )
                     ) : (
@@ -251,7 +251,7 @@ const MembersScreenContent = ({ theme }) => {
                         ) : (
                             <div className="py-20 text-center" style={{ color: theme.colors.textSecondary }}>
                                 <Building2 className="w-10 h-10 mx-auto mb-3 opacity-20" />
-                                <p className="text-[14px]">{searchQuery ? 'No dealers match your search' : 'No dealers signed up yet'}</p>
+                                <p className="text-sm">{searchQuery ? 'No dealers match your search' : 'No dealers signed up yet'}</p>
                             </div>
                         )
                     )}

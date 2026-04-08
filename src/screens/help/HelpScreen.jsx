@@ -109,7 +109,7 @@ export const HelpScreen = ({ theme }) => {
                 <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
                     <button
                         onClick={() => setActiveCategory(null)}
-                        className="text-[11px] font-semibold px-3 py-1.5 rounded-full flex-shrink-0 whitespace-nowrap transition-all active:scale-95 border"
+                        className="text-[0.6875rem] font-semibold px-3 py-1.5 rounded-full flex-shrink-0 whitespace-nowrap transition-all active:scale-95 border"
                         style={{
                             color: !activeCategory ? theme.colors.accentText : theme.colors.textSecondary,
                             borderColor: !activeCategory ? theme.colors.accent : (dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'),
@@ -122,7 +122,7 @@ export const HelpScreen = ({ theme }) => {
                         <button
                             key={cat.id}
                             onClick={() => setActiveCategory(activeCategory === cat.id ? null : cat.id)}
-                            className="text-[11px] font-medium px-3 py-1.5 rounded-full flex-shrink-0 whitespace-nowrap transition-all active:scale-95 border flex items-center gap-1.5"
+                            className="text-[0.6875rem] font-medium px-3 py-1.5 rounded-full flex-shrink-0 whitespace-nowrap transition-all active:scale-95 border flex items-center gap-1.5"
                             style={{
                                 color: activeCategory === cat.id ? theme.colors.accentText : theme.colors.textSecondary,
                                 borderColor: activeCategory === cat.id ? theme.colors.accent : (dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'),

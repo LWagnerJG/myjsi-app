@@ -86,9 +86,9 @@ export const CommissionsScreen = ({ theme }) => {
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[15px] font-bold" style={{ color: theme.colors.textPrimary }}>{m.month}</span>
+                    <span className="text-[0.9375rem] font-bold" style={{ color: theme.colors.textPrimary }}>{m.month}</span>
                     <span
-                      className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
+                      className="text-[0.6875rem] font-semibold px-2 py-0.5 rounded-full"
                       style={{
                         backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.05)',
                         color: theme.colors.textSecondary,
@@ -137,7 +137,7 @@ export const CommissionsScreen = ({ theme }) => {
                         {/* SO + meta */}
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex-1 min-w-0 space-y-0.5">
-                            <div className="font-bold text-[13px]" style={{ color: theme.colors.textPrimary }}>{inv.so}</div>
+                            <div className="font-bold text-[0.8125rem]" style={{ color: theme.colors.textPrimary }}>{inv.so}</div>
                             <div className="text-xs font-medium truncate" style={{ color: theme.colors.textSecondary }}>{inv.dealer}</div>
                             <div className="text-xs truncate" style={{ color: theme.colors.textSecondary, opacity: 0.7 }}>{inv.project}</div>
                           </div>
@@ -151,7 +151,7 @@ export const CommissionsScreen = ({ theme }) => {
                             >
                               {rateDisplay}% rate
                             </div>
-                            <div className="text-[11px]" style={{ color: theme.colors.textSecondary, opacity: 0.55 }}>{invDate}</div>
+                            <div className="text-[0.6875rem]" style={{ color: theme.colors.textSecondary, opacity: 0.55 }}>{invDate}</div>
                           </div>
                         </div>
 
@@ -161,16 +161,16 @@ export const CommissionsScreen = ({ theme }) => {
                           style={{ borderTop: `1px solid ${theme.colors.border}` }}
                         >
                           <div>
-                            <div className="text-[10px] font-semibold uppercase tracking-wider mb-1 opacity-50" style={{ color: theme.colors.textSecondary }}>Invoiced</div>
+                            <div className="text-[0.625rem] font-semibold uppercase tracking-wider mb-1 opacity-50" style={{ color: theme.colors.textSecondary }}>Invoiced</div>
                             <div className="text-sm font-semibold tabular-nums" style={{ color: theme.colors.textSecondary }}>{formatCurrency(inv.invoicedAmount)}</div>
                           </div>
                           <div className="text-center">
-                            <div className="text-[10px] font-semibold uppercase tracking-wider mb-1 opacity-50" style={{ color: theme.colors.textSecondary }}>Net</div>
+                            <div className="text-[0.625rem] font-semibold uppercase tracking-wider mb-1 opacity-50" style={{ color: theme.colors.textSecondary }}>Net</div>
                             <div className="text-sm font-bold tabular-nums" style={{ color: theme.colors.textPrimary }}>{formatCurrency(inv.netAmount)}</div>
                           </div>
                           <div className="text-right">
-                            <div className="text-[10px] font-semibold uppercase tracking-wider mb-1 opacity-50" style={{ color: theme.colors.textSecondary }}>Earned</div>
-                            <div className="text-[15px] font-black tabular-nums" style={{ color: theme.colors.textPrimary }}>{formatCurrency(inv.commission)}</div>
+                            <div className="text-[0.625rem] font-semibold uppercase tracking-wider mb-1 opacity-50" style={{ color: theme.colors.textSecondary }}>Earned</div>
+                            <div className="text-[0.9375rem] font-black tabular-nums" style={{ color: theme.colors.textPrimary }}>{formatCurrency(inv.commission)}</div>
                           </div>
                         </div>
                       </div>
@@ -187,15 +187,15 @@ export const CommissionsScreen = ({ theme }) => {
                       }}
                     >
                       <div>
-                        <div className="text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-50" style={{ color: theme.colors.textSecondary }}>Invoiced</div>
+                        <div className="text-[0.625rem] font-semibold uppercase tracking-wider mb-1.5 opacity-50" style={{ color: theme.colors.textSecondary }}>Invoiced</div>
                         <div className="text-sm font-bold tabular-nums" style={{ color: theme.colors.textSecondary }}>{formatCurrency(m.details[1].listTotal)}</div>
                       </div>
                       <div>
-                        <div className="text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-50" style={{ color: theme.colors.textSecondary }}>Net</div>
+                        <div className="text-[0.625rem] font-semibold uppercase tracking-wider mb-1.5 opacity-50" style={{ color: theme.colors.textSecondary }}>Net</div>
                         <div className="text-sm font-bold tabular-nums" style={{ color: theme.colors.textPrimary }}>{formatCurrency(m.details[1].netTotal)}</div>
                       </div>
                       <div>
-                        <div className="text-[10px] font-semibold uppercase tracking-wider mb-1.5 opacity-50" style={{ color: theme.colors.textSecondary }}>Total Earned</div>
+                        <div className="text-[0.625rem] font-semibold uppercase tracking-wider mb-1.5 opacity-50" style={{ color: theme.colors.textSecondary }}>Total Earned</div>
                         <div className="text-base font-black tabular-nums" style={{ color: theme.colors.textPrimary }}>{formatCurrency(m.details[1].commissionTotal)}</div>
                       </div>
                     </div>

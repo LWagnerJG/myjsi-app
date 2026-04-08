@@ -17,7 +17,7 @@ export const SectionCard = ({ children, isDark, className = '' }) => {
 };
 
 export const SectionHeader = ({ title, theme }) => (
-  <span className="text-[11px] font-semibold uppercase tracking-widest block mb-3" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>
+  <span className="text-[0.6875rem] font-semibold uppercase tracking-widest block mb-3" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>
     {title}
   </span>
 );
@@ -75,7 +75,7 @@ export const RemovablePillList = ({ items = [], onRemove, onAdd, suggestions, pl
         className="px-3 h-7 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all"
         style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)', color: theme.colors.textPrimary }}
       >
-        {item}<span className="opacity-40 text-[11px]">×</span>
+        {item}<span className="opacity-40 text-[0.6875rem]">×</span>
       </button>
     ))}
     <SuggestInputPill placeholder={placeholder} suggestions={suggestions} onAdd={onAdd} theme={theme} />
