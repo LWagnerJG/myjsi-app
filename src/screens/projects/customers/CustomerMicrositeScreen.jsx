@@ -23,15 +23,15 @@ const Sect = ({ title, icon: Icon, right, children, theme, noPad = false }) => {
   return (
     <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.06)' : '#fff', border: `1px solid ${border}` }}>
       {title && (
-        <div className="flex items-center justify-between px-5 pt-4 pb-3">
+        <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b" style={{ borderColor: border }}>
           <div className="flex items-center gap-2">
-            {Icon && <Icon className="w-3.5 h-3.5" style={{ color: theme.colors.textSecondary, opacity: 0.5 }} />}
-            <span className="text-[0.6875rem] font-bold uppercase tracking-[0.09em]" style={{ color: theme.colors.textSecondary, opacity: 0.6 }}>{title}</span>
+            {Icon && <Icon className="w-4 h-4" style={{ color: theme.colors.textSecondary, opacity: 0.45 }} />}
+            <span className="text-xs font-bold uppercase tracking-[0.08em]" style={{ color: theme.colors.textSecondary, opacity: 0.65 }}>{title}</span>
           </div>
           {right}
         </div>
       )}
-      <div className={noPad ? '' : 'px-5 pb-5'}>
+      <div className={noPad ? '' : 'px-5 pb-5 pt-4'}>
         {children}
       </div>
     </div>
@@ -44,16 +44,16 @@ const Sect = ({ title, icon: Icon, right, children, theme, noPad = false }) => {
 const TabBar = ({ tabs, value, onChange, theme }) => {
   const dark = isDarkTheme(theme);
   return (
-    <div className="flex flex-wrap gap-1.5 mb-3">
+    <div className="flex flex-wrap gap-2 mb-4">
       {tabs.map(t => {
         const active = t === value;
         return (
           <button key={t} onClick={() => onChange(t)}
-            className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-[0.97]"
+            className="px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-[0.97]"
             style={{
               backgroundColor: active ? theme.colors.accent : 'transparent',
               color: active ? theme.colors.accentText : theme.colors.textSecondary,
-              border: active ? `1.5px solid ${theme.colors.accent}` : `1.5px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.10)'}`,
+              border: active ? `1.5px solid ${theme.colors.accent}` : `1.5px solid ${dark ? 'rgba(255,255,255,0.14)' : 'rgba(0,0,0,0.12)'}`,
             }}>
             {t}
           </button>
@@ -69,7 +69,7 @@ const TabBar = ({ tabs, value, onChange, theme }) => {
 const StatusBadge = ({ status }) => {
   const color = ORDER_STATUS_COLORS[status] || '#9B9B9B';
   return (
-    <span className="text-[0.6875rem] font-bold px-2.5 py-0.5 rounded-full whitespace-nowrap"
+    <span className="text-xs font-bold px-2.5 py-1 rounded-full whitespace-nowrap"
       style={{ backgroundColor: `${color}22`, color }}>
       {status}
     </span>
@@ -77,8 +77,8 @@ const StatusBadge = ({ status }) => {
 };
 
 const CodeChip = ({ code, theme }) => (
-  <span className="text-[0.6875rem] font-mono font-bold px-2.5 py-0.5 rounded-full whitespace-nowrap"
-    style={{ backgroundColor: `${theme.colors.accent}18`, color: theme.colors.accent }}>
+  <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-full whitespace-nowrap"
+    style={{ backgroundColor: `${theme.colors.accent}15`, color: theme.colors.accent }}>
     {code}
   </span>
 );
@@ -255,14 +255,14 @@ export const CustomerMicrositeScreen = ({ customer, theme, onBack }) => {
 
   const renderProgramRow = useCallback((prog, dim = false) => (
     <button key={prog.id} type="button" onClick={() => setSelectedProgram(prog)}
-      className="w-full flex items-center gap-3 py-3.5 text-left transition-colors active:bg-black/[0.03] dark:active:bg-white/[0.05]"
-      style={{ opacity: dim ? 0.5 : 1 }}>
-      <div className="flex items-center gap-2 shrink-0">
+      className="w-full flex items-center gap-3 py-4 text-left transition-colors active:bg-black/[0.03] dark:active:bg-white/[0.05]"
+      style={{ opacity: dim ? 0.45 : 1 }}>
+      <div className="flex flex-wrap items-center gap-1.5 shrink-0">
         <CodeChip code={prog.code} theme={theme} />
         <StatusBadge status={prog.status} />
       </div>
-      <span className="text-sm font-semibold flex-1 truncate" style={{ color: c.textPrimary }}>{prog.title}</span>
-      <ChevronRight className="w-4 h-4 shrink-0 opacity-25" style={{ color: c.textSecondary }} />
+      <span className="text-sm font-semibold flex-1 min-w-0" style={{ color: c.textPrimary }}>{prog.title}</span>
+      <ChevronRight className="w-4 h-4 shrink-0 opacity-25 ml-1" style={{ color: c.textSecondary }} />
     </button>
   ), [c, theme]);
 
@@ -275,27 +275,28 @@ export const CustomerMicrositeScreen = ({ customer, theme, onBack }) => {
           <div className="flex-1 min-w-0 space-y-4">
 
             {/* ── HERO HEADER ── */}
-            <div className="flex items-start gap-4">
+            <div className="rounded-2xl px-5 py-5 flex items-center gap-4"
+              style={{ backgroundColor: dark ? 'rgba(255,255,255,0.06)' : '#fff', border: `1px solid ${border}` }}>
               {/* Logo */}
-              <div className="w-16 h-16 rounded-2xl overflow-hidden shrink-0 flex items-center justify-center"
+              <div className="w-[4.5rem] h-[4.5rem] rounded-2xl overflow-hidden shrink-0 flex items-center justify-center"
                 style={{ backgroundColor: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)', border: `1px solid ${border}` }}>
                 {logoUrl && !logoError ? (
-                  <img src={logoError ? faviconUrl : logoUrl} alt="" className="w-full h-full object-contain p-1.5"
+                  <img src={logoError ? faviconUrl : logoUrl} alt="" className="w-full h-full object-contain p-2"
                     onError={() => setLogoError(true)} />
                 ) : faviconUrl && logoError ? (
                   <img src={faviconUrl} alt="" className="w-10 h-10 object-contain" onError={() => {}} />
                 ) : (
-                  <InitialsAvatar name={customer.name} size={64} theme={theme} />
+                  <InitialsAvatar name={customer.name} size={72} theme={theme} />
                 )}
               </div>
-              <div className="flex-1 min-w-0 pt-1">
-                <h1 className="text-[1.375rem] font-bold tracking-tight leading-tight" style={{ color: c.textPrimary }}>{customer.name}</h1>
-                <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+              <div className="flex-1 min-w-0">
+                <h1 className="text-xl font-bold tracking-tight leading-tight" style={{ color: c.textPrimary }}>{customer.name}</h1>
+                <div className="flex items-center gap-1.5 mt-2 flex-wrap">
                   <div className="flex items-center gap-1">
                     <MapPin className="w-3.5 h-3.5 shrink-0" style={{ color: c.textSecondary }} />
                     <span className="text-sm" style={{ color: c.textSecondary }}>{customer.location.city}, {customer.location.state}</span>
                   </div>
-                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full"
+                  <span className="text-xs font-bold px-2.5 py-1 rounded-full"
                     style={{ backgroundColor: `${verticalColor}18`, color: verticalColor }}>
                     {customer.vertical}
                   </span>
@@ -305,31 +306,34 @@ export const CustomerMicrositeScreen = ({ customer, theme, onBack }) => {
 
             {/* ── ORDERS ── */}
             <Sect title="Orders" icon={Package} theme={theme} noPad>
-              <div className="px-5 pb-1">
+              <div className="px-5 pt-4 pb-1">
                 <TabBar tabs={['Current', 'History']} value={orderTab} onChange={setOrderTab} theme={theme} />
               </div>
-              {ordersList.length > 0 ? ordersList.map((o, idx) => (
+              {ordersList.length > 0 ? ordersList.map((o) => (
                 <React.Fragment key={o.id}>
                   <Divider dark={dark} />
-                  <div className="flex items-center gap-3 px-5 py-3.5">
+                  <div className="flex items-center gap-3 px-5 py-4">
                     <div className="flex-1 min-w-0">
-                      <span className="text-sm font-semibold" style={{ color: c.textPrimary }}>{o.orderNumber}</span>
-                      <span className="text-sm font-bold ml-2.5" style={{ color: c.textPrimary }}>{fmtMoney(o.amount)}</span>
+                      <p className="text-sm font-bold" style={{ color: c.textPrimary }}>{o.orderNumber}</p>
+                      <p className="text-[0.8125rem] font-semibold mt-0.5" style={{ color: c.textSecondary }}>{fmtMoney(o.amount)}</p>
                     </div>
-                    <span className="text-xs shrink-0" style={{ color: c.textSecondary }}>{o.eta ? `ETA ${fmtDate(o.eta)}` : fmtDate(o.completedAt)}</span>
+                    <div className="text-right shrink-0">
+                      <p className="text-xs" style={{ color: c.textSecondary }}>{o.eta ? `ETA ${fmtDate(o.eta)}` : fmtDate(o.completedAt)}</p>
+                    </div>
                     <StatusBadge status={o.status} />
                   </div>
                 </React.Fragment>
               )) : (
-                <div className="px-5 pb-5">
-                  <p className="text-sm py-4 text-center" style={{ color: c.textSecondary, opacity: 0.6 }}>No {orderTab.toLowerCase()} orders</p>
+                <div className="px-5 py-6">
+                  <p className="text-sm text-center" style={{ color: c.textSecondary, opacity: 0.6 }}>No {orderTab.toLowerCase()} orders</p>
                 </div>
               )}
+              <div className="pb-1" />
             </Sect>
 
             {/* ── APPROVED MATERIALS ── */}
             <Sect title="Approved Materials" icon={Award} theme={theme} noPad>
-              <div className="px-5 pb-1">
+              <div className="px-5 pt-4 pb-1">
                 <TabBar
                   tabs={MATERIAL_CATEGORIES.map(m => m.label)}
                   value={MATERIAL_CATEGORIES.find(m => m.key === materialTab)?.label || 'Laminates'}
@@ -338,30 +342,31 @@ export const CustomerMicrositeScreen = ({ customer, theme, onBack }) => {
                 />
               </div>
               {materialsList.length > 0 ? (
-                materialsList.map((m, idx) => (
+                materialsList.map((m) => (
                   <React.Fragment key={m.id}>
                     <Divider dark={dark} />
-                    <div className="flex items-center gap-3.5 px-5 py-3.5">
-                      <div className="w-8 h-8 rounded-lg shrink-0 shadow-sm" style={{ backgroundColor: m.swatchHex, border: `1px solid ${border}` }} />
+                    <div className="flex items-center gap-3.5 px-5 py-4">
+                      <div className="w-9 h-9 rounded-xl shrink-0" style={{ backgroundColor: m.swatchHex, border: `1.5px solid ${border}` }} />
                       <div className="flex-1 min-w-0">
-                        <span className="text-sm font-semibold" style={{ color: c.textPrimary }}>{m.name}</span>
-                        <span className="text-xs font-mono ml-2" style={{ color: c.textSecondary, opacity: 0.7 }}>{m.code}</span>
+                        <p className="text-sm font-semibold" style={{ color: c.textPrimary }}>{m.name}</p>
+                        <p className="text-xs font-mono mt-0.5" style={{ color: c.textSecondary, opacity: 0.65 }}>{m.code}</p>
                       </div>
                       {m.vendor && <span className="text-xs shrink-0" style={{ color: c.textSecondary }}>{m.vendor}</span>}
                     </div>
                   </React.Fragment>
                 ))
               ) : (
-                <div className="px-5 pb-5">
-                  <p className="text-sm py-4 text-center" style={{ color: c.textSecondary, opacity: 0.6 }}>None approved</p>
+                <div className="px-5 py-6">
+                  <p className="text-sm text-center" style={{ color: c.textSecondary, opacity: 0.6 }}>None approved</p>
                 </div>
               )}
+              <div className="pb-1" />
             </Sect>
 
             {/* ── STANDARDS & PROGRAMS ── */}
             {(customer.standardsPrograms || []).length > 0 && (
               <Sect title="Standards & Programs" theme={theme} noPad>
-                <div className="px-5">
+                <div className="px-5 pt-2">
                   {programs.length > 0 && (
                     <div className="divide-y" style={{ borderColor: border }}>
                       {programs.map(p => renderProgramRow(p))}
@@ -369,7 +374,7 @@ export const CustomerMicrositeScreen = ({ customer, theme, onBack }) => {
                   )}
                   {contracts.length > 0 && (
                     <>
-                      <p className="text-[0.6875rem] font-bold uppercase tracking-wider pt-3 pb-1" style={{ color: c.accent, opacity: 0.6 }}>Contracts</p>
+                      <p className="text-xs font-bold uppercase tracking-wider pt-4 pb-0.5" style={{ color: c.accent, opacity: 0.65 }}>Contracts</p>
                       <div className="divide-y" style={{ borderColor: border }}>
                         {contracts.map(p => renderProgramRow(p))}
                       </div>
@@ -377,14 +382,14 @@ export const CustomerMicrositeScreen = ({ customer, theme, onBack }) => {
                   )}
                   {dimmed.length > 0 && (
                     <>
-                      <p className="text-[0.6875rem] font-bold uppercase tracking-wider pt-3 pb-1" style={{ color: c.textSecondary, opacity: 0.45 }}>Expiring / Expired</p>
+                      <p className="text-xs font-bold uppercase tracking-wider pt-4 pb-0.5" style={{ color: c.textSecondary, opacity: 0.5 }}>Expiring / Expired</p>
                       <div className="divide-y" style={{ borderColor: border }}>
                         {dimmed.map(p => renderProgramRow(p, true))}
                       </div>
                     </>
                   )}
                 </div>
-                <div className="pb-2" />
+                <div className="pb-3" />
               </Sect>
             )}
 
@@ -411,7 +416,7 @@ export const CustomerMicrositeScreen = ({ customer, theme, onBack }) => {
             {/* ── PROJECTS ── */}
             {(customer.projects || []).length > 0 && (
               <Sect title="Projects" theme={theme} noPad>
-                <div className="px-5">
+                <div className="px-5 pt-1">
                   {(customer.projects || []).map((proj, idx) => {
                     const photoCount = (proj.installs || []).length;
                     const isActive = selectedProjectFilter === proj.id;
@@ -420,14 +425,14 @@ export const CustomerMicrositeScreen = ({ customer, theme, onBack }) => {
                         {idx > 0 && <Divider dark={dark} />}
                         <button type="button"
                           onClick={() => setSelectedProjectFilter(isActive ? 'All' : proj.id)}
-                          className="w-full flex items-center gap-3.5 py-3.5 text-left transition-all active:bg-black/[0.03] dark:active:bg-white/[0.05]"
+                          className="w-full flex items-center gap-4 py-4 text-left transition-all active:bg-black/[0.03] dark:active:bg-white/[0.05]"
                           style={{ backgroundColor: isActive ? `${c.accent}08` : 'transparent' }}>
-                          <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0">
+                          <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0">
                             <img src={proj.image} alt={proj.name} className="w-full h-full object-cover" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-semibold" style={{ color: c.textPrimary }}>{proj.name}</p>
-                            <p className="text-xs mt-0.5" style={{ color: c.textSecondary }}>
+                            <p className="text-xs mt-1" style={{ color: c.textSecondary }}>
                               {proj.location}{photoCount > 0 ? ` · ${photoCount} photo${photoCount !== 1 ? 's' : ''}` : ''}
                             </p>
                           </div>
@@ -437,7 +442,7 @@ export const CustomerMicrositeScreen = ({ customer, theme, onBack }) => {
                     );
                   })}
                 </div>
-                <div className="pb-2" />
+                <div className="pb-3" />
               </Sect>
             )}
 
@@ -456,6 +461,7 @@ export const CustomerMicrositeScreen = ({ customer, theme, onBack }) => {
                   tabs={INSTALL_SPACE_TYPES.filter(t => t === 'All' || allInstalls.some(i => i.spaceType === t))}
                   value={spaceFilter} onChange={setSpaceFilter} theme={theme}
                 />
+
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
                   {filteredInstalls.map(i => (
                     <button key={i.id} type="button" onClick={() => setLightboxImg(i)}
@@ -472,11 +478,11 @@ export const CustomerMicrositeScreen = ({ customer, theme, onBack }) => {
             {/* ── DOCUMENTS ── */}
             {(customer.documents || []).length > 0 && (
               <Sect title="Documents" icon={FileText} theme={theme} noPad>
-                <div className="px-5">
+                <div className="px-5 pt-1">
                   {customer.documents.map((d, idx) => (
                     <React.Fragment key={d.id}>
                       {idx > 0 && <Divider dark={dark} />}
-                      <div className="flex items-center gap-3 py-3.5">
+                      <div className="flex items-center gap-3 py-4">
                         <FileText className="w-4 h-4 shrink-0" style={{ color: c.textSecondary, opacity: 0.5 }} />
                         <span className="text-sm font-medium flex-1 truncate" style={{ color: c.textPrimary }}>{d.name}</span>
                         <Download className="w-4 h-4 shrink-0 opacity-35" style={{ color: c.textSecondary }} />
@@ -484,19 +490,19 @@ export const CustomerMicrositeScreen = ({ customer, theme, onBack }) => {
                     </React.Fragment>
                   ))}
                 </div>
-                <div className="pb-2" />
+                <div className="pb-3" />
               </Sect>
             )}
 
             {/* ── CONTACTS ── */}
             {(customer.contacts || []).filter(ct => ct.visibility === 'dealer').length > 0 && (
               <Sect title="Contacts" theme={theme} noPad>
-                <div className="px-5">
+                <div className="px-5 pt-1">
                   {customer.contacts.filter(ct => ct.visibility === 'dealer').map((ct, idx) => (
                     <React.Fragment key={ct.id}>
                       {idx > 0 && <Divider dark={dark} />}
-                      <div className="flex items-center gap-3 py-3.5">
-                        <InitialsAvatar name={ct.name} size={36} theme={theme} />
+                      <div className="flex items-center gap-3.5 py-4">
+                        <InitialsAvatar name={ct.name} size={38} theme={theme} />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-semibold" style={{ color: c.textPrimary }}>{ct.name}</p>
                           <p className="text-xs mt-0.5" style={{ color: c.textSecondary }}>{ct.role}</p>
@@ -506,7 +512,7 @@ export const CustomerMicrositeScreen = ({ customer, theme, onBack }) => {
                     </React.Fragment>
                   ))}
                 </div>
-                <div className="pb-2" />
+                <div className="pb-3" />
               </Sect>
             )}
           </div>
