@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { isDarkTheme } from '../../design-system/tokens.js';
+import { inputSurface, isDarkTheme, subtleBorder } from '../../design-system/tokens.js';
 
 export const FormInput = React.memo(({
     label,
@@ -18,7 +18,6 @@ export const FormInput = React.memo(({
 }) => {
     const controlledValue = value === undefined || value === null ? '' : value;
     const dark = isDarkTheme(theme);
-    const subtleBorder = dark ? 'rgba(255,255,255,0.11)' : 'rgba(0,0,0,0.07)';
 
     const textSizeClass = size === 'sm' ? 'text-sm' : 'text-base';
     const paddingClass = size === 'sm' ? 'px-4' : 'px-4 py-3';
@@ -26,11 +25,14 @@ export const FormInput = React.memo(({
     const inputClass = `w-full ${paddingClass} border rounded-full focus:outline-none focus:ring-0 ${textSizeClass} ${dateDarkClass} ${icon ? 'pr-10' : ''} ${className}`;
 
     // On dark: always use background color so inputs appear as inset wells below the card surface
-    const backgroundColor = dark ? theme.colors.background : (surfaceBg ? theme.colors.surface : theme.colors.subtle);
+    const sharedInputSurface = inputSurface(theme);
+    const backgroundColor = dark
+        ? theme.colors.background
+        : (surfaceBg ? sharedInputSurface.backgroundColor : theme.colors.subtle);
 
     const styles = {
         backgroundColor,
-        borderColor: subtleBorder,
+        borderColor: subtleBorder(theme).replace('1px solid ', ''),
         color: readOnly && !controlledValue ? theme.colors.textSecondary : theme.colors.textPrimary,
         ...(size === 'sm' ? { height: 40 } : {}),
     };

@@ -5,6 +5,7 @@ import React, {
     useRef
 } from 'react';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
+import { EmptyState as SharedEmptyState } from '../../components/common/EmptyState.jsx';
 import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 import { isDarkTheme, cardSurface } from '../../design-system/tokens.js';
@@ -242,34 +243,6 @@ const StickyHeader = React.memo(({
 ));
 StickyHeader.displayName = 'StickyHeader';
 
-// ─── Empty state ────────────────────────────────────────────────────────────
-const EmptyState = React.memo(({ searchTerm, theme, onClearSearch }) => {
-    const dark = isDarkTheme(theme);
-    return (
-        <div className="rounded-[24px] p-10 text-center" style={{ ...cardStyle(dark, theme) }}>
-            <Package className="w-12 h-12 mx-auto mb-4" style={{ color: theme.colors.textSecondary }} />
-            <p className="font-semibold text-lg mb-2" style={{ color: theme.colors.textPrimary }}>
-                No Products Found
-            </p>
-            <p className="text-sm" style={{ color: theme.colors.textSecondary }}>
-                No products match "{searchTerm}"
-            </p>
-            <button
-                type="button"
-                onClick={onClearSearch}
-                className="mt-4 px-4 py-2 rounded-full text-xs font-semibold transition-colors hover:bg-black/5 dark:hover:bg-white/5"
-                style={{
-                    color: theme.colors.textPrimary,
-                    border: `1px solid ${theme.colors.border}`,
-                }}
-            >
-                Clear Search
-            </button>
-        </div>
-    );
-});
-EmptyState.displayName = 'EmptyState';
-
 // ─── Series Row ─────────────────────────────────────────────────────────────
 const SeriesRow = React.memo(({ series, theme, isLast, onClick }) => (
     <button
@@ -304,25 +277,14 @@ const FamiliesView = React.memo(({ groupedSeries, theme, onSeriesClick, searchTe
 
     if (groupedSeries.length === 0) {
         return (
-            <div className="rounded-[24px] p-10 text-center" style={{ ...cardStyle(dark, theme) }}>
-                <Package className="w-12 h-12 mx-auto mb-4" style={{ color: theme.colors.textSecondary }} />
-                <p className="font-semibold text-lg mb-2" style={{ color: theme.colors.textPrimary }}>
-                    No Series Found
-                </p>
-                <p className="text-sm" style={{ color: theme.colors.textSecondary }}>
-                    No series match "{searchTerm}"
-                </p>
-                <button
-                    type="button"
-                    onClick={onClearSearch}
-                    className="mt-4 px-4 py-2 rounded-full text-xs font-semibold transition-colors hover:bg-black/5 dark:hover:bg-white/5"
-                    style={{
-                        color: theme.colors.textPrimary,
-                        border: `1px solid ${theme.colors.border}`,
-                    }}
-                >
-                    Clear Search
-                </button>
+            <div className="rounded-[24px]" style={{ ...cardStyle(dark, theme) }}>
+                <SharedEmptyState
+                    icon={Package}
+                    title="No series found"
+                    description={`No series match "${searchTerm}".`}
+                    action={{ label: 'Clear Search', onClick: onClearSearch }}
+                    theme={theme}
+                />
             </div>
         );
     }
@@ -471,7 +433,15 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
                             />
                         </div>
                     ) : filteredCategories.length === 0 ? (
-                        <EmptyState searchTerm={searchTerm} theme={theme} onClearSearch={clearSearch} />
+                        <div className="rounded-[24px]" style={{ ...cardStyle(isDarkTheme(theme), theme) }}>
+                            <SharedEmptyState
+                                icon={Package}
+                                title="No products found"
+                                description={`No products match "${searchTerm}".`}
+                                action={{ label: 'Clear Search', onClick: clearSearch }}
+                                theme={theme}
+                            />
+                        </div>
                     ) : (
                         <div className={activeViewMode === 'grid' ? 'grid grid-cols-2 gap-2.5' : 'space-y-2'} style={{ paddingTop: 4 }}>
                             {filteredCategories.map((category) => (

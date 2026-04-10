@@ -7,9 +7,9 @@ import { Modal } from '../../../components/common/Modal.jsx';
 import { isDarkTheme } from '../../../design-system/tokens.js';
 import { DEALER_DIRECTORY_DATA, DAILY_DISCOUNT_OPTIONS, ROLE_OPTIONS, PROJECT_STATUS_CONFIG } from './data.js';
 import {
-    Phone, MapPin, Building2, Users, DollarSign,
-    MoreVertical, UserPlus, CheckCircle, Trash2, Award,
-    BarChart3, CalendarDays, ChevronDown, Info, TrendingUp, Target,
+    Phone, MapPin, Building2,
+    MoreVertical, UserPlus, CheckCircle, Trash2,
+    ChevronDown, Info, Target,
 } from 'lucide-react';
 import { HBar, DonutChart, SparkBars } from './components/DealerDetailComponents.jsx';
 
@@ -27,16 +27,16 @@ const initials  = (name) => (name || '').split(' ').slice(0, 2).map(w => w[0]).j
 /* ── Card section header ─────────────────────────────── */
 const CardHeader = ({ children, right, dark, colors }) => (
     <div
-        className="flex items-center justify-between px-5 py-3"
+        className="flex items-center justify-between px-5 py-3.5"
         style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)'}` }}
     >
         <span
-            className="text-xs font-bold uppercase tracking-[0.07em]"
-            style={{ color: colors.textSecondary, opacity: 0.6 }}
+            className="text-xs font-bold uppercase tracking-[0.07em] truncate"
+            style={{ color: colors.textSecondary, opacity: 0.64 }}
         >
             {children}
         </span>
-        {right && <span style={{ color: colors.textSecondary }}>{right}</span>}
+        {right && <div className="shrink-0" style={{ color: colors.textSecondary }}>{right}</div>}
     </div>
 );
 
@@ -182,61 +182,89 @@ export const DealerDetailScreen = ({
     const subtleBorder  = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.05)';
 
     return (
-        <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: colors.background }}>
+        <div
+            className="flex flex-col h-full app-header-offset"
+            style={{
+                background: isDark
+                    ? colors.background
+                    : `linear-gradient(180deg, ${colors.background} 0%, ${colors.surface || '#FFFFFF'} 100%)`,
+            }}
+        >
 
             {/* ─── Header ─── */}
             <div
-                className="flex-shrink-0 px-4 pt-3 pb-4"
-                style={{ backgroundColor: colors.background }}
+                className="flex-shrink-0 px-4 pt-3 pb-3"
             >
-                <div className="flex items-start gap-3.5">
-                    <div
-                        className="w-12 h-12 rounded-2xl flex-shrink-0 flex items-center justify-center"
-                        style={{ backgroundColor: colors.accent }}
-                    >
-                        <span className="text-[0.9375rem] font-black" style={{ color: colors.accentText }}>
-                            {initials(dealer.name)}
-                        </span>
-                    </div>
-                    <div className="flex-1 min-w-0 pt-0.5">
-                        <h1 className="text-[1.3125rem] font-black tracking-tight leading-tight truncate" style={{ color: colors.textPrimary }}>
-                            {dealer.name}
-                        </h1>
-                        <div className="flex items-center gap-3 mt-1 flex-wrap">
-                            {dealer.address && (
-                                <span className="flex items-center gap-1 text-xs" style={{ color: colors.textSecondary, opacity: 0.75 }}>
-                                    <MapPin className="w-3 h-3 flex-shrink-0" style={{ color: colors.accent, opacity: 0.55 }} />
-                                    <span className="truncate">{dealer.address}</span>
-                                </span>
+                <GlassCard theme={theme} className="rounded-[24px] p-4 sm:p-5">
+                    <div className="flex items-start gap-3.5">
+                        <div
+                            className="w-12 h-12 rounded-2xl flex-shrink-0 flex items-center justify-center border"
+                            style={{
+                                backgroundColor: colors.accent,
+                                borderColor: isDark ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.64)',
+                                boxShadow: isDark ? '0 10px 24px rgba(0,0,0,0.35)' : '0 10px 24px rgba(53,53,53,0.12)',
+                            }}
+                        >
+                            <span className="text-[0.9375rem] font-black" style={{ color: colors.accentText }}>
+                                {initials(dealer.name)}
+                            </span>
+                        </div>
+                        <div className="flex-1 min-w-0 pt-0.5">
+                            {dealer.territory && (
+                                <p
+                                    className="text-[0.625rem] font-bold uppercase tracking-[0.08em] mb-1"
+                                    style={{ color: colors.textSecondary, opacity: 0.52 }}
+                                >
+                                    {dealer.territory}
+                                </p>
                             )}
+
+                            <h1
+                                className="text-[1.5rem] font-black tracking-tight leading-tight truncate"
+                                style={{ color: colors.textPrimary }}
+                            >
+                                {dealer.name}
+                            </h1>
+
+                            {dealer.address && (
+                                <p className="mt-1.5 flex items-center gap-1.5 text-xs min-w-0" style={{ color: colors.textSecondary, opacity: 0.76 }}>
+                                    <MapPin className="w-3 h-3 flex-shrink-0" style={{ color: colors.textSecondary, opacity: 0.65 }} />
+                                    <span className="truncate">{dealer.address}</span>
+                                </p>
+                            )}
+
                             {dealer.phone && (
                                 <a
                                     href={`tel:${dealer.phone}`}
-                                    className="flex items-center gap-1 text-xs font-semibold flex-shrink-0"
-                                    style={{ color: colors.accent }}
+                                    className="inline-flex items-center gap-1.5 mt-2.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-opacity hover:opacity-85"
+                                    style={{
+                                        backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : `${colors.accent}10`,
+                                        color: colors.accent,
+                                    }}
                                 >
-                                    <Phone className="w-3 h-3" />{dealer.phone}
+                                    <Phone className="w-3 h-3" />
+                                    {dealer.phone}
                                 </a>
                             )}
                         </div>
                     </div>
-                </div>
+                </GlassCard>
             </div>
 
             {/* ─── Scrollable content ─── */}
-            <div className="flex-1 overflow-y-auto scrollbar-hide px-4 pb-28 space-y-3 max-w-5xl mx-auto w-full">
+            <div className="flex-1 overflow-y-auto scrollbar-hide px-4 pb-24 space-y-4 max-w-5xl mx-auto w-full">
 
                 {/* ── Scorecard: Sales · Bookings · Discount ── */}
-                <GlassCard theme={theme} className="rounded-[22px] overflow-hidden p-0">
+                <GlassCard theme={theme} className="rounded-[24px] overflow-hidden p-0">
                     <div className="flex">
                         {/* YTD Sales */}
                         <div
-                            className="flex-1 px-4 pt-4 pb-4"
+                            className="flex-1 px-4 py-4 text-center"
                             style={{ borderRight: `1px solid ${subtleBorder}` }}
                         >
                             <p
-                                className="text-[0.625rem] font-bold uppercase tracking-[0.07em] mb-1.5"
-                                style={{ color: colors.textSecondary, opacity: 0.5 }}
+                                className="text-[0.625rem] font-bold uppercase tracking-[0.07em]"
+                                style={{ color: colors.textSecondary, opacity: 0.56 }}
                             >
                                 YTD Sales
                             </p>
@@ -247,12 +275,12 @@ export const DealerDetailScreen = ({
 
                         {/* Bookings */}
                         <div
-                            className="flex-1 px-4 pt-4 pb-4"
+                            className="flex-1 px-4 py-4 text-center"
                             style={{ borderRight: `1px solid ${subtleBorder}` }}
                         >
                             <p
-                                className="text-[0.625rem] font-bold uppercase tracking-[0.07em] mb-1.5"
-                                style={{ color: colors.textSecondary, opacity: 0.5 }}
+                                className="text-[0.625rem] font-bold uppercase tracking-[0.07em]"
+                                style={{ color: colors.textSecondary, opacity: 0.56 }}
                             >
                                 Bookings
                             </p>
@@ -263,16 +291,16 @@ export const DealerDetailScreen = ({
 
                         {/* Discount (tappable) */}
                         <button
-                            className="flex-1 px-4 pt-4 pb-4 text-left transition-all active:scale-[0.97]"
+                            className="flex-1 px-4 py-4 text-center transition-all active:scale-[0.97]"
                             onClick={() => setShowDiscountPicker(true)}
                         >
                             <p
-                                className="text-[0.625rem] font-bold uppercase tracking-[0.07em] mb-1.5"
-                                style={{ color: colors.textSecondary, opacity: 0.5 }}
+                                className="text-[0.625rem] font-bold uppercase tracking-[0.07em]"
+                                style={{ color: colors.textSecondary, opacity: 0.56 }}
                             >
                                 Discount
                             </p>
-                            <div className="flex items-center gap-1">
+                            <div className="inline-flex items-center gap-1 mt-0.5">
                                 <p className="text-[1.375rem] font-black tracking-tight leading-none" style={{ color: colors.accent }}>
                                     {discountShort}
                                 </p>
@@ -283,7 +311,7 @@ export const DealerDetailScreen = ({
                 </GlassCard>
 
                 {/* ── Goal Progress ── */}
-                <GlassCard theme={theme} className="rounded-[22px] overflow-hidden p-0">
+                <GlassCard theme={theme} className="rounded-[24px] overflow-hidden p-0">
                     <CardHeader dark={isDark} colors={colors} right={
                         <span className="text-xs font-semibold">
                             {fmt(dealer.sales)} of {fmt(dealer.ytdGoal)}
@@ -369,7 +397,7 @@ export const DealerDetailScreen = ({
 
                 {/* ── Monthly Trend ── */}
                 {dealer.monthlySales?.length > 0 && (
-                    <GlassCard theme={theme} className="rounded-[22px] overflow-hidden p-0">
+                    <GlassCard theme={theme} className="rounded-[24px] overflow-hidden p-0">
                         <CardHeader dark={isDark} colors={colors} right={
                             <span className="text-xs font-bold" style={{ color: colors.accent }}>
                                 {fmtK(dealer.monthlySales[dealer.monthlySales.length - 1]?.amount || 0)} last mo
@@ -386,7 +414,7 @@ export const DealerDetailScreen = ({
                 {/* ── Sales Breakdown ── */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {dealer.verticalSales?.length > 0 && (
-                        <GlassCard theme={theme} className="rounded-[22px] overflow-hidden p-0">
+                        <GlassCard theme={theme} className="rounded-[24px] overflow-hidden p-0">
                             <CardHeader dark={isDark} colors={colors}>By Vertical</CardHeader>
                             <div className="px-4 pt-3 pb-4 flex items-center gap-4">
                                 <DonutChart data={dealer.verticalSales} size={92} strokeWidth={14} colors={colors} />
@@ -407,7 +435,7 @@ export const DealerDetailScreen = ({
                     )}
 
                     {dealer.seriesSales?.length > 0 && (
-                        <GlassCard theme={theme} className="rounded-[22px] overflow-hidden p-0">
+                        <GlassCard theme={theme} className="rounded-[24px] overflow-hidden p-0">
                             <CardHeader dark={isDark} colors={colors} right={
                                 <span className="text-[0.6875rem] font-bold" style={{ opacity: 0.45 }}>
                                     {dealer.seriesSales.length} series
@@ -435,7 +463,7 @@ export const DealerDetailScreen = ({
 
                 {/* ── Recent Projects ── */}
                 {dealer.recentProjects?.length > 0 && (
-                    <GlassCard theme={theme} className="rounded-[22px] overflow-hidden p-0">
+                    <GlassCard theme={theme} className="rounded-[24px] overflow-hidden p-0">
                         <CardHeader dark={isDark} colors={colors}>Recent Projects</CardHeader>
                         {dealer.recentProjects.map((proj, i) => {
                             const statusCfg = PROJECT_STATUS_CONFIG[proj.status] || {};
@@ -457,15 +485,17 @@ export const DealerDetailScreen = ({
                                             {new Date(proj.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                                         </p>
                                     </div>
-                                    <span
-                                        className="px-2 py-0.5 rounded-md text-[0.6875rem] font-bold flex-shrink-0"
-                                        style={{ backgroundColor: statusCfg.bg, color: statusCfg.color }}
-                                    >
-                                        {statusCfg.label || proj.status}
-                                    </span>
-                                    <span className="text-sm font-black flex-shrink-0 tabular-nums" style={{ color: colors.textPrimary }}>
-                                        {fmtK(proj.amount)}
-                                    </span>
+                                    <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                                        <span className="text-sm font-black tabular-nums" style={{ color: colors.textPrimary }}>
+                                            {fmtK(proj.amount)}
+                                        </span>
+                                        <span
+                                            className="px-2 py-0.5 rounded-md text-[0.6875rem] font-bold"
+                                            style={{ backgroundColor: statusCfg.bg, color: statusCfg.color }}
+                                        >
+                                            {statusCfg.label || proj.status}
+                                        </span>
+                                    </div>
                                 </div>
                             );
                         })}
@@ -474,7 +504,7 @@ export const DealerDetailScreen = ({
 
                 {/* ── Rewards ── */}
                 {dealer.repRewards?.length > 0 && (
-                    <GlassCard theme={theme} className="rounded-[22px] overflow-hidden p-0">
+                    <GlassCard theme={theme} className="rounded-[24px] overflow-hidden p-0">
                         <CardHeader dark={isDark} colors={colors}>Rewards</CardHeader>
                         {dealer.repRewards.map((rep, i) => (
                             <div
@@ -490,13 +520,16 @@ export const DealerDetailScreen = ({
                                     <p className="text-sm font-semibold truncate leading-snug" style={{ color: colors.textPrimary }}>
                                         {rep.name}
                                     </p>
-                                    <span
-                                        className="text-[0.625rem] font-bold uppercase tracking-wide"
-                                        style={{ color: rep.type === 'sales' ? '#4A7C59' : '#5B7B8C' }}
-                                    >
-                                        {rep.type}
-                                    </span>
                                 </div>
+                                <span
+                                    className="px-2 py-0.5 rounded-full text-[0.625rem] font-bold uppercase tracking-wide flex-shrink-0"
+                                    style={{
+                                        color: rep.type === 'sales' ? '#4A7C59' : '#5B7B8C',
+                                        backgroundColor: rep.type === 'sales' ? 'rgba(74,124,89,0.12)' : 'rgba(91,123,140,0.12)',
+                                    }}
+                                >
+                                    {rep.type}
+                                </span>
                                 <span className="text-[0.9375rem] font-black flex-shrink-0 tabular-nums" style={{ color: colors.accent }}>
                                     {fmt(rep.ytd)}
                                 </span>
@@ -506,7 +539,7 @@ export const DealerDetailScreen = ({
                 )}
 
                 {/* ── Staff / Team ── */}
-                <GlassCard theme={theme} className="rounded-[22px] overflow-hidden p-0">
+                <GlassCard theme={theme} className="rounded-[24px] overflow-hidden p-0">
                     <CardHeader dark={isDark} colors={colors} right={
                         <button
                             onClick={() => setShowAddPerson(true)}

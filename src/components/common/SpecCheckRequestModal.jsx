@@ -1,5 +1,6 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { FileText, Search, Upload, X } from 'lucide-react';
+import { PrimaryButton, SecondaryButton } from './JSIButtons.jsx';
 import { Modal } from './Modal.jsx';
 
 export const SpecCheckRequestModal = ({
@@ -196,26 +197,22 @@ export const SpecCheckRequestModal = ({
                 </div>
 
                 <div className="flex items-center gap-3 pt-1">
-                    <button
+                    <SecondaryButton
                         type="button"
                         onClick={handleClose}
-                        className="flex-1 h-11 rounded-full text-sm font-semibold border transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.08]"
-                        style={{ borderColor: colors.border, color: colors.textPrimary }}
+                        theme={theme}
+                        className="flex-1 h-11 !py-0 px-5 text-[0.8125rem]"
                     >
                         Cancel
-                    </button>
-                    <button
+                    </SecondaryButton>
+                    <PrimaryButton
                         type="submit"
                         disabled={!canSubmit}
-                        className="flex-1 h-11 rounded-full text-sm font-semibold transition-opacity"
-                        style={{
-                            backgroundColor: colors.accent,
-                            color: '#FFFFFF',
-                            opacity: canSubmit ? 1 : 0.5,
-                        }}
+                        theme={theme}
+                        className="flex-1 h-11 !py-0 px-5 text-[0.8125rem] disabled:cursor-not-allowed"
                     >
                         Submit Request
-                    </button>
+                    </PrimaryButton>
                 </div>
             </form>
         </Modal>

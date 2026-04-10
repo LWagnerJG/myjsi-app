@@ -1,5 +1,6 @@
 import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { Modal } from '../../components/common/Modal.jsx';
+import { PrimaryButton, SecondaryButton } from '../../components/common/JSIButtons.jsx';
 import { X, ImageIcon, Plus, Tag } from 'lucide-react';
 import { AutoCompleteCombobox } from '../../components/forms/AutoCompleteCombobox.jsx';
 import { CITY_OPTIONS } from '../../constants/locations.js';
@@ -273,22 +274,22 @@ export const UploadToLibraryModal = ({ show, onClose, theme, onUpload }) => {
 
         {/* ── Actions ── */}
         <div className="flex gap-3 pt-2">
-          <button
+          <SecondaryButton
             type="button"
             onClick={() => { reset(); onClose?.(); }}
-            className="flex-1 h-11 rounded-full text-[0.8125rem] font-semibold transition-colors"
-            style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }}
+            theme={theme}
+            className="flex-1 h-11 !py-0 px-5 text-[0.8125rem]"
           >
             Cancel
-          </button>
-          <button
+          </SecondaryButton>
+          <PrimaryButton
             type="submit"
             disabled={!canSubmit}
-            className="flex-1 h-11 rounded-full text-[0.8125rem] font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-            style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
+            theme={theme}
+            className="flex-1 h-11 !py-0 px-5 text-[0.8125rem] disabled:cursor-not-allowed"
           >
             Upload {files.length > 1 ? `${files.length} Images` : 'Image'}
-          </button>
+          </PrimaryButton>
         </div>
       </form>
     </Modal>

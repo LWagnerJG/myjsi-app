@@ -1,7 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
+import { PageTitle } from '../../../components/common/PageTitle.jsx';
+import StandardSearchBar from '../../../components/common/StandardSearchBar.jsx';
 import { motion } from 'framer-motion';
-import { ChevronRight, Building2, Search, UserPlus } from 'lucide-react';
+import { ChevronRight, Building2, UserPlus } from 'lucide-react';
 import { DEALER_DIRECTORY_DATA } from './data.js';
 import { isDarkTheme } from '../../../design-system/tokens.js';
 import { formatCurrency } from '../../../utils/format.js';
@@ -37,49 +39,30 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, onNavigate }) =>
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: colors.background }}>
 
             {/* ── Header ── */}
-            <div className="flex-shrink-0 px-4 pt-3 pb-3">
-                <h1 className="text-[1.375rem] font-black tracking-tight leading-tight" style={{ color: colors.textPrimary }}>
-                    Dealers
-                </h1>
-                <p className="text-sm mt-0.5" style={{ color: colors.textSecondary }}>
-                    {dealers.length} accounts &middot; {formatCurrency(totalSales)} portfolio
-                </p>
+            <div className="flex-shrink-0 px-4 pt-3 pb-2">
+                <PageTitle
+                    title="Dealers"
+                    subtitle={`${dealers.length} accounts - ${formatCurrency(totalSales)} portfolio`}
+                    theme={theme}
+                    className="px-0 pt-0 pb-0"
+                    titleClassName="text-[1.375rem] font-black"
+                    subtitleClassName="text-sm mt-0.5"
+                />
             </div>
 
             {/* ── Search + Add ── */}
             <div className="flex-shrink-0 px-4 pb-3 flex items-center gap-2">
-                <div
-                    className="flex-1 flex items-center gap-2.5 px-3.5 rounded-full"
-                    style={{
-                        height: 42,
-                        backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)',
-                        border: `1px solid ${subtleBorder}`,
-                    }}
-                >
-                    <Search className="w-[15px] h-[15px] flex-shrink-0" style={{ color: colors.textSecondary, opacity: 0.45 }} />
-                    <input
-                        value={searchTerm}
-                        onChange={e => setSearchTerm(e.target.value)}
-                        placeholder="Search dealers…"
-                        type="search"
-                        autoComplete="off"
-                        className="flex-1 bg-transparent text-sm outline-none"
-                        style={{ color: colors.textPrimary }}
-                    />
-                    {searchTerm && (
-                        <button
-                            onClick={() => setSearchTerm('')}
-                            className="text-xs font-semibold"
-                            style={{ color: colors.textSecondary }}
-                        >
-                            Clear
-                        </button>
-                    )}
-                </div>
+                <StandardSearchBar
+                    value={searchTerm}
+                    onChange={setSearchTerm}
+                    placeholder="Search dealers..."
+                    theme={theme}
+                    className="flex-1"
+                />
                 <button
                     onClick={() => onNavigate?.('new-dealer-signup')}
                     className="flex items-center gap-1.5 px-4 rounded-full transition-all active:scale-[0.97] flex-shrink-0"
-                    style={{ height: 42, backgroundColor: colors.accent, color: colors.accentText }}
+                    style={{ height: 44, backgroundColor: colors.accent, color: colors.accentText }}
                 >
                     <UserPlus className="w-4 h-4" />
                     <span className="text-[0.8125rem] font-semibold">Add</span>

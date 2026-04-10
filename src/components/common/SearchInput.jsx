@@ -165,7 +165,10 @@ export const SearchInput = React.memo(function SearchInput({
     style = {},
     variant,        // kept for backwards-compat, ignored
     inputClassName = '',
+    autoFocus = false,
+    inputRef,
 }) {
+    void variant;
     const dark = isDarkTheme(theme);
     // Match homeChrome primary palette — frosted glass pill
     const bg  = dark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.72)';
@@ -207,6 +210,8 @@ export const SearchInput = React.memo(function SearchInput({
                 style={{ color: theme?.colors?.textPrimary || '#111', fontSize: "1rem" }}
                 aria-label={placeholder}
                 autoComplete="off"
+                autoFocus={autoFocus}
+                ref={inputRef}
             />
             {value && onChange && (
                 <button

@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Briefcase, MapPin, Plus, X, Building2, Upload, ImageIcon, Search } from 'lucide-react';
+import { EmptyState as SharedEmptyState } from '../../components/common/EmptyState.jsx';
 import { INSTALLATION_CONSTANTS } from './installation-data.js';
 import { CITY_OPTIONS } from '../../constants/locations.js';
 import { AutoCompleteCombobox } from '../../components/forms/AutoCompleteCombobox.jsx';
@@ -8,7 +9,7 @@ import { STAGES } from './data.js';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 import { isDarkTheme, JSI_COLORS } from '../../design-system/tokens.js';
 import { usePersistentState } from '../../hooks/usePersistentState.js';
-import FloatingPill from '../../components/common/FloatingPill.jsx';
+import { FloatingActionCTA } from '../../components/common/FloatingActionCTA.jsx';
 import { PROJECTS_TAB_OPTIONS, fmtCurrency } from './components/projects/utils.js';
 import { OpportunityDetail } from './components/projects/OpportunityDetail.jsx';
 import { ProjectCard } from './components/projects/ProjectCard.jsx';
@@ -673,9 +674,9 @@ export const ProjectsScreen = forwardRef(({
               ))}
             </div>
           ) : (
-            <EmptyState icon={Briefcase} theme={theme} isDark={isDark}
+            <SharedEmptyState icon={Briefcase} theme={theme}
               title={`No projects in ${selectedPipelineStage}`}
-              subtitle='Tap "+ Project" to add one' />
+              description='Tap "+ Project" to add one.' />
           )
         )}
 
@@ -689,9 +690,9 @@ export const ProjectsScreen = forwardRef(({
               ))}
             </div>
           ) : (
-            <EmptyState icon={Building2} theme={theme} isDark={isDark}
+            <SharedEmptyState icon={Building2} theme={theme}
               title="No customers yet"
-              subtitle='Tap "+ Customer" to add one' />
+              description='Tap "+ Customer" to add one.' />
           )
         )}
 
@@ -708,15 +709,15 @@ export const ProjectsScreen = forwardRef(({
               })}
             </div>
           ) : (
-            <EmptyState icon={Briefcase} theme={theme} isDark={isDark}
+            <SharedEmptyState icon={Briefcase} theme={theme}
               title="No installations recorded yet"
-              subtitle='Tap "+ Install" to add one' />
+              description='Tap "+ Install" to add one.' />
           )
         )}
       </div>
 
       {/* Floating summary pill (pipeline only) */}
-      <FloatingPill
+      <FloatingActionCTA
         theme={theme}
         visible={projectsTab === 'pipeline' && filteredOpportunities.length > 0}
         icon={<Briefcase />}
@@ -822,13 +823,3 @@ const InstallCard = React.memo(({ project, isDark, onClick }) => (
 ));
 InstallCard.displayName = 'InstallCard';
 
-const EmptyState = ({ icon: Icon, theme, isDark, title, subtitle }) => (
-  <div className="flex flex-col items-center justify-center py-16">
-    <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4"
-      style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.03)' }}>
-      <Icon className="w-7 h-7" style={{ color: theme.colors.textSecondary, opacity: 0.5 }} />
-    </div>
-    <p className="text-center text-[0.9375rem] font-semibold" style={{ color: theme.colors.textPrimary }}>{title}</p>
-    <p className="text-center text-[0.8125rem] mt-1" style={{ color: theme.colors.textSecondary }}>{subtitle}</p>
-  </div>
-);

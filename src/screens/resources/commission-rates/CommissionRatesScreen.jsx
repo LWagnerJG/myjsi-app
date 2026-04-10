@@ -1,5 +1,6 @@
 import React from 'react';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
+import { PageTitle } from '../../../components/common/PageTitle.jsx';
 import { InfoTooltip } from '../../../components/common/InfoTooltip.jsx';
 import { isDarkTheme } from '../../../design-system/tokens.js';
 import * as Data from './data.js';
@@ -75,14 +76,14 @@ export const CommissionRatesScreen = ({ theme }) => {
             <div className="flex-1 overflow-y-auto scrollbar-hide px-4 pb-8 space-y-4">
 
                 {/* ── Page title ── */}
-                <div className="pt-5 pb-1 px-1">
-                    <h1 className="text-[1.375rem] font-bold leading-tight" style={{ color: theme.colors.textPrimary }}>
-                        Commission Rates
-                    </h1>
-                    <p className="text-sm mt-0.5" style={{ color: theme.colors.textSecondary }}>
-                        Current rep rates and spiff structure.
-                    </p>
-                </div>
+                <PageTitle
+                    title="Commission Rates"
+                    subtitle="Current rep rates and spiff structure."
+                    theme={theme}
+                    className="px-1 pt-5 pb-1"
+                    titleClassName="text-[1.375rem]"
+                    subtitleClassName="text-sm mt-0.5"
+                />
 
                 {/* ── Standard Discounts ── */}
                 <GlassCard theme={theme} className="rounded-[22px] overflow-hidden">

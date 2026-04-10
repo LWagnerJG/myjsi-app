@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { Send, Paperclip, X, MessageSquare, Bug, Lightbulb, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Paperclip, X, MessageSquare, Bug, Lightbulb, Sparkles, CheckCircle2 } from 'lucide-react';
+import { AppScreenLayout } from '../../components/common/AppScreenLayout.jsx';
+import { FloatingSubmitCTA } from '../../components/common/FloatingSubmitCTA.jsx';
 import { isDarkTheme, subtleBorder } from '../../design-system/tokens.js';
 import { hapticSuccess } from '../../utils/haptics.js';
 
@@ -43,12 +45,11 @@ export const FeedbackScreen = ({ theme }) => {
 
     const surface = isDark ? 'rgba(255,255,255,0.09)' : 'rgba(255,255,255,0.80)';
     const surfaceBorder = subtleBorder(theme);
-    const inputBg = isDark ? 'rgba(0,0,0,0.20)' : 'rgba(0,0,0,0.025)';
 
     /* ── Success ── */
     if (submitted) {
         return (
-            <div className="min-h-full flex items-center justify-center px-6" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 0px)', backgroundColor: colors.background }}>
+            <div className="min-h-full app-header-offset flex items-center justify-center px-6" style={{ backgroundColor: colors.background }}>
                 <div className="text-center max-w-xs space-y-5">
                     <div
                         className="w-14 h-14 rounded-full flex items-center justify-center mx-auto"
@@ -75,20 +76,26 @@ export const FeedbackScreen = ({ theme }) => {
     }
 
     return (
-        <div className="min-h-full" style={{ backgroundColor: colors.background }}>
-            <div className="flex-1 overflow-y-auto scrollbar-hide" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 16px)' }}>
-                <form onSubmit={handleSubmit}>
-                    <div className="px-4 sm:px-6 pb-10 max-w-lg mx-auto space-y-6">
-
-                        {/* ── Page header ── */}
-                        <div>
-                            <h1 className="text-2xl font-bold tracking-tight leading-tight" style={{ color: colors.textPrimary }}>
-                                Share Feedback
-                            </h1>
-                            <p className="mt-1.5 text-[0.8125rem] leading-relaxed" style={{ color: colors.textSecondary, opacity: 0.65 }}>
-                                Help us build a better myJSI — we read every message.
-                            </p>
-                        </div>
+        <AppScreenLayout
+            theme={theme}
+            asForm
+            onSubmit={handleSubmit}
+            title="Share Feedback"
+            subtitle="Help us build a better myJSI. We read every message."
+            maxWidthClass="max-w-lg"
+            horizontalPaddingClass="px-4 sm:px-6"
+            contentPaddingBottomClass="pb-28"
+            contentClassName="space-y-6"
+            footer={(
+                <FloatingSubmitCTA
+                    theme={theme}
+                    type="submit"
+                    label="Send Feedback"
+                    disabled={!message.trim()}
+                    visible
+                />
+            )}
+        >
 
                         {/* ── Category ── */}
                         <div className="space-y-2.5">
@@ -194,23 +201,6 @@ export const FeedbackScreen = ({ theme }) => {
                             )}
                         </div>
 
-                        {/* ── Submit ── */}
-                        <button
-                            type="submit"
-                            disabled={!message.trim()}
-                            className="w-full flex items-center justify-center gap-2 py-4 text-[0.8125rem] font-bold tracking-wide rounded-full transition-all active:scale-[0.98] disabled:opacity-30"
-                            style={{
-                                backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : colors.textPrimary,
-                                color: isDark ? colors.textPrimary : '#fff',
-                            }}
-                        >
-                            <Send className="w-3.5 h-3.5" />
-                            Send Feedback
-                        </button>
-
-                    </div>
-                </form>
-            </div>
-        </div>
+        </AppScreenLayout>
     );
 };

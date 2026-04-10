@@ -11,10 +11,11 @@ import {
   Tag,
   Truck,
   Wallet,
-  X,
 } from 'lucide-react';
+import { EmptyState as SharedEmptyState } from '../../components/common/EmptyState.jsx';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
+import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
 import { isDarkTheme } from '../../design-system/tokens.js';
 import { hapticLight, hapticMedium, hapticSuccess } from '../../utils/haptics.js';
 import {
@@ -39,25 +40,6 @@ const EARNING_PROGRAMS = [
   { title: 'Send platform feedback', desc: 'Thoughtful feedback that improves the app.', amount: '✦ 100' },
 ];
 
-const EmptyState = ({ icon: Icon, title, description, actionLabel, onAction, theme, isDark }) => (
-  <GlassCard theme={theme} className="py-14 px-6 text-center">
-    <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(53,53,53,0.04)' }}>
-      <Icon className="w-7 h-7" style={{ color: theme.colors.textSecondary }} />
-    </div>
-    <p className="text-sm font-semibold mb-1" style={{ color: theme.colors.textPrimary }}>{title}</p>
-    <p className="text-xs max-w-xs mx-auto" style={{ color: theme.colors.textSecondary }}>{description}</p>
-    {actionLabel && onAction && (
-      <button
-        onClick={onAction}
-        className="mt-5 px-5 py-2.5 rounded-full text-xs font-bold transition-all active:scale-95"
-        style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
-      >
-        {actionLabel}
-      </button>
-    )}
-  </GlassCard>
-);
-
 export const MarketplaceScreen = ({ theme, userSettings }) => {
   const isDark = isDarkTheme(theme);
   const defaultShirtSize = userSettings?.shirtSize || 'M';
@@ -70,6 +52,9 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
   const [orders, setOrders] = useState(INITIAL_ORDERS);
   const [txnHistory, setTxnHistory] = useState(BALANCE_HISTORY);
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
+
+  const totalCartPrice = useMemo(() => cart.reduce((sum, item) => sum + item.qty * item.price, 0), [cart]);
+  const cartItemCount = useMemo(() => cart.reduce((sum, item) => sum + item.qty, 0), [cart]);
 
   const tabOptions = useMemo(() => [
     { value: 'shop', label: 'Shop', icon: Tag, badge: cartItemCount || undefined },
@@ -132,9 +117,6 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
       ));
     });
   }, []);
-
-  const totalCartPrice = useMemo(() => cart.reduce((sum, item) => sum + item.qty * item.price, 0), [cart]);
-  const cartItemCount = useMemo(() => cart.reduce((sum, item) => sum + item.qty, 0), [cart]);
 
   const filteredProducts = useMemo(() => {
     let list = MARKETPLACE_PRODUCTS;
@@ -252,32 +234,12 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
 
               {/* Search & filters — no wrapper card, lives directly in the flow */}
               <div className="space-y-3">
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(event) => setSearchQuery(event.target.value)}
-                    placeholder="Search merch..."
-                    className="w-full pl-10 pr-10 py-3 text-[0.8125rem] outline-none transition"
-                    style={{
-                      borderRadius: 9999,
-                      background: isDark ? 'rgba(255,255,255,0.09)' : theme.colors.inputBackground,
-                      border: `1px solid ${theme.colors.border}`,
-                      color: theme.colors.textPrimary,
-                    }}
-                  />
-                  <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: theme.colors.textSecondary }} />
-
-                  {searchQuery && (
-                    <button
-                      onClick={() => setSearchQuery('')}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full"
-                      style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.07)' }}
-                    >
-                      <X className="w-3 h-3" style={{ color: theme.colors.textSecondary }} />
-                    </button>
-                  )}
-                </div>
+                <StandardSearchBar
+                  value={searchQuery}
+                  onChange={setSearchQuery}
+                  placeholder="Search merch..."
+                  theme={theme}
+                />
 
                 <div className="flex gap-2 overflow-x-auto scrollbar-hide">
                   {MARKETPLACE_CATEGORIES.map((category) => {
@@ -319,13 +281,14 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
                   ))}
                 </div>
               ) : (
-                <EmptyState
-                  icon={Search}
-                  title="No products found"
-                  description="Try adjusting your search or switch categories to bring the collection back into view."
-                  theme={theme}
-                  isDark={isDark}
-                />
+                <GlassCard theme={theme} className="py-2">
+                  <SharedEmptyState
+                    icon={Search}
+                    title="No products found"
+                    description="Try adjusting your search or switch categories to bring the collection back into view."
+                    theme={theme}
+                  />
+                </GlassCard>
               )}
 
               {cart.length > 0 && <div className="h-24" />}
@@ -376,15 +339,15 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
                   {orders.map((order) => <OrderCard key={order.id} order={order} theme={theme} />)}
                 </div>
               ) : (
-                <EmptyState
-                  icon={Package}
-                  title="No orders yet"
-                  description="Shop the LWYD collection to place your first order and start a cleaner redemption history."
-                  actionLabel="Start shopping"
-                  onAction={() => setActiveTab('shop')}
-                  theme={theme}
-                  isDark={isDark}
-                />
+                <GlassCard theme={theme} className="py-2">
+                  <SharedEmptyState
+                    icon={Package}
+                    title="No orders yet"
+                    description="Shop the LWYD collection to place your first order and start a cleaner redemption history."
+                    action={{ label: 'Start Shopping', onClick: () => setActiveTab('shop') }}
+                    theme={theme}
+                  />
+                </GlassCard>
               )}
             </div>
           )}

@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { SegmentedToggle } from '../../components/common/GroupedToggle';
 import { CountUp } from '../../components/common/CountUp';
+import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
 import { CUSTOMER_RANK_DATA } from './data.js';
 import { isDarkTheme } from '../../design-system/tokens.js';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -171,18 +172,12 @@ export const CustomerRankingScreen = ({ theme, onNavigate }) => {
                                 className="overflow-hidden"
                             >
                                 <div className="pt-3">
-                                    <input
-                                        type="text"
+                                    <StandardSearchBar
                                         value={search}
-                                        onChange={e => setSearch(e.target.value)}
+                                        onChange={setSearch}
                                         placeholder="Search dealers..."
+                                        theme={theme}
                                         autoFocus
-                                        className="w-full px-4 py-2.5 rounded-[14px] text-sm outline-none transition-all"
-                                        style={{
-                                            backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)',
-                                            border: `1px solid ${theme.colors.border}`,
-                                            color: theme.colors.textPrimary,
-                                        }}
                                     />
                                 </div>
                             </motion.div>

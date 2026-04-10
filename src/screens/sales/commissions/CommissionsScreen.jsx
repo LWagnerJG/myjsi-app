@@ -1,205 +1,112 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { ChevronDown, TrendingUp } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { COMMISSIONS_DATA, COMMISSION_YEARS } from './data.js';
-import { isDarkTheme } from '../../../design-system/tokens.js';
+import { GlassCard } from '../../../components/common/GlassCard.jsx';
+import { subtleBg } from '../../../design-system/tokens.js';
 import { formatCurrency } from '../../../utils/format.js';
 
-const getMonthDateRange = (year, monthIndex) => {
-  const startDate = new Date(year, monthIndex, 1);
-  const endDate = new Date(year, monthIndex + 1, 0);
-  const fmt = (d, opts) => d.toLocaleDateString(undefined, opts);
-  return `${fmt(startDate, { month: 'short', day: 'numeric' })} – ${fmt(endDate, { month: 'short', day: 'numeric', year: 'numeric' })}`;
+const formatCompact = (v) => {
+  if (v >= 1_000_000) return `$${(v / 1_000_000).toFixed(1)}M`;
+  if (v >= 1_000) return `$${(v / 1_000).toFixed(0)}k`;
+  return `$${v}`;
 };
 
 export const CommissionsScreen = ({ theme }) => {
-  const [year, setYear] = useState(COMMISSION_YEARS[0]);
   const [openId, setOpenId] = useState(null);
-  const isDark = isDarkTheme(theme);
 
-  const data = useMemo(() => COMMISSIONS_DATA[year] || [], [year]);
-  const total = useMemo(() => data.reduce((s, m) => s + m.amount, 0), [data]);
+  const colors = useMemo(() => ({
+    textPrimary: theme?.colors?.textPrimary || '#353535',
+    textSecondary: theme?.colors?.textSecondary || '#666666',
+  }), [theme]);
+
   const toggle = useCallback((id) => setOpenId(p => p === id ? null : id), []);
-
-  const bdr = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)';
+  const dividerStyle = { borderColor: subtleBg(theme, 1.35) };
 
   return (
     <div className="min-h-full" style={{ backgroundColor: theme.colors.background }}>
-      <div className="px-4 sm:px-6 pb-8 space-y-3 max-w-2xl mx-auto w-full" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 16px)' }}>
+      <div className="px-4 sm:px-6 pb-8 space-y-6 max-w-2xl mx-auto w-full" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 16px)' }}>
 
-        {/* Summary card */}
-        <div className="rounded-[22px] overflow-hidden p-5 sm:p-6" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${bdr}` }}>
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <div className="flex items-baseline gap-2.5">
-                <span className="text-3xl sm:text-4xl font-black tracking-tight" style={{ color: theme.colors.textPrimary }}>
-                  {formatCurrency(total)}
-                </span>
-                <span className="text-xs font-bold uppercase tracking-[0.07em] opacity-40">YTD</span>
-              </div>
-              <div className="flex items-center gap-1.5 mt-1.5">
-                <TrendingUp className="w-3.5 h-3.5 opacity-40" style={{ color: theme.colors.textPrimary }} />
-                <span className="text-sm font-medium" style={{ color: theme.colors.textSecondary }}>Total Commissions</span>
-              </div>
-            </div>
-            {/* Year selector — styled pill */}
-            <div className="relative">
-              <select
-                value={year}
-                onChange={e => setYear(e.target.value)}
-                className="appearance-none text-sm font-bold pl-4 pr-8 py-2.5 rounded-full focus:outline-none transition-all cursor-pointer"
-                style={{
-                  backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.05)',
-                  color: theme.colors.textPrimary,
-                  border: `1px solid ${theme.colors.border}`,
-                }}
-              >
-                {COMMISSION_YEARS.map(y => <option key={y} value={y}>{y}</option>)}
-              </select>
-              <ChevronDown className="w-4 h-4 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none opacity-40" style={{ color: theme.colors.textPrimary }} />
-            </div>
-          </div>
-        </div>
-
-        {/* Monthly rows */}
-        {data.map((m) => {
-          const isOpen = openId === m.id;
-          const paidDate = new Date(m.issuedDate);
-          const monthIndex = paidDate.getMonth();
-          const yearNum = parseInt(year);
-          const dateRange = getMonthDateRange(yearNum, monthIndex);
-          const paidStr = paidDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        {COMMISSION_YEARS.map((yr) => {
+          const months = COMMISSIONS_DATA[yr] || [];
+          const yearTotal = months.reduce((s, m) => s + m.amount, 0);
 
           return (
-            <div
-              key={m.id}
-              className="rounded-[22px] overflow-hidden"
-              style={{ backgroundColor: theme.colors.surface, border: `1px solid ${bdr}` }}
-            >
-              {/* Row header */}
-              <button
-                onClick={() => toggle(m.id)}
-                className="w-full px-5 py-4 flex items-center gap-3 text-left"
-                onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.015)'}
-                onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
-              >
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[0.9375rem] font-bold" style={{ color: theme.colors.textPrimary }}>{m.month}</span>
-                    <span
-                      className="text-[0.6875rem] font-semibold px-2 py-0.5 rounded-full"
-                      style={{
-                        backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.05)',
-                        color: theme.colors.textSecondary,
-                      }}
-                    >
-                      Paid {paidStr}
-                    </span>
-                  </div>
-                  <div className="text-xs mt-1 font-medium" style={{ color: theme.colors.textSecondary }}>
-                    {dateRange}
-                  </div>
-                </div>
-                <span className="text-lg font-black tabular-nums shrink-0" style={{ color: theme.colors.textPrimary }}>
-                  {formatCurrency(m.amount)}
+            <div key={yr} className="space-y-2">
+              {/* Year label + total */}
+              <div className="flex items-baseline justify-between px-1">
+                <span className="text-[0.8125rem] font-bold tracking-tight" style={{ color: colors.textPrimary, opacity: 0.45 }}>
+                  {yr}
                 </span>
-                <ChevronDown
-                  className={`w-4 h-4 shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
-                  style={{ color: theme.colors.textSecondary, opacity: 0.5 }}
-                />
-              </button>
+                <span className="text-[0.75rem] font-semibold tabular-nums" style={{ color: colors.textSecondary, opacity: 0.45 }}>
+                  {formatCurrency(yearTotal)}
+                </span>
+              </div>
 
-              {/* Expandable detail */}
-              <div className={`transition-all duration-300 ease-out overflow-hidden ${isOpen ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'}`}>
-                <div
-                  className="mx-4 sm:mx-5 mb-4 h-px"
-                  style={{ backgroundColor: theme.colors.border }}
-                />
-                <div className="px-4 sm:px-5 pb-5 space-y-3">
+              {/* Month rows */}
+              <GlassCard theme={theme} className="overflow-hidden" variant="elevated">
+                {months.map((m, idx) => {
+                  const isOpen = openId === m.id;
+                  const paidDate = new Date(m.issuedDate);
+                  const paidStr = paidDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 
-                  {/* Individual invoices */}
-                  {m.details?.[0]?.invoices?.map((inv, ii) => {
-                    const rateDisplay = inv.netAmount
-                      ? ((inv.commission / inv.netAmount) * 100).toFixed(1)
-                      : inv.rate;
-                    const invDate = new Date(inv.invoiceDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                  return (
+                    <div key={m.id}>
+                      {idx > 0 && <div className="mx-5" style={{ borderTop: `1px solid ${subtleBg(theme, 1.35)}` }} />}
 
-                    return (
-                      <div
-                        key={ii}
-                        className="rounded-[18px] p-4 space-y-3"
-                        style={{
-                          backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.025)',
-                          border: `1px solid ${theme.colors.border}`,
-                        }}
+                      <button
+                        onClick={() => toggle(m.id)}
+                        className="w-full px-5 py-3 flex items-center gap-3 text-left"
                       >
-                        {/* SO + meta */}
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex-1 min-w-0 space-y-0.5">
-                            <div className="font-bold text-[0.8125rem]" style={{ color: theme.colors.textPrimary }}>{inv.so}</div>
-                            <div className="text-xs font-medium truncate" style={{ color: theme.colors.textSecondary }}>{inv.dealer}</div>
-                            <div className="text-xs truncate" style={{ color: theme.colors.textSecondary, opacity: 0.7 }}>{inv.project}</div>
-                          </div>
-                          <div className="text-right shrink-0 space-y-1">
-                            <div
-                              className="text-xs font-bold px-2.5 py-1 rounded-full tabular-nums"
-                              style={{
-                                backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.05)',
-                                color: theme.colors.textSecondary,
-                              }}
-                            >
-                              {rateDisplay}% rate
-                            </div>
-                            <div className="text-[0.6875rem]" style={{ color: theme.colors.textSecondary, opacity: 0.55 }}>{invDate}</div>
+                        <span className="text-sm font-bold flex-1" style={{ color: colors.textPrimary }}>{m.month}</span>
+                        <span className="text-sm font-bold tabular-nums shrink-0" style={{ color: colors.textPrimary }}>
+                          {formatCurrency(m.amount)}
+                        </span>
+                        <ChevronDown
+                          className={`w-3.5 h-3.5 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+                          style={{ color: colors.textSecondary, opacity: 0.35 }}
+                        />
+                      </button>
+
+                      {/* Expanded */}
+                      <div className={`transition-all duration-200 ease-out overflow-hidden ${isOpen ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                        <div className="px-5 pb-4 pt-0.5">
+                          <p className="text-[0.6875rem] font-medium mb-2" style={{ color: colors.textSecondary }}>
+                            Paid {paidStr}
+                          </p>
+
+                          <div className="divide-y" style={dividerStyle}>
+                            {m.details?.[0]?.invoices?.map((inv, ii) => {
+                              const rate = inv.netAmount
+                                ? ((inv.commission / inv.netAmount) * 100).toFixed(1)
+                                : inv.rate;
+
+                              return (
+                                <div key={ii} className="py-2.5 flex items-center justify-between gap-3">
+                                  <div className="min-w-0">
+                                    <div className="text-[0.8125rem] font-semibold truncate" style={{ color: colors.textPrimary }}>
+                                      {inv.dealer}
+                                    </div>
+                                    <div className="text-[0.6875rem] font-medium flex items-center gap-2 mt-0.5" style={{ color: colors.textSecondary }}>
+                                      <span>{inv.so}</span>
+                                      <span>·</span>
+                                      <span>Net {formatCompact(inv.netAmount)}</span>
+                                      <span>·</span>
+                                      <span>{rate}%</span>
+                                    </div>
+                                  </div>
+                                  <span className="text-sm font-bold tabular-nums shrink-0" style={{ color: colors.textPrimary }}>
+                                    {formatCurrency(inv.commission)}
+                                  </span>
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
-
-                        {/* Numbers */}
-                        <div
-                          className="grid grid-cols-3 gap-3 pt-3"
-                          style={{ borderTop: `1px solid ${theme.colors.border}` }}
-                        >
-                          <div>
-                            <div className="text-[0.625rem] font-semibold uppercase tracking-[0.07em] mb-1 opacity-50" style={{ color: theme.colors.textSecondary }}>Invoiced</div>
-                            <div className="text-sm font-semibold tabular-nums" style={{ color: theme.colors.textSecondary }}>{formatCurrency(inv.invoicedAmount)}</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="text-[0.625rem] font-semibold uppercase tracking-[0.07em] mb-1 opacity-50" style={{ color: theme.colors.textSecondary }}>Net</div>
-                            <div className="text-sm font-bold tabular-nums" style={{ color: theme.colors.textPrimary }}>{formatCurrency(inv.netAmount)}</div>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-[0.625rem] font-semibold uppercase tracking-[0.07em] mb-1 opacity-50" style={{ color: theme.colors.textSecondary }}>Earned</div>
-                            <div className="text-[0.9375rem] font-black tabular-nums" style={{ color: theme.colors.textPrimary }}>{formatCurrency(inv.commission)}</div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-
-                  {/* Monthly totals row */}
-                  {m.details?.[1]?.brandTotal && (
-                    <div
-                      className="rounded-[18px] p-4 grid grid-cols-3 gap-3 text-center"
-                      style={{
-                        backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.025)',
-                        border: `1px solid ${theme.colors.border}`,
-                      }}
-                    >
-                      <div>
-                        <div className="text-[0.625rem] font-semibold uppercase tracking-[0.07em] mb-1.5 opacity-50" style={{ color: theme.colors.textSecondary }}>Invoiced</div>
-                        <div className="text-sm font-bold tabular-nums" style={{ color: theme.colors.textSecondary }}>{formatCurrency(m.details[1].listTotal)}</div>
-                      </div>
-                      <div>
-                        <div className="text-[0.625rem] font-semibold uppercase tracking-[0.07em] mb-1.5 opacity-50" style={{ color: theme.colors.textSecondary }}>Net</div>
-                        <div className="text-sm font-bold tabular-nums" style={{ color: theme.colors.textPrimary }}>{formatCurrency(m.details[1].netTotal)}</div>
-                      </div>
-                      <div>
-                        <div className="text-[0.625rem] font-semibold uppercase tracking-[0.07em] mb-1.5 opacity-50" style={{ color: theme.colors.textSecondary }}>Total Earned</div>
-                        <div className="text-base font-black tabular-nums" style={{ color: theme.colors.textPrimary }}>{formatCurrency(m.details[1].commissionTotal)}</div>
                       </div>
                     </div>
-                  )}
-                </div>
-              </div>
+                  );
+                })}
+              </GlassCard>
             </div>
           );
         })}

@@ -3,8 +3,8 @@ import React from 'react';
 // Core screen component imports (eager - always needed)
 import { HomeScreen } from '../screens/home/HomeScreen.jsx';
 import { ResourcesScreen } from '../screens/resources/ResourcesScreen.jsx';
-import { ProjectsScreen, NewLeadScreen, AddNewInstallScreen } from '../screens/projects/index.js';
-import { ResourceDetailScreen } from '../screens/utility/UtilityScreens.jsx';
+import { NewLeadScreen } from '../screens/projects/NewLeadScreen.jsx';
+import { AddNewInstallScreen } from '../screens/projects/AddNewInstallScreen.jsx';
 
 // Lazy-loaded primary screens for better code splitting
 const SalesScreen = React.lazy(() => import('../screens/sales/index.js').then(m => ({ default: m.SalesScreen })));
@@ -15,8 +15,6 @@ const OrdersScreen = React.lazy(() => import('../screens/orders/index.js').then(
 const ProductsScreen = React.lazy(() => import('../screens/products/index.js').then(m => ({ default: m.ProductsScreen })));
 const ProductComparisonScreen = React.lazy(() => import('../screens/products/index.js').then(m => ({ default: m.ProductComparisonScreen })));
 const CompetitiveAnalysisScreen = React.lazy(() => import('../screens/products/index.js').then(m => ({ default: m.CompetitiveAnalysisScreen })));
-const CommunityScreen = React.lazy(() => import('../screens/community/index.js').then(m => ({ default: m.CommunityScreen })));
-const CreateContentModal = React.lazy(() => import('../screens/community/index.js').then(m => ({ default: m.CreateContentModal })));
 const CommunityLibraryLayout = React.lazy(() => import('../screens/home/CommunityLibraryLayout.jsx').then(m => ({ default: m.CommunityLibraryLayout })));
 const ReplacementsScreen = React.lazy(() => import('../screens/replacements/ReplacementsScreen.jsx').then(m => ({ default: m.ReplacementsScreen })));
 const FeedbackScreen = React.lazy(() => import('../screens/feedback/index.js').then(m => ({ default: m.FeedbackScreen })));
@@ -40,7 +38,6 @@ export const SCREEN_MAP = {
   'sales': SalesScreen,
   'products': ProductsScreen,
   'resources': ResourcesScreen,
-  'projects': ProjectsScreen,
   'community': CommunityLibraryLayout, // swapped to new layout providing Community + Library toggle
   'replacements': ReplacementsScreen,
   'incentive-rewards': IncentiveRewardsScreen,
@@ -62,41 +59,40 @@ export const SCREEN_MAP = {
 };
 
 export {
-  ResourceDetailScreen,
   ProductComparisonScreen,
   CompetitiveAnalysisScreen,
-  AddNewInstallScreen,
-  SettingsScreen,
-  NewLeadScreen,
-  MembersScreen,
   SalesScreen,
-  CustomerRankingScreen,
-  IncentiveRewardsScreen,
-  CommissionsScreen,
-  CommunityScreen,
-  CreateContentModal,
   SamplesScreen,
-  MarketplaceScreen,
 };
 
-// Preload the most-visited screens during browser idle time so first navigation
-// never hits a Suspense fallback and flickers.
+const canWarmPreload = () => {
+  if (typeof navigator === 'undefined') return false;
+
+  const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  if (conn?.saveData) return false;
+
+  const effectiveType = String(conn?.effectiveType || '').toLowerCase();
+  if (effectiveType.includes('2g')) return false;
+
+  if (typeof navigator.deviceMemory === 'number' && navigator.deviceMemory <= 2) {
+    return false;
+  }
+
+  return true;
+};
+
+// Warm only the highest-frequency destinations and skip on constrained devices.
 const preloadMainScreens = () => {
   import('../screens/sales/index.js');
   import('../screens/orders/index.js');
   import('../screens/products/index.js');
-  import('../screens/members/index.js');
-  import('../screens/community/index.js');
   import('../screens/home/CommunityLibraryLayout.jsx');
-  import('../screens/settings/index.js');
-  import('../screens/samples/index.js');
-  import('../screens/marketplace/index.js');
 };
 
-if (typeof window !== 'undefined') {
+if (typeof window !== 'undefined' && canWarmPreload()) {
   if ('requestIdleCallback' in window) {
-    requestIdleCallback(preloadMainScreens, { timeout: 3000 });
+    requestIdleCallback(preloadMainScreens, { timeout: 4000 });
   } else {
-    setTimeout(preloadMainScreens, 1500);
+    setTimeout(preloadMainScreens, 2000);
   }
 }

@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useRef, useCallback } from 'react';
-import { PageTitle } from '../../../components/common/PageTitle.jsx';
+import { AppScreenLayout } from '../../../components/common/AppScreenLayout.jsx';
+import { FloatingSubmitCTA } from '../../../components/common/FloatingSubmitCTA.jsx';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import { FormInput } from '../../../components/common/FormComponents.jsx';
 import SwipeCalendar from '../../../components/common/SwipeCalendar.jsx';
@@ -48,10 +49,17 @@ export const RequestFieldVisitScreen = ({ theme, setSuccessMessage, onNavigate }
     };
 
     const removePhoto = (i) => setPhotos(prev => prev.filter((_, idx) => idx !== i));
+    const canSubmit = !!(
+        selectedDate &&
+        soNumber.trim() &&
+        address.trim() &&
+        notes.trim() &&
+        photos.length
+    );
 
     // Submission
     const handleSubmit = () => {
-        if (selectedDate && soNumber && address && notes && photos.length) {
+        if (canSubmit) {
             hapticSuccess();
             setSuccessMessage('Field visit requested!');
             setTimeout(() => {
@@ -66,11 +74,24 @@ export const RequestFieldVisitScreen = ({ theme, setSuccessMessage, onNavigate }
     };
 
     return (
-        <div className="flex flex-col h-full app-header-offset">
-            <PageTitle title="Request Field Visit" theme={theme} />
-
-            <div className="flex-1 overflow-y-auto scrollbar-hide">
-                <div className="px-4 py-4 space-y-4">
+        <AppScreenLayout
+            theme={theme}
+            title="Request Field Visit"
+            subtitle="Schedule an on-site visit and include issue photos for review."
+            maxWidthClass="max-w-3xl"
+            horizontalPaddingClass="px-4"
+            contentPaddingBottomClass="pb-28"
+            contentClassName="py-4 space-y-4"
+            footer={(
+                <FloatingSubmitCTA
+                    theme={theme}
+                    onClick={handleSubmit}
+                    visible={!!selectedDate}
+                    disabled={!canSubmit}
+                    label="Submit Field Visit Request"
+                />
+            )}
+        >
                     {/* Info Card */}
                     <GlassCard theme={theme} className="p-4">
                         <div className="flex items-start space-x-3">
@@ -204,19 +225,9 @@ export const RequestFieldVisitScreen = ({ theme, setSuccessMessage, onNavigate }
                                         Upload photos showing the issue or area requiring attention
                                     </p>
                                 </div>
-
-                                <button
-                                    onClick={handleSubmit}
-                                    className="w-full font-bold py-3 px-6 rounded-lg transition-colors"
-                                    style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
-                                >
-                                    Submit Field Visit Request
-                                </button>
                             </GlassCard>
                         </div>
                     )}
-                </div>
-            </div>
-        </div>
+        </AppScreenLayout>
     );
 };

@@ -8,7 +8,7 @@ import { getHomeChromePillStyles, HOME_CHROME_PILL_HEIGHT } from '../../design-s
 import { isDarkTheme } from '../../design-system/tokens.js';
 import { usePersistentState } from '../../hooks/usePersistentState.js';
 import { MessageSquarePlus } from 'lucide-react';
-import FloatingPill from '../../components/common/FloatingPill.jsx';
+import { FloatingActionCTA } from '../../components/common/FloatingActionCTA.jsx';
 import { LEAD_TIMES_DATA } from '../resources/lead-times/data.js';
 import {
     PointerSensor,
@@ -27,6 +27,7 @@ import { AppGrid } from './components/AppGrid.jsx';
 import { HomeFeatureCards } from './components/HomeFeatureCards.jsx';
 import { IndieSconce } from './components/IndieSconce.jsx';
 import { ChatOverlay } from './components/ChatOverlay.jsx';
+import { persistQuoteRequest } from '../../utils/quoteRequests.js';
 import { createProjectDraft, projectNameMatches } from '../../utils/projectHelpers.js';
 import { useHomeChat } from './hooks/useHomeChat.js';
 import { useIndieSconce } from './hooks/useIndieSconce.js';
@@ -401,7 +402,7 @@ export const HomeScreen = React.memo(({
             />
 
             {/* Mobile sticky feedback pill — hidden on sm+ */}
-            <FloatingPill
+            <FloatingActionCTA
                 theme={theme}
                 onClick={() => onNavigate('feedback')}
                 visible={!isEditMode}
@@ -510,8 +511,11 @@ export const HomeScreen = React.memo(({
                 members={members}
                 currentUserId={currentUserId}
                 onSubmit={(data) => {
-                    // TODO: wire to quote submission API
-                    if (import.meta.env.DEV) console.log('Quote request submitted:', data);
+                    persistQuoteRequest(data, { source: 'home-dashboard' });
+                    if (typeof setSuccessMessage === 'function') {
+                        setSuccessMessage('Quote request submitted');
+                        setTimeout(() => setSuccessMessage(''), 1800);
+                    }
                 }}
             />
             <SpecCheckRequestModal

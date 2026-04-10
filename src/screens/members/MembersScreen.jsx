@@ -16,9 +16,9 @@ import {
     isAdminRole,
     PERMISSION_LABELS,
 } from './data.js';
-import { isDarkTheme } from '../../design-system/tokens.js';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
+import { PageTitle } from '../../components/common/PageTitle.jsx';
 
 import { MembersErrorBoundary } from './components/members/MembersErrorBoundary.jsx';
 import { ConfirmModal } from './components/members/SharedComponents.jsx';
@@ -46,7 +46,6 @@ const useMediaQuery = (query) => {
    Main Screen
    ================== */
 const MembersScreenContent = ({ theme }) => {
-    const dark = isDarkTheme(theme);
     const [tab, setTab] = useState('team');
     const [original, setOriginal] = useState(INITIAL_MEMBERS);
     const [members, setMembers] = useState(INITIAL_MEMBERS);
@@ -151,29 +150,25 @@ const MembersScreenContent = ({ theme }) => {
                 <div className="px-4 sm:px-6 lg:px-8 pb-24 lg:pb-12 max-w-2xl lg:max-w-5xl mx-auto w-full">
 
                     {/* Header */}
-                    <div className="pt-4 pb-3 flex items-center justify-between gap-4">
-                        <div>
-                            <h1 className="text-[1.375rem] font-bold leading-tight tracking-tight" style={{ color: theme.colors.textPrimary }}>
-                                {tab === 'dealers' ? 'Dealers' : 'Members'}
-                            </h1>
-                            <p className="text-[0.8125rem] mt-0.5" style={{ color: theme.colors.textSecondary }}>
-                                {tab === 'team'
-                                    ? `${members.length} team members`
-                                    : `${INITIAL_DEALER_COMPANIES.length} accounts`
-                                }
-                            </p>
-                        </div>
+                    <PageTitle
+                        title={tab === 'dealers' ? 'Dealers' : 'Members'}
+                        subtitle={tab === 'team' ? `${members.length} team members` : `${INITIAL_DEALER_COMPANIES.length} accounts`}
+                        theme={theme}
+                        className="px-0 pt-4 pb-3"
+                        titleClassName="text-[1.375rem]"
+                        subtitleClassName="mt-0.5"
+                    >
                         {tab === 'team' && (
                             <button
                                 onClick={() => setShowInvite(true)}
-                                className="flex items-center gap-1.5 px-4 py-2 rounded-full text-[0.8125rem] font-semibold transition-all active:scale-95 shrink-0"
+                                className="flex items-center gap-1.5 px-4 py-2 rounded-full text-[0.8125rem] font-semibold transition-all active:scale-95 shrink-0 mt-0.5"
                                 style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
                             >
                                 <UserPlus className="w-3.5 h-3.5" />
                                 Invite
                             </button>
                         )}
-                    </div>
+                    </PageTitle>
 
                     {/* Pill tabs */}
                     <div className="mb-4">

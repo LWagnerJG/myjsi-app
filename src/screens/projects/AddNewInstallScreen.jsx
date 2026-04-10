@@ -4,7 +4,7 @@ import { X, ImageIcon, Upload } from 'lucide-react';
 import { INSTALLATION_CONSTANTS, FORM_VALIDATION } from './installation-data.js';
 import { hapticSuccess } from '../../utils/haptics.js';
 import { isDarkTheme } from '../../design-system/tokens.js';
-import FloatingPill from '../../components/common/FloatingPill.jsx';
+import { FloatingSubmitCTA } from '../../components/common/FloatingSubmitCTA.jsx';
 
 export const AddNewInstallScreen = ({ theme, onAddInstall }) => {
     const [projectName, setProjectName] = useState('');
@@ -270,7 +270,7 @@ export const AddNewInstallScreen = ({ theme, onAddInstall }) => {
                         </div>
                     </div>
 
-                    <FloatingPill
+                    <FloatingSubmitCTA
                         theme={theme}
                         onClick={() => {}}
                         type="submit"

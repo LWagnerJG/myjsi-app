@@ -1,10 +1,11 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { ArrowUp, ArrowDown, TrendingUp, ChevronRight, Trophy, Calendar, DollarSign } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { MONTHLY_SALES_DATA, SALES_VERTICALS_DATA, CUSTOMER_RANK_DATA, INCENTIVE_REWARDS_DATA } from './data.js';
-import { ORDER_DATA, STATUS_COLORS } from '../orders/data.js';
+import { ORDER_DATA } from '../orders/data.js';
 import { SalesByVerticalBreakdown } from './components/SalesByVerticalBreakdown.jsx';
 import { CountUp } from '../../components/common/CountUp.jsx';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
+
 import { isDarkTheme, subtleBg } from '../../design-system/tokens.js';
 import { formatCurrency, formatCompanyName } from '../../utils/format.js';
 
@@ -21,36 +22,11 @@ const sortQuarterEntries = (entries) =>
     return pa.y === pb.y ? pa.q - pb.q : pa.y - pb.y;
   });
 
-/* ── Inline text toggle (discrete) ───────────────────────────── */
-
-const InlineToggle = ({ options, value, onChange, colors, isDark }) => (
-  <div className="inline-flex items-center gap-0.5 rounded-full p-[2px]"
-    style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : colors.border }}>
-    {options.map(opt => (
-      <button
-        key={opt.value}
-        onClick={() => onChange(opt.value)}
-        className="rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-wider transition-all"
-        style={{
-          backgroundColor: value === opt.value
-            ? (isDark ? 'rgba(255,255,255,0.22)' : colors.surface)
-            : 'transparent',
-          color: colors.textPrimary,
-          opacity: value === opt.value ? 1 : 0.45,
-          boxShadow: value === opt.value ? (isDark ? '0 1px 3px rgba(0,0,0,0.3)' : '0 1px 2px rgba(0,0,0,0.06)') : 'none',
-        }}
-      >
-        {opt.label}
-      </button>
-    ))}
-  </div>
-);
-
 /* ── Main Screen ─────────────────────────────────────────────── */
 
 export const SalesScreen = ({ theme, onNavigate }) => {
   const [chartDataType, setChartDataType] = useState('bookings');
-  const [hoveredBar, setHoveredBar] = useState(null);
+  const [showTableView, setShowTableView] = useState(false);
   const isDark = isDarkTheme(theme);
 
   const colors = useMemo(() => ({
@@ -72,17 +48,9 @@ export const SalesScreen = ({ theme, onNavigate }) => {
 
   const activeTotal = chartDataType === 'bookings' ? totalBookings : totalSales;
 
-  const { aheadOfPace, deltaLabel, progressPct } = useMemo(() => {
-    const now = new Date();
-    const start = new Date(now.getFullYear(), 0, 1);
-    const next = new Date(now.getFullYear() + 1, 0, 1);
-    const yearPct = ((Math.floor((now - start) / 86400000) + 1) / ((next - start) / 86400000)) * 100;
+  const progressPct = useMemo(() => {
     const goalPct = ((chartDataType === 'bookings' ? totalBookings : totalSales) / 7_000_000) * 100;
-    return {
-      aheadOfPace: goalPct >= yearPct,
-      deltaLabel: `${Math.abs(goalPct - yearPct).toFixed(1)}%`,
-      progressPct: Math.min(100, goalPct),
-    };
+    return Math.min(100, goalPct);
   }, [chartDataType, totalBookings, totalSales]);
 
   const recentOrders = useMemo(() => [...ORDER_DATA].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5), []);
@@ -128,7 +96,34 @@ export const SalesScreen = ({ theme, onNavigate }) => {
     { value: 'sales', label: 'Sales' },
   ], []);
 
-  const statusColor = (status) => STATUS_COLORS[status] || colors.textSecondary;
+  const viewModeOpts = useMemo(() => [
+    { value: 'chart', label: 'Chart' },
+    { value: 'table', label: 'Table' },
+  ], []);
+
+  const formatChartValue = (value) => {
+    if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`;
+    return `$${Math.round(value / 1_000)}k`;
+  };
+
+  const tableRows = useMemo(() => {
+    const points = MONTHLY_SALES_DATA.map((entry) => ({
+      month: entry.month,
+      value: chartDataType === 'bookings' ? entry.bookings : entry.sales,
+    }));
+    const half = Math.ceil(points.length / 2);
+    const left = points.slice(0, half);
+    const right = points.slice(half);
+    return left.map((item, index) => ({
+      left: item,
+      right: right[index] || null,
+    }));
+  }, [chartDataType]);
+
+
+
+  const topSalesLeader = rewardsSnapshot?.topSales?.[0] || null;
+  const topDesignLeader = rewardsSnapshot?.topDesigners?.[0] || null;
 
   /* ── animation gate — wait for screen slide-in ── */
 
@@ -138,131 +133,168 @@ export const SalesScreen = ({ theme, onNavigate }) => {
   /* ── render ── */
 
   /* shared tile header */
-  const TileHeader = ({ icon: Icon, title, action, badge }) => (
-    <div className="flex items-center justify-between mb-3">
-      <div className="flex items-center gap-2">
-        {Icon && <Icon className="w-4 h-4" style={{ color: colors.textSecondary, opacity: 0.6 }} />}
-        <h3 className="text-[0.9375rem] font-bold" style={{ color: colors.textPrimary }}>{title}</h3>
-        {badge && (
-          <span className="text-[0.6875rem] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
-            style={{ backgroundColor: subtleBg(theme, 1.5), color: colors.textSecondary }}>{badge}</span>
+  const TileHeader = ({ title, action, detail }) => (
+    <div className="flex items-center justify-between gap-3 mb-3">
+      <h3 className="text-[0.9375rem] font-bold truncate" style={{ color: colors.textPrimary }}>{title}</h3>
+      <div className="flex items-center gap-2 shrink-0">
+        {detail && (
+          <span className="text-sm font-bold tabular-nums" style={{ color: colors.textPrimary }}>{detail}</span>
+        )}
+        {action && (
+          <ChevronRight className="w-3.5 h-3.5" style={{ color: colors.textSecondary, opacity: 0.45 }} />
         )}
       </div>
-      {action && (
-        <span className="text-xs font-bold uppercase tracking-widest flex items-center gap-0.5 transition-opacity"
-          style={{ color: colors.textSecondary, opacity: 0.5 }}>
-          {action} <ChevronRight className="w-3.5 h-3.5" />
-        </span>
-      )}
     </div>
   );
 
   /* shared content row */
-  const tileRowCls = "flex items-center justify-between py-2.5 px-3.5 rounded-xl";
-  const tileRowBg = subtleBg(theme);
+  const flatRowCls = "flex items-center justify-between gap-3 py-2.5";
+  const flatRowsDivider = { borderColor: subtleBg(theme, 1.35) };
 
   return (
     <div className="min-h-full app-header-offset" style={{ backgroundColor: colors.background, color: colors.textPrimary }}>
-      <div className="px-4 sm:px-6 lg:px-8 pt-4 pb-4 space-y-4 lg:space-y-5 max-w-5xl mx-auto w-full">
+      <div className="px-4 sm:px-6 lg:px-8 pt-5 pb-6 space-y-5 max-w-5xl mx-auto w-full">
 
         {/* ── Hero KPI + sidebar ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1.65fr_1fr] xl:grid-cols-[1.8fr_1fr] gap-4 lg:gap-5">
+        <div className="grid grid-cols-1 lg:grid-cols-[5fr_3fr] gap-5">
 
           {/* Main KPI card */}
           <GlassCard theme={theme} className="p-5 h-full" variant="elevated">
-            <div className="h-full flex flex-col gap-3">
-              {/* Header */}
-              <div className="flex items-start justify-between gap-3">
-                <div className="space-y-1 min-w-0">
-                  <p className="text-xs font-bold uppercase tracking-widest opacity-40">
-                    {chartDataType === 'bookings' ? 'Total Bookings' : 'Total Sales'}
-                  </p>
-                  <div className="text-4xl sm:text-[2.625rem] font-black tracking-tight leading-none" style={{ opacity: ready ? 1 : 0, transition: 'opacity 0.4s ease' }}>
-                    {ready ? (
-                      <CountUp value={activeTotal} prefix="$" duration={0.6} format={(v) => `$${Math.round(v).toLocaleString()}`} />
-                    ) : (
-                      <span style={{ color: 'transparent' }}>$0</span>
-                    )}
-                  </div>
+            <div className="h-full flex flex-col gap-4">
+              {/* Metric row — value + delta badge */}
+              <div className="flex items-baseline gap-2.5">
+                <div className="text-4xl sm:text-[2.6rem] font-black tracking-tight leading-none" style={{ opacity: ready ? 1 : 0, transition: 'opacity 0.4s ease' }}>
+                  {ready ? (
+                    <CountUp value={activeTotal} prefix="$" duration={0.6} format={(v) => `$${Math.round(v).toLocaleString()}`} />
+                  ) : (
+                    <span style={{ color: 'transparent' }}>$0</span>
+                  )}
                 </div>
-                <InlineToggle options={toggleOpts} value={chartDataType} onChange={setChartDataType} colors={colors} isDark={isDark} />
               </div>
 
-              {/* Progress to goal */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold opacity-40">Progress to Goal</span>
-                  <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-widest"
-                    style={{
-                      backgroundColor: aheadOfPace ? (isDark ? 'rgba(107,155,122,0.15)' : 'rgba(74,124,89,0.08)') : (isDark ? 'rgba(200,112,112,0.15)' : 'rgba(184,92,92,0.08)'),
-                      color: aheadOfPace ? theme.colors.success : theme.colors.error,
-                    }}>
-                    {aheadOfPace ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
-                    {deltaLabel} {aheadOfPace ? 'Ahead' : 'Behind'}
+              {/* Controls + Progress */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-3 text-[0.8125rem] font-semibold">
+                  {toggleOpts.map((opt) => (
+                    <button
+                      key={opt.value}
+                      onClick={() => setChartDataType(opt.value)}
+                      className="transition-opacity"
+                      style={{
+                        color: colors.textPrimary,
+                        opacity: chartDataType === opt.value ? 1 : 0.32,
+                      }}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                  <span style={{ color: colors.border }}>|</span>
+                  {viewModeOpts.map((opt) => (
+                    <button
+                      key={opt.value}
+                      onClick={() => setShowTableView(opt.value === 'table')}
+                      className="transition-opacity"
+                      style={{
+                        color: colors.textPrimary,
+                        opacity: (showTableView ? 'table' : 'chart') === opt.value ? 1 : 0.32,
+                      }}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="relative flex-1 h-3.5 rounded-full overflow-hidden" style={{ backgroundColor: subtleBg(theme, 1.5) }}>
+                    <div
+                      className="h-full rounded-full"
+                      style={{
+                        backgroundColor: colors.accent,
+                        width: ready ? `${progressPct}%` : '0%',
+                        transition: 'width 0.7s ease-out 0.1s',
+                      }}
+                    />
                   </div>
+                  <span className="text-[0.6875rem] font-semibold tabular-nums shrink-0" style={{ color: colors.textSecondary }}>
+                    {progressPct.toFixed(0)}%<span style={{ opacity: 0.45 }}>{' of $7M'}</span>
+                  </span>
                 </div>
-                <div className="h-2 w-full rounded-full overflow-hidden" style={{ backgroundColor: subtleBg(theme, 1.5) }}>
-                  <div className="h-full rounded-full" style={{ backgroundColor: colors.accent, width: ready ? `${progressPct}%` : '0%', transition: 'width 0.7s ease-out 0.1s' }} />
-                </div>
-                <div className="text-xs font-semibold opacity-35 tabular-nums">{progressPct.toFixed(1)}% of $7M goal</div>
               </div>
 
-              {/* Sparkline — flex-1 fills remaining card height on desktop */}
-              <div className="min-h-[112px] flex-1 flex items-end gap-1.5">
-                {MONTHLY_SALES_DATA.map((m, i) => {
-                  const val = chartDataType === 'bookings' ? m.bookings : m.sales;
-                  const pct = (val / chartMax) * 100;
-                  const isHovered = hoveredBar === `mini-${i}`;
-                  return (
-                    <div key={m.month} className="flex-1 flex flex-col items-center justify-end gap-1.5 cursor-default h-full"
-                      onMouseEnter={() => setHoveredBar(`mini-${i}`)} onMouseLeave={() => setHoveredBar(null)}>
-                      <div className="w-full relative flex items-end flex-1">
-                        {isHovered && (
-                          <div className="absolute -top-5 left-1/2 -translate-x-1/2 text-[0.6875rem] font-bold whitespace-nowrap" style={{ color: colors.textPrimary }}>
-                            ${(val / 1000).toFixed(0)}k
-                          </div>
-                        )}
-                        <div className="w-full rounded-md" style={{
-                          height: ready ? `${Math.max(8, pct)}%` : '0%',
-                          // In dark mode, semi-transparent accent blends grey with the surface.
-                          // Use explicit rgba so bars appear as warm cream, not muddy grey.
-                          backgroundColor: isDark
-                            ? (isHovered ? 'rgba(245,240,235,1.0)' : 'rgba(245,240,235,0.70)')
-                            : colors.accent,
-                          opacity: isDark ? 1 : (isHovered ? 0.75 : 0.32),
-                          transition: `height 0.4s ease-out ${0.1 + i * 0.025}s, background-color 0.15s, opacity 0.15s`,
-                        }} />
+              {/* Sparkline */}
+              {showTableView ? (
+                <div className="pt-1">
+                  <table className="w-full text-[0.75rem]">
+                    <tbody>
+                      {tableRows.map((row, index) => (
+                        <tr
+                          key={`table-row-${row.left.month}`}
+                          className={index < tableRows.length - 1 ? 'border-b' : ''}
+                          style={{ borderColor: subtleBg(theme, 1.35) }}
+                        >
+                          <td className="py-2 pr-3 font-medium" style={{ color: colors.textSecondary }}>
+                            {row.left.month}
+                          </td>
+                          <td className="py-2 pr-6 text-right font-semibold tabular-nums" style={{ color: colors.textPrimary }}>
+                            {formatChartValue(row.left.value)}
+                          </td>
+                          {row.right ? (
+                            <>
+                              <td className="py-2 pr-3 font-medium" style={{ color: colors.textSecondary }}>
+                                {row.right.month}
+                              </td>
+                              <td className="py-2 text-right font-semibold tabular-nums" style={{ color: colors.textPrimary }}>
+                                {formatChartValue(row.right.value)}
+                              </td>
+                            </>
+                          ) : (
+                            <>
+                              <td className="py-2" />
+                              <td className="py-2" />
+                            </>
+                          )}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="flex-1 flex items-end gap-2 min-h-[110px] pt-1">
+                  {MONTHLY_SALES_DATA.map((m, i) => {
+                    const val = chartDataType === 'bookings' ? m.bookings : m.sales;
+                    const pct = (val / chartMax) * 100;
+                    return (
+                      <div key={m.month} className="flex-1 flex flex-col items-center justify-end gap-1.5 h-full">
+                        <div className="w-full flex items-end flex-1">
+                          <div className="w-full rounded-md" style={{
+                            height: ready ? `${Math.max(8, pct)}%` : '0%',
+                            backgroundColor: isDark
+                              ? 'rgba(245,240,235,0.55)'
+                              : colors.accent,
+                            opacity: isDark ? 1 : (0.18 + (pct / 100) * 0.28),
+                            transition: `height 0.5s ease-out ${0.05 + i * 0.03}s, opacity 0.3s ease`,
+                          }} />
+                        </div>
+                        <span className="text-[0.5625rem] font-semibold tracking-wide" style={{ color: colors.textSecondary, opacity: 0.5 }}>
+                          {m.month}
+                        </span>
                       </div>
-                      <span className="text-[0.6875rem] font-semibold" style={{ opacity: isHovered ? 0.8 : 0.4, transition: 'opacity 0.15s' }}>{m.month}</span>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </GlassCard>
 
           {/* Sidebar cards */}
-          <div className="grid grid-cols-1 grid-rows-2 gap-4">
+          <div className="grid grid-cols-1 gap-5 lg:grid-rows-2">
             {/* Leaderboard */}
             <button onClick={() => onNavigate('customer-rank')} className="w-full h-full text-left group">
               <GlassCard theme={theme} className="p-5 h-full flex flex-col" variant="elevated">
-                <TileHeader icon={TrendingUp} title="Leaderboard" action="View All" />
-                <div className="space-y-1.5 flex-1 flex flex-col justify-center">
-                  {topLeaders.map((leader, idx) => (
-                    <div key={leader.id} className={tileRowCls}
-                      style={{
-                        backgroundColor: tileRowBg,
-                        opacity: ready ? 1 : 0,
-                        transform: ready ? 'none' : 'translateX(-4px)',
-                        transition: `opacity 0.3s ease ${0.05 + idx * 0.05}s, transform 0.3s ease ${0.05 + idx * 0.05}s`,
-                      }}>
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-black shrink-0"
-                          style={{ backgroundColor: subtleBg(theme, 2), color: colors.textSecondary }}>
-                          {idx + 1}
-                        </span>
-                        <span className="text-sm font-semibold truncate">{leader.name}</span>
-                      </div>
+                <TileHeader title="Leaderboard" action />
+                <div className="flex-1 divide-y" style={flatRowsDivider}>
+                  {topLeaders.map((leader) => (
+                    <div key={leader.id} className={flatRowCls}>
+                      <span className="text-sm font-semibold truncate">{leader.name}</span>
                       <span className="text-sm font-bold tabular-nums shrink-0 ml-2">{formatCurrency(leader.bookings)}</span>
                     </div>
                   ))}
@@ -273,47 +305,30 @@ export const SalesScreen = ({ theme, onNavigate }) => {
             {/* Dealer Rewards */}
             <button onClick={() => onNavigate('incentive-rewards')} className="w-full h-full text-left group">
               <GlassCard theme={theme} className="p-5 h-full flex flex-col" variant="elevated">
-                <TileHeader icon={Trophy} title="Dealer Rewards" action="Details" />
+                <TileHeader title="Dealer Rewards" action />
                 {rewardsSnapshot ? (
-                  <div className="flex-1 flex flex-col justify-center space-y-1.5">
-                    <div className={tileRowCls} style={{ backgroundColor: tileRowBg }}>
-                      <div className="flex items-center gap-2.5">
-                        <Calendar className="w-4 h-4 opacity-35" />
-                        <span className="text-sm font-semibold">{rewardsSnapshot.key}</span>
-                      </div>
-                      <span className="text-sm font-bold tabular-nums">{formatCurrency(rewardsSnapshot.totalAll)}</span>
+                  <div className="flex-1">
+                    <div className="flex items-baseline justify-between mb-3">
+                      <span className="text-[0.6875rem] font-medium" style={{ color: colors.textSecondary }}>{rewardsSnapshot.key}</span>
+                      <span className="text-lg font-black tabular-nums">{formatCurrency(rewardsSnapshot.totalAll)}</span>
                     </div>
-                    <div className="grid grid-cols-2 gap-2 pt-1">
-                      {rewardsSnapshot.topSales.length > 0 && (
-                        <div className="py-2 px-3.5 rounded-xl" style={{ backgroundColor: tileRowBg }}>
-                          <div className="text-[0.6875rem] font-bold uppercase tracking-wider opacity-30 mb-1.5">Top Sales</div>
-                          <div className="space-y-1.5">
-                            {rewardsSnapshot.topSales.map((p) => (
-                              <div key={p.name}>
-                                <div className="text-sm font-semibold truncate">{p.name}</div>
-                                <div className="text-xs tabular-nums opacity-50">{formatCurrency(p.amount)}</div>
-                              </div>
-                            ))}
-                          </div>
+                    <div className="divide-y" style={flatRowsDivider}>
+                      {topSalesLeader && (
+                        <div className={flatRowCls}>
+                          <span className="text-sm font-semibold truncate">{topSalesLeader.name}</span>
+                          <span className="text-sm font-bold tabular-nums ml-2">{formatCurrency(topSalesLeader.amount)}</span>
                         </div>
                       )}
-                      {rewardsSnapshot.topDesigners.length > 0 && (
-                        <div className="py-2 px-3.5 rounded-xl" style={{ backgroundColor: tileRowBg }}>
-                          <div className="text-[0.6875rem] font-bold uppercase tracking-wider opacity-30 mb-1.5">Top Design</div>
-                          <div className="space-y-1.5">
-                            {rewardsSnapshot.topDesigners.map((p) => (
-                              <div key={p.name}>
-                                <div className="text-sm font-semibold truncate">{p.name}</div>
-                                <div className="text-xs tabular-nums opacity-50">{formatCurrency(p.amount)}</div>
-                              </div>
-                            ))}
-                          </div>
+                      {topDesignLeader && (
+                        <div className={flatRowCls}>
+                          <span className="text-sm font-semibold truncate">{topDesignLeader.name}</span>
+                          <span className="text-sm font-bold tabular-nums ml-2">{formatCurrency(topDesignLeader.amount)}</span>
                         </div>
                       )}
                     </div>
                   </div>
                 ) : (
-                  <p className="text-sm opacity-40 flex-1 flex items-center">No rewards data yet.</p>
+                  <p className="text-sm opacity-40 flex-1 flex items-center">No data yet.</p>
                 )}
               </GlassCard>
             </button>
@@ -321,31 +336,24 @@ export const SalesScreen = ({ theme, onNavigate }) => {
         </div>
 
         {/* ── Data sections ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-4 lg:gap-5">
+        <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-5">
           {/* Recent Activity */}
           <button onClick={() => onNavigate('orders')} className="w-full text-left group">
             <GlassCard theme={theme} className="p-5" variant="elevated">
-              <TileHeader title="Recent Activity" action="All Orders" />
-              <div className="space-y-1.5">
-                {recentOrders.map((order, i) => {
-                  const sc = statusColor(order.status);
+              <TileHeader title="Recent Activity" action />
+              <div className="divide-y" style={flatRowsDivider}>
+                {recentOrders.map((order) => {
                   return (
-                    <div key={order.orderNumber} className={tileRowCls}
-                      style={{
-                        backgroundColor: tileRowBg,
-                        opacity: ready ? 1 : 0,
-                        transition: `opacity 0.25s ease ${0.08 + i * 0.03}s`,
-                      }}>
+                    <div key={order.orderNumber} className={flatRowCls}>
                       <div className="min-w-0">
                         <p className="text-sm font-semibold truncate">{formatCompanyName(order.company)}</p>
                         <p className="text-xs opacity-40 tabular-nums">{new Date(order.date).toLocaleDateString()}</p>
                       </div>
-                      <div className="text-right shrink-0 ml-2 space-y-0.5">
+                      <div className="text-right shrink-0 ml-2">
                         <p className="text-sm font-bold tabular-nums">${order.net.toLocaleString()}</p>
-                        <span className="inline-block text-[0.6875rem] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
-                          style={{ backgroundColor: sc + '14', color: sc }}>
+                        <p className="text-[0.6875rem] font-medium" style={{ color: colors.textSecondary }}>
                           {order.status}
-                        </span>
+                        </p>
                       </div>
                     </div>
                   );
@@ -356,7 +364,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
 
           {/* Invoiced by Vertical */}
           <GlassCard theme={theme} className="p-5" variant="elevated">
-            <TileHeader title="Invoiced by Vertical" badge="YTD" />
+            <TileHeader title="Invoiced by Vertical" />
             <SalesByVerticalBreakdown theme={theme} data={SALES_VERTICALS_DATA.map(v => ({ name: v.label, value: v.value, color: v.color }))} />
           </GlassCard>
         </div>
@@ -365,25 +373,14 @@ export const SalesScreen = ({ theme, onNavigate }) => {
         {commissionsSnapshot && (
           <button onClick={() => onNavigate('commissions')} className="w-full text-left group">
             <GlassCard theme={theme} className="p-5" variant="elevated">
-              <TileHeader icon={DollarSign} title="Commissions" action="View All" />
-              <div className="space-y-2.5">
-                <div className={tileRowCls} style={{ backgroundColor: tileRowBg }}>
-                  <div className="flex items-center gap-2.5">
-                    <Calendar className="w-4 h-4 opacity-35" />
-                    <span className="text-sm font-semibold">{commissionsSnapshot.year} · {commissionsSnapshot.quartersReported}Q reported</span>
+              <TileHeader title="Commissions" action detail={formatCurrency(commissionsSnapshot.ytdTotal)} />
+              <div className="divide-y" style={flatRowsDivider}>
+                {commissionsSnapshot.topEarners.map(([name, amount]) => (
+                  <div key={name} className={flatRowCls}>
+                    <span className="text-sm font-semibold truncate">{name}</span>
+                    <span className="text-sm font-bold tabular-nums ml-2">{formatCurrency(amount)}</span>
                   </div>
-                  <span className="text-base font-black tabular-nums">{formatCurrency(commissionsSnapshot.ytdTotal)}</span>
-                </div>
-                {commissionsSnapshot.topEarners.length > 0 && (
-                  <div className="grid grid-cols-3 gap-1.5">
-                    {commissionsSnapshot.topEarners.map(([name, amount]) => (
-                      <div key={name} className="py-2 px-3.5 rounded-xl min-w-0" style={{ backgroundColor: tileRowBg }}>
-                        <div className="text-xs opacity-35 truncate mb-0.5">{name}</div>
-                        <div className="text-sm font-bold tabular-nums">{formatCurrency(amount)}</div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                ))}
               </div>
             </GlassCard>
           </button>

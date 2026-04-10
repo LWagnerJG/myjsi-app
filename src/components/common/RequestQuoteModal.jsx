@@ -7,6 +7,7 @@ import { hapticMedium, hapticSuccess } from '../../utils/haptics.js';
 import { isDarkTheme, DESIGN_TOKENS } from '../../design-system/tokens.js';
 import { getModalMotion } from '../../design-system/motion.js';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion.js';
+import { PrimaryButton, SecondaryButton } from './JSIButtons.jsx';
 import { INITIAL_MEMBERS } from '../../screens/members/data.js';
 import { CONTRACTS_DATA } from '../../screens/resources/contracts/data.js';
 import { SearchSelect } from './RequestQuoteModalComponents.jsx';
@@ -411,30 +412,28 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                     {/* ── Footer ── */}
                     <div className="flex items-center justify-end gap-2.5 px-5 py-3.5 flex-shrink-0"
                         style={{ borderTop: `1px solid ${divider}` }}>
-                        <button type="button" onClick={onClose}
-                            className="px-4 py-2 rounded-full text-xs font-semibold transition-colors"
-                            style={{ color: c.textSecondary }}>
+                        <SecondaryButton
+                            type="button"
+                            onClick={onClose}
+                            theme={theme}
+                            className="h-10 !py-0 px-5 text-[0.75rem]"
+                        >
                             Cancel
-                        </button>
-                        <button type="submit" disabled={isSubmitting}
-                            onClick={handleSubmit}
-                            className="px-5 py-2.5 rounded-full text-xs font-bold transition-all active:scale-[0.98] disabled:opacity-50 flex items-center gap-2"
-                            style={{ backgroundColor: c.accent, color: c.accentText || '#fff' }}>
-                            {isSubmitting ? (
-                                <>
-                                    <svg className="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                                    </svg>
-                                    Sending…
-                                </>
-                            ) : (
-                                <>
-                                    <Send className="w-3.5 h-3.5" />
-                                    Submit Request
-                                </>
-                            )}
-                        </button>
+                        </SecondaryButton>
+                        <PrimaryButton
+                            type="submit"
+                            disabled={isSubmitting}
+                            theme={theme}
+                            icon={isSubmitting ? (
+                                <svg className="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                </svg>
+                            ) : <Send className="w-3.5 h-3.5" />}
+                            className="h-10 !py-0 px-5 text-[0.75rem] disabled:cursor-not-allowed"
+                        >
+                            {isSubmitting ? 'Sending…' : 'Submit Request'}
+                        </PrimaryButton>
                     </div>
                 </motion.div>
             </motion.div>

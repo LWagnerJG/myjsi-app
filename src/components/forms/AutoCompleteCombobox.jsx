@@ -1,6 +1,6 @@
 import React, { useState, useRef, useMemo, useEffect, useLayoutEffect } from 'react';
 import { Search } from 'lucide-react';
-import { isDarkTheme, DESIGN_TOKENS } from '../../design-system/tokens.js';
+import { inputSurface, isDarkTheme, subtleBorder } from '../../design-system/tokens.js';
 
 export const AutoCompleteCombobox = React.memo(({
     label,
@@ -54,8 +54,9 @@ export const AutoCompleteCombobox = React.memo(({
             && !options.some(o => o.toLowerCase() === value.toLowerCase());
     }, [showAddButton, onAddNew, value, options]);
 
-    const subtleBorder = dark ? 'rgba(255,255,255,0.11)' : 'rgba(0,0,0,0.07)';
-    const inputBg = dark ? theme.colors.background : theme.colors.surface;
+    const borderColor = subtleBorder(theme).replace('1px solid ', '');
+    const sharedInputSurface = inputSurface(theme);
+    const inputBg = dark ? theme.colors.background : sharedInputSurface.backgroundColor;
 
     // Close on outside click/tap — option buttons are inside wrapperRef so they won't trigger this
     useEffect(() => {
@@ -125,7 +126,7 @@ export const AutoCompleteCombobox = React.memo(({
                         paddingRight: 16,
                         fontSize: "0.875rem",
                         backgroundColor: inputBg,
-                        borderColor: subtleBorder,
+                        borderColor,
                         color: theme.colors.textPrimary,
                     }}
                 />
@@ -137,7 +138,7 @@ export const AutoCompleteCombobox = React.memo(({
                         style={{
                             ...(dropUp ? { bottom: 'calc(100% + 6px)' } : { top: 'calc(100% + 6px)' }),
                             backgroundColor: theme.colors.surface,
-                            borderColor: subtleBorder,
+                            borderColor,
                             boxShadow: dark
                                 ? '0 8px 32px rgba(0,0,0,0.45)'
                                 : '0 8px 24px rgba(0,0,0,0.11)',

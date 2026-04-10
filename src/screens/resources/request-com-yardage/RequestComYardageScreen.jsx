@@ -1,11 +1,13 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { SearchableSelect } from '../../../components/forms/SearchableSelect.jsx';
 import { Modal } from '../../../components/common/Modal.jsx';
-import { FrostButton, PrimaryButton } from '../../../components/common/JSIButtons.jsx';
-import { X, Plus, Minus, Trash2 } from 'lucide-react';
+import { PrimaryButton } from '../../../components/common/JSIButtons.jsx';
+import { AppScreenLayout } from '../../../components/common/AppScreenLayout.jsx';
+import { FloatingSubmitCTA } from '../../../components/common/FloatingSubmitCTA.jsx';
+import { X, Plus, Minus, Trash2, Scissors } from 'lucide-react';
 import { FABRICS_DATA, JSI_MODELS } from '../../products/data.js';
 import { hapticSuccess } from '../../../utils/haptics.js';
-import { floatingBarStyle } from '../../../design-system/tokens.js';
+import { cardSurface, subtleBorder, isDarkTheme } from '../../../design-system/tokens.js';
 
 /* Inline editable qty — tap the number to type directly (opens numpad on mobile) */
 const QtyValue = ({ value, onChange, theme }) => {
@@ -50,6 +52,7 @@ export const RequestComYardageScreen = ({ theme, showAlert, onNavigate, userSett
     const [selectedItems, setSelectedItems] = useState([]);
     const [showConfirm, setShowConfirm] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const dark = isDarkTheme(theme);
 
     const modelOptions = useMemo(() => JSI_MODELS.filter(m => m.isUpholstered).map(m => ({ value: m.id, label: `${m.name} (${m.id})` })), []);
     const fabricOptions = useMemo(() => FABRICS_DATA.map(f => ({ value: `${f.supplier}, ${f.pattern}`, label: `${f.supplier}, ${f.pattern}` })), []);
@@ -93,69 +96,99 @@ export const RequestComYardageScreen = ({ theme, showAlert, onNavigate, userSett
     };
 
     const itemCount = selectedItems.length;
+    const card = cardSurface(theme);
+    const bdr = subtleBorder(theme);
+
+    // Frosted glass style for the search pill — matches StandardSearchBar / SearchInput
+    const frostedPill = {
+        backgroundColor: dark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.72)',
+        border: dark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(255,255,255,0.80)',
+        boxShadow: dark ? '0 2px 10px rgba(0,0,0,0.25)' : '0 2px 10px rgba(53,53,53,0.08)',
+        backdropFilter: 'blur(12px) saturate(1.4)',
+        WebkitBackdropFilter: 'blur(12px) saturate(1.4)',
+    };
 
     return (
-        <div className="flex flex-col h-full app-header-offset" style={{ background: theme.colors.background }}>
-            {/* Scrollable content */}
-            <div className="flex-1 overflow-y-auto scrollbar-hide">
-                <div className="max-w-2xl mx-auto w-full px-4 sm:px-6 pb-32">
+        <>
+            <AppScreenLayout
+                theme={theme}
+                title="COM Yardage"
+                subtitle="Add fabric patterns, assign models, and submit one combined yardage request."
+                maxWidthClass="max-w-2xl"
+                horizontalPaddingClass="px-4 sm:px-6"
+                contentPaddingBottomClass="pb-6"
+                footer={(
+                    <FloatingSubmitCTA
+                        theme={theme}
+                        onClick={handleSubmit}
+                        visible={canSubmit}
+                        label={`Submit Request${itemCount > 1 ? ` (${itemCount})` : ''}`}
+                    />
+                )}
+            >
 
-                    {/* Search bar to add fabrics */}
-                    <div className="pt-2 pb-5 sticky top-0 z-10" style={{ background: theme.colors.background }}>
+                    {/* Fabric search — frosted glass pill matching app search bars */}
+                    <div className="pb-5">
                         <SearchableSelect
                             theme={theme}
-                            placeholder="Add a fabric pattern..."
+                            placeholder="Search fabric pattern…"
                             options={fabricOptions}
                             value=""
                             onChange={addFabric}
                             size="md"
-                            searchPlaceholder="Search supplier or pattern..."
-                            missingActionLabel="Fabric not listed? Send it for testing"
+                            inlineSearch
+                            leadingIndicator
+                            buttonStyle={frostedPill}
+                            inputStyle={frostedPill}
+                            buttonClassName="h-[52px]"
+                            inputClassName="h-[52px]"
+                            missingActionLabel="Fabric not listed? Send for testing"
                             onMissingAction={() => onNavigate && onNavigate('resources/comcol-request')}
                         />
                     </div>
 
                     {/* Empty state */}
                     {itemCount === 0 && (
-                        <div className="text-center py-16 px-4">
-                            <p className="text-sm font-medium" style={{ color: theme.colors.textSecondary }}>
-                                Search above to add a fabric, then assign models and quantities.
+                        <div className="flex flex-col items-center justify-center pt-8 pb-16 px-6">
+                            <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6"
+                                style={{ backgroundColor: `${theme.colors.accent}15` }}>
+                                <Scissors className="w-10 h-10" style={{ color: theme.colors.accent }} />
+                            </div>
+                            <h3 className="font-bold text-[1.375rem] mb-2" style={{ color: theme.colors.textPrimary }}>
+                                Request COM Yardage
+                            </h3>
+                            <p className="text-[0.8125rem] text-center max-w-sm leading-relaxed" style={{ color: theme.colors.textSecondary }}>
+                                Search for a fabric pattern above to get started. You'll assign models and quantities to each line before submitting.
                             </p>
                         </div>
                     )}
 
                     {/* Line items */}
                     {itemCount > 0 && (
-                        <div className="space-y-3">
+                        <div className="space-y-2.5 pb-28">
                             {selectedItems.map((item) => (
-                                <div
-                                    key={item.key}
-                                    className="rounded-card p-4"
-                                    style={{
-                                        background: theme.colors.surface,
-                                        border: `1px solid ${theme.colors.border}`,
-                                    }}
-                                >
-                                    {/* Row 1: Fabric name + X remove */}
+                                <div key={item.key} className="rounded-[24px] p-4" style={card}>
+                                    {/* Fabric name + remove */}
                                     <div className="flex items-center gap-2 mb-3">
-                                        <p className="flex-1 text-sm font-semibold truncate" style={{ color: theme.colors.textPrimary }}>
+                                        <p className="flex-1 text-[0.9375rem] font-semibold truncate" style={{ color: theme.colors.textPrimary }}>
                                             {item.fabric}
                                         </p>
                                         <button
                                             onClick={() => removeItem(item.key)}
-                                            className="w-7 h-7 flex items-center justify-center rounded-full flex-shrink-0 active:scale-90 transition-all hover:bg-black/5 dark:hover:bg-white/5"
+                                            className="w-7 h-7 flex items-center justify-center rounded-full flex-shrink-0 active:scale-90 transition-transform"
+                                            style={{ backgroundColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}
                                             aria-label="Remove line"
                                         >
                                             <X className="w-3.5 h-3.5" style={{ color: theme.colors.textSecondary }} />
                                         </button>
                                     </div>
 
-                                    {/* Row 2: Model select + quantity stepper */}
+                                    {/* Model select + quantity stepper */}
                                     <div className="flex items-end gap-3">
                                         <div className="flex-1 min-w-0 relative" style={{ zIndex: 1 }}>
                                             <SearchableSelect
                                                 theme={theme}
-                                                placeholder="Select model..."
+                                                placeholder="Select model…"
                                                 options={modelOptions}
                                                 value={item.modelId}
                                                 onChange={(v) => {
@@ -164,17 +197,17 @@ export const RequestComYardageScreen = ({ theme, showAlert, onNavigate, userSett
                                                 }}
                                                 size="sm"
                                                 allowClear
-                                                searchPlaceholder="Search model..."
+                                                searchPlaceholder="Search model…"
                                             />
                                         </div>
-                                        {/* Quantity stepper — trash icon replaces minus at qty 1 */}
-                                        <div className="flex items-center gap-0 rounded-full flex-shrink-0" style={{ border: `1px solid ${theme.colors.border}` }}>
+                                        {/* Quantity stepper */}
+                                        <div className="flex items-center rounded-full flex-shrink-0" style={{ border: bdr }}>
                                             <button
                                                 onClick={() => {
                                                     if (item.quantity <= 1) removeItem(item.key);
                                                     else updateItem(item.key, { quantity: item.quantity - 1 });
                                                 }}
-                                                className="w-9 h-9 flex items-center justify-center rounded-l-full active:scale-90 transition-all hover:bg-black/5 dark:hover:bg-white/5"
+                                                className="w-9 h-9 flex items-center justify-center rounded-l-full active:scale-90 transition-transform"
                                                 aria-label={item.quantity <= 1 ? 'Remove item' : 'Decrease quantity'}
                                             >
                                                 {item.quantity <= 1
@@ -182,14 +215,10 @@ export const RequestComYardageScreen = ({ theme, showAlert, onNavigate, userSett
                                                     : <Minus className="w-3.5 h-3.5" style={{ color: theme.colors.textSecondary }} />
                                                 }
                                             </button>
-                                            <QtyValue
-                                                value={item.quantity}
-                                                onChange={(n) => updateItem(item.key, { quantity: n })}
-                                                theme={theme}
-                                            />
+                                            <QtyValue value={item.quantity} onChange={(n) => updateItem(item.key, { quantity: n })} theme={theme} />
                                             <button
                                                 onClick={() => updateItem(item.key, { quantity: item.quantity + 1 })}
-                                                className="w-9 h-9 flex items-center justify-center rounded-r-full active:scale-90 transition-all hover:bg-black/5 dark:hover:bg-white/5"
+                                                className="w-9 h-9 flex items-center justify-center rounded-r-full active:scale-90 transition-transform"
                                                 aria-label="Increase quantity"
                                             >
                                                 <Plus className="w-3.5 h-3.5" style={{ color: theme.colors.textSecondary }} />
@@ -200,55 +229,36 @@ export const RequestComYardageScreen = ({ theme, showAlert, onNavigate, userSett
                             ))}
                         </div>
                     )}
-                </div>
-            </div>
-
-            {/* Sticky frost-glass submit bar at bottom */}
-            <div
-                className="flex-shrink-0 flex justify-center px-5 pt-3"
-                style={{ paddingBottom: 'max(20px, calc(env(safe-area-inset-bottom, 0px) + 12px))' }}
-            >
-                <div className="w-full max-w-md rounded-2xl px-4 py-3" style={floatingBarStyle(theme)}>
-                    <FrostButton
-                        onClick={handleSubmit}
-                        disabled={!canSubmit}
-                        variant="dark"
-                        size="large"
-                        className="w-full"
-                    >
-                        {itemCount === 0 ? 'Submit Request' : `Submit Request${itemCount > 1 ? ` (${itemCount})` : ''}`}
-                    </FrostButton>
-                </div>
-            </div>
+            </AppScreenLayout>
 
             {/* Confirmation modal */}
             <Modal show={showConfirm} onClose={() => setShowConfirm(false)} title="Confirm Request" theme={theme}>
                 <div>
-                    <p className="text-[0.6875rem] font-semibold tracking-widest uppercase mb-3" style={{ color: theme.colors.textSecondary }}>
-                        ITEMS TO SUBMIT
-                    </p>
-                    <div className="space-y-2 mb-5">
+                    <div className="space-y-0 mb-5">
                         {selectedItems.map((item, idx) => (
-                            <div
-                                key={item.key}
-                                className="flex items-baseline gap-3 text-sm py-2"
-                                style={{ borderBottom: idx < selectedItems.length - 1 ? `1px solid ${theme.colors.border}` : 'none' }}
-                            >
+                            <div key={item.key}
+                                className="flex items-center gap-3 py-3"
+                                style={{ borderBottom: idx < selectedItems.length - 1 ? bdr : 'none' }}>
                                 <div className="flex-1 min-w-0">
-                                    <p className="font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{item.modelName}</p>
-                                    <p className="text-xs truncate" style={{ color: theme.colors.textSecondary }}>{item.fabric}</p>
+                                    <p className="font-semibold text-[0.9375rem] truncate" style={{ color: theme.colors.textPrimary }}>
+                                        {item.modelName || 'No model'}
+                                    </p>
+                                    <p className="text-xs truncate mt-0.5" style={{ color: theme.colors.textSecondary }}>
+                                        {item.fabric}
+                                    </p>
                                 </div>
-                                <span className="text-xs font-medium flex-shrink-0 tabular-nums" style={{ color: theme.colors.textSecondary }}>
-                                    {item.quantity}x
+                                <span className="text-xs font-bold px-2 py-0.5 rounded-full tabular-nums"
+                                    style={{ backgroundColor: `${theme.colors.accent}15`, color: theme.colors.accent }}>
+                                    ×{item.quantity}
                                 </span>
                             </div>
                         ))}
                     </div>
                     <PrimaryButton onClick={handleFinalSubmit} disabled={isSubmitting} theme={theme} fullWidth>
-                        {isSubmitting ? 'Submitting...' : 'Confirm and Send'}
+                        {isSubmitting ? 'Submitting…' : 'Confirm & Send'}
                     </PrimaryButton>
                 </div>
             </Modal>
-        </div>
+        </>
     );
 };

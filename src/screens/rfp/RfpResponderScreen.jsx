@@ -1,18 +1,21 @@
 /* ── RFP Responder Screen — Main stage machine ──────────────────── */
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, Suspense } from 'react';
 import { AnimatedScreenWrapper } from '../../components/common/AnimatedScreenWrapper.jsx';
 import {
   UploadStage,
   ProcessingStage,
   ClarificationStage,
-  ResponseBuilder,
-} from './RfpResponderComponents.jsx';
+} from './RfpResponderStages.jsx';
 import {
   PROCESSING_STEPS,
   CLARIFICATION_QUESTIONS,
   MOCK_RESPONSE,
   NON_JSI_ITEMS,
 } from './rfpMockData.js';
+
+const ResponseBuilder = React.lazy(() =>
+  import('./RfpResponderComponents.jsx').then((m) => ({ default: m.ResponseBuilder }))
+);
 
 const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20 MB
 
@@ -138,15 +141,25 @@ const RfpResponderScreen = ({ theme, screenParams, onNavigate, setSuccessMessage
           )}
 
           {stage === 3 && responseData && (
-            <ResponseBuilder
-              data={responseData}
-              onChange={setResponseData}
-              partnerItems={partnerItems}
-              onPartnerItemChange={handlePartnerItemChange}
-              onExport={handleExport}
-              onSave={handleSaveOpportunity}
-              theme={theme}
-            />
+            <Suspense
+              fallback={(
+                <div className="w-full max-w-xl mx-auto py-10 text-center">
+                  <p className="text-sm" style={{ color: theme?.colors?.textSecondary }}>
+                    Preparing response editor...
+                  </p>
+                </div>
+              )}
+            >
+              <ResponseBuilder
+                data={responseData}
+                onChange={setResponseData}
+                partnerItems={partnerItems}
+                onPartnerItemChange={handlePartnerItemChange}
+                onExport={handleExport}
+                onSave={handleSaveOpportunity}
+                theme={theme}
+              />
+            </Suspense>
           )}
         </div>
       </div>

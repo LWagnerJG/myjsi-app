@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Modal } from '../../../../components/common/Modal.jsx';
 import { FormInput } from '../../../../components/common/FormComponents.jsx';
+import { PrimaryButton, SecondaryButton } from '../../../../components/common/JSIButtons.jsx';
 import { Send, User, Calendar, MessageSquare } from 'lucide-react';
 import { CURRENT_USER, SALES_REPS } from '../data.js';
 import { hapticSuccess } from '../../../../utils/haptics.js';
@@ -154,23 +155,23 @@ export const TransferRequestModal = ({
                     </div>
 
                     <div className="pt-2 flex gap-3">
-                        <button
+                        <SecondaryButton
                             type="button"
                             onClick={onClose}
-                            className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all active:scale-[0.98]"
-                            style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }}
+                            theme={theme}
+                            className="flex-1 h-11 !py-0 px-5 text-[0.8125rem]"
                         >
                             Cancel
-                        </button>
-                        <button
+                        </SecondaryButton>
+                        <PrimaryButton
                             type="submit"
                             disabled={!formData.desiredStartDate || !formData.message.trim()}
-                            className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                            style={{ backgroundColor: theme.colors.accent, color: '#fff' }}
+                            theme={theme}
+                            icon={<Send className="w-4 h-4" />}
+                            className="flex-1 h-11 !py-0 px-5 text-[0.8125rem] disabled:cursor-not-allowed"
                         >
-                            <Send className="w-4 h-4" />
                             Send Request
-                        </button>
+                        </PrimaryButton>
                     </div>
                 </form>
             </div>

@@ -1,7 +1,8 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { isDarkTheme } from '../../../design-system/tokens.js';
 import StandardSearchBar from '../../../components/common/StandardSearchBar.jsx';
+import { PageTitle } from '../../../components/common/PageTitle.jsx';
 import { FileText, Clock, Wrench, ExternalLink, Play, X } from 'lucide-react';
 import { INSTALL_INSTRUCTIONS_DATA } from './data.js';
 import { UNIFIED_MODAL_Z } from '../../../components/common/modalUtils.js';
@@ -61,15 +62,10 @@ const toEmbedUrl = (rawUrl) => {
 export const InstallInstructionsScreen = ({ theme }) => {
   const c = theme.colors;
   const isDark = isDarkTheme(theme);
-  const listRef = useRef(null);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState('all');
   const [activeVideo, setActiveVideo] = useState(null);
-  const [isTopCollapsed, setIsTopCollapsed] = useState(false);
-  const [isMobileViewport, setIsMobileViewport] = useState(
-    typeof window !== 'undefined' ? window.innerWidth < 768 : false
-  );
 
   const instructions = useMemo(
     () => [...(INSTALL_INSTRUCTIONS_DATA || [])].sort((a, b) => a.title.localeCompare(b.title)),
@@ -115,12 +111,6 @@ export const InstallInstructionsScreen = ({ theme }) => {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [activeVideo]);
 
-  useEffect(() => {
-    const onResize = () => setIsMobileViewport(window.innerWidth < 768);
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, []);
-
   const handleSearchChange = (value) => {
     if (typeof value === 'string') setSearchTerm(value);
     else setSearchTerm(value?.target?.value || '');
@@ -138,83 +128,58 @@ export const InstallInstructionsScreen = ({ theme }) => {
     });
   };
 
-  const handleListScroll = (e) => {
-    const scrollTop = e.currentTarget.scrollTop;
-    const isMobile = window.innerWidth < 768;
-    const shouldCollapse = isMobile && scrollTop > 28;
-    setIsTopCollapsed(shouldCollapse);
-  };
-
-  const showCompactSearch = isMobileViewport && isTopCollapsed;
-
   return (
     <div className="flex flex-col h-full app-header-offset">
-      <div className={`px-4 sm:px-5 pt-2 ${showCompactSearch ? 'pb-2' : 'pb-4'}`}>
-        {showCompactSearch ? (
-          <div className="transition-all duration-200">
-            <StandardSearchBar
-              value={searchTerm}
-              onChange={handleSearchChange}
-              placeholder="Search by series, type, or keyword..."
-              theme={theme}
-            />
-          </div>
-        ) : (
-          <div className="rounded-2xl border p-4 sm:p-5 lg:p-6 space-y-4" style={{ backgroundColor: cardBg, borderColor: divider }}>
-            <div
-              className="overflow-hidden transition-all duration-200"
-              style={{ maxHeight: isTopCollapsed ? 0 : 120, opacity: isTopCollapsed ? 0 : 1 }}
-            >
-              <div className="flex flex-wrap items-start justify-between gap-3 sm:gap-4">
-              <div>
-                <h2 className="text-[1.1875rem] sm:text-xl font-bold tracking-tight" style={{ color: c.textPrimary }}>Install Instructions</h2>
-                <p className="text-xs mt-0.5" style={{ color: c.textSecondary }}>
-                  {instructions.length} guides organized by product type.
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5" style={{ backgroundColor: subtleBg }}>
-                  <FileText className="w-3.5 h-3.5" style={{ color: c.textSecondary }} />
-                  <span className="text-[0.6875rem] leading-none font-semibold" style={{ color: c.textSecondary }}>{instructions.length} Docs</span>
-                </div>
-                <div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5" style={{ backgroundColor: subtleBg }}>
-                  <span className="text-[0.6875rem] leading-none font-semibold" style={{ color: c.textSecondary }}>{typeCount} Types</span>
-                </div>
-              </div>
-              </div>
+      <div className="px-4 sm:px-5 pt-3 pb-1">
+        <PageTitle
+          title="Install Instructions"
+          subtitle={`${instructions.length} guides organized by product type.`}
+          theme={theme}
+          className="px-0 pt-0 pb-0"
+          titleClassName="text-[1.375rem] font-black"
+          subtitleClassName="text-sm mt-0.5"
+        >
+          <div className="flex items-center gap-2">
+            <div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5" style={{ backgroundColor: subtleBg }}>
+              <FileText className="w-3.5 h-3.5" style={{ color: c.textSecondary }} />
+              <span className="text-[0.6875rem] leading-none font-semibold" style={{ color: c.textSecondary }}>{instructions.length} Docs</span>
             </div>
-
-            <StandardSearchBar
-              value={searchTerm}
-              onChange={handleSearchChange}
-              placeholder="Search by series, type, or keyword..."
-              theme={theme}
-            />
-
-            <div
-              className="grid w-full grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-2 overflow-hidden transition-all duration-200"
-              style={{ maxHeight: isTopCollapsed ? 0 : 240, opacity: isTopCollapsed ? 0 : 1 }}
-            >
-              {types.map((type) => (
-                <button
-                  key={type}
-                  onClick={() => setSelectedType(type)}
-                  className="h-9 px-3 rounded-full text-xs font-semibold whitespace-nowrap transition-colors inline-flex items-center justify-center leading-none"
-                  style={{
-                    backgroundColor: selectedType === type ? c.accent : subtleBg,
-                    color: selectedType === type ? c.accentText : c.textSecondary,
-                    border: selectedType === type ? 'none' : `1px solid ${divider}`,
-                  }}
-                >
-                  {type === 'all' ? 'All Types' : type}
-                </button>
-              ))}
+            <div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5" style={{ backgroundColor: subtleBg }}>
+              <span className="text-[0.6875rem] leading-none font-semibold" style={{ color: c.textSecondary }}>{typeCount} Types</span>
             </div>
           </div>
-        )}
+        </PageTitle>
       </div>
 
-      <div ref={listRef} onScroll={handleListScroll} className="flex-1 overflow-y-auto scrollbar-hide px-4 sm:px-5 pb-8">
+      <div className="px-4 sm:px-5 pb-2">
+        <StandardSearchBar
+          value={searchTerm}
+          onChange={handleSearchChange}
+          placeholder="Search by series, type, or keyword..."
+          theme={theme}
+        />
+      </div>
+
+      <div className="px-4 sm:px-5 pb-3">
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1">
+          {types.map((type) => (
+            <button
+              key={type}
+              onClick={() => setSelectedType(type)}
+              className="h-9 px-4 rounded-full text-xs font-semibold whitespace-nowrap transition-colors inline-flex items-center justify-center leading-none"
+              style={{
+                backgroundColor: selectedType === type ? c.accent : subtleBg,
+                color: selectedType === type ? c.accentText : c.textSecondary,
+                border: selectedType === type ? `1px solid ${c.accent}` : `1px solid ${divider}`,
+              }}
+            >
+              {type === 'all' ? 'All Types' : type}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto scrollbar-hide px-4 sm:px-5 pb-8">
         {filtered.length ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3.5">
             {filtered.map((item) => {
@@ -262,7 +227,7 @@ export const InstallInstructionsScreen = ({ theme }) => {
                     <div>
                       <button
                         onClick={() => openLink(item.pdfUrl)}
-                        className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition-all motion-tap"
+                        className="w-full flex items-center justify-center gap-2 py-2.5 rounded-full text-xs font-bold transition-all motion-tap"
                         style={{
                           backgroundColor: c.accent,
                           color: c.accentText,
@@ -299,22 +264,23 @@ export const InstallInstructionsScreen = ({ theme }) => {
             onClick={() => setActiveVideo(null)}
           >
             <div
-              className="relative w-full max-w-5xl rounded-2xl overflow-hidden border"
-              style={{ backgroundColor: c.surface, borderColor: divider, boxShadow: '0 24px 60px rgba(0,0,0,0.35)' }}
+              className="relative w-full max-w-5xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="h-12 px-4 flex items-center justify-between" style={{ borderBottom: `1px solid ${divider}` }}>
-                <p className="text-[0.8125rem] font-semibold" style={{ color: c.textPrimary }}>{activeVideo.title} · Video Preview</p>
-                <button
-                  onClick={() => setActiveVideo(null)}
-                  className="w-8 h-8 rounded-full inline-flex items-center justify-center"
-                  style={{ backgroundColor: subtleBg, color: c.textSecondary }}
-                  aria-label="Close video"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-              <div className="relative w-full" style={{ paddingTop: '56.25%', backgroundColor: '#111' }}>
+              <button
+                type="button"
+                onClick={() => setActiveVideo(null)}
+                className="absolute top-3 right-3 z-10 w-9 h-9 rounded-full inline-flex items-center justify-center"
+                style={{ backgroundColor: 'rgba(0,0,0,0.55)', color: '#fff' }}
+                aria-label="Close video"
+              >
+                <X className="w-4 h-4" />
+              </button>
+
+              <div
+                className="relative w-full overflow-hidden rounded-2xl"
+                style={{ paddingTop: '56.25%', backgroundColor: '#000', boxShadow: '0 24px 60px rgba(0,0,0,0.35)' }}
+              >
                 <iframe
                   title="Install Instruction Video"
                   src={activeVideo.url + (activeVideo.url.includes('?') ? '&' : '?') + 'autoplay=1&muted=0'}
@@ -323,6 +289,11 @@ export const InstallInstructionsScreen = ({ theme }) => {
                   allow="autoplay; fullscreen; picture-in-picture"
                   allowFullScreen
                 />
+
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
+                <p className="pointer-events-none absolute left-4 bottom-3 text-[0.8125rem] font-semibold text-white">
+                  {activeVideo.title} - Video Preview
+                </p>
               </div>
             </div>
           </div>,

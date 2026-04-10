@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
+import { PageTitle } from '../../../components/common/PageTitle.jsx';
 import { isDarkTheme } from '../../../design-system/tokens.js';
 import { Copy, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -67,13 +68,15 @@ export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: colors.background }}>
 
             {/* ── Page header ── */}
-            <div className="flex-shrink-0 px-4 pt-3 pb-3">
-                <h1 className="text-[1.375rem] font-black tracking-tight leading-tight" style={{ color: colors.textPrimary }}>
-                    Sample Policies
-                </h1>
-                <p className="text-sm mt-0.5" style={{ color: colors.textSecondary }}>
-                    Effective May 1, 2021 &middot; Commission not paid
-                </p>
+            <div className="flex-shrink-0 px-4 pt-3 pb-2">
+                <PageTitle
+                    title="Sample Policies"
+                    subtitle="Effective May 1, 2021 - Commission not paid"
+                    theme={theme}
+                    className="px-0 pt-0 pb-0"
+                    titleClassName="text-[1.375rem] font-black"
+                    subtitleClassName="text-sm mt-0.5"
+                />
             </div>
 
             {/* ── Policy card ── */}

@@ -2,7 +2,8 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { Modal } from '../../../components/common/Modal.jsx';
 import { FormInput } from '../../../components/common/FormComponents.jsx';
 import { SegmentedToggle } from '../../../components/common/GroupedToggle.jsx';
-import { Search, Package, ArrowRightLeft } from 'lucide-react';
+import StandardSearchBar from '../../../components/common/StandardSearchBar.jsx';
+import { Package, ArrowRightLeft } from 'lucide-react';
 import { 
     LOANER_POOL_PRODUCTS, 
     AVAILABILITY_STATUS, 
@@ -208,19 +209,13 @@ export const LoanerPoolScreen = ({ theme, setSuccessMessage, userSettings, myPro
                 {activeTab === 'browse' ? (
                     <>
                         {/* Search bar */}
-                        <div className="p-4 flex items-center gap-4">
-                            <div className="relative flex-1">
-                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: theme.colors.textSecondary }} />
-                                <input
-                                    type="text"
-                                    placeholder="Search by name or model..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full border py-3 pl-11 pr-4 rounded-full text-sm"
-                                    style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.border, color: theme.colors.textPrimary }}
-                                    aria-label="Search loaner pool products"
-                                />
-                            </div>
+                        <div className="px-4 pt-4 pb-3">
+                            <StandardSearchBar
+                                value={searchQuery}
+                                onChange={setSearchQuery}
+                                placeholder="Search by name or model..."
+                                theme={theme}
+                            />
                         </div>
 
                         {/* Info banner about transfers */}

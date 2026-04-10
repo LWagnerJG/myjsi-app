@@ -4,7 +4,8 @@ import { Package, Plus, Info } from 'lucide-react';
 import { PRODUCT_DATA } from './data.js';
 import { COMPETITION_METRICS } from './comparison-data.js';
 import { Modal } from '../../components/common/Modal.jsx';
-import FloatingPill from '../../components/common/FloatingPill.jsx';
+import { PrimaryButton, SecondaryButton } from '../../components/common/JSIButtons.jsx';
+import { FloatingActionCTA } from '../../components/common/FloatingActionCTA.jsx';
 
 const AdvantageChip = ({ value, onClick }) => (
     <button onClick={onClick} className={`min-w-[42px] inline-flex items-center justify-center px-2 py-1 text-xs font-semibold rounded-full focus:outline-none focus:ring-2 focus:ring-white/40 transition ${value > 0 ? COMPETITION_METRICS.displayFormat.advantage.positive : COMPETITION_METRICS.displayFormat.advantage.negative}`}>
@@ -101,7 +102,7 @@ export const CompetitiveAnalysisScreen = ({ categoryId, productId, theme }) => {
                     <VersusList jsiProduct={product} competitors={perProductList.length ? perProductList : categoryCompetitors} theme={theme} title={perProductList.length ? 'Versus Competitors' : 'Versus Competitors (Category)'} />
                 </div>
             </div>
-            <FloatingPill
+            <FloatingActionCTA
                 theme={theme}
                 onClick={() => setShowRequest(true)}
                 icon={<Plus />}
@@ -122,10 +123,22 @@ export const CompetitiveAnalysisScreen = ({ categoryId, productId, theme }) => {
                         <textarea name="notes" value={formState.notes} onChange={handleChange} rows={3} placeholder="Any context or price info..." className="w-full px-3 py-2 rounded-lg text-sm font-medium resize-none" style={{ background: theme.colors.subtle, color: theme.colors.textPrimary, border: `1px solid ${theme.colors.border}` }} />
                     </div>
                     <div className="flex justify-end gap-3 pt-2">
-                        <button type="button" onClick={()=>setShowRequest(false)} className="px-5 h-10 rounded-full font-semibold" style={{ background: theme.colors.subtle, color: theme.colors.textPrimary, border: `1px solid ${theme.colors.border}` }}>Cancel</button>
-                        <button type="submit" disabled={!canSubmit || submitted} className="px-6 h-10 rounded-full font-semibold disabled:opacity-50 disabled:cursor-not-allowed" style={{ background: theme.colors.accent, color: theme.colors.accentText }}>
+                        <SecondaryButton
+                            type="button"
+                            onClick={() => setShowRequest(false)}
+                            theme={theme}
+                            className="h-10 !py-0 px-5 text-[0.8125rem] border"
+                        >
+                            Cancel
+                        </SecondaryButton>
+                        <PrimaryButton
+                            type="submit"
+                            disabled={!canSubmit || submitted}
+                            theme={theme}
+                            className="h-10 !py-0 px-6 text-[0.8125rem] disabled:cursor-not-allowed"
+                        >
                             {submitted ? 'Sent!' : 'Submit'}
-                        </button>
+                        </PrimaryButton>
                     </div>
                 </form>
             </Modal>

@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { Trash2, ChevronUp, ChevronDown, Package, Send } from 'lucide-react';
 import { FormInput } from '../../../../components/common/FormComponents.jsx';
+import { PrimaryButton } from '../../../../components/common/JSIButtons.jsx';
 import { LOAN_DURATIONS } from '../data.js';
 import { hapticSuccess } from '../../../../utils/haptics.js';
 import { createProjectDraft, getProjectDisplayName, projectNameMatches } from '../../../../utils/projectHelpers.js';
@@ -287,8 +288,11 @@ export const RequestDrawer = ({
                                 />
                             </div>
 
-                            <button
+                            <PrimaryButton
                                 type="submit"
+                                theme={theme}
+                                fullWidth
+                                icon={<Send className="w-4 h-4" />}
                                 disabled={
                                     requestItems.length === 0 ||
                                     !requestForm.contactName.trim() ||
@@ -297,12 +301,10 @@ export const RequestDrawer = ({
                                     !requestForm.address.trim() ||
                                     !requestForm.duration.trim()
                                 }
-                                className="w-full py-3 rounded-xl font-bold text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                                style={{ backgroundColor: theme.colors.accent, color: '#fff' }}
+                                className="h-11 !py-0 px-5 text-[0.8125rem] disabled:cursor-not-allowed"
                             >
-                                <Send className="w-4 h-4" />
                                 Submit Request
-                            </button>
+                            </PrimaryButton>
                         </form>
                     </div>
                 </div>

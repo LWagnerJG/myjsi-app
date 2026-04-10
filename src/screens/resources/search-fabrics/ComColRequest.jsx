@@ -1,10 +1,12 @@
 import React, { useState, useCallback } from 'react';
+import { AppScreenLayout } from '../../../components/common/AppScreenLayout.jsx';
+import { FloatingSubmitCTA } from '../../../components/common/FloatingSubmitCTA.jsx';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
-import { PillButton, PrimaryButton } from '../../../components/common/JSIButtons.jsx';
+import { PillButton } from '../../../components/common/JSIButtons.jsx';
 import { ExternalLink, CheckCircle } from 'lucide-react';
 
 /* COM / COL Pattern Submission Form
-   Lightweight in�app version of the PDF. Captures core details needed to start an evaluation.
+  Lightweight in-app version of the PDF. Captures core details needed to start an evaluation.
 */
 export const ComColRequest = ({ theme, showAlert }) => {
   const [form, setForm] = useState({
@@ -26,7 +28,12 @@ export const ComColRequest = ({ theme, showAlert }) => {
 
   const update = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
-  const canSubmit = form.customer && form.dealerProject && form.fabricMill && form.fabricPattern && form.modelNumbers;
+  const canSubmit =
+    form.customer.trim() &&
+    form.dealerProject.trim() &&
+    form.fabricMill.trim() &&
+    form.fabricPattern.trim() &&
+    form.modelNumbers.trim();
 
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
@@ -59,19 +66,28 @@ export const ComColRequest = ({ theme, showAlert }) => {
   };
 
   return (
-    <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
-      <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-5">
-        <GlassCard theme={theme} className="rounded-2xl">
-          <div className="p-6 space-y-6">
-            <div className="space-y-2">
-              <h2 className="text-xl font-bold leading-tight" style={{ color: theme.colors.textPrimary }}>COM / COL Pattern Submission</h2>
-              <p className="text-sm leading-relaxed" style={{ color: theme.colors.textSecondary }}>
-                Use this form to submit a Customer&apos;s Own Material / Leather pattern for testing and approval.
-                Provide as much detail as possible. After submission you will receive next�step instructions
-                (ship sample memo, performance requirements, fire code, etc.). Fields marked * are required.
-              </p>
-            </div>
-            <form onSubmit={handleSubmit} className="space-y-7">
+    <AppScreenLayout
+      theme={theme}
+      asForm
+      onSubmit={handleSubmit}
+      title="COM / COL Pattern Submission"
+      subtitle="Submit material details for testing and approval. Fields marked with * are required."
+      maxWidthClass="max-w-3xl"
+      horizontalPaddingClass="px-4"
+      contentPaddingBottomClass="pb-28"
+      contentClassName="space-y-5"
+      footer={(
+        <FloatingSubmitCTA
+          theme={theme}
+          type="submit"
+          label={submitting ? 'Submitting...' : 'Submit COM / COL Pattern'}
+          disabled={!canSubmit || submitting}
+          visible
+        />
+      )}
+    >
+          <GlassCard theme={theme} className="rounded-2xl">
+            <div className="p-6 space-y-7">
               {/* Customer / Dealer */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -145,37 +161,25 @@ export const ComColRequest = ({ theme, showAlert }) => {
                 {sectionLabel('Notes / Special Instructions')}
                 <textarea value={form.notes} onChange={e => update('notes', e.target.value)} placeholder="Fire code requirements, backing, finish treatments, testing needs, etc." rows={3} className={inputBase} style={inputStyle} />
               </div>
-              <div className="pt-2">
-                <PrimaryButton
-                  type="submit"
-                  disabled={!canSubmit || submitting}
-                  theme={theme}
-                  size="large"
-                  fullWidth
-                >
-                  {submitting ? 'Submitting...' : 'Submit COM / COL Pattern'}
-                </PrimaryButton>
-                {submitted && (
-                  <div className="flex items-center gap-2 mt-3 text-sm font-medium" style={{ color: theme.colors.accent }}>
-                    <CheckCircle className="w-4 h-4" /> Submitted!
-                  </div>
-                )}
-              </div>
-            </form>
-          </div>
-        </GlassCard>
-        {/* Helpful Links */}
-        <GlassCard theme={theme} className="rounded-2xl">
-          <div className="p-5 sm:p-6 space-y-3">
-            <h3 className="font-semibold text-sm" style={{ color: theme.colors.textPrimary }}>Helpful References</h3>
-            <div className="grid sm:grid-cols-3 gap-3">
-              <a className="px-4 py-3 rounded-2xl border flex items-center justify-between" style={{ borderColor: theme.colors.border, color: theme.colors.textPrimary, background: theme.colors.surface }} href="https://webresources.jsifurniture.com/production/uploads/documents/JSI-BrandDoc-COMCOLOrderForm-0321.pdf" target="_blank" rel="noreferrer" title="Open the COM/COL Order Form PDF in a new tab">COM/COL Order Form<ExternalLink className="w-4 h-4 opacity-70" /></a>
-              <a className="px-4 py-3 rounded-2xl border flex items-center justify-between" style={{ borderColor: theme.colors.border, color: theme.colors.textPrimary, background: theme.colors.surface }} href="https://jasperwebsites.blob.core.windows.net/production/uploads/documents/jsi_COMCOL_approval_3.pdf" target="_blank" rel="noreferrer">Approval Process Guide<ExternalLink className="w-4 h-4 opacity-70" /></a>
-              <a className="px-4 py-3 rounded-2xl border flex items-center justify-between" style={{ borderColor: theme.colors.border, color: theme.colors.textPrimary, background: theme.colors.surface }} href="https://www.jsifurniture.com/resources/textile-partner-info/col-com/" target="_blank" rel="noreferrer">Textile Partner Info<ExternalLink className="w-4 h-4 opacity-70" /></a>
+              {submitted && (
+                <div className="flex items-center gap-2 text-sm font-medium" style={{ color: theme.colors.accent }}>
+                  <CheckCircle className="w-4 h-4" /> Submitted!
+                </div>
+              )}
             </div>
-          </div>
-        </GlassCard>
-      </div>
-    </div>
+          </GlassCard>
+
+          {/* Helpful Links */}
+          <GlassCard theme={theme} className="rounded-2xl">
+            <div className="p-5 sm:p-6 space-y-3">
+              <h3 className="font-semibold text-sm" style={{ color: theme.colors.textPrimary }}>Helpful References</h3>
+              <div className="grid sm:grid-cols-3 gap-3">
+                <a className="px-4 py-3 rounded-2xl border flex items-center justify-between" style={{ borderColor: theme.colors.border, color: theme.colors.textPrimary, background: theme.colors.surface }} href="https://webresources.jsifurniture.com/production/uploads/documents/JSI-BrandDoc-COMCOLOrderForm-0321.pdf" target="_blank" rel="noreferrer" title="Open the COM/COL Order Form PDF in a new tab">COM/COL Order Form<ExternalLink className="w-4 h-4 opacity-70" /></a>
+                <a className="px-4 py-3 rounded-2xl border flex items-center justify-between" style={{ borderColor: theme.colors.border, color: theme.colors.textPrimary, background: theme.colors.surface }} href="https://jasperwebsites.blob.core.windows.net/production/uploads/documents/jsi_COMCOL_approval_3.pdf" target="_blank" rel="noreferrer">Approval Process Guide<ExternalLink className="w-4 h-4 opacity-70" /></a>
+                <a className="px-4 py-3 rounded-2xl border flex items-center justify-between" style={{ borderColor: theme.colors.border, color: theme.colors.textPrimary, background: theme.colors.surface }} href="https://www.jsifurniture.com/resources/textile-partner-info/col-com/" target="_blank" rel="noreferrer">Textile Partner Info<ExternalLink className="w-4 h-4 opacity-70" /></a>
+              </div>
+            </div>
+          </GlassCard>
+    </AppScreenLayout>
   );
 };

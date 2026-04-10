@@ -207,7 +207,7 @@ export const SearchableSelect = ({
   };
 
   const renderOptions = () => (
-    <ul className="max-h-64 overflow-y-auto px-1.5 py-1.5 scrollbar-hide" role="listbox" style={{ background: theme.colors.surface }}>
+    <ul className="max-h-64 overflow-y-auto px-1.5 py-1 scrollbar-hide" role="listbox" style={{ background: theme.colors.surface }}>
       {filtered.length === 0 && (
         <li className="px-4 py-3 text-center">
           {onMissingAction && missingActionLabel ? (
@@ -232,7 +232,7 @@ export const SearchableSelect = ({
           <button
             type="button"
             onClick={() => selectValue(option.value)}
-            className={`w-full rounded-xl px-3.5 py-2.5 text-left text-sm transition-colors ${option.value === value ? 'font-semibold' : 'font-medium'}`}
+            className={`w-full rounded-xl px-3.5 py-2 text-left text-sm transition-colors ${option.value === value ? 'font-semibold' : 'font-medium'}`}
             style={{
               color: theme.colors.textPrimary,
               backgroundColor: option.value === value ? `${theme.colors.accent}12` : 'transparent',
@@ -342,7 +342,7 @@ export const SearchableSelect = ({
         <div ref={menuRef} style={{ position: 'fixed', left: menuPos.left, top: menuPos.top, width: menuPos.width, zIndex: 10000 }}>
           <div className="overflow-hidden rounded-2xl border shadow-2xl" style={{ background: theme.colors.surface, borderColor: theme.colors.border }}>
             {!inlineSearch && searchable ? (
-              <div className="border-b p-2" style={{ borderColor: theme.colors.border, background: theme.colors.surface }}>
+              <div className="px-2.5 pt-2.5 pb-1.5" style={{ background: theme.colors.surface }}>
                 <input
                   ref={(node) => {
                     inputRef.current = node;
@@ -354,8 +354,8 @@ export const SearchableSelect = ({
                   }}
                   onKeyDown={handleInlineKeyDown}
                   placeholder={searchPlaceholder}
-                  className="w-full rounded-xl border px-3 py-2 text-sm outline-none"
-                  style={{ background: theme.colors.subtle, borderColor: theme.colors.border, color: theme.colors.textPrimary }}
+                  className="w-full rounded-full px-3.5 py-2 text-sm outline-none transition-colors"
+                  style={{ background: theme.colors.background, border: `1px solid ${theme.colors.border}`, color: theme.colors.textPrimary }}
                 />
               </div>
             ) : null}

@@ -18,10 +18,12 @@ export default defineConfig({
             output: {
                 manualChunks: {
                     'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-                    'vendor-ui': ['lucide-react', 'framer-motion'],
+                    'vendor-icons': ['lucide-react'],
+                    'vendor-motion': ['framer-motion'],
                     'vendor-charts': ['recharts'],
                     'vendor-dnd': ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'],
                     'vendor-state': ['zustand'],
+                    'vendor-pdf': ['html2pdf.js'],
                 }
             }
         }

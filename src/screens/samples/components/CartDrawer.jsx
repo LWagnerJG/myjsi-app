@@ -9,6 +9,7 @@ import { SAMPLE_CATEGORIES, FINISH_CATEGORIES } from '../data.js';
 import { getSampleProduct } from '../sampleIndex.js';
 import { DirectoryModal } from './DirectoryModal.jsx';
 import { DrawerItem } from './DrawerItem.jsx';
+import { PrimaryButton } from '../../../components/common/JSIButtons.jsx';
 import { getUnifiedBackdropStyle, UNIFIED_BACKDROP_TRANSITION, UNIFIED_MODAL_Z } from '../../../components/common/modalUtils.js';
 import { getBottomSheetMotion, getModalMotion, MOTION_DURATIONS_MS, MOTION_EASINGS, buildCssTransition } from '../../../design-system/motion.js';
 import { usePrefersReducedMotion } from '../../../hooks/usePrefersReducedMotion.js';
@@ -136,18 +137,17 @@ export const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, d
                             </div>
 
                             {/* Submit */}
-                            <button
-                                disabled={!canSubmit}
+                            <PrimaryButton
+                                type="button"
                                 onClick={submit}
-                                className="w-full py-3 rounded-full text-[0.8125rem] font-semibold transition-all flex items-center justify-center gap-2 disabled:opacity-30 disabled:pointer-events-none active:scale-[0.97]"
-                                style={{
-                                    backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)',
-                                    color: theme.colors.textPrimary,
-                                }}
+                                theme={theme}
+                                disabled={!canSubmit}
+                                fullWidth
+                                className="py-3 text-[0.8125rem]"
+                                icon={<Send className="w-3.5 h-3.5" />}
                             >
-                                <Send className="w-3.5 h-3.5" />
                                 Submit Request
-                            </button>
+                            </PrimaryButton>
                         </div>
                         </motion.div>
                     </div>

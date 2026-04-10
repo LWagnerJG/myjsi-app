@@ -27,7 +27,7 @@ export const HBar = ({ label, value, maxValue, color, isDark, colors, rank }) =>
             </span>
             <div
                 className="flex-1 rounded-full overflow-hidden"
-                style={{ height: 5, backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.05)' }}
+                style={{ height: 6, backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.05)' }}
             >
                 <div
                     className="h-full rounded-full transition-all duration-500"
@@ -104,17 +104,22 @@ export const SparkBars = ({ data, colors, isDark }) => {
                                     width: '68%',
                                     maxWidth: 22,
                                     height: `${hPct}%`,
-                                    backgroundColor: isLast
-                                        ? colors.accent
-                                        : (isDark ? 'rgba(255,255,255,0.11)' : 'rgba(53,53,53,0.09)'),
+                                    backgroundColor: colors.accent,
+                                    opacity: isLast ? 1 : (isDark ? 0.28 : 0.2),
                                     alignSelf: 'flex-end',
                                     borderRadius: '3px 3px 0 0',
+                                    boxShadow: isLast
+                                        ? (isDark ? '0 6px 12px rgba(0,0,0,0.35)' : '0 6px 12px rgba(53,53,53,0.14)')
+                                        : 'none',
                                 }}
                             />
                         </div>
                         <span
                             className="text-[0.5625rem] font-semibold leading-none"
-                            style={{ color: colors.textSecondary, opacity: isLast ? 0.8 : 0.5 }}
+                            style={{
+                                color: isLast ? colors.textPrimary : colors.textSecondary,
+                                opacity: isLast ? 0.88 : 0.52,
+                            }}
                         >
                             {d.month}
                         </span>

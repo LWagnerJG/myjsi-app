@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Modal } from '../../components/common/Modal.jsx';
-import { Camera, FileText, AlertCircle, CheckCircle, Clock, XCircle, Image, ChevronRight } from 'lucide-react';
+import { Camera, FileText, AlertCircle, CheckCircle, Clock, XCircle, Image } from 'lucide-react';
+import { FloatingSubmitCTA } from '../../components/common/FloatingSubmitCTA.jsx';
 import { REPLACEMENT_REQUESTS_DATA } from './data.js';
 import jsQR from 'jsqr';
 import { hapticSuccess } from '../../utils/haptics.js';
@@ -26,30 +27,26 @@ function StatusBadge({ status }) {
 }
 
 /* ── Single request card ── */
-function RequestCard({ r, onClick, dark, bdr }) {
-    const statusAccent = STATUS_FG[r.status] || '#353535';
+function RequestCard({ r, onClick, theme }) {
     return (
-        <button onClick={onClick} className="w-full text-left active:scale-[0.99] transition-transform">
-            <div className="rounded-[24px] overflow-hidden flex items-center gap-3 transition-all"
-                style={{ backgroundColor: 'transparent', border: `1px solid ${bdr}`, borderLeft: `3px solid ${statusAccent}40` }}>
-                <div className="flex-1 min-w-0 px-4 py-3.5">
-                    <div className="font-semibold text-[0.9375rem] truncate" style={{ color: 'var(--text-primary)' }}>
+        <button onClick={onClick} className="w-full text-left active:scale-[0.98] transition-transform">
+            <div className="flex items-center gap-3 py-3 px-1">
+                <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-[0.875rem] truncate" style={{ color: theme.colors.textPrimary }}>
                         {r.name}
                     </div>
-                    <div className="text-xs mt-0.5 truncate opacity-60">
+                    <div className="text-xs mt-0.5 truncate opacity-50" style={{ color: theme.colors.textSecondary }}>
                         {r.dealer || 'Unknown Dealer'} · {new Date(r.date).toLocaleDateString()}
                     </div>
                 </div>
-                <div className="pr-4 shrink-0 flex items-center gap-2">
-                    <StatusBadge status={r.status} />
-                </div>
+                <StatusBadge status={r.status} />
             </div>
         </button>
     );
 }
 
 /* ── Manual entry form ── */
-function ReplacementForm({ theme, formData, onChange, onSubmit, fileInputRef, onPickPhotos, openPhotoPicker }) {
+function ReplacementForm({ theme, formData, onChange, fileInputRef, onPickPhotos, openPhotoPicker }) {
     const dark = isDarkTheme(theme);
     const bdr = dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)';
     const fieldBg = dark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.03)';
@@ -68,7 +65,7 @@ function ReplacementForm({ theme, formData, onChange, onSubmit, fileInputRef, on
     const inputStyle = { backgroundColor: fieldBg, border: `1px solid ${bdr}`, color: theme.colors.textPrimary };
 
     return (
-        <div className="px-4 sm:px-6 lg:px-8 pb-8 max-w-5xl mx-auto w-full" style={{ paddingTop: CONTENT_PT }}>
+        <div className="px-4 sm:px-6 lg:px-8 pb-28 max-w-5xl mx-auto w-full" style={{ paddingTop: CONTENT_PT }}>
             <div className="space-y-4">
                 {/* Form card */}
                 <div className="rounded-[24px] overflow-hidden p-5 space-y-4"
@@ -115,13 +112,6 @@ function ReplacementForm({ theme, formData, onChange, onSubmit, fileInputRef, on
                         </button>
                     </Field>
                 </div>
-
-                {/* Submit */}
-                <button onClick={onSubmit}
-                    className="w-full py-3.5 rounded-full font-bold text-[0.9375rem] active:scale-[0.98] transition-transform"
-                    style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}>
-                    Submit Replacement Request
-                </button>
             </div>
         </div>
     );
@@ -234,14 +224,22 @@ export const ReplacementsScreen = ({ theme }) => {
     }, []);
 
     const openPhotoPicker = useCallback(() => fileInputRef.current?.click(), []);
+    const canSubmit = Boolean(formData.salesOrder.trim() && formData.lineItem.trim());
 
     /* ── Render ── */
     if (view === 'form') {
         return (
             <div className="min-h-full" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
                 <ReplacementForm
-                    theme={theme} formData={formData} onChange={onChange} onSubmit={submit}
+                    theme={theme} formData={formData} onChange={onChange}
                     fileInputRef={fileInputRef} onPickPhotos={onPickPhotos} openPhotoPicker={openPhotoPicker}
+                />
+                <FloatingSubmitCTA
+                    theme={theme}
+                    onClick={submit}
+                    label="Submit Replacement Request"
+                    visible
+                    disabled={!canSubmit}
                 />
             </div>
         );
@@ -249,114 +247,89 @@ export const ReplacementsScreen = ({ theme }) => {
 
     return (
         <div className="min-h-full" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
-            <div className="px-4 sm:px-6 lg:px-8 pb-8 max-w-5xl mx-auto w-full space-y-4"
+            <div className="px-4 sm:px-6 lg:px-8 pb-8 max-w-5xl mx-auto w-full"
                 style={{ paddingTop: CONTENT_PT }}>
 
-                {/* ── QR Scanner card ── */}
-                <div className="rounded-[24px] overflow-hidden"
-                    style={{ backgroundColor: theme.colors.surface, border: `1px solid ${isScanning ? theme.colors.accent + '60' : bdr}` }}>
-                    {/* video always mounted so the ref is stable */}
-                    <div className="relative overflow-hidden" style={{ height: isScanning ? 280 : 0, transition: 'height 0.35s ease' }}>
+                {/* ── Action tiles — side-by-side ── */}
+                <div className="grid grid-cols-2 gap-2.5 mb-5">
+                    {/* Scan QR */}
+                    <button onClick={startScanning}
+                        className="rounded-2xl p-4 flex flex-col items-center gap-2 active:scale-[0.97] transition-transform"
+                        style={{ backgroundColor: theme.colors.surface, border: `1px solid ${bdr}` }}>
+                        <Camera className="w-5 h-5" style={{ color: theme.colors.accent }} />
+                        <span className="font-semibold text-[0.8125rem]" style={{ color: theme.colors.textPrimary }}>Scan QR</span>
+                    </button>
+                    {/* Manual entry */}
+                    <button
+                        onClick={() => { setFormData({ salesOrder: '', lineItem: '', dealer: '', notes: '', photos: [] }); goToForm(); }}
+                        className="rounded-2xl p-4 flex flex-col items-center gap-2 active:scale-[0.97] transition-transform"
+                        style={{ backgroundColor: theme.colors.surface, border: `1px solid ${bdr}` }}>
+                        <FileText className="w-5 h-5" style={{ color: theme.colors.accent }} />
+                        <span className="font-semibold text-[0.8125rem]" style={{ color: theme.colors.textPrimary }}>Enter Manually</span>
+                    </button>
+                </div>
+
+                {/* ── QR Scanner viewport (expands when scanning) ── */}
+                <div className="rounded-2xl overflow-hidden mb-5"
+                    style={{ height: isScanning ? 240 : 0, transition: 'height 0.3s ease', border: isScanning ? `1px solid ${theme.colors.accent}50` : 'none' }}>
+                    <div className="relative w-full h-full">
                         <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover" playsInline muted autoPlay />
                         {isScanning && (
                             <>
-                                {/* corner brackets */}
-                                {[['top-4 left-4', 'border-t-2 border-l-2 rounded-tl-lg'],
-                                  ['top-4 right-4', 'border-t-2 border-r-2 rounded-tr-lg'],
-                                  ['bottom-4 left-4', 'border-b-2 border-l-2 rounded-bl-lg'],
-                                  ['bottom-4 right-4', 'border-b-2 border-r-2 rounded-br-lg']].map(([pos, cls]) => (
-                                    <div key={pos} className={`absolute w-6 h-6 ${pos} ${cls}`}
+                                {[['top-3 left-3', 'border-t-2 border-l-2 rounded-tl-md'],
+                                  ['top-3 right-3', 'border-t-2 border-r-2 rounded-tr-md'],
+                                  ['bottom-3 left-3', 'border-b-2 border-l-2 rounded-bl-md'],
+                                  ['bottom-3 right-3', 'border-b-2 border-r-2 rounded-br-md']].map(([pos, cls]) => (
+                                    <div key={pos} className={`absolute w-5 h-5 ${pos} ${cls}`}
                                         style={{ borderColor: theme.colors.accent }} />
                                 ))}
-                                <div className="absolute top-3 left-3 text-xs font-semibold px-2.5 py-1 rounded-full"
-                                    style={{ backgroundColor: 'rgba(0,0,0,0.55)', color: '#fff' }}>
-                                    Scanning…
-                                </div>
                                 <button onClick={stopScanning}
-                                    className="absolute bottom-3 right-3 px-3.5 py-1.5 rounded-full text-sm font-bold text-white active:scale-95"
-                                    style={{ backgroundColor: 'rgba(0,0,0,0.60)' }}>
+                                    className="absolute bottom-3 right-3 px-3 py-1.5 rounded-full text-xs font-bold text-white active:scale-95"
+                                    style={{ backgroundColor: 'rgba(0,0,0,0.55)' }}>
                                     Cancel
                                 </button>
                                 <canvas ref={canvasRef} className="hidden" />
                             </>
                         )}
                     </div>
-
-                    {/* Tap-to-scan area (shown when not scanning) */}
-                    {!isScanning && (
-                        <button onClick={startScanning}
-                            className="w-full flex flex-col items-center justify-center gap-2 py-10 transition-opacity active:opacity-70">
-                            <div className="w-14 h-14 rounded-[18px] flex items-center justify-center mb-1"
-                                style={{ backgroundColor: dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.05)' }}>
-                                <Camera className="w-7 h-7" style={{ color: theme.colors.textSecondary }} />
-                            </div>
-                            <div className="font-bold text-[0.9375rem]" style={{ color: theme.colors.textPrimary }}>
-                                Scan QR Code
-                            </div>
-                            <div className="text-sm opacity-55" style={{ color: theme.colors.textSecondary }}>
-                                Tap to open camera
-                            </div>
-                            {cameraError && (
-                                <div className="mt-2 text-xs px-4 py-2 rounded-[12px] max-w-xs text-center"
-                                    style={{ backgroundColor: 'rgba(184,92,92,0.12)', color: '#B85C5C' }}>
-                                    {cameraError}
-                                </div>
-                            )}
-                        </button>
-                    )}
                 </div>
-
-                {/* ── Manual entry card ── */}
-                <button
-                    onClick={() => { setFormData({ salesOrder: '', lineItem: '', dealer: '', notes: '', photos: [] }); goToForm(); }}
-                    className="w-full text-left rounded-[24px] px-5 py-4 flex items-center gap-4 active:scale-[0.99] transition-transform"
-                    style={{ backgroundColor: theme.colors.surface, border: `1px solid ${bdr}` }}>
-                    <div className="w-10 h-10 rounded-[13px] flex items-center justify-center shrink-0"
-                        style={{ backgroundColor: dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.05)' }}>
-                        <FileText className="w-5 h-5" style={{ color: theme.colors.textSecondary }} />
+                {cameraError && (
+                    <div className="mb-4 text-xs px-3 py-2 rounded-xl text-center"
+                        style={{ backgroundColor: 'rgba(184,92,92,0.10)', color: '#B85C5C' }}>
+                        {cameraError}
                     </div>
-                    <div className="flex-1 min-w-0">
-                        <div className="font-bold text-[0.9375rem]" style={{ color: theme.colors.textPrimary }}>
-                            Enter Details Manually
-                        </div>
-                        <div className="text-sm opacity-55 mt-0.5" style={{ color: theme.colors.textSecondary }}>
-                            Fill out the form without scanning
-                        </div>
-                    </div>
-                    <ChevronRight className="w-4 h-4 opacity-30 shrink-0" style={{ color: theme.colors.textSecondary }} />
-                </button>
+                )}
 
                 {/* ── Previous Requests ── */}
-                <div>
-                    <div className="flex items-center justify-between mb-3 px-1">
-                        <h3 className="text-[0.9375rem] font-bold" style={{ color: theme.colors.textPrimary }}>
-                            Previous Requests
-                        </h3>
-                        <span className="text-xs font-bold uppercase tracking-[0.07em] opacity-40"
-                            style={{ color: theme.colors.textSecondary }}>
-                            {replacementRequests.length} total
+                <div className="flex items-baseline justify-between mb-1 px-1">
+                    <h3 className="text-[0.8125rem] font-semibold opacity-50" style={{ color: theme.colors.textSecondary }}>
+                        History
+                    </h3>
+                    {replacementRequests.length > 0 && (
+                        <span className="text-xs opacity-35" style={{ color: theme.colors.textSecondary }}>
+                            {replacementRequests.length}
                         </span>
-                    </div>
-
-                    {replacementRequests.length > 0 ? (
-                        <div className="space-y-2.5">
-                            {replacementRequests.map((r, i) => (
-                                <RequestCard key={`${r.name}-${i}`} r={r} dark={dark} bdr={bdr}
-                                    onClick={() => setSelectedRequest(r)} />
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="rounded-[24px] p-8 text-center"
-                            style={{ backgroundColor: theme.colors.surface, border: `1px solid ${bdr}` }}>
-                            <div className="font-semibold mb-1" style={{ color: theme.colors.textPrimary }}>
-                                No Previous Requests
-                            </div>
-                            <div className="text-sm opacity-55" style={{ color: theme.colors.textSecondary }}>
-                                Submit your first replacement request above.
-                            </div>
-                        </div>
                     )}
                 </div>
+
+                {replacementRequests.length > 0 ? (
+                    <div className="rounded-2xl overflow-hidden divide-y px-4"
+                        style={{ backgroundColor: theme.colors.surface, border: `1px solid ${bdr}`, borderColor: bdr }}>
+                        {replacementRequests.map((r, i) => (
+                            <div key={`${r.name}-${i}`} style={{ borderColor: bdr }}>
+                                <RequestCard r={r} theme={theme}
+                                    onClick={() => setSelectedRequest(r)} />
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="rounded-2xl py-10 text-center"
+                        style={{ backgroundColor: theme.colors.surface, border: `1px solid ${bdr}` }}>
+                        <div className="text-sm font-medium opacity-40" style={{ color: theme.colors.textSecondary }}>
+                            No requests yet
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* ── Request detail modal ── */}

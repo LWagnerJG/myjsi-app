@@ -9,6 +9,7 @@ import {
     Send,
     X,
 } from 'lucide-react';
+import { FloatingSubmitCTA } from '../../../components/common/FloatingSubmitCTA.jsx';
 import { isDarkTheme } from '../../../design-system/tokens.js';
 import { FormInput } from '../../../components/common/FormComponents.jsx';
 import { SearchableSelect } from '../../../components/forms/SearchableSelect.jsx';
@@ -1225,6 +1226,8 @@ const AddAttendeeActions = ({
 };
 
 export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members = [], currentUserId, currentScreen, onNavigate }) => {
+    const dark = isDarkTheme(theme);
+    const border = bdr(dark);
     const [entryMode, setEntryMode] = useState('home');
     const [guests, setGuests] = useState(() => [createRepGuest(userSettings)]);
     const [selectedCustomerId, setSelectedCustomerId] = useState('');
@@ -1428,6 +1431,7 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
         { label: 'Attendees', value: `${completedGuestCount}/${guests.length || 0}` },
         { label: 'Experiences', value: String(selectedExperienceCount) },
     ];
+    const showTourVisitSubmitCta = entryMode === 'new' && Boolean(selectedFacility);
 
     useEffect(() => {
         if (!pendingGuestFocusId) return;
@@ -1700,7 +1704,7 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
     return (
         <div className="screen-container app-header-offset relative" style={{ backgroundColor: theme.colors.background }}>
             <div className="screen-content-area">
-                <div className="screen-content-inner pt-4 md:pt-5">
+                <div className={`screen-content-inner pt-4 md:pt-5 ${showTourVisitSubmitCta ? 'pb-28' : ''}`}>
                     <div className="mx-auto w-full max-w-[760px] space-y-3">
                         {entryMode === 'home' ? (
                             <>
@@ -2072,19 +2076,6 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                             ))}
                                         </div>
 
-                                        <button
-                                            type="button"
-                                            onClick={handleSubmit}
-                                            className="w-full rounded-full px-6 py-2.5 text-sm font-semibold transition-all motion-tap md:w-auto md:self-end"
-                                            style={{
-                                                color: theme.colors.accentText,
-                                                backgroundColor: theme.colors.accent,
-                                                border: `1px solid ${theme.colors.accent}`,
-                                                boxShadow: 'none',
-                                            }}
-                                        >
-                                            Submit
-                                        </button>
                                     </div>
 
                                     {formMessage ? (
@@ -2105,6 +2096,15 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                     </div>
                 </div>
             </div>
+
+            {showTourVisitSubmitCta ? (
+                <FloatingSubmitCTA
+                    theme={theme}
+                    onClick={handleSubmit}
+                    label="Submit Trip Request"
+                    visible
+                />
+            ) : null}
 
             {showSuccessOverlay ? (
                 <TourVisitSuccessOverlay

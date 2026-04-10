@@ -1,32 +1,31 @@
 import React from 'react';
 import { SUBREDDITS } from './data.js';
 
-export const ChannelChips = ({ theme, dark, onSelect, activeId }) => (
-  <div className="flex gap-1.5 overflow-x-auto no-scrollbar pt-2 pb-1">
+export const ChannelChips = ({ theme, dark, onSelect, activeId }) => {
+  const chip = (id, label, onClick, active) => (
     <button
-      onClick={() => onSelect(null)}
-      className="text-[0.6875rem] font-semibold px-3 py-1.5 rounded-full flex-shrink-0 whitespace-nowrap transition-all active:scale-95 border"
+      key={id}
+      onClick={onClick}
+      aria-pressed={active}
+      className="px-2.5 py-1 rounded-full text-[0.6875rem] font-semibold whitespace-nowrap flex-shrink-0 transition-all duration-200 active:scale-95"
       style={{
-        color: !activeId ? theme.colors.accentText : theme.colors.textSecondary,
-        borderColor: !activeId ? theme.colors.accent : (dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'),
-        backgroundColor: !activeId ? theme.colors.accent : 'transparent',
+        color: theme.colors.textPrimary,
+        opacity: active ? 0.85 : 0.3,
+        backgroundColor: active
+          ? (dark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.055)')
+          : 'transparent',
       }}
     >
-      All
+      {label}
     </button>
-    {SUBREDDITS.map((sub) => (
-      <button
-        key={sub.id}
-        onClick={() => onSelect(sub)}
-        className="text-[0.6875rem] font-medium px-3 py-1.5 rounded-full flex-shrink-0 whitespace-nowrap transition-all active:scale-95 border"
-        style={{
-          color: activeId === sub.id ? theme.colors.accentText : theme.colors.textSecondary,
-          borderColor: activeId === sub.id ? theme.colors.accent : (dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'),
-          backgroundColor: activeId === sub.id ? theme.colors.accent : 'transparent',
-        }}
-      >
-        {sub.name}
-      </button>
-    ))}
-  </div>
-);
+  );
+
+  return (
+    <div className="flex gap-1 overflow-x-auto no-scrollbar -mx-0.5">
+      {chip('all', 'All', () => onSelect(null), !activeId)}
+      {SUBREDDITS.map(sub =>
+        chip(sub.id, sub.name, () => onSelect(sub), activeId === sub.id)
+      )}
+    </div>
+  );
+};

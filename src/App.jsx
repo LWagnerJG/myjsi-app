@@ -11,14 +11,9 @@ import { AppHeader } from './components/navigation/AppHeader.jsx';
 import { ProfileMenu } from './components/navigation/ProfileMenu.jsx';
 import { VoiceModal, SuccessToast } from './components/feedback/ToastsAndModals.jsx';
 import { SCREEN_MAP, ProductComparisonScreen, CompetitiveAnalysisScreen, SalesScreen, SamplesScreen } from './config/screenMap.js';
-import { OrderDetailScreen } from './screens/orders/index.js';
 import { Modal } from './components/common/Modal.jsx';
-import { ResourceDetailScreen } from './screens/utility/UtilityScreens.jsx';
-import { CreateContentModal } from './screens/community/CreateContentModal.jsx';
-import { UploadToLibraryModal } from './screens/library/UploadToLibraryModal.jsx';
 import { INITIAL_ASSETS } from './screens/library/data.js';
 import { AnimatedScreenWrapper } from './components/common/AnimatedScreenWrapper.jsx';
-import { ProjectsScreen } from './screens/projects/ProjectsScreen.jsx';
 import { usePersistentState } from './hooks/usePersistentState.js';
 import { ToastHost } from './components/common/ToastHost.jsx';
 import { ErrorBoundary } from './components/common/ErrorBoundary.jsx';
@@ -45,6 +40,11 @@ const SearchFabricsScreen = React.lazy(() => import('./screens/resources/search-
 const RequestComYardageScreen = React.lazy(() => import('./screens/resources/request-com-yardage/index.js'));
 const SocialMediaScreen = React.lazy(() => import('./screens/resources/social-media/index.js'));
 const ComColRequest = React.lazy(() => import('./screens/resources/search-fabrics/ComColRequest.jsx').then(m => ({ default: m.ComColRequest })));
+const ProjectsScreen = React.lazy(() => import('./screens/projects/ProjectsScreen.jsx').then(m => ({ default: m.ProjectsScreen })));
+const OrderDetailScreen = React.lazy(() => import('./screens/orders/index.js').then(m => ({ default: m.OrderDetailScreen })));
+const ResourceDetailScreen = React.lazy(() => import('./screens/utility/UtilityScreens.jsx').then(m => ({ default: m.ResourceDetailScreen })));
+const CreateContentModal = React.lazy(() => import('./screens/community/CreateContentModal.jsx').then(m => ({ default: m.CreateContentModal })));
+const UploadToLibraryModal = React.lazy(() => import('./screens/library/UploadToLibraryModal.jsx').then(m => ({ default: m.UploadToLibraryModal })));
 
 // Centralized legacy -> canonical slug mapping for resource feature routes
 const RESOURCE_SLUG_ALIASES = {
@@ -108,9 +108,19 @@ const ScreenRouter = React.memo(({ screenKey, projectsScreenRef, SuspenseFallbac
     if (base === 'projects' && parts[1]) {
         // Deep link: /projects/{id} — find the opportunity and show detail
         const oppId = parts[1];
-        return <ProjectsScreen ref={projectsScreenRef} {...rest} deepLinkOppId={oppId} />;
+        return (
+            <Suspense fallback={SuspenseFallback}>
+                <ProjectsScreen ref={projectsScreenRef} {...rest} deepLinkOppId={oppId} />
+            </Suspense>
+        );
     }
-    if (base === 'projects') return <ProjectsScreen ref={projectsScreenRef} {...rest} />;
+    if (base === 'projects') {
+        return (
+            <Suspense fallback={SuspenseFallback}>
+                <ProjectsScreen ref={projectsScreenRef} {...rest} />
+            </Suspense>
+        );
+    }
 
     // Feature screens (lazy) inside Suspense to isolate fallback flicker per screen
     const lazyWrap = (Comp, extraProps) => (
@@ -175,14 +185,14 @@ const ScreenRouter = React.memo(({ screenKey, projectsScreenRef, SuspenseFallbac
         );
     }
 
-    if (base === 'orders' && parts.length > 1) return <OrderDetailScreen {...rest} />;
+    if (base === 'orders' && parts.length > 1) return lazyWrap(OrderDetailScreen);
 
     // Dealer directory detail route: resources/dealer-directory/{id}
     if (base === 'resources' && parts[1] === 'dealer-directory' && parts[2]) {
         return lazyWrap(DealerDetailScreen, { screenKey });
     }
 
-    if (base === 'resources' && parts.length > 1) return <ResourceDetailScreen {...rest} />;
+    if (base === 'resources' && parts.length > 1) return lazyWrap(ResourceDetailScreen);
 
     // All SCREEN_MAP components may be lazy - wrap in Suspense
     const ScreenComponent = SCREEN_MAP[base] || SalesScreen;
@@ -529,8 +539,16 @@ function App() {
                 )}
                 <VoiceModal message={voiceMessage} show={!!voiceMessage} theme={currentTheme} />
                 <SuccessToast message={successMessage} show={!!successMessage} theme={currentTheme} />
-                <CreateContentModal show={showCreateContentModal} onClose={closeCreateContentModal} theme={currentTheme} onCreatePost={handleCreatePost} />
-                <UploadToLibraryModal show={showLibraryUploadModal} onClose={closeLibraryUploadModal} theme={currentTheme} onUpload={handleLibraryUpload} />
+                {showCreateContentModal && (
+                    <Suspense fallback={null}>
+                        <CreateContentModal show={showCreateContentModal} onClose={closeCreateContentModal} theme={currentTheme} onCreatePost={handleCreatePost} />
+                    </Suspense>
+                )}
+                {showLibraryUploadModal && (
+                    <Suspense fallback={null}>
+                        <UploadToLibraryModal show={showLibraryUploadModal} onClose={closeLibraryUploadModal} theme={currentTheme} onUpload={handleLibraryUpload} />
+                    </Suspense>
+                )}
                 <Modal show={alertInfo.show} onClose={closeAlert} title="Alert" theme={currentTheme}>
                     <p>{alertInfo.message}</p>
                 </Modal>

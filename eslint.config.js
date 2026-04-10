@@ -39,4 +39,25 @@ export default [
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
     },
   },
+  {
+    files: ['src/screens/**/*.{js,jsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: [
+                '../**/FloatingPill.jsx',
+                '../../**/FloatingPill.jsx',
+                '../../../**/FloatingPill.jsx',
+                '../../../../**/FloatingPill.jsx',
+              ],
+              message: 'Use FloatingActionCTA or FloatingSubmitCTA instead of importing FloatingPill directly in screen files.',
+            },
+          ],
+        },
+      ],
+    },
+  },
 ]

@@ -1,7 +1,8 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import StandardSearchBar from '../../../components/common/StandardSearchBar.jsx';
-import { isDarkTheme } from '../../../design-system/tokens.js';
+import { isDarkTheme, subtleBg } from '../../../design-system/tokens.js';
+import { PrimaryButton, SecondaryButton } from '../../../components/common/JSIButtons.jsx';
 import {
     ArrowLeft,
     Download,
@@ -9,8 +10,10 @@ import {
     Share2,
 } from 'lucide-react';
 import {
+    WEIGHT_FAILURE_TEST_LBS,
     WEIGHT_LIMIT_LBS,
     WEIGHT_RATINGS_BIFMA_POINTS,
+    WEIGHT_RATINGS_CERTIFICATION_NOTE,
     WEIGHT_RATINGS_FALLBACK_IMAGE,
     WEIGHT_RATINGS_ROUTE,
     WEIGHT_RATINGS_SERIES,
@@ -56,6 +59,7 @@ export const WeightRatingsScreen = ({
     const [searchTerm, setSearchTerm] = useState('');
 
     const dividerColor = dark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.04)';
+    const softPanel = subtleBg(safeTheme, 1.6);
 
     const feedback = useCallback((message) => {
         if (!setSuccessMessage) return;
@@ -90,7 +94,7 @@ export const WeightRatingsScreen = ({
     const shareOnePager = useCallback(async (series) => {
         const url = getOnePagerUrl(series.slug);
         const title = `${series.series} Weight Rating`;
-        const text = `${series.series} seating is rated up to ${WEIGHT_LIMIT_LBS} lbs and tested to applicable ANSI/BIFMA seating standards.`;
+        const text = `${series.series} seating is rated to ${WEIGHT_LIMIT_LBS} lbs for ANSI/BIFMA certification and internally tested through failure beyond ${WEIGHT_FAILURE_TEST_LBS} lbs.`;
 
         if (navigator.share) {
             try {
@@ -138,9 +142,10 @@ li { margin-bottom: 6px; }
 <h1>${series.series}</h1>
 <h2>JSI Seating Weight Rating</h2>
 <div class="badge">Weight Limit: ${WEIGHT_LIMIT_LBS} lbs</div>
+<div class="badge">Internal Failure Testing: ${WEIGHT_FAILURE_TEST_LBS}+ lbs</div>
 <div class="box">
 <strong>Certification Summary</strong>
-<p>JSI seating is tested to applicable ANSI/BIFMA seating standards for commercial use.</p>
+<p>${WEIGHT_RATINGS_CERTIFICATION_NOTE}</p>
 <ul>
 ${WEIGHT_RATINGS_BIFMA_POINTS.map((point) => `<li>${point}</li>`).join('')}
 </ul>
@@ -157,100 +162,144 @@ ${WEIGHT_RATINGS_BIFMA_POINTS.map((point) => `<li>${point}</li>`).join('')}
 
     /* ── Detail View ──────────────────────────────────── */
     const DetailView = ({ series }) => (
-        <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-3 scrollbar-hide">
-            <button
-                type="button"
-                onClick={goToList}
-                className="mt-2 mb-1 inline-flex items-center gap-1.5 text-[0.8125rem] font-medium"
-                style={{ color: safeTheme.colors.textSecondary }}
-            >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                Weight Ratings
-            </button>
+        <div className="flex-1 overflow-y-auto px-4 pt-3 pb-8 space-y-4 scrollbar-hide">
+            <GlassCard theme={safeTheme} className="rounded-[24px] overflow-hidden" variant="elevated">
+                <div className="p-5 sm:p-6 space-y-5">
+                    <div className="flex items-start gap-4">
+                        <div
+                            className="w-20 h-20 rounded-[20px] overflow-hidden flex items-center justify-center flex-shrink-0"
+                            style={{ backgroundColor: softPanel }}
+                        >
+                            <img
+                                src={series.image || WEIGHT_RATINGS_FALLBACK_IMAGE}
+                                onError={imageFallback}
+                                alt={series.series}
+                                className="w-full h-full object-cover"
+                            />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                            <p className="text-[0.625rem] font-bold uppercase tracking-[0.08em] mb-1.5" style={{ color: safeTheme.colors.textSecondary, opacity: 0.5 }}>
+                                Seating Weight Rating
+                            </p>
+                            <h2 className="text-[1.5rem] font-black tracking-tight leading-tight" style={{ color: safeTheme.colors.textPrimary }}>
+                                {series.series}
+                            </h2>
+                            <div className="mt-2 flex flex-wrap gap-2">
+                                {series.supportedTypes?.map((type) => (
+                                    <span
+                                        key={type}
+                                        className="inline-flex items-center rounded-full px-2.5 py-1 text-[0.625rem] font-semibold"
+                                        style={{ backgroundColor: softPanel, color: safeTheme.colors.textSecondary }}
+                                    >
+                                        {type}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
 
-            {/* Series header */}
-            <GlassCard theme={safeTheme} className="rounded-[22px] overflow-hidden">
-                <div className="flex items-center gap-3.5 px-4 py-3.5">
-                    <img
-                        src={series.image || WEIGHT_RATINGS_FALLBACK_IMAGE}
-                        onError={imageFallback}
-                        alt={series.series}
-                        className="w-16 h-16 rounded-xl object-cover flex-shrink-0"
-                    />
-                    <div className="min-w-0">
-                        <h2 className="text-[1.0625rem] font-bold leading-tight" style={{ color: safeTheme.colors.textPrimary }}>
-                            {series.series}
-                        </h2>
-                        <p className="mt-0.5 text-[0.8125rem]" style={{ color: safeTheme.colors.textSecondary }}>
-                            Rated to {WEIGHT_LIMIT_LBS} lbs
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="rounded-[18px] px-4 py-3.5" style={{ backgroundColor: softPanel }}>
+                            <p className="text-[0.625rem] font-bold uppercase tracking-[0.08em] mb-1" style={{ color: safeTheme.colors.textSecondary, opacity: 0.46 }}>
+                                Published Rating
+                            </p>
+                            <p className="text-[1.25rem] font-black tabular-nums leading-none" style={{ color: safeTheme.colors.textPrimary }}>
+                                {WEIGHT_LIMIT_LBS} lbs
+                            </p>
+                        </div>
+                        <div className="rounded-[18px] px-4 py-3.5" style={{ backgroundColor: softPanel }}>
+                            <p className="text-[0.625rem] font-bold uppercase tracking-[0.08em] mb-1" style={{ color: safeTheme.colors.textSecondary, opacity: 0.46 }}>
+                                Failure Testing
+                            </p>
+                            <p className="text-[1.25rem] font-black tabular-nums leading-none" style={{ color: safeTheme.colors.accent }}>
+                                {WEIGHT_FAILURE_TEST_LBS}+ lbs
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="rounded-[20px] p-4" style={{ backgroundColor: softPanel, border: `1px solid ${safeTheme.colors.border}` }}>
+                        <p className="text-[0.8125rem] leading-relaxed" style={{ color: safeTheme.colors.textPrimary }}>
+                            {WEIGHT_RATINGS_CERTIFICATION_NOTE}
                         </p>
                     </div>
-                </div>
 
-                <div style={{ borderTop: `1px solid ${dividerColor}` }} className="px-4 py-3.5">
-                    <p className="text-xs uppercase font-bold tracking-[0.07em] mb-2" style={{ color: safeTheme.colors.textSecondary, opacity: 0.5 }}>
-                        ANSI/BIFMA Testing
+                    <div className="grid gap-2 sm:grid-cols-2">
+                        <SecondaryButton
+                            type="button"
+                            onClick={() => shareOnePager(series)}
+                            theme={safeTheme}
+                            className="h-11 !py-0 px-5 text-[0.8125rem]"
+                        >
+                            <span className="inline-flex items-center gap-2">
+                                <Share2 className="w-3.5 h-3.5" />
+                                Share One-Pager
+                            </span>
+                        </SecondaryButton>
+                        <PrimaryButton
+                            type="button"
+                            onClick={() => openPrintableOnePager(series)}
+                            theme={safeTheme}
+                            className="h-11 !py-0 px-5 text-[0.8125rem]"
+                            icon={<Download className="w-3.5 h-3.5" />}
+                        >
+                            Print / Save PDF
+                        </PrimaryButton>
+                    </div>
+                </div>
+            </GlassCard>
+
+            <GlassCard theme={safeTheme} className="rounded-[24px] overflow-hidden" variant="elevated">
+                <div className="px-5 sm:px-6 py-4" style={{ borderBottom: `1px solid ${dividerColor}` }}>
+                    <p className="text-[0.6875rem] font-bold uppercase tracking-[0.08em]" style={{ color: safeTheme.colors.textSecondary, opacity: 0.5 }}>
+                        ANSI/BIFMA Scope
                     </p>
-                    <ul className="space-y-1.5">
-                        {WEIGHT_RATINGS_BIFMA_POINTS.map((point) => (
-                            <li key={point} className="text-[0.8125rem] leading-snug" style={{ color: safeTheme.colors.textSecondary }}>
-                                • {point}
-                            </li>
-                        ))}
-                    </ul>
                 </div>
+                <div className="px-5 sm:px-6 py-3.5">
+                    <div className="space-y-3">
+                        {WEIGHT_RATINGS_BIFMA_POINTS.map((point, index) => (
+                            <div key={point} className="flex items-start gap-3">
+                                <span
+                                    className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-[0.625rem] font-bold"
+                                    style={{ backgroundColor: softPanel, color: safeTheme.colors.textSecondary }}
+                                >
+                                    {index + 1}
+                                </span>
+                                <p className="text-[0.8125rem] leading-relaxed pt-0.5" style={{ color: safeTheme.colors.textSecondary }}>
+                                    {point}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </GlassCard>
 
-                <div style={{ borderTop: `1px solid ${dividerColor}` }} className="px-4 py-3 flex flex-wrap gap-2">
-                    {WEIGHT_RATINGS_SOURCE_LINKS.map((link) => (
+            <GlassCard theme={safeTheme} className="rounded-[24px] overflow-hidden" variant="elevated">
+                <div className="px-5 sm:px-6 py-4" style={{ borderBottom: `1px solid ${dividerColor}` }}>
+                    <p className="text-[0.6875rem] font-bold uppercase tracking-[0.08em]" style={{ color: safeTheme.colors.textSecondary, opacity: 0.5 }}>
+                        Reference Links
+                    </p>
+                </div>
+                <div>
+                    {WEIGHT_RATINGS_SOURCE_LINKS.map((link, index) => (
                         <a
                             key={link.url}
                             href={link.url}
                             target="_blank"
                             rel="noreferrer"
-                            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium"
-                            style={{
-                                backgroundColor: safeTheme.colors.subtle,
-                                color: safeTheme.colors.textSecondary,
-                                border: `1px solid ${safeTheme.colors.border}`
-                            }}
+                            className="flex items-center justify-between gap-3 px-5 sm:px-6 py-4"
+                            style={{ borderTop: index > 0 ? `1px solid ${dividerColor}` : 'none' }}
                         >
-                            {link.label}
-                            <ExternalLink className="w-3 h-3" />
+                            <div className="min-w-0">
+                                <p className="text-[0.8125rem] font-semibold" style={{ color: safeTheme.colors.textPrimary }}>
+                                    {link.label}
+                                </p>
+                                <p className="text-[0.6875rem] mt-1" style={{ color: safeTheme.colors.textSecondary, opacity: 0.7 }}>
+                                    Opens official certification reference
+                                </p>
+                            </div>
+                            <ExternalLink className="w-3.5 h-3.5 flex-shrink-0" style={{ color: safeTheme.colors.textSecondary, opacity: 0.5 }} />
                         </a>
                     ))}
-                </div>
-            </GlassCard>
-
-            {/* Actions */}
-            <GlassCard theme={safeTheme} className="rounded-[22px] overflow-hidden">
-                <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: `1px solid ${dividerColor}` }}>
-                    <span className="text-[0.6875rem] font-bold uppercase tracking-[0.08em]" style={{ color: safeTheme.colors.textSecondary, opacity: 0.5 }}>
-                        One-Pager
-                    </span>
-                </div>
-                <div className="px-4 py-3 flex flex-wrap gap-2">
-                    <button
-                        type="button"
-                        onClick={() => shareOnePager(series)}
-                        className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold"
-                        style={{ backgroundColor: safeTheme.colors.accent, color: safeTheme.colors.accentText }}
-                    >
-                        <Share2 className="w-3.5 h-3.5" />
-                        Share
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => openPrintableOnePager(series)}
-                        className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold"
-                        style={{
-                            border: `1px solid ${safeTheme.colors.border}`,
-                            color: safeTheme.colors.textPrimary,
-                            backgroundColor: safeTheme.colors.subtle
-                        }}
-                    >
-                        <Download className="w-3.5 h-3.5" />
-                        Print / Save PDF
-                    </button>
                 </div>
             </GlassCard>
         </div>

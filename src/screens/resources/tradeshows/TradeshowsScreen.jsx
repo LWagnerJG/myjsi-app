@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
+import { PageTitle } from '../../../components/common/PageTitle.jsx';
 import {
   Calendar, MapPin, ExternalLink, Sparkles, HeartPulse,
   GraduationCap, ChevronRight, Star,
@@ -52,15 +53,14 @@ const BrandSelection = ({ theme, onSelect }) => {
     <div className="flex flex-col h-full">
       {/* Page title - matches app pattern */}
       <div className="px-2 pt-4 pb-3">
-        <h1
-          className="text-3xl font-bold tracking-tight"
-          style={{ color: text, letterSpacing: '-0.02em' }}
-        >
-          Tradeshows
-        </h1>
-        <p className="text-sm mt-1" style={{ color: sub }}>
-          Select a show to view schedules and details.
-        </p>
+        <PageTitle
+          title="Tradeshows"
+          subtitle="Select a show to view schedules and details."
+          theme={theme}
+          className="px-0 pt-0 pb-0"
+          titleClassName="text-3xl"
+          subtitleClassName="text-sm mt-1"
+        />
       </div>
 
       {/* Brand cards */}
@@ -162,7 +162,6 @@ const BrandSelection = ({ theme, onSelect }) => {
 // STEP 2: Shows for a Brand (Year picker)
 // ============================================
 const BrandShowList = ({ theme, brandId, onSelectShow }) => {
-  const text = theme.colors.textPrimary;
   const sub = theme.colors.textSecondary;
   const brand = findBrand(brandId);
   const shows = useMemo(() => getShowsByBrand(brandId), [brandId]);
@@ -182,13 +181,15 @@ const BrandShowList = ({ theme, brandId, onSelectShow }) => {
             style: { color: brand.accent },
           })}
         </div>
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight" style={{ color: text, letterSpacing: '-0.02em' }}>
-            {brand.name}
-          </h1>
-          <p className="text-xs" style={{ color: sub }}>
-            {brand.tagline}
-          </p>
+        <div className="flex-1 min-w-0">
+          <PageTitle
+            title={brand.name}
+            subtitle={brand.tagline}
+            theme={theme}
+            className="px-0 pt-0 pb-0"
+            titleClassName="text-2xl"
+            subtitleClassName="text-xs"
+          />
         </div>
       </div>
 

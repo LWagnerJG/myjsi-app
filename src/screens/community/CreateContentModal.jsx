@@ -1,5 +1,6 @@
 import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { Modal } from '../../components/common/Modal.jsx';
+import { PrimaryButton, SecondaryButton } from '../../components/common/JSIButtons.jsx';
 import { X, ImageIcon, ListChecks } from 'lucide-react';
 import { hapticSuccess } from '../../utils/haptics.js';
 
@@ -222,14 +223,22 @@ export const CreateContentModal = ({ show, onClose, theme, onCreatePost }) => {
 
                 {/* ── Actions ── */}
                 <div className="flex gap-3 pt-1">
-                  <button type="button" onClick={() => { reset(); onClose?.(); }}
-                    className="flex-1 h-11 rounded-full text-[0.8125rem] font-semibold transition-colors"
-                    style={{ backgroundColor: theme.colors.subtle, color: theme.colors.textPrimary }}
-                  >Cancel</button>
-                  <button type="submit" disabled={!canSubmit}
-                    className="flex-1 h-11 rounded-full text-[0.8125rem] font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                    style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
-                  >{mode === 'poll' ? 'Create Poll' : 'Post'}</button>
+                                    <SecondaryButton
+                                        type="button"
+                                        onClick={() => { reset(); onClose?.(); }}
+                                        theme={theme}
+                                        className="flex-1 h-11 !py-0 px-5 text-[0.8125rem]"
+                                    >
+                                        Cancel
+                                    </SecondaryButton>
+                                    <PrimaryButton
+                                        type="submit"
+                                        disabled={!canSubmit}
+                                        theme={theme}
+                                        className="flex-1 h-11 !py-0 px-5 text-[0.8125rem] disabled:cursor-not-allowed"
+                                    >
+                                        {mode === 'poll' ? 'Create Poll' : 'Post'}
+                                    </PrimaryButton>
                 </div>
             </form>
         </Modal>

@@ -3,8 +3,10 @@ import { ChevronDown, Upload, FileText, Eye, Send, Paperclip, Users, Clock, Chec
 import { isDarkTheme, DESIGN_TOKENS, JSI_COLORS } from '../../../../design-system/tokens.js';
 import { STAGES, VERTICALS, COMPETITORS, DISCOUNT_OPTIONS, PO_TIMEFRAMES, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS } from '../../data.js';
 import { JSI_SERIES } from '../../../products/data.js';
+import { PrimaryButton } from '../../../../components/common/JSIButtons.jsx';
 import { ProbabilitySlider } from '../../../../components/forms/ProbabilitySlider.jsx';
 import { RequestQuoteModal } from '../../../../components/common/RequestQuoteModal.jsx';
+import { createQuoteListItem, persistQuoteRequest } from '../../../../utils/quoteRequests.js';
 import { ToggleSwitch } from '../../../../components/forms/ToggleSwitch.jsx';
 import { SuggestInputPill } from './SuggestInputPill.jsx';
 import { ContactSearchSelector } from './ContactSearchSelector.jsx';
@@ -159,10 +161,16 @@ const QuoteTracker = ({ quotes = [], theme, onRequestQuote }) => {
       ))}
 
       {/* ── Request new quote CTA ── */}
-      <button onClick={onRequestQuote} className="w-full flex items-center justify-center gap-2 py-2.5 rounded-full text-xs font-bold transition-all active:scale-[0.98] hover:opacity-90"
-        style={{ backgroundColor: c.accent, color: c.accentText }}>
-        <Send className="w-3.5 h-3.5" /> Request Quote
-      </button>
+      <PrimaryButton
+        type="button"
+        onClick={onRequestQuote}
+        theme={theme}
+        fullWidth
+        className="py-2.5 text-xs font-bold"
+        icon={<Send className="w-3.5 h-3.5" />}
+      >
+        Request Quote
+      </PrimaryButton>
     </div>
   );
 };
@@ -507,7 +515,11 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
         members={members}
         currentUserId={currentUserId}
         onSubmit={(data) => {
-          const newQuote = { id: 'q-' + Date.now(), fileName: `Quote Request - ${data.projectName || draft.project || draft.name || 'Untitled'}.pdf`, status: 'requested', url: null };
+          const record = persistQuoteRequest(data, {
+            source: 'opportunity-detail',
+            metadata: { opportunityId: draft.id || null },
+          });
+          const newQuote = createQuoteListItem(record, data.projectName || draft.project || draft.name || 'Untitled');
           update('quotes', [...(draft.quotes || []), newQuote]);
           setQuoteModalOpen(false);
         }}

@@ -5,9 +5,10 @@ import { AutoCompleteCombobox } from '../../components/forms/AutoCompleteCombobo
 import { PortalNativeSelect } from '../../components/forms/PortalNativeSelect.jsx';
 import { ToggleSwitch } from '../../components/forms/ToggleSwitch.jsx';
 import { SpotlightMultiSelect } from '../../components/common/SpotlightMultiSelect.jsx';
+import { WizardBottomBar } from '../../components/common/WizardBottomBar.jsx';
 import { PillButton, PrimaryButton } from '../../components/common/JSIButtons.jsx';
 import SwipeCalendar from '../../components/common/SwipeCalendar.jsx';
-import { isDarkTheme, floatingBarStyle } from '../../design-system/tokens.js';
+import { isDarkTheme } from '../../design-system/tokens.js';
 import { hapticSuccess } from '../../utils/haptics.js';
 import { STAGES, VERTICALS, COMPETITORS } from './data.js';
 import { DISCOUNT_OPTIONS_WITH_UNKNOWN } from '../../constants/discounts.js';
@@ -205,7 +206,6 @@ const DatePickerInput = ({ value, onChange, theme, placeholder = 'Select date' }
   const [isOpen, setIsOpen] = useState(false);
   const [dropUp, setDropUp] = useState(false);
   const wrapperRef = useRef(null);
-  const today = new Date();
   const parsed = value ? new Date(value + 'T00:00:00') : null;
 
   // Flip calendar above trigger when there isn't enough space below.
@@ -832,9 +832,6 @@ export const NewLeadScreen = ({
     hapticSuccess();
     onSuccess(newLeadData);
   }, [animateToStep, canSubmit, errors, markStepFieldsTouched, newLeadData, onSuccess]);
-
-  const isOutToBid = (newLeadData.dealers || []).length === 1 && newLeadData.dealers[0] === 'Out to Bid';
-  const realDealers = (newLeadData.dealers || []).filter(d => d !== 'Out to Bid');
 
   return (
     <form onSubmit={handleSubmit} className="min-h-full flex flex-col" style={{ backgroundColor: c.background }}>
@@ -1680,66 +1677,37 @@ export const NewLeadScreen = ({
         </div>{/* end animated step wrapper */}
       </div>
 
-      {/* ── Integrated bottom bar: step nav + lead score + action ── */}
-      <div
-        data-bottom-chrome=""
-        className="sticky bottom-0 z-20 rounded-t-2xl"
-        style={floatingBarStyle(theme)}
-      >
-        {/* Step pills + score row */}
-        <div className="max-w-3xl mx-auto px-4 sm:px-5 pt-3 pb-2 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-1.5">
-            {STEP_LABELS.map((label, idx) => {
-              const active = step === idx;
-              return (
-                <button
-                  key={label}
-                  type="button"
-                  onClick={() => animateToStep(idx)}
-                  className="rounded-full px-3 py-1.5 text-xs font-semibold transition-all border"
-                  style={{
-                    backgroundColor: active ? c.accent : 'transparent',
-                    borderColor: active ? c.accent : subtleBorder,
-                    color: active ? c.accentText : c.textSecondary,
-                    letterSpacing: '0.01em',
-                  }}
-                >
-                  {label}
-                </button>
-              );
-            })}
-          </div>
-          <InlineStepHealth health={health} theme={theme} />
-        </div>
-
-        {/* Action button */}
-        <div className="max-w-3xl mx-auto px-4 sm:px-5 pb-2.5" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 10px)' }}>
-          {step < 2 ? (
-            <div style={{ opacity: stepValid ? 1 : 0.45, transition: 'opacity 0.2s ease' }}>
-              <PrimaryButton
-                type="button"
-                onClick={goNext}
-                theme={theme}
-                size="default"
-                fullWidth
-                icon={<ArrowRight className="w-4 h-4" />}
-              >
-                Continue
-              </PrimaryButton>
-            </div>
-          ) : (
+      <WizardBottomBar
+        theme={theme}
+        steps={STEP_LABELS}
+        currentStep={step}
+        onStepChange={animateToStep}
+        healthNode={<InlineStepHealth health={health} theme={theme} />}
+        actionNode={step < 2 ? (
+          <div style={{ opacity: stepValid ? 1 : 0.45, transition: 'opacity 0.2s ease' }}>
             <PrimaryButton
-              type="submit"
+              type="button"
+              onClick={goNext}
               theme={theme}
               size="default"
               fullWidth
               icon={<ArrowRight className="w-4 h-4" />}
             >
-              Submit Lead
+              Continue
             </PrimaryButton>
-          )}
-        </div>
-      </div>
+          </div>
+        ) : (
+          <PrimaryButton
+            type="submit"
+            theme={theme}
+            size="default"
+            fullWidth
+            icon={<ArrowRight className="w-4 h-4" />}
+          >
+            Submit Lead
+          </PrimaryButton>
+        )}
+      />
     </form>
   );
 };
