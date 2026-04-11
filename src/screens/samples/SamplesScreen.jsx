@@ -101,12 +101,12 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                     return (
                         <div
                             key={pid}
-                            className="relative rounded-2xl overflow-hidden transition-all duration-200"
+                            className="relative rounded-2xl transition-all duration-200"
                             style={{
                                 backgroundColor: theme.colors.surface,
-                                boxShadow: qty > 0
-                                    ? `0 0 0 2px ${theme.colors.accent}`
-                                    : (isDark ? 'none' : '0 1px 3px rgba(0,0,0,0.04)'),
+                                border: qty > 0
+                                    ? `2px solid ${theme.colors.accent}`
+                                    : `1.5px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'}`,
                             }}
                         >
                             {/* Quantity badge */}
@@ -119,27 +119,35 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
 
                             {/* Swatch image area */}
                             <div role="button" tabIndex={0} onClick={addOne} onKeyPress={e => { if (e.key === 'Enter') addOne(e); }}
-                                className="aspect-[4/3] flex items-center justify-center overflow-hidden cursor-pointer"
+                                className="aspect-[4/3] flex items-center justify-center overflow-hidden cursor-pointer rounded-t-[14px]"
                                 style={{ backgroundColor: bg }}>
                                 {hasImage && <img loading="lazy" width="600" height="600" src={product.image} alt={product.name} className="object-cover w-full h-full select-none pointer-events-none" draggable={false} />}
                             </div>
 
                             {/* Footer: name + actions */}
                             <div className="px-2 sm:px-2.5 py-1.5 sm:py-2 flex items-center gap-1">
-                                <p className="text-[0.6875rem] sm:text-[0.75rem] truncate flex-1" style={{ color: theme.colors.textPrimary }}>{cleanName(product.name)}</p>
+                                <p className="text-[0.6875rem] sm:text-[0.75rem] truncate flex-1 leading-tight" style={{ color: theme.colors.textPrimary }}>{cleanName(product.name)}</p>
                                 {qty > 0 ? (
-                                    <button type="button" onClick={removeOne}
-                                        className="w-6 h-6 rounded-full flex items-center justify-center active:scale-90 transition-all flex-shrink-0"
-                                        style={{ backgroundColor: isDark ? 'rgba(255,100,100,0.15)' : 'rgba(184,92,92,0.08)' }}
-                                        aria-label={qty === 1 ? `Remove ${product.name}` : `Decrease ${product.name} quantity`}>
-                                        {qty === 1
-                                            ? <Trash2 className="w-3 h-3" style={{ color: theme.colors.error || '#B85C5C' }} />
-                                            : <Minus className="w-3 h-3" style={{ color: theme.colors.error || '#B85C5C' }} />
-                                        }
-                                    </button>
+                                    <div className="flex items-center gap-1 flex-shrink-0">
+                                        <button type="button" onClick={removeOne}
+                                            className="w-7 h-7 rounded-full flex items-center justify-center active:scale-90 transition-all"
+                                            style={{ backgroundColor: isDark ? 'rgba(255,100,100,0.15)' : 'rgba(184,92,92,0.10)' }}
+                                            aria-label={qty === 1 ? `Remove ${product.name}` : `Decrease ${product.name} quantity`}>
+                                            {qty === 1
+                                                ? <Trash2 className="w-3.5 h-3.5" style={{ color: theme.colors.error || '#B85C5C' }} />
+                                                : <Minus className="w-3.5 h-3.5" style={{ color: theme.colors.error || '#B85C5C' }} />
+                                            }
+                                        </button>
+                                        <button type="button" onClick={addOne}
+                                            className="w-7 h-7 rounded-full flex items-center justify-center active:scale-90 transition-all"
+                                            style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.06)' }}
+                                            aria-label={`Add another ${product.name}`}>
+                                            <Plus className="w-3.5 h-3.5" style={{ color: theme.colors.textPrimary, opacity: 0.7 }} />
+                                        </button>
+                                    </div>
                                 ) : (
                                     <button type="button" onClick={addOne}
-                                        className="w-6 h-6 rounded-full flex items-center justify-center active:scale-90 transition-all flex-shrink-0"
+                                        className="w-7 h-7 rounded-full flex items-center justify-center active:scale-90 transition-all flex-shrink-0"
                                         style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.05)' }}
                                         aria-label={`Add ${product.name}`}>
                                         <Plus className="w-3.5 h-3.5" style={{ color: theme.colors.textSecondary, opacity: 0.6 }} />
