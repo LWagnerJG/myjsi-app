@@ -69,17 +69,17 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                     className="relative rounded-2xl overflow-hidden transition-all duration-200 active:scale-[0.97] text-left"
                     style={{
                         backgroundColor: setQty > 0 ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.06)' : theme.colors.surface),
-                        boxShadow: isDark ? 'none' : '0 1px 3px rgba(0,0,0,0.04)',
+                        boxShadow: setQty > 0 ? undefined : (isDark ? 'none' : '0 1px 3px rgba(0,0,0,0.04)'),
                     }}
                 >
-                    <div className="aspect-[4/3] flex flex-col items-center justify-center gap-1.5 p-3"
+                    <div className="aspect-[4/3] flex flex-col items-center justify-center p-3"
                         style={{ backgroundColor: setQty > 0 ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.04)' : 'rgba(53,53,53,0.03)') }}>
                         {setQty > 0
                             ? <CheckCircle className="w-6 h-6" style={{ color: '#fff' }} />
-                            : <span className="text-[1.5rem] font-bold" style={{ color: theme.colors.textSecondary, opacity: 0.35 }}>All</span>
+                            : <Layers className="w-6 h-6" style={{ color: theme.colors.textSecondary, opacity: 0.3 }} />
                         }
                     </div>
-                    <div className="px-2.5 py-2">
+                    <div className="px-2 sm:px-2.5 py-1.5 sm:py-2">
                         <p className="text-[0.6875rem] sm:text-[0.75rem] font-bold truncate" style={{ color: setQty > 0 ? '#fff' : theme.colors.textPrimary }}>
                             All {currentCategoryName}
                         </p>
@@ -156,7 +156,7 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
     return (
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
             {/* Category chips — scrollable pills */}
-            <ScreenTopChrome theme={theme} maxWidthClass="max-w-5xl" horizontalPaddingClass="px-0" contentClassName="pt-1 pb-1">
+            <ScreenTopChrome theme={theme} maxWidthClass="max-w-5xl" horizontalPaddingClass="px-0" contentClassName="pt-2.5 pb-2">
                 <div className="flex overflow-x-auto scrollbar-hide no-scrollbar gap-2 px-4">
                     {allCategories.map((cat) => {
                         const isActive = selectedCategory === cat.id;
@@ -187,36 +187,34 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                 <div className="px-4 pt-2" style={{ paddingBottom: totalCartItems > 0 ? `${COLLAPSED_HEIGHT + 16}px` : '16px' }}>
                     <div className="max-w-5xl mx-auto w-full space-y-3">
 
-                        {/* ── Full JSI Set — clean inline banner ── */}
+                        {/* ── Full JSI Set — prominent banner ── */}
                         <button
                             onClick={toggleFull}
-                            className="w-full rounded-2xl transition-all duration-200 active:scale-[0.99] overflow-hidden"
+                            className="w-full rounded-2xl transition-all duration-200 active:scale-[0.98] overflow-hidden"
                             style={{
-                                backgroundColor: fullQty > 0 ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.06)' : theme.colors.surface),
-                                boxShadow: fullQty > 0 ? undefined : (isDark ? 'none' : '0 1px 3px rgba(0,0,0,0.03)'),
+                                backgroundColor: fullQty > 0 ? theme.colors.accent : theme.colors.textPrimary,
+                                boxShadow: '0 4px 16px rgba(53,53,53,0.12)',
                             }}
                         >
-                            <div className="flex items-center gap-3.5 px-4 py-3">
+                            <div className="flex items-center gap-3.5 px-4 py-3.5">
                                 <div
                                     className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                                    style={{
-                                        backgroundColor: fullQty > 0 ? 'rgba(255,255,255,0.18)' : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.05)'),
-                                    }}
+                                    style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}
                                 >
-                                    <Layers className="w-5 h-5" style={{ color: fullQty > 0 ? '#fff' : theme.colors.textSecondary }} />
+                                    <Layers className="w-5 h-5" style={{ color: '#fff' }} />
                                 </div>
                                 <div className="flex-1 text-left min-w-0">
-                                    <p className="text-[0.8125rem] font-bold truncate" style={{ color: fullQty > 0 ? '#fff' : theme.colors.textPrimary }}>
+                                    <p className="text-[0.8125rem] font-bold truncate" style={{ color: '#fff' }}>
                                         Full JSI Sample Set
                                     </p>
-                                    <p className="text-[0.6875rem] mt-0.5" style={{ color: fullQty > 0 ? 'rgba(255,255,255,0.7)' : theme.colors.textSecondary, opacity: fullQty > 0 ? 1 : 0.6 }}>
+                                    <p className="text-[0.6875rem] mt-0.5" style={{ color: 'rgba(255,255,255,0.65)' }}>
                                         Every finish across all categories · {totalFinishCount} samples
                                     </p>
                                 </div>
                                 {fullQty > 0 ? (
                                     <CheckCircle className="w-5 h-5 flex-shrink-0" style={{ color: '#fff' }} />
                                 ) : (
-                                    <Plus className="w-4.5 h-4.5 flex-shrink-0" style={{ color: theme.colors.textSecondary, opacity: 0.5 }} />
+                                    <Plus className="w-5 h-5 flex-shrink-0" style={{ color: 'rgba(255,255,255,0.5)' }} />
                                 )}
                             </div>
                         </button>

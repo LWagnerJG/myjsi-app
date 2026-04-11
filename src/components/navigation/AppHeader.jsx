@@ -22,8 +22,8 @@ export const AppHeader = React.memo(({
     const homeChromeIconButtonStyles = getHomeChromeIconButtonStyles(dark);
 
     const bgR = dark ? '26,26,26' : '240,237,232';
-    const homeScrimHeight = 88;
-    const innerScrimHeight = 96;
+    const homeScrimHeight = 'calc(env(safe-area-inset-top, 0px) + 88px)';
+    const innerScrimHeight = 'calc(env(safe-area-inset-top, 0px) + 96px)';
     const scrimProgress = isHome ? Math.min(Math.max((scrollDepth - 2) / 36, 0), 1) : 0;
     const scrimOpacity = scrimProgress * 0.92;
     const gradientOpacity = scrimProgress * 0.9;
@@ -167,7 +167,7 @@ export const AppHeader = React.memo(({
                 }}
             />
 
-            <div className="px-4 sm:px-5 pt-3 pb-1 fixed top-0 left-0 right-0 z-30 pointer-events-none bg-transparent">
+            <div className="px-4 sm:px-5 pb-1 fixed top-0 left-0 right-0 z-30 pointer-events-none bg-transparent" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.75rem)' }}>
                 <div
                     className="max-w-5xl mx-auto w-full flex items-center justify-between px-4 sm:px-5 pointer-events-auto overflow-hidden"
                     style={{
