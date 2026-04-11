@@ -72,7 +72,7 @@ export const ProfileMenu = ({ show, onClose, onNavigate, theme, anchorRef, isDar
                     top: pos.top,
                     right: pos.right,
                     backgroundColor: theme?.colors?.surface || (isDark ? '#282828' : '#FFFFFF'),
-                    border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.06)',
+                    border: isDark ? '1px solid rgba(255,255,255,0.1)' : 'none',
                     boxShadow: DESIGN_TOKENS.shadows.modal,
                     animation: 'profileMenuSlideIn 200ms cubic-bezier(0.16,1,0.3,1)',
                     transformOrigin: 'top right',

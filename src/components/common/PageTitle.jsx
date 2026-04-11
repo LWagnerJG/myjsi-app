@@ -15,7 +15,7 @@ export const PageTitle = React.memo(({
 }) => {
     const dark = isDarkTheme(theme);
     return (
-        <div className={`px-4 pt-6 pb-4 flex justify-between items-start gap-3 ${className}`}>
+        <div className={`px-4 pt-4 pb-3 flex justify-between items-start gap-3 ${className}`}>
             <div className="flex-1 flex items-start space-x-2 min-w-0">
                 {onBack && showBack && (
                     <button

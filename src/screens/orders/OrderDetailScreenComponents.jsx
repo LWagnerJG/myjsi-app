@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { ChevronDown, Share2, X, Play, Download } from 'lucide-react';
+import { Share2, X, Play, Download, MapPin } from 'lucide-react';
 import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z } from '../../components/common/modalUtils.js';
+import { JSIWebButton } from '../../components/common/JSIButtons.jsx';
 
 /* ── helpers ────────────────────────────────────────────────── */
 const ABBR = /\b(llc|inc|msd|lecc)\b/gi;
@@ -18,12 +19,12 @@ export const fs = d => d ? new Date(d).toLocaleDateString('en-US', { month: 'sho
 
 /* shared label style used across all expanded/detail areas */
 const fieldLabel = (c) => ({
-  fontSize: "0.625rem",
-  fontWeight: 700,
+  fontSize: "0.6875rem",
+  fontWeight: 500,
   textTransform: 'uppercase',
-  letterSpacing: '0.07em',
+  letterSpacing: '0.05em',
   color: c.textSecondary,
-  opacity: 0.55,
+  opacity: 0.5,
   marginBottom: 2,
 });
 
@@ -60,8 +61,8 @@ export const Card = ({ children, dark, c, className = '', style }) => (
   <div className={className} style={{
     padding: 20,
     backgroundColor: c?.surface || (dark ? 'rgba(255,255,255,0.08)' : '#fff'),
-    borderRadius: 22,
-    border: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)'}`,
+    borderRadius: 24,
+    border: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.03)'}`,
     ...style,
   }}>{children}</div>
 );
@@ -89,7 +90,7 @@ export const Chk = ({ clr }) => (
 );
 
 /* ── timeline stage ──────────────────────────────────────────── */
-export const Stage = React.memo(({ stage, state, isLast, subtitle, statusColor, progress, dark, c, idx }) => {
+export const Stage = React.memo(({ stage, state, isLast, subtitle, statusColor, progress, dark, c, idx, shipTo }) => {
   const done = state === 'completed', now = state === 'current', later = state === 'future';
   const { Icon } = stage;
   const ref = useFadeUp(idx * 45);
@@ -115,7 +116,7 @@ export const Stage = React.memo(({ stage, state, isLast, subtitle, statusColor, 
       {/* content */}
       <div className={`flex-1 min-w-0 ${isLast ? 'pb-1' : 'pb-3'}`} style={{ paddingTop: 4 }}>
         <div className="flex items-center gap-2 flex-wrap">
-          <span className={`font-bold text-sm leading-snug ${later ? '' : ''}`} style={{ color: txtClr }}>
+          <span className={`font-bold text-sm leading-snug`} style={{ color: txtClr }}>
             {stage.label}
           </span>
           {now && (
@@ -135,6 +136,15 @@ export const Stage = React.memo(({ stage, state, isLast, subtitle, statusColor, 
             <div className="h-full rounded-full" style={{ width: `${progress}%`, backgroundColor: sc, transition: 'width .8s cubic-bezier(.4,0,.2,1)' }} />
           </div>
         )}
+        {/* ship-to address inline on Shipping stage */}
+        {shipTo && !later && (
+          <div className="flex items-start gap-1.5 mt-1.5">
+            <MapPin className="w-3 h-3 flex-shrink-0 mt-0.5" style={{ color: c.textSecondary, opacity: 0.5 }} />
+            <p className="text-[0.6875rem] leading-snug" style={{ color: c.textSecondary, opacity: 0.7 }}>
+              {shipTo.join(', ')}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -142,64 +152,51 @@ export const Stage = React.memo(({ stage, state, isLast, subtitle, statusColor, 
 
 /* ── line item row ───────────────────────────────────────────── */
 export const LineItem = React.memo(({ item, open, onToggle, c, dark, panelBorder, isFirst }) => (
-  <div className="transition-colors" style={{
-    backgroundColor: open ? (dark ? 'rgba(255,255,255,0.12)' : `${c.accent}05`) : 'transparent',
-    borderTop: !isFirst ? `1px solid ${panelBorder}` : undefined,
-  }}>
+  <div style={{ borderTop: !isFirst ? `1px solid ${panelBorder}` : undefined }}>
     <button
       onClick={onToggle}
-      className="w-full text-left px-5 py-3.5 flex items-center gap-3 select-none focus:outline-none active:opacity-70 transition-opacity"
+      className="w-full text-left px-5 py-3.5 flex items-start gap-3.5 select-none focus:outline-none active:opacity-70 transition-opacity"
     >
-      {/* line number badge */}
-      <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-[0.6875rem] font-bold tabular-nums"
-        style={{ backgroundColor: dark ? 'rgba(255,255,255,0.12)' : `${c.accent}10`, color: c.accent }}>
-        {item.line}
-      </div>
+      {/* line number — clean text, not a badge */}
+      <span className="text-[0.6875rem] font-semibold tabular-nums pt-0.5 flex-shrink-0"
+        style={{ color: c.accent, opacity: 0.7, minWidth: 20 }}>
+        {String(item.line).padStart(2, '0')}
+      </span>
 
       {/* name + model */}
       <div className="flex-1 min-w-0">
-        <p className="font-semibold text-sm leading-snug truncate" style={{ color: c.textPrimary }}>{tc(item.name)}</p>
-        <p className="text-xs mt-0.5" style={{ color: c.textSecondary, opacity: 0.7 }}>{item.model}</p>
+        <p className="font-semibold text-[0.8125rem] leading-snug truncate" style={{ color: c.textPrimary }}>{tc(item.name)}</p>
+        <p className="text-[0.6875rem] mt-0.5" style={{ color: c.textSecondary, opacity: 0.6 }}>{item.model}</p>
       </div>
 
       {/* price + qty */}
       <div className="text-right flex-shrink-0">
-        <p className="font-bold text-sm" style={{ color: c.textPrimary }}>{fmt$(item.extNet, true)}</p>
-        <p className="text-xs mt-0.5" style={{ color: c.textSecondary, opacity: 0.7 }}>Qty {item.quantity}</p>
+        <p className="font-semibold text-[0.8125rem]" style={{ color: c.textPrimary }}>{fmt$(item.extNet, true)}</p>
+        <p className="text-[0.6875rem] mt-0.5" style={{ color: c.textSecondary, opacity: 0.6 }}>× {item.quantity}</p>
       </div>
-
-      <ChevronDown className="w-4 h-4 flex-shrink-0 transition-transform ml-1" style={{
-        color: c.textSecondary, opacity: 0.4, transform: open ? 'rotate(180deg)' : 'none',
-      }} />
     </button>
 
-    {/* expanded detail */}
+    {/* expanded detail — smooth grid animation */}
     <div style={{ display: 'grid', gridTemplateRows: open ? '1fr' : '0fr', opacity: open ? 1 : 0, transition: 'grid-template-rows .25s ease, opacity .2s ease' }}>
       <div style={{ overflow: 'hidden' }}>
-        <div className="px-5 pb-4">
-          <div className="ml-10 pt-1 space-y-3">
-            {/* pricing grid */}
-            <div className="grid grid-cols-3 gap-3">
-              {[['Unit Price', fmt$(item.net, true)], ['Extended', fmt$(item.extNet, true)], ['Qty', item.quantity]].map(([l, v]) => (
-                <div key={l}>
-                  <p style={fieldLabel(c)}>{l}</p>
-                  <p className="text-[0.8125rem] font-semibold" style={{ color: c.textPrimary }}>{v}</p>
+        <div className="px-5 pb-4" style={{ paddingLeft: 'calc(1.25rem + 20px + 0.875rem)' }}>
+          {/* unit price — only show this since extended + qty are already in the header */}
+          <div className="mb-2">
+            <p style={fieldLabel(c)}>Unit Price</p>
+            <p className="text-[0.8125rem] font-semibold" style={{ color: c.textPrimary }}>{fmt$(item.net, true)}</p>
+          </div>
+
+          {/* specs — clean inline rows, no background card */}
+          {item.specs?.length > 0 && (
+            <div className="space-y-1.5 pt-1" style={{ borderTop: `1px solid ${dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)'}` }}>
+              {item.specs.map((s, i) => (
+                <div key={i} className="flex items-center justify-between gap-4">
+                  <span style={fieldLabel(c)}>{s.label}</span>
+                  <span className="text-[0.75rem] font-semibold text-right" style={{ color: c.textPrimary }}>{s.value}</span>
                 </div>
               ))}
             </div>
-
-            {/* specs */}
-            {item.specs?.length > 0 && (
-              <div className="rounded-xl py-2 px-3 space-y-1.5" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.12)' : 'rgba(53,53,53,0.025)' }}>
-                {item.specs.map((s, i) => (
-                  <div key={i} className="flex items-center justify-between gap-4">
-                    <p style={fieldLabel(c)}>{s.label}</p>
-                    <p className="text-xs font-semibold text-right" style={{ color: c.textPrimary }}>{s.value}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          )}
         </div>
       </div>
     </div>
@@ -211,11 +208,11 @@ export const AckModal = ({ order, onClose, onShare, dark, c }) => (
   <Portal>
     <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: UNIFIED_MODAL_Z }} role="dialog" aria-label="Acknowledgment">
       <div className="absolute inset-0" style={getUnifiedBackdropStyle(true)} onClick={onClose} />
-      <div className="relative w-full max-w-md rounded-[22px] overflow-hidden flex flex-col"
-        style={{ maxHeight: '85vh', backgroundColor: c?.surface || '#fff', border: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)'}` }}>
+      <div className="relative w-full max-w-md rounded-[24px] overflow-hidden flex flex-col"
+        style={{ maxHeight: '85vh', backgroundColor: c?.surface || '#fff', border: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.03)'}` }}>
 
         {/* header */}
-        <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)'}` }}>
+        <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.03)'}` }}>
           <div>
             <p style={fieldLabel(c)}>Acknowledgment</p>
             <p className="text-sm font-bold" style={{ color: c.textPrimary }}>SO {order.orderNumber}</p>
@@ -253,7 +250,7 @@ export const AckModal = ({ order, onClose, onShare, dark, c }) => (
             <div className="mt-1.5">
               {order.lineItems.map((li, i) => (
                 <div key={li.line} className="flex items-start justify-between gap-3 py-2.5"
-                  style={{ borderBottom: i < order.lineItems.length - 1 ? `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)'}` : 'none' }}>
+                  style={{ borderBottom: i < order.lineItems.length - 1 ? `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.03)'}` : 'none' }}>
                   <div className="flex-1 min-w-0">
                     <p className="text-[0.8125rem] font-semibold" style={{ color: c.textPrimary }}>{tc(li.name)}</p>
                     <p className="text-xs mt-0.5" style={{ color: c.textSecondary, opacity: 0.7 }}>{li.model} · Qty {li.quantity}</p>
@@ -264,17 +261,25 @@ export const AckModal = ({ order, onClose, onShare, dark, c }) => (
             </div>
           </div>
 
-          <div className="flex items-center justify-between pt-0.5" style={{ borderTop: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)'}` }}>
+          <div className="flex items-center justify-between pt-0.5" style={{ borderTop: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.03)'}` }}>
             <p className="text-[0.8125rem] font-bold" style={{ color: c.textSecondary }}>Total</p>
             <p className="text-[1.0625rem] font-black" style={{ color: c.textPrimary }}>{fmt$(order.net, true)}</p>
           </div>
 
           {order.ackUrl && (
-            <a href={order.ackUrl} target="_blank" rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-full text-[0.8125rem] font-semibold transition active:scale-[0.97]"
-              style={{ backgroundColor: dark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.05)', border: `1px solid ${dark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.09)'}`, color: c.textPrimary }}>
-              <Download className="w-4 h-4" /> Download PDF
-            </a>
+            <JSIWebButton
+              as="a"
+              href={order.ackUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              theme={{ colors: { accent: c.textPrimary, accentText: dark ? '#1A1A1A' : '#FFFFFF', surface: dark ? 'rgba(255,255,255,0.10)' : c.surface, border: dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.03)' } }}
+              variant="soft"
+              size="medium"
+              className="w-full"
+              icon={<Download className="w-4 h-4" />}
+            >
+              Download PDF
+            </JSIWebButton>
           )}
         </div>
       </div>
@@ -287,10 +292,10 @@ export const ClipsModal = ({ onClose, dark, c }) => (
   <Portal>
     <div className="fixed inset-0 flex items-end sm:items-center justify-center" style={{ zIndex: UNIFIED_MODAL_Z }} role="dialog" aria-label="Production clips">
       <div className="absolute inset-0" style={getUnifiedBackdropStyle(true)} onClick={onClose} />
-      <div className="relative w-full max-w-lg rounded-t-[22px] sm:rounded-[22px] overflow-hidden flex flex-col"
-        style={{ maxHeight: '80vh', backgroundColor: c?.surface || '#fff', border: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)'}` }}>
+      <div className="relative w-full max-w-lg rounded-t-[24px] sm:rounded-[24px] overflow-hidden flex flex-col"
+        style={{ maxHeight: '80vh', backgroundColor: c?.surface || '#fff', border: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.03)'}` }}>
 
-        <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)'}` }}>
+        <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.03)'}` }}>
           <div>
             <p style={fieldLabel(c)}>JSI Factory</p>
             <p className="text-sm font-bold" style={{ color: c.textPrimary }}>Production Clips</p>

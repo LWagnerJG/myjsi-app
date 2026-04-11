@@ -4,7 +4,7 @@ import { allApps, DEFAULT_HOME_APPS } from '../../constants/apps.js';
 import { ORDER_DATA } from '../orders/data.js';
 import { RequestQuoteModal } from '../../components/common/RequestQuoteModal.jsx';
 import { SpecCheckRequestModal } from '../../components/common/SpecCheckRequestModal.jsx';
-import { getHomeChromePillStyles, HOME_CHROME_PILL_HEIGHT } from '../../design-system/homeChrome.js';
+import { getHomeChromePillStyles, HOME_CHROME_PILL_HEIGHT, HOME_SURFACE_LIGHT, HOME_SURFACE_DARK } from '../../design-system/homeChrome.js';
 import { isDarkTheme } from '../../design-system/tokens.js';
 import { usePersistentState } from '../../hooks/usePersistentState.js';
 import { MessageSquarePlus } from 'lucide-react';
@@ -168,7 +168,7 @@ export const HomeScreen = React.memo(({
     const colors = useMemo(() => ({
         background: theme?.colors?.background || '#F0EDE8',
         surface: theme?.colors?.surface || '#FFFFFF',
-        tileSurface: isDark ? 'rgba(42,42,42,0.82)' : 'rgba(255,255,255,0.78)',
+        tileSurface: isDark ? HOME_SURFACE_DARK : HOME_SURFACE_LIGHT,
         tileShadow: 'none',
         accent: theme?.colors?.accent || '#353535',
         textPrimary: theme?.colors?.textPrimary || '#353535',

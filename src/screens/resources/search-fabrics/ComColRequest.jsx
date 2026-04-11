@@ -75,7 +75,7 @@ export const ComColRequest = ({ theme, showAlert }) => {
       maxWidthClass="max-w-3xl"
       horizontalPaddingClass="px-4"
       contentPaddingBottomClass="pb-28"
-      contentClassName="space-y-5"
+      contentClassName="pt-1 space-y-5"
       footer={(
         <FloatingSubmitCTA
           theme={theme}

@@ -48,70 +48,68 @@ function RequestCard({ r, onClick, theme }) {
 /* ── Manual entry form ── */
 function ReplacementForm({ theme, formData, onChange, fileInputRef, onPickPhotos, openPhotoPicker }) {
     const dark = isDarkTheme(theme);
-    const bdr = dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)';
-    const fieldBg = dark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.03)';
+    const inputBg = dark ? 'rgba(255,255,255,0.07)' : theme.colors.surface || '#FFFFFF';
 
     const Field = ({ label, children }) => (
         <div>
-            <label className="block text-xs font-bold uppercase tracking-[0.07em] mb-1.5 opacity-50"
-                style={{ color: theme.colors.textPrimary }}>
+            <label className="block text-[0.6875rem] font-semibold uppercase tracking-[0.08em] mb-1.5"
+                style={{ color: theme.colors.textSecondary, opacity: 0.6 }}>
                 {label}
             </label>
             {children}
         </div>
     );
 
-    const inputCls = "w-full px-3.5 py-2.5 rounded-[12px] text-sm outline-none transition-colors";
-    const inputStyle = { backgroundColor: fieldBg, border: `1px solid ${bdr}`, color: theme.colors.textPrimary };
+    const inputCls = "w-full px-4 py-3 rounded-2xl text-[0.875rem] outline-none placeholder:opacity-40";
+    const inputStyle = {
+        backgroundColor: inputBg,
+        border: 'none',
+        color: theme.colors.textPrimary,
+        boxShadow: dark ? 'none' : '0 1px 3px rgba(0,0,0,0.03)',
+    };
 
     return (
         <div className="px-4 sm:px-6 lg:px-8 pb-28 max-w-5xl mx-auto w-full" style={{ paddingTop: CONTENT_PT }}>
-            <div className="space-y-4">
-                {/* Form card */}
-                <div className="rounded-[24px] overflow-hidden p-5 space-y-4"
-                    style={{ backgroundColor: theme.colors.surface, border: `1px solid ${bdr}` }}>
-                    <Field label="Sales Order">
-                        <input value={formData.salesOrder} onChange={e => onChange('salesOrder', e.target.value)}
-                            className={inputCls} style={inputStyle} autoComplete="off" placeholder="e.g., SO-12345" />
-                    </Field>
-                    <Field label="Line Item">
-                        <input value={formData.lineItem} onChange={e => onChange('lineItem', e.target.value)}
-                            className={inputCls} style={inputStyle} autoComplete="off" placeholder="e.g., 003" />
-                    </Field>
-                    <Field label="Dealer">
-                        <input value={formData.dealer} onChange={e => onChange('dealer', e.target.value)}
-                            className={inputCls} style={inputStyle} autoComplete="off" placeholder="e.g., Acme Office Solutions" />
-                    </Field>
-                    <Field label="Notes">
-                        <textarea rows={3} value={formData.notes} onChange={e => onChange('notes', e.target.value)}
-                            className={`${inputCls} resize-none`} style={inputStyle}
-                            placeholder="Describe the issue or parts needed…" />
-                    </Field>
+            <div className="space-y-5">
+                <Field label="Sales Order">
+                    <input value={formData.salesOrder} onChange={e => onChange('salesOrder', e.target.value)}
+                        className={inputCls} style={inputStyle} autoComplete="off" placeholder="e.g. SO-12345" />
+                </Field>
+                <Field label="Line Item">
+                    <input value={formData.lineItem} onChange={e => onChange('lineItem', e.target.value)}
+                        className={inputCls} style={inputStyle} autoComplete="off" placeholder="e.g. 003" />
+                </Field>
+                <Field label="Dealer">
+                    <input value={formData.dealer} onChange={e => onChange('dealer', e.target.value)}
+                        className={inputCls} style={inputStyle} autoComplete="off" placeholder="e.g. Acme Office Solutions" />
+                </Field>
+                <Field label="Notes">
+                    <textarea rows={3} value={formData.notes} onChange={e => onChange('notes', e.target.value)}
+                        className={`${inputCls} resize-none`} style={inputStyle}
+                        placeholder="Describe the issue or parts needed…" />
+                </Field>
 
-                    {/* Photos */}
-                    <Field label="Photos">
-                        {Array.isArray(formData.photos) && formData.photos.length > 0 && (
-                            <div className="mb-3 grid grid-cols-3 gap-2">
-                                {formData.photos.map((src, idx) => (
-                                    <div key={idx} className="relative rounded-[12px] overflow-hidden aspect-square"
-                                        style={{ border: `1px solid ${bdr}` }}>
-                                        <img src={src} alt={`Photo ${idx + 1}`} className="w-full h-full object-cover" />
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                        <input ref={fileInputRef} type="file" accept="image/*" multiple capture="environment"
-                            className="hidden" onChange={onPickPhotos} />
-                        <button type="button" onClick={openPhotoPicker}
-                            className="w-full rounded-[12px] py-3 flex items-center justify-center gap-2 transition-opacity hover:opacity-70"
-                            style={{ border: `1.5px dashed ${bdr}`, color: theme.colors.textSecondary }}>
-                            <Image className="w-4 h-4" />
-                            <span className="text-sm font-medium">
-                                {formData.photos?.length ? 'Add More Photos' : 'Add Photos'}
-                            </span>
-                        </button>
-                    </Field>
-                </div>
+                <Field label="Photos">
+                    {Array.isArray(formData.photos) && formData.photos.length > 0 && (
+                        <div className="mb-3 grid grid-cols-3 gap-2">
+                            {formData.photos.map((src, idx) => (
+                                <div key={idx} className="relative rounded-2xl overflow-hidden aspect-square">
+                                    <img src={src} alt={`Photo ${idx + 1}`} className="w-full h-full object-cover" />
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    <input ref={fileInputRef} type="file" accept="image/*" multiple capture="environment"
+                        className="hidden" onChange={onPickPhotos} />
+                    <button type="button" onClick={openPhotoPicker}
+                        className="w-full rounded-2xl py-3.5 flex items-center justify-center gap-2 transition-opacity active:scale-[0.98]"
+                        style={{ backgroundColor: inputBg, color: theme.colors.textSecondary, boxShadow: dark ? 'none' : '0 1px 3px rgba(0,0,0,0.03)' }}>
+                        <Image className="w-4 h-4" style={{ color: theme.colors.accent }} />
+                        <span className="text-[0.8125rem] font-semibold">
+                            {formData.photos?.length ? 'Add More Photos' : 'Add Photos'}
+                        </span>
+                    </button>
+                </Field>
             </div>
         </div>
     );

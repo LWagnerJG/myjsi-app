@@ -33,23 +33,25 @@ export const AppScreenLayout = ({
             style={{ backgroundColor: theme.colors.background }}
         >
             <WrapperTag className="flex flex-col min-h-full" {...wrapperProps}>
-                {showTitle ? (
-                    <PageTitle
-                        title={title}
-                        subtitle={subtitle}
-                        theme={theme}
-                        onBack={onBack}
-                        showBack={showBack}
-                    >
-                        {headerSlot}
-                    </PageTitle>
-                ) : null}
-
-                {topSlot || null}
-
                 <div className="flex-1 overflow-y-auto scrollbar-hide">
-                    <div className={`mx-auto w-full ${maxWidthClass} ${horizontalPaddingClass} ${contentPaddingBottomClass} ${contentClassName}`}>
-                        {children}
+                    <div className={`mx-auto w-full ${maxWidthClass} ${horizontalPaddingClass} ${contentPaddingBottomClass}`}>
+                        {showTitle ? (
+                            <PageTitle
+                                title={title}
+                                subtitle={subtitle}
+                                theme={theme}
+                                onBack={onBack}
+                                showBack={showBack}
+                            >
+                                {headerSlot}
+                            </PageTitle>
+                        ) : null}
+
+                        {topSlot || null}
+
+                        <div className={contentClassName}>
+                            {children}
+                        </div>
                     </div>
                 </div>
 

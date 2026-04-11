@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { INITIAL_ASSETS } from './data.js';
 import { X, Download, Share2, Copy, Heart } from 'lucide-react';
 import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z } from '../../components/common/modalUtils.js';
+import { JSIWebButton } from '../../components/common/JSIButtons.jsx';
 
 // Simple in-memory library grid with mock data
 export const LibraryGrid = ({ theme, query, parentHeaderRef, savedImageIds = [], onToggleSaveImage, assetsOverride }) => {
@@ -120,40 +121,49 @@ export const LibraryGrid = ({ theme, query, parentHeaderRef, savedImageIds = [],
                   {onToggleSaveImage && (() => {
                     const isSaved = savedImageIds.includes(selected.id);
                     return (
-                      <button
+                      <JSIWebButton
                         onClick={() => onToggleSaveImage(selected.id)}
-                        className="flex items-center gap-2 px-4 h-10 rounded-full text-[0.8125rem] font-medium"
-                        style={{ background: isSaved ? '#fee2e2' : theme.colors.subtle, color: isSaved ? '#dc2626' : theme.colors.textPrimary, border: `1px solid ${isSaved ? '#fca5a5' : theme.colors.border}` }}
+                        theme={theme}
+                        variant="soft"
+                        size="medium"
+                        icon={<Heart className="w-3.5 h-3.5" fill={isSaved ? '#dc2626' : 'none'} />}
+                        style={isSaved ? { backgroundColor: '#fee2e2', borderColor: '#fca5a5', color: '#dc2626' } : undefined}
                       >
-                        <Heart className="w-3.5 h-3.5" fill={isSaved ? '#dc2626' : 'none'} />
                         {isSaved ? 'Saved' : 'Save'}
-                      </button>
+                      </JSIWebButton>
                     );
                   })()}
-                  <button
+                  <JSIWebButton
                     onClick={() => { navigator.clipboard.writeText(window.location.origin + '/library#' + selected.id); }}
-                    className="flex items-center gap-2 px-4 h-10 rounded-full text-[0.8125rem] font-medium"
-                    style={{ background: theme.colors.subtle, color: theme.colors.textPrimary, border: `1px solid ${theme.colors.border}` }}
+                    theme={theme}
+                    variant="soft"
+                    size="medium"
+                    icon={<Share2 className="w-3.5 h-3.5" />}
                   >
-                    <Share2 className="w-3.5 h-3.5" /> Share
-                  </button>
-                  <button
+                    Share
+                  </JSIWebButton>
+                  <JSIWebButton
                     onClick={() => { navigator.clipboard.writeText(selected.src); }}
-                    className="flex items-center gap-2 px-4 h-10 rounded-full text-[0.8125rem] font-medium"
-                    style={{ background: theme.colors.subtle, color: theme.colors.textPrimary, border: `1px solid ${theme.colors.border}` }}
+                    theme={theme}
+                    variant="soft"
+                    size="medium"
+                    icon={<Copy className="w-3.5 h-3.5" />}
                   >
-                    <Copy className="w-3.5 h-3.5" /> Copy URL
-                  </button>
-                  <a
+                    Copy URL
+                  </JSIWebButton>
+                  <JSIWebButton
+                    as="a"
                     href={selected.src}
                     download
                     target="_blank"
                     rel="noreferrer"
-                    className="flex items-center gap-2 px-4 h-10 rounded-full text-[0.8125rem] font-semibold"
-                    style={{ background: theme.colors.accent, color: theme.colors.accentText }}
+                    theme={theme}
+                    variant="filled"
+                    size="medium"
+                    icon={<Download className="w-3.5 h-3.5" />}
                   >
-                    <Download className="w-3.5 h-3.5" /> Download
-                  </a>
+                    Download
+                  </JSIWebButton>
                 </div>
               </div>
             </div>

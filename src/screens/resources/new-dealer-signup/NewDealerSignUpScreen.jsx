@@ -30,7 +30,7 @@ export const NewDealerSignUpScreen = ({ theme, setSuccessMessage, onNavigate, ha
             maxWidthClass="max-w-xl"
             horizontalPaddingClass="px-4"
             contentPaddingBottomClass="pb-28"
-            contentClassName="mt-2 space-y-6"
+            contentClassName="pt-1 space-y-6"
             footer={(
                 <FloatingSubmitCTA
                     theme={theme}

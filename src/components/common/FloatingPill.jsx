@@ -13,7 +13,7 @@
  */
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { floatingBarStyle, isDarkTheme } from '../../design-system/tokens.js';
+import { isDarkTheme } from '../../design-system/tokens.js';
 import { getFloatingPillMotion } from '../../design-system/motion.js';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion.js';
 
@@ -28,6 +28,8 @@ const FloatingPill = ({
   type = 'button',
   disabled = false,
   zIndex = 20,
+  style = {},
+  iconContainerStyle = {},
 }) => {
   const prefersReducedMotion = usePrefersReducedMotion();
   const m = getFloatingPillMotion(prefersReducedMotion);
@@ -56,16 +58,26 @@ const FloatingPill = ({
             ${className}
           `}
           style={{
-            ...floatingBarStyle(theme),
+            backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : '#353535',
+            backdropFilter: isDark ? 'blur(24px) saturate(1.8)' : undefined,
+            WebkitBackdropFilter: isDark ? 'blur(24px) saturate(1.8)' : undefined,
+            border: isDark ? '1px solid rgba(255,255,255,0.14)' : 'none',
+            boxShadow: isDark
+              ? '0 -4px 24px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.08)'
+              : '0 4px 20px rgba(53,53,53,0.18), 0 1px 4px rgba(53,53,53,0.10)',
             bottom: 'max(20px, calc(env(safe-area-inset-bottom, 0px) + 12px))',
             zIndex,
-            color: isDark ? '#fff' : '#353535',
+            color: isDark ? '#fff' : '#FFFFFF',
+            ...style,
           }}
         >
           {icon && (
             <div
               className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center shrink-0"
-              style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.14)' : 'rgba(0,0,0,0.07)' }}
+              style={{
+                backgroundColor: isDark ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.18)',
+                ...iconContainerStyle,
+              }}
             >
               {React.cloneElement(icon, { className: 'w-4 h-4 sm:w-[18px] sm:h-[18px]' })}
             </div>

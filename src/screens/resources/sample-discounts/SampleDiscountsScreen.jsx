@@ -5,6 +5,7 @@ import { isDarkTheme } from '../../../design-system/tokens.js';
 import { Copy, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SAMPLE_POLICIES } from './data.js';
+import { ScreenTopChrome } from '../../../components/common/ScreenTopChrome.jsx';
 
 const stagger = (i) => ({
     initial: { opacity: 0, y: 6 },
@@ -68,7 +69,7 @@ export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: colors.background }}>
 
             {/* ── Page header ── */}
-            <div className="flex-shrink-0 px-4 pt-3 pb-2">
+            <ScreenTopChrome theme={theme} maxWidthClass="" horizontalPaddingClass="px-4" contentClassName="pt-3 pb-2">
                 <PageTitle
                     title="Sample Policies"
                     subtitle="Effective May 1, 2021 - Commission not paid"
@@ -77,7 +78,7 @@ export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
                     titleClassName="text-[1.375rem] font-black"
                     subtitleClassName="text-sm mt-0.5"
                 />
-            </div>
+            </ScreenTopChrome>
 
             {/* ── Policy card ── */}
             <div className="flex-1 overflow-y-auto scrollbar-hide px-4 pb-10">

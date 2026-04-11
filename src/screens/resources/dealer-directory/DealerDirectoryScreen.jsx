@@ -7,6 +7,7 @@ import { ChevronRight, Building2, UserPlus } from 'lucide-react';
 import { DEALER_DIRECTORY_DATA } from './data.js';
 import { isDarkTheme, subtleBg, subtleBorder } from '../../../design-system/tokens.js';
 import { formatCurrency } from '../../../utils/format.js';
+import { ScreenTopChrome } from '../../../components/common/ScreenTopChrome.jsx';
 
 const stagger = (i) => ({
     initial: { opacity: 0, y: 6 },
@@ -38,8 +39,7 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, onNavigate }) =>
     return (
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: colors.background }}>
 
-            {/* Title */}
-            <div className="flex-shrink-0 px-4 pt-3 pb-1">
+            <ScreenTopChrome theme={theme} maxWidthClass="" horizontalPaddingClass="px-4" contentClassName="pt-3 pb-3">
                 <PageTitle
                     title="Dealers"
                     subtitle={`${dealers.length} accounts \u00B7 ${formatCurrency(totalSales)}`}
@@ -58,10 +58,6 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, onNavigate }) =>
                         Add
                     </button>
                 </PageTitle>
-            </div>
-
-            {/* Search */}
-            <div className="flex-shrink-0 px-4 pb-3">
                 <StandardSearchBar
                     value={searchTerm}
                     onChange={setSearchTerm}
@@ -69,7 +65,7 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, onNavigate }) =>
                     theme={theme}
                     className="w-full"
                 />
-            </div>
+            </ScreenTopChrome>
 
             {/* List */}
             <div className="flex-1 overflow-y-auto scrollbar-hide px-4 pb-10">

@@ -1,11 +1,11 @@
 // src/screens/samples/SamplesScreen.jsx
 import React, { useState, useMemo, useCallback } from 'react';
-import { motion } from 'framer-motion';
-import { isDarkTheme, DESIGN_TOKENS } from '../../design-system/tokens.js';
-import { Package, Plus, Trash2, Minus, CheckCircle, Layers } from 'lucide-react';
+import { isDarkTheme } from '../../design-system/tokens.js';
+import { Plus, Trash2, Minus, CheckCircle, Layers } from 'lucide-react';
 import { hapticMedium } from '../../utils/haptics.js';
 import { SAMPLE_PRODUCTS, SAMPLE_CATEGORIES, FINISH_CATEGORIES, FINISH_SAMPLES } from './data.js';
 import { CartDrawer } from './components/CartDrawer.jsx';
+import { ScreenTopChrome } from '../../components/common/ScreenTopChrome.jsx';
 
 const idOf = (x) => String(x);
 const COLLAPSED_HEIGHT = 96;
@@ -62,26 +62,32 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
         const toggleSet = () => onUpdateCart({ id: setId, name: `All ${currentCategoryName} Finishes`, isSet: true }, setQty > 0 ? -setQty : 1);
 
         return (
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-3 pb-4">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2.5 sm:gap-3 pb-4">
                 {/* ── Category Set Tile ── */}
-                <div
+                <button
                     onClick={toggleSet}
-                    className="group relative rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer"
+                    className="relative rounded-2xl overflow-hidden transition-all duration-200 active:scale-[0.97] text-left"
                     style={{
-                        backgroundColor: setQty > 0 ? theme.colors.accent : theme.colors.surface,
-                        boxShadow: setQty > 0 ? DESIGN_TOKENS.shadows.md : 'none',
-                        border: setQty > 0 ? `2px solid ${theme.colors.accent}` : `1px solid ${theme.colors.border}`,
+                        backgroundColor: setQty > 0 ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.06)' : theme.colors.surface),
+                        boxShadow: isDark ? 'none' : '0 1px 3px rgba(0,0,0,0.04)',
                     }}
                 >
-                    <div className="aspect-[4/3] flex flex-col items-center justify-center gap-1.5 p-3" style={{ backgroundColor: setQty > 0 ? theme.colors.accent : theme.colors.subtle }}>
-                        <Package className="w-7 h-7" style={{ color: setQty > 0 ? theme.colors.accentText : theme.colors.textSecondary }} />
-                        {setQty > 0 && <CheckCircle className="w-4 h-4" style={{ color: theme.colors.accentText }} />}
+                    <div className="aspect-[4/3] flex flex-col items-center justify-center gap-1.5 p-3"
+                        style={{ backgroundColor: setQty > 0 ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.04)' : 'rgba(53,53,53,0.03)') }}>
+                        {setQty > 0
+                            ? <CheckCircle className="w-6 h-6" style={{ color: '#fff' }} />
+                            : <span className="text-[1.5rem] font-bold" style={{ color: theme.colors.textSecondary, opacity: 0.35 }}>All</span>
+                        }
                     </div>
-                    <div className="px-2 sm:px-3 py-1.5 sm:py-2 text-center" style={{ backgroundColor: setQty > 0 ? theme.colors.accent : theme.colors.surface }}>
-                        <p className="text-[0.6875rem] sm:text-xs font-bold truncate" style={{ color: setQty > 0 ? theme.colors.accentText : theme.colors.textPrimary }}>All {currentCategoryName}</p>
-                        <p className="text-[0.625rem] sm:text-[0.6875rem] mt-0.5 font-medium" style={{ color: setQty > 0 ? 'rgba(255,255,255,0.7)' : theme.colors.textSecondary }}>{products.length} {categoryItemLabel}</p>
+                    <div className="px-2.5 py-2">
+                        <p className="text-[0.6875rem] sm:text-[0.75rem] font-bold truncate" style={{ color: setQty > 0 ? '#fff' : theme.colors.textPrimary }}>
+                            All {currentCategoryName}
+                        </p>
+                        <p className="text-[0.625rem] sm:text-[0.6875rem] mt-0.5" style={{ color: setQty > 0 ? 'rgba(255,255,255,0.7)' : theme.colors.textSecondary, opacity: setQty > 0 ? 1 : 0.5 }}>
+                            {products.length} {categoryItemLabel}
+                        </p>
                     </div>
-                </div>
+                </button>
 
                 {/* ── Individual product tiles ── */}
                 {products.map(product => {
@@ -95,32 +101,50 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                     return (
                         <div
                             key={pid}
-                            className="group relative rounded-2xl overflow-hidden transition-all duration-300"
+                            className="relative rounded-2xl overflow-hidden transition-all duration-200"
                             style={{
                                 backgroundColor: theme.colors.surface,
-                                boxShadow: qty > 0 ? DESIGN_TOKENS.shadows.md : 'none',
-                                border: qty > 0 ? `2px solid ${theme.colors.accent}` : `1px solid ${theme.colors.border}`,
-                                transform: qty > 0 ? 'scale(1.02)' : 'scale(1)'
+                                boxShadow: qty > 0
+                                    ? `0 0 0 2px ${theme.colors.accent}`
+                                    : (isDark ? 'none' : '0 1px 3px rgba(0,0,0,0.04)'),
                             }}
                         >
+                            {/* Quantity badge */}
                             {qty > 0 && (
-                                <div className="absolute top-1.5 left-1.5 z-10 min-w-[20px] sm:min-w-[28px] h-5 sm:h-7 px-1.5 sm:px-2 rounded-full text-[0.6875rem] sm:text-sm font-bold flex items-center justify-center shadow-md" style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}>{qty}</div>
+                                <div className="absolute top-2 left-2 z-10 min-w-[22px] h-[22px] px-1.5 rounded-full text-[0.6875rem] font-bold flex items-center justify-center"
+                                    style={{ backgroundColor: theme.colors.accent, color: '#fff', boxShadow: '0 2px 6px rgba(0,0,0,0.15)' }}>
+                                    {qty}
+                                </div>
                             )}
-                            <div role="button" tabIndex={0} onClick={addOne} onKeyPress={e => { if (e.key === 'Enter') addOne(e); }} className="aspect-[4/3] flex items-center justify-center overflow-hidden" style={{ backgroundColor: bg }}>
+
+                            {/* Swatch image area */}
+                            <div role="button" tabIndex={0} onClick={addOne} onKeyPress={e => { if (e.key === 'Enter') addOne(e); }}
+                                className="aspect-[4/3] flex items-center justify-center overflow-hidden cursor-pointer"
+                                style={{ backgroundColor: bg }}>
                                 {hasImage && <img loading="lazy" width="600" height="600" src={product.image} alt={product.name} className="object-cover w-full h-full select-none pointer-events-none" draggable={false} />}
                             </div>
-                            <div className="px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-between gap-1" style={{ backgroundColor: theme.colors.surface }}>
-                                <p className="text-[0.6875rem] sm:text-sm truncate flex-1" style={{ color: theme.colors.textPrimary }}>{cleanName(product.name)}</p>
-                                <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
-                                    {qty > 0 && (
-                                        <button type="button" onClick={removeOne} className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center active:scale-90 transition-all" style={{ backgroundColor: qty === 1 ? theme.colors.destructiveLight : theme.colors.subtle, border: qty === 1 ? `1px solid ${theme.colors.destructiveBorder}` : `1px solid ${theme.colors.border}` }} aria-label={qty === 1 ? `Remove ${product.name}` : `Decrease ${product.name} quantity`}>
-                                            {qty === 1 ? <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" style={{ color: theme.colors.error }} /> : <Minus className="w-3 h-3 sm:w-4 sm:h-4" style={{ color: theme.colors.textSecondary }} />}
-                                        </button>
-                                    )}
-                                    <button type="button" onClick={addOne} className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center active:scale-95 border" style={{ borderColor: theme.colors.border, backgroundColor: theme.colors.inputBackground }} aria-label={`Add ${product.name}`}>
-                                        <Plus className="w-3 h-3 sm:w-4 sm:h-4" style={{ color: theme.colors.textSecondary }} />
+
+                            {/* Footer: name + actions */}
+                            <div className="px-2 sm:px-2.5 py-1.5 sm:py-2 flex items-center gap-1">
+                                <p className="text-[0.6875rem] sm:text-[0.75rem] truncate flex-1" style={{ color: theme.colors.textPrimary }}>{cleanName(product.name)}</p>
+                                {qty > 0 ? (
+                                    <button type="button" onClick={removeOne}
+                                        className="w-6 h-6 rounded-full flex items-center justify-center active:scale-90 transition-all flex-shrink-0"
+                                        style={{ backgroundColor: isDark ? 'rgba(255,100,100,0.15)' : 'rgba(184,92,92,0.08)' }}
+                                        aria-label={qty === 1 ? `Remove ${product.name}` : `Decrease ${product.name} quantity`}>
+                                        {qty === 1
+                                            ? <Trash2 className="w-3 h-3" style={{ color: theme.colors.error || '#B85C5C' }} />
+                                            : <Minus className="w-3 h-3" style={{ color: theme.colors.error || '#B85C5C' }} />
+                                        }
                                     </button>
-                                </div>
+                                ) : (
+                                    <button type="button" onClick={addOne}
+                                        className="w-6 h-6 rounded-full flex items-center justify-center active:scale-90 transition-all flex-shrink-0"
+                                        style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.05)' }}
+                                        aria-label={`Add ${product.name}`}>
+                                        <Plus className="w-3.5 h-3.5" style={{ color: theme.colors.textSecondary, opacity: 0.6 }} />
+                                    </button>
+                                )}
                             </div>
                         </div>
                     );
@@ -131,72 +155,69 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
 
     return (
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
-            {/* Category tabs — underline style */}
-            <div className="flex-shrink-0 px-4 pt-2 pb-0" style={{ background: theme.colors.background }}>
-                <div className="max-w-5xl mx-auto w-full">
-                    <div className="relative">
-                        <div className="flex overflow-x-auto scrollbar-hide whitespace-nowrap gap-1 border-b" style={{ borderColor: theme.colors.border }}>
-                            {allCategories.map((cat) => {
-                                const isActive = selectedCategory === cat.id;
-                                return (
-                                    <button
-                                        key={cat.id}
-                                        onClick={() => setSelectedCategory(cat.id)}
-                                        className="relative px-4 py-2.5 text-sm font-medium transition-all"
-                                        style={{ color: isActive ? theme.colors.accent : theme.colors.textSecondary, background: 'transparent' }}
-                                    >
-                                        {cat.name}
-                                        {isActive && <motion.span layoutId="samples-tab-underline" className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full" style={{ backgroundColor: theme.colors.accent }} transition={{ type: 'spring', stiffness: 500, damping: 35 }} />}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                        <div className="absolute right-0 top-0 bottom-0 w-16 pointer-events-none" style={{ background: `linear-gradient(to left, ${theme.colors.background}, transparent)` }} />
-                    </div>
+            {/* Category chips — scrollable pills */}
+            <ScreenTopChrome theme={theme} maxWidthClass="max-w-5xl" horizontalPaddingClass="px-0" contentClassName="pt-1 pb-1">
+                <div className="flex overflow-x-auto scrollbar-hide no-scrollbar gap-2 px-4">
+                    {allCategories.map((cat) => {
+                        const isActive = selectedCategory === cat.id;
+                        return (
+                            <button
+                                key={cat.id}
+                                onClick={() => setSelectedCategory(cat.id)}
+                                className="px-3.5 py-2 rounded-full text-[0.8125rem] font-semibold whitespace-nowrap transition-all duration-150 active:scale-95 flex-shrink-0"
+                                style={{
+                                    backgroundColor: isActive
+                                        ? (isDark ? 'rgba(255,255,255,0.16)' : theme.colors.textPrimary)
+                                        : 'transparent',
+                                    color: isActive
+                                        ? (isDark ? '#fff' : '#fff')
+                                        : theme.colors.textSecondary,
+                                    opacity: isActive ? 1 : 0.7,
+                                }}
+                            >
+                                {cat.name}
+                            </button>
+                        );
+                    })}
                 </div>
-            </div>
+            </ScreenTopChrome>
 
             {/* Scrollable content */}
             <div className="flex-1 overflow-y-auto scrollbar-hide" style={{ backgroundColor: theme.colors.background }}>
                 <div className="px-4 pt-2" style={{ paddingBottom: totalCartItems > 0 ? `${COLLAPSED_HEIGHT + 16}px` : '16px' }}>
                     <div className="max-w-5xl mx-auto w-full space-y-3">
 
-                        {/* ── Full JSI Set — persistent banner above grid ── */}
+                        {/* ── Full JSI Set — clean inline banner ── */}
                         <button
                             onClick={toggleFull}
-                            className="w-full rounded-2xl transition-all duration-200 active:scale-[0.99] overflow-hidden group"
+                            className="w-full rounded-2xl transition-all duration-200 active:scale-[0.99] overflow-hidden"
                             style={{
-                                backgroundColor: fullQty > 0 ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.08)' : theme.colors.surface),
-                                border: fullQty > 0 ? `2px solid ${theme.colors.accent}` : `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : theme.colors.border}`,
-                                boxShadow: fullQty > 0 ? DESIGN_TOKENS.shadows.md : 'none',
+                                backgroundColor: fullQty > 0 ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.06)' : theme.colors.surface),
+                                boxShadow: fullQty > 0 ? undefined : (isDark ? 'none' : '0 1px 3px rgba(0,0,0,0.03)'),
                             }}
                         >
-                            <div className="flex items-center gap-4 px-4 py-3.5">
+                            <div className="flex items-center gap-3.5 px-4 py-3">
                                 <div
-                                    className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+                                    className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
                                     style={{
-                                        backgroundColor: fullQty > 0 ? 'rgba(255,255,255,0.15)' : (isDark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.04)'),
+                                        backgroundColor: fullQty > 0 ? 'rgba(255,255,255,0.18)' : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.05)'),
                                     }}
                                 >
-                                    <Layers className="w-5 h-5" style={{ color: fullQty > 0 ? theme.colors.accentText : theme.colors.accent }} />
+                                    <Layers className="w-5 h-5" style={{ color: fullQty > 0 ? '#fff' : theme.colors.textSecondary }} />
                                 </div>
-                                <div className="flex-1 text-left">
-                                    <p className="text-[0.8125rem] font-bold" style={{ color: fullQty > 0 ? theme.colors.accentText : theme.colors.textPrimary }}>
+                                <div className="flex-1 text-left min-w-0">
+                                    <p className="text-[0.8125rem] font-bold truncate" style={{ color: fullQty > 0 ? '#fff' : theme.colors.textPrimary }}>
                                         Full JSI Sample Set
                                     </p>
-                                    <p className="text-xs mt-0.5" style={{ color: fullQty > 0 ? 'rgba(255,255,255,0.7)' : theme.colors.textSecondary }}>
-                                        Every finish across all categories • {totalFinishCount} samples
+                                    <p className="text-[0.6875rem] mt-0.5" style={{ color: fullQty > 0 ? 'rgba(255,255,255,0.7)' : theme.colors.textSecondary, opacity: fullQty > 0 ? 1 : 0.6 }}>
+                                        Every finish across all categories · {totalFinishCount} samples
                                     </p>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    {fullQty > 0 ? (
-                                        <CheckCircle className="w-5 h-5" style={{ color: theme.colors.accentText }} />
-                                    ) : (
-                                        <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.04)' }}>
-                                            <Plus className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
-                                        </div>
-                                    )}
-                                </div>
+                                {fullQty > 0 ? (
+                                    <CheckCircle className="w-5 h-5 flex-shrink-0" style={{ color: '#fff' }} />
+                                ) : (
+                                    <Plus className="w-4.5 h-4.5 flex-shrink-0" style={{ color: theme.colors.textSecondary, opacity: 0.5 }} />
+                                )}
                             </div>
                         </button>
 

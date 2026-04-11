@@ -5,7 +5,7 @@ import FloatingPill from './FloatingPill.jsx';
  * Shared floating action CTA for non-submit actions.
  * Keeps screen-level floating action pills consistent without importing FloatingPill directly.
  */
-export const FloatingActionCTA = ({
+export const FloatingActionCTA = React.memo(({
     theme,
     onClick,
     visible = true,
@@ -27,6 +27,7 @@ export const FloatingActionCTA = ({
         disabled={disabled}
         zIndex={zIndex}
     />
-);
+));
+FloatingActionCTA.displayName = 'FloatingActionCTA';
 
 export default FloatingActionCTA;

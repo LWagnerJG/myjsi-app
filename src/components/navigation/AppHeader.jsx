@@ -102,8 +102,8 @@ export const AppHeader = React.memo(({
                             height: homeScrimHeight,
                             zIndex: 29,
                             opacity: scrimOpacity,
-                            backdropFilter: 'blur(20px) saturate(1.6)',
-                            WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
+                            backdropFilter: 'blur(16px) saturate(1.6)',
+                            WebkitBackdropFilter: 'blur(16px) saturate(1.6)',
                             maskImage: 'linear-gradient(to bottom, black 0%, black 58%, rgba(0,0,0,0.42) 74%, transparent 100%)',
                             WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 58%, rgba(0,0,0,0.42) 74%, transparent 100%)',
                         }}
@@ -129,14 +129,23 @@ export const AppHeader = React.memo(({
 
             {!isHome && (
                 <>
-                    {/* Subtle fade below the pill — blur-only, no color fill */}
+                    {/* Inner-page scrim — tinted blur that matches the page background,
+                        giving scrolled content the same polished fade as the Home screen. */}
                     <div
                         aria-hidden="true"
                         className="fixed top-0 left-0 right-0 pointer-events-none"
                         style={{
                             height: innerScrimHeight,
                             zIndex: 29,
-                            background: 'transparent',
+                            backdropFilter: 'blur(16px) saturate(1.6)',
+                            WebkitBackdropFilter: 'blur(16px) saturate(1.6)',
+                            background: `linear-gradient(to bottom,
+                                rgba(${bgR},0.82) 0%,
+                                rgba(${bgR},0.60) 40%,
+                                rgba(${bgR},0.20) 70%,
+                                rgba(${bgR},0) 100%)`,
+                            maskImage: 'linear-gradient(to bottom, black 0%, black 52%, rgba(0,0,0,0.5) 72%, rgba(0,0,0,0.12) 88%, transparent 100%)',
+                            WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 52%, rgba(0,0,0,0.5) 72%, rgba(0,0,0,0.12) 88%, transparent 100%)',
                         }}
                     />
                 </>
@@ -151,8 +160,8 @@ export const AppHeader = React.memo(({
                 style={{
                     height: 'calc(env(safe-area-inset-top, 0px) + 96px)',
                     zIndex: 27,
-                    backdropFilter: 'blur(32px) saturate(1.8)',
-                    WebkitBackdropFilter: 'blur(32px) saturate(1.8)',
+                    backdropFilter: 'blur(16px) saturate(1.8)',
+                    WebkitBackdropFilter: 'blur(16px) saturate(1.8)',
                     maskImage: 'linear-gradient(to bottom, black 0%, black 52%, rgba(0,0,0,0.5) 72%, rgba(0,0,0,0.12) 88%, transparent 100%)',
                     WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 52%, rgba(0,0,0,0.5) 72%, rgba(0,0,0,0.12) 88%, transparent 100%)',
                 }}

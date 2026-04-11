@@ -4,6 +4,7 @@ import { PillButton, PrimaryButton, SecondaryButton } from '../../../components/
 import { FormInput } from '../../../components/common/FormComponents.jsx';
 import { PortalNativeSelect } from '../../../components/forms/PortalNativeSelect.jsx';
 import { Modal } from '../../../components/common/Modal.jsx';
+import { ScreenTopChrome } from '../../../components/common/ScreenTopChrome.jsx';
 import { isDarkTheme } from '../../../design-system/tokens.js';
 import { DEALER_DIRECTORY_DATA, DAILY_DISCOUNT_OPTIONS, ROLE_OPTIONS, PROJECT_STATUS_CONFIG } from './data.js';
 import {
@@ -192,9 +193,7 @@ export const DealerDetailScreen = ({
         >
 
             {/* ─── Header ─── */}
-            <div
-                className="flex-shrink-0 px-4 pt-3 pb-3"
-            >
+            <ScreenTopChrome theme={theme} maxWidthClass="" horizontalPaddingClass="px-4" contentClassName="pt-3 pb-3">
                 <GlassCard theme={theme} className="rounded-[24px] p-4 sm:p-5">
                     <div className="flex items-start gap-3.5">
                         <div
@@ -249,7 +248,7 @@ export const DealerDetailScreen = ({
                         </div>
                     </div>
                 </GlassCard>
-            </div>
+            </ScreenTopChrome>
 
             {/* ─── Scrollable content ─── */}
             <div className="flex-1 overflow-y-auto scrollbar-hide px-4 pb-24 space-y-4 max-w-5xl mx-auto w-full">

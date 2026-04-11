@@ -32,6 +32,7 @@ import { CheckoutSuccess } from './components/marketplace/CheckoutSuccess.jsx';
 import { OrderCard } from './components/marketplace/OrderCard.jsx';
 import { ProductCard } from './components/marketplace/ProductCard.jsx';
 import { TransactionRow } from './components/marketplace/TransactionRow.jsx';
+import { ScreenTopChrome } from '../../components/common/ScreenTopChrome.jsx';
 
 const EARNING_PROGRAMS = [
   { title: 'Sign up new dealers', desc: 'Bonus for each new dealer onboarded.', amount: '✦ 750' },
@@ -207,8 +208,8 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
 
   return (
     <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
-      <div className="flex-shrink-0 px-4 pt-2 pb-1" style={{ background: theme.colors.background }}>
-        <div className="max-w-2xl mx-auto w-full flex justify-center">
+      <ScreenTopChrome theme={theme} maxWidthClass="max-w-2xl" horizontalPaddingClass="px-4" contentClassName="pt-2 pb-1">
+        <div className="flex justify-center">
           <SegmentedToggle
             value={activeTab}
             onChange={(val) => { hapticLight(); setActiveTab(val); }}
@@ -217,7 +218,7 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
             theme={theme}
           />
         </div>
-      </div>
+      </ScreenTopChrome>
 
       <div className="flex-1 overflow-y-auto scrollbar-hide" style={{ backgroundColor: theme.colors.background }}>
         <div className="max-w-2xl mx-auto w-full px-4 pb-8">

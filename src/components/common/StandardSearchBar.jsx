@@ -3,7 +3,7 @@ import { SearchInput } from './SearchInput.jsx';
 
 // Standardized 56px pill search used across feature screens (matches Orders / AppHeader styling)
 // Props: value, onChange (event or value), placeholder, theme, className, id
-export const StandardSearchBar = ({ value, onChange, placeholder='Search...', theme, className='', id, autoFocus = false, inputRef }) => {
+export const StandardSearchBar = ({ value, onChange, placeholder='Search...', theme, className='', id, autoFocus = false, inputRef, style, inputClassName = '' }) => {
   const handleChange = (e) => {
     // Accept both synthetic event and raw value handlers
     const val = e?.target ? e.target.value : e;
@@ -18,9 +18,10 @@ export const StandardSearchBar = ({ value, onChange, placeholder='Search...', th
       theme={theme}
       variant="header"
       className={className}
-      inputClassName=""
+      inputClassName={inputClassName}
       autoFocus={autoFocus}
       inputRef={inputRef}
+      style={style}
     />
   );
 };

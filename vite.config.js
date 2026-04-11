@@ -22,7 +22,6 @@ export default defineConfig({
                     'vendor-motion': ['framer-motion'],
                     'vendor-charts': ['recharts'],
                     'vendor-dnd': ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'],
-                    'vendor-state': ['zustand'],
                     'vendor-pdf': ['html2pdf.js'],
                 }
             }

@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useState, useEffect } from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getToastMotion } from '../../design-system/motion.js';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion.js';
@@ -27,9 +27,10 @@ export const ToastHost = ({ children, theme }) => {
   }, [toasts]);
 
   const toastMotion = getToastMotion(prefersReducedMotion);
+  const ctxValue = useMemo(() => ({ push }), [push]);
 
   return (
-    <ToastContext.Provider value={{ push }}>
+    <ToastContext.Provider value={ctxValue}>
       {children}
       <div className="fixed inset-x-0 bottom-4 flex flex-col items-center gap-2 px-2 z-[1200] pointer-events-none" role="log" aria-label="Notifications">
         <AnimatePresence mode="popLayout">

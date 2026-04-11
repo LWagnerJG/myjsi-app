@@ -81,7 +81,7 @@ export const RequestFieldVisitScreen = ({ theme, setSuccessMessage, onNavigate }
             maxWidthClass="max-w-3xl"
             horizontalPaddingClass="px-4"
             contentPaddingBottomClass="pb-28"
-            contentClassName="py-4 space-y-4"
+            contentClassName="pt-1 pb-4 space-y-4"
             footer={(
                 <FloatingSubmitCTA
                     theme={theme}

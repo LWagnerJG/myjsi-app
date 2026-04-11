@@ -438,7 +438,7 @@ export const cardSurface = (theme) => {
   const dark = isDarkTheme(theme);
   return {
     backgroundColor: dark ? 'rgba(255,255,255,0.08)' : (theme?.colors?.surface || '#FFFFFF'),
-    border: dark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(0,0,0,0.06)',
+    border: dark ? '1px solid rgba(255,255,255,0.12)' : 'none',
     boxShadow: dark ? DESIGN_TOKENS.shadowsDark.card : DESIGN_TOKENS.shadows.card,
   };
 };
@@ -460,7 +460,7 @@ export const subtleBg = (theme, strength = 1) => {
  */
 export const subtleBorder = (theme) => {
   const dark = isDarkTheme(theme);
-  return dark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)';
+  return dark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.03)';
 };
 
 /**
@@ -471,7 +471,7 @@ export const inputSurface = (theme) => {
   const dark = isDarkTheme(theme);
   return {
     backgroundColor: dark ? 'rgba(255,255,255,0.10)' : (theme?.colors?.surface || '#FFFFFF'),
-    border: `1px solid ${theme?.colors?.border || JSI_COLORS.stone}`,
+    border: dark ? `1px solid ${theme?.colors?.border || JSI_COLORS.stone}` : '1px solid rgba(0,0,0,0.04)',
     color: theme?.colors?.textPrimary || JSI_COLORS.charcoal,
   };
 };
@@ -486,10 +486,10 @@ export const floatingBarStyle = (theme) => {
   return {
     backdropFilter: 'blur(24px) saturate(1.8)',
     WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
-    backgroundColor: dark ? 'rgba(38, 36, 34, 0.62)' : 'rgba(255, 253, 250, 0.72)',
-    border: dark ? '1px solid rgba(255,255,255,0.14)' : '1px solid rgba(0,0,0,0.07)',
+    backgroundColor: dark ? 'rgba(38, 36, 34, 0.62)' : 'rgba(240, 237, 232, 0.72)',
+    border: dark ? '1px solid rgba(255,255,255,0.14)' : 'none',
     boxShadow: dark
       ? '0 -4px 24px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.08)'
-      : '0 -2px 20px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.90)',
+      : '0 -2px 16px rgba(0,0,0,0.04)',
   };
 };

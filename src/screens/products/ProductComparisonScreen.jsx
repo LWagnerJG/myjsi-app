@@ -1,24 +1,20 @@
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
-import { ArrowRight, Package, Check, ChevronRight } from 'lucide-react';
+import { JSIWebButton } from '../../components/common/JSIButtons.jsx';
+import { ArrowRight, Package } from 'lucide-react';
 import { PRODUCT_DATA } from './data.js';
-import { isDarkTheme, DESIGN_TOKENS } from '../../design-system/tokens.js';
+import { isDarkTheme, cardSurface, subtleBg } from '../../design-system/tokens.js';
+import { HOME_SURFACE_DARK, HOME_SURFACE_LIGHT } from '../../design-system/homeChrome.js';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // ─── Configuration option sets ───────────────────────────────────────────────
-const CASEGOODS_TYPICAL_OPTIONS = ['U-Shape','L-Shape','Single Ped Desk','Adjustable Ht Desk'];
+const CASEGOODS_TYPICAL_OPTIONS = ['U-Shape','L-Shape','Single Ped','AH Desk'];
 const CONFERENCE_SIZE_OPTIONS = ['30x72','42x90','48x108','54x180','60x210'];
 const LOUNGE_SEATING_OPTIONS = ['Single Seater','Two Seater','Three Seater','Ottoman'];
 const MATERIAL_UPCHARGE = { laminate: 1, veneer: 1.12 };
-const TYPICAL_MULTIPLIERS = { 'U-Shape': 1, 'L-Shape': 0.92, 'Single Ped Desk': 0.85, 'Adjustable Ht Desk': 1.05 };
+const TYPICAL_MULTIPLIERS = { 'U-Shape': 1, 'L-Shape': 0.92, 'Single Ped': 0.85, 'AH Desk': 1.05 };
 
-// ─── Clean card helpers (consistent surfaces) ───────────────────────────────
-const glassStyle = (theme, dark) => ({
-  backgroundColor: dark ? '#2A2A2A' : '#FFFFFF',
-  border: dark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)',
-  boxShadow: 'none',
-});
+
 
 // ─── Product thumbnail strip ─────────────────────────────────────────────────
 const ProductTabs = React.memo(({ products, activeProduct, onProductSelect, theme, categoryName }) => {
@@ -29,7 +25,12 @@ const ProductTabs = React.memo(({ products, activeProduct, onProductSelect, them
   return (
     <div
       className="rounded-[24px] overflow-hidden"
-      style={{ ...glassStyle(theme, dark), padding: 0 }}
+      style={{
+        ...cardSurface(theme),
+        backgroundColor: dark ? HOME_SURFACE_DARK : HOME_SURFACE_LIGHT,
+        boxShadow: 'none',
+        padding: 0,
+      }}
     >
       <div
         ref={scrollRef}
@@ -107,12 +108,9 @@ const ProductHero = React.memo(({ product, theme, categoryId, onNavigate, catego
 
   return (
     <motion.div
-      className={`relative w-full ${aspectClass} rounded-2xl overflow-hidden group`}
+      className={`relative w-full ${aspectClass} rounded-[24px] overflow-hidden group`}
       style={{
         backgroundColor: dark ? '#1E1E1E' : '#F0EDE8',
-        boxShadow: dark
-          ? '0 4px 12px rgba(0,0,0,0.2)'
-          : '0 2px 8px rgba(53,53,53,0.08)',
       }}
       initial={false}
       animate={{ opacity: 1, scale: 1 }}
@@ -170,20 +168,23 @@ const ProductHero = React.memo(({ product, theme, categoryId, onNavigate, catego
           </AnimatePresence>
         </div>
 
-        {/* Competition CTA — frosted glass */}
-        <button
+        {/* Competition CTA — same sweep-up hover treatment as Order Detail actions */}
+        <JSIWebButton
           onClick={handleCompetitionClick}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-full font-medium text-[0.8125rem] transition-all active:scale-95 hover:scale-[1.03]"
+          theme={theme}
+          variant="filled"
+          tone="light"
+          size="medium"
+          icon={<ArrowRight className="w-3.5 h-3.5" />}
           style={{
-            backgroundColor: dark ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.6)',
-            color: dark ? '#fff' : theme.colors.textPrimary,
-            border: dark ? '1px solid rgba(255,255,255,0.15)' : '1px solid rgba(255,255,255,0.7)',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+            backgroundColor: dark ? 'rgba(255,255,255,0.20)' : 'rgba(255,255,255,0.72)',
+            border: 'none',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
           }}
         >
           Competition
-          <ArrowRight className="w-3.5 h-3.5" />
-        </button>
+        </JSIWebButton>
       </div>
     </motion.div>
   );
@@ -239,10 +240,17 @@ const PricingTable = React.memo(({
   }, [isCasegoods, materialMode, typicalLayout]);
 
   return (
-    <div className="space-y-3">
-      {/* Config toggles — outside the card */}
+    <div
+      className="rounded-[24px] overflow-hidden"
+      style={{
+        ...cardSurface(theme),
+        backgroundColor: dark ? HOME_SURFACE_DARK : HOME_SURFACE_LIGHT,
+        boxShadow: 'none',
+      }}
+    >
+      {/* Config toggles — inside the card top */}
       {(configOptions.length > 0 || showMaterialToggle) && (
-        <div className="space-y-2.5">
+        <div className="px-4 pt-4 space-y-2">
           {showMaterialToggle && (
             <SegmentedToggle
               value={materialMode}
@@ -269,79 +277,68 @@ const PricingTable = React.memo(({
         </div>
       )}
 
-      {/* Series list card */}
-      <div
-        className="rounded-[24px] overflow-hidden"
-        style={{ ...glassStyle(theme, dark) }}
-      >
-        {/* Column headers */}
-        <div className="px-5 pt-4 pb-2 flex items-center justify-between">
-          <span className="text-[0.6875rem] font-medium tracking-widest uppercase" style={{ color: theme.colors.textSecondary, opacity: 0.6 }}>
-            Series
-          </span>
-          <span className="text-[0.6875rem] font-medium tracking-widest uppercase" style={{ color: theme.colors.textSecondary, opacity: 0.6 }}>
-            List
-          </span>
-        </div>
+      {/* Column headers */}
+      <div className="px-5 pt-4 pb-1.5 flex items-center justify-between">
+        <span className="text-[0.6875rem] font-medium tracking-wide uppercase" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>
+          Series
+        </span>
+        <span className="text-[0.6875rem] font-medium tracking-wide uppercase" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>
+          List
+        </span>
+      </div>
 
-        {/* Product rows */}
-        <div className="px-2 pb-3 space-y-0.5">
-          {sorted.map((p) => {
-            const active = p.id === activeProduct?.id;
-            const price = computePrice(p);
-            return (
-              <button
-                key={p.id}
-                onClick={() => onSelectProduct(p)}
-                className="w-full group px-3 py-3.5 flex items-center justify-between transition-all duration-200 text-left rounded-2xl active:scale-[0.99]"
-                style={{
-                  cursor: active ? 'default' : 'pointer',
-                  backgroundColor: active
-                    ? (dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)')
-                    : 'transparent',
-                }}
-                onMouseEnter={(e) => {
-                  if (!active) e.currentTarget.style.backgroundColor = dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = active
-                    ? (dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)')
-                    : 'transparent';
-                }}
-              >
-                <span className="flex items-center gap-2.5">
-                  {/* Active indicator */}
-                  <span
-                    className="inline-block rounded-full transition-all duration-200"
-                    style={{
-                      width: 3,
-                      height: active ? 20 : 16,
-                      backgroundColor: active ? theme.colors.accent : (dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)'),
-                    }}
-                  />
-                  <span
-                    className="text-[0.9375rem] transition-all"
-                    style={{
-                      color: active ? theme.colors.textPrimary : theme.colors.textSecondary,
-                      fontWeight: active ? 600 : 450,
-                    }}
-                  >
-                    {p.name}
-                  </span>
-                </span>
+      {/* Product rows */}
+      <div className="px-2 pb-3">
+        {sorted.map((p) => {
+          const active = p.id === activeProduct?.id;
+          const price = computePrice(p);
+          return (
+            <button
+              key={p.id}
+              onClick={() => onSelectProduct(p)}
+              className="w-full px-3 py-3 flex items-center justify-between transition-all duration-200 text-left rounded-[16px] active:scale-[0.99]"
+              style={{
+                cursor: active ? 'default' : 'pointer',
+                backgroundColor: active ? subtleBg(theme, 1.5) : 'transparent',
+              }}
+              onMouseEnter={(e) => {
+                if (!active) e.currentTarget.style.backgroundColor = subtleBg(theme, 0.8);
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = active ? subtleBg(theme, 1.5) : 'transparent';
+              }}
+            >
+              <span className="flex items-center gap-2.5">
                 <span
-                  className="text-[0.9375rem] tabular-nums transition-colors"
+                  className="rounded-full transition-all duration-200"
+                  style={{
+                    width: 3,
+                    height: active ? 18 : 14,
+                    backgroundColor: active ? theme.colors.accent : (dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'),
+                  }}
+                />
+                <span
+                  className="text-[0.875rem] transition-all"
                   style={{
                     color: active ? theme.colors.textPrimary : theme.colors.textSecondary,
                     fontWeight: active ? 600 : 450,
                   }}
                 >
-                  ${price?.toLocaleString?.() || 'TBD'}
+                  {p.name}
                 </span>
-              </button>
-            );
-          })}
-        </div>
+              </span>
+              <span
+                className="text-[0.875rem] tabular-nums transition-colors"
+                style={{
+                  color: active ? theme.colors.textPrimary : theme.colors.textSecondary,
+                  fontWeight: active ? 600 : 450,
+                }}
+              >
+                ${price?.toLocaleString?.() || 'TBD'}
+              </span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -355,7 +352,7 @@ const ErrorState = ({ theme, message = 'The requested item does not exist.' }) =
     <div className="p-6">
       <div
         className="p-10 text-center rounded-[24px]"
-        style={{ ...glassStyle(theme, dark) }}
+        style={{ ...cardSurface(theme), boxShadow: 'none' }}
       >
         <Package className="w-12 h-12 mx-auto mb-4" style={{ color: theme.colors.textSecondary }} />
         <p className="font-medium" style={{ color: theme.colors.textPrimary }}>{message}</p>
@@ -371,7 +368,7 @@ export const ProductComparisonScreen = ({ categoryId, onNavigate, theme }) => {
 
   const [activeProduct, setActiveProduct] = useState(categoryData?.products?.[0]);
   const [materialMode, setMaterialMode] = useState(isGuest ? 'wood' : 'laminate');
-  const [typicalLayout, setTypicalLayout] = useState('U-Shape');
+  const [typicalLayout, setTypicalLayout] = useState('U-Shape');  // matches TYPICAL_MULTIPLIERS keys
   const [conferenceSize, setConferenceSize] = useState('30x72');
   const [loungeConfig, setLoungeConfig] = useState('Single Seater');
   const [guestLegType, setGuestLegType] = useState('wood');
@@ -396,19 +393,14 @@ export const ProductComparisonScreen = ({ categoryId, onNavigate, theme }) => {
   return (
     <div className="flex flex-col h-full app-header-offset">
       <div className="flex-1 overflow-y-auto scrollbar-hide">
-        <div className="px-4 sm:px-5 lg:px-8 pt-3 pb-8 space-y-4 max-w-5xl mx-auto w-full">
+        <div className="px-4 sm:px-5 lg:px-8 pt-2 pb-8 space-y-3 max-w-5xl mx-auto w-full">
           {/* Category title */}
-          <div
-            className="px-1 pt-1"
+          <h1
+            className="text-[1.25rem] font-bold tracking-tight px-1"
+            style={{ color: theme.colors.textPrimary }}
           >
-            <h1
-              className="text-[1.375rem] font-bold tracking-tight"
-              style={{ color: theme.colors.textPrimary }}
-            >
-              {categoryData.name}
-            </h1>
-
-          </div>
+            {categoryData.name}
+          </h1>
 
           {/* Product tabs */}
           <ProductTabs

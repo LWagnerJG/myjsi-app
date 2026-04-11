@@ -395,6 +395,87 @@ h6 {
     opacity: 1;
 }
 
+/* ── JSI Web Button — sweep-up hover (matches jsifurniture.com) ── */
+.jsi-web-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 30px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    box-sizing: border-box;
+    cursor: pointer;
+    text-decoration: none;
+}
+.jsi-web-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* sizes */
+.jsi-web-btn--default { min-width: 170px; height: 45px; font-size: 17px; padding: 0 16px; }
+.jsi-web-btn--medium  { min-width: 140px; height: 38px; font-size: 14px; padding: 0 14px; }
+.jsi-web-btn--small   { min-width: 0;     height: 30px; font-size: 11px; padding: 0 12px; }
+
+/* content layer (default visible) */
+.jsi-web-btn__content {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: opacity 0.25s ease-in-out, transform 0.25s ease-in-out;
+}
+
+/* hover-sweep layer (hidden below by default) */
+.jsi-web-btn__sweep {
+    position: absolute;
+    z-index: 2;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 100% 100% 0 0;
+    transform: translateY(100%);
+    transition: transform 0.25s ease-in-out, border-radius 0.25s ease-in-out;
+}
+.jsi-web-btn__sweep-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* hover / focus interaction */
+.jsi-web-btn:hover:not(:disabled) .jsi-web-btn__content,
+.jsi-web-btn:focus-visible:not(:disabled) .jsi-web-btn__content {
+    transform: translateY(-50%);
+    opacity: 0;
+}
+.jsi-web-btn:hover:not(:disabled) .jsi-web-btn__sweep,
+.jsi-web-btn:focus-visible:not(:disabled) .jsi-web-btn__sweep {
+    transform: translateY(0);
+    border-radius: 0;
+}
+.jsi-web-btn:hover:not(:disabled) .jsi-web-btn__sweep-inner,
+.jsi-web-btn:focus-visible:not(:disabled) .jsi-web-btn__sweep-inner {
+    opacity: 1;
+}
+
+/* auto-width variant for flex row layouts */
+.jsi-web-btn--auto { min-width: 0; flex: 1; }
+
+/* respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .jsi-web-btn__content,
+    .jsi-web-btn__sweep,
+    .jsi-web-btn__sweep-inner {
+        transition-duration: 1ms !important;
+    }
+}
+
 .app-header-offset {
     padding-top: calc(var(--app-header-offset) + var(--safe-area-inset-top));
 }
@@ -558,43 +639,7 @@ h6 {
     display: none;
 }
 
-.screen-content {
-    padding-left: 1rem;
-    padding-right: 1rem;
-    padding-top: 1rem;
-    padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px));
-}
 
-@media (min-width: 1024px) {
-    .screen-content {
-        padding: 1.5rem 1.5rem 2rem;
-    }
-}
-
-.card-standard {
-    background-color: var(--jsi-white);
-    border-radius: var(--jsi-radius-card);
-    padding: 1.5rem;
-    box-shadow: 0 2px 8px rgba(53, 53, 53, 0.05);
-    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.card-standard:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(53, 53, 53, 0.1);
-}
-
-.section-spacing {
-    margin-bottom: 2rem;
-}
-
-.item-spacing {
-    margin-bottom: 1.5rem;
-}
-
-.gap-standard {
-    gap: 1.5rem;
-}
 
 /* Animations */
 .animate-fade-in {
@@ -622,67 +667,7 @@ h6 {
     }
 }
 
-@keyframes slideUp {
-    from {
-        transform: translateY(100%);
-        opacity: 0
-    }
 
-    to {
-        transform: translateY(0);
-        opacity: 1
-    }
-}
-
-@keyframes slideDown {
-    from {
-        transform: translateY(0);
-        opacity: 1
-    }
-
-    to {
-        transform: translateY(100%);
-        opacity: 0
-    }
-}
-
-/* Success toast animations */
-@keyframes toastIn {
-    0% {
-        opacity: 0;
-        transform: translate(-50%, -8px) scale(.95);
-    }
-
-    60% {
-        opacity: 1;
-        transform: translate(-50%, 2px) scale(1.02);
-    }
-
-    100% {
-        opacity: 1;
-        transform: translate(-50%, 0) scale(1);
-    }
-}
-
-@keyframes toastOut {
-    0% {
-        opacity: 1;
-        transform: translate(-50%, 0) scale(1);
-    }
-
-    100% {
-        opacity: 0;
-        transform: translate(-50%, -6px) scale(.92);
-    }
-}
-
-.success-toast-enter {
-    animation: toastIn .26s cubic-bezier(.34, 1.56, .64, 1);
-}
-
-.success-toast-exit {
-    animation: toastOut .24s ease forwards;
-}
 
 /* Existing UX helpers */
 .animated-screen-container {

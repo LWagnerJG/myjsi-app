@@ -117,6 +117,7 @@ export const RequestComYardageScreen = ({ theme, showAlert, onNavigate, userSett
                 maxWidthClass="max-w-2xl"
                 horizontalPaddingClass="px-4 sm:px-6"
                 contentPaddingBottomClass="pb-6"
+                contentClassName="pt-1"
                 footer={(
                     <FloatingSubmitCTA
                         theme={theme}

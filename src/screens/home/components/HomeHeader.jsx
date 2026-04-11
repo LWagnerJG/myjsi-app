@@ -100,7 +100,7 @@ export const HomeHeader = ({
     }, [onRfpFileDrop]);
 
     // ── Highlight style shared between app results and Elliott row ─────
-    const focusedBg = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)';
+    const focusedBg = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.03)';
 
     return (
         <div className="relative group">

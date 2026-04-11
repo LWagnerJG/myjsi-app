@@ -7,13 +7,16 @@ export const ChannelChips = ({ theme, dark, onSelect, activeId }) => {
       key={id}
       onClick={onClick}
       aria-pressed={active}
-      className="px-2.5 py-1 rounded-full text-[0.6875rem] font-semibold whitespace-nowrap flex-shrink-0 transition-all duration-200 active:scale-95"
+      className="px-3.5 py-2 rounded-full text-[0.75rem] font-semibold whitespace-nowrap flex-shrink-0 transition-all duration-200 active:scale-95"
       style={{
-        color: theme.colors.textPrimary,
-        opacity: active ? 0.85 : 0.3,
+        color: active ? theme.colors.textPrimary : theme.colors.textSecondary,
+        opacity: active ? 1 : 0.72,
         backgroundColor: active
-          ? (dark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.055)')
+          ? (dark ? 'rgba(255,255,255,0.16)' : 'rgba(255,255,255,0.92)')
           : 'transparent',
+        boxShadow: active
+          ? (dark ? '0 8px 18px rgba(0,0,0,0.16)' : '0 6px 14px rgba(53,53,53,0.05)')
+          : 'none',
       }}
     >
       {label}
@@ -21,7 +24,7 @@ export const ChannelChips = ({ theme, dark, onSelect, activeId }) => {
   );
 
   return (
-    <div className="flex gap-1 overflow-x-auto no-scrollbar -mx-0.5">
+    <div className="flex gap-2 overflow-x-auto no-scrollbar">
       {chip('all', 'All', () => onSelect(null), !activeId)}
       {SUBREDDITS.map(sub =>
         chip(sub.id, sub.name, () => onSelect(sub), activeId === sub.id)

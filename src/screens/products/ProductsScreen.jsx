@@ -4,7 +4,6 @@ import React, {
     useCallback,
     useRef
 } from 'react';
-import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { EmptyState as SharedEmptyState } from '../../components/common/EmptyState.jsx';
 import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
@@ -12,15 +11,14 @@ import { isDarkTheme, cardSurface } from '../../design-system/tokens.js';
 import {
     List,
     Grid,
-    ArrowRight,
     Package,
     ChevronRight
 } from 'lucide-react';
-import { PRODUCTS_CATEGORIES_DATA, PRODUCT_DATA, FABRICS_DATA, JSI_MODELS, JSI_SERIES } from './data.js';
+import { PRODUCTS_CATEGORIES_DATA, JSI_SERIES } from './data.js';
 import { usePersistentState } from '../../hooks/usePersistentState.js';
 
 // ─── Clean card helpers ───────────────────────────────────────────────────────────────
-const cardStyle = (dark, theme) => cardSurface(theme || { colors: { surface: dark ? '#2A2A2A' : '#FFFFFF', border: dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)' } });
+const cardStyle = (dark, theme) => cardSurface(theme || { colors: { surface: dark ? '#2A2A2A' : '#FFFFFF', border: dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.03)' } });
 
 const normalizeSeriesKey = (value) => String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 
@@ -151,7 +149,6 @@ const CategoryCard = React.memo(({
         );
     }
 
-    // List view — taller rows with bigger thumbnail
     return (
         <div
             onClick={handleClick}
@@ -291,24 +288,22 @@ const FamiliesView = React.memo(({ groupedSeries, theme, onSeriesClick, searchTe
 
     return (
         <div
-            className="rounded-[20px] overflow-hidden"
+            className="rounded-[24px] overflow-hidden"
             style={{
-                backgroundColor: theme.colors.surface,
-                border: `1px solid ${theme.colors.border}`,
+                ...cardStyle(dark, theme),
             }}
         >
             {groupedSeries.map(([letter, seriesList], gi) => (
                 <div key={letter}>
-                    {/* Letter section header */}
                     <div
-                        className="px-4 py-1.5"
+                        className="px-4 pt-2 pb-1.5"
                         style={{
-                            backgroundColor: dark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.04)',
-                            borderBottom: `1px solid ${theme.colors.border}`,
+                            backgroundColor: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.03)',
+                            borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)'}`,
                         }}
                     >
                         <span
-                            className="text-xs font-bold tracking-widest uppercase"
+                            className="text-[0.6875rem] font-semibold tracking-wide uppercase leading-none"
                             style={{ color: theme.colors.accent }}
                         >
                             {letter}
@@ -337,6 +332,8 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
     const [viewMode, setViewMode] = usePersistentState('pref.products.viewMode', 'list');
     const [productView, setProductView] = usePersistentState('pref.products.productView', 'categories');
     const scrollContainerRef = useRef(null);
+    const dark = isDarkTheme(theme);
+    const bgRgb = dark ? '26,26,26' : '240,237,232';
     const activeViewMode = viewMode === 'list' ? 'list' : 'grid';
     const activeProductView = productView === 'families' ? 'families' : 'categories';
 
@@ -397,65 +394,83 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
 
     return (
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
-            <div className="max-w-5xl mx-auto w-full">
-                <StickyHeader
-                    theme={theme}
-                    viewMode={activeViewMode}
-                    onToggleViewMode={toggleViewMode}
-                    searchTerm={searchTerm}
-                    onSearchChange={handleSearchChange}
-                    placeholder={activeProductView === 'families' ? 'Search series...' : 'Search products...'}
-                    showViewToggle={activeProductView !== 'families'}
-                />
-                <div className="px-4 sm:px-5 pb-3">
-                    <SegmentedToggle
-                        value={activeProductView}
-                        onChange={handleViewChange}
-                        options={productViewOptions}
-                        theme={theme}
-                        size="md"
-                    />
-                </div>
-            </div>
             <div
                 ref={scrollContainerRef}
-                className="flex-1 overflow-y-auto px-4 sm:px-5 lg:px-8 pb-8 scrollbar-hide"
+                className="flex-1 overflow-y-auto scrollbar-hide"
             >
                 <div className="max-w-5xl mx-auto w-full">
-                    {activeProductView === 'families' ? (
-                        <div className="w-full mx-auto xl:max-w-[980px] 2xl:max-w-[920px]">
-                            <FamiliesView
-                                groupedSeries={groupedSeries}
+                    <div className="sticky top-0 z-20" style={{ backgroundColor: theme.colors.background }}>
+                        <StickyHeader
+                            theme={theme}
+                            viewMode={activeViewMode}
+                            onToggleViewMode={toggleViewMode}
+                            searchTerm={searchTerm}
+                            onSearchChange={handleSearchChange}
+                            placeholder={activeProductView === 'families' ? 'Search series...' : 'Search products...'}
+                            showViewToggle={activeProductView !== 'families'}
+                        />
+                        <div className="px-4 sm:px-5 pb-0.5">
+                            <SegmentedToggle
+                                value={activeProductView}
+                                onChange={handleViewChange}
+                                options={productViewOptions}
                                 theme={theme}
-                                onSeriesClick={handleSeriesClick}
-                                searchTerm={searchTerm}
-                                onClearSearch={clearSearch}
+                                size="md"
                             />
                         </div>
-                    ) : filteredCategories.length === 0 ? (
-                        <div className="rounded-[24px]" style={{ ...cardStyle(isDarkTheme(theme), theme) }}>
-                            <SharedEmptyState
-                                icon={Package}
-                                title="No products found"
-                                description={`No products match "${searchTerm}".`}
-                                action={{ label: 'Clear Search', onClick: clearSearch }}
-                                theme={theme}
-                            />
-                        </div>
-                    ) : (
-                        <div className={activeViewMode === 'grid' ? 'grid grid-cols-2 gap-2.5' : 'space-y-2'} style={{ paddingTop: 4 }}>
-                            {filteredCategories.map((category) => (
-                                <CategoryCard
-                                    key={category.name}
-                                    category={category}
+                        <div
+                            aria-hidden="true"
+                            className="pointer-events-none h-2"
+                            style={{
+                                backdropFilter: 'blur(4px) saturate(1.05)',
+                                WebkitBackdropFilter: 'blur(4px) saturate(1.05)',
+                                background: `linear-gradient(to bottom,
+                                    rgba(${bgRgb},0.42) 0%,
+                                    rgba(${bgRgb},0.18) 58%,
+                                    rgba(${bgRgb},0.04) 84%,
+                                    rgba(${bgRgb},0) 100%)`,
+                            }}
+                        />
+                    </div>
+                </div>
+
+                <div className="px-4 sm:px-5 lg:px-8 pt-0 pb-8">
+                    <div className="max-w-5xl mx-auto w-full">
+                        {activeProductView === 'families' ? (
+                            <div className="w-full mx-auto xl:max-w-[980px] 2xl:max-w-[920px]">
+                                <FamiliesView
+                                    groupedSeries={groupedSeries}
                                     theme={theme}
-                                    viewMode={activeViewMode}
-                                    onClick={handleCategoryClick}
-                                    className={activeViewMode === 'grid' ? 'h-full' : ''}
+                                    onSeriesClick={handleSeriesClick}
+                                    searchTerm={searchTerm}
+                                    onClearSearch={clearSearch}
                                 />
-                            ))}
-                        </div>
-                    )}
+                            </div>
+                        ) : filteredCategories.length === 0 ? (
+                            <div className="rounded-[24px]" style={{ ...cardStyle(isDarkTheme(theme), theme) }}>
+                                <SharedEmptyState
+                                    icon={Package}
+                                    title="No products found"
+                                    description={`No products match "${searchTerm}".`}
+                                    action={{ label: 'Clear Search', onClick: clearSearch }}
+                                    theme={theme}
+                                />
+                            </div>
+                        ) : (
+                            <div className={activeViewMode === 'grid' ? 'grid grid-cols-2 gap-2.5' : 'space-y-2'} style={{ paddingTop: 4 }}>
+                                {filteredCategories.map((category) => (
+                                    <CategoryCard
+                                        key={category.name}
+                                        category={category}
+                                        theme={theme}
+                                        viewMode={activeViewMode}
+                                        onClick={handleCategoryClick}
+                                        className={activeViewMode === 'grid' ? 'h-full' : ''}
+                                    />
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

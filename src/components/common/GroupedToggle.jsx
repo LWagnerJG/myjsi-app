@@ -64,8 +64,14 @@ export const SegmentedToggle = ({
   const selectedBg = dark ? 'rgba(255,255,255,0.14)' : '#FFFFFF';
   const selectedText = theme?.colors?.textPrimary || '#1a1a1a';
   const unselectedText = dark ? 'rgba(240,240,240,0.78)' : '#6A6762';
-
-  const selectedIndex = options.findIndex((opt) => opt.value === value);
+  const badgeBg = theme?.colors?.error || '#B85C5C';
+  const selectedPillStyle = dark
+    ? { backgroundColor: selectedBg }
+    : {
+        backgroundColor: '#FFFFFF',
+        border: '1px solid rgba(255,255,255,0.96)',
+        boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+      };
 
   return (
     <div 
@@ -88,7 +94,7 @@ export const SegmentedToggle = ({
               <motion.span
                 layoutId={`toggle-pill-${id}`}
                 className="absolute inset-[-3px] rounded-full"
-                style={{ backgroundColor: selectedBg }}
+                style={selectedPillStyle}
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
               />
             )}
@@ -100,7 +106,7 @@ export const SegmentedToggle = ({
               {badge != null && badge > 0 && (
                 <span 
                   className={`${s.badgeSize} rounded-full flex items-center justify-center font-bold ml-1`}
-                  style={{ backgroundColor: 'var(--theme-error)', color: 'white' }}
+                  style={{ backgroundColor: badgeBg, color: 'white' }}
                 >
                   {badge > 99 ? '99+' : badge}
                 </span>

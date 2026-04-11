@@ -1,7 +1,7 @@
-import React from 'react';
+﻿import React from 'react';
 import { ChevronRight, Package, DollarSign, Calendar, Zap, Megaphone, Clock, Users } from 'lucide-react';
 import { ANNOUNCEMENTS } from '../../community/data.js';
-import { MARKETPLACE_PRODUCTS, INITIAL_BALANCE } from '../../marketplace/data.js';
+import { MARKETPLACE_PRODUCTS, INITIAL_BALANCE, formatElliottBucks } from '../../marketplace/data.js';
 import { PRODUCTS_CATEGORIES_DATA, PRODUCT_DATA } from '../../products/data.js';
 import { getCommunityAuthorSafe, getCommunityTextSafe } from '../utils/homeUtils.js';
 import { smartTitleCase } from '../../../utils/format.js';
@@ -33,7 +33,7 @@ export const HomeFeatureContent = ({
                                 onNavigate(`community/post/${post.id}`);
                             }}
                             className={`w-full p-3 rounded-2xl text-left ${hoverBg} transition-colors`}
-                            style={{ border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)' }}
+                            style={{ border: isDark ? '1px solid rgba(255,255,255,0.10)' : 'none' }}
                         >
                             <div className="flex items-start gap-3">
                                 {(() => {
@@ -89,7 +89,7 @@ export const HomeFeatureContent = ({
                             key={`${item.series}-${item.type}`}
                             onClick={() => onNavigate('resources/lead-times')}
                             className={`w-full flex items-center justify-between p-3 rounded-2xl ${hoverBg} transition-colors`}
-                            style={{ border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)' }}
+                            style={{ border: isDark ? '1px solid rgba(255,255,255,0.10)' : 'none' }}
                         >
                             <div className="text-left">
                                 <div className="text-sm font-semibold" style={{ color: colors.textPrimary }}>{item.series}</div>
@@ -114,7 +114,7 @@ export const HomeFeatureContent = ({
                             className="text-xs font-medium underline underline-offset-2 transition-opacity hover:opacity-70"
                             style={{ color: colors.accent }}
                         >
-                            Star series in Lead Times →
+                            Open Lead Times
                         </button>
                     </div>
                 )}
@@ -135,7 +135,7 @@ export const HomeFeatureContent = ({
                             key={ann.id}
                             onClick={() => ann.actionRoute ? onNavigate(ann.actionRoute) : onNavigate('community')}
                             className={`w-full flex items-start gap-3 p-3 rounded-2xl text-left ${hoverBg} transition-colors`}
-                            style={{ border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)', borderLeft: `3px solid ${accentColor}` }}
+                            style={{ border: isDark ? '1px solid rgba(255,255,255,0.10)' : 'none', borderLeft: `3px solid ${accentColor}` }}
                         >
                             <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${accentColor}15`, color: accentColor }}>
                                 <Icon className="w-3.5 h-3.5" />
@@ -166,7 +166,7 @@ export const HomeFeatureContent = ({
                                 key={category.nav}
                                 onClick={() => onNavigate(category.nav)}
                                 className={`w-full flex items-center gap-3 p-3 rounded-2xl text-left ${hoverBg} transition-colors`}
-                                style={{ border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)' }}
+                                style={{ border: isDark ? '1px solid rgba(255,255,255,0.10)' : 'none' }}
                             >
                                 <div className="w-11 h-11 rounded-xl overflow-hidden flex-shrink-0">
                                     <img
@@ -212,7 +212,7 @@ export const HomeFeatureContent = ({
                                 key={project.id}
                                 onClick={() => onNavigate(`projects/${project.id}`)}
                                 className={`w-full flex items-center gap-3 p-3 rounded-2xl text-left ${hoverBg} transition-colors`}
-                                style={{ border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)' }}
+                                style={{ border: isDark ? '1px solid rgba(255,255,255,0.10)' : 'none' }}
                             >
                                 <div className="flex-1 min-w-0">
                                     <div className="text-sm font-semibold truncate" style={{ color: colors.textPrimary }}>
@@ -241,7 +241,7 @@ export const HomeFeatureContent = ({
                     <button
                         onClick={() => onNavigate('projects')}
                         className={`w-full p-3 rounded-2xl text-left ${hoverBg} transition-colors`}
-                        style={{ border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)' }}
+                        style={{ border: isDark ? '1px solid rgba(255,255,255,0.10)' : 'none' }}
                     >
                         <div className="text-sm font-semibold" style={{ color: colors.textPrimary }}>No active projects yet</div>
                         <div className="text-xs" style={{ color: colors.textSecondary }}>Tap to open Projects and create one</div>
@@ -255,7 +255,7 @@ export const HomeFeatureContent = ({
         const featured = MARKETPLACE_PRODUCTS.slice(0, 3);
         return (
             <div className="space-y-2">
-                {/* Balance row — warm-tinted, same shape as every other row */}
+                {/* Balance row - warm-tinted, same shape as every other row */}
                 <button
                     onClick={() => onNavigate('marketplace')}
                     className={`w-full flex items-center justify-between p-3 rounded-2xl ${hoverBg} transition-colors`}
@@ -266,25 +266,25 @@ export const HomeFeatureContent = ({
                 >
                     <div className="text-left">
                         <div className="text-[0.6875rem] uppercase tracking-widest" style={{ color: colors.textSecondary, opacity: 0.6 }}>Available balance</div>
-                        <div className="text-lg font-bold tabular-nums" style={{ color: colors.textPrimary }}>✦ {INITIAL_BALANCE.toLocaleString()}</div>
+                        <div className="text-lg font-bold tabular-nums" style={{ color: colors.textPrimary }}>{formatElliottBucks(INITIAL_BALANCE)}</div>
                     </div>
-                    <div className="text-xs font-medium" style={{ color: '#C4956A' }}>Redeem →</div>
+                    <div className="text-xs font-medium" style={{ color: '#C4956A' }}>Redeem now</div>
                 </button>
 
-                {/* Product rows — same pattern as products mode */}
+                {/* Product rows - same pattern as products mode */}
                 {featured.map(p => (
                     <button
                         key={p.id}
                         onClick={() => onNavigate('marketplace')}
                         className={`w-full flex items-center gap-3 p-3 rounded-2xl text-left ${hoverBg} transition-colors`}
-                        style={{ border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)' }}
+                        style={{ border: isDark ? '1px solid rgba(255,255,255,0.10)' : 'none' }}
                     >
-                        <div className="w-11 h-11 rounded-xl overflow-hidden flex-shrink-0" style={{ border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)' }}>
+                        <div className="w-11 h-11 rounded-xl overflow-hidden flex-shrink-0" style={{ border: isDark ? '1px solid rgba(255,255,255,0.10)' : 'none' }}>
                             <img src={p.image} alt={p.name} className="w-full h-full object-cover" />
                         </div>
                         <div className="flex-1 min-w-0">
                             <div className="text-sm font-semibold truncate" style={{ color: colors.textPrimary }}>{p.name}</div>
-                            <div className="text-xs" style={{ color: colors.textSecondary }}>✦ {p.price.toLocaleString()}</div>
+                            <div className="text-xs" style={{ color: colors.textSecondary }}>{formatElliottBucks(p.price)}</div>
                         </div>
                         <ChevronRight className="w-3.5 h-3.5 flex-shrink-0 opacity-30" style={{ color: colors.textSecondary }} />
                     </button>
@@ -327,7 +327,7 @@ export const HomeFeatureContent = ({
                     key={order.orderNumber}
                     onClick={() => onNavigate(`orders/${order.orderNumber}`)}
                     className={`w-full ${hiddenOnMobile} items-center gap-3 py-3.5 px-1 ${hoverBg} transition-colors`}
-                    style={i > 0 ? { borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.05)'}` } : undefined}
+                    style={i > 0 ? { borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.03)'}` } : undefined}
                 >
                     {/* Status dot */}
                     <div className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${statusColor}14` }}>

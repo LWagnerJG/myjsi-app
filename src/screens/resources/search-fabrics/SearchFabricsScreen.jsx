@@ -13,36 +13,26 @@ import {
 } from './data.js';
 import { FABRICS_DATA } from '../../products/data.js';
 import { isDarkTheme } from '../../../design-system/tokens.js';
+import { JSIWebButton } from '../../../components/common/JSIButtons.jsx';
 
-/* ── Required label helper ── */
+/* ── Label helper ── */
 const FieldLabel = ({ children, required, theme }) => (
-  <label className="text-xs font-semibold mb-1.5 block" style={{ color: theme.colors.textSecondary }}>
+  <label className="text-[0.6875rem] font-medium uppercase tracking-wide mb-1 block" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>
     {children}
-    {required && <span className="text-red-500 ml-0.5">*</span>}
+    {required && <span style={{ color: theme.colors.error, opacity: 1 }} className="ml-0.5">*</span>}
   </label>
 );
 
-const SectionCard = ({ title, subtitle, children, theme, className = '' }) => (
+const SectionCard = ({ title, children, theme, className = '' }) => (
   <div
-    className={`rounded-2xl p-3.5 sm:p-4 ${className}`}
+    className={`rounded-[24px] p-4 sm:p-5 ${className}`}
     style={{
       backgroundColor: theme.colors.surface,
-      border: `1px solid ${theme.colors.border}`,
+      border: `1px solid ${isDarkTheme(theme) ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.03)'}`,
     }}
   >
-    {(title || subtitle) && (
-      <div className="mb-3">
-        {title && (
-          <h3 className="text-[0.8125rem] font-semibold tracking-tight" style={{ color: theme.colors.textPrimary }}>
-            {title}
-          </h3>
-        )}
-        {subtitle && (
-          <p className="text-xs mt-0.5" style={{ color: theme.colors.textSecondary }}>
-            {subtitle}
-          </p>
-        )}
-      </div>
+    {title && (
+      <p className="text-[0.6875rem] font-semibold uppercase tracking-wide mb-3" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>{title}</p>
     )}
     {children}
   </div>
@@ -108,7 +98,8 @@ const LocalSearchSelect = ({
     };
   }, [open]);
 
-  const border = `1px solid ${theme.colors.border}`;
+  const border = isDarkTheme(theme) ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(0,0,0,0.03)';
+  const divider = isDarkTheme(theme) ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.03)';
 
   const menu = open && menuRect ? ReactDOM.createPortal(
     <div
@@ -117,10 +108,10 @@ const LocalSearchSelect = ({
       onMouseDown={(e) => e.stopPropagation()}
     >
       <div
-        className="rounded-2xl shadow-2xl overflow-hidden"
+        className="rounded-[20px] shadow-2xl overflow-hidden"
         style={{ backgroundColor: theme.colors.surface, border }}
       >
-        <div className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: `1px solid ${theme.colors.border}` }}>
+        <div className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: `1px solid ${divider}` }}>
           <Search className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
           <input
             autoFocus
@@ -146,7 +137,7 @@ const LocalSearchSelect = ({
               style={{
                 color: !value ? theme.colors.textPrimary : theme.colors.textSecondary,
                 backgroundColor: !value ? theme.colors.subtle : 'transparent',
-                borderBottom: `1px solid ${theme.colors.border}`,
+                borderBottom: `1px solid ${divider}`,
               }}
             >
               Any
@@ -201,7 +192,7 @@ const LocalSearchSelect = ({
         ref={fieldRef}
         type="button"
         onClick={() => setOpen(o => !o)}
-        className="w-full text-left px-3.5 py-2.5 rounded-xl flex items-center justify-between transition-colors"
+        className="w-full text-left px-3.5 py-2.5 rounded-[16px] flex items-center justify-between transition-colors"
         style={{
           backgroundColor: theme.colors.surface,
           color: theme.colors.textPrimary,
@@ -227,20 +218,23 @@ const LocalSearchSelect = ({
 };
 
 /* ── Chip / pill toggle ── */
-const Chip = ({ label, active, onClick, theme, className = '' }) => (
-  <button
-    type="button"
-    onClick={onClick}
-    className={`min-w-[3.5rem] px-3 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95 text-center ${className}`}
-    style={{
-      backgroundColor: active ? theme.colors.accent : theme.colors.surface,
-      color: active ? theme.colors.accentText : theme.colors.textPrimary,
-      border: `1px solid ${active ? theme.colors.accent : theme.colors.border}`,
-    }}
-  >
-    {label}
-  </button>
-);
+const Chip = ({ label, active, onClick, theme, className = '' }) => {
+  const dark = isDarkTheme(theme);
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`min-w-[3rem] px-2.5 py-1.5 rounded-full text-[0.6875rem] font-semibold transition-all active:scale-95 text-center ${className}`}
+      style={{
+        backgroundColor: active ? theme.colors.accent : 'transparent',
+        color: active ? theme.colors.accentText : theme.colors.textPrimary,
+        border: `1px solid ${active ? theme.colors.accent : (dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)')}`,
+      }}
+    >
+      {label}
+    </button>
+  );
+};
 
 /* ── Screen ── */
 export const SearchFabricsScreen = ({ theme, onNavigate, onUpdateCart }) => {
@@ -349,31 +343,35 @@ export const SearchFabricsScreen = ({ theme, onNavigate, onUpdateCart }) => {
     onNavigate && onNavigate('comcol-request');
   };
 
+  const hasFilled = form.supplier || form.jsiSeries || form.pattern;
+
   /* ── Single unified view: form + inline results ── */
   return (
     <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
       <div className="flex-1 overflow-y-auto scrollbar-hide">
-        <div className="max-w-2xl mx-auto w-full px-4 sm:px-6 pt-2 pb-20">
+        <div className="max-w-2xl mx-auto w-full px-5 sm:px-6 pt-2 pb-20">
           <form onSubmit={handleSubmit}>
-            {/* Header row with title + clear */}
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-semibold tracking-tight" style={{ color: theme.colors.textPrimary }}>Search Fabrics</h2>
-              {(form.supplier || form.jsiSeries || form.pattern) && (
-                <button type="button" onClick={resetSearch} className="flex items-center gap-1 text-xs font-medium active:scale-95 transition-all" style={{ color: theme.colors.textSecondary }}>
-                  <RotateCcw className="w-3 h-3" />
-                  Clear
-                </button>
-              )}
+            {/* Header — title always left, clear always right (invisible when not needed) */}
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-[1.125rem] font-semibold tracking-tight" style={{ color: theme.colors.textPrimary }}>Search Fabrics</h2>
+              <button
+                type="button"
+                onClick={resetSearch}
+                className="flex items-center gap-1 text-[0.6875rem] font-semibold transition-opacity active:scale-95"
+                style={{ color: theme.colors.textSecondary, opacity: hasFilled ? 0.6 : 0, pointerEvents: hasFilled ? 'auto' : 'none' }}
+              >
+                <RotateCcw className="w-3 h-3" /> Clear
+              </button>
             </div>
 
             {/* Error */}
             {error && (
-              <div className="mb-3 px-3 py-2 rounded-xl" style={{ backgroundColor: `${theme.colors.error}20`, border: `1px solid ${theme.colors.error}55` }}>
+              <div className="mb-3 px-4 py-2.5 rounded-[16px]" style={{ backgroundColor: `${theme.colors.error}12`, border: `1px solid ${theme.colors.error}30` }}>
                 <p className="text-xs font-medium" style={{ color: theme.colors.error }}>{error}</p>
               </div>
             )}
 
-            {/* Required selects — compact grid */}
+            {/* Required selects + Pattern — single card */}
             <SectionCard theme={theme} className="mb-3">
               <div className="grid grid-cols-2 gap-3 mb-3">
                 <LocalSearchSelect
@@ -407,32 +405,28 @@ export const SearchFabricsScreen = ({ theme, onNavigate, onUpdateCart }) => {
               />
             </SectionCard>
 
-            {/* Optional filters — always visible, even 3-col grid */}
-            <SectionCard theme={theme} title="Optional Filters" className="mb-3">
-              <div className="grid grid-cols-3 divide-x" style={{ borderColor: theme.colors.border }}>
-                <div className="flex flex-col items-stretch px-2 gap-1.5">
-                  <FieldLabel theme={theme}>Grade</FieldLabel>
-                  <Chip label="Any" active={anyGrade} onClick={() => pressAny('grade')} theme={theme} className="w-full" />
-                  {!anyGrade && (
-                    <div className="grid grid-cols-2 gap-1.5">
-                      {FABRIC_GRADES.map(g => (
-                        <Chip key={g} label={g} active={form.grade.includes(g)} onClick={() => toggleMulti('grade', g)} theme={theme} className="w-full" />
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <div className="flex flex-col items-stretch px-2 gap-1.5">
-                  <FieldLabel theme={theme}>Fabric Type</FieldLabel>
-                  <Chip label="Any" active={anyFabric} onClick={() => pressAny('fabricType')} theme={theme} className="w-full" />
-                  {!anyFabric && FABRIC_TYPES.map(t => (
-                    <Chip key={t} label={t} active={form.fabricType.includes(t)} onClick={() => toggleMulti('fabricType', t)} theme={theme} className="w-full" />
+            {/* Optional filters — compact inline chips per row */}
+            <SectionCard theme={theme} title="Filters" className="mb-3">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[0.6875rem] font-medium w-16 shrink-0" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Grade</span>
+                  <Chip label="Any" active={anyGrade} onClick={() => pressAny('grade')} theme={theme} />
+                  {!anyGrade && FABRIC_GRADES.map(g => (
+                    <Chip key={g} label={g} active={form.grade.includes(g)} onClick={() => toggleMulti('grade', g)} theme={theme} />
                   ))}
                 </div>
-                <div className="flex flex-col items-stretch px-2 gap-1.5">
-                  <FieldLabel theme={theme}>Tackable</FieldLabel>
-                  <Chip label="Any" active={anyTack} onClick={() => pressAny('tackable')} theme={theme} className="w-full" />
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[0.6875rem] font-medium w-16 shrink-0" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Type</span>
+                  <Chip label="Any" active={anyFabric} onClick={() => pressAny('fabricType')} theme={theme} />
+                  {!anyFabric && FABRIC_TYPES.map(t => (
+                    <Chip key={t} label={t} active={form.fabricType.includes(t)} onClick={() => toggleMulti('fabricType', t)} theme={theme} />
+                  ))}
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[0.6875rem] font-medium w-16 shrink-0" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>Tackable</span>
+                  <Chip label="Any" active={anyTack} onClick={() => pressAny('tackable')} theme={theme} />
                   {!anyTack && TACKABLE_OPTIONS.map(t => (
-                    <Chip key={t} label={t} active={form.tackable.includes(t.toLowerCase())} onClick={() => toggleMulti('tackable', t.toLowerCase())} theme={theme} className="w-full" />
+                    <Chip key={t} label={t} active={form.tackable.includes(t.toLowerCase())} onClick={() => toggleMulti('tackable', t.toLowerCase())} theme={theme} />
                   ))}
                 </div>
               </div>
@@ -442,37 +436,38 @@ export const SearchFabricsScreen = ({ theme, onNavigate, onUpdateCart }) => {
           {/* ── Inline results ── */}
           {results && (
             <div
-              className="rounded-2xl overflow-hidden"
+              className="rounded-[24px] overflow-hidden"
               style={{
                 backgroundColor: isDark ? theme.colors.surface : '#fff',
-                border: `1px solid ${theme.colors.border}`,
+                border: `1px solid ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.03)'}`,
               }}
             >
               {/* Results header */}
-              <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: results.length > 0 ? `1px solid ${theme.colors.border}` : 'none' }}>
-                <p className="text-[0.8125rem] font-bold" style={{ color: theme.colors.textPrimary }}>
+              <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: results.length > 0 ? `1px solid ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.03)'}` : 'none' }}>
+                <p className="text-[0.8125rem] font-semibold" style={{ color: theme.colors.textPrimary }}>
                   {results.length > 0 ? (
-                    <>{results.length} match{results.length !== 1 ? 'es' : ''}<span className="font-normal" style={{ color: theme.colors.textSecondary }}> — {form.supplier}, {form.jsiSeries}</span></>
+                    <>{results.length} match{results.length !== 1 ? 'es' : ''}<span className="font-normal ml-1" style={{ color: theme.colors.textSecondary }}>{form.supplier}, {form.jsiSeries}</span></>
                   ) : 'Results'}
                 </p>
               </div>
 
               {results.length === 0 ? (
-                <div className="flex items-center gap-3 px-4 py-4">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(53,53,53,0.04)' }}>
+                <div className="flex items-center gap-3 px-5 py-5">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(53,53,53,0.04)' }}>
                     <SearchX className="w-5 h-5" style={{ color: theme.colors.textSecondary, opacity: 0.5 }} />
                   </div>
                   <div>
-                    <p className="text-[0.8125rem] font-semibold" style={{ color: theme.colors.textPrimary }}>No matching fabrics</p>
-                    <p className="text-xs" style={{ color: theme.colors.textSecondary }}>Try a different supplier or series combination.</p>
+                    <p className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>No matching fabrics</p>
+                    <p className="text-xs mt-0.5" style={{ color: theme.colors.textSecondary }}>Try a different supplier or series.</p>
                   </div>
                 </div>
               ) : (
-                <div className="divide-y" style={{ borderColor: theme.colors.border }}>
+                <div>
                   {results.map((r, i) => (
                     <div
                       key={i}
-                      className="px-4 py-3 flex items-center gap-3"
+                      className="px-5 py-3.5 flex items-center gap-3"
+                      style={{ borderTop: i > 0 ? `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)'}` : undefined }}
                     >
                       <CheckCircle className="w-4 h-4 flex-shrink-0" style={{ color: theme.colors.success }} />
                       <div className="flex-1 min-w-0">
@@ -480,21 +475,21 @@ export const SearchFabricsScreen = ({ theme, onNavigate, onUpdateCart }) => {
                           {r.pattern}
                           <span className="font-normal ml-1" style={{ color: theme.colors.textSecondary }}>— {r.supplier}</span>
                         </p>
-                        <div className="flex flex-wrap gap-1.5 mt-1">
-                          <span className="text-[0.625rem] px-2 py-0.5 rounded-full font-medium" style={{ background: theme.colors.subtle, color: theme.colors.textSecondary }}>Grade {r.grade}</span>
-                          {r.textile && <span className="text-[0.625rem] px-2 py-0.5 rounded-full font-medium" style={{ background: theme.colors.subtle, color: theme.colors.textSecondary }}>{r.textile}</span>}
-                          <span className="text-[0.625rem] px-2 py-0.5 rounded-full font-medium capitalize" style={{ background: theme.colors.subtle, color: theme.colors.textSecondary }}>Tack: {r.tackable}</span>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          <span className="text-[0.625rem] px-2 py-0.5 rounded-full font-medium" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.04)', color: theme.colors.textSecondary }}>Grade {r.grade}</span>
+                          {r.textile && <span className="text-[0.625rem] px-2 py-0.5 rounded-full font-medium" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.04)', color: theme.colors.textSecondary }}>{r.textile}</span>}
+                          <span className="text-[0.625rem] px-2 py-0.5 rounded-full font-medium capitalize" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.04)', color: theme.colors.textSecondary }}>Tack: {r.tackable}</span>
                         </div>
                       </div>
-                      <button
-                        type="button"
+                      <JSIWebButton
                         onClick={() => handleOrderSample(r)}
-                        className="px-3 py-1.5 rounded-full text-[0.6875rem] font-semibold flex items-center gap-1 flex-shrink-0 active:scale-95 transition-all"
-                        style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
+                        theme={theme}
+                        variant="outlined"
+                        size="small"
+                        icon={<Package className="w-3 h-3" />}
                       >
-                        <Package className="w-3 h-3" />
                         Sample
-                      </button>
+                      </JSIWebButton>
                     </div>
                   ))}
                 </div>

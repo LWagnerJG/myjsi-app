@@ -299,7 +299,7 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
             <div className="p-3">
               {notifGroups.map((group, gi) => (
                 <div key={group.label}>
-                  {gi > 0 && <div className="mx-3 my-1" style={{ borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)'}` }} />}
+                  {gi > 0 && <div className="mx-3 my-1" style={{ borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.03)'}` }} />}
                   <div className="px-3 pt-3 pb-1">
                     <span className="text-[0.625rem] font-bold uppercase tracking-[0.12em]" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>{group.label}</span>
                   </div>

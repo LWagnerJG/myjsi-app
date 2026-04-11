@@ -7,6 +7,7 @@ import { isDarkTheme } from '../../design-system/tokens.js';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrendingUp, TrendingDown, ChevronRight, Search, X } from 'lucide-react';
 import { formatCurrency } from '../../utils/format.js';
+import { ScreenTopChrome } from '../../components/common/ScreenTopChrome.jsx';
 
 const RANKING_TAB_OPTIONS = [
     { value: 'sales', label: 'Sales' },
@@ -138,7 +139,7 @@ export const CustomerRankingScreen = ({ theme, onNavigate }) => {
     return (
         <div className="h-full flex flex-col app-header-offset" style={{ backgroundColor: theme.colors.background }}>
             {/* Summary Header */}
-            <div className="px-4 sm:px-6 lg:px-8 pt-4 pb-2 max-w-5xl mx-auto w-full space-y-4">
+            <ScreenTopChrome theme={theme} maxWidthClass="max-w-5xl" horizontalPaddingClass="px-4 sm:px-6 lg:px-8" contentClassName="pt-4 pb-2 space-y-4">
                 {/* Aggregate KPI */}
                 <div className="rounded-[22px] overflow-hidden px-5 py-4" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${bdr}` }}>
                     <div className="flex items-center justify-between">
@@ -193,7 +194,7 @@ export const CustomerRankingScreen = ({ theme, onNavigate }) => {
                     theme={theme}
                     size="sm"
                 />
-            </div>
+            </ScreenTopChrome>
 
             {/* Rankings List */}
             <div className="flex-1 overflow-y-auto scrollbar-hide">

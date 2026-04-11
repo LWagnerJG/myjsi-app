@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
-import { Bookmark, ChevronLeft, Image, MessageSquare, Sparkles } from 'lucide-react';
 import { LibraryGrid } from '../library/LibraryGrid.jsx';
 import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
 import { isDarkTheme } from '../../design-system/tokens.js';
@@ -7,6 +6,8 @@ import { ChannelAwareFeed } from './components/community/ChannelAwareFeed.jsx';
 import { MyBoardView } from './components/community/MyBoardView.jsx';
 import { MakersStudioTab } from './components/community/MakersStudioTab.jsx';
 import { ChannelChips } from './components/community/ChannelChips.jsx';
+import { ScreenTopChrome } from '../../components/common/ScreenTopChrome.jsx';
+import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 
 export const CommunityLibraryLayout = ({
   theme,
@@ -28,9 +29,9 @@ export const CommunityLibraryLayout = ({
     const base = [
       { value: 'community', label: 'Community' },
       { value: 'library', label: 'Library' },
-      { value: 'makers studio', label: 'Makers Studio' },
+      { value: 'makers studio', label: 'Studio' },
     ];
-    if (hasBoardContent) base.push({ value: 'my board', label: 'My Board' });
+    if (hasBoardContent) base.push({ value: 'my board', label: 'Board' });
     return base;
   }, [hasBoardContent]);
 
@@ -86,100 +87,51 @@ export const CommunityLibraryLayout = ({
     return () => window.removeEventListener('popstate', onPopState);
   }, [activeSubreddit]);
 
-  const tr = prefersReducedMotion ? 'none' : 'opacity 250ms ease, transform 250ms ease';
+  const tr = prefersReducedMotion ? 'none' : 'opacity 200ms ease';
   const paneStyle = (name) => activeTab === name
-    ? { position: 'relative', opacity: 1, transform: 'translateY(0)', transition: tr, pointerEvents: 'auto' }
-    : { position: 'absolute', inset: 0, opacity: 0, transform: 'translateY(6px)', transition: tr, pointerEvents: 'none' };
+    ? { position: 'relative', opacity: 1, transition: tr, pointerEvents: 'auto' }
+    : { position: 'absolute', inset: 0, opacity: 0, transition: tr, pointerEvents: 'none' };
 
   const inSubCommunity = activeTab === 'community' && !!activeSubreddit;
   const showSearch = activeTab !== 'my board' && activeTab !== 'makers studio';
-  const activeAction = activeTab === 'library' ? openLibraryUploadModal : openCreateContentModal;
+  const activeAction = activeTab === 'community'
+    ? openCreateContentModal
+    : activeTab === 'library'
+      ? openLibraryUploadModal
+      : null;
   const actionLabel = activeTab === 'library' ? '+ Upload' : '+ Post';
   const searchPlaceholder = inSubCommunity
     ? `Search ${activeSubreddit?.name}...`
     : activeTab === 'library' ? 'Search library' : 'Search posts, people, tags...';
 
-  const dividerColor = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
-
   return (
     <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
-      <div className="flex-shrink-0" style={{ backgroundColor: theme.colors.background }}>
-        <div className="max-w-3xl mx-auto w-full px-4">
+      <ScreenTopChrome theme={theme} maxWidthClass="max-w-3xl" horizontalPaddingClass="px-4" contentClassName="pt-1 pb-2">
+        <div className="space-y-3">
 
-          {/* ── Tabs row + action button ── */}
-          <div className="flex items-center pt-1.5 pb-2">
-            <div className="flex items-center gap-5 flex-1 overflow-x-auto no-scrollbar">
-              {tabs.map(t => {
-                const isActive = activeTab === t.value;
-                return (
-                  <button
-                    key={t.value}
-                    onClick={() => switchTab(t.value)}
-                    className="relative pb-1.5 text-[0.8125rem] font-semibold whitespace-nowrap transition-all duration-200 active:scale-95"
-                    style={{ color: theme.colors.textPrimary, opacity: isActive ? 1 : 0.28 }}
-                  >
-                    {t.label}
-                    <span
-                      className="absolute bottom-0 left-0 right-0 h-[1.5px] rounded-full transition-all duration-250"
-                      style={{
-                        backgroundColor: theme.colors.textPrimary,
-                        opacity: isActive ? 0.7 : 0,
-                        transform: `scaleX(${isActive ? 1 : 0})`,
-                        transformOrigin: 'center',
-                      }}
-                    />
-                  </button>
-                );
-              })}
-            </div>
-            {activeAction && (
-              <button
-                onClick={activeAction}
-                className="ml-3 h-8 px-3.5 rounded-full text-[0.75rem] font-semibold transition-all duration-150 active:scale-95 flex-shrink-0"
-                style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
-              >
-                {actionLabel}
-              </button>
-            )}
-          </div>
-
-          {/* ── Community channels or sub-community breadcrumb ── */}
-          {activeTab === 'community' && (
-            <div className="pb-2">
-              {inSubCommunity ? (
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={exitSubreddit}
-                    className="flex items-center gap-1 text-[0.75rem] font-semibold transition-all duration-150 active:scale-95"
-                    style={{ color: theme.colors.textSecondary }}
-                  >
-                    <ChevronLeft className="w-3.5 h-3.5" />
-                    <span>All</span>
-                  </button>
-                  <span className="text-[0.625rem]" style={{ color: theme.colors.textSecondary, opacity: 0.2 }}>/</span>
-                  <span className="text-[0.75rem] font-bold" style={{ color: theme.colors.textPrimary }}>
-                    {activeSubreddit?.name}
+          {inSubCommunity ? (
+            /* ── Immersive sub-community header ── */
+            <>
+              <div className="flex items-baseline gap-3">
+                <h2 className="text-[1.125rem] font-bold truncate" style={{ color: theme.colors.textPrimary }}>
+                  {activeSubreddit?.name}
+                </h2>
+                {activeSubreddit?.members ? (
+                  <span className="text-[0.75rem] font-medium tabular-nums flex-shrink-0" style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>
+                    {activeSubreddit.members}
                   </span>
-                  {activeSubreddit?.members && (
-                    <span className="text-[0.6875rem] font-medium ml-auto tabular-nums" style={{ color: theme.colors.textSecondary, opacity: 0.35 }}>
-                      {activeSubreddit.members}
-                    </span>
-                  )}
-                </div>
-              ) : (
-                <ChannelChips
-                  theme={theme}
-                  dark={dark}
-                  onSelect={enterSubreddit}
-                  activeId={null}
-                />
-              )}
-            </div>
-          )}
-
-          {/* ── Search row ── */}
-          {showSearch && (
-            <div className="pb-2.5">
+                ) : null}
+                <button
+                  onClick={openCreateContentModal}
+                  className="h-8 px-3.5 rounded-full text-[0.8125rem] font-semibold transition-all duration-150 active:scale-95 flex-shrink-0 ml-auto"
+                  style={{
+                    backgroundColor: theme.colors.accent || theme.colors.textPrimary,
+                    color: theme.colors.accentText || '#FFFFFF',
+                  }}
+                >
+                  + Post
+                </button>
+              </div>
               <StandardSearchBar
                 id="community-main-search"
                 value={query}
@@ -187,13 +139,56 @@ export const CommunityLibraryLayout = ({
                 placeholder={searchPlaceholder}
                 theme={theme}
               />
-            </div>
-          )}
-        </div>
+            </>
+          ) : (
+            /* ── Normal top-level chrome ── */
+            <>
+              <div className="flex items-center gap-3">
+                <SegmentedToggle
+                  value={activeTab}
+                  onChange={switchTab}
+                  options={tabs}
+                  size="sm"
+                  theme={theme}
+                />
 
-        {/* ── Separator ── */}
-        <div style={{ height: 1, backgroundColor: dividerColor }} />
-      </div>
+                {activeAction ? (
+                  <button
+                    onClick={activeAction}
+                    className="h-8 px-3.5 rounded-full text-[0.8125rem] font-semibold transition-all duration-150 active:scale-95 flex-shrink-0 ml-auto"
+                    style={{
+                      backgroundColor: theme.colors.accent || theme.colors.textPrimary,
+                      color: theme.colors.accentText || '#FFFFFF',
+                    }}
+                  >
+                    {actionLabel}
+                  </button>
+                ) : null}
+              </div>
+
+              {activeTab === 'community' ? (
+                <ChannelChips
+                  theme={theme}
+                  dark={dark}
+                  onSelect={enterSubreddit}
+                  activeId={null}
+                />
+              ) : null}
+
+              {showSearch ? (
+                <StandardSearchBar
+                  id="community-main-search"
+                  value={query}
+                  onChange={setQuery}
+                  placeholder={searchPlaceholder}
+                  theme={theme}
+                />
+              ) : null}
+            </>
+          )}
+
+        </div>
+      </ScreenTopChrome>
 
       <div ref={containerRef} className="flex-1 overflow-y-auto pb-10 scrollbar-hide">
         <div className="mx-auto w-full max-w-3xl px-4 pt-3" style={{ position: 'relative' }}>

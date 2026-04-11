@@ -1,5 +1,6 @@
 import React from 'react';
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
+import { JSIWebButton } from './JSIButtons.jsx';
 
 /**
  * Error Boundary Component
@@ -107,30 +108,25 @@ export class ErrorBoundary extends React.Component {
                     )}
 
                     <div className="flex gap-3">
-                        <button
+                        <JSIWebButton
                             onClick={this.handleRetry}
-                            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all hover:scale-[1.02] active:scale-[0.98]"
-                            style={{ 
-                                backgroundColor: colors.accent, 
-                                color: colors.accentText || '#FFFFFF' 
-                            }}
+                            theme={this.props.theme}
+                            variant="filled"
+                            size="medium"
+                            icon={<RefreshCw className="w-4 h-4" />}
                         >
-                            <RefreshCw className="w-4 h-4" />
                             Try Again
-                        </button>
+                        </JSIWebButton>
 
-                        <button
+                        <JSIWebButton
                             onClick={this.handleGoHome}
-                            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all hover:scale-[1.02] active:scale-[0.98]"
-                            style={{ 
-                                backgroundColor: colors.surface, 
-                                color: colors.textPrimary,
-                                border: `1px solid ${colors.border}`
-                            }}
+                            theme={this.props.theme}
+                            variant="soft"
+                            size="medium"
+                            icon={<Home className="w-4 h-4" />}
                         >
-                            <Home className="w-4 h-4" />
                             Go Home
-                        </button>
+                        </JSIWebButton>
                     </div>
                 </div>
             );

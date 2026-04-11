@@ -9,9 +9,6 @@ import { isDarkTheme, DESIGN_TOKENS, cardSurface } from '../../design-system/tok
 import { ORDER_DATA, STATUS_COLORS } from './data.js';
 import { formatCurrency, formatCompanyName } from '../../utils/format.js';
 
-const initials = (company) =>
-    (company || '').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('') || '?';
-
 /* ---------------------- Calendar View ---------------------- */
 export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => {
     const [selectedDate, setSelectedDate] = useState(null);
@@ -66,24 +63,23 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
                             <div key={o.orderNumber} className="rounded-[24px] overflow-hidden cursor-pointer active:scale-[0.99] transition"
                                 style={{ ...cardSurface(theme) }}
                                 onClick={() => onOrderClick(o)}>
-                                <div className="flex items-center gap-3.5 px-4 py-3.5">
-                                    <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-black"
-                                        style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : `${theme.colors.accent}15`, color: theme.colors.accent }}>
-                                        {initials(o.company)}
-                                    </div>
+                                            <div className="px-5 py-3.5">
+                                <div className="flex items-center justify-between gap-4">
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-semibold text-[0.9375rem] leading-snug truncate" style={{ color: theme.colors.textPrimary }}>{o.details}</p>
-                                        <p className="text-xs mt-0.5 truncate" style={{ color: theme.colors.textSecondary }}>{formatCompanyName(o.company)}</p>
-                                        <div className="flex items-center gap-2 mt-1.5">
-                                            <span className="text-[0.6875rem] font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.04)', color: theme.colors.textSecondary }}>SO {o.orderNumber}</span>
-                                            <span className="inline-flex items-center gap-1 text-[0.6875rem] font-semibold" style={{ color: sc }}>
-                                                <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: sc }} />
-                                                {o.status}
-                                            </span>
-                                        </div>
+                                        <p className="text-[0.9375rem] font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{o.details}</p>
+                                        <p className="text-[0.8125rem] mt-0.5" style={{ color: theme.colors.textSecondary }}>
+                                            {formatCompanyName(o.company)}
+                                        </p>
                                     </div>
-                                    <p className="font-bold text-base tabular-nums flex-shrink-0" style={{ color: theme.colors.textPrimary }}>{formatCurrency(o.net)}</p>
+                                    <div className="flex-shrink-0 text-right">
+                                        <p className="text-[0.9375rem] font-semibold tabular-nums" style={{ color: theme.colors.textPrimary }}>{formatCurrency(o.net)}</p>
+                                        <p className="text-[0.6875rem] mt-0.5 flex items-center justify-end gap-1" style={{ color: theme.colors.textSecondary }}>
+                                            <span>{o.orderNumber}</span>
+                                            <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: sc }} />
+                                        </p>
+                                    </div>
                                 </div>
+                            </div>
                             </div>
                         );
                     })}
@@ -93,58 +89,45 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
     );
 };
 
-/* ---- Order Row (inside a group card) ---- */
+/* ---- Order Row ---- */
 const OrderRow = ({ order, theme, onNavigate, isLast }) => {
     const dark = isDarkTheme(theme);
     const statusColor = STATUS_COLORS[order.status] || '#8B8680';
     return (
         <button
             onClick={() => onNavigate(`orders/${order.orderNumber}`)}
-            className={`w-full text-left transition active:scale-[0.99] ${dark ? 'hover:bg-white/[0.08]' : 'hover:bg-black/[0.015]'}`}
+            className={`w-full text-left transition active:scale-[0.98] ${dark ? 'hover:bg-white/[0.04]' : 'hover:bg-black/[0.02]'}`}
         >
-            <div className="flex items-center gap-3.5 px-4 py-3.5">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-black"
-                    style={{ backgroundColor: dark ? 'rgba(255,255,255,0.08)' : `${theme.colors.accent}15`, color: theme.colors.accent }}>
-                    {initials(order.company)}
-                </div>
+            <div className="flex items-center justify-between gap-4 px-5 py-3.5">
                 <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-[0.9375rem] leading-snug truncate" style={{ color: theme.colors.textPrimary }}>{order.details}</p>
-                    <p className="text-xs mt-0.5 truncate" style={{ color: theme.colors.textSecondary }}>{formatCompanyName(order.company)}</p>
-                    <div className="flex items-center gap-2 mt-1.5">
-                        <span className="text-[0.6875rem] font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.04)', color: theme.colors.textSecondary }}>SO {order.orderNumber}</span>
-                        <span className="inline-flex items-center gap-1 text-[0.6875rem] font-semibold" style={{ color: statusColor }}>
-                            <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: statusColor }} />
-                            {order.status}
-                        </span>
-                    </div>
+                    <p className="text-[0.9375rem] font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{order.details}</p>
+                    <p className="text-[0.8125rem] mt-0.5" style={{ color: theme.colors.textSecondary }}>
+                        {formatCompanyName(order.company)}
+                    </p>
                 </div>
-                <p className="font-bold text-base tabular-nums flex-shrink-0" style={{ color: theme.colors.textPrimary }}>{formatCurrency(order.net)}</p>
+                <div className="flex-shrink-0 text-right">
+                    <p className="text-[0.9375rem] font-semibold tabular-nums" style={{ color: theme.colors.textPrimary }}>{formatCurrency(order.net)}</p>
+                    <p className="text-[0.6875rem] mt-0.5 flex items-center justify-end gap-1" style={{ color: theme.colors.textSecondary }}>
+                        <span>{order.orderNumber}</span>
+                        <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: statusColor }} />
+                    </p>
+                </div>
             </div>
-            {!isLast && <div className="mx-4" style={{ borderTop: `1px solid ${dark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.05)'}` }} />}
+            {!isLast && <div className="mx-5" style={{ borderTop: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'}` }} />}
         </button>
     );
 };
 
-/* ---- Date Group Card ---- */
+/* ---- Date Group ---- */
 const DateGroupCard = ({ theme, dateKey, group, onNavigate }) => {
-    const dark = isDarkTheme(theme);
     const date = new Date(dateKey);
     date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
     const label = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }).toUpperCase();
 
     return (
-        <div className="rounded-[24px] overflow-hidden" style={{ ...cardSurface(theme) }}>
-            <div
-                className="flex items-baseline justify-between px-4 pt-3 pb-2"
-                style={{
-                    backgroundColor: dark ? 'rgba(255,255,255,0.12)' : 'rgba(53,53,53,0.025)',
-                    borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.04)'}`,
-                }}
-            >
-                <h2 className="text-xs font-bold tracking-wider" style={{ color: theme.colors.accent }}>{label}</h2>
-                <p className="text-[0.6875rem] font-medium" style={{ color: theme.colors.textSecondary, opacity: 0.7 }}>{group.orders.length} {group.orders.length === 1 ? 'order' : 'orders'} &middot; {formatCurrency(group.total)}</p>
-            </div>
-            <div>
+        <div>
+            <p className="text-[0.6875rem] font-semibold tracking-wide px-2 mb-1.5" style={{ color: theme.colors.textSecondary, opacity: 0.6 }}>{label}</p>
+            <div className="rounded-[24px] overflow-hidden" style={{ ...cardSurface(theme) }}>
                 {group.orders.map((o, idx) => (
                     <OrderRow key={o.orderNumber} order={o} theme={theme} onNavigate={onNavigate} isLast={idx === group.orders.length - 1} />
                 ))}
@@ -201,7 +184,7 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
             {/* Controls */}
             <div className="flex-shrink-0 max-w-2xl mx-auto w-full">
-                <div className="px-5 pt-4 pb-3 flex flex-col gap-3">
+                <div className="px-5 pt-3 pb-2 flex flex-col gap-2.5">
                     <StandardSearchBar value={searchTerm} onChange={setSearchTerm} placeholder="Search orders..." theme={theme} />
                     <div className="flex items-center justify-between gap-3">
                         <div className="min-w-0">
@@ -220,7 +203,7 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                                         initial={{ opacity: 0, scale: 0.95, y: -4 }}
                                         animate={{ opacity: 1, scale: 1, y: 0 }}
                                         transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
-                                        className="absolute right-0 mt-2 w-56 max-h-72 overflow-y-auto p-2 z-20 rounded-2xl"
+                                        className="absolute right-0 mt-2 w-56 max-h-72 overflow-y-auto p-2 z-20 rounded-[24px]"
                                         style={{ transformOrigin: 'top right', backgroundColor: theme.colors.surface, border: dark ? '1px solid rgba(255,255,255,0.12)' : `1px solid ${theme.colors.border}`, boxShadow: DESIGN_TOKENS.shadows.modal }}>
                                         {dealers.map(d => {
                                             const active = d === selectedDealer;
@@ -242,7 +225,7 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
 
             {/* Content */}
             <div ref={scrollRef} className="flex-1 overflow-y-auto scrollbar-hide">
-                <div className="px-5 pt-3 pb-24 max-w-2xl mx-auto w-full">
+                <div className="px-5 pt-2 pb-24 max-w-2xl mx-auto w-full">
                     <AnimatePresence mode="wait">
                       {viewMode === 'list' ? (
                         <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>

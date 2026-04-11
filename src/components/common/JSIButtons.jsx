@@ -1,11 +1,121 @@
 import React from 'react';
 import { DESIGN_TOKENS, isDarkTheme } from '../../design-system/tokens.js';
+import { ArrowUpRight } from 'lucide-react';
 
-/**
- * JSI Frost Button — Frosted glass CTA for floating/overlay contexts
- * (fixed footers, sticky bars, buttons over imagery or gradients).
- * Style presets live in DESIGN_TOKENS.frost.button.
- */
+/* ─────────────────────────────────────────────────────────────────────────────
+ * JSI Web Button — Faithful replica of the jsifurniture.com button with the
+ * signature "sweep-up" hover animation. A hidden duplicate layer slides up
+ * from below on hover, filling the pill with the inverted color while the
+ * original content fades up and out.
+ *
+ * Variants:
+ *   outlined (default) — transparent bg, border, text → hover fills solid
+ *   filled             — solid bg → hover sweeps matching color
+ *
+ * Tones:
+ *   dark  (default) — dark border/text, dark sweep bg
+ *   light           — white border/text, white sweep bg
+ *
+ * Sizes: default (45px), medium (38px), small (30px)
+ *
+ * Use `as="a"` + href to render as a link.
+ * ────────────────────────────────────────────────────────────────────────── */
+
+const webBtnColors = (variant, tone, theme) => {
+    const accent = theme?.colors?.accent || '#353535';
+    const accentText = theme?.colors?.accentText || '#FFFFFF';
+    const dark = theme ? isDarkTheme(theme) : false;
+
+    if (tone === 'light') {
+        const fg = dark ? accentText : '#FFFFFF';
+        return {
+            base: {
+                color: fg,
+                border: variant === 'outlined' ? `2px solid ${fg}` : 'none',
+                backgroundColor: variant === 'filled' ? fg : 'transparent',
+                ...(variant === 'filled' && { color: accent }),
+            },
+            sweep: {
+                backgroundColor: fg,
+                color: accent,
+            },
+        };
+    }
+
+    // tone = 'dark' (default)
+    const surface = theme?.colors?.surface || '#FFFFFF';
+    const softBg = dark ? 'rgba(255,255,255,0.10)' : surface;
+    const softBorder = dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.03)';
+
+    if (variant === 'soft') {
+        return {
+            base: {
+                color: accent,
+                backgroundColor: softBg,
+                border: `1px solid ${softBorder}`,
+            },
+            sweep: {
+                backgroundColor: accent,
+                color: accentText,
+            },
+        };
+    }
+
+    return {
+        base: {
+            color: accent,
+            border: variant === 'outlined' ? `2px solid ${accent}` : 'none',
+            backgroundColor: variant === 'filled' ? accent : 'transparent',
+            ...(variant === 'filled' && { color: accentText }),
+        },
+        sweep: {
+            backgroundColor: accent,
+            color: accentText,
+        },
+    };
+};
+
+export const JSIWebButton = ({
+    children,
+    onClick,
+    theme,
+    variant = 'outlined',
+    tone = 'dark',
+    size = 'default',
+    icon = <ArrowUpRight size={size === 'small' ? 18 : size === 'medium' ? 20 : 22} strokeWidth={2} />,
+    as: Tag = 'button',
+    className = '',
+    disabled = false,
+    style: styleProp,
+    ...props
+}) => {
+    const colors = webBtnColors(variant, tone, theme);
+    const sizeClass = `jsi-web-btn--${size}`;
+    const borderWidth = variant === 'outlined' ? (size === 'small' ? '1px' : '2px') : undefined;
+
+    const content = (
+        <>
+            {children}
+            {icon && <span className="inline-flex shrink-0">{icon}</span>}
+        </>
+    );
+
+    return (
+        <Tag
+            {...(Tag === 'button' ? { type: 'button' } : {})}
+            onClick={onClick}
+            disabled={disabled}
+            className={`jsi-web-btn ${sizeClass} ${className}`}
+            style={{ ...colors.base, ...(borderWidth && { borderWidth }), ...styleProp }}
+            {...props}
+        >
+            <span className="jsi-web-btn__content">{content}</span>
+            <span className="jsi-web-btn__sweep" style={colors.sweep} aria-hidden="true">
+                <span className="jsi-web-btn__sweep-inner">{content}</span>
+            </span>
+        </Tag>
+    );
+};
 const FROST_SIZES = {
     compact: 'px-4 py-2.5 text-xs gap-2',
     default: 'px-5 py-3 text-sm gap-2.5',

@@ -1,11 +1,16 @@
 export const HOME_CHROME_PILL_HEIGHT = 56;
 
+export const HOME_SURFACE_LIGHT = 'rgba(255,255,255,0.78)';
+export const HOME_SURFACE_DARK = 'rgba(42,42,42,0.82)';
+
 const HOME_CHROME_SURFACES = {
   primary: {
     light: {
-      backgroundColor: 'rgba(255,255,255,0.60)',
-      border: '1px solid rgba(255,255,255,0.80)',
-      boxShadow: '0 4px 20px rgba(53,53,53,0.10)',
+      backgroundColor: HOME_SURFACE_LIGHT,
+      border: 'none',
+      boxShadow: 'none',
+      backdropFilter: 'none',
+      WebkitBackdropFilter: 'none',
     },
     dark: {
       backgroundColor: 'rgba(255,255,255,0.08)',
@@ -15,9 +20,11 @@ const HOME_CHROME_SURFACES = {
   },
   soft: {
     light: {
-      backgroundColor: 'rgba(255,255,255,0.54)',
-      border: '1px solid rgba(255,255,255,0.74)',
-      boxShadow: '0 4px 18px rgba(53,53,53,0.08)',
+      backgroundColor: HOME_SURFACE_LIGHT,
+      border: 'none',
+      boxShadow: 'none',
+      backdropFilter: 'none',
+      WebkitBackdropFilter: 'none',
     },
     dark: {
       backgroundColor: 'rgba(255,255,255,0.12)',
@@ -48,7 +55,7 @@ export function getHomeChromeIconButtonStyles(isDark, { active = false } = {}) {
   }
 
   return {
-    backgroundColor: active ? 'rgba(255,255,255,0.50)' : 'rgba(255,255,255,0.34)',
-    border: '1px solid rgba(255,255,255,0.60)',
+    backgroundColor: active ? 'rgba(255,255,255,0.32)' : 'rgba(255,255,255,0.18)',
+    border: 'none',
   };
 }

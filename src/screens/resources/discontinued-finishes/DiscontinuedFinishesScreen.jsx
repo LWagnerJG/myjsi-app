@@ -7,6 +7,7 @@ import { EmptyState } from '../../../components/common/EmptyState.jsx';
 import { isDarkTheme } from '../../../design-system/tokens.js';
 import { DISCONTINUED_FINISHES } from './data.js';
 import { SAMPLE_PRODUCTS } from '../../samples/data.js';
+import { ScreenTopChrome } from '../../../components/common/ScreenTopChrome.jsx';
 
 export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -169,14 +170,14 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
     return (
         <div className="h-full flex flex-col app-header-offset">
             {/* Title + search */}
-            <div className="flex-shrink-0 px-5 pt-3 pb-3" style={{ backgroundColor: theme.colors.background }}>
+            <ScreenTopChrome theme={theme} maxWidthClass="" horizontalPaddingClass="px-5" contentClassName="pt-3 pb-3">
                 <StandardSearchBar
                     value={searchTerm}
                     onChange={(val) => setSearchTerm(val)}
                     placeholder="Search by finish name..."
                     theme={theme}
                 />
-            </div>
+            </ScreenTopChrome>
 
             <div className="flex-1 overflow-y-auto px-5 pb-8 scrollbar-hide">
                 {grouped.length > 0 ? (
