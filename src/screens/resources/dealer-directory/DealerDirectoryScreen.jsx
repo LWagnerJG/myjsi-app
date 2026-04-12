@@ -3,15 +3,14 @@ import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import { PageTitle } from '../../../components/common/PageTitle.jsx';
 import StandardSearchBar from '../../../components/common/StandardSearchBar.jsx';
 import { Modal } from '../../../components/common/Modal.jsx';
-import { FormInput } from '../../../components/common/FormComponents.jsx';
-import { PortalNativeSelect } from '../../../components/forms/PortalNativeSelect.jsx';
 import { motion } from 'framer-motion';
-import { ChevronRight, Building2, UserPlus } from 'lucide-react';
+import { ChevronRight, Building2, UserPlus, ChevronDown, Check } from 'lucide-react';
 import { DEALER_DIRECTORY_DATA } from './data.js';
-import { DISCOUNT_OPTIONS } from '../../../constants/discounts.js';
-import { isDarkTheme, subtleBg } from '../../../design-system/tokens.js';
+import { DAILY_DISCOUNT_OPTIONS } from '../../../constants/discounts.js';
+import { isDarkTheme, subtleBg, DESIGN_TOKENS } from '../../../design-system/tokens.js';
 import { formatCurrency } from '../../../utils/format.js';
 import { ScreenTopChrome } from '../../../components/common/ScreenTopChrome.jsx';
+import { UNIFIED_MODAL_Z } from '../../../components/common/modalUtils.js';
 
 const stagger = (i) => ({
     initial: { opacity: 0, y: 6 },
@@ -115,7 +114,13 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, setDealerDirecto
             {/* List */}
             <div className="flex-1 overflow-y-auto scrollbar-hide px-4 pb-10">
                 {sorted.length > 0 ? (
-                    <GlassCard theme={theme} className="rounded-[22px] overflow-hidden p-0">
+                    <div
+                        className="rounded-[20px] overflow-hidden"
+                        style={{
+                            backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : colors.surface,
+                            boxShadow: isDark ? 'none' : '0 1px 4px rgba(0,0,0,0.04)',
+                        }}
+                    >
                         {sorted.map((d, i) => {
                             const pct = d.ytdGoal ? Math.round((d.sales / d.ytdGoal) * 100) : null;
                             const gColor = pct !== null ? goalTone(pct) : null;
@@ -128,57 +133,57 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, setDealerDirecto
                                     onClick={() => onNavigate?.(`resources/dealer-directory/${d.id}`)}
                                     className="w-full text-left flex items-center gap-3 px-4 transition-colors active:bg-black/[0.02]"
                                     style={{
-                                        paddingTop: 14,
-                                        paddingBottom: 14,
+                                        paddingTop: 13,
+                                        paddingBottom: 13,
                                         borderBottom: i < sorted.length - 1 ? `1px solid ${rowBorder}` : 'none',
                                     }}
                                 >
                                     {/* Avatar */}
                                     <div
-                                        className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-black"
-                                        style={{ backgroundColor: `${colors.accent}14`, color: colors.accent }}
+                                        className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-[0.6875rem] font-black"
+                                        style={{ backgroundColor: `${colors.accent}12`, color: colors.accent }}
                                     >
                                         {initials}
                                     </div>
 
                                     {/* Name + territory */}
                                     <div className="flex-1 min-w-0">
-                                        <p className="text-[0.9375rem] font-bold tracking-tight truncate leading-snug" style={{ color: colors.textPrimary }}>
+                                        <p className="text-[0.875rem] font-bold tracking-tight truncate leading-snug" style={{ color: colors.textPrimary }}>
                                             {d.name}
                                         </p>
-                                        <p className="text-xs truncate mt-0.5 leading-snug" style={{ color: colors.textSecondary, opacity: 0.72 }}>
-                                            {d.territory || d.address}
+                                        <p className="text-[0.6875rem] truncate mt-0.5 leading-snug" style={{ color: colors.textSecondary, opacity: 0.65 }}>
+                                            {d.territory || d.address || d.dailyDiscount || ''}
                                         </p>
                                     </div>
 
                                     {/* Sales + goal bar */}
-                                    <div className="flex flex-col items-end flex-shrink-0 gap-1 mr-0.5">
-                                        <span className="text-sm font-black tabular-nums leading-none" style={{ color: colors.textPrimary }}>
+                                    <div className="flex flex-col items-end flex-shrink-0 gap-1">
+                                        <span className="text-[0.8125rem] font-black tabular-nums leading-none" style={{ color: colors.textPrimary }}>
                                             {formatCurrency(d.sales)}
                                         </span>
                                         {pct !== null && (
                                             <div className="flex items-center gap-1.5">
                                                 <div
-                                                    className="w-14 rounded-full overflow-hidden"
-                                                    style={{ height: 3, backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)' }}
+                                                    className="w-12 rounded-full overflow-hidden"
+                                                    style={{ height: 3, backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }}
                                                 >
                                                     <div
                                                         className="h-full rounded-full"
                                                         style={{ width: `${Math.min(pct, 100)}%`, backgroundColor: gColor }}
                                                     />
                                                 </div>
-                                                <span className="text-[0.6875rem] font-bold tabular-nums" style={{ color: gColor, minWidth: 28, textAlign: 'right' }}>
+                                                <span className="text-[0.625rem] font-bold tabular-nums" style={{ color: gColor, minWidth: 26, textAlign: 'right' }}>
                                                     {pct}%
                                                 </span>
                                             </div>
                                         )}
                                     </div>
 
-                                    <ChevronRight className="w-4 h-4 flex-shrink-0" style={{ color: colors.textSecondary, opacity: 0.2 }} />
+                                    <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" style={{ color: colors.textSecondary, opacity: 0.18 }} />
                                 </motion.button>
                             );
                         })}
-                    </GlassCard>
+                    </div>
                 ) : (
                     <div className="py-16 flex flex-col items-center justify-center text-center gap-3">
                         <div
@@ -194,34 +199,89 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, setDealerDirecto
             </div>
 
             {/* ── Add Dealer Modal ── */}
-            <Modal show={showAddModal} onClose={() => { setShowAddModal(false); setForm(EMPTY_FORM); }} title="Add Dealer" theme={theme}>
-                <div className="p-5 space-y-5">
-                    <FormInput
-                        label="Company Name"
-                        value={form.companyName}
-                        onChange={(e) => handleFormChange('companyName', e.target.value)}
-                        theme={theme}
-                        required
-                        placeholder="Registered company name..."
-                    />
-                    <FormInput
-                        label="Admin Email"
-                        type="email"
-                        value={form.adminEmail}
-                        onChange={(e) => handleFormChange('adminEmail', e.target.value)}
-                        theme={theme}
-                        required
-                        placeholder="Primary contact email..."
-                    />
-                    <PortalNativeSelect
-                        label="Daily Discount"
-                        value={form.dailyDiscount}
-                        onChange={(e) => handleFormChange('dailyDiscount', e?.target?.value ?? e)}
-                        options={DISCOUNT_OPTIONS.map(opt => ({ label: opt, value: opt }))}
-                        placeholder="Select discount tier..."
-                        theme={theme}
-                        required
-                    />
+            <Modal show={showAddModal} onClose={() => { setShowAddModal(false); setForm(EMPTY_FORM); }} title="New Dealer" theme={theme}>
+                <div className="px-5 pb-5 pt-1 space-y-4">
+                    {/* Company Name */}
+                    <div>
+                        <label className="block text-[0.75rem] font-semibold mb-1.5 px-0.5" style={{ color: colors.textSecondary }}>
+                            Company Name
+                        </label>
+                        <input
+                            type="text"
+                            value={form.companyName}
+                            onChange={(e) => handleFormChange('companyName', e.target.value)}
+                            placeholder="Registered company name"
+                            className="w-full outline-none text-[0.875rem]"
+                            style={{
+                                height: 44,
+                                padding: '0 14px',
+                                borderRadius: 12,
+                                backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)',
+                                border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'}`,
+                                color: colors.textPrimary,
+                            }}
+                        />
+                    </div>
+
+                    {/* Admin Email */}
+                    <div>
+                        <label className="block text-[0.75rem] font-semibold mb-1.5 px-0.5" style={{ color: colors.textSecondary }}>
+                            Admin Email
+                        </label>
+                        <input
+                            type="email"
+                            value={form.adminEmail}
+                            onChange={(e) => handleFormChange('adminEmail', e.target.value)}
+                            placeholder="Primary contact email"
+                            className="w-full outline-none text-[0.875rem]"
+                            style={{
+                                height: 44,
+                                padding: '0 14px',
+                                borderRadius: 12,
+                                backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)',
+                                border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'}`,
+                                color: colors.textPrimary,
+                            }}
+                        />
+                    </div>
+
+                    {/* Daily Discount — inline scrollable picker */}
+                    <div>
+                        <label className="block text-[0.75rem] font-semibold mb-1.5 px-0.5" style={{ color: colors.textSecondary }}>
+                            Daily Discount
+                        </label>
+                        <div
+                            className="w-full overflow-y-auto scrollbar-hide"
+                            style={{
+                                maxHeight: 180,
+                                borderRadius: 12,
+                                backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)',
+                                border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'}`,
+                            }}
+                        >
+                            {DAILY_DISCOUNT_OPTIONS.filter(o => o !== 'Undecided').map((opt) => {
+                                const isSelected = form.dailyDiscount === opt;
+                                return (
+                                    <button
+                                        key={opt}
+                                        type="button"
+                                        onClick={() => handleFormChange('dailyDiscount', opt)}
+                                        className="w-full text-left flex items-center justify-between px-3.5 py-2.5 text-[0.8125rem] transition-colors"
+                                        style={{
+                                            color: isSelected ? colors.accent : colors.textPrimary,
+                                            fontWeight: isSelected ? 700 : 400,
+                                            backgroundColor: isSelected ? `${colors.accent}10` : 'transparent',
+                                        }}
+                                    >
+                                        <span className="truncate">{opt}</span>
+                                        {isSelected && <Check className="w-3.5 h-3.5 flex-shrink-0" style={{ color: colors.accent }} />}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* Submit */}
                     <button
                         type="button"
                         onClick={handleAddDealer}
@@ -229,7 +289,7 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, setDealerDirecto
                         className="w-full rounded-xl py-3 text-[0.875rem] font-bold transition-all active:scale-[0.98]"
                         style={{
                             backgroundColor: canSubmit ? colors.accent : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'),
-                            color: canSubmit ? colors.accentText : colors.textSecondary,
+                            color: canSubmit ? (colors.accentText || '#fff') : colors.textSecondary,
                             opacity: canSubmit ? 1 : 0.5,
                         }}
                     >
