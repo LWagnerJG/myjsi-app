@@ -57,12 +57,29 @@ export const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, d
         <>
             {/* Floating cart pill  shared component */}
             {!isExpanded && (
-                <FloatingCart
-                    itemCount={totalCartItems}
-                    label={`View Cart (${totalCartItems})`}
-                    onClick={() => setIsExpanded(true)}
-                    theme={theme}
-                />
+                <>
+                    {/* Blur scrim behind the cart pill */}
+                    {totalCartItems > 0 && (
+                        <div
+                            aria-hidden="true"
+                            className="fixed left-0 right-0 pointer-events-none"
+                            style={{
+                                bottom: 0,
+                                height: 'max(100px, calc(env(safe-area-inset-bottom, 0px) + 80px))',
+                                background: `linear-gradient(to top, ${isDark ? 'rgba(26,26,26,0.85)' : 'rgba(240,237,232,0.85)'} 0%, ${isDark ? 'rgba(26,26,26,0.5)' : 'rgba(240,237,232,0.5)'} 50%, transparent 100%)`,
+                                backdropFilter: 'blur(12px)',
+                                WebkitBackdropFilter: 'blur(12px)',
+                                zIndex: 19,
+                            }}
+                        />
+                    )}
+                    <FloatingCart
+                        itemCount={totalCartItems}
+                        label={`View Cart (${totalCartItems})`}
+                        onClick={() => setIsExpanded(true)}
+                        theme={theme}
+                    />
+                </>
             )}
 
             {/* Expanded drawer modal */}
