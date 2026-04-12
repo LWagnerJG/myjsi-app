@@ -267,7 +267,7 @@ function App() {
     const [postUpvotes, setPostUpvotes] = useState({});
 
     // Directories / leads
-    const [dealerDirectory] = useState(DEALER_DIRECTORY_DATA);
+    const [dealerDirectory, setDealerDirectory] = useState(DEALER_DIRECTORY_DATA);
     const [designFirms, setDesignFirms] = useState(INITIAL_DESIGN_FIRMS);
     const [dealers, setDealers] = useState(INITIAL_DEALERS);
     const [newLeadData, setNewLeadData] = usePersistentState('draft.newLead', EMPTY_LEAD);
@@ -476,6 +476,7 @@ function App() {
         setCart,
         onUpdateCart: handleUpdateCart,
         dealerDirectory,
+        setDealerDirectory,
         designFirms,
         setDesignFirms,
         dealers,
@@ -500,7 +501,7 @@ function App() {
         posts, polls, likedPosts, pollChoices, handleToggleLike,
         handleAddComment, handlePollVote, openCreateContentModal, openLibraryUploadModal, libraryAssets, savedImageIds,
         handleToggleSaveImage, postUpvotes, handleUpvote, cart, setCart,
-        handleUpdateCart, dealerDirectory, designFirms, dealers, newLeadData,
+        handleUpdateCart, dealerDirectory, setDealerDirectory, designFirms, dealers, newLeadData,
         handleNewLeadChange, isDarkMode, handleToggleTheme, handleLeadSuccess,
         handleAddInstall, projectsTabOverride, clearProjectsInitialTab, projectsStageOverride, clearProjectsInitialStage,
         homeApps, handleUpdateHomeApps, homeResetKey

@@ -1,11 +1,15 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import { PageTitle } from '../../../components/common/PageTitle.jsx';
 import StandardSearchBar from '../../../components/common/StandardSearchBar.jsx';
+import { Modal } from '../../../components/common/Modal.jsx';
+import { FormInput } from '../../../components/common/FormComponents.jsx';
+import { PortalNativeSelect } from '../../../components/forms/PortalNativeSelect.jsx';
 import { motion } from 'framer-motion';
 import { ChevronRight, Building2, UserPlus } from 'lucide-react';
 import { DEALER_DIRECTORY_DATA } from './data.js';
-import { isDarkTheme, subtleBg, subtleBorder } from '../../../design-system/tokens.js';
+import { DISCOUNT_OPTIONS } from '../../../constants/discounts.js';
+import { isDarkTheme, subtleBg } from '../../../design-system/tokens.js';
 import { formatCurrency } from '../../../utils/format.js';
 import { ScreenTopChrome } from '../../../components/common/ScreenTopChrome.jsx';
 
@@ -16,11 +20,52 @@ const stagger = (i) => ({
 
 const goalTone = (pct) => pct >= 80 ? '#4A7C59' : pct >= 50 ? '#C4956A' : '#B85C5C';
 
-export const DealerDirectoryScreen = ({ theme, dealerDirectory, onNavigate }) => {
+export const DealerDirectoryScreen = ({ theme, dealerDirectory, setDealerDirectory, onNavigate, setSuccessMessage }) => {
     const dealers = useMemo(() => dealerDirectory || DEALER_DIRECTORY_DATA || [], [dealerDirectory]);
     const [searchTerm, setSearchTerm] = useState('');
     const isDark = isDarkTheme(theme);
     const colors = theme.colors;
+
+    /* ── Add dealer modal state ── */
+    const [showAddModal, setShowAddModal] = useState(false);
+    const EMPTY_FORM = { companyName: '', adminEmail: '', dailyDiscount: '' };
+    const [form, setForm] = useState(EMPTY_FORM);
+    const canSubmit = !!(form.companyName.trim() && form.adminEmail.trim() && form.dailyDiscount);
+
+    const handleFormChange = useCallback((field, value) => {
+        setForm(prev => ({ ...prev, [field]: value }));
+    }, []);
+
+    const handleAddDealer = useCallback(() => {
+        if (!canSubmit) return;
+        const newDealer = {
+            id: Date.now(),
+            name: form.companyName.trim(),
+            address: '',
+            phone: '',
+            territory: '',
+            salespeople: [{ name: 'Admin', email: form.adminEmail.trim(), status: 'active', roleLabel: 'Admin' }],
+            designers: [],
+            administration: [],
+            installers: [],
+            dailyDiscount: form.dailyDiscount,
+            bookings: 0,
+            sales: 0,
+            ytdGoal: 0,
+            rebatableGoal: 0,
+            rebatableSales: 0,
+            verticalSales: [],
+            seriesSales: [],
+            monthlyTrend: [],
+            recentProjects: [],
+            repRewards: [],
+        };
+        setDealerDirectory?.(prev => [...prev, newDealer]);
+        setShowAddModal(false);
+        setForm(EMPTY_FORM);
+        setSuccessMessage?.('Dealer Added');
+        setTimeout(() => setSuccessMessage?.(''), 1500);
+    }, [canSubmit, form, setDealerDirectory, setSuccessMessage]);
 
     const sorted = useMemo(() => dealers
         .filter(d => {
@@ -50,7 +95,7 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, onNavigate }) =>
                 >
                     <button
                         type="button"
-                        onClick={() => onNavigate?.('new-dealer-signup')}
+                        onClick={() => setShowAddModal(true)}
                         className="flex items-center gap-1.5 rounded-full px-3.5 h-9 text-[0.8125rem] font-semibold transition-all active:scale-[0.97] flex-shrink-0"
                         style={{ backgroundColor: colors.accent, color: colors.accentText }}
                     >
@@ -147,6 +192,51 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, onNavigate }) =>
                     </div>
                 )}
             </div>
+
+            {/* ── Add Dealer Modal ── */}
+            <Modal show={showAddModal} onClose={() => { setShowAddModal(false); setForm(EMPTY_FORM); }} title="Add Dealer" theme={theme}>
+                <div className="p-5 space-y-5">
+                    <FormInput
+                        label="Company Name"
+                        value={form.companyName}
+                        onChange={(e) => handleFormChange('companyName', e.target.value)}
+                        theme={theme}
+                        required
+                        placeholder="Registered company name..."
+                    />
+                    <FormInput
+                        label="Admin Email"
+                        type="email"
+                        value={form.adminEmail}
+                        onChange={(e) => handleFormChange('adminEmail', e.target.value)}
+                        theme={theme}
+                        required
+                        placeholder="Primary contact email..."
+                    />
+                    <PortalNativeSelect
+                        label="Daily Discount"
+                        value={form.dailyDiscount}
+                        onChange={(e) => handleFormChange('dailyDiscount', e?.target?.value ?? e)}
+                        options={DISCOUNT_OPTIONS.map(opt => ({ label: opt, value: opt }))}
+                        placeholder="Select discount tier..."
+                        theme={theme}
+                        required
+                    />
+                    <button
+                        type="button"
+                        onClick={handleAddDealer}
+                        disabled={!canSubmit}
+                        className="w-full rounded-xl py-3 text-[0.875rem] font-bold transition-all active:scale-[0.98]"
+                        style={{
+                            backgroundColor: canSubmit ? colors.accent : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'),
+                            color: canSubmit ? colors.accentText : colors.textSecondary,
+                            opacity: canSubmit ? 1 : 0.5,
+                        }}
+                    >
+                        Add Dealer
+                    </button>
+                </div>
+            </Modal>
         </div>
     );
 };
