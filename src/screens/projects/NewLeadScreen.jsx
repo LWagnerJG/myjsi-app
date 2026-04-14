@@ -192,7 +192,7 @@ const InlineStepHealth = ({ health, theme }) => {
       style={{ borderColor: subtleBorder, backgroundColor: dark ? c.background : c.surface }}
     >
       <StrengthCircle percent={health.percent} tone={health.tone} size={30} stroke={3} textSize="10px" />
-      <span className="text-[0.6875rem] font-semibold" style={{ color: health.tone }}>
+      <span className="text-xs font-semibold" style={{ color: health.tone }}>
         {health.label}
       </span>
     </div>
@@ -877,7 +877,7 @@ export const NewLeadScreen = ({
                           }}
                         >
                           <span
-                            className="text-[0.6875rem] font-bold w-5 h-5 rounded-full flex items-center justify-center shrink-0"
+                            className="text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shrink-0"
                             style={{
                               backgroundColor: isSelected ? 'rgba(255,255,255,0.2)' : isPast ? `${c.accent}20` : dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)',
                               color: isSelected ? c.accentText : isPast ? c.accent : c.textSecondary,
@@ -886,7 +886,7 @@ export const NewLeadScreen = ({
                             {num}
                           </span>
                           <span
-                            className="text-[0.8125rem] font-semibold leading-tight"
+                            className="text-sm font-semibold leading-tight"
                             style={{ color: isSelected ? c.accentText : c.textPrimary }}
                           >
                             {stage}
@@ -919,7 +919,7 @@ export const NewLeadScreen = ({
                         onChange={(e) => { upd('otherVertical', e.target.value); markTouched('otherVertical'); }}
                         onBlur={() => markTouched('otherVertical')}
                         placeholder="Specify other vertical"
-                        className="w-full h-9 px-3.5 text-[0.8125rem] focus:outline-none focus:ring-0 placeholder-theme-secondary bg-transparent border-0"
+                        className="w-full h-9 px-3.5 text-sm focus:outline-none focus:ring-0 placeholder-theme-secondary bg-transparent border-0"
                         style={{ color: c.textPrimary }}
                       />
                     </div>
@@ -970,8 +970,8 @@ export const NewLeadScreen = ({
                     className="w-full h-10 rounded-full border flex items-center justify-between px-4 text-sm transition-colors"
                     style={{ borderColor: subtleBorder, backgroundColor: dark ? c.background : c.surface, color: c.textSecondary }}
                   >
-                    <span className="text-[0.8125rem] font-medium">Unknown</span>
-                    <span className="text-[0.6875rem]" style={{ color: c.textSecondary, opacity: 0.55 }}>Set location</span>
+                    <span className="text-sm font-medium">Unknown</span>
+                    <span className="text-xs" style={{ color: c.textSecondary, opacity: 0.55 }}>Set location</span>
                   </button>
                 )}
               </Row>
@@ -1003,8 +1003,8 @@ export const NewLeadScreen = ({
                     className="w-full h-10 rounded-full border flex items-center justify-between px-4 transition-colors"
                     style={{ borderColor: subtleBorder, backgroundColor: dark ? c.background : c.surface, color: c.textSecondary }}
                   >
-                    <span className="text-[0.8125rem] font-medium">Unknown</span>
-                    <span className="text-[0.6875rem]" style={{ color: c.textSecondary, opacity: 0.55 }}>Set date</span>
+                    <span className="text-sm font-medium">Unknown</span>
+                    <span className="text-xs" style={{ color: c.textSecondary, opacity: 0.55 }}>Set date</span>
                   </button>
                 )}
               </Row>
@@ -1043,7 +1043,7 @@ export const NewLeadScreen = ({
               <Row label="Estimated List" theme={theme} inline noSep>
                 <div>
                   <div className="relative w-full">
-                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none select-none" style={{ color: theme.colors.textSecondary, fontSize: "0.8125rem" }}>$</span>
+                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none select-none" style={{ color: theme.colors.textSecondary, fontSize: "1rem" }}>$</span>
                     <input
                       type="text"
                       inputMode="numeric"
@@ -1064,7 +1064,6 @@ export const NewLeadScreen = ({
                         border: `1px solid ${getSubtleBorder(theme)}`,
                         backgroundColor: theme.colors.surface,
                         color: theme.colors.textPrimary,
-                        fontSize: "0.8125rem",
                         padding: '0 14px 0 26px',
                       }}
                     />
@@ -1085,7 +1084,7 @@ export const NewLeadScreen = ({
                           {winProb}<span style={{ fontSize: "0.9375rem", fontWeight: 600, color: c.textSecondary, marginLeft: 2 }}>%</span>
                         </span>
                         <span
-                          className="text-[0.6875rem] font-semibold px-2.5 py-1 rounded-full"
+                          className="text-xs font-semibold px-2.5 py-1 rounded-full"
                           style={{ backgroundColor: `${winBand.tone}1A`, color: winBand.tone, transition: 'color .15s, background-color .15s' }}
                         >
                           {winBand.label}
@@ -1115,7 +1114,7 @@ export const NewLeadScreen = ({
                               onClick={() => upd('winProbability', pct)}
                               className="flex-1 rounded-full py-1.5 border transition-all"
                               style={{
-                                fontSize: "0.6875rem",
+                                fontSize: "0.75rem",
                                 fontWeight: 600,
                                 backgroundColor: active ? c.accent : 'transparent',
                                 borderColor: active ? c.accent : subtleBorder,
@@ -1136,7 +1135,7 @@ export const NewLeadScreen = ({
                 <div>
                   {newLeadData.poTimeframe && newLeadData.poTimeframe !== 'Unknown' && (
                     <div className="flex justify-end mb-2">
-                      <span className="text-[0.6875rem] font-semibold px-2.5 py-1 rounded-full"
+                      <span className="text-xs font-semibold px-2.5 py-1 rounded-full"
                         style={{ backgroundColor: `${c.accent}14`, color: c.accent, transition: 'color .15s, background-color .15s' }}>
                         {getPoDateLabel(newLeadData.poTimeframe)}
                       </span>
@@ -1264,8 +1263,8 @@ export const NewLeadScreen = ({
                       className="w-full h-10 rounded-full border flex items-center justify-between px-4 transition-colors"
                       style={{ borderColor: theme.colors.accent, backgroundColor: `${theme.colors.accent}12`, color: c.textPrimary }}
                     >
-                      <span className="text-[0.8125rem] font-medium" style={{ color: theme.colors.accent }}>Out to Bid</span>
-                      <span className="text-[0.6875rem]" style={{ color: c.textSecondary, opacity: 0.55 }}>Add dealers</span>
+                      <span className="text-sm font-medium" style={{ color: theme.colors.accent }}>Out to Bid</span>
+                      <span className="text-xs" style={{ color: c.textSecondary, opacity: 0.55 }}>Add dealers</span>
                     </button>
                   ) : (
                     <div className="flex items-center gap-2">
@@ -1362,7 +1361,7 @@ export const NewLeadScreen = ({
                         />
                       </div>
                       <div className="flex items-center gap-1.5 shrink-0">
-                        <span className="text-[0.6875rem] font-medium" style={{ color: c.textSecondary }}>Active</span>
+                        <span className="text-xs font-medium" style={{ color: c.textSecondary }}>Active</span>
                         <ToggleSwitch
                           checked
                           onChange={() => {
@@ -1472,7 +1471,7 @@ export const NewLeadScreen = ({
               {/* JSI Series — full-width, search + cards unified */}
               <div className="py-3">
                 <div className="mb-2">
-                  <span className="text-[0.8125rem] font-semibold" style={{ color: c.textSecondary }}>JSI Series</span>
+                  <span className="text-sm font-semibold" style={{ color: c.textSecondary }}>JSI Series</span>
                 </div>
                 <ProductSpotlight
                   selectedSeries={(newLeadData.products || []).map((p) => p.series)}
@@ -1496,7 +1495,7 @@ export const NewLeadScreen = ({
                           />
                           {/* Intake — compact inline rows, no heavy inner borders */}
                           <div className="border-t" style={{ borderColor: subtleBorder }}>
-                            <p className="px-4 pt-2.5 pb-1 text-[0.625rem] font-semibold uppercase tracking-[0.06em]" style={{ color: c.textSecondary, opacity: 0.5 }}>
+                            <p className="px-4 pt-2.5 pb-1 text-xs font-semibold uppercase tracking-[0.06em]" style={{ color: c.textSecondary, opacity: 0.5 }}>
                               Manufacturing context <span className="normal-case tracking-normal font-normal opacity-100">· optional</span>
                             </p>
                             {[prompts.first, prompts.second].map((prompt) => (
@@ -1533,7 +1532,7 @@ export const NewLeadScreen = ({
                 onChange={(e) => upd('notes', e.target.value)}
                 rows={4}
                 placeholder="Add context, timing risks, or requirements..."
-                className="mt-2.5 w-full px-4 py-3 text-[0.8125rem] rounded-2xl border focus:outline-none resize-none placeholder-theme-secondary transition-shadow"
+                className="mt-2.5 w-full px-4 py-3 text-sm rounded-2xl border focus:outline-none resize-none placeholder-theme-secondary transition-shadow"
                 style={{ backgroundColor: dark ? c.background : c.surface, borderColor: subtleBorder, color: c.textPrimary }}
                 onFocus={(e) => { e.target.style.boxShadow = `0 0 0 3px ${c.accent}33`; e.target.style.borderColor = c.accent || subtleBorder; }}
                 onBlur={(e) => { e.target.style.boxShadow = 'none'; e.target.style.borderColor = subtleBorder; }}
@@ -1623,16 +1622,16 @@ export const NewLeadScreen = ({
               >
                 <StrengthCircle percent={health.percent} tone={health.tone} size={60} stroke={4} textSize="12px" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-[0.625rem] font-semibold uppercase tracking-wider mb-0.5" style={{ color: health.tone, opacity: 0.7 }}>Lead Score</p>
+                  <p className="text-xs font-semibold uppercase tracking-wider mb-0.5" style={{ color: health.tone, opacity: 0.7 }}>Lead Score</p>
                   <div className="flex items-center gap-2">
                     <span className="text-[1.375rem] font-bold tabular-nums leading-none" style={{ color: health.tone }}>{health.percent}</span>
-                    <span className="text-[0.6875rem] font-semibold px-2.5 py-0.5 rounded-full" style={{ color: health.tone, backgroundColor: `${health.tone}20` }}>{health.label}</span>
+                    <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full" style={{ color: health.tone, backgroundColor: `${health.tone}20` }}>{health.label}</span>
                     {canSubmit
                       ? <CheckCircle2 className="w-4 h-4 ml-auto shrink-0" style={{ color: health.tone }} />
                       : <AlertTriangle className="w-4 h-4 ml-auto shrink-0" style={{ color: health.tone }} />
                     }
                   </div>
-                  <p className="text-[0.6875rem] mt-1" style={{ color: health.tone, opacity: 0.7 }}>
+                  <p className="text-xs mt-1" style={{ color: health.tone, opacity: 0.7 }}>
                     {health.missing[0] ? `+ ${health.missing[0]} will boost your score` : 'All key fields complete'}
                   </p>
                 </div>
@@ -1651,7 +1650,7 @@ export const NewLeadScreen = ({
                         {gi > 0 && (
                           <div className="flex items-center gap-2 px-3.5 py-1" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.025)' }}>
                             <div className="flex-1 h-px" style={{ backgroundColor: subtleBorder }} />
-                            <span className="text-[0.5625rem] font-bold uppercase tracking-[0.07em]" style={{ color: c.textSecondary, opacity: 0.4 }}>
+                            <span className="text-xs font-bold uppercase tracking-[0.07em]" style={{ color: c.textSecondary, opacity: 0.4 }}>
                               {['Basics', 'Scope', 'Details'][group.stepIdx]}
                             </span>
                             <div className="flex-1 h-px" style={{ backgroundColor: subtleBorder }} />
@@ -1670,7 +1669,7 @@ export const NewLeadScreen = ({
                             }}
                           >
                             <span className="text-xs font-medium shrink-0 w-[96px]" style={{ color: c.textSecondary }}>{item.label}</span>
-                            <span className="text-[0.8125rem] font-semibold flex-1 text-right truncate" style={{ color: c.textPrimary }}>{item.value}</span>
+                            <span className="text-sm font-semibold flex-1 text-right truncate" style={{ color: c.textPrimary }}>{item.value}</span>
                             <ChevronRight className="w-3.5 h-3.5 shrink-0 opacity-25" style={{ color: c.textSecondary }} />
                           </button>
                         ))}

@@ -17,6 +17,18 @@ html {
     /* font-size is set dynamically by initDynamicType() on iOS */
 }
 
+/* ── Prevent iOS Safari auto-zoom on input focus ──────────────────────────
+   iOS Safari zooms the viewport whenever a focused input's computed
+   font-size is below 16px. max(1rem, 16px) ensures we always meet the
+   threshold while still scaling with Dynamic Type on larger settings.
+   !important is required to override Tailwind class specificity and any
+   component-level inline fontSize styles.                                  */
+.panel-content input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="reset"]),
+.panel-content select,
+.panel-content textarea {
+    font-size: max(1rem, 16px) !important;
+}
+
 :root {
     --font-scale: 1;        /* updated by initDynamicType() */
     --font-scale-pct: 100%; /* CSS percentage form */

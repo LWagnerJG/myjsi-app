@@ -23,12 +23,12 @@ export const Section = ({ title, subtitle, titleRight, children, theme, classNam
         <div className="mb-2.5">
           <div className="flex items-start gap-3">
             <div className="min-w-0">
-              <h3 className="text-sm font-semibold leading-tight" style={{
+              <h3 className="text-[0.9375rem] font-semibold leading-tight" style={{
                 color: theme.colors.textPrimary,
                 letterSpacing: '-0.01em',
               }}>{title}</h3>
               {subtitle && (
-                <p className="text-xs mt-0.5 leading-snug" style={{ color: theme.colors.textSecondary }}>
+                <p className="text-sm mt-0.5 leading-snug" style={{ color: theme.colors.textSecondary }}>
                   {subtitle}
                 </p>
               )}
@@ -51,7 +51,7 @@ export const Row = ({ label, children, theme, tip, noSep, inline }) => {
     style={{ borderColor: undefined }}>
     {label && (
       <div className={`flex items-center gap-1.5 ${inline ? 'md:min-h-[34px] md:pt-1' : 'mb-1.5'}`}>
-        <label className={`text-xs font-semibold ${inline ? 'whitespace-nowrap' : ''}`}
+        <label className={`text-sm font-semibold ${inline ? 'whitespace-nowrap' : ''}`}
           style={{ color: theme.colors.textSecondary }}>{label}</label>
         {tip && <InfoTooltip content={tip} theme={theme} position="right" size="sm" />}
       </div>
@@ -139,7 +139,7 @@ export const ProductSpotlight = ({ selectedSeries, onAdd, available, theme }) =>
           onChange={e => { setQ(e.target.value); if (!open) doOpen(); }}
           onFocus={doOpen} onKeyDown={onKey}
           placeholder="Search JSI series..."
-          className="flex-1 bg-transparent outline-none text-[0.8125rem]"
+          className="flex-1 bg-transparent outline-none text-sm"
           style={{ color: theme.colors.textPrimary }} />
       </div>
       {open && createPortal(
@@ -158,14 +158,14 @@ export const ProductSpotlight = ({ selectedSeries, onAdd, available, theme }) =>
                 <button key={s} type="button"
                   onClick={() => pick(s)}
                   onMouseEnter={() => setHlIdx(idx)}
-                  className={`w-full text-left px-3.5 py-2.5 text-[0.8125rem] flex items-center justify-between transition-colors ${hl ? 'bg-black/5 dark:bg-white/5' : ''}`}
+                  className={`w-full text-left px-3.5 py-2.5 text-sm flex items-center justify-between transition-colors ${hl ? 'bg-black/5 dark:bg-white/5' : ''}`}
                   style={{ color: sel ? theme.colors.textSecondary : theme.colors.textPrimary, opacity: sel ? 0.5 : 1 }}>
                   <span>{s}</span>
                   {sel && <Check className="w-3.5 h-3.5" style={{ color: theme.colors.accent }} />}
                 </button>
               );
             }) : (
-              <div className="px-3.5 py-4 text-[0.8125rem] text-center" style={{ color: theme.colors.textSecondary }}>No products found</div>
+              <div className="px-3.5 py-4 text-sm text-center" style={{ color: theme.colors.textSecondary }}>No products found</div>
             )}
           </div>
         </div>, document.body
@@ -186,7 +186,7 @@ export const ProductCard = React.memo(({ product, idx, onRemove, onUpdate, theme
       style={{ backgroundColor: theme.colors.surface, borderColor: showBorder ? subtleBorder : 'transparent' }}
     >
       <div className="flex items-center justify-between px-4 py-3">
-        <span className="text-[0.8125rem] font-semibold" style={{ color: theme.colors.textPrimary }}>{product.series}</span>
+        <span className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>{product.series}</span>
         <button type="button" onClick={() => onRemove(idx)}
           className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-all active:scale-[0.97]"
             style={{ color: theme.colors.error, backgroundColor: theme.colors.errorLight }}>

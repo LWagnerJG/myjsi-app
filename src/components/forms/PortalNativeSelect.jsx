@@ -230,7 +230,7 @@ export const PortalNativeSelect = ({
                       role="option"
                       aria-selected={isSelected}
                       type="button"
-                      className="w-full text-left flex items-center justify-between px-3.5 py-2.5 text-[0.8125rem] transition-colors cursor-pointer outline-none"
+                      className="w-full text-left flex items-center justify-between px-3.5 py-2.5 text-sm transition-colors cursor-pointer outline-none"
                       style={{
                         color: optMuted ? c.textSecondary : c.textPrimary,
                         fontWeight: isSelected ? 700 : 500,
