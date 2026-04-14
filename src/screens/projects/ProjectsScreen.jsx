@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Briefcase, MapPin, Plus, X, Building2, Upload, ImageIcon, Search } from 'lucide-react';
+import { Briefcase, MapPin, Plus, X, Building2, Upload, ImageIcon, Search, ChevronDown, Check, Store, Pencil } from 'lucide-react';
 import { EmptyState as SharedEmptyState } from '../../components/common/EmptyState.jsx';
 import { INSTALLATION_CONSTANTS } from './installation-data.js';
 import { CITY_OPTIONS } from '../../constants/locations.js';
@@ -19,10 +19,89 @@ import { CustomerMicrositeScreen } from './customers/CustomerMicrositeScreen.jsx
 /* ── vertical options (matches VERTICAL_COLORS keys + extras) ── */
 const VERTICAL_OPTIONS = ['Corporate', 'Healthcare', 'HigherEd', 'Government', 'Hospitality', 'Education', 'Other'];
 
+/* ── Customer type config ── */
+const CUSTOMER_TYPES = [
+  { id: 'end-users',    label: 'End Users',    singular: 'End User',    icon: Building2 },
+  { id: 'dealers',      label: 'Dealers',      singular: 'Dealer',      icon: Store     },
+  { id: 'design-firms', label: 'Design Firms', singular: 'Design Firm', icon: Pencil    },
+];
+
+/* ── Type dropdown — branded title + popover ── */
+const TypeDropdown = React.memo(({ value, onChange, theme }) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const isDark = isDarkTheme(theme);
+  const c = theme.colors;
+  const current = CUSTOMER_TYPES.find(t => t.id === value) || CUSTOMER_TYPES[0];
+
+  useEffect(() => {
+    if (!open) return;
+    const close = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', close);
+    document.addEventListener('touchstart', close, { passive: true });
+    return () => { document.removeEventListener('mousedown', close); document.removeEventListener('touchstart', close); };
+  }, [open]);
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="flex items-center gap-1.5 active:opacity-60 transition-opacity select-none"
+        style={{ WebkitTapHighlightColor: 'transparent' }}
+      >
+        <span className="text-[1.375rem] font-bold tracking-tight leading-none" style={{ color: c.textPrimary }}>
+          {current.label}
+        </span>
+        <ChevronDown
+          className={`w-[18px] h-[18px] transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+          style={{ color: c.textSecondary, opacity: 0.55, marginTop: 2 }}
+        />
+      </button>
+
+      {open && (
+        <div
+          className="absolute left-0 top-full mt-2 z-50 rounded-2xl overflow-hidden"
+          style={{
+            backgroundColor: isDark ? 'rgba(35,35,35,0.96)' : c.surface,
+            border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.08)',
+            boxShadow: isDark ? '0 8px 32px rgba(0,0,0,0.55)' : '0 8px 28px rgba(0,0,0,0.13)',
+            minWidth: 170,
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+          }}
+        >
+          {CUSTOMER_TYPES.map((type, idx) => {
+            const Icon = type.icon;
+            const active = type.id === value;
+            return (
+              <button
+                key={type.id}
+                onClick={() => { onChange(type.id); setOpen(false); }}
+                className="w-full text-left px-4 py-3 flex items-center gap-3 transition-colors"
+                style={{
+                  color: active ? c.accent : c.textPrimary,
+                  borderTop: idx > 0 ? `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'}` : 'none',
+                }}
+                onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.03)'}
+                onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+              >
+                <Icon className="w-4 h-4 flex-shrink-0" style={{ color: active ? c.accent : c.textSecondary, opacity: active ? 1 : 0.5 }} />
+                <span className="text-sm font-semibold flex-1">{type.label}</span>
+                {active && <Check className="w-3.5 h-3.5 flex-shrink-0" style={{ color: c.accent }} />}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+});
+TypeDropdown.displayName = 'TypeDropdown';
+
 /* ═══════════════════════════════════════════════════════════════
    ADD CUSTOMER MODAL
    ═══════════════════════════════════════════════════════════════ */
-const AddCustomerModal = ({ theme, onClose, onAdd }) => {
+const AddCustomerModal = ({ theme, onClose, onAdd, customerType = 'end-users', typeSingular = 'Customer' }) => {
   const isDark = isDarkTheme(theme);
   const c = theme.colors;
   const border = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)';
@@ -50,8 +129,10 @@ const AddCustomerModal = ({ theme, onClose, onAdd }) => {
     const city = parts[0] || location.trim();
     const state = (parts[1] || '').toUpperCase().slice(0, 2);
 
+    const typeMap = { 'dealers': 'dealer', 'design-firms': 'design-firm', 'end-users': 'end-user' };
     const newCustomer = {
       id: `cust-${Date.now()}`,
+      type: typeMap[customerType] || 'end-user',
       name: name.trim(),
       location: { city, state },
       vertical: resolvedVertical,
@@ -81,7 +162,7 @@ const AddCustomerModal = ({ theme, onClose, onAdd }) => {
             <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: `${c.accent}15` }}>
               <Building2 className="w-4 h-4" style={{ color: c.accent }} />
             </div>
-            <h2 className="text-base font-bold" style={{ color: c.textPrimary }}>Add Customer</h2>
+            <h2 className="text-base font-bold" style={{ color: c.textPrimary }}>Add {typeSingular}</h2>
           </div>
           <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
             style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}>
@@ -181,7 +262,7 @@ const AddCustomerModal = ({ theme, onClose, onAdd }) => {
             <button onClick={handleSubmit}
               className="flex-1 py-3 rounded-xl text-sm font-bold transition-all active:scale-[0.97]"
               style={{ backgroundColor: c.accent, color: c.accentText }}>
-              Add Customer
+              Add {typeSingular}
             </button>
           </div>
         </div>
@@ -475,6 +556,7 @@ export const ProjectsScreen = forwardRef(({
   const [selectedOpportunity, setSelectedOpportunity] = useState(null);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [customers, setCustomers] = useState(MOCK_CUSTOMERS);
+  const [customerType, setCustomerType] = usePersistentState('pref.projects.customerType', 'end-users');
   const [showAddCustomer, setShowAddCustomer] = useState(false);
   const [showAddInstall, setShowAddInstall] = useState(false);
   const stagesScrollRef = useRef(null);
@@ -570,12 +652,23 @@ export const ProjectsScreen = forwardRef(({
     setCustomers(prev => [...prev, newCustomer]);
   }, []);
 
+  /* ── Filtered customers for current type ── */
+  const filteredCustomers = useMemo(() => {
+    if (customerType === 'dealers')       return customers.filter(c => c.type === 'dealer');
+    if (customerType === 'design-firms')  return customers.filter(c => c.type === 'design-firm');
+    return customers.filter(c => !c.type || c.type === 'end-user');
+  }, [customers, customerType]);
+
   /* ── CTA config per tab ── */
+  const ctaSingular = useMemo(
+    () => CUSTOMER_TYPES.find(t => t.id === customerType)?.singular || 'Customer',
+    [customerType],
+  );
   const cta = useMemo(() => ({
-    pipeline:      { label: 'Project',  action: () => onNavigate('new-lead') },
-    customers:     { label: 'Customer', action: () => setShowAddCustomer(true) },
-    'my-projects': { label: 'Install',  action: () => setShowAddInstall(true) },
-  })[projectsTab], [projectsTab, onNavigate]);
+    pipeline:      { label: 'Project',    action: () => onNavigate('new-lead') },
+    customers:     { label: ctaSingular,  action: () => setShowAddCustomer(true) },
+    'my-projects': { label: 'Install',    action: () => onNavigate('add-new-install') },
+  })[projectsTab], [projectsTab, ctaSingular, onNavigate]);
 
   /* ── Sub-screen renders ── */
   if (selectedCustomer) return (
@@ -603,25 +696,34 @@ export const ProjectsScreen = forwardRef(({
 
       {/* ── Top controls bar ── */}
       <div className="flex-shrink-0" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 12px)', backgroundColor: theme.colors.background }}>
+        {/* Row 1 — full-width toggle */}
         <div className="px-4 sm:px-6 lg:px-8 pb-3 max-w-5xl mx-auto w-full">
-          <div className="flex items-center justify-between gap-2">
-            <SegmentedToggle
-              value={projectsTab}
-              onChange={setProjectsTab}
-              options={PROJECTS_TAB_OPTIONS}
-              size="sm"
-              theme={theme}
-            />
-            {cta && (
-              <button
-                onClick={cta.action}
-                className="flex-shrink-0 inline-flex items-center justify-center gap-1 rounded-full text-[0.8125rem] font-semibold transition-all whitespace-nowrap active:scale-[0.97]"
-                style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText, paddingTop: 9, paddingBottom: 9, paddingLeft: 12, paddingRight: 14 }}
-              >
-                <Plus size={13} strokeWidth={2.5} /> {cta.label}
-              </button>
-            )}
-          </div>
+          <SegmentedToggle
+            value={projectsTab}
+            onChange={setProjectsTab}
+            options={PROJECTS_TAB_OPTIONS}
+            size="sm"
+            theme={theme}
+            fullWidth
+          />
+        </div>
+
+        {/* Row 2 — contextual title + CTA */}
+        <div className="px-4 sm:px-6 lg:px-8 pb-3 max-w-5xl mx-auto w-full flex items-center justify-between gap-3">
+          {projectsTab === 'customers' ? (
+            <TypeDropdown value={customerType} onChange={setCustomerType} theme={theme} />
+          ) : (
+            <div /> /* spacer keeps CTA right-aligned on other tabs */
+          )}
+          {cta && (
+            <button
+              onClick={cta.action}
+              className="flex-shrink-0 inline-flex items-center justify-center gap-1 rounded-full text-sm font-semibold transition-all whitespace-nowrap active:scale-[0.97]"
+              style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText, paddingTop: 9, paddingBottom: 9, paddingLeft: 14, paddingRight: 16 }}
+            >
+              <Plus size={13} strokeWidth={2.5} /> {cta.label}
+            </button>
+          )}
         </div>
 
         {/* Pipeline stage strip */}
@@ -682,17 +784,17 @@ export const ProjectsScreen = forwardRef(({
 
         {/* CUSTOMERS tab */}
         {projectsTab === 'customers' && (
-          customers.length > 0 ? (
+          filteredCustomers.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-              {customers.map(cust => (
+              {filteredCustomers.map(cust => (
                 <CustomerCard key={cust.id} customer={cust} isDark={isDark}
                   onClick={() => setSelectedCustomer(cust)} />
               ))}
             </div>
           ) : (
             <SharedEmptyState icon={Building2} theme={theme}
-              title="No customers yet"
-              description='Tap "+ Customer" to add one.' />
+              title={`No ${ctaSingular.toLowerCase()}s yet`}
+              description={`Tap "+ ${ctaSingular}" to add one.`} />
           )
         )}
 
@@ -730,6 +832,8 @@ export const ProjectsScreen = forwardRef(({
           theme={theme}
           onClose={() => setShowAddCustomer(false)}
           onAdd={handleAddCustomer}
+          customerType={customerType}
+          typeSingular={ctaSingular}
         />
       )}
 

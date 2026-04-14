@@ -5,6 +5,7 @@
 export const MOCK_CUSTOMERS = [
   {
     id: 'cust-1',
+    type: 'end-user',
     name: 'Midwest Health Partners',
     domain: 'midwesthealthpartners.com',
     location: { city: 'Indianapolis', state: 'IN' },
@@ -120,6 +121,7 @@ export const MOCK_CUSTOMERS = [
 
   {
     id: 'cust-2',
+    type: 'end-user',
     name: 'Crane & Associates',
     domain: 'craneassociates.com',
     location: { city: 'Chicago', state: 'IL' },
@@ -192,6 +194,7 @@ export const MOCK_CUSTOMERS = [
 
   {
     id: 'cust-3',
+    type: 'end-user',
     name: 'State University System',
     domain: 'stateuniv.edu',
     location: { city: 'Columbus', state: 'OH' },
@@ -268,6 +271,7 @@ export const MOCK_CUSTOMERS = [
 
   {
     id: 'cust-4',
+    type: 'end-user',
     name: 'Greenfield Government Center',
     domain: 'greenfieldgov.org',
     location: { city: 'Greenfield', state: 'IN' },
@@ -308,6 +312,112 @@ export const MOCK_CUSTOMERS = [
 
     jsiRep: { name: 'Tom Bradley', role: 'Territory Manager', email: 'tbradley@jsifurniture.com', phone: '317-555-0163' },
   },
+
+  /* ── Dealers ── */
+  {
+    id: 'dealer-1', type: 'dealer',
+    name: 'Contract Source Interiors',
+    domain: 'contractsource.com',
+    location: { city: 'Chicago', state: 'IL' },
+    vertical: 'Full Service',
+    image: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=600&q=80',
+    standardsPrograms: [
+      { id: 'dsp-1', title: 'Preferred Dealer Agreement', code: 'CSI-PDA-2024', status: 'Active', startDate: '2024-01-01', endDate: '2027-01-01', summary: 'Authorized reseller agreement with preferred pricing tiers.', poRequirementText: null, purchasingAwarenessRequired: false, purchasingNotifiedAt: null, specialNotes: [], specialMaterials: [], attachments: [], lastUpdated: '2025-10-01', ownerName: 'Rachel Owens' },
+    ],
+    approvedMaterials: { laminates: [], metals: [], upholstery: [], woods: [], paintPlastic: [] },
+    orders: { current: [{ id: 'dord-1', orderNumber: 'JSI-94800', type: 'Standard', status: 'In Production', amount: 31200, eta: '2026-05-20', createdAt: '2026-02-14' }], history: [] },
+    projects: [], documents: [], typicals: [],
+    contacts: [
+      { id: 'dc1', name: 'Rachel Owens', role: 'Sales Manager', email: 'rowens@contractsource.com', visibility: 'dealer' },
+      { id: 'dc2', name: 'Kevin Blake', role: 'Project Coordinator', email: 'kblake@contractsource.com', visibility: 'dealer' },
+    ],
+    jsiRep: { name: 'Sarah Mitchell', role: 'Account Executive', email: 'smitchell@jsifurniture.com', phone: '317-555-0142' },
+  },
+  {
+    id: 'dealer-2', type: 'dealer',
+    name: 'WorkSpace Environments',
+    domain: 'wsenviro.com',
+    location: { city: 'Indianapolis', state: 'IN' },
+    vertical: 'Corporate',
+    image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&q=80',
+    standardsPrograms: [],
+    approvedMaterials: { laminates: [], metals: [], upholstery: [], woods: [], paintPlastic: [] },
+    orders: { current: [], history: [{ id: 'dord-2', orderNumber: 'JSI-91500', type: 'Standard', status: 'Delivered', amount: 22400, completedAt: '2025-11-08', createdAt: '2025-07-01' }] },
+    projects: [], documents: [], typicals: [],
+    contacts: [
+      { id: 'dc3', name: 'Monica Lewis', role: 'Principal', email: 'mlewis@wsenviro.com', visibility: 'dealer' },
+    ],
+    jsiRep: { name: 'Sarah Mitchell', role: 'Account Executive', email: 'smitchell@jsifurniture.com', phone: '317-555-0142' },
+  },
+  {
+    id: 'dealer-3', type: 'dealer',
+    name: 'Apex Office Solutions',
+    domain: 'apexofficesolutions.com',
+    location: { city: 'Columbus', state: 'OH' },
+    vertical: 'Healthcare',
+    image: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=600&q=80',
+    standardsPrograms: [],
+    approvedMaterials: { laminates: [], metals: [], upholstery: [], woods: [], paintPlastic: [] },
+    orders: { current: [], history: [] },
+    projects: [], documents: [], typicals: [],
+    contacts: [
+      { id: 'dc4', name: 'James Tran', role: 'Sales Director', email: 'jtran@apexoffice.com', visibility: 'dealer' },
+    ],
+    jsiRep: { name: 'Tom Bradley', role: 'Territory Manager', email: 'tbradley@jsifurniture.com', phone: '317-555-0163' },
+  },
+
+  /* ── Design Firms ── */
+  {
+    id: 'df-1', type: 'design-firm',
+    name: 'Meridian Design Studio',
+    domain: 'meridianstudio.com',
+    location: { city: 'Chicago', state: 'IL' },
+    vertical: 'Workplace',
+    image: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=600&q=80',
+    standardsPrograms: [
+      { id: 'dfsp-1', title: 'Preferred Specification Agreement', code: 'MDS-PSA-2025', status: 'Active', startDate: '2025-06-01', endDate: '2028-06-01', summary: 'Preferred specification relationship with JSI product libraries.', poRequirementText: null, purchasingAwarenessRequired: false, purchasingNotifiedAt: null, specialNotes: ['JSI library integrated in Revit workflow'], specialMaterials: [], attachments: [], lastUpdated: '2025-09-14', ownerName: 'Amanda Reyes' },
+    ],
+    approvedMaterials: { laminates: [], metals: [], upholstery: [], woods: [], paintPlastic: [] },
+    orders: { current: [], history: [] },
+    projects: [], documents: [], typicals: [],
+    contacts: [
+      { id: 'dfc1', name: 'Amanda Reyes', role: 'Principal, Interior Design', email: 'areyes@meridianstudio.com', visibility: 'dealer' },
+      { id: 'dfc2', name: 'Carlos Diaz', role: 'Project Designer', email: 'cdiaz@meridianstudio.com', visibility: 'dealer' },
+    ],
+    jsiRep: { name: 'Sarah Mitchell', role: 'Account Executive', email: 'smitchell@jsifurniture.com', phone: '317-555-0142' },
+  },
+  {
+    id: 'df-2', type: 'design-firm',
+    name: 'Foundry Architecture + Interiors',
+    domain: 'foundryai.com',
+    location: { city: 'Indianapolis', state: 'IN' },
+    vertical: 'Healthcare',
+    image: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=600&q=80',
+    standardsPrograms: [],
+    approvedMaterials: { laminates: [], metals: [], upholstery: [], woods: [], paintPlastic: [] },
+    orders: { current: [], history: [] },
+    projects: [], documents: [], typicals: [],
+    contacts: [
+      { id: 'dfc3', name: 'Brianna Cole', role: 'Senior Interior Designer', email: 'bcole@foundryai.com', visibility: 'dealer' },
+    ],
+    jsiRep: { name: 'Sarah Mitchell', role: 'Account Executive', email: 'smitchell@jsifurniture.com', phone: '317-555-0142' },
+  },
+  {
+    id: 'df-3', type: 'design-firm',
+    name: 'Nucleus Creative Group',
+    domain: 'nucleuscreative.com',
+    location: { city: 'Detroit', state: 'MI' },
+    vertical: 'Education',
+    image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=600&q=80',
+    standardsPrograms: [],
+    approvedMaterials: { laminates: [], metals: [], upholstery: [], woods: [], paintPlastic: [] },
+    orders: { current: [], history: [] },
+    projects: [], documents: [], typicals: [],
+    contacts: [
+      { id: 'dfc4', name: 'Tyrone Nash', role: 'Creative Director', email: 'tnash@nucleuscreative.com', visibility: 'dealer' },
+    ],
+    jsiRep: { name: 'Tom Bradley', role: 'Territory Manager', email: 'tbradley@jsifurniture.com', phone: '317-555-0163' },
+  },
 ];
 
 export const VERTICAL_COLORS = {
@@ -316,6 +426,9 @@ export const VERTICAL_COLORS = {
   HigherEd: '#8B6914',
   Government: '#6B4E8A',
   Hospitality: '#8A5C2E',
+  Education: '#7A5C2E',
+  'Full Service': '#2E5C7A',
+  Workplace: '#4A6B7C',
 };
 
 export const ORDER_STATUS_COLORS = {
