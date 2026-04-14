@@ -142,7 +142,7 @@ export const ChatOverlay = ({
                             </div>
                             <div className="flex items-center gap-1.5">
                                 <Sparkles className="w-3 h-3" style={{ color: '#D3A891' }} />
-                                <span className="text-[0.6875rem]" style={{ color: colors.textSecondary }}>
+                                <span className="text-xs" style={{ color: colors.textSecondary }}>
                                     JSI Sales Assistant
                                 </span>
                             </div>
@@ -176,7 +176,7 @@ export const ChatOverlay = ({
                                 Hey, I&apos;m Elliott!
                             </p>
                             <p
-                                className="text-[0.8125rem] text-center mb-6 max-w-[280px]"
+                                className="text-sm text-center mb-6 max-w-[280px]"
                                 style={{ color: colors.textSecondary, animation: 'elliott-fade-up 0.4s ease-out 0.1s both' }}
                             >
                                 Your JSI sales assistant. I know lead times, orders, commissions, contracts&nbsp;&mdash; ask me anything.
@@ -236,7 +236,7 @@ export const ChatOverlay = ({
                                                 {msg.attachments.map((file) => (
                                                     <span
                                                         key={file.id}
-                                                        className="text-[0.6875rem] px-2 py-1 rounded-full"
+                                                        className="text-xs px-2 py-1 rounded-full"
                                                         style={{
                                                             backgroundColor: msg.role === 'user' ? 'rgba(255,255,255,0.2)' : `${colors.border}66`,
                                                             color: msg.role === 'user' ? '#FFFFFF' : colors.textSecondary
@@ -286,7 +286,7 @@ export const ChatOverlay = ({
 
                                     {/* ── Timestamp + Copy/Share row ──── */}
                                     <div className={`flex items-center gap-2 mt-1 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                        <span className="text-[0.625rem]" style={{ color: colors.textSecondary, opacity: 0.6 }}>
+                                        <span className="text-xs" style={{ color: colors.textSecondary, opacity: 0.6 }}>
                                             {formatTimestamp(msg.timestamp)}
                                         </span>
                                         {msg.role === 'assistant' && (

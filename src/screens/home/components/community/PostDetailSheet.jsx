@@ -44,8 +44,8 @@ export const PostDetailSheet = ({ post, theme, dark, isLiked, isUpvoted, onToggl
           <div className="flex items-center gap-2.5">
             <MiniAvatar src={post.user?.avatar} name={post.user?.name} dark={dark} />
             <div>
-              <p className="text-[0.8125rem] font-semibold" style={{ color: theme.colors.textPrimary }}>{post.user?.name}</p>
-              <p className="text-[0.6875rem]" title={formatExact(post.createdAt)} style={{ color: theme.colors.textSecondary }}>{formatTs(post.createdAt)}</p>
+              <p className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>{post.user?.name}</p>
+              <p className="text-xs" title={formatExact(post.createdAt)} style={{ color: theme.colors.textSecondary }}>{formatTs(post.createdAt)}</p>
             </div>
           </div>
           <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }}>
@@ -56,7 +56,7 @@ export const PostDetailSheet = ({ post, theme, dark, isLiked, isUpvoted, onToggl
         {/* Scrollable body */}
         <div className="flex-1 overflow-y-auto px-4 pb-2 space-y-3">
           {post.title && <p className="text-[0.9375rem] font-bold" style={{ color: theme.colors.textPrimary }}>{post.title}</p>}
-          {post.text && <p className="text-[0.8125rem] leading-relaxed whitespace-pre-line" style={{ color: theme.colors.textSecondary }}>{post.text}</p>}
+          {post.text && <p className="text-sm leading-relaxed whitespace-pre-line" style={{ color: theme.colors.textSecondary }}>{post.text}</p>}
           {post.image && (
             <button onClick={() => setLightboxSrc(post.image)} className="block w-full relative group rounded-2xl overflow-hidden">
               <img src={post.image} alt="post" className="w-full rounded-2xl object-cover" />
@@ -103,7 +103,7 @@ export const PostDetailSheet = ({ post, theme, dark, isLiked, isUpvoted, onToggl
           <div className="space-y-2 pb-2">
             {localComments.map(c => (
               <div key={c.id} className="flex items-start gap-2">
-                <div className="w-6 h-6 rounded-full flex items-center justify-center text-[0.625rem] font-bold flex-shrink-0" style={{ backgroundColor: dark ? '#333' : '#EDEAE4', color: theme.colors.textSecondary }}>
+                <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0" style={{ backgroundColor: dark ? '#333' : '#EDEAE4', color: theme.colors.textSecondary }}>
                   {c.name?.[0] || '?'}
                 </div>
                 <div className="flex-1 rounded-xl px-2.5 py-1.5" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.03)' }}>
@@ -124,7 +124,7 @@ export const PostDetailSheet = ({ post, theme, dark, isLiked, isUpvoted, onToggl
             value={draft}
             onChange={e => setDraft(e.target.value)}
             placeholder="Add a comment\u2026"
-            className="flex-1 text-[0.8125rem] px-3 py-2 rounded-full outline-none"
+            className="flex-1 text-sm px-3 py-2 rounded-full outline-none"
             style={{ backgroundColor: dark ? '#333' : '#f0ede8', color: theme.colors.textPrimary }}
           />
           <button

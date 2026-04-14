@@ -68,7 +68,7 @@ export const ChannelAwareFeed = ({
   return (
     <div>
       {!hasAnything ? (
-        <div className="text-center text-[0.8125rem] pt-16" style={{ color: theme.colors.textSecondary }}>No content found.</div>
+        <div className="text-center text-sm pt-16" style={{ color: theme.colors.textSecondary }}>No content found.</div>
       ) : (
         <>
           {trendingFeed.length > 0 && (

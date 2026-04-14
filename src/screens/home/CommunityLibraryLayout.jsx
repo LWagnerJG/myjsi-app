@@ -123,7 +123,7 @@ export const CommunityLibraryLayout = ({
                 ) : null}
                 <button
                   onClick={openCreateContentModal}
-                  className="h-8 px-3.5 rounded-full text-[0.8125rem] font-semibold transition-all duration-150 active:scale-95 flex-shrink-0 ml-auto"
+                  className="h-8 px-3.5 rounded-full text-sm font-semibold transition-all duration-150 active:scale-95 flex-shrink-0 ml-auto"
                   style={{
                     backgroundColor: theme.colors.accent || theme.colors.textPrimary,
                     color: theme.colors.accentText || '#FFFFFF',
@@ -155,7 +155,7 @@ export const CommunityLibraryLayout = ({
                 {activeAction ? (
                   <button
                     onClick={activeAction}
-                    className="h-8 px-3.5 rounded-full text-[0.8125rem] font-semibold transition-all duration-150 active:scale-95 flex-shrink-0 ml-auto"
+                    className="h-8 px-3.5 rounded-full text-sm font-semibold transition-all duration-150 active:scale-95 flex-shrink-0 ml-auto"
                     style={{
                       backgroundColor: theme.colors.accent || theme.colors.textPrimary,
                       color: theme.colors.accentText || '#FFFFFF',

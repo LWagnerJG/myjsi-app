@@ -32,17 +32,17 @@ export const SubredditPostCard = ({ post, idx, isTop, dark, theme, isLiked, isUp
       <div className="p-3.5 pb-2">
         <div className="flex items-center gap-2 mb-1.5">
           {isTop && typeof idx === 'number' && (
-            <span className="text-[0.625rem] font-bold w-4.5 h-4.5 rounded-full flex items-center justify-center flex-shrink-0"
+            <span className="text-xs font-bold w-4.5 h-4.5 rounded-full flex items-center justify-center flex-shrink-0"
               style={{ backgroundColor: dark ? 'rgba(53,53,53,0.25)' : 'rgba(53,53,53,0.08)', color: theme.colors.accent }}>
               {idx + 1}
             </span>
           )}
           <MiniAvatar src={post.user?.avatar} name={post.user?.name} dark={dark} />
           <span className="text-xs font-semibold" style={{ color: theme.colors.textPrimary }}>{post.user?.name}</span>
-          <span className="text-[0.6875rem] ml-auto cursor-default" title={formatExact(post.createdAt)} style={{ color: theme.colors.textSecondary }}>{formatTs(post.createdAt)}</span>
+          <span className="text-xs ml-auto cursor-default" title={formatExact(post.createdAt)} style={{ color: theme.colors.textSecondary }}>{formatTs(post.createdAt)}</span>
         </div>
         <button onClick={() => setShowDetail(true)} className="text-left w-full">
-          {post.title && <p className="text-[0.8125rem] font-bold mb-1" style={{ color: theme.colors.textPrimary }}>{post.title}</p>}
+          {post.title && <p className="text-sm font-bold mb-1" style={{ color: theme.colors.textPrimary }}>{post.title}</p>}
           <p className="text-xs leading-relaxed line-clamp-3" style={{ color: theme.colors.textSecondary }}>{post.text}</p>
         </button>
         {post.image && (
@@ -79,7 +79,7 @@ export const SubredditPostCard = ({ post, idx, isTop, dark, theme, isLiked, isUp
             <div className="space-y-1.5 pt-2.5">
               {localComments.map(c => (
                 <div key={c.id} className="flex items-start gap-2">
-                  <div className="w-5 h-5 rounded-full flex items-center justify-center text-[0.625rem] font-bold flex-shrink-0 mt-0.5" style={{ backgroundColor: dark ? '#333' : '#EDEAE4', color: theme.colors.textSecondary }}>
+                  <div className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5" style={{ backgroundColor: dark ? '#333' : '#EDEAE4', color: theme.colors.textSecondary }}>
                     {c.name?.[0] || '?'}
                   </div>
                   <div>

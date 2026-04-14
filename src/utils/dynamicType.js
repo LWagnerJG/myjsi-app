@@ -36,10 +36,11 @@ function readProbeSize(el) {
 
 function applyScale(probeEl) {
   const size  = readProbeSize(probeEl);
-  // Clamp: allow modest compaction at xSmall, cap at ~AX2 (23px body = 1.35x)
+  // Clamp: floor at 0.94 so the smallest iOS Dynamic Type setting ("xSmall")
+  // still produces comfortably readable text. Cap at ~AX2 (23px body = 1.35x)
   // so extreme accessibility sizes don't break px-locked chrome elements.
   // Nav/tile chrome uses explicit px so it never scales regardless of this.
-  const scale = Math.min(Math.max(size / IOS_DEFAULT_BODY_PX, 0.88), 1.35);
+  const scale = Math.min(Math.max(size / IOS_DEFAULT_BODY_PX, 0.94), 1.35);
 
   const root = document.documentElement;
   root.style.setProperty('--font-scale',     scale.toFixed(4));

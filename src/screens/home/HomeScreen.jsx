@@ -497,7 +497,7 @@ export const HomeScreen = React.memo(({
                             }}
                         >
                             <MessageSquarePlus className="w-4 h-4" />
-                            <span className="text-[0.8125rem] font-semibold">Share Feedback</span>
+                            <span className="text-sm font-semibold">Share Feedback</span>
                         </button>
                     </div>
                 )}

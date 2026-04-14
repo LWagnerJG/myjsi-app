@@ -16,18 +16,18 @@ export const PostMiniCard = ({ post, theme, dark, isLiked, isUpvoted, onToggleLi
         <div className="flex items-center gap-2 mb-1.5">
           <MiniAvatar src={post.user?.avatar} name={post.user?.name} dark={dark} size={24} />
           <span className="text-xs font-semibold" style={{ color: theme.colors.textPrimary }}>{post.user?.name}</span>
-          <span className="text-[0.6875rem] ml-auto" title={formatExact(post.createdAt)} style={{ color: theme.colors.textSecondary }}>{formatTs(post.createdAt)}</span>
+          <span className="text-xs ml-auto" title={formatExact(post.createdAt)} style={{ color: theme.colors.textSecondary }}>{formatTs(post.createdAt)}</span>
         </div>
         {post.title && <p className="text-xs font-semibold mb-0.5" style={{ color: theme.colors.textPrimary }}>{post.title}</p>}
         <p className="text-xs line-clamp-2 leading-relaxed" style={{ color: theme.colors.textSecondary }}>{post.text}</p>
         <div className="flex items-center gap-3 mt-2">
-          <span className="flex items-center gap-1 text-[0.6875rem]" style={{ color: isUpvoted ? '#f97316' : theme.colors.textSecondary }}>
+          <span className="flex items-center gap-1 text-xs" style={{ color: isUpvoted ? '#f97316' : theme.colors.textSecondary }}>
             <ChevronUp className="w-3 h-3" /> {post.upvotes || 0}
           </span>
-          <span className="flex items-center gap-1 text-[0.6875rem]" style={{ color: isLiked ? theme.colors.accent : theme.colors.textSecondary }}>
+          <span className="flex items-center gap-1 text-xs" style={{ color: isLiked ? theme.colors.accent : theme.colors.textSecondary }}>
             <Heart className="w-3 h-3" style={isLiked ? { fill: theme.colors.accent } : undefined} /> {post.likes || 0}
           </span>
-          <span className="flex items-center gap-1 text-[0.6875rem] ml-auto" style={{ color: theme.colors.textSecondary }}>
+          <span className="flex items-center gap-1 text-xs ml-auto" style={{ color: theme.colors.textSecondary }}>
             <MessageSquare className="w-3 h-3" /> {(post.comments || []).length}
           </span>
         </div>

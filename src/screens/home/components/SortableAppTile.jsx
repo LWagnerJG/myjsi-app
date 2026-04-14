@@ -85,7 +85,7 @@ export const SortableAppTile = React.memo(({ id, app, colors, onRemove, isRemove
             </div>
 
             <span
-                className="text-xs sm:text-[0.8125rem] font-semibold tracking-tight text-center leading-tight line-clamp-2 w-full px-0.5"
+                className="text-[0.8125rem] sm:text-sm font-semibold tracking-tight text-center leading-tight line-clamp-2 w-full px-0.5"
                 style={{ color: colors.textPrimary }}
             >
                 {app.name}
