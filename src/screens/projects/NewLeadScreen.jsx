@@ -1042,25 +1042,33 @@ export const NewLeadScreen = ({
             <Section title="Commercial Scope" subtitle="Sizing, timeline, and discount details." theme={theme}>
               <Row label="Estimated List" theme={theme} inline noSep>
                 <div>
-                  <input
-                    type="text"
-                    inputMode="decimal"
-                    pattern="[0-9.,]*"
-                    value={newLeadData.estimatedList || ''}
-                    onChange={(e) => { upd('estimatedList', e.target.value); markTouched('estimatedList'); }}
-                    onBlur={() => markTouched('estimatedList')}
-                    placeholder="Estimated list amount"
-                    className="w-full outline-none"
-                    style={{
-                      height: 40,
-                      borderRadius: 9999,
-                      border: `1px solid ${getSubtleBorder(theme)}`,
-                      backgroundColor: theme.colors.surface,
-                      color: theme.colors.textPrimary,
-                      fontSize: "0.8125rem",
-                      padding: '0 14px',
-                    }}
-                  />
+                  <div className="relative w-full">
+                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none select-none" style={{ color: theme.colors.textSecondary, fontSize: "0.8125rem" }}>$</span>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9,]*"
+                      value={newLeadData.estimatedList || ''}
+                      onChange={(e) => {
+                        const digits = e.target.value.replace(/[^0-9]/g, '');
+                        const formatted = digits ? Number(digits).toLocaleString('en-US') : '';
+                        upd('estimatedList', formatted);
+                        markTouched('estimatedList');
+                      }}
+                      onBlur={() => markTouched('estimatedList')}
+                      placeholder="0"
+                      className="w-full outline-none"
+                      style={{
+                        height: 40,
+                        borderRadius: 9999,
+                        border: `1px solid ${getSubtleBorder(theme)}`,
+                        backgroundColor: theme.colors.surface,
+                        color: theme.colors.textPrimary,
+                        fontSize: "0.8125rem",
+                        padding: '0 14px 0 26px',
+                      }}
+                    />
+                  </div>
                   <FieldError show={!!visibleError('estimatedList')} message={visibleError('estimatedList')} />
                 </div>
               </Row>
