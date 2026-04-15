@@ -1,5 +1,6 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { FileText, Search, Upload, X } from 'lucide-react';
+import { getProjectDisplayName } from '../../utils/projectHelpers.js';
 import { PrimaryButton, SecondaryButton } from './JSIButtons.jsx';
 import { Modal } from './Modal.jsx';
 
@@ -28,7 +29,7 @@ export const SpecCheckRequestModal = ({
     const normalizedProjects = useMemo(
         () => (myProjects || []).map((project) => ({
             ...project,
-            displayName: project?.name || project?.projectName || '',
+            displayName: getProjectDisplayName(project),
         })),
         [myProjects]
     );

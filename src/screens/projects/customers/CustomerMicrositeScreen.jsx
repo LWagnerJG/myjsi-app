@@ -7,12 +7,13 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { isDarkTheme, DESIGN_TOKENS, JSI_COLORS } from '../../../design-system/tokens.js';
 import { getModalMotion } from '../../../design-system/motion.js';
+import { formatCurrency, formatLongDate } from '../../../utils/format.js';
 import {
   VERTICAL_COLORS, ORDER_STATUS_COLORS, MATERIAL_CATEGORIES, INSTALL_SPACE_TYPES, getAllInstalls,
 } from './customerData.js';
 
-const fmtMoney = v => (v ?? 0).toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
-const fmtDate = d => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+const fmtMoney = formatCurrency;
+const fmtDate = formatLongDate;
 
 /* ═══════════════════════════════════════════════════════════════
    SECTION CARD PRIMITIVE
@@ -155,7 +156,7 @@ const StandardsProgramDetailModal = ({ program, customer, theme, onClose }) => {
                   ['Effective', `${new Date(program.startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })} – ${new Date(program.endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`],
                   ['Status', program.status],
                   ['Owner', program.ownerName],
-                  ['Updated', new Date(program.lastUpdated).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })],
+                  ['Updated', formatLongDate(program.lastUpdated)],
                 ].map(([label, val]) => (
                   <div key={label}>
                     <span className="font-semibold" style={{ color: c.textSecondary }}>{label}: </span>
@@ -186,7 +187,7 @@ const StandardsProgramDetailModal = ({ program, customer, theme, onClose }) => {
                 <p className="text-[0.6875rem] font-bold uppercase tracking-wider mb-1.5" style={{ color: c.textSecondary, opacity: 0.6 }}>Purchasing Visibility</p>
                 <p className="text-sm" style={{ color: c.textPrimary }}>
                   Purchasing awareness required.
-                  {program.purchasingNotifiedAt && ` Notified ${new Date(program.purchasingNotifiedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}.`}
+                  {program.purchasingNotifiedAt && ` Notified ${formatLongDate(program.purchasingNotifiedAt)}.`}
                 </p>
               </div>
             )}

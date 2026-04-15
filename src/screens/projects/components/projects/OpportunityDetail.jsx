@@ -1,6 +1,7 @@
 ﻿import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { ChevronDown, Upload, FileText, Eye, Send, Paperclip, Users, Clock, CheckCircle, AlertCircle, Loader2, Share2, Download, ExternalLink } from 'lucide-react';
 import { isDarkTheme, DESIGN_TOKENS, JSI_COLORS } from '../../../../design-system/tokens.js';
+import { formatCurrency } from '../../../../utils/format.js';
 import { STAGES, VERTICALS, COMPETITORS, DISCOUNT_OPTIONS, PO_TIMEFRAMES, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS } from '../../data.js';
 import { JSI_SERIES } from '../../../products/data.js';
 import { PrimaryButton } from '../../../../components/common/JSIButtons.jsx';
@@ -17,7 +18,6 @@ const parseCurrency = (raw) => {
   const n = Number(String(raw).replace(/[^0-9.]/g, ''));
   return Number.isFinite(n) ? n : 0;
 };
-const fmtCurrency = (n) => n > 0 ? `$${n.toLocaleString()}` : '\u2014';
 const SPIFF_502010_MIN_LIST = 10000;
 
 /* ---- section primitives ---- */
@@ -272,7 +272,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
 
           {/* HERO */}
           <div className="pb-0.5">
-            <input value={draft.project || draft.name || ''} onChange={e => update(draft.project !== undefined ? 'project' : 'name', e.target.value)}
+            <input value={draft.name || ''} onChange={e => update('name', e.target.value)}
               className="w-full bg-transparent outline-none text-xl font-bold tracking-tight leading-tight" style={{ color: c.textPrimary }} placeholder="Project name" />
             <div className="flex items-center gap-2 mt-0.5">
               <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: c.accent, opacity: 0.5 }} />
@@ -302,7 +302,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
               <div className="w-px h-7 flex-shrink-0" style={{ backgroundColor: divider }} />
               <div className="flex-1 min-w-0">
                 <span className="text-[0.625rem] font-bold uppercase tracking-[0.08em] block mb-0.5" style={{ color: c.accent, opacity: 0.7 }}>Net Value</span>
-                <span className="text-[0.8125rem] font-bold tracking-tight leading-none" style={{ color: c.textPrimary }}>{netValue > 0 && discountPct > 0 ? fmtCurrency(netValue) : '\u2014'}</span>
+                <span className="text-[0.8125rem] font-bold tracking-tight leading-none" style={{ color: c.textPrimary }}>{netValue > 0 && discountPct > 0 ? formatCurrency(netValue) : '\u2014'}</span>
               </div>
             </div>
             <div className="h-px mt-2" style={{ backgroundColor: divider }} />
@@ -519,11 +519,11 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
             source: 'opportunity-detail',
             metadata: { opportunityId: draft.id || null },
           });
-          const newQuote = createQuoteListItem(record, data.projectName || draft.project || draft.name || 'Untitled');
+          const newQuote = createQuoteListItem(record, data.projectName || draft.name || 'Untitled');
           update('quotes', [...(draft.quotes || []), newQuote]);
           setQuoteModalOpen(false);
         }}
-        initialData={{ projectName: draft.project || draft.name || '', dealerName: (draft.dealers || [])[0] || '', adFirm: (draft.designFirms || [])[0] || '' }} />
+        initialData={{ projectName: draft.name || '', dealerName: (draft.dealers || [])[0] || '', adFirm: (draft.designFirms || [])[0] || '' }} />
     </div>
   );
 };

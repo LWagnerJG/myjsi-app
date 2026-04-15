@@ -3,13 +3,7 @@ import { ChevronDown } from 'lucide-react';
 import { COMMISSIONS_DATA, COMMISSION_YEARS } from './data.js';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import { subtleBg } from '../../../design-system/tokens.js';
-import { formatCurrency } from '../../../utils/format.js';
-
-const formatCompact = (v) => {
-  if (v >= 1_000_000) return `$${(v / 1_000_000).toFixed(1)}M`;
-  if (v >= 1_000) return `$${(v / 1_000).toFixed(0)}k`;
-  return `$${v}`;
-};
+import { formatCurrency, formatCurrencyCompact } from '../../../utils/format.js';
 
 export const CommissionsScreen = ({ theme }) => {
   const [openId, setOpenId] = useState(null);
@@ -89,7 +83,7 @@ export const CommissionsScreen = ({ theme }) => {
                                     <div className="text-[0.6875rem] font-medium flex items-center gap-2 mt-0.5" style={{ color: colors.textSecondary }}>
                                       <span>{inv.so}</span>
                                       <span>·</span>
-                                      <span>Net {formatCompact(inv.netAmount)}</span>
+                                      <span>Net {formatCurrencyCompact(inv.netAmount)}</span>
                                       <span>·</span>
                                       <span>{rate}%</span>
                                     </div>

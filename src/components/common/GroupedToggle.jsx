@@ -119,6 +119,4 @@ export const SegmentedToggle = ({
   );
 };
 
-// Backward compatible export
-export const GroupedToggle = SegmentedToggle;
 

@@ -80,6 +80,14 @@ export const formatShortDate = (dateStr) =>
   formatDate(dateStr, { month: 'short', day: 'numeric' });
 
 /**
+ * Format a date with short month, day, and year — returns '—' for missing/invalid input.
+ * @param {string|Date} dateStr - Date to format
+ * @returns {string} Formatted date (e.g., "Jan 15, 2025") or '—'
+ */
+export const formatLongDate = (dateStr) =>
+  dateStr ? (formatDate(dateStr, { month: 'short', day: 'numeric', year: 'numeric' }) || '—') : '—';
+
+/**
  * Format a date with weekday, short month and day
  * @param {string|Date} dateStr - Date to format
  * @returns {string} Formatted date (e.g., "Mon, Jan 15")

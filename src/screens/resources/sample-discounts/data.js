@@ -53,5 +53,3 @@ export const SAMPLE_POLICIES = [
   },
 ];
 
-// Backward-compat alias for consumers that import the old name
-export const SAMPLE_DISCOUNTS_DATA = SAMPLE_POLICIES;

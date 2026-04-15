@@ -6,20 +6,13 @@ import { CUSTOMER_RANK_DATA } from './data.js';
 import { isDarkTheme } from '../../design-system/tokens.js';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrendingUp, TrendingDown, ChevronRight, Search, X } from 'lucide-react';
-import { formatCurrency } from '../../utils/format.js';
+import { formatCurrency, formatCurrencyCompact } from '../../utils/format.js';
 import { ScreenTopChrome } from '../../components/common/ScreenTopChrome.jsx';
 
 const RANKING_TAB_OPTIONS = [
     { value: 'sales', label: 'Sales' },
     { value: 'bookings', label: 'Bookings' }
 ];
-
-const formatCompact = (n) => {
-    const abs = Math.abs(n);
-    if (abs >= 1e6) return `$${(n / 1e6).toFixed(1)}M`;
-    if (abs >= 1e3) return `$${(n / 1e3).toFixed(0)}K`;
-    return `$${n.toFixed(0)}`;
-};
 
 // Podium rank styling — gold / silver / bronze
 const RANK_CONFIG = {
@@ -119,7 +112,7 @@ export const CustomerRankingScreen = ({ theme, onNavigate }) => {
                             {/* Secondary metric */}
                             <div className="flex items-center gap-1 shrink-0">
                                 <span className="text-[0.6875rem] font-medium tabular-nums" style={{ color: theme.colors.textSecondary }}>
-                                    {formatCompact(otherVal)} {otherTab === 'sales' ? 'sold' : 'booked'}
+                                    {formatCurrencyCompact(otherVal)} {otherTab === 'sales' ? 'sold' : 'booked'}
                                 </span>
                                 {delta !== 0 && (
                                     <span className="flex items-center text-[0.6875rem] font-bold" style={{ color: delta > 0 ? (isDark ? '#6B9B7A' : '#4A7C59') : (isDark ? '#C87070' : '#B85C5C') }}>

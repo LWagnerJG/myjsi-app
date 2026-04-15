@@ -5,6 +5,7 @@ import { PrimaryButton, SecondaryButton } from '../../../../components/common/JS
 import { Send, User, Calendar, MessageSquare } from 'lucide-react';
 import { CURRENT_USER, SALES_REPS } from '../data.js';
 import { hapticSuccess } from '../../../../utils/haptics.js';
+import { getProjectDisplayName } from '../../../../utils/projectHelpers.js';
 
 const getRepById = (repId) => SALES_REPS.find(r => r.id === repId);
 
@@ -29,8 +30,8 @@ export const TransferRequestModal = ({
     const filteredProjects = useMemo(() => {
         const q = formData.projectName.trim().toLowerCase();
         if (!q) return (myProjects || []).slice(0, 6);
-        return (myProjects || []).filter(p => 
-            (p.name || p.projectName || '').toLowerCase().includes(q)
+        return (myProjects || []).filter(p =>
+            getProjectDisplayName(p).toLowerCase().includes(q)
         ).slice(0, 6);
     }, [formData.projectName, myProjects]);
 
@@ -119,11 +120,11 @@ export const TransferRequestModal = ({
                                         className="w-full text-left px-4 py-2 text-sm hover:bg-black/5 transition-colors"
                                         style={{ color: theme.colors.textPrimary }}
                                         onMouseDown={() => {
-                                            setFormData({ ...formData, projectName: p.name || p.projectName });
+                                            setFormData({ ...formData, projectName: getProjectDisplayName(p) });
                                             setShowProjectDropdown(false);
                                         }}
                                     >
-                                        {p.name || p.projectName}
+                                        {getProjectDisplayName(p)}
                                     </button>
                                 ))}
                             </div>

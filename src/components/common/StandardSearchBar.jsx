@@ -16,7 +16,6 @@ export const StandardSearchBar = ({ value, onChange, placeholder='Search...', th
       onChange={handleChange}
       placeholder={placeholder}
       theme={theme}
-      variant="header"
       className={className}
       inputClassName={inputClassName}
       autoFocus={autoFocus}

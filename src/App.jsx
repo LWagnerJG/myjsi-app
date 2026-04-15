@@ -411,7 +411,11 @@ function App() {
     const handleLeadSuccess = useCallback((lead) => {
         // Fire-and-forget: send lead data to shared Excel via Power Automate
         submitLeadToExcel(lead);
-        const newOpp = { id: Date.now(), name: lead.project || 'Untitled Project', stage: lead.projectStatus && STAGES.includes(lead.projectStatus) ? lead.projectStatus : STAGES[0], discount: lead.discount || 'Undecided', value: lead.estimatedList || '$0', company: lead.designFirms?.[0] || lead.dealers?.[0] || 'Unknown', contact: lead.contact || '', poTimeframe: lead.poTimeframe || '', ...lead };
+        // Normalize lead → opportunity: rename `project` → `name` so all opportunities
+        // share the same canonical `name` field. Drop the redundant `project` key so
+        // consumers don't need `opp.name || opp.project` defensive fallbacks.
+        const { project: _project, projectStatus: _projectStatus, ...leadRest } = lead;
+        const newOpp = { id: Date.now(), name: lead.project || 'Untitled Project', stage: lead.projectStatus && STAGES.includes(lead.projectStatus) ? lead.projectStatus : STAGES[0], discount: lead.discount || 'Undecided', value: lead.estimatedList || '$0', company: lead.designFirms?.[0] || lead.dealers?.[0] || 'Unknown', contact: lead.contact || '', poTimeframe: lead.poTimeframe || '', ...leadRest };
         setOpportunities(prev => [newOpp, ...prev]); setNewLeadData(EMPTY_LEAD); handleNavigate('projects', { tab: 'pipeline', stage: newOpp.stage }); flashSuccess('Lead Added');
     }, [handleNavigate, setNewLeadData, flashSuccess]);
 

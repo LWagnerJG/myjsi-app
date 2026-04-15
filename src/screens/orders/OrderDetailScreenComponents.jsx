@@ -56,17 +56,6 @@ export const useFadeUp = (delay = 0) => {
 /* ── portal ─────────────────────────────────────────────────── */
 export const Portal = ({ children }) => createPortal(children, document.body);
 
-/* ── card (legacy wrapper, kept for any external usage) ─────── */
-export const Card = ({ children, dark, c, className = '', style }) => (
-  <div className={className} style={{
-    padding: 20,
-    backgroundColor: c?.surface || (dark ? 'rgba(255,255,255,0.08)' : '#fff'),
-    borderRadius: 24,
-    border: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.03)'}`,
-    ...style,
-  }}>{children}</div>
-);
-
 /* ── pill action button ──────────────────────────────────────── */
 export const Pill = ({ icon: Ic, label, onClick, dark }) => (
   <button

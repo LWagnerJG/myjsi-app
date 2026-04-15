@@ -49,8 +49,6 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
         return () => clearTimeout(t);
     }, [tick, phraseFor]);
     const currentText = phraseFor(tick);
-    const isAskCycle = currentText === 'Ask me anything...';
-    const shouldPulse = isAskCycle && tick !== 0;
     const showHint = !value && !focused;
     const isDark = isDarkTheme(theme);
     const iconButtonStyles = getHomeChromeIconButtonStyles(isDark);
@@ -68,7 +66,6 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
             <style>{`
         @keyframes siFadeIn { from { opacity: 0 } to { opacity: .52 } }
         @keyframes siFadeOut { from { opacity: .52 } to { opacity: 0 } }
-        @keyframes siPulseSlow { 0% { transform: scale(1) } 50% { transform: scale(1.01) } 100% { transform: scale(1) } }
       `}</style>
 
             <div className="flex items-center justify-center mr-3" style={{ width: 20, height: 20 }}>
@@ -128,8 +125,7 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
                                 zIndex: 1,
                                 color: theme.colors.textSecondary,
                                 opacity: 0.52,
-                                animation: `siFadeIn ${FADE_MS}ms ${FADE_IN_DELAY}ms ease both${shouldPulse ? `, siPulseSlow 2600ms ease-in-out infinite` : ''}`,
-                                transformOrigin: 'center',
+                                animation: `siFadeIn ${FADE_MS}ms ${FADE_IN_DELAY}ms ease both`,
                                 fontWeight: 400,
                             }}
                         >
@@ -154,7 +150,6 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
 
 // SearchInput — universal search pill used across all non-home screens.
 // Uses the same frosted-glass language as the home screen pill and app header.
-// `variant` prop is accepted for backwards-compat but no longer changes styling.
 export const SearchInput = React.memo(function SearchInput({
     id,
     value = '',
@@ -163,12 +158,10 @@ export const SearchInput = React.memo(function SearchInput({
     theme,
     className = '',
     style = {},
-    variant,        // kept for backwards-compat, ignored
     inputClassName = '',
     autoFocus = false,
     inputRef,
 }) {
-    void variant;
     const dark = isDarkTheme(theme);
     // Match homeChrome primary palette — frosted glass pill
     const bg  = dark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.72)';

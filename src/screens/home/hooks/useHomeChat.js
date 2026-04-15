@@ -4,7 +4,7 @@ import { LEAD_TIMES_DATA, QUICKSHIP_SERIES } from '../../resources/lead-times/da
 import { ORDER_DATA } from '../../orders/data.js';
 import { COMMISSION_RATES_DATA, BONUS_STRUCTURE } from '../../resources/commission-rates/data.js';
 import { CONTRACTS_DATA } from '../../resources/contracts/data.js';
-import { SAMPLE_DISCOUNTS_DATA } from '../../resources/sample-discounts/data.js';
+import { SAMPLE_POLICIES } from '../../resources/sample-discounts/data.js';
 import { COM_YARDAGE_DATA } from '../../resources/request-com-yardage/data.js';
 
 /* ── Knowledge base built from live app data ─────────────────────────── */
@@ -205,7 +205,7 @@ function generateReply(text) {
     }
 
     case 'sampleDiscount': {
-        const lines = SAMPLE_DISCOUNTS_DATA.map(d => `• **${d.Title}** (${d.category}) — **${d.Discount}% off**`).join('\n');
+        const lines = SAMPLE_POLICIES.map(d => `• **${d.title}** — **${d.discount}% off**`).join('\n');
         return `**Sample Discount Programs:**\n${lines}\n\nFull details at **${NAV.sampleDisc}**.`;
     }
 

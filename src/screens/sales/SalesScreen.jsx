@@ -7,7 +7,7 @@ import { CountUp } from '../../components/common/CountUp.jsx';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 
 import { isDarkTheme, subtleBg } from '../../design-system/tokens.js';
-import { formatCurrency, formatCompanyName } from '../../utils/format.js';
+import { formatCurrency, formatCompanyName, formatCurrencyCompact } from '../../utils/format.js';
 
 /* ── helpers ─────────────────────────────────────────────────── */
 
@@ -100,11 +100,6 @@ export const SalesScreen = ({ theme, onNavigate }) => {
     { value: 'chart', label: 'Chart' },
     { value: 'table', label: 'Table' },
   ], []);
-
-  const formatChartValue = (value) => {
-    if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`;
-    return `$${Math.round(value / 1_000)}k`;
-  };
 
   const tableRows = useMemo(() => {
     const points = MONTHLY_SALES_DATA.map((entry) => ({
@@ -235,7 +230,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                             {row.left.month}
                           </td>
                           <td className="py-2 pr-6 text-right font-semibold tabular-nums" style={{ color: colors.textPrimary }}>
-                            {formatChartValue(row.left.value)}
+                            {formatCurrencyCompact(row.left.value)}
                           </td>
                           {row.right ? (
                             <>
@@ -243,7 +238,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                                 {row.right.month}
                               </td>
                               <td className="py-2 text-right font-semibold tabular-nums" style={{ color: colors.textPrimary }}>
-                                {formatChartValue(row.right.value)}
+                                {formatCurrencyCompact(row.right.value)}
                               </td>
                             </>
                           ) : (

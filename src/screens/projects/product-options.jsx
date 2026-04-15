@@ -125,6 +125,3 @@ export const WinkHoopzOptions = ({ theme, product, productIndex, onUpdate }) => 
     </div>
   );
 };
-
-/* ── re-export material group for backward compat ────────────── */
-export const MaterialButtonGroup = FinishPicker;

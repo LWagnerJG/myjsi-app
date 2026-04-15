@@ -22,6 +22,8 @@ const LEADS_URL = import.meta.env.VITE_LEADS_POWER_AUTOMATE_URL;
 /**
  * Flatten the lead object into a simple key→string map
  * suitable for a single Excel row.
+ * @param {{ project?: string, projectStatus?: string, vertical?: string, otherVertical?: string, expectedInstallDate?: string, installationLocation?: string, estimatedList?: string, winProbability?: number, discount?: string, salesReward?: boolean, designerReward?: boolean, poTimeframe?: string, contractType?: string, dealers?: string[], designFirms?: string[], endUser?: string, isBid?: boolean, competitionPresent?: boolean, competitors?: string[], jsiQuoteNumber?: string, quoteNeeded?: boolean, products?: Array<{ series: string }>, notes?: string }} lead
+ * @returns {Object}
  */
 const flattenLead = (lead) => ({
   submittedAt:      new Date().toISOString(),
