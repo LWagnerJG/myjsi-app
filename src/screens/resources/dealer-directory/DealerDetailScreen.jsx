@@ -16,7 +16,6 @@ import {
 import { HBar, DonutChart, SparkBars } from './components/DealerDetailComponents.jsx';
 
 const fmt  = formatCurrency;
-const fmtK = formatCurrencyCompact;
 
 const goalTone  = (pct) => pct >= 80 ? '#4A7C59' : pct >= 50 ? '#C4956A' : '#B85C5C';
 const initials  = (name) => (name || '').split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
@@ -264,7 +263,7 @@ export const DealerDetailScreen = ({
                                 YTD Sales
                             </p>
                             <p className="text-[1.375rem] font-black tracking-tight leading-none" style={{ color: colors.textPrimary }}>
-                                {fmtK(dealer.sales)}
+                                {formatCurrencyCompact(dealer.sales)}
                             </p>
                         </div>
 
@@ -280,7 +279,7 @@ export const DealerDetailScreen = ({
                                 Bookings
                             </p>
                             <p className="text-[1.375rem] font-black tracking-tight leading-none" style={{ color: colors.textPrimary }}>
-                                {fmtK(dealer.bookings)}
+                                {formatCurrencyCompact(dealer.bookings)}
                             </p>
                         </div>
 
@@ -379,10 +378,10 @@ export const DealerDetailScreen = ({
                                 </div>
                                 <div className="flex justify-between mt-1.5">
                                     <span className="text-[0.6875rem]" style={{ color: colors.textSecondary, opacity: 0.5 }}>
-                                        {fmtK(dealer.rebatableSales)} sales
+                                        {formatCurrencyCompact(dealer.rebatableSales)} sales
                                     </span>
                                     <span className="text-[0.6875rem]" style={{ color: colors.textSecondary, opacity: 0.5 }}>
-                                        {fmtK(dealer.rebatableGoal)} goal
+                                        {formatCurrencyCompact(dealer.rebatableGoal)} goal
                                     </span>
                                 </div>
                             </div>
@@ -395,7 +394,7 @@ export const DealerDetailScreen = ({
                     <GlassCard theme={theme} className="rounded-[24px] overflow-hidden p-0">
                         <CardHeader dark={isDark} colors={colors} right={
                             <span className="text-xs font-bold" style={{ color: colors.accent }}>
-                                {fmtK(dealer.monthlySales[dealer.monthlySales.length - 1]?.amount || 0)} last mo
+                                {formatCurrencyCompact(dealer.monthlySales[dealer.monthlySales.length - 1]?.amount || 0)} last mo
                             </span>
                         }>
                             Monthly Trend
@@ -482,7 +481,7 @@ export const DealerDetailScreen = ({
                                     </div>
                                     <div className="flex flex-col items-end gap-1 flex-shrink-0">
                                         <span className="text-sm font-black tabular-nums" style={{ color: colors.textPrimary }}>
-                                            {fmtK(proj.amount)}
+                                            {formatCurrencyCompact(proj.amount)}
                                         </span>
                                         <span
                                             className="px-2 py-0.5 rounded-md text-[0.6875rem] font-bold"

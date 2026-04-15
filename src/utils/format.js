@@ -87,37 +87,3 @@ export const formatShortDate = (dateStr) =>
 export const formatLongDate = (dateStr) =>
   dateStr ? (formatDate(dateStr, { month: 'short', day: 'numeric', year: 'numeric' }) || '—') : '—';
 
-/**
- * Format a date with weekday, short month and day
- * @param {string|Date} dateStr - Date to format
- * @returns {string} Formatted date (e.g., "Mon, Jan 15")
- */
-export const formatDateWithDay = (dateStr) =>
-  formatDate(dateStr, { weekday: 'short', month: 'short', day: 'numeric' });
-
-/**
- * Get relative time string (e.g., "2h", "yesterday", "3d ago")
- * @param {Date|number} timestamp - Date or timestamp
- * @returns {string} Relative time string
- */
-export const getRelativeTime = (timestamp) => {
-  const now = Date.now();
-  const time = timestamp instanceof Date ? timestamp.getTime() : timestamp;
-  const diff = now - time;
-
-  const minutes = Math.floor(diff / 60000);
-  const hours = Math.floor(diff / 3600000);
-  const days = Math.floor(diff / 86400000);
-
-  if (minutes < 60) return `${minutes}m`;
-  if (hours < 24) return `${hours}h`;
-  if (days === 1) return 'yesterday';
-  if (days < 7) return `${days}d`;
-  return formatShortDate(new Date(time));
-};
-
-// Month name to number mapping
-export const MONTH_NAME_TO_NUMBER = {
-  Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
-  Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11
-};
