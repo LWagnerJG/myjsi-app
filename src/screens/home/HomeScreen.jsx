@@ -1,4 +1,3 @@
-// Enhanced HomeScreen with Dealer Dashboard design and reconfiguration functionality
 import React, { useState, useCallback, useMemo, useEffect, useRef, useDeferredValue } from 'react';
 import { allApps, DEFAULT_HOME_APPS } from '../../constants/apps.js';
 import { ORDER_DATA } from '../orders/data.js';
@@ -68,7 +67,6 @@ export const HomeScreen = React.memo(({
     const [showRfpDropModal, setShowRfpDropModal] = useState(false);
     const rfpFileInputRef = useRef(null);
 
-    // Chat logic extracted to custom hook
     const {
         isChatOpen, setIsChatOpen,
         chatMessages, chatInput, setChatInput,
@@ -154,7 +152,6 @@ export const HomeScreen = React.memo(({
         }
     }, [myProjects, onNavigate, setMyProjects, setSuccessMessage]);
 
-    // Safe theme color extraction with fallbacks
     const isDark = isDarkTheme(theme);
     
     const {
@@ -190,7 +187,6 @@ export const HomeScreen = React.memo(({
         return withResources.length ? withResources : DEFAULT_HOME_APPS;
     }, [allAppRoutes, homeEligibleRoutes]);
 
-    // Ensure homeApps is always a valid array
     const safeHomeApps = useMemo(() => {
         return normalizeHomeApps(homeApps);
     }, [homeApps, normalizeHomeApps]);
@@ -235,7 +231,7 @@ export const HomeScreen = React.memo(({
         );
     }, [safeHomeApps]);
 
-    // Defer the filter so keystrokes feel instant even on slow devices
+    // useDeferredValue so keystrokes feel instant even on slow devices
     const deferredSearchQuery = useDeferredValue(searchQuery);
     const spotlightResults = useMemo(() => {
         const query = deferredSearchQuery.trim().toLowerCase();
@@ -250,8 +246,8 @@ export const HomeScreen = React.memo(({
     }, [deferredSearchQuery]);
 
     const toggleApp = useCallback((route) => {
-        if (!onUpdateHomeApps) return; // Guard against missing prop
-        if (NON_REMOVABLE_APPS.has(route)) return; // Resources is always pinned
+        if (!onUpdateHomeApps) return;
+        if (NON_REMOVABLE_APPS.has(route)) return;
         if (safeHomeApps.includes(route)) {
             if (safeHomeApps.length > MIN_PINNED_APPS) {
                 onUpdateHomeApps(safeHomeApps.filter(r => r !== route));
@@ -350,7 +346,6 @@ export const HomeScreen = React.memo(({
         return [...ORDER_DATA].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 8);
     }, []);
 
-    // Shared route lookup for feature card modes
     const FEATURE_ROUTES = useMemo(() => ({
         community: 'community',
         'lead-times': 'resources/lead-times',
@@ -364,7 +359,7 @@ export const HomeScreen = React.memo(({
 
     const samplesCartCount = useMemo(() => Object.values(cart || {}).reduce((sum, qty) => sum + qty, 0), [cart]);
 
-    // Smart grid: always 3 cols on mobile, scale up on sm+ to fill rows evenly
+    // Always 3 cols on mobile; sm+ picks column count to avoid orphaned tiles
     const appGridCols = useMemo(() => {
         const count = currentApps.length;
         // Mobile is always 3 cols. sm+ picks the best column count to avoid orphans.

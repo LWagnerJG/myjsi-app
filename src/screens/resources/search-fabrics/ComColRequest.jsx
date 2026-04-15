@@ -35,23 +35,17 @@ export const ComColRequest = ({ theme, showAlert }) => {
     form.fabricPattern.trim() &&
     form.modelNumbers.trim();
 
-  const handleSubmit = useCallback(async (e) => {
+  const handleSubmit = useCallback((e) => {
     e.preventDefault();
     if (!canSubmit) return;
     setSubmitting(true);
-    try {
-      // For now just log; could be wired to flow similar to Yardage request.
-      if (import.meta.env.DEV) console.log('COM/COL Pattern Submission', form);
-      setSubmitted(true);
-      showAlert && showAlert('COM / COL Pattern request submitted');
-      setTimeout(() => setSubmitted(false), 2500);
-      setForm(f => ({ ...f, notes: '' }));
-    } catch (err) {
-      console.error(err);
-      showAlert && showAlert('Submission failed');
-    } finally {
-      setSubmitting(false);
-    }
+    // For now just log; could be wired to flow similar to Yardage request.
+    if (import.meta.env.DEV) console.log('COM/COL Pattern Submission', form);
+    setSubmitted(true);
+    showAlert && showAlert('COM / COL Pattern request submitted');
+    setTimeout(() => setSubmitted(false), 2500);
+    setForm(f => ({ ...f, notes: '' }));
+    setSubmitting(false);
   }, [form, canSubmit, showAlert]);
 
   const sectionLabel = (txt) => (
