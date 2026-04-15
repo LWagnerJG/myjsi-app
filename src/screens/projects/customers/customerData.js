@@ -431,6 +431,11 @@ export const VERTICAL_COLORS = {
   Workplace: '#4A6B7C',
 };
 
+// Ordered list of verticals used for customer/project filtering UI.
+// Matches the primary VERTICAL_COLORS keys (excluding 'Full Service' and 'Workplace'
+// which are legacy internal categories) plus 'Other' for catch-all.
+export const VERTICAL_OPTIONS = ['Corporate', 'Healthcare', 'HigherEd', 'Government', 'Hospitality', 'Education', 'Other'];
+
 export const ORDER_STATUS_COLORS = {
   Entered: '#9B9B9B',
   Acknowledged: '#5B7B8C',

@@ -10,14 +10,13 @@ import { PillButton, PrimaryButton } from '../../components/common/JSIButtons.js
 import SwipeCalendar from '../../components/common/SwipeCalendar.jsx';
 import { isDarkTheme } from '../../design-system/tokens.js';
 import { hapticSuccess } from '../../utils/haptics.js';
-import { STAGES, VERTICALS, COMPETITORS } from './data.js';
+import { STAGES, VERTICALS, COMPETITORS, PO_TIMEFRAMES } from './data.js';
 import { DISCOUNT_OPTIONS_WITH_UNKNOWN } from '../../constants/discounts.js';
 import { CITY_OPTIONS } from '../../constants/locations.js';
 import { JSI_SERIES } from '../products/data.js';
 import { CONTRACTS_DATA } from '../resources/contracts/data.js';
 import { ProductCard, ProductSpotlight, Reveal, Row, Section } from './NewLeadScreenComponents.jsx';
 
-const PO_OPTIONS = ['Unknown', '<30 Days', '30-60 Days', '60-180 Days', '180+ Days', 'Next Year'];
 const WIN_PRESETS = [10, 25, 50, 75, 90];
 const getWinBand = (pct) => {
   if (pct <= 15) return { label: 'Unlikely', tone: '#B85C5C' };
@@ -32,7 +31,7 @@ const getPoDateLabel = (option) => {
   const now = new Date();
   const fmt = (d) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   const addDays = (n) => { const r = new Date(now); r.setDate(r.getDate() + n); return r; };
-  if (option === '<30 Days') return `By ${fmt(addDays(30))}`;
+  if (option === 'Within 30 Days') return `By ${fmt(addDays(30))}`;
   if (option === '30-60 Days') return `${fmt(addDays(30))} – ${fmt(addDays(60))}`;
   if (option === '60-180 Days') return `${fmt(addDays(60))} – ${fmt(addDays(180))}`;
   if (option === '180+ Days') return `After ${fmt(addDays(180))}`;
@@ -527,7 +526,7 @@ export const NewLeadScreen = ({
               : 0;
 
     const poTimeframePoints = {
-      '<30 Days': 8,
+      'Within 30 Days': 8,
       '30-60 Days': 7,
       '60-180 Days': 5,
       '180+ Days': 3,
@@ -1142,7 +1141,7 @@ export const NewLeadScreen = ({
                     </div>
                   )}
                   <div className="grid grid-cols-3 gap-1.5">
-                    {PO_OPTIONS.map((item) => (
+                    {PO_TIMEFRAMES.map((item) => (
                       <PillButton
                         key={item}
                         size="xs"

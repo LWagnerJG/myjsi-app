@@ -13,11 +13,8 @@ import { FloatingActionCTA } from '../../components/common/FloatingActionCTA.jsx
 import { PROJECTS_TAB_OPTIONS, fmtCurrency } from './components/projects/utils.js';
 import { OpportunityDetail } from './components/projects/OpportunityDetail.jsx';
 import { ProjectCard } from './components/projects/ProjectCard.jsx';
-import { MOCK_CUSTOMERS, VERTICAL_COLORS, getAllProjectsWithMeta } from './customers/customerData.js';
+import { MOCK_CUSTOMERS, VERTICAL_COLORS, VERTICAL_OPTIONS, getAllProjectsWithMeta } from './customers/customerData.js';
 import { CustomerMicrositeScreen } from './customers/CustomerMicrositeScreen.jsx';
-
-/* ── vertical options (matches VERTICAL_COLORS keys + extras) ── */
-const VERTICAL_OPTIONS = ['Corporate', 'Healthcare', 'HigherEd', 'Government', 'Hospitality', 'Education', 'Other'];
 
 /* ── Customer type config ── */
 const CUSTOMER_TYPES = [
