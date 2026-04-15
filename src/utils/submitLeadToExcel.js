@@ -56,6 +56,8 @@ const flattenLead = (lead) => ({
 /**
  * Fire-and-forget POST to Power Automate.
  * Returns true on success, false on failure (never throws).
+ * @param {{ project?: string, projectStatus?: string, vertical?: string, otherVertical?: string, expectedInstallDate?: string, installationLocation?: string, estimatedList?: string, winProbability?: number, discount?: string, salesReward?: boolean, designerReward?: boolean, poTimeframe?: string, contractType?: string, dealers?: string[], designFirms?: string[], endUser?: string, isBid?: boolean, competitionPresent?: boolean, competitors?: string[], jsiQuoteNumber?: string, quoteNeeded?: boolean, products?: Array<{ series: string }>, notes?: string }} lead
+ * @returns {Promise<boolean>}
  */
 export async function submitLeadToExcel(lead) {
   if (!LEADS_URL) {

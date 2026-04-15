@@ -2,13 +2,10 @@ import React from 'react';
 import { User, Calendar, ArrowRightLeft } from 'lucide-react';
 import { Modal } from '../../../../components/common/Modal.jsx';
 import { AVAILABILITY_STATUS, STATUS_LABELS, STATUS_COLORS, CURRENT_USER, SALES_REPS } from '../data.js';
+import { formatLongDate } from '../../../../utils/format.js';
 
 const getRepById = (repId) => SALES_REPS.find(r => r.id === repId);
-const formatDate = (dateStr) => {
-    if (!dateStr) return '';
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-};
+const formatDate = (dateStr) => dateStr ? formatLongDate(dateStr) : '';
 
 export const ProductDetailModal = React.memo(({ product, theme, onClose, onTransfer }) => {
     const currentHolder = product?.currentHolderRepId ? getRepById(product.currentHolderRepId) : null;

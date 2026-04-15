@@ -6,6 +6,7 @@ import { PortalNativeSelect } from '../../../components/forms/PortalNativeSelect
 import { Modal } from '../../../components/common/Modal.jsx';
 import { ScreenTopChrome } from '../../../components/common/ScreenTopChrome.jsx';
 import { isDarkTheme } from '../../../design-system/tokens.js';
+import { formatCurrency, formatCurrencyCompact } from '../../../utils/format.js';
 import { DEALER_DIRECTORY_DATA, DAILY_DISCOUNT_OPTIONS, ROLE_OPTIONS, PROJECT_STATUS_CONFIG } from './data.js';
 import {
     Phone, MapPin, Building2,
@@ -15,12 +16,8 @@ import {
 import { HBar, DonutChart, SparkBars } from './components/DealerDetailComponents.jsx';
 
 /* ── Helpers ─────────────────────────────────────────── */
-const fmt  = (n) => '$' + Number(n).toLocaleString();
-const fmtK = (n) => {
-    if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
-    if (n >= 1_000)     return `$${Math.round(n / 1_000)}K`;
-    return `$${n.toLocaleString()}`;
-};
+const fmt  = formatCurrency;
+const fmtK = formatCurrencyCompact;
 
 const goalTone  = (pct) => pct >= 80 ? '#4A7C59' : pct >= 50 ? '#C4956A' : '#B85C5C';
 const initials  = (name) => (name || '').split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();

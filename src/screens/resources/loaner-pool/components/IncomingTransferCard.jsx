@@ -1,13 +1,10 @@
 import React, { useState } from 'react';
 import { ArrowRightLeft, Calendar, MessageSquare, Check, X } from 'lucide-react';
 import { CURRENT_USER, SALES_REPS, TRANSFER_STATUS, TRANSFER_STATUS_LABELS, TRANSFER_STATUS_COLORS } from '../data.js';
+import { formatLongDate } from '../../../../utils/format.js';
 
 const getRepById = (repId) => SALES_REPS.find(r => r.id === repId);
-const formatDate = (dateStr) => {
-    if (!dateStr) return '';
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-};
+const formatDate = (dateStr) => dateStr ? formatLongDate(dateStr) : '';
 
 export const IncomingTransferCard = ({ request, products, theme, onApprove, onDecline }) => {
     const [declineReason, setDeclineReason] = useState('');

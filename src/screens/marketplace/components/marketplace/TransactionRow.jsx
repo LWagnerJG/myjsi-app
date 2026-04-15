@@ -1,6 +1,7 @@
 import React from 'react';
 import { getIcon } from './utils.js';
 import { formatElliottBucks } from '../../data.js';
+import { formatLongDate } from '../../../../utils/format.js';
 
 export const TransactionRow = ({ txn, theme, isLast }) => {
   const Icon = getIcon(txn.icon);
@@ -16,7 +17,7 @@ export const TransactionRow = ({ txn, theme, isLast }) => {
       <div className="flex-1 min-w-0">
         <p className="text-xs font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{txn.description}</p>
         <p className="text-[0.6875rem]" style={{ color: theme.colors.textSecondary }}>
-          {new Date(txn.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+          {formatLongDate(txn.date)}
         </p>
       </div>
       <span className="text-[0.8125rem] font-bold flex-shrink-0" style={{ color: isCredit ? theme.colors.success : theme.colors.error }}>

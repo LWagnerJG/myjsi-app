@@ -8,18 +8,12 @@ import {
 import { TRADESHOW_BRANDS, TRADESHOWS, findTradeshow, findBrand, getShowsByBrand } from './data.js';
 import { isDarkTheme } from '../../../design-system/tokens.js';
 
-// ============================================
-// Icon resolver for brand cards
-// ============================================
 const BRAND_ICONS = {
   'sparkles': Sparkles,
   'heart-pulse': HeartPulse,
   'graduation-cap': GraduationCap,
 };
 
-// ============================================
-// Format date range helper
-// ============================================
 const formatDateRange = (start, end) => {
   if (!start) return '';
   const s = new Date(start + 'T00:00:00');
@@ -33,25 +27,18 @@ const formatDateRange = (start, end) => {
   return `${mo} ${day} \u2013 ${eMo} ${eDay}`;
 };
 
-// ============================================
-// Gradient placeholders per brand when no image
-// ============================================
 const BRAND_GRADIENTS = {
   'design-days': 'linear-gradient(135deg, #5B7B8C22 0%, #5B7B8C08 40%, #E3E0D8 100%)',
   'hcd': 'linear-gradient(135deg, #4A7C5922 0%, #4A7C5908 40%, #E3E0D8 100%)',
   'edspaces': 'linear-gradient(135deg, #C4956A22 0%, #C4956A08 40%, #E3E0D8 100%)',
 };
 
-// ============================================
-// STEP 1: Brand Selection Landing
-// ============================================
 const BrandSelection = ({ theme, onSelect }) => {
   const text = theme.colors.textPrimary;
   const sub = theme.colors.textSecondary;
 
   return (
     <div className="flex flex-col h-full">
-      {/* Page title - matches app pattern */}
       <div className="px-2 pt-4 pb-3">
         <PageTitle
           title="Tradeshows"
@@ -158,9 +145,6 @@ const BrandSelection = ({ theme, onSelect }) => {
   );
 };
 
-// ============================================
-// STEP 2: Shows for a Brand (Year picker)
-// ============================================
 const BrandShowList = ({ theme, brandId, onSelectShow }) => {
   const sub = theme.colors.textSecondary;
   const brand = findBrand(brandId);
@@ -234,9 +218,6 @@ const BrandShowList = ({ theme, brandId, onSelectShow }) => {
   );
 };
 
-// ============================================
-// ShowCard component — ALWAYS shows hero strip
-// ============================================
 const ShowCard = ({ show, brand, theme, onClick }) => {
   const text = theme.colors.textPrimary;
   const sub = theme.colors.textSecondary;
@@ -333,9 +314,6 @@ const ShowCard = ({ show, brand, theme, onClick }) => {
   );
 };
 
-// ============================================
-// STEP 3: Show Detail with Hero
-// ============================================
 const ShowDetail = ({ theme, showId }) => {
   const show = findTradeshow(showId);
   const brand = findBrand(show?.brandId);
@@ -567,9 +545,6 @@ const ShowDetail = ({ theme, showId }) => {
   );
 };
 
-// ============================================
-// MAIN SCREEN: Orchestrates the 3 views
-// ============================================
 export const TradeshowsScreen = ({ theme, onNavigate, initialBrandId, initialShowId }) => {
   // Determine which view to show based on route props
   const brandId = initialBrandId || null;

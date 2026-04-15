@@ -1,5 +1,3 @@
-// screens/members/MembersScreen.jsx
-// Clean user management — My Team + Dealers tabs
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
     Search,
@@ -26,9 +24,6 @@ import { InviteModal } from './components/members/InviteModal.jsx';
 import { MemberCard } from './components/members/MemberCard.jsx';
 import { DealerCompanyCard } from './components/members/DealerCompanyCard.jsx';
 
-/* ===========================
-   Hooks
-   =========================== */
 const useMediaQuery = (query) => {
     const [matches, setMatches] = useState(() =>
         typeof window !== 'undefined' ? window.matchMedia(query).matches : false
@@ -42,9 +37,6 @@ const useMediaQuery = (query) => {
     return matches;
 };
 
-/* ==================
-   Main Screen
-   ================== */
 const MembersScreenContent = ({ theme }) => {
     const [tab, setTab] = useState('team');
     const [original, setOriginal] = useState(INITIAL_MEMBERS);

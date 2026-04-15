@@ -1,9 +1,7 @@
-// Products feature specific data (authoritative after migration)
-// NOTE: Root data/products.js has been migrated and can be removed.
+// Products feature data
 
-const localImage = (path) => path; // helper passthrough for public assets
+const localImage = (path) => path;
 
-// Helper to build competitor entry (placeholder illustrative only)
 const comp = (name, laminate, advantage) => ({ id: name.toLowerCase().replace(/[^a-z0-9]+/g,'-'), name, laminate, adv: advantage });
 
 export const PRODUCT_DATA = {

@@ -46,7 +46,7 @@ const ResourceDetailScreen = React.lazy(() => import('./screens/utility/UtilityS
 const CreateContentModal = React.lazy(() => import('./screens/community/CreateContentModal.jsx').then(m => ({ default: m.CreateContentModal })));
 const UploadToLibraryModal = React.lazy(() => import('./screens/library/UploadToLibraryModal.jsx').then(m => ({ default: m.UploadToLibraryModal })));
 
-// Centralized legacy -> canonical slug mapping for resource feature routes
+// Legacy underscore routes aliased to their canonical hyphenated slugs
 const RESOURCE_SLUG_ALIASES = {
     'discontinued_finishes': 'discontinued-finishes',
     'design_days': 'tradeshows',
@@ -63,12 +63,10 @@ const RESOURCE_SLUG_ALIASES = {
 };
 
 function normalizeResourceSlug(raw) {
-    // Only transform single segment slugs (ignore nested paths like search-fabrics/...)
     if (!raw || raw.includes('/')) return raw;
     return RESOURCE_SLUG_ALIASES[raw] || raw;
 }
 
-// Map canonical resource feature slugs to their (lazy) components
 const RESOURCE_FEATURE_SCREENS = {
     'commission-rates': CommissionRatesScreen,
     'lead-times': LeadTimesScreen,
@@ -106,8 +104,7 @@ const ScreenRouter = React.memo(({ screenKey, projectsScreenRef, SuspenseFallbac
     const base = parts[0];
 
     if (base === 'projects' && parts[1]) {
-        // Deep link: /projects/{id} — find the opportunity and show detail
-        const oppId = parts[1];
+            const oppId = parts[1];
         return (
             <Suspense fallback={SuspenseFallback}>
                 <ProjectsScreen ref={projectsScreenRef} {...rest} deepLinkOppId={oppId} />
@@ -122,14 +119,12 @@ const ScreenRouter = React.memo(({ screenKey, projectsScreenRef, SuspenseFallbac
         );
     }
 
-    // Feature screens (lazy) inside Suspense to isolate fallback flicker per screen
     const lazyWrap = (Comp, extraProps) => (
         <Suspense fallback={SuspenseFallback}>
             {React.createElement(Comp, { ...rest, ...extraProps })}
         </Suspense>
     );
 
-    // Samples routes (cart first)
     if (screenKey === 'samples/cart') return lazyWrap(SamplesScreen, { initialCartOpen: true });
     if (base === 'samples') return lazyWrap(SamplesScreen);
 
@@ -137,7 +132,6 @@ const ScreenRouter = React.memo(({ screenKey, projectsScreenRef, SuspenseFallbac
         return lazyWrap(TourVisitScreen);
     }
 
-    // Resource route normalization (support legacy underscore routes)
     if (base === 'resources') {
         const slug = parts.slice(1).join('/');
         const firstSegment = slug.split('/')[0];
@@ -194,7 +188,6 @@ const ScreenRouter = React.memo(({ screenKey, projectsScreenRef, SuspenseFallbac
 
     if (base === 'resources' && parts.length > 1) return lazyWrap(ResourceDetailScreen);
 
-    // All SCREEN_MAP components may be lazy - wrap in Suspense
     const ScreenComponent = SCREEN_MAP[base] || SalesScreen;
     return (
         <Suspense fallback={SuspenseFallback}>
@@ -205,16 +198,14 @@ const ScreenRouter = React.memo(({ screenKey, projectsScreenRef, SuspenseFallbac
 ScreenRouter.displayName = 'ScreenRouter';
 
 function App() {
-    // React Router hooks
     const routerNavigate = useNavigate();
     const location = useLocation();
 
-    // Persistent preferences / cart
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [cart, setCart] = usePersistentState('samples.cart', {});
     const [homeApps, setHomeApps] = usePersistentState('pref.homeApps', DEFAULT_HOME_APPS);
 
-    // Migrate previously stored 6-app selection to new 8-app default
+    // Reset to current default if stored count mismatches (e.g. after adding new apps)
     useEffect(() => {
         if (!Array.isArray(homeApps) || homeApps.length !== DEFAULT_HOME_APPS.length) {
             setHomeApps(DEFAULT_HOME_APPS);
@@ -222,7 +213,6 @@ function App() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // Navigation / UI state — direction tracked for AnimatedScreenWrapper
     const [lastNavigationDirection, setLastNavigationDirection] = useState('forward');
     const [screenParams, setScreenParams] = useState({});
     const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -233,20 +223,16 @@ function App() {
     const [homeResetKey, setHomeResetKey] = useState(0);
     const backHandlerRef = useRef(null);
 
-    // Track navigation depth for back button visibility and direction detection
     const [navDepth, setNavDepth] = useState(0);
 
-    // Derive current screen from React Router location
     const currentScreen = useMemo(() => pathToScreen(location.pathname), [location.pathname]);
 
-    // Screen name for aria-live route announcer
     const screenLabel = useMemo(() => {
         if (!currentScreen || currentScreen === 'home') return 'Home';
         const app = allApps.find(a => a.route === currentScreen.split('/')[0]);
         return app?.name || currentScreen.split('/')[0].replace(/-/g, ' ');
     }, [currentScreen]);
 
-    // Domain state
     const [userSettings, setUserSettings] = useState({ id: 1, firstName: 'Luke', lastName: 'Wagner', homeAddress: '5445 N Deerwood Lake Rd, Jasper, IN 47546', shirtSize: 'L' });
     const [opportunities, setOpportunities] = useState(INITIAL_OPPORTUNITIES);
     const [myProjects, setMyProjects] = useState(MY_PROJECTS_DATA);
@@ -255,7 +241,6 @@ function App() {
     const [members, setMembers] = useState(INITIAL_MEMBERS);
     const [currentUserId] = useState(1);
 
-    // Community
     const [posts, setPosts] = useState([...INITIAL_POSTS, ...INITIAL_WINS, ...SUBREDDIT_POSTS]);
     const [polls, setPolls] = useState(INITIAL_POLLS);
     const [likedPosts, setLikedPosts] = useState({});
@@ -266,7 +251,6 @@ function App() {
     const [savedImageIds, setSavedImageIds] = usePersistentState('library.saved', []);
     const [postUpvotes, setPostUpvotes] = useState({});
 
-    // Directories / leads
     const [dealerDirectory, setDealerDirectory] = useState(DEALER_DIRECTORY_DATA);
     const [designFirms, setDesignFirms] = useState(INITIAL_DESIGN_FIRMS);
     const [dealers, setDealers] = useState(INITIAL_DEALERS);
@@ -276,7 +260,6 @@ function App() {
 
     const currentTheme = useMemo(() => (isDarkMode ? darkTheme : lightTheme), [isDarkMode]);
 
-    // mobile vh fix
     useEffect(() => {
         const setAppHeight = () => document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
         setAppHeight();
@@ -430,7 +413,6 @@ function App() {
         setHomeApps(filtered);
     }, [setHomeApps]);
 
-    // Stable callbacks extracted from inline arrows (prevents screenProps re-creation)
     const handleToggleTheme = useCallback(() => setIsDarkMode(d => !d), []);
     const openCreateContentModal = useCallback(() => setShowCreateContentModal(true), []);
     const openLibraryUploadModal = useCallback(() => setShowLibraryUploadModal(true), []);
@@ -518,7 +500,6 @@ function App() {
     return (
         <ToastHost theme={currentTheme}>
             <div className="h-screen-safe w-screen font-sans flex flex-col relative" style={{ backgroundColor: currentTheme.colors.background }}>
-                {/* Screen reader route announcer */}
                 <div aria-live="polite" aria-atomic="true" className="sr-only">
                     {screenLabel} screen
                 </div>

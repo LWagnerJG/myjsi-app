@@ -3,19 +3,18 @@ import { createPortal } from 'react-dom';
 import { Share2, X, Play, Download, MapPin } from 'lucide-react';
 import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z } from '../../components/common/modalUtils.js';
 import { JSIWebButton } from '../../components/common/JSIButtons.jsx';
+import { formatCurrencyDecimal, formatCurrency, formatLongDate, formatShortDate } from '../../utils/format.js';
 
 /* ── helpers ────────────────────────────────────────────────── */
 const ABBR = /\b(llc|inc|msd|lecc)\b/gi;
 // eslint-disable-next-line react-refresh/only-export-components
 export const tc = s => s?.toLowerCase().replace(/\b\w/g, c => c.toUpperCase()).replace(ABBR, m => m.toUpperCase()) ?? '';
 // eslint-disable-next-line react-refresh/only-export-components
-export const fmt$ = (n, cents) => cents
-  ? `$${Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-  : `$${Number(n).toLocaleString()}`;
+export const fmt$ = (n, cents) => cents ? formatCurrencyDecimal(n) : formatCurrency(n);
 // eslint-disable-next-line react-refresh/only-export-components
-export const fd = d => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+export const fd = formatLongDate;
 // eslint-disable-next-line react-refresh/only-export-components
-export const fs = d => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+export const fs = (d) => d ? formatShortDate(d) : '';
 
 /* shared label style used across all expanded/detail areas */
 const fieldLabel = (c) => ({

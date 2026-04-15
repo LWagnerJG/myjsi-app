@@ -1,9 +1,7 @@
 // Marketplace data — LWYD (Love What You Do) branded merchandise
 // ElliottBucks currency system with product catalog, orders & shipments
 
-// ============================================
 // PRODUCT CATALOG
-// ============================================
 export const MARKETPLACE_CATEGORIES = [
   { id: 'all', name: 'All' },
   { id: 'cups', name: 'Drinkware' },
@@ -141,9 +139,7 @@ export const MARKETPLACE_PRODUCTS = [
   },
 ];
 
-// ============================================
 // ELLIOTTBUCKS ACCOUNT
-// ============================================
 export const INITIAL_BALANCE = 2500;
 
 export const BALANCE_HISTORY = [
@@ -157,9 +153,7 @@ export const BALANCE_HISTORY = [
   { id: 'txn-008', type: 'credit', amount: 100, description: 'Feedback Survey Completed', date: '2025-12-28', icon: 'check-circle' },
 ];
 
-// ============================================
 // MOCK ORDERS / SHIPMENTS
-// ============================================
 export const INITIAL_ORDERS = [
   {
     id: 'MKT-1001',
@@ -206,9 +200,7 @@ export const INITIAL_ORDERS = [
   },
 ];
 
-// ============================================
 // HELPERS
-// ============================================
 export const getProductById = (id) => MARKETPLACE_PRODUCTS.find(p => p.id === id) || null;
 
 export const ELLIOTT_BUCKS_SYMBOL = '✦';

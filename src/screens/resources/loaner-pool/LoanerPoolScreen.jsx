@@ -20,9 +20,6 @@ import {
     LOAN_EVENT_TYPES
 } from './data.js';
 
-// ============================================
-// HELPER FUNCTIONS
-// ============================================
 const getRepById = (repId) => SALES_REPS.find(r => r.id === repId);
 
 import { TransferRequestModal } from './components/TransferRequestModal.jsx';
@@ -32,9 +29,6 @@ import { RequestItem, RequestDrawer } from './components/RequestDrawer.jsx';
 import { ProductCard } from './components/ProductCard.jsx';
 import { ProductDetailModal } from './components/ProductDetailModal.jsx';
 
-// ============================================
-// MAIN LOANER POOL SCREEN
-// ============================================
 export const LoanerPoolScreen = ({ theme, setSuccessMessage, userSettings, myProjects = [], setMyProjects }) => {
     const [activeTab, setActiveTab] = useState('browse'); // browse, transfers
     const [requestItems, setRequestItems] = useState([]);
@@ -42,13 +36,11 @@ export const LoanerPoolScreen = ({ theme, setSuccessMessage, userSettings, myPro
     const [searchQuery, setSearchQuery] = useState('');
     const [transferModalProduct, setTransferModalProduct] = useState(null);
     
-    // State for products (to track ownership changes)
     const [products, setProducts] = useState(LOANER_POOL_PRODUCTS);
     
-    // State for transfer requests
     const [transferRequests, setTransferRequests] = useState(INITIAL_TRANSFER_REQUESTS);
     
-    // State for loan events (audit trail) - collected for future use
+    // Loan events are written but not yet read — placeholder for an audit trail feature
     const [, setLoanEvents] = useState([]);
 
     const requestItemIds = useMemo(() => new Set(requestItems.map(item => item.id)), [requestItems]);

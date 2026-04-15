@@ -4,9 +4,7 @@
 // Typography: Neue Haas Grotesk Display Pro
 // Color Approach: Earth-toned, warm, grounded (NO pure black)
 
-// ============================================
 // JSI BRAND COLOR PALETTE
-// ============================================
 export const JSI_COLORS = {
   // Primary Colors
   charcoal: '#353535',        // Primary text & action color (replaces pure black)
@@ -25,9 +23,7 @@ export const JSI_COLORS = {
   info: '#5B7B8C',            // Slate blue
 };
 
-// ============================================
 // TYPOGRAPHY - Neue Haas Grotesk Display Pro
-// ============================================
 // Based on JSI Digital Style Guide 1.0 Typography & Styles
 // Heading levels from style guide: H1 Grotesk 185, H2 Grotesk 132, H3 Grotesk 110,
 // H4 Grotesk 72, H5 Grotesk 58, H6 Grotesk 44, H7 Grotesk 26, H8 Grotesk 18/16
@@ -72,9 +68,7 @@ export const JSI_TYPOGRAPHY = {
   },
 };
 
-// ============================================
-// DESIGN TOKENS (Updated for JSI)
-// ============================================
+// DESIGN TOKENS
 export const DESIGN_TOKENS = {
   // Spacing scale
   spacing: {
@@ -256,9 +250,7 @@ export const DESIGN_TOKENS = {
   },
 };
 
-// ============================================
-// STATUS STYLES (Updated for JSI palette)
-// ============================================
+// STATUS STYLES
 export const STATUS_STYLES = {
   success: {
     bg: `${JSI_COLORS.success}15`,
@@ -310,33 +302,25 @@ export const STATUS_STYLES = {
   }
 };
 
-// ============================================
 // HELPER FUNCTIONS
-// ============================================
 
-// Get spacing value
 export const spacing = (key) => DESIGN_TOKENS.spacing[key] || DESIGN_TOKENS.spacing.md;
 
-// Get border radius
 export const radius = (key) => DESIGN_TOKENS.borderRadius[key] || DESIGN_TOKENS.borderRadius.md;
 
-// Check if dark theme
 export const isDarkTheme = (theme) => {
   const bg = (theme?.colors?.background || '').toLowerCase();
   return bg.startsWith('#0') || bg.startsWith('#1') || bg.startsWith('#2') ||
     bg.startsWith('rgb(0') || bg.startsWith('rgb(1') || bg.startsWith('rgb(2');
 };
 
-// Get shadow based on theme
 export const shadow = (key, theme) => {
   const shadows = isDarkTheme(theme) ? DESIGN_TOKENS.shadowsDark : DESIGN_TOKENS.shadows;
   return shadows[key] || shadows.md;
 };
 
-// Get transition
 export const transition = (key) => DESIGN_TOKENS.transitions[key] || DESIGN_TOKENS.transitions.normal;
 
-// Get max-width class
 export const getMaxWidthClass = (size = 'lg') => {
   const map = {
     sm: 'max-w-md',
@@ -354,17 +338,13 @@ export const getMaxWidthClass = (size = 'lg') => {
   return map[size] || map.lg;
 };
 
-// Get JSI color
 export const getJSIColor = (key) => JSI_COLORS[key] || JSI_COLORS.charcoal;
 
-// Get typography style
 export const getTypography = (variant) => {
   return DESIGN_TOKENS.typography[variant] || DESIGN_TOKENS.typography.body;
 };
 
-// ============================================
 // STYLE UTILITIES FOR CONSISTENCY
-// ============================================
 
 // Text color for use on accent backgrounds (buttons, badges)
 // Always use this instead of hardcoding '#fff' or '#FFFFFF'
@@ -425,13 +405,10 @@ export const getDrawerShadow = (isExpanded) => ({
   collapsed: '0 -6px 14px -2px rgba(0,0,0,0.18), 0 -1px 0 rgba(0,0,0,0.08)',
 })[isExpanded ? 'expanded' : 'collapsed'];
 
-// ============================================
 // SURFACE HELPERS — eliminate repeated dark/light card + input styling
-// ============================================
 
 /**
  * Standard card/surface background for dark/light mode.
- * Replaces the scattered pattern: `isDark ? 'rgba(255,255,255,0.08)' : theme.colors.surface`
  * Returns { backgroundColor, border, boxShadow } ready to spread into style.
  */
 export const cardSurface = (theme) => {
@@ -444,8 +421,7 @@ export const cardSurface = (theme) => {
 };
 
 /**
- * Subtle tinted background (for hover rows, sub-panels, inline containers).
- * Replaces: `isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.03)'`
+ * Subtle tinted background for hover rows, sub-panels, and inline containers.
  */
 export const subtleBg = (theme, strength = 1) => {
   const dark = isDarkTheme(theme);
@@ -455,8 +431,7 @@ export const subtleBg = (theme, strength = 1) => {
 };
 
 /**
- * Standard border for dark/light mode.
- * Replaces: `isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)'`
+ * Standard border color for dark/light mode.
  */
 export const subtleBorder = (theme) => {
   const dark = isDarkTheme(theme);
@@ -465,7 +440,6 @@ export const subtleBorder = (theme) => {
 
 /**
  * Standard input field surface. Spread into style prop.
- * Replaces: `{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : theme.colors.surface, border, color }`
  */
 export const inputSurface = (theme) => {
   const dark = isDarkTheme(theme);
@@ -477,9 +451,8 @@ export const inputSurface = (theme) => {
 };
 
 /**
- * Floating bar style — frosted-glass strip for sticky / fixed bottom CTA areas.
- * Lighter than the old dark backdrop; centered-friendly.  Spread into style prop.
- * Works for both button bars AND non-button info bars (pipeline totals, feedback, etc.).
+ * Frosted-glass strip for sticky/fixed bottom bars. Spread into style prop.
+ * Covers both action bars and info bars (e.g. pipeline summary, feedback CTA).
  */
 export const floatingBarStyle = (theme) => {
   const dark = isDarkTheme(theme);

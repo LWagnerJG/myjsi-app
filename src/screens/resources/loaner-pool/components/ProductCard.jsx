@@ -1,13 +1,10 @@
 import React from 'react';
 import { ArrowRightLeft } from 'lucide-react';
 import { AVAILABILITY_STATUS, STATUS_LABELS, CURRENT_USER, SALES_REPS } from '../data.js';
+import { formatLongDate } from '../../../../utils/format.js';
 
 const getRepById = (repId) => SALES_REPS.find(r => r.id === repId);
-const formatDate = (dateStr) => {
-    if (!dateStr) return '';
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-};
+const formatDate = (dateStr) => dateStr ? formatLongDate(dateStr) : '';
 
 export const ProductCard = React.memo(({ product, theme, isInRequest, onView, onTransfer, onAdd, onRemove }) => {
     const isAvailable = product.status === AVAILABILITY_STATUS.AVAILABLE;

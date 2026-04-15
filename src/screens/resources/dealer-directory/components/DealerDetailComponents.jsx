@@ -1,10 +1,5 @@
 import React from 'react';
-
-const fmtK = (n) => {
-    if (n >= 1000000) return `$${(n / 1000000).toFixed(1)}M`;
-    if (n >= 1000) return `$${Math.round(n / 1000)}K`;
-    return `$${n.toLocaleString()}`;
-};
+import { formatCurrencyCompact } from '../../../../utils/format.js';
 
 /* ── Horizontal bar (series breakdown) ──────────────── */
 export const HBar = ({ label, value, maxValue, color, isDark, colors, rank }) => {
@@ -38,7 +33,7 @@ export const HBar = ({ label, value, maxValue, color, isDark, colors, rank }) =>
                 className="text-xs font-bold w-14 text-right flex-shrink-0 tabular-nums"
                 style={{ color: colors.textSecondary }}
             >
-                {fmtK(value)}
+                {formatCurrencyCompact(value)}
             </span>
         </div>
     );

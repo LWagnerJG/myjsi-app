@@ -3,6 +3,7 @@ import { Ban, CheckCircle, ChevronDown, Clock, Package, Truck } from 'lucide-rea
 import { GlassCard } from '../../../../components/common/GlassCard.jsx';
 import { isDarkTheme } from '../../../../design-system/tokens.js';
 import { ORDER_STATUS_CONFIG, formatElliottBucks, getProductById } from '../../data.js';
+import { formatLongDate, formatShortDate } from '../../../../utils/format.js';
 
 export const OrderCard = ({ order, theme }) => {
   const [open, setOpen] = useState(false);
@@ -32,7 +33,7 @@ export const OrderCard = ({ order, theme }) => {
             </span>
           </div>
           <p className="text-xs mt-0.5" style={{ color: theme.colors.textSecondary }}>
-            {new Date(order.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} - {itemCount} item{itemCount !== 1 ? 's' : ''}
+            {formatLongDate(order.date)} - {itemCount} item{itemCount !== 1 ? 's' : ''}
           </p>
         </div>
 
@@ -86,19 +87,19 @@ export const OrderCard = ({ order, theme }) => {
 
               {order.status === 'delivered' && order.deliveredDate && (
                 <p className="text-xs" style={{ color: theme.colors.success }}>
-                  Delivered {new Date(order.deliveredDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  Delivered {formatShortDate(order.deliveredDate)}
                 </p>
               )}
 
               {order.status === 'shipped' && order.estimatedDelivery && (
                 <p className="text-xs" style={{ color: theme.colors.info }}>
-                  Estimated delivery {new Date(order.estimatedDelivery).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  Estimated delivery {formatShortDate(order.estimatedDelivery)}
                 </p>
               )}
 
               {order.status === 'processing' && order.estimatedDelivery && (
                 <p className="text-xs" style={{ color: theme.colors.warning }}>
-                  Ships by {new Date(order.estimatedDelivery).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  Ships by {formatShortDate(order.estimatedDelivery)}
                 </p>
               )}
             </div>
