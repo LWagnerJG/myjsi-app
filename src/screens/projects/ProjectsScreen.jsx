@@ -16,14 +16,12 @@ import { ProjectCard } from './components/projects/ProjectCard.jsx';
 import { MOCK_CUSTOMERS, VERTICAL_COLORS, VERTICAL_OPTIONS, getAllProjectsWithMeta } from './customers/customerData.js';
 import { CustomerMicrositeScreen } from './customers/CustomerMicrositeScreen.jsx';
 
-/* ── Customer type config ── */
 const CUSTOMER_TYPES = [
   { id: 'end-users',    label: 'End Users',    singular: 'End User',    icon: Building2 },
   { id: 'dealers',      label: 'Dealers',      singular: 'Dealer',      icon: Store     },
   { id: 'design-firms', label: 'Design Firms', singular: 'Design Firm', icon: Pencil    },
 ];
 
-/* ── Type dropdown — branded title + popover ── */
 const TypeDropdown = React.memo(({ value, onChange, theme }) => {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
@@ -95,9 +93,6 @@ const TypeDropdown = React.memo(({ value, onChange, theme }) => {
 });
 TypeDropdown.displayName = 'TypeDropdown';
 
-/* ═══════════════════════════════════════════════════════════════
-   ADD CUSTOMER MODAL
-   ═══════════════════════════════════════════════════════════════ */
 const AddCustomerModal = ({ theme, onClose, onAdd, customerType = 'end-users', typeSingular = 'Customer' }) => {
   const isDark = isDarkTheme(theme);
   const c = theme.colors;
@@ -121,7 +116,6 @@ const AddCustomerModal = ({ theme, onClose, onAdd, customerType = 'end-users', t
     if (!vertical)        { setError('Select a vertical.'); return; }
     if (vertical === 'Other' && !customVertical.trim()) { setError('Enter a custom vertical.'); return; }
 
-    // Parse "City, ST" format
     const parts = location.trim().split(',').map(s => s.trim());
     const city = parts[0] || location.trim();
     const state = (parts[1] || '').toUpperCase().slice(0, 2);
@@ -153,7 +147,6 @@ const AddCustomerModal = ({ theme, onClose, onAdd, customerType = 'end-users', t
         style={{ backgroundColor: c.surface, border: `1px solid ${border}`, overflow: 'visible' }}
         onClick={e => e.stopPropagation()}>
 
-        {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b flex-shrink-0 rounded-t-3xl sm:rounded-t-2xl" style={{ borderColor: border, backgroundColor: c.surface }}>
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: `${c.accent}15` }}>
@@ -168,7 +161,6 @@ const AddCustomerModal = ({ theme, onClose, onAdd, customerType = 'end-users', t
         </div>
 
         <div className="p-5 space-y-4 overflow-y-auto flex-1 scrollbar-hide" style={{ backgroundColor: c.surface, borderBottomLeftRadius: 'inherit', borderBottomRightRadius: 'inherit' }}>
-          {/* Name */}
           <div>
             <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: c.textSecondary, opacity: 0.7 }}>Account Name</label>
             <input
@@ -180,7 +172,6 @@ const AddCustomerModal = ({ theme, onClose, onAdd, customerType = 'end-users', t
             />
           </div>
 
-          {/* Location */}
           <div>
             <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: c.textSecondary, opacity: 0.7 }}>Location</label>
             <AutoCompleteCombobox
@@ -196,7 +187,6 @@ const AddCustomerModal = ({ theme, onClose, onAdd, customerType = 'end-users', t
             />
           </div>
 
-          {/* Vertical */}
           <div>
             <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: c.textSecondary, opacity: 0.7 }}>Vertical</label>
             <div className="flex flex-wrap gap-2">
@@ -246,10 +236,8 @@ const AddCustomerModal = ({ theme, onClose, onAdd, customerType = 'end-users', t
             </div>
           </div>
 
-          {/* Error */}
           {error && <p className="text-xs font-medium" style={{ color: JSI_COLORS.error }}>{error}</p>}
 
-          {/* Actions */}
           <div className="flex gap-3 pt-1">
             <button onClick={onClose}
               className="flex-1 py-3 rounded-xl text-sm font-semibold transition-all active:scale-[0.97]"
@@ -272,9 +260,6 @@ const AddCustomerModal = ({ theme, onClose, onAdd, customerType = 'end-users', t
   );
 };
 
-/* ═══════════════════════════════════════════════════════════════
-   ADD INSTALL MODAL
-   ═══════════════════════════════════════════════════════════════ */
 const AddInstallModal = ({ theme, onClose, onAdd, customers }) => {
   const isDark = isDarkTheme(theme);
   const c = theme.colors;
@@ -294,7 +279,6 @@ const AddInstallModal = ({ theme, onClose, onAdd, customers }) => {
 
   useEffect(() => { searchRef.current?.focus(); }, []);
 
-  /* ── Build searchable project options from customers → projects ── */
   const projectOptions = useMemo(() => {
     return (customers || []).flatMap(cust =>
       (cust.projects || []).map(p => ({
@@ -316,7 +300,6 @@ const AddInstallModal = ({ theme, onClose, onAdd, customers }) => {
     );
   }, [projectSearch, projectOptions]);
 
-  /* ── Close project dropdown on outside click ── */
   useEffect(() => {
     if (!projectOpen) return;
     const close = (e) => {
@@ -327,7 +310,6 @@ const AddInstallModal = ({ theme, onClose, onAdd, customers }) => {
     return () => { document.removeEventListener('mousedown', close); document.removeEventListener('touchstart', close); };
   }, [projectOpen]);
 
-  /* ── Auto-fill location when project selected ── */
   const handleSelectProject = useCallback((proj) => {
     setSelectedProject(proj);
     setProjectSearch(proj.label);
@@ -386,7 +368,6 @@ const AddInstallModal = ({ theme, onClose, onAdd, customers }) => {
         style={{ backgroundColor: c.surface, border: `1px solid ${border}`, overflow: 'visible' }}
         onClick={e => e.stopPropagation()}>
 
-        {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b flex-shrink-0 rounded-t-3xl sm:rounded-t-2xl" style={{ borderColor: border, backgroundColor: c.surface }}>
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: `${c.accent}15` }}>
@@ -401,7 +382,6 @@ const AddInstallModal = ({ theme, onClose, onAdd, customers }) => {
         </div>
 
         <div className="p-5 space-y-4 overflow-y-auto flex-1 scrollbar-hide" style={{ backgroundColor: c.surface, borderBottomLeftRadius: 'inherit', borderBottomRightRadius: 'inherit' }}>
-          {/* Project spotlight search */}
           <div>
             <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: c.textSecondary, opacity: 0.7 }}>Project</label>
             <div className="relative" ref={projectDropdownRef}>
@@ -453,7 +433,6 @@ const AddInstallModal = ({ theme, onClose, onAdd, customers }) => {
             </div>
           </div>
 
-          {/* Location */}
           <div>
             <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: c.textSecondary, opacity: 0.7 }}>Location</label>
             <AutoCompleteCombobox
@@ -469,7 +448,6 @@ const AddInstallModal = ({ theme, onClose, onAdd, customers }) => {
             />
           </div>
 
-          {/* Photos */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label className="text-xs font-semibold uppercase tracking-wider" style={{ color: c.textSecondary, opacity: 0.7 }}>Photos</label>
@@ -511,10 +489,8 @@ const AddInstallModal = ({ theme, onClose, onAdd, customers }) => {
             />
           </div>
 
-          {/* Error */}
           {error && <p className="text-xs font-medium" style={{ color: JSI_COLORS.error }}>{error}</p>}
 
-          {/* Actions */}
           <div className="flex gap-3 pt-1">
             <button onClick={onClose}
               className="flex-1 py-3 rounded-xl text-sm font-semibold transition-all active:scale-[0.97]"
@@ -537,9 +513,6 @@ const AddInstallModal = ({ theme, onClose, onAdd, customers }) => {
   );
 };
 
-/* ═══════════════════════════════════════════════════════════════
-   PROJECTS SCREEN
-   ═══════════════════════════════════════════════════════════════ */
 export const ProjectsScreen = forwardRef(({
   onNavigate, theme, opportunities, setOpportunities,
   projectsInitialTab, clearProjectsInitialTab,
@@ -560,7 +533,6 @@ export const ProjectsScreen = forwardRef(({
   const [showStageFadeLeft, setShowStageFadeLeft] = useState(false);
   const [showStageFadeRight, setShowStageFadeRight] = useState(false);
 
-  /* ── Deep-link / initial tab effects ── */
   useEffect(() => {
     if (projectsInitialTab) {
       setProjectsTab(projectsInitialTab);
@@ -582,7 +554,6 @@ export const ProjectsScreen = forwardRef(({
     }
   }, [deepLinkOppId, opportunities]);
 
-  /* ── Expose clearSelection to parent ── */
   useImperativeHandle(ref, () => ({
     clearSelection: () => {
       if (selectedCustomer)    { setSelectedCustomer(null);    return true; }
@@ -591,7 +562,6 @@ export const ProjectsScreen = forwardRef(({
     },
   }));
 
-  /* ── Register back handler for sub-screen navigation ── */
   useEffect(() => {
     if (selectedCustomer || selectedOpportunity) {
       setBackHandler?.(() => {
@@ -605,7 +575,6 @@ export const ProjectsScreen = forwardRef(({
     return () => setBackHandler?.(null);
   }, [selectedCustomer, selectedOpportunity, setBackHandler]);
 
-  /* ── Stage scroll fades ── */
   const updateStageFade = useCallback(() => {
     const el = stagesScrollRef.current;
     if (!el) return;
@@ -627,7 +596,6 @@ export const ProjectsScreen = forwardRef(({
     };
   }, [projectsTab, updateStageFade]);
 
-  /* ── Derived pipeline data ── */
   const filteredOpportunities = useMemo(
     () => (opportunities || []).filter(o => o.stage === selectedPipelineStage),
     [selectedPipelineStage, opportunities],
@@ -649,14 +617,12 @@ export const ProjectsScreen = forwardRef(({
     setCustomers(prev => [...prev, newCustomer]);
   }, []);
 
-  /* ── Filtered customers for current type ── */
   const filteredCustomers = useMemo(() => {
     if (customerType === 'dealers')       return customers.filter(c => c.type === 'dealer');
     if (customerType === 'design-firms')  return customers.filter(c => c.type === 'design-firm');
     return customers.filter(c => !c.type || c.type === 'end-user');
   }, [customers, customerType]);
 
-  /* ── CTA config per tab ── */
   const ctaSingular = useMemo(
     () => CUSTOMER_TYPES.find(t => t.id === customerType)?.singular || 'Customer',
     [customerType],
@@ -667,7 +633,6 @@ export const ProjectsScreen = forwardRef(({
     'my-projects': { label: 'Install',    action: () => onNavigate('add-new-install') },
   })[projectsTab], [projectsTab, ctaSingular, onNavigate]);
 
-  /* ── Sub-screen renders ── */
   if (selectedCustomer) return (
     <CustomerMicrositeScreen
       customer={selectedCustomer}
@@ -691,9 +656,7 @@ export const ProjectsScreen = forwardRef(({
   return (
     <div className="min-h-full relative" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
 
-      {/* ── Top controls bar ── */}
       <div className="flex-shrink-0" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 12px)', backgroundColor: theme.colors.background }}>
-        {/* Row 1 — full-width toggle */}
         <div className="px-4 sm:px-6 lg:px-8 pb-3 max-w-5xl mx-auto w-full">
           <SegmentedToggle
             value={projectsTab}
@@ -705,7 +668,6 @@ export const ProjectsScreen = forwardRef(({
           />
         </div>
 
-        {/* Row 2 — contextual title + CTA */}
         <div className="px-4 sm:px-6 lg:px-8 pb-3 max-w-5xl mx-auto w-full flex items-center justify-between gap-3">
           {projectsTab === 'customers' ? (
             <TypeDropdown value={customerType} onChange={setCustomerType} theme={theme} />
@@ -723,7 +685,6 @@ export const ProjectsScreen = forwardRef(({
           )}
         </div>
 
-        {/* Pipeline stage strip */}
         {projectsTab === 'pipeline' && (
           <div className="px-4 sm:px-6 lg:px-8 pb-3 relative max-w-5xl mx-auto w-full">
             <div ref={stagesScrollRef} onScroll={updateStageFade} className="overflow-x-auto scrollbar-hide">
@@ -760,10 +721,8 @@ export const ProjectsScreen = forwardRef(({
         )}
       </div>
 
-      {/* ── Content ── */}
       <div className="px-4 sm:px-6 lg:px-8 pt-3 pb-40 max-w-5xl mx-auto w-full">
 
-        {/* PIPELINE tab */}
         {projectsTab === 'pipeline' && (
           filteredOpportunities.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
@@ -779,7 +738,6 @@ export const ProjectsScreen = forwardRef(({
           )
         )}
 
-        {/* CUSTOMERS tab */}
         {projectsTab === 'customers' && (
           filteredCustomers.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
@@ -795,7 +753,6 @@ export const ProjectsScreen = forwardRef(({
           )
         )}
 
-        {/* MY PROJECTS tab */}
         {projectsTab === 'my-projects' && (
           allProjects.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
@@ -815,7 +772,6 @@ export const ProjectsScreen = forwardRef(({
         )}
       </div>
 
-      {/* Floating summary pill (pipeline only) */}
       <FloatingActionCTA
         theme={theme}
         visible={projectsTab === 'pipeline' && filteredOpportunities.length > 0}
@@ -823,7 +779,6 @@ export const ProjectsScreen = forwardRef(({
         label={`${selectedPipelineStage} · ${filteredOpportunities.length} ${filteredOpportunities.length === 1 ? 'project' : 'projects'} · ${fmtCurrency(stageTotalValue)}`}
       />
 
-      {/* Add Customer modal */}
       {showAddCustomer && (
         <AddCustomerModal
           theme={theme}
@@ -834,7 +789,6 @@ export const ProjectsScreen = forwardRef(({
         />
       )}
 
-      {/* Add Install modal */}
       {showAddInstall && (
         <AddInstallModal
           theme={theme}
@@ -849,9 +803,6 @@ export const ProjectsScreen = forwardRef(({
 
 ProjectsScreen.displayName = 'ProjectsScreen';
 
-/* ═══════════════════════════════════════════════════════════════
-   CARD SUB-COMPONENTS (extracted to prevent inline re-creation)
-   ═══════════════════════════════════════════════════════════════ */
 const CustomerCard = React.memo(({ customer, isDark, onClick }) => {
   const border = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)';
   const activeStds = (customer.standardsPrograms || []).filter(p => p.status === 'Active' || p.status === 'Expiring').length;

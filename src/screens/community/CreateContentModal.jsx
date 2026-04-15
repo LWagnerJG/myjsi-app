@@ -191,7 +191,6 @@ export const CreateContentModal = ({ show, onClose, theme, onCreatePost }) => {
                     </>
                 ) : (
                   <>
-                    {/* ── Image previews ── */}
                     {files.length > 0 && (
                       <div className="grid grid-cols-3 gap-2">
                         {files.map((o, idx) => (
@@ -207,7 +206,6 @@ export const CreateContentModal = ({ show, onClose, theme, onCreatePost }) => {
                         ))}
                       </div>
                     )}
-                    {/* ── Add images ── */}
                     <button type="button" onClick={() => fileInputRef.current?.click()}
                       className="w-full flex items-center justify-center gap-2 h-11 rounded-xl text-[0.8125rem] font-medium transition-colors"
                       style={{ background: theme.colors.subtle, color: theme.colors.textSecondary }}
@@ -218,7 +216,6 @@ export const CreateContentModal = ({ show, onClose, theme, onCreatePost }) => {
                   </>
                 )}
 
-                {/* ── Actions ── */}
                 <div className="flex gap-3 pt-1">
                                     <SecondaryButton
                                         type="button"

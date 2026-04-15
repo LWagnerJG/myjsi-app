@@ -9,7 +9,6 @@ import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { isDarkTheme, subtleBg } from '../../design-system/tokens.js';
 import { formatCurrency, formatCompanyName, formatCurrencyCompact } from '../../utils/format.js';
 
-/* ── helpers ─────────────────────────────────────────────────── */
 
 const parseQuarterKey = (key = '') => {
   const [y, q] = key.split('-Q');
@@ -22,7 +21,6 @@ const sortQuarterEntries = (entries) =>
     return pa.y === pb.y ? pa.q - pb.q : pa.y - pb.y;
   });
 
-/* ── Main Screen ─────────────────────────────────────────────── */
 
 export const SalesScreen = ({ theme, onNavigate }) => {
   const [chartDataType, setChartDataType] = useState('bookings');
@@ -39,7 +37,6 @@ export const SalesScreen = ({ theme, onNavigate }) => {
     subtle: theme?.colors?.subtle || 'rgba(0,0,0,0.03)',
   }), [theme]);
 
-  /* ── derived data (all static, compute once) ── */
 
   const { totalBookings, totalSales } = useMemo(() => ({
     totalBookings: MONTHLY_SALES_DATA.reduce((a, m) => a + m.bookings, 0),
@@ -125,7 +122,6 @@ export const SalesScreen = ({ theme, onNavigate }) => {
   const [ready, setReady] = useState(false);
   useEffect(() => { const t = setTimeout(() => setReady(true), 300); return () => clearTimeout(t); }, []);
 
-  /* ── render ── */
 
   /* shared tile header */
   const TileHeader = ({ title, action, detail }) => (

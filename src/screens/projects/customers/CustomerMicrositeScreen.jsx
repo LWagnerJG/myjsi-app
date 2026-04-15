@@ -272,7 +272,6 @@ export const CustomerMicrositeScreen = ({ customer, theme, onBack }) => {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-40">
         <div className="flex flex-col lg:flex-row gap-5 pt-5">
 
-          {/* ── MAIN COLUMN ── */}
           <div className="flex-1 min-w-0 space-y-4">
 
             {/* ── HERO HEADER ── */}
