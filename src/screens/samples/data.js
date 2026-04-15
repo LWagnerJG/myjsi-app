@@ -18,7 +18,6 @@ export const SAMPLE_CATEGORIES = [
     { id: 'hardware', name: 'Hardware' },
 ];
 
-// Helper for building finish entries using actual public root images
 const TFL = (code, name, file, finishType = 'solid') => ({
     id: `tfl-${code.toLowerCase()}`,
     name,

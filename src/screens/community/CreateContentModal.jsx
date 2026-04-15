@@ -109,7 +109,6 @@ export const CreateContentModal = ({ show, onClose, theme, onCreatePost }) => {
     return (
         <Modal show={show} onClose={onClose} title="New Post" theme={theme}>
             <form onSubmit={submit} className="space-y-5">
-                {/* ── Mode toggle ── */}
                 <div
                     className="grid grid-cols-2 gap-1 p-0.5 rounded-full"
                     style={{ background: theme.colors.subtle }}
@@ -131,7 +130,6 @@ export const CreateContentModal = ({ show, onClose, theme, onCreatePost }) => {
                     ))}
                 </div>
 
-                {/* ── Text area ── */}
                 <textarea
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
@@ -146,7 +144,6 @@ export const CreateContentModal = ({ show, onClose, theme, onCreatePost }) => {
 
                 {mode === 'poll' ? (
                     <>
-                        {/* ── Poll options ── */}
                         <div className="space-y-2">
                             {[0, 1].map((i) => (
                                 <input

@@ -51,7 +51,6 @@ export const SalesByVerticalBreakdown = ({ data = [], theme, palette }) => {
   );
 };
 
-// Helpers
 const BASE_PALETTE = ['#4A7C59', '#5B7B8C', '#C4956A', '#B85C5C', '#7A8C6E', '#8B8680'];
 function hashColor(name = '', override) { if (name === 'Other') return '#8B8680'; const palette = (override && override.length) ? override : BASE_PALETTE; let h = 0; for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0; return palette[h % (palette.length - 1)]; }
 export default SalesByVerticalBreakdown;

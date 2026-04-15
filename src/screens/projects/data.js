@@ -1,4 +1,4 @@
-// Projects feature specific data (migrated from root data/projects.js)
+// Projects feature data
 export const MY_PROJECTS_DATA = [
   { id: 'proj1', name: 'Acme Corp HQ', location: 'Indianapolis, IN', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_vision_install_0000010.jpg' },
   { id: 'proj2', name: 'Tech Park Offices', location: 'Fishers, IN', image: 'https://webresources.jsifurniture.com/production/uploads/jsi_caav_install_00024_pldPbiW.jpg' },

@@ -208,7 +208,6 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                         maxHeight: '85vh',
                     }}
                 >
-                    {/* ── Success overlay ── */}
                     <AnimatePresence>
                         {submitSuccess && (
                             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -223,7 +222,6 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                         )}
                     </AnimatePresence>
 
-                    {/* ── Header ── */}
                     <div className="flex items-center justify-between px-5 py-4 flex-shrink-0"
                         style={{ borderBottom: `1px solid ${divider}` }}>
                         <h2 className="text-[0.9375rem] font-bold tracking-tight" style={{ color: c.textPrimary }}>
@@ -236,7 +234,6 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                         </button>
                     </div>
 
-                    {/* ── Form ── */}
                     <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto scrollbar-hide">
                         <div className="px-5 py-4 space-y-4">
 
@@ -409,7 +406,6 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                         </div>
                     </form>
 
-                    {/* ── Footer ── */}
                     <div className="flex items-center justify-end gap-2.5 px-5 py-3.5 flex-shrink-0"
                         style={{ borderTop: `1px solid ${divider}` }}>
                         <SecondaryButton

@@ -37,7 +37,6 @@ export function SpotlightMultiSelect({
     chipBg: theme.colors.surface,
   };
 
-  // ── Drop-direction ────────────────────────────────────────────────────────
   // Anchors to triggerRef (input bar) not wrapperRef (input + chips below)
   // so chip height doesn't skew the available-space calculation.
   const calcDropUp = useCallback(() => {
@@ -56,7 +55,6 @@ export function SpotlightMultiSelect({
     return () => window.removeEventListener("resize", calcDropUp);
   }, [open, calcDropUp]);
 
-  // ── Outside-click close ───────────────────────────────────────────────────
   useEffect(() => {
     if (!open) return;
     const close = (e) => {
@@ -70,7 +68,6 @@ export function SpotlightMultiSelect({
     };
   }, [open]);
 
-  // ── Options filtering ─────────────────────────────────────────────────────
   const norm = (s) => (s || "").trim().toLowerCase();
 
   const available = useMemo(
@@ -98,7 +95,6 @@ export function SpotlightMultiSelect({
     }
   }, [activeIndex, open]);
 
-  // ── Actions ───────────────────────────────────────────────────────────────
   const pick = (val) => {
     if (!val) return;
     onAddItem?.(val);
@@ -140,7 +136,6 @@ export function SpotlightMultiSelect({
 
   const showMenu = open && (filtered.length > 0 || canCreate);
 
-  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="w-full" ref={wrapperRef}>
       {label ? (

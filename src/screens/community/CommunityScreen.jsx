@@ -11,7 +11,6 @@ import { PostCard } from './components/community/PostCard.jsx';
 import { PollCard } from './components/community/PollCard.jsx';
 import { cardBg } from './components/community/utils.js';
 
-/* ── Community Screen ── */
 export const CommunityScreen = ({
   theme,
   posts = [],
@@ -90,7 +89,6 @@ export const CommunityScreen = ({
   const toggleComments = useCallback(id => setExpandedComments(p => ({ ...p, [id]: !p[id] })), []);
   const dismissAnnouncement = useCallback(id => setDismissedAnnouncements(prev => new Set([...prev, id])), []);
 
-  /* ── Layout ── */
   return (
     <div className="flex flex-col h-full" style={{ backgroundColor: 'transparent', color: theme?.colors?.textPrimary }}>
       {/* Standalone mode header (non-embed) */}

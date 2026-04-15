@@ -1,4 +1,4 @@
-// Resources feature specific data (migrated from root data folder)
+// Resources feature data
 export const RESOURCES_DATA = [
     {
         category: "Sales & Rep Tools",

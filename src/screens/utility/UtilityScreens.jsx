@@ -109,7 +109,7 @@ const CustomSelect = ({ label, value, onChange, options, theme, placeholder, req
     );
 };
 
-// Resource detail screen placeholder - truly generic utility
+// Generic fallback rendered when a resource sub-route has no dedicated screen yet
 export const ResourceDetailScreen = ({ theme, currentScreen }) => (
     <div className="p-4">
         <PageTitle title="Resource Detail" theme={theme} />
@@ -122,5 +122,4 @@ export const ResourceDetailScreen = ({ theme, currentScreen }) => (
     </div>
 );
 
-// Export shared utility components
 export { CustomSelect };

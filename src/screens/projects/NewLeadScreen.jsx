@@ -10,6 +10,7 @@ import { PillButton, PrimaryButton } from '../../components/common/JSIButtons.js
 import SwipeCalendar from '../../components/common/SwipeCalendar.jsx';
 import { isDarkTheme } from '../../design-system/tokens.js';
 import { hapticSuccess } from '../../utils/haptics.js';
+import { formatDate } from '../../utils/format.js';
 import { STAGES, VERTICALS, COMPETITORS, PO_TIMEFRAMES } from './data.js';
 import { DISCOUNT_OPTIONS_WITH_UNKNOWN } from '../../constants/discounts.js';
 import { CITY_OPTIONS } from '../../constants/locations.js';
@@ -29,7 +30,7 @@ const getWinBand = (pct) => {
 const getPoDateLabel = (option) => {
   if (!option || option === 'Unknown') return null;
   const now = new Date();
-  const fmt = (d) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const fmt = (d) => formatDate(d, { month: 'short', day: 'numeric', year: 'numeric' });
   const addDays = (n) => { const r = new Date(now); r.setDate(r.getDate() + n); return r; };
   if (option === 'Within 30 Days') return `By ${fmt(addDays(30))}`;
   if (option === '30-60 Days') return `${fmt(addDays(30))} – ${fmt(addDays(60))}`;
@@ -313,7 +314,6 @@ export const NewLeadScreen = ({
   const [stepAnimClass, setStepAnimClass] = useState('');
   const prevStepRef = useRef(0);
 
-  // Declared early so effects that depend on it don't hit the temporal dead zone
   const animateToStep = useCallback((nextStep) => {
     const dir = nextStep > prevStepRef.current ? 'nl-fwd' : 'nl-back';
     prevStepRef.current = nextStep;
@@ -1336,7 +1336,6 @@ export const NewLeadScreen = ({
                 </div>
               </Row>
 
-              {/* Competition */}
               <Row label="Competition" theme={theme} inline>
                 <div>
                   {newLeadData.competitionPresent ? (
@@ -1392,7 +1391,6 @@ export const NewLeadScreen = ({
                 </div>
               </Row>
 
-              {/* Rewards — label left, toggles right */}
               <div className="flex items-center justify-between gap-4 py-2.5">
                 <span className="text-xs font-semibold shrink-0" style={{ color: c.textSecondary }}>Rewards</span>
                 <div className="flex items-center gap-5 shrink-0">
@@ -1467,7 +1465,6 @@ export const NewLeadScreen = ({
                 </div>
               </Row>
 
-              {/* JSI Series — full-width, search + cards unified */}
               <div className="py-3">
                 <div className="mb-2">
                   <span className="text-sm font-semibold" style={{ color: c.textSecondary }}>JSI Series</span>
@@ -1492,7 +1489,6 @@ export const NewLeadScreen = ({
                             theme={theme}
                             showBorder={false}
                           />
-                          {/* Intake — compact inline rows, no heavy inner borders */}
                           <div className="border-t" style={{ borderColor: subtleBorder }}>
                             <p className="px-4 pt-2.5 pb-1 text-xs font-semibold uppercase tracking-[0.06em]" style={{ color: c.textSecondary, opacity: 0.5 }}>
                               Manufacturing context <span className="normal-case tracking-normal font-normal opacity-100">· optional</span>
@@ -1611,7 +1607,6 @@ export const NewLeadScreen = ({
             </Section>
 
             <Section title="Review & Submit" subtitle="Tap any row to edit." theme={theme}>
-              {/* Score card */}
               <div
                 className="rounded-2xl px-4 py-4 mb-3 flex items-center gap-4"
                 style={{
@@ -1636,7 +1631,6 @@ export const NewLeadScreen = ({
                 </div>
               </div>
 
-              {/* Single unified review card */}
               {filledReviewItems.filter((item) => item.label !== 'Notes').length > 0 && (() => {
                 const groups = [0, 1, 2].map((stepIdx) => ({
                   stepIdx,
@@ -1680,7 +1674,7 @@ export const NewLeadScreen = ({
             </Section>
           </>
         )}
-        </div>{/* end animated step wrapper */}
+        </div>
       </div>
 
       <WizardBottomBar

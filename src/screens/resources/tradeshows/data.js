@@ -315,7 +315,6 @@ export const TRADESHOWS = [
   },
 ];
 
-// Helpers
 export const findTradeshow = (id) => TRADESHOWS.find((s) => s.id === id);
 export const findBrand = (id) => TRADESHOW_BRANDS.find((b) => b.id === id);
 export const getShowsByBrand = (brandId) =>

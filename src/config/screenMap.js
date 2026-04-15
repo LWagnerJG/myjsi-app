@@ -6,7 +6,6 @@ import { ResourcesScreen } from '../screens/resources/ResourcesScreen.jsx';
 import { NewLeadScreen } from '../screens/projects/NewLeadScreen.jsx';
 import { AddNewInstallScreen } from '../screens/projects/AddNewInstallScreen.jsx';
 
-// Lazy-loaded primary screens for better code splitting
 const SalesScreen = React.lazy(() => import('../screens/sales/index.js').then(m => ({ default: m.SalesScreen })));
 const CustomerRankingScreen = React.lazy(() => import('../screens/sales/index.js').then(m => ({ default: m.CustomerRankingScreen })));
 const IncentiveRewardsScreen = React.lazy(() => import('../screens/sales/index.js').then(m => ({ default: m.IncentiveRewardsScreen })));
@@ -27,10 +26,8 @@ const MarketplaceScreen = React.lazy(() => import('../screens/marketplace/index.
 const PresentationsScreen = React.lazy(() => import('../screens/resources/presentations/index.js').then(m => ({ default: m.PresentationsScreen })));
 const RfpResponderScreen = React.lazy(() => import('../screens/rfp/RfpResponderScreen.jsx').then(m => ({ default: m.default })));
 
-// NOTE:
-// Feature resource detail routes (e.g. 'lead-times', 'commission-rates', etc.) are now handled lazily
-// in App.jsx and intentionally omitted here to allow code splitting. Keeping them out of SCREEN_MAP
-// prevents accidental static inclusion in the main bundle.
+// Resource feature routes (lead-times, commission-rates, etc.) are handled lazily in App.jsx
+// and intentionally omitted here — including them here would pull them into the main bundle.
 
 export const SCREEN_MAP = {
   'home': HomeScreen,
@@ -38,7 +35,7 @@ export const SCREEN_MAP = {
   'sales': SalesScreen,
   'products': ProductsScreen,
   'resources': ResourcesScreen,
-  'community': CommunityLibraryLayout, // swapped to new layout providing Community + Library toggle
+  'community': CommunityLibraryLayout,
   'replacements': ReplacementsScreen,
   'incentive-rewards': IncentiveRewardsScreen,
   'customer-rank': CustomerRankingScreen,

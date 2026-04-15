@@ -1,6 +1,7 @@
 import React from 'react';
 import { Download, Share2, Trash2, LayoutGrid, Sparkles, Clock } from 'lucide-react';
 import { isDarkTheme } from '../../../../design-system/tokens.js';
+import { formatLongDate } from '../../../../utils/format.js';
 
 const CARD_SHADOW = '0 4px 16px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05)';
 
@@ -36,7 +37,7 @@ export const MyDeckCard = ({ deck, theme, onDownload, onShare, onDelete }) => {
                     )}
                     <div className="flex items-center gap-1 text-xs" style={{ color: theme.colors.textSecondary }}>
                         <Clock className="w-3 h-3" />
-                        <span>{new Date(deck.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                        <span>{formatLongDate(deck.updatedAt)}</span>
                         {deck.slideCount && <span>· {deck.slideCount} slides</span>}
                     </div>
                 </div>

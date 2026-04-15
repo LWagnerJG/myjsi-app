@@ -1,6 +1,7 @@
 import React from 'react';
 import { Download, Share2, Check, Plus } from 'lucide-react';
 import { isDarkTheme } from '../../../../design-system/tokens.js';
+import { formatLongDate } from '../../../../utils/format.js';
 import { SlideCarousel } from './SlideCarousel.jsx';
 
 const CARD_SHADOW = '0 4px 16px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05)';
@@ -20,7 +21,7 @@ export const PresentationCard = ({ p, theme, onAddToMyDecks, myDeckIds, onDownlo
                     <div className="flex flex-wrap items-center gap-1.5 text-xs font-medium">
                         <span className="px-2 py-0.5 rounded-full" style={{ background: `${theme.colors.accent}18`, color: theme.colors.accent }}>{p.category}</span>
                         <span style={{ color: theme.colors.textSecondary }}>{p.type} · {p.size}</span>
-                        <span style={{ color: theme.colors.textSecondary }}>Updated {new Date(p.lastUpdated).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                        <span style={{ color: theme.colors.textSecondary }}>Updated {formatLongDate(p.lastUpdated)}</span>
                     </div>
                     <p className="text-[0.8125rem] leading-relaxed" style={{ color: theme.colors.textSecondary }}>{p.description}</p>
                 </div>
