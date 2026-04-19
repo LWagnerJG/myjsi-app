@@ -15,6 +15,7 @@ import {
 import { EmptyState as SharedEmptyState } from '../../components/common/EmptyState.jsx';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
+import { TabContent } from '../../components/common/TabContent.jsx';
 import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
 import { isDarkTheme } from '../../design-system/tokens.js';
 import { hapticLight, hapticMedium, hapticSuccess } from '../../utils/haptics.js';
@@ -209,19 +210,19 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
   return (
     <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
       <ScreenTopChrome theme={theme} maxWidthClass="max-w-2xl" horizontalPaddingClass="px-4" contentClassName="pt-2 pb-1">
-        <div className="flex justify-center">
-          <SegmentedToggle
-            value={activeTab}
-            onChange={(val) => { hapticLight(); setActiveTab(val); }}
-            options={tabOptions}
-            size="md"
-            theme={theme}
-          />
-        </div>
+        <SegmentedToggle
+          value={activeTab}
+          onChange={(val) => { hapticLight(); setActiveTab(val); }}
+          options={tabOptions}
+          size="sm"
+          theme={theme}
+          fullWidth
+        />
       </ScreenTopChrome>
 
       <div className="flex-1 overflow-y-auto scrollbar-hide" style={{ backgroundColor: theme.colors.background }}>
         <div className="max-w-2xl mx-auto w-full px-4 pb-8">
+          <TabContent activeKey={activeTab}>
           {activeTab === 'shop' && (
             <div className="pt-4 space-y-4">
               <BalanceCard
@@ -418,6 +419,7 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
               </GlassCard>
             </div>
           )}
+          </TabContent>
         </div>
       </div>
 

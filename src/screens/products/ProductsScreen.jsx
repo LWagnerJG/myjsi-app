@@ -7,6 +7,7 @@ import React, {
 import { EmptyState as SharedEmptyState } from '../../components/common/EmptyState.jsx';
 import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
+import { TabContent } from '../../components/common/TabContent.jsx';
 import { isDarkTheme, cardSurface } from '../../design-system/tokens.js';
 import {
     List,
@@ -184,7 +185,7 @@ const CategoryCard = React.memo(({
 });
 CategoryCard.displayName = 'CategoryCard';
 
-// ─── View mode toggle — compact icon button, same height as search bar ───────
+// ─── View mode toggle — matches Orders' filter-row icon button (h-10 pill) ──
 const ViewModeToggle = React.memo(({ viewMode, onToggle, theme }) => {
     const dark = isDarkTheme(theme);
     const isGrid = viewMode === 'grid';
@@ -192,8 +193,11 @@ const ViewModeToggle = React.memo(({ viewMode, onToggle, theme }) => {
     return (
         <button
             onClick={onToggle}
-            className="w-[44px] h-[44px] flex-shrink-0 rounded-2xl flex items-center justify-center transition-all duration-200 active:scale-90"
-            style={cardStyle(dark, theme)}
+            className="h-10 w-10 flex-shrink-0 rounded-full flex items-center justify-center active:scale-95 transition border"
+            style={{
+                backgroundColor: dark ? 'rgba(255,255,255,0.10)' : theme.colors.surface,
+                borderColor: dark ? 'rgba(255,255,255,0.12)' : theme.colors.border,
+            }}
             aria-label={actionLabel}
             title={actionLabel}
         >
@@ -205,40 +209,6 @@ const ViewModeToggle = React.memo(({ viewMode, onToggle, theme }) => {
     );
 });
 ViewModeToggle.displayName = 'ViewModeToggle';
-
-// ─── Search header ──────────────────────────────────────────────────────────
-const StickyHeader = React.memo(({
-    theme,
-    viewMode,
-    onToggleViewMode,
-    searchTerm,
-    onSearchChange,
-    placeholder,
-    showViewToggle,
-}) => (
-    <div
-        className="flex-shrink-0 px-4 sm:px-5 pt-4 pb-3"
-        style={{ backgroundColor: theme.colors.background }}
-    >
-        <div className="flex items-center gap-3">
-            <StandardSearchBar
-                value={searchTerm}
-                onChange={onSearchChange}
-                placeholder={placeholder}
-                theme={theme}
-                className="flex-grow"
-            />
-            {showViewToggle && (
-                <ViewModeToggle
-                    viewMode={viewMode}
-                    onToggle={onToggleViewMode}
-                    theme={theme}
-                />
-            )}
-        </div>
-    </div>
-));
-StickyHeader.displayName = 'StickyHeader';
 
 // ─── Series Row ─────────────────────────────────────────────────────────────
 const SeriesRow = React.memo(({ series, theme, isLast, onClick }) => (
@@ -400,23 +370,31 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
             >
                 <div className="max-w-5xl mx-auto w-full">
                     <div className="sticky top-0 z-20" style={{ backgroundColor: theme.colors.background }}>
-                        <StickyHeader
-                            theme={theme}
-                            viewMode={activeViewMode}
-                            onToggleViewMode={toggleViewMode}
-                            searchTerm={searchTerm}
-                            onSearchChange={handleSearchChange}
-                            placeholder={activeProductView === 'families' ? 'Search series...' : 'Search products...'}
-                            showViewToggle={activeProductView !== 'families'}
-                        />
-                        <div className="px-4 sm:px-5 pb-0.5">
-                            <SegmentedToggle
-                                value={activeProductView}
-                                onChange={handleViewChange}
-                                options={productViewOptions}
+                        <div className="px-4 sm:px-5 pt-3 pb-2 flex flex-col gap-2.5">
+                            <StandardSearchBar
+                                value={searchTerm}
+                                onChange={handleSearchChange}
+                                placeholder={activeProductView === 'families' ? 'Search series...' : 'Search products...'}
                                 theme={theme}
-                                size="md"
                             />
+                            <div className="flex items-center justify-between gap-3">
+                                <div className="min-w-0">
+                                    <SegmentedToggle
+                                        value={activeProductView}
+                                        onChange={handleViewChange}
+                                        options={productViewOptions}
+                                        theme={theme}
+                                        size="sm"
+                                    />
+                                </div>
+                                {activeProductView !== 'families' && (
+                                    <ViewModeToggle
+                                        viewMode={activeViewMode}
+                                        onToggle={toggleViewMode}
+                                        theme={theme}
+                                    />
+                                )}
+                            </div>
                         </div>
                         <div
                             aria-hidden="true"
@@ -436,6 +414,7 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
 
                 <div className="px-4 sm:px-5 lg:px-8 pt-0 pb-8">
                     <div className="max-w-5xl mx-auto w-full">
+                        <TabContent activeKey={activeProductView === 'families' ? 'families' : 'other'}>
                         {activeProductView === 'families' ? (
                             <div className="w-full mx-auto xl:max-w-[980px] 2xl:max-w-[920px]">
                                 <FamiliesView
@@ -470,6 +449,7 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
                                 ))}
                             </div>
                         )}
+                        </TabContent>
                     </div>
                 </div>
             </div>

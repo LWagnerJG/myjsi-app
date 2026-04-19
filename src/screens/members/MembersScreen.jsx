@@ -15,6 +15,7 @@ import {
     PERMISSION_LABELS,
 } from './data.js';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
+import { TabContent } from '../../components/common/TabContent.jsx';
 import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
 import { PageTitle } from '../../components/common/PageTitle.jsx';
 
@@ -187,6 +188,7 @@ const MembersScreenContent = ({ theme }) => {
                     )}
 
                     {/* Tab content */}
+                    <TabContent activeKey={tab}>
                     {tab === 'team' ? (
                         members.length > 0 ? (
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5">
@@ -232,6 +234,7 @@ const MembersScreenContent = ({ theme }) => {
                             </div>
                         )
                     )}
+                    </TabContent>
 
                 </div>
             </div>

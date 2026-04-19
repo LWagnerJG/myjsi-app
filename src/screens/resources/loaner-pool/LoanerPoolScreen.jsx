@@ -2,6 +2,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { Modal } from '../../../components/common/Modal.jsx';
 import { FormInput } from '../../../components/common/FormComponents.jsx';
 import { SegmentedToggle } from '../../../components/common/GroupedToggle.jsx';
+import { TabContent } from '../../../components/common/TabContent.jsx';
 import StandardSearchBar from '../../../components/common/StandardSearchBar.jsx';
 import { Package, ArrowRightLeft } from 'lucide-react';
 import { 
@@ -191,13 +192,15 @@ export const LoanerPoolScreen = ({ theme, setSuccessMessage, userSettings, myPro
                         { value: 'browse', label: 'Browse', icon: Package },
                         { value: 'transfers', label: 'Transfers', icon: ArrowRightLeft, badge: pendingTransferCount }
                     ]}
-                    size="md"
+                    size="sm"
+                    theme={theme}
                     fullWidth
                 />
             </div>
 
             {/* Content */}
             <div className="flex-1 overflow-y-auto scrollbar-hide">
+                <TabContent activeKey={activeTab}>
                 {activeTab === 'browse' ? (
                     <>
                         {/* Search bar */}
@@ -256,6 +259,7 @@ export const LoanerPoolScreen = ({ theme, setSuccessMessage, userSettings, myPro
                         onDecline={handleDeclineTransfer}
                     />
                 )}
+                </TabContent>
             </div>
 
             {/* Request drawer */}
