@@ -351,17 +351,28 @@ export const PRODUCTS_CATEGORIES_DATA = [
 // Re-export the single-source-of-truth series list so existing imports keep working
 export { JSI_SERIES } from '../../data/jsiSeries.js';
 
-// Map series slug (e.g. 'harbor') → { categoryId, productId } by scanning PRODUCT_DATA.
-// Prefers exact product-id match, then falls back to name-based match.
-const _seriesLookup = {};
+// Map series slug (e.g. 'harbor') → array of { categoryId, categoryName, productId, productName, image }
+// by scanning PRODUCT_DATA. Collects ALL categories a series appears in.
+const _seriesMulti = {};
 for (const [catId, cat] of Object.entries(PRODUCT_DATA)) {
     for (const p of cat.products || []) {
         const slug = p.name.toLowerCase().replace(/\s+/g, '-');
-        if (!_seriesLookup[slug]) _seriesLookup[slug] = { categoryId: catId, productId: p.id };
-        if (!_seriesLookup[p.id]) _seriesLookup[p.id] = { categoryId: catId, productId: p.id };
+        const entry = { categoryId: catId, categoryName: cat.name, productId: p.id, productName: p.name, image: p.image };
+        if (!_seriesMulti[slug]) _seriesMulti[slug] = [];
+        _seriesMulti[slug].push(entry);
+        // Also index by product id for direct lookups
+        if (slug !== p.id) {
+            if (!_seriesMulti[p.id]) _seriesMulti[p.id] = [];
+            _seriesMulti[p.id].push(entry);
+        }
     }
 }
-export const SERIES_TO_CATEGORY = Object.freeze(_seriesLookup);
+export const SERIES_CATEGORIES = Object.freeze(_seriesMulti);
+
+// Convenience: single-match lookup (first category found) — kept for backwards compat
+export const SERIES_TO_CATEGORY = Object.freeze(
+    Object.fromEntries(Object.entries(_seriesMulti).map(([k, v]) => [k, v[0]]))
+);
 
 // Re-export new hierarchical data + API abstraction
 export { PRODUCT_FAMILIES, PRODUCT_SUBCATEGORIES, PRODUCT_MODELS, PRODUCT_CATEGORIES } from './productHierarchy.js';

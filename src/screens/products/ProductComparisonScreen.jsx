@@ -22,6 +22,22 @@ const ProductTabs = React.memo(({ products, activeProduct, onProductSelect, them
   const isCasegoods = categoryName?.toLowerCase() === 'casegoods';
   const scrollRef = useRef(null);
 
+  // Auto-scroll the active product into view
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (!container || !activeProduct) return;
+    const idx = products.findIndex(p => p.id === activeProduct.id);
+    if (idx < 0) return;
+    const btn = container.children[idx];
+    if (!btn) return;
+    const btnLeft = btn.offsetLeft;
+    const btnWidth = btn.offsetWidth;
+    const containerWidth = container.offsetWidth;
+    // Center the button in the scroll area
+    const scrollTarget = btnLeft - (containerWidth / 2) + (btnWidth / 2);
+    container.scrollTo({ left: scrollTarget, behavior: 'smooth' });
+  }, [activeProduct, products]);
+
   return (
     <div
       className="rounded-[24px] overflow-hidden"

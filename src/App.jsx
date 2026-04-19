@@ -11,7 +11,8 @@ import { AppHeader } from './components/navigation/AppHeader.jsx';
 import { ProfileMenu } from './components/navigation/ProfileMenu.jsx';
 import { VoiceModal, SuccessToast } from './components/feedback/ToastsAndModals.jsx';
 import { SCREEN_MAP, ProductComparisonScreen, CompetitiveAnalysisScreen, SalesScreen, SamplesScreen } from './config/screenMap.js';
-import { SERIES_TO_CATEGORY } from './screens/products/data.js';
+import { SERIES_CATEGORIES } from './screens/products/data.js';
+import { SeriesCategoryPickerScreen } from './screens/products/SeriesCategoryPickerScreen.jsx';
 import { Modal } from './components/common/Modal.jsx';
 import { INITIAL_ASSETS } from './screens/library/data.js';
 import { AnimatedScreenWrapper } from './components/common/AnimatedScreenWrapper.jsx';
@@ -169,13 +170,18 @@ const ScreenRouter = React.memo(({ screenKey, projectsScreenRef, SuspenseFallbac
     }
 
     if (base === 'products' && parts[1] === 'series' && parts[2]) {
-        const match = SERIES_TO_CATEGORY[parts[2]];
-        if (match) return lazyWrap(ProductComparisonScreen, { categoryId: match.categoryId, initialProductId: match.productId });
+        const matches = SERIES_CATEGORIES[parts[2]];
+        if (matches?.length === 1) {
+            return lazyWrap(ProductComparisonScreen, { categoryId: matches[0].categoryId, initialProductId: matches[0].productId });
+        }
+        if (matches?.length > 1) {
+            return lazyWrap(SeriesCategoryPickerScreen, { seriesSlug: parts[2], categories: matches });
+        }
         // Fallback: show products screen if slug not recognized
     }
 
     if (base === 'products' && parts[1] === 'category' && parts.length === 3) {
-        return lazyWrap(ProductComparisonScreen, { categoryId: parts[2] });
+        return lazyWrap(ProductComparisonScreen, { categoryId: parts[2], initialProductId: rest.screenParams?.initialProductId });
     }
     if (base === 'products' && parts[1] === 'category' && (parts[2] === 'competition' || parts[3] === 'competition')) {
         const productId = parts[3] === 'competition' && parts[4] ? parts[4] : null;
