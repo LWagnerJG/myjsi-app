@@ -692,12 +692,6 @@ h6 {
 /* Existing UX helpers */
 .animated-screen-container {
     overscroll-behavior: contain;
-    touch-action: pan-y;
-}
-
-.gesture-lock {
-    touch-action: none;
-    overscroll-behavior: none;
 }
 
 .animated-screen-container [data-screen="current"] {

@@ -224,8 +224,34 @@ function App() {
     const backHandlerRef = useRef(null);
 
     const [navDepth, setNavDepth] = useState(0);
+    const navDepthRef = useRef(navDepth);
+    useEffect(() => { navDepthRef.current = navDepth; }, [navDepth]);
+
+    // Track whether the last navigation was initiated by our handleNavigate/handleBack
+    const internalNavRef = useRef(false);
 
     const currentScreen = useMemo(() => pathToScreen(location.pathname), [location.pathname]);
+
+    // Sync navDepth when browser native back/forward triggers a location change
+    // without going through handleNavigate/handleBack (e.g. native swipe-back,
+    // hardware back button, browser forward/back buttons).
+    useEffect(() => {
+        if (internalNavRef.current) {
+            // This location change was triggered by our code — already handled
+            internalNavRef.current = false;
+            return;
+        }
+        // External navigation (native gesture, browser button, etc.)
+        const isHome = currentScreen === 'home' || !currentScreen;
+        if (isHome) {
+            setLastNavigationDirection('backward');
+            setNavDepth(0);
+        } else if (navDepthRef.current === 0) {
+            // Navigated to a non-home screen externally (e.g. browser forward)
+            setLastNavigationDirection('forward');
+            setNavDepth(1);
+        }
+    }, [currentScreen]);
 
     const screenLabel = useMemo(() => {
         if (!currentScreen || currentScreen === 'home') return 'Home';
@@ -279,6 +305,7 @@ function App() {
     }, [isDarkMode]);
 
     const handleNavigate = useCallback((screen, params = {}) => {
+        internalNavRef.current = true;
         setLastNavigationDirection('forward');
         setScreenParams(params || {});
         if (screen === 'projects') {
@@ -298,6 +325,7 @@ function App() {
         }
 
         if (navDepth > 0) {
+            internalNavRef.current = true;
             setLastNavigationDirection('backward');
             setScreenParams({});
             setNavDepth(d => Math.max(0, d - 1));
@@ -310,6 +338,7 @@ function App() {
     }, []);
 
     const handleHome = useCallback(() => {
+        internalNavRef.current = true;
         setLastNavigationDirection('backward');
         setNavDepth(0);
         routerNavigate('/', { replace: true });
@@ -514,7 +543,7 @@ function App() {
                     profileBtnRef={profileBtnRef}
                 />
                 <main className="flex-1 overflow-hidden max-w-content mx-auto w-full" style={{ backgroundColor: currentTheme.colors.background }}>
-                    <AnimatedScreenWrapper screenKey={currentScreen} direction={lastNavigationDirection} onSwipeBack={navDepth > 0 ? handleBack : null}>
+                    <AnimatedScreenWrapper screenKey={currentScreen} direction={lastNavigationDirection}>
                         <ErrorBoundary screenKey={currentScreen} theme={currentTheme}>
                             <ScreenRouter screenKey={currentScreen} projectsScreenRef={projectsScreenRef} SuspenseFallback={suspenseFallback} {...screenProps} />
                         </ErrorBoundary>

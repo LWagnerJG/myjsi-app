@@ -3,9 +3,7 @@
     width: 100%;
     height: 100%;
     overflow: hidden;
-    touch-action: pan-y;
     background-color: inherit;
-    /* Prevent pull-to-refresh and over-scroll bounce interfering with transitions */
     overscroll-behavior: none;
     -webkit-tap-highlight-color: transparent;
 }
@@ -14,7 +12,6 @@
     position: absolute;
     inset: 0;
     background-color: inherit;
-    /* GPU compositing layer — no layout/paint during animation */
     will-change: transform, opacity;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
@@ -36,52 +33,22 @@
     scroll-padding-top: calc(var(--app-header-offset, 72px) + var(--safe-area-inset-top, 0px) + 12px);
 }
 
-/* ─── Left-edge gesture capture zone ────────────────────────── */
-/* Transparent overlay that sits above panel-content in the left 44px.
-   touch-action:none tells iOS not to start ANY native gesture (scroll,
-   pan, zoom) for touches that begin here — so our JS handlers get the
-   touch sequence without competing with UIScrollView. */
-.swipe-edge-zone {
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 44px;
-    z-index: 20;
-    touch-action: none;
-    background: transparent;
-    /* pointer-events must remain 'auto' (default) for touch-action to work */
-}
-
-/* ─── Swipe gesture shadow (dims the screen being revealed) ─── */
-.swipe-shadow {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background: rgba(0,0,0,0.18);
-    opacity: 0;
-    z-index: 10;
-    transition: opacity var(--screen-shadow-duration, 280ms) var(--screen-shadow-ease, cubic-bezier(0.4,0,0.2,1));
-}
-
 /* ═══════════════════════════════════════════════════════════════
    FORWARD navigation  (Home → Screen)
-   New screen slides in from the right; old screen stays in place
-   and subtly scales back — creating a "depth stack" effect.
+   New screen slides in from the right; old screen dims.
    ═══════════════════════════════════════════════════════════════ */
 .enter-right {
     animation: enterRight var(--screen-motion-duration, 320ms) var(--screen-motion-ease, cubic-bezier(0.22,1,0.36,1)) forwards;
 }
 
-/* Old screen recedes slightly — gives the new screen something to land on */
 .exit-left {
     animation: exitLeft var(--screen-motion-duration, 320ms) var(--screen-motion-ease, cubic-bezier(0.22,1,0.36,1)) forwards;
 }
 
 /* ═══════════════════════════════════════════════════════════════
    BACK navigation  (Screen → Home)
-   Current screen slides away to the right; previous screen was
-   already sitting behind it — it just rises back up.
+   Current screen slides away to the right; previous screen
+   brightens back up.
    ═══════════════════════════════════════════════════════════════ */
 .exit-right {
     animation: exitRight var(--screen-motion-duration, 320ms) var(--screen-motion-ease, cubic-bezier(0.22,1,0.36,1)) forwards;
@@ -93,41 +60,22 @@
 
 /* ─── Keyframes ─────────────────────────────────────────────── */
 
-/* New screen slides in from right */
 @keyframes enterRight {
     from { transform: translate3d(100%, 0, 0); }
     to   { transform: translate3d(0, 0, 0); }
 }
 
-/* Old screen stays full-size but dims as new screen slides over it */
 @keyframes exitLeft {
     from { opacity: 1; }
     to   { opacity: 0.72; }
 }
 
-/* Current screen slides out to the right */
 @keyframes exitRight {
     from { transform: translate3d(0, 0, 0); }
     to   { transform: translate3d(100%, 0, 0); }
 }
 
-/* Previous screen brightens back up as current slides away */
 @keyframes enterLeft {
     from { opacity: 0.72; }
     to   { opacity: 1; }
-}
-
-/* ─── Swipe-back helpers ─────────────────────────────────────── */
-.animated-screen-container {
-    overscroll-behavior: contain;
-}
-
-.gesture-lock {
-    touch-action: none;
-    overscroll-behavior: none;
-}
-
-.gesture-lock > .panel {
-    user-select: none;
-    -webkit-user-select: none;
 }
