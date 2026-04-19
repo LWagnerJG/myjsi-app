@@ -721,7 +721,7 @@ export const ProjectsScreen = forwardRef(({
       </div>
 
       <div className="px-4 sm:px-6 lg:px-8 pt-3 pb-10 max-w-content mx-auto w-full">
-        <TabContent activeKey={projectsTab}>
+        <TabContent activeKey={projectsTab} tabIndex={PROJECTS_TAB_OPTIONS.findIndex(o => o.value === projectsTab)}>
           {projectsTab === 'pipeline' && (
             filteredOpportunities.length > 0 ? (
               <>

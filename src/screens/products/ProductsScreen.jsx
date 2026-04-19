@@ -414,7 +414,7 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
 
                 <div className="px-4 sm:px-6 lg:px-8 pt-0 pb-8">
                     <div className="max-w-content mx-auto w-full">
-                        <TabContent activeKey={activeProductView === 'families' ? 'families' : 'other'}>
+                        <TabContent activeKey={activeProductView === 'families' ? 'families' : 'other'} tabIndex={activeProductView === 'families' ? 0 : 1}>
                         {activeProductView === 'families' ? (
                             <div className="w-full mx-auto xl:max-w-[980px] 2xl:max-w-[920px]">
                                 <FamiliesView

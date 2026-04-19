@@ -188,7 +188,7 @@ const MembersScreenContent = ({ theme }) => {
                     )}
 
                     {/* Tab content */}
-                    <TabContent activeKey={tab}>
+                    <TabContent activeKey={tab} tabIndex={tabOptions.findIndex(o => o.value === tab)}>
                     {tab === 'team' ? (
                         members.length > 0 ? (
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5">

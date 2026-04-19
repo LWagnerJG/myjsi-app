@@ -1,24 +1,11 @@
-import React, { useId } from 'react';
+import React, { useRef, useState, useCallback, useLayoutEffect, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { isDarkTheme } from '../../design-system/tokens.js';
 
 /**
  * JSI-style Segmented Toggle
- * A beautiful, animated pill-style toggle for switching between options.
- * 
- * Features:
- * - Warm pill container background (#E3E0D8)
- * - Animated white selected pill with spring physics
- * - Icon support with optional badges (for notifications/counts)
- * - Responsive: fullWidth mode stretches to fill container
- * - Three sizes: sm, md, lg
- * 
- * @param {string} value - Current selected value
- * @param {function} onChange - Callback when selection changes
- * @param {Array} options - Array of option objects: { value, label, icon?, badge? }
- * @param {string} size - 'sm' | 'md' | 'lg'
- * @param {boolean} fullWidth - If true, toggle stretches to fill container width
- * @param {string} className - Additional classes for the container
+ * Uses a single measured pill that animates via spring physics.
+ * No layoutId — avoids text-flash issues on mobile browsers.
  */
 export const SegmentedToggle = ({ 
   value, 
@@ -29,8 +16,10 @@ export const SegmentedToggle = ({
   theme,
   className = ''
 }) => {
-  const id = useId();
   const dark = theme ? isDarkTheme(theme) : false;
+  const containerRef = useRef(null);
+  const [pillLayout, setPillLayout] = useState(null);
+  const isFirstRender = useRef(true);
   
   const sizes = {
     sm: { 
@@ -61,23 +50,60 @@ export const SegmentedToggle = ({
   
   const s = sizes[size] || sizes.md;
   const containerBg = theme?.colors?.subtle || '#E3E0D8';
-  const selectedBg = dark ? 'rgba(255,255,255,0.14)' : '#FFFFFF';
   const selectedText = theme?.colors?.textPrimary || '#1a1a1a';
   const unselectedText = dark ? 'rgba(240,240,240,0.78)' : '#6A6762';
   const badgeBg = theme?.colors?.error || '#B85C5C';
   const selectedPillStyle = dark
-    ? { backgroundColor: selectedBg }
+    ? { backgroundColor: 'rgba(255,255,255,0.14)' }
     : {
         backgroundColor: '#FFFFFF',
         border: '1px solid rgba(255,255,255,0.96)',
         boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
       };
 
+  // Measure the active button and position the pill
+  const measure = useCallback(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const activeIndex = options.findIndex(o => o.value === value);
+    const btn = container.querySelectorAll('[data-toggle-btn]')[activeIndex];
+    if (btn) {
+      setPillLayout({ left: btn.offsetLeft, width: btn.offsetWidth });
+    }
+  }, [value, options]);
+
+  useLayoutEffect(() => {
+    measure();
+    // After first render, allow spring animations
+    requestAnimationFrame(() => { isFirstRender.current = false; });
+  }, [measure]);
+
+  // Re-measure on resize
+  useEffect(() => {
+    const ro = new ResizeObserver(measure);
+    if (containerRef.current) ro.observe(containerRef.current);
+    return () => ro.disconnect();
+  }, [measure]);
+
   return (
     <div 
-      className={`${fullWidth ? 'flex w-full' : 'inline-flex'} rounded-full p-[3px] ${className}`} 
+      ref={containerRef}
+      className={`${fullWidth ? 'flex w-full' : 'inline-flex'} rounded-full p-[3px] relative ${className}`} 
       style={{ backgroundColor: containerBg }}
     >
+      {/* Single animated pill — no conditional rendering, no layoutId */}
+      {pillLayout && (
+        <motion.div
+          className="absolute top-0 bottom-0 rounded-full pointer-events-none"
+          style={selectedPillStyle}
+          initial={false}
+          animate={{ left: pillLayout.left, width: pillLayout.width }}
+          transition={isFirstRender.current
+            ? { duration: 0 }
+            : { type: 'spring', stiffness: 400, damping: 30 }
+          }
+        />
+      )}
       {options.map((opt) => {
         const isSelected = opt.value === value;
         const Icon = opt.icon;
@@ -86,18 +112,11 @@ export const SegmentedToggle = ({
         return (
           <button
             key={opt.value}
+            data-toggle-btn
             onClick={() => onChange(opt.value)}
-            className={`relative rounded-full ${s.px} ${s.py} ${s.text} transition whitespace-nowrap ${fullWidth ? 'flex-1' : ''}`}
+            className={`relative rounded-full ${s.px} ${s.py} ${s.text} transition-colors whitespace-nowrap ${fullWidth ? 'flex-1' : ''}`}
             style={{ color: isSelected ? selectedText : unselectedText }}
           >
-            {isSelected && (
-              <motion.span
-                layoutId={`toggle-pill-${id}`}
-                className="absolute inset-[-3px] rounded-full"
-                style={selectedPillStyle}
-                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-              />
-            )}
             <span className={`relative z-10 flex items-center justify-center ${s.gap}`}
               style={{ fontWeight: 600 }}
             >

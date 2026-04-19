@@ -222,7 +222,7 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
 
       <div className="flex-1 overflow-y-auto scrollbar-hide" style={{ backgroundColor: theme.colors.background }}>
         <div className="max-w-content mx-auto w-full px-4 sm:px-6 lg:px-8 pb-8">
-          <TabContent activeKey={activeTab}>
+          <TabContent activeKey={activeTab} tabIndex={tabOptions.findIndex(o => o.value === activeTab)}>
           {activeTab === 'shop' && (
             <div className="pt-4 space-y-4">
               <BalanceCard
