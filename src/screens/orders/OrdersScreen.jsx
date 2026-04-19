@@ -12,7 +12,6 @@ import { formatCurrency, formatCompanyName } from '../../utils/format.js';
 /* ---------------------- Calendar View ---------------------- */
 export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => {
     const [selectedDate, setSelectedDate] = useState(null);
-    const isDark = isDarkTheme(theme);
 
     const ordersByDate = useMemo(() => {
         const m = new Map();

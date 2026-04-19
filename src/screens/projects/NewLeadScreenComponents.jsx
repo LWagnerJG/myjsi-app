@@ -43,12 +43,10 @@ export const Section = ({ title, subtitle, titleRight, children, theme, classNam
 };
 
 /* Compact field row */
-export const Row = ({ label, children, theme, tip, noSep, inline }) => {
-  const divider = isDarkTheme(theme) ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)';
+export const Row = ({ label, children, theme, tip, inline }) => {
   const rowLayout = inline ? 'grid items-start gap-2 md:grid-cols-[110px_minmax(0,1fr)] md:gap-3' : '';
   return (
-  <div className={`${rowLayout} py-2.5`}
-    style={{ borderColor: undefined }}>
+  <div className={`${rowLayout} py-2.5`}>
     {label && (
       <div className={`flex items-center gap-1.5 ${inline ? 'md:min-h-[34px] md:pt-1' : 'mb-1.5'}`}>
         <label className={`text-sm font-semibold ${inline ? 'whitespace-nowrap' : ''}`}

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import { HomeSearchInput } from '../../../components/common/SearchInput.jsx';
 import { QuickActionDropdown } from '../../../components/common/QuickActionDropdown.jsx';
@@ -20,7 +20,6 @@ export const HomeHeader = ({
     spotlightResults,
     onNavigate,
     openChatFromQuery,
-    hoverBg,
     isDark,
     onRfpFileDrop,
 }) => {

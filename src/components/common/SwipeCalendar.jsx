@@ -69,8 +69,6 @@ const SwipeCalendar = ({
   }, [viewMonth]);
 
   const goToday = useCallback(() => {
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const dd = String(today.getDate()).padStart(2, '0');
     onSelect?.(new Date(today.getFullYear(), today.getMonth(), today.getDate()));
   }, [today, onSelect]);
 

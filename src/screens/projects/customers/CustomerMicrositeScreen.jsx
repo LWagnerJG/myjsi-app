@@ -202,7 +202,7 @@ const StandardsProgramDetailModal = ({ program, customer, theme, onClose }) => {
 /* ═══════════════════════════════════════════════════════════════
    MAIN: CustomerMicrositeScreen
    ═══════════════════════════════════════════════════════════════ */
-export const CustomerMicrositeScreen = ({ customer, theme, onBack }) => {
+export const CustomerMicrositeScreen = ({ customer, theme }) => {
   const dark = isDarkTheme(theme);
   const c = theme.colors;
   const border = dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)';

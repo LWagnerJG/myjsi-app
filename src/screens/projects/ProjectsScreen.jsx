@@ -637,7 +637,6 @@ export const ProjectsScreen = forwardRef(({
     <CustomerMicrositeScreen
       customer={selectedCustomer}
       theme={theme}
-      onBack={() => setSelectedCustomer(null)}
     />
   );
 

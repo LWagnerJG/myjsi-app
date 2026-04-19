@@ -428,7 +428,6 @@ export const HomeScreen = React.memo(({
                     spotlightResults={spotlightResults}
                     onNavigate={onNavigate}
                     openChatFromQuery={openChatFromQuery}
-                    hoverBg={hoverBg}
                     isDark={isDark}
                     onRfpFileDrop={handleRfpFileDrop}
                 />

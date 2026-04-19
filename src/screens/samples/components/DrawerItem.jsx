@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { Package, Plus, Trash2, Minus } from 'lucide-react';
 import { isDarkTheme } from '../../../design-system/tokens.js';
 
-export const DrawerItem = React.memo(({ item, onUpdateCart, theme, isLast = false }) => {
+export const DrawerItem = React.memo(({ item, onUpdateCart, theme }) => {
     const isDark = isDarkTheme(theme);
     const dec = useCallback((e) => { e.stopPropagation(); onUpdateCart(item, -1); }, [item, onUpdateCart]);
     const inc = useCallback((e) => { e.stopPropagation(); onUpdateCart(item, 1); }, [item, onUpdateCart]);

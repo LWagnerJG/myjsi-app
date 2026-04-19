@@ -118,7 +118,7 @@ const PdfPage = ({ children, pageNumber, totalPages, footerTitle, theme, classNa
   );
 };
 
-export const ResponseBuilder = ({ data, onChange, partnerItems, onPartnerItemChange, onExport, onSave, theme }) => {
+export const ResponseBuilder = ({ data, onChange, partnerItems, onPartnerItemChange, onExport, theme }) => {
   const c = theme?.colors || {};
   const isDark = isDarkTheme(theme);
   const docRef = useRef(null);

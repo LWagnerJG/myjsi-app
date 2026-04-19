@@ -347,7 +347,6 @@ PricingTable.displayName = 'PricingTable';
 
 // ─── Error State ─────────────────────────────────────────────────────────────
 const ErrorState = ({ theme, message = 'The requested item does not exist.' }) => {
-  const dark = isDarkTheme(theme);
   return (
     <div className="p-6">
       <div

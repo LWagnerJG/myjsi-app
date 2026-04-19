@@ -246,7 +246,6 @@ export const AnimatedScreenWrapper = ({
                 shadow.style.opacity    = '0';
             }
 
-            const snapDx = g.dx;
             resetGesture();
 
             if (commit) {

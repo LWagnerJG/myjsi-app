@@ -19,6 +19,8 @@ const stagger = (i) => ({
 
 const goalTone = (pct) => pct >= 80 ? '#4A7C59' : pct >= 50 ? '#C4956A' : '#B85C5C';
 
+const EMPTY_FORM = { companyName: '', adminEmail: '', dailyDiscount: '' };
+
 export const DealerDirectoryScreen = ({ theme, dealerDirectory, setDealerDirectory, onNavigate, setSuccessMessage }) => {
     const dealers = useMemo(() => dealerDirectory || DEALER_DIRECTORY_DATA || [], [dealerDirectory]);
     const [searchTerm, setSearchTerm] = useState('');
@@ -27,7 +29,6 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, setDealerDirecto
 
     /* ── Add dealer modal state ── */
     const [showAddModal, setShowAddModal] = useState(false);
-    const EMPTY_FORM = { companyName: '', adminEmail: '', dailyDiscount: '' };
     const [form, setForm] = useState(EMPTY_FORM);
     const canSubmit = !!(form.companyName.trim() && form.adminEmail.trim() && form.dailyDiscount);
 

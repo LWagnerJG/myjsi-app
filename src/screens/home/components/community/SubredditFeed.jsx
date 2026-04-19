@@ -31,7 +31,7 @@ export const SubredditFeed = ({ subreddit, allPosts, theme, dark, likedPosts, po
         <>
           {topPosts.length > 0 && (
             <>
-              <FeedDivider label="Trending" dark={dark} theme={theme} first />
+              <FeedDivider label="Trending" theme={theme} first />
               <div className="space-y-3">
                 {topPosts.map((post, idx) => {
                   const isLiked = !!likedPosts?.[post.id];
@@ -56,7 +56,7 @@ export const SubredditFeed = ({ subreddit, allPosts, theme, dark, likedPosts, po
             </>
           )}
           {latestPosts.length > 0 && (
-            <FeedDivider label="Latest" dark={dark} theme={theme} />
+            <FeedDivider label="Latest" theme={theme} />
           )}
           {latestPosts.length > 0 && (
             <div className="space-y-3">

@@ -73,13 +73,13 @@ export const ChannelAwareFeed = ({
         <>
           {trendingFeed.length > 0 && (
             <>
-              <FeedDivider label="Trending" dark={dark} theme={theme} first />
+              <FeedDivider label="Trending" theme={theme} first />
               <div className="space-y-3">{trendingFeed.map(renderItem)}</div>
             </>
           )}
           {latestFeed.length > 0 && (
             <>
-              <FeedDivider label="Latest" dark={dark} theme={theme} />
+              <FeedDivider label="Latest" theme={theme} />
               <div className="space-y-3">{latestFeed.map(renderItem)}</div>
             </>
           )}

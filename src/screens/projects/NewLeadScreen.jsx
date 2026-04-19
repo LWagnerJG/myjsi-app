@@ -842,7 +842,7 @@ export const NewLeadScreen = ({
         {step === 0 && (
           <>
             <Section title="Project Basics" subtitle="Required project context to register this lead." theme={theme}>
-              <Row label="Project Name" theme={theme} inline noSep>
+              <Row label="Project Name" theme={theme} inline>
                 <div>
                   <FormInput
                     value={newLeadData.project || ''}
@@ -1039,7 +1039,7 @@ export const NewLeadScreen = ({
         {step === 1 && (
           <>
             <Section title="Commercial Scope" subtitle="Sizing, timeline, and discount details." theme={theme}>
-              <Row label="Estimated List" theme={theme} inline noSep>
+              <Row label="Estimated List" theme={theme} inline>
                 <div>
                   <div className="relative w-full">
                     <span className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none select-none" style={{ color: theme.colors.textSecondary, fontSize: "1rem" }}>$</span>
@@ -1220,7 +1220,7 @@ export const NewLeadScreen = ({
             </Section>
 
             <Section title="Stakeholders & Competition" subtitle="Who's involved and who you're up against." theme={theme}>
-              <Row label="End User" theme={theme} inline noSep>
+              <Row label="End User" theme={theme} inline>
                 <div>
                   <div className="flex items-center gap-2">
                     <div className="flex-1 min-w-0">
@@ -1420,7 +1420,7 @@ export const NewLeadScreen = ({
         {step === 2 && (
           <>
             <Section title="Quote & JSI Series" subtitle="Attach a quote and specify product lines." theme={theme}>
-              <Row label="JSI Quote" theme={theme} inline noSep>
+              <Row label="JSI Quote" theme={theme} inline>
                 <div>
                   <div className="flex flex-wrap items-center gap-1.5">
                     <PillButton

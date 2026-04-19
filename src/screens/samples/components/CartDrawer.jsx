@@ -105,7 +105,7 @@ export const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, d
                         <div className="px-5 pb-5 pt-2 max-h-[60vh] overflow-y-auto scrollbar-hide flex flex-col gap-4">
                             {/* Items */}
                             <div className="pt-1">
-                                {cartItems.map((item, idx) => (<DrawerItem key={item.id} item={item} onUpdateCart={onUpdateCart} theme={theme} isLast={idx === 0} />))}
+                                {cartItems.map((item) => (<DrawerItem key={item.id} item={item} onUpdateCart={onUpdateCart} theme={theme} />))}
                             </div>
 
                             {/* Divider */}

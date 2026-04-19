@@ -62,8 +62,6 @@ export const CommunityLibraryLayout = ({
     setActiveSubreddit(subreddit);
   }, []);
 
-  const exitSubreddit = useCallback(() => setActiveSubreddit(null), []);
-
   useEffect(() => {
     const handler = (event) => {
       if ((event.metaKey || event.ctrlKey) && event.key === '/') {

@@ -19,7 +19,7 @@ const ResponseBuilder = React.lazy(() =>
 
 const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20 MB
 
-const RfpResponderScreen = ({ theme, screenParams, onNavigate, setSuccessMessage }) => {
+const RfpResponderScreen = ({ theme, screenParams, setSuccessMessage }) => {
   /* ── Stage: 0 = upload, 1 = processing, 2 = clarification, 3 = builder ── */
   const [stage, setStage] = useState(0);
   const [file, setFile] = useState(null);
@@ -76,7 +76,7 @@ const RfpResponderScreen = ({ theme, screenParams, onNavigate, setSuccessMessage
   }, [stage]);
 
   /* ── Stage 2: Handle answer selection ── */
-  const handleAnswer = useCallback((choiceIdx) => {
+  const handleAnswer = useCallback(() => {
     const nextIdx = questionIndex + 1;
     if (nextIdx < CLARIFICATION_QUESTIONS.length) {
       setQuestionIndex(nextIdx);
@@ -98,11 +98,6 @@ const RfpResponderScreen = ({ theme, screenParams, onNavigate, setSuccessMessage
   const handleExport = useCallback(() => {
     setSuccessMessage?.('PDF downloaded successfully');
     setTimeout(() => setSuccessMessage?.(''), 3000);
-  }, [setSuccessMessage]);
-
-  const handleSaveOpportunity = useCallback(() => {
-    setSuccessMessage?.('Saved as opportunity');
-    setTimeout(() => setSuccessMessage?.(''), 2500);
   }, [setSuccessMessage]);
 
   /* ── Render ── */
@@ -156,7 +151,6 @@ const RfpResponderScreen = ({ theme, screenParams, onNavigate, setSuccessMessage
                 partnerItems={partnerItems}
                 onPartnerItemChange={handlePartnerItemChange}
                 onExport={handleExport}
-                onSave={handleSaveOpportunity}
                 theme={theme}
               />
             </Suspense>

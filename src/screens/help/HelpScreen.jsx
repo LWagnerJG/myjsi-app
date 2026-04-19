@@ -50,42 +50,42 @@ const QAItem = ({ q, a, theme, defaultOpen = false }) => {
     );
 };
 
+const CATEGORIES = [
+    { id: 'getting-started', label: 'Getting Started', icon: BookOpen, color: '#4A7C59' },
+    { id: 'navigation', label: 'Navigation', icon: Layout, color: '#5B7B8C' },
+    { id: 'projects', label: 'Projects & Leads', icon: FolderKanban, color: '#C4956A' },
+    { id: 'samples', label: 'Samples & Cart', icon: ShoppingCart, color: '#8C7B63' },
+    { id: 'appearance', label: 'Appearance', icon: Palette, color: '#6A6762' },
+    { id: 'shortcuts', label: 'Shortcuts', icon: Keyboard, color: '#5B7B8C' },
+];
+
+const FAQS = [
+    { cat: 'getting-started', q: 'How do I get started with MyJSI?', a: 'Start on the Home screen. Your pinned apps are in the grid at the top — tap any tile to jump into that area. Long-press and drag tiles to reorder them. Use the search bar to find anything quickly.' },
+    { cat: 'getting-started', q: 'What is the Home screen app grid?', a: 'The app grid shows your pinned apps. You can long-press to enter edit mode, then drag to reorder or remove tiles. Tap the edit pencil to add or remove apps.' },
+    { cat: 'getting-started', q: 'How do I use the global search?', a: 'Tap "Ask me anything" on Home. Start typing to jump to areas of the app, search products, or start a conversation with the assistant.' },
+    { cat: 'navigation', q: 'Can I swipe back to the previous screen?', a: 'Yes. Swipe from the left edge to go back, or use the back arrow in the top bar.' },
+    { cat: 'navigation', q: 'How do I switch between tabs?', a: 'Each screen with tabs shows them at the top. Tap to switch. On Community, you can also tap channel chips to filter by sub-community.' },
+    { cat: 'navigation', q: 'Where is the sidebar / main menu?', a: 'The main navigation is at the bottom of the screen on mobile, or in the left sidebar on desktop. Tap any icon to navigate.' },
+    { cat: 'projects', q: 'How do I create a new lead or project?', a: 'From the Projects screen, tap New Lead. Fill in the basic details and tap Save. You can edit value, stage, and competitors any time from the project details page.' },
+    { cat: 'projects', q: 'How do I track project stages?', a: 'Projects move through pipeline stages shown as tabs. Tap a stage to filter. Each project card shows its current stage, value, and health indicator.' },
+    { cat: 'projects', q: 'Can I add notes or files to a project?', a: 'Yes. Open a project and scroll to the notes section. You can attach files, PDFs, and images from the project detail view.' },
+    { cat: 'samples', q: 'Where can I see sample finishes and add to cart?', a: 'Go to Samples. Tap a tile to add it to the cart. Use the +/- controls on each tile to adjust quantities. The cart drawer appears at the bottom and updates right away.' },
+    { cat: 'samples', q: 'How do I order a full set of samples?', a: 'On the Samples screen, tap "Full JSI Set" at the top, or use the set button within a specific category to add all finishes from that group.' },
+    { cat: 'samples', q: 'My cart did not update. What should I try?', a: 'Check your connection and try again. If the issue continues, clear the cart from the drawer and re-add items. You can also contact support below.' },
+    { cat: 'appearance', q: 'How do I switch between light and dark mode?', a: 'Open the profile button in the top bar and toggle the theme switch. You can also find it under Settings > Appearance.' },
+    { cat: 'appearance', q: 'Can I customize the accent color?', a: 'Not yet — the accent color follows the JSI brand palette. This may be available in a future update.' },
+    { cat: 'shortcuts', q: 'Are there keyboard shortcuts?', a: 'Yes. Press Ctrl+/ (or ⌘/) to focus the search bar on Community. Most list screens support arrow-key navigation when focused.' },
+    { cat: 'shortcuts', q: 'Can I use voice to navigate?', a: 'Voice input is available in the Home search bar — tap the microphone icon to activate.' },
+];
+
 export const HelpScreen = ({ theme }) => {
     const dark = isDarkTheme(theme);
     const [query, setQuery] = useState('');
     const [activeCategory, setActiveCategory] = useState(null);
 
-    const categories = [
-        { id: 'getting-started', label: 'Getting Started', icon: BookOpen, color: '#4A7C59' },
-        { id: 'navigation', label: 'Navigation', icon: Layout, color: '#5B7B8C' },
-        { id: 'projects', label: 'Projects & Leads', icon: FolderKanban, color: '#C4956A' },
-        { id: 'samples', label: 'Samples & Cart', icon: ShoppingCart, color: '#8C7B63' },
-        { id: 'appearance', label: 'Appearance', icon: Palette, color: '#6A6762' },
-        { id: 'shortcuts', label: 'Shortcuts', icon: Keyboard, color: '#5B7B8C' },
-    ];
-
-    const faqs = [
-        { cat: 'getting-started', q: 'How do I get started with MyJSI?', a: 'Start on the Home screen. Your pinned apps are in the grid at the top — tap any tile to jump into that area. Long-press and drag tiles to reorder them. Use the search bar to find anything quickly.' },
-        { cat: 'getting-started', q: 'What is the Home screen app grid?', a: 'The app grid shows your pinned apps. You can long-press to enter edit mode, then drag to reorder or remove tiles. Tap the edit pencil to add or remove apps.' },
-        { cat: 'getting-started', q: 'How do I use the global search?', a: 'Tap "Ask me anything" on Home. Start typing to jump to areas of the app, search products, or start a conversation with the assistant.' },
-        { cat: 'navigation', q: 'Can I swipe back to the previous screen?', a: 'Yes. Swipe from the left edge to go back, or use the back arrow in the top bar.' },
-        { cat: 'navigation', q: 'How do I switch between tabs?', a: 'Each screen with tabs shows them at the top. Tap to switch. On Community, you can also tap channel chips to filter by sub-community.' },
-        { cat: 'navigation', q: 'Where is the sidebar / main menu?', a: 'The main navigation is at the bottom of the screen on mobile, or in the left sidebar on desktop. Tap any icon to navigate.' },
-        { cat: 'projects', q: 'How do I create a new lead or project?', a: 'From the Projects screen, tap New Lead. Fill in the basic details and tap Save. You can edit value, stage, and competitors any time from the project details page.' },
-        { cat: 'projects', q: 'How do I track project stages?', a: 'Projects move through pipeline stages shown as tabs. Tap a stage to filter. Each project card shows its current stage, value, and health indicator.' },
-        { cat: 'projects', q: 'Can I add notes or files to a project?', a: 'Yes. Open a project and scroll to the notes section. You can attach files, PDFs, and images from the project detail view.' },
-        { cat: 'samples', q: 'Where can I see sample finishes and add to cart?', a: 'Go to Samples. Tap a tile to add it to the cart. Use the +/- controls on each tile to adjust quantities. The cart drawer appears at the bottom and updates right away.' },
-        { cat: 'samples', q: 'How do I order a full set of samples?', a: 'On the Samples screen, tap "Full JSI Set" at the top, or use the set button within a specific category to add all finishes from that group.' },
-        { cat: 'samples', q: 'My cart did not update. What should I try?', a: 'Check your connection and try again. If the issue continues, clear the cart from the drawer and re-add items. You can also contact support below.' },
-        { cat: 'appearance', q: 'How do I switch between light and dark mode?', a: 'Open the profile button in the top bar and toggle the theme switch. You can also find it under Settings > Appearance.' },
-        { cat: 'appearance', q: 'Can I customize the accent color?', a: 'Not yet — the accent color follows the JSI brand palette. This may be available in a future update.' },
-        { cat: 'shortcuts', q: 'Are there keyboard shortcuts?', a: 'Yes. Press Ctrl+/ (or ⌘/) to focus the search bar on Community. Most list screens support arrow-key navigation when focused.' },
-        { cat: 'shortcuts', q: 'Can I use voice to navigate?', a: 'Voice input is available in the Home search bar — tap the microphone icon to activate.' },
-    ];
-
     const filtered = useMemo(() => {
         const q = query.trim().toLowerCase();
-        let items = faqs;
+        let items = FAQS;
         if (activeCategory) items = items.filter(f => f.cat === activeCategory);
         if (q) items = items.filter(f => f.q.toLowerCase().includes(q) || f.a.toLowerCase().includes(q));
         return items;
@@ -118,7 +118,7 @@ export const HelpScreen = ({ theme }) => {
                     >
                         All
                     </button>
-                    {categories.map(cat => (
+                    {CATEGORIES.map(cat => (
                         <button
                             key={cat.id}
                             onClick={() => setActiveCategory(activeCategory === cat.id ? null : cat.id)}

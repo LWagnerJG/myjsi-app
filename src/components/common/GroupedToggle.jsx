@@ -78,7 +78,7 @@ export const SegmentedToggle = ({
       className={`${fullWidth ? 'flex w-full' : 'inline-flex'} rounded-full p-[3px] ${className}`} 
       style={{ backgroundColor: containerBg }}
     >
-      {options.map((opt, i) => {
+      {options.map((opt) => {
         const isSelected = opt.value === value;
         const Icon = opt.icon;
         const badge = opt.badge;
