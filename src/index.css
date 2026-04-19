@@ -756,6 +756,15 @@ h6 {
     outline: none !important;
 }
 
+/* Headings focused programmatically (screen-reader announce) should never show
+   a visible ring — they aren't keyboard-navigation targets. Some mobile browsers
+   treat .focus() as :focus-visible, so we suppress both states explicitly. */
+h1[tabindex="-1"], h2[tabindex="-1"], h3[tabindex="-1"], h4[tabindex="-1"],
+[data-autofocus][tabindex="-1"] {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
 /* Used by FormInput, TagInput, PortalNativeSelect, and any interactive element
    that needs a visible keyboard-focus indicator. Relies on --theme-focus-ring
    which is set per-theme in :root and [data-theme="dark"]. */
