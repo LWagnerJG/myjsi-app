@@ -242,13 +242,15 @@ function App() {
             return;
         }
         // External navigation (native gesture, browser button, etc.)
+        // Use 'none' so AnimatedScreenWrapper skips its CSS slide animation —
+        // the browser/OS already provided the visual transition.
         const isHome = currentScreen === 'home' || !currentScreen;
         if (isHome) {
-            setLastNavigationDirection('backward');
+            setLastNavigationDirection('none');
             setNavDepth(0);
         } else if (navDepthRef.current === 0) {
             // Navigated to a non-home screen externally (e.g. browser forward)
-            setLastNavigationDirection('forward');
+            setLastNavigationDirection('none');
             setNavDepth(1);
         }
     }, [currentScreen]);

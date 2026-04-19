@@ -52,6 +52,13 @@ export const AnimatedScreenWrapper = ({
         const prev = root.querySelector('[data-role="previous"]');
         const done = () => { setPrevNode(null); setAnimating(false); };
 
+        // 'none' = external navigation (native swipe-back, browser buttons).
+        // The browser already provided the visual transition, so swap instantly.
+        if (direction === 'none') {
+            done();
+            return;
+        }
+
         // Reset classes for fresh animation
         [cur, prev].forEach(el => {
             if (!el) return;
