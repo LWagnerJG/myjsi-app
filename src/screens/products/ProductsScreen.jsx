@@ -368,9 +368,9 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
                 ref={scrollContainerRef}
                 className="flex-1 overflow-y-auto scrollbar-hide"
             >
-                <div className="max-w-5xl mx-auto w-full">
+                <div className="max-w-content mx-auto w-full">
                     <div className="sticky top-0 z-20" style={{ backgroundColor: theme.colors.background }}>
-                        <div className="px-4 sm:px-5 pt-3 pb-2 flex flex-col gap-2.5">
+                        <div className="px-4 sm:px-6 lg:px-8 pt-3 pb-2 flex flex-col gap-2.5">
                             <StandardSearchBar
                                 value={searchTerm}
                                 onChange={handleSearchChange}
@@ -412,8 +412,8 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
                     </div>
                 </div>
 
-                <div className="px-4 sm:px-5 lg:px-8 pt-0 pb-8">
-                    <div className="max-w-5xl mx-auto w-full">
+                <div className="px-4 sm:px-6 lg:px-8 pt-0 pb-8">
+                    <div className="max-w-content mx-auto w-full">
                         <TabContent activeKey={activeProductView === 'families' ? 'families' : 'other'}>
                         {activeProductView === 'families' ? (
                             <div className="w-full mx-auto xl:max-w-[980px] 2xl:max-w-[920px]">

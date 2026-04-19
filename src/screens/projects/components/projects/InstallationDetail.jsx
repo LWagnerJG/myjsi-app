@@ -8,7 +8,7 @@ export const InstallationDetail = ({ project, theme, onAddPhotoFiles }) => {
   return (
     <div className="min-h-full" style={{ backgroundColor: theme.colors.background }}>
       <div className="px-4 sm:px-6 lg:px-8 pb-32 scrollbar-hide" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 16px)' }}>
-        <div className="max-w-5xl mx-auto w-full space-y-4">
+        <div className="max-w-content mx-auto w-full space-y-4">
           <div className="rounded-[22px] overflow-hidden p-5 space-y-4" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${bdr}` }}>
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">

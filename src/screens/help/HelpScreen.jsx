@@ -93,8 +93,8 @@ export const HelpScreen = ({ theme }) => {
 
     return (
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
-            <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-4 scrollbar-hide">
-                
+            <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pb-6 space-y-4 scrollbar-hide">
+                <div className="max-w-content mx-auto w-full space-y-4">
                 {/* Search */}
                 <div className="pt-4">
                     <StandardSearchBar
@@ -187,6 +187,7 @@ export const HelpScreen = ({ theme }) => {
                         </div>
                     </div>
                 </GlassCard>
+                </div>
             </div>
         </div>
     );

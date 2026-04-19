@@ -268,7 +268,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
   return (
     <div className="flex flex-col h-full app-header-offset" style={{ background: c.background }}>
       <div className="flex-1 overflow-y-auto scrollbar-hide">
-        <div className="px-4 sm:px-5 pt-3 pb-6 max-w-3xl mx-auto w-full space-y-2.5">
+        <div className="px-4 sm:px-6 lg:px-8 pt-3 pb-6 max-w-content mx-auto w-full space-y-2.5">
 
           {/* HERO */}
           <div className="pb-0.5">

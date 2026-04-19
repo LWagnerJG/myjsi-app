@@ -74,6 +74,9 @@ module.exports = {
                 'card-hover': '0 8px 32px rgba(53,53,53,0.12), 0 4px 12px rgba(53,53,53,0.06)',
                 'modal': '0 24px 64px rgba(53,53,53,0.18), 0 12px 28px rgba(53,53,53,0.1)',
             },
+            maxWidth: {
+                'content': 'var(--content-max-width)',
+            },
             spacing: {
                 'header': '72px',
                 'header-lg': '76px',

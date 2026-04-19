@@ -6,8 +6,8 @@ export const ScreenTopChrome = React.memo(({
     children,
     className = '',
     contentClassName = '',
-    maxWidthClass = 'max-w-5xl',
-    horizontalPaddingClass = 'px-4',
+    maxWidthClass = 'max-w-content',
+    horizontalPaddingClass = 'px-4 sm:px-6 lg:px-8',
     fade = true,
 }) => {
     const dark = isDarkTheme(theme);

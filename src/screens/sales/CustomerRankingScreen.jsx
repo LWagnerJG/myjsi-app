@@ -132,7 +132,7 @@ export const CustomerRankingScreen = ({ theme, onNavigate }) => {
     return (
         <div className="h-full flex flex-col app-header-offset" style={{ backgroundColor: theme.colors.background }}>
             {/* Summary Header */}
-            <ScreenTopChrome theme={theme} maxWidthClass="max-w-5xl" horizontalPaddingClass="px-4 sm:px-6 lg:px-8" contentClassName="pt-4 pb-2 space-y-4">
+            <ScreenTopChrome theme={theme} contentClassName="pt-4 pb-2 space-y-4">
                 {/* Aggregate KPI */}
                 <div className="rounded-[22px] overflow-hidden px-5 py-4" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${bdr}` }}>
                     <div className="flex items-center justify-between">
@@ -191,7 +191,7 @@ export const CustomerRankingScreen = ({ theme, onNavigate }) => {
 
             {/* Rankings List */}
             <div className="flex-1 overflow-y-auto scrollbar-hide">
-                <div className="px-4 sm:px-6 lg:px-8 pt-3 pb-4 max-w-5xl mx-auto w-full">
+                <div className="px-4 sm:px-6 lg:px-8 pt-3 pb-4 max-w-content mx-auto w-full">
                     {rows.length === 0 ? (
                         <div className="text-center py-16">
                             <p className="text-sm font-medium" style={{ color: theme.colors.textSecondary }}>No dealers match "{search}"</p>

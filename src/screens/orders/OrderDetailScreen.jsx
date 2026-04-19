@@ -75,8 +75,8 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
 
   return (
     <div className="min-h-full" style={{ backgroundColor: c.background }}>
-      <div className="flex-1 overflow-y-auto px-5 pb-10 scrollbar-hide" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 16px)' }}>
-        <div className="max-w-xl mx-auto w-full">
+      <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pb-10 scrollbar-hide" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 16px)' }}>
+        <div className="max-w-content mx-auto w-full">
 
           {/* ── header card ── */}
           <div ref={hdrRef} className="mt-3 mb-3">

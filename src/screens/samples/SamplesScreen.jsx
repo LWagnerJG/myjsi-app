@@ -275,7 +275,7 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
     return (
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
             {/* Category chips — scrollable pills */}
-            <ScreenTopChrome theme={theme} maxWidthClass="max-w-5xl" horizontalPaddingClass="px-0" contentClassName="pt-2.5 pb-2" fade={false}>
+            <ScreenTopChrome theme={theme} horizontalPaddingClass="px-0" contentClassName="pt-2.5 pb-2" fade={false}>
                 <div className="flex overflow-x-auto scrollbar-hide no-scrollbar gap-2 px-4">
                     {allCategories.map((cat) => {
                         const isActive = selectedCategory === cat.id;
@@ -304,7 +304,7 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
             {/* Scrollable content */}
             <div className="flex-1 overflow-y-auto scrollbar-hide" style={{ backgroundColor: theme.colors.background }}>
                 <div className="px-4 pt-2" style={{ paddingBottom: totalCartItems > 0 ? `${COLLAPSED_HEIGHT + 16}px` : '16px' }}>
-                    <div className="max-w-5xl mx-auto w-full space-y-3">
+                    <div className="max-w-content mx-auto w-full space-y-3">
 
                         {/* ── Full JSI Set — prominent banner ── */}
                         <button

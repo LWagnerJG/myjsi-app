@@ -513,7 +513,7 @@ function App() {
                     isDarkMode={isDarkMode}
                     profileBtnRef={profileBtnRef}
                 />
-                <main className="flex-1 overflow-hidden max-w-5xl mx-auto w-full" style={{ backgroundColor: currentTheme.colors.background }}>
+                <main className="flex-1 overflow-hidden max-w-content mx-auto w-full" style={{ backgroundColor: currentTheme.colors.background }}>
                     <AnimatedScreenWrapper screenKey={currentScreen} direction={lastNavigationDirection} onSwipeBack={navDepth > 0 ? handleBack : null}>
                         <ErrorBoundary screenKey={currentScreen} theme={currentTheme}>
                             <ScreenRouter screenKey={currentScreen} projectsScreenRef={projectsScreenRef} SuspenseFallback={suspenseFallback} {...screenProps} />

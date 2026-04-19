@@ -10,7 +10,6 @@ import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 import { TabContent } from '../../components/common/TabContent.jsx';
 import { isDarkTheme, JSI_COLORS } from '../../design-system/tokens.js';
 import { usePersistentState } from '../../hooks/usePersistentState.js';
-import { FloatingActionCTA } from '../../components/common/FloatingActionCTA.jsx';
 import { PROJECTS_TAB_OPTIONS, fmtCurrency } from './components/projects/utils.js';
 import { OpportunityDetail } from './components/projects/OpportunityDetail.jsx';
 import { ProjectCard } from './components/projects/ProjectCard.jsx';
@@ -657,36 +656,36 @@ export const ProjectsScreen = forwardRef(({
     <div className="min-h-full relative" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
 
       <div className="flex-shrink-0" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 12px)', backgroundColor: theme.colors.background }}>
-        <div className="px-4 sm:px-6 lg:px-8 pb-3 max-w-5xl mx-auto w-full">
-          <SegmentedToggle
-            value={projectsTab}
-            onChange={setProjectsTab}
-            options={PROJECTS_TAB_OPTIONS}
-            size="sm"
-            theme={theme}
-            fullWidth
-          />
-        </div>
-
-        <div className="px-4 sm:px-6 lg:px-8 pb-3 max-w-5xl mx-auto w-full flex items-center justify-between gap-3">
-          {projectsTab === 'customers' ? (
-            <TypeDropdown value={customerType} onChange={setCustomerType} theme={theme} />
-          ) : (
-            <div /> /* spacer keeps CTA right-aligned on other tabs */
-          )}
+        <div className="px-4 sm:px-6 lg:px-8 pb-3 max-w-content mx-auto w-full flex items-center justify-between gap-2.5">
+          <div className="min-w-0 overflow-x-auto scrollbar-hide">
+            <SegmentedToggle
+              value={projectsTab}
+              onChange={setProjectsTab}
+              options={PROJECTS_TAB_OPTIONS}
+              size="sm"
+              theme={theme}
+            />
+          </div>
           {cta && (
             <button
               onClick={cta.action}
-              className="flex-shrink-0 inline-flex items-center justify-center gap-1 rounded-full text-sm font-semibold transition-all whitespace-nowrap active:scale-[0.97]"
-              style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText, paddingTop: 9, paddingBottom: 9, paddingLeft: 14, paddingRight: 16 }}
+              className="flex-shrink-0 inline-flex items-center justify-center rounded-full font-semibold transition-all whitespace-nowrap active:scale-[0.97] h-9 min-w-[36px] gap-1 text-sm py-2 px-3.5"
+              style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
             >
-              <Plus size={13} strokeWidth={2.5} /> {cta.label}
+              <Plus size={14} strokeWidth={2.5} />
+              {cta.label}
             </button>
           )}
         </div>
 
+        {projectsTab === 'customers' && (
+          <div className="px-4 sm:px-6 lg:px-8 pb-3 max-w-content mx-auto w-full">
+            <TypeDropdown value={customerType} onChange={setCustomerType} theme={theme} />
+          </div>
+        )}
+
         {projectsTab === 'pipeline' && (
-          <div className="px-4 sm:px-6 lg:px-8 pb-3 relative max-w-5xl mx-auto w-full">
+          <div className="px-4 sm:px-6 lg:px-8 pb-3 relative max-w-content mx-auto w-full">
             <div ref={stagesScrollRef} onScroll={updateStageFade} className="overflow-x-auto scrollbar-hide">
               <div className="inline-flex items-center gap-0 py-0.5 whitespace-nowrap">
                 {STAGES.map((stage, i) => {
@@ -721,16 +720,30 @@ export const ProjectsScreen = forwardRef(({
         )}
       </div>
 
-      <div className="px-4 sm:px-6 lg:px-8 pt-3 pb-40 max-w-5xl mx-auto w-full">
+      <div className="px-4 sm:px-6 lg:px-8 pt-3 pb-10 max-w-content mx-auto w-full">
         <TabContent activeKey={projectsTab}>
           {projectsTab === 'pipeline' && (
             filteredOpportunities.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-                {filteredOpportunities.map(opp => (
-                  <ProjectCard key={opp.id} opp={opp} theme={theme}
-                    onClick={() => { setSelectedOpportunity(opp); onNavigate(`projects/${opp.id}`); }} />
-                ))}
-              </div>
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
+                  {filteredOpportunities.map(opp => (
+                    <ProjectCard key={opp.id} opp={opp} theme={theme}
+                      onClick={() => { setSelectedOpportunity(opp); onNavigate(`projects/${opp.id}`); }} />
+                  ))}
+                </div>
+                <div className="mt-6 flex justify-center">
+                  <div
+                    className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full text-[0.8125rem] font-semibold"
+                    style={{
+                      backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.06)',
+                      color: theme.colors.textSecondary,
+                    }}
+                  >
+                    <Briefcase size={15} style={{ opacity: 0.5 }} />
+                    {selectedPipelineStage} · {filteredOpportunities.length} {filteredOpportunities.length === 1 ? 'project' : 'projects'} · {fmtCurrency(stageTotalValue)}
+                  </div>
+                </div>
+              </>
             ) : (
               <SharedEmptyState icon={Briefcase} theme={theme}
                 title={`No projects in ${selectedPipelineStage}`}
@@ -740,7 +753,7 @@ export const ProjectsScreen = forwardRef(({
 
           {projectsTab === 'customers' && (
             filteredCustomers.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
                 {filteredCustomers.map(cust => (
                   <CustomerCard key={cust.id} customer={cust} isDark={isDark}
                     onClick={() => setSelectedCustomer(cust)} />
@@ -755,7 +768,7 @@ export const ProjectsScreen = forwardRef(({
 
           {projectsTab === 'my-projects' && (
             allProjects.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
                 {allProjects.map(p => {
                   const ownerCustomer = customers.find(c => c.id === p.customerId);
                   return (
@@ -772,13 +785,6 @@ export const ProjectsScreen = forwardRef(({
           )}
         </TabContent>
       </div>
-
-      <FloatingActionCTA
-        theme={theme}
-        visible={projectsTab === 'pipeline' && filteredOpportunities.length > 0}
-        icon={<Briefcase />}
-        label={`${selectedPipelineStage} · ${filteredOpportunities.length} ${filteredOpportunities.length === 1 ? 'project' : 'projects'} · ${fmtCurrency(stageTotalValue)}`}
-      />
 
       {showAddCustomer && (
         <AddCustomerModal

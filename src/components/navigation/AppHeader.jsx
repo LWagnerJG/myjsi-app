@@ -169,7 +169,7 @@ export const AppHeader = React.memo(({
 
             <div className="px-4 sm:px-5 pb-1 fixed top-0 left-0 right-0 z-30 pointer-events-none bg-transparent" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.75rem)' }}>
                 <div
-                    className="max-w-5xl mx-auto w-full flex items-center justify-between px-4 sm:px-5 pointer-events-auto overflow-hidden"
+                    className="max-w-content mx-auto w-full flex items-center justify-between px-4 sm:px-6 lg:px-8 pointer-events-auto overflow-hidden"
                     style={{
                         transition: 'border-radius 200ms ease',
                         ...homeChromePillStyles,

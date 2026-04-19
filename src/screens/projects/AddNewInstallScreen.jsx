@@ -142,7 +142,7 @@ export const AddNewInstallScreen = ({ theme, onAddInstall }) => {
     return (
         <form onSubmit={handleSubmit} className="min-h-full" style={{ backgroundColor: theme.colors.background }}>
             <div className="scrollbar-hide">
-                <div className="max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 pb-24" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 16px)' }}>
+                <div className="max-w-content mx-auto w-full px-4 sm:px-6 lg:px-8 pb-24" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 16px)' }}>
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5">
                         <div className="lg:col-span-5 rounded-[22px] overflow-hidden p-5 sm:p-6 space-y-5" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)'}` }}>
                             <div>

@@ -209,7 +209,7 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
 
   return (
     <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
-      <ScreenTopChrome theme={theme} maxWidthClass="max-w-2xl" horizontalPaddingClass="px-4" contentClassName="pt-2 pb-1">
+      <ScreenTopChrome theme={theme} contentClassName="pt-2 pb-1">
         <SegmentedToggle
           value={activeTab}
           onChange={(val) => { hapticLight(); setActiveTab(val); }}
@@ -221,7 +221,7 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
       </ScreenTopChrome>
 
       <div className="flex-1 overflow-y-auto scrollbar-hide" style={{ backgroundColor: theme.colors.background }}>
-        <div className="max-w-2xl mx-auto w-full px-4 pb-8">
+        <div className="max-w-content mx-auto w-full px-4 sm:px-6 lg:px-8 pb-8">
           <TabContent activeKey={activeTab}>
           {activeTab === 'shop' && (
             <div className="pt-4 space-y-4">

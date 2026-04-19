@@ -392,7 +392,7 @@ export const ProductComparisonScreen = ({ categoryId, onNavigate, theme }) => {
   return (
     <div className="flex flex-col h-full app-header-offset">
       <div className="flex-1 overflow-y-auto scrollbar-hide">
-        <div className="px-4 sm:px-5 lg:px-8 pt-2 pb-8 space-y-3 max-w-5xl mx-auto w-full">
+        <div className="px-4 sm:px-6 lg:px-8 pt-2 pb-8 space-y-3 max-w-content mx-auto w-full">
           {/* Category title */}
           <h1
             className="text-[1.25rem] font-bold tracking-tight px-1"

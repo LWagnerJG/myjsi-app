@@ -35,7 +35,7 @@ export const SegmentedToggle = ({
   const sizes = {
     sm: { 
       text: 'text-[0.8125rem]', 
-      px: 'px-4', 
+      px: 'px-3', 
       py: 'py-1.5', 
       gap: 'gap-1.5',
       iconSize: 'w-3.5 h-3.5',

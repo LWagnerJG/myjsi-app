@@ -104,7 +104,7 @@ export const CommunityLibraryLayout = ({
 
   return (
     <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
-      <ScreenTopChrome theme={theme} maxWidthClass="max-w-3xl" horizontalPaddingClass="px-4" contentClassName="pt-1 pb-2">
+      <ScreenTopChrome theme={theme} contentClassName="pt-1 pb-2">
         <div className="space-y-3">
 
           {inSubCommunity ? (
@@ -189,7 +189,7 @@ export const CommunityLibraryLayout = ({
       </ScreenTopChrome>
 
       <div ref={containerRef} className="flex-1 overflow-y-auto pb-10 scrollbar-hide">
-        <div className="mx-auto w-full max-w-3xl px-4 pt-3" style={{ position: 'relative' }}>
+        <div className="mx-auto w-full max-w-content px-4 sm:px-6 lg:px-8 pt-3" style={{ position: 'relative' }}>
           <div style={{ position: 'relative' }}>
             <div style={paneStyle('community')}>
               <ChannelAwareFeed

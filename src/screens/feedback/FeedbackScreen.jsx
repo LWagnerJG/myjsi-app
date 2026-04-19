@@ -148,7 +148,7 @@ export const FeedbackScreen = ({ theme }) => {
             asForm
             onSubmit={handleSubmit}
             title="Feedback"
-            maxWidthClass="max-w-xl"
+            maxWidthClass="max-w-content"
             horizontalPaddingClass="px-4 sm:px-6"
             contentPaddingBottomClass="pb-36"
             contentClassName="pt-2 space-y-5"

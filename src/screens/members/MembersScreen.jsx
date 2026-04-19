@@ -140,7 +140,7 @@ const MembersScreenContent = ({ theme }) => {
     return (
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
             <div className="flex-1 overflow-y-auto scrollbar-hide">
-                <div className="px-4 sm:px-6 lg:px-8 pb-24 lg:pb-12 max-w-2xl lg:max-w-5xl mx-auto w-full">
+                <div className="px-4 sm:px-6 lg:px-8 pb-24 lg:pb-12 max-w-content mx-auto w-full">
 
                     {/* Header */}
                     <PageTitle

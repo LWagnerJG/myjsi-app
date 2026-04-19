@@ -23,7 +23,7 @@ export const WizardBottomBar = ({
             className={`sticky bottom-0 z-20 rounded-t-2xl ${className}`}
             style={floatingBarStyle(theme)}
         >
-            <div className="max-w-3xl mx-auto px-4 sm:px-5 pt-3 pb-2 flex items-center justify-between gap-3">
+            <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8 pt-3 pb-2 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-1.5">
                     {steps.map((label, idx) => {
                         const active = currentStep === idx;
@@ -50,7 +50,7 @@ export const WizardBottomBar = ({
             </div>
 
             <div
-                className="max-w-3xl mx-auto px-4 sm:px-5 pb-2.5"
+                className="max-w-content mx-auto px-4 sm:px-6 lg:px-8 pb-2.5"
                 style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 10px)' }}
             >
                 {actionNode || null}

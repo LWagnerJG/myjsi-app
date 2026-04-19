@@ -182,8 +182,8 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
     return (
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
             {/* Controls */}
-            <div className="flex-shrink-0 max-w-2xl mx-auto w-full">
-                <div className="px-5 pt-3 pb-2 flex flex-col gap-2.5">
+            <div className="flex-shrink-0 max-w-content mx-auto w-full">
+                <div className="px-4 sm:px-6 lg:px-8 pt-3 pb-2 flex flex-col gap-2.5">
                     <StandardSearchBar value={searchTerm} onChange={setSearchTerm} placeholder="Search orders..." theme={theme} />
                     <div className="flex items-center justify-between gap-3">
                         <div className="min-w-0">
@@ -224,7 +224,7 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
 
             {/* Content */}
             <div ref={scrollRef} className="flex-1 overflow-y-auto scrollbar-hide">
-                <div className="px-5 pt-2 pb-24 max-w-2xl mx-auto w-full">
+                <div className="px-4 sm:px-6 lg:px-8 pt-2 pb-24 max-w-content mx-auto w-full">
                     <AnimatePresence mode="wait">
                       {viewMode === 'list' ? (
                         <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>

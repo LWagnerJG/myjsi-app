@@ -69,7 +69,7 @@ function ReplacementForm({ theme, formData, onChange, fileInputRef, onPickPhotos
     };
 
     return (
-        <div className="px-4 sm:px-6 lg:px-8 pb-28 max-w-5xl mx-auto w-full" style={{ paddingTop: CONTENT_PT }}>
+        <div className="px-4 sm:px-6 lg:px-8 pb-28 max-w-content mx-auto w-full" style={{ paddingTop: CONTENT_PT }}>
             <div className="space-y-5">
                 <Field label="Sales Order">
                     <input value={formData.salesOrder} onChange={e => onChange('salesOrder', e.target.value)}
@@ -245,7 +245,7 @@ export const ReplacementsScreen = ({ theme }) => {
 
     return (
         <div className="min-h-full" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
-            <div className="px-4 sm:px-6 lg:px-8 pb-8 max-w-5xl mx-auto w-full"
+            <div className="px-4 sm:px-6 lg:px-8 pb-8 max-w-content mx-auto w-full"
                 style={{ paddingTop: CONTENT_PT }}>
 
                 {/* ── Action tiles — side-by-side ── */}
