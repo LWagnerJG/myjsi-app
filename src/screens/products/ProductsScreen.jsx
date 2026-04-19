@@ -417,7 +417,6 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
                                 options={productViewOptions}
                                 theme={theme}
                                 size="sm"
-                                fullWidth
                             />
                         </div>
                         <div
