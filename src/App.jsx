@@ -21,6 +21,7 @@ import { ToastHost } from './components/common/ToastHost.jsx';
 import { ErrorBoundary } from './components/common/ErrorBoundary.jsx';
 import { ScreenSkeleton } from './components/common/ScreenSkeleton.jsx';
 import { submitLeadToExcel } from './utils/submitLeadToExcel.js';
+import { INITIAL_SAMPLE_ORDERS, buildSubmittedSampleOrder } from './screens/samples/sampleOrders.js';
 
 // Lazy load less-frequently visited resource feature screens for bundle splitting
 const CommissionRatesScreen = React.lazy(() => import('./screens/resources/commission-rates/index.js'));
@@ -32,6 +33,7 @@ const DealerDetailScreen = React.lazy(() => import('./screens/resources/dealer-d
 const DiscontinuedFinishesScreen = React.lazy(() => import('./screens/resources/discontinued-finishes/index.js'));
 const TradeshowsScreen = React.lazy(() => import('./screens/resources/tradeshows/index.js'));
 const SampleDiscountsScreen = React.lazy(() => import('./screens/resources/sample-discounts/index.js'));
+const SampleOrdersScreen = React.lazy(() => import('./screens/samples/SampleOrdersScreen.jsx').then(m => ({ default: m.SampleOrdersScreen })));
 const LoanerPoolScreen = React.lazy(() => import('./screens/resources/loaner-pool/index.js'));
 const InstallInstructionsScreen = React.lazy(() => import('./screens/resources/install-instructions/index.js'));
 const NewDealerSignUpScreen = React.lazy(() => import('./screens/resources/new-dealer-signup/index.js'));
@@ -128,6 +130,7 @@ const ScreenRouter = React.memo(({ screenKey, projectsScreenRef, SuspenseFallbac
     );
 
     if (screenKey === 'samples/cart') return lazyWrap(SamplesScreen, { initialCartOpen: true });
+    if (screenKey === 'samples/orders') return lazyWrap(SampleOrdersScreen);
     if (base === 'samples') return lazyWrap(SamplesScreen);
 
     if (base === 'new-trip') {
@@ -216,6 +219,7 @@ function App() {
 
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [cart, setCart] = usePersistentState('samples.cart', {});
+    const [sampleOrders, setSampleOrders] = usePersistentState('samples.orders', INITIAL_SAMPLE_ORDERS);
     const [homeApps, setHomeApps] = usePersistentState('pref.homeApps', DEFAULT_HOME_APPS);
 
     // Reset to current default if stored count mismatches (e.g. after adding new apps)
@@ -244,6 +248,7 @@ function App() {
     const internalNavRef = useRef(false);
 
     const currentScreen = useMemo(() => pathToScreen(location.pathname), [location.pathname]);
+    const isHomeScreen = !currentScreen || currentScreen === 'home';
 
     // Sync navDepth when browser native back/forward triggers a location change
     // without going through handleNavigate/handleBack (e.g. native swipe-back,
@@ -257,8 +262,7 @@ function App() {
         // External navigation (native gesture, browser button, etc.)
         // Use 'none' so AnimatedScreenWrapper skips its CSS slide animation —
         // the browser/OS already provided the visual transition.
-        const isHome = currentScreen === 'home' || !currentScreen;
-        if (isHome) {
+        if (isHomeScreen) {
             setLastNavigationDirection('none');
             setNavDepth(0);
         } else if (navDepthRef.current === 0) {
@@ -266,7 +270,7 @@ function App() {
             setLastNavigationDirection('none');
             setNavDepth(1);
         }
-    }, [currentScreen]);
+    }, [currentScreen, isHomeScreen]);
 
     const screenLabel = useMemo(() => {
         if (!currentScreen || currentScreen === 'home') return 'Home';
@@ -319,7 +323,23 @@ function App() {
         document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
     }, [isDarkMode]);
 
+    const navigateHome = useCallback(({ reset = true, direction = 'home' } = {}) => {
+        internalNavRef.current = true;
+        setLastNavigationDirection(direction);
+        setScreenParams({});
+        setNavDepth(0);
+        routerNavigate('/', { replace: true });
+        if (reset) {
+            setHomeResetKey((prev) => prev + 1);
+        }
+    }, [routerNavigate]);
+
     const handleNavigate = useCallback((screen, params = {}) => {
+        if (!screen || screen === 'home') {
+            navigateHome({ reset: true, direction: 'home' });
+            return;
+        }
+
         internalNavRef.current = true;
         setLastNavigationDirection('forward');
         setScreenParams(params || {});
@@ -329,7 +349,7 @@ function App() {
         }
         setNavDepth(d => d + 1);
         routerNavigate(screenToPath(screen));
-    }, [routerNavigate]);
+    }, [navigateHome, routerNavigate]);
 
     const handleBack = useCallback(() => {
         if (typeof backHandlerRef.current === 'function') {
@@ -341,7 +361,7 @@ function App() {
 
         if (navDepth > 0) {
             internalNavRef.current = true;
-            setLastNavigationDirection('backward');
+            setLastNavigationDirection(navDepth <= 1 ? 'home' : 'backward');
             setScreenParams({});
             setNavDepth(d => Math.max(0, d - 1));
             routerNavigate(-1);
@@ -353,12 +373,8 @@ function App() {
     }, []);
 
     const handleHome = useCallback(() => {
-        internalNavRef.current = true;
-        setLastNavigationDirection('backward');
-        setNavDepth(0);
-        routerNavigate('/', { replace: true });
-        setHomeResetKey((prev) => prev + 1);
-    }, [routerNavigate]);
+        navigateHome({ reset: true, direction: 'home' });
+    }, [navigateHome]);
 
     const handleVoiceActivate = useCallback((message) => { setVoiceMessage(message); setTimeout(() => setVoiceMessage(''), 1500); }, []);
     const handleAskAI = useCallback((query) => { setVoiceMessage(`AI Search: ${query}`); setTimeout(() => setVoiceMessage(''), 2500); }, []);
@@ -373,6 +389,24 @@ function App() {
             return next;
         });
     }, [setCart]);
+
+    const handleSubmitSampleOrder = useCallback((draft) => {
+        let createdOrder = null;
+        setSampleOrders((prev) => {
+            const existing = Array.isArray(prev) ? prev : INITIAL_SAMPLE_ORDERS;
+            createdOrder = buildSubmittedSampleOrder({
+                existingOrders: existing,
+                cartItems: draft?.cartItems || [],
+                shipToName: draft?.shipToName,
+                address1: draft?.address1,
+                address2: draft?.address2,
+                shipToType: draft?.shipToType,
+                userSettings,
+            });
+            return [createdOrder, ...existing];
+        });
+        return createdOrder;
+    }, [setSampleOrders, userSettings]);
 
     const handleToggleLike = useCallback((postId) => {
         setLikedPosts((prev) => {
@@ -505,6 +539,8 @@ function App() {
         cart,
         setCart,
         onUpdateCart: handleUpdateCart,
+        sampleOrders,
+        onSubmitSampleOrder: handleSubmitSampleOrder,
         dealerDirectory,
         setDealerDirectory,
         designFirms,
@@ -531,7 +567,7 @@ function App() {
         posts, polls, likedPosts, pollChoices, handleToggleLike,
         handleAddComment, handlePollVote, openCreateContentModal, openLibraryUploadModal, libraryAssets, savedImageIds,
         handleToggleSaveImage, postUpvotes, handleUpvote, cart, setCart,
-        handleUpdateCart, dealerDirectory, setDealerDirectory, designFirms, dealers, newLeadData,
+        handleUpdateCart, sampleOrders, handleSubmitSampleOrder, dealerDirectory, setDealerDirectory, designFirms, dealers, newLeadData,
         handleNewLeadChange, isDarkMode, handleToggleTheme, handleLeadSuccess,
         handleAddInstall, projectsTabOverride, clearProjectsInitialTab, projectsStageOverride, clearProjectsInitialStage,
         homeApps, handleUpdateHomeApps, homeResetKey
@@ -550,7 +586,7 @@ function App() {
                 <AppHeader
                     theme={currentTheme}
                     userName={userSettings.firstName}
-                    showBack={navDepth > 0}
+                    showBack={!isHomeScreen && navDepth > 0}
                     handleBack={handleBack}
                     onHomeClick={handleHome}
                     onProfileClick={toggleProfileMenu}

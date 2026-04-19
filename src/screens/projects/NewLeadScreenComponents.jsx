@@ -14,21 +14,20 @@ export const Section = ({ title, subtitle, titleRight, children, theme, classNam
   const dark = isDarkTheme(theme);
   const divider = dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.07)';
   return (
-    <div className={`rounded-[24px] ${className}`} style={{
-      padding: '16px',
+    <div className={`rounded-[22px] ${className}`} style={{
+      padding: '14px 16px',
       backgroundColor: dark ? theme.colors.surface : '#fff',
       border: `1px solid ${divider}`,
     }}>
       {title && (
-        <div className="mb-2.5">
-          <div className="flex items-start gap-3">
+        <div className="mb-2">
+          <div className="flex items-center gap-3">
             <div className="min-w-0">
-              <h3 className="text-[0.9375rem] font-semibold leading-tight" style={{
+              <h3 className="text-sm font-bold leading-tight tracking-tight" style={{
                 color: theme.colors.textPrimary,
-                letterSpacing: '-0.01em',
               }}>{title}</h3>
               {subtitle && (
-                <p className="text-sm mt-0.5 leading-snug" style={{ color: theme.colors.textSecondary }}>
+                <p className="text-xs mt-0.5 leading-snug" style={{ color: theme.colors.textSecondary }}>
                   {subtitle}
                 </p>
               )}
@@ -44,12 +43,12 @@ export const Section = ({ title, subtitle, titleRight, children, theme, classNam
 
 /* Compact field row */
 export const Row = ({ label, children, theme, tip, inline }) => {
-  const rowLayout = inline ? 'grid items-start gap-2 md:grid-cols-[110px_minmax(0,1fr)] md:gap-3' : '';
+  const rowLayout = inline ? 'grid items-start gap-1.5 md:grid-cols-[100px_minmax(0,1fr)] md:gap-2.5' : '';
   return (
-  <div className={`${rowLayout} py-2.5`}>
+  <div className={`${rowLayout} py-2`}>
     {label && (
-      <div className={`flex items-center gap-1.5 ${inline ? 'md:min-h-[34px] md:pt-1' : 'mb-1.5'}`}>
-        <label className={`text-sm font-semibold ${inline ? 'whitespace-nowrap' : ''}`}
+      <div className={`flex items-center gap-1.5 ${inline ? 'md:min-h-[34px] md:pt-1' : 'mb-1'}`}>
+        <label className={`text-[0.8125rem] font-semibold ${inline ? 'whitespace-nowrap' : ''}`}
           style={{ color: theme.colors.textSecondary }}>{label}</label>
         {tip && <InfoTooltip content={tip} theme={theme} position="right" size="sm" />}
       </div>

@@ -2,7 +2,7 @@
 import React, { useState, useMemo, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { isDarkTheme } from '../../design-system/tokens.js';
-import { Plus, Trash2, Minus, CheckCircle, Layers } from 'lucide-react';
+import { Plus, Trash2, Minus, CheckCircle, Layers, Package } from 'lucide-react';
 import { hapticMedium } from '../../utils/haptics.js';
 import { SAMPLE_PRODUCTS, SAMPLE_CATEGORIES, FINISH_CATEGORIES, FINISH_SAMPLES } from './data.js';
 import { CartDrawer } from './components/CartDrawer.jsx';
@@ -36,11 +36,13 @@ const ProductTile = memo(({ product, qty, theme, isDark, onAdd, onRemove }) => {
 
     return (
         <div
-            className="relative rounded-2xl"
+            className="relative rounded-xl overflow-hidden"
             style={{
                 backgroundColor: theme.colors.surface,
-                border: `2px solid ${qty > 0 ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)')}`,
-                transition: 'border-color 0.2s ease',
+                boxShadow: qty > 0
+                    ? `0 0 0 2.5px ${theme.colors.accent}`
+                    : `0 0 0 1px ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}`,
+                transition: 'box-shadow 0.2s ease',
             }}
         >
             {/* Quantity badge */}
@@ -75,7 +77,7 @@ const ProductTile = memo(({ product, qty, theme, isDark, onAdd, onRemove }) => {
                 tabIndex={0}
                 onClick={handleAdd}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleAdd(e); } }}
-                className="aspect-[4/3] flex items-center justify-center overflow-hidden cursor-pointer rounded-t-[14px]"
+                className="aspect-[4/3] flex items-center justify-center overflow-hidden cursor-pointer"
                 style={{ backgroundColor: bg }}
             >
                 {hasImage && (
@@ -85,8 +87,8 @@ const ProductTile = memo(({ product, qty, theme, isDark, onAdd, onRemove }) => {
             </div>
 
             {/* Footer: name + actions */}
-            <div className="px-2 sm:px-2.5 py-1.5 sm:py-2 flex items-center gap-1">
-                <p className="text-[0.6875rem] sm:text-[0.75rem] truncate flex-1 leading-tight"
+            <div className="px-2.5 py-2 flex items-center gap-1.5">
+                <p className="text-[0.875rem] truncate flex-1 leading-tight"
                     style={{ color: theme.colors.textPrimary }}>
                     {cleanName(product.name)}
                 </p>
@@ -96,7 +98,7 @@ const ProductTile = memo(({ product, qty, theme, isDark, onAdd, onRemove }) => {
                             <motion.div
                                 key="remove-slot"
                                 initial={{ width: 0, opacity: 0, marginRight: 0 }}
-                                animate={{ width: 28, opacity: 1, marginRight: 4 }}
+                                animate={{ width: 32, opacity: 1, marginRight: 4 }}
                                 exit={{ width: 0, opacity: 0, marginRight: 0 }}
                                 transition={stepperSpring}
                                 style={{ overflow: 'hidden', flexShrink: 0 }}
@@ -104,7 +106,7 @@ const ProductTile = memo(({ product, qty, theme, isDark, onAdd, onRemove }) => {
                                 <button
                                     type="button"
                                     onClick={handleRemove}
-                                    className="w-7 h-7 rounded-full flex items-center justify-center active:scale-90 transition-transform"
+                                    className="w-8 h-8 rounded-full flex items-center justify-center active:scale-90 transition-transform"
                                     style={{ backgroundColor: isDark ? 'rgba(255,100,100,0.15)' : 'rgba(184,92,92,0.10)' }}
                                     aria-label={qty === 1 ? `Remove ${product.name}` : `Decrease ${product.name} quantity`}
                                 >
@@ -113,13 +115,13 @@ const ProductTile = memo(({ product, qty, theme, isDark, onAdd, onRemove }) => {
                                             <motion.span key="trash" className="flex items-center justify-center"
                                                 initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
                                                 exit={{ scale: 0.5, opacity: 0 }} transition={iconSwap}>
-                                                <Trash2 className="w-3.5 h-3.5" style={{ color: theme.colors.error || '#B85C5C' }} />
+                                                <Trash2 className="w-4 h-4" style={{ color: theme.colors.error || '#B85C5C' }} />
                                             </motion.span>
                                         ) : (
                                             <motion.span key="minus" className="flex items-center justify-center"
                                                 initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
                                                 exit={{ scale: 0.5, opacity: 0 }} transition={iconSwap}>
-                                                <Minus className="w-3.5 h-3.5" style={{ color: theme.colors.error || '#B85C5C' }} />
+                                                <Minus className="w-4 h-4" style={{ color: theme.colors.error || '#B85C5C' }} />
                                             </motion.span>
                                         )}
                                     </AnimatePresence>
@@ -130,7 +132,7 @@ const ProductTile = memo(({ product, qty, theme, isDark, onAdd, onRemove }) => {
                     <button
                         type="button"
                         onClick={handleAdd}
-                        className="w-7 h-7 rounded-full flex items-center justify-center active:scale-90 transition-transform flex-shrink-0"
+                        className="w-8 h-8 rounded-full flex items-center justify-center active:scale-90 transition-transform flex-shrink-0"
                         style={{
                             backgroundColor: qty > 0
                                 ? (isDark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.06)')
@@ -139,7 +141,7 @@ const ProductTile = memo(({ product, qty, theme, isDark, onAdd, onRemove }) => {
                         }}
                         aria-label={qty > 0 ? `Add another ${product.name}` : `Add ${product.name}`}
                     >
-                        <Plus className="w-3.5 h-3.5" style={{
+                        <Plus className="w-4 h-4" style={{
                             color: qty > 0 ? theme.colors.textPrimary : theme.colors.textSecondary,
                             opacity: qty > 0 ? 0.7 : 0.6,
                             transition: 'color 0.15s ease, opacity 0.15s ease',
@@ -152,7 +154,7 @@ const ProductTile = memo(({ product, qty, theme, isDark, onAdd, onRemove }) => {
 });
 ProductTile.displayName = 'ProductTile';
 
-export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart: onUpdateCartProp, userSettings, dealerDirectory, designFirms, initialCartOpen = false }) => {
+export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart: onUpdateCartProp, userSettings, dealerDirectory, designFirms, sampleOrders = [], onSubmitSampleOrder, initialCartOpen = false }) => {
     const [cartInternal, setCartInternal] = useState({});
     const cart = cartProp ?? cartInternal;
     const isDark = isDarkTheme(theme);
@@ -200,6 +202,10 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
     const categoryItemLabel = isFinishCategory ? 'finishes' : 'samples';
 
     const totalFinishCount = FINISH_SAMPLES.length;
+    const activeOrderCount = useMemo(
+        () => (Array.isArray(sampleOrders) ? sampleOrders.filter((order) => order.status !== 'delivered').length : 0),
+        [sampleOrders]
+    );
 
     /* Full JSI Set — lives above the grid, always visible regardless of category */
     const fullId = idOf('full-jsi-set');
@@ -212,14 +218,16 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
         const toggleSet = () => { hapticMedium(); onUpdateCart({ id: setId, name: `All ${currentCategoryName} Finishes`, isSet: true }, setQty > 0 ? -setQty : 1); };
 
         return (
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2.5 sm:gap-3 pb-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 pb-4">
                 {/* ── Category Set Tile ── */}
                 <button
                     onClick={toggleSet}
-                    className="relative rounded-2xl overflow-hidden text-left active:scale-[0.97]"
+                    className="relative rounded-xl overflow-hidden text-left active:scale-[0.97]"
                     style={{
                         backgroundColor: setQty > 0 ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.06)' : theme.colors.surface),
-                        boxShadow: setQty > 0 ? undefined : (isDark ? 'none' : '0 1px 3px rgba(0,0,0,0.04)'),
+                        boxShadow: setQty > 0
+                            ? `0 0 0 2.5px ${theme.colors.accent}`
+                            : `0 0 0 1px ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}`,
                         transition: 'background-color 0.25s ease, box-shadow 0.25s ease',
                     }}
                 >
@@ -244,12 +252,12 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                             )}
                         </AnimatePresence>
                     </div>
-                    <div className="px-2 sm:px-2.5 py-1.5 sm:py-2">
-                        <p className="text-[0.6875rem] sm:text-[0.75rem] font-bold truncate"
+                    <div className="px-2.5 py-2">
+                        <p className="text-[0.875rem] font-bold truncate"
                             style={{ color: setQty > 0 ? '#fff' : theme.colors.textPrimary, transition: 'color 0.25s ease' }}>
                             All {currentCategoryName}
                         </p>
-                        <p className="text-[0.625rem] sm:text-[0.6875rem] mt-0.5"
+                        <p className="text-[0.6875rem] mt-0.5"
                             style={{ color: setQty > 0 ? 'rgba(255,255,255,0.7)' : theme.colors.textSecondary, opacity: setQty > 0 ? 1 : 0.5, transition: 'color 0.25s ease, opacity 0.25s ease' }}>
                             {products.length} {categoryItemLabel}
                         </p>
@@ -274,30 +282,52 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
 
     return (
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
-            {/* Category chips — scrollable pills */}
+            {/* Category chips — scrollable pills with Orders CTA */}
             <ScreenTopChrome theme={theme} horizontalPaddingClass="px-0" contentClassName="pt-2.5 pb-2" fade={false}>
-                <div className="flex overflow-x-auto scrollbar-hide no-scrollbar gap-2 px-4">
-                    {allCategories.map((cat) => {
-                        const isActive = selectedCategory === cat.id;
-                        return (
-                            <button
-                                key={cat.id}
-                                onClick={() => setSelectedCategory(cat.id)}
-                                className="px-3.5 py-2 rounded-full text-[0.8125rem] font-semibold whitespace-nowrap transition-all duration-150 active:scale-95 flex-shrink-0"
-                                style={{
-                                    backgroundColor: isActive
-                                        ? (isDark ? 'rgba(255,255,255,0.16)' : theme.colors.textPrimary)
-                                        : 'transparent',
-                                    color: isActive
-                                        ? (isDark ? '#fff' : '#fff')
-                                        : theme.colors.textSecondary,
-                                    opacity: isActive ? 1 : 0.7,
-                                }}
-                            >
-                                {cat.name}
-                            </button>
-                        );
-                    })}
+                <div className="flex items-center gap-2 px-4">
+                    <div className="flex overflow-x-auto scrollbar-hide no-scrollbar gap-2 flex-1 min-w-0" style={{ maskImage: 'linear-gradient(to right, black 92%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to right, black 92%, transparent 100%)' }}>
+                        {allCategories.map((cat) => {
+                            const isActive = selectedCategory === cat.id;
+                            return (
+                                <button
+                                    key={cat.id}
+                                    onClick={() => setSelectedCategory(cat.id)}
+                                    className="px-3.5 py-2 rounded-full text-[0.8125rem] font-semibold whitespace-nowrap transition-all duration-150 active:scale-95 flex-shrink-0"
+                                    style={{
+                                        backgroundColor: isActive
+                                            ? (isDark ? 'rgba(255,255,255,0.16)' : theme.colors.textPrimary)
+                                            : 'transparent',
+                                        color: isActive
+                                            ? (isDark ? '#fff' : '#fff')
+                                            : theme.colors.textSecondary,
+                                        opacity: isActive ? 1 : 0.7,
+                                    }}
+                                >
+                                    {cat.name}
+                                </button>
+                            );
+                        })}
+                    </div>
+                    {/* Orders CTA */}
+                    <button
+                        onClick={() => onNavigate('samples/orders')}
+                        className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[0.8125rem] font-bold whitespace-nowrap transition-all active:scale-95 flex-shrink-0"
+                        style={{
+                            backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.06)',
+                            color: theme.colors.textPrimary,
+                            backdropFilter: 'blur(12px)',
+                            WebkitBackdropFilter: 'blur(12px)',
+                        }}
+                    >
+                        <Package className="w-3.5 h-3.5" style={{ opacity: 0.6 }} />
+                        Orders
+                        <span
+                            className="ml-0.5 w-5 h-5 rounded-full text-[0.625rem] font-bold flex items-center justify-center"
+                            style={{ backgroundColor: theme.colors.accent, color: '#fff' }}
+                        >
+                            {activeOrderCount}
+                        </span>
+                    </button>
                 </div>
             </ScreenTopChrome>
 
@@ -374,7 +404,7 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                     </div>
                 </div>
             </div>
-            <CartDrawer cart={cart} onUpdateCart={onUpdateCart} theme={theme} userSettings={userSettings} dealers={dealerDirectory} designFirms={designFirms} initialOpen={initialCartOpen} onNavigate={onNavigate} />
+            <CartDrawer cart={cart} onUpdateCart={onUpdateCart} theme={theme} userSettings={userSettings} dealers={dealerDirectory} designFirms={designFirms} initialOpen={initialCartOpen} onNavigate={onNavigate} onSubmitOrder={onSubmitSampleOrder} />
         </div>
     );
 };

@@ -655,8 +655,8 @@ export const ProjectsScreen = forwardRef(({
   return (
     <div className="min-h-full relative" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
 
-      <div className="flex-shrink-0" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 12px)', backgroundColor: theme.colors.background }}>
-        <div className="px-4 sm:px-6 lg:px-8 pb-3 max-w-content mx-auto w-full flex items-center justify-between gap-2.5">
+      <div className="flex-shrink-0" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 20px)', backgroundColor: theme.colors.background }}>
+        <div className="px-4 sm:px-6 lg:px-8 pb-4 max-w-content mx-auto w-full flex items-center justify-between gap-2.5">
           <div className="min-w-0 overflow-x-auto scrollbar-hide">
             <SegmentedToggle
               value={projectsTab}
@@ -679,7 +679,7 @@ export const ProjectsScreen = forwardRef(({
         </div>
 
         {projectsTab === 'customers' && (
-          <div className="px-4 sm:px-6 lg:px-8 pb-3 max-w-content mx-auto w-full">
+          <div className="px-4 sm:px-6 lg:px-8 pb-1 max-w-content mx-auto w-full">
             <TypeDropdown value={customerType} onChange={setCustomerType} theme={theme} />
           </div>
         )}
@@ -720,7 +720,7 @@ export const ProjectsScreen = forwardRef(({
         )}
       </div>
 
-      <div className="px-4 sm:px-6 lg:px-8 pt-3 pb-10 max-w-content mx-auto w-full">
+      <div className="px-4 sm:px-6 lg:px-8 pt-4 pb-10 max-w-content mx-auto w-full">
         <TabContent activeKey={projectsTab} tabIndex={PROJECTS_TAB_OPTIONS.findIndex(o => o.value === projectsTab)}>
           {projectsTab === 'pipeline' && (
             filteredOpportunities.length > 0 ? (

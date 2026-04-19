@@ -58,6 +58,14 @@
     animation: enterLeft var(--screen-motion-duration, 320ms) var(--screen-motion-ease, cubic-bezier(0.22,1,0.36,1)) forwards;
 }
 
+.exit-to-home {
+    animation: exitToHome var(--screen-motion-duration, 460ms) var(--screen-motion-ease, cubic-bezier(0.22,1,0.36,1)) forwards;
+}
+
+.enter-home {
+    animation: enterHome var(--screen-motion-duration, 460ms) var(--screen-motion-ease, cubic-bezier(0.22,1,0.36,1)) forwards;
+}
+
 /* ─── Keyframes ─────────────────────────────────────────────── */
 
 @keyframes enterRight {
@@ -78,4 +86,26 @@
 @keyframes enterLeft {
     from { opacity: 0.72; }
     to   { opacity: 1; }
+}
+
+@keyframes exitToHome {
+    from {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translate3d(12%, 0, 0) scale(0.985);
+    }
+}
+
+@keyframes enterHome {
+    from {
+        opacity: 0.34;
+        transform: translate3d(0, 10px, 0) scale(1.012);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
 }

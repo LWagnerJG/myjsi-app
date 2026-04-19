@@ -33,6 +33,7 @@ export const AnimatedScreenWrapper = ({
 
     const prefersReducedMotion = usePrefersReducedMotion();
     const screenAnimationMs = prefersReducedMotion ? 1 : MOTION_DURATIONS_MS.screen;
+    const animationMs = direction === 'home' ? Math.round(screenAnimationMs * 1.45) : screenAnimationMs;
 
     // ─── Screen transition effect ─────────────────────────────────────────────
     useLayoutEffect(() => {
@@ -65,7 +66,10 @@ export const AnimatedScreenWrapper = ({
             el.className = 'panel';
         });
 
-        if (direction === 'forward') {
+        if (direction === 'home') {
+            prev?.classList.add('panel', 'exit-to-home');
+            cur?.classList.add('panel', 'enter-home');
+        } else if (direction === 'forward') {
             prev?.classList.add('panel', 'exit-left');
             cur?.classList.add('panel', 'enter-right');
         } else {
@@ -73,9 +77,9 @@ export const AnimatedScreenWrapper = ({
             cur?.classList.add('panel', 'enter-left');
         }
 
-        const t = setTimeout(done, screenAnimationMs + 24);
+        const t = setTimeout(done, animationMs + 32);
         return () => clearTimeout(t);
-    }, [animating, direction, screenAnimationMs]);
+    }, [animating, direction, animationMs]);
 
     // ─── Focus management ─────────────────────────────────────────────────────
     useEffect(() => {
@@ -93,7 +97,7 @@ export const AnimatedScreenWrapper = ({
             className="animated-screen-container"
             aria-live="polite"
             style={{
-                '--screen-motion-duration': `${screenAnimationMs}ms`,
+                '--screen-motion-duration': `${animationMs}ms`,
                 '--screen-motion-ease':     toCssBezier(MOTION_EASINGS.screenPush),
             }}
         >

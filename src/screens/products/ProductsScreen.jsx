@@ -25,10 +25,11 @@ const normalizeSeriesKey = (value) => String(value || '').toLowerCase().replace(
 
 // Curated family thumbnails for "Our Families" rows.
 // Uses true cutout/white-space product imagery where available.
+const CLD = 'https://res.cloudinary.com/jasper-jsi-furniture/image/upload/t_thumbnail/c_limit,w_256/f_auto/q_auto/v1';
 const SERIES_THUMBNAILS = Object.freeze({
-    'addison': '/category-images/casegood-images/api_vision.jpg',
+    'addison': '/series-images/jsi_addison_comp_00015.jpg',
     'americana': '/category-images/swivel-images/api_americana.jpg',
-    'ansen': '/category-images/guest-images/jsi_knox_comp_00020.jpg',
+    'ansen': '/series-images/jsi_ansen_comp_00002.jpg',
     'anthology': '/category-images/casegood-images/api_anthology.jpg',
     'arwyn': '/category-images/guest-images/jsi_arwyn_comp_00032.jpg',
     'avini': '/category-images/guest-images/jsi_avini_comp_00007.jpg',
@@ -38,63 +39,60 @@ const SERIES_THUMBNAILS = Object.freeze({
     'brogan': '/category-images/casegood-images/api_brogan.jpg',
     'bryn': '/category-images/guest-images/jsi_bryn_comp_00023.jpg',
     'caav': '/category-images/lounge-images/api_caav.jpg',
-    'class act': '/category-images/swivel-images/api_protocol.jpg',
+    'class act': `${CLD}/jsi_classact_enviro_00001`,
     'collective motion': '/category-images/guest-images/jsi_collectivemotion_comp_00014.jpg',
     'connect': '/category-images/training-images/api_connect.jpg',
-    'copilot': '/category-images/swivel-images/api_proxy.jpg',
+    'copilot': `${CLD}/jsi_copilot_enviro_00002_zrnojs`,
     'cosgrove': '/category-images/swivel-images/api_cosgrove.jpg',
     'draft': '/category-images/training-images/api_draft.jpg',
-    'encore': '/category-images/lounge-images/api_boston.jpg',
     'finale': '/category-images/casegood-images/api_finale.jpg',
     'finn': '/category-images/lounge-images/api_finn.jpg',
     'finn nu': '/category-images/lounge-images/api_finn-nu.jpg',
     'flux': '/category-images/casegood-images/api_flux-private-office.jpg',
-    'forge': '/category-images/bench-images/api_native.jpg',
-    'garvey rs': '/category-images/swivel-images/api_garvey-r5.jpg',
-    'gatsby': '/category-images/casegood-images/api_wellington.jpg',
+    'forge': `${CLD}/jsi_forge_enviro_00003`,
+    'garvey r5': '/category-images/swivel-images/api_garvey-r5.jpg',
+    'gatsby': `${CLD}/jsi_gatsby_enviro_00003`,
     'harbor': '/category-images/guest-images/jsi_harbor_comp_00010_7pPSeR6.jpg',
     'henley': '/category-images/guest-images/jsi_henley_comp_00001.jpg',
-    'hoopz': '/category-images/lounge-images/api_caav.jpg',
+    'hoopz': `${CLD}/jsi_hoopz_enviro_00015`,
     'indie': '/category-images/lounge-images/api_indie.jpg',
     'jude': '/category-images/lounge-images/api_jude.jpg',
-    'kindera': '/category-images/lounge-images/api_bourne.jpg',
+    'kindera': `${CLD}/jsi_kindera_enviro_00014`,
     'knox': '/category-images/swivel-images/api_knox.jpg',
-    'kyla': '/category-images/guest-images/jsi_harbor_comp_00010_7pPSeR6.jpg',
-    'lincoln': '/category-images/casegood-images/api_walden.jpg',
+    'kyla': `${CLD}/jsi_kyla_enviro_00001`,
+    'lincoln': `${CLD}/jsi_lincoln_enviro_00001`,
     'lok': '/category-images/training-images/api_lok-training.jpg',
-    'mackey': '/category-images/casegood-images/api_brogan.jpg',
+    'mackey': `${CLD}/jsi_mackey_enviro_00002`,
     'madison': '/category-images/swivel-images/api_madison.jpg',
     'millie': '/category-images/guest-images/jsi_millie_comp_00005_g77W9GX.jpg',
-    'mittle': '/category-images/guest-images/jsi_boston_comp_0007_jBfEUNr.jpg',
     'moto': '/category-images/conference-images/api_moto.jpg',
     'native': '/category-images/bench-images/api_native.jpg',
-    'native benches': '/category-images/bench-images/api_native.jpg',
     'newton': '/category-images/swivel-images/api_newton.jpg',
     'nosh': '/category-images/training-images/api_nosh.jpg',
     'oxley': '/category-images/bench-images/api_oxley.jpg',
-    'pillows': '/category-images/lounge-images/api_caav.jpg',
+    'pillows': `${CLD}/jsi_pillows_enviro_001_tyoung`,
     'poet': '/category-images/lounge-images/api_poet.jpg',
-    'privacy': '/category-images/training-images/api_connect.jpg',
-    'prost': '/category-images/training-images/api_nosh.jpg',
+    'privacy': `${CLD}/jsi_privacy_enviro_00001`,
+    'prost': `${CLD}/jsi_prost_enviro_00005`,
     'protocol': '/category-images/swivel-images/api_protocol.jpg',
     'proxy': '/category-images/swivel-images/api_proxy.jpg',
     'ramona': '/category-images/guest-images/jsi_ramona_comp_rotation_ra2581f_00001.jpg',
     'reef': '/category-images/conference-images/api_reef.jpg',
     'ria': '/category-images/guest-images/jsi_ria_comp_00007.jpg',
-    'romy': '/category-images/guest-images/jsi_ria_comp_00007.jpg',
+    'romy': `${CLD}/jsi_romy_enviro_00001`,
     'satisse': '/category-images/lounge-images/api_satisse.jpg',
-    'scroll': '/category-images/conference-images/api_reef.jpg',
-    'somna': '/category-images/lounge-images/api_indie.jpg',
+    'scroll': `${CLD}/jsi_scroll_enviro_00001_edjdyj`,
+    'somna': `${CLD}/jsi_somna_enviro_00003`,
     'sosa': '/category-images/guest-images/jsi_sosa_comp_00020.jpg',
     'teekan': '/category-images/lounge-images/api_teekan.jpg',
     'totem': '/category-images/guest-images/jsi_totem_comp_00003.jpg',
+    'traditional': `${CLD}/jsi_traditional_enviro_00001_cgxffc`,
     'trail': '/category-images/training-images/api_lok-training.jpg',
-    'trinity': '/category-images/casegood-images/api_vision.jpg',
     'vision': '/category-images/casegood-images/api_vision.jpg',
     'walden': '/category-images/casegood-images/api_walden.jpg',
     'wellington': '/category-images/casegood-images/api_wellington.jpg',
     'wink': '/category-images/guest-images/jsi_wink_comp_00070.jpg',
-    'ziva': '/category-images/conference-images/api_reef.jpg',
+    'ziva': `${CLD}/jsi_ziva_comp_00001`,
 });
 
 const getSeriesThumbnail = (series) => (
@@ -124,7 +122,7 @@ const CategoryCard = React.memo(({
             >
                 <div className="p-4 pb-3">
                     <div className="flex items-center justify-between mb-2.5">
-                        <h2 className="text-[0.9375rem] font-semibold tracking-tight" style={{ color: theme.colors.textPrimary }}>
+                        <h2 className="text-base font-semibold tracking-tight" style={{ color: theme.colors.textPrimary }}>
                             {category.name}
                         </h2>
                         <ChevronRight className="w-4 h-4 opacity-30" style={{ color: theme.colors.textSecondary }} />
@@ -156,9 +154,9 @@ const CategoryCard = React.memo(({
             className={`rounded-[24px] overflow-hidden cursor-pointer transition-all duration-200 hover:scale-[1.005] active:scale-[0.99] ${className}`}
             style={{ ...cardStyle(dark, theme) }}
         >
-            <div className="p-3 flex items-center gap-3.5">
+            <div className="p-3.5 flex items-center gap-4">
                 <div
-                    className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0"
+                    className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0"
                     style={{ backgroundColor: dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)' }}
                 >
                     <img
@@ -169,11 +167,11 @@ const CategoryCard = React.memo(({
                     />
                 </div>
                 <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-[0.9375rem]" style={{ color: theme.colors.textPrimary }}>
+                    <h3 className="font-semibold text-base" style={{ color: theme.colors.textPrimary }}>
                         {category.name}
                     </h3>
                     {category.description && (
-                        <p className="text-[0.8125rem] mt-0.5" style={{ color: theme.colors.textSecondary }}>
+                        <p className="text-sm mt-0.5" style={{ color: theme.colors.textSecondary }}>
                             {category.description}
                         </p>
                     )}
@@ -220,8 +218,8 @@ const SeriesRow = React.memo(({ series, theme, isLast, onClick }) => (
             borderBottom: isLast ? 'none' : `1px solid ${theme.colors.border}`,
         }}
     >
-        <div className="flex items-center gap-3 min-w-0">
-            <div className="w-12 h-9 md:w-14 md:h-10 flex-shrink-0 overflow-hidden">
+        <div className="flex items-center gap-3.5 min-w-0">
+            <div className="w-14 h-11 md:w-16 md:h-12 flex-shrink-0 overflow-hidden">
                 <img
                     src={getSeriesThumbnail(series)}
                     alt={series}
@@ -229,7 +227,7 @@ const SeriesRow = React.memo(({ series, theme, isLast, onClick }) => (
                     loading="lazy"
                 />
             </div>
-            <span className="font-medium text-[0.9375rem] truncate" style={{ color: theme.colors.textPrimary }}>
+            <span className="font-medium text-base truncate" style={{ color: theme.colors.textPrimary }}>
                 {series}
             </span>
         </div>
@@ -374,7 +372,7 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
                             <StandardSearchBar
                                 value={searchTerm}
                                 onChange={handleSearchChange}
-                                placeholder={activeProductView === 'families' ? 'Search series...' : 'Search products...'}
+                                placeholder="Search series..."
                                 theme={theme}
                             />
                             <div className="flex items-center justify-between gap-3">
@@ -415,7 +413,7 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
                 <div className="px-4 sm:px-6 lg:px-8 pt-0 pb-8">
                     <div className="max-w-content mx-auto w-full">
                         <TabContent activeKey={activeProductView} tabIndex={activeProductView === 'categories' ? 0 : 1}>
-                        {activeProductView === 'families' ? (
+                        {(activeProductView === 'families' || searchTerm.trim()) ? (
                             <div className="w-full mx-auto xl:max-w-[980px] 2xl:max-w-[920px]">
                                 <FamiliesView
                                     groupedSeries={groupedSeries}

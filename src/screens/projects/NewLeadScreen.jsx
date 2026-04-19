@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { AlertTriangle, ArrowRight, CalendarDays, CheckCircle2, ChevronRight, FileText, Paperclip, UploadCloud, X } from 'lucide-react';
+import { AlertTriangle, ArrowRight, CalendarDays, CheckCircle2, ChevronRight, FileText, UploadCloud, X } from 'lucide-react';
 import { FormInput } from '../../components/forms/FormInput.jsx';
 import { AutoCompleteCombobox } from '../../components/forms/AutoCompleteCombobox.jsx';
 import { PortalNativeSelect } from '../../components/forms/PortalNativeSelect.jsx';
@@ -836,12 +836,12 @@ export const NewLeadScreen = ({
     <form onSubmit={handleSubmit} className="min-h-full flex flex-col" style={{ backgroundColor: c.background }}>
       {/* Invisible focus sink — prevents AnimatedScreenWrapper from focusing a heading on mount */}
       <div data-autofocus tabIndex={-1} aria-hidden="true" style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden', outline: 'none' }} />
-      <div className="px-4 sm:px-6 lg:px-8 pb-40 max-w-content mx-auto w-full" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 16px)' }}>
+      <div className="px-4 sm:px-6 lg:px-8 pb-32 max-w-content mx-auto w-full" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 16px)' }}>
 
         <div key={step} className={`space-y-4 ${stepAnimClass}`}>
         {step === 0 && (
           <>
-            <Section title="Project Basics" subtitle="Required project context to register this lead." theme={theme}>
+            <Section title="Project Basics" theme={theme}>
               <Row label="Project Name" theme={theme} inline>
                 <div>
                   <FormInput
@@ -859,7 +859,7 @@ export const NewLeadScreen = ({
 
               <Row label="Stage" theme={theme} inline>
                 <div>
-                  <div className="grid grid-cols-2 gap-1.5">
+                  <div className="grid grid-cols-2 gap-1">
                     {stageOptions.map((stage, idx) => {
                       const num = idx + 1;
                       const isSelected = newLeadData.projectStatus === stage;
@@ -869,15 +869,16 @@ export const NewLeadScreen = ({
                           key={stage}
                           type="button"
                           onClick={() => { upd('projectStatus', stage); markTouched('projectStatus'); }}
-                          className="flex items-center gap-2.5 rounded-full border transition-all text-left px-3 py-2.5"
+                          className="flex items-center gap-2 rounded-full border transition-all text-left px-2.5 py-2"
                           style={{
                             backgroundColor: isSelected ? c.accent : isPast ? `${c.accent}14` : 'transparent',
                             borderColor: isSelected ? c.accent : isPast ? `${c.accent}50` : subtleBorder,
                           }}
                         >
                           <span
-                            className="text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shrink-0"
+                            className="text-[0.625rem] font-bold w-4.5 h-4.5 rounded-full flex items-center justify-center shrink-0"
                             style={{
+                              width: 18, height: 18,
                               backgroundColor: isSelected ? 'rgba(255,255,255,0.2)' : isPast ? `${c.accent}20` : dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)',
                               color: isSelected ? c.accentText : isPast ? c.accent : c.textSecondary,
                             }}
@@ -885,7 +886,7 @@ export const NewLeadScreen = ({
                             {num}
                           </span>
                           <span
-                            className="text-sm font-semibold leading-tight"
+                            className="text-[0.8125rem] font-semibold leading-tight"
                             style={{ color: isSelected ? c.accentText : c.textPrimary }}
                           >
                             {stage}
@@ -1038,7 +1039,7 @@ export const NewLeadScreen = ({
 
         {step === 1 && (
           <>
-            <Section title="Commercial Scope" subtitle="Sizing, timeline, and discount details." theme={theme}>
+            <Section title="Commercial Scope" theme={theme}>
               <Row label="Estimated List" theme={theme} inline>
                 <div>
                   <div className="relative w-full">
@@ -1140,7 +1141,7 @@ export const NewLeadScreen = ({
                       </span>
                     </div>
                   )}
-                  <div className="grid grid-cols-3 gap-1.5">
+                  <div className="grid grid-cols-3 gap-1">
                     {PO_TIMEFRAMES.map((item) => (
                       <PillButton
                         key={item}
@@ -1219,7 +1220,7 @@ export const NewLeadScreen = ({
               </Row>
             </Section>
 
-            <Section title="Stakeholders & Competition" subtitle="Who's involved and who you're up against." theme={theme}>
+            <Section title="Stakeholders & Competition" theme={theme}>
               <Row label="End User" theme={theme} inline>
                 <div>
                   <div className="flex items-center gap-2">
@@ -1419,7 +1420,7 @@ export const NewLeadScreen = ({
 
         {step === 2 && (
           <>
-            <Section title="Quote & JSI Series" subtitle="Attach a quote and specify product lines." theme={theme}>
+            <Section title="Quote & JSI Series" theme={theme}>
               <Row label="JSI Quote" theme={theme} inline>
                 <div>
                   <div className="flex flex-wrap items-center gap-1.5">
@@ -1521,52 +1522,37 @@ export const NewLeadScreen = ({
               </div>
             </Section>
 
-            <Section title="Notes & Attachments" subtitle="Optional context and support files." theme={theme}>
+            <Section title="Notes & Attachments" theme={theme}>
               <textarea
                 value={newLeadData.notes || ''}
                 onChange={(e) => upd('notes', e.target.value)}
-                rows={4}
-                placeholder="Add context, timing risks, or requirements..."
-                className="mt-2.5 w-full px-4 py-3 text-sm rounded-2xl border focus:outline-none resize-none placeholder-theme-secondary transition-shadow"
+                rows={3}
+                placeholder="Add notes, timing risks, requirements..."
+                className="mt-1 w-full px-4 py-3 text-sm rounded-2xl border focus:outline-none resize-none placeholder-theme-secondary transition-shadow"
                 style={{ backgroundColor: dark ? c.background : c.surface, borderColor: subtleBorder, color: c.textPrimary }}
                 onFocus={(e) => { e.target.style.boxShadow = `0 0 0 3px ${c.accent}33`; e.target.style.borderColor = c.accent || subtleBorder; }}
                 onBlur={(e) => { e.target.style.boxShadow = 'none'; e.target.style.borderColor = subtleBorder; }}
               />
 
-              <div className="mt-3 space-y-2">
+              <div className="mt-2 space-y-1.5">
                 <div
                   onDragEnter={(e) => { e.preventDefault(); setDragActive(true); }}
                   onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
                   onDragLeave={(e) => { e.preventDefault(); setDragActive(false); }}
                   onDrop={handleDrop}
                   onClick={() => fileInputRef.current?.click()}
-                  className="rounded-2xl border border-dashed px-4 py-4 transition-colors cursor-pointer"
+                  className="rounded-xl border border-dashed px-3.5 py-3 transition-colors cursor-pointer"
                   style={{
                     borderColor: dragActive ? c.accent : subtleBorder,
-                    backgroundColor: dragActive ? `${c.accent}12` : (dark ? 'rgba(255,255,255,0.12)' : 'transparent'),
+                    backgroundColor: dragActive ? `${c.accent}12` : (dark ? 'rgba(255,255,255,0.06)' : 'transparent'),
                   }}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: c.subtle }}>
-                      <UploadCloud className="w-4 h-4" style={{ color: c.textSecondary }} />
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold" style={{ color: c.textPrimary }}>
-                        Drag files here or click to upload
-                      </p>
-                      <p className="text-xs mt-0.5" style={{ color: c.textSecondary }}>
-                        Optional. Up to {FILE_LIMIT} files, 20 MB each (PDF, Office files, PNG/JPG/HEIC)
-                      </p>
-                    </div>
+                  <div className="flex items-center gap-2.5">
+                    <UploadCloud className="w-4 h-4 shrink-0" style={{ color: c.textSecondary, opacity: 0.5 }} />
+                    <p className="text-xs" style={{ color: c.textSecondary }}>
+                      Tap to attach files <span style={{ opacity: 0.5 }}>· up to {FILE_LIMIT}, 20 MB each</span>
+                    </p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
-                    className="mt-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold border transition-colors hover:bg-black/5 dark:hover:bg-white/5"
-                    style={{ borderColor: subtleBorder, color: c.textPrimary }}
-                  >
-                    <Paperclip className="w-3.5 h-3.5" /> Browse Files
-                  </button>
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -1606,27 +1592,26 @@ export const NewLeadScreen = ({
               </div>
             </Section>
 
-            <Section title="Review & Submit" subtitle="Tap any row to edit." theme={theme}>
+            <Section title="Review & Submit" theme={theme}>
               <div
-                className="rounded-2xl px-4 py-4 mb-3 flex items-center gap-4"
+                className="rounded-xl px-3.5 py-3 mb-3 flex items-center gap-3"
                 style={{
                   backgroundColor: `${health.tone}0D`,
                   border: `1.5px solid ${health.tone}30`,
                 }}
               >
-                <StrengthCircle percent={health.percent} tone={health.tone} size={60} stroke={4} textSize="12px" />
+                <StrengthCircle percent={health.percent} tone={health.tone} size={48} stroke={3.5} textSize="11px" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold uppercase tracking-wider mb-0.5" style={{ color: health.tone, opacity: 0.7 }}>Lead Score</p>
                   <div className="flex items-center gap-2">
-                    <span className="text-[1.375rem] font-bold tabular-nums leading-none" style={{ color: health.tone }}>{health.percent}</span>
-                    <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full" style={{ color: health.tone, backgroundColor: `${health.tone}20` }}>{health.label}</span>
+                    <span className="text-lg font-bold tabular-nums leading-none" style={{ color: health.tone }}>{health.percent}</span>
+                    <span className="text-[0.625rem] font-bold px-2 py-0.5 rounded-full" style={{ color: health.tone, backgroundColor: `${health.tone}20` }}>{health.label}</span>
                     {canSubmit
-                      ? <CheckCircle2 className="w-4 h-4 ml-auto shrink-0" style={{ color: health.tone }} />
-                      : <AlertTriangle className="w-4 h-4 ml-auto shrink-0" style={{ color: health.tone }} />
+                      ? <CheckCircle2 className="w-3.5 h-3.5 ml-auto shrink-0" style={{ color: health.tone }} />
+                      : <AlertTriangle className="w-3.5 h-3.5 ml-auto shrink-0" style={{ color: health.tone }} />
                     }
                   </div>
-                  <p className="text-xs mt-1" style={{ color: health.tone, opacity: 0.7 }}>
-                    {health.missing[0] ? `+ ${health.missing[0]} will boost your score` : 'All key fields complete'}
+                  <p className="text-[0.6875rem] mt-0.5" style={{ color: health.tone, opacity: 0.7 }}>
+                    {health.missing[0] ? `+ ${health.missing[0]}` : 'All key fields complete'}
                   </p>
                 </div>
               </div>
@@ -1637,13 +1622,13 @@ export const NewLeadScreen = ({
                   items: filledReviewItems.filter((i) => i.step === stepIdx && i.label !== 'Notes'),
                 })).filter((g) => g.items.length > 0);
                 return (
-                  <div className="rounded-2xl border overflow-hidden" style={{ borderColor: subtleBorder, backgroundColor: c.surface }}>
+                  <div className="rounded-xl border overflow-hidden" style={{ borderColor: subtleBorder, backgroundColor: c.surface }}>
                     {groups.map((group, gi) => (
                       <React.Fragment key={group.stepIdx}>
                         {gi > 0 && (
-                          <div className="flex items-center gap-2 px-3.5 py-1" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.025)' }}>
+                          <div className="flex items-center gap-2 px-3 py-0.5" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.02)' }}>
                             <div className="flex-1 h-px" style={{ backgroundColor: subtleBorder }} />
-                            <span className="text-xs font-bold uppercase tracking-[0.07em]" style={{ color: c.textSecondary, opacity: 0.4 }}>
+                            <span className="text-[0.625rem] font-bold uppercase tracking-[0.08em]" style={{ color: c.textSecondary, opacity: 0.35 }}>
                               {['Basics', 'Scope', 'Details'][group.stepIdx]}
                             </span>
                             <div className="flex-1 h-px" style={{ backgroundColor: subtleBorder }} />
@@ -1654,16 +1639,16 @@ export const NewLeadScreen = ({
                             key={item.label}
                             type="button"
                             onClick={() => animateToStep(item.step)}
-                            className="w-full flex items-center gap-3 px-3.5 text-left active:bg-black/[0.04] dark:active:bg-white/[0.08] transition-colors"
+                            className="w-full flex items-center gap-2.5 px-3 text-left active:bg-black/[0.04] dark:active:bg-white/[0.08] transition-colors"
                             style={{
-                              paddingTop: 11,
-                              paddingBottom: 11,
+                              paddingTop: 9,
+                              paddingBottom: 9,
                               borderTop: (gi === 0 && i === 0) ? 'none' : (i > 0 ? `1px solid ${subtleBorder}` : 'none'),
                             }}
                           >
-                            <span className="text-xs font-medium shrink-0 w-[96px]" style={{ color: c.textSecondary }}>{item.label}</span>
-                            <span className="text-sm font-semibold flex-1 text-right truncate" style={{ color: c.textPrimary }}>{item.value}</span>
-                            <ChevronRight className="w-3.5 h-3.5 shrink-0 opacity-25" style={{ color: c.textSecondary }} />
+                            <span className="text-[0.6875rem] font-medium shrink-0 w-[88px]" style={{ color: c.textSecondary }}>{item.label}</span>
+                            <span className="text-[0.8125rem] font-semibold flex-1 text-right truncate" style={{ color: c.textPrimary }}>{item.value}</span>
+                            <ChevronRight className="w-3 h-3 shrink-0 opacity-20" style={{ color: c.textSecondary }} />
                           </button>
                         ))}
                       </React.Fragment>
@@ -1693,7 +1678,7 @@ export const NewLeadScreen = ({
               fullWidth
               icon={<ArrowRight className="w-4 h-4" />}
             >
-              Continue
+              {step === 0 ? 'Continue to Scope' : 'Continue to Review'}
             </PrimaryButton>
           </div>
         ) : (
