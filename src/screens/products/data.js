@@ -351,6 +351,18 @@ export const PRODUCTS_CATEGORIES_DATA = [
 // Re-export the single-source-of-truth series list so existing imports keep working
 export { JSI_SERIES } from '../../data/jsiSeries.js';
 
+// Map series slug (e.g. 'harbor') → { categoryId, productId } by scanning PRODUCT_DATA.
+// Prefers exact product-id match, then falls back to name-based match.
+const _seriesLookup = {};
+for (const [catId, cat] of Object.entries(PRODUCT_DATA)) {
+    for (const p of cat.products || []) {
+        const slug = p.name.toLowerCase().replace(/\s+/g, '-');
+        if (!_seriesLookup[slug]) _seriesLookup[slug] = { categoryId: catId, productId: p.id };
+        if (!_seriesLookup[p.id]) _seriesLookup[p.id] = { categoryId: catId, productId: p.id };
+    }
+}
+export const SERIES_TO_CATEGORY = Object.freeze(_seriesLookup);
+
 // Re-export new hierarchical data + API abstraction
 export { PRODUCT_FAMILIES, PRODUCT_SUBCATEGORIES, PRODUCT_MODELS, PRODUCT_CATEGORIES } from './productHierarchy.js';
 export * from './productApi.js';

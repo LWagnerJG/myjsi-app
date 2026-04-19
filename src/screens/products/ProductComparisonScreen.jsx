@@ -361,11 +361,20 @@ const ErrorState = ({ theme, message = 'The requested item does not exist.' }) =
 };
 
 // ─── Main Screen ─────────────────────────────────────────────────────────────
-export const ProductComparisonScreen = ({ categoryId, onNavigate, theme }) => {
+export const ProductComparisonScreen = ({ categoryId, initialProductId, onNavigate, theme }) => {
   const categoryData = PRODUCT_DATA?.[categoryId];
   const isGuest = categoryId === 'guest';
 
-  const [activeProduct, setActiveProduct] = useState(categoryData?.products?.[0]);
+  const initialProduct = useMemo(() => {
+    if (!categoryData) return null;
+    if (initialProductId) {
+      const match = categoryData.products.find(p => p.id === initialProductId);
+      if (match) return match;
+    }
+    return categoryData.products[0];
+  }, [categoryData, initialProductId]);
+
+  const [activeProduct, setActiveProduct] = useState(initialProduct);
   const [materialMode, setMaterialMode] = useState(isGuest ? 'wood' : 'laminate');
   const [typicalLayout, setTypicalLayout] = useState('U-Shape');  // matches TYPICAL_MULTIPLIERS keys
   const [conferenceSize, setConferenceSize] = useState('30x72');

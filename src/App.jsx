@@ -11,6 +11,7 @@ import { AppHeader } from './components/navigation/AppHeader.jsx';
 import { ProfileMenu } from './components/navigation/ProfileMenu.jsx';
 import { VoiceModal, SuccessToast } from './components/feedback/ToastsAndModals.jsx';
 import { SCREEN_MAP, ProductComparisonScreen, CompetitiveAnalysisScreen, SalesScreen, SamplesScreen } from './config/screenMap.js';
+import { SERIES_TO_CATEGORY } from './screens/products/data.js';
 import { Modal } from './components/common/Modal.jsx';
 import { INITIAL_ASSETS } from './screens/library/data.js';
 import { AnimatedScreenWrapper } from './components/common/AnimatedScreenWrapper.jsx';
@@ -165,6 +166,12 @@ const ScreenRouter = React.memo(({ screenKey, projectsScreenRef, SuspenseFallbac
                 <ScreenComponent {...rest} focusPostId={parts[2]} />
             </Suspense>
         );
+    }
+
+    if (base === 'products' && parts[1] === 'series' && parts[2]) {
+        const match = SERIES_TO_CATEGORY[parts[2]];
+        if (match) return lazyWrap(ProductComparisonScreen, { categoryId: match.categoryId, initialProductId: match.productId });
+        // Fallback: show products screen if slug not recognized
     }
 
     if (base === 'products' && parts[1] === 'category' && parts.length === 3) {
