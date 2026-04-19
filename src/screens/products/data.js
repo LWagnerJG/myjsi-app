@@ -30,24 +30,16 @@ export const PRODUCT_DATA = {
         name: 'Casegoods',
         products: [
             { id: 'vision', name: 'Vision', price: 3200, image: localImage('/category-images/casegood-images/api_vision.jpg') },
-            { id: 'flux', name: 'Flux Private Office', price: 3700, image: localImage('/category-images/casegood-images/api_flux-private-office.jpg') },
+            { id: 'flux', name: 'Flux', price: 3700, image: localImage('/category-images/casegood-images/api_flux-private-office.jpg') },
             { id: 'brogan', name: 'Brogan', price: 4200, image: localImage('/category-images/casegood-images/api_brogan.jpg') },
             { id: 'finale', name: 'Finale', price: 4700, image: localImage('/category-images/casegood-images/api_finale.jpg') },
-            { id: 'walden', name: 'Walden', price: 5200, image: localImage('/category-images/casegood-images/api_walden.jpg') },
-            { id: 'wellington', name: 'Wellington', price: 5700, image: localImage('/category-images/casegood-images/api_wellington.jpg') },
-            { id: 'anthology-casegoods', name: 'Anthology', price: 5900, image: localImage('/category-images/casegood-images/api_anthology.jpg') },
-            { id: 'bespace-casegoods', name: 'BeSPACE', price: 5400, image: localImage('/category-images/casegood-images/api_bespace.jpg') },
-            { id: 'native-casegoods', name: 'Native', price: 5000, image: localImage('/category-images/casegood-images/api_native.jpg') },
-            { id: 'connect-casegoods', name: 'Connect', price: 4600, image: localImage('/category-images/casegood-images/api_connect.jpg') },
         ],
         competition: [],
         competitionByProduct: {
             'vision': [comp('OFS Staks', '$3350', '-5%'), comp('Kimball Narrate', '$3425', '-7%'), comp('Indiana Canvas', '$3180', '+1%'), comp('Hon Abound', '$3050', '+5%')],
             'flux': [comp('OFS ReframE', '$3825', '-3%'), comp('Kimball Alterna', '$3775', '-2%'), comp('Indiana Gesso', '$3650', '+1%')],
             'brogan': [comp('Kimball Priority', '$4350', '-4%'), comp('OFS Aptos', '$4425', '-6%'), comp('Teknion Expansion', '$4185', '+0%')],
-            'finale': [comp('OFS Impulse', '$4850', '-3%'), comp('Kimball Xsede', '$4920', '-4%'), comp('Hon Accelerate', '$4600', '+2%')],
-            'walden': [comp('Kimball Hum', '$5350', '-3%'), comp('OFS Eleven', '$5480', '-5%'), comp('Indiana Compel', '$5120', '+2%')],
-            'wellington': [comp('Kimball Evoke', '$5850', '-3%'), comp('OFS Slate', '$5980', '-5%'), comp('Hon Coordinate', '$5520', '+3%')]
+            'finale': [comp('OFS Impulse', '$4850', '-3%'), comp('Kimball Xsede', '$4920', '-4%'), comp('Hon Accelerate', '$4600', '+2%')]
         }
     },
     'conference-tables': {
@@ -161,22 +153,27 @@ export const PRODUCT_DATA = {
             'protocol': [comp('SitOnIt Amplify', '$835', '-4%'), comp('Kimball Task Pro', '$825', '-3%'), comp('OFS Rally Lite', '$810', '-1%')]
         }
     },
-    'training-tables': {
-        name: 'Training Tables',
+    'credenzas': {
+        name: 'Credenzas',
         products: [
-            { id: 'moto-training', name: 'Moto', price: 900, image: localImage('/category-images/training-images/api_moto.jpg') },
-            { id: 'connect', name: 'Connect', price: 850, image: localImage('/category-images/training-images/api_connect.jpg') },
-            { id: 'bespace', name: 'BeSPACE', price: 950, image: localImage('/category-images/training-images/api_bespace.jpg') },
-            { id: 'lok-training', name: 'Lok Training', price: 980, image: localImage('/category-images/training-images/api_lok-training.jpg') },
-            { id: 'lok-teamwork', name: 'Lok Teamwork Tables', price: 1020, image: localImage('/category-images/training-images/api_lok-teamwork-tables.jpg') },
-            { id: 'nosh-training', name: 'Nosh', price: 920, image: localImage('/category-images/training-images/api_nosh.jpg') },
-            { id: 'draft-training', name: 'Draft', price: 880, image: localImage('/category-images/training-images/api_draft.jpg') },
+            { id: 'vision-credenza', name: 'Vision', price: 2400, image: localImage('/category-images/casegood-images/api_vision.jpg') },
+            { id: 'flux-credenza', name: 'Flux', price: 2800, image: localImage('/category-images/casegood-images/api_flux-private-office.jpg') },
+            { id: 'brogan-credenza', name: 'Brogan', price: 3200, image: localImage('/category-images/casegood-images/api_brogan.jpg') },
+            { id: 'finale-credenza', name: 'Finale', price: 3600, image: localImage('/category-images/casegood-images/api_finale.jpg') },
+            { id: 'walden-credenza', name: 'Walden', price: 4000, image: localImage('/category-images/casegood-images/api_walden.jpg') },
+            { id: 'wellington-credenza', name: 'Wellington', price: 4400, image: localImage('/category-images/casegood-images/api_wellington.jpg') },
+            { id: 'anthology-credenza', name: 'Anthology', price: 3800, image: localImage('/category-images/casegood-images/api_anthology.jpg') },
+            { id: 'bespace-credenza', name: 'BeSPACE', price: 2600, image: localImage('/category-images/casegood-images/api_bespace.jpg') },
+            { id: 'native-credenza', name: 'Native', price: 3000, image: localImage('/category-images/casegood-images/api_native.jpg') },
+            { id: 'connect-credenza', name: 'Connect', price: 2200, image: localImage('/category-images/casegood-images/api_connect.jpg') },
+            { id: 'lok-credenza', name: 'Lok', price: 2500, image: localImage('/category-images/casegood-images/api_vision.jpg') },
         ],
         competition: [],
         competitionByProduct: {
-            'moto-training': [comp('SitOnIt Switch', '$930', '-3%'), comp('Kimball KORE Train', '$920', '-2%'), comp('OFS Applause Train', '$905', '-1%')],
-            'connect': [comp('SitOnIt Link', '$875', '-3%'), comp('Kimball Pairings Train', '$865', '-2%'), comp('OFS Motum Train', '$852', '-0%')],
-            'bespace': [comp('SitOnIt Flex Train', '$980', '-3%'), comp('Kimball Dock Train', '$970', '-2%'), comp('OFS Thrive Train', '$955', '-1%')]
+            'vision-credenza': [comp('OFS Staks Credenza', '$2550', '-6%'), comp('Kimball Narrate Storage', '$2620', '-8%'), comp('Hon Abound Credenza', '$2340', '+3%')],
+            'flux-credenza': [comp('OFS ReframE Storage', '$2920', '-4%'), comp('Kimball Alterna Credenza', '$2880', '-3%'), comp('Indiana Gesso Storage', '$2750', '+2%')],
+            'walden-credenza': [comp('Kimball Hum Credenza', '$4150', '-4%'), comp('OFS Eleven Credenza', '$4280', '-7%'), comp('Indiana Compel Storage', '$3900', '+3%')],
+            'wellington-credenza': [comp('Kimball Evoke Credenza', '$4580', '-4%'), comp('OFS Slate Credenza', '$4680', '-6%'), comp('Hon Coordinate Storage', '$4280', '+3%')]
         }
     }
 };
@@ -278,7 +275,7 @@ export const VISION_MATERIALS = ['TFL', 'HPL', 'Veneer'];
 export const PRODUCTS_CATEGORIES_DATA = [
     {
         name: 'Casegoods',
-        description: 'Storage and workspace solutions',
+        description: 'Private office desk systems',
         nav: 'products/category/casegoods',
         images: [
             '/category-images/casegood-images/api_vision.jpg',
@@ -327,13 +324,13 @@ export const PRODUCTS_CATEGORIES_DATA = [
         ].map(localImage)
     },
     {
-        name: 'Training Tables',
-        description: 'Flexible training furniture',
-        nav: 'products/category/training-tables',
+        name: 'Credenzas',
+        description: 'Storage and credenza solutions',
+        nav: 'products/category/credenzas',
         images: [
-            '/category-images/training-images/lok-training-lkt022.jpg',
-            '/category-images/training-images/lok-training-lkt023.jpg',
-            '/category-images/training-images/lok-training-lkt024.jpg'
+            '/category-images/casegood-images/api_vision.jpg',
+            '/category-images/casegood-images/api_walden.jpg',
+            '/category-images/casegood-images/api_wellington.jpg'
         ].map(localImage)
     },
     {

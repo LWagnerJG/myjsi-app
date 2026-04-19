@@ -222,10 +222,11 @@ const PricingTable = React.memo(({
   const isGuest = categoryId === 'guest';
   const isCasegoods = categoryId === 'casegoods';
   const isConference = categoryId === 'conference-tables';
-  const isTraining = categoryId === 'training-tables';
+  const isTraining = false; // training-tables category removed
+  const isCredenzas = categoryId === 'credenzas';
   const isLounge = categoryId === 'lounge';
 
-  const showMaterialToggle = isCasegoods || isConference || isTraining;
+  const showMaterialToggle = isCasegoods || isConference || isCredenzas;
 
   let configOptions = [];
   let configValue = '';

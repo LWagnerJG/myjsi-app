@@ -202,24 +202,23 @@ export const PRODUCT_SUBCATEGORIES = [
   { id: 'poet-bench', familyId: 'poet', categorySlug: 'benches', name: 'Poet Bench', description: 'Multi-seat bench', heroImage: img('/category-images/bench-images/api_poet.jpg'), modelIds: ['poet-bench-2seat', 'poet-bench-3seat'] },
 
   // Lok family
-  { id: 'lok-training', familyId: 'lok', categorySlug: 'training-tables', name: 'Lok Training', description: 'Flip-top training tables', heroImage: img('/category-images/training-images/api_lok-training.jpg'), modelIds: ['lok-training-rect', 'lok-training-trap'] },
-  { id: 'lok-teamwork', familyId: 'lok', categorySlug: 'training-tables', name: 'Lok Teamwork', description: 'Collaborative tables', heroImage: img('/category-images/training-images/api_lok-teamwork-tables.jpg'), modelIds: ['lok-teamwork-round', 'lok-teamwork-rect'] },
+  { id: 'lok-credenza', familyId: 'lok', categorySlug: 'credenzas', name: 'Lok Credenza', description: 'Storage credenza', heroImage: img('/category-images/casegood-images/api_vision.jpg'), modelIds: ['lok-credenza-rect'] },
   { id: 'lok-conference', familyId: 'lok', categorySlug: 'conference-tables', name: 'Lok Conference', description: 'Meeting tables', heroImage: img('/category-images/conference-images/api_lok-conference.jpg'), modelIds: ['lok-conf-30x72', 'lok-conf-42x90'] },
 
   // Moto family
   { id: 'moto-conference', familyId: 'moto', categorySlug: 'conference-tables', name: 'Moto Conference', description: 'Conference tables', heroImage: img('/category-images/conference-images/api_moto.jpg'), modelIds: ['moto-conf-30x72', 'moto-conf-48x108'] },
-  { id: 'moto-training', familyId: 'moto', categorySlug: 'training-tables', name: 'Moto Training', description: 'Training tables', heroImage: img('/category-images/training-images/api_moto.jpg'), modelIds: ['moto-training-rect'] },
+  { id: 'moto-training', familyId: 'moto', categorySlug: 'credenzas', name: 'Moto Credenza', description: 'Storage credenza', heroImage: img('/category-images/casegood-images/api_vision.jpg'), modelIds: ['moto-credenza-rect'] },
   { id: 'moto-lounge', familyId: 'moto', categorySlug: 'lounge', name: 'Moto Lounge', description: 'Occasional tables', heroImage: img('/category-images/lounge-images/api_moto.jpg'), modelIds: ['moto-lounge-occasional'] },
 
   // Connect family
-  { id: 'connect-training', familyId: 'connect', categorySlug: 'training-tables', name: 'Connect Training', description: 'Nesting training tables', heroImage: img('/category-images/training-images/api_connect.jpg'), modelIds: ['connect-training-rect', 'connect-training-round'] },
-  { id: 'connect-casegoods', familyId: 'connect', categorySlug: 'casegoods', name: 'Connect Casegoods', description: 'Desking and storage', heroImage: img('/category-images/casegood-images/api_connect.jpg'), modelIds: ['connect-desk-ltype'] },
+  { id: 'connect-credenza', familyId: 'connect', categorySlug: 'credenzas', name: 'Connect Credenza', description: 'Storage credenza', heroImage: img('/category-images/casegood-images/api_connect.jpg'), modelIds: ['connect-credenza-rect'] },
+  { id: 'connect-casegoods', familyId: 'connect', categorySlug: 'credenzas', name: 'Connect Credenza', description: 'Desking and storage', heroImage: img('/category-images/casegood-images/api_connect.jpg'), modelIds: ['connect-desk-ltype'] },
   { id: 'connect-lounge', familyId: 'connect', categorySlug: 'lounge', name: 'Connect Lounge', description: 'Lounge seating', heroImage: img('/category-images/lounge-images/api_connect.jpg'), modelIds: ['connect-lounge-single'] },
   { id: 'connect-bench', familyId: 'connect', categorySlug: 'benches', name: 'Connect Bench', description: 'Multi-seat bench', heroImage: img('/category-images/bench-images/api_connect.jpg'), modelIds: ['connect-bench-2seat'] },
 
   // Native family
   { id: 'native-bench', familyId: 'native', categorySlug: 'benches', name: 'Native Bench', description: 'Benching and desking', heroImage: img('/category-images/bench-images/api_native.jpg'), modelIds: ['native-bench-120', 'native-bench-180'] },
-  { id: 'native-casegoods', familyId: 'native', categorySlug: 'casegoods', name: 'Native Casegoods', description: 'Storage components', heroImage: img('/category-images/casegood-images/api_native.jpg'), modelIds: ['native-storage-low', 'native-storage-tower'] },
+  { id: 'native-casegoods', familyId: 'native', categorySlug: 'credenzas', name: 'Native Credenza', description: 'Storage components', heroImage: img('/category-images/casegood-images/api_native.jpg'), modelIds: ['native-storage-low', 'native-storage-tower'] },
 
   // Protocol family
   { id: 'protocol-swivel', familyId: 'protocol', categorySlug: 'swivels', name: 'Protocol Task', description: 'High-performance task chair', heroImage: img('/category-images/swivel-images/api_protocol.jpg'), modelIds: ['protocol-mid', 'protocol-high'] },
@@ -233,20 +232,20 @@ export const PRODUCT_SUBCATEGORIES = [
   { id: 'finale-conference', familyId: 'finale', categorySlug: 'conference-tables', name: 'Finale Conference', description: 'Conference tables', heroImage: img('/category-images/conference-images/api_finale.jpg'), modelIds: ['finale-conf-48x108'] },
 
   // Walden family
-  { id: 'walden-casegoods', familyId: 'walden', categorySlug: 'casegoods', name: 'Walden Casegoods', description: 'Classic workspace', heroImage: img('/category-images/casegood-images/api_walden.jpg'), modelIds: ['walden-desk-utype'] },
+  { id: 'walden-casegoods', familyId: 'walden', categorySlug: 'credenzas', name: 'Walden Credenza', description: 'Classic workspace storage', heroImage: img('/category-images/casegood-images/api_walden.jpg'), modelIds: ['walden-desk-utype'] },
   { id: 'walden-conference', familyId: 'walden', categorySlug: 'conference-tables', name: 'Walden Conference', description: 'Meeting tables', heroImage: img('/category-images/conference-images/api_walden.jpg'), modelIds: ['walden-conf-54x180'] },
 
   // Wellington family
-  { id: 'wellington-casegoods', familyId: 'wellington', categorySlug: 'casegoods', name: 'Wellington Casegoods', description: 'Premium traditional desking', heroImage: img('/category-images/casegood-images/api_wellington.jpg'), modelIds: ['wellington-desk-utype'] },
+  { id: 'wellington-casegoods', familyId: 'wellington', categorySlug: 'credenzas', name: 'Wellington Credenza', description: 'Premium traditional storage', heroImage: img('/category-images/casegood-images/api_wellington.jpg'), modelIds: ['wellington-desk-utype'] },
   { id: 'wellington-conference', familyId: 'wellington', categorySlug: 'conference-tables', name: 'Wellington Conference', description: 'Boardroom tables', heroImage: img('/category-images/conference-images/api_wellington.jpg'), modelIds: ['wellington-conf-60x210'] },
 
   // Flux family
-  { id: 'flux-casegoods', familyId: 'flux', categorySlug: 'casegoods', name: 'Flux Private Office', description: 'Modern private office', heroImage: img('/category-images/casegood-images/api_flux-private-office.jpg'), modelIds: ['flux-desk-ltype', 'flux-credenza'] },
+  { id: 'flux-casegoods', familyId: 'flux', categorySlug: 'casegoods', name: 'Flux', description: 'Modern private office', heroImage: img('/category-images/casegood-images/api_flux-private-office.jpg'), modelIds: ['flux-desk-ltype', 'flux-credenza'] },
 
   // BeSPACE family
-  { id: 'bespace-training', familyId: 'bespace', categorySlug: 'training-tables', name: 'BeSPACE Training', description: 'Collaborative training', heroImage: img('/category-images/training-images/api_bespace.jpg'), modelIds: ['bespace-training-rect'] },
+  { id: 'bespace-training', familyId: 'bespace', categorySlug: 'credenzas', name: 'BeSPACE Credenza', description: 'Storage credenza', heroImage: img('/category-images/casegood-images/api_bespace.jpg'), modelIds: ['bespace-credenza-rect'] },
   { id: 'bespace-lounge', familyId: 'bespace', categorySlug: 'lounge', name: 'BeSPACE Lounge', description: 'Open-plan lounge', heroImage: img('/category-images/lounge-images/api_bespace.jpg'), modelIds: ['bespace-lounge-single'] },
-  { id: 'bespace-casegoods', familyId: 'bespace', categorySlug: 'casegoods', name: 'BeSPACE Casegoods', description: 'Storage and desking', heroImage: img('/category-images/casegood-images/api_bespace.jpg'), modelIds: ['bespace-desk-ltype'] },
+  { id: 'bespace-casegoods', familyId: 'bespace', categorySlug: 'credenzas', name: 'BeSPACE Credenza', description: 'Storage and desking', heroImage: img('/category-images/casegood-images/api_bespace.jpg'), modelIds: ['bespace-desk-ltype'] },
   { id: 'bespace-bench', familyId: 'bespace', categorySlug: 'benches', name: 'BeSPACE Bench', description: 'Benching system', heroImage: img('/category-images/bench-images/api_bespace.jpg'), modelIds: ['bespace-bench-120'] },
 ];
 
@@ -379,6 +378,6 @@ export const PRODUCT_CATEGORIES = [
   { slug: 'guest', name: 'Guest' },
   { slug: 'lounge', name: 'Lounge' },
   { slug: 'swivels', name: 'Swivels' },
-  { slug: 'training-tables', name: 'Training Tables' },
+  { slug: 'credenzas', name: 'Credenzas' },
   { slug: 'benches', name: 'Benches' },
 ];
