@@ -85,10 +85,11 @@ export const getToastMotion = (prefersReducedMotion = false) => ({
 });
 
 // Crossfade with a small upward drift — used for tab panel swaps.
+// Exit is instant so AnimatePresence mode="wait" never produces a visible gap.
 export const getTabContentMotion = (prefersReducedMotion = false) => ({
   initial: prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 6 },
   animate: { opacity: 1, y: 0 },
-  exit: prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -4 },
+  exit: { opacity: 0, transition: { duration: 0 } },
   transition: prefersReducedMotion
     ? { duration: 0 }
     : {
