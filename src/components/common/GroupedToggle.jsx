@@ -91,13 +91,13 @@ export const SegmentedToggle = ({
       className={`${fullWidth ? 'flex w-full' : 'inline-flex'} rounded-full p-[3px] relative ${className}`} 
       style={{ backgroundColor: containerBg }}
     >
-      {/* Single animated pill — no conditional rendering, no layoutId */}
+      {/* Single animated pill — extends 3px beyond button to cover container padding */}
       {pillLayout && (
         <motion.div
           className="absolute top-0 bottom-0 rounded-full pointer-events-none"
           style={selectedPillStyle}
           initial={false}
-          animate={{ left: pillLayout.left, width: pillLayout.width }}
+          animate={{ left: pillLayout.left - 3, width: pillLayout.width + 6 }}
           transition={isFirstRender.current
             ? { duration: 0 }
             : { type: 'spring', stiffness: 400, damping: 30 }
